@@ -7,7 +7,7 @@ from image.functions import analyze_remote_url
 from .models import GoogleSearchUserManager, GOOGLE_SEARCH_API_NAME, GOOGLE_SEARCH_API_VERSION, GOOGLE_SEARCH_API_KEY, \
     GOOGLE_SEARCH_ENGINE_ID, BALLOTPEDIA_LOGO_URL, MAXIMUM_CHARACTERS_LENGTH, MAXIMUM_GOOGLE_SEARCH_USERS
 from googleapiclient.discovery import build
-from image.controllers import BALLOTPEDIA_IMAGE_SOURCE, LINKEDIN, FACEBOOK, TWITTER, WIKIPEDIA
+from image.controllers import IMAGE_SOURCE_BALLOTPEDIA, LINKEDIN, FACEBOOK, TWITTER, WIKIPEDIA
 from import_export_facebook.models import FacebookManager
 from import_export_wikipedia.controllers import reach_out_to_wikipedia_with_guess, \
     retrieve_candidate_images_from_wikipedia_page
@@ -262,7 +262,7 @@ def analyze_google_search_results(search_results, search_term, candidate_name,
                     continue
 
             # if item_image does not exist and this link is not from ballotpedia then skip this
-            if not positive_value_exists(google_json['item_image']) and BALLOTPEDIA_IMAGE_SOURCE not in google_json['item_link']:
+            if not positive_value_exists(google_json['item_image']) and IMAGE_SOURCE_BALLOTPEDIA not in google_json['item_link']:
                 continue
             elif BALLOTPEDIA_LOGO_URL in google_json['item_image']:
                 google_json['item_image'] = ""
@@ -309,7 +309,7 @@ def analyze_google_search_results(search_results, search_term, candidate_name,
                     political_party in google_json['item_meta_tags_description']:
                 likelihood_score += 20
 
-            if BALLOTPEDIA_IMAGE_SOURCE in google_json['item_link']:
+            if IMAGE_SOURCE_BALLOTPEDIA in google_json['item_link']:
                 from_ballotpedia = True
                 likelihood_score += 20
             if LINKEDIN in google_json['item_link']:

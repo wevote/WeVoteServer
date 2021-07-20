@@ -1926,7 +1926,7 @@ def groom_and_store_sample_ballot_results_api_v4(
         new_candidate_we_vote_ids_list=[],
         new_measure_we_vote_ids_list=[],
         ):
-    from image.controllers import cache_master_and_resized_image, BALLOTPEDIA_IMAGE_SOURCE
+    from image.controllers import cache_master_and_resized_image, IMAGE_SOURCE_BALLOTPEDIA
     status = ""
     success = False
     generated_ballot_order = 0
@@ -2252,31 +2252,32 @@ def groom_and_store_sample_ballot_results_api_v4(
                                         candidate_we_vote_id = candidate.we_vote_id
                                         if candidate_we_vote_id not in new_candidate_we_vote_ids_list:
                                             new_candidate_we_vote_ids_list.append(candidate_we_vote_id)
+
+                                        if new_candidate_created and save_ballotpedia_image:
+                                            cache_results = cache_master_and_resized_image(
+                                                candidate_id=candidate.id,
+                                                candidate_we_vote_id=candidate.we_vote_id,
+                                                ballotpedia_profile_image_url=ballotpedia_profile_image_url_https,
+                                                image_source=IMAGE_SOURCE_BALLOTPEDIA)
+                                            cached_ballotpedia_image_url_https = cache_results[
+                                                'cached_ballotpedia_image_url_https']
+                                            we_vote_hosted_profile_image_url_large = cache_results[
+                                                'we_vote_hosted_profile_image_url_large']
+                                            we_vote_hosted_profile_image_url_medium = cache_results[
+                                                'we_vote_hosted_profile_image_url_medium']
+                                            we_vote_hosted_profile_image_url_tiny = cache_results[
+                                                'we_vote_hosted_profile_image_url_tiny']
+
+                                            save_candidate_results = \
+                                                candidate_manager.update_candidate_ballotpedia_image_details(
+                                                    candidate,
+                                                    cached_ballotpedia_image_url_https,
+                                                    we_vote_hosted_profile_image_url_large,
+                                                    we_vote_hosted_profile_image_url_medium,
+                                                    we_vote_hosted_profile_image_url_tiny)
+                                            candidate = save_candidate_results['candidate']
+
                                         existing_candidate_objects_dict[ballotpedia_candidate_id] = candidate
-
-                                    if new_candidate_created and save_ballotpedia_image:
-                                        cache_results = cache_master_and_resized_image(
-                                            candidate_id=candidate.id,
-                                            candidate_we_vote_id=candidate.we_vote_id,
-                                            ballotpedia_profile_image_url=ballotpedia_profile_image_url_https,
-                                            image_source=BALLOTPEDIA_IMAGE_SOURCE)
-                                        cached_ballotpedia_image_url_https = cache_results[
-                                            'cached_ballotpedia_image_url_https']
-                                        we_vote_hosted_profile_image_url_large = cache_results[
-                                            'we_vote_hosted_profile_image_url_large']
-                                        we_vote_hosted_profile_image_url_medium = cache_results[
-                                            'we_vote_hosted_profile_image_url_medium']
-                                        we_vote_hosted_profile_image_url_tiny = cache_results[
-                                            'we_vote_hosted_profile_image_url_tiny']
-
-                                        save_candidate_results = \
-                                            candidate_manager.update_candidate_ballotpedia_image_details(
-                                                candidate,
-                                                cached_ballotpedia_image_url_https,
-                                                we_vote_hosted_profile_image_url_large,
-                                                we_vote_hosted_profile_image_url_medium,
-                                                we_vote_hosted_profile_image_url_tiny)
-                                        candidate = save_candidate_results['candidate']
                                     # if new_candidate_created:
                                     #     # Need to update voter ballotpedia details for the candidate in future
                                     #     save_politician_details_results = \

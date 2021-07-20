@@ -101,8 +101,11 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES = {
     'ballotpedia_office_id': 'ballotpedia_office_id * (elected_office)',  # For matching only
     'ballotpedia_person_id': 'ballotpedia_person_id',
     'ballotpedia_race_id': 'ballotpedia_race_id * (contest_office)',  # For matching only
+    'ballotpedia url': 'vote_usa_ballotpedia_candidate_url',
     'birth_day_text': 'birth_day_text',
+    'candidate': 'vote_usa_candidate_name',
     'candidate_batch_id': 'candidate_batch_id',
+    'candidate_contact_form_url': 'candidate_contact_form_url',
     'candidate_ctcl_uuid': 'candidate_ctcl_uuid',
     'candidate_ctcl_person_id': 'candidate_ctcl_person_id',
     'candidate_email': 'candidate_email',
@@ -115,25 +118,25 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES = {
     'candidate_profile_image_url': 'candidate_profile_image_url',
     'candidate_twitter_handle': 'candidate_twitter_handle',
     'candidate_url': 'candidate_url (website)',
-    'candidate_contact_form_url': 'candidate_contact_form_url',
     'contest_office_name': 'contest_office_name *',  # For matching only
     'contest_office_we_vote_id': 'contest_office_we_vote_id *',  # For matching only
     'crowdpac_candidate_id': 'crowdpac_candidate_id',
     'election_day': 'election_day',
+    'email': 'vote_usa_candidate_email',
     'facebook_url': 'facebook_url',
+    'facebook url': 'vote_usa_facebook_url',
     'google_civic_election_id': 'google_civic_election_id',
+    'party': 'vote_usa_party_name',
+    'photo_url': 'photo_url',
+    'photo_url_from_ctcl': 'photo_url_from_ctcl',
+    'photo_url_from_vote_usa': 'photo_url_from_vote_usa',
+    'photo300 url': 'vote_usa_profile_image_url_https',
     'state_code': 'state_code',
+    'state code': 'vote_usa_state_code',
+    'twitter url': 'vote_usa_candidate_twitter_url',
     'voteusa office id': 'vote_usa_office_id',
     'voteusa politician id': 'vote_usa_politician_id',
-    'candidate': 'vote_usa_candidate_name',
-    'state code': 'vote_usa_state_code',
-    'photo300 url': 'vote_usa_profile_image_url',
-    'party': 'vote_usa_party_name',
-    'email': 'vote_usa_candidate_email',
     'website url': 'vote_usa_candidate_url',
-    'facebook url': 'vote_usa_facebook_url',
-    'twitter url': 'vote_usa_candidate_twitter_url',
-    'ballotpedia url': 'vote_usa_ballotpedia_candidate_url',
 }
 
 # We Vote contest office key on the left, and Ballotpedia field name on right
@@ -5941,7 +5944,7 @@ class BatchRowActionCandidate(models.Model):
         verbose_name="vote smart candidate id", max_length=15, default=None, null=True, blank=True, unique=False)
     vote_usa_office_id = models.CharField(max_length=64, default=None, null=True, blank=True)
     vote_usa_politician_id = models.CharField(max_length=64, default=None, null=True, blank=True)
-    vote_usa_profile_image_url = models.TextField(null=True, blank=True, default=None)
+    vote_usa_profile_image_url_https = models.TextField(null=True, blank=True, default=None)
     # The internal We Vote id for the ContestOffice that this candidate is competing for. During setup we need to allow
     # this to be null.
     contest_office_id = models.CharField(
@@ -5969,10 +5972,12 @@ class BatchRowActionCandidate(models.Model):
     party = models.CharField(verbose_name="party", max_length=255, null=True, blank=True)
     # A URL for a photo of the candidate.
     photo_url = models.CharField(verbose_name="photoUrl", max_length=255, null=True, blank=True)
+    photo_url_from_ctcl = models.TextField(null=True, blank=True, default=None)
     photo_url_from_maplight = models.URLField(
         verbose_name='candidate portrait url of candidate from maplight', max_length=255, blank=True, null=True)
     photo_url_from_vote_smart = models.URLField(
         verbose_name='candidate portrait url of candidate from vote smart', max_length=255, blank=True, null=True)
+    photo_url_from_vote_usa = models.TextField(null=True, blank=True, default=None)
     # The order the candidate appears on the ballot relative to other candidates for this contest.
     order_on_ballot = models.CharField(verbose_name="order on ballot", max_length=255, null=True, blank=True)
     # The unique ID of the election containing this contest. (Provided by Google Civic)

@@ -63,8 +63,10 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'other_source_url',
     'party',
     'photo_url',
+    'photo_url_from_ctcl',
     'photo_url_from_maplight',
     'photo_url_from_vote_smart',
+    'photo_url_from_vote_usa',
     'politician_id',
     'politician_we_vote_id',
     'state_code',
@@ -78,7 +80,7 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'vote_smart_id',
     'vote_usa_office_id',
     'vote_usa_politician_id',
-    'vote_usa_profile_image_url',
+    'vote_usa_profile_image_url_https',
     'we_vote_hosted_profile_image_url_large',
     'we_vote_hosted_profile_image_url_medium',
     'we_vote_hosted_profile_image_url_tiny',
@@ -86,6 +88,19 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'wikipedia_photo_url',
     'youtube_url',
 ]
+
+PROFILE_IMAGE_TYPE_FACEBOOK = 'FACEBOOK'
+PROFILE_IMAGE_TYPE_TWITTER = 'TWITTER'
+PROFILE_IMAGE_TYPE_UNKNOWN = 'UNKNOWN'
+PROFILE_IMAGE_TYPE_UPLOADED = 'UPLOADED'
+PROFILE_IMAGE_TYPE_VOTE_USA = 'VOTE_USA'
+PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES = (
+    (PROFILE_IMAGE_TYPE_FACEBOOK, 'Facebook'),
+    (PROFILE_IMAGE_TYPE_TWITTER, 'Twitter'),
+    (PROFILE_IMAGE_TYPE_UNKNOWN, 'Unknown'),
+    (PROFILE_IMAGE_TYPE_UPLOADED, 'Uploaded'),
+    (PROFILE_IMAGE_TYPE_VOTE_USA, 'Vote-USA'),
+)
 
 
 class CandidateListManager(models.Manager):
@@ -1579,6 +1594,7 @@ class CandidateCampaign(models.Model):
         verbose_name='candidate portrait url of candidate from maplight', blank=True, null=True)
     photo_url_from_vote_smart = models.TextField(
         verbose_name='candidate portrait url of candidate from vote smart', blank=True, null=True)
+    # Image URL on Vote USA's servers. See vote_usa_profile_image_url_https, the master image cached on We Vote servers.
     photo_url_from_vote_usa = models.TextField(null=True, blank=True)
     # The order the candidate appears on the ballot relative to other candidates for this contest.
     order_on_ballot = models.CharField(verbose_name="order on ballot", max_length=255, null=True, blank=True)
@@ -1604,8 +1620,10 @@ class CandidateCampaign(models.Model):
         verbose_name='website url of candidate contact form', max_length=255, blank=True, null=True)
     facebook_url = models.TextField(verbose_name='facebook url of candidate', blank=True, null=True)
     facebook_url_is_broken = models.BooleanField(verbose_name="facebook url is broken", default=False)
-    facebook_profile_image_url_https = models.TextField(verbose_name='url of profile image from facebook',
-                                                        blank=True, null=True)
+    # Some ambiguity to be resolved. In some places this variable is used for photo url on Facebook servers.
+    # Should be the master image url cached on We Vote servers.
+    facebook_profile_image_url_https = models.TextField(
+        verbose_name='url of profile image from facebook', blank=True, null=True)
 
     twitter_url = models.URLField(verbose_name='twitter url of candidate', blank=True, null=True)
     twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)
@@ -1617,6 +1635,7 @@ class CandidateCampaign(models.Model):
         verbose_name="candidate location from twitter", max_length=255, null=True, blank=True)
     twitter_followers_count = models.IntegerField(verbose_name="number of twitter followers",
                                                   null=False, blank=True, default=0)
+    # This is the master image cached on We Vote servers. Note that we do not keep the original image URL from Twitter.
     twitter_profile_image_url_https = models.TextField(
         verbose_name='locally cached url of candidate profile image from twitter', blank=True, null=True)
     twitter_profile_background_image_url_https = models.TextField(verbose_name='tile-able background from twitter',
@@ -1629,13 +1648,32 @@ class CandidateCampaign(models.Model):
         verbose_name="Vote USA permanent id for the office", max_length=64, default=None, null=True, blank=True)
     vote_usa_politician_id = models.CharField(
         verbose_name="Vote USA permanent id for this candidate", max_length=64, default=None, null=True, blank=True)
-    vote_usa_profile_image_url = models.TextField(null=True, blank=True, default=None)
-    we_vote_hosted_profile_image_url_large = models.TextField(verbose_name='we vote hosted large image url',
-                                                              blank=True, null=True)
-    we_vote_hosted_profile_image_url_medium = models.TextField(verbose_name='we vote hosted medium image url',
-                                                               blank=True, null=True)
-    we_vote_hosted_profile_image_url_tiny = models.TextField(verbose_name='we vote hosted tiny image url',
-                                                             blank=True, null=True)
+    # This is the master image url cached on We Vote servers. See photo_url_from_vote_usa for Vote USA URL.
+    vote_usa_profile_image_url_https = models.TextField(null=True, blank=True, default=None)
+
+    # Which voter image is currently active?
+    profile_image_type_currently_active = models.CharField(
+        max_length=10, choices=PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES, default=PROFILE_IMAGE_TYPE_UNKNOWN)
+    # Image for candidate from Facebook, cached on We Vote's servers. See also facebook_profile_image_url_https.
+    we_vote_hosted_profile_facebook_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_facebook_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_facebook_image_url_tiny = models.TextField(blank=True, null=True)
+    # Image for candidate from Twitter, cached on We Vote's servers. See local master twitter_profile_image_url_https.
+    we_vote_hosted_profile_twitter_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_twitter_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_twitter_image_url_tiny = models.TextField(blank=True, null=True)
+    # Image for candidate uploaded to We Vote's servers.
+    we_vote_hosted_profile_uploaded_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_uploaded_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_uploaded_image_url_tiny = models.TextField(blank=True, null=True)
+    # Image for candidate from Vote USA, cached on We Vote's servers. See local master vote_usa_profile_image_url_https.
+    we_vote_hosted_profile_vote_usa_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_vote_usa_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_vote_usa_image_url_tiny = models.TextField(blank=True, null=True)
+    # Image we are using as the profile photo (could be sourced from Twitter, Facebook, etc.)
+    we_vote_hosted_profile_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
 
     google_plus_url = models.URLField(verbose_name='google plus url of candidate', blank=True, null=True)
     youtube_url = models.URLField(verbose_name='youtube url of candidate', blank=True, null=True)
@@ -3126,15 +3164,16 @@ class CandidateManager(models.Manager):
         }
         return results
 
-    def update_candidate_twitter_details(self,
-                                         candidate,
-                                         twitter_json,
-                                         cached_twitter_profile_image_url_https,
-                                         cached_twitter_profile_background_image_url_https,
-                                         cached_twitter_profile_banner_url_https,
-                                         we_vote_hosted_profile_image_url_large,
-                                         we_vote_hosted_profile_image_url_medium,
-                                         we_vote_hosted_profile_image_url_tiny):
+    def update_candidate_twitter_details(
+            self,
+            candidate,
+            twitter_json,
+            cached_twitter_profile_image_url_https,
+            cached_twitter_profile_background_image_url_https,
+            cached_twitter_profile_banner_url_https,
+            we_vote_hosted_profile_image_url_large,
+            we_vote_hosted_profile_image_url_medium,
+            we_vote_hosted_profile_image_url_tiny):
         """
         Update a candidate entry with details retrieved from the Twitter API.
         """
@@ -3187,13 +3226,17 @@ class CandidateManager(models.Manager):
                     candidate.twitter_profile_background_image_url_https = \
                         twitter_json['profile_background_image_url_https']
                     values_changed = True
-            if positive_value_exists(we_vote_hosted_profile_image_url_large):
+
+            candidate.we_vote_hosted_profile_twitter_image_url_large = we_vote_hosted_profile_image_url_large
+            candidate.we_vote_hosted_profile_twitter_image_url_medium = we_vote_hosted_profile_image_url_medium
+            candidate.we_vote_hosted_profile_twitter_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+
+            if candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
+                candidate.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_TWITTER
+                values_changed = True
+            if candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_TWITTER:
                 candidate.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
-                values_changed = True
-            if positive_value_exists(we_vote_hosted_profile_image_url_medium):
                 candidate.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
-                values_changed = True
-            if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
                 candidate.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
                 values_changed = True
 
@@ -3219,13 +3262,13 @@ class CandidateManager(models.Manager):
                                 values_changed = True
                                 break
 
-            if values_changed:
+            try:
                 candidate.save()
                 success = True
                 status += "SAVED_CANDIDATE_TWITTER_DETAILS "
-            else:
-                success = True
-                status += "NO_CHANGES_SAVED_TO_CANDIDATE_TWITTER_DETAILS "
+            except Exception as e:
+                success = False
+                status += "NO_CHANGES_SAVED_TO_CANDIDATE_TWITTER_DETAILS: " + str(e) + " "
 
         results = {
             'success':      success,
@@ -3409,8 +3452,8 @@ class CandidateManager(models.Manager):
             if 'vote_usa_office_id' in update_values else None
         vote_usa_politician_id = update_values['vote_usa_politician_id'] \
             if 'vote_usa_politician_id' in update_values else None
-        vote_usa_profile_image_url = update_values['vote_usa_profile_image_url'] \
-            if 'vote_usa_profile_image_url' in update_values else None
+        vote_usa_profile_image_url_https = update_values['vote_usa_profile_image_url_https'] \
+            if 'vote_usa_profile_image_url_https' in update_values else None
 
         if not positive_value_exists(candidate_name) or not positive_value_exists(contest_office_we_vote_id) \
                 or not positive_value_exists(contest_office_id) \
@@ -3476,20 +3519,9 @@ class CandidateManager(models.Manager):
                 new_candidate.photo_url = photo_url
                 new_candidate.photo_url_from_ctcl = photo_url_from_ctcl
                 new_candidate.photo_url_from_vote_usa = photo_url_from_vote_usa
-                if new_candidate.photo_url:
-                    candidate_results = self.modify_candidate_with_organization_endorsements_image(
-                        new_candidate, photo_url, True)
-                    if candidate_results['success']:
-                        candidate = candidate_results['candidate']
-                        new_candidate.we_vote_hosted_profile_image_url_large = \
-                            candidate.we_vote_hosted_profile_image_url_large
-                        new_candidate.we_vote_hosted_profile_image_url_medium = \
-                            candidate.we_vote_hosted_profile_image_url_medium
-                        new_candidate.we_vote_hosted_profile_image_url_tiny = \
-                            candidate.we_vote_hosted_profile_image_url_tiny
                 new_candidate.vote_usa_office_id = vote_usa_office_id
                 new_candidate.vote_usa_politician_id = vote_usa_politician_id
-                new_candidate.vote_usa_profile_image_url = vote_usa_profile_image_url
+                new_candidate.vote_usa_profile_image_url_https = vote_usa_profile_image_url_https
                 new_candidate.save()
 
                 status += "CANDIDATE_CREATE_THEN_UPDATE_SUCCESS "
@@ -3665,8 +3697,8 @@ class CandidateManager(models.Manager):
                 if 'vote_usa_politician_id' in update_values:
                     existing_candidate_entry.vote_usa_politician_id = update_values['vote_usa_politician_id']
                     values_changed = True
-                if 'vote_usa_profile_image_url' in update_values:
-                    existing_candidate_entry.vote_usa_profile_image_url = update_values['vote_usa_profile_image_url']
+                if 'vote_usa_profile_image_url_https' in update_values:
+                    existing_candidate_entry.vote_usa_profile_image_url_https = update_values['vote_usa_profile_image_url_https']
                     values_changed = True
 
                 # now go ahead and save this entry (update)
@@ -3743,10 +3775,9 @@ class CandidateManager(models.Manager):
                 candidate.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
                 candidate.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
                 success = True
-                status += "MODIFY_CANDIDATE_WITH_ORGANIZATION_ENDORSEMENTS_IMAGE-IMAGE_SAVED"
+                status += "MODIFY_CANDIDATE_WITH_ORGANIZATION_ENDORSEMENTS_IMAGE-IMAGE_SAVED "
             except Exception as e:
-                status += "MODIFY_CANDIDATE_WITH_ORGANIZATION_ENDORSEMENTS_IMAGE-IMAGE_SAVE_FAILED"
-                pass
+                status += "MODIFY_CANDIDATE_WITH_ORGANIZATION_ENDORSEMENTS_IMAGE-IMAGE_SAVE_FAILED: " + str(e) + " "
         results = {
             'success': success,
             'status': status,

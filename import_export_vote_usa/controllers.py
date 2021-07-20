@@ -4,10 +4,11 @@
 
 from .models import VoteUSAApiCounterManager
 from ballot.models import BallotReturnedManager
+from candidate.models import PROFILE_IMAGE_TYPE_UNKNOWN, PROFILE_IMAGE_TYPE_VOTE_USA
 from config.base import get_environment_variable
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
+from image.controllers import cache_master_and_resized_image, IMAGE_SOURCE_VOTE_USA
 from import_export_batches.controllers_vote_usa import store_vote_usa_json_response_to_import_batch_system
-from import_export_google_civic.controllers import groom_and_store_google_civic_ballot_json_2021
 import json
 from polling_location.models import PollingLocationManager
 import requests
@@ -30,6 +31,46 @@ HEADERS_FOR_VOTE_USA_API_CALL = {
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:72.0) Gecko/20100101 Firefox/72.0',
 }
 
+
+def retrieve_and_store_vote_usa_candidate_photo(candidate):
+    success = True
+    status = ''
+
+    cache_results = cache_master_and_resized_image(
+        candidate_id=candidate.id,
+        candidate_we_vote_id=candidate.we_vote_id,
+        photo_url_from_vote_usa=candidate.photo_url_from_vote_usa,
+        image_source=IMAGE_SOURCE_VOTE_USA)
+    vote_usa_profile_image_url_https = cache_results['cached_vote_usa_profile_image_url_https']
+    we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+    we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+    we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+
+    candidate.vote_usa_profile_image_url_https = vote_usa_profile_image_url_https
+    candidate.we_vote_hosted_profile_vote_usa_image_url_large = we_vote_hosted_profile_image_url_large
+    candidate.we_vote_hosted_profile_vote_usa_image_url_medium = we_vote_hosted_profile_image_url_medium
+    candidate.we_vote_hosted_profile_vote_usa_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+
+    if candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
+        candidate.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_VOTE_USA
+    if candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_VOTE_USA:
+        candidate.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+        candidate.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+        candidate.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+
+    try:
+        candidate.save()
+        status += "CANDIDATE_SAVED "
+    except Exception as e:
+        success = False
+        status += "CANDIDATE_NOT_SAVED: " + str(e) + " "
+
+    results = {
+        'success': success,
+        'status': status,
+        'candidate': candidate,
+    }
+    return results
 
 def retrieve_vote_usa_ballot_items_from_polling_location_api(
         google_civic_election_id,
@@ -198,6 +239,7 @@ def retrieve_vote_usa_ballot_items_from_polling_location_api(
                 google_civic_election_id=google_civic_election_id)
 
             if 'contests' in one_ballot_json:
+                from import_export_google_civic.controllers import groom_and_store_google_civic_ballot_json_2021
                 groom_results = groom_and_store_google_civic_ballot_json_2021(
                     one_ballot_json,
                     google_civic_election_id=google_civic_election_id,

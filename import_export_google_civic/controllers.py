@@ -739,6 +739,13 @@ def groom_and_store_google_civic_candidates_json_2021(
                     continue_searching_for_candidate = False
                     candidate = candidate_results['candidate']
                     candidate_we_vote_id = candidate.we_vote_id
+                    if positive_value_exists(candidate.photo_url_from_vote_usa) \
+                            and not positive_value_exists(candidate.vote_usa_profile_image_url_https):
+                        from import_export_vote_usa.controllers import \
+                            retrieve_and_store_vote_usa_candidate_photo
+                        results = retrieve_and_store_vote_usa_candidate_photo(candidate)
+                        if results['success']:
+                            candidate = results['candidate']
                     existing_candidate_objects_dict[vote_usa_politician_id] = candidate
                     # In the future, we will want to look for updated data to save
                 elif candidate_results['MultipleObjectsReturned']:
@@ -873,10 +880,24 @@ def groom_and_store_google_civic_candidates_json_2021(
                             if candidate_we_vote_id not in new_candidate_we_vote_ids_list:
                                 new_candidate_we_vote_ids_list.append(candidate_we_vote_id)
                             if positive_value_exists(use_ctcl):
-                                if candidate_name not in existing_candidate_objects_dict:
+                                if positive_value_exists(candidate_name):
                                     existing_candidate_objects_dict[candidate_name] = candidate  # ctcl_candidate_uuid
                             elif positive_value_exists(use_vote_usa):
+                                if positive_value_exists(candidate.photo_url_from_vote_usa):
+                                    from import_export_vote_usa.controllers import \
+                                        retrieve_and_store_vote_usa_candidate_photo
+                                    results = retrieve_and_store_vote_usa_candidate_photo(candidate)
+                                    if results['success']:
+                                        candidate = results['candidate']
                                 existing_candidate_objects_dict[vote_usa_politician_id] = candidate
+                            else:
+                                if positive_value_exists(candidate.photo_url):
+                                    candidate_results = \
+                                        candidate_manager.modify_candidate_with_organization_endorsements_image(
+                                            candidate, photo_url, True)
+                                    if candidate_results['success']:
+                                        candidate = candidate_results['candidate']
+                                existing_candidate_objects_dict[candidate_we_vote_id] = candidate
                 else:
                     candidate_results = candidate_manager.update_or_create_candidate(
                         google_civic_election_id=google_civic_election_id,
@@ -1687,21 +1708,22 @@ def process_contest_common_fields_from_structured_json(one_contest_structured_js
 
     # The name of the district.
     results['district_name'] = district_dict['name'] if 'name' in district_dict else ''
-
     # The geographic scope of this district. If unspecified the district's geography is not known.
     # One of: national, statewide, congressional, stateUpper, stateLower, countywide, judicial, schoolBoard,
     # cityWide, township, countyCouncil, cityCouncil, ward, special
     results['district_scope'] = district_dict['scope'] if 'scope' in district_dict else ''
+    results['district_id'] = district_dict['id'] if 'id' in district_dict else ''
+
+    if 'contest_ocd_division_id' in results:
+        # This is the OCD ID. The district integer is added to the end. For example,
+        # Virginia's 8th congressional district 8 looks like this:
+        # ocd-division/country:us/state:va/cd:8
+        results['district'] = extract_district_from_ocd_division_id(results['contest_ocd_division_id']) \
+            if 'contest_ocd_division_id' in results else ''
+        results['district_id'] = extract_district_id_from_ocd_division_id(results['contest_ocd_division_id']) \
+            if 'contest_ocd_division_id' in results else results['district_id']
 
     results['contest_ocd_division_id'] = district_dict['id'] if 'id' in district_dict else ''
-
-    # This is the OCD ID. The district integer is added to the end. For example,
-    # Virginia's 8th congressional district 8 looks like this:
-    # ocd-division/country:us/state:va/cd:8
-    results['district'] = extract_district_from_ocd_division_id(results['contest_ocd_division_id']) \
-        if 'contest_ocd_division_id' in results else ''
-    results['district_id'] = extract_district_id_from_ocd_division_id(results['contest_ocd_division_id']) \
-        if 'contest_ocd_division_id' in results else ''
 
     # A description of any additional eligibility requirements for voting in this contest.
     results['electorate_specifications'] = \

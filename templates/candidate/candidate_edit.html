@@ -19,7 +19,14 @@ th, td {
 <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ page }}">
     < Back to Candidates</a>
 
-<h1>{% if candidate %}Edit Candidate "{{ candidate.candidate_name }}"{% else %}New Candidate{% endif %}</h1>
+<h1>
+    {% if candidate %}Edit Candidate:
+        {% if candidate.we_vote_hosted_profile_image_url_medium %}
+            <img src='{{ candidate.we_vote_hosted_profile_image_url_medium }}' />
+        {% endif %}
+    {{ candidate.candidate_name }}
+    {% else %}New Candidate{% endif %}
+</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
 
@@ -91,6 +98,53 @@ th, td {
                 {% endif %}
             {% endif %}
         </div>
+    </div>
+</div>
+
+
+<div class="form-group">
+    <label for="profile_image_type_currently_active_id" class="col-sm-3 control-label">
+        Candidate Photo Choice<br />
+        <span style="color: darkgray">{{ candidate.profile_image_type_currently_active }}</span>
+    </label>
+    <div class="col-sm-8">
+        <span style="float: left; padding: 8px 20px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="UNKNOWN"
+                {% if candidate.profile_image_type_currently_active == 'UNKNOWN' %} checked {% endif %}
+                />
+        {% if candidate.we_vote_hosted_profile_twitter_image_url_tiny %}
+            <span style="text-decoration: line-through">Unknown</span>
+        {% else %}
+            Unknown
+        {% endif %}
+        </span>
+        {% if candidate.we_vote_hosted_profile_facebook_image_url_tiny %}
+        <span style="float: left; padding: 8px 20px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="FACEBOOK"
+                {% if candidate.profile_image_type_currently_active == 'FACEBOOK' %} checked {% endif %}
+                />
+            <img src='{{ candidate.we_vote_hosted_profile_facebook_image_url_tiny }}' />
+            Facebook
+        </span>
+        {% endif %}
+        {% if candidate.we_vote_hosted_profile_twitter_image_url_tiny %}
+        <span style="float: left; padding: 8px 20px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="TWITTER"
+                {% if candidate.profile_image_type_currently_active == 'TWITTER' %} checked {% endif %}
+                />
+            <img src='{{ candidate.we_vote_hosted_profile_twitter_image_url_tiny }}' />
+            Twitter
+        </span>
+        {% endif %}
+        {% if candidate.we_vote_hosted_profile_vote_usa_image_url_tiny %}
+        <span style="float: left; padding: 8px 25px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="VOTE_USA"
+                {% if candidate.profile_image_type_currently_active == 'VOTE_USA' %} checked {% endif %}
+                />
+            <img src='{{ candidate.we_vote_hosted_profile_vote_usa_image_url_tiny }}' />
+            Vote USA
+        {% endif %}
+        </span>
     </div>
 </div>
 
@@ -255,7 +309,11 @@ th, td {
 <a name="twitter_link_possibility_list" />
 
 <div class="form-group">
-    <label for="candidate_twitter_handle_id" class="col-sm-3 control-label">Twitter Handle</label>
+    <label for="candidate_twitter_handle_id" class="col-sm-3 control-label">
+        {% if candidate.we_vote_hosted_profile_twitter_image_url_tiny %}
+            <img src='{{ candidate.we_vote_hosted_profile_twitter_image_url_tiny }}' />
+        {% endif %}
+        Twitter Handle</label>
     <div class="col-sm-8">
         <input type="text" name="candidate_twitter_handle" id="candidate_twitter_handle_id" class="form-control"
                value="{% if candidate %}{{ candidate.candidate_twitter_handle|default_if_none:"" }}{% else %}{{ candidate_twitter_handle|default_if_none:"" }}{% endif %}" />
@@ -500,10 +558,14 @@ th, td {
 </div>
 
 <div class="form-group">
-    <label for="vote_usa_profile_image_id" class="col-sm-3 control-label">Vote USA Image</label>
+    <label for="photo_url_from_vote_usa_id" class="col-sm-3 control-label">
+        {% if candidate.we_vote_hosted_profile_vote_usa_image_url_tiny %}
+            <img src='{{ candidate.we_vote_hosted_profile_vote_usa_image_url_tiny }}' />
+        {% endif %}
+        Vote USA Image</label>
     <div class="col-sm-8">
-        <input type="text" name="vote_usa_profile_image" id="vote_usa_profile_image_id" class="form-control"
-               value="{% if candidate %}{{ candidate.vote_usa_profile_image|default_if_none:"" }}{% endif %}" />
+        <input type="text" name="photo_url_from_vote_usa" id="photo_url_from_vote_usa_id" class="form-control"
+               value="{% if candidate %}{{ candidate.photo_url_from_vote_usa|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
 

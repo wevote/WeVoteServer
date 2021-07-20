@@ -49,7 +49,9 @@ from .controllers import candidates_import_from_master_server, candidates_import
     save_image_to_candidate_table, \
     save_google_search_link_to_candidate_table
 from .models import CandidateCampaign, CandidateListManager, CandidateManager, CandidateToOfficeLink, \
-    CANDIDATE_UNIQUE_IDENTIFIERS
+    CANDIDATE_UNIQUE_IDENTIFIERS, PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
+    PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_VOTE_USA
+
 
 CANDIDATES_SYNC_URL = get_environment_variable("CANDIDATES_SYNC_URL")  # candidatesSyncOut
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
@@ -116,8 +118,9 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
             'candidate_name', 'candidate_year', 'ctcl_uuid', 'google_civic_candidate_name',
             'google_civic_candidate_name2', 'google_civic_candidate_name3',
             'party',
-            'photo_url', 'photo_url_from_maplight',
-            'photo_url_from_vote_smart', 'order_on_ballot',
+            'photo_url', 'photo_url_from_ctcl',
+            'photo_url_from_maplight', 'photo_url_from_vote_smart', 'photo_url_from_vote_usa',
+            'order_on_ballot',
             'google_civic_election_id', 'ocd_division_id', 'state_code',
             'candidate_url', 'candidate_contact_form_url', 'facebook_url',
             'twitter_url',
@@ -141,7 +144,7 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
             'crowdpac_candidate_id',
             'vote_usa_office_id',
             'vote_usa_politician_id',
-            'vote_usa_profile_image_url',
+            'vote_usa_profile_image_url_https',
             'we_vote_hosted_profile_image_url_large',
             'we_vote_hosted_profile_image_url_medium',
             'we_vote_hosted_profile_image_url_tiny',
@@ -1226,12 +1229,13 @@ def candidate_edit_process_view(request):
     ballotpedia_race_id = request.POST.get('ballotpedia_race_id', False)
     vote_usa_politician_id = request.POST.get('vote_usa_politician_id', False)
     vote_usa_office_id = request.POST.get('vote_usa_office_id', False)
-    vote_usa_profile_image = request.POST.get('vote_usa_profile_image', False)
+    photo_url_from_vote_usa = request.POST.get('photo_url_from_vote_usa', False)
     vote_smart_id = request.POST.get('vote_smart_id', False)
     maplight_id = request.POST.get('maplight_id', False)
     page = convert_to_int(request.POST.get('page', 0))
     state_code = request.POST.get('state_code', False)
     politician_we_vote_id = request.POST.get('politician_we_vote_id', False)
+    profile_image_type_currently_active = request.POST.get('profile_image_type_currently_active', False)
     google_search_image_file = request.POST.get('google_search_image_file', False)
     google_search_link = request.POST.get('google_search_link', False)
     twitter_url = request.POST.get('twitter_url', False)
@@ -1522,14 +1526,14 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.ballotpedia_person_id = convert_to_int(ballotpedia_person_id)
             if ballotpedia_race_id is not False:
                 candidate_on_stage.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
+            if photo_url_from_vote_usa is not False:
+                candidate_on_stage.photo_url_from_vote_usa = photo_url_from_vote_usa
+            if vote_smart_id is not False:
+                candidate_on_stage.vote_smart_id = vote_smart_id
             if vote_usa_politician_id is not False:
                 candidate_on_stage.vote_usa_politician_id = vote_usa_politician_id
             if vote_usa_office_id is not False:
                 candidate_on_stage.vote_usa_office_id = vote_usa_office_id
-            if vote_usa_profile_image is not False:
-                candidate_on_stage.vote_usa_profile_image = vote_usa_profile_image
-            if vote_smart_id is not False:
-                candidate_on_stage.vote_smart_id = vote_smart_id
             if maplight_id is not False:
                 candidate_on_stage.maplight_id = maplight_id
             if google_civic_candidate_name is not False:
@@ -1572,6 +1576,40 @@ def candidate_edit_process_view(request):
             # is_we_vote_google_civic_election_id = True \
             #     if convert_to_int(candidate_on_stage.google_civic_election_id) >= 1000000 \
             #     else False
+
+            if profile_image_type_currently_active is not False:
+                if profile_image_type_currently_active in [
+                        PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN,
+                        PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_VOTE_USA]:
+                    candidate_on_stage.profile_image_type_currently_active = profile_image_type_currently_active
+                    if profile_image_type_currently_active == PROFILE_IMAGE_TYPE_FACEBOOK:
+                        candidate_on_stage.we_vote_hosted_profile_image_url_large = \
+                            candidate_on_stage.we_vote_hosted_profile_facebook_image_url_large
+                        candidate_on_stage.we_vote_hosted_profile_image_url_medium = \
+                            candidate_on_stage.we_vote_hosted_profile_facebook_image_url_medium
+                        candidate_on_stage.we_vote_hosted_profile_image_url_tiny = \
+                            candidate_on_stage.we_vote_hosted_profile_facebook_image_url_tiny
+                    elif profile_image_type_currently_active == PROFILE_IMAGE_TYPE_TWITTER:
+                        candidate_on_stage.we_vote_hosted_profile_image_url_large = \
+                            candidate_on_stage.we_vote_hosted_profile_twitter_image_url_large
+                        candidate_on_stage.we_vote_hosted_profile_image_url_medium = \
+                            candidate_on_stage.we_vote_hosted_profile_twitter_image_url_medium
+                        candidate_on_stage.we_vote_hosted_profile_image_url_tiny = \
+                            candidate_on_stage.we_vote_hosted_profile_twitter_image_url_tiny
+                    elif profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UPLOADED:
+                        candidate_on_stage.we_vote_hosted_profile_image_url_large = \
+                            candidate_on_stage.we_vote_hosted_profile_uploaded_image_url_large
+                        candidate_on_stage.we_vote_hosted_profile_image_url_medium = \
+                            candidate_on_stage.we_vote_hosted_profile_uploaded_image_url_medium
+                        candidate_on_stage.we_vote_hosted_profile_image_url_tiny = \
+                            candidate_on_stage.we_vote_hosted_profile_uploaded_image_url_tiny
+                    elif profile_image_type_currently_active == PROFILE_IMAGE_TYPE_VOTE_USA:
+                        candidate_on_stage.we_vote_hosted_profile_image_url_large = \
+                            candidate_on_stage.we_vote_hosted_profile_vote_usa_image_url_large
+                        candidate_on_stage.we_vote_hosted_profile_image_url_medium = \
+                            candidate_on_stage.we_vote_hosted_profile_vote_usa_image_url_medium
+                        candidate_on_stage.we_vote_hosted_profile_image_url_tiny = \
+                            candidate_on_stage.we_vote_hosted_profile_vote_usa_image_url_tiny
 
             candidate_on_stage.save()
 
@@ -1641,8 +1679,14 @@ def candidate_edit_process_view(request):
                     candidate_on_stage.ballotpedia_person_id = convert_to_int(ballotpedia_person_id)
                 if ballotpedia_race_id is not False:
                     candidate_on_stage.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
+                if photo_url_from_vote_usa is not False:
+                    candidate_on_stage.photo_url_from_vote_usa = photo_url_from_vote_usa
                 if vote_smart_id is not False:
                     candidate_on_stage.vote_smart_id = vote_smart_id
+                if vote_usa_politician_id is not False:
+                    candidate_on_stage.vote_usa_politician_id = vote_usa_politician_id
+                if vote_usa_office_id is not False:
+                    candidate_on_stage.vote_usa_office_id = vote_usa_office_id
                 if maplight_id is not False:
                     candidate_on_stage.maplight_id = maplight_id
                 if politician_we_vote_id is not False:
@@ -1703,7 +1747,12 @@ def candidate_edit_process_view(request):
     # if positive_value_exists(ballotpedia_image_id) and not positive_value_exists(ballotpedia_profile_image_url_https):
     #     results = retrieve_and_save_ballotpedia_candidate_images(candidate_on_stage)
 
-    if positive_value_exists(refresh_from_twitter) or positive_value_exists(candidate_twitter_handle):
+    if positive_value_exists(refresh_from_twitter):
+        results = refresh_twitter_candidate_details(candidate_on_stage)
+    # elif profile_image_type_currently_active == 'UNKNOWN':
+    #     # Prevent Twitter from updating
+    #     pass
+    elif positive_value_exists(candidate_twitter_handle):
         results = refresh_twitter_candidate_details(candidate_on_stage)
 
     # Make sure 'which_marking' is one of the allowed Filter fields

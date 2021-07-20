@@ -16,25 +16,26 @@ import wevote_functions.admin
 from .functions import analyze_remote_url
 
 # naming convention stored at aws
+BALLOTPEDIA_IMAGE_NAME = "ballotpedia_image"
+CAMPAIGNX_PHOTO_IMAGE_NAME = "campaignx_photo_image"
+CTCL_PROFILE_IMAGE_NAME = "ctcl_profile_image"
 CHOSEN_FAVICON_NAME = "favicon_image"
 CHOSEN_LOGO_NAME = "logo_image"
 CHOSEN_SOCIAL_SHARE_IMAGE_NAME = "social_share_image"
 FACEBOOK_PROFILE_IMAGE_NAME = "facebook_profile_image"
 FACEBOOK_BACKGROUND_IMAGE_NAME = "facebook_background_image"
+ISSUE_IMAGE_NAME = "issue_image"
+LINKEDIN_IMAGE_NAME = "linkedin_image"
+MAPLIGHT_IMAGE_NAME = "maplight_image"
+MASTER_IMAGE = "master"
+ORGANIZATION_ENDORSEMENTS_IMAGE_NAME = "organization_endorsements_image"
 TWITTER_PROFILE_IMAGE_NAME = "twitter_profile_image"
 TWITTER_BACKGROUND_IMAGE_NAME = "twitter_background_image"
 TWITTER_BANNER_IMAGE_NAME = "twitter_banner_image"
-MAPLIGHT_IMAGE_NAME = "maplight_image"
 VOTE_SMART_IMAGE_NAME = "vote_smart_image"
-ISSUE_IMAGE_NAME = "issue_image"
-BALLOTPEDIA_IMAGE_NAME = "ballotpedia_image"
-CAMPAIGNX_PHOTO_IMAGE_NAME = "campaignx_photo_image"
-LINKEDIN_IMAGE_NAME = "linkedin_image"
-WIKIPEDIA_IMAGE_NAME = "wikipedia_image"
+VOTE_USA_PROFILE_IMAGE_NAME = "vote_usa_profile_image"
 VOTER_UPLOADED_IMAGE_NAME = "voter_uploaded_profile_image"
-MASTER_IMAGE = "master"
-# This constant is stored in WeVoteImage, field is other_source
-ORGANIZATION_ENDORSEMENTS_IMAGE_NAME = "organization_endorsements_image"
+WIKIPEDIA_IMAGE_NAME = "wikipedia_image"
 
 AWS_ACCESS_KEY_ID = get_environment_variable("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = get_environment_variable("AWS_SECRET_ACCESS_KEY")
@@ -93,6 +94,8 @@ class WeVoteImage(models.Model):
         verbose_name='org master share image', blank=True, null=True)
     linkedin_profile_image_url = models.TextField(
         verbose_name='profile image from linkedin', blank=True, null=True)
+    photo_url_from_ctcl = models.TextField(blank=True, null=True)  # URL provided by CTCL stored on other server
+    photo_url_from_vote_usa = models.TextField(blank=True, null=True)  # URL from Vote USA: stored on other server
     voter_uploaded_profile_image_url_https = models.TextField(blank=True, null=True)
     wikipedia_profile_image_url = models.TextField(
         verbose_name='profile image from wikipedia', blank=True, null=True)
@@ -109,6 +112,7 @@ class WeVoteImage(models.Model):
     is_active_version = models.BooleanField(verbose_name="True if image is newest", default=False)
 
     kind_of_image_ballotpedia_profile = models.BooleanField(verbose_name="image is ballotpedia", default=False)
+    kind_of_image_ctcl_profile = models.BooleanField(default=False)
     kind_of_image_campaignx_photo = models.BooleanField(default=False)
     kind_of_image_chosen_favicon = models.BooleanField(verbose_name="image is for favicon", default=False)
     kind_of_image_chosen_logo = models.BooleanField(verbose_name="image is for header", default=False)
@@ -123,6 +127,7 @@ class WeVoteImage(models.Model):
     kind_of_image_twitter_banner = models.BooleanField(verbose_name="image is twitter banner", default=False)
     kind_of_image_twitter_profile = models.BooleanField(verbose_name="image is twitter profile", default=False)
     kind_of_image_vote_smart = models.BooleanField(verbose_name="image is vote smart", default=False)
+    kind_of_image_vote_usa_profile = models.BooleanField(default=False)
     kind_of_image_voter_uploaded_profile = models.BooleanField(verbose_name="image was uploaded", default=False)
     kind_of_image_wikipedia_profile = models.BooleanField(verbose_name="image is wikipedia", default=False)
 
@@ -146,12 +151,16 @@ class WeVoteImage(models.Model):
             return "facebook_background"
         elif self.kind_of_image_original:
             return "original"
-        if self.kind_of_image_twitter_profile:
+        if self.kind_of_image_ctcl_profile:
+            return "ctcl_profile"
+        elif self.kind_of_image_twitter_profile:
             return "twitter_profile"
         elif self.kind_of_image_twitter_background:
             return "twitter_background"
         elif self.kind_of_image_twitter_banner:
             return "twitter_banner"
+        elif self.kind_of_image_vote_usa_profile:
+            return "vote_usa_profile"
         if self.kind_of_image_voter_uploaded_profile:
             return "voter_uploaded_profile"
         return ""
@@ -182,6 +191,7 @@ class WeVoteImageManager(models.Manager):
             organization_we_vote_id=None,
             issue_we_vote_id=None,
             kind_of_image_ballotpedia_profile=False,
+            kind_of_image_ctcl_profile=False,
             kind_of_image_campaignx_photo=False,
             kind_of_image_chosen_favicon=False,
             kind_of_image_chosen_logo=False,
@@ -200,6 +210,7 @@ class WeVoteImageManager(models.Manager):
             kind_of_image_twitter_banner=False,
             kind_of_image_twitter_profile=False,
             kind_of_image_vote_smart=False,
+            kind_of_image_vote_usa_profile=False,
             kind_of_image_voter_uploaded_profile=False,
             kind_of_image_wikipedia_profile=False,
             facebook_background_image_offset_x=False,
@@ -214,6 +225,7 @@ class WeVoteImageManager(models.Manager):
         :param organization_we_vote_id:
         :param issue_we_vote_id:
         :param kind_of_image_ballotpedia_profile:
+        :param kind_of_image_ctcl_profile:
         :param kind_of_image_campaignx_photo:
         :param kind_of_image_chosen_favicon:
         :param kind_of_image_chosen_logo:
@@ -232,6 +244,7 @@ class WeVoteImageManager(models.Manager):
         :param kind_of_image_twitter_banner:
         :param kind_of_image_twitter_profile:
         :param kind_of_image_vote_smart:
+        :param kind_of_image_vote_usa_profile:
         :param kind_of_image_voter_uploaded_profile:
         :param kind_of_image_wikipedia_profile:
         :param facebook_background_image_offset_x:
@@ -249,6 +262,7 @@ class WeVoteImageManager(models.Manager):
                 issue_we_vote_id=issue_we_vote_id,
                 google_civic_election_id=google_civic_election_id,
                 kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
+                kind_of_image_ctcl_profile=kind_of_image_ctcl_profile,
                 kind_of_image_campaignx_photo=kind_of_image_campaignx_photo,
                 kind_of_image_chosen_favicon=kind_of_image_chosen_favicon,
                 kind_of_image_chosen_logo=kind_of_image_chosen_logo,
@@ -267,6 +281,7 @@ class WeVoteImageManager(models.Manager):
                 kind_of_image_twitter_banner=kind_of_image_twitter_banner,
                 kind_of_image_twitter_profile=kind_of_image_twitter_profile,
                 kind_of_image_vote_smart=kind_of_image_vote_smart,
+                kind_of_image_vote_usa_profile=kind_of_image_vote_usa_profile,
                 kind_of_image_voter_uploaded_profile=kind_of_image_voter_uploaded_profile,
                 kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
                 facebook_background_image_offset_x=facebook_background_image_offset_x,
@@ -278,7 +293,7 @@ class WeVoteImageManager(models.Manager):
         except Exception as e:
             we_vote_image_saved = False
             success = False
-            status += "WE_VOTE_IMAGE_NOT_CREATED "
+            status += "WE_VOTE_IMAGE_NOT_CREATED: " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
 
         results = {
@@ -526,6 +541,45 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
+    def save_we_vote_image_vote_usa_info(
+            self,
+            we_vote_image=None,
+            image_width='',
+            image_height='',
+            image_url_https='',
+            same_day_image_version=0,
+            image_url_valid=False):
+        """
+
+        :param we_vote_image:
+        :param image_width:
+        :param image_height:
+        :param image_url_https:
+        :param same_day_image_version:
+        :param image_url_valid:
+        :return:
+        """
+        try:
+            we_vote_image.image_width = image_width
+            we_vote_image.image_height = image_height
+            we_vote_image.source_image_still_valid = image_url_valid
+            we_vote_image.same_day_image_version = same_day_image_version
+            we_vote_image.photo_url_from_vote_usa = image_url_https
+            we_vote_image.save()
+            success = True
+            status = "SAVED_WE_VOTE_IMAGE_VOTE_USA_PROFILE_INFO "
+        except Exception as e:
+            status = "UNABLE_TO_SAVE_WE_VOTE_IMAGE_VOTE_USA_PROFILE_INFO: " + str(e) + ' '
+            success = False
+            handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
+
+        results = {
+            'status':           status,
+            'success':          success,
+            'we_vote_image':    we_vote_image,
+        }
+        return results
+
     def save_we_vote_image_voter_uploaded_info(
             self,
             we_vote_image=None,
@@ -630,6 +684,45 @@ class WeVoteImageManager(models.Manager):
             status = "SAVED_WE_VOTE_IMAGE_CAMPAIGNX_INFO "
         except Exception as e:
             status = "UNABLE_TO_SAVE_WE_VOTE_IMAGE_CAMPAIGNX_INFO " + str(e) + ' '
+            success = False
+            handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
+
+        results = {
+            'status':           status,
+            'success':          success,
+            'we_vote_image':    we_vote_image,
+        }
+        return results
+
+    def save_we_vote_image_ctcl_info(
+            self,
+            we_vote_image=None,
+            image_width='',
+            image_height='',
+            image_url_https='',
+            same_day_image_version=0,
+            image_url_valid=False):
+        """
+
+        :param we_vote_image:
+        :param image_width:
+        :param image_height:
+        :param image_url_https:
+        :param same_day_image_version:
+        :param image_url_valid:
+        :return:
+        """
+        try:
+            we_vote_image.image_width = image_width
+            we_vote_image.image_height = image_height
+            we_vote_image.source_image_still_valid = image_url_valid
+            we_vote_image.same_day_image_version = same_day_image_version
+            we_vote_image.photo_url_from_ctcl = image_url_https
+            we_vote_image.save()
+            success = True
+            status = "SAVED_WE_VOTE_IMAGE_CTCL_PROFILE_INFO "
+        except Exception as e:
+            status = "UNABLE_TO_SAVE_WE_VOTE_IMAGE_CTCL_PROFILE_INFO: " + str(e) + ' '
             success = False
             handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
 
@@ -833,17 +926,17 @@ class WeVoteImageManager(models.Manager):
         return results
 
     def set_active_version_false_for_other_images(
-            self, voter_we_vote_id=None,
+            self,
             campaignx_we_vote_id=None,
             candidate_we_vote_id=None,
-            organization_we_vote_id=None,
-            issue_we_vote_id=None,
             image_url_https=None,
+            issue_we_vote_id=None,
             kind_of_image_ballotpedia_profile=False,
             kind_of_image_campaignx_photo=False,
             kind_of_image_chosen_favicon=False,
             kind_of_image_chosen_logo=False,
             kind_of_image_chosen_social_share_master=False,
+            kind_of_image_ctcl_profile=False,
             kind_of_image_facebook_background=False,
             kind_of_image_facebook_profile=False,
             kind_of_image_issue=False,
@@ -854,21 +947,24 @@ class WeVoteImageManager(models.Manager):
             kind_of_image_twitter_banner=False,
             kind_of_image_twitter_profile=False,
             kind_of_image_vote_smart=False,
+            kind_of_image_vote_usa_profile=False,
             kind_of_image_voter_uploaded_profile=False,
-            kind_of_image_wikipedia_profile=False):
+            kind_of_image_wikipedia_profile=False,
+            organization_we_vote_id=None,
+            voter_we_vote_id=None,
+    ):
         """
         Set active version false for all other images except for current latest image of a candidate/organization
-        :param voter_we_vote_id:
         :param campaignx_we_vote_id:
         :param candidate_we_vote_id:
-        :param organization_we_vote_id:
-        :param issue_we_vote_id:
         :param image_url_https:
+        :param issue_we_vote_id:
         :param kind_of_image_ballotpedia_profile:
         :param kind_of_image_campaignx_photo:
         :param kind_of_image_chosen_favicon:
         :param kind_of_image_chosen_logo:
         :param kind_of_image_chosen_social_share_master:
+        :param kind_of_image_ctcl_profile:
         :param kind_of_image_facebook_background:
         :param kind_of_image_facebook_profile:
         :param kind_of_image_issue:
@@ -879,8 +975,11 @@ class WeVoteImageManager(models.Manager):
         :param kind_of_image_twitter_banner:
         :param kind_of_image_twitter_profile:
         :param kind_of_image_vote_smart:
+        :param kind_of_image_vote_usa_profile:
         :param kind_of_image_voter_uploaded_profile:
         :param kind_of_image_wikipedia_profile:
+        :param organization_we_vote_id:
+        :param voter_we_vote_id:
         :return:
         """
         status = ""
@@ -898,6 +997,7 @@ class WeVoteImageManager(models.Manager):
                 kind_of_image_chosen_favicon=kind_of_image_chosen_favicon,
                 kind_of_image_chosen_logo=kind_of_image_chosen_logo,
                 kind_of_image_chosen_social_share_master=kind_of_image_chosen_social_share_master,
+                kind_of_image_ctcl_profile=kind_of_image_ctcl_profile,
                 kind_of_image_facebook_profile=kind_of_image_facebook_profile,
                 kind_of_image_facebook_background=kind_of_image_facebook_background,
                 kind_of_image_issue=kind_of_image_issue,
@@ -908,6 +1008,7 @@ class WeVoteImageManager(models.Manager):
                 kind_of_image_twitter_background=kind_of_image_twitter_background,
                 kind_of_image_twitter_banner=kind_of_image_twitter_banner,
                 kind_of_image_vote_smart=kind_of_image_vote_smart,
+                kind_of_image_vote_usa_profile=kind_of_image_vote_usa_profile,
                 kind_of_image_voter_uploaded_profile=kind_of_image_voter_uploaded_profile,
                 kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
             )
@@ -924,6 +1025,8 @@ class WeVoteImageManager(models.Manager):
             if kind_of_image_chosen_social_share_master:
                 we_vote_image_list = we_vote_image_list.exclude(
                     chosen_social_share_master_image_url_https=image_url_https)
+            if kind_of_image_ctcl_profile:
+                we_vote_image_list = we_vote_image_list.exclude(photo_url_from_ctcl=image_url_https)
             if kind_of_image_facebook_background:
                 we_vote_image_list = we_vote_image_list.exclude(facebook_background_image_url_https=image_url_https)
             if kind_of_image_facebook_profile:
@@ -945,6 +1048,8 @@ class WeVoteImageManager(models.Manager):
                 we_vote_image_list = we_vote_image_list.exclude(twitter_profile_banner_url_https=image_url_https)
             if kind_of_image_vote_smart:
                 we_vote_image_list = we_vote_image_list.exclude(vote_smart_image_url_https=image_url_https)
+            if kind_of_image_vote_usa_profile:
+                we_vote_image_list = we_vote_image_list.exclude(photo_url_from_vote_usa=image_url_https)
             if kind_of_image_voter_uploaded_profile:
                 we_vote_image_list = we_vote_image_list.exclude(voter_uploaded_profile_image_url_https=image_url_https)
             if kind_of_image_wikipedia_profile:
@@ -1113,54 +1218,59 @@ class WeVoteImageManager(models.Manager):
 
     def retrieve_we_vote_image_from_url(
             self,
-            voter_we_vote_id=None,
-            campaignx_we_vote_id=None,
-            candidate_we_vote_id=None,
-            organization_we_vote_id=None,
-            issue_we_vote_id=None,
             ballotpedia_profile_image_url=None,
             campaignx_photo_url_https=None,
+            campaignx_we_vote_id=None,
+            candidate_we_vote_id=None,
             facebook_background_image_url_https=None,
             facebook_profile_image_url_https=None,
+            issue_we_vote_id=None,
             issue_image_url_https=None,
+            kind_of_image_original=False,
+            kind_of_image_large=False,
+            kind_of_image_medium=False,
+            kind_of_image_tiny=False,
             linkedin_profile_image_url=None,
             maplight_image_url_https=None,
+            organization_we_vote_id=None,
             other_source_image_url=None,
+            photo_url_from_ctcl=None,
+            photo_url_from_vote_usa=None,
             twitter_profile_background_image_url_https=None,
             twitter_profile_banner_url_https=None,
             twitter_profile_image_url_https=None,
             vote_smart_image_url_https=None,
             voter_uploaded_profile_image_url_https=None,
+            voter_we_vote_id=None,
             wikipedia_profile_image_url=None,
-            kind_of_image_original=False,
-            kind_of_image_large=False,
-            kind_of_image_medium=False,
-            kind_of_image_tiny=False):
+    ):
         """
 
-        :param voter_we_vote_id:
-        :param campaignx_we_vote_id:
-        :param candidate_we_vote_id:
-        :param organization_we_vote_id:
-        :param issue_we_vote_id:
         :param ballotpedia_profile_image_url:
         :param campaignx_photo_url_https:
+        :param campaignx_we_vote_id:
+        :param candidate_we_vote_id:
         :param facebook_background_image_url_https:
         :param facebook_profile_image_url_https:
+        :param issue_we_vote_id:
         :param issue_image_url_https:
+        :param kind_of_image_original:
+        :param kind_of_image_large:
+        :param kind_of_image_medium:
+        :param kind_of_image_tiny:
         :param linkedin_profile_image_url:
         :param maplight_image_url_https:
+        :param organization_we_vote_id:
         :param other_source_image_url:
+        :param photo_url_from_ctcl:
+        :param photo_url_from_vote_usa:
         :param twitter_profile_background_image_url_https:
         :param twitter_profile_banner_url_https:
         :param twitter_profile_image_url_https:
         :param vote_smart_image_url_https:
         :param voter_uploaded_profile_image_url_https:
+        :param voter_we_vote_id:
         :param wikipedia_profile_image_url:
-        :param kind_of_image_original:
-        :param kind_of_image_large:
-        :param kind_of_image_medium:
-        :param kind_of_image_tiny:
         :return:
         """
         status = ""
@@ -1171,29 +1281,31 @@ class WeVoteImageManager(models.Manager):
         try:
             # check if multiple records exist
             we_vote_image_on_stage_query = WeVoteImage.objects.filter(
-                voter_we_vote_id__iexact=voter_we_vote_id,
-                campaignx_we_vote_id__iexact=campaignx_we_vote_id,
-                candidate_we_vote_id__iexact=candidate_we_vote_id,
-                organization_we_vote_id__iexact=organization_we_vote_id,
-                issue_we_vote_id__iexact=issue_we_vote_id,
                 ballotpedia_profile_image_url__iexact=ballotpedia_profile_image_url,
                 campaignx_photo_url_https__iexact=campaignx_photo_url_https,
+                campaignx_we_vote_id__iexact=campaignx_we_vote_id,
+                candidate_we_vote_id__iexact=candidate_we_vote_id,
                 facebook_background_image_url_https__iexact=facebook_background_image_url_https,
                 facebook_profile_image_url_https__iexact=facebook_profile_image_url_https,
                 issue_image_url_https__iexact=issue_image_url_https,
+                issue_we_vote_id__iexact=issue_we_vote_id,
+                kind_of_image_original=kind_of_image_original,
+                kind_of_image_large=kind_of_image_large,
+                kind_of_image_medium=kind_of_image_medium,
+                kind_of_image_tiny=kind_of_image_tiny,
                 linkedin_profile_image_url__iexact=linkedin_profile_image_url,
                 maplight_image_url_https__iexact=maplight_image_url_https,
+                organization_we_vote_id__iexact=organization_we_vote_id,
                 other_source_image_url__iexact=other_source_image_url,
+                photo_url_from_ctcl=photo_url_from_ctcl,
+                photo_url_from_vote_usa=photo_url_from_vote_usa,
                 twitter_profile_background_image_url_https__iexact=twitter_profile_background_image_url_https,
                 twitter_profile_banner_url_https__iexact=twitter_profile_banner_url_https,
                 twitter_profile_image_url_https__iexact=twitter_profile_image_url_https,
                 vote_smart_image_url_https__iexact=vote_smart_image_url_https,
                 voter_uploaded_profile_image_url_https__iexact=voter_uploaded_profile_image_url_https,
+                voter_we_vote_id__iexact=voter_we_vote_id,
                 wikipedia_profile_image_url__iexact=wikipedia_profile_image_url,
-                kind_of_image_original=kind_of_image_original,
-                kind_of_image_large=kind_of_image_large,
-                kind_of_image_medium=kind_of_image_medium,
-                kind_of_image_tiny=kind_of_image_tiny
             ).order_by('-date_image_saved')
             we_vote_image_on_stage_list = list(we_vote_image_on_stage_query)
             no_of_existing_entries = len(we_vote_image_on_stage_list)
@@ -1220,46 +1332,51 @@ class WeVoteImageManager(models.Manager):
 
     def retrieve_we_vote_image_list_from_url(
             self,
-            voter_we_vote_id=None,
-            campaignx_we_vote_id=None,
-            candidate_we_vote_id=None,
-            organization_we_vote_id=None,
-            issue_we_vote_id=None,
             ballotpedia_profile_image_url=None,
             campaignx_photo_url_https=None,
-            facebook_profile_image_url_https=None,
+            campaignx_we_vote_id=None,
+            candidate_we_vote_id=None,
             facebook_background_image_url_https=None,
+            facebook_profile_image_url_https=None,
             issue_image_url_https=None,
+            issue_we_vote_id=None,
             linkedin_profile_image_url=None,
             maplight_image_url_https=None,
+            organization_we_vote_id=None,
+            other_source_image_url=None,
+            photo_url_from_ctcl=None,
+            photo_url_from_vote_usa=None,
             twitter_profile_background_image_url_https=None,
             twitter_profile_banner_url_https=None,
             twitter_profile_image_url_https=None,
             vote_smart_image_url_https=None,
             voter_uploaded_profile_image_url_https=None,
+            voter_we_vote_id=None,
             wikipedia_profile_image_url=None,
-            other_source_image_url=None):
+    ):
         """
         Retrieve voter's we vote image list as per image url
-        :param voter_we_vote_id:
-        :param campaignx_we_vote_id:
-        :param candidate_we_vote_id:
-        :param organization_we_vote_id:
-        :param issue_we_vote_id:
         :param ballotpedia_profile_image_url:
         :param campaignx_photo_url_https:
-        :param facebook_profile_image_url_https:
+        :param campaignx_we_vote_id:
+        :param candidate_we_vote_id:
         :param facebook_background_image_url_https:
+        :param facebook_profile_image_url_https:
         :param issue_image_url_https:
+        :param issue_we_vote_id:
         :param linkedin_profile_image_url:
         :param maplight_image_url_https:
+        :param organization_we_vote_id:
+        :param other_source_image_url:
+        :param photo_url_from_ctcl:
+        :param photo_url_from_vote_usa:
         :param twitter_profile_background_image_url_https:
         :param twitter_profile_banner_url_https:
         :param twitter_profile_image_url_https:
         :param vote_smart_image_url_https:
         :param voter_uploaded_profile_image_url_https:
+        :param voter_we_vote_id:
         :param wikipedia_profile_image_url:
-        :param other_source_image_url:
         :return:
         """
         we_vote_image_list = []
@@ -1267,7 +1384,6 @@ class WeVoteImageManager(models.Manager):
         try:
             we_vote_image_queryset = WeVoteImage.objects.all()
             we_vote_image_queryset = we_vote_image_queryset.filter(
-                voter_we_vote_id__iexact=voter_we_vote_id,
                 ballotpedia_profile_image_url__iexact=ballotpedia_profile_image_url,
                 campaignx_photo_url_https__iexact=campaignx_photo_url_https,
                 campaignx_we_vote_id__iexact=campaignx_we_vote_id,
@@ -1280,11 +1396,14 @@ class WeVoteImageManager(models.Manager):
                 maplight_image_url_https__iexact=maplight_image_url_https,
                 organization_we_vote_id__iexact=organization_we_vote_id,
                 other_source_image_url__iexact=other_source_image_url,
+                photo_url_from_ctcl__iexact=photo_url_from_ctcl,
+                photo_url_from_vote_usa__iexact=photo_url_from_vote_usa,
                 twitter_profile_background_image_url_https__iexact=twitter_profile_background_image_url_https,
                 twitter_profile_banner_url_https__iexact=twitter_profile_banner_url_https,
                 twitter_profile_image_url_https__iexact=twitter_profile_image_url_https,
                 vote_smart_image_url_https__iexact=vote_smart_image_url_https,
                 voter_uploaded_profile_image_url_https__iexact=voter_uploaded_profile_image_url_https,
+                voter_we_vote_id__iexact=voter_we_vote_id,
                 wikipedia_profile_image_url__iexact=wikipedia_profile_image_url,
             )
             we_vote_image_list = we_vote_image_queryset
@@ -1409,11 +1528,11 @@ class WeVoteImageManager(models.Manager):
 
     def retrieve_recent_cached_we_vote_image(
             self,
-            voter_we_vote_id=None,
             candidate_we_vote_id=None,
-            organization_we_vote_id=None,
             issue_we_vote_id=None,
+            is_active_version=True,
             kind_of_image_ballotpedia_profile=False,
+            kind_of_image_ctcl_profile=False,
             kind_of_image_facebook_profile=False,
             kind_of_image_facebook_background=False,
             kind_of_image_issue=False,
@@ -1428,16 +1547,19 @@ class WeVoteImageManager(models.Manager):
             kind_of_image_twitter_banner=False,
             kind_of_image_twitter_profile=False,
             kind_of_image_vote_smart=False,
+            kind_of_image_vote_usa_profile=False,
             kind_of_image_voter_uploaded_profile=False,
             kind_of_image_wikipedia_profile=False,
-            is_active_version=True):
+            organization_we_vote_id=None,
+            voter_we_vote_id=None,
+    ):
         """
         Retrieve cached we vote image list as per kind of image
-        :param voter_we_vote_id:
         :param candidate_we_vote_id:
-        :param organization_we_vote_id:
         :param issue_we_vote_id:
+        :param is_active_version:
         :param kind_of_image_ballotpedia_profile:
+        :param kind_of_image_ctcl_profile:
         :param kind_of_image_facebook_profile:
         :param kind_of_image_facebook_background:
         :param kind_of_image_issue:
@@ -1452,20 +1574,22 @@ class WeVoteImageManager(models.Manager):
         :param kind_of_image_twitter_banner:
         :param kind_of_image_twitter_profile:
         :param kind_of_image_vote_smart:
+        :param kind_of_image_vote_usa_profile:
         :param kind_of_image_voter_uploaded_profile:
         :param kind_of_image_wikipedia_profile:
-        :param is_active_version:
+        :param organization_we_vote_id:
+        :param voter_we_vote_id:
         :return:
         """
         we_vote_image_on_stage = WeVoteImage()
         status = ""
         try:
             we_vote_image_on_stage = WeVoteImage.objects.get(
-                voter_we_vote_id__iexact=voter_we_vote_id,
                 candidate_we_vote_id__iexact=candidate_we_vote_id,
-                organization_we_vote_id__iexact=organization_we_vote_id,
+                is_active_version=is_active_version,
                 issue_we_vote_id__iexact=issue_we_vote_id,
                 kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
+                kind_of_image_ctcl_profile=kind_of_image_ctcl_profile,
                 kind_of_image_facebook_background=kind_of_image_facebook_background,
                 kind_of_image_facebook_profile=kind_of_image_facebook_profile,
                 kind_of_image_issue=kind_of_image_issue,
@@ -1480,9 +1604,12 @@ class WeVoteImageManager(models.Manager):
                 kind_of_image_twitter_banner=kind_of_image_twitter_banner,
                 kind_of_image_twitter_profile=kind_of_image_twitter_profile,
                 kind_of_image_vote_smart=kind_of_image_vote_smart,
+                kind_of_image_vote_usa_profile=kind_of_image_vote_usa_profile,
                 kind_of_image_voter_uploaded_profile=kind_of_image_voter_uploaded_profile,
                 kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
-                is_active_version=is_active_version)
+                organization_we_vote_id__iexact=organization_we_vote_id,
+                voter_we_vote_id__iexact=voter_we_vote_id,
+            )
             success = True
             we_vote_image_found = True
             status += ' RECENT_CACHED_WE_VOTE_IMAGE_RETRIEVED '
@@ -1495,7 +1622,7 @@ class WeVoteImageManager(models.Manager):
             success = True
             we_vote_image_found = False
         except Exception as e:
-            status += " FAILED_TO RETRIEVE_RECENT_CACHED_WE_VOTE_IMAGE "
+            status += " FAILED_TO RETRIEVE_RECENT_CACHED_WE_VOTE_IMAGE: " + str(e) + " "
             success = False
             we_vote_image_found = False
             handle_exception(e, logger=logger, exception_message=status)
@@ -1510,16 +1637,15 @@ class WeVoteImageManager(models.Manager):
 
     def retrieve_todays_cached_we_vote_image_list(
             self,
-            voter_we_vote_id=None,
             campaignx_we_vote_id=None,
             candidate_we_vote_id=None,
-            organization_we_vote_id=None,
             issue_we_vote_id=None,
             kind_of_image_ballotpedia_profile=False,
             kind_of_image_campaignx_photo=False,
             kind_of_image_chosen_favicon=False,
             kind_of_image_chosen_logo=False,
             kind_of_image_chosen_social_share_master=False,
+            kind_of_image_ctcl_profile=False,
             kind_of_image_facebook_background=False,
             kind_of_image_facebook_profile=False,
             kind_of_image_issue=False,
@@ -1534,8 +1660,12 @@ class WeVoteImageManager(models.Manager):
             kind_of_image_twitter_background=False,
             kind_of_image_twitter_banner=False,
             kind_of_image_vote_smart=False,
+            kind_of_image_vote_usa_profile=False,
             kind_of_image_voter_uploaded_profile=False,
-            kind_of_image_wikipedia_profile=False):
+            kind_of_image_wikipedia_profile=False,
+            organization_we_vote_id=None,
+            voter_we_vote_id=None,
+    ):
         """
         Retrieve today's cached images according to the kind of image
         :param voter_we_vote_id:
@@ -1548,6 +1678,7 @@ class WeVoteImageManager(models.Manager):
         :param kind_of_image_chosen_favicon:
         :param kind_of_image_chosen_logo:
         :param kind_of_image_chosen_social_share_master:
+        :param kind_of_image_ctcl_profile:
         :param kind_of_image_facebook_background:
         :param kind_of_image_facebook_profile:
         :param kind_of_image_issue:
@@ -1562,6 +1693,7 @@ class WeVoteImageManager(models.Manager):
         :param kind_of_image_twitter_background:
         :param kind_of_image_twitter_banner:
         :param kind_of_image_vote_smart:
+        :param kind_of_image_vote_usa_profile:
         :param kind_of_image_voter_uploaded_profile:
         :param kind_of_image_wikipedia_profile:
         :return:
@@ -1583,6 +1715,7 @@ class WeVoteImageManager(models.Manager):
                 kind_of_image_chosen_favicon=kind_of_image_chosen_favicon,
                 kind_of_image_chosen_logo=kind_of_image_chosen_logo,
                 kind_of_image_chosen_social_share_master=kind_of_image_chosen_social_share_master,
+                kind_of_image_ctcl_profile=kind_of_image_ctcl_profile,
                 kind_of_image_facebook_background=kind_of_image_facebook_background,
                 kind_of_image_facebook_profile=kind_of_image_facebook_profile,
                 kind_of_image_issue=kind_of_image_issue,
@@ -1594,12 +1727,13 @@ class WeVoteImageManager(models.Manager):
                 kind_of_image_twitter_background=kind_of_image_twitter_background,
                 kind_of_image_twitter_banner=kind_of_image_twitter_banner,
                 kind_of_image_vote_smart=kind_of_image_vote_smart,
+                kind_of_image_vote_usa_profile=kind_of_image_vote_usa_profile,
                 kind_of_image_voter_uploaded_profile=kind_of_image_voter_uploaded_profile,
                 kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
                 kind_of_image_large=kind_of_image_large,
                 kind_of_image_medium=kind_of_image_medium,
                 kind_of_image_tiny=kind_of_image_tiny)
-            we_vote_image_list = we_vote_image_queryset
+            we_vote_image_list = list(we_vote_image_queryset)
 
             if len(we_vote_image_list):
                 success = True
@@ -1615,7 +1749,7 @@ class WeVoteImageManager(models.Manager):
             success = True
             we_vote_image_list_found = False
         except Exception as e:
-            status += " FAILED_TO RETRIEVE_TODAYS_CACHED_WE_VOTE_IMAGE_LIST "
+            status += " FAILED_TO RETRIEVE_TODAYS_CACHED_WE_VOTE_IMAGE_LIST: " + str(e) + " "
             success = False
             we_vote_image_list_found = False
             handle_exception(e, logger=logger, exception_message=status)

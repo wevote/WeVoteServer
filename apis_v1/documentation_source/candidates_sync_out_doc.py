@@ -65,8 +65,10 @@ def candidates_sync_out_doc_template_values(url_root):
                    '  "order_on_ballot": string,\n' \
                    '  "party": string,\n' \
                    '  "photo_url": string,\n' \
+                   '  "photo_url_from_ctcl": string,\n' \
                    '  "photo_url_from_maplight": string,\n' \
                    '  "photo_url_from_vote_smart": string,\n' \
+                   '  "photo_url_from_vote_usa": string,\n' \
                    '  "politician_we_vote_id": string,\n' \
                    '  "state_code": string,\n' \
                    '  "twitter_url": string,\n' \
@@ -79,7 +81,7 @@ def candidates_sync_out_doc_template_values(url_root):
                    '  "vote_smart_id": integer,\n' \
                    '  "vote_usa_office_id": string,\n' \
                    '  "vote_usa_politician_id": string,\n' \
-                   '  "vote_usa_profile_image_url": string,\n' \
+                   '  "vote_usa_profile_image_url_https": string,\n' \
                    '  "we_vote_id": string,\n' \
                    '  "wikipedia_page_id": string,\n' \
                    '  "wikipedia_page_title": string,\n' \
