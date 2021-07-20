@@ -2000,12 +2000,16 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         "candidate_twitter_handle", batch_header_map, one_batch_row)
     candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle_raw)
     candidate_url = batch_manager.retrieve_value_from_batch_row("candidate_url", batch_header_map, one_batch_row)
-    candidate_contact_form_url = batch_manager.retrieve_value_from_batch_row("candidate_contact_form_url",
-                                                                             batch_header_map, one_batch_row)
+    candidate_contact_form_url = batch_manager.retrieve_value_from_batch_row(
+        "candidate_contact_form_url", batch_header_map, one_batch_row)
     facebook_url = batch_manager.retrieve_value_from_batch_row("facebook_url", batch_header_map, one_batch_row)
     candidate_email = batch_manager.retrieve_value_from_batch_row("candidate_email", batch_header_map, one_batch_row)
-    candidate_profile_image_url = batch_manager.retrieve_value_from_batch_row("candidate_profile_image_url",
-                                                                              batch_header_map, one_batch_row)
+    candidate_profile_image_url = batch_manager.retrieve_value_from_batch_row(
+        "candidate_profile_image_url", batch_header_map, one_batch_row)
+    photo_url_from_ctcl = batch_manager.retrieve_value_from_batch_row(
+        "photo_url_from_ctcl", batch_header_map, one_batch_row)
+    photo_url_from_vote_usa = batch_manager.retrieve_value_from_batch_row(
+        "photo_url_from_vote_usa", batch_header_map, one_batch_row)
     state_code = batch_manager.retrieve_value_from_batch_row("state_code", batch_header_map, one_batch_row)
     candidate_temp_id = batch_manager.retrieve_value_from_batch_row(
         "candidate_batch_id", batch_header_map, one_batch_row)  # TODO Is the name transformation correct?
@@ -2018,7 +2022,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         "candidate", batch_header_map, one_batch_row)
     vote_usa_state_code = batch_manager.retrieve_value_from_batch_row(
         "state code", batch_header_map, one_batch_row)
-    vote_usa_profile_image_url = batch_manager.retrieve_value_from_batch_row(
+    vote_usa_profile_image_url_https = batch_manager.retrieve_value_from_batch_row(
         "photo300 url", batch_header_map, one_batch_row)
     vote_usa_party_name = batch_manager.retrieve_value_from_batch_row(
         "party", batch_header_map, one_batch_row)
@@ -2320,11 +2324,13 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         else:
             batch_row_action_candidate.party = candidate_party_name
         batch_row_action_candidate.photo_url = candidate_profile_image_url
+        batch_row_action_candidate.photo_url_from_ctcl = photo_url_from_ctcl
+        batch_row_action_candidate.photo_url_from_vote_usa = photo_url_from_vote_usa
         batch_row_action_candidate.state_code = state_code
         batch_row_action_candidate.status = status
         batch_row_action_candidate.vote_usa_office_id = vote_usa_office_id
         batch_row_action_candidate.vote_usa_politician_id = vote_usa_politician_id
-        batch_row_action_candidate.vote_usa_profile_image_url = vote_usa_profile_image_url
+        batch_row_action_candidate.vote_usa_profile_image_url_https = vote_usa_profile_image_url_https
         batch_row_action_candidate.save()
     except Exception as e:
         success = False
@@ -4196,12 +4202,16 @@ def import_candidate_data_from_batch_row_actions(batch_header_id, batch_row_id, 
             update_values['party'] = one_batch_row_action.party
         if positive_value_exists(one_batch_row_action.photo_url):
             update_values['photo_url'] = one_batch_row_action.photo_url
+        if positive_value_exists(one_batch_row_action.photo_url_from_ctcl):
+            update_values['photo_url_from_ctcl'] = one_batch_row_action.photo_url_from_ctcl
+        if positive_value_exists(one_batch_row_action.photo_url_from_vote_usa):
+            update_values['photo_url_from_vote_usa'] = one_batch_row_action.photo_url_from_vote_usa
         if positive_value_exists(one_batch_row_action.vote_usa_office_id):
             update_values['vote_usa_office_id'] = one_batch_row_action.vote_usa_office_id
         if positive_value_exists(one_batch_row_action.vote_usa_politician_id):
             update_values['vote_usa_politician_id'] = one_batch_row_action.vote_usa_politician_id
-        if positive_value_exists(one_batch_row_action.vote_usa_profile_image_url):
-            update_values['vote_usa_profile_image_url'] = one_batch_row_action.vote_usa_profile_image_url
+        if positive_value_exists(one_batch_row_action.vote_usa_profile_image_url_https):
+            update_values['vote_usa_profile_image_url_https'] = one_batch_row_action.vote_usa_profile_image_url_https
         if positive_value_exists(one_batch_row_action.state_code):
             update_values['state_code'] = one_batch_row_action.state_code
 

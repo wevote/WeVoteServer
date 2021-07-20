@@ -907,10 +907,12 @@ def convert_district_scope_to_ballotpedia_race_office_level(district_scope):
     federal_scope_list = ['congressional', 'national']
     local_scope_list = [
         'cityCouncil', 'citywide', 'countyCouncil', 'countywide', 'schoolBoard', 'special',
-        'city', 'county', 'county-council']  # ids in this line not in specification
+        'city', 'county', 'county-council',
+    ]  # ids on second line from CTCL and not in specification
     state_scope_list = [
         'judicial', 'stateLower', 'stateUpper', 'statewide', 'township', 'ward',
-        'state', 'state-house']  # ids in this line not in specification
+        'state', 'state-house',
+    ]  # ids on second line from CTCL and not in specification
     if district_scope in federal_scope_list:
         return 'Federal'
     elif district_scope in local_scope_list:

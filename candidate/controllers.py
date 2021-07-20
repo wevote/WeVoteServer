@@ -15,7 +15,7 @@ from config.base import get_environment_variable
 from election.models import ElectionManager
 from exception.models import handle_exception
 from image.controllers import retrieve_all_images_for_one_candidate, cache_master_and_resized_image, \
-    BALLOTPEDIA_IMAGE_SOURCE, \
+    IMAGE_SOURCE_BALLOTPEDIA, \
     LINKEDIN, TWITTER, WIKIPEDIA, FACEBOOK
 from import_export_vote_smart.controllers import retrieve_and_match_candidate_from_vote_smart, \
     retrieve_candidate_photo_from_vote_smart
@@ -807,8 +807,9 @@ def candidates_import_from_structured_json(structured_json):  # Consumes candida
             if 'photo_url_from_maplight' in one_candidate:
                 updated_candidate_values['photo_url_from_maplight'] = one_candidate['photo_url_from_maplight']
             if 'photo_url_from_vote_smart' in one_candidate:
-                updated_candidate_values['photo_url_from_vote_smart'] = \
-                    one_candidate['photo_url_from_vote_smart']
+                updated_candidate_values['photo_url_from_vote_smart'] = one_candidate['photo_url_from_vote_smart']
+            if 'photo_url_from_vote_usa' in one_candidate:
+                updated_candidate_values['photo_url_from_vote_usa'] = one_candidate['photo_url_from_vote_usa']
             if 'twitter_url' in one_candidate:
                 updated_candidate_values['twitter_url'] = one_candidate['twitter_url']
             if 'youtube_url' in one_candidate:
@@ -832,8 +833,8 @@ def candidates_import_from_structured_json(structured_json):  # Consumes candida
                 updated_candidate_values['vote_usa_office_id'] = one_candidate['vote_usa_office_id']
             if 'vote_usa_politician_id' in one_candidate:
                 updated_candidate_values['vote_usa_politician_id'] = one_candidate['vote_usa_politician_id']
-            if 'vote_usa_profile_image_url' in one_candidate:
-                updated_candidate_values['vote_usa_profile_image_url'] = one_candidate['vote_usa_profile_image_url']
+            if 'vote_usa_profile_image_url_https' in one_candidate:
+                updated_candidate_values['vote_usa_profile_image_url_https'] = one_candidate['vote_usa_profile_image_url_https']
             if 'we_vote_hosted_profile_image_url_large' in one_candidate:
                 updated_candidate_values['we_vote_hosted_profile_image_url_large'] = \
                     one_candidate['we_vote_hosted_profile_image_url_large']
@@ -1694,11 +1695,11 @@ def save_image_to_candidate_table(candidate, image_url, source_link, url_is_brok
 
     if not positive_value_exists(kind_of_source_website):
         kind_of_source_website = extract_website_from_url(source_link)
-    if BALLOTPEDIA_IMAGE_SOURCE in kind_of_source_website:
+    if IMAGE_SOURCE_BALLOTPEDIA in kind_of_source_website:
         cache_results = cache_master_and_resized_image(
             candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
             ballotpedia_profile_image_url=image_url,
-            image_source=BALLOTPEDIA_IMAGE_SOURCE)
+            image_source=IMAGE_SOURCE_BALLOTPEDIA)
         cached_ballotpedia_profile_image_url_https = cache_results['cached_ballotpedia_image_url_https']
         candidate.ballotpedia_photo_url = cached_ballotpedia_profile_image_url_https
         candidate.ballotpedia_page_title = source_link
@@ -1771,7 +1772,7 @@ def save_image_to_candidate_table(candidate, image_url, source_link, url_is_brok
 
 def save_google_search_link_to_candidate_table(candidate, google_search_link):
     google_search_website_name = google_search_link.split("//")[1].split("/")[0]
-    if BALLOTPEDIA_IMAGE_SOURCE in google_search_website_name:
+    if IMAGE_SOURCE_BALLOTPEDIA in google_search_website_name:
         candidate.ballotpedia_page_title = google_search_link
     elif LINKEDIN in google_search_website_name:
         candidate.linkedin_url = google_search_link
