@@ -3087,6 +3087,7 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
         refresh_ballot_returned=False,
         date_last_updated_should_not_exceed=None,
         batch_process_ballot_item_chunk=None,
+        batch_process_date_started=None,
         use_ballotpedia=False,
         use_ctcl=False,
         use_vote_usa=False):
@@ -3238,9 +3239,11 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
         if positive_value_exists(refresh_ballot_returned):
             limit_polling_locations_retrieved = MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK  # 125. Formerly 250 and 111
         else:
+            # When retrieving (as opposed to refreshing) we set the "number retrieved" limit
+            # below with MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK
             limit_polling_locations_retrieved = 0
 
-        # Retrieve map points already in ballot_returned table
+        # Retrieve the map points already in ballot_returned table
         if positive_value_exists(is_national_election) and positive_value_exists(state_code):
             status += "NATIONAL_WITH_STATE (" + str(state_code) + ") "
             status += "date_last_updated_should_not_exceed: " + str(date_last_updated_should_not_exceed) + ' '
@@ -3273,6 +3276,18 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
             polling_location_list = list(polling_location_query)
             polling_location_count = len(polling_location_list)
         else:
+            # If here, we are starting a fresh retrieve so we want to also exclude BallotReturnedEmpty entries
+            results = ballot_returned_list_manager.\
+                retrieve_polling_location_we_vote_id_list_from_ballot_returned_empty(
+                    google_civic_election_id=google_civic_election_id,
+                    state_code=state_code,
+                    batch_process_date_started=batch_process_date_started,
+                )
+            if results['polling_location_we_vote_id_list_found']:
+                polling_location_we_vote_id_list_to_exclude = results['polling_location_we_vote_id_list']
+                polling_location_we_vote_id_list = \
+                    list(set(polling_location_we_vote_id_list + polling_location_we_vote_id_list_to_exclude))
+
             polling_location_query = PollingLocation.objects.using('readonly').all()
             polling_location_query = \
                 polling_location_query.exclude(Q(latitude__isnull=True) | Q(latitude__exact=0.0))

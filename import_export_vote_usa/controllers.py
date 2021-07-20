@@ -299,8 +299,17 @@ def retrieve_vote_usa_ballot_items_from_polling_location_api(
                     batch_header_id = results['batch_header_id']
                 else:
                     # We need to at least to mark the BallotReturned entry with a new date_last_updated date so
-                    #  we can more on to other ballot returned entries.
-                    status += "NO_INCOMING_BALLOT_ITEMS_FOUND-VOTE_USA "
+                    #  we can move on to other ballot returned entries.
+                    status += "CONTESTS_BUT_NO_INCOMING_BALLOT_ITEMS_FOUND-VOTE_USA "
+            else:
+                # Create BallotReturnedEmpty entry so we don't keep retrieving this map point
+                status += "NO_INCOMING_BALLOT_ITEMS_FOUND-VOTE_USA "
+                ballot_returned_manager = BallotReturnedManager()
+                results = ballot_returned_manager.create_ballot_returned_empty(
+                    google_civic_election_id=google_civic_election_id,
+                    polling_location_we_vote_id=polling_location_we_vote_id,
+                    state_code=state_code,
+                )
         except Exception as e:
             success = False
             status += 'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS_API_V4-VOTE_USA-ERROR: ' + str(e) + ' '
