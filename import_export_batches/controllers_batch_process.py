@@ -1565,6 +1565,7 @@ def process_one_ballot_item_batch_process(batch_process):
                 retrieve_ballots_for_polling_locations_api_v4_internal_view
             # Steve, Oct 2020: This line took 35 seconds to execute on my local, in the debugger
             results = retrieve_ballots_for_polling_locations_api_v4_internal_view(
+                batch_process_date_started=batch_process.date_started,
                 google_civic_election_id=batch_process.google_civic_election_id,
                 state_code=batch_process.state_code,
                 refresh_ballot_returned=False,
@@ -2078,7 +2079,7 @@ def process_one_ballot_item_batch_process(batch_process):
             # If here, we know that the analyze_date_completed has a value
             batch_process_ballot_item_chunk.create_date_started = now()
             batch_process_ballot_item_chunk.save()
-            status += "CREATE_DATE_STARTED-CREATE_DATE_STARTED_SAVED "
+            status += "CREATE_DATE_STARTED-SAVED "
             batch_process_manager.create_batch_process_log_entry(
                 batch_process_id=batch_process.id,
                 batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
