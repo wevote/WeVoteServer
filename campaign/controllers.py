@@ -300,6 +300,158 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
     return json_data
 
 
+def campaignx_news_item_save_for_api(  # campaignNewsItemSave
+        campaign_news_subject='',
+        campaign_news_subject_changed=False,
+        campaign_news_text='',
+        campaign_news_text_changed=False,
+        campaignx_news_item_we_vote_id='',
+        campaignx_we_vote_id='',
+        in_draft_mode=False,
+        in_draft_mode_changed=False,
+        visible_to_public=False,
+        visible_to_public_changed=False,
+        voter_device_id=''):
+    status = ''
+    success = True
+
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if voter_results['voter_found']:
+        voter = voter_results['voter']
+        voter_we_vote_id = voter.we_vote_id
+        linked_organization_we_vote_id = voter.linked_organization_we_vote_id
+    else:
+        status += "VALID_VOTER_ID_MISSING "
+        results = {
+            'status':                           status,
+            'success':                          False,
+            'campaign_news_subject':            '',
+            'campaign_news_text':               '',
+            'campaignx_news_item_we_vote_id':   '',
+            'campaignx_we_vote_id':             '',
+            'date_last_changed':                '',
+            'date_posted':                      '',
+            'in_draft_mode':                    True,
+            'organization_we_vote_id':          '',
+            'speaker_name':                     '',
+            'visible_to_public':                True,
+            'voter_we_vote_id':                 '',
+            'we_vote_hosted_profile_photo_image_url_tiny': '',
+        }
+        return results
+
+    if not positive_value_exists(campaignx_we_vote_id):
+        status += "CAMPAIGNX_WE_VOTE_ID_REQUIRED "
+        results = {
+            'status':                           status,
+            'success':                          False,
+            'campaign_news_subject':            '',
+            'campaign_news_text':               '',
+            'campaignx_news_item_we_vote_id':   '',
+            'campaignx_we_vote_id':             '',
+            'date_last_changed':                '',
+            'date_posted':                      '',
+            'in_draft_mode':                    True,
+            'organization_we_vote_id':          '',
+            'speaker_name':                     '',
+            'visible_to_public':                True,
+            'voter_we_vote_id':                 '',
+            'we_vote_hosted_profile_photo_image_url_tiny': '',
+        }
+        return results
+
+    campaignx_manager = CampaignXManager()
+    voter_is_campaignx_owner = campaignx_manager.is_voter_campaignx_owner(
+        campaignx_we_vote_id=campaignx_we_vote_id,
+        voter_we_vote_id=voter_we_vote_id,
+    )
+    if not positive_value_exists(voter_is_campaignx_owner):
+        status += "VOTER_DOES_NOT_HAVE_RIGHT_TO_CREATE_NEWS_ITEM "
+        results = {
+            'status':                           status,
+            'success':                          False,
+            'campaign_news_subject':            '',
+            'campaign_news_text':               '',
+            'campaignx_news_item_we_vote_id':   '',
+            'campaignx_we_vote_id':             '',
+            'date_last_changed':                '',
+            'date_posted':                      '',
+            'in_draft_mode':                    True,
+            'organization_we_vote_id':          '',
+            'speaker_name':                     '',
+            'visible_to_public':                True,
+            'voter_we_vote_id':                 '',
+            'we_vote_hosted_profile_photo_image_url_tiny': '',
+        }
+        return results
+
+    update_values = {
+        'campaign_news_subject':            campaign_news_subject,
+        'campaign_news_subject_changed':    campaign_news_subject_changed,
+        'campaign_news_text':               campaign_news_text,
+        'campaign_news_text_changed':       campaign_news_text_changed,
+        'in_draft_mode':                    in_draft_mode,
+        'in_draft_mode_changed':            in_draft_mode_changed,
+        'visible_to_public':                visible_to_public,
+        'visible_to_public_changed':        visible_to_public_changed,
+    }
+    create_results = campaignx_manager.update_or_create_campaignx_news_item(
+        campaignx_news_item_we_vote_id=campaignx_news_item_we_vote_id,
+        campaignx_we_vote_id=campaignx_we_vote_id,
+        organization_we_vote_id=linked_organization_we_vote_id,
+        voter_we_vote_id=voter_we_vote_id,
+        update_values=update_values,
+    )
+
+    status += create_results['status']
+    if create_results['campaignx_news_item_found']:
+        campaignx_news_item = create_results['campaignx_news_item']
+        date_last_changed_string = ''
+        date_posted_string = ''
+        try:
+            date_last_changed_string = campaignx_news_item.date_last_changed.strftime('%Y-%m-%d %H:%M:%S')
+            date_posted_string = campaignx_news_item.date_posted.strftime('%Y-%m-%d %H:%M:%S')
+        except Exception as e:
+            status += "DATE_CONVERSION_ERROR: " + str(e) + " "
+        results = {
+            'status':                       status,
+            'success':                      success,
+            'campaign_news_subject':        campaignx_news_item.campaign_news_subject,
+            'campaign_news_text':           campaignx_news_item.campaign_news_text,
+            'campaignx_news_item_we_vote_id': campaignx_news_item.we_vote_id,
+            'campaignx_we_vote_id':         campaignx_news_item.campaignx_we_vote_id,
+            'date_last_changed':            date_last_changed_string,
+            'date_posted':                  date_posted_string,
+            'in_draft_mode':                campaignx_news_item.in_draft_mode,
+            'organization_we_vote_id':      campaignx_news_item.organization_we_vote_id,
+            'speaker_name':                 campaignx_news_item.speaker_name,
+            'visible_to_public':            campaignx_news_item.visible_to_public,
+            'voter_we_vote_id':             campaignx_news_item.voter_we_vote_id,
+            'we_vote_hosted_profile_photo_image_url_tiny': campaignx_news_item.we_vote_hosted_profile_image_url_tiny,
+        }
+        return results
+    else:
+        status += "CAMPAIGNX_NEWS_ITEM_NOT_FOUND_ERROR "
+        results = {
+            'status':                           status,
+            'success':                          False,
+            'campaign_news_subject':            '',
+            'campaign_news_text':               '',
+            'campaignx_news_item_we_vote_id':   '',
+            'campaignx_we_vote_id':             '',
+            'date_last_changed':                '',
+            'date_posted':                      '',
+            'in_draft_mode':                    True,
+            'organization_we_vote_id':          '',
+            'speaker_name':                     '',
+            'visible_to_public':                True,
+            'voter_we_vote_id':                 '',
+            'we_vote_hosted_profile_photo_image_url_tiny': '',
+        }
+        return results
+
+
 def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (No CDN)
         request=None,
         voter_device_id='',
@@ -435,6 +587,38 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
     campaignx = results['campaignx']
     campaignx_owner_list = results['campaignx_owner_list']
     seo_friendly_path_list = results['seo_friendly_path_list']
+
+    # Get campaignx news items / updates
+    campaignx_news_item_list = []
+    news_item_list_results = campaignx_manager.retrieve_campaignx_news_item_list(
+        campaignx_we_vote_id=campaignx.we_vote_id,
+        read_only=True,
+        voter_is_campaignx_owner=voter_is_campaignx_owner)
+    if news_item_list_results['campaignx_news_item_list_found']:
+        news_item_list = news_item_list_results['campaignx_news_item_list']
+        for news_item in news_item_list:
+            date_last_changed_string = ''
+            date_posted_string = ''
+            try:
+                date_last_changed_string = news_item.date_last_changed.strftime('%Y-%m-%d %H:%M:%S')
+                date_posted_string = news_item.date_posted.strftime('%Y-%m-%d %H:%M:%S')
+            except Exception as e:
+                status += "DATE_CONVERSION_ERROR: " + str(e) + " "
+            one_news_item_dict = {
+                'campaign_news_subject': news_item.campaign_news_subject,
+                'campaign_news_text': news_item.campaign_news_text,
+                'campaignx_news_item_we_vote_id': news_item.we_vote_id,
+                'campaignx_we_vote_id': news_item.campaignx_we_vote_id,
+                'date_last_changed': date_last_changed_string,
+                'date_posted': date_posted_string,
+                'in_draft_mode': news_item.in_draft_mode,
+                'organization_we_vote_id': news_item.organization_we_vote_id,
+                'speaker_name': news_item.speaker_name,
+                'visible_to_public': news_item.visible_to_public,
+                'voter_we_vote_id': news_item.voter_we_vote_id,
+                'we_vote_hosted_profile_image_url_tiny': news_item.we_vote_hosted_profile_image_url_tiny,
+            }
+            campaignx_news_item_list.append(one_news_item_dict)
 
     from organization.controllers import site_configuration_retrieve_for_api
     site_results = site_configuration_retrieve_for_api(hostname)
@@ -592,6 +776,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
         'success':                          True,
         'campaign_description':             campaignx.campaign_description,
         'campaign_title':                   campaignx.campaign_title,
+        'campaignx_news_item_list':         campaignx_news_item_list,
         'campaignx_owner_list':             campaignx_owner_list,
         'campaignx_politician_list':        campaignx_politician_list_modified,
         'campaignx_politician_list_exists': campaignx_politician_list_exists,

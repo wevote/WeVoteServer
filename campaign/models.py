@@ -8,11 +8,13 @@ from django.utils.text import slugify
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception
 import json
+from organization.models import OrganizationManager
 import string
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, generate_date_as_integer, generate_random_string, \
     positive_value_exists
-from wevote_settings.models import fetch_next_we_vote_id_campaignx_integer, fetch_site_unique_id_prefix
+from wevote_settings.models import fetch_next_we_vote_id_campaignx_integer, \
+    fetch_next_we_vote_id_campaignx_news_item_integer, fetch_site_unique_id_prefix
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -122,6 +124,18 @@ class CampaignXManager(models.Manager):
             return campaignx_queryset.count()
         except Exception as e:
             status += "RETRIEVE_CAMPAIGNX_SUPPORTER_LIST_FAILED: " + str(e) + " "
+
+        return 0
+
+    def fetch_campaignx_news_item_count(self, campaignx_we_vote_id=None):
+        status = ""
+
+        try:
+            campaignx_queryset = CampaignXNewsItem.objects.using('readonly').all()
+            campaignx_queryset = campaignx_queryset.filter(campaignx_we_vote_id=campaignx_we_vote_id)
+            return campaignx_queryset.count()
+        except Exception as e:
+            status += "RETRIEVE_CAMPAIGNX_NEWS_UPDATE_COUNT_FAILED: " + str(e) + " "
 
         return 0
 
@@ -1292,7 +1306,6 @@ class CampaignXManager(models.Manager):
 
                     # Get the updated organization_name and we_vote_hosted_profile_image_url_tiny
                     if positive_value_exists(linked_organization_we_vote_id):
-                        from organization.models import OrganizationManager
                         organization_manager = OrganizationManager()
                         results = organization_manager.retrieve_organization(
                             we_vote_id=linked_organization_we_vote_id,
@@ -1449,7 +1462,90 @@ class CampaignXManager(models.Manager):
         }
         return results
 
-    def retrieve_campaignx_title(campaignx_we_vote_id='', read_only=False):
+    def retrieve_campaignx_news_item(
+            self,
+            campaignx_news_item_we_vote_id='',
+            read_only=False):
+        campaignx_news_item = None
+        campaignx_news_item_found = False
+        status = ''
+        success = True
+
+        try:
+            if positive_value_exists(campaignx_news_item_we_vote_id):
+                if positive_value_exists(read_only):
+                    campaignx_news_item = CampaignXNewsItem.objects.using('readonly').get(
+                        we_vote_id=campaignx_news_item_we_vote_id)
+                else:
+                    campaignx_news_item = CampaignXNewsItem.objects.get(
+                        we_vote_id=campaignx_news_item_we_vote_id)
+                campaignx_news_item_found = True
+                status += 'CAMPAIGNX_NEWS_ITEM_FOUND_WITH_WE_VOTE_ID '
+            else:
+                status += 'CAMPAIGNX_NEWS_ITEM_NOT_FOUND-MISSING_VARIABLE '
+                success = False
+        except CampaignXNewsItem.DoesNotExist as e:
+            status += 'CAMPAIGNX_NEWS_ITEM_NOT_FOUND '
+            success = True
+        except Exception as e:
+            status += 'CAMPAIGNX_NEWS_ITEM_NOT_FOUND_EXCEPTION: ' + str(e) + ' '
+            success = False
+
+        results = {
+            'status':                       status,
+            'success':                      success,
+            'campaignx_news_item':          campaignx_news_item,
+            'campaignx_news_item_found':    campaignx_news_item_found,
+        }
+        return results
+
+    def retrieve_campaignx_news_item_list(
+            self,
+            campaignx_we_vote_id=None,
+            limit=0,
+            read_only=True,
+            voter_is_campaignx_owner=False,
+    ):
+        success = True
+        status = ""
+
+        try:
+            if read_only:
+                queryset = CampaignXNewsItem.objects.using('readonly').all()
+            else:
+                queryset = CampaignXNewsItem.objects.all()
+
+            queryset = queryset.filter(campaignx_we_vote_id=campaignx_we_vote_id)
+            if positive_value_exists(voter_is_campaignx_owner):
+                # Return all news items
+                pass
+            else:
+                queryset = queryset.filter(in_draft_mode=False)
+                queryset = queryset.filter(visibility_blocked_by_we_vote=False)
+                queryset = queryset.filter(visible_to_public=True)
+            queryset = queryset.order_by('-date_posted')
+            if limit > 0:
+                queryset = queryset[:limit]
+            else:
+                queryset = queryset
+            campaignx_news_item_list = list(queryset)
+            campaignx_news_item_list_found = positive_value_exists(len(campaignx_news_item_list))
+            status += "RETRIEVE_CAMPAIGNX_NEWS_ITEM_LIST_SUCCEEDED "
+        except Exception as e:
+            success = False
+            status += "RETRIEVE_CAMPAIGNX_NEWS_ITEM_LIST_FAILED: " + str(e) + " "
+            campaignx_news_item_list = []
+            campaignx_news_item_list_found = False
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'campaignx_news_item_list_found':   campaignx_news_item_list_found,
+            'campaignx_news_item_list':         campaignx_news_item_list,
+        }
+        return results
+
+    def retrieve_campaignx_title(self, campaignx_we_vote_id='', read_only=False):
         if campaignx_we_vote_id is None or len(campaignx_we_vote_id) == 0:
             return ''
         try:
@@ -1820,6 +1916,158 @@ class CampaignXManager(models.Manager):
         }
         return results
 
+    def update_or_create_campaignx_news_item(
+            self,
+            campaignx_news_item_we_vote_id='',
+            campaignx_we_vote_id='',
+            organization_we_vote_id='',
+            voter_we_vote_id='',
+            update_values={}):
+        status = ""
+        success = True
+        campaignx_news_item = None
+        campaignx_news_item_changed = False
+        campaignx_news_item_created = False
+        campaignx_news_item_found = False
+        campaignx_manager = CampaignXManager()
+
+        create_variables_exist = positive_value_exists(campaignx_we_vote_id) \
+            and positive_value_exists(voter_we_vote_id) \
+            and positive_value_exists(organization_we_vote_id)
+        update_variables_exist = positive_value_exists(campaignx_we_vote_id) \
+            and positive_value_exists(campaignx_news_item_we_vote_id) \
+            and positive_value_exists(voter_we_vote_id)
+        if not create_variables_exist and not update_variables_exist:
+            status += "COULD_NOT_UPDATE_OR_CREATE: "
+            if not create_variables_exist:
+                status += "CREATE_CAMPAIGNX_NEWS_ITEM_VARIABLES_MISSING "
+            if not update_variables_exist:
+                status += "UPDATE_CAMPAIGNX_NEWS_ITEM_VARIABLES_MISSING "
+            results = {
+                'success':                      False,
+                'status':                       status,
+                'campaignx_news_item':          None,
+                'campaignx_news_item_changed':  False,
+                'campaignx_news_item_created':  False,
+                'campaignx_news_item_found':    False,
+                'campaignx_news_item_we_vote_id': campaignx_news_item_we_vote_id,
+                'campaignx_we_vote_id':         '',
+                'voter_we_vote_id':             '',
+            }
+            return results
+
+        if not positive_value_exists(organization_we_vote_id):
+            status += "UPDATE_CAMPAIGNX_NEWS_ITEM_MISSING_ORGANIZATION_WE_VOTE_ID "
+            results = {
+                'success':                      False,
+                'status':                       status,
+                'campaignx_news_item':          None,
+                'campaignx_news_item_changed':  False,
+                'campaignx_news_item_created':  False,
+                'campaignx_news_item_found':    False,
+                'campaignx_news_item_we_vote_id': campaignx_news_item_we_vote_id,
+                'campaignx_we_vote_id':         '',
+                'voter_we_vote_id':             '',
+            }
+            return results
+
+        if positive_value_exists(campaignx_news_item_we_vote_id):
+            results = campaignx_manager.retrieve_campaignx_news_item(
+                campaignx_news_item_we_vote_id=campaignx_news_item_we_vote_id,
+                read_only=False)
+            campaignx_news_item_found = results['campaignx_news_item_found']
+            if campaignx_news_item_found:
+                campaignx_news_item = results['campaignx_news_item']
+            success = results['success']
+            status += results['status']
+        else:
+            try:
+                campaignx_news_item = CampaignXNewsItem.objects.create(
+                    campaign_news_subject=update_values['campaign_news_subject'],
+                    campaign_news_text=update_values['campaign_news_text'],
+                    campaignx_we_vote_id=campaignx_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id,
+                    voter_we_vote_id=voter_we_vote_id,
+                )
+                campaignx_news_item_found = True
+                status += "CAMPAIGNX_NEWS_ITEM_CREATED "
+            except Exception as e:
+                status += "CAMPAIGNX_NEWS_ITEM_NOT_CREATED: " + str(e) + " "
+                success = False
+
+        if not positive_value_exists(success) or not positive_value_exists(campaignx_news_item_found):
+            results = {
+                'success':                      success,
+                'status':                       status,
+                'campaignx_news_item':          campaignx_news_item,
+                'campaignx_news_item_changed':  campaignx_news_item_changed,
+                'campaignx_news_item_created':  campaignx_news_item_created,
+                'campaignx_news_item_found':    campaignx_news_item_found,
+                'campaignx_news_item_we_vote_id': campaignx_news_item_we_vote_id,
+                'campaignx_we_vote_id':         campaignx_we_vote_id,
+                'voter_we_vote_id':             voter_we_vote_id,
+            }
+            return results
+
+        # from organization.models import OrganizationManager
+        organization_manager = OrganizationManager()
+        # Update existing campaignx_news_item with changes
+        try:
+            # Retrieve the speaker_name and we_vote_hosted_profile_image_url_tiny from the organization entry
+            organization_results = \
+                organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
+            if organization_results['organization_found']:
+                organization = organization_results['organization']
+                if positive_value_exists(organization.organization_name):
+                    campaignx_news_item.speaker_name = organization.organization_name
+                    campaignx_news_item_changed = True
+                if positive_value_exists(organization.we_vote_hosted_profile_image_url_tiny):
+                    campaignx_news_item.we_vote_hosted_profile_image_url_tiny = \
+                        organization.we_vote_hosted_profile_image_url_tiny
+                    campaignx_news_item_changed = True
+
+            if 'campaign_news_subject_changed' in update_values \
+                    and positive_value_exists(update_values['campaign_news_subject_changed']):
+                campaignx_news_item.campaign_news_subject = update_values['campaign_news_subject']
+                campaignx_news_item_changed = True
+            if 'campaign_news_text_changed' in update_values \
+                    and positive_value_exists(update_values['campaign_news_text_changed']):
+                campaignx_news_item.campaign_news_text = \
+                    update_values['campaign_news_text']
+                campaignx_news_item_changed = True
+            if 'in_draft_mode_changed' in update_values \
+                    and positive_value_exists(update_values['in_draft_mode_changed']):
+                campaignx_news_item.in_draft_mode = \
+                    update_values['in_draft_mode']
+                campaignx_news_item_changed = True
+            if 'visible_to_public_changed' in update_values \
+                    and positive_value_exists(update_values['visible_to_public_changed']):
+                campaignx_news_item.visible_to_public = update_values['visible_to_public']
+                campaignx_news_item_changed = True
+            if campaignx_news_item_changed:
+                campaignx_news_item.save()
+                status += "CAMPAIGNX_NEWS_ITEM_UPDATED "
+            else:
+                status += "CAMPAIGNX_NEWS_ITEM_NOT_UPDATED-NO_CHANGES_FOUND "
+            success = True
+        except Exception as e:
+            campaignx_news_item = None
+            campaignx_news_item_changed = False
+            success = False
+            status += "CAMPAIGNX_NEWS_ITEM_NOT_UPDATED: " + str(e) + " "
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'campaignx_news_item':              campaignx_news_item,
+            'campaignx_news_item_changed':      campaignx_news_item_changed,
+            'campaignx_news_item_created':      campaignx_news_item_created,
+            'campaignx_news_item_found':        campaignx_news_item_found,
+            'campaignx_news_item_we_vote_id':   campaignx_news_item_we_vote_id,
+            'campaignx_we_vote_id':             campaignx_we_vote_id,
+        }
+        return results
+
     def update_or_create_campaignx_owner(
             self,
             campaignx_we_vote_id='',
@@ -1853,7 +2101,6 @@ class CampaignXManager(models.Manager):
         status += results['status']
 
         if positive_value_exists(organization_we_vote_id):
-            from organization.models import OrganizationManager
             organization_manager = OrganizationManager()
             organization_results = \
                 organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
@@ -2168,7 +2415,6 @@ class CampaignXManager(models.Manager):
             }
             return results
 
-        from organization.models import OrganizationManager
         organization_manager = OrganizationManager()
         campaignx_supporter_changed = False
         if campaignx_supporter_found:
@@ -2322,3 +2568,43 @@ class CampaignXSupporter(models.Model):
     visible_to_public = models.BooleanField(default=False)
     date_last_changed = models.DateTimeField(null=True, auto_now=True, db_index=True)
     date_supported = models.DateTimeField(null=True, auto_now_add=True, db_index=True)
+
+
+class CampaignXNewsItem(models.Model):
+    def __unicode__(self):
+        return "CampaignXNewsItem"
+
+    campaignx_we_vote_id = models.CharField(max_length=255, db_index=True)
+    voter_we_vote_id = models.CharField(max_length=255, db_index=True)
+    organization_we_vote_id = models.CharField(max_length=255, null=True)
+    speaker_name = models.CharField(max_length=255, null=True)
+    campaign_news_subject = models.TextField(null=True)
+    campaign_news_text = models.TextField(null=True)
+    in_draft_mode = models.BooleanField(default=True, db_index=True)
+    we_vote_hosted_profile_image_url_tiny = models.TextField(null=True)
+    visibility_blocked_by_we_vote = models.BooleanField(default=False)
+    visible_to_public = models.BooleanField(default=False)
+    date_last_changed = models.DateTimeField(null=True, auto_now=True, db_index=True)
+    date_posted = models.DateTimeField(null=True, auto_now_add=True, db_index=True)
+    we_vote_id = models.CharField(
+        max_length=255, default=None, null=True,
+        blank=True, unique=True, db_index=True)
+
+    # We override the save function so we can auto-generate we_vote_id
+    def save(self, *args, **kwargs):
+        # Even if this data came from another source we still need a unique we_vote_id
+        if self.we_vote_id:
+            self.we_vote_id = self.we_vote_id.strip().lower()
+        if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
+            # ...generate a new id
+            site_unique_id_prefix = fetch_site_unique_id_prefix()
+            next_local_integer = fetch_next_we_vote_id_campaignx_news_item_integer()
+            # "wv" = We Vote
+            # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
+            # "campnews" = tells us this is a unique id for a CampaignXNewsItem
+            # next_integer = a unique, sequential integer for this server - not necessarily tied to database id
+            self.we_vote_id = "wv{site_unique_id_prefix}campnews{next_integer}".format(
+                site_unique_id_prefix=site_unique_id_prefix,
+                next_integer=next_local_integer,
+            )
+        super(CampaignXNewsItem, self).save(*args, **kwargs)
