@@ -65,6 +65,8 @@ urlpatterns = [
     re_path(r'^campaignRetrieve/', views_campaign.campaignx_retrieve_view, name='campaignRetrieveView'),
     re_path(r'^campaignRetrieveAsOwner/',
         views_campaign.campaignx_retrieve_as_owner_view, name='campaignRetrieveAsOwnerView'),
+    re_path(r'^campaignNewsItemSave/',
+        views_campaign.campaignx_news_item_save_view, name='campaignNewsItemSaveView'),
     re_path(r'^campaignSave/', views_campaign.campaignx_save_view, name='campaignSaveView'),
     # campaignx_save_view also used for campaignStartSave
     re_path(r'^campaignStartSave/', views_campaign.campaignx_save_view, name='campaignStartSaveView'),
@@ -373,6 +375,8 @@ urlpatterns = [
         views_docs.ballot_returned_sync_out_doc_view, name='ballotReturnedSyncOutDocs'),
     re_path(r'^docs/campaignFollow/$', views_docs.campaign_follow_doc_view, name='campaignFollowDocs'),
     re_path(r'^docs/campaignListRetrieve/$', views_docs.campaign_list_retrieve_doc_view, name='campaignListRetrieveDocs'),
+    re_path(r'^docs/campaignNewsItemSave/$',
+            views_docs.campaign_news_item_save_doc_view, name='campaignNewsItemSaveDocs'),
     re_path(r'^docs/campaignRetrieve/$', views_docs.campaign_retrieve_doc_view, name='campaignRetrieveDocs'),
     re_path(r'^docs/campaignSave/$', views_docs.campaign_save_doc_view, name='campaignSaveDocs'),
     re_path(r'^docs/campaignStartSave/$', views_docs.campaign_save_doc_view, name='campaignStartSaveDocs'),

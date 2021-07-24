@@ -3373,8 +3373,8 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
             return results
 
     if polling_location_count == 0:
-        message = 'Did not retrieve (as opposed to refresh) ballot data for the {election_name}. ' \
-                  'Data for all map points for the state \'{state}\' has been retrieved once ' \
+        message = 'Data for all map points for the state \'{state}\' for the {election_name} ' \
+                  'have been retrieved once. Please use RETRIEVE to get latest data. ' \
                   'date_last_updated_should_not_exceed: \'{date_last_updated_should_not_exceed}\'. ' \
                   '(result 2 - retrieve_ballots_for_polling_locations_api_v4_view)'.format(
                      election_name=election_name,

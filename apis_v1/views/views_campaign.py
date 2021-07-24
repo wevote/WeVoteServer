@@ -1,7 +1,8 @@
 # apis_v1/views/views_campaign.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-from campaign.controllers import campaignx_list_retrieve_for_api, campaignx_retrieve_for_api, campaignx_save_for_api, \
+from campaign.controllers import campaignx_list_retrieve_for_api, campaignx_news_item_save_for_api, \
+    campaignx_retrieve_for_api, campaignx_save_for_api, \
     campaignx_supporter_retrieve_for_api, campaignx_supporter_save_for_api
 from config.base import get_environment_variable
 from django.http import HttpResponse
@@ -38,6 +39,34 @@ def campaignx_list_retrieve_view(request):  # campaignListRetrieve (No CDN)
         handle_exception(e, logger=logger, exception_message=status)
 
     return HttpResponse(json_string, content_type='application/json')
+
+
+def campaignx_news_item_save_view(request):  # campaignNewsItemSave
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    campaign_news_subject = request.GET.get('campaign_news_subject', '')
+    campaign_news_subject_changed = positive_value_exists(request.GET.get('campaign_news_subject_changed', False))
+    campaign_news_text = request.GET.get('campaign_news_text', '')
+    campaign_news_text_changed = positive_value_exists(request.GET.get('campaign_news_text_changed', False))
+    campaignx_news_item_we_vote_id = request.GET.get('campaignx_news_item_we_vote_id', '')
+    campaignx_we_vote_id = request.GET.get('campaignx_we_vote_id', '')
+    in_draft_mode = positive_value_exists(request.GET.get('in_draft_mode', False))
+    in_draft_mode_changed = positive_value_exists(request.GET.get('in_draft_mode_changed', False))
+    visible_to_public = positive_value_exists(request.GET.get('visible_to_public', True))
+    visible_to_public_changed = positive_value_exists(request.GET.get('visible_to_public_changed', False))
+    json_data = campaignx_news_item_save_for_api(
+        campaign_news_subject=campaign_news_subject,
+        campaign_news_subject_changed=campaign_news_subject_changed,
+        campaign_news_text=campaign_news_text,
+        campaign_news_text_changed=campaign_news_text_changed,
+        campaignx_news_item_we_vote_id=campaignx_news_item_we_vote_id,
+        campaignx_we_vote_id=campaignx_we_vote_id,
+        in_draft_mode=in_draft_mode,
+        in_draft_mode_changed=in_draft_mode_changed,
+        visible_to_public=visible_to_public,
+        visible_to_public_changed=visible_to_public_changed,
+        voter_device_id=voter_device_id,
+    )
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def campaignx_supporter_retrieve_view(request):  # campaignSupporterRetrieve

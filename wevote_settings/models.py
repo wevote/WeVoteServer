@@ -386,6 +386,10 @@ def fetch_next_we_vote_id_campaignx_integer():
     return fetch_next_we_vote_id_integer('we_vote_id_last_campaignx_integer')
 
 
+def fetch_next_we_vote_id_campaignx_news_item_integer():
+    return fetch_next_we_vote_id_integer('we_vote_id_last_campaignx_news_item_integer')
+
+
 def fetch_next_we_vote_id_candidate_campaign_integer():
     return fetch_next_we_vote_id_integer('we_vote_id_last_candidate_campaign_integer')
 
