@@ -2,24 +2,26 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import CampaignX, CampaignXManager, CampaignXOwner, CampaignXPolitician, CampaignXSupporter, \
-    FINAL_ELECTION_DATE_COOL_DOWN, SUPPORTERS_COUNT_MINIMUM_FOR_LISTING
-from admin_tools.views import redirect_to_sign_in_page
-from config.base import get_environment_variable
-from django.db.models import Q
-from django.http import HttpResponseRedirect
-from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
+from django.db.models import Q
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
+
+import wevote_functions.admin
+from admin_tools.views import redirect_to_sign_in_page
+from config.base import get_environment_variable
 from election.models import ElectionManager
 from organization.models import OrganizationManager
 from politician.models import PoliticianManager
+from stripe_donations.models import StripeManager
 from voter.models import voter_has_authority, VoterManager
-import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, \
     generate_date_as_integer, positive_value_exists, STATE_CODE_MAP
+from .models import CampaignX, CampaignXManager, CampaignXOwner, CampaignXPolitician, CampaignXSupporter, \
+    FINAL_ELECTION_DATE_COOL_DOWN, SUPPORTERS_COUNT_MINIMUM_FOR_LISTING
 
 logger = wevote_functions.admin.get_logger(__name__)
 WEB_APP_ROOT_URL = get_environment_variable("WEB_APP_ROOT_URL")
@@ -584,6 +586,7 @@ def campaign_list_view(request):
         campaignx.campaignx_owner_list = campaignx_manager.retrieve_campaignx_owner_list(
             campaignx_we_vote_id=campaignx.we_vote_id,
             viewer_is_owner=True)
+        campaignx.chip_in_total = StripeManager.retrieve_chip_in_total(campaignx.we_vote_id)
         modified_campaignx_list.append(campaignx)
 
     state_list = STATE_CODE_MAP

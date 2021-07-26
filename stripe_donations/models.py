@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models, transaction
-from django.db.models import Q
+from django.db.models import Sum, Q
 from datetime import datetime, timezone
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 # from organization.models import CHOSEN_FAVICON_ALLOWED, CHOSEN_FULL_DOMAIN_ALLOWED, CHOSEN_GOOGLE_ANALYTICS_ALLOWED, \
@@ -2012,3 +2012,29 @@ class StripeManager(models.Manager):
             'to_organization_we_vote_id':   to_organization_we_vote_id,
         }
         return results
+
+    @staticmethod
+    def retrieve_chip_in_total(campaignx_wevote_id):
+        """
+        Get the sum of all chip in donations for a campaign
+        :param voter_we_vote_id:
+        :return:
+        """
+
+        try:
+            payment_queryset = StripePayments.objects.all()
+            payment_queryset = payment_queryset.filter(
+                Q(campaignx_wevote_id__iexact=campaignx_wevote_id) & Q(is_chip_in=True)
+            )
+            amount_int = payment_queryset.aggregate(Sum('amount'))['amount__sum']
+            total_chip_ins = "${:,.2f}".format(amount_int)
+
+            return total_chip_ins
+
+        except StripePayments.DoesNotExist:
+            print("DONATION_PAYMENT_LIST_DOES_NOT_EXIST ")
+            return 'none'
+
+        except Exception as e:
+            print("FAILED_TO RETRIEVE_DONATION_PAYMENT_LIST ", e)
+            return 'none'
