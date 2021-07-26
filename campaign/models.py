@@ -23,6 +23,10 @@ SUPPORTERS_COUNT_MINIMUM_FOR_LISTING = 5  # How many supporters are required bef
 
 
 class CampaignX(models.Model):
+    DoesNotExist = None
+    MultipleObjectsReturned = None
+    objects = None
+
     def __unicode__(self):
         return "CampaignX"
 
@@ -97,6 +101,8 @@ class CampaignXListedByOrganization(models.Model):
     An individual or organization can specify a campaign as one they want to list on their private-labeled site.
     This is the link that says "show this campaign on my promotion site".
     """
+    objects = None
+
     def __unicode__(self):
         return "CampaignXListedByOrganization"
 
@@ -2513,6 +2519,10 @@ class CampaignXManager(models.Manager):
 
 
 class CampaignXOwner(models.Model):
+    DoesNotExist = None
+    MultipleObjectsReturned = None
+    objects = None
+
     def __unicode__(self):
         return "CampaignXOwner"
 
@@ -2527,6 +2537,10 @@ class CampaignXOwner(models.Model):
 
 
 class CampaignXPolitician(models.Model):
+    DoesNotExist = None
+    MultipleObjectsReturned = None
+    objects = None
+
     def __unicode__(self):
         return "CampaignXPolitician"
 
@@ -2543,6 +2557,8 @@ class CampaignXPolitician(models.Model):
 
 
 class CampaignXSEOFriendlyPath(models.Model):
+    objects = None
+
     def __unicode__(self):
         return "CampaignXSEOFriendlyPath"
 
@@ -2554,6 +2570,8 @@ class CampaignXSEOFriendlyPath(models.Model):
 
 
 class CampaignXSupporter(models.Model):
+    objects = None
+
     def __unicode__(self):
         return "CampaignXSupporter"
 
@@ -2571,6 +2589,9 @@ class CampaignXSupporter(models.Model):
 
 
 class CampaignXNewsItem(models.Model):
+    DoesNotExist = None
+    objects = None
+
     def __unicode__(self):
         return "CampaignXNewsItem"
 
