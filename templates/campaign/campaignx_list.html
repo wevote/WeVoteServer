@@ -106,7 +106,6 @@
     <input type="submit" value="Search for Campaign" />
 
 </form>
-
 {% if campaignx_list %}
     <table class="table">
     {% for campaignx in campaignx_list %}
@@ -133,6 +132,7 @@
                   </a>
               {% endif %}
             </th>
+            <th style="min-width: 90px">Chipped In</th>
             <th>Description</th>
         </tr>
       </thead>
@@ -194,6 +194,10 @@
                     </span>
                 {% endif %}
             {% endif %}</td>
+            <td style="text-align: right">
+                {{ campaignx.chip_in_total }}
+                <!--<pre> {% filter force_escape %} {% debug %} {% endfilter %} </pre>-->
+            </td>
             <td>
                 {{ campaignx.campaign_description|default_if_none:""|truncatechars:250 }}
                 {% if campaignx.date_campaign_started %}
