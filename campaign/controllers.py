@@ -1490,10 +1490,9 @@ def campaignx_supporter_save_for_api(  # campaignSupporterSave
 
     status += create_results['status']
     if create_results['campaignx_supporter_found']:
-        if positive_value_exists(campaign_supported_changed):
-            count_results = campaignx_manager.update_campaignx_supporters_count(campaignx_we_vote_id)
-            if not count_results['success']:
-                status += count_results['status']
+        count_results = campaignx_manager.update_campaignx_supporters_count(campaignx_we_vote_id)
+        if not count_results['success']:
+            status += count_results['status']
 
         campaignx_supporter = create_results['campaignx_supporter']
         date_last_changed_string = ''
