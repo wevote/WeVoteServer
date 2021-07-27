@@ -586,7 +586,7 @@ def campaign_list_view(request):
         campaignx.campaignx_owner_list = campaignx_manager.retrieve_campaignx_owner_list(
             campaignx_we_vote_id=campaignx.we_vote_id,
             viewer_is_owner=True)
-        campaignx.chip_in_total = StripeManager.retrieve_chip_in_total(campaignx.we_vote_id)
+        campaignx.chip_in_total = StripeManager.retrieve_chip_in_total('', campaignx.we_vote_id)
         modified_campaignx_list.append(campaignx)
 
     state_list = STATE_CODE_MAP
@@ -784,6 +784,11 @@ def campaign_supporters_list_view(request, campaignx_we_vote_id=""):
         supporters_list = supporters_query
     else:
         supporters_list = supporters_query[:200]
+
+    for supporter in supporters_list:
+        supporter.chip_in_total = StripeManager.retrieve_chip_in_total(supporter.voter_we_vote_id,
+                                                                       supporter.campaignx_we_vote_id)
+
 
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())

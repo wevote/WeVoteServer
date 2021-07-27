@@ -186,7 +186,7 @@ class StripePayments(models.Model):
         verbose_name="is this a premium organization plan (and not a personal donation subscription)?", default=False)
     is_monthly_donation = models.BooleanField(
         verbose_name="is this a repeating monthly subscription donation?", default=False)
-    campaignx_wevote_id = models.CharField(
+    campaignx_we_vote_id = models.CharField(
         verbose_name="Campaign we vote id, in order to credit chip ins", max_length=32, unique=False, null=True,
         blank=True)
     record_enum = models.CharField(
@@ -2014,20 +2014,30 @@ class StripeManager(models.Manager):
         return results
 
     @staticmethod
-    def retrieve_chip_in_total(campaignx_wevote_id):
+    def retrieve_chip_in_total(voter_wevote_id, campaignx_we_vote_id):
         """
-        Get the sum of all chip in donations for a campaign
-        :param voter_we_vote_id:
+        Get the sum of all chip in donations for a campaign, only pass in one of the two types of wevote_ids
+        :param voter_wevote_id:
+        :param campaignx_we_vote_id:
         :return:
         """
 
         try:
             payment_queryset = StripePayments.objects.all()
-            payment_queryset = payment_queryset.filter(
-                Q(campaignx_wevote_id__iexact=campaignx_wevote_id) & Q(is_chip_in=True)
-            )
-            amount_int = payment_queryset.aggregate(Sum('amount'))['amount__sum']
-            total_chip_ins = "${:,.2f}".format(amount_int)
+            if voter_wevote_id and len(voter_wevote_id) > 0:
+                payment_queryset = payment_queryset.filter(
+                    Q(is_chip_in=True) &
+                    Q(campaignx_we_vote_id__iexact=campaignx_we_vote_id) &
+                    Q(voter_we_vote_id__iexact=voter_wevote_id)
+                )
+            else:
+                payment_queryset = payment_queryset.filter(
+                    Q(is_chip_in=True) &
+                    Q(campaignx_we_vote_id__iexact=campaignx_we_vote_id)
+                )
+            amount_int_pennies = payment_queryset.aggregate(Sum('amount'))['amount__sum']
+            amount_dollars = amount_int_pennies / 100
+            total_chip_ins = "${:,.2f}".format(amount_dollars)
 
             return total_chip_ins
 
