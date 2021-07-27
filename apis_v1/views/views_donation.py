@@ -38,7 +38,7 @@ def donation_with_stripe_view(request):  # donationWithStripe
     is_monthly_donation = positive_value_exists(request.GET.get('is_monthly_donation', False))
     is_premium_plan = positive_value_exists(request.GET.get('is_premium_plan', False))
     client_ip = request.GET.get('client_ip', '')
-    campaignx_wevote_id = request.GET.get('campaignx_we_vote_id', '')
+    campaignx_we_vote_id = request.GET.get('campaignx_we_vote_id', '')
     payment_method_id = request.GET.get('payment_method_id', '')
     coupon_code = request.GET.get('coupon_code', '')
     premium_plan_type_enum = request.GET.get('premium_plan_type_enum', '')
@@ -57,7 +57,7 @@ def donation_with_stripe_view(request):  # donationWithStripe
     if positive_value_exists(token):
         results = donation_with_stripe_for_api(request, token, email, donation_amount,
                                                is_chip_in, is_monthly_donation, is_premium_plan,
-                                               client_ip, campaignx_wevote_id, payment_method_id, coupon_code,
+                                               client_ip, campaignx_we_vote_id, payment_method_id, coupon_code,
                                                premium_plan_type_enum,
                                                voter_we_vote_id, linked_organization_we_vote_id )
 

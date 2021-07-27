@@ -4,9 +4,11 @@
 
 import json
 import string
+
 from django.db import models
 from django.db.models import Q
 from django.utils.text import slugify
+
 import wevote_functions.admin
 from exception.models import handle_record_found_more_than_one_exception, \
     handle_record_not_found_exception
@@ -1551,7 +1553,7 @@ class CampaignXManager(models.Manager):
         }
         return results
 
-    def retrieve_campaignx_title(self, campaignx_we_vote_id='', read_only=False):
+    def retrieve_campaignx_title(campaignx_we_vote_id='', read_only=False):
         if campaignx_we_vote_id is None or len(campaignx_we_vote_id) == 0:
             return ''
         try:

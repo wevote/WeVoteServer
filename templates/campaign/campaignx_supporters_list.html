@@ -105,6 +105,7 @@
             <th></th>
             <th>Supporter</th>
             <th>Endorsement</th>
+            <th>Chip Ins</th>
             <th>Supporter Wants Visibility</th>
             <th>Blocked by We Vote?</th>
             <th>Delete</th>
@@ -126,6 +127,7 @@
                 </div>
             </td>
             <td>{{ campaignx_supporter.supporter_endorsement|default_if_none:"" }}</td>
+            <td>{{ campaignx_supporter.chip_in_total }}</td>
             <td>
                 <input type="checkbox"
                        name="campaignx_supporter_visible_to_public_{{ campaignx_supporter.id }}"

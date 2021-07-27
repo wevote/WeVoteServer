@@ -176,7 +176,7 @@ def donation_active_paid_plan_retrieve(linked_organization_we_vote_id, voter_we_
 
 def donation_with_stripe_for_api(request, token, email, donation_amount,
                                  is_chip_in, is_monthly_donation, is_premium_plan,
-                                 client_ip, campaignx_wevote_id, payment_method_id, coupon_code,
+                                 client_ip, campaignx_we_vote_id, payment_method_id, coupon_code,
                                  premium_plan_type_enum,
                                  voter_we_vote_id, linked_organization_we_vote_id):
     """
@@ -189,7 +189,7 @@ def donation_with_stripe_for_api(request, token, email, donation_amount,
     :param is_monthly_donation: (boolean) is this a monthly donation subscription
     :param is_premium_plan:  True for a premium organization plan, False for a donation (one time or donation subs.)
     :param client_ip: As reported by Stripe (i.e. outside looking in)
-    :param campaignx_wevote_id: To track Campaign "Chip In"s
+    :param campaignx_we_vote_id: To track Campaign "Chip In"s
     :param payment_method_id: payment method selected/created on the client CheckoutForm.jsx
     :param coupon_code: Our coupon codes for pricing and features that are looked up
            in the OrganizationSubscriptionPlans
@@ -363,7 +363,7 @@ def donation_with_stripe_for_api(request, token, email, donation_amount,
                         'is_chip_in': is_chip_in,
                         'is_monthly_donation': is_monthly_donation,
                         'is_premium_plan': is_premium_plan,
-                        'campaignx_wevote_id': campaignx_wevote_id,
+                        'campaignx_we_vote_id': campaignx_we_vote_id,
                     }
                 )
                 results['status'] += textwrap.shorten("STRIPE_CHARGE_SUCCESSFUL " + results['status'], width=255,
@@ -547,8 +547,8 @@ def donation_lists_for_a_voter(voter_we_vote_id):
                 'is_chip_in': payment_row.is_chip_in,
                 'is_monthly_donation': payment_row.is_monthly_donation,
                 'is_premium_plan': payment_row.is_premium_plan,
-                'campaignx_wevote_id': payment_row.campaignx_wevote_id,
-                'campaign_title': CampaignXManager.retrieve_campaignx_title(payment_row.campaignx_wevote_id),
+                'campaignx_we_vote_id': payment_row.campaignx_we_vote_id,
+                'campaign_title': CampaignXManager.retrieve_campaignx_title(payment_row.campaignx_we_vote_id),
                 'voter_we_vote_id': payment_row.voter_we_vote_id,
 
                 # 'is_premium_plan': positive_value_exists(payment_row.is_premium_plan),
@@ -669,7 +669,7 @@ def donation_process_charge(event):           # 'charge.succeeded' webhook
             'amount_refunded': charge['amount_refunded'],
             'api_version': event['api_version'],
             'brand': source['brand'],
-            'campaignx_wevote_id': metadata['campaignx_wevote_id'] if 'campaignx_wevote_id' in metadata else '',
+            'campaignx_we_vote_id': metadata['campaignx_we_vote_id'] if 'campaignx_we_vote_id' in metadata else '',
             'country': source['country'],
             'created': datetime.fromtimestamp(event['created'], timezone.utc),
             'currency': charge['currency'],
