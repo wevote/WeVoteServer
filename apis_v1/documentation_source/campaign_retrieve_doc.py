@@ -148,6 +148,21 @@ def campaign_retrieve_doc_template_values(url_root):
                    '   ],\n' \
                    '  "seo_friendly_path_list": list\n' \
                    '   [],\n' \
+                   '  "voter_campaignx_supporter": {\n' \
+                   '     "id": integer,\n' \
+                   '     "campaign_supported": boolean,\n' \
+                   '     "campaignx_we_vote_id": string,\n' \
+                   '     "chip_in_total": string,\n' \
+                   '     "date_last_changed": string,\n' \
+                   '     "date_supported": string,\n' \
+                   '     "organization_we_vote_id": string,\n' \
+                   '     "supporter_endorsement": string,\n' \
+                   '     "supporter_name": string,\n' \
+                   '     "visible_to_public": boolean,\n' \
+                   '     "voter_signed_in_with_email": boolean,\n' \
+                   '     "voter_we_vote_id": string,\n' \
+                   '     "we_vote_hosted_profile_image_url_tiny": string,\n' \
+                   '   },\n' \
                    '}'
 
     template_values = {

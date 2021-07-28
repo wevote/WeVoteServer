@@ -2606,7 +2606,7 @@ class CampaignXNewsItem(models.Model):
     in_draft_mode = models.BooleanField(default=True, db_index=True)
     we_vote_hosted_profile_image_url_tiny = models.TextField(null=True)
     visibility_blocked_by_we_vote = models.BooleanField(default=False)
-    visible_to_public = models.BooleanField(default=False)
+    visible_to_public = models.BooleanField(default=True)
     date_last_changed = models.DateTimeField(null=True, auto_now=True, db_index=True)
     date_posted = models.DateTimeField(null=True, auto_now_add=True, db_index=True)
     we_vote_id = models.CharField(

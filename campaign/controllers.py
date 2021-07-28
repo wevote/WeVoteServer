@@ -173,6 +173,7 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
                 read_only=True)
             if supporter_results['success'] and supporter_results['campaignx_supporter_found']:
                 campaignx_supporter = supporter_results['campaignx_supporter']
+                chip_in_total = 'none'
                 date_last_changed_string = ''
                 date_supported_string = ''
                 try:
@@ -180,9 +181,15 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
                     date_supported_string = campaignx_supporter.date_supported.strftime('%Y-%m-%d %H:%M:%S')
                 except Exception as e:
                     status += "DATE_CONVERSION_ERROR: " + str(e) + " "
+                try:
+                    from stripe_donations.models import StripeManager
+                    chip_in_total = StripeManager.retrieve_chip_in_total(voter_we_vote_id, campaignx.we_vote_id)
+                except Exception as e:
+                    status += "LIST_RETRIEVE_CHIP_IN_TOTAL_ERROR: " + str(e) + " "
                 voter_campaignx_supporter_dict = {
                     'campaign_supported':           campaignx_supporter.campaign_supported,
                     'campaignx_we_vote_id':         campaignx_supporter.campaignx_we_vote_id,
+                    'chip_in_total':                chip_in_total,
                     'date_last_changed':            date_last_changed_string,
                     'date_supported':               date_supported_string,
                     'id':                           campaignx_supporter.id,
@@ -309,6 +316,7 @@ def campaignx_news_item_save_for_api(  # campaignNewsItemSave
         campaignx_we_vote_id='',
         in_draft_mode=False,
         in_draft_mode_changed=False,
+        send_now=False,
         visible_to_public=False,
         visible_to_public_changed=False,
         voter_device_id=''):
@@ -675,6 +683,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
         read_only=True)
     if supporter_results['success'] and supporter_results['campaignx_supporter_found']:
         campaignx_supporter = supporter_results['campaignx_supporter']
+        chip_in_total = 'none'
         date_last_changed_string = ''
         date_supported_string = ''
         try:
@@ -682,9 +691,16 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
             date_supported_string = campaignx_supporter.date_supported.strftime('%Y-%m-%d %H:%M:%S')
         except Exception as e:
             status += "DATE_CONVERSION_ERROR: " + str(e) + " "
+        try:
+            from stripe_donations.models import StripeManager
+            chip_in_total = StripeManager.retrieve_chip_in_total(voter_we_vote_id, campaignx.we_vote_id)
+        except Exception as e:
+            status += "RETRIEVE_CHIP_IN_TOTAL_ERROR: " + str(e) + " "
+
         voter_campaignx_supporter_dict = {
             'campaign_supported':           campaignx_supporter.campaign_supported,
             'campaignx_we_vote_id':         campaignx_supporter.campaignx_we_vote_id,
+            'chip_in_total':                chip_in_total,
             'date_last_changed':            date_last_changed_string,
             'date_supported':               date_supported_string,
             'id':                           campaignx_supporter.id,
