@@ -2,13 +2,17 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+import facebook
+import json
+import requests
 from django.core.validators import RegexValidator
 from django.db import models
-from email_outbound.models import SEND_STATUS_CHOICES, TO_BE_PROCESSED
-from wevote_functions.functions import generate_random_string, positive_value_exists, convert_to_int
-from exception.models import handle_exception, print_to_log
+
 import wevote_functions.admin
-import facebook
+from config.base import get_environment_variable
+from email_outbound.models import SEND_STATUS_CHOICES, TO_BE_PROCESSED
+from exception.models import handle_exception, print_to_log
+from wevote_functions.functions import generate_random_string, positive_value_exists, convert_to_int
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -232,7 +236,7 @@ class FacebookManager(models.Manager):
 
     def delete_facebook_link_to_voter(self, voter_we_vote_id):
         success = False
-        facebook_user_id = "";
+        facebook_user_id = ""
 
         try:
             facebook_link_to_voter = FacebookLinkToVoter.objects.get(
@@ -243,7 +247,7 @@ class FacebookManager(models.Manager):
         except FacebookLinkToVoter.DoesNotExist:
             pass
         except Exception as e:
-           handle_exception(e, logger=logger, exception_message="delete_facebook_link_to_voter")
+            handle_exception(e, logger=logger, exception_message="delete_facebook_link_to_voter")
 
         results = {
             'success':           success,
@@ -596,7 +600,7 @@ class FacebookManager(models.Manager):
         results = {
             'success':                  success,
             'status':                   status,
-            'facebook_user':             facebook_user,
+            'facebook_user':            facebook_user,
         }
         return results
 
@@ -812,8 +816,129 @@ class FacebookManager(models.Manager):
                                                              keys() else "")
         return facebook_friend_dict
 
-    def retrieve_facebook_friends_from_facebook(self, voter_device_id):
+    def retrieve_facebook_friends_from_facebook(self, facebook_candidate_url):
+        success = False
+        status = ''
+        facebook_friends_list_found = False
+        facebook_friends_list = []
+        facebook_api_fields = "id, name, first_name, middle_name, last_name, location{id, name}, gender, birthday, " \
+                              "cover{source}, picture.width(200).height(200){url, is_silhouette}, about, is_verified "
+
+        # auth_response_results = self.retrieve_facebook_auth_response(voter_device_id)
+        # if not auth_response_results['facebook_auth_response_found']:
+        #     error_results = {
+        #         'status':                           "FACEBOOK_AUTH_RESPONSE_NOT_FOUND",
+        #         'success':                          success,
+        #         'facebook_friends_list_found':      facebook_friends_list_found,
+        #         'facebook_friends_list': facebook_friends_list,
+        #     }
+        #     return error_results
+        #
+        # facebook_auth_response = auth_response_results['facebook_auth_response']
+        # try:
+        #     facebook_graph = facebook.GraphAPI(facebook_auth_response.facebook_access_token, version='3.1')
+        #     facebook_friends_api_details = facebook_graph.get_connections(id=facebook_auth_response.facebook_user_id,
+        #                                                                   connection_name="friends",
+        #                                                                   fields=facebook_api_fields)
+        #
+        #     # graph.get_connections returns three dictionary keys i.e. data, paging, summary,
+        #     # here data key contains list of friends with the given fields values and paging contains cursors position
+        #     # and summary contains total_count of your friends, for ex:
+        #     # {"data": [{"name": "Micheal", "first_name": "Micheal", "id": "16086981492"},
+        #     # {"name": "John", "first_name": "John", "id": "1263984"],
+        #     # "paging": {"cursors": {"before": "QVFmc0QVBsZAk1KWmNwRVFoRzB1MGFDWlpoa3J0NFR6VTQZD",
+        #     # "after": "QVFIUlAzdGplaWV5YTZAmeUNCNzVuRk1iPZAnhUNjltUldoSjR5aWZAxdGJ2UktEUHQzNWpBeHRmcEkZD"}},
+        #     # "summary": {'total_count': 10}}
+        #     for facebook_friend_api_details_entry in facebook_friends_api_details.get('data', []):
+        #         # Extract required details for each facebook friend and then updating FacebookFriendsUsingWeVote table
+        #         facebook_friend_dict = self.extract_facebook_details_data(facebook_friend_api_details_entry)
+        #         facebook_friend_dict['facebook_user_friend_total_count'] = (
+        #             facebook_friend_api_details_entry.get('friends').get('summary').get('total_count')
+        #             if facebook_friend_api_details_entry.get('friends', {}).get('summary', {}).get('total_count', {})
+        #             else None)
+        #         if facebook_friend_dict not in facebook_friends_list:
+        #             facebook_friends_list.append(facebook_friend_dict)
+        #         facebook_friends_saved_results = self.update_or_create_facebook_friends_using_we_vote(
+        #             facebook_auth_response.facebook_user_id, facebook_friend_dict.get('facebook_user_id'))
+        #         status += ' ' + facebook_friends_saved_results['status']
+        #
+        #     if facebook_friends_api_details.get('data', []).__len__() == 0:
+        #         logger.debug("retrieve_facebook_friends_from_facebook  received zero friends from the API")
+        #     success = True
+        #     status += " " + "FACEBOOK_FRIENDS_LIST_FOUND"
+        #     facebook_friends_list_found = True
+        # except Exception as e:
+        #     success = False
+        #     status += " " + "FACEBOOK_FRIENDS_LIST_FAILED_WITH_EXCEPTION"
+        #     facebook_friends_list_found = False
+        #     handle_exception(e, logger=logger, exception_message=status)
+        #
+        # results = {
+        #     'success':                          success,
+        #     'status':                           status,
+        #     'facebook_friends_list_found':      facebook_friends_list_found,
+        #     'facebook_friends_list':            facebook_friends_list,
+        # }
+        # return results
+        return True
+
+    @staticmethod
+    def retrieve_facebook_photo_from_person_id(person_id):
         """
+        person_id can be either id number like '106677724821943' or a login name like 'Bob4Delegate'
+        The app_secret is for server based queries only, it is specifically the "App Secret" not the "Client Secret"
+        Uses Facebook API 11.0
+        """
+        try:
+            app_id = get_environment_variable("SOCIAL_AUTH_FACEBOOK_APP_ID")
+            app_secret = get_environment_variable("SOCIAL_AUTH_FACEBOOK_APP_SECRET")
+
+            url = "https://graph.facebook.com/v11.0/{}/picture?height=256&access_token={}|{}&redirect=0".format(
+                person_id, app_id, app_secret)
+            print(url)
+            source = requests.get(url)
+            data = json.loads(source.text)
+            print(data)
+            if 'error' in data:
+                logger.error("retrieve_facebook_photo {}, {}, for person_id == {}".
+                             format(data['error']['type'], data['error']['message'], person_id))
+                results = {
+                    'url': '',
+                    'is_silhouette': False,
+                    'status': 'FACEBOOK_OBJECT_WITH_ID-{}-DOES_NOT_EXIST  '.format(person_id),
+                }
+                return results
+            url = data['data']['url']
+            is_silhouette = data['data']['is_silhouette']
+            if is_silhouette:
+                logger.error("retrieve_facebook_photo is_silhouette == True, for person_id == {}, indicating a "
+                             "facebook auth problem".format(person_id))
+                results = {
+                    'url': url,
+                    'is_silhouette': is_silhouette,
+                    'status': 'FB_API_RETURNED_SILOHOUETTE ',
+                }
+                return results
+            print(url)
+            results = {
+                'url': url,
+                'is_silhouette': is_silhouette,
+                'status': 'FB_API_SUCCESS ',
+            }
+            return results
+
+        except Exception as e:
+            logger.error('retrieve_facebook_photo_from_person_id threw ', e)
+            results = {
+                'url': '',
+                'is_silhouette': False,
+                'status': 'FB_API_RETURNED_ERROR' + str(e) + ' ',
+            }
+            return results
+
+    def retrieve_facebook_picture_from_facebook(self, voter_device_id):
+        """
+        NOTE August 2021: This was written for fb API 3, and we now are at fb API 11.  This does not work.
         This function is for getting facebook friends who are already using WeVote
         NOTE August 2017:  The facebook "friends" API call when called from the server now only returns that subset of
         your facebook friends who are already on WeVote, it will not show your friends who do not have the facebook
@@ -1106,4 +1231,3 @@ class FacebookManager(models.Manager):
             if convert_to_int(facebook_user_entry['facebook_user_id']) == facebook_id_of_me:
                 facebook_suggested_friends_list.remove(facebook_user_entry)
         return facebook_suggested_friends_list
-

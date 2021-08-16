@@ -197,6 +197,7 @@
             <td style="text-align: right">
                 <a href="{% url 'campaign:supporters_list' campaignx.we_vote_id %}?show_supporters_without_endorsements=1&show_supporters_not_visible_to_public=1" target="_blank">
                     {{ campaignx.chip_in_total }}
+                    <!--<pre> {% filter force_escape %} {% debug %} {% endfilter %} </pre>-->
                 </a>
             </td>
             <td>
