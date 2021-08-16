@@ -22,40 +22,32 @@ logger = wevote_functions.admin.get_logger(__name__)
 def get_one_picture_from_facebook_graphapi(one_candidate, request, remote_request_history_manager, add_messages):
     status = ""
     success = True
+
     results = get_facebook_photo_url_from_graphapi(one_candidate.facebook_url)
     if results.get('success'):
         photo_url = results.get('photo_url')
-        link_is_broken = results.get('http_response_code') == 404
-        is_placeholder_photo = not photo_url.startswith('https://scontent')
-        if link_is_broken:
-            success = False
-            # status += results['status']
-            status += "IS_BROKEN_URL-(" + str(photo_url) + " / " + str(one_candidate.facebook_url) + ") "
-            logger.info("Broken URL: " + photo_url)
-            if add_messages:
-                messages.add_message(
-                    request, messages.INFO,
-                    'Failed to retrieve Facebook picture:  The Facebook URL is broken, or is not a '
-                    'legal Facebook alias')
-        elif is_placeholder_photo:
+        # link_is_broken = results.get('http_response_code') == 404
+        is_placeholder_photo = results.get('is_silhouette')
+        if is_placeholder_photo:
             success = False
             # status += results['status']
             status += "IS_PLACEHOLDER_PHOTO "
-            logger.info("Placeholder: " + photo_url)
+            logger.info("Placeholder/Silhouette: " + photo_url)
             if add_messages:
                 messages.add_message(
                     request, messages.INFO,
-                    'Failed to retrieve Facebook picture:  The Facebook URL is for placeholder image.')
+                    'Failed to retrieve Facebook picture:  The Facebook URL is for placeholder/Silhouette image.')
             # Create a record denoting that we have retrieved from Facebook for this candidate
             save_results_history = remote_request_history_manager.create_remote_request_history_entry(
                 RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS, one_candidate.google_civic_election_id,
-                one_candidate.we_vote_id, None, 1, "CANDIDATE_FACEBOOK_URL_IS_PLACEHOLDER:" + photo_url)
+                one_candidate.we_vote_id, None, 1, "CANDIDATE_FACEBOOK_URL_IS_PLACEHOLDER_SILHOUETTE:" + photo_url)
         else:
+            # Success!
             logger.info("Queried URL: " + one_candidate.facebook_url + " ==> " + photo_url)
             if add_messages:
                 messages.add_message(request, messages.INFO, 'Facebook photo retrieved.')
             results = save_image_to_candidate_table(
-                one_candidate, photo_url, one_candidate.facebook_url, link_is_broken, FACEBOOK)
+                one_candidate, photo_url, one_candidate.facebook_url, False, FACEBOOK)
             if not positive_value_exists(results['success']):
                 success = False
                 status += results['status']
@@ -66,7 +58,7 @@ def get_one_picture_from_facebook_graphapi(one_candidate, request, remote_reques
                 save_results_history = remote_request_history_manager.create_remote_request_history_entry(
                     RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS, one_candidate.google_civic_election_id,
                     one_candidate.we_vote_id, None, 1, "CANDIDATE_FACEBOOK_URL_PARSED_HTTP:" +
-                                                       str(link_is_broken) + ", " + one_candidate.facebook_url)
+                                                       one_candidate.facebook_url)
     else:
         success = False
         status += results['status']

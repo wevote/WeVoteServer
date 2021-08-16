@@ -2,19 +2,17 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from candidate.controllers import FakeFirefoxURLopener
+import re
+
+import wevote_functions.admin
 from config.base import get_environment_variable
 from email_outbound.models import EmailManager
 from friend.models import FriendManager
 from image.controllers import FACEBOOK, cache_master_and_resized_image
 from import_export_facebook.models import FacebookManager
 from organization.models import OrganizationManager, INDIVIDUAL
-from socket import timeout
-import urllib.request
-from urllib.error import HTTPError
 from voter.models import VoterManager
-import wevote_functions.admin
-from wevote_functions.functions import extract_and_replace_facebook_page_id, is_voter_device_id_valid, \
+from wevote_functions.functions import is_voter_device_id_valid, \
     positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -801,117 +799,30 @@ def voter_facebook_sign_in_save_for_api(voter_device_id,  # voterFacebookSignInS
 
 
 def get_facebook_photo_url_from_graphapi(facebook_candidate_url):
-    candidate_we_vote_ids_list = []
-    http_response_code = 0
     photo_url = ""
     status = ""
     success = False
-    # https://www.facebook.com/aaron.peskin/
-    graphapi_url = facebook_candidate_url
 
-    if len(graphapi_url) < 10:
-        status += 'FIND_CANDIDATES-PROPER_URL_NOT_PROVIDED: ' + facebook_candidate_url + " "
-        results = {
-            'status':                       status,
-            'success':                      success,
-            'at_least_one_candidate_found': False,
-            'candidate_we_vote_ids_list':   candidate_we_vote_ids_list,
-            'page_redirected':              False,
-        }
-        return results
+    m = re.search(r'^.*?facebook.com/(.*?)((/$)|($)|(/.*?$))', facebook_candidate_url)
+    fb_id_or_login_name = m.group(1)
 
-    urllib._urlopener = FakeFirefoxURLopener()
-    headers = {
-        'User-Agent':
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) '
-            'Chrome/68.0.3440.106 Safari/537.36',
-        'accept':
-            'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8'
-           }
+    if len(m.groups()) < 2:
+        status += 'GET_FACEBOOK_PHOTO_URL_FROM_GRAPHAPI-PROPER_URL_NOT_PROVIDED: ' + facebook_candidate_url + " "
+    else:
+        results = FacebookManager.retrieve_facebook_photo_from_person_id(fb_id_or_login_name)
+        status += results['status']
+        photo_url = results['url']
 
-    attempt_to_retrieve_by_page_id = False
-    try:
-        graphapi_url = graphapi_url.replace("http://", "https://")
-        graphapi_url = graphapi_url.replace("www.facebook.com", "graph.facebook.com")
-        graphapi_url = graphapi_url.strip()
-        if not graphapi_url.endswith("/"):
-            graphapi_url += "/"
-
-        graphapi_url += "picture?type=large"
-        logger.info("API call: " + graphapi_url)
-        request = urllib.request.Request(graphapi_url, None, headers)
-        response = urllib.request.urlopen(request, timeout=10)
-        http_response_code = response.code
-        if http_response_code == 200:
-            photo_url = response.url
-            success = True
-            status += "FINISHED_QUERYING_GRAPHAPI_FOR_ONE_CANDIDATE1 "
+        if len(photo_url) < 1:
+            status += 'GET_FACEBOOK_PHOTO_URL_FROM_GRAPHAPI-PHOTO_RETRIEVE_FAILED: ' + facebook_candidate_url + " "
         else:
-            logger.error("get_facebook_photo_url_from_graphapi, failed to read url: " + graphapi_url +
-                         "  , username must be an alias for this to work")
-            success = False
-            status += "QUERYING_GRAPHAPI_FOR_ONE_CANDIDATE_FAILED1 "
-
-    except timeout:
-        status += "CANDIDATE_QUERYING_GRAPHAPI_TIMEOUT_ERROR1 "
-        success = False
-    except HTTPError as http_error:
-        # HTTP Error 404: Not Found
-        http_response_code = http_error.code
-        attempt_to_retrieve_by_page_id = True
-        success = True
-    except IOError as error_instance:
-        error_message = error_instance
-        status += "QUERYING_GRAPHAPI_IO_ERROR1: {error_message}".format(error_message=error_message)
-        success = False
-    except Exception as error_instance:
-        error_message = error_instance
-        status += "QUERYING_GRAPHAPI_GENERAL_EXCEPTION_ERROR1: {error_message}".format(error_message=error_message)
-        success = False
-
-    if attempt_to_retrieve_by_page_id:
-        try:
-            graphapi_url = facebook_candidate_url.replace("http://", "https://")
-            graphapi_url = graphapi_url.replace("www.facebook.com", "graph.facebook.com")
-            graphapi_url = graphapi_url.strip()
-            if not graphapi_url.endswith("/"):
-                graphapi_url += "/"
-            graphapi_url = extract_and_replace_facebook_page_id(graphapi_url)
-            graphapi_url += "picture?type=large"
-            logger.info("API call: " + graphapi_url)
-            request = urllib.request.Request(graphapi_url, None, headers)
-            response = urllib.request.urlopen(request, timeout=10)
-            http_response_code = response.code
-            if http_response_code == 200:
-                photo_url = response.url
-                success = True
-                status += "FINISHED_QUERYING_GRAPHAPI_FOR_ONE_CANDIDATE2 "
-            else:
-                logger.error("get_facebook_photo_url_from_graphapi, failed to read url: " + graphapi_url +
-                             "  , username must be an alias for this to work")
-                success = False
-                status += "QUERYING_GRAPHAPI_FOR_ONE_CANDIDATE_FAILED2 "
-
-        except timeout:
-            status += "CANDIDATE_QUERYING_GRAPHAPI_TIMEOUT_ERROR2 "
-            success = False
-        except HTTPError as http_error:
-            # HTTP Error 404: Not Found
-            http_response_code = http_error.code
+            status += 'GET_FACEBOOK_PHOTO_URL_FROM_GRAPHAPI-SUCCESS '
             success = True
-        except IOError as error_instance:
-            error_message = error_instance
-            status += "QUERYING_GRAPHAPI_IO_ERROR2: {error_message}".format(error_message=error_message)
-            success = False
-        except Exception as error_instance:
-            error_message = error_instance
-            status += "QUERYING_GRAPHAPI_GENERAL_EXCEPTION_ERROR2: {error_message}".format(error_message=error_message)
-            success = False
 
     results = {
         'status':               status,
         'success':              success,
-        'http_response_code':   http_response_code,
         'photo_url':            photo_url,
+        'is_silhouette':        results['is_silhouette'],
     }
     return results
