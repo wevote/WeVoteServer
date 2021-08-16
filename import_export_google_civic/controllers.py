@@ -1459,7 +1459,9 @@ def groom_and_store_google_civic_office_json_2021(
                 }
                 return results
             else:
-                continue_searching_for_office = True
+                # If here, we have a Vote USA Office Id, but no office found.
+                create_office_entry = True
+                continue_searching_for_office = False
 
     if continue_searching_for_office:
         # Check to see if there is an office which doesn't match by data provider id

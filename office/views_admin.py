@@ -572,10 +572,21 @@ def office_edit_process_view(request):
         if office_on_stage_found:
             # Update
             # Removed for now: convert_to_int(office_on_stage.google_civic_election_id) >= 1000000 and
+            office_on_stage.ballotpedia_is_marquee = positive_value_exists(ballotpedia_is_marquee)
+            if ballotpedia_office_id is not False:
+                office_on_stage.ballotpedia_office_id = convert_to_int(ballotpedia_office_id)
+            if ballotpedia_office_name is not False:
+                office_on_stage.ballotpedia_office_name = ballotpedia_office_name
+            if ballotpedia_race_id is not False:
+                office_on_stage.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
+            if ballotpedia_race_office_level is not False:
+                office_on_stage.ballotpedia_race_office_level = ballotpedia_race_office_level
             if ctcl_uuid is not False:
                 office_on_stage.ctcl_uuid = ctcl_uuid
-            if office_name is not False:
-                office_on_stage.office_name = office_name
+            if district_id is not False:
+                office_on_stage.district_id = district_id
+            if positive_value_exists(election_state):
+                office_on_stage.state_code = election_state
             if google_civic_office_name is not False:
                 office_on_stage.google_civic_office_name = google_civic_office_name
             if google_civic_office_name2 is not False:
@@ -586,24 +597,13 @@ def office_edit_process_view(request):
                 office_on_stage.google_civic_office_name4 = google_civic_office_name4
             if google_civic_office_name5 is not False:
                 office_on_stage.google_civic_office_name5 = google_civic_office_name5
+            office_on_stage.is_battleground_race = positive_value_exists(is_battleground_race)
             if ocd_division_id is not False:
                 office_on_stage.ocd_division_id = ocd_division_id
-            if district_id is not False:
-                office_on_stage.district_id = district_id
+            if office_name is not False:
+                office_on_stage.office_name = office_name
             if primary_party is not False:
                 office_on_stage.primary_party = primary_party
-            if positive_value_exists(election_state):
-                office_on_stage.state_code = election_state
-            office_on_stage.ballotpedia_is_marquee = positive_value_exists(ballotpedia_is_marquee)
-            office_on_stage.is_battleground_race = positive_value_exists(is_battleground_race)
-            if ballotpedia_office_id is not False:
-                office_on_stage.ballotpedia_office_id = convert_to_int(ballotpedia_office_id)
-            if ballotpedia_office_name is not False:
-                office_on_stage.ballotpedia_office_name = ballotpedia_office_name
-            if ballotpedia_race_id is not False:
-                office_on_stage.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
-            if ballotpedia_race_office_level is not False:
-                office_on_stage.ballotpedia_race_office_level = ballotpedia_race_office_level
             if vote_usa_office_id is not False:
                 office_on_stage.vote_usa_office_id = vote_usa_office_id
             office_on_stage.save()
@@ -622,27 +622,46 @@ def office_edit_process_view(request):
                 state_code=election_state,
             )
             # Removing this limitation: convert_to_int(office_on_stage.google_civic_election_id) >= 1000000 and
-            if google_civic_office_name is not False:
-                office_on_stage.google_civic_office_name = google_civic_office_name
-            if ocd_division_id is not False:
-                office_on_stage.ocd_division_id = ocd_division_id
-            if district_id is not False:
-                office_on_stage.district_id = district_id
-            if primary_party is not False:
-                office_on_stage.primary_party = primary_party
+            office_on_stage.ballotpedia_is_marquee = positive_value_exists(ballotpedia_is_marquee)
             if ballotpedia_office_id is not False:
                 office_on_stage.ballotpedia_office_id = convert_to_int(ballotpedia_office_id)
             if ballotpedia_office_name is not False:
                 office_on_stage.ballotpedia_office_name = ballotpedia_office_name
             if ballotpedia_race_id is not False:
                 office_on_stage.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
-            if is_battleground_race is not None:
-                office_on_stage.is_battleground_race = positive_value_exists(is_battleground_race)
+            if ballotpedia_race_office_level is not False:
+                office_on_stage.ballotpedia_race_office_level = ballotpedia_race_office_level
+            if ctcl_uuid is not False:
+                office_on_stage.ctcl_uuid = ctcl_uuid
+            if district_id is not False:
+                office_on_stage.district_id = district_id
+            if positive_value_exists(election_state):
+                office_on_stage.state_code = election_state
+            if google_civic_office_name is not False:
+                office_on_stage.google_civic_office_name = google_civic_office_name
+            if google_civic_office_name2 is not False:
+                office_on_stage.google_civic_office_name2 = google_civic_office_name2
+            if google_civic_office_name3 is not False:
+                office_on_stage.google_civic_office_name3 = google_civic_office_name3
+            if google_civic_office_name4 is not False:
+                office_on_stage.google_civic_office_name4 = google_civic_office_name4
+            if google_civic_office_name5 is not False:
+                office_on_stage.google_civic_office_name5 = google_civic_office_name5
+            office_on_stage.is_battleground_race = positive_value_exists(is_battleground_race)
+            if ocd_division_id is not False:
+                office_on_stage.ocd_division_id = ocd_division_id
+            if office_name is not False:
+                office_on_stage.office_name = office_name
+            if primary_party is not False:
+                office_on_stage.primary_party = primary_party
+            if vote_usa_office_id is not False:
+                office_on_stage.vote_usa_office_id = vote_usa_office_id
+
             office_on_stage.save()
+            office_on_stage_id = office_on_stage.id
             messages.add_message(request, messages.INFO, 'New office saved.')
 
-            # Come back to the "Create New Office" page
-            return HttpResponseRedirect(reverse('office:office_new', args=()) +
+            return HttpResponseRedirect(reverse('office:office_summary', args=(office_on_stage_id,)) +
                                         "?google_civic_election_id=" + str(google_civic_election_id) +
                                         "&state_code=" + str(state_code))
     except Exception as e:
@@ -854,10 +873,12 @@ def office_delete_process_view(request):
 
     office_on_stage_found = False
     office_on_stage = ContestOffice()
+    office_on_stage_we_vote_id = ''
     try:
         office_on_stage = ContestOffice.objects.get(id=office_id)
         office_on_stage_found = True
         google_civic_election_id = office_on_stage.google_civic_election_id
+        office_on_stage_we_vote_id = office_on_stage.we_vote_id
     except ContestOffice.MultipleObjectsReturned as e:
         pass
     except ContestOffice.DoesNotExist:
@@ -865,15 +886,12 @@ def office_delete_process_view(request):
 
     candidates_found_for_this_office = False
     if office_on_stage_found:
-        try:
-            candidate_list = CandidateCampaign.objects.filter(contest_office_id=office_id)
-            # if positive_value_exists(google_civic_election_id):
-            #     candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
-            candidate_list = candidate_list.order_by('candidate_name')
-            if len(candidate_list):
-                candidates_found_for_this_office = True
-        except CandidateCampaign.DoesNotExist:
-            pass
+        candidate_list_manager = CandidateListManager()
+        results = candidate_list_manager.retrieve_candidate_to_office_link_list(
+            contest_office_we_vote_id_list=[office_on_stage_we_vote_id])
+        candidate_to_office_link_list = results['candidate_to_office_link_list']
+        if len(candidate_to_office_link_list):
+            candidates_found_for_this_office = True
 
     try:
         if not candidates_found_for_this_office:
@@ -885,7 +903,7 @@ def office_delete_process_view(request):
                                                           'candidates still attached to this office.')
             return HttpResponseRedirect(reverse('office:office_summary', args=(office_id,)))
     except Exception as e:
-        messages.add_message(request, messages.ERROR, 'Could not delete office -- exception.')
+        messages.add_message(request, messages.ERROR, 'Could not delete office -- exception: ' + str(e))
         return HttpResponseRedirect(reverse('office:office_summary', args=(office_id,)))
 
     return HttpResponseRedirect(reverse('office:office_list', args=()) +
