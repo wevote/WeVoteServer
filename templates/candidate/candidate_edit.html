@@ -451,6 +451,7 @@ th, td {
                value="{% if candidate %}{{ candidate.facebook_url|default_if_none:"" }}{% else %}{{ facebook_url|default_if_none:"" }}{% endif %}" />
       {% if candidate.facebook_url %}
       <a href="{% url 'import_export_facebook:get_and_save_facebook_photo' %}?candidate_we_vote_id={{ candidate.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&page={{ page }}">
+<!--        <a id="facebook_url_id_a" href="temp" >-->
             Refresh Facebook Photo</a>
           {% if candidate.facebook_url_is_broken %}
             <b> &nbsp;&nbsp; The previous attempt at getting a photo from this link failed, it may be a broken link</b>
@@ -844,8 +845,16 @@ th, td {
           $("input[name='candidate_name']").val(name);
           $('#update_name_id').prop('disabled', true).css('opacity',0.5);
         });
-
     }(window.$, window.autosize));
+
+    $(function (){
+      $('#facebook_url_id_a').on('click', () => {
+          let href = "{% url 'import_export_facebook:get_and_save_facebook_photo' %}?candidate_we_vote_id={{ candidate.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&page={{ page }}";
+          href += "&fburl=" + $('#facebook_url_id').val();
+          document.location.href = href;
+      });
+    }(window.$, document);
+
 </script>
 
 
