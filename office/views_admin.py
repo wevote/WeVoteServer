@@ -1218,11 +1218,11 @@ def office_merge_process_view(request):
 
     for attribute in CONTEST_OFFICE_UNIQUE_IDENTIFIERS:
         conflict_value = conflict_values.get(attribute, None)
-        if conflict_value is "CONFLICT":
+        if conflict_value == "CONFLICT":
             choice = request.POST.get(attribute + '_choice', '')
             if contest_office2_we_vote_id == choice:
                 setattr(contest_office1_on_stage, attribute, getattr(contest_office2_on_stage, attribute))
-        elif conflict_value is "CONTEST_OFFICE2":
+        elif conflict_value == "CONTEST_OFFICE2":
             setattr(contest_office1_on_stage, attribute, getattr(contest_office2_on_stage, attribute))
         else:
             pass
