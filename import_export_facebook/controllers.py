@@ -801,6 +801,7 @@ def voter_facebook_sign_in_save_for_api(voter_device_id,  # voterFacebookSignInS
 def get_facebook_photo_url_from_graphapi(facebook_candidate_url):
     photo_url = ""
     status = ""
+    clean_message = ''
     success = False
 
     m = re.search(r'^.*?facebook.com/(.*?)((/$)|($)|(/.*?$))', facebook_candidate_url)
@@ -815,6 +816,9 @@ def get_facebook_photo_url_from_graphapi(facebook_candidate_url):
 
         if len(photo_url) < 1:
             status += 'GET_FACEBOOK_PHOTO_URL_FROM_GRAPHAPI-PHOTO_RETRIEVE_FAILED: ' + facebook_candidate_url + " "
+            clean_message = "Facebook did not return a photo for '{}' for the URL entered on this page. " \
+                            "Possible reasons:  The campaign has not granted 'apps' access permission for this page. " \
+                            "Or the page is no longer published.  Or the URL is incorrect.".format(fb_id_or_login_name)
         else:
             status += 'GET_FACEBOOK_PHOTO_URL_FROM_GRAPHAPI-SUCCESS '
             success = True
@@ -824,5 +828,6 @@ def get_facebook_photo_url_from_graphapi(facebook_candidate_url):
         'success':              success,
         'photo_url':            photo_url,
         'is_silhouette':        results['is_silhouette'],
+        'clean_message':        clean_message,
     }
     return results
