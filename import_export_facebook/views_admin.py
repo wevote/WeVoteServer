@@ -65,7 +65,7 @@ def get_one_picture_from_facebook_graphapi(one_candidate, request, remote_reques
         status += "GET_FACEBOOK_FAILED "
 
         if add_messages:
-            if results.get('clean_message'):
+            if len(results.get('clean_message')) > 0:
                 messages.add_message(request, messages.ERROR, results.get('clean_message'))
             else:
                 messages.add_message(request, messages.ERROR, 'Facebook photo NOT retrieved (2). status: ' +
