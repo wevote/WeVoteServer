@@ -817,9 +817,9 @@ def get_facebook_photo_url_from_graphapi(facebook_candidate_url):
         if len(photo_url) < 1:
             status += 'GET_FACEBOOK_PHOTO_URL_FROM_GRAPHAPI-PHOTO_RETRIEVE_FAILED: ' + facebook_candidate_url + " "
             clean_message = "Facebook did not return a photo for '{}' for the URL entered on this page. " \
-                            "Possible reasons:  " \
-                            "1) The campaign has not granted 'apps' access permission for this page. " \
-                            "2) The page is no longer published.  3) The URL is incorrect.".format(fb_id_or_login_name)
+                            "Possible reasons: \n " \
+                            "1) The campaign has not granted 'apps' access permission for this page.\n " \
+                            "2) The page is no longer published.  \n3) The URL is incorrect.".format(fb_id_or_login_name)
         else:
             status += 'GET_FACEBOOK_PHOTO_URL_FROM_GRAPHAPI-SUCCESS '
             success = True
