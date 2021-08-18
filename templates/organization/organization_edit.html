@@ -12,7 +12,12 @@
     }
 </style>
 
-<h1>{% if organization %}{{ organization.organization_name }}{% else %}New Endorser{% endif %}</h1>
+<h1>
+    {% if organization %}{{ organization.organization_name }}{% else %}New Endorser{% endif %}
+    {% if organization.we_vote_hosted_profile_image_url_large %}
+        <img src='{{ organization.we_vote_hosted_profile_image_url_large }}' />
+    {% endif %}
+</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
 
@@ -54,7 +59,7 @@
     entries.</p>
 {% endif %}
 
-<form action="{% url "organization:organization_edit_process" %}" method="post" class="form-horizontal">
+<form action="{% url 'organization:organization_edit_process' %}" method="post" class="form-horizontal">
 {% csrf_token %}
     <input type="hidden" name="organization_id" value="{% if organization %}{{ organization.id }}{% else %}0{% endif %}">
 
@@ -94,7 +99,7 @@
                 -- Filter by Endorser Type --</option>
         {% for key, organization_type in organization_types %}
             <option value="{{ key }}"
-                    {% if key|lower == organization.organization_type|lower %} selected="selected"{% endif %}>
+                    {% if key|lower == organization.organization_type|lower %} selected="selected" {% endif %}>
             {{ organization_type }}</option>
         {% endfor %}
         </select>
@@ -140,7 +145,7 @@
 
 <div class="form-group">
     <label for="organization_twitter_handle_id" class="col-sm-3 control-label">
-    <span {% if twitter_handle_mismatch %}style="color: red;"{% endif %}>
+    <span {% if twitter_handle_mismatch %} style="color: red;" {% endif %}>
         Twitter Handle
         {% if twitter_handle_mismatch %} MISMATCH WITH TWITTER LINK ('{{ twitter_link_to_organization_handle }}' expected){% endif %}
     </span>
@@ -157,10 +162,14 @@
 </div>
 
 <div class="form-group">
-    <label for="organization_facebook_id" class="col-sm-3 control-label">Facebook</label>
+    <label for="organization_facebook_id" class="col-sm-3 control-label">Facebook URL</label>
     <div class="col-sm-8">
-    <input type="text" name="organization_facebook" id="organization_facebook_id" class="form-control"
-           value="{% if organization %}{{ organization.organization_facebook|default_if_none:"" }}{% else %}{{ organization_facebook }}{% endif %}" />
+        <input type="text" name="organization_facebook" id="organization_facebook_id" class="form-control"
+               value="{% if organization %}{{ organization.organization_facebook|default_if_none:'' }}{% else %}{{ organization_facebook }}{% endif %}" />
+        {% if organization.organization_facebook %}
+            <a href="{% url 'import_export_facebook:get_and_save_facebook_photo' %}?organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&page={{ page }}">
+                Refresh Facebook Photo</a>
+        {% endif %}
     </div>
 </div>
 
@@ -168,9 +177,9 @@
 {#<div class="form-group">#}
 {#    <label for="wikipedia_page_title_id" class="col-sm-3 control-label">Wikipedia Page URL / Page Name</label>#}
 {#    <div class="col-sm-8">#}
-{#        <input type="text" name="wikipedia_page_title" id="wikipedia_page_title_id" class="form-control"#}
-{#               placeholder="The Wikipedia Full URL, or Wikipedia Page Identifier"#}
-{#               value="{% if organization %}{{ organization.wikipedia_page_title|default_if_none:"" }}{% else %}{{ wikipedia_page_title }}{% endif %}" />#}
+{#        <input type="text" name="wikipedia_page_title" id="wikipedia_page_title_id" class="form-control" #}
+{#               placeholder="The Wikipedia Full URL, or Wikipedia Page Identifier" #}
+{#               value="{% if organization %}{{ organization.wikipedia_page_title|default_if_none:"" }}{% else %}{{ wikipedia_page_title }}{% endif %}" /> #}
 {#    </div>#}
 {#</div>#}
 {##}
@@ -287,7 +296,7 @@
 {% if organization %}
   <br />
   <br />
-<form action="{% url "organization:organization_delete_process" %}" method="post" class="form-horizontal">
+<form action="{% url 'organization:organization_delete_process' %}" method="post" class="form-horizontal">
 {% csrf_token %}
   <input type="hidden" name="organization_id" value="{% if organization %}{{ organization.id }}{% else %}0{% endif %}">
   <button type="submit" class="btn btn-danger">Delete Endorser</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;

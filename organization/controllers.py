@@ -2,42 +2,45 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers_fastly import add_wevote_subdomain_to_fastly, add_subdomain_route53_record, \
-    get_wevote_subdomain_status
-from .models import Organization, OrganizationListManager, OrganizationManager, \
-    OrganizationReservedDomain, ORGANIZATION_UNIQUE_IDENTIFIERS, OrganizationMembershipLinkToVoter
+import base64
+import json
+import re
+from io import BytesIO
+
+import robot_detection
+import tweepy
+from PIL import Image
+from django.http import HttpResponse
+
+import wevote_functions.admin
 from analytics.models import ACTION_BALLOT_VISIT, ACTION_ORGANIZATION_FOLLOW, ACTION_ORGANIZATION_FOLLOW_IGNORE, \
     ACTION_ORGANIZATION_STOP_FOLLOWING, ACTION_ORGANIZATION_STOP_IGNORING, AnalyticsManager
-import base64
 from config.base import get_environment_variable
-from django.http import HttpResponse
-from stripe_donations.controllers import move_donation_info_to_another_organization
 from election.models import ElectionManager
 from exception.models import handle_record_not_found_exception
 from follow.controllers import delete_organization_followers_for_organization, \
     move_organization_followers_to_another_organization
 from follow.models import FollowOrganizationManager, FollowOrganizationList, FOLLOW_IGNORE, FOLLOWING, \
     STOP_FOLLOWING, STOP_IGNORING
+from image.controllers import cache_master_and_resized_image, \
+    FACEBOOK
 from image.controllers import cache_organization_sharing_image, retrieve_all_images_for_one_organization
 from import_export_facebook.models import FacebookManager
-import json
-from io import BytesIO, StringIO
-from PIL import Image, ImageOps
 from position.controllers import add_position_network_count_entries_for_one_organization, \
     delete_positions_for_organization, move_positions_to_another_organization, \
     update_position_entered_details_from_organization
 from position.models import PositionListManager
-import robot_detection
+from stripe_donations.controllers import move_donation_info_to_another_organization
 from twitter.models import TwitterUserManager
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager, Voter
 from voter_guide.models import VoterGuide, VoterGuideManager, VoterGuideListManager
-import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, \
     extract_twitter_handle_from_text_string, positive_value_exists, \
-    process_request_from_master
-import tweepy
-import re
-
+    process_request_from_master, extract_website_from_url
+from .controllers_fastly import add_wevote_subdomain_to_fastly, add_subdomain_route53_record, \
+    get_wevote_subdomain_status
+from .models import Organization, OrganizationListManager, OrganizationManager, \
+    OrganizationReservedDomain, ORGANIZATION_UNIQUE_IDENTIFIERS, OrganizationMembershipLinkToVoter
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -515,7 +518,8 @@ def organization_analytics_by_voter_for_api(voter_device_id='',
 
     # Now cycle through each voter with only voter_we_vote_id
     for voter_we_vote_id_key in election_participation_dict_with_we_vote_id_lists.keys():
-        election_participation_list_for_one_voter = election_participation_dict_with_we_vote_id_lists[voter_we_vote_id_key]
+        election_participation_list_for_one_voter = \
+            election_participation_dict_with_we_vote_id_lists[voter_we_vote_id_key]
         this_election_already_seen_by_voter = []  # Reset for each voter
         elections_visited = []
         voter_we_vote_id_from_analytics = ''
@@ -672,7 +676,7 @@ def organization_analyze_tweets(organization_we_vote_id):
         if re.findall(r"#(\w+)", cached_tweets[i].tweet_text):
             all_hashtags.append(re.findall(r"#(\w+)", cached_tweets[i].tweet_text))
 
-    all_hashtags_list = [] # all_hashtags is a nested list, flattened here prior to building frequency distribution
+    all_hashtags_list = []  # all_hashtags is a nested list, flattened here prior to building frequency distribution
     [[all_hashtags_list.append(hashtag) for hashtag in hashtag_list]for hashtag_list in all_hashtags]
     unique_hashtags_count_dict = dict(zip(all_hashtags_list, [0] * len(all_hashtags_list)))
     for hashtag in all_hashtags_list:
@@ -685,8 +689,8 @@ def organization_analyze_tweets(organization_we_vote_id):
     # TODO (eayoungs@gmail.com) This is Abed's code; left to be considered for future work
     # This is giving a weird output!
     # Populate a dictionary with the frequency of words in all tweets 
-    #counts = dict()
-    #for tweet in tweet_list:
+    # counts = dict()
+    # for tweet in tweet_list:
     #    words = str(tweet.tweet_text).split()
     #    # return tweet.tweet_text, str(tweet.tweet_text).split(), tweet.tweet_text.split(), words
     #    for word in words:
@@ -696,8 +700,8 @@ def organization_analyze_tweets(organization_we_vote_id):
     #            counts[word] = 1
 
     # THIS PART IS STILL UNDERDEV
-    #organization_link_to_hashtag = OrganizationLinkToHashtag()
-    #organization_link_to_hashtag.organization_we_vote_id = organization_we_vote_id
+    # organization_link_to_hashtag = OrganizationLinkToHashtag()
+    # organization_link_to_hashtag.organization_we_vote_id = organization_we_vote_id
 
     organization_manager = OrganizationManager()
     for key, value in unique_hashtags_count_dict.items():
@@ -717,7 +721,7 @@ def organization_analyze_tweets(organization_we_vote_id):
 
 def merge_these_two_organizations(organization1_we_vote_id, organization2_we_vote_id, admin_merge_choices={}):
     """
-    Process the merging of two organizations. Note: Organization1 is saved at the end. Organization2 is deleted at the end.
+    Process the merging of two organizations. Note: Organization1 is saved at the end. Organization2 is deleted at end.
     :param organization1_we_vote_id:
     :param organization2_we_vote_id:
     :param admin_merge_choices: Dictionary with the attribute name as the key, and the chosen value as the value
@@ -3053,5 +3057,89 @@ def update_social_media_statistics_in_other_tables(organization):
         'status':       status,
         'organization': organization,
         'voter_guide':  voter_guide,
+    }
+    return results
+
+
+def save_image_to_organization_table(organization, image_url, source_link, url_is_broken, kind_of_source_website=None):
+    status = ''
+    success = True
+    cache_results = {
+        'we_vote_hosted_profile_image_url_large':   None,
+        'we_vote_hosted_profile_image_url_medium':  None,
+        'we_vote_hosted_profile_image_url_tiny':    None
+    }
+
+    if not positive_value_exists(kind_of_source_website):
+        kind_of_source_website = extract_website_from_url(source_link)
+    # if IMAGE_SOURCE_BALLOTPEDIA in kind_of_source_website:
+    #     cache_results = cache_master_and_resized_image(
+    #         organization_id=organization.id, organization_we_vote_id=organization.we_vote_id,
+    #         ballotpedia_profile_image_url=image_url,
+    #         image_source=IMAGE_SOURCE_BALLOTPEDIA)
+    #     cached_ballotpedia_profile_image_url_https = cache_results['cached_ballotpedia_image_url_https']
+    #     organization.ballotpedia_photo_url = cached_ballotpedia_profile_image_url_https
+    #     organization.ballotpedia_page_title = source_link
+    #
+    # elif LINKEDIN in kind_of_source_website:
+    #     cache_results = cache_master_and_resized_image(
+    #         organization_id=organization.id, organization_we_vote_id=organization.we_vote_id,
+    #         linkedin_profile_image_url=image_url,
+    #         image_source=LINKEDIN)
+    #     cached_linkedin_profile_image_url_https = cache_results['cached_linkedin_image_url_https']
+    #     organization.linkedin_url = source_link
+    #     organization.linkedin_photo_url = cached_linkedin_profile_image_url_https
+    #
+    # elif WIKIPEDIA in kind_of_source_website:
+    #     cache_results = cache_master_and_resized_image(
+    #         organization_id=organization.id, organization_we_vote_id=organization.we_vote_id,
+    #         wikipedia_profile_image_url=image_url,
+    #         image_source=WIKIPEDIA)
+    #     cached_wikipedia_profile_image_url_https = cache_results['cached_wikipedia_image_url_https']
+    #     organization.wikipedia_photo_url = cached_wikipedia_profile_image_url_https
+    #     organization.wikipedia_page_title = source_link
+    #
+    # elif TWITTER in kind_of_source_website:
+    #     twitter_screen_name = extract_twitter_handle_from_text_string(source_link)
+    #     organization.twitter_name = twitter_screen_name
+    #     organization.twitter_url = source_link
+
+    if FACEBOOK in kind_of_source_website:
+        # organization.facebook_url_is_broken = url_is_broken
+        if not url_is_broken:
+            cache_results = cache_master_and_resized_image(
+                candidate_id=organization.id, candidate_we_vote_id=organization.we_vote_id,
+                facebook_profile_image_url_https=image_url,
+                image_source=FACEBOOK)
+            cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
+            organization.facebook_url = source_link
+            organization.facebook_profile_image_url_https = cached_facebook_profile_image_url_https
+        else:
+            organization.facebook_profile_image_url_https = None
+
+    # else:
+    #     cache_results = cache_master_and_resized_image(
+    #         candidate_id=organization.id, candidate_we_vote_id=organization.we_vote_id,
+    #         other_source_image_url=image_url,
+    #         other_source=kind_of_source_website)
+    #     cached_other_source_image_url_https = cache_results['cached_other_source_image_url_https']
+    #     organization.other_source_url = source_link
+    #     organization.other_source_photo_url = cached_other_source_image_url_https
+
+    try:
+        if not url_is_broken:
+            we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+            we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+            we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+            organization.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+            organization.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+            organization.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+        organization.save()
+    except Exception as e:
+        status += "CANDIDATE_NOT_SAVED: " + str(e) + " "
+
+    results = {
+        'success': success,
+        'status': status,
     }
     return results

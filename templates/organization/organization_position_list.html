@@ -11,7 +11,12 @@
     Analyze Endorser Data ></a></p>
 
 {% if organization %}
-<h1>{{ organization.organization_name }}</h1>
+<h1>
+    {{ organization.organization_name }}
+    {% if organization.we_vote_hosted_profile_image_url_large %}
+        <img src='{{ organization.we_vote_hosted_profile_image_url_large }}' />
+    {% endif %}
+</h1>
 
 <table>{# Two column master table #}
     <tr>
@@ -209,10 +214,16 @@
                 <li><a href="{% url 'voter_guide:voter_guide_list' %}?voter_guide_search={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}"
                        target="_blank">Find Voter Guides for this Endorser <span class="glyphicon glyphicon-new-window"></span></a></li>
                 <li>Assorted tools:
-                    <a href="{% url 'import_export_wikipedia:import_organization_logo' organization.id %}">Retrieve photos from Wikipedia</a>,
-                    <a href="{% url 'import_export_twitter:scrape_website_for_social_media' organization.id %}">Scrape endorser website for Twitter Accounts</a>,
-                    <a href="{% url 'organization:organization_retrieve_tweets' organization.we_vote_id %}">Retrieve tweets for endorser</a>,
-                    <a href="{% url 'organization:organization_analyze_tweets' organization.we_vote_id %}">Link issues from twitter feed</a>
+                    <a href="{% url 'import_export_wikipedia:import_organization_logo' organization.id %}" style="padding-left: 10px">Retrieve photos from Wikipedia</a>,
+                    <a href="{% url 'import_export_twitter:scrape_website_for_social_media' organization.id %}" style="padding-left: 10px">Scrape endorser website for Twitter Accounts</a>,
+                    <a href="{% url 'organization:organization_retrieve_tweets' organization.we_vote_id %}" style="padding-left: 10px">Retrieve tweets for endorser</a>,
+                    <a href="{% url 'organization:organization_analyze_tweets' organization.we_vote_id %}" style="padding-left: 10px">Link issues from twitter feed</a>,
+                    {% if organization.organization_facebook %}
+                        <a href="{% url 'import_export_facebook:get_and_save_facebook_photo' %}?reverse_path=organization:organization_position_list&organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&reverse_path='organization:organization_edit'&page={{ page }}"
+                           style="padding-left: 10px" id="steve">
+                            Refresh Facebook Photo
+                        </a>
+                    {% endif %}
                 </li>
             </ul>
 
