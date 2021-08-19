@@ -267,7 +267,7 @@ def edit_team_members_view(request, organization_id=0, organization_we_vote_id="
     team_member_list_modified = []
     team_member_list = organization_manager.retrieve_team_member_list(
         organization_we_vote_id=organization_we_vote_id,
-        read_only=True
+        read_only=False
     )
 
     voter_manager = VoterManager()

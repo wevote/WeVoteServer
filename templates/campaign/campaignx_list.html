@@ -164,7 +164,7 @@
                    {{ campaignx.we_vote_id }}&nbsp;
                 </span>
                 <span style="font-size: .95rem; color: gray">
-                {% if not campaignx.is_in_team_review_mode %}
+                {% if campaignx.is_in_team_review_mode %}
                     OWNER-IN-TEAM-REVIEW&nbsp;
                 {% endif %}
                 {% if not campaignx.is_ok_to_promote_on_we_vote %}
