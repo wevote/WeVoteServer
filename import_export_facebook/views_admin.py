@@ -2,28 +2,40 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import get_facebook_photo_url_from_graphapi
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+
+import wevote_functions.admin
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.controllers import FACEBOOK, save_image_to_candidate_table
 from candidate.models import CandidateCampaign, CandidateListManager
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.urls import reverse
-from django.http import HttpResponseRedirect
+from organization.controllers import save_image_to_organization_table
+from organization.models import Organization
 from voter.models import voter_has_authority
 from wevote_functions.functions import convert_to_int, positive_value_exists
-import wevote_functions.admin
 from wevote_settings.models import RemoteRequestHistory, RemoteRequestHistoryManager, RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS
-
+from .controllers import get_facebook_photo_url_from_graphapi
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 
-def get_one_picture_from_facebook_graphapi(one_candidate, request, remote_request_history_manager, add_messages):
+def get_one_picture_from_facebook_graphapi(one_entity, request, remote_request_history_manager, add_messages):
     status = ""
     success = True
 
-    results = get_facebook_photo_url_from_graphapi(one_candidate.facebook_url)
+    we_vote_id = one_entity.we_vote_id
+    if hasattr(one_entity, 'facebook_url'):
+        facebook_url = one_entity.facebook_url
+        google_civic_election_id = one_entity.google_civic_election_id
+        is_candidate = True
+    else:
+        facebook_url = one_entity.organization_facebook
+        google_civic_election_id = ''
+        is_candidate = False
+
+    results = get_facebook_photo_url_from_graphapi(facebook_url)
     if results.get('success'):
         photo_url = results.get('photo_url')
         # link_is_broken = results.get('http_response_code') == 404
@@ -38,16 +50,22 @@ def get_one_picture_from_facebook_graphapi(one_candidate, request, remote_reques
                     request, messages.INFO,
                     'Failed to retrieve Facebook picture:  The Facebook URL is for placeholder/Silhouette image.')
             # Create a record denoting that we have retrieved from Facebook for this candidate
-            save_results_history = remote_request_history_manager.create_remote_request_history_entry(
-                RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS, one_candidate.google_civic_election_id,
-                one_candidate.we_vote_id, None, 1, "CANDIDATE_FACEBOOK_URL_IS_PLACEHOLDER_SILHOUETTE:" + photo_url)
+            if is_candidate:
+                save_results_history = remote_request_history_manager.create_remote_request_history_entry(
+                    RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS, google_civic_election_id,
+                    we_vote_id, None, 1, "CANDIDATE_FACEBOOK_URL_IS_PLACEHOLDER_SILHOUETTE:" + photo_url)
         else:
             # Success!
-            logger.info("Queried URL: " + one_candidate.facebook_url + " ==> " + photo_url)
+            logger.info("Queried URL: " + facebook_url + " ==> " + photo_url)
             if add_messages:
                 messages.add_message(request, messages.INFO, 'Facebook photo retrieved.')
-            results = save_image_to_candidate_table(
-                one_candidate, photo_url, one_candidate.facebook_url, False, FACEBOOK)
+            if is_candidate:
+                results = save_image_to_candidate_table(
+                    one_entity, photo_url, facebook_url, False, FACEBOOK)
+            else:
+                results = save_image_to_organization_table(
+                    one_entity, photo_url, facebook_url, False, FACEBOOK)
+
             if not positive_value_exists(results['success']):
                 success = False
                 status += results['status']
@@ -55,10 +73,11 @@ def get_one_picture_from_facebook_graphapi(one_candidate, request, remote_reques
             else:
                 status += "SAVED_FB_IMAGE "
                 # Create a record denoting that we have retrieved from Facebook for this candidate
-                save_results_history = remote_request_history_manager.create_remote_request_history_entry(
-                    RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS, one_candidate.google_civic_election_id,
-                    one_candidate.we_vote_id, None, 1, "CANDIDATE_FACEBOOK_URL_PARSED_HTTP:" +
-                                                       one_candidate.facebook_url)
+
+                if is_candidate:
+                    save_results_history = remote_request_history_manager.create_remote_request_history_entry(
+                        RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS, google_civic_election_id,
+                        we_vote_id, None, 1, "CANDIDATE_FACEBOOK_URL_PARSED_HTTP:" + facebook_url)
     else:
         success = False
         status += results['status']
@@ -71,11 +90,11 @@ def get_one_picture_from_facebook_graphapi(one_candidate, request, remote_reques
                 messages.add_message(request, messages.ERROR, 'Facebook photo NOT retrieved (2). status: ' +
                                  results.get('status'))
 
-    results2 = {
+    results = {
         'success': success,
         'status': status,
     }
-    return results2
+    return results
 
 
 # Test SQL for pgAdmin 4
@@ -205,12 +224,24 @@ def get_and_save_facebook_photo_view(request):
     hide_candidate_tools = request.GET.get('hide_candidate_tools', False)
     page = request.GET.get('page', 0)
     state_code = request.GET.get('state_code', '')
-    candidate_we_vote_id = request.GET.get('candidate_we_vote_id', "")
+    we_vote_id = request.GET.get('candidate_we_vote_id', "")
+    if positive_value_exists(we_vote_id):
+        is_candidate = True
+        reverse_path = 'candidate:candidate_edit_we_vote_id'
+        msg_base = 'get_and_save_facebook_photo_view, Candidate '
+        reverse_id = we_vote_id
+    else:
+        is_candidate = False
+        we_vote_id = request.GET.get('organization_we_vote_id', "")
+        reverse_path = 'organization:organization_position_list'
+        msg_base = 'get_and_save_facebook_photo_view, Organization '
+        reverse_id = we_vote_id.split('org')[1]
+    if positive_value_exists(request.GET.get('reverse_path', "")):
+        reverse_path = request.GET.get('reverse_path', "").replace('\'', '')
 
-    if not positive_value_exists(candidate_we_vote_id):
-        messages.add_message(request, messages.ERROR,
-                             'get_and_save_facebook_photo_view, Candidate not specified')
-        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
+    if not positive_value_exists(we_vote_id):
+        messages.add_message(request, messages.ERROR, msg_base + 'not specified')
+        return HttpResponseRedirect(reverse(reverse_path, args=()) +
                                     '?google_civic_election_id=' + str(google_civic_election_id) +
                                     '&state_code=' + str(state_code) +
                                     '&hide_candidate_tools=' + str(hide_candidate_tools) +
@@ -218,18 +249,18 @@ def get_and_save_facebook_photo_view(request):
                                     )
 
     try:
-        candidate_query = CandidateCampaign.objects.all()
-        candidate_query = candidate_query.filter(we_vote_id__iexact=candidate_we_vote_id)
-        candidate_list = list(candidate_query)
-        one_candidate = candidate_list[0]
+        query = CandidateCampaign.objects.all() if is_candidate else Organization.objects.all()
 
-        # If the candidate has a facebook_url, but no facebook_profile_image_url_https,
+        query = query.filter(we_vote_id__iexact=we_vote_id)
+        entity_list = list(query)
+        one_entity = entity_list[0]
+
+        # If the entity has a facebook_url, but no facebook_profile_image_url_https,
         # see if we already tried to scrape them
-        if not positive_value_exists(one_candidate.facebook_url):
-            messages.add_message(request, messages.ERROR,
-                                 'get_and_save_facebook_photo_view, No facebook_url found.')
+        if not positive_value_exists(one_entity.facebook_url if is_candidate else one_entity.organization_facebook):
+            messages.add_message(request, messages.ERROR, msg_base + ', No facebook_url found.')
             return HttpResponseRedirect(
-                reverse('candidate:candidate_edit_we_vote_id', args=(one_candidate.we_vote_id,)) +
+                reverse(reverse_path, args=(reverse_id,)) +
                 '?google_civic_election_id=' + str(google_civic_election_id) +
                 '&state_code=' + str(state_code) +
                 '&hide_candidate_tools=' + str(hide_candidate_tools) +
@@ -237,20 +268,19 @@ def get_and_save_facebook_photo_view(request):
                 )
 
         add_messages = True
-        get_one_picture_from_facebook_graphapi(one_candidate, request, remote_request_history_manager, add_messages)
+        get_one_picture_from_facebook_graphapi(one_entity, request, remote_request_history_manager, add_messages)
 
-    except CandidateCampaign.DoesNotExist:
+    except (CandidateCampaign.DoesNotExist, Organization.DoesNotExist):
         # This is fine, do nothing
-        messages.add_message(request, messages.ERROR,
-                             'get_and_save_facebook_photo_view, Candidate not found.')
-        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
+        messages.add_message(request, messages.ERROR, msg_base + ' not found')
+        return HttpResponseRedirect(reverse(reverse_path, args=()) +
                                     '?google_civic_election_id=' + str(google_civic_election_id) +
                                     '&state_code=' + str(state_code) +
                                     '&hide_candidate_tools=' + str(hide_candidate_tools) +
                                     '&page=' + str(page)
                                     )
 
-    return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id', args=(one_candidate.we_vote_id,)) +
+    return HttpResponseRedirect(reverse(reverse_path, args=(reverse_id,)) +
                                 '?google_civic_election_id=' + str(google_civic_election_id) +
                                 '&state_code=' + str(state_code) +
                                 '&hide_candidate_tools=' + str(hide_candidate_tools) +

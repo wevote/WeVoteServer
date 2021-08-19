@@ -4,12 +4,13 @@
 
 import facebook
 import json
+import re
 import requests
 from django.core.validators import RegexValidator
 from django.db import models
 
 import wevote_functions.admin
-from config.base import get_environment_variable
+from config.base import get_environment_variable, get_environment_variable_default
 from email_outbound.models import SEND_STATUS_CHOICES, TO_BE_PROCESSED
 from exception.models import handle_exception, print_to_log
 from wevote_functions.functions import generate_random_string, positive_value_exists, convert_to_int
@@ -890,16 +891,25 @@ class FacebookManager(models.Manager):
         Uses Facebook API 11.0
         """
         try:
-            app_id = get_environment_variable("SOCIAL_AUTH_FACEBOOK_APP_ID")
-            app_secret = get_environment_variable("SOCIAL_AUTH_FACEBOOK_APP_SECRET")
+            # Fall back to old env var names, if they are still defined on developers machines
+            app_id = get_environment_variable_default(
+                "SOCIAL_AUTH_FACEBOOK_APP_ID", get_environment_variable_default("SOCIAL_AUTH_FACEBOOK_KEY", ""))
+            app_secret = get_environment_variable_default(
+                "SOCIAL_AUTH_FACEBOOK_APP_SECRET", get_environment_variable_default("SOCIAL_AUTH_FACEBOOK_SECRET", ""))
 
             url = "https://graph.facebook.com/v11.0/{}/picture?height=256&access_token={}|{}&redirect=0".format(
                 person_id, app_id, app_secret)
-            print(url)
+            # print(url)
             source = requests.get(url)
             data = json.loads(source.text)
-            print(data)
+            # print(data)
             if 'error' in data:
+                # handle https://facebook.com/andrea-nelson-moore-for-judge-145896229538232
+                m = re.search(r'-(\d{6,})$', person_id)
+                if bool(m):
+                    tail_fb_id = m.group(1)    # e.g.  145896229538232
+                    return FacebookManager.retrieve_facebook_photo_from_person_id(tail_fb_id)  # recursive call
+
                 logger.error("retrieve_facebook_photo {}, {}, for person_id == {}".
                              format(data['error']['type'], data['error']['message'], person_id))
                 results = {
@@ -919,7 +929,7 @@ class FacebookManager(models.Manager):
                     'status': 'FB_API_RETURNED_SILOHOUETTE ',
                 }
                 return results
-            print(url)
+            # print(url)
             results = {
                 'url': url,
                 'is_silhouette': is_silhouette,

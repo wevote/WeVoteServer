@@ -100,6 +100,7 @@ def compare_two_organizations_for_merge_view(request):
         organization_merge_conflict_values,
         remove_duplicate_process)
 
+
 @login_required
 def organization_analyze_tweets_view(request, organization_we_vote_id):
     """
@@ -1991,7 +1992,8 @@ def organization_position_new_view(request, organization_id):
             if positive_value_exists(google_civic_election_id):
                 this_election_found = False
                 for one_election in election_list:
-                    if convert_to_int(one_election.google_civic_election_id) == convert_to_int(google_civic_election_id):
+                    if convert_to_int(one_election.google_civic_election_id) ==\
+                            convert_to_int(google_civic_election_id):
                         this_election_found = True
                         break
                 if not this_election_found:
@@ -2646,7 +2648,8 @@ def reserved_domain_edit_process_view(request):
         try:
             organization_list_query = Organization.objects.using('readonly').all()
             if positive_value_exists(full_domain_string):
-                organization_list_query = organization_list_query.filter(chosen_domain_string__iexact=full_domain_string)
+                organization_list_query = organization_list_query.\
+                    filter(chosen_domain_string__iexact=full_domain_string)
             else:
                 organization_list_query = organization_list_query.\
                     filter(chosen_subdomain_string__iexact=subdomain_string)
@@ -2666,7 +2669,8 @@ def reserved_domain_edit_process_view(request):
                 reserved_domain_list_query = reserved_domain_list_query.\
                     filter(full_domain_string__iexact=full_domain_string)
             else:
-                reserved_domain_list_query = reserved_domain_list_query.filter(subdomain_string__iexact=subdomain_string)
+                reserved_domain_list_query = reserved_domain_list_query.\
+                    filter(subdomain_string__iexact=subdomain_string)
             reserved_domain_list = list(reserved_domain_list_query)
         except Exception as e:
             messages.add_message(request, messages.ERROR, 'Could not find existing reserved domain.'

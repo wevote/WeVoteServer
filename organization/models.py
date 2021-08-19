@@ -167,7 +167,7 @@ class OrganizationLinkToWordOrPhrase(models.Model):
 
     organization_we_vote_id = models.CharField(verbose_name="we vote permanent id", max_length=255, unique=True)
     word_or_phrase_text = models.CharField(verbose_name="text of a word or phrase", max_length=255, unique=False)
-    tweet_id = models.BigIntegerField(verbose_name="tweet id",unique=True)
+    tweet_id = models.BigIntegerField(verbose_name="tweet id", unique=True)
     published_datetime = models.DateTimeField(verbose_name="published datetime")
     organization_twitter_handle = models.CharField(verbose_name="organization twitter handle", max_length=15,
                                                    unique=False)
@@ -1240,7 +1240,8 @@ class OrganizationManager(models.Manager):
                     organization_on_stage.chosen_domain_string = chosen_domain_string
                 if chosen_google_analytics_account_number is not False:
                     value_changed = True
-                    organization_on_stage.chosen_google_analytics_account_number = chosen_google_analytics_account_number
+                    organization_on_stage.chosen_google_analytics_account_number = \
+                        chosen_google_analytics_account_number
                 if chosen_html_verification_string is not False:
                     value_changed = True
                     organization_on_stage.chosen_html_verification_string = chosen_html_verification_string
@@ -1748,7 +1749,8 @@ class OrganizationManager(models.Manager):
                 organization.chosen_logo_url_https = None
                 values_changed = True
             if chosen_social_share_master_image_url_https:
-                organization.chosen_social_share_master_image_url_https = str(chosen_social_share_master_image_url_https)
+                organization.chosen_social_share_master_image_url_https = \
+                    str(chosen_social_share_master_image_url_https)
                 values_changed = True
             elif delete_chosen_social_share_master_image:
                 organization.chosen_social_share_master_image_url_https = None
@@ -2007,9 +2009,10 @@ class OrganizationManager(models.Manager):
             organization.twitter_name = ''
             organization.twitter_followers_count = 0
             organization.twitter_profile_image_url_https = ''
-            organization.we_vote_hosted_profile_image_url_large = ''
-            organization.we_vote_hosted_profile_image_url_medium = ''
-            organization.we_vote_hosted_profile_image_url_tiny = ''
+            # Steve Aug 17, 2021 -- this clears the saved image if it came from Facebook, so I removed it.
+            # organization.we_vote_hosted_profile_image_url_large = ''
+            # organization.we_vote_hosted_profile_image_url_medium = ''
+            # organization.we_vote_hosted_profile_image_url_tiny = ''
             organization.twitter_description = ''
             organization.twitter_location = ''
             organization.save()
