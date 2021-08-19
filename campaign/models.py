@@ -12,7 +12,7 @@ from django.utils.text import slugify
 import wevote_functions.admin
 from exception.models import handle_record_found_more_than_one_exception, \
     handle_record_not_found_exception
-from organization.models import OrganizationManager
+from organization.models import OrganizationManager, OrganizationTeamMember
 from wevote_functions.functions import convert_to_int, generate_date_as_integer, generate_random_string, \
     positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_campaignx_integer, \
@@ -52,6 +52,7 @@ class CampaignX(models.Model):
     # Settings controlled by We Vote staff
     is_blocked_by_we_vote = models.BooleanField(default=False, db_index=True)
     is_blocked_by_we_vote_reason = models.TextField(null=True, blank=True)
+    is_in_team_review_mode = models.BooleanField(default=False, db_index=True)
     is_not_promoted_by_we_vote = models.BooleanField(default=False, db_index=True)
     is_not_promoted_by_we_vote_reason = models.TextField(null=True, blank=True)
     is_still_active = models.BooleanField(default=True, db_index=True)
@@ -458,17 +459,53 @@ class CampaignXManager(models.Manager):
         return results
 
     def is_voter_campaignx_owner(self, campaignx_we_vote_id='', voter_we_vote_id=''):
+        """
+        We will also need functions that return the rights of the voter:
+        - can_edit_campaignx_owned_by_organization
+        - can_moderate_campaignx_owned_by_organization
+        - can_send_updates_for_campaignx_owned_by_organization
+        :param campaignx_we_vote_id:
+        :param voter_we_vote_id:
+        :return:
+        """
         status = ''
+        continue_checking = True
         voter_is_campaignx_owner = False
 
         try:
             campaignx_owner_query = CampaignXOwner.objects.using('readonly').filter(
-                campaignx_we_vote_id=campaignx_we_vote_id,
-                voter_we_vote_id=voter_we_vote_id)
+                campaignx_we_vote_id__iexact=campaignx_we_vote_id,
+                voter_we_vote_id__iexact=voter_we_vote_id)
             voter_is_campaignx_owner = positive_value_exists(campaignx_owner_query.count())
             status += 'VOTER_IS_CAMPAIGNX_OWNER '
         except CampaignXOwner as e:
+            continue_checking = False
             status += 'CAMPAIGNX_OWNER_QUERY_FAILED: ' + str(e) + ' '
+
+        if continue_checking and not voter_is_campaignx_owner:
+            teams_voter_is_on_organization_we_vote_id_list = []
+            try:
+                # Which teams does this voter belong to, with campaignX rights?
+                team_member_queryset = OrganizationTeamMember.objects.using('readonly').filter(
+                    voter_we_vote_id__iexact=voter_we_vote_id)
+                team_member_queryset = team_member_queryset.filter(
+                    Q(can_edit_campaignx_owned_by_organization=True) |
+                    Q(can_moderate_campaignx_owned_by_organization=True) |
+                    Q(can_send_updates_for_campaignx_owned_by_organization=True))
+                team_member_queryset = team_member_queryset.values_list('organization_we_vote_id', flat=True).distinct()
+                teams_voter_is_on_organization_we_vote_id_list = list(team_member_queryset)
+            except OrganizationTeamMember as e:
+                status += 'CAMPAIGNX_OWNER_FROM_TEAM_QUERY_FAILED: ' + str(e) + ' '
+            # Now see if this campaignX is owned by any of the teams this voter belongs to
+            if len(teams_voter_is_on_organization_we_vote_id_list) > 0:
+                try:
+                    owner_queryset = CampaignXOwner.objects.using('readonly').filter(
+                        campaignx_we_vote_id__iexact=campaignx_we_vote_id,
+                        organization_we_vote_id__in=teams_voter_is_on_organization_we_vote_id_list)
+                    voter_is_campaignx_owner = positive_value_exists(owner_queryset.count())
+                    status += 'VOTER_IS_CAMPAIGNX_OWNER_AS_TEAM_MEMBER '
+                except CampaignXOwner as e:
+                    status += 'CAMPAIGNX_OWNER_AS_TEAM_MEMBER_QUERY_FAILED: ' + str(e) + ' '
 
         return voter_is_campaignx_owner
 
@@ -512,7 +549,8 @@ class CampaignXManager(models.Manager):
 
         if positive_value_exists(campaignx_we_vote_id):
             viewer_is_owner = campaignx_manager.is_voter_campaignx_owner(
-                campaignx_we_vote_id=campaignx_we_vote_id, voter_we_vote_id=voter_we_vote_id)
+                campaignx_we_vote_id=campaignx_we_vote_id,
+                voter_we_vote_id=voter_we_vote_id)
 
         try:
             if positive_value_exists(campaignx_we_vote_id):
@@ -778,6 +816,7 @@ class CampaignXManager(models.Manager):
             read_only=True):
         campaignx_list = []
         campaignx_list_found = False
+        campaignx_manager = CampaignXManager()
         success = True
         status = ""
         voter_started_campaignx_we_vote_ids = []
@@ -793,13 +832,20 @@ class CampaignXManager(models.Manager):
             # All "OR" queries
             filters = []
             if positive_value_exists(including_started_by_voter_we_vote_id):
+                # started_by this voter
                 new_filter = Q(started_by_voter_we_vote_id__iexact=including_started_by_voter_we_vote_id)
+                filters.append(new_filter)
+                # Voter is owner of the campaign, or on team that owns it
+                voter_owned_campaignx_we_vote_ids = campaignx_manager.retrieve_voter_owned_campaignx_we_vote_ids(
+                    voter_we_vote_id=including_started_by_voter_we_vote_id)
+                new_filter = Q(we_vote_id__in=voter_owned_campaignx_we_vote_ids)
                 filters.append(new_filter)
 
             final_election_date_plus_cool_down = generate_date_as_integer() + FINAL_ELECTION_DATE_COOL_DOWN
             new_filter = \
                 Q(in_draft_mode=False,
                   is_blocked_by_we_vote=False,
+                  is_in_team_review_mode=False,
                   is_not_promoted_by_we_vote=False,
                   is_still_active=True,
                   is_ok_to_promote_on_we_vote=True) & \
@@ -852,6 +898,7 @@ class CampaignXManager(models.Manager):
             site_owner_organization_we_vote_id='',
             read_only=True):
         campaignx_list = []
+        campaignx_manager = CampaignXManager()
         success = True
         status = ""
         visible_on_this_site_campaignx_we_vote_id_list = []
@@ -862,7 +909,6 @@ class CampaignXManager(models.Manager):
         # Limit the campaigns retrieved to the ones approved by the site owner
         if positive_value_exists(site_owner_organization_we_vote_id):
             try:
-                campaignx_manager = CampaignXManager()
                 visible_on_this_site_campaignx_we_vote_id_list = \
                     campaignx_manager.retrieve_visible_on_this_site_campaignx_simple_list(
                         site_owner_organization_we_vote_id=site_owner_organization_we_vote_id)
@@ -881,17 +927,24 @@ class CampaignXManager(models.Manager):
             filters = []
             # Campaigns started by this voter
             if positive_value_exists(including_started_by_voter_we_vote_id):
+                # started_by this voter
                 new_filter = \
-                    Q(started_by_voter_we_vote_id__iexact=including_started_by_voter_we_vote_id)  # , in_draft_mode=True
+                    Q(started_by_voter_we_vote_id__iexact=including_started_by_voter_we_vote_id)
+                filters.append(new_filter)
+                # Voter is owner of the campaign, or on team that owns it
+                voter_owned_campaignx_we_vote_ids = campaignx_manager.retrieve_voter_owned_campaignx_we_vote_ids(
+                    voter_we_vote_id=including_started_by_voter_we_vote_id)
+                new_filter = Q(we_vote_id__in=voter_owned_campaignx_we_vote_ids)
                 filters.append(new_filter)
 
             # Campaigns approved to be shown on this site
             final_election_date_plus_cool_down = generate_date_as_integer() + FINAL_ELECTION_DATE_COOL_DOWN
+            # is_not_promoted_by_we_vote = False,  # Removed since it is private labeled
             new_filter = \
                 Q(we_vote_id__in=visible_on_this_site_campaignx_we_vote_id_list,
                   in_draft_mode=False,
                   is_blocked_by_we_vote=False,
-                  is_not_promoted_by_we_vote=False,
+                  is_in_team_review_mode=False,
                   is_still_active=True) & \
                 (Q(final_election_date_as_integer__isnull=True) |
                  Q(final_election_date_as_integer__gt=final_election_date_plus_cool_down))
@@ -1592,6 +1645,53 @@ class CampaignXManager(models.Manager):
             if positive_value_exists(one_path.final_pathname_string):
                 simple_list.append(one_path.final_pathname_string)
         return simple_list
+
+    def retrieve_voter_owned_campaignx_we_vote_ids(self, voter_we_vote_id=''):
+        """
+        :param voter_we_vote_id:
+        :return:
+        """
+        status = ''
+        campaignx_owner_campaignx_we_vote_ids = []
+        team_member_campaignx_we_vote_ids = []
+
+        try:
+            campaignx_owner_query = CampaignXOwner.objects.using('readonly').filter(
+                voter_we_vote_id__iexact=voter_we_vote_id)
+            campaignx_owner_query = campaignx_owner_query.values_list('campaignx_we_vote_id', flat=True).distinct()
+            campaignx_owner_campaignx_we_vote_ids = list(campaignx_owner_query)
+        except CampaignXOwner as e:
+            status += 'CAMPAIGNX_OWNER_QUERY_FAILED: ' + str(e) + ' '
+
+        teams_voter_is_on_organization_we_vote_id_list = []
+        try:
+            # Which teams does this voter belong to, with campaignX rights?
+            team_member_queryset = OrganizationTeamMember.objects.using('readonly').filter(
+                voter_we_vote_id__iexact=voter_we_vote_id)
+            team_member_queryset = team_member_queryset.filter(
+                Q(can_edit_campaignx_owned_by_organization=True) |
+                Q(can_moderate_campaignx_owned_by_organization=True) |
+                Q(can_send_updates_for_campaignx_owned_by_organization=True))
+            team_member_queryset = team_member_queryset.values_list('organization_we_vote_id', flat=True).distinct()
+            teams_voter_is_on_organization_we_vote_id_list = list(team_member_queryset)
+        except OrganizationTeamMember as e:
+            status += 'CAMPAIGNX_OWNER_FROM_TEAM_QUERY_FAILED: ' + str(e) + ' '
+
+        # Now see if this campaignX is owned by any of the teams this voter belongs to
+        if len(teams_voter_is_on_organization_we_vote_id_list) > 0:
+            try:
+                owner_queryset = CampaignXOwner.objects.using('readonly').filter(
+                    organization_we_vote_id__in=teams_voter_is_on_organization_we_vote_id_list)
+                owner_queryset = owner_queryset.values_list('campaignx_we_vote_id', flat=True).distinct()
+                team_member_campaignx_we_vote_ids = list(owner_queryset)
+            except CampaignXOwner as e:
+                status += 'CAMPAIGNX_OWNER_AS_TEAM_MEMBER_QUERY_FAILED: ' + str(e) + ' '
+
+        campaignx_owner_set = set(campaignx_owner_campaignx_we_vote_ids)
+        team_member_set = set(team_member_campaignx_we_vote_ids)
+        combined_set = campaignx_owner_set | team_member_set
+
+        return list(combined_set)
 
     def update_campaignx_owners_with_organization_change(
             self,

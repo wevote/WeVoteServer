@@ -1188,7 +1188,7 @@ def voter_list_view(request):
 
 
 @login_required
-def voter_summary_view(request, voter_id):
+def voter_summary_view(request, voter_id=0, voter_we_vote_id=''):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
@@ -1198,14 +1198,25 @@ def voter_summary_view(request, voter_id):
     voter_id = convert_to_int(voter_id)
     voter_on_stage_found = False
     voter_on_stage = Voter()
-    try:
-        voter_on_stage = Voter.objects.get(id=voter_id)
-        voter_on_stage_found = True
-    except Voter.MultipleObjectsReturned as e:
-        handle_record_found_more_than_one_exception(e, logger=logger)
-    except Voter.DoesNotExist:
-        # This is fine, create new
-        pass
+    if positive_value_exists(voter_id):
+        try:
+            voter_on_stage = Voter.objects.get(id=voter_id)
+            voter_on_stage_found = True
+        except Voter.MultipleObjectsReturned as e:
+            handle_record_found_more_than_one_exception(e, logger=logger)
+        except Voter.DoesNotExist:
+            # This is fine, create new below
+            pass
+    elif positive_value_exists(voter_we_vote_id):
+        try:
+            voter_on_stage = Voter.objects.get(we_vote_id=voter_we_vote_id)
+            voter_id = voter_on_stage.id
+            voter_on_stage_found = True
+        except Voter.MultipleObjectsReturned as e:
+            handle_record_found_more_than_one_exception(e, logger=logger)
+        except Voter.DoesNotExist:
+            # This is fine, create new below
+            pass
 
     voter_address_manager = VoterAddressManager()
     address_results = voter_address_manager.retrieve_voter_address_list(voter_id=voter_id)

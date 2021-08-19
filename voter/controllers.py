@@ -47,9 +47,8 @@ from image.controllers import cache_master_and_resized_image, cache_voter_master
 from import_export_facebook.models import FacebookManager
 from import_export_twitter.models import TwitterAuthManager
 import json
-from organization.controllers import delete_membership_link_entries_for_voter, \
-    delete_organization_complete, \
-    move_membership_link_entries_to_another_voter, \
+from organization.controllers import delete_membership_link_entries_for_voter, delete_organization_complete, \
+    move_membership_link_entries_to_another_voter, move_organization_team_member_entries_to_another_voter, \
     move_organization_to_another_complete, transfer_voter_images_to_organization, transform_web_app_url
 from organization.models import OrganizationListManager, OrganizationManager, INDIVIDUAL
 from position.controllers import delete_positions_for_voter, duplicate_positions_to_another_voter, \
@@ -2344,6 +2343,12 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
         from_voter_we_vote_id, to_voter_we_vote_id)
     status += move_membership_link_results['status']
 
+    # Transfer the OrganizationTeamMember entries to new voter
+    move_organization_team_member_results = move_organization_team_member_entries_to_another_voter(
+        from_voter_we_vote_id, to_voter_we_vote_id,
+        from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id)
+    status += move_organization_team_member_results['status']
+
     # Transfer the issues that the voter is following
     move_follow_issue_results = move_follow_issue_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id)
     status += move_follow_issue_results['status']
@@ -2573,6 +2578,7 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
     :param user_agent_object:
     :return:
     """
+    organization_manager = OrganizationManager()
     voter_manager = VoterManager()
     voter_device_link = VoterDeviceLink()
     voter_device_link_manager = VoterDeviceLinkManager()
@@ -2807,7 +2813,6 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
             if not existing_organization_for_this_voter_found:
                 status += "EXISTING_ORGANIZATION_NOT_FOUND "
                 # If we are here, we need to create an organization for this voter
-                organization_manager = OrganizationManager()
                 create_results = organization_manager.create_organization(
                     organization_name=voter.get_full_name(),
                     organization_twitter_handle=organization_twitter_handle,
@@ -2909,7 +2914,6 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
         if not positive_value_exists(voter.linked_organization_we_vote_id):
             # If we are here, we need to create an organization for this voter
             status += "NEED_TO_CREATE_ORGANIZATION_FOR_THIS_VOTER "
-            organization_manager = OrganizationManager()
             create_results = organization_manager.create_organization(
                 organization_name=voter.get_full_name(),
                 organization_image=voter.voter_photo_url(),
@@ -2971,7 +2975,6 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
             we_vote_hosted_profile_image_url_medium = \
             get_displayable_images(voter, facebook_user)
 
-
         # Make a best effort to get the text_for_map_search.  Adds 7ms to this API call with WeVoteServer running
         # locally on a Mac, vs 500ms as a separate API call with queuing due to too many request channels from a browser
         text_for_map_search = ""
@@ -2984,9 +2987,17 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
         except Exception as e:
             pass
 
+        team_member_list = organization_manager.retrieve_team_member_list(
+            can_edit_campaignx_owned_by_organization=True,
+            voter_we_vote_id=voter.we_vote_id)
+        can_edit_campaignx_owned_by_organization_list = []
+        for team_member in team_member_list:
+            can_edit_campaignx_owned_by_organization_list.append(team_member.organization_we_vote_id)
+
         json_data = {
             'status':                           status,
             'success':                          True,
+            'can_edit_campaignx_owned_by_organization_list': can_edit_campaignx_owned_by_organization_list,
             'date_joined':                      voter.date_joined.strftime('%Y-%m-%d %H:%M:%S'),
             'email':                            voter.email,
             'facebook_email':                   voter.facebook_email,
@@ -3032,6 +3043,7 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
         json_data = {
             'status':                           status,
             'success':                          False,
+            'can_edit_campaignx_owned_by_organization_list': [],
             'date_joined':                      '',
             'voter_device_id':                  voter_device_id,
             'voter_created':                    False,

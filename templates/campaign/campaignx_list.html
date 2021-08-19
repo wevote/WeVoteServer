@@ -59,6 +59,18 @@
              {% if include_campaigns_from_prior_elections %}checked{% endif %} /> Include Prior Elections
     </label>
 
+    {#  #}
+    &nbsp;&nbsp;&nbsp;
+    <select id="campaignx_owner_organization_we_vote_id_id" name="campaignx_owner_organization_we_vote_id">
+        <option value="" {% if '' == campaignx_owner_organization_we_vote_id %} selected="selected"{% endif %}>
+            -- Filter by Client --</option>
+    {% for client_organization in client_organization_list %}
+        <option value="{{ client_organization.organization_we_vote_id }}"
+                {% if client_organization.organization_we_vote_id|slugify == campaignx_owner_organization_we_vote_id|slugify %} selected="selected"{% endif %}>
+            {{ client_organization.organization_name }}</option>
+    {% endfor %}
+    </select>
+
     &nbsp;&nbsp;&nbsp;&nbsp;
 {#    {% if election_years_available %}#}
 {#    <select id="limit_to_opinions_in_this_year_id" name="limit_to_opinions_in_this_year">#}
@@ -152,6 +164,9 @@
                    {{ campaignx.we_vote_id }}&nbsp;
                 </span>
                 <span style="font-size: .95rem; color: gray">
+                {% if not campaignx.is_in_team_review_mode %}
+                    OWNER-IN-TEAM-REVIEW&nbsp;
+                {% endif %}
                 {% if not campaignx.is_ok_to_promote_on_we_vote %}
                     OWNER-NO-PROMOTE&nbsp;
                 {% endif %}
@@ -170,6 +185,7 @@
                 (<a href="{% url 'campaign:campaignx_edit' campaignx.we_vote_id %}">edit</a>)
             </td>
             <td>
+                <a href="{% url 'campaign:campaignx_edit_owners' campaignx.we_vote_id %}" target="_blank">
             {% for campaignx_owner in campaignx.campaignx_owner_list %}
                 {% if campaignx_owner.organization_name %}
                     <span class="u-no-break">{{ campaignx_owner.organization_name }}</span><br />
@@ -177,6 +193,7 @@
                     {{ campaignx_owner.organization_we_vote_id }}<br />
                 {% endif %}
             {% endfor %}
+                </a>
             </td>
             <td style="text-align: right">{% if campaignx.supporters_count %}
                 <a href="{% url 'campaign:supporters_list' campaignx.we_vote_id %}" target="_blank">
@@ -195,10 +212,12 @@
                 {% endif %}
             {% endif %}</td>
             <td style="text-align: right">
+            {% if campaignx.chip_in_total != 'none' %}
                 <a href="{% url 'campaign:supporters_list' campaignx.we_vote_id %}?show_supporters_without_endorsements=1&show_supporters_not_visible_to_public=1" target="_blank">
                     {{ campaignx.chip_in_total }}
                     <!--<pre> {% filter force_escape %} {% debug %} {% endfilter %} </pre>-->
                 </a>
+            {% endif %}
             </td>
             <td>
                 {{ campaignx.campaign_description|default_if_none:""|truncatechars:250 }}

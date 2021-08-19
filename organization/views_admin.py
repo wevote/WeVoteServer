@@ -4,12 +4,14 @@
 
 from .controllers import full_domain_string_available, merge_these_two_organizations,\
     move_organization_followers_to_another_organization, move_organization_membership_link_to_another_organization, \
-    organizations_import_from_master_server, \
+    move_organization_team_member_entries_to_another_organization, organizations_import_from_master_server, \
     push_organization_data_to_other_table_caches, subdomain_string_available
 from .controllers_fastly import add_wevote_subdomain_to_fastly, add_subdomain_route53_record, \
     get_wevote_subdomain_status
-from .models import GROUP, INDIVIDUAL, Organization, OrganizationReservedDomain, ORGANIZATION_UNIQUE_IDENTIFIERS
+from .models import GROUP, INDIVIDUAL, Organization, OrganizationReservedDomain, OrganizationTeamMember, \
+    ORGANIZATION_UNIQUE_IDENTIFIERS
 from admin_tools.views import redirect_to_sign_in_page
+from campaign.controllers import move_campaignx_to_another_organization
 from campaign.models import CampaignXListedByOrganization, CampaignXManager
 from candidate.models import CandidateCampaign, CandidateListManager, CandidateManager
 from config.base import get_environment_variable
@@ -100,6 +102,198 @@ def compare_two_organizations_for_merge_view(request):
         organization_merge_conflict_values,
         remove_duplicate_process)
 
+
+@login_required
+def edit_team_members_process_view(request):
+    """
+    Process the edit team members form
+    :param request:
+    :return:
+    """
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    team_member_voter_we_vote_id = request.POST.get('team_member_voter_we_vote_id', None)
+    if positive_value_exists(team_member_voter_we_vote_id):
+        team_member_voter_we_vote_id = team_member_voter_we_vote_id.strip()
+    can_edit_campaignx_owned_by_organization = \
+        positive_value_exists(request.POST.get('can_edit_campaignx_owned_by_organization', False))
+    can_manage_team_members = positive_value_exists(request.POST.get('can_manage_team_members', False))
+    can_send_updates_for_campaignx_owned_by_organization = \
+        positive_value_exists(request.POST.get('can_send_updates_for_campaignx_owned_by_organization', False))
+    google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
+    organization_id = convert_to_int(request.POST.get('organization_id', None))
+    organization_we_vote_id = request.POST.get('organization_we_vote_id', None)
+    state_code = request.POST.get('state_code', '')
+
+    voter_manager = VoterManager()
+
+    # Create new OrganizationTeamMember
+    if positive_value_exists(team_member_voter_we_vote_id):
+        if 'voter' not in team_member_voter_we_vote_id:
+            messages.add_message(request, messages.ERROR, 'Valid VoterWeVoteId missing.')
+        else:
+            do_not_create = False
+            link_already_exists = False
+            status = ""
+            # Does it already exist?
+            try:
+                OrganizationTeamMember.objects.get(
+                    voter_we_vote_id=team_member_voter_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id)
+                link_already_exists = True
+            except OrganizationTeamMember.DoesNotExist:
+                link_already_exists = False
+            except Exception as e:
+                do_not_create = True
+                messages.add_message(request, messages.ERROR, 'Link already exists.')
+                status += "ADD_TEAM_MEMBER_ALREADY_EXISTS: " + str(e) + " "
+
+            if not do_not_create and not link_already_exists:
+                # Now create new link
+                voter_results = voter_manager.retrieve_voter_by_we_vote_id(
+                    voter_we_vote_id=team_member_voter_we_vote_id,
+                    read_only=True)
+                team_member_name = ''
+                team_member_organization_we_vote_id = ''
+                we_vote_hosted_profile_image_url_tiny = ''
+                if voter_results['voter_found']:
+                    team_member_name = voter_results['voter'].get_full_name()
+                    team_member_organization_we_vote_id = voter_results['voter'].linked_organization_we_vote_id
+                    we_vote_hosted_profile_image_url_tiny = voter_results['voter'].we_vote_hosted_profile_image_url_tiny
+                try:
+                    # Create the OrganizationTeamMember link
+                    OrganizationTeamMember.objects.create(
+                        can_edit_campaignx_owned_by_organization=can_edit_campaignx_owned_by_organization,
+                        can_manage_team_members=can_manage_team_members,
+                        can_send_updates_for_campaignx_owned_by_organization=can_send_updates_for_campaignx_owned_by_organization,
+                        organization_we_vote_id=organization_we_vote_id,
+                        team_member_name=team_member_name,
+                        team_member_organization_we_vote_id=team_member_organization_we_vote_id,
+                        voter_we_vote_id=team_member_voter_we_vote_id,
+                        we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny,
+                    )
+                    # can_edit_organization = models.BooleanField(default=True)
+                    # can_moderate_campaignx_owned_by_organization = models.BooleanField(default=True)
+
+                    messages.add_message(request, messages.INFO, 'New OrganizationTeamMember created.')
+                except Exception as e:
+                    messages.add_message(request, messages.ERROR,
+                                         'Could not create OrganizationTeamMember.'
+                                         ' {error} [type: {error_type}]'.format(error=e, error_type=type(e)))
+
+    # ##################################
+    # Deleting or Adding a new OrganizationTeamMember
+    organization_manager = OrganizationManager()
+    team_member_list = organization_manager.retrieve_team_member_list(
+        organization_we_vote_id=organization_we_vote_id,
+        read_only=False
+    )
+    for team_member in team_member_list:
+        if positive_value_exists(team_member.voter_we_vote_id):
+            variable_name = "delete_team_member_" + str(team_member.id)
+            delete_team_member = positive_value_exists(request.POST.get(variable_name, False))
+            if positive_value_exists(delete_team_member):
+                team_member.delete()
+                messages.add_message(request, messages.INFO, 'Deleted OrganizationTeamMember.')
+            else:
+                # Refresh voter information
+                voter_results = voter_manager.retrieve_voter_by_we_vote_id(
+                    voter_we_vote_id=team_member.voter_we_vote_id,
+                    read_only=True)
+                if voter_results['voter_found']:
+                    team_member.team_member_name = voter_results['voter'].get_full_name()
+                    team_member.team_member_organization_we_vote_id = \
+                        voter_results['voter'].linked_organization_we_vote_id
+                    team_member.we_vote_hosted_profile_image_url_tiny = \
+                        voter_results['voter'].we_vote_hosted_profile_image_url_tiny
+
+                # can_edit_campaignx_owned_by_organization
+                variable_name = "can_edit_campaignx_owned_by_organization_" + str(team_member.id)
+                can_edit_campaignx_owned_by_organization = positive_value_exists(request.POST.get(variable_name, False))
+                exists_variable_name = "can_edit_campaignx_owned_by_organization_" + str(team_member.id) + "_exists"
+                can_edit_campaignx_owned_by_organization_exists = request.POST.get(exists_variable_name, None)
+                if can_edit_campaignx_owned_by_organization_exists:
+                    team_member.can_edit_campaignx_owned_by_organization = can_edit_campaignx_owned_by_organization
+
+                # can_manage_team_members
+                variable_name = "can_manage_team_members_" + str(team_member.id)
+                can_manage_team_members = positive_value_exists(request.POST.get(variable_name, False))
+                exists_variable_name = "can_manage_team_members_" + str(team_member.id) + "_exists"
+                can_manage_team_members_exists = request.POST.get(exists_variable_name, None)
+                if can_manage_team_members_exists:
+                    team_member.can_manage_team_members = can_manage_team_members
+
+                # can_send_updates_for_campaignx_owned_by_organization
+                variable_name = "can_send_updates_for_campaignx_owned_by_organization_" + str(team_member.id)
+                can_send_updates_for_campaignx_owned_by_organization = \
+                    positive_value_exists(request.POST.get(variable_name, False))
+                exists_variable_name = "can_edit_campaignx_owned_by_organization_" + str(team_member.id) + "_exists"
+                can_send_updates_for_campaignx_owned_by_organization_exists = \
+                    request.POST.get(exists_variable_name, None)
+                if can_send_updates_for_campaignx_owned_by_organization_exists:
+                    team_member.can_send_updates_for_campaignx_owned_by_organization = \
+                        can_send_updates_for_campaignx_owned_by_organization
+                team_member.save()
+
+    return HttpResponseRedirect(reverse('organization:edit_team_members', args=(organization_we_vote_id,)) +
+                                "?google_civic_election_id=" + str(google_civic_election_id) +
+                                "&state_code=" + str(state_code))
+
+
+@login_required
+def edit_team_members_view(request, organization_id=0, organization_we_vote_id=""):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    state_code = request.GET.get('state_code', '')
+
+    messages_on_stage = get_messages(request)
+    organization_id = convert_to_int(organization_id)
+    organization_manager = OrganizationManager()
+    organization_on_stage = Organization()
+    results = organization_manager.retrieve_organization(organization_id, organization_we_vote_id)
+
+    if results['organization_found']:
+        organization_on_stage = results['organization']
+        organization_we_vote_id = organization_on_stage.we_vote_id
+
+    organization_manager = OrganizationManager()
+    team_member_list_modified = []
+    team_member_list = organization_manager.retrieve_team_member_list(
+        organization_we_vote_id=organization_we_vote_id,
+        read_only=True
+    )
+
+    voter_manager = VoterManager()
+    for organization_team_member in team_member_list:
+        if positive_value_exists(organization_team_member.voter_we_vote_id):
+            results = voter_manager.retrieve_voter_by_we_vote_id(
+                voter_we_vote_id=organization_team_member.voter_we_vote_id,
+                read_only=False,
+            )
+            if results['voter_found']:
+                organization_team_member.team_member_name = results['voter'].get_full_name()
+                organization_team_member.we_vote_hosted_profile_image_url_tiny = \
+                    results['voter'].we_vote_hosted_profile_image_url_tiny
+                organization_team_member.team_member_organization_we_vote_id = \
+                    results['voter'].linked_organization_we_vote_id
+                organization_team_member.save()
+        team_member_list_modified.append(organization_team_member)
+
+    template_values = {
+        'google_civic_election_id': google_civic_election_id,
+        'messages_on_stage':        messages_on_stage,
+        'organization':             organization_on_stage,
+        'state_code':               state_code,
+        'team_member_list':         team_member_list_modified,
+    }
+    return render(request, 'organization/edit_team_members.html', template_values)
 
 @login_required
 def organization_analyze_tweets_view(request, organization_we_vote_id):
@@ -594,6 +788,17 @@ def organization_merge_process_view(request):
                                     "&organization1_we_vote_id=" + str(organization1_we_vote_id) +
                                     "&organization2_we_vote_id=" + str(organization2_we_vote_id))
 
+    move_organization_team_member_results = move_organization_team_member_entries_to_another_organization(
+        from_organization_we_vote_id, to_organization_we_vote_id)
+    status += " " + move_organization_team_member_results['status']
+    if not positive_value_exists(move_organization_team_member_results['success']):
+        messages.add_message(request, messages.ERROR, status)
+        return HttpResponseRedirect(reverse('organization:compare_two_organizations_for_merge', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code) +
+                                    "&organization1_we_vote_id=" + str(organization1_we_vote_id) +
+                                    "&organization2_we_vote_id=" + str(organization2_we_vote_id))
+
     # Gather choices made from merge form
     conflict_values = figure_out_organization_conflict_values(organization1_on_stage, organization2_on_stage)
     admin_merge_choices = {}
@@ -621,6 +826,12 @@ def organization_merge_process_view(request):
                                     "&organization2_we_vote_id=" + str(organization2_we_vote_id))
 
     organization = merge_results['organization']
+    to_organization_name = organization.organization_name
+
+    move_campaignx_results = move_campaignx_to_another_organization(
+        from_organization_we_vote_id, to_organization_we_vote_id, to_organization_name)
+    status += " " + move_campaignx_results['status']
+
     messages.add_message(request, messages.INFO, "Endorser '{organization_name}' merged."
                                                  "".format(organization_name=organization.organization_name))
 
@@ -1496,7 +1707,7 @@ def organization_edit_listed_campaigns_process_view(request):
             except Exception as e:
                 do_not_create = True
                 messages.add_message(request, messages.ERROR, 'Link already exists.')
-                status += "ADD_LISTED_CAMPAIGN_ALREADY_EXISTS " + str(e) + " "
+                status += "ADD_LISTED_CAMPAIGN_ALREADY_EXISTS: " + str(e) + " "
 
             if not do_not_create and not link_already_exists:
                 # Now create new link
@@ -1744,7 +1955,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
             organization_blocked_issues_list.append(issue_object)
 
     except Exception as e:
-        status += "COULD_NOT_RETRIEVE_POSITION_LIST " + str(e) + ' '
+        status += "COULD_NOT_RETRIEVE_POSITION_LIST: " + str(e) + ' '
         organization_position_list = []
 
     voter_manager = VoterManager()
@@ -1839,7 +2050,12 @@ def organization_position_list_view(request, organization_id=0, organization_we_
         viewer_is_owner=True
     )
 
-    # voter_manager = VoterManager()
+    organization_manager = OrganizationManager()
+    organization_team_member_list = organization_manager.retrieve_team_member_list(
+        organization_we_vote_id=organization_we_vote_id,
+        read_only=True
+    )
+
     for campaignx_owner in campaignx_owner_list:
         if positive_value_exists(campaignx_owner.campaignx_we_vote_id):
             results = campaignx_manager.retrieve_campaignx(
@@ -1864,6 +2080,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
         'organization_num_positions':       friends_only_position_count + public_position_count,
         'organization_search_for_merge':    organization_search_for_merge,
         'organization_search_results_list': organization_search_results_list,
+        'organization_team_member_list':    organization_team_member_list,
         'organization_type_display_text':   organization_type_display_text,
         'public_position_count':            public_position_count,
         'show_all_elections':               show_all_elections,

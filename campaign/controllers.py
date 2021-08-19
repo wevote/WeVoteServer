@@ -2,7 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import CampaignX, CampaignXManager, CampaignXOwner, CampaignXSupporter, FINAL_ELECTION_DATE_COOL_DOWN
+from .models import CampaignX, CampaignXListedByOrganization, CampaignXManager, CampaignXNewsItem, CampaignXOwner, \
+    CampaignXSupporter, FINAL_ELECTION_DATE_COOL_DOWN
 import base64
 from image.controllers import cache_campaignx_image, create_resized_images
 import json
@@ -238,6 +239,7 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
                 'in_draft_mode':                            campaignx.in_draft_mode,
                 'is_blocked_by_we_vote':                    campaignx.is_blocked_by_we_vote,
                 'is_blocked_by_we_vote_reason':             campaignx.is_blocked_by_we_vote_reason,
+                'is_in_team_review_mode':                   campaignx.is_in_team_review_mode,
                 'is_supporters_count_minimum_exceeded':     campaignx.is_supporters_count_minimum_exceeded(),
                 'seo_friendly_path':                        campaignx.seo_friendly_path,
                 'seo_friendly_path_list':                   seo_friendly_path_list,
@@ -255,12 +257,9 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
             campaignx_display_list.append(one_campaignx)
 
     if success and voter_owned_campaignx_list_returned:
-        voter_owned_list = campaignx_manager.retrieve_campaignx_owner_list(
+        voter_owned_campaignx_we_vote_ids = campaignx_manager.retrieve_voter_owned_campaignx_we_vote_ids(
             voter_we_vote_id=voter_we_vote_id,
-            viewer_is_owner=True,
-            read_only=True)
-        for one_owner in voter_owned_list:
-            voter_owned_campaignx_we_vote_ids.append(one_owner.campaignx_we_vote_id)
+        )
 
     if success and voter_started_campaignx_list_returned:
         results = campaignx_manager.retrieve_campaignx_we_vote_id_list_started_by_voter(
@@ -1556,12 +1555,113 @@ def campaignx_supporter_save_for_api(  # campaignSupporterSave
         return results
 
 
+def move_campaignx_to_another_organization(
+        from_organization_we_vote_id, to_organization_we_vote_id,
+        to_organization_name=None):
+    status = ''
+    success = True
+    campaignx_entries_moved = 0
+    campaignx_listed_entries_moved = 0
+    campaignx_news_item_entries_moved = 0
+    campaignx_owner_entries_moved = 0
+    campaignx_supporter_entries_moved = 0
+
+    if not positive_value_exists(from_organization_we_vote_id) or not positive_value_exists(to_organization_we_vote_id):
+        status += "MOVE_CAMPAIGNX_TO_ORG-MISSING_EITHER_FROM_OR_TO_ORG_WE_VOTE_ID "
+        success = False
+        results = {
+            'status':                           status,
+            'success':                          success,
+            'from_organization_we_vote_id':     from_organization_we_vote_id,
+            'to_organization_we_vote_id':       to_organization_we_vote_id,
+            'campaignx_entries_moved':          campaignx_entries_moved,
+            'campaignx_owner_entries_moved':    campaignx_owner_entries_moved,
+        }
+        return results
+
+    if from_organization_we_vote_id == to_organization_we_vote_id:
+        status += "MOVE_CAMPAIGNX_TO_ORG-FROM_AND_TO_ORG_WE_VOTE_IDS_IDENTICAL "
+        success = False
+        results = {
+            'status':                           status,
+            'success':                          success,
+            'from_organization_we_vote_id':     from_organization_we_vote_id,
+            'to_organization_we_vote_id':       to_organization_we_vote_id,
+            'campaignx_entries_moved':          campaignx_entries_moved,
+            'campaignx_owner_entries_moved':    campaignx_owner_entries_moved,
+        }
+        return results
+
+    # #############################################
+    # Move based on organization_we_vote_id
+    if positive_value_exists(to_organization_name):
+        try:
+            campaignx_owner_entries_moved += CampaignXOwner.objects \
+                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .update(organization_name=to_organization_name,
+                        organization_we_vote_id=to_organization_we_vote_id)
+        except Exception as e:
+            status += "FAILED-CAMPAIGNX_TO_ORG_OWNER_UPDATE-FROM_ORG_WE_VOTE_ID-WITH_NAME: " + str(e) + " "
+        try:
+            campaignx_supporter_entries_moved += CampaignXSupporter.objects \
+                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .update(supporter_name=to_organization_name,
+                        organization_we_vote_id=to_organization_we_vote_id)
+        except Exception as e:
+            status += "FAILED-CAMPAIGNX_TO_ORG_SUPPORTER_UPDATE-FROM_ORG_WE_VOTE_ID-WITH_NAME: " + str(e) + " "
+        try:
+            campaignx_news_item_entries_moved += CampaignXNewsItem.objects \
+                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .update(speaker_name=to_organization_name,
+                        organization_we_vote_id=to_organization_we_vote_id)
+        except Exception as e:
+            status += "FAILED-CAMPAIGNX_NEWS_ITEM_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+    else:
+        try:
+            campaignx_owner_entries_moved += CampaignXOwner.objects \
+                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .update(organization_we_vote_id=to_organization_we_vote_id)
+        except Exception as e:
+            status += "FAILED-CAMPAIGNX_TO_ORG_OWNER_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+        try:
+            campaignx_supporter_entries_moved += CampaignXSupporter.objects \
+                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .update(organization_we_vote_id=to_organization_we_vote_id)
+        except Exception as e:
+            status += "FAILED-CAMPAIGNX_TO_ORG_SUPPORTER_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+        try:
+            campaignx_news_item_entries_moved += CampaignXNewsItem.objects \
+                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .update(organization_we_vote_id=to_organization_we_vote_id)
+        except Exception as e:
+            status += "FAILED-CAMPAIGNX_NEWS_ITEM_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+
+    try:
+        campaignx_listed_entries_moved += CampaignXListedByOrganization.objects \
+            .filter(site_owner_organization_we_vote_id__iexact=from_organization_we_vote_id) \
+            .update(site_owner_organization_we_vote_id=to_organization_we_vote_id)
+    except Exception as e:
+        status += "FAILED-CAMPAIGNX_LISTED_BY_ORG_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'from_organization_we_vote_id':     from_organization_we_vote_id,
+        'to_organization_we_vote_id':       to_organization_we_vote_id,
+        'campaignx_entries_moved':          campaignx_owner_entries_moved,
+        'campaignx_owner_entries_moved':    campaignx_owner_entries_moved,
+    }
+    return results
+
+
 def move_campaignx_to_another_voter(
         from_voter_we_vote_id, to_voter_we_vote_id, from_organization_we_vote_id, to_organization_we_vote_id,
         to_organization_name=None):
     status = ''
     success = True
     campaignx_entries_moved = 0
+    campaignx_listed_entries_moved = 0
+    campaignx_news_item_entries_moved = 0
     campaignx_owner_entries_moved = 0
     campaignx_supporter_entries_moved = 0
 
@@ -1601,6 +1701,15 @@ def move_campaignx_to_another_voter(
         status += "FAILED-CAMPAIGNX_UPDATE: " + str(e) + " "
 
     # ######################
+    # Move News Item based on voter_we_vote_id
+    try:
+        campaignx_news_item_entries_moved += CampaignXNewsItem.objects\
+            .filter(voter_we_vote_id__iexact=from_voter_we_vote_id)\
+            .update(voter_we_vote_id=to_voter_we_vote_id)
+    except Exception as e:
+        status += "FAILED-CAMPAIGNX_NEWS_ITEM_UPDATE-FROM_VOTER_WE_VOTE_ID: " + str(e) + " "
+
+    # ######################
     # Move owners based on voter_we_vote_id
     try:
         campaignx_owner_entries_moved += CampaignXOwner.objects\
@@ -1635,6 +1744,13 @@ def move_campaignx_to_another_voter(
                         organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-CAMPAIGNX_SUPPORTER_UPDATE-FROM_ORG_WE_VOTE_ID-WITH_NAME: " + str(e) + " "
+        try:
+            campaignx_news_item_entries_moved += CampaignXNewsItem.objects \
+                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .update(speaker_name=to_organization_name,
+                        organization_we_vote_id=to_organization_we_vote_id)
+        except Exception as e:
+            status += "FAILED-CAMPAIGNX_NEWS_ITEM_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
     else:
         try:
             campaignx_owner_entries_moved += CampaignXOwner.objects \
@@ -1648,6 +1764,19 @@ def move_campaignx_to_another_voter(
                 .update(organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-CAMPAIGNX_SUPPORTER_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+        try:
+            campaignx_news_item_entries_moved += CampaignXNewsItem.objects \
+                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .update(organization_we_vote_id=to_organization_we_vote_id)
+        except Exception as e:
+            status += "FAILED-CAMPAIGNX_NEWS_ITEM_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+
+    try:
+        campaignx_listed_entries_moved += CampaignXListedByOrganization.objects \
+            .filter(site_owner_organization_we_vote_id__iexact=from_organization_we_vote_id) \
+            .update(site_owner_organization_we_vote_id=to_organization_we_vote_id)
+    except Exception as e:
+        status += "FAILED-CAMPAIGNX_LISTED_BY_ORG_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
 
     results = {
         'status':                           status,
