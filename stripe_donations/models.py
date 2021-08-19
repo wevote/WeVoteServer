@@ -2042,9 +2042,9 @@ class StripeManager(models.Manager):
             return total_chip_ins
 
         except StripePayments.DoesNotExist:
-            print("DONATION_PAYMENT_LIST_DOES_NOT_EXIST ")
+            logger.info("DONATION_PAYMENT_LIST_DOES_NOT_EXIST ")
             return 'none'
 
         except Exception as e:
-            print("FAILED_TO RETRIEVE_DONATION_PAYMENT_LIST ", e)
+            logger.info("FAILED_TO RETRIEVE_DONATION_PAYMENT_LIST ", e)
             return 'none'
