@@ -235,7 +235,7 @@ def get_and_save_facebook_photo_view(request):
         we_vote_id = request.GET.get('organization_we_vote_id', "")
         reverse_path = 'organization:organization_position_list'
         msg_base = 'get_and_save_facebook_photo_view, Organization '
-        reverse_id = we_vote_id.split('org')[1]
+        reverse_id = ''
     if positive_value_exists(request.GET.get('reverse_path', "")):
         reverse_path = request.GET.get('reverse_path', "").replace('\'', '')
 
@@ -280,6 +280,8 @@ def get_and_save_facebook_photo_view(request):
                                     '&page=' + str(page)
                                     )
 
+    if not is_candidate:
+        reverse_id = one_entity.id
     return HttpResponseRedirect(reverse(reverse_path, args=(reverse_id,)) +
                                 '?google_civic_election_id=' + str(google_civic_election_id) +
                                 '&state_code=' + str(state_code) +
