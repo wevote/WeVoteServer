@@ -691,6 +691,8 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
     messages_on_stage = get_messages(request)
     office_id = convert_to_int(office_id)
     contest_office_found = False
+    state_code_for_template = ''
+
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', "")
     office_search = request.GET.get('office_search', "")
@@ -704,6 +706,7 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
         contest_office_found = True
         contest_office_we_vote_id = contest_office.we_vote_id
         google_civic_election_id = contest_office.google_civic_election_id
+        state_code_for_template = contest_office.state_code
     except ContestOffice.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
     except ContestOffice.DoesNotExist:
@@ -824,7 +827,7 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
             'messages_on_stage':        messages_on_stage,
             'office':                   contest_office,
             'candidate_list':           candidate_list_modified,
-            'state_code':               state_code,
+            'state_code':               state_code_for_template,
             'election':                 election,
             'election_list':            election_list,
             'office_search':            office_search,
@@ -834,7 +837,8 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
         }
     else:
         template_values = {
-            'messages_on_stage': messages_on_stage,
+            'messages_on_stage':    messages_on_stage,
+            'state_code':           state_code_for_template,
         }
     return render(request, 'office/office_summary.html', template_values)
 

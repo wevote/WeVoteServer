@@ -212,8 +212,8 @@
         <li><a href="{% url 'import_export_twitter:scrape_social_media_for_candidates_in_one_election' %}?google_civic_election_id={{ google_civic_election_id }}" >
         Go to Candidate Sites and get Twitter Handles for this Election</a> (1-2 minutes)</li>
 
-        <li><a href="{% url 'import_export_twitter:bulk_retrieve_possible_twitter_handles' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}" target="_blank" >
-        Retrieve Possible Twitter Handles</a> (25 at a time - about 30 seconds - Open in New Window)</li>
+{#        <li><a href="{% url 'import_export_twitter:bulk_retrieve_possible_twitter_handles' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}" target="_blank" >#}
+{#        Retrieve Possible Twitter Handles</a> (25 at a time - about 30 seconds - Open in New Window)</li>#}
 
         <li><a href="{% url 'import_export_facebook:bulk_retrieve_facebook_photos' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}" target="_blank" >
             Retrieve Facebook Photos for up to <b>{{facebook_urls_without_picture_urls}}</b> Candidates</a> (If the count does not decrease with each click, you are done for this election - Opens in a new tab)</li>
@@ -224,10 +224,8 @@
         <li><a href="{% url 'import_export_twitter:refresh_twitter_candidate_details_for_election' google_civic_election_id %}?state_code={{ state_code }}" >
         Retrieve/Refresh Candidate Twitter Info for this Election</a> (1-2 minutes)</li>
 
-        <!--
-        <li><a href="{% url 'import_export_vote_smart:retrieve_positions_from_vote_smart_for_election' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
-        Retrieve Positions from Vote Smart for this Election</a> (5-15 minutes - Open in New Window)</li>
-        // -->
+{#        <li><a href="{% url 'import_export_vote_smart:retrieve_positions_from_vote_smart_for_election' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >#}
+{#        Retrieve Positions from Vote Smart for this Election</a> (5-15 minutes - Open in New Window)</li>#}
 
         <li><a href="{% url 'voter_guide:generate_voter_guides_one_election' %}?google_civic_election_id={{ google_civic_election_id }}" >
         Generate Voter Guides for this Election</a> (about 1 minute)</li>

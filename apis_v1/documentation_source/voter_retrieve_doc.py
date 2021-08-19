@@ -45,6 +45,9 @@ def voter_retrieve_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string (description of what happened),\n' \
                    '  "success": boolean (True as long as no db errors),\n' \
+                   '  "can_edit_campaignx_owned_by_organization_list": list [\n' \
+                   '     organization_we_vote_id,\n' \
+                   '  ],\n' \
                    '  "date_joined": string,\n' \
                    '  "email": string,\n' \
                    '  "facebook_email": string,\n' \

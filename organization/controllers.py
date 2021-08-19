@@ -15,6 +15,7 @@ from django.http import HttpResponse
 import wevote_functions.admin
 from analytics.models import ACTION_BALLOT_VISIT, ACTION_ORGANIZATION_FOLLOW, ACTION_ORGANIZATION_FOLLOW_IGNORE, \
     ACTION_ORGANIZATION_STOP_FOLLOWING, ACTION_ORGANIZATION_STOP_IGNORING, AnalyticsManager
+from campaign.controllers import move_campaignx_to_another_organization
 from config.base import get_environment_variable
 from election.models import ElectionManager
 from exception.models import handle_record_not_found_exception
@@ -39,8 +40,8 @@ from wevote_functions.functions import convert_to_int, \
     process_request_from_master, extract_website_from_url
 from .controllers_fastly import add_wevote_subdomain_to_fastly, add_subdomain_route53_record, \
     get_wevote_subdomain_status
-from .models import Organization, OrganizationListManager, OrganizationManager, \
-    OrganizationReservedDomain, ORGANIZATION_UNIQUE_IDENTIFIERS, OrganizationMembershipLinkToVoter
+from .models import Organization, OrganizationListManager, OrganizationManager, OrganizationMembershipLinkToVoter, \
+    OrganizationReservedDomain, OrganizationTeamMember, ORGANIZATION_UNIQUE_IDENTIFIERS
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -1073,6 +1074,138 @@ def move_organization_data_to_another_organization(from_organization_we_vote_id,
     return results
 
 
+def move_organization_team_member_entries_to_another_organization(
+        from_organization_we_vote_id,
+        to_organization_we_vote_id):
+    status = ''
+    success = True
+    organization_team_member_entries_moved = 0
+
+    if not positive_value_exists(from_organization_we_vote_id) or not positive_value_exists(to_organization_we_vote_id):
+        status += "MOVE_ORG_TEAM_MEMBER-MISSING_EITHER_FROM_OR_TO_VOTER_WE_VOTE_ID "
+        success = False
+        results = {
+            'status':                                   status,
+            'success':                                  success,
+            'from_organization_we_vote_id':             from_organization_we_vote_id,
+            'to_organization_we_vote_id':               to_organization_we_vote_id,
+            'organization_team_member_entries_moved':   organization_team_member_entries_moved,
+        }
+        return results
+
+    if from_organization_we_vote_id == to_organization_we_vote_id:
+        status += "MOVE_ORG_TEAM_MEMBER-FROM_AND_TO_ORGANIZATION_WE_VOTE_IDS_IDENTICAL "
+        success = False
+        results = {
+            'status':                                   status,
+            'success':                                  success,
+            'from_organization_we_vote_id':             from_organization_we_vote_id,
+            'to_organization_we_vote_id':               to_organization_we_vote_id,
+            'organization_team_member_entries_moved':   organization_team_member_entries_moved,
+        }
+        return results
+
+    # #############################################
+    # Move based on organization_we_vote_id
+    try:
+        organization_team_member_entries_moved += OrganizationTeamMember.objects \
+            .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+            .update(organization_we_vote_id=to_organization_we_vote_id)
+    except Exception as e:
+        status += "FAILED-ORG_TEAM_MEMBER_UPDATE_ORG-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+        success = False
+
+    results = {
+        'status':                                   status,
+        'success':                                  success,
+        'from_organization_we_vote_id':             from_organization_we_vote_id,
+        'to_organization_we_vote_id':               to_organization_we_vote_id,
+        'organization_team_member_entries_moved':   organization_team_member_entries_moved,
+    }
+    return results
+
+
+def move_organization_team_member_entries_to_another_voter(
+        from_voter_we_vote_id,
+        to_voter_we_vote_id,
+        from_organization_we_vote_id,
+        to_organization_we_vote_id,
+        to_organization_name=''):
+    status = ''
+    success = True
+    organization_team_member_entries_moved = 0
+
+    if not positive_value_exists(from_voter_we_vote_id) or not positive_value_exists(to_voter_we_vote_id):
+        # We still proceed even if we don't have organization_we_vote_id's
+        status += "MOVE_ORG_TEAM_MEMBER-MISSING_EITHER_FROM_OR_TO_VOTER_WE_VOTE_ID "
+        success = False
+        results = {
+            'status':                                   status,
+            'success':                                  success,
+            'from_voter_we_vote_id':                    from_voter_we_vote_id,
+            'to_voter_we_vote_id':                      to_voter_we_vote_id,
+            'organization_team_member_entries_moved':   organization_team_member_entries_moved,
+        }
+        return results
+
+    if from_voter_we_vote_id == to_voter_we_vote_id:
+        status += "MOVE_ORG_TEAM_MEMBER-FROM_AND_TO_VOTER_WE_VOTE_IDS_IDENTICAL "
+        success = False
+        results = {
+            'status':                                   status,
+            'success':                                  success,
+            'from_voter_we_vote_id':                    from_voter_we_vote_id,
+            'to_voter_we_vote_id':                      to_voter_we_vote_id,
+            'organization_team_member_entries_moved':   organization_team_member_entries_moved,
+        }
+        return results
+
+    # ######################
+    # Move based on voter_we_vote_id
+    try:
+        organization_team_member_entries_moved += OrganizationTeamMember.objects\
+            .filter(voter_we_vote_id__iexact=from_voter_we_vote_id)\
+            .update(voter_we_vote_id=to_voter_we_vote_id)
+    except Exception as e:
+        status += "FAILED-ORG_TEAM_MEMBER_VOTER_UPDATE: " + str(e) + " "
+
+    if positive_value_exists(from_organization_we_vote_id) and positive_value_exists(to_organization_we_vote_id):
+        # #############################################
+        # Move based on team_member_organization_we_vote_id
+        if positive_value_exists(to_organization_name):
+            try:
+                organization_team_member_entries_moved += OrganizationTeamMember.objects \
+                    .filter(team_member_organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                    .update(organization_name=to_organization_name,
+                            team_member_organization_we_vote_id=to_organization_we_vote_id)
+            except Exception as e:
+                status += "FAILED-ORG_TEAM_MEMBER_UPDATE-FROM_ORG_WE_VOTE_ID-WITH_NAME: " + str(e) + " "
+        else:
+            try:
+                organization_team_member_entries_moved += OrganizationTeamMember.objects \
+                    .filter(team_member_organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                    .update(team_member_organization_we_vote_id=to_organization_we_vote_id)
+            except Exception as e:
+                status += "FAILED-ORG_TEAM_MEMBER_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+        # #############################################
+        # Move based on organization_we_vote_id
+        try:
+            organization_team_member_entries_moved += OrganizationTeamMember.objects \
+                .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
+                .update(organization_we_vote_id=to_organization_we_vote_id)
+        except Exception as e:
+            status += "FAILED-ORG_TEAM_MEMBER_UPDATE_ORG-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+
+    results = {
+        'status':                                   status,
+        'success':                                  success,
+        'from_voter_we_vote_id':                    from_voter_we_vote_id,
+        'to_voter_we_vote_id':                      to_voter_we_vote_id,
+        'organization_team_member_entries_moved':   organization_team_member_entries_moved,
+    }
+    return results
+
+
 def move_organization_to_another_complete(from_organization_id, from_organization_we_vote_id,
                                           to_organization_id, to_organization_we_vote_id,
                                           to_voter_id, to_voter_we_vote_id):
@@ -1131,6 +1264,10 @@ def move_organization_to_another_complete(from_organization_id, from_organizatio
         from_organization_we_vote_id, to_organization_we_vote_id)
     status += " " + move_organization_membership_link_results['status']
 
+    move_organization_team_member_results = move_organization_team_member_entries_to_another_organization(
+        from_organization_we_vote_id, to_organization_we_vote_id)
+    status += " " + move_organization_team_member_results['status']
+
     # Transfer positions from "from" organization to the "to" organization
     move_positions_to_another_org_results = move_positions_to_another_organization(
         from_organization_id, from_organization_we_vote_id,
@@ -1145,10 +1282,15 @@ def move_organization_to_another_complete(from_organization_id, from_organizatio
     # There might be some useful information in the from_voter's organization that needs to be moved
     move_organization_results = move_organization_data_to_another_organization(
         from_organization_we_vote_id, to_organization_we_vote_id)
+    status += " " + move_organization_results['status']
     if positive_value_exists(move_organization_results['to_organization_found']):
         to_organization_found = True
         to_organization = move_organization_results['to_organization']
-    status += " " + move_organization_results['status']
+        to_organization_name = to_organization.organization_name
+
+        move_campaignx_results = move_campaignx_to_another_organization(
+            from_organization_we_vote_id, to_organization_we_vote_id, to_organization_name)
+        status += " " + move_campaignx_results['status']
 
     # Finally, delete the from_voter's organization
     if move_organization_results['data_transfer_complete']:

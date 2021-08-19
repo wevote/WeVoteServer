@@ -127,7 +127,7 @@
                 </div>
             </td>
             <td>{{ campaignx_supporter.supporter_endorsement|default_if_none:"" }}</td>
-            <td>{{ campaignx_supporter.chip_in_total }}</td>
+            <td>{% if campaignx_supporter.chip_in_total != 'none' %}{{ campaignx_supporter.chip_in_total|default_if_none:"" }}{% endif %}</td>
             <td>
                 <input type="checkbox"
                        name="campaignx_supporter_visible_to_public_{{ campaignx_supporter.id }}"

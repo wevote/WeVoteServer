@@ -313,6 +313,47 @@
                 </tr>
             </table>
 
+            <br />
+            <br />
+            <br />
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Team Members</th>
+                        <th>Manage Team</th>
+                        <th>Edit Campaigns</th>
+                        <th>Send Campaign Updates</th>
+                    </tr>
+                </thead>
+            {% for team_member in organization_team_member_list %}
+                <tr>
+                    <td>
+                        <img src="{{ team_member.we_vote_hosted_profile_image_url_tiny }}" width="32px" />
+                        {{ team_member.team_member_name }}&nbsp;&nbsp;
+                    </td>
+                    <td>
+                        {% if team_member.can_manage_team_members %}
+                            <span class="glyphicon glyphicon-ok"></span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if team_member.can_edit_campaignx_owned_by_organization %}
+                            <span class="glyphicon glyphicon-ok"></span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if team_member.can_send_updates_for_campaignx_owned_by_organization %}
+                            <span class="glyphicon glyphicon-ok"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="4"><a href="{% url 'organization:edit_team_members' organization.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                                       class="btn btn-primary">Add or Edit Team Members</a></td>
+                </tr>
+            </table>
+
 
             <br />
             <br />

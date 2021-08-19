@@ -1,0 +1,168 @@
+{# templates/organization/edit_team_members.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if organization %}{{ organization.organization_name }}{% endif %}: Team Members{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+<style>
+span.nobr { white-space: nowrap; }
+</style>
+
+{% if not organization or not organization.we_vote_id %}
+  This page requires a valid organization.
+{% else %}
+<a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+>
+    &lt; Back to {% if organization %}{{ organization.organization_name }}{% else %}Endorser{% endif %} Summary
+</a>
+
+<h1>{{ organization.organization_name }}: Team Members</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+
+
+<form action="{% url "organization:edit_team_members_process" %}" method="post" class="form-horizontal">
+{% csrf_token %}
+<input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
+<input type="hidden" name="organization_id" value="{{ organization.id }}">
+<input type="hidden" name="organization_we_vote_id" value="{{ organization.we_vote_id }}">
+<input type="hidden" name="state_code" value="{{ state_code }}">
+
+<div class="form-group">
+    <label for="google_civic_election_id_id" class="col-sm-2 control-label">
+        Add New Team Member:
+    </label>
+    <div class="col-sm-9">
+        <table id="team_member_table_add">
+            <thead>
+                <tr>
+                    <th>Voter We Vote Id</th>
+                    <th>Can Add Teammates?&nbsp;&nbsp;</th>
+                    <th>Edit Campaigns?&nbsp;&nbsp;</th>
+                    <th>Send Campaign Updates?&nbsp;&nbsp;</th>
+                </tr>
+            </thead>
+            <tr>
+                <td style="width: 250px;">
+                    <input type="text"
+                           name="team_member_voter_we_vote_id"
+                           style="width: 230px; border: 1px solid lightgray;"/>
+                </td>
+                <td>
+                    <input type="checkbox"
+                           name="can_manage_team_members"
+                           id="can_manage_team_members_id"
+                           value=1
+                           checked
+                    />
+                </td>
+                <td>
+                    <input type="checkbox"
+                           name="can_edit_campaignx_owned_by_organization"
+                           id="can_edit_campaignx_owned_by_organization_id"
+                           value=1
+                           checked
+                    />
+                </td>
+                <td>
+                    <input type="checkbox"
+                           name="can_send_updates_for_campaignx_owned_by_organization"
+                           id="can_send_updates_for_campaignx_owned_by_organization_id"
+                           value=1
+                           checked
+                    />
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="col-8">
+<table class="table">
+    <thead>
+        <tr>
+            <th>Teammate</th>
+            <th>Can Add Teammates?</th>
+            <th>Edit Campaigns?</th>
+            <th>Send Campaign Updates?</th>
+            <th>Delete Listing</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for team_member in team_member_list %}
+        <tr>
+            <td>
+                {% if team_member.we_vote_hosted_profile_image_url_tiny %}
+                <a href="{% url 'voter:voter_edit_we_vote_id' team_member.voter_we_vote_id %}" target="_blank">
+                    <img src="{{ team_member.we_vote_hosted_profile_image_url_tiny }}" width="32px" /></a>
+                {% endif %}
+                {{ team_member.team_member_name }}&nbsp;&nbsp;
+                <a href="{% url 'voter:voter_summary_we_vote_id' team_member.voter_we_vote_id %}"
+                   target="_blank">
+                    view
+                    <span class="glyphicon glyphicon-new-window"></span></a>
+            </td>
+            <td>
+                <input type="hidden" name="can_manage_team_members_{{ team_member.id }}_exists" value="1">
+                <input type="checkbox"
+                       name="can_manage_team_members_{{ team_member.id }}"
+                       id="can_manage_team_members_{{ team_member.id }}_id"
+                       value="True"
+                       {% if team_member.can_manage_team_members %}
+                         checked="checked"
+                       {% endif %}
+                />
+            </td>
+            <td>
+                <input type="hidden" name="can_edit_campaignx_owned_by_organization_{{ team_member.id }}_exists" value="1">
+                <input type="checkbox"
+                       name="can_edit_campaignx_owned_by_organization_{{ team_member.id }}"
+                       id="can_edit_campaignx_owned_by_organization_{{ team_member.id }}_id"
+                       value="True"
+                       {% if team_member.can_edit_campaignx_owned_by_organization %}
+                         checked="checked"
+                       {% endif %}
+                />
+            </td>
+            <td>
+                <input type="hidden" name="can_send_updates_for_campaignx_owned_by_organization_{{ team_member.id }}_exists" value="1">
+                <input type="checkbox"
+                       name="can_send_updates_for_campaignx_owned_by_organization_{{ team_member.id }}"
+                       id="can_send_updates_for_campaignx_owned_by_organization_{{ team_member.id }}_id"
+                       value="True"
+                       {% if team_member.can_send_updates_for_campaignx_owned_by_organization %}
+                         checked="checked"
+                       {% endif %}
+                />
+            </td>
+            <td>
+                <input type="checkbox"
+                       name="delete_team_member_{{ team_member.id }}"
+                       id="delete_team_member_{{ team_member.id }}_id"
+                       value=1
+                />
+                delete
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+
+
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">
+      <a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">cancel</a>
+    </label>
+    <div class="col-sm-8">
+        <button type="submit" class="btn btn-default">Update Team Members</button>
+    </div>
+</div>
+
+</form>
+{% endif %}
+  <br />
+  <br />
+{% endblock %}

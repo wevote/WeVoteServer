@@ -373,6 +373,7 @@ def campaign_edit_process_view(request):
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     is_blocked_by_we_vote = request.POST.get('is_blocked_by_we_vote', False)
     is_blocked_by_we_vote_reason = request.POST.get('is_blocked_by_we_vote_reason', None)
+    is_in_team_review_mode = request.POST.get('is_in_team_review_mode', False)
     is_not_promoted_by_we_vote = request.POST.get('is_not_promoted_by_we_vote', False)
     is_not_promoted_by_we_vote_reason = request.POST.get('is_not_promoted_by_we_vote_reason', None)
     is_ok_to_promote_on_we_vote = request.POST.get('is_ok_to_promote_on_we_vote', False)
@@ -380,7 +381,7 @@ def campaign_edit_process_view(request):
     state_code = request.POST.get('state_code', None)
     supporters_count_minimum_ignored = request.POST.get('supporters_count_minimum_ignored', False)
 
-    # Check to see if this organization is already being used anywhere
+    # Check to see if this campaign is already being used anywhere
     campaignx = None
     campaignx_found = False
     status = ""
@@ -407,6 +408,7 @@ def campaign_edit_process_view(request):
                 campaignx.final_election_date_as_integer = final_election_date_as_integer
             if is_blocked_by_we_vote_reason is not None:
                 campaignx.is_blocked_by_we_vote_reason = is_blocked_by_we_vote_reason.strip()
+            campaignx.is_in_team_review_mode = positive_value_exists(is_in_team_review_mode)
             campaignx.is_not_promoted_by_we_vote = positive_value_exists(is_not_promoted_by_we_vote)
             if is_not_promoted_by_we_vote_reason is not None:
                 campaignx.is_not_promoted_by_we_vote_reason = is_not_promoted_by_we_vote_reason.strip()
@@ -419,7 +421,7 @@ def campaign_edit_process_view(request):
 
             messages.add_message(request, messages.INFO, 'CampaignX updated.')
         else:
-            # We do not create organizations in this view
+            # We do not create campaigns in this view
             pass
     except Exception as e:
         messages.add_message(request, messages.ERROR, 'Could not save CampaignX.'
@@ -526,6 +528,8 @@ def campaign_list_view(request):
     else:
         campaignx_list_query = campaignx_list_query.filter(in_draft_mode=False)
 
+    client_organization_list = []
+
     if positive_value_exists(sort_by):
         # if sort_by == "twitter":
         #     campaignx_list_query = \
@@ -534,12 +538,6 @@ def campaign_list_view(request):
         campaignx_list_query = campaignx_list_query.order_by('-supporters_count')
     else:
         campaignx_list_query = campaignx_list_query.order_by('-supporters_count')
-
-    # if positive_value_exists(show_organizations_without_email):
-    #     campaignx_list_query = campaignx_list_query.filter(
-    #         Q(organization_email__isnull=True) |
-    #         Q(organization_email__exact='')
-    #     )
 
     if positive_value_exists(campaignx_search):
         search_words = campaignx_search.split()

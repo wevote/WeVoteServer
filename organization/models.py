@@ -747,6 +747,38 @@ class OrganizationManager(models.Manager):
         }
         return results
 
+    def retrieve_team_member_list(
+            self,
+            can_edit_campaignx_owned_by_organization=None,
+            organization_we_vote_id='',
+            voter_we_vote_id='',
+            read_only=False):
+        team_member_list_found = False
+        team_member_list = []
+        try:
+            if positive_value_exists(read_only):
+                queryset = OrganizationTeamMember.objects.using('readonly').all()
+            else:
+                queryset = OrganizationTeamMember.objects.all()
+            if can_edit_campaignx_owned_by_organization is not None:
+                queryset = queryset.filter(
+                    can_edit_campaignx_owned_by_organization=can_edit_campaignx_owned_by_organization)
+            if positive_value_exists(organization_we_vote_id):
+                queryset = queryset.filter(organization_we_vote_id=organization_we_vote_id)
+            if positive_value_exists(voter_we_vote_id):
+                queryset = queryset.filter(voter_we_vote_id=voter_we_vote_id)
+            team_member_list = list(queryset)
+            if len(team_member_list):
+                team_member_list_found = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+
+        if team_member_list_found:
+            return team_member_list
+        else:
+            team_member_list = []
+            return team_member_list
+
     def fetch_external_voter_id(self, organization_we_vote_id, voter_we_vote_id):
         if positive_value_exists(organization_we_vote_id) and positive_value_exists(voter_we_vote_id):
             link_query = OrganizationMembershipLinkToVoter.objects.all()
@@ -3105,3 +3137,24 @@ class OrganizationReservedDomain(models.Model):
     # Ex/ zoom (referring to zoom.wevote.us)
     subdomain_string = models.CharField(
         verbose_name="we vote subdomain", max_length=255, null=True, blank=True, unique=True)
+
+
+class OrganizationTeamMember(models.Model):
+    DoesNotExist = None
+    MultipleObjectsReturned = None
+    objects = None
+
+    def __unicode__(self):
+        return "OrganizationTeamMember"
+
+    organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
+    can_edit_campaignx_owned_by_organization = models.BooleanField(default=True)
+    can_edit_organization = models.BooleanField(default=True)
+    can_manage_team_members = models.BooleanField(default=False)
+    can_moderate_campaignx_owned_by_organization = models.BooleanField(default=True)
+    can_send_updates_for_campaignx_owned_by_organization = models.BooleanField(default=False)
+    team_member_name = models.CharField(max_length=255, null=False, blank=False)
+    team_member_organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
+    voter_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
+    we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
+    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True, db_index=True)
