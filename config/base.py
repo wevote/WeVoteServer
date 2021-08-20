@@ -378,7 +378,12 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 6000000
 #     'x-api-key'
 # )
 
+SOCIAL_AUTH_FACEBOOK_KEY = get_environment_variable_default(            # for social-auth app
+                "SOCIAL_AUTH_FACEBOOK_APP_ID", get_environment_variable_default("SOCIAL_AUTH_FACEBOOK_KEY", ""))
+SOCIAL_AUTH_FACEBOOK_SECRET = get_environment_variable_default(         # for social-auth app
+                "SOCIAL_AUTH_FACEBOOK_APP_SECRET", get_environment_variable_default("SOCIAL_AUTH_FACEBOOK_SECRET", ""))
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']  # , 'user_friends'
+
 SOCIAL_AUTH_TWITTER_KEY = get_environment_variable("SOCIAL_AUTH_TWITTER_KEY")
 SOCIAL_AUTH_TWITTER_SECRET = get_environment_variable("SOCIAL_AUTH_TWITTER_SECRET")
 
