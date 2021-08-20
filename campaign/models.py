@@ -163,6 +163,14 @@ class CampaignXManager(models.Manager):
         return supporters_count if supporters_count % tier_size == 0 \
             else supporters_count + tier_size - supporters_count % tier_size
 
+    def fetch_campaignx_we_vote_id_list_from_owner_organization_we_vote_id(self, organization_we_vote_id):
+        owner_list = self.retrieve_campaignx_owner_list(
+            organization_we_vote_id=organization_we_vote_id, read_only=True)
+        campaignx_we_vote_id_list = []
+        for owner in owner_list:
+            campaignx_we_vote_id_list.append(owner.campaignx_we_vote_id)
+        return campaignx_we_vote_id_list
+
     def fetch_supporters_count_next_goal(
             self,
             supporters_count=1,

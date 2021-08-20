@@ -14,7 +14,7 @@ import wevote_functions.admin
 from admin_tools.views import redirect_to_sign_in_page
 from config.base import get_environment_variable
 from election.models import ElectionManager
-from organization.models import OrganizationManager
+from organization.models import Organization, OrganizationManager
 from politician.models import PoliticianManager
 from stripe_donations.models import StripeManager
 from voter.models import voter_has_authority, VoterManager
@@ -479,6 +479,7 @@ def campaign_list_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    campaignx_owner_organization_we_vote_id = request.GET.get('campaignx_owner_organization_we_vote_id', '')
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
     google_civic_election_id = request.GET.get('google_civic_election_id', '')
     limit_to_opinions_in_state_code = request.GET.get('limit_to_opinions_in_state_code', '')
@@ -504,6 +505,7 @@ def campaign_list_view(request):
 
     messages_on_stage = get_messages(request)
     campaignx_list_query = CampaignX.objects.all()
+    campaignx_manager = CampaignXManager()
 
     if positive_value_exists(hide_campaigns_not_visible_yet):
         campaignx_list_query = campaignx_list_query.filter(
@@ -528,7 +530,16 @@ def campaign_list_view(request):
     else:
         campaignx_list_query = campaignx_list_query.filter(in_draft_mode=False)
 
-    client_organization_list = []
+    if positive_value_exists(campaignx_owner_organization_we_vote_id):
+        campaignx_we_vote_id_list_from_owner_organization_we_vote_id = \
+            campaignx_manager.fetch_campaignx_we_vote_id_list_from_owner_organization_we_vote_id(
+                campaignx_owner_organization_we_vote_id)
+        campaignx_list_query = campaignx_list_query.filter(
+            we_vote_id__in=campaignx_we_vote_id_list_from_owner_organization_we_vote_id)
+
+    client_list_query = Organization.objects.all()
+    client_list_query = client_list_query.filter(chosen_feature_package__isnull=False)
+    client_organization_list = list(client_list_query)
 
     if positive_value_exists(sort_by):
         # if sort_by == "twitter":
@@ -579,7 +590,6 @@ def campaign_list_view(request):
 
     # Now loop through these organizations and add owners
     modified_campaignx_list = []
-    campaignx_manager = CampaignXManager()
     for campaignx in campaignx_list:
         campaignx.campaignx_owner_list = campaignx_manager.retrieve_campaignx_owner_list(
             campaignx_we_vote_id=campaignx.we_vote_id,
@@ -591,28 +601,30 @@ def campaign_list_view(request):
     sorted_state_list = sorted(state_list.items())
 
     template_values = {
-        'candidate_we_vote_id':     candidate_we_vote_id,
-        'election_years_available': election_years_available,
-        'final_election_date_plus_cool_down':   final_election_date_plus_cool_down,
-        'google_civic_election_id': google_civic_election_id,
-        'hide_campaigns_not_visible_yet': hide_campaigns_not_visible_yet,
+        'campaignx_list':                           modified_campaignx_list,
+        'campaignx_owner_organization_we_vote_id':  campaignx_owner_organization_we_vote_id,
+        'campaignx_search':                         campaignx_search,
+        'campaignx_type_filter':                    campaignx_type_filter,
+        'campaignx_types':                          [],
+        'candidate_we_vote_id':                     candidate_we_vote_id,
+        'client_organization_list':                 client_organization_list,
+        'election_years_available':                 election_years_available,
+        'final_election_date_plus_cool_down':       final_election_date_plus_cool_down,
+        'google_civic_election_id':                 google_civic_election_id,
+        'hide_campaigns_not_visible_yet':           hide_campaigns_not_visible_yet,
         'include_campaigns_from_prior_elections':   include_campaigns_from_prior_elections,
-        'limit_to_opinions_in_state_code': limit_to_opinions_in_state_code,
-        'limit_to_opinions_in_this_year': limit_to_opinions_in_this_year,
-        'messages_on_stage':        messages_on_stage,
-        'campaignx_type_filter':    campaignx_type_filter,
-        'campaignx_types':          [],
-        'campaignx_list':           modified_campaignx_list,
-        'campaignx_search':         campaignx_search,
-        'show_all':                 show_all,
-        'show_issues':              show_issues,
-        'show_more':                show_more,
-        'show_organizations_without_email': show_organizations_without_email,
-        'show_blocked_campaigns':   show_blocked_campaigns,
-        'show_campaigns_in_draft':  show_campaigns_in_draft,
-        'sort_by':                  sort_by,
-        'state_code':               state_code,
-        'state_list':               sorted_state_list,
+        'limit_to_opinions_in_state_code':          limit_to_opinions_in_state_code,
+        'limit_to_opinions_in_this_year':           limit_to_opinions_in_this_year,
+        'messages_on_stage':                        messages_on_stage,
+        'show_all':                                 show_all,
+        'show_issues':                              show_issues,
+        'show_more':                                show_more,
+        'show_organizations_without_email':         show_organizations_without_email,
+        'show_blocked_campaigns':                   show_blocked_campaigns,
+        'show_campaigns_in_draft':                  show_campaigns_in_draft,
+        'sort_by':                                  sort_by,
+        'state_code':                               state_code,
+        'state_list':                               sorted_state_list,
     }
     return render(request, 'campaign/campaignx_list.html', template_values)
 

@@ -328,7 +328,9 @@
             {% for team_member in organization_team_member_list %}
                 <tr>
                     <td>
+                        {% if team_member.we_vote_hosted_profile_image_url_tiny %}
                         <img src="{{ team_member.we_vote_hosted_profile_image_url_tiny }}" width="32px" />
+                        {% endif %}
                         {{ team_member.team_member_name }}&nbsp;&nbsp;
                     </td>
                     <td>

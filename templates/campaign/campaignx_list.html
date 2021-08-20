@@ -65,8 +65,8 @@
         <option value="" {% if '' == campaignx_owner_organization_we_vote_id %} selected="selected"{% endif %}>
             -- Filter by Client --</option>
     {% for client_organization in client_organization_list %}
-        <option value="{{ client_organization.organization_we_vote_id }}"
-                {% if client_organization.organization_we_vote_id|slugify == campaignx_owner_organization_we_vote_id|slugify %} selected="selected"{% endif %}>
+        <option value="{{ client_organization.we_vote_id }}"
+                {% if client_organization.we_vote_id|slugify == campaignx_owner_organization_we_vote_id|slugify %} selected="selected"{% endif %}>
             {{ client_organization.organization_name }}</option>
     {% endfor %}
     </select>
@@ -260,6 +260,9 @@
                 this.form.submit();
             });
             $('#limit_to_opinions_in_state_code_id').change(function() {
+                this.form.submit();
+            });
+            $('#campaignx_owner_organization_we_vote_id_id').change(function() {
                 this.form.submit();
             });
             $('#campaignx_type_filter_id').change(function() {

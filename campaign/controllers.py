@@ -114,15 +114,22 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
         final_election_date_plus_cool_down = generate_date_as_integer() + FINAL_ELECTION_DATE_COOL_DOWN
         for campaignx in campaignx_list:
             viewer_is_owner = False
+            final_election_date_in_past = \
+                final_election_date_plus_cool_down >= campaignx.final_election_date_as_integer \
+                if positive_value_exists(campaignx.final_election_date_as_integer) else False
             if positive_value_exists(voter_we_vote_id):
                 viewer_is_owner = campaignx_manager.is_voter_campaignx_owner(
                     campaignx_we_vote_id=campaignx.we_vote_id, voter_we_vote_id=voter_we_vote_id)
-            if campaignx.is_still_active and campaignx.is_ok_to_promote_on_we_vote:
+
+            # Should we promote this campaign on home page?
+            if campaignx.is_still_active and campaignx.is_ok_to_promote_on_we_vote \
+                    and not final_election_date_in_past and not campaignx.is_in_team_review_mode:
                 if positive_value_exists(site_owner_organization_we_vote_id):
                     if campaignx.we_vote_id in visible_on_this_site_campaignx_we_vote_id_list:
                         promoted_campaignx_we_vote_ids.append(campaignx.we_vote_id)
                 else:
-                    promoted_campaignx_we_vote_ids.append(campaignx.we_vote_id)
+                    if campaignx.is_supporters_count_minimum_exceeded():
+                        promoted_campaignx_we_vote_ids.append(campaignx.we_vote_id)
 
             campaignx_owner_object_list = campaignx_manager.retrieve_campaignx_owner_list(
                 campaignx_we_vote_id=campaignx.we_vote_id, viewer_is_owner=viewer_is_owner)
@@ -223,9 +230,6 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
             supporters_count_next_goal = campaignx_manager.fetch_supporters_count_next_goal(
                 supporters_count=campaignx.supporters_count,
                 supporters_count_victory_goal=campaignx.supporters_count_victory_goal)
-            final_election_date_in_past = \
-                final_election_date_plus_cool_down >= campaignx.final_election_date_as_integer \
-                if positive_value_exists(campaignx.final_election_date_as_integer) else False
             one_campaignx = {
                 'campaign_description':                     campaignx.campaign_description,
                 'campaignx_owner_list':                     campaignx_owner_list,
