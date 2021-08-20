@@ -165,9 +165,12 @@
     <label for="organization_facebook_id" class="col-sm-3 control-label">Facebook URL</label>
     <div class="col-sm-8">
         <input type="text" name="organization_facebook" id="organization_facebook_id" class="form-control"
-               value="{% if organization %}{{ organization.organization_facebook|default_if_none:'' }}{% else %}{{ organization_facebook }}{% endif %}" />
+               value="{% if organization %}{{ organization.organization_facebook|default_if_none:'' }}{% else %}{{ organization_facebook }}{% endif %}"
+        />
         {% if organization.organization_facebook %}
-            <a href="{% url 'import_export_facebook:get_and_save_facebook_photo' %}?organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&page={{ page }}">
+            <a href="{% url 'import_export_facebook:get_and_save_facebook_photo' %}?organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&page={{ page }}&reverse_path='organization:organization_position_list'"
+               id="facebook_a_tag"
+            >
                 Refresh Facebook Photo</a>
         {% endif %}
     </div>
@@ -320,4 +323,21 @@
         Full size<br />
     {% endif %}
 {% endif %}
+<script>
+  // when you change the facebook url disable the button
+  $(function() {
+    $('#organization_facebook_id').change(function() {
+      console.log('txt fld changed');
+      $('#facebook_a_tag').removeAttr('href').attr('type', 'button').attr('disabled');
+      $('#facebook_a_tag').css('color', 'lightblue');
+    });
+    // When loading the page, setup the href for the button
+<!--    const rev = "{% url 'organization:organization_position_list' organization.id %}";  // django does this substitution when rendering the template serverside-->
+<!--    const revEncoded = encodeURIComponent(rev);-->
+<!--    const initial_href = $('#facebook_a_tag').attr('href');-->
+<!--    const new_href = initial_href + '&reverse_path=' + revEncoded;-->
+<!--    $('#facebook_a_tag').attr('href', new_href);-->
+  });
+</script>
 {% endblock %}
+
