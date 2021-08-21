@@ -67,6 +67,7 @@ def campaign_retrieve_doc_template_values(url_root):
                    '  "supporters_count_next_goal": integer,\n' \
                    '  "supporters_count_victory_goal": integer,\n' \
                    '  "visible_on_this_site": boolean,\n' \
+                   '  "voter_can_send_updates_to_campaignx": boolean,\n' \
                    '  "voter_is_campaignx_owner": boolean,\n' \
                    '  "voter_signed_in_with_email": boolean,\n' \
                    '  "voter_we_vote_id": string,\n' \

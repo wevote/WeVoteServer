@@ -56,6 +56,7 @@ def campaign_list_retrieve_doc_template_values(url_root):
                    '     "supporters_count_next_goal": integer,\n' \
                    '     "supporters_count_victory_goal": integer,\n' \
                    '     "visible_on_this_site": boolean,\n' \
+                   '     "voter_can_send_updates_to_campaignx": boolean,\n' \
                    '     "voter_is_campaignx_owner": boolean,\n' \
                    '     "voter_signed_in_with_email": boolean,\n' \
                    '     "voter_we_vote_id": string,\n' \
@@ -89,6 +90,7 @@ def campaign_list_retrieve_doc_template_values(url_root):
                    '     [],\n' \
                    '   ],\n' \
                    '  "campaign_list_found": boolean,\n' \
+                   '  "promoted_campaignx_list_returned": boolean,\n' \
                    '  "promoted_campaignx_we_vote_ids": list [],\n' \
                    '  "voter_campaignx_supporter": {\n' \
                    '     "id": integer,\n' \
@@ -105,7 +107,14 @@ def campaign_list_retrieve_doc_template_values(url_root):
                    '     "voter_we_vote_id": string,\n' \
                    '     "we_vote_hosted_profile_image_url_tiny": string,\n' \
                    '   },\n' \
+                   '  "voter_can_send_updates_campaignx_we_vote_ids": list [],\n' \
+                   '  "voter_can_vote_for_politicians_list_returned": boolean,\n' \
+                   '  "voter_can_vote_for_politician_we_vote_ids": list [],\n' \
+                   '  "voter_owned_campaignx_list_returned": boolean,\n' \
+                   '  "voter_owned_campaignx_we_vote_ids": list [],\n' \
+                   '  "voter_started_campaignx_list_returned": boolean,\n' \
                    '  "voter_started_campaignx_we_vote_ids": list [],\n' \
+                   '  "voter_supported_campaignx_list_returned": boolean,\n' \
                    '  "voter_supported_campaignx_we_vote_ids": list [],\n' \
                    '}'
 

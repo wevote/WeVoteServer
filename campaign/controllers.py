@@ -49,6 +49,7 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
     voter_supported_campaignx_list_returned = True
 
     if positive_value_exists(recommended_campaigns_for_campaignx_we_vote_id):
+        # Do not retrieve certain data if returning recommended campaigns
         promoted_campaignx_list_returned = False
         voter_can_vote_for_politicians_list_returned = False
         voter_owned_campaignx_list_returned = False
@@ -56,6 +57,7 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
         voter_supported_campaignx_list_returned = False
 
     promoted_campaignx_we_vote_ids = []
+    voter_can_send_updates_campaignx_we_vote_ids = []
     voter_owned_campaignx_we_vote_ids = []
     voter_started_campaignx_we_vote_ids = []
     voter_supported_campaignx_we_vote_ids = []
@@ -111,15 +113,20 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
     campaignx_list_found = results['campaignx_list_found']
 
     if success:
+        voter_owned_campaignx_we_vote_ids = campaignx_manager.retrieve_voter_owned_campaignx_we_vote_ids(
+            voter_we_vote_id=voter_we_vote_id,
+        )
+        voter_can_send_updates_campaignx_we_vote_ids = \
+            campaignx_manager.retrieve_voter_can_send_updates_campaignx_we_vote_ids(
+                voter_we_vote_id=voter_we_vote_id,
+            )
+
         final_election_date_plus_cool_down = generate_date_as_integer() + FINAL_ELECTION_DATE_COOL_DOWN
         for campaignx in campaignx_list:
-            viewer_is_owner = False
+            viewer_is_owner = campaignx.we_vote_id in voter_owned_campaignx_we_vote_ids
             final_election_date_in_past = \
                 final_election_date_plus_cool_down >= campaignx.final_election_date_as_integer \
                 if positive_value_exists(campaignx.final_election_date_as_integer) else False
-            if positive_value_exists(voter_we_vote_id):
-                viewer_is_owner = campaignx_manager.is_voter_campaignx_owner(
-                    campaignx_we_vote_id=campaignx.we_vote_id, voter_we_vote_id=voter_we_vote_id)
 
             # Should we promote this campaign on home page?
             if campaignx.is_still_active and campaignx.is_ok_to_promote_on_we_vote \
@@ -252,6 +259,8 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
                 'supporters_count_victory_goal':            campaignx.supporters_count_victory_goal,
                 'visible_on_this_site':                     visible_on_this_site,
                 'voter_campaignx_supporter':                voter_campaignx_supporter_dict,
+                'voter_can_send_updates_to_campaignx':
+                    campaignx.we_vote_id in voter_can_send_updates_campaignx_we_vote_ids,
                 'voter_is_campaignx_owner':                 viewer_is_owner,
                 'voter_signed_in_with_email':               voter_signed_in_with_email,
                 'we_vote_hosted_campaign_photo_large_url':  campaignx.we_vote_hosted_campaign_photo_large_url,
@@ -259,11 +268,6 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
                 'we_vote_hosted_campaign_photo_small_url':  we_vote_hosted_campaign_photo_small_url,
             }
             campaignx_display_list.append(one_campaignx)
-
-    if success and voter_owned_campaignx_list_returned:
-        voter_owned_campaignx_we_vote_ids = campaignx_manager.retrieve_voter_owned_campaignx_we_vote_ids(
-            voter_we_vote_id=voter_we_vote_id,
-        )
 
     if success and voter_started_campaignx_list_returned:
         results = campaignx_manager.retrieve_campaignx_we_vote_id_list_started_by_voter(
@@ -301,6 +305,7 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
     if voter_owned_campaignx_list_returned:
         json_data['voter_owned_campaignx_list_returned'] = True
         json_data['voter_owned_campaignx_we_vote_ids'] = voter_owned_campaignx_we_vote_ids
+        json_data['voter_can_send_updates_campaignx_we_vote_ids'] = voter_can_send_updates_campaignx_we_vote_ids
     if voter_started_campaignx_list_returned:
         json_data['voter_started_campaignx_list_returned'] = True
         json_data['voter_started_campaignx_we_vote_ids'] = voter_started_campaignx_we_vote_ids
@@ -510,6 +515,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
                 'supporters_count_victory_goal':            0,
                 'visible_on_this_site':                     False,
                 'voter_campaignx_supporter':                {},
+                'voter_can_send_updates_to_campaignx':      False,
                 'voter_is_campaignx_owner':                 False,
                 'voter_signed_in_with_email':               voter_signed_in_with_email,
                 'we_vote_hosted_campaign_photo_large_url':  '',
@@ -554,6 +560,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
             'supporters_count_victory_goal':    0,
             'visible_on_this_site':             False,
             'voter_campaignx_supporter':        {},
+            'voter_can_send_updates_to_campaignx': False,
             'voter_is_campaignx_owner':         False,
             'voter_signed_in_with_email':       voter_signed_in_with_email,
             'we_vote_hosted_campaign_photo_large_url': '',
@@ -587,6 +594,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
             'supporters_count_victory_goal':    0,
             'visible_on_this_site':             False,
             'voter_campaignx_supporter':        {},
+            'voter_can_send_updates_to_campaignx': False,
             'voter_is_campaignx_owner':         False,
             'voter_signed_in_with_email':       voter_signed_in_with_email,
             'we_vote_hosted_campaign_photo_large_url':  '',
@@ -649,6 +657,11 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
             status += "RETRIEVE_CAMPAIGNX_LIST_FOR_PRIVATE_LABEL_FAILED: " + str(e) + " "
     else:
         campaignx.visible_on_this_site = True
+
+    voter_can_send_updates_campaignx_we_vote_ids = \
+        campaignx_manager.retrieve_voter_can_send_updates_campaignx_we_vote_ids(
+            voter_we_vote_id=voter_we_vote_id,
+        )
 
     if campaignx.politician_starter_list_serialized:
         campaignx_politician_starter_list = json.loads(campaignx.politician_starter_list_serialized)
@@ -816,6 +829,8 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
         'supporters_count_victory_goal':    campaignx.supporters_count_victory_goal,
         'visible_on_this_site':             campaignx.visible_on_this_site,
         'voter_campaignx_supporter':        voter_campaignx_supporter_dict,
+        'voter_can_send_updates_to_campaignx':
+            campaignx.we_vote_id in voter_can_send_updates_campaignx_we_vote_ids,
         'voter_can_vote_for_politician_we_vote_ids': voter_can_vote_for_politician_we_vote_ids,
         'voter_is_campaignx_owner':         voter_is_campaignx_owner,
         'voter_signed_in_with_email':       voter_signed_in_with_email,
@@ -878,6 +893,7 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
             'supporters_count_next_goal':           0,
             'supporters_count_victory_goal':        0,
             'visible_on_this_site':                 False,
+            'voter_can_send_updates_to_campaignx':  False,
             'voter_is_campaignx_owner':             False,
             'voter_signed_in_with_email':           voter_signed_in_with_email,
             'we_vote_hosted_campaign_photo_large_url': '',
@@ -938,6 +954,7 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
                 'supporters_count_next_goal':           0,
                 'supporters_count_victory_goal':        0,
                 'visible_on_this_site':                 False,
+                'voter_can_send_updates_to_campaignx':  False,
                 'voter_is_campaignx_owner':             False,
                 'voter_signed_in_with_email':           voter_signed_in_with_email,
                 'we_vote_hosted_campaign_photo_large_url': '',
@@ -975,6 +992,7 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
                 'supporters_count_next_goal':           0,
                 'supporters_count_victory_goal':        0,
                 'visible_on_this_site':                 False,
+                'voter_can_send_updates_to_campaignx':  False,
                 'voter_is_campaignx_owner':             False,
                 'voter_signed_in_with_email':           voter_signed_in_with_email,
                 'we_vote_hosted_campaign_photo_large_url': '',
@@ -1096,6 +1114,11 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
         )
         campaignx_owner_list = results['campaignx_owner_list']
 
+        voter_can_send_updates_campaignx_we_vote_ids = \
+            campaignx_manager.retrieve_voter_can_send_updates_campaignx_we_vote_ids(
+                voter_we_vote_id=voter_we_vote_id,
+            )
+
         # Get politician_starter_list
         if campaignx.politician_starter_list_serialized:
             campaignx_politician_starter_list = json.loads(campaignx.politician_starter_list_serialized)
@@ -1202,6 +1225,8 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
             'supporters_count_next_goal':           supporters_count_next_goal,
             'supporters_count_victory_goal':        campaignx.supporters_count_victory_goal,
             'visible_on_this_site':                 visible_on_this_site,
+            'voter_can_send_updates_to_campaignx':
+                campaignx.we_vote_id in voter_can_send_updates_campaignx_we_vote_ids,
             'voter_is_campaignx_owner':             viewer_is_owner,
             'voter_signed_in_with_email':           voter_signed_in_with_email,
             'we_vote_hosted_campaign_photo_large_url': campaignx.we_vote_hosted_campaign_photo_large_url,
@@ -1228,6 +1253,7 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
             'supporters_count_next_goal':           0,
             'supporters_count_victory_goal':        0,
             'visible_on_this_site':                 False,
+            'voter_can_send_updates_to_campaignx':  False,
             'voter_is_campaignx_owner':             False,
             'voter_signed_in_with_email':           voter_signed_in_with_email,
             'we_vote_hosted_campaign_photo_large_url': '',
