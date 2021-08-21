@@ -1654,6 +1654,51 @@ class CampaignXManager(models.Manager):
                 simple_list.append(one_path.final_pathname_string)
         return simple_list
 
+    def retrieve_voter_can_send_updates_campaignx_we_vote_ids(self, voter_we_vote_id=''):
+        """
+        :param voter_we_vote_id:
+        :return:
+        """
+        status = ''
+        campaignx_owner_campaignx_we_vote_ids = []
+        team_member_campaignx_we_vote_ids = []
+
+        try:
+            campaignx_owner_query = CampaignXOwner.objects.using('readonly').filter(
+                voter_we_vote_id__iexact=voter_we_vote_id)
+            campaignx_owner_query = campaignx_owner_query.values_list('campaignx_we_vote_id', flat=True).distinct()
+            campaignx_owner_campaignx_we_vote_ids = list(campaignx_owner_query)
+        except CampaignXOwner as e:
+            status += 'CAMPAIGNX_OWNER_UPDATE_QUERY_FAILED: ' + str(e) + ' '
+
+        teams_voter_can_send_updates_organization_we_vote_id_list = []
+        try:
+            # Which teams does this voter belong to, with can_send_updates_for_campaignx_owned_by_organization rights?
+            team_member_queryset = OrganizationTeamMember.objects.using('readonly').filter(
+                voter_we_vote_id__iexact=voter_we_vote_id,
+                can_send_updates_for_campaignx_owned_by_organization=True
+            )
+            team_member_queryset = team_member_queryset.values_list('organization_we_vote_id', flat=True).distinct()
+            teams_voter_can_send_updates_organization_we_vote_id_list = list(team_member_queryset)
+        except OrganizationTeamMember as e:
+            status += 'CAMPAIGNX_OWNER_FROM_TEAM_UPDATE_QUERY_FAILED: ' + str(e) + ' '
+
+        # Now see if this campaignX is owned by any of the teams this voter belongs to
+        if len(teams_voter_can_send_updates_organization_we_vote_id_list) > 0:
+            try:
+                owner_queryset = CampaignXOwner.objects.using('readonly').filter(
+                    organization_we_vote_id__in=teams_voter_can_send_updates_organization_we_vote_id_list)
+                owner_queryset = owner_queryset.values_list('campaignx_we_vote_id', flat=True).distinct()
+                team_member_campaignx_we_vote_ids = list(owner_queryset)
+            except CampaignXOwner as e:
+                status += 'CAMPAIGNX_OWNER_AS_TEAM_MEMBER_UPDATES_QUERY_FAILED: ' + str(e) + ' '
+
+        campaignx_owner_set = set(campaignx_owner_campaignx_we_vote_ids)
+        team_member_set = set(team_member_campaignx_we_vote_ids)
+        combined_set = campaignx_owner_set | team_member_set
+
+        return list(combined_set)
+
     def retrieve_voter_owned_campaignx_we_vote_ids(self, voter_we_vote_id=''):
         """
         :param voter_we_vote_id:
