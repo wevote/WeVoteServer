@@ -1925,6 +1925,16 @@ class CampaignXManager(models.Manager):
                         campaignx.we_vote_hosted_campaign_photo_small_url = \
                             update_values['we_vote_hosted_campaign_photo_small_url']
                         campaignx_changed = True
+                elif 'campaign_photo_delete_changed' in update_values \
+                        and positive_value_exists(update_values['campaign_photo_delete_changed']) \
+                        and 'campaign_photo_delete' in update_values \
+                        and positive_value_exists(update_values['campaign_photo_delete']):
+                    # Only delete if another photo was not provided
+                    campaignx.we_vote_hosted_campaign_photo_original_url = None
+                    campaignx.we_vote_hosted_campaign_photo_large_url = None
+                    campaignx.we_vote_hosted_campaign_photo_medium_url = None
+                    campaignx.we_vote_hosted_campaign_photo_small_url = None
+                    campaignx_changed = True
                 if 'campaign_title_changed' in update_values \
                         and positive_value_exists(update_values['campaign_title_changed']):
                     campaignx.campaign_title = update_values['campaign_title']
