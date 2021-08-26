@@ -2,6 +2,7 @@
   "_comment":                       "Note that WE_VOTE_SERVER_ROOT_URL should end without slash",
   "WE_VOTE_SERVER_ROOT_URL":        "http://localhost:8000",
   "WEB_APP_ROOT_URL":               "http://localhost:3000",
+  "CAMPAIGNS_ROOT_URL":             "http://localhost:3000",
   "TIME_ZONE":                      "US/Pacific",
   "SERVER_IN_DEBUG_MODE":           true,
 
