@@ -56,7 +56,9 @@
         {% if campaignx.campaign_description %}
             <tr>
                 <td colspan="2" style="vertical-align:top">
-                    {{ campaignx.campaign_description|default_if_none:"" }}
+<div style="white-space: pre-wrap;">
+{{ campaignx.campaign_description|default_if_none:"" }}
+</div>
                     {% if campaignx.date_campaign_started %}
                         <span class="u-no-break" style="color: darkgray">(Started: {{ campaignx.date_campaign_started }})</span>
                     {% endif %}

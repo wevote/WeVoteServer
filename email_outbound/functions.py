@@ -2,7 +2,9 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import FRIEND_ACCEPTED_INVITATION_TEMPLATE, FRIEND_INVITATION_TEMPLATE, LINK_TO_SIGN_IN_TEMPLATE, \
+from .models import CAMPAIGNX_FRIEND_HAS_SUPPORTED_TEMPLATE, CAMPAIGNX_NEWS_ITEM_SEND_TEMPLATE, \
+    CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_TEMPLATE, \
+    FRIEND_ACCEPTED_INVITATION_TEMPLATE, FRIEND_INVITATION_TEMPLATE, LINK_TO_SIGN_IN_TEMPLATE, \
     NOTICE_FRIEND_ENDORSEMENTS_TEMPLATE, NOTICE_VOTER_DAILY_SUMMARY_TEMPLATE, \
     SEND_BALLOT_TO_SELF, SEND_BALLOT_TO_FRIENDS, SIGN_IN_CODE_EMAIL_TEMPLATE, VERIFY_EMAIL_ADDRESS_TEMPLATE
 from django.template.loader import get_template
@@ -16,6 +18,21 @@ def get_template_filename(kind_of_email_template, text_or_html):
             return "verify_email_address.html"
         else:
             return "verify_email_address.txt"
+    elif kind_of_email_template == CAMPAIGNX_FRIEND_HAS_SUPPORTED_TEMPLATE:
+        if text_or_html == "HTML":
+            return "campaignx_friend_has_supported.html"
+        else:
+            return "campaignx_friend_has_supported.txt"
+    elif kind_of_email_template == CAMPAIGNX_NEWS_ITEM_SEND_TEMPLATE:
+        if text_or_html == "HTML":
+            return "campaignx_news_item_send.html"
+        else:
+            return "campaignx_news_item_send.txt"
+    elif kind_of_email_template == CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_TEMPLATE:
+        if text_or_html == "HTML":
+            return "campaignx_supporter_initial_response.html"
+        else:
+            return "campaignx_supporter_initial_response.txt"
     elif kind_of_email_template == FRIEND_INVITATION_TEMPLATE:
         if text_or_html == "HTML":
             return "friend_invitation.html"

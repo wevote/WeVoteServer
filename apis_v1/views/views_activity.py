@@ -8,7 +8,9 @@ import json
 import threading
 import time
 from activity.controllers import update_or_create_activity_notice_seed_for_activity_posts
-from activity.models import ActivityManager, NOTICE_FRIEND_ACTIVITY_POSTS, NOTICE_FRIEND_ENDORSEMENTS, \
+from activity.models import ActivityManager, \
+    NOTICE_CAMPAIGNX_FRIEND_HAS_SUPPORTED, NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE, \
+    NOTICE_FRIEND_ACTIVITY_POSTS, NOTICE_FRIEND_ENDORSEMENTS, \
     NOTICE_FRIEND_ENDORSEMENTS_SEED
 from config.base import get_environment_variable
 from friend.models import FriendManager
@@ -400,13 +402,18 @@ def activity_notice_list_retrieve_view(request):  # activityNoticeListRetrieve
                 position_we_vote_id_list = json.loads(activity_notice.position_we_vote_id_list_serialized)
             new_positions_entered_count = activity_notice.new_positions_entered_count
             include_this_activity_notice = True
-        elif activity_notice.kind_of_notice == NOTICE_FRIEND_ACTIVITY_POSTS:
+        elif activity_notice.kind_of_notice in [
+            NOTICE_CAMPAIGNX_FRIEND_HAS_SUPPORTED,
+            NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE,
+            NOTICE_FRIEND_ACTIVITY_POSTS,
+        ]:
             include_this_activity_notice = True
         if include_this_activity_notice:
             activity_notice_dict = {
                 'activity_notice_clicked':          activity_notice.activity_notice_clicked,
                 'activity_notice_seen':             activity_notice.activity_notice_seen,
                 'activity_tidbit_we_vote_id':       activity_notice.activity_tidbit_we_vote_id,
+                'campaignx_we_vote_id':             activity_notice.campaignx_we_vote_id,
                 'date_last_changed':                activity_notice.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
                 'date_of_notice':                   activity_notice.date_of_notice.strftime('%Y-%m-%d %H:%M:%S'),
                 'activity_notice_id':               activity_notice.id,
@@ -421,7 +428,7 @@ def activity_notice_list_retrieve_view(request):  # activityNoticeListRetrieve
                 'speaker_voter_we_vote_id':         activity_notice.speaker_voter_we_vote_id,
                 'speaker_profile_image_url_medium': activity_notice.speaker_profile_image_url_medium,
                 'speaker_profile_image_url_tiny':   activity_notice.speaker_profile_image_url_tiny,
-                'statement_text_preview':             activity_notice.statement_text_preview,
+                'statement_text_preview':           activity_notice.statement_text_preview,
             }
             modified_activity_notice_list.append(activity_notice_dict)
     json_data = {

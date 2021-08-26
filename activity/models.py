@@ -7,17 +7,20 @@ from django.db.models import Q
 from django.utils.timezone import now
 from datetime import timedelta
 import json
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_activity_notice_seed_integer, \
     fetch_next_we_vote_id_activity_comment_integer, fetch_next_we_vote_id_activity_post_integer, \
     fetch_site_unique_id_prefix
 
-# Kind of Seeds
+# Kind of Seeds (value should not exceed 50 chars)
 NOTICE_ACTIVITY_POST_SEED = 'NOTICE_ACTIVITY_POST_SEED'
+NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_SEED = 'NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_SEED'
 NOTICE_FRIEND_ENDORSEMENTS_SEED = 'NOTICE_FRIEND_ENDORSEMENTS_SEED'
 NOTICE_VOTER_DAILY_SUMMARY_SEED = 'NOTICE_VOTER_DAILY_SUMMARY_SEED'  # Activity that touches each voter, for each day
 
-# Kind of Notices
+# Kind of Notices (value should not exceed 50 chars)
+NOTICE_CAMPAIGNX_FRIEND_HAS_SUPPORTED = 'NOTICE_CAMPAIGNX_FRIEND_HAS_SUPPORTED'
+NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE = 'NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE'
 NOTICE_FRIEND_ACTIVITY_POSTS = 'NOTICE_FRIEND_ACTIVITY_POSTS'  # Notice shown in header menu, no email sent
 NOTICE_FRIEND_ENDORSEMENTS = 'NOTICE_FRIEND_ENDORSEMENTS'
 NOTICE_VOTER_DAILY_SUMMARY = 'NOTICE_VOTER_DAILY_SUMMARY'  # Email sent, not shown in header menu
@@ -77,6 +80,7 @@ class ActivityManager(models.Manager):
             self,
             activity_notice_seed_id=0,
             activity_tidbit_we_vote_id='',
+            campaignx_we_vote_id=None,
             date_of_notice=None,
             kind_of_notice=None,
             kind_of_seed=None,
@@ -113,6 +117,7 @@ class ActivityManager(models.Manager):
             activity_notice = ActivityNotice.objects.create(
                 activity_notice_seed_id=activity_notice_seed_id,
                 activity_tidbit_we_vote_id=activity_tidbit_we_vote_id,
+                campaignx_we_vote_id=campaignx_we_vote_id,
                 date_of_notice=date_of_notice,
                 kind_of_notice=kind_of_notice,
                 kind_of_seed=kind_of_seed,
@@ -154,6 +159,7 @@ class ActivityManager(models.Manager):
             activity_notices_scheduled=False,
             activity_tidbit_we_vote_ids_for_friends_serialized='',
             activity_tidbit_we_vote_ids_for_public_serialized='',
+            campaignx_we_vote_id=None,
             date_of_notice=None,
             kind_of_seed=None,
             position_names_for_friends_serialized='',
@@ -191,6 +197,7 @@ class ActivityManager(models.Manager):
                 activity_notices_scheduled=activity_notices_scheduled,
                 activity_tidbit_we_vote_ids_for_friends_serialized=activity_tidbit_we_vote_ids_for_friends_serialized,
                 activity_tidbit_we_vote_ids_for_public_serialized=activity_tidbit_we_vote_ids_for_public_serialized,
+                campaignx_we_vote_id=campaignx_we_vote_id,
                 date_of_notice=date_of_notice,
                 kind_of_seed=kind_of_seed,
                 position_names_for_friends_serialized=position_names_for_friends_serialized,
@@ -265,6 +272,46 @@ class ActivityManager(models.Manager):
             'activity_post':        activity_post,
         }
         return results
+
+    def fetch_activity_notice_count(
+            self,
+            activity_in_last_x_seconds=None,
+            kind_of_notice='',
+            recipient_voter_we_vote_id='',
+            send_to_email=None,
+            speaker_voter_we_vote_id='',
+    ):
+        """
+        We use this to figure out how many prior notices have been emailed in a period of time
+        :param activity_in_last_x_seconds:
+        :param kind_of_notice:
+        :param recipient_voter_we_vote_id:
+        :param send_to_email:
+        :param speaker_voter_we_vote_id:
+        :return:
+        """
+        try:
+            queryset = ActivityNotice.objects.all()
+            queryset = queryset.filter(deleted=False)
+            if activity_in_last_x_seconds is not None:
+                activity_in_last_x_seconds = convert_to_int(activity_in_last_x_seconds)
+                earliest_date_of_notice = now() - timedelta(seconds=activity_in_last_x_seconds)
+                queryset = queryset.filter(date_of_notice__gte=earliest_date_of_notice)
+            if positive_value_exists(kind_of_notice):
+                queryset = queryset.filter(kind_of_notice=kind_of_notice)
+            if positive_value_exists(recipient_voter_we_vote_id):
+                queryset = queryset.filter(recipient_voter_we_vote_id=recipient_voter_we_vote_id)
+            if send_to_email is not None:
+                send_to_email = positive_value_exists(send_to_email)
+                queryset = queryset.filter(send_to_email=send_to_email)
+            if positive_value_exists(speaker_voter_we_vote_id):
+                queryset = queryset.filter(speaker_voter_we_vote_id=speaker_voter_we_vote_id)
+
+            activity_notice_count = queryset.count()
+        except Exception as e:
+            activity_notice_count = 0
+
+        return activity_notice_count
 
     def fetch_number_of_comments(self, parent_we_vote_id='', parent_comment_we_vote_id=''):
         results = self.retrieve_number_of_comments(
@@ -543,6 +590,7 @@ class ActivityManager(models.Manager):
     def retrieve_recent_activity_notice_from_speaker_and_recipient(
             self,
             activity_notice_seed_id=0,
+            campaignx_we_vote_id=None,
             kind_of_notice='',
             recipient_voter_we_vote_id='',
             speaker_organization_we_vote_id='',
@@ -558,6 +606,7 @@ class ActivityManager(models.Manager):
             if positive_value_exists(speaker_organization_we_vote_id):
                 activity_notice = ActivityNotice.objects.get(
                     activity_notice_seed_id=activity_notice_seed_id,
+                    campaignx_we_vote_id=campaignx_we_vote_id,
                     deleted=False,
                     kind_of_notice=kind_of_notice,
                     recipient_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
@@ -570,6 +619,7 @@ class ActivityManager(models.Manager):
             elif positive_value_exists(speaker_voter_we_vote_id):
                 activity_notice = ActivityNotice.objects.get(
                     activity_notice_seed_id=activity_notice_seed_id,
+                    campaignx_we_vote_id=campaignx_we_vote_id,
                     deleted=False,
                     kind_of_notice=kind_of_notice,
                     recipient_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
@@ -604,11 +654,13 @@ class ActivityManager(models.Manager):
 
     def retrieve_recent_activity_notice_seed_from_speaker(
             self,
+            campaignx_we_vote_id=None,
             kind_of_seed='',
             speaker_organization_we_vote_id='',
             speaker_voter_we_vote_id=''):
         """
 
+        :param campaignx_we_vote_id:
         :param kind_of_seed:
         :param speaker_organization_we_vote_id:
         :param speaker_voter_we_vote_id:
@@ -627,6 +679,7 @@ class ActivityManager(models.Manager):
         try:
             if positive_value_exists(speaker_organization_we_vote_id):
                 activity_notice_seed = ActivityNoticeSeed.objects.get(
+                    campaignx_we_vote_id=campaignx_we_vote_id,
                     date_of_notice__gte=earliest_date_of_notice,
                     deleted=False,
                     kind_of_seed=kind_of_seed,
@@ -638,6 +691,7 @@ class ActivityManager(models.Manager):
                 status += "RETRIEVE_RECENT_ACTIVITY_NOTICE_SEED_FOUND_BY_ORG_WE_VOTE_ID "
             elif positive_value_exists(speaker_voter_we_vote_id):
                 activity_notice_seed = ActivityNoticeSeed.objects.get(
+                    campaignx_we_vote_id=campaignx_we_vote_id,
                     date_of_notice__gte=earliest_date_of_notice,
                     deleted=False,
                     kind_of_seed=kind_of_seed,
@@ -822,20 +876,35 @@ class ActivityManager(models.Manager):
             if positive_value_exists(notices_to_be_created):
                 queryset = queryset.filter(activity_notices_created=False)
                 queryset = \
-                    queryset.filter(kind_of_seed__in=[NOTICE_ACTIVITY_POST_SEED, NOTICE_FRIEND_ENDORSEMENTS_SEED])
+                    queryset.filter(kind_of_seed__in=[
+                        NOTICE_ACTIVITY_POST_SEED,
+                        NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_SEED,
+                        NOTICE_FRIEND_ENDORSEMENTS_SEED
+                    ])
             elif positive_value_exists(notices_to_be_scheduled):
                 queryset = queryset.filter(activity_notices_scheduled=False)
                 queryset = queryset.filter(
-                    kind_of_seed__in=[NOTICE_FRIEND_ENDORSEMENTS_SEED, NOTICE_VOTER_DAILY_SUMMARY_SEED])
+                    kind_of_seed__in=[
+                        NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_SEED,
+                        NOTICE_FRIEND_ENDORSEMENTS_SEED,
+                        NOTICE_VOTER_DAILY_SUMMARY_SEED
+                    ])
             elif positive_value_exists(notices_to_be_updated):
                 queryset = queryset.filter(activity_notices_created=True)
                 queryset = queryset.filter(date_of_notice_earlier_than_update_window=False)
                 queryset = queryset.filter(
-                    kind_of_seed__in=[NOTICE_ACTIVITY_POST_SEED, NOTICE_FRIEND_ENDORSEMENTS_SEED])
+                    kind_of_seed__in=[
+                        NOTICE_ACTIVITY_POST_SEED,
+                        NOTICE_FRIEND_ENDORSEMENTS_SEED
+                    ])
             elif positive_value_exists(to_be_added_to_voter_daily_summary):
                 queryset = queryset.filter(added_to_voter_daily_summary=False)
                 queryset = queryset.filter(
-                    kind_of_seed__in=[NOTICE_ACTIVITY_POST_SEED, NOTICE_FRIEND_ENDORSEMENTS_SEED])
+                    kind_of_seed__in=[
+                        NOTICE_ACTIVITY_POST_SEED,
+                        NOTICE_FRIEND_ENDORSEMENTS_SEED
+                    ])
+                # TODO: NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_SEED
             if activity_notice_seed_id_already_reviewed_list and len(activity_notice_seed_id_already_reviewed_list) > 0:
                 queryset = queryset.exclude(id__in=activity_notice_seed_id_already_reviewed_list)
 
@@ -855,7 +924,7 @@ class ActivityManager(models.Manager):
         except Exception as e:
             success = False
             activity_notice_seed_found = False
-            status += 'FAILED retrieve_activity_notice_seed ActivityNoticeSeed ' + str(e) + ' '
+            status += 'FAILED retrieve_activity_notice_seed ActivityNoticeSeed: ' + str(e) + ' '
 
         results = {
             'success':                      success,
@@ -1403,6 +1472,7 @@ class ActivityNotice(models.Model):
     """
     activity_notice_seed_id = models.PositiveIntegerField(default=None, null=True)
     activity_tidbit_we_vote_id = models.CharField(max_length=255, default=None, null=True)  # subject of notice
+    campaignx_we_vote_id = models.CharField(max_length=255, default=None, null=True)  # subject if campaignx
     date_of_notice = models.DateTimeField(null=True)
     date_last_changed = models.DateTimeField(null=True, auto_now=True)
     activity_notice_clicked = models.BooleanField(default=False)
@@ -1444,6 +1514,7 @@ class ActivityNoticeSeed(models.Model):
     date_of_notice_earlier_than_update_window = models.BooleanField(default=False)
     activity_notices_scheduled = models.BooleanField(default=False)
     added_to_voter_daily_summary = models.BooleanField(default=False)
+    campaignx_we_vote_id = models.CharField(max_length=255, default=None, null=True)
     date_of_notice = models.DateTimeField(null=True)
     date_last_changed = models.DateTimeField(null=True, auto_now=True)
     deleted = models.BooleanField(default=False)
@@ -1539,6 +1610,8 @@ class ActivityPost(models.Model):
 def get_lifespan_of_seed(kind_of_seed):
     if kind_of_seed == NOTICE_ACTIVITY_POST_SEED:
         return 14400  # 4 hours * 60 minutes * 60 seconds/minute
+    if kind_of_seed == NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_SEED:
+        return 7776000  # 3 months * 30 days * 24 hours * 60 minutes * 60 seconds/minute
     if kind_of_seed == NOTICE_FRIEND_ENDORSEMENTS_SEED:
         return 21600  # 6 hours * 60 minutes * 60 seconds/minute
     if kind_of_seed == NOTICE_VOTER_DAILY_SUMMARY_SEED:

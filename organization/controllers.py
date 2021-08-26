@@ -45,6 +45,9 @@ from .models import Organization, OrganizationListManager, OrganizationManager, 
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+CAMPAIGNS_ROOT_URL = get_environment_variable("CAMPAIGNS_ROOT_URL", no_exception=True)
+if not positive_value_exists(CAMPAIGNS_ROOT_URL):
+    CAMPAIGNS_ROOT_URL = "https://campaigns.wevote.us"
 WEB_APP_ROOT_URL = get_environment_variable("WEB_APP_ROOT_URL")
 ORGANIZATIONS_SYNC_URL = get_environment_variable("ORGANIZATIONS_SYNC_URL")  # organizationsSyncOut
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
@@ -3161,6 +3164,19 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
         'reserved_by_we_vote':              reserved_by_we_vote,
     }
     return results
+
+
+def transform_campaigns_url(campaigns_root_url):
+    campaigns_root_url_verified = CAMPAIGNS_ROOT_URL
+    if positive_value_exists(campaigns_root_url):
+        configuration_results = site_configuration_retrieve_for_api(campaigns_root_url)
+        # Make sure hostname is allowed or success if False -- we clear it out if it is not allowed
+        if positive_value_exists(configuration_results['hostname']):
+            # If this hostname is either reserved by We Vote or a current organization is found, then use the custom URL
+            if positive_value_exists(configuration_results['reserved_by_we_vote']) \
+                    or positive_value_exists(configuration_results['organization_we_vote_id']):
+                campaigns_root_url_verified = 'https://{hostname}'.format(hostname=configuration_results['hostname'])
+    return campaigns_root_url_verified
 
 
 def transform_web_app_url(web_app_root_url):

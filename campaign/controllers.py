@@ -10,6 +10,7 @@ import json
 from io import BytesIO
 from PIL import Image
 import re
+from activity.controllers import update_or_create_activity_notice_seed_for_campaignx_supporter_initial_response
 from voter.models import VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import generate_date_as_integer, positive_value_exists
@@ -1539,6 +1540,28 @@ def campaignx_supporter_save_for_api(  # campaignSupporterSave
         update_values=update_values,
     )
 
+    if create_results['campaignx_supporter_found']:
+        campaignx_supporter = create_results['campaignx_supporter']
+        results = campaignx_manager.retrieve_campaignx(
+            campaignx_we_vote_id=campaignx_we_vote_id,
+            read_only=True,
+        )
+        statement_text = ''
+        if results['campaignx_found']:
+            campaignx = results['campaignx']
+            statement_text = campaignx.campaign_title
+
+        activity_results = update_or_create_activity_notice_seed_for_campaignx_supporter_initial_response(
+            campaignx_we_vote_id=campaignx_supporter.campaignx_we_vote_id,
+            visibility_is_public=campaignx_supporter.visible_to_public,
+            speaker_name=campaignx_supporter.supporter_name,
+            speaker_organization_we_vote_id=campaignx_supporter.organization_we_vote_id,
+            speaker_voter_we_vote_id=campaignx_supporter.voter_we_vote_id,
+            speaker_profile_image_url_medium=voter.we_vote_hosted_profile_image_url_medium,
+            speaker_profile_image_url_tiny=voter.we_vote_hosted_profile_image_url_tiny,
+            statement_text=statement_text)
+        status += activity_results['status']
+
     status += create_results['status']
     if create_results['campaignx_supporter_found']:
         count_results = campaignx_manager.update_campaignx_supporters_count(campaignx_we_vote_id)
@@ -1589,6 +1612,41 @@ def campaignx_supporter_save_for_api(  # campaignSupporterSave
             'we_vote_hosted_profile_photo_image_url_tiny': '',
         }
         return results
+
+
+def fetch_sentence_string_from_politician_list(politician_list, max_number_of_list_items=200):
+    """
+    Parallel to politicianListToSentenceString in Campaigns site
+    :param politician_list:
+    :param max_number_of_list_items:
+    :return:
+    """
+    sentence_string = ''
+    if not politician_list or len(politician_list) == 0:
+        return sentence_string
+    if len(politician_list) == 1:
+        sentence_string += ' ' + politician_list[0].politician_name
+        return sentence_string
+    number_of_politicians_in_list = len(politician_list)
+    number_of_politicians_in_list_great_than_max_number_of_list_items = \
+        number_of_politicians_in_list > max_number_of_list_items
+    if number_of_politicians_in_list_great_than_max_number_of_list_items:
+        number_of_politicians_to_show = max_number_of_list_items
+    else:
+        number_of_politicians_to_show = number_of_politicians_in_list
+    politician_number = 0
+    for politician in politician_list:
+        politician_number += 1
+        if politician_number >= number_of_politicians_to_show:
+            if number_of_politicians_in_list_great_than_max_number_of_list_items:
+                sentence_string += ' and more'
+            else:
+                sentence_string += ' and ' + politician.politician_name
+        else:
+            comma_or_not = '' if politician_number == (number_of_politicians_to_show - 1) else ','
+            sentence_string += ' ' + politician.politician_name + comma_or_not
+
+    return sentence_string
 
 
 def move_campaignx_to_another_organization(

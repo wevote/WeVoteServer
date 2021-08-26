@@ -1,0 +1,29 @@
+
+
+{% if recipient_name %}
+Hello {{ recipient_name }},
+{% else %}
+Hello,
+{% endif %}
+
+{% if speaker_voter_name %}Your friend {{ speaker_voter_name }} {% else %}Your friend {% endif %}is supporting
+{% if politician_count > 0 %}
+{{ politician_full_sentence_string }}! This is the campaign they supported:
+{{ campaignx_title }}
+{% else %}
+{{ campaignx_title }}
+{% endif %}
+
+Click to see: {{ campaignx_url }}
+
+Please support these candidates too! Every vote counts, and many elections are won by a small number of voters.
+
+Thank you,
+The We Vote Team
+
+
+
+========================================
+This message was sent to {{ recipient_voter_email }}. If you don't want to receive emails from We Vote, please follow the link below to unsubscribe:
+{{ recipient_unsubscribe_url }}
+We Vote, Attention: Campaigns Team, 1423 Broadway PMB 158, Oakland, CA 94612

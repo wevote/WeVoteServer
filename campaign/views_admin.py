@@ -25,6 +25,9 @@ from .models import CampaignX, CampaignXManager, CampaignXOwner, CampaignXPoliti
 
 logger = wevote_functions.admin.get_logger(__name__)
 WEB_APP_ROOT_URL = get_environment_variable("WEB_APP_ROOT_URL")
+CAMPAIGNS_ROOT_URL = get_environment_variable("CAMPAIGNS_ROOT_URL", no_exception=True)
+if not positive_value_exists(CAMPAIGNS_ROOT_URL):
+    CAMPAIGNS_ROOT_URL = "https://campaigns.wevote.us"
 
 
 @login_required
@@ -674,7 +677,7 @@ def campaign_summary_view(request, campaignx_we_vote_id=""):
     campaignx_supporter_list = list(supporters_query[:4])
 
     campaignx_supporters_count = campaignx_manager.fetch_campaignx_supporter_count(campaignx_we_vote_id)
-    if 'localhost' in WEB_APP_ROOT_URL:
+    if 'localhost' in CAMPAIGNS_ROOT_URL:
         campaigns_site_root_url = 'https://localhost:3000'
     else:
         campaigns_site_root_url = 'https://campaigns.WeVote.US'
@@ -913,10 +916,6 @@ def campaign_supporters_list_process_view(request):
                     final_filters |= item
 
                 supporters_query = supporters_query.filter(final_filters)
-
-    supporters_count = supporters_query.count()
-    messages.add_message(request, messages.INFO,
-                         'Showing {supporters_count:,} campaign supporters.'.format(supporters_count=supporters_count))
 
     # Limit to only showing 200 on screen
     if positive_value_exists(show_more):

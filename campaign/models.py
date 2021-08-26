@@ -517,6 +517,27 @@ class CampaignXManager(models.Manager):
 
         return voter_is_campaignx_owner
 
+    def is_voter_campaignx_supporter(self, campaignx_we_vote_id='', voter_we_vote_id=''):
+        """
+
+        :param campaignx_we_vote_id:
+        :param voter_we_vote_id:
+        :return:
+        """
+        status = ''
+        voter_is_campaignx_owner = False
+
+        try:
+            queryset = CampaignXSupporter.objects.using('readonly').filter(
+                campaignx_we_vote_id__iexact=campaignx_we_vote_id,
+                voter_we_vote_id__iexact=voter_we_vote_id)
+            voter_is_campaignx_owner = positive_value_exists(queryset.count())
+            status += 'VOTER_IS_CAMPAIGNX_SUPPORTER '
+        except CampaignXSupporter as e:
+            status += 'IS_VOTER_CAMPAIGNX_SUPPORTER_QUERY_FAILED: ' + str(e) + ' '
+
+        return voter_is_campaignx_owner
+
     def remove_campaignx_owner(self, campaignx_we_vote_id='', voter_we_vote_id=''):
         return
 
