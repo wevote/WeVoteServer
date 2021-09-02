@@ -2036,7 +2036,7 @@ class StripeManager(models.Manager):
                     Q(campaignx_we_vote_id__iexact=campaignx_we_vote_id)
                 )
             amount_int_pennies = payment_queryset.aggregate(Sum('amount'))['amount__sum']
-            amount_dollars = amount_int_pennies / 100
+            amount_dollars = amount_int_pennies / 100 if positive_value_exists(amount_int_pennies) else 0
             total_chip_ins = "${:,.2f}".format(amount_dollars)
 
             return total_chip_ins
