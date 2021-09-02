@@ -79,17 +79,24 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
     link_results = facebook_manager.create_facebook_link_to_voter(facebook_auth_response.facebook_user_id,
                                                                   voter.we_vote_id)
 
-    if not link_results['facebook_link_to_voter_saved']:
-        error_results = {
-            'status':                   link_results['status'],
-            'success':                  False,
-            'voter_device_id':          voter_device_id,
-            'facebook_account_created': facebook_account_created,
-        }
-        return error_results
+    # Prior to Sept 2, 2021 -- you only had one shot at updating the voter info on a facebook sign-in
+    # if not link_results['facebook_link_to_voter_saved']:
+    #     error_results = {
+    #         'status':                   link_results['status'],
+    #         'success':                  False,
+    #         'voter_device_id':          voter_device_id,
+    #         'facebook_account_created': facebook_account_created,
+    #     }
+    #     return error_results
 
     facebook_account_created = True
     facebook_link_to_voter = link_results['facebook_link_to_voter']
+
+    if not positive_value_exists(facebook_auth_response.facebook_profile_image_url_https):
+        results = get_facebook_photo_url_from_graphapi('', facebook_auth_response.facebook_user_id)
+        photo_url = results['photo_url']
+        if positive_value_exists(photo_url):
+            facebook_auth_response.facebook_profile_image_url_https = photo_url
 
     # Cache original and resized images
     cache_results = cache_master_and_resized_image(
@@ -798,18 +805,21 @@ def voter_facebook_sign_in_save_for_api(voter_device_id,  # voterFacebookSignInS
     return json_data
 
 
-def get_facebook_photo_url_from_graphapi(facebook_candidate_url):
+def get_facebook_photo_url_from_graphapi(facebook_candidate_url, facebook_id = False):
     photo_url = ""
     status = ""
     clean_message = ''
     success = False
 
-    m = re.search(r'^.*?facebook.com/(.*?)((/$)|($)|(/.*?$))', facebook_candidate_url)
-    fb_id_or_login_name = m.group(1)
-
-    if len(m.groups()) < 2:
-        status += 'GET_FACEBOOK_PHOTO_URL_FROM_GRAPHAPI-PROPER_URL_NOT_PROVIDED: ' + facebook_candidate_url + " "
+    if facebook_id:
+        fb_id_or_login_name = facebook_id
     else:
+        m = re.search(r'^.*?facebook.com/(.*?)((/$)|($)|(/.*?$))', facebook_candidate_url)
+        fb_id_or_login_name = m.group(1)
+        if len(m.groups()) < 2:
+            status += 'GET_FACEBOOK_PHOTO_URL_FROM_GRAPHAPI-PROPER_URL_NOT_PROVIDED: ' + facebook_candidate_url + " "
+
+    if positive_value_exists(fb_id_or_login_name):
         results = FacebookManager.retrieve_facebook_photo_from_person_id(fb_id_or_login_name)
         status += results['status']
         photo_url = results['url']
