@@ -109,6 +109,13 @@
         </span>
 
         <span style="padding: 6px">
+            <label for="is_verified_volunteer_id">
+                <input type="checkbox" name="is_verified_volunteer" id="is_verified_volunteer_id" value="1"
+                    {% if is_verified_volunteer %}checked{% endif %} /> Is Verified Volunteer
+            </label>
+        </span>
+
+        <span style="padding: 6px">
             <label for="has_contributed_id">
               <input type="checkbox" name="has_contributed" id="has_contributed_id" value="1"
                      {% if has_contributed %}checked{% endif %} /> Has Contributed
@@ -132,7 +139,7 @@
             <th>Email / Phone</th>
             <th>Opt In</th>
             <th>Org we_vote_id</th>
-            <th style='text-align: center'>$</th>
+            <th style='text-align: right'>Contributions</th>
             <th>Admin</th>
             <th>Partner Org</th>
             <th>Political Data</th>
