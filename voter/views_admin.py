@@ -1,19 +1,19 @@
 # voter/views_admin.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
+import string
 
-from .controllers import delete_all_voter_information_permanently, process_maintenance_status_flags
-from .models import fetch_voter_id_from_voter_device_link, Voter, VoterAddressManager, VoterDeviceLinkManager, \
-    voter_has_authority, VoterManager, voter_setup
-from admin_tools.views import redirect_to_sign_in_page
-from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
-from django.db.models import Q
+from django.db.models import Q, Subquery
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
+
+import wevote_functions.admin
+from admin_tools.views import redirect_to_sign_in_page
 from email_outbound.models import EmailAddress, EmailManager
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
     handle_record_not_saved_exception, handle_exception
@@ -22,11 +22,13 @@ from organization.models import Organization, OrganizationManager, INDIVIDUAL
 from position.controllers import merge_duplicate_positions_for_voter
 from position.models import PositionEntered, PositionForFriends
 from sms.models import SMSManager, SMSPhoneNumber
-import string
+from stripe_donations.models import StripeManager, StripePayments
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
-import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, generate_random_string, get_voter_api_device_id, \
     set_voter_api_device_id, positive_value_exists
+from .controllers import delete_all_voter_information_permanently, process_maintenance_status_flags
+from .models import fetch_voter_id_from_voter_device_link, Voter, VoterAddressManager, VoterDeviceLinkManager, \
+    voter_has_authority, VoterManager, voter_setup
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -907,6 +909,7 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
             'voter':                                    voter_on_stage,
             'voter_list_duplicate_facebook':            voter_list_duplicate_facebook_updated,
             'voter_list_duplicate_twitter':             voter_list_duplicate_twitter_updated,
+            'stripe_payments':                          StripeManager.retrieve_payments_total(voter_on_stage.we_vote_id),
         }
     else:
         messages_on_stage = get_messages(request)
@@ -1056,6 +1059,7 @@ def voter_list_view(request):
     is_political_data_manager = request.GET.get('is_political_data_manager', '')
     is_political_data_viewer = request.GET.get('is_political_data_viewer', '')
     is_verified_volunteer = request.GET.get('is_verified_volunteer', '')
+    has_contributed = request.GET.get('has_contributed', '')
 
     voter_api_device_id = get_voter_api_device_id(request)  # We look in the cookies for voter_api_device_id
     voter_manager = VoterManager()
@@ -1146,8 +1150,9 @@ def voter_list_view(request):
         voter_query = voter_query.filter(is_political_data_manager=True)
     if positive_value_exists(is_political_data_viewer):
         voter_query = voter_query.filter(is_political_data_viewer=True)
-    if positive_value_exists(is_verified_volunteer):
-        voter_query = voter_query.filter(is_verified_volunteer=True)
+    if positive_value_exists(has_contributed):
+        payments = StripePayments.objects.all()
+        voter_query = voter_query.filter(we_vote_id__in=Subquery(payments.values('voter_we_vote_id')))
 
     voter_list_found_count = voter_query.count()
 
@@ -1159,6 +1164,8 @@ def voter_list_view(request):
     for one_voter in voter_list:
         one_voter.twitter_handle = twitter_user_manager.fetch_twitter_handle_from_voter_we_vote_id(one_voter.we_vote_id)
         one_voter.retrieved_facebook_id = facebook_manager.fetch_facebook_id_from_voter_we_vote_id(one_voter.we_vote_id)
+        spent = StripeManager.retrieve_payments_total(one_voter.we_vote_id)
+        one_voter.amount_spent = spent if spent != '$0.00' else ''
         modified_voter_list.append(one_voter)
 
     # For the create new voter account form, create a proposed default password
@@ -1177,6 +1184,7 @@ def voter_list_view(request):
         'is_political_data_manager':    is_political_data_manager,
         'is_political_data_viewer':     is_political_data_viewer,
         'is_verified_volunteer':        is_verified_volunteer,
+        'has_contributed':              has_contributed,
         'messages_on_stage':            messages_on_stage,
         'password_proposed':            password_proposed,
         'voter_list':                   modified_voter_list,

@@ -46,6 +46,10 @@
 
       <input type="checkbox" name="checkbox-volunteer" id="checkbox-volunteer">
       <label for="checkbox-volunteer">Is Verified Volunteer</label><br />
+
+      <input type="checkbox" name="checkbox-contributed" id="checkbox-contributed">
+      <label for="checkbox-contributed">Has Contributed</label><br />
+
       <!-- Allow form submission with keyboard without duplicating the dialog button -->
       <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
     </fieldset>
@@ -60,50 +64,57 @@
 <form name="voter_search_form" method="get" action="{% url 'voter:voter_list' %}">
     {% csrf_token %}
 
+    <div style="padding-top: 4px">
+      {% if voter_search or issues_selected %}
+        <a href="{% url 'voter:voter_list' %}" style="padding-right: 4px">clear search</a>
+      {% endif %}
+        <input type="text" name="voter_search" id="voter_search_id" value="{{ voter_search }}" />
+        <input type="submit" value="Search for Voter" />
+    </div>
 
-{% if voter_search or issues_selected %}
-    <a href="{% url 'voter:voter_list' %}">
-         clear search</a>&nbsp;
-{% endif %}
-    <input type="text" name="voter_search" id="voter_search_id" value="{{ voter_search }}" />
-    <input type="submit" value="Search for Voter" />
+    <div style="padding: 6px 0">
+        <span style="padding: 6px">
+            <label for="is_admin_id">
+                <input type="checkbox" name="is_admin" id="is_admin_id" value="1"
+                     {% if is_admin %}checked{% endif %} /> Is Admin
+            </label>
+        </span>
 
-<div>
-    <label for="is_admin_id">
-      <input type="checkbox" name="is_admin" id="is_admin_id" value="1"
-             {% if is_admin %}checked{% endif %} /> Is Admin
-    </label>
+        <span style="padding: 6px">
+            <label for="is_analytics_admin_id">
+                <input type="checkbox" name="is_analytics_admin" id="is_analytics_admin_id" value="1"
+                       {% if is_analytics_admin %}checked{% endif %} /> Is Analytics Admin
+            </label>
+        </span>
 
-    &nbsp;&nbsp;&nbsp;
-    <label for="is_analytics_admin_id">
-      <input type="checkbox" name="is_analytics_admin" id="is_analytics_admin_id" value="1"
-             {% if is_analytics_admin %}checked{% endif %} /> Is Analytics Admin
-    </label>
+        <span style="padding: 6px">
+            <label for="is_partner_organization_id">
+                <input type="checkbox" name="is_partner_organization" id="is_partner_organization_id" value="1"
+                    {% if is_partner_organization %}checked{% endif %} /> Is Partner Organization
+            </label>
+        </span>
 
-    &nbsp;&nbsp;&nbsp;
-    <label for="is_partner_organization_id">
-      <input type="checkbox" name="is_partner_organization" id="is_partner_organization_id" value="1"
-             {% if is_partner_organization %}checked{% endif %} /> Is Partner Organization
-    </label>
+        <span style="padding: 6px">
+            <label for="is_political_data_manager_id">
+                <input type="checkbox" name="is_political_data_manager" id="is_political_data_manager_id" value="1"
+                    {% if is_political_data_manager %}checked{% endif %} /> Is Political Data Manager
+            </label>
+        </span>
 
-    &nbsp;&nbsp;&nbsp;
-    <label for="is_political_data_manager_id">
-      <input type="checkbox" name="is_political_data_manager" id="is_political_data_manager_id" value="1"
-             {% if is_political_data_manager %}checked{% endif %} /> Is Political Data Manager
-    </label>
+        <span style="padding: 6px">
+            <label for="is_political_data_viewer_id">
+                <input type="checkbox" name="is_political_data_viewer" id="is_political_data_viewer_id" value="1"
+                    {% if is_political_data_viewer %}checked{% endif %} /> Is Political Data Viewer
+            </label>
+        </span>
 
-    &nbsp;&nbsp;&nbsp;
-    <label for="is_political_data_viewer_id">
-      <input type="checkbox" name="is_political_data_viewer" id="is_political_data_viewer_id" value="1"
-             {% if is_political_data_viewer %}checked{% endif %} /> Is Political Data Viewer
-    </label>
-
-    &nbsp;&nbsp;&nbsp;
-    <label for="is_verified_volunteer_id">
-      <input type="checkbox" name="is_verified_volunteer" id="is_verified_volunteer_id" value="1"
-             {% if is_verified_volunteer %}checked{% endif %} /> Is Verified Volunteer
-    </label>
-</div>
+        <span style="padding: 6px">
+            <label for="has_contributed_id">
+              <input type="checkbox" name="has_contributed" id="has_contributed_id" value="1"
+                     {% if has_contributed %}checked{% endif %} /> Has Contributed
+            </label>
+        </span>
+    </div>
 </form>
 
 
@@ -121,8 +132,9 @@
             <th>Email / Phone</th>
             <th>Opt In</th>
             <th>Org we_vote_id</th>
+            <th style='text-align: center'>$</th>
             <th>Admin</th>
-            <th>Partner Organization</th>
+            <th>Partner Org</th>
             <th>Political Data</th>
             <th>Verified Volunteer</th>
             <th>Voter Images</th>
@@ -178,6 +190,10 @@
                 {{ voter.linked_organization_we_vote_id|default_if_none:"" }}
                 </a>
                 {% endif %}
+            </td>
+            <!-- Amount voter has paid in Membership fees + Donations + "Chip in"s to campaigns //-->
+            <td style='text-align: right'>
+                {{ voter.amount_spent }}
             </td>
             <!-- Is site administrator? //-->
             <td>
@@ -244,6 +260,11 @@
     $(function() {
         $('#is_verified_volunteer_id').change(function() {
             {#this.form.show_candidates_with_best_twitter_options_id.value = '0';#}
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#has_contributed_id').change(function() {
             this.form.submit();
         });
     });
@@ -330,6 +351,7 @@
         is_political_data_manager: $("#checkbox-datamanager").prop('checked'),
         is_political_data_viewer: $("#checkbox-dataviewer").prop('checked'),
         is_verified_volunteer: $("#checkbox-volunteer").prop('checked'),
+        has_contributed: $("#checkbox-contributed").prop('checked'),
       }
 
       $.getJSON(apiURL, createAccountData, (result) => {

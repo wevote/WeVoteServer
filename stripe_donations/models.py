@@ -2048,3 +2048,34 @@ class StripeManager(models.Manager):
         except Exception as e:
             logger.info("FAILED_TO RETRIEVE_DONATION_PAYMENT_LIST ", e)
             return 'none'
+
+    @staticmethod
+    def retrieve_payments_total(voter_wevote_id):
+        """
+        Amount voter has paid in Membership fees + Donations + "Chip in"s to campaigns
+        :param voter_wevote_id:
+        :return:
+        """
+
+        try:
+            payment_queryset = StripePayments.objects.all()
+            payment_queryset = payment_queryset.filter(
+                Q(voter_we_vote_id__iexact=voter_wevote_id)
+                # The not logged in donations are messy and should just be considered lost if the donation does not also
+                # have a voter_we_vote_id -- i.e. an id that is associated with a not_loggedin id when the voter logs in
+                # within the session.
+                # |Q(not_loggedin_voter_we_vote_id__iexact=voter_wevote_id)
+            )
+            amount_int_pennies = payment_queryset.aggregate(Sum('amount'))['amount__sum']
+            amount_dollars = amount_int_pennies / 100 if positive_value_exists(amount_int_pennies) else 0
+            total_spent = "${:,.2f}".format(amount_dollars)
+
+            return total_spent
+
+        except StripePayments.DoesNotExist:
+            logger.info("DONATION_PAYMENT_LIST_DOES_NOT_EXIST ")
+            return 'none'
+
+        except Exception as e:
+            logger.info("FAILED_TO RETRIEVE_DONATION_PAYMENT_LIST ", e)
+            return 'none'

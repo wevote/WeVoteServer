@@ -44,6 +44,15 @@
 
 <div class="form-group">
     <label class="col-sm-3 control-label">
+        Stripe Payments Made </label>
+    <div class="col-sm-9 form-control-plaintext">
+        {{ stripe_payments }}
+    </div>
+</div>
+
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">
         Voter's Endorser Object</label>
     <div class="col-sm-9 form-control-plaintext">
         {{ voter.linked_organization_we_vote_id|default_if_none:"" }}
