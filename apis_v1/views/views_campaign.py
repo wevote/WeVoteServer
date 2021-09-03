@@ -51,6 +51,7 @@ def campaignx_news_item_save_view(request):  # campaignNewsItemSave
     campaignx_we_vote_id = request.GET.get('campaignx_we_vote_id', '')
     in_draft_mode = positive_value_exists(request.GET.get('in_draft_mode', False))
     in_draft_mode_changed = positive_value_exists(request.GET.get('in_draft_mode_changed', False))
+    send_now = positive_value_exists(request.GET.get('send_now', False))
     visible_to_public = positive_value_exists(request.GET.get('visible_to_public', True))
     visible_to_public_changed = positive_value_exists(request.GET.get('visible_to_public_changed', False))
     json_data = campaignx_news_item_save_for_api(
@@ -62,6 +63,7 @@ def campaignx_news_item_save_view(request):  # campaignNewsItemSave
         campaignx_we_vote_id=campaignx_we_vote_id,
         in_draft_mode=in_draft_mode,
         in_draft_mode_changed=in_draft_mode_changed,
+        send_now=send_now,
         visible_to_public=visible_to_public,
         visible_to_public_changed=visible_to_public_changed,
         voter_device_id=voter_device_id,

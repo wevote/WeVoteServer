@@ -83,6 +83,7 @@ def campaign_retrieve_doc_template_values(url_root):
                    '     "campaignx_we_vote_id": string,\n' \
                    '     "date_last_changed": string,\n' \
                    '     "date_posted": string,\n' \
+                   '     "date_sent_to_email": string,\n' \
                    '     "in_draft_mode": string,\n' \
                    '     "organization_we_vote_id": string,\n' \
                    '     "speaker_name": string,\n' \

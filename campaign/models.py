@@ -204,8 +204,10 @@ class CampaignXManager(models.Manager):
                 return self.fetch_next_goal_level(supporters_count=supporters_count, tier_size=250)
             elif supporters_count >= 125:
                 return self.fetch_next_goal_level(supporters_count=supporters_count, tier_size=125)
+            elif supporters_count >= 50:
+                return self.fetch_next_goal_level(supporters_count=supporters_count, tier_size=50)
             else:
-                return 125
+                return 50
         except Exception as e:
             return 0
 
@@ -2224,13 +2226,11 @@ class CampaignXManager(models.Manager):
                 campaignx_news_item_changed = True
             if 'campaign_news_text_changed' in update_values \
                     and positive_value_exists(update_values['campaign_news_text_changed']):
-                campaignx_news_item.campaign_news_text = \
-                    update_values['campaign_news_text']
+                campaignx_news_item.campaign_news_text = update_values['campaign_news_text']
                 campaignx_news_item_changed = True
             if 'in_draft_mode_changed' in update_values \
                     and positive_value_exists(update_values['in_draft_mode_changed']):
-                campaignx_news_item.in_draft_mode = \
-                    update_values['in_draft_mode']
+                campaignx_news_item.in_draft_mode = update_values['in_draft_mode']
                 campaignx_news_item_changed = True
             if 'visible_to_public_changed' in update_values \
                     and positive_value_exists(update_values['visible_to_public_changed']):
@@ -2763,6 +2763,7 @@ class CampaignXSupporter(models.Model):
 
     campaign_supported = models.BooleanField(default=True, db_index=True)
     campaignx_we_vote_id = models.CharField(max_length=255, db_index=True)
+    is_subscribed_by_email = models.BooleanField(default=True)
     voter_we_vote_id = models.CharField(max_length=255, db_index=True)
     organization_we_vote_id = models.CharField(max_length=255, null=True)
     supporter_name = models.CharField(max_length=255, null=True)
@@ -2793,6 +2794,7 @@ class CampaignXNewsItem(models.Model):
     visible_to_public = models.BooleanField(default=True)
     date_last_changed = models.DateTimeField(null=True, auto_now=True, db_index=True)
     date_posted = models.DateTimeField(null=True, auto_now_add=True, db_index=True)
+    date_sent_to_email = models.DateTimeField(null=True, db_index=True)
     we_vote_id = models.CharField(
         max_length=255, default=None, null=True,
         blank=True, unique=True, db_index=True)
