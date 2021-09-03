@@ -72,7 +72,6 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
             'success': False,
             'campaignx_list': [],
         }
-        # return HttpResponse(json.dumps(json_data), content_type='application/json')
         return json_data
     voter = voter_results['voter']
     voter_signed_in_with_email = voter.signed_in_with_email()
@@ -83,12 +82,13 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
     site_owner_organization_we_vote_id = results['organization_we_vote_id']
 
     voter_can_vote_for_politician_we_vote_ids = []
-    if voter_can_vote_for_politicians_list_returned:
-        # We need to know all of the politicians this voter can vote for so we can figure out
-        #  if the voter can vote for any politicians in the election
-        from ballot.controllers import what_voter_can_vote_for
-        results = what_voter_can_vote_for(request=request, voter_device_id=voter_device_id)
-        voter_can_vote_for_politician_we_vote_ids = results['voter_can_vote_for_politician_we_vote_ids']
+    # TODO: Creates excessive slow-down. We need a more optimized solution.
+    # if voter_can_vote_for_politicians_list_returned:
+    #     # We need to know all of the politicians this voter can vote for so we can figure out
+    #     #  if the voter can vote for any politicians in the election
+    #     from ballot.controllers import what_voter_can_vote_for
+    #     results = what_voter_can_vote_for(request=request, voter_device_id=voter_device_id)
+    #     voter_can_vote_for_politician_we_vote_ids = results['voter_can_vote_for_politician_we_vote_ids']
 
     visible_on_this_site_campaignx_we_vote_id_list = []
     campaignx_manager = CampaignXManager()
@@ -139,9 +139,46 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
                     if campaignx.is_supporters_count_minimum_exceeded():
                         promoted_campaignx_we_vote_ids.append(campaignx.we_vote_id)
 
+            # Get campaignx news items / updates
+            # NOTE: Leaving this in campaignRetrieve so initial load is as fast as possible
+            # campaignx_news_item_list = []
+            # news_item_list_results = campaignx_manager.retrieve_campaignx_news_item_list(
+            #     campaignx_we_vote_id=campaignx.we_vote_id,
+            #     read_only=True,
+            #     voter_is_campaignx_owner=viewer_is_owner)
+            # if news_item_list_results['campaignx_news_item_list_found']:
+            #     news_item_list = news_item_list_results['campaignx_news_item_list']
+            #     for news_item in news_item_list:
+            #         date_last_changed_string = ''
+            #         date_posted_string = ''
+            #         date_sent_to_email_string = ''
+            #         try:
+            #             date_last_changed_string = news_item.date_last_changed.strftime('%Y-%m-%d %H:%M:%S')
+            #             date_posted_string = news_item.date_posted.strftime('%Y-%m-%d %H:%M:%S')
+            #             if positive_value_exists(news_item.date_sent_to_email):
+            #                 date_sent_to_email_string = news_item.date_sent_to_email.strftime('%Y-%m-%d %H:%M:%S')
+            #         except Exception as e:
+            #             status += "DATE_CONVERSION_ERROR: " + str(e) + " "
+            #         one_news_item_dict = {
+            #             'campaign_news_subject': news_item.campaign_news_subject,
+            #             'campaign_news_text': news_item.campaign_news_text,
+            #             'campaignx_news_item_we_vote_id': news_item.we_vote_id,
+            #             'campaignx_we_vote_id': news_item.campaignx_we_vote_id,
+            #             'date_last_changed': date_last_changed_string,
+            #             'date_posted': date_posted_string,
+            #             'date_sent_to_email': date_sent_to_email_string,
+            #             'in_draft_mode': news_item.in_draft_mode,
+            #             'organization_we_vote_id': news_item.organization_we_vote_id,
+            #             'speaker_name': news_item.speaker_name,
+            #             'visible_to_public': news_item.visible_to_public,
+            #             'voter_we_vote_id': news_item.voter_we_vote_id,
+            #             'we_vote_hosted_profile_image_url_tiny': news_item.we_vote_hosted_profile_image_url_tiny,
+            #         }
+            #         campaignx_news_item_list.append(one_news_item_dict)
+
+            campaignx_owner_list = []
             campaignx_owner_object_list = campaignx_manager.retrieve_campaignx_owner_list(
                 campaignx_we_vote_id=campaignx.we_vote_id, viewer_is_owner=viewer_is_owner)
-            campaignx_owner_list = []
             for campaignx_owner in campaignx_owner_object_list:
                 campaign_owner_dict = {
                     'organization_name':                        campaignx_owner.organization_name,
@@ -174,7 +211,8 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
                         campaignx_politician.we_vote_hosted_profile_image_url_large,
                     'we_vote_hosted_profile_image_url_medium':
                         campaignx_politician.we_vote_hosted_profile_image_url_medium,
-                    'we_vote_hosted_profile_image_url_tiny': campaignx_politician.we_vote_hosted_profile_image_url_tiny,
+                    'we_vote_hosted_profile_image_url_tiny':
+                        campaignx_politician.we_vote_hosted_profile_image_url_tiny,
                 }
                 campaignx_politician_list_modified.append(campaignx_politician_dict)
 
@@ -183,6 +221,7 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
                 campaignx_we_vote_id=campaignx.we_vote_id,
             )
 
+            voter_campaignx_supporter_dict = {}
             supporter_results = campaignx_manager.retrieve_campaignx_supporter(
                 campaignx_we_vote_id=campaignx.we_vote_id,
                 voter_we_vote_id=voter_we_vote_id,
@@ -218,8 +257,6 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
                     'we_vote_hosted_profile_photo_image_url_tiny':
                     campaignx_supporter.we_vote_hosted_profile_image_url_tiny,
                 }
-            else:
-                voter_campaignx_supporter_dict = {}
 
             if hasattr(campaignx, 'visible_on_this_site'):
                 visible_on_this_site = campaignx.visible_on_this_site
@@ -349,6 +386,7 @@ def campaignx_news_item_save_for_api(  # campaignNewsItemSave
             'campaignx_we_vote_id':             '',
             'date_last_changed':                '',
             'date_posted':                      '',
+            'date_sent_to_email':               '',
             'in_draft_mode':                    True,
             'organization_we_vote_id':          '',
             'speaker_name':                     '',
@@ -369,6 +407,7 @@ def campaignx_news_item_save_for_api(  # campaignNewsItemSave
             'campaignx_we_vote_id':             '',
             'date_last_changed':                '',
             'date_posted':                      '',
+            'date_sent_to_email':               '',
             'in_draft_mode':                    True,
             'organization_we_vote_id':          '',
             'speaker_name':                     '',
@@ -394,6 +433,7 @@ def campaignx_news_item_save_for_api(  # campaignNewsItemSave
             'campaignx_we_vote_id':             '',
             'date_last_changed':                '',
             'date_posted':                      '',
+            'date_sent_to_email':               '',
             'in_draft_mode':                    True,
             'organization_we_vote_id':          '',
             'speaker_name':                     '',
@@ -422,8 +462,42 @@ def campaignx_news_item_save_for_api(  # campaignNewsItemSave
     )
 
     status += create_results['status']
+    campaignx_news_item = None
+    campaignx_news_item_found = False
+    date_sent_to_email_found = False
     if create_results['campaignx_news_item_found']:
         campaignx_news_item = create_results['campaignx_news_item']
+        date_sent_to_email_found = positive_value_exists(campaignx_news_item.date_sent_to_email)
+        campaignx_news_item_found = True
+
+    send_campaignx_news_item = positive_value_exists(send_now)
+    if campaignx_news_item_found:
+        results = campaignx_manager.retrieve_campaignx(
+            campaignx_we_vote_id=campaignx_we_vote_id,
+            read_only=True,
+        )
+        if results['campaignx_found']:
+            campaignx = results['campaignx']
+
+            from activity.controllers import update_or_create_activity_notice_seed_for_campaignx_news_item
+            activity_results = update_or_create_activity_notice_seed_for_campaignx_news_item(
+                campaignx_news_item_we_vote_id=campaignx_news_item.we_vote_id,
+                campaignx_we_vote_id=campaignx.we_vote_id,
+                send_campaignx_news_item=send_campaignx_news_item,
+                speaker_name=campaignx_news_item.speaker_name,
+                speaker_organization_we_vote_id=campaignx_news_item.organization_we_vote_id,
+                speaker_voter_we_vote_id=campaignx_news_item.voter_we_vote_id,
+                speaker_profile_image_url_tiny=campaignx_news_item.we_vote_hosted_profile_image_url_tiny,
+                statement_subject=campaignx_news_item.campaign_news_subject,
+                statement_text=campaignx_news_item.campaign_news_text)
+            status += activity_results['status']
+            if activity_results['success'] and send_campaignx_news_item and not date_sent_to_email_found:
+                if activity_results['activity_notice_seed_found']:
+                    activity_notice_seed = activity_results['activity_notice_seed']
+                    campaignx_news_item.date_sent_to_email = activity_notice_seed.date_sent_to_email
+                    campaignx_news_item.save()
+
+    if campaignx_news_item_found:
         date_last_changed_string = ''
         date_posted_string = ''
         try:
@@ -440,10 +514,10 @@ def campaignx_news_item_save_for_api(  # campaignNewsItemSave
             'campaignx_we_vote_id':         campaignx_news_item.campaignx_we_vote_id,
             'date_last_changed':            date_last_changed_string,
             'date_posted':                  date_posted_string,
+            'date_sent_to_email':           campaignx_news_item.date_sent_to_email,
             'in_draft_mode':                campaignx_news_item.in_draft_mode,
             'organization_we_vote_id':      campaignx_news_item.organization_we_vote_id,
             'speaker_name':                 campaignx_news_item.speaker_name,
-            'visible_to_public':            campaignx_news_item.visible_to_public,
             'voter_we_vote_id':             campaignx_news_item.voter_we_vote_id,
             'we_vote_hosted_profile_photo_image_url_tiny': campaignx_news_item.we_vote_hosted_profile_image_url_tiny,
         }
@@ -459,6 +533,7 @@ def campaignx_news_item_save_for_api(  # campaignNewsItemSave
             'campaignx_we_vote_id':             '',
             'date_last_changed':                '',
             'date_posted':                      '',
+            'date_sent_to_email':               '',
             'in_draft_mode':                    True,
             'organization_we_vote_id':          '',
             'speaker_name':                     '',
@@ -619,9 +694,12 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
         for news_item in news_item_list:
             date_last_changed_string = ''
             date_posted_string = ''
+            date_sent_to_email_string = ''
             try:
                 date_last_changed_string = news_item.date_last_changed.strftime('%Y-%m-%d %H:%M:%S')
                 date_posted_string = news_item.date_posted.strftime('%Y-%m-%d %H:%M:%S')
+                if positive_value_exists(news_item.date_sent_to_email):
+                    date_sent_to_email_string = news_item.date_sent_to_email.strftime('%Y-%m-%d %H:%M:%S')
             except Exception as e:
                 status += "DATE_CONVERSION_ERROR: " + str(e) + " "
             one_news_item_dict = {
@@ -631,6 +709,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
                 'campaignx_we_vote_id': news_item.campaignx_we_vote_id,
                 'date_last_changed': date_last_changed_string,
                 'date_posted': date_posted_string,
+                'date_sent_to_email': date_sent_to_email_string,
                 'in_draft_mode': news_item.in_draft_mode,
                 'organization_we_vote_id': news_item.organization_we_vote_id,
                 'speaker_name': news_item.speaker_name,

@@ -14,12 +14,15 @@ from wevote_settings.models import fetch_next_we_vote_id_activity_notice_seed_in
 
 # Kind of Seeds (value should not exceed 50 chars)
 NOTICE_ACTIVITY_POST_SEED = 'NOTICE_ACTIVITY_POST_SEED'
+NOTICE_CAMPAIGNX_NEWS_ITEM_SEED = 'NOTICE_CAMPAIGNX_NEWS_ITEM_SEED'
 NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_SEED = 'NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_SEED'
 NOTICE_FRIEND_ENDORSEMENTS_SEED = 'NOTICE_FRIEND_ENDORSEMENTS_SEED'
 NOTICE_VOTER_DAILY_SUMMARY_SEED = 'NOTICE_VOTER_DAILY_SUMMARY_SEED'  # Activity that touches each voter, for each day
 
 # Kind of Notices (value should not exceed 50 chars)
 NOTICE_CAMPAIGNX_FRIEND_HAS_SUPPORTED = 'NOTICE_CAMPAIGNX_FRIEND_HAS_SUPPORTED'
+NOTICE_CAMPAIGNX_NEWS_ITEM = 'NOTICE_CAMPAIGNX_NEWS_ITEM'
+NOTICE_CAMPAIGNX_NEWS_ITEM_AUTHORED = 'NOTICE_CAMPAIGNX_NEWS_ITEM_AUTHORED'
 NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE = 'NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE'
 NOTICE_FRIEND_ACTIVITY_POSTS = 'NOTICE_FRIEND_ACTIVITY_POSTS'  # Notice shown in header menu, no email sent
 NOTICE_FRIEND_ENDORSEMENTS = 'NOTICE_FRIEND_ENDORSEMENTS'
@@ -80,6 +83,7 @@ class ActivityManager(models.Manager):
             self,
             activity_notice_seed_id=0,
             activity_tidbit_we_vote_id='',
+            campaignx_news_item_we_vote_id=None,
             campaignx_we_vote_id=None,
             date_of_notice=None,
             kind_of_notice=None,
@@ -96,7 +100,8 @@ class ActivityManager(models.Manager):
             speaker_voter_we_vote_id='',
             speaker_profile_image_url_medium='',
             speaker_profile_image_url_tiny='',
-            statement_text_preview=''):
+            statement_subject=None,
+            statement_text_preview=None):
         status = ''
 
         if not positive_value_exists(speaker_organization_we_vote_id):
@@ -117,6 +122,7 @@ class ActivityManager(models.Manager):
             activity_notice = ActivityNotice.objects.create(
                 activity_notice_seed_id=activity_notice_seed_id,
                 activity_tidbit_we_vote_id=activity_tidbit_we_vote_id,
+                campaignx_news_item_we_vote_id=campaignx_news_item_we_vote_id,
                 campaignx_we_vote_id=campaignx_we_vote_id,
                 date_of_notice=date_of_notice,
                 kind_of_notice=kind_of_notice,
@@ -134,7 +140,8 @@ class ActivityManager(models.Manager):
                 speaker_voter_we_vote_id=speaker_voter_we_vote_id,
                 speaker_profile_image_url_medium=speaker_profile_image_url_medium,
                 speaker_profile_image_url_tiny=speaker_profile_image_url_tiny,
-                statement_text_preview=statement_text_preview
+                statement_subject=statement_subject,
+                statement_text_preview=statement_text_preview,
             )
             activity_notice_saved = True
             success = True
@@ -159,6 +166,7 @@ class ActivityManager(models.Manager):
             activity_notices_scheduled=False,
             activity_tidbit_we_vote_ids_for_friends_serialized='',
             activity_tidbit_we_vote_ids_for_public_serialized='',
+            campaignx_news_item_we_vote_id=None,
             campaignx_we_vote_id=None,
             date_of_notice=None,
             kind_of_seed=None,
@@ -166,8 +174,8 @@ class ActivityManager(models.Manager):
             position_names_for_public_serialized='',
             position_we_vote_ids_for_friends_serialized='',
             position_we_vote_ids_for_public_serialized='',
-            recipient_name='',
-            recipient_voter_we_vote_id='',
+            recipient_name=None,
+            recipient_voter_we_vote_id=None,
             send_to_email=False,  # For VOTER_DAILY_SUMMARY
             send_to_sms=False,  # For VOTER_DAILY_SUMMARY
             speaker_name='',
@@ -177,19 +185,23 @@ class ActivityManager(models.Manager):
             speaker_voter_we_vote_ids_serialized=None,
             speaker_profile_image_url_medium='',
             speaker_profile_image_url_tiny='',
+            statement_subject='',
             statement_text_preview=''):
         status = ''
 
-        if not positive_value_exists(speaker_organization_we_vote_id) \
-                and not positive_value_exists(recipient_voter_we_vote_id):
+        if not positive_value_exists(speaker_organization_we_vote_id):
             activity_notice_seed = None
             results = {
                 'success':                      False,
-                'status':                       "ACTIVITY_NOTICE_SEED_MISSING_SPEAKER_AND_LISTENER ",
+                'status':                       "ACTIVITY_NOTICE_SEED_MISSING_SPEAKER ",
                 'activity_notice_seed_saved':   False,
                 'activity_notice_seed':         activity_notice_seed,
             }
             return results
+
+        date_sent_to_email = None
+        if positive_value_exists(send_to_email):
+            date_sent_to_email = now()
 
         try:
             activity_notice_seed = ActivityNoticeSeed.objects.create(
@@ -197,8 +209,10 @@ class ActivityManager(models.Manager):
                 activity_notices_scheduled=activity_notices_scheduled,
                 activity_tidbit_we_vote_ids_for_friends_serialized=activity_tidbit_we_vote_ids_for_friends_serialized,
                 activity_tidbit_we_vote_ids_for_public_serialized=activity_tidbit_we_vote_ids_for_public_serialized,
+                campaignx_news_item_we_vote_id=campaignx_news_item_we_vote_id,
                 campaignx_we_vote_id=campaignx_we_vote_id,
                 date_of_notice=date_of_notice,
+                date_sent_to_email=date_sent_to_email,
                 kind_of_seed=kind_of_seed,
                 position_names_for_friends_serialized=position_names_for_friends_serialized,
                 position_names_for_public_serialized=position_names_for_public_serialized,
@@ -215,7 +229,8 @@ class ActivityManager(models.Manager):
                 speaker_voter_we_vote_ids_serialized=speaker_voter_we_vote_ids_serialized,
                 speaker_profile_image_url_medium=speaker_profile_image_url_medium,
                 speaker_profile_image_url_tiny=speaker_profile_image_url_tiny,
-                statement_text_preview=statement_text_preview
+                statement_subject=statement_subject,
+                statement_text_preview=statement_text_preview,
             )
             activity_notice_seed_saved = True
             success = True
@@ -291,7 +306,7 @@ class ActivityManager(models.Manager):
         :return:
         """
         try:
-            queryset = ActivityNotice.objects.all()
+            queryset = ActivityNotice.objects.using('readonly').all()
             queryset = queryset.filter(deleted=False)
             if activity_in_last_x_seconds is not None:
                 activity_in_last_x_seconds = convert_to_int(activity_in_last_x_seconds)
@@ -343,7 +358,7 @@ class ActivityManager(models.Manager):
         number_of_comments = 0
         try:
             if positive_value_exists(parent_comment_we_vote_id):
-                queryset = ActivityComment.objects.all()
+                queryset = ActivityComment.objects.using('readonly').all()
                 queryset = queryset.filter(
                     parent_comment_we_vote_id__iexact=parent_comment_we_vote_id,
                     deleted=False
@@ -440,6 +455,72 @@ class ActivityManager(models.Manager):
             'parent_comment_we_vote_id': parent_comment_we_vote_id,
             'activity_comment_list_found':  activity_comment_list_found,
             'activity_comment_list':        activity_comment_list,
+        }
+        return results
+
+    def retrieve_activity_notice_for_campaignx(
+            self,
+            campaignx_news_item_we_vote_id=None,
+            campaignx_we_vote_id=None,
+            kind_of_notice='',
+            recipient_voter_we_vote_id='',
+            speaker_organization_we_vote_id='',
+            speaker_voter_we_vote_id=''):
+        exception_does_not_exist = False
+        exception_multiple_object_returned = False
+        activity_notice = None
+        activity_notice_found = False
+        activity_notice_id = 0
+        status = ""
+
+        try:
+            query = ActivityNotice.objects.filter(
+                campaignx_news_item_we_vote_id=campaignx_news_item_we_vote_id,
+                campaignx_we_vote_id=campaignx_we_vote_id,
+                deleted=False,
+                kind_of_notice=kind_of_notice,
+                recipient_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
+            )
+            if positive_value_exists(speaker_organization_we_vote_id):
+                query = query.filter(
+                    speaker_organization_we_vote_id__iexact=speaker_organization_we_vote_id,
+                )
+                activity_notice = query.get()
+                activity_notice_id = activity_notice.id
+                activity_notice_found = True
+                success = True
+                status += "RETRIEVE_RECENT_ACTIVITY_NOTICE_FOUND_BY_ORG_WE_VOTE_ID "
+            elif positive_value_exists(speaker_voter_we_vote_id):
+                query = query.filter(
+                    speaker_voter_we_vote_id__iexact=speaker_voter_we_vote_id,
+                )
+                activity_notice = query.get()
+                activity_notice_id = activity_notice.id
+                activity_notice_found = True
+                success = True
+                status += "RETRIEVE_RECENT_ACTIVITY_NOTICE_FOUND_BY_VOTER_WE_VOTE_ID "
+            else:
+                activity_notice = query.get()
+                activity_notice_id = activity_notice.id
+                activity_notice_found = True
+                success = True
+                status += "RETRIEVE_RECENT_ACTIVITY_NOTICE_FOUND "
+        except ActivityNotice.DoesNotExist:
+            exception_does_not_exist = True
+            success = True
+            status += "RETRIEVE_RECENT_ACTIVITY_NOTICE_NOT_FOUND "
+        except Exception as e:
+            success = False
+            status += 'FAILED retrieve_recent_activity_notice_from_speaker_and_recipient: ' + str(e) + ' '
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'DoesNotExist':             exception_does_not_exist,
+            'MultipleObjectsReturned':  exception_multiple_object_returned,
+            'activity_notice_found':    activity_notice_found,
+            'activity_notice_id':       activity_notice_id,
+            'activity_notice':          activity_notice,
         }
         return results
 
@@ -652,6 +733,53 @@ class ActivityManager(models.Manager):
         }
         return results
 
+    def retrieve_activity_notice_seed(
+            self,
+            campaignx_news_item_we_vote_id=None,
+            campaignx_we_vote_id=None,
+            kind_of_seed=''):
+        exception_does_not_exist = False
+        exception_multiple_object_returned = False
+        activity_notice_seed_found = False
+        activity_notice_seed = None
+        activity_notice_seed_id = 0
+        status = ""
+
+        try:
+            if positive_value_exists(campaignx_news_item_we_vote_id):
+                activity_notice_seed = ActivityNoticeSeed.objects.get(
+                    campaignx_news_item_we_vote_id=campaignx_news_item_we_vote_id,
+                    campaignx_we_vote_id=campaignx_we_vote_id,
+                    deleted=False,
+                    kind_of_seed=kind_of_seed,
+                )
+                activity_notice_seed_id = activity_notice_seed.id
+                activity_notice_seed_found = True
+                success = True
+                status += "RETRIEVE_ACTIVITY_NOTICE_SEED_FOUND "
+            else:
+                activity_notice_seed_found = False
+                success = False
+                status += "RETRIEVE_RECENT_ACTIVITY_NOTICE_SEED_VARIABLES_MISSING "
+        except ActivityNoticeSeed.DoesNotExist:
+            exception_does_not_exist = True
+            success = True
+            status += "RETRIEVE_RECENT_ACTIVITY_NOTICE_SEED_NOT_FOUND "
+        except Exception as e:
+            success = False
+            status += 'FAILED retrieve_activity_notice_seed ActivityNoticeSeed: ' + str(e) + ' '
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'DoesNotExist':                     exception_does_not_exist,
+            'MultipleObjectsReturned':          exception_multiple_object_returned,
+            'activity_notice_seed_found':       activity_notice_seed_found,
+            'activity_notice_seed_id':          activity_notice_seed_id,
+            'activity_notice_seed':             activity_notice_seed,
+        }
+        return results
+
     def retrieve_recent_activity_notice_seed_from_speaker(
             self,
             campaignx_we_vote_id=None,
@@ -711,7 +839,7 @@ class ActivityManager(models.Manager):
             status += "RETRIEVE_RECENT_ACTIVITY_NOTICE_SEED_NOT_FOUND "
         except Exception as e:
             success = False
-            status += 'FAILED retrieve_recent_activity_notice_seed_from_speaker ActivityNoticeSeed ' + str(e) + ' '
+            status += 'FAILED retrieve_recent_activity_notice_seed_from_speaker ActivityNoticeSeed: ' + str(e) + ' '
 
         results = {
             'success':                          success,
@@ -878,6 +1006,7 @@ class ActivityManager(models.Manager):
                 queryset = \
                     queryset.filter(kind_of_seed__in=[
                         NOTICE_ACTIVITY_POST_SEED,
+                        NOTICE_CAMPAIGNX_NEWS_ITEM_SEED,
                         NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_SEED,
                         NOTICE_FRIEND_ENDORSEMENTS_SEED
                     ])
@@ -885,6 +1014,7 @@ class ActivityManager(models.Manager):
                 queryset = queryset.filter(activity_notices_scheduled=False)
                 queryset = queryset.filter(
                     kind_of_seed__in=[
+                        NOTICE_CAMPAIGNX_NEWS_ITEM_SEED,
                         NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_SEED,
                         NOTICE_FRIEND_ENDORSEMENTS_SEED,
                         NOTICE_VOTER_DAILY_SUMMARY_SEED
@@ -904,7 +1034,7 @@ class ActivityManager(models.Manager):
                         NOTICE_ACTIVITY_POST_SEED,
                         NOTICE_FRIEND_ENDORSEMENTS_SEED
                     ])
-                # TODO: NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_SEED
+                # TODO Add: NOTICE_CAMPAIGNX_NEWS_ITEM_SEED, NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_SEED
             if activity_notice_seed_id_already_reviewed_list and len(activity_notice_seed_id_already_reviewed_list) > 0:
                 queryset = queryset.exclude(id__in=activity_notice_seed_id_already_reviewed_list)
 
@@ -1472,7 +1602,8 @@ class ActivityNotice(models.Model):
     """
     activity_notice_seed_id = models.PositiveIntegerField(default=None, null=True)
     activity_tidbit_we_vote_id = models.CharField(max_length=255, default=None, null=True)  # subject of notice
-    campaignx_we_vote_id = models.CharField(max_length=255, default=None, null=True)  # subject if campaignx
+    campaignx_news_item_we_vote_id = models.CharField(max_length=255, default=None, null=True)
+    campaignx_we_vote_id = models.CharField(max_length=255, default=None, null=True)
     date_of_notice = models.DateTimeField(null=True)
     date_last_changed = models.DateTimeField(null=True, auto_now=True)
     activity_notice_clicked = models.BooleanField(default=False)
@@ -1500,6 +1631,7 @@ class ActivityNotice(models.Model):
     sent_to_sms = models.BooleanField(default=False)
     speaker_profile_image_url_medium = models.TextField(blank=True, null=True)
     speaker_profile_image_url_tiny = models.TextField(blank=True, null=True)
+    statement_subject = models.CharField(max_length=255, default=None, null=True)
     statement_text_preview = models.CharField(max_length=255, default=None, null=True)
 
 
@@ -1514,9 +1646,11 @@ class ActivityNoticeSeed(models.Model):
     date_of_notice_earlier_than_update_window = models.BooleanField(default=False)
     activity_notices_scheduled = models.BooleanField(default=False)
     added_to_voter_daily_summary = models.BooleanField(default=False)
+    campaignx_news_item_we_vote_id = models.CharField(max_length=255, default=None, null=True)
     campaignx_we_vote_id = models.CharField(max_length=255, default=None, null=True)
     date_of_notice = models.DateTimeField(null=True)
     date_last_changed = models.DateTimeField(null=True, auto_now=True)
+    date_sent_to_email = models.DateTimeField(null=True)
     deleted = models.BooleanField(default=False)
     kind_of_seed = models.CharField(max_length=50, default=None, null=True)
     # Positions that were changed: NOTICE_FRIEND_ENDORSEMENTS
@@ -1545,6 +1679,7 @@ class ActivityNoticeSeed(models.Model):
     speaker_profile_image_url_tiny = models.TextField(blank=True, null=True)
     speaker_twitter_handle = models.CharField(max_length=255, null=True, unique=False, default=None)
     speaker_twitter_followers_count = models.IntegerField(default=0)
+    statement_subject = models.CharField(max_length=255, default=None, null=True)
     statement_text_preview = models.CharField(max_length=255, default=None, null=True)
     # we_vote_id of this SEED
     we_vote_id = models.CharField(max_length=255, default=None, null=True, unique=True)
@@ -1610,6 +1745,8 @@ class ActivityPost(models.Model):
 def get_lifespan_of_seed(kind_of_seed):
     if kind_of_seed == NOTICE_ACTIVITY_POST_SEED:
         return 14400  # 4 hours * 60 minutes * 60 seconds/minute
+    if kind_of_seed == NOTICE_CAMPAIGNX_NEWS_ITEM_SEED:
+        return 7776000  # 3 months * 30 days * 24 hours * 60 minutes * 60 seconds/minute
     if kind_of_seed == NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_SEED:
         return 7776000  # 3 months * 30 days * 24 hours * 60 minutes * 60 seconds/minute
     if kind_of_seed == NOTICE_FRIEND_ENDORSEMENTS_SEED:

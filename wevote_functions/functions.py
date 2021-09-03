@@ -1657,6 +1657,28 @@ def remove_period_from_name_prefix_and_suffix(name):
     return results
 
 
+def return_first_x_words(original_string, number_of_words_to_return, include_ellipses=False):
+    # Mimics returnFirstXWords in WebApp and Campaigns site
+    if not original_string:
+        return ''
+
+    need_for_ellipses = False
+    words_array = original_string.split()
+    x_words = ''
+    i = 0
+    for one_word in words_array:
+        if i >= number_of_words_to_return:
+            need_for_ellipses = True
+        if i < number_of_words_to_return:
+            x_words += one_word + ' '
+        i += 1
+    # Finally remove leading or trailing spaces
+    x_words = x_words.strip()
+    if need_for_ellipses and include_ellipses:
+        x_words += '...'
+    return x_words
+
+
 def strip_html_tags(value):
     """
     Creating a separate strip tag function instead of using  django.utils.html.strip_tags directly where required to

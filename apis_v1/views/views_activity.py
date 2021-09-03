@@ -9,7 +9,9 @@ import threading
 import time
 from activity.controllers import update_or_create_activity_notice_seed_for_activity_posts
 from activity.models import ActivityManager, \
-    NOTICE_CAMPAIGNX_FRIEND_HAS_SUPPORTED, NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE, \
+    NOTICE_CAMPAIGNX_FRIEND_HAS_SUPPORTED, \
+    NOTICE_CAMPAIGNX_NEWS_ITEM, NOTICE_CAMPAIGNX_NEWS_ITEM_AUTHORED, \
+    NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE, \
     NOTICE_FRIEND_ACTIVITY_POSTS, NOTICE_FRIEND_ENDORSEMENTS, \
     NOTICE_FRIEND_ENDORSEMENTS_SEED
 from config.base import get_environment_variable
@@ -404,6 +406,8 @@ def activity_notice_list_retrieve_view(request):  # activityNoticeListRetrieve
             include_this_activity_notice = True
         elif activity_notice.kind_of_notice in [
             NOTICE_CAMPAIGNX_FRIEND_HAS_SUPPORTED,
+            NOTICE_CAMPAIGNX_NEWS_ITEM,
+            NOTICE_CAMPAIGNX_NEWS_ITEM_AUTHORED,
             NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE,
             NOTICE_FRIEND_ACTIVITY_POSTS,
         ]:
