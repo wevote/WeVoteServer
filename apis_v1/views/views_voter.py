@@ -2410,12 +2410,16 @@ def voter_update_view(request):  # voterUpdate
                         owner_results = campaignx_manager.update_campaignx_owners_with_organization_change(
                             organization_we_vote_id=organization.we_vote_id,
                             organization_name=organization.organization_name,
+                            we_vote_hosted_profile_image_url_medium=
+                            organization.we_vote_hosted_profile_image_url_medium,
                             we_vote_hosted_profile_image_url_tiny=organization.we_vote_hosted_profile_image_url_tiny,
                         )
                         status += owner_results['status']
                         supporter_results = campaignx_manager.update_campaignx_supporters_with_organization_change(
                             organization_we_vote_id=organization.we_vote_id,
                             supporter_name=organization.organization_name,
+                            we_vote_hosted_profile_image_url_medium=
+                            organization.we_vote_hosted_profile_image_url_medium,
                             we_vote_hosted_profile_image_url_tiny=organization.we_vote_hosted_profile_image_url_tiny,
                         )
                         status += supporter_results['status']

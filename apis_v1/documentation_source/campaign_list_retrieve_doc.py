@@ -65,8 +65,10 @@ def campaign_list_retrieve_doc_template_values(url_root):
                    '     "we_vote_hosted_campaign_photo_small_url": string,\n' \
                    '     "campaignx_owner_list": list\n' \
                    '     [\n' \
+                   '       "feature_this_profile_image": boolean,\n' \
                    '       "organization_name": string,\n' \
                    '       "organization_we_vote_id": string,\n' \
+                   '       "we_vote_hosted_profile_image_url_medium": string,\n' \
                    '       "we_vote_hosted_profile_image_url_tiny": string,\n' \
                    '       "visible_to_public": boolean,\n' \
                    '     ],\n' \

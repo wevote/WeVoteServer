@@ -109,10 +109,12 @@ def campaign_save_doc_template_values(url_root):
                    '  "campaignx_owner_list": list\n' \
                    '   [\n' \
                    '   {\n' \
+                   '     "feature_this_profile_image": boolean,\n' \
                    '     "organization_name": string,\n' \
                    '     "organization_we_vote_id": string,\n' \
-                   '     "we_vote_hosted_profile_image_url_tiny": string,\n' \
                    '     "visible_to_public": boolean,\n' \
+                   '     "we_vote_hosted_profile_image_url_medium": string,\n' \
+                   '     "we_vote_hosted_profile_image_url_tiny": string,\n' \
                    '   },\n' \
                    '   ],\n' \
                    '  "campaignx_politician_list": list\n' \
@@ -159,6 +161,7 @@ def campaign_save_doc_template_values(url_root):
                    '     "supporter_endorsement": string,\n' \
                    '     "supporter_name": string,\n' \
                    '     "voter_we_vote_id": string,\n' \
+                   '     "we_vote_hosted_profile_image_url_medium": string,\n' \
                    '     "we_vote_hosted_profile_image_url_tiny": string,\n' \
                    '   },\n' \
                    '   ],\n' \

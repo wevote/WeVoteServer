@@ -644,6 +644,9 @@ class CampaignXManager(models.Manager):
                     else campaignx_owner.organization_name
                 campaignx_owner_organization_we_vote_id = '' if campaignx_owner.organization_we_vote_id is None \
                     else campaignx_owner.organization_we_vote_id
+                campaignx_owner_we_vote_hosted_profile_image_url_medium = '' \
+                    if campaignx_owner.we_vote_hosted_profile_image_url_medium is None \
+                    else campaignx_owner.we_vote_hosted_profile_image_url_medium
                 campaignx_owner_we_vote_hosted_profile_image_url_tiny = '' \
                     if campaignx_owner.we_vote_hosted_profile_image_url_tiny is None \
                     else campaignx_owner.we_vote_hosted_profile_image_url_tiny
@@ -652,7 +655,9 @@ class CampaignXManager(models.Manager):
                     'organization_we_vote_id':                  campaignx_owner_organization_we_vote_id,
                     'feature_this_profile_image':                       campaignx_owner.feature_this_profile_image,
                     'visible_to_public':                        campaignx_owner.visible_to_public,
-                    'we_vote_hosted_profile_image_url_tiny':    campaignx_owner_we_vote_hosted_profile_image_url_tiny,
+                    'we_vote_hosted_profile_image_url_medium':
+                        campaignx_owner_we_vote_hosted_profile_image_url_medium,
+                    'we_vote_hosted_profile_image_url_tiny': campaignx_owner_we_vote_hosted_profile_image_url_tiny,
                 }
                 campaignx_owner_list.append(campaign_owner_dict)
 
@@ -750,6 +755,7 @@ class CampaignXManager(models.Manager):
                     'organization_we_vote_id':                  campaignx_owner.organization_we_vote_id,
                     'feature_this_profile_image':               campaignx_owner.feature_this_profile_image,
                     'visible_to_public':                        campaignx_owner.visible_to_public,
+                    'we_vote_hosted_profile_image_url_medium':  campaignx_owner.we_vote_hosted_profile_image_url_medium,
                     'we_vote_hosted_profile_image_url_tiny':    campaignx_owner.we_vote_hosted_profile_image_url_tiny,
                 }
                 campaignx_owner_list.append(campaign_owner_dict)
@@ -1405,6 +1411,8 @@ class CampaignXManager(models.Manager):
                         if results['organization_found']:
                             organization = results['organization']
                             first_campaignx_supporter.supporter_name = organization.organization_name
+                            first_campaignx_supporter.we_vote_hosted_profile_image_url_medium = \
+                                organization.we_vote_hosted_profile_image_url_medium
                             first_campaignx_supporter.we_vote_hosted_profile_image_url_tiny = \
                                 organization.we_vote_hosted_profile_image_url_tiny
 
@@ -1773,6 +1781,7 @@ class CampaignXManager(models.Manager):
             self,
             organization_we_vote_id,
             organization_name,
+            we_vote_hosted_profile_image_url_medium,
             we_vote_hosted_profile_image_url_tiny):
         status = ''
         success = True
@@ -1782,6 +1791,7 @@ class CampaignXManager(models.Manager):
             campaignx_owner_entries_updated = CampaignXOwner.objects \
                 .filter(organization_we_vote_id__iexact=organization_we_vote_id) \
                 .update(organization_name=organization_name,
+                        we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
                         we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
         except Exception as e:
             status += "FAILED-CAMPAIGNX_OWNER_UPDATE_WITH_ORGANIZATION_CHANGE: " + str(e) + " "
@@ -1798,6 +1808,7 @@ class CampaignXManager(models.Manager):
             self,
             organization_we_vote_id,
             supporter_name,
+            we_vote_hosted_profile_image_url_medium,
             we_vote_hosted_profile_image_url_tiny):
         status = ''
         success = True
@@ -1807,6 +1818,7 @@ class CampaignXManager(models.Manager):
             campaignx_supporter_entries_updated = CampaignXSupporter.objects \
                 .filter(organization_we_vote_id__iexact=organization_we_vote_id) \
                 .update(supporter_name=supporter_name,
+                        we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
                         we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
         except Exception as e:
             status += "FAILED-CAMPAIGNX_SUPPORTER_UPDATE_WITH_ORGANIZATION_CHANGE: " + str(e) + " "
@@ -2215,6 +2227,10 @@ class CampaignXManager(models.Manager):
                 if positive_value_exists(organization.organization_name):
                     campaignx_news_item.speaker_name = organization.organization_name
                     campaignx_news_item_changed = True
+                if positive_value_exists(organization.we_vote_hosted_profile_image_url_medium):
+                    campaignx_news_item.we_vote_hosted_profile_image_url_medium = \
+                        organization.we_vote_hosted_profile_image_url_medium
+                    campaignx_news_item_changed = True
                 if positive_value_exists(organization.we_vote_hosted_profile_image_url_tiny):
                     campaignx_news_item.we_vote_hosted_profile_image_url_tiny = \
                         organization.we_vote_hosted_profile_image_url_tiny
@@ -2267,6 +2283,7 @@ class CampaignXManager(models.Manager):
             organization_we_vote_id=None,
             organization_name=None,
             visible_to_public=None,
+            we_vote_hosted_profile_image_url_medium=None,
             we_vote_hosted_profile_image_url_tiny=None):
         status = ""
         if not positive_value_exists(campaignx_we_vote_id) or not positive_value_exists(voter_we_vote_id):
@@ -2286,7 +2303,9 @@ class CampaignXManager(models.Manager):
         campaignx_owner_updated = False
 
         results = campaignx_manager.retrieve_campaignx_owner(
-            campaignx_we_vote_id=campaignx_we_vote_id, voter_we_vote_id=voter_we_vote_id, read_only=False)
+            campaignx_we_vote_id=campaignx_we_vote_id,
+            voter_we_vote_id=voter_we_vote_id,
+            read_only=False)
         campaignx_owner_found = results['campaignx_owner_found']
         campaignx_owner = results['campaignx_owner']
         success = results['success']
@@ -2300,6 +2319,8 @@ class CampaignXManager(models.Manager):
                 organization = organization_results['organization']
                 if organization_name is None:
                     organization_name = organization.organization_name
+                if we_vote_hosted_profile_image_url_medium is None:
+                    we_vote_hosted_profile_image_url_medium = organization.we_vote_hosted_profile_image_url_medium
                 if we_vote_hosted_profile_image_url_tiny is None:
                     we_vote_hosted_profile_image_url_tiny = organization.we_vote_hosted_profile_image_url_tiny
 
@@ -2307,6 +2328,7 @@ class CampaignXManager(models.Manager):
             if organization_name is not None \
                     or organization_we_vote_id is not None \
                     or visible_to_public is not None \
+                    or we_vote_hosted_profile_image_url_medium is not None \
                     or we_vote_hosted_profile_image_url_tiny is not None:
                 try:
                     if organization_name is not None:
@@ -2315,6 +2337,9 @@ class CampaignXManager(models.Manager):
                         campaignx_owner.organization_we_vote_id = organization_we_vote_id
                     if visible_to_public is not None:
                         campaignx_owner.visible_to_public = positive_value_exists(visible_to_public)
+                    if we_vote_hosted_profile_image_url_medium is not None:
+                        campaignx_owner.we_vote_hosted_profile_image_url_medium = \
+                            we_vote_hosted_profile_image_url_medium
                     if we_vote_hosted_profile_image_url_tiny is not None:
                         campaignx_owner.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
                     campaignx_owner.save()
@@ -2338,6 +2363,8 @@ class CampaignXManager(models.Manager):
                     campaignx_owner.organization_we_vote_id = organization_we_vote_id
                 if visible_to_public is not None:
                     campaignx_owner.visible_to_public = positive_value_exists(visible_to_public)
+                if we_vote_hosted_profile_image_url_medium is not None:
+                    campaignx_owner.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
                 if we_vote_hosted_profile_image_url_tiny is not None:
                     campaignx_owner.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
                 campaignx_owner.save()
@@ -2620,6 +2647,10 @@ class CampaignXManager(models.Manager):
                     if positive_value_exists(organization.organization_name):
                         campaignx_supporter.supporter_name = organization.organization_name
                         campaignx_supporter_changed = True
+                    if positive_value_exists(organization.we_vote_hosted_profile_image_url_medium):
+                        campaignx_supporter.we_vote_hosted_profile_image_url_medium = \
+                            organization.we_vote_hosted_profile_image_url_medium
+                        campaignx_supporter_changed = True
                     if positive_value_exists(organization.we_vote_hosted_profile_image_url_tiny):
                         campaignx_supporter.we_vote_hosted_profile_image_url_tiny = \
                             organization.we_vote_hosted_profile_image_url_tiny
@@ -2665,6 +2696,10 @@ class CampaignXManager(models.Manager):
                     organization = organization_results['organization']
                     if positive_value_exists(organization.organization_name):
                         campaignx_supporter.supporter_name = organization.organization_name
+                        campaignx_supporter_changed = True
+                    if positive_value_exists(organization.we_vote_hosted_profile_image_url_medium):
+                        campaignx_supporter.we_vote_hosted_profile_image_url_medium = \
+                            organization.we_vote_hosted_profile_image_url_medium
                         campaignx_supporter_changed = True
                     if positive_value_exists(organization.we_vote_hosted_profile_image_url_tiny):
                         campaignx_supporter.we_vote_hosted_profile_image_url_tiny = \
@@ -2718,6 +2753,7 @@ class CampaignXOwner(models.Model):
     organization_name = models.CharField(max_length=255, null=False, blank=False)
     feature_this_profile_image = models.BooleanField(default=True)
     visible_to_public = models.BooleanField(default=False)
+    we_vote_hosted_profile_image_url_medium = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True, db_index=True)
 
@@ -2768,6 +2804,7 @@ class CampaignXSupporter(models.Model):
     organization_we_vote_id = models.CharField(max_length=255, null=True)
     supporter_name = models.CharField(max_length=255, null=True)
     supporter_endorsement = models.TextField(null=True)
+    we_vote_hosted_profile_image_url_medium = models.TextField(null=True)
     we_vote_hosted_profile_image_url_tiny = models.TextField(null=True)
     visibility_blocked_by_we_vote = models.BooleanField(default=False)
     visible_to_public = models.BooleanField(default=False)
@@ -2789,6 +2826,7 @@ class CampaignXNewsItem(models.Model):
     campaign_news_subject = models.TextField(null=True)
     campaign_news_text = models.TextField(null=True)
     in_draft_mode = models.BooleanField(default=True, db_index=True)
+    we_vote_hosted_profile_image_url_medium = models.TextField(null=True)
     we_vote_hosted_profile_image_url_tiny = models.TextField(null=True)
     visibility_blocked_by_we_vote = models.BooleanField(default=False)
     visible_to_public = models.BooleanField(default=True)

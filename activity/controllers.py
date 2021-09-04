@@ -1116,6 +1116,13 @@ def update_or_create_activity_notices_from_seed(activity_notice_seed):
         if activity_notice_seed.kind_of_seed == NOTICE_CAMPAIGNX_NEWS_ITEM_SEED:
             # #########
             # Notice to the creator for drop down.
+            results = campaignx_manager.retrieve_campaignx(
+                campaignx_we_vote_id=activity_notice_seed.campaignx_we_vote_id,
+                read_only=True
+            )
+            statement_subject = ''
+            if results['campaignx_found']:
+                statement_subject = results['campaignx'].campaign_title
             kind_of_notice = NOTICE_CAMPAIGNX_NEWS_ITEM_AUTHORED
             activity_results = update_or_create_activity_notice_for_campaignx_news_item(
                 activity_notice_seed_id=activity_notice_seed.id,
@@ -1131,7 +1138,7 @@ def update_or_create_activity_notices_from_seed(activity_notice_seed):
                 speaker_voter_we_vote_id=activity_notice_seed.speaker_voter_we_vote_id,
                 speaker_profile_image_url_medium=activity_notice_seed.speaker_profile_image_url_medium,
                 speaker_profile_image_url_tiny=activity_notice_seed.speaker_profile_image_url_tiny,
-                statement_subject=activity_notice_seed.statement_subject,
+                statement_subject=statement_subject,
                 statement_text_preview=activity_notice_seed.statement_text_preview)
             if activity_results['success']:
                 activity_notice_count += 1
@@ -1920,6 +1927,14 @@ def update_or_create_activity_notice_for_campaignx_news_item(
             if positive_value_exists(speaker_name) and speaker_name != activity_notice.speaker_name:
                 activity_notice.speaker_name = speaker_name
                 change_found = True
+            if positive_value_exists(speaker_profile_image_url_medium) and \
+                    speaker_profile_image_url_medium != activity_notice.speaker_profile_image_url_medium:
+                activity_notice.speaker_profile_image_url_medium = speaker_profile_image_url_medium
+                change_found = True
+            if positive_value_exists(speaker_profile_image_url_tiny) and \
+                    speaker_profile_image_url_tiny != activity_notice.speaker_profile_image_url_tiny:
+                activity_notice.speaker_profile_image_url_tiny = speaker_profile_image_url_tiny
+                change_found = True
             if positive_value_exists(statement_subject) and \
                     statement_subject != activity_notice.statement_subject:
                 activity_notice.statement_subject = statement_subject
@@ -1931,7 +1946,7 @@ def update_or_create_activity_notice_for_campaignx_news_item(
             if change_found:
                 activity_notice.save()
         except Exception as e:
-            status += "FAILED_ACTIVITY_NOTICE_SAVE_CAMPAIGNX_INITIAL_RESPONSE: " + str(e) + ' '
+            status += "FAILED_ACTIVITY_NOTICE_SAVE_CAMPAIGNX_NEWS_ITEM: " + str(e) + ' '
         status += results['status']
     elif results['success']:
         date_of_notice = now()
@@ -2427,6 +2442,7 @@ def update_or_create_activity_notice_seed_for_campaignx_news_item(
         speaker_name='',
         speaker_organization_we_vote_id='',
         speaker_voter_we_vote_id='',
+        speaker_profile_image_url_medium='',
         speaker_profile_image_url_tiny='',
         statement_subject='',
         statement_text=''):
@@ -2449,6 +2465,7 @@ def update_or_create_activity_notice_seed_for_campaignx_news_item(
                 if not positive_value_exists(activity_notice_seed.date_sent_to_email):
                     activity_notice_seed.date_sent_to_email = now()
             activity_notice_seed.speaker_name = speaker_name
+            activity_notice_seed.speaker_profile_image_url_medium = speaker_profile_image_url_medium
             activity_notice_seed.speaker_profile_image_url_tiny = speaker_profile_image_url_tiny
             activity_notice_seed.statement_subject = statement_subject
             if statement_text:
@@ -2485,6 +2502,7 @@ def update_or_create_activity_notice_seed_for_campaignx_news_item(
             speaker_name=speaker_name,
             speaker_organization_we_vote_id=speaker_organization_we_vote_id,
             speaker_voter_we_vote_id=speaker_voter_we_vote_id,
+            speaker_profile_image_url_medium=speaker_profile_image_url_medium,
             speaker_profile_image_url_tiny=speaker_profile_image_url_tiny,
             statement_subject=statement_subject,
             statement_text_preview=statement_text_preview)
@@ -2811,71 +2829,3 @@ def update_activity_notice_seed_with_positions(activity_notice_seed):
         'date_of_notice_earlier_than_update_window':    False,
     }
     return results
-
-
-def voter_activity_notice_list_retrieve_for_api(voter_device_id):  # voterActivityNoticeListRetrieve
-    """
-    See: activity_notice_list_retrieve_view in apis_v1/views/views_activity.py
-    :param voter_device_id:
-    :return:
-    """
-    activity_notice_list_found = False
-    status = ""
-    success = True
-
-    # If a voter_device_id is passed in that isn't valid, we want to throw an error
-    device_id_results = is_voter_device_id_valid(voter_device_id)
-    if not device_id_results['success']:
-        json_data = {
-            'status':                       device_id_results['status'],
-            'success':                      False,
-            'voter_device_id':              voter_device_id,
-            'activity_notice_list_found':   False,
-            'activity_notice_list':         [],
-        }
-        return json_data
-
-    voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
-    if not voter_results['voter_found']:
-        status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
-        error_results = {
-            'status':                       status,
-            'success':                      False,
-            'voter_device_id':              voter_device_id,
-            'activity_notice_list_found':   False,
-            'activity_notice_list':         [],
-        }
-        return error_results
-    voter = voter_results['voter']
-    voter_we_vote_id = voter.we_vote_id
-
-    activity_notice_list_augmented = []
-    # sms_manager = SMSManager()
-    # merge_results = sms_manager.find_and_merge_all_duplicate_sms(voter_we_vote_id)
-    # status += merge_results['status']
-    #
-    #
-    # sms_results = sms_manager.retrieve_voter_activity_notice_list(voter_we_vote_id)
-    # status += sms_results['status']
-    # if sms_results['activity_notice_list_found']:
-    #     activity_notice_list_found = True
-    #     activity_notice_list = sms_results['activity_notice_list']
-    #
-    #     # Remove duplicates: sms_we_vote_id
-    #     merge_results = heal_primary_sms_data_for_voter(activity_notice_list, voter)
-    #     activity_notice_list = merge_results['activity_notice_list']
-    #     status += merge_results['status']
-    #
-    #     augment_results = augment_activity_notice_list(activity_notice_list, voter)
-    #     activity_notice_list_augmented = augment_results['activity_notice_list']
-    #     status += augment_results['status']
-
-    json_data = {
-        'status':                       status,
-        'success':                      success,
-        'voter_device_id':              voter_device_id,
-        'activity_notice_list_found':   activity_notice_list_found,
-        'activity_notice_list':         activity_notice_list_augmented,
-    }
-    return json_data

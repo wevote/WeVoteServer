@@ -194,6 +194,7 @@ class ActivityManager(models.Manager):
             results = {
                 'success':                      False,
                 'status':                       "ACTIVITY_NOTICE_SEED_MISSING_SPEAKER ",
+                'activity_notice_seed_found':   False,
                 'activity_notice_seed_saved':   False,
                 'activity_notice_seed':         activity_notice_seed,
             }
@@ -232,10 +233,12 @@ class ActivityManager(models.Manager):
                 statement_subject=statement_subject,
                 statement_text_preview=statement_text_preview,
             )
+            activity_notice_seed_found = True
             activity_notice_seed_saved = True
             success = True
             status += "ACTIVITY_NOTICE_SEED_CREATED "
         except Exception as e:
+            activity_notice_seed_found = False
             activity_notice_seed_saved = False
             activity_notice_seed = None
             success = False
@@ -244,6 +247,7 @@ class ActivityManager(models.Manager):
         results = {
             'success':                      success,
             'status':                       status,
+            'activity_notice_seed_found':   activity_notice_seed_found,
             'activity_notice_seed_saved':   activity_notice_seed_saved,
             'activity_notice_seed':         activity_notice_seed,
         }

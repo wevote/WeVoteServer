@@ -100,10 +100,13 @@ def campaign_edit_owners_process_view(request):
                 organization_manager.retrieve_organization_from_we_vote_id(campaignx_owner_organization_we_vote_id)
             if organization_results['organization_found']:
                 organization_name = organization_results['organization'].organization_name
+                we_vote_hosted_profile_image_url_medium = \
+                    organization_results['organization'].we_vote_hosted_profile_image_url_medium
                 we_vote_hosted_profile_image_url_tiny = \
                     organization_results['organization'].we_vote_hosted_profile_image_url_tiny
             else:
                 organization_name = ''
+                we_vote_hosted_profile_image_url_medium = ''
                 we_vote_hosted_profile_image_url_tiny = ''
             # Now create new link
             try:
@@ -114,6 +117,7 @@ def campaign_edit_owners_process_view(request):
                     organization_we_vote_id=campaignx_owner_organization_we_vote_id,
                     feature_this_profile_image=campaignx_owner_feature_this_profile_image,
                     voter_we_vote_id=campaignx_owner_voter_we_vote_id,
+                    we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
                     we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny,
                     visible_to_public=campaignx_owner_visible_to_public)
 
@@ -163,6 +167,14 @@ def campaign_edit_owners_process_view(request):
                     if positive_value_exists(organization_name) and \
                             campaignx_owner.organization_name != organization_name:
                         campaignx_owner.organization_name = organization_name
+                        owner_changed = True
+                    we_vote_hosted_profile_image_url_medium = \
+                        organization_results['organization'].we_vote_hosted_profile_image_url_medium
+                    if positive_value_exists(we_vote_hosted_profile_image_url_medium) and \
+                            campaignx_owner.we_vote_hosted_profile_image_url_medium != \
+                            we_vote_hosted_profile_image_url_medium:
+                        campaignx_owner.we_vote_hosted_profile_image_url_medium = \
+                            we_vote_hosted_profile_image_url_medium
                         owner_changed = True
                     we_vote_hosted_profile_image_url_tiny = \
                         organization_results['organization'].we_vote_hosted_profile_image_url_tiny
@@ -958,10 +970,13 @@ def campaign_supporters_list_process_view(request):
                 organization_manager.retrieve_organization_from_we_vote_id(campaignx_supporter_organization_we_vote_id)
             if organization_results['organization_found']:
                 supporter_name = organization_results['organization'].supporter_name
+                we_vote_hosted_profile_image_url_medium = \
+                    organization_results['organization'].we_vote_hosted_profile_image_url_medium
                 we_vote_hosted_profile_image_url_tiny = \
                     organization_results['organization'].we_vote_hosted_profile_image_url_tiny
             else:
                 supporter_name = ''
+                we_vote_hosted_profile_image_url_medium = ''
                 we_vote_hosted_profile_image_url_tiny = ''
             try:
                 # Create the CampaignXSupporter
@@ -971,6 +986,7 @@ def campaign_supporters_list_process_view(request):
                     organization_we_vote_id=campaignx_supporter_organization_we_vote_id,
                     supporter_endorsement=incoming_campaignx_supporter_endorsement,
                     voter_we_vote_id=campaignx_supporter_voter_we_vote_id,
+                    we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
                     we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny,
                     visibility_blocked_by_we_vote=incoming_visibility_blocked_by_we_vote,
                     visible_to_public=incoming_campaignx_supporter_wants_visibility)
@@ -1021,6 +1037,14 @@ def campaign_supporters_list_process_view(request):
                     if positive_value_exists(supporter_name) and \
                             campaignx_supporter.supporter_name != supporter_name:
                         campaignx_supporter.supporter_name = supporter_name
+                        supporter_changed = True
+                    we_vote_hosted_profile_image_url_medium = \
+                        organization_results['organization'].we_vote_hosted_profile_image_url_medium
+                    if positive_value_exists(we_vote_hosted_profile_image_url_medium) and \
+                            campaignx_supporter.we_vote_hosted_profile_image_url_medium != \
+                            we_vote_hosted_profile_image_url_medium:
+                        campaignx_supporter.we_vote_hosted_profile_image_url_medium = \
+                            we_vote_hosted_profile_image_url_medium
                         supporter_changed = True
                     we_vote_hosted_profile_image_url_tiny = \
                         organization_results['organization'].we_vote_hosted_profile_image_url_tiny
