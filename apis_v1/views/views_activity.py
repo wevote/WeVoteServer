@@ -417,6 +417,7 @@ def activity_notice_list_retrieve_view(request):  # activityNoticeListRetrieve
                 'activity_notice_clicked':          activity_notice.activity_notice_clicked,
                 'activity_notice_seen':             activity_notice.activity_notice_seen,
                 'activity_tidbit_we_vote_id':       activity_notice.activity_tidbit_we_vote_id,
+                'campaignx_news_item_we_vote_id':   activity_notice.campaignx_news_item_we_vote_id,
                 'campaignx_we_vote_id':             activity_notice.campaignx_we_vote_id,
                 'date_last_changed':                activity_notice.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
                 'date_of_notice':                   activity_notice.date_of_notice.strftime('%Y-%m-%d %H:%M:%S'),
@@ -432,6 +433,7 @@ def activity_notice_list_retrieve_view(request):  # activityNoticeListRetrieve
                 'speaker_voter_we_vote_id':         activity_notice.speaker_voter_we_vote_id,
                 'speaker_profile_image_url_medium': activity_notice.speaker_profile_image_url_medium,
                 'speaker_profile_image_url_tiny':   activity_notice.speaker_profile_image_url_tiny,
+                'statement_subject':                activity_notice.statement_subject,
                 'statement_text_preview':           activity_notice.statement_text_preview,
             }
             modified_activity_notice_list.append(activity_notice_dict)

@@ -139,52 +139,16 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
                     if campaignx.is_supporters_count_minimum_exceeded():
                         promoted_campaignx_we_vote_ids.append(campaignx.we_vote_id)
 
-            # Get campaignx news items / updates
-            # NOTE: Leaving this in campaignRetrieve so initial load is as fast as possible
-            # campaignx_news_item_list = []
-            # news_item_list_results = campaignx_manager.retrieve_campaignx_news_item_list(
-            #     campaignx_we_vote_id=campaignx.we_vote_id,
-            #     read_only=True,
-            #     voter_is_campaignx_owner=viewer_is_owner)
-            # if news_item_list_results['campaignx_news_item_list_found']:
-            #     news_item_list = news_item_list_results['campaignx_news_item_list']
-            #     for news_item in news_item_list:
-            #         date_last_changed_string = ''
-            #         date_posted_string = ''
-            #         date_sent_to_email_string = ''
-            #         try:
-            #             date_last_changed_string = news_item.date_last_changed.strftime('%Y-%m-%d %H:%M:%S')
-            #             date_posted_string = news_item.date_posted.strftime('%Y-%m-%d %H:%M:%S')
-            #             if positive_value_exists(news_item.date_sent_to_email):
-            #                 date_sent_to_email_string = news_item.date_sent_to_email.strftime('%Y-%m-%d %H:%M:%S')
-            #         except Exception as e:
-            #             status += "DATE_CONVERSION_ERROR: " + str(e) + " "
-            #         one_news_item_dict = {
-            #             'campaign_news_subject': news_item.campaign_news_subject,
-            #             'campaign_news_text': news_item.campaign_news_text,
-            #             'campaignx_news_item_we_vote_id': news_item.we_vote_id,
-            #             'campaignx_we_vote_id': news_item.campaignx_we_vote_id,
-            #             'date_last_changed': date_last_changed_string,
-            #             'date_posted': date_posted_string,
-            #             'date_sent_to_email': date_sent_to_email_string,
-            #             'in_draft_mode': news_item.in_draft_mode,
-            #             'organization_we_vote_id': news_item.organization_we_vote_id,
-            #             'speaker_name': news_item.speaker_name,
-            #             'visible_to_public': news_item.visible_to_public,
-            #             'voter_we_vote_id': news_item.voter_we_vote_id,
-            #             'we_vote_hosted_profile_image_url_tiny': news_item.we_vote_hosted_profile_image_url_tiny,
-            #         }
-            #         campaignx_news_item_list.append(one_news_item_dict)
-
             campaignx_owner_list = []
             campaignx_owner_object_list = campaignx_manager.retrieve_campaignx_owner_list(
                 campaignx_we_vote_id=campaignx.we_vote_id, viewer_is_owner=viewer_is_owner)
             for campaignx_owner in campaignx_owner_object_list:
                 campaign_owner_dict = {
+                    'feature_this_profile_image':               campaignx_owner.feature_this_profile_image,
                     'organization_name':                        campaignx_owner.organization_name,
                     'organization_we_vote_id':                  campaignx_owner.organization_we_vote_id,
-                    'feature_this_profile_image':               campaignx_owner.feature_this_profile_image,
                     'visible_to_public':                        campaignx_owner.visible_to_public,
+                    'we_vote_hosted_profile_image_url_medium':  campaignx_owner.we_vote_hosted_profile_image_url_medium,
                     'we_vote_hosted_profile_image_url_tiny':    campaignx_owner.we_vote_hosted_profile_image_url_tiny,
                 }
                 campaignx_owner_list.append(campaign_owner_dict)
@@ -254,8 +218,10 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
                     'visible_to_public':            campaignx_supporter.visible_to_public,
                     'voter_we_vote_id':             campaignx_supporter.voter_we_vote_id,
                     'voter_signed_in_with_email':   voter_signed_in_with_email,
+                    'we_vote_hosted_profile_photo_image_url_medium':
+                        campaignx_supporter.we_vote_hosted_profile_image_url_medium,
                     'we_vote_hosted_profile_photo_image_url_tiny':
-                    campaignx_supporter.we_vote_hosted_profile_image_url_tiny,
+                        campaignx_supporter.we_vote_hosted_profile_image_url_tiny,
                 }
 
             if hasattr(campaignx, 'visible_on_this_site'):
@@ -487,6 +453,7 @@ def campaignx_news_item_save_for_api(  # campaignNewsItemSave
                 speaker_name=campaignx_news_item.speaker_name,
                 speaker_organization_we_vote_id=campaignx_news_item.organization_we_vote_id,
                 speaker_voter_we_vote_id=campaignx_news_item.voter_we_vote_id,
+                speaker_profile_image_url_medium=campaignx_news_item.we_vote_hosted_profile_image_url_medium,
                 speaker_profile_image_url_tiny=campaignx_news_item.we_vote_hosted_profile_image_url_tiny,
                 statement_subject=campaignx_news_item.campaign_news_subject,
                 statement_text=campaignx_news_item.campaign_news_text)
@@ -500,9 +467,11 @@ def campaignx_news_item_save_for_api(  # campaignNewsItemSave
     if campaignx_news_item_found:
         date_last_changed_string = ''
         date_posted_string = ''
+        date_sent_to_email_string = ''
         try:
             date_last_changed_string = campaignx_news_item.date_last_changed.strftime('%Y-%m-%d %H:%M:%S')
             date_posted_string = campaignx_news_item.date_posted.strftime('%Y-%m-%d %H:%M:%S')
+            date_sent_to_email_string = campaignx_news_item.date_posted.strftime('%Y-%m-%d %H:%M:%S')
         except Exception as e:
             status += "DATE_CONVERSION_ERROR: " + str(e) + " "
         results = {
@@ -514,11 +483,13 @@ def campaignx_news_item_save_for_api(  # campaignNewsItemSave
             'campaignx_we_vote_id':         campaignx_news_item.campaignx_we_vote_id,
             'date_last_changed':            date_last_changed_string,
             'date_posted':                  date_posted_string,
-            'date_sent_to_email':           campaignx_news_item.date_sent_to_email,
+            'date_sent_to_email':           date_sent_to_email_string,
             'in_draft_mode':                campaignx_news_item.in_draft_mode,
             'organization_we_vote_id':      campaignx_news_item.organization_we_vote_id,
             'speaker_name':                 campaignx_news_item.speaker_name,
             'voter_we_vote_id':             campaignx_news_item.voter_we_vote_id,
+            'we_vote_hosted_profile_photo_image_url_medium':
+                campaignx_news_item.we_vote_hosted_profile_image_url_medium,
             'we_vote_hosted_profile_photo_image_url_tiny': campaignx_news_item.we_vote_hosted_profile_image_url_tiny,
         }
         return results
@@ -715,6 +686,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
                 'speaker_name': news_item.speaker_name,
                 'visible_to_public': news_item.visible_to_public,
                 'voter_we_vote_id': news_item.voter_we_vote_id,
+                'we_vote_hosted_profile_image_url_medium': news_item.we_vote_hosted_profile_image_url_medium,
                 'we_vote_hosted_profile_image_url_tiny': news_item.we_vote_hosted_profile_image_url_tiny,
             }
             campaignx_news_item_list.append(one_news_item_dict)
@@ -806,6 +778,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
             'visible_to_public':            campaignx_supporter.visible_to_public,
             'voter_we_vote_id':             campaignx_supporter.voter_we_vote_id,
             'voter_signed_in_with_email':   voter_signed_in_with_email,
+            'we_vote_hosted_profile_image_url_medium': campaignx_supporter.we_vote_hosted_profile_image_url_medium,
             'we_vote_hosted_profile_image_url_tiny': campaignx_supporter.we_vote_hosted_profile_image_url_tiny,
         }
     else:
@@ -835,6 +808,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
                 'supporter_endorsement': campaignx_supporter.supporter_endorsement,
                 'supporter_name': campaignx_supporter.supporter_name,
                 'voter_we_vote_id': campaignx_supporter.voter_we_vote_id,
+                'we_vote_hosted_profile_image_url_medium': campaignx_supporter.we_vote_hosted_profile_image_url_medium,
                 'we_vote_hosted_profile_image_url_tiny': campaignx_supporter.we_vote_hosted_profile_image_url_tiny,
             }
             latest_campaignx_supporter_list.append(one_supporter_dict)
@@ -863,6 +837,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
                 'supporter_endorsement': campaignx_supporter.supporter_endorsement,
                 'supporter_name': campaignx_supporter.supporter_name,
                 'voter_we_vote_id': campaignx_supporter.voter_we_vote_id,
+                'we_vote_hosted_profile_image_url_medium': campaignx_supporter.we_vote_hosted_profile_image_url_medium,
                 'we_vote_hosted_profile_image_url_tiny': campaignx_supporter.we_vote_hosted_profile_image_url_tiny,
             }
             latest_campaignx_supporter_endorsement_list.append(one_supporter_dict)
@@ -1446,6 +1421,7 @@ def campaignx_supporter_retrieve_for_api(  # campaignSupporterRetrieve
             'visible_to_public':            True,
             'voter_we_vote_id':             '',
             'voter_signed_in_with_email':   voter_signed_in_with_email,
+            'we_vote_hosted_profile_photo_image_url_medium': '',
             'we_vote_hosted_profile_photo_image_url_tiny': '',
         }
         return results
@@ -1516,6 +1492,7 @@ def campaignx_supporter_retrieve_for_api(  # campaignSupporterRetrieve
         'visible_to_public':            campaignx_supporter.visible_to_public,
         'voter_we_vote_id':             campaignx_supporter.voter_we_vote_id,
         'voter_signed_in_with_email':   voter_signed_in_with_email,
+        'we_vote_hosted_profile_photo_image_url_medium': campaignx_supporter.we_vote_hosted_profile_image_url_medium,
         'we_vote_hosted_profile_photo_image_url_tiny': campaignx_supporter.we_vote_hosted_profile_image_url_tiny,
     }
     return results
@@ -1669,6 +1646,8 @@ def campaignx_supporter_save_for_api(  # campaignSupporterSave
             'visible_to_public':            campaignx_supporter.visible_to_public,
             'voter_we_vote_id':             campaignx_supporter.voter_we_vote_id,
             'voter_signed_in_with_email':   voter_signed_in_with_email,
+            'we_vote_hosted_profile_photo_image_url_medium':
+                campaignx_supporter.we_vote_hosted_profile_image_url_medium,
             'we_vote_hosted_profile_photo_image_url_tiny': campaignx_supporter.we_vote_hosted_profile_image_url_tiny,
         }
         return results
