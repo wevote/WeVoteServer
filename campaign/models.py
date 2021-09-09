@@ -637,6 +637,17 @@ class CampaignXManager(models.Manager):
             exception_multiple_object_returned = True
             status += 'RETRIEVE_CAMPAIGNX_AS_OWNER_NOT_FOUND_MultipleObjectsReturned '
             success = False
+        except CampaignX.DoesNotExist:
+            campaignx_found = False
+            campaignx_we_vote_id = ''
+            exception_does_not_exist = True
+            status += 'RETRIEVE_CAMPAIGNX_AS_OWNER_NOT_FOUND_DoesNotExist '
+            success = True
+        except Exception as e:
+            campaignx_found = False
+            campaignx_we_vote_id = ''
+            status += 'RETRIEVE_CAMPAIGNX_AS_OWNER_NOT_FOUND_ERROR: ' + str(e) + ' '
+            success = False
 
         if positive_value_exists(campaignx_found):
             campaignx_owner_object_list = campaignx_manager.retrieve_campaignx_owner_list(
