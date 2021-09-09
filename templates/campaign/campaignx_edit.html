@@ -11,7 +11,7 @@
       height: auto !important;
     }
 </style>
-<a href="{% url 'campaign:campaignx_list' %}">< Cancel and Back to List</a>
+<a href="{% url 'campaign:campaignx_list' %}?campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">< Cancel and Back to List</a>
 
 <h1>{% if campaignx %}{{ campaignx.campaign_title }}{% else %}Missing Campaign{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
@@ -24,11 +24,13 @@
 
 <form action="{% url "campaign:campaignx_edit_process" %}" method="post" class="form-horizontal">
 {% csrf_token %}
+    <input type="hidden" name="campaignx_owner_organization_we_vote_id" value="{% if campaignx_owner_organization_we_vote_id %}{{ campaignx_owner_organization_we_vote_id }}{% endif %}">
+    <input type="hidden" name="campaignx_search" value="{% if campaignx_search %}{{ campaignx_search }}{% endif %}">
     <input type="hidden" name="campaignx_we_vote_id" value="{% if campaignx %}{{ campaignx.we_vote_id }}{% endif %}">
 
 <div class="form-group">
     <label class="col-sm-3 control-label">
-        <a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}">cancel</a>
+        <a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}?campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">cancel</a>
     </label>
     <div class="col-sm-8">
         <button type="submit" class="btn btn-primary">{% if campaignx %}Update Campaign{% else %}CANNOT SAVE{% endif %}</button>
@@ -139,7 +141,7 @@
 
 <div class="form-group">
     <label class="col-sm-3 control-label">
-        <a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}">cancel</a>
+        <a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}?campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">cancel</a>
     </label>
     <div class="col-sm-8">
         <button type="submit" class="btn btn-primary">{% if campaignx %}Update Campaign{% else %}CANNOT SAVE{% endif %}</button>

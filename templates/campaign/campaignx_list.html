@@ -152,11 +152,11 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{% if campaignx.we_vote_hosted_campaign_photo_large_url %}
-                <a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}">
+                <a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">
                     <img src="{{ campaignx.we_vote_hosted_campaign_photo_large_url }}" width="128px" /></a>{% endif %}</td>
             <td>
                 <span class="u-no-break">
-                    <a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}">
+                    <a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">
                         <strong>{{ campaignx.campaign_title }}</strong>&nbsp;
                     </a>
                 </span><br />
@@ -182,10 +182,10 @@
                 </span>
 
                 <br />
-                (<a href="{% url 'campaign:campaignx_edit' campaignx.we_vote_id %}">edit</a>)
+                (<a href="{% url 'campaign:campaignx_edit' campaignx.we_vote_id %}?campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">edit</a>)
             </td>
             <td>
-                <a href="{% url 'campaign:campaignx_edit_owners' campaignx.we_vote_id %}" target="_blank">
+                <a href="{% url 'campaign:campaignx_edit_owners' campaignx.we_vote_id %}?campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}" target="_blank">
             {% for campaignx_owner in campaignx.campaignx_owner_list %}
                 {% if campaignx_owner.organization_name %}
                     <span class="u-no-break">{{ campaignx_owner.organization_name }}</span><br />
@@ -196,7 +196,7 @@
                 </a>
             </td>
             <td style="text-align: right">{% if campaignx.supporters_count %}
-                <a href="{% url 'campaign:supporters_list' campaignx.we_vote_id %}" target="_blank">
+                <a href="{% url 'campaign:supporters_list' campaignx.we_vote_id %}?campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}" target="_blank">
                     {{ campaignx.supporters_count|intcomma }} <span class="glyphicon glyphicon-new-window" style="font-size: .95rem"></span>
                 </a>
                 {% if campaignx.supporters_count_minimum_ignored and campaignx.supporters_count < 5 %}

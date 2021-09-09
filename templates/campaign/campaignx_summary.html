@@ -13,7 +13,7 @@
     }
 </style>
 
-<a href="{% url 'campaign:campaignx_list' %}">< Back to List</a>
+<a href="{% url 'campaign:campaignx_list' %}?campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">< Back to List</a>
 
 <h1>{% if campaignx %}{{ campaignx.campaign_title }}{% else %}New Campaign{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
@@ -28,7 +28,7 @@
             <tr>
                 <th>We Vote ID:&nbsp;</th>
                 <td> {{ campaignx.we_vote_id }}
-                    (<a href="{% url 'campaign:campaignx_edit' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}">edit</a>)
+                    (<a href="{% url 'campaign:campaignx_edit' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">edit</a>)
                 </td>
             </tr>
             <tr>
@@ -72,7 +72,7 @@
         {% endif %}
             <tr>
                 <th></th>
-                <td><a href="{% url 'campaign:campaignx_edit' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                <td><a href="{% url 'campaign:campaignx_edit' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}"
                        class="btn btn-primary">Edit</a></td>
             </tr>
         </table>
@@ -119,7 +119,7 @@
         {% endfor %}
             <tr>
                 <td colspan="3">
-                    <a href="{% url 'campaign:campaignx_edit_owners' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                    <a href="{% url 'campaign:campaignx_edit_owners' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}"
                        class="btn btn-primary">
                         Add or Edit Campaign Owners
                     </a>
@@ -151,7 +151,7 @@
             </tr>
         {% endfor %}
             <tr>
-                <td colspan="3"><a href="{% url 'campaign:campaignx_edit_politicians' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                <td colspan="3"><a href="{% url 'campaign:campaignx_edit_politicians' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}"
                                    class="btn btn-primary">Add or Edit Politicians to Campaign</a></td>
             </tr>
         </table>
@@ -175,7 +175,7 @@
             </tr>
         {% endfor %}
             <tr>
-                <td colspan="3"><a href="{% url 'campaign:supporters_list' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                <td colspan="3"><a href="{% url 'campaign:supporters_list' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}"
                                    class="btn btn-primary">View All Supporters for Campaign</a></td>
             </tr>
         </table>

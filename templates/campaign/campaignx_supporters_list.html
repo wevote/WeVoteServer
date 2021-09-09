@@ -7,12 +7,14 @@
 {% load template_filters %}
 {% load humanize %}
 
-<a href="{% url 'campaign:campaignx_summary' campaignx_we_vote_id %}">< Back to Campaign</a><br />
+<a href="{% url 'campaign:campaignx_summary' campaignx_we_vote_id %}?campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">< Back to Campaign</a><br />
 
 <h1>Campaign Supporters: {{ campaignx_title }}</h1>
 
 <form name="state_code_form" method="get" action="{% url 'campaign:supporters_list' campaignx_we_vote_id %}">
     {% csrf_token %}
+    <input type="hidden" name="campaignx_owner_organization_we_vote_id" value="{% if campaignx_owner_organization_we_vote_id %}{{ campaignx_owner_organization_we_vote_id }}{% endif %}">
+    <input type="hidden" name="campaignx_search" value="{% if campaignx_search %}{{ campaignx_search }}{% endif %}">
     <input type="hidden" name="sort_by" value="{{ sort_by }}">
     <input type="hidden" name="show_all" value="{{ show_all }}">
     <input type="hidden" name="show_more" value="{{ show_more }}">
@@ -44,6 +46,8 @@
 <form action="{% url "campaign:supporters_list_process" %}" method="post" class="form-horizontal">
 {% csrf_token %}
 <input type="hidden" name="campaignx_we_vote_id" value="{{ campaignx_we_vote_id }}">
+<input type="hidden" name="campaignx_owner_organization_we_vote_id" value="{% if campaignx_owner_organization_we_vote_id %}{{ campaignx_owner_organization_we_vote_id }}{% endif %}">
+<input type="hidden" name="campaignx_search" value="{% if campaignx_search %}{{ campaignx_search }}{% endif %}">
 <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
 <input type="hidden" name="state_code" value="{{ state_code }}">
 <input type="hidden" name="show_supporters_without_endorsements" value="{{ show_supporters_without_endorsements }}">
@@ -161,16 +165,16 @@
     {% endfor %}
     </table>
     {% if not show_all and not show_more %}
-    <a href="{% url 'campaign:supporters_list' campaignx_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_search={{ campaignx_search }}&state_code={{ state_code }}&show_supporters_without_endorsements={{ show_supporters_without_endorsements }}&show_supporters_not_visible_to_public={{ show_supporters_not_visible_to_public }}&sort_by={{ sort_by }}&show_more=1">
+    <a href="{% url 'campaign:supporters_list' campaignx_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}&state_code={{ state_code }}&show_supporters_without_endorsements={{ show_supporters_without_endorsements }}&show_supporters_not_visible_to_public={{ show_supporters_not_visible_to_public }}&sort_by={{ sort_by }}&show_more=1">
         show more</a>
     {% endif %}
     {% if show_more %}
-    <a href="{% url 'campaign:supporters_list' campaignx_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_search={{ campaignx_search }}&state_code={{ state_code }}&show_supporters_without_endorsements={{ show_supporters_without_endorsements }}&show_supporters_not_visible_to_public={{ show_supporters_not_visible_to_public }}&sort_by={{ sort_by }}&show_all=1">
+    <a href="{% url 'campaign:supporters_list' campaignx_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}&state_code={{ state_code }}&show_supporters_without_endorsements={{ show_supporters_without_endorsements }}&show_supporters_not_visible_to_public={{ show_supporters_not_visible_to_public }}&sort_by={{ sort_by }}&show_all=1">
         show all</a>
     {% endif %}
     {% if show_all or show_more %}
     &nbsp;&nbsp;&nbsp;
-      (<a href="{% url 'campaign:supporters_list' campaignx_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_search={{ campaignx_search }}&state_code={{ state_code }}&show_supporters_without_endorsements={{ show_supporters_without_endorsements }}&show_supporters_not_visible_to_public={{ show_supporters_not_visible_to_public }}&sort_by={{ sort_by }}">
+      (<a href="{% url 'campaign:supporters_list' campaignx_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}&state_code={{ state_code }}&show_supporters_without_endorsements={{ show_supporters_without_endorsements }}&show_supporters_not_visible_to_public={{ show_supporters_not_visible_to_public }}&sort_by={{ sort_by }}">
         show fewer</a>)
     {% endif %}
 
@@ -178,7 +182,7 @@
 
 <div class="form-group">
     <label class="col-sm-3 control-label">
-      <a href="{% url 'campaign:supporters_list' campaignx_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">cancel</a>
+      <a href="{% url 'campaign:supporters_list' campaignx_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">cancel</a>
     </label>
     <div class="col-sm-8">
         <button type="submit" class="btn btn-default">Update Campaign Supporters</button>

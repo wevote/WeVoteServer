@@ -12,7 +12,7 @@ span.nobr { white-space: nowrap; }
 {% if not campaignx or not campaignx.we_vote_id %}
   This page requires a valid campaignx.
 {% else %}
-<a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+<a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}"
 >
     &lt; Back to Campaign Summary
 </a>
@@ -27,6 +27,8 @@ span.nobr { white-space: nowrap; }
 {% csrf_token %}
 <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
 <input type="hidden" name="campaignx_id" value="{{ campaignx.id }}">
+<input type="hidden" name="campaignx_owner_organization_we_vote_id" value="{% if campaignx_owner_organization_we_vote_id %}{{ campaignx_owner_organization_we_vote_id }}{% endif %}">
+<input type="hidden" name="campaignx_search" value="{% if campaignx_search %}{{ campaignx_search }}{% endif %}">
 <input type="hidden" name="campaignx_we_vote_id" value="{{ campaignx.we_vote_id }}">
 <input type="hidden" name="state_code" value="{{ state_code }}">
 
@@ -141,7 +143,7 @@ span.nobr { white-space: nowrap; }
 
 <div class="form-group">
     <label class="col-sm-3 control-label">
-      <a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">cancel</a>
+      <a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">cancel</a>
     </label>
     <div class="col-sm-8">
         <button type="submit" class="btn btn-default">Update Campaign Owner(s)</button>
