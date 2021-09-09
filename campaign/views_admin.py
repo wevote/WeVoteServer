@@ -47,6 +47,8 @@ def campaign_edit_owners_process_view(request):
         positive_value_exists(request.POST.get('campaignx_owner_visible_to_public', False))
     campaignx_owner_feature_this_profile_image = \
         positive_value_exists(request.POST.get('campaignx_owner_feature_this_profile_image', False))
+    campaignx_owner_organization_we_vote_id_filter = request.POST.get('campaignx_owner_organization_we_vote_id', '')
+    campaignx_search = request.POST.get('campaignx_search', '')
     google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
     incoming_campaignx_owner_we_vote_id = request.POST.get('incoming_campaignx_owner_we_vote_id', None)
     if positive_value_exists(incoming_campaignx_owner_we_vote_id):
@@ -194,6 +196,9 @@ def campaign_edit_owners_process_view(request):
 
     return HttpResponseRedirect(reverse('campaign:campaignx_edit_owners', args=(campaignx_we_vote_id,)) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
+                                "&campaignx_owner_organization_we_vote_id=" +
+                                str(campaignx_owner_organization_we_vote_id_filter) +
+                                "&campaignx_search=" + str(campaignx_search) +
                                 "&state_code=" + str(state_code))
 
 
@@ -204,6 +209,8 @@ def campaign_edit_owners_view(request, campaignx_id=0, campaignx_we_vote_id=""):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    campaignx_owner_organization_we_vote_id = request.GET.get('campaignx_owner_organization_we_vote_id', '')
+    campaignx_search = request.GET.get('campaignx_search', '')
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     state_code = request.GET.get('state_code', '')
 
@@ -227,11 +234,13 @@ def campaign_edit_owners_view(request, campaignx_id=0, campaignx_we_vote_id=""):
         campaignx_owner_list_modified.append(campaignx_owner)
 
     template_values = {
-        'campaignx':                campaignx,
-        'campaignx_owner_list':     campaignx_owner_list_modified,
-        'google_civic_election_id': google_civic_election_id,
-        'messages_on_stage':        messages_on_stage,
-        'state_code':               state_code,
+        'campaignx':                                campaignx,
+        'campaignx_owner_list':                     campaignx_owner_list_modified,
+        'campaignx_owner_organization_we_vote_id':  campaignx_owner_organization_we_vote_id,
+        'campaignx_search':                         campaignx_search,
+        'google_civic_election_id':                 google_civic_election_id,
+        'messages_on_stage':                        messages_on_stage,
+        'state_code':                               state_code,
     }
     return render(request, 'campaign/campaignx_edit_owners.html', template_values)
 
@@ -248,6 +257,8 @@ def campaign_edit_politicians_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    campaignx_owner_organization_we_vote_id = request.POST.get('campaignx_owner_organization_we_vote_id', '')
+    campaignx_search = request.POST.get('campaignx_search', '')
     campaignx_we_vote_id = request.POST.get('campaignx_we_vote_id', None)
     politician_we_vote_id = request.POST.get('politician_we_vote_id', None)
     if positive_value_exists(politician_we_vote_id):
@@ -331,6 +342,9 @@ def campaign_edit_politicians_process_view(request):
 
     return HttpResponseRedirect(reverse('campaign:campaignx_edit_politicians', args=(campaignx_we_vote_id,)) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
+                                "&campaignx_owner_organization_we_vote_id=" +
+                                str(campaignx_owner_organization_we_vote_id) +
+                                "&campaignx_search=" + str(campaignx_search) +
                                 "&state_code=" + str(state_code))
 
 
@@ -341,6 +355,8 @@ def campaign_edit_politicians_view(request, campaignx_id=0, campaignx_we_vote_id
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    campaignx_owner_organization_we_vote_id = request.GET.get('campaignx_owner_organization_we_vote_id', '')
+    campaignx_search = request.GET.get('campaignx_search', '')
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     state_code = request.GET.get('state_code', '')
 
@@ -358,11 +374,13 @@ def campaign_edit_politicians_view(request, campaignx_id=0, campaignx_we_vote_id
     )
 
     template_values = {
-        'campaignx':                    campaignx,
-        'campaignx_politician_list':    campaignx_politician_list,
-        'google_civic_election_id':     google_civic_election_id,
-        'messages_on_stage':            messages_on_stage,
-        'state_code':                   state_code,
+        'campaignx':                                campaignx,
+        'campaignx_owner_organization_we_vote_id':  campaignx_owner_organization_we_vote_id,
+        'campaignx_search':                         campaignx_search,
+        'campaignx_politician_list':                campaignx_politician_list,
+        'google_civic_election_id':                 google_civic_election_id,
+        'messages_on_stage':                        messages_on_stage,
+        'state_code':                               state_code,
     }
     return render(request, 'campaign/campaignx_edit_politicians.html', template_values)
 
@@ -380,6 +398,8 @@ def campaign_edit_process_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     campaignx_id = convert_to_int(request.POST.get('campaignx_id', 0))
+    campaignx_owner_organization_we_vote_id = request.POST.get('campaignx_owner_organization_we_vote_id', '')
+    campaignx_search = request.POST.get('campaignx_search', '')
     campaignx_we_vote_id = request.POST.get('campaignx_we_vote_id', None)
     campaign_title = request.POST.get('campaign_title', None)
     campaign_description = request.POST.get('campaign_description', None)
@@ -444,10 +464,16 @@ def campaign_edit_process_view(request):
                                                                                              error_type=type(e)))
         return HttpResponseRedirect(reverse('campaign:campaignx_edit', args=(campaignx_we_vote_id,)) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&campaignx_owner_organization_we_vote_id=" +
+                                    str(campaignx_owner_organization_we_vote_id) +
+                                    "&campaignx_search=" + str(campaignx_search) +
                                     "&state_code=" + str(state_code))
 
     return HttpResponseRedirect(reverse('campaign:campaignx_summary', args=(campaignx_we_vote_id,)) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
+                                "&campaignx_owner_organization_we_vote_id=" +
+                                str(campaignx_owner_organization_we_vote_id) +
+                                "&campaignx_search=" + str(campaignx_search) +
                                 "&state_code=" + str(state_code))
 
 
@@ -458,6 +484,8 @@ def campaign_edit_view(request, campaignx_we_vote_id=""):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    campaignx_owner_organization_we_vote_id = request.GET.get('campaignx_owner_organization_we_vote_id', '')
+    campaignx_search = request.GET.get('campaignx_search', '')
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
 
     messages_on_stage = get_messages(request)
@@ -478,11 +506,13 @@ def campaign_edit_view(request, campaignx_we_vote_id=""):
     sorted_state_list = sorted(state_list.items())
 
     template_values = {
-        'google_civic_election_id': google_civic_election_id,
-        'messages_on_stage':        messages_on_stage,
-        'campaignx':                campaignx,
-        'state_list':               sorted_state_list,
-        'upcoming_election_list':   upcoming_election_list,
+        'campaignx':                                campaignx,
+        'campaignx_owner_organization_we_vote_id':  campaignx_owner_organization_we_vote_id,
+        'campaignx_search':                         campaignx_search,
+        'google_civic_election_id':                 google_civic_election_id,
+        'messages_on_stage':                        messages_on_stage,
+        'state_list':                               sorted_state_list,
+        'upcoming_election_list':                   upcoming_election_list,
     }
     return render(request, 'campaign/campaignx_edit.html', template_values)
 
@@ -495,12 +525,11 @@ def campaign_list_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     campaignx_owner_organization_we_vote_id = request.GET.get('campaignx_owner_organization_we_vote_id', '')
-    candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
+    campaignx_search = request.GET.get('campaignx_search', '')
+    campaignx_type_filter = request.GET.get('campaignx_type_filter', '')
     google_civic_election_id = request.GET.get('google_civic_election_id', '')
     limit_to_opinions_in_state_code = request.GET.get('limit_to_opinions_in_state_code', '')
     limit_to_opinions_in_this_year = convert_to_int(request.GET.get('limit_to_opinions_in_this_year', 0))
-    campaignx_search = request.GET.get('campaignx_search', '')
-    campaignx_type_filter = request.GET.get('campaignx_type_filter', '')
     hide_campaigns_not_visible_yet = \
         positive_value_exists(request.GET.get('hide_campaigns_not_visible_yet', False))
     include_campaigns_from_prior_elections = \
@@ -621,7 +650,6 @@ def campaign_list_view(request):
         'campaignx_search':                         campaignx_search,
         'campaignx_type_filter':                    campaignx_type_filter,
         'campaignx_types':                          [],
-        'candidate_we_vote_id':                     candidate_we_vote_id,
         'client_organization_list':                 client_organization_list,
         'election_years_available':                 election_years_available,
         'final_election_date_plus_cool_down':       final_election_date_plus_cool_down,
@@ -651,6 +679,8 @@ def campaign_summary_view(request, campaignx_we_vote_id=""):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    campaignx_owner_organization_we_vote_id = request.GET.get('campaignx_owner_organization_we_vote_id', '')
+    campaignx_search = request.GET.get('campaignx_search', '')
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     state_code = request.GET.get('state_code', '')
 
@@ -694,15 +724,17 @@ def campaign_summary_view(request, campaignx_we_vote_id=""):
     else:
         campaigns_site_root_url = 'https://campaigns.WeVote.US'
     template_values = {
-        'campaigns_site_root_url':  campaigns_site_root_url,
-        'campaignx':                campaignx,
-        'campaignx_owner_list':     campaignx_owner_list_modified,
-        'campaignx_politician_list': campaignx_politician_list_modified,
-        'campaignx_supporters_count': campaignx_supporters_count,
-        'campaignx_supporter_list': campaignx_supporter_list,
-        'google_civic_election_id': google_civic_election_id,
-        'messages_on_stage':        messages_on_stage,
-        'state_code':               state_code,
+        'campaigns_site_root_url':                  campaigns_site_root_url,
+        'campaignx':                                campaignx,
+        'campaignx_owner_list':                     campaignx_owner_list_modified,
+        'campaignx_owner_organization_we_vote_id':  campaignx_owner_organization_we_vote_id,
+        'campaignx_politician_list':                campaignx_politician_list_modified,
+        'campaignx_search':                         campaignx_search,
+        'campaignx_supporters_count':               campaignx_supporters_count,
+        'campaignx_supporter_list':                 campaignx_supporter_list,
+        'google_civic_election_id':                 google_civic_election_id,
+        'messages_on_stage':                        messages_on_stage,
+        'state_code':                               state_code,
     }
     return render(request, 'campaign/campaignx_summary.html', template_values)
 
@@ -714,11 +746,12 @@ def campaign_supporters_list_view(request, campaignx_we_vote_id=""):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    campaignx_owner_organization_we_vote_id = request.GET.get('campaignx_owner_organization_we_vote_id', '')
+    campaignx_search = request.GET.get('campaignx_search', '')
+    campaignx_type_filter = request.GET.get('campaignx_type_filter', '')
     google_civic_election_id = request.GET.get('google_civic_election_id', '')
     limit_to_opinions_in_state_code = request.GET.get('limit_to_opinions_in_state_code', '')
     limit_to_opinions_in_this_year = convert_to_int(request.GET.get('limit_to_opinions_in_this_year', 0))
-    campaignx_search = request.GET.get('campaignx_search', '')
-    campaignx_type_filter = request.GET.get('campaignx_type_filter', '')
     sort_by = request.GET.get('sort_by', '')
     state_code = request.GET.get('state_code', '')
     show_all = request.GET.get('show_all', False)
@@ -819,25 +852,26 @@ def campaign_supporters_list_view(request, campaignx_we_vote_id=""):
     sorted_state_list = sorted(state_list.items())
 
     template_values = {
-        'campaignx_we_vote_id':     campaignx_we_vote_id,
-        'campaignx_search':         campaignx_search,
-        'campaignx_title':          campaignx_title,
-        'election_years_available': election_years_available,
-        'google_civic_election_id': google_civic_election_id,
-        'limit_to_opinions_in_state_code': limit_to_opinions_in_state_code,
-        'limit_to_opinions_in_this_year': limit_to_opinions_in_this_year,
-        'messages_on_stage':        messages_on_stage,
-        'campaignx_type_filter':    campaignx_type_filter,
-        'campaignx_types':          [],
-        'supporters_list':          supporters_list,
-        'show_all':                 show_all,
-        'show_issues':              show_issues,
-        'show_more':                show_more,
-        'show_supporters_not_visible_to_public': show_supporters_not_visible_to_public,
-        'show_supporters_without_endorsements': show_supporters_without_endorsements,
-        'sort_by':                  sort_by,
-        'state_code':               state_code,
-        'state_list':               sorted_state_list,
+        'campaignx_owner_organization_we_vote_id':  campaignx_owner_organization_we_vote_id,
+        'campaignx_search':                         campaignx_search,
+        'campaignx_we_vote_id':                     campaignx_we_vote_id,
+        'campaignx_title':                          campaignx_title,
+        'election_years_available':                 election_years_available,
+        'google_civic_election_id':                 google_civic_election_id,
+        'limit_to_opinions_in_state_code':          limit_to_opinions_in_state_code,
+        'limit_to_opinions_in_this_year':           limit_to_opinions_in_this_year,
+        'messages_on_stage':                        messages_on_stage,
+        'campaignx_type_filter':                    campaignx_type_filter,
+        'campaignx_types':                          [],
+        'supporters_list':                          supporters_list,
+        'show_all':                                 show_all,
+        'show_issues':                              show_issues,
+        'show_more':                                show_more,
+        'show_supporters_not_visible_to_public':    show_supporters_not_visible_to_public,
+        'show_supporters_without_endorsements':     show_supporters_without_endorsements,
+        'sort_by':                                  sort_by,
+        'state_code':                               state_code,
+        'state_list':                               sorted_state_list,
     }
     return render(request, 'campaign/campaignx_supporters_list.html', template_values)
 
@@ -849,13 +883,14 @@ def campaign_supporters_list_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    campaignx_owner_organization_we_vote_id = request.POST.get('campaignx_owner_organization_we_vote_id', '')
+    campaignx_search = request.POST.get('campaignx_search', '')
     campaignx_we_vote_id = request.POST.get('campaignx_we_vote_id', '')
     google_civic_election_id = request.POST.get('google_civic_election_id', '')
     incoming_campaignx_supporter_we_vote_id = request.POST.get('incoming_campaignx_supporter_we_vote_id', '')
     incoming_campaignx_supporter_endorsement = request.POST.get('incoming_campaignx_supporter_endorsement', '')
     incoming_campaignx_supporter_wants_visibility = request.POST.get('incoming_campaignx_supporter_wants_visibility', '')
     incoming_visibility_blocked_by_we_vote = request.POST.get('incoming_visibility_blocked_by_we_vote', '')
-    campaignx_search = request.POST.get('campaignx_search', '')
     state_code = request.POST.get('state_code', '')
     show_all = request.POST.get('show_all', False)
     show_more = request.POST.get('show_more', False)  # Show up to 1,000 organizations
@@ -1075,6 +1110,9 @@ def campaign_supporters_list_process_view(request):
 
     return HttpResponseRedirect(reverse('campaign:supporters_list', args=(campaignx_we_vote_id,)) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
+                                "&campaignx_owner_organization_we_vote_id=" +
+                                str(campaignx_owner_organization_we_vote_id) +
+                                "&campaignx_search=" + str(campaignx_search) +
                                 "&state_code=" + str(state_code) +
                                 "&show_supporters_without_endorsements=" + str(show_supporters_without_endorsements) +
                                 "&show_supporters_not_visible_to_public=" + str(show_supporters_not_visible_to_public)

@@ -591,7 +591,7 @@ class CampaignXManager(models.Manager):
                     campaignx = CampaignX.objects.get(we_vote_id=campaignx_we_vote_id)
                 campaignx_found = True
                 campaignx_we_vote_id = campaignx.we_vote_id
-                status += 'CAMPAIGNX_AS_OWNER_FOUND_WITH_WE_VOTE_ID '
+                status += 'RETRIEVE_CAMPAIGNX_AS_OWNER_FOUND_WITH_WE_VOTE_ID '
                 success = True
             elif positive_value_exists(seo_friendly_path):
                 if positive_value_exists(read_only):
@@ -600,25 +600,34 @@ class CampaignXManager(models.Manager):
                     campaignx = CampaignX.objects.get(seo_friendly_path__iexact=seo_friendly_path)
                 campaignx_found = True
                 campaignx_we_vote_id = campaignx.we_vote_id
-                status += 'CAMPAIGNX_AS_OWNER_FOUND_WITH_SEO_FRIENDLY_PATH '
+                status += 'RETRIEVE_CAMPAIGNX_AS_OWNER_FOUND_WITH_SEO_FRIENDLY_PATH '
                 success = True
             elif positive_value_exists(voter_we_vote_id):
                 # If ONLY the voter_we_vote_id is passed in, get the campaign for that voter in draft mode
                 if positive_value_exists(read_only):
-                    campaignx = CampaignX.objects.using('readonly').get(
+                    query = CampaignX.objects.using('readonly').filter(
                         in_draft_mode=True,
                         started_by_voter_we_vote_id=voter_we_vote_id)
                 else:
-                    campaignx = CampaignX.objects.get(
+                    query = CampaignX.objects.filter(
                         in_draft_mode=True,
                         started_by_voter_we_vote_id=voter_we_vote_id)
-                campaignx_found = True
-                campaignx_we_vote_id = campaignx.we_vote_id
-                viewer_is_owner = True
-                status += 'CAMPAIGNX_AS_OWNER_FOUND_WITH_ORGANIZATION_WE_VOTE_ID-IN_DRAFT_MODE '
+                draft_campaign_list = list(query)
+                if len(draft_campaign_list) > 0:
+                    campaignx = draft_campaign_list[0]
+                    campaignx_found = True
+                    campaignx_we_vote_id = campaignx.we_vote_id
+                    viewer_is_owner = True
+                    status += 'RETRIEVE_CAMPAIGNX_AS_OWNER_FOUND_WITH_VOTER_WE_VOTE_ID-IN_DRAFT_MODE '
+                    if len(draft_campaign_list) > 1:
+                        exception_multiple_object_returned = True
+                        status += '(NUMBER_FOUND: ' + str(len(draft_campaign_list)) + ') '
+                else:
+                    campaignx_found = False
+                    status += 'RETRIEVE_CAMPAIGNX_AS_OWNER-VOTER_WE_VOTE_ID-NOT_FOUND '
                 success = True
             else:
-                status += 'CAMPAIGNX_AS_OWNER_NOT_FOUND-MISSING_VARIABLES '
+                status += 'RETRIEVE_CAMPAIGNX_AS_OWNER_NOT_FOUND-MISSING_VARIABLES '
                 success = False
                 campaignx_found = False
         except CampaignX.MultipleObjectsReturned as e:
@@ -626,14 +635,19 @@ class CampaignXManager(models.Manager):
             campaignx_found = False
             campaignx_we_vote_id = ''
             exception_multiple_object_returned = True
-            status += 'CAMPAIGNX_AS_OWNER_NOT_FOUND_MultipleObjectsReturned '
+            status += 'RETRIEVE_CAMPAIGNX_AS_OWNER_NOT_FOUND_MultipleObjectsReturned '
             success = False
         except CampaignX.DoesNotExist:
             campaignx_found = False
             campaignx_we_vote_id = ''
             exception_does_not_exist = True
-            status += 'CAMPAIGNX_AS_OWNER_NOT_FOUND_DoesNotExist '
+            status += 'RETRIEVE_CAMPAIGNX_AS_OWNER_NOT_FOUND_DoesNotExist '
             success = True
+        except Exception as e:
+            campaignx_found = False
+            campaignx_we_vote_id = ''
+            status += 'RETRIEVE_CAMPAIGNX_AS_OWNER_NOT_FOUND_ERROR: ' + str(e) + ' '
+            success = False
 
         if positive_value_exists(campaignx_found):
             campaignx_owner_object_list = campaignx_manager.retrieve_campaignx_owner_list(
@@ -1194,28 +1208,32 @@ class CampaignXManager(models.Manager):
         try:
             if positive_value_exists(campaignx_we_vote_id) and positive_value_exists(voter_we_vote_id):
                 if positive_value_exists(read_only):
-                    campaignx_owner = CampaignXOwner.objects.using('readonly').get(
+                    query = CampaignXOwner.objects.using('readonly').filter(
                         campaignx_we_vote_id=campaignx_we_vote_id,
                         voter_we_vote_id=voter_we_vote_id)
                 else:
-                    campaignx_owner = CampaignXOwner.objects.get(
+                    query = CampaignXOwner.objects.filter(
                         campaignx_we_vote_id=campaignx_we_vote_id,
                         voter_we_vote_id=voter_we_vote_id)
-                campaignx_owner_found = True
-                status += 'CAMPAIGNX_OWNER_FOUND_WITH_WE_VOTE_ID '
+                campaign_owner_list = list(query)
+                if len(campaign_owner_list) > 0:
+                    campaignx_owner = campaign_owner_list[0]
+                    campaignx_owner_found = True
+                    status += 'CAMPAIGNX_OWNER_FOUND_WITH_WE_VOTE_ID '
+                    if len(campaign_owner_list) > 1:
+                        exception_multiple_object_returned = True
+                        status += 'MULTIPLE_CAMPAIGNX_OWNER_FOUND_WITH_WE_VOTE_ID-'
+                        status += '(NUMBER_FOUND: ' + str(len(campaign_owner_list)) + ') '
+                else:
+                    exception_does_not_exist = True
                 success = True
             else:
+                exception_multiple_object_returned = True
                 status += 'CAMPAIGNX_OWNER_NOT_FOUND-MISSING_VARIABLES '
                 success = False
-        except CampaignXOwner.MultipleObjectsReturned as e:
-            handle_record_found_more_than_one_exception(e, logger=logger)
-            exception_multiple_object_returned = True
-            status += 'CAMPAIGNX_OWNER_NOT_FOUND_MultipleObjectsReturned '
+        except Exception as e:
+            status += 'CAMPAIGNX_OWNER_NOT_FOUND-ERROR: ' + str(e) + ' '
             success = False
-        except CampaignXOwner.DoesNotExist:
-            exception_does_not_exist = True
-            status += 'CAMPAIGNX_OWNER_NOT_FOUND_DoesNotExist '
-            success = True
 
         results = {
             'status':                   status,
@@ -1277,40 +1295,52 @@ class CampaignXManager(models.Manager):
         try:
             if positive_value_exists(campaignx_we_vote_id) and positive_value_exists(politician_we_vote_id):
                 if positive_value_exists(read_only):
-                    campaignx_politician = CampaignXPolitician.objects.using('readonly').get(
+                    query = CampaignXPolitician.objects.using('readonly').filter(
                         campaignx_we_vote_id=campaignx_we_vote_id,
                         politician_we_vote_id=politician_we_vote_id)
                 else:
-                    campaignx_politician = CampaignXPolitician.objects.get(
+                    query = CampaignXPolitician.objects.filter(
                         campaignx_we_vote_id=campaignx_we_vote_id,
                         politician_we_vote_id=politician_we_vote_id)
-                campaignx_politician_found = True
-                status += 'CAMPAIGNX_POLITICIAN_FOUND_WITH_WE_VOTE_ID '
+                campaignx_politician_list = list(query)
+                if len(campaignx_politician_list) > 0:
+                    campaignx_politician = campaignx_politician_list[0]
+                    campaignx_politician_found = True
+                    status += 'CAMPAIGNX_POLITICIAN_FOUND_WITH_WE_VOTE_ID '
+                    if len(campaignx_politician_list) > 1:
+                        exception_multiple_object_returned = True
+                        status += 'MULTIPLE_POLITICIAN_FOUND_WITH_WE_VOTE_ID-'
+                        status += '(NUMBER_FOUND: ' + str(len(campaignx_politician_list)) + ') '
+                else:
+                    status += 'CAMPAIGNX_POLITICIAN_NOT_FOUND_WITH_WE_VOTE_ID '
                 success = True
             elif positive_value_exists(campaignx_we_vote_id) and positive_value_exists(politician_name):
                 if positive_value_exists(read_only):
-                    campaignx_politician = CampaignXPolitician.objects.using('readonly').get(
+                    query = CampaignXPolitician.objects.using('readonly').filter(
                         campaignx_we_vote_id=campaignx_we_vote_id,
                         politician_name=politician_name)
                 else:
-                    campaignx_politician = CampaignXPolitician.objects.get(
+                    query = CampaignXPolitician.objects.filter(
                         campaignx_we_vote_id=campaignx_we_vote_id,
                         politician_name=politician_name)
-                campaignx_politician_found = True
-                status += 'CAMPAIGNX_POLITICIAN_FOUND_WITH_NAME '
+                campaignx_politician_list = list(query)
+                if len(campaignx_politician_list) > 0:
+                    campaignx_politician = campaignx_politician_list[0]
+                    campaignx_politician_found = True
+                    status += 'CAMPAIGNX_POLITICIAN_FOUND_WITH_NAME '
+                    if len(campaignx_politician_list) > 1:
+                        exception_multiple_object_returned = True
+                        status += 'MULTIPLE_POLITICIAN_FOUND_WITH_WE_VOTE_ID-'
+                        status += '(NUMBER_FOUND: ' + str(len(campaignx_politician_list)) + ') '
+                else:
+                    status += 'CAMPAIGNX_POLITICIAN_NOT_FOUND_WITH_NAME '
                 success = True
             else:
                 status += 'CAMPAIGNX_POLITICIAN_NOT_FOUND-MISSING_VARIABLES '
                 success = False
-        except CampaignXPolitician.MultipleObjectsReturned as e:
-            handle_record_found_more_than_one_exception(e, logger=logger)
-            exception_multiple_object_returned = True
-            status += 'CAMPAIGNX_POLITICIAN_NOT_FOUND_MultipleObjectsReturned '
+        except Exception as e:
+            status += 'CAMPAIGNX_POLITICIAN_NOT_FOUND_ERROR: ' + str(e) + ' '
             success = False
-        except CampaignXPolitician.DoesNotExist:
-            exception_does_not_exist = True
-            status += 'CAMPAIGNX_POLITICIAN_NOT_FOUND_DoesNotExist '
-            success = True
 
         results = {
             'status':                       status,
