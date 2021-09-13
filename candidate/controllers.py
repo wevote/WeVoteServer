@@ -29,7 +29,7 @@ from wevote_functions.functions import add_period_to_middle_name_initial, add_pe
     extract_twitter_handle_from_text_string, extract_website_from_url, \
     remove_period_from_middle_name_initial, remove_period_from_name_prefix_and_suffix
 from .models import CandidateListManager, CandidateCampaign, CandidateManager, \
-    CANDIDATE_UNIQUE_IDENTIFIERS
+    CANDIDATE_UNIQUE_IDENTIFIERS, PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_UNKNOWN
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -1696,6 +1696,7 @@ def save_image_to_candidate_table(candidate, image_url, source_link, url_is_brok
     if not positive_value_exists(kind_of_source_website):
         kind_of_source_website = extract_website_from_url(source_link)
     if IMAGE_SOURCE_BALLOTPEDIA in kind_of_source_website:
+        # NOT FULLY UPDATED TO WORK
         cache_results = cache_master_and_resized_image(
             candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
             ballotpedia_profile_image_url=image_url,
@@ -1705,6 +1706,7 @@ def save_image_to_candidate_table(candidate, image_url, source_link, url_is_brok
         candidate.ballotpedia_page_title = source_link
 
     elif LINKEDIN in kind_of_source_website:
+        # NOT FULLY UPDATED TO WORK
         cache_results = cache_master_and_resized_image(
             candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
             linkedin_profile_image_url=image_url,
@@ -1714,6 +1716,7 @@ def save_image_to_candidate_table(candidate, image_url, source_link, url_is_brok
         candidate.linkedin_photo_url = cached_linkedin_profile_image_url_https
 
     elif WIKIPEDIA in kind_of_source_website:
+        # NOT FULLY UPDATED TO WORK
         cache_results = cache_master_and_resized_image(
             candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
             wikipedia_profile_image_url=image_url,
@@ -1723,6 +1726,7 @@ def save_image_to_candidate_table(candidate, image_url, source_link, url_is_brok
         candidate.wikipedia_page_title = source_link
 
     elif TWITTER in kind_of_source_website:
+        # NOT FULLY UPDATED TO WORK
         twitter_screen_name = extract_twitter_handle_from_text_string(source_link)
         candidate.candidate_twitter_handle = twitter_screen_name
         candidate.twitter_url = source_link
@@ -1731,12 +1735,30 @@ def save_image_to_candidate_table(candidate, image_url, source_link, url_is_brok
         candidate.facebook_url_is_broken = url_is_broken
         if not url_is_broken:
             cache_results = cache_master_and_resized_image(
-                candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
+                candidate_id=candidate.id,
+                candidate_we_vote_id=candidate.we_vote_id,
                 facebook_profile_image_url_https=image_url,
                 image_source=FACEBOOK)
             cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
             candidate.facebook_url = source_link
             candidate.facebook_profile_image_url_https = cached_facebook_profile_image_url_https
+            # Store the We Vote cached URL
+            candidate.we_vote_hosted_profile_facebook_image_url_large = \
+                cache_results['we_vote_hosted_profile_image_url_large']
+            candidate.we_vote_hosted_profile_facebook_image_url_medium = \
+                cache_results['we_vote_hosted_profile_image_url_medium']
+            candidate.we_vote_hosted_profile_facebook_image_url_tiny = \
+                cache_results['we_vote_hosted_profile_image_url_tiny']
+            # Update the active image
+            if candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
+                candidate.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_FACEBOOK
+            if candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_FACEBOOK:
+                candidate.we_vote_hosted_profile_image_url_large = \
+                    cache_results['we_vote_hosted_profile_image_url_large']
+                candidate.we_vote_hosted_profile_image_url_medium = \
+                    cache_results['we_vote_hosted_profile_image_url_medium']
+                candidate.we_vote_hosted_profile_image_url_tiny = \
+                    cache_results['we_vote_hosted_profile_image_url_tiny']
         else:
             candidate.facebook_profile_image_url_https = None
 
@@ -1749,16 +1771,7 @@ def save_image_to_candidate_table(candidate, image_url, source_link, url_is_brok
         candidate.other_source_url = source_link
         candidate.other_source_photo_url = cached_other_source_image_url_https
 
-    if not url_is_broken:
-        we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
-        we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
-        we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
-
     try:
-        if not url_is_broken:
-            candidate.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
-            candidate.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
-            candidate.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
         candidate.save()
     except Exception as e:
         status += "CANDIDATE_NOT_SAVED: " + str(e) + " "

@@ -406,6 +406,7 @@ def campaign_edit_process_view(request):
     final_election_date_as_integer = convert_to_int(request.POST.get('final_election_date_as_integer', 0))
     final_election_date_as_integer = None if final_election_date_as_integer == 0 else final_election_date_as_integer
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    take_out_of_draft_mode = request.POST.get('take_out_of_draft_mode', None)
     is_blocked_by_we_vote = request.POST.get('is_blocked_by_we_vote', False)
     is_blocked_by_we_vote_reason = request.POST.get('is_blocked_by_we_vote_reason', None)
     is_in_team_review_mode = request.POST.get('is_in_team_review_mode', False)
@@ -438,6 +439,9 @@ def campaign_edit_process_view(request):
                 campaignx.campaign_title = campaign_title
             if campaign_description is not None:
                 campaignx.campaign_description = campaign_description.strip()
+            if take_out_of_draft_mode is not None and positive_value_exists(take_out_of_draft_mode):
+                # Take a campaign out of draft mode. Do not support taking it back to draft mode.
+                campaignx.in_draft_mode = False
             campaignx.is_blocked_by_we_vote = positive_value_exists(is_blocked_by_we_vote)
             if final_election_date_as_integer is not None:
                 campaignx.final_election_date_as_integer = final_election_date_as_integer

@@ -61,7 +61,14 @@ def get_one_picture_from_facebook_graphapi(one_entity, request, remote_request_h
                 messages.add_message(request, messages.INFO, 'Facebook photo retrieved.')
             if is_candidate:
                 results = save_image_to_candidate_table(
-                    one_entity, photo_url, facebook_url, False, FACEBOOK)
+                    candidate=one_entity,
+                    image_url=photo_url,
+                    source_link=facebook_url,
+                    url_is_broken=False,
+                    kind_of_source_website=FACEBOOK)
+
+                # When saving to candidate object, update:
+                # we_vote_hosted_profile_facebook_image_url_tiny
             else:
                 results = save_image_to_organization_table(
                     one_entity, photo_url, facebook_url, False, FACEBOOK)
@@ -87,8 +94,8 @@ def get_one_picture_from_facebook_graphapi(one_entity, request, remote_request_h
             if len(results.get('clean_message')) > 0:
                 messages.add_message(request, messages.ERROR, results.get('clean_message'))
             else:
-                messages.add_message(request, messages.ERROR, 'Facebook photo NOT retrieved (2). status: ' +
-                                 results.get('status'))
+                messages.add_message(
+                    request, messages.ERROR, 'Facebook photo NOT retrieved (2). status: ' + results.get('status'))
 
     results = {
         'success': success,

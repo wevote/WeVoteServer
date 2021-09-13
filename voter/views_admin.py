@@ -27,7 +27,10 @@ from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, Twitte
 from wevote_functions.functions import convert_to_int, generate_random_string, get_voter_api_device_id, \
     set_voter_api_device_id, positive_value_exists
 from .controllers import delete_all_voter_information_permanently, process_maintenance_status_flags
-from .models import fetch_voter_id_from_voter_device_link, Voter, VoterAddressManager, VoterDeviceLinkManager, \
+from .models import fetch_voter_id_from_voter_device_link, \
+    PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
+    PROFILE_IMAGE_TYPE_UPLOADED, \
+    Voter, VoterAddressManager, VoterDeviceLinkManager, \
     voter_has_authority, VoterManager, voter_setup
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -268,6 +271,7 @@ def voter_edit_process_view(request):
     twitter_handle = request.POST.get('twitter_handle', False)
     email = request.POST.get('email', False)
     password_text = request.POST.get('password_text', False)
+    profile_image_type_currently_active = request.POST.get('profile_image_type_currently_active', False)
     sms_phone_number = request.POST.get('sms_phone_number', False)
     voter_we_vote_id = None
 
@@ -418,6 +422,34 @@ def voter_edit_process_view(request):
             voter_on_stage.sms_ownership_is_verified = False
             at_least_one_value_changed = True
 
+        if profile_image_type_currently_active is not False:
+            if profile_image_type_currently_active in [
+                    PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN,
+                    PROFILE_IMAGE_TYPE_UPLOADED]:
+                at_least_one_value_changed = True
+                voter_on_stage.profile_image_type_currently_active = profile_image_type_currently_active
+                if profile_image_type_currently_active == PROFILE_IMAGE_TYPE_FACEBOOK:
+                    voter_on_stage.we_vote_hosted_profile_image_url_large = \
+                        voter_on_stage.we_vote_hosted_profile_facebook_image_url_large
+                    voter_on_stage.we_vote_hosted_profile_image_url_medium = \
+                        voter_on_stage.we_vote_hosted_profile_facebook_image_url_medium
+                    voter_on_stage.we_vote_hosted_profile_image_url_tiny = \
+                        voter_on_stage.we_vote_hosted_profile_facebook_image_url_tiny
+                elif profile_image_type_currently_active == PROFILE_IMAGE_TYPE_TWITTER:
+                    voter_on_stage.we_vote_hosted_profile_image_url_large = \
+                        voter_on_stage.we_vote_hosted_profile_twitter_image_url_large
+                    voter_on_stage.we_vote_hosted_profile_image_url_medium = \
+                        voter_on_stage.we_vote_hosted_profile_twitter_image_url_medium
+                    voter_on_stage.we_vote_hosted_profile_image_url_tiny = \
+                        voter_on_stage.we_vote_hosted_profile_twitter_image_url_tiny
+                elif profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UPLOADED:
+                    voter_on_stage.we_vote_hosted_profile_image_url_large = \
+                        voter_on_stage.we_vote_hosted_profile_uploaded_image_url_large
+                    voter_on_stage.we_vote_hosted_profile_image_url_medium = \
+                        voter_on_stage.we_vote_hosted_profile_uploaded_image_url_medium
+                    voter_on_stage.we_vote_hosted_profile_image_url_tiny = \
+                        voter_on_stage.we_vote_hosted_profile_uploaded_image_url_tiny
+
         try:
             # Update existing voter
             if first_name is not False:
@@ -430,8 +462,13 @@ def voter_edit_process_view(request):
                 voter_on_stage.twitter_screen_name = twitter_handle
                 at_least_one_value_changed = True
             if password_text is not False:
-                voter_on_stage.set_password(password_text)
-                at_least_one_value_changed = True
+                if len(password_text) == 0:
+                    pass
+                elif len(password_text) > 5:
+                    voter_on_stage.set_password(password_text)
+                    at_least_one_value_changed = True
+                else:
+                    messages.add_message(request, messages.ERROR, 'The password must be 6 digits or more.')
 
             if at_least_one_value_changed:
                 voter_on_stage.save()

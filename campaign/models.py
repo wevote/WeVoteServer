@@ -945,7 +945,7 @@ class CampaignXManager(models.Manager):
     def retrieve_campaignx_list_for_private_label(
             self,
             including_started_by_voter_we_vote_id='',
-            limit=25,
+            limit=150,
             site_owner_organization_we_vote_id='',
             read_only=True):
         campaignx_list = []

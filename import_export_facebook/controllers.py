@@ -113,8 +113,12 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
 
     # Update voter with Facebook info (not including email -- that is done below)
     results = voter_manager.save_facebook_user_values(
-        voter, facebook_auth_response, cached_facebook_profile_image_url_https, we_vote_hosted_profile_image_url_large,
-        we_vote_hosted_profile_image_url_medium, we_vote_hosted_profile_image_url_tiny)
+        voter=voter,
+        facebook_auth_response=facebook_auth_response,
+        cached_facebook_profile_image_url_https=cached_facebook_profile_image_url_https,
+        we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
+        we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
+        we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
 
     status += results['status'] + ", "
     success = results['success']
@@ -805,10 +809,12 @@ def voter_facebook_sign_in_save_for_api(voter_device_id,  # voterFacebookSignInS
     return json_data
 
 
-def get_facebook_photo_url_from_graphapi(facebook_candidate_url, facebook_id = False):
-    photo_url = ""
-    status = ""
+def get_facebook_photo_url_from_graphapi(facebook_candidate_url, facebook_id=False):
     clean_message = ''
+    is_silhouette = False
+    photo_url = ""
+    photo_url_found = False
+    status = ""
     success = False
 
     if facebook_id:
@@ -821,10 +827,15 @@ def get_facebook_photo_url_from_graphapi(facebook_candidate_url, facebook_id = F
 
     if positive_value_exists(fb_id_or_login_name):
         results = FacebookManager.retrieve_facebook_photo_from_person_id(fb_id_or_login_name)
-        status += results['status']
-        photo_url = results['url']
+        try:
+            is_silhouette = results['is_silhouette']
+            status += results['status']
+            photo_url = results['url']
+        except Exception as e:
+            status += "UNEXPECTED_RESULTS: " + str(e) + " "
 
         if len(photo_url) < 1:
+            photo_url_found = False
             status += 'GET_FACEBOOK_PHOTO_URL_FROM_GRAPHAPI-PHOTO_RETRIEVE_FAILED: ' + facebook_candidate_url + " "
             clean_message = "Facebook did not return a photo for '{}' for the Facebook URL entered on this page. " \
                             "Possible reasons: \n " \
@@ -832,6 +843,7 @@ def get_facebook_photo_url_from_graphapi(facebook_candidate_url, facebook_id = F
                             "2) The page is no longer published.  \n3) The Facebook URL is incorrect.".\
                             format(fb_id_or_login_name)
         else:
+            photo_url_found = True
             status += 'GET_FACEBOOK_PHOTO_URL_FROM_GRAPHAPI-SUCCESS '
             success = True
 
@@ -839,7 +851,8 @@ def get_facebook_photo_url_from_graphapi(facebook_candidate_url, facebook_id = F
         'status':               status,
         'success':              success,
         'photo_url':            photo_url,
-        'is_silhouette':        results['is_silhouette'],
+        'photo_url_found':      photo_url_found,
+        'is_silhouette':        is_silhouette,
         'clean_message':        clean_message,
     }
     return results
