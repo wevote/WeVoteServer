@@ -8,7 +8,7 @@ import base64
 from image.controllers import cache_campaignx_image, create_resized_images
 import json
 from io import BytesIO
-from PIL import Image
+from PIL import Image, ImageOps
 import re
 from activity.controllers import update_or_create_activity_notice_seed_for_campaignx_supporter_initial_response
 from voter.models import VoterManager
@@ -1358,8 +1358,9 @@ def campaignx_save_photo_from_file_reader(
             base64_data = img_dict['data']
             byte_data = base64.b64decode(base64_data)
             image_data = BytesIO(byte_data)
-            python_image_library_image = Image.open(image_data)
-            format_to_cache = python_image_library_image.format
+            original_image = Image.open(image_data)
+            format_to_cache = original_image.format
+            python_image_library_image = ImageOps.exif_transpose(original_image)
             python_image_library_image.thumbnail(
                 (CAMPAIGN_PHOTO_ORIGINAL_MAX_WIDTH, CAMPAIGN_PHOTO_ORIGINAL_MAX_HEIGHT), Image.ANTIALIAS)
             python_image_library_image.format = format_to_cache

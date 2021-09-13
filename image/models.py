@@ -1786,7 +1786,8 @@ class WeVoteImageManager(models.Manager):
         """
         try:
             image_local_path = "/tmp/" + image_local_path
-            image = Image.open(image_local_path)
+            original_image = Image.open(image_local_path)
+            image = ImageOps.exif_transpose(original_image)
             if image_type == TWITTER_BACKGROUND_IMAGE_NAME or image_type == TWITTER_BANNER_IMAGE_NAME:
                 image = image.resize((image_width, image_height), Image.ANTIALIAS)
             elif image_type == FACEBOOK_BACKGROUND_IMAGE_NAME:

@@ -4,7 +4,7 @@
 
 from exception.models import handle_exception
 from io import BytesIO
-from PIL import Image
+from PIL import Image, ImageOps
 from urllib.request import Request, urlopen
 import urllib
 import requests
@@ -47,9 +47,10 @@ def analyze_remote_url(image_url_https):
     if image_url_valid:
         try:
             response = requests.get(image_url_https)
-            image = Image.open(BytesIO(response.content))
+            original_image = Image.open(BytesIO(response.content))
+            image_format = original_image.format
+            image = ImageOps.exif_transpose(original_image)
             image_width, image_height = image.size
-            image_format = image.format
         except Exception as e:
             image_url_valid = False
 
@@ -74,11 +75,12 @@ def analyze_image_file(image_file):
     image_url_valid = False
     if image_file is not None:
         image_url_valid = True
-        image = Image.open(image_file.file)
+        original_image = Image.open(image_file.file)
+        image_format = original_image.format
+        image = ImageOps.exif_transpose(original_image)
         # When PIL opens image file, pointer will go to end of file so seeking it to 0 to access again
         image_file.seek(0)
         image_width, image_height = image.size
-        image_format = image.format
 
     results = {
         'image_url_valid':              image_url_valid,
