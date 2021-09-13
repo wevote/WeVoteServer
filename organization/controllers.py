@@ -9,7 +9,7 @@ from io import BytesIO
 
 import robot_detection
 import tweepy
-from PIL import Image
+from PIL import Image, ImageOps
 from django.http import HttpResponse
 
 import wevote_functions.admin
@@ -2010,8 +2010,9 @@ def organization_photos_save_for_api(  # organizationPhotosSave
                 base64_data = img_dict['data']
                 byte_data = base64.b64decode(base64_data)
                 image_data = BytesIO(byte_data)
-                python_image_library_image = Image.open(image_data)
-                format_to_cache = python_image_library_image.format
+                original_image = Image.open(image_data)
+                format_to_cache = original_image.format
+                python_image_library_image = ImageOps.exif_transpose(original_image)
                 python_image_library_image.thumbnail((CHOSEN_FAVICON_MAX_WIDTH, CHOSEN_FAVICON_MAX_HEIGHT),
                                                      Image.ANTIALIAS)
                 # python_image_library_image = ImageOps.fit(
@@ -2047,8 +2048,9 @@ def organization_photos_save_for_api(  # organizationPhotosSave
                 base64_data = img_dict['data']
                 byte_data = base64.b64decode(base64_data)
                 image_data = BytesIO(byte_data)
-                python_image_library_image = Image.open(image_data)
-                format_to_cache = python_image_library_image.format
+                original_image = Image.open(image_data)
+                format_to_cache = original_image.format
+                python_image_library_image = ImageOps.exif_transpose(original_image)
                 python_image_library_image.thumbnail((CHOSEN_LOGO_MAX_WIDTH, CHOSEN_LOGO_MAX_HEIGHT), Image.ANTIALIAS)
                 # Did not keep image within size limit
                 # python_image_library_image = ImageOps.fit(
@@ -2085,8 +2087,9 @@ def organization_photos_save_for_api(  # organizationPhotosSave
                 base64_data = img_dict['data']
                 byte_data = base64.b64decode(base64_data)
                 image_data = BytesIO(byte_data)
-                python_image_library_image = Image.open(image_data)
-                format_to_cache = python_image_library_image.format
+                original_image = Image.open(image_data)
+                format_to_cache = original_image.format
+                python_image_library_image = ImageOps.exif_transpose(original_image)
                 python_image_library_image.thumbnail(
                     (CHOSEN_SOCIAL_SHARE_MASTER_MAX_WIDTH, CHOSEN_SOCIAL_SHARE_MASTER_MAX_HEIGHT), Image.ANTIALIAS)
                 # python_image_library_image = ImageOps.fit(

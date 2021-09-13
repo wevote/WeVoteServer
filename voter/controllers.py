@@ -3416,8 +3416,9 @@ def voter_save_photo_from_file_reader(
             base64_data = img_dict['data']
             byte_data = base64.b64decode(base64_data)
             image_data = BytesIO(byte_data)
-            python_image_library_image = Image.open(image_data)
-            format_to_cache = python_image_library_image.format
+            original_image = Image.open(image_data)
+            format_to_cache = original_image.format
+            python_image_library_image = ImageOps.exif_transpose(original_image)
             python_image_library_image.thumbnail(
                 (PROFILE_IMAGE_ORIGINAL_MAX_WIDTH, PROFILE_IMAGE_ORIGINAL_MAX_HEIGHT), Image.ANTIALIAS)
             python_image_library_image.format = format_to_cache
