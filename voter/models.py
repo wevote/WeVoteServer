@@ -1373,6 +1373,7 @@ class VoterManager(BaseUserManager):
                                   we_vote_hosted_profile_image_url_large=None,
                                   we_vote_hosted_profile_image_url_medium=None,
                                   we_vote_hosted_profile_image_url_tiny=None):
+        status = ''
         try:
             if positive_value_exists(facebook_auth_response.facebook_user_id):
                 voter.facebook_id = facebook_auth_response.facebook_user_id
@@ -1404,9 +1405,9 @@ class VoterManager(BaseUserManager):
 
             voter.save()
             success = True
-            status = "SAVED_FACEBOOK_USER_VALUES "
+            status += "SAVED_FACEBOOK_USER_VALUES "
         except Exception as e:
-            status = "UNABLE_TO_SAVE_FACEBOOK_USER_VALUES: " + str(e) + " "
+            status += "UNABLE_TO_SAVE_FACEBOOK_USER_VALUES: " + str(e) + " "
             success = False
 
         results = {

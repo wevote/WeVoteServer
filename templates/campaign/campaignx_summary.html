@@ -31,6 +31,12 @@
                     (<a href="{% url 'campaign:campaignx_edit' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">edit</a>)
                 </td>
             </tr>
+        {% if campaignx.in_draft_mode %}
+            <tr>
+                <th>IN DRAFT MODE</th>
+                <td></td>
+            </tr>
+        {% endif %}
             <tr>
                 <th>Supporters:&nbsp;</th>
                 <td> {{ campaignx.supporters_count }}

@@ -1556,9 +1556,12 @@ def candidate_edit_process_view(request):
 
             if google_search_image_file:
                 # If google search image exist then cache master and resized images and save them to candidate table
-                url_is_broken = False
                 results = save_image_to_candidate_table(
-                    candidate_on_stage, google_search_image_file, google_search_link, url_is_broken)
+                    candidate=candidate_on_stage,
+                    image_url=google_search_image_file,
+                    source_link=google_search_link,
+                    url_is_broken=False,
+                    kind_of_source_website=None)
                 if not positive_value_exists(results['success']):
                     status += results['status']
                 google_search_user_manager = GoogleSearchUserManager()

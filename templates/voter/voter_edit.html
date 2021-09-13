@@ -15,20 +15,12 @@
 <input type="hidden" name="voter_id" value="{% if voter %}{{ voter.id }}{% else %}0{% endif %}">
 
 {% if voter %}
-<div class="form-group">
-    <label class="col-sm-3 control-label">
-        Voter ID</label>
-    <div class="col-sm-9 form-control-plaintext">
-        {{ voter.id }}
-    </div>
-</div>
-
 
 <div class="form-group">
     <label class="col-sm-3 control-label">
         We Vote ID</label>
     <div class="col-sm-9 form-control-plaintext">
-        {{ voter.we_vote_id }} (<a href="{% url 'image:images_for_one_voter' voter.id %}" target="_blank">See images</a>)
+        {{ voter.id }} / {{ voter.we_vote_id }} (<a href="{% url 'image:images_for_one_voter' voter.id %}" target="_blank">See images</a>)
     </div>
 </div>
 
@@ -63,6 +55,54 @@
     </div>
 </div>
 {% endif %}
+
+
+<div class="form-group">
+    <label for="profile_image_type_currently_active_id" class="col-sm-3 control-label">
+        Voter Photo Choice<br />
+        <span style="color: darkgray">{{ voter.profile_image_type_currently_active }}</span>
+    </label>
+    <div class="col-sm-8">
+        <span style="float: left; padding: 8px 20px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="UNKNOWN"
+                {% if voter.profile_image_type_currently_active == 'UNKNOWN' %} checked {% endif %}
+                />
+        {% if voter.we_vote_hosted_profile_twitter_image_url_tiny %}
+            <span style="text-decoration: line-through">Unknown</span>
+        {% else %}
+            Unknown
+        {% endif %}
+        </span>
+        {% if voter.we_vote_hosted_profile_uploaded_image_url_tiny %}
+        <span style="float: left; padding: 8px 20px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="UPLOADED"
+                {% if voter.profile_image_type_currently_active == 'UPLOADED' %} checked {% endif %}
+                />
+            <img src='{{ voter.we_vote_hosted_profile_uploaded_image_url_tiny }}' />
+            Uploaded
+        </span>
+        {% endif %}
+        {% if voter.we_vote_hosted_profile_facebook_image_url_tiny %}
+        <span style="float: left; padding: 8px 20px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="FACEBOOK"
+                {% if voter.profile_image_type_currently_active == 'FACEBOOK' %} checked {% endif %}
+                />
+            <img src='{{ voter.we_vote_hosted_profile_facebook_image_url_tiny }}' />
+            Facebook
+        </span>
+        {% endif %}
+        {% if voter.we_vote_hosted_profile_twitter_image_url_tiny %}
+        <span style="float: left; padding: 8px 20px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="TWITTER"
+                {% if voter.profile_image_type_currently_active == 'TWITTER' %} checked {% endif %}
+                />
+            <img src='{{ voter.we_vote_hosted_profile_twitter_image_url_tiny }}' />
+            Twitter
+        </span>
+        {% endif %}
+        </span>
+    </div>
+</div>
 
 
 <div class="form-group">
