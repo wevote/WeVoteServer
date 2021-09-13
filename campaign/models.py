@@ -367,48 +367,48 @@ class CampaignXManager(models.Manager):
                         chars=string.ascii_lowercase + string.digits,
                         remove_confusing_digits=True,
                     )
-                final_pathname_string_to_test = "{base_pathname_string}-{pathname_modifier}".format(
-                    base_pathname_string=base_pathname_string,
-                    pathname_modifier=pathname_modifier)
-                try:
-                    pathname_modifiers_already_reviewed_list.append(pathname_modifier)
-                    path_query = CampaignXSEOFriendlyPath.objects.using('readonly').all()
-                    path_query = path_query.filter(final_pathname_string__iexact=final_pathname_string_to_test)
-                    match_count = path_query.count()
-                    if not positive_value_exists(match_count):
-                        try:
-                            path_query = CampaignX.objects.using('readonly').all()
-                            path_query = path_query.filter(seo_friendly_path__iexact=final_pathname_string_to_test)
-                            match_count = path_query.count()
-                            if positive_value_exists(match_count):
-                                status += "FOUND_IN_ANOTHER_CAMPAIGNX2 "
-                            else:
-                                continue_retrieving = False
-                                final_pathname_string = final_pathname_string_to_test
-                                owned_by_another_campaignx = False
-                                status += "NO_PATHNAME_COLLISION "
-                        except Exception as e:
-                            status += 'PROBLEM_QUERYING_CAMPAIGNX_TABLE {error} [type: {error_type}] ' \
-                                      ''.format(error=str(e), error_type=type(e))
-                            results = {
-                                'seo_friendly_path':            final_pathname_string,
-                                'seo_friendly_path_created':    False,
-                                'seo_friendly_path_found':      False,
-                                'status':                       status,
-                                'success':                      False,
-                            }
-                            return results
-                except Exception as e:
-                    status += 'PROBLEM_QUERYING_CAMPAIGNX_SEO_FRIENDLY_PATH_TABLE4 {error} [type: {error_type}] ' \
-                              ''.format(error=str(e), error_type=type(e))
-                    results = {
-                        'seo_friendly_path':            final_pathname_string,
-                        'seo_friendly_path_created':    False,
-                        'seo_friendly_path_found':      False,
-                        'status':                       status,
-                        'success':                      False,
-                    }
-                    return results
+                    final_pathname_string_to_test = "{base_pathname_string}-{pathname_modifier}".format(
+                        base_pathname_string=base_pathname_string,
+                        pathname_modifier=pathname_modifier)
+                    try:
+                        pathname_modifiers_already_reviewed_list.append(pathname_modifier)
+                        path_query = CampaignXSEOFriendlyPath.objects.using('readonly').all()
+                        path_query = path_query.filter(final_pathname_string__iexact=final_pathname_string_to_test)
+                        match_count = path_query.count()
+                        if not positive_value_exists(match_count):
+                            try:
+                                path_query = CampaignX.objects.using('readonly').all()
+                                path_query = path_query.filter(seo_friendly_path__iexact=final_pathname_string_to_test)
+                                match_count = path_query.count()
+                                if positive_value_exists(match_count):
+                                    status += "FOUND_IN_ANOTHER_CAMPAIGNX2 "
+                                else:
+                                    continue_retrieving = False
+                                    final_pathname_string = final_pathname_string_to_test
+                                    owned_by_another_campaignx = False
+                                    status += "NO_PATHNAME_COLLISION "
+                            except Exception as e:
+                                status += 'PROBLEM_QUERYING_CAMPAIGNX_TABLE {error} [type: {error_type}] ' \
+                                          ''.format(error=str(e), error_type=type(e))
+                                results = {
+                                    'seo_friendly_path':            final_pathname_string,
+                                    'seo_friendly_path_created':    False,
+                                    'seo_friendly_path_found':      False,
+                                    'status':                       status,
+                                    'success':                      False,
+                                }
+                                return results
+                    except Exception as e:
+                        status += 'PROBLEM_QUERYING_CAMPAIGNX_SEO_FRIENDLY_PATH_TABLE4 {error} [type: {error_type}] ' \
+                                  ''.format(error=str(e), error_type=type(e))
+                        results = {
+                            'seo_friendly_path':            final_pathname_string,
+                            'seo_friendly_path_created':    False,
+                            'seo_friendly_path_found':      False,
+                            'status':                       status,
+                            'success':                      False,
+                        }
+                        return results
 
         if owned_by_another_campaignx:
             # We have failed to find a unique URL
@@ -612,6 +612,7 @@ class CampaignXManager(models.Manager):
                     query = CampaignX.objects.filter(
                         in_draft_mode=True,
                         started_by_voter_we_vote_id=voter_we_vote_id)
+                query = query.order_by('-id')
                 draft_campaign_list = list(query)
                 if len(draft_campaign_list) > 0:
                     campaignx = draft_campaign_list[0]
@@ -2018,7 +2019,8 @@ class CampaignXManager(models.Manager):
                                 campaignx.seo_friendly_path = path_results['seo_friendly_path']
                             else:
                                 status += path_results['status']
-                                in_draft_mode_may_be_updated = False
+                                # We don't want to prevent a campaign from leaving draft mode here
+                                # in_draft_mode_may_be_updated = False
                     if in_draft_mode_may_be_updated:
                         campaignx.in_draft_mode = positive_value_exists(update_values['in_draft_mode'])
                         campaignx_changed = True
