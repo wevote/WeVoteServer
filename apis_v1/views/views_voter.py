@@ -36,11 +36,11 @@ from support_oppose_deciding.controllers import voter_opposing_save, voter_stop_
 from voter.controllers import voter_address_retrieve_for_api, voter_create_for_api, voter_merge_two_accounts_for_api, \
     voter_merge_two_accounts_action, voter_photo_save_for_api, voter_retrieve_for_api, \
     voter_save_photo_from_file_reader, voter_sign_out_for_api, voter_split_into_two_accounts_for_api
+from voter.controllers_contacts import delete_google_contacts, save_google_contacts, voter_contact_list_retrieve_for_api
 from voter.models import BALLOT_ADDRESS, fetch_voter_we_vote_id_from_voter_device_link, \
     PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, PROFILE_IMAGE_TYPE_UPLOADED, \
     VoterAddress, VoterAddressManager, VoterDeviceLink, VoterDeviceLinkManager, VoterManager, Voter, \
     voter_has_authority
-
 from voter_guide.controllers import voter_follow_all_organizations_followed_by_organization_for_api
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_maximum_number_to_retrieve_from_request, \
@@ -2872,30 +2872,66 @@ def voter_verify_secret_code_view(request):  # voterVerifySecretCode
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 @csrf_exempt
-def voter_send_google_contacts_view(request):  # voterSendGoogleContacts
+def voter_contact_list_retrieve_view(request):  # voterContactListRetrieve
     """
-    Receive the voter's google contacts that they allowed the download from the Campaign app
+    Retrieve from the We Vote database all contacts previously uploaded
     :param request:
     :return:
     """
     success = True
     status = ''
     status, voter, voter_found, voter_device_link = views_voter_utils.get_voter_from_request(request, status)
-    contacts_string = request.POST.get('contacts', None)
-    contacts = json.loads(contacts_string)
+    voter_contact_email_google_count = 0
+    voter_contact_email_list = []
 
-    j = 0
-    if contacts is not None:
-        success = True
-        for contact in contacts:
-            j += 1
-            print(str(j) + " " + json.dumps(contact))
+    if hasattr(voter, 'we_vote_id'):
+        retrieve_results = voter_contact_list_retrieve_for_api(voter_we_vote_id=voter.we_vote_id)
+        voter_contact_email_list = retrieve_results['voter_contact_email_list']
+        voter_contact_email_google_count = retrieve_results['voter_contact_email_google_count']
 
     json_data = {
-        'status':                                   status,
-        'success':                                  success,
-        'we_vote_id_for_google_contacts':           voter.we_vote_id,
-        'contacts_stored':                          len(contacts),
+        'status':                           status,
+        'success':                          success,
+        'voter_contact_email_google_count': voter_contact_email_google_count,
+        'voter_contact_email_list':         voter_contact_email_list,
+        'voter_contact_email_list_count':   len(voter_contact_email_list),
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+@csrf_exempt
+def voter_contact_list_save_view(request):  # voterContactListSave
+    """
+    Receive the voter's contacts that they allowed to download from sources like Google, and their phone address book
+    :param request:
+    :return:
+    """
+    success = True
+    status = ''
+    contacts_stored = 0
+
+    status, voter, voter_found, voter_device_link = views_voter_utils.get_voter_from_request(request, status)
+    contacts_string = request.POST.get('contacts', None)
+    delete_from_google_people_api = request.POST.get('delete_from_google_people_api', False)
+
+    if positive_value_exists(delete_from_google_people_api):
+        results = delete_google_contacts(voter_we_vote_id=voter.we_vote_id)
+    elif hasattr(voter, 'we_vote_id'):
+        contacts = json.loads(contacts_string)
+        contacts_stored = len(contacts)
+        results = save_google_contacts(voter_we_vote_id=voter.we_vote_id, contacts=contacts)
+
+    retrieve_results = voter_contact_list_retrieve_for_api(voter_we_vote_id=voter.we_vote_id)
+    voter_contact_email_list = retrieve_results['voter_contact_email_list']
+    voter_contact_email_google_count = retrieve_results['voter_contact_email_google_count']
+
+    json_data = {
+        'status':                           status,
+        'success':                          success,
+        'we_vote_id_for_google_contacts':   voter.we_vote_id,
+        'contacts_stored':                  contacts_stored,
+        'voter_contact_email_google_count': voter_contact_email_google_count,
+        'voter_contact_email_list':         voter_contact_email_list,
+        'voter_contact_email_list_count':   len(voter_contact_email_list),
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

@@ -65,7 +65,7 @@ def move_shared_items_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_i
                 .update(shared_by_voter_we_vote_id=to_voter_we_vote_id,
                         shared_by_organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
-            status += "FAILED-SHARED_ITEM-SHARED_BY_VOTER_WE_VOTE_ID-INCLUDING_ORG " + str(e) + " "
+            status += "FAILED-SHARED_ITEM-SHARED_BY_VOTER_WE_VOTE_ID-INCLUDING_ORG: " + str(e) + " "
         try:
             SharedLinkClicked.objects.filter(shared_by_voter_we_vote_id__iexact=from_voter_we_vote_id) \
                 .update(shared_by_voter_we_vote_id=to_voter_we_vote_id,
@@ -74,7 +74,7 @@ def move_shared_items_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_i
                 .update(viewed_by_voter_we_vote_id=to_voter_we_vote_id,
                         viewed_by_organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
-            status += "FAILED-SHARED_LINK_CLICKED-SHARED_BY_VOTER_WE_VOTE_ID-INCLUDING_ORG " + str(e) + " "
+            status += "FAILED-SHARED_LINK_CLICKED-SHARED_BY_VOTER_WE_VOTE_ID-INCLUDING_ORG: " + str(e) + " "
         try:
             SharedPermissionsGranted.objects.filter(shared_by_voter_we_vote_id__iexact=from_voter_we_vote_id) \
                 .update(shared_by_voter_we_vote_id=to_voter_we_vote_id,
@@ -83,27 +83,27 @@ def move_shared_items_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_i
                 .update(shared_to_voter_we_vote_id=to_voter_we_vote_id,
                         shared_to_organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
-            status += "FAILED-SHARED_PERMISSIONS_GRANTED-SHARED_BY_VOTER_WE_VOTE_ID-INCLUDING_ORG " + str(e) + " "
+            status += "FAILED-SHARED_PERMISSIONS_GRANTED-SHARED_BY_VOTER_WE_VOTE_ID-INCLUDING_ORG: " + str(e) + " "
     else:
         try:
             SharedItem.objects.filter(shared_by_voter_we_vote_id__iexact=from_voter_we_vote_id)\
                 .update(shared_by_voter_we_vote_id=to_voter_we_vote_id)
         except Exception as e:
-            status += "FAILED-SHARED_ITEM-SHARED_BY_VOTER_WE_VOTE_ID " + str(e) + " "
+            status += "FAILED-SHARED_ITEM-SHARED_BY_VOTER_WE_VOTE_ID: " + str(e) + " "
         try:
             SharedLinkClicked.objects.filter(shared_by_voter_we_vote_id__iexact=from_voter_we_vote_id) \
                 .update(shared_by_voter_we_vote_id=to_voter_we_vote_id)
             SharedLinkClicked.objects.filter(viewed_by_voter_we_vote_id__iexact=from_voter_we_vote_id) \
                 .update(viewed_by_voter_we_vote_id=to_voter_we_vote_id)
         except Exception as e:
-            status += "FAILED-SHARED_LINK_CLICKED-SHARED_BY_VOTER_WE_VOTE_ID " + str(e) + " "
+            status += "FAILED-SHARED_LINK_CLICKED-SHARED_BY_VOTER_WE_VOTE_ID: " + str(e) + " "
         try:
             SharedPermissionsGranted.objects.filter(shared_by_voter_we_vote_id__iexact=from_voter_we_vote_id) \
                 .update(shared_by_voter_we_vote_id=to_voter_we_vote_id)
             SharedPermissionsGranted.objects.filter(shared_to_voter_we_vote_id__iexact=from_voter_we_vote_id) \
                 .update(shared_to_voter_we_vote_id=to_voter_we_vote_id)
         except Exception as e:
-            status += "FAILED-SHARED_PERMISSIONS_GRANTED-SHARED_BY_VOTER_WE_VOTE_ID " + str(e) + " "
+            status += "FAILED-SHARED_PERMISSIONS_GRANTED-SHARED_BY_VOTER_WE_VOTE_ID: " + str(e) + " "
 
     if positive_value_exists(from_organization_we_vote_id) and positive_value_exists(to_organization_we_vote_id):
         try:
@@ -112,14 +112,14 @@ def move_shared_items_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_i
             SharedItem.objects.filter(shared_by_organization_we_vote_id__iexact=from_organization_we_vote_id) \
                 .update(shared_by_organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
-            status += "FAILED-SHARED_ITEM-SITE_OWNER_ORGANIZATION_WE_VOTE_ID " + str(e) + " "
+            status += "FAILED-SHARED_ITEM-SITE_OWNER_ORGANIZATION_WE_VOTE_ID: " + str(e) + " "
         try:
             SharedLinkClicked.objects.filter(shared_by_organization_we_vote_id__iexact=from_organization_we_vote_id) \
                 .update(shared_by_organization_we_vote_id=to_organization_we_vote_id)
             SharedLinkClicked.objects.filter(viewed_by_organization_we_vote_id__iexact=from_organization_we_vote_id) \
                 .update(viewed_by_organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
-            status += "FAILED-SHARED_LINK_CLICKED-SHARED_BY_ORGANIZATION_WE_VOTE_ID " + str(e) + " "
+            status += "FAILED-SHARED_LINK_CLICKED-SHARED_BY_ORGANIZATION_WE_VOTE_ID: " + str(e) + " "
         try:
             SharedPermissionsGranted.objects\
                 .filter(shared_by_organization_we_vote_id__iexact=from_organization_we_vote_id) \
@@ -128,7 +128,7 @@ def move_shared_items_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_i
                 .filter(shared_to_organization_we_vote_id__iexact=from_organization_we_vote_id) \
                 .update(shared_to_organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
-            status += "FAILED-SHARED_PERMISSIONS_GRANTED-SHARED_BY_ORGANIZATION_WE_VOTE_ID " + str(e) + " "
+            status += "FAILED-SHARED_PERMISSIONS_GRANTED-SHARED_BY_ORGANIZATION_WE_VOTE_ID: " + str(e) + " "
     else:
         status += "MOVE_SHARED_ITEMS-MISSING_EITHER_FROM_OR_TO_ORGANIZATION_WE_VOTE_ID "
 
@@ -237,7 +237,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
             url_with_shared_item_code_all_opinions = \
                 "https://" + hostname + "/-" + shared_item.shared_item_code_all_opinions
         except Exception as e:
-            status += "COULD_NOT_MODIFY_HOSTNAME " + str(e) + " "
+            status += "COULD_NOT_MODIFY_HOSTNAME: " + str(e) + " "
 
     if viewed_by_voter_we_vote_id == shared_item.shared_by_voter_we_vote_id:
         api_call_coming_from_voter_who_shared = True
@@ -416,6 +416,7 @@ def shared_item_save_for_api(  # sharedItemSave
     success = True
     candidate_we_vote_id = ''
     date_first_shared = None
+    hostname = ''
     measure_we_vote_id = ''
     office_we_vote_id = ''
     shared_by_voter_we_vote_id = ''
@@ -451,7 +452,7 @@ def shared_item_save_for_api(  # sharedItemSave
             organization = results['organization']
             site_owner_organization_we_vote_id = organization.we_vote_id
     except Exception as e:
-        status += "COULD_NOT_MODIFY_HOSTNAME " + str(e) + " "
+        status += "COULD_NOT_MODIFY_HOSTNAME: " + str(e) + " "
         success = False
 
     if positive_value_exists(ballot_item_we_vote_id):
@@ -546,5 +547,124 @@ def shared_item_save_for_api(  # sharedItemSave
         'measure_we_vote_id':           measure_we_vote_id,
         'office_we_vote_id':            office_we_vote_id,
         'date_first_shared':            date_first_shared,
+    }
+    return results
+
+
+def super_share_item_save_for_api(  # superShareItemSave
+        campaignx_we_vote_id='',
+        campaignx_news_item_we_vote_id='',
+        destination_full_url='',
+        personalized_message='',
+        personalized_message_changed=False,
+        personalized_subject='',
+        personalized_subject_changed=False,
+        voter_device_id=''):
+    status = ''
+    success = True
+    shared_by_voter_we_vote_id = ''
+    shared_by_organization_type = ''
+    shared_by_organization_we_vote_id = ''
+    site_owner_organization_we_vote_id = ''
+    super_share_item_id = 0
+
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if voter_results['voter_found']:
+        voter = voter_results['voter']
+        shared_by_voter_we_vote_id = voter.we_vote_id
+        shared_by_organization_we_vote_id = voter.linked_organization_we_vote_id
+        shared_by_organization_type = INDIVIDUAL
+
+    organization_manager = OrganizationManager()
+    try:
+        hostname = destination_full_url.strip().lower()
+        hostname = hostname.replace('http://', '')
+        hostname = hostname.replace('https://', '')
+        if '/' in hostname:
+            hostname_array = hostname.split('/')
+            hostname = hostname_array[0]
+
+        results = organization_manager.retrieve_organization_from_incoming_hostname(hostname, read_only=True)
+        status += results['status']
+        organization_found = results['organization_found']
+        if organization_found:
+            organization = results['organization']
+            site_owner_organization_we_vote_id = organization.we_vote_id
+    except Exception as e:
+        status += "COULD_NOT_MODIFY_HOSTNAME: " + str(e) + " "
+        success = False
+
+    # if positive_value_exists(ballot_item_we_vote_id):
+    #     if "cand" in ballot_item_we_vote_id:
+    #         candidate_we_vote_id = ballot_item_we_vote_id
+    #     elif "meas" in ballot_item_we_vote_id:
+    #         measure_we_vote_id = ballot_item_we_vote_id
+    #     elif "off" in ballot_item_we_vote_id:
+    #         office_we_vote_id = ballot_item_we_vote_id
+
+    required_variables_for_new_entry = positive_value_exists(campaignx_we_vote_id) \
+        and positive_value_exists(shared_by_voter_we_vote_id)
+    if not required_variables_for_new_entry or not success:
+        status += "SUPER_SHARE_ITEM_REQUIRED_VARIABLES_MISSING "
+        results = {
+            'status':                               status,
+            'success':                              False,
+            'campaignx_we_vote_id':                 campaignx_we_vote_id,
+            'destination_full_url':                 destination_full_url,
+            'personalized_message':                 personalized_message,
+            'personalized_subject':                 personalized_subject,
+            'shared_by_organization_type':          shared_by_organization_type,
+            'shared_by_organization_we_vote_id':    shared_by_organization_we_vote_id,
+            'shared_by_voter_we_vote_id':           shared_by_voter_we_vote_id,
+            'site_owner_organization_we_vote_id':   site_owner_organization_we_vote_id,
+            'super_share_item_id':                  super_share_item_id,
+        }
+        return results
+
+    share_manager = ShareManager()
+    defaults = {
+        'campaignx_news_item_we_vote_id':       campaignx_news_item_we_vote_id,
+        'campaignx_we_vote_id':                 campaignx_we_vote_id,
+        'personalized_message':                 personalized_message,
+        'personalized_message_changed':         personalized_message_changed,
+        'personalized_subject':                 personalized_subject,
+        'personalized_subject_changed':         personalized_subject_changed,
+        'shared_by_organization_type':          shared_by_organization_type,
+        'shared_by_organization_we_vote_id':    shared_by_organization_we_vote_id,
+        'shared_by_voter_we_vote_id':           shared_by_voter_we_vote_id,
+        'site_owner_organization_we_vote_id':   site_owner_organization_we_vote_id,
+    }
+    create_results = share_manager.update_or_create_super_share_item(
+        campaignx_we_vote_id=campaignx_we_vote_id,
+        shared_by_voter_we_vote_id=shared_by_voter_we_vote_id,
+        defaults=defaults,
+    )
+    status += create_results['status']
+    personalized_message = ''
+    personalized_subject = ''
+    if create_results['super_share_item_found']:
+        super_share_item = create_results['super_share_item']
+        personalized_message = super_share_item.personalized_message
+        personalized_subject = super_share_item.personalized_subject
+        super_share_item_id = super_share_item.id
+        # super_share_item_code_no_opinions = super_share_item.super_share_item_code_no_opinions
+        # super_share_item_code_all_opinions = super_share_item.super_share_item_code_all_opinions
+        # url_with_super_share_item_code_no_opinions = "https://" + hostname + "/-" + super_share_item_code_no_opinions
+        # url_with_super_share_item_code_all_opinions = "https://" + hostname + "/-" +
+        # super_share_item_code_all_opinions
+
+    results = {
+        'status':                               status,
+        'success':                              success,
+        'campaignx_we_vote_id':                 campaignx_we_vote_id,
+        'destination_full_url':                 destination_full_url,
+        'personalized_message':                 personalized_message,
+        'personalized_subject':                 personalized_subject,
+        'shared_by_organization_type':          shared_by_organization_type,
+        'shared_by_organization_we_vote_id':    shared_by_organization_we_vote_id,
+        'shared_by_voter_we_vote_id':           shared_by_voter_we_vote_id,
+        'site_owner_organization_we_vote_id':   site_owner_organization_we_vote_id,
+        'super_share_item_id':                  super_share_item_id,
     }
     return results

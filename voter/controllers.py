@@ -2377,6 +2377,11 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
     move_twitter_results = move_twitter_info_to_another_voter(from_voter, new_owner_voter)
     status += " " + move_twitter_results['status']
 
+    from voter.controllers_contacts import move_voter_contact_email_to_another_voter
+    move_voter_contact_email_results = move_voter_contact_email_to_another_voter(
+        from_voter_we_vote_id, to_voter_we_vote_id)
+    status += " " + move_voter_contact_email_results['status']
+
     # Bring over the voter's plans to vote
     move_voter_plan_results = move_voter_plan_to_another_voter(from_voter, new_owner_voter)
     status += " " + move_voter_plan_results['status']

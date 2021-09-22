@@ -1636,7 +1636,7 @@ class ActivityNotice(models.Model):
     speaker_profile_image_url_medium = models.TextField(blank=True, null=True)
     speaker_profile_image_url_tiny = models.TextField(blank=True, null=True)
     statement_subject = models.CharField(max_length=255, default=None, null=True)
-    statement_text_preview = models.CharField(max_length=255, default=None, null=True)
+    statement_text_preview = models.TextField(default=None, null=True)
 
 
 class ActivityNoticeSeed(models.Model):
@@ -1684,7 +1684,7 @@ class ActivityNoticeSeed(models.Model):
     speaker_twitter_handle = models.CharField(max_length=255, null=True, unique=False, default=None)
     speaker_twitter_followers_count = models.IntegerField(default=0)
     statement_subject = models.CharField(max_length=255, default=None, null=True)
-    statement_text_preview = models.CharField(max_length=255, default=None, null=True)
+    statement_text_preview = models.TextField(default=None, null=True)
     # we_vote_id of this SEED
     we_vote_id = models.CharField(max_length=255, default=None, null=True, unique=True)
 
