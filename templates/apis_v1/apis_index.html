@@ -282,9 +282,15 @@
           </td>
         </tr>
         <tr>
-          <td><a href="{% url 'apis_v1:voterSendGoogleContactsDocs' %}">voterSendGoogleContacts</a></td>
+          <td><a href="{% url 'apis_v1:voterContactListRetrieveDocs' %}">voterContactListRetrieve</a></td>
           <td></td>
-          <td>Send the voter&apos;s Google contacts for processing.  (Voter has explicitly opted in.)
+          <td>Retrieve from the We Vote database all contacts previously uploaded
+          </td>
+        </tr>
+        <tr>
+          <td><a href="{% url 'apis_v1:voterContactListSaveDocs' %}">voterContactListSave</a></td>
+          <td></td>
+          <td>Send the voter&apos;s contacts for processing.  (Voter has explicitly opted in.)
           </td>
         </tr>
 

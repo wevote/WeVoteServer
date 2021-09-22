@@ -35,12 +35,14 @@ class SharedItem(models.Model):
     google_civic_election_id = models.PositiveIntegerField(default=0, null=True, blank=True)
     hide_introduction = models.BooleanField(default=False)
     is_ballot_share = models.BooleanField(default=False)
+    is_campaignx_share = models.BooleanField(default=False)
     is_candidate_share = models.BooleanField(default=False)
     is_measure_share = models.BooleanField(default=False)
     is_office_share = models.BooleanField(default=False)
     is_organization_share = models.BooleanField(default=False)
     is_ready_share = models.BooleanField(default=False)
     # What is being shared
+    campaignx_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
     candidate_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
     measure_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
     office_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
@@ -255,7 +257,7 @@ class ShareManager(models.Manager):
                     shared_item_created = False
                     shared_item = None
                     success = False
-                    status += "SHARED_ITEM_NOT_UPDATED " + str(e) + " "
+                    status += "SHARED_ITEM_NOT_UPDATED: " + str(e) + " "
         else:
             try:
                 shared_item = SharedItem.objects.create(
@@ -284,7 +286,7 @@ class ShareManager(models.Manager):
                 shared_item_created = False
                 shared_item = None
                 success = False
-                status += "SHARED_ITEM_NOT_CREATED " + str(e) + " "
+                status += "SHARED_ITEM_NOT_CREATED: " + str(e) + " "
 
         results = {
             'success':              success,
@@ -362,7 +364,7 @@ class ShareManager(models.Manager):
                     shared_permissions_granted_created = False
                     shared_permissions_granted = None
                     success = False
-                    status += "SHARED_PERMISSIONS_GRANTED_NOT_UPDATED " + str(e) + " "
+                    status += "SHARED_PERMISSIONS_GRANTED_NOT_UPDATED: " + str(e) + " "
         else:
             try:
                 shared_permissions_granted = SharedPermissionsGranted.objects.create(
@@ -382,7 +384,7 @@ class ShareManager(models.Manager):
                 shared_permissions_granted_created = False
                 shared_permissions_granted = None
                 success = False
-                status += "SHARED_PERMISSIONS_GRANTED_NOT_CREATED " + str(e) + " "
+                status += "SHARED_PERMISSIONS_GRANTED_NOT_CREATED: " + str(e) + " "
 
         results = {
             'success':              success,
@@ -390,6 +392,108 @@ class ShareManager(models.Manager):
             'shared_permissions_granted_found':    shared_permissions_granted_found,
             'shared_permissions_granted_created':  shared_permissions_granted_created,
             'shared_permissions_granted':          shared_permissions_granted,
+        }
+        return results
+
+    def update_or_create_super_share_item(
+            self,
+            campaignx_we_vote_id='',
+            shared_by_voter_we_vote_id='',
+            super_share_item_id=0,
+            defaults={}):
+        super_share_item_created = False
+        super_share_item_found = False
+        status = ""
+        success = True
+        if not positive_value_exists(campaignx_we_vote_id) or not positive_value_exists(shared_by_voter_we_vote_id):
+            status += "CREATE_OR_UPDATE_SUPER_SHARE_ITEM-MISSING_REQUIRED_VARIABLE "
+            results = {
+                'success':              False,
+                'status':               status,
+                'super_share_item_found':    super_share_item_found,
+                'super_share_item_created':  super_share_item_created,
+                'super_share_item':          None,
+            }
+            return results
+
+        results = self.retrieve_super_share_item(
+            campaignx_we_vote_id=campaignx_we_vote_id,
+            shared_by_voter_we_vote_id=shared_by_voter_we_vote_id,
+            super_share_item_id=super_share_item_id,
+            read_only=False)
+        super_share_item_found = results['super_share_item_found']
+        super_share_item = results['super_share_item']
+        success = results['success']
+        status += results['status']
+
+        # if create_super_share_item_code_no_opinions:
+        #     random_string = generate_random_string(6)
+        #     # TODO: Confirm its not in use
+        #     super_share_item_code_no_opinions = random_string
+        #
+        # if create_super_share_item_code_all_opinions:
+        #     random_string = generate_random_string(10)
+        #     # TODO: Confirm its not in use
+        #     super_share_item_code_all_opinions = random_string
+
+        if super_share_item_found:
+            try:
+                change_to_save = False
+                personalized_message_changed = defaults['personalized_message_changed'] \
+                    if 'personalized_message_changed' in defaults else False
+                if positive_value_exists(personalized_message_changed):
+                    super_share_item.personalized_message = defaults['personalized_message'] \
+                        if 'personalized_message' in defaults else ''
+                    change_to_save = True
+                personalized_subject_changed = defaults['personalized_subject_changed'] \
+                    if 'personalized_subject_changed' in defaults else False
+                if positive_value_exists(personalized_subject_changed):
+                    super_share_item.personalized_subject = defaults['personalized_subject'] \
+                        if 'personalized_subject' in defaults else ''
+                    change_to_save = True
+                if change_to_save:
+                    super_share_item.save()
+                    super_share_item_created = True
+                    success = True
+                    status += "SUPER_SHARE_ITEM_UPDATED "
+            except Exception as e:
+                super_share_item_created = False
+                super_share_item = None
+                success = False
+                status += "SUPER_SHARE_ITEM_NOT_UPDATED: " + str(e) + " "
+
+        if success and not super_share_item_found:
+            try:
+                super_share_item = SuperShareItem.objects.create(
+                    campaignx_we_vote_id=defaults['campaignx_we_vote_id']
+                    if 'campaignx_we_vote_id' in defaults else None,
+                    destination_full_url=defaults['destination_full_url']
+                    if 'destination_full_url' in defaults else None,
+                    in_draft_mode=defaults['in_draft_mode']
+                    if 'in_draft_mode' in defaults else True,
+                    personalized_message=defaults['personalized_message']
+                    if 'personalized_message' in defaults else None,
+                    personalized_subject=defaults['personalized_subject']
+                    if 'personalized_subject' in defaults else None,
+                    shared_by_voter_we_vote_id=shared_by_voter_we_vote_id,
+                    site_owner_organization_we_vote_id=defaults['site_owner_organization_we_vote_id']
+                    if 'site_owner_organization_we_vote_id' in defaults else None,
+                )
+                super_share_item_created = True
+                super_share_item_found = True
+                status += "SUPER_SHARE_ITEM_CREATED "
+            except Exception as e:
+                super_share_item_created = False
+                super_share_item = None
+                success = False
+                status += "SUPER_SHARE_ITEM_NOT_CREATED: " + str(e) + " "
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'super_share_item_found':   super_share_item_found,
+            'super_share_item_created': super_share_item_created,
+            'super_share_item':         super_share_item,
         }
         return results
 
@@ -789,3 +893,127 @@ class ShareManager(models.Manager):
             'shared_permissions_granted_list': shared_permissions_granted_list,
         }
         return results
+
+    def retrieve_super_share_item(
+            self,
+            campaignx_we_vote_id='',
+            super_share_item_id=0,
+            super_share_item_code='',
+            destination_full_url='',
+            shared_by_voter_we_vote_id='',
+            read_only=False):
+        exception_does_not_exist = False
+        exception_multiple_object_returned = False
+        super_share_item_found = False
+        super_share_item = SuperShareItem()
+        super_share_item_list_found = False
+        super_share_item_list = []
+        status = ""
+
+        try:
+            if positive_value_exists(super_share_item_id):
+                if positive_value_exists(read_only):
+                    super_share_item = SuperShareItem.objects.using('readonly').get(
+                        id=super_share_item_id,
+                        deleted=False
+                    )
+                else:
+                    super_share_item = SuperShareItem.objects.get(
+                        id=super_share_item_id,
+                        deleted=False
+                    )
+                super_share_item_id = super_share_item.id
+                super_share_item_found = True
+                success = True
+                status += "RETRIEVE_SUPER_SHARE_ITEM_FOUND_BY_ID "
+            elif positive_value_exists(campaignx_we_vote_id) and positive_value_exists(shared_by_voter_we_vote_id):
+                if positive_value_exists(read_only):
+                    super_share_item_queryset = SuperShareItem.objects.using('readonly').all()
+                else:
+                    super_share_item_queryset = SuperShareItem.objects.all()
+                super_share_item_queryset = super_share_item_queryset.filter(
+                    shared_by_voter_we_vote_id__iexact=shared_by_voter_we_vote_id,
+                    campaignx_we_vote_id__iexact=campaignx_we_vote_id,
+                    in_draft_mode=True
+                )
+                super_share_item_queryset = super_share_item_queryset.order_by('-date_created')
+                super_share_item_list = list(super_share_item_queryset)
+
+                if len(super_share_item_list):
+                    if len(super_share_item_list) == 1:
+                        # If only one super_share_item is found, return the results as a single super_share_item
+                        super_share_item = super_share_item_list[0]
+                        super_share_item_id = super_share_item.id
+                        super_share_item_found = True
+                        super_share_item_list_found = False
+                        success = True
+                        status += "RETRIEVE_SUPER_SHARE_ITEM_FOUND_BY_URL-ONLY_ONE_FOUND "
+                    else:
+                        success = True
+                        super_share_item = super_share_item_list[0]
+                        super_share_item_found = True
+                        super_share_item_list_found = True
+                        status += 'RETRIEVE_SUPER_SHARE_ITEM_FOUND_BY_URL-LIST_RETRIEVED '
+                else:
+                    success = True
+                    super_share_item_list_found = False
+                    status += 'RETRIEVE_SUPER_SHARE_ITEM-NO_SUPER_SHARE_ITEM_LIST_RETRIEVED '
+            else:
+                super_share_item_found = False
+                success = False
+                status += "RETRIEVE_SUPER_SHARE_ITEM_VARIABLES_MISSING "
+        except SuperShareItem.DoesNotExist:
+            exception_does_not_exist = True
+            success = True
+            status += "RETRIEVE_SUPER_SHARE_ITEM_NOT_FOUND "
+        except Exception as e:
+            success = False
+            status += 'FAILED_RETRIEVE_SUPER_SHARE_ITEM ' + str(e) + ' '
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'DoesNotExist':                 exception_does_not_exist,
+            'MultipleObjectsReturned':      exception_multiple_object_returned,
+            'super_share_item_found':       super_share_item_found,
+            'super_share_item_id':          super_share_item_id,
+            'super_share_item':             super_share_item,
+            'super_share_item_list_found':  super_share_item_list_found,
+            'super_share_item_list':        super_share_item_list,
+        }
+        return results
+
+
+class SuperShareItem(models.Model):
+    """
+    Keep track of the data assembled in the Super Share process
+    """
+    # What is being shared
+    campaignx_news_item_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
+    campaignx_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
+    date_created = models.DateTimeField(null=True, auto_now_add=True, db_index=True)
+    # The ending destination -- meaning the link that is being shared
+    destination_full_url = models.URLField(max_length=255, blank=True, null=True)
+    in_draft_mode = models.BooleanField(default=True, db_index=True)
+    personalized_message = models.TextField(null=True, blank=True, db_index=True)
+    personalized_subject = models.TextField(null=True, blank=True, db_index=True)
+    shared_by_voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True)
+    # The owner of the custom site this share was from
+    site_owner_organization_we_vote_id = models.CharField(max_length=255, null=True, blank=False, db_index=True)
+
+
+class SuperShareEmailRecipient(models.Model):
+    """
+    One recipient of one super shared email.
+    """
+    # What is being shared
+    campaignx_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
+    date_email_sent = models.DateTimeField(null=True, default=None)
+    email_address_text = models.TextField(null=True, blank=True, db_index=True)
+    google_contact_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
+    recipient_first_name = models.CharField(max_length=255, default=None, null=True)
+    recipient_last_name = models.CharField(max_length=255, default=None, null=True)
+    recipient_state_code = models.CharField(max_length=2, default=None, null=True, db_index=True)
+    recipient_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
+    shared_by_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
+    super_share_item_id = models.PositiveIntegerField(default=0, null=True, blank=True)

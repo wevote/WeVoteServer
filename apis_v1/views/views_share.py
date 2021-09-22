@@ -1,9 +1,10 @@
 # apis_v1/views/views_share.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-from share.controllers import shared_item_retrieve_for_api, shared_item_save_for_api
+from share.controllers import shared_item_retrieve_for_api, shared_item_save_for_api, super_share_item_save_for_api
 from config.base import get_environment_variable
 from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 from django_user_agents.utils import get_user_agent
 import json
 import wevote_functions.admin
@@ -60,3 +61,30 @@ def shared_item_save_view(request):  # sharedItemSave
     )
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
+
+@csrf_exempt
+def super_share_item_save_view(request):  # superShareItemSave
+    """
+    We use superShareItemSave for both saving and retrieving the saved data.
+    :param request:
+    :return:
+    """
+    campaignx_we_vote_id = request.POST.get('campaignx_we_vote_id', None)
+    campaignx_news_item_we_vote_id = request.POST.get('campaignx_news_item_we_vote_id', None)
+    destination_full_url = request.POST.get('destination_full_url', '')
+    personalized_subject = request.POST.get('personalized_subject', '')
+    personalized_subject_changed = positive_value_exists(request.POST.get('personalized_subject_changed', False))
+    personalized_message = request.POST.get('personalized_message', '')
+    personalized_message_changed = positive_value_exists(request.POST.get('personalized_message_changed', False))
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    json_data = super_share_item_save_for_api(
+        campaignx_we_vote_id=campaignx_we_vote_id,
+        campaignx_news_item_we_vote_id=campaignx_news_item_we_vote_id,
+        destination_full_url=destination_full_url,
+        personalized_message=personalized_message,
+        personalized_message_changed=personalized_message_changed,
+        personalized_subject=personalized_subject,
+        personalized_subject_changed=personalized_subject_changed,
+        voter_device_id=voter_device_id,
+    )
+    return HttpResponse(json.dumps(json_data), content_type='application/json')

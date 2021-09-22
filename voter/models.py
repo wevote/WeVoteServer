@@ -86,6 +86,11 @@ PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES = (
     (PROFILE_IMAGE_TYPE_UPLOADED, 'Uploaded'),
 )
 
+IMPORT_CONTACT_GOOGLE_PEOPLE = 'GOOGLE_PEOPLE_API'
+IMPORT_CONTACT_SOURCE_CHOICES = (
+    (IMPORT_CONTACT_GOOGLE_PEOPLE, 'Google People API'),
+)
+
 
 # See AUTH_USER_MODEL in config/base.py
 class VoterManager(BaseUserManager):
@@ -128,12 +133,144 @@ class VoterManager(BaseUserManager):
                 voter.save()
             except Exception as e:
                 success = False
-                status += " UNABLE_TO_UPDATE_VOTER_LINKED_ORGANIZATION_WE_VOTE_ID " + str(e)
+                status += " UNABLE_TO_UPDATE_VOTER_LINKED_ORGANIZATION_WE_VOTE_ID: " + str(e)
         else:
             status += "INVALID_VOTER "
         results = {
             'success':  success,
             'status':   status
+        }
+        return results
+
+    def update_or_create_voter_contact_email(
+            self,
+            email_address_text='',
+            existing_voter_contact_email_dict={},
+            from_google_people_api=False,
+            google_contact_id=None,
+            google_date_last_updated=None,
+            display_name=None,
+            first_name=None,
+            last_name=None,
+            ignore_contact=None,
+            imported_by_voter_we_vote_id='',
+            state_code=None,
+    ):
+        status = ""
+        success = True
+        voter_contact_email = None
+        voter_contact_email_found = False
+        voter_contact_email_created = False
+
+        source_specified = positive_value_exists(from_google_people_api)
+        if not source_specified or not positive_value_exists(email_address_text):
+            status += "CREATE_OR_UPDATE_VOTER_CONTACT_EMAIL-MISSING_REQUIRED_VARIABLES "
+            results = {
+                'success':                      False,
+                'status':                       status,
+                'voter_contact_email':          None,
+                'voter_contact_email_created':  voter_contact_email_created,
+                'voter_contact_email_found':    voter_contact_email_found,
+            }
+            return results
+
+        if email_address_text.lower() in existing_voter_contact_email_dict:
+            voter_contact_email_found = True
+            voter_contact_email = existing_voter_contact_email_dict[email_address_text.lower()]
+
+        if voter_contact_email_found:
+            try:
+                change_to_save = False
+                if positive_value_exists(from_google_people_api):
+                    if not positive_value_exists(voter_contact_email.has_data_from_google_people_api):
+                        voter_contact_email.has_data_from_google_people_api = True
+                        change_to_save = True
+                    if display_name is not None:
+                        if voter_contact_email.google_display_name != display_name:
+                            voter_contact_email.google_display_name = display_name
+                            change_to_save = True
+                    if first_name is not None:
+                        if voter_contact_email.google_first_name != first_name:
+                            voter_contact_email.google_first_name = first_name
+                            change_to_save = True
+                    if google_contact_id is not None:
+                        if voter_contact_email.google_contact_id != google_contact_id:
+                            voter_contact_email.google_contact_id = google_contact_id
+                            change_to_save = True
+                    if google_date_last_updated is not None:
+                        if voter_contact_email.google_date_last_updated != google_date_last_updated:
+                            voter_contact_email.google_date_last_updated = google_date_last_updated
+                            change_to_save = True
+                    if last_name is not None:
+                        if voter_contact_email.google_last_name != last_name:
+                            voter_contact_email.google_last_name = last_name
+                            change_to_save = True
+                if ignore_contact is not None:
+                    if voter_contact_email.ignore_contact != ignore_contact:
+                        voter_contact_email.ignore_contact = ignore_contact
+                        change_to_save = True
+                if state_code is not None:
+                    if voter_contact_email.state_code != state_code:
+                        voter_contact_email.state_code = state_code
+                        change_to_save = True
+                if change_to_save:
+                    voter_contact_email.save()
+                    voter_contact_email_created = True
+                    success = True
+                    status += "VOTER_CONTACT_EMAIL_UPDATED "
+                else:
+                    status += "NO_CHANGE_TO_VOTER_CONTACT_EMAIL "
+            except Exception as e:
+                voter_contact_email_created = False
+                voter_contact_email = None
+                success = False
+                status += "VOTER_CONTACT_EMAIL_NOT_UPDATED: " + str(e) + " "
+        else:
+            try:
+                change_to_save = False
+                if positive_value_exists(from_google_people_api):
+                    voter_contact_email = VoterContactEmail.objects.create(
+                        email_address_text=email_address_text,
+                        has_data_from_google_people_api=True,
+                        google_contact_id=google_contact_id,
+                        google_date_last_updated=google_date_last_updated,
+                        google_display_name=display_name,
+                        google_first_name=first_name,
+                        google_last_name=last_name,
+                        imported_by_voter_we_vote_id=imported_by_voter_we_vote_id,
+                        state_code=state_code,
+                    )
+                else:
+                    status += "NOT_A_RECOGNIZED_CONTACT_TYPE "
+                    results = {
+                        'success': False,
+                        'status': status,
+                        'voter_contact_email': None,
+                        'voter_contact_email_created': voter_contact_email_created,
+                        'voter_contact_email_found': voter_contact_email_found,
+                    }
+                    return results
+                if ignore_contact is not None:
+                    voter_contact_email.ignore_contact = ignore_contact
+                    change_to_save = True
+                if change_to_save:
+                    voter_contact_email.save()
+                voter_contact_email_created = True
+                voter_contact_email_found = True
+                status += "VOTER_CONTACT_EMAIL_CREATED "
+            except Exception as e:
+                voter_contact_email_created = False
+                voter_contact_email_found = False
+                voter_contact_email = None
+                success = False
+                status += "VOTER_CONTACT_EMAIL_NOT_CREATED: " + str(e) + " "
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'voter_contact_email':          voter_contact_email,
+            'voter_contact_email_created':  voter_contact_email_created,
+            'voter_contact_email_found':    voter_contact_email_found,
         }
         return results
 
@@ -146,7 +283,6 @@ class VoterManager(BaseUserManager):
             voter_plan_data_serialized=None,
             voter_plan_text=None):
         status = ""
-        success = True
         voter_plan_found = False
         voter_plan_created = False
         voter_plan = None
@@ -213,7 +349,7 @@ class VoterManager(BaseUserManager):
                 voter_plan_created = False
                 voter_plan = None
                 success = False
-                status += "VOTER_PLAN_NOT_UPDATED " + str(e) + " "
+                status += "VOTER_PLAN_NOT_UPDATED: " + str(e) + " "
         else:
             try:
                 voter_plan = VoterPlan.objects.create(
@@ -231,7 +367,7 @@ class VoterManager(BaseUserManager):
                 voter_plan_created = False
                 voter_plan = None
                 success = False
-                status += "VOTER_PLAN_NOT_CREATED " + str(e) + " "
+                status += "VOTER_PLAN_NOT_CREATED: " + str(e) + " "
 
         results = {
             'success':              success,
@@ -289,7 +425,7 @@ class VoterManager(BaseUserManager):
             voter_created = True
         except IntegrityError as e:
             handle_record_not_saved_exception(e, logger=logger)
-            logger.debug("create_voter IntegrityError exception (#1) " + str(e))
+            logger.debug("create_voter IntegrityError exception (#1): " + str(e))
             try:
                 # Trying to save again will increment the 'we_vote_id_last_voter_integer'
                 # by calling 'fetch_next_we_vote_id_voter_integer'
@@ -467,6 +603,47 @@ class VoterManager(BaseUserManager):
             'status':           status,
             'voter_duplicated': True if voter_id > 0 else False,
             'voter':            voter,
+        }
+        return results
+
+    def retrieve_voter_contact_email_list(self, imported_by_voter_we_vote_id='', read_only=True):
+        success = True
+        status = ""
+        voter_contact_email_list = []
+
+        try:
+            if positive_value_exists(read_only):
+                list_query = VoterContactEmail.objects.using('readonly').all()
+            else:
+                list_query = VoterContactEmail.objects.all()
+            if positive_value_exists(imported_by_voter_we_vote_id):
+                list_query = list_query.filter(imported_by_voter_we_vote_id=imported_by_voter_we_vote_id)
+            else:
+                status += "MISSING_IMPORTED_BY_VOTER_WE_VOTE_ID "
+                results = {
+                    'success':                          False,
+                    'status':                           status,
+                    'voter_contact_email_list':         [],
+                    'voter_contact_email_list_found':   False,
+                }
+                return results
+            voter_contact_email_list = list(list_query)
+            if len(voter_contact_email_list) > 0:
+                status += "VOTER_CONTACT_EMAIL_LIST_FOUND "
+                voter_contact_email_list_found = True
+            else:
+                status += "NO_VOTER_CONTACT_EMAILS_FOUND "
+                voter_contact_email_list_found = False
+        except Exception as e:
+            voter_contact_email_list_found = False
+            status += "VOTER_CONTACT_EMAIL_LIST_NOT_FOUND-EXCEPTION: " + str(e) + ' '
+            success = False
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'voter_contact_email_list':         voter_contact_email_list,
+            'voter_contact_email_list_found':   voter_contact_email_list_found,
         }
         return results
 
@@ -684,7 +861,7 @@ class VoterManager(BaseUserManager):
                         status += "REPAIR_FACEBOOK_CACHING-NO_NEED_TO_SAVE_LINKED_VOTER "
 
                 except Exception as e:
-                    status += "REPAIR_FACEBOOK_CACHING-COULD_NOT_SAVE_LINKED_VOTER " + str(e) + " "
+                    status += "REPAIR_FACEBOOK_CACHING-COULD_NOT_SAVE_LINKED_VOTER: " + str(e) + " "
 
         results = {
             'status': status,
@@ -854,7 +1031,7 @@ class VoterManager(BaseUserManager):
                             status += "REPAIR_TWITTER_CACHING-NO_NEED_TO_SAVE_LINKED_VOTER "
 
                     except Exception as e:
-                        status += "REPAIR_TWITTER_CACHING-COULD_NOT_SAVE_LINKED_VOTER " + str(e) + " "
+                        status += "REPAIR_TWITTER_CACHING-COULD_NOT_SAVE_LINKED_VOTER: " + str(e) + " "
 
         results = {
             'status': status,
@@ -1263,10 +1440,10 @@ class VoterManager(BaseUserManager):
             success = False
 
         results = {
-            'success': success,
-            'status': status,
-            'voter_plan_list': voter_plan_list,
-            'voter_plan_list_found': voter_plan_list_found,
+            'success':                  success,
+            'status':                   status,
+            'voter_plan_list':          voter_plan_list,
+            'voter_plan_list_found':    voter_plan_list_found,
         }
         return results
 
@@ -1298,7 +1475,7 @@ class VoterManager(BaseUserManager):
                     status += "ABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_EMAIL "
                     success = True
                 except Exception as e:
-                    status += "UNABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_EMAIL " + str(e) + " "
+                    status += "UNABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_EMAIL: " + str(e) + " "
 
         if positive_value_exists(email_address_object.we_vote_id):
             voter_by_primary_email_results = voter_manager.retrieve_voter_by_primary_email_we_vote_id(
@@ -1315,7 +1492,7 @@ class VoterManager(BaseUserManager):
                     status += "ABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_PRIMARY_EMAIL_WE_VOTE_ID "
                     success = True
                 except Exception as e:
-                    status += "UNABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_PRIMARY_EMAIL_WE_VOTE_ID " + str(e) + " "
+                    status += "UNABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_PRIMARY_EMAIL_WE_VOTE_ID: " + str(e) + " "
 
         results = {
             'success': success,
@@ -1343,7 +1520,7 @@ class VoterManager(BaseUserManager):
                     status += "ABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_SMS "
                     success = True
                 except Exception as e:
-                    status += "UNABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_SMS " + str(e) + " "
+                    status += "UNABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_SMS: " + str(e) + " "
 
         if positive_value_exists(sms_phone_number.we_vote_id):
             voter_by_primary_email_results = voter_manager.retrieve_voter_by_primary_email_we_vote_id(
@@ -1360,7 +1537,7 @@ class VoterManager(BaseUserManager):
                     status += "ABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_PRIMARY_EMAIL_WE_VOTE_ID "
                     success = True
                 except Exception as e:
-                    status += "UNABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_PRIMARY_EMAIL_WE_VOTE_ID " + str(e) + " "
+                    status += "UNABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_PRIMARY_EMAIL_WE_VOTE_ID: " + str(e) + " "
 
         results = {
             'success': success,
@@ -1451,7 +1628,7 @@ class VoterManager(BaseUserManager):
             success = True
             status = "SAVED_FACEBOOK_USER_VALUES_FROM_DICT "
         except Exception as e:
-            status = "UNABLE_TO_SAVE_FACEBOOK_USER_VALUES_FROM_DICT " + str(e) + " "
+            status = "UNABLE_TO_SAVE_FACEBOOK_USER_VALUES_FROM_DICT: " + str(e) + " "
             success = False
             handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
 
@@ -2165,7 +2342,7 @@ class VoterManager(BaseUserManager):
 
             success = True
         except Exception as e:
-            status += "UNABLE_TO_UPDATE_INCOMING_VOTER " + str(e) + " "
+            status += "UNABLE_TO_UPDATE_INCOMING_VOTER: " + str(e) + " "
             # We tried to update the incoming voter found but got an error, so we retrieve voter's based on
             #  normalized_email address, and then by primary_email_we_vote_id
             remove_cached_results = voter_manager.remove_voter_cached_email_entries_from_email_address_object(
@@ -2183,7 +2360,7 @@ class VoterManager(BaseUserManager):
                 success = True
             except Exception as e:
                 success = False
-                status += "UNABLE_TO_UPDATE_VOTER_EMAIL_OWNERSHIP2 " + str(e) + ' '
+                status += "UNABLE_TO_UPDATE_VOTER_EMAIL_OWNERSHIP2: " + str(e) + ' '
 
         results = {
             'status': status,
@@ -2213,7 +2390,7 @@ class VoterManager(BaseUserManager):
             status += "UPDATED_VOTER_SMS_OWNERSHIP "
             success = True
         except Exception as e:
-            status += "UNABLE_TO_UPDATE_INCOMING_VOTER " + str(e) + ' '
+            status += "UNABLE_TO_UPDATE_INCOMING_VOTER: " + str(e) + ' '
             # We tried to update the incoming voter found but got an error, so we retrieve voter's based on
             #  normalized_email address, and then by primary_email_we_vote_id
             remove_cached_results = voter_manager.remove_voter_cached_sms_entries_from_sms_phone_number(
@@ -2231,7 +2408,7 @@ class VoterManager(BaseUserManager):
                 success = True
             except Exception as e:
                 success = False
-                status += "UNABLE_TO_UPDATE_VOTER_EMAIL_OWNERSHIP2 " + str(e) + ' '
+                status += "UNABLE_TO_UPDATE_VOTER_EMAIL_OWNERSHIP2: " + str(e) + ' '
 
         results = {
             'status':           status,
@@ -2716,6 +2893,46 @@ class VoterChangeLog(models.Model):
 
     boolean_value_from = models.BooleanField(default=None, null=True)
     boolean_value_to = models.BooleanField(default=None, null=True)
+
+
+class VoterContactEmail(models.Model):
+    """
+    One contact imported from third-party voter address book. Voter may delete at any time.
+    """
+    date_last_changed = models.DateTimeField(null=True, auto_now=True, db_index=True)
+    email_address_text = models.TextField(null=True, blank=True, db_index=True)
+    google_contact_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
+    google_date_last_updated = models.DateTimeField(null=True)
+    google_display_name = models.CharField(max_length=255, default=None, null=True)
+    google_first_name = models.CharField(max_length=255, default=None, null=True)
+    google_last_name = models.CharField(max_length=255, default=None, null=True)
+    has_data_from_google_people_api = models.BooleanField(default=False)
+    ignore_contact = models.BooleanField(default=False)
+    imported_by_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
+    state_code = models.CharField(max_length=2, default=None, null=True, db_index=True)
+
+
+# class VoterContactSMS(models.Model):
+#     """
+#     One contact imported from third-party voter address book. Voter may delete at any time.
+#     """
+#     date_last_changed = models.DateTimeField(null=True, auto_now=True, db_index=True)
+#     google_contact_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
+#     google_date_last_updated = models.DateTimeField(null=True)
+#     google_display_name = models.CharField(max_length=255, default=None, null=True)
+#     google_first_name = models.CharField(max_length=255, default=None, null=True)
+#     google_last_name = models.CharField(max_length=255, default=None, null=True)
+#     ignore_contact = models.BooleanField(default=False)
+#     imported_by_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
+#     normalized_sms_phone_number = models.CharField(max_length=50, default=None, null=True)
+#     state_code = models.CharField(max_length=2, default=None, null=True, db_index=True)
+
+
+# class VoterFileInfo(models.Model):
+#     """
+#     What voter file information have we retrieved for one email address?
+#     """
+#     email_address_text = models.TextField(null=True, blank=True, db_index=True)
 
 
 class VoterDeviceLink(models.Model):
@@ -3238,7 +3455,7 @@ class VoterDeviceLinkManager(models.Manager):
                     voter_device_link.secret_code_number_of_failed_tries_for_this_code = None
                     voter_device_link.save()
                 except Exception as e:
-                    status += "FAILED_RESETTING_SECRET_CODE_AND_COUNTERS " + str(e) + " "
+                    status += "FAILED_RESETTING_SECRET_CODE_AND_COUNTERS: " + str(e) + " "
             else:
                 # Increase counts
                 try:
@@ -3263,7 +3480,7 @@ class VoterDeviceLinkManager(models.Manager):
                     # Now save
                     voter_device_link.save()
                 except Exception as e:
-                    status += "FAILED_INCREASING_COUNTERS " + str(e) + " "
+                    status += "FAILED_INCREASING_COUNTERS: " + str(e) + " "
         results = {
             'status':                                   status,
             'success':                                  success,

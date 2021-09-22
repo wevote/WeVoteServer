@@ -20,7 +20,8 @@ from apis_v1.documentation_source import \
     friend_invitation_by_email_verify_doc, friend_invitation_by_we_vote_id_send_doc, \
     friend_invitation_by_facebook_send_doc, friend_invitation_by_facebook_verify_doc, \
     friend_invitation_information_doc, \
-    friend_invite_response_doc, friend_list_doc, friend_lists_all_doc, issue_descriptions_retrieve_doc, issue_follow_doc, \
+    friend_invite_response_doc, friend_list_doc, friend_lists_all_doc, \
+    issue_descriptions_retrieve_doc, issue_follow_doc, \
     issues_followed_retrieve_doc, issues_retrieve_doc, issues_under_ballot_items_retrieve_doc, issues_sync_out_doc, \
     issues_linked_to_organization_doc, issues_to_link_to_for_organization_doc, \
     measure_retrieve_doc, measures_sync_out_doc, measure_list_for_upcoming_elections_retrieve_doc, \
@@ -43,7 +44,7 @@ from apis_v1.documentation_source import \
     positions_count_for_all_ballot_items_doc, positions_count_for_one_ballot_item_doc, \
     quick_info_retrieve_doc, retrieve_issues_to_follow_doc, \
     save_analytics_action_doc, search_all_doc, shared_item_retrieve_doc, \
-    shared_item_save_doc, site_configuration_retrieve_doc, \
+    shared_item_save_doc, super_share_item_save_doc, site_configuration_retrieve_doc, \
     sitewide_daily_metrics_sync_out_doc, sitewide_election_metrics_sync_out_doc, sitewide_voter_metrics_sync_out_doc, \
     twitter_identity_retrieve_doc, \
     twitter_sign_in_request_access_token_doc, twitter_sign_in_request_voter_info_doc, twitter_sign_in_retrieve_doc, \
@@ -53,6 +54,7 @@ from apis_v1.documentation_source import \
     voter_ballot_items_retrieve_from_google_civic_doc, voter_ballot_list_retrieve_doc, \
     voter_bookmark_off_save_doc, \
     voter_bookmark_on_save_doc, voter_bookmark_status_retrieve_doc, \
+    voter_contact_list_retrieve_doc, voter_contact_list_save_doc, \
     voter_count_doc, voter_create_doc, voter_email_address_retrieve_doc, voter_email_address_save_doc, \
     voter_email_address_sign_in_doc, voter_email_address_verify_doc, voter_facebook_save_to_current_account_doc, \
     voter_facebook_sign_in_retrieve_doc, voter_facebook_sign_in_save_doc, \
@@ -69,7 +71,7 @@ from apis_v1.documentation_source import \
     voter_plan_list_retrieve_doc, voter_plan_save_doc, \
     voter_reaction_like_off_save_doc, voter_reaction_like_on_save_doc, reaction_like_status_retrieve_doc, \
     voter_position_comment_save_doc, voter_position_retrieve_doc, voter_position_visibility_save_doc, \
-    voter_opposing_save_doc, voter_retrieve_doc, voter_send_google_contacts_doc, voter_sign_out_doc, \
+    voter_opposing_save_doc, voter_retrieve_doc, voter_sign_out_doc, \
     voter_sms_phone_number_retrieve_doc, voter_sms_phone_number_save_doc, \
     voter_split_into_two_accounts_doc, \
     voter_stop_opposing_save_doc, \
@@ -433,7 +435,6 @@ def apple_sign_in_save_doc_view(request):
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
-
 def email_ballot_data_doc_view(request):
     """
     Show documentation about emailBallotData
@@ -584,7 +585,8 @@ def issues_under_ballot_items_retrieve_doc_view(request):
     Show documentation about issuesUnderBallotItemsRetrieve
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
-    template_values = issues_under_ballot_items_retrieve_doc.issues_under_ballot_items_retrieve_doc_template_values(url_root)
+    template_values = issues_under_ballot_items_retrieve_doc.issues_under_ballot_items_retrieve_doc_template_values(
+        url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
@@ -1058,6 +1060,16 @@ def shared_item_save_doc_view(request):
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
+def super_share_item_save_doc_view(request):
+    """
+    Show documentation about superShareItemSave
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = super_share_item_save_doc.super_share_item_save_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
 def site_configuration_retrieve_doc_view(request):
     """
     Show documentation about siteConfigurationRetrieve
@@ -1488,7 +1500,8 @@ def voter_notification_settings_update_doc_view(request):
     Show documentation about voterNotificationSettingsUpdate
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
-    template_values = voter_notification_settings_update_doc.voter_notification_settings_update_doc_template_values(url_root)
+    template_values = voter_notification_settings_update_doc.voter_notification_settings_update_doc_template_values(
+        url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
@@ -1523,12 +1536,22 @@ def voter_plan_save_doc_view(request):
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
-def voter_send_google_contacts_doc_view(request):
+def voter_contact_list_retrieve_doc_view(request):
     """
-    Show documentation about voterPlanSave
+    Show documentation about voterContactListRetrieve
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
-    template_values = voter_send_google_contacts_doc.voter_send_google_contacts_doc_template_values(url_root)
+    template_values = voter_contact_list_retrieve_doc.voter_contact_list_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def voter_contact_list_save_doc_view(request):
+    """
+    Show documentation about voterContactListSave
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = voter_contact_list_save_doc.voter_contact_list_save_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
