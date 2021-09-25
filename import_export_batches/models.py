@@ -4949,7 +4949,7 @@ class BatchProcessManager(models.Manager):
                 use_ctcl=use_ctcl,
                 use_vote_usa=use_vote_usa,
             )
-            status += 'BATCH_PROCESS_SAVED '
+            status += 'CREATE_BATCH_PROCESS_SAVED '
         except Exception as e:
             success = False
             status += 'COULD_NOT_SAVE_BATCH_PROCESS: ' + str(e) + ' '
@@ -5008,7 +5008,7 @@ class BatchProcessManager(models.Manager):
                 save_changes = True
             if save_changes:
                 batch_process_log_entry.save()
-            status += 'BATCH_PROCESS_SAVED '
+            status += 'CREATE_BATCH_PROCESS_LOG_SAVED '
             batch_process_log_entry_saved = True
         except Exception as e:
             success = False

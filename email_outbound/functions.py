@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .models import CAMPAIGNX_FRIEND_HAS_SUPPORTED_TEMPLATE, CAMPAIGNX_NEWS_ITEM_TEMPLATE, \
-    CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_TEMPLATE, \
+    CAMPAIGNX_SUPER_SHARE_ITEM_TEMPLATE, CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_TEMPLATE, \
     FRIEND_ACCEPTED_INVITATION_TEMPLATE, FRIEND_INVITATION_TEMPLATE, LINK_TO_SIGN_IN_TEMPLATE, \
     NOTICE_FRIEND_ENDORSEMENTS_TEMPLATE, NOTICE_VOTER_DAILY_SUMMARY_TEMPLATE, \
     SEND_BALLOT_TO_SELF, SEND_BALLOT_TO_FRIENDS, SIGN_IN_CODE_EMAIL_TEMPLATE, VERIFY_EMAIL_ADDRESS_TEMPLATE
@@ -28,6 +28,11 @@ def get_template_filename(kind_of_email_template, text_or_html):
             return "campaignx_news_item.html"
         else:
             return "campaignx_news_item.txt"
+    elif kind_of_email_template == CAMPAIGNX_SUPER_SHARE_ITEM_TEMPLATE:
+        if text_or_html == "HTML":
+            return "campaignx_super_share_item.html"
+        else:
+            return "campaignx_super_share_item.txt"
     elif kind_of_email_template == CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_TEMPLATE:
         if text_or_html == "HTML":
             return "campaignx_supporter_initial_response.html"

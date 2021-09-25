@@ -471,14 +471,14 @@ def process_next_activity_notices():
                 kind_of_process=ACTIVITY_NOTICE_PROCESS)
             status += results['status']
             success = results['success']
-            if results['batch_process_saved']:
+            if results['success']:
                 batch_process = results['batch_process']
                 status += "SCHEDULED_ACTIVITY_NOTICE_PROCESS "
-                batch_process_manager.create_batch_process_log_entry(
-                    batch_process_id=batch_process.id,
-                    kind_of_process=batch_process.kind_of_process,
-                    status=status,
-                )
+                # batch_process_manager.create_batch_process_log_entry(
+                #     batch_process_id=batch_process.id,
+                #     kind_of_process=batch_process.kind_of_process,
+                #     status=status,
+                # )
             else:
                 status += "FAILED_TO_SCHEDULE-" + str(ACTIVITY_NOTICE_PROCESS) + " "
                 batch_process_manager.create_batch_process_log_entry(
@@ -513,7 +513,7 @@ def process_next_activity_notices():
         batch_process_full_list = results['batch_process_list']
         # Only use the first one
         batch_process = batch_process_full_list[0]
-    status += "BATCH_PROCESS_LIST_NEEDS_TO_BE_RUN_COUNT: " + str(len(batch_process_full_list)) + ", "
+    status += "BATCH_PROCESS_LIST_NEEDS_TO_BE_RUN_ACTIVITY_NOTICES_COUNT: " + str(len(batch_process_full_list)) + ", "
 
     # We should only run one per minute
     if batch_process_found:
@@ -522,6 +522,14 @@ def process_next_activity_notices():
             status += results['status']
         else:
             status += "KIND_OF_PROCESS_NOT_RECOGNIZED "
+            try:
+                batch_process_manager.create_batch_process_log_entry(
+                    batch_process_id=batch_process.id,
+                    kind_of_process=batch_process.kind_of_process,
+                    status=status,
+                )
+            except Exception as e:
+                pass
 
     results = {
         'success': success,
@@ -1038,7 +1046,7 @@ def process_next_general_maintenance():
         status += "] (ONLY_USING_FIRST) "
         # Only use the first one
         batch_process = batch_process_full_list[0]
-    status += "BATCH_PROCESS_LIST_NEEDS_TO_BE_RUN_COUNT: " + str(len(batch_process_full_list)) + ", "
+    status += "BATCH_PROCESS_LIST_NEEDS_TO_BE_RUN_GENERAL_MAINT_COUNT: " + str(len(batch_process_full_list)) + ", "
 
     # We should only run one per minute
     if batch_process_found:
@@ -2350,7 +2358,7 @@ def process_activity_notice_batch_process(batch_process):
                     batch_process.date_checked_out = None
                     batch_process.date_completed = now()
                     batch_process.save()
-                    status += "BATCH_PROCESS_SAVED "
+                    status += "ACTIVITY_NOTICE_BATCH_PROCESS_SAVED "
                 if positive_value_exists(activity_notice_seed_count) or positive_value_exists(activity_notice_count):
                     batch_process_manager.create_batch_process_log_entry(
                         batch_process_id=batch_process.id,
@@ -2836,7 +2844,7 @@ def schedule_retrieve_ballots_for_polling_locations_api_v4(
     success = results['success']
     if results['batch_process_saved']:
         batch_process = results['batch_process']
-        status += "BATCH_PROCESS_SAVED "
+        status += "RETRIEVE_BALLOTS_BATCH_PROCESS_SAVED "
         batch_process_manager.create_batch_process_log_entry(
             batch_process_id=batch_process.id,
             google_civic_election_id=batch_process.google_civic_election_id,

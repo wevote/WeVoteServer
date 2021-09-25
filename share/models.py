@@ -125,6 +125,86 @@ class ShareManager(models.Manager):
     def __unicode__(self):
         return "ShareManager"
 
+    def add_and_remove_email_recipients(
+            self,
+            campaignx_we_vote_id='',
+            email_recipient_list=[],
+            shared_by_voter_we_vote_id='',
+            super_share_item_id=0,
+    ):
+        success = True
+        status = ''
+        existing_emails_in_email_recipient_list = []
+
+        # Get the existing list of SuperShareEmailList recipients for this super_share_item_id
+        results = self.retrieve_super_share_email_recipient_list(
+            super_share_item_id=super_share_item_id,
+            read_only=False,
+        )
+        if results['email_recipient_list_found']:
+            recipient_list = results['email_recipient_list']
+            for super_share_email_recipient in recipient_list:
+                if super_share_email_recipient.email_address_text.lower() not in email_recipient_list:
+                    try:
+                        super_share_email_recipient.delete()
+                    except Exception as e:
+                        status += "DELETE_FAIL: " + str(e) + " "
+                else:
+                    existing_emails_in_email_recipient_list.append(
+                        super_share_email_recipient.email_address_text.lower())
+
+        # At the end, calculate email_recipient_list_to_add by comparing email_recipient_list with
+        #  existing_email_recipient_list. Retrieve/augment data from VoterContactEmail
+        #  and create SuperShareEmailRecipient from email_recipient_list_to_add
+        email_recipient_list_to_add = list(set(email_recipient_list) - set(existing_emails_in_email_recipient_list))
+        existing_voter_contact_emails = {}
+        if len(email_recipient_list_to_add) > 0:
+            # We need to augment the email addresses we are sending to
+            from voter.models import VoterManager
+            voter_manager = VoterManager()
+            voter_contact_results = voter_manager.retrieve_voter_contact_email_list(
+                imported_by_voter_we_vote_id=shared_by_voter_we_vote_id,
+                read_only=True)
+            if voter_contact_results['voter_contact_email_list_found']:
+                voter_contact_email_list = voter_contact_results['voter_contact_email_list']
+                for voter_contact_email in voter_contact_email_list:
+                    existing_voter_contact_emails[voter_contact_email.email_address_text.lower()] = voter_contact_email
+        for new_email in email_recipient_list_to_add:
+            if new_email.lower() in existing_voter_contact_emails:
+                voter_contact_email = existing_voter_contact_emails[new_email.lower()]
+                google_contact_id = voter_contact_email.google_contact_id
+                recipient_display_name = voter_contact_email.google_display_name
+                recipient_first_name = voter_contact_email.google_first_name
+                recipient_last_name = voter_contact_email.google_last_name
+                recipient_state_code = voter_contact_email.state_code
+            else:
+                google_contact_id = 0
+                recipient_display_name = ''
+                recipient_first_name = ''
+                recipient_last_name = ''
+                recipient_state_code = ''
+            defaults = {
+                'campaignx_we_vote_id': campaignx_we_vote_id,
+                'google_contact_id': google_contact_id,
+                'recipient_display_name': recipient_display_name,
+                'recipient_first_name': recipient_first_name,
+                'recipient_last_name': recipient_last_name,
+                'recipient_state_code': recipient_state_code,
+                'shared_by_voter_we_vote_id': shared_by_voter_we_vote_id,
+            }
+            new_results = self.update_or_create_super_share_email_recipient(
+                email_address_text=new_email,
+                super_share_item_id=super_share_item_id,
+                defaults=defaults,
+            )
+
+        results = {
+            'success': success,
+            'status': status,
+        }
+
+        return results
+
     def create_shared_link_clicked(
             self,
             destination_full_url='',
@@ -165,7 +245,7 @@ class ShareManager(models.Manager):
             shared_link_clicked_saved = False
             shared_link_clicked = None
             success = False
-            status += "SHARED_LINK_CLICKED_NOT_CREATED " + str(e) + ' '
+            status += "SHARED_LINK_CLICKED_NOT_CREATED: " + str(e) + ' '
 
         results = {
             'success':                      success,
@@ -392,6 +472,114 @@ class ShareManager(models.Manager):
             'shared_permissions_granted_found':    shared_permissions_granted_found,
             'shared_permissions_granted_created':  shared_permissions_granted_created,
             'shared_permissions_granted':          shared_permissions_granted,
+        }
+        return results
+
+    def update_or_create_super_share_email_recipient(
+            self,
+            email_address_text='',
+            super_share_item_id=0,
+            defaults={}):
+        super_share_email_recipient_created = False
+        super_share_email_recipient_found = False
+        status = ""
+        if not positive_value_exists(super_share_item_id) or not positive_value_exists(email_address_text):
+            status += "CREATE_OR_UPDATE_EMAIL_RECIPIENT-MISSING_REQUIRED_VARIABLE "
+            results = {
+                'success':                              False,
+                'status':                               status,
+                'super_share_email_recipient_found':    super_share_email_recipient_found,
+                'super_share_email_recipient_created':  super_share_email_recipient_created,
+                'super_share_email_recipient':          None,
+            }
+            return results
+
+        results = self.retrieve_super_share_email_recipient_list(
+            email_address_text=email_address_text,
+            super_share_item_id=super_share_item_id,
+            read_only=False)
+        super_share_email_recipient_found = results['email_recipient_found']
+        super_share_email_recipient = results['email_recipient']
+        success = results['success']
+        status += results['status']
+
+        if super_share_email_recipient_found:
+            try:
+                change_to_save = False
+                if 'campaignx_we_vote_id' in defaults:
+                    super_share_email_recipient.campaignx_we_vote_id = defaults['campaignx_we_vote_id']
+                    change_to_save = True
+                if 'date_sent_to_email' in defaults:
+                    super_share_email_recipient.date_sent_to_email = defaults['date_sent_to_email']
+                    change_to_save = True
+                if 'google_contact_id' in defaults:
+                    super_share_email_recipient.google_contact_id = defaults['google_contact_id']
+                    change_to_save = True
+                if 'recipient_first_name' in defaults:
+                    super_share_email_recipient.recipient_first_name = defaults['recipient_first_name']
+                    change_to_save = True
+                if 'recipient_last_name' in defaults:
+                    super_share_email_recipient.recipient_last_name = defaults['recipient_last_name']
+                    change_to_save = True
+                if 'recipient_state_code' in defaults:
+                    super_share_email_recipient.recipient_state_code = defaults['recipient_state_code']
+                    change_to_save = True
+                if 'recipient_voter_we_vote_id' in defaults:
+                    super_share_email_recipient.recipient_voter_we_vote_id = defaults['recipient_voter_we_vote_id']
+                    change_to_save = True
+                if 'shared_by_voter_we_vote_id' in defaults:
+                    super_share_email_recipient.shared_by_voter_we_vote_id = defaults['shared_by_voter_we_vote_id']
+                    change_to_save = True
+                if change_to_save:
+                    super_share_email_recipient.save()
+                    super_share_email_recipient_created = True
+                    success = True
+                    status += "SUPER_SHARE_EMAIL_RECIPIENT_UPDATED "
+            except Exception as e:
+                super_share_email_recipient_created = False
+                super_share_email_recipient = None
+                success = False
+                status += "SUPER_SHARE_EMAIL_RECIPIENT_NOT_UPDATED: " + str(e) + " "
+
+        if success and not super_share_email_recipient_found:
+            try:
+                super_share_email_recipient = SuperShareEmailRecipient.objects.create(
+                    campaignx_we_vote_id=defaults['campaignx_we_vote_id']
+                    if 'campaignx_we_vote_id' in defaults else None,
+                    date_sent_to_email=defaults['date_sent_to_email']
+                    if 'date_sent_to_email' in defaults else None,
+                    email_address_text=email_address_text.lower(),
+                    google_contact_id=defaults['google_contact_id']
+                    if 'google_contact_id' in defaults else None,
+                    recipient_display_name=defaults['recipient_display_name']
+                    if 'recipient_display_name' in defaults else None,
+                    recipient_first_name=defaults['recipient_first_name']
+                    if 'recipient_first_name' in defaults else None,
+                    recipient_last_name=defaults['recipient_last_name']
+                    if 'recipient_last_name' in defaults else None,
+                    recipient_state_code=defaults['recipient_state_code']
+                    if 'recipient_state_code' in defaults else None,
+                    recipient_voter_we_vote_id=defaults['recipient_voter_we_vote_id']
+                    if 'recipient_voter_we_vote_id' in defaults else None,
+                    shared_by_voter_we_vote_id=defaults['shared_by_voter_we_vote_id']
+                    if 'shared_by_voter_we_vote_id' in defaults else None,
+                    super_share_item_id=super_share_item_id,
+                )
+                super_share_email_recipient_created = True
+                super_share_email_recipient_found = True
+                status += "SUPER_SHARE_EMAIL_RECIPIENT_CREATED "
+            except Exception as e:
+                super_share_email_recipient_created = False
+                super_share_email_recipient = None
+                success = False
+                status += "SUPER_SHARE_EMAIL_RECIPIENT_NOT_CREATED: " + str(e) + " "
+
+        results = {
+            'success':                              success,
+            'status':                               status,
+            'super_share_email_recipient_found':    super_share_email_recipient_found,
+            'super_share_email_recipient_created':  super_share_email_recipient_created,
+            'super_share_email_recipient':          super_share_email_recipient,
         }
         return results
 
@@ -699,7 +887,7 @@ class ShareManager(models.Manager):
             status += "RETRIEVE_SHARED_ITEM_NOT_FOUND "
         except Exception as e:
             success = False
-            status += 'FAILED_RETRIEVE_SHARED_ITEM ' + str(e) + ' '
+            status += 'FAILED_RETRIEVE_SHARED_ITEM: ' + str(e) + ' '
 
         results = {
             'success':                 success,
@@ -815,7 +1003,7 @@ class ShareManager(models.Manager):
             status += "RETRIEVE_SHARED_PERMISSIONS_GRANTED_NOT_FOUND "
         except Exception as e:
             success = False
-            status += 'FAILED retrieve_shared_permissions_granted SharedPermissionsGranted ' + str(e) + ' '
+            status += 'FAILED retrieve_shared_permissions_granted SharedPermissionsGranted: ' + str(e) + ' '
 
         results = {
             'success':                 success,
@@ -884,13 +1072,67 @@ class ShareManager(models.Manager):
                 status += 'RETRIEVE_SHARED_PERMISSIONS_GRANTED-NO_SHARED_PERMISSIONS_GRANTED_LIST_RETRIEVED '
         except Exception as e:
             success = False
-            status += 'FAILED-RETRIEVE_SHARED_PERMISSIONS_GRANTED_LIST ' + str(e) + ' '
+            status += 'FAILED-RETRIEVE_SHARED_PERMISSIONS_GRANTED_LIST: ' + str(e) + ' '
 
         results = {
             'success': success,
             'status': status,
             'shared_permissions_granted_list_found': shared_permissions_granted_list_found,
             'shared_permissions_granted_list': shared_permissions_granted_list,
+        }
+        return results
+
+    def retrieve_super_share_email_recipient_list(
+            self,
+            email_address_text='',
+            read_only=True,
+            retrieve_count_limit=0,
+            retrieve_only_if_not_sent=False,
+            super_share_email_recipient_already_reviewed_list=[],
+            super_share_item_id=0):
+        email_recipient = None
+        email_recipient_found = False
+        email_recipient_list = []
+        success = True
+        status = ""
+
+        try:
+            if read_only:
+                queryset = SuperShareEmailRecipient.objects.using('readonly').all()
+            else:
+                queryset = SuperShareEmailRecipient.objects.all()
+            queryset = queryset.filter(super_share_item_id=super_share_item_id)
+            if positive_value_exists(email_address_text):
+                queryset = queryset.filter(email_address_text__iexact=email_address_text)
+            if positive_value_exists(retrieve_only_if_not_sent):
+                queryset = queryset.filter(date_sent_to_email__isnull=True)
+            if super_share_email_recipient_already_reviewed_list and \
+                    len(super_share_email_recipient_already_reviewed_list) > 0:
+                queryset = queryset.exclude(id__in=super_share_email_recipient_already_reviewed_list)
+            queryset = queryset.order_by('-id')  # Put most recent at top of list
+
+            if positive_value_exists(retrieve_count_limit):
+                email_recipient_list = queryset[:retrieve_count_limit]
+            else:
+                email_recipient_list = list(queryset)
+
+            email_recipient_list_found = positive_value_exists(len(email_recipient_list))
+            status += "RETRIEVE_SUPER_SHARE_EMAIL_RECIPIENT_LIST_SUCCEEDED "
+            if len(email_recipient_list) == 1:
+                email_recipient = email_recipient_list[0]
+                email_recipient_found = True
+        except Exception as e:
+            success = False
+            status += "RETRIEVE_SUPER_SHARE_EMAIL_RECIPIENT_LIST_FAILED: " + str(e) + " "
+            email_recipient_list_found = False
+
+        results = {
+            'success':                                  success,
+            'status':                                   status,
+            'email_recipient_list':                     email_recipient_list,
+            'email_recipient_list_found':               email_recipient_list_found,
+            'email_recipient':                          email_recipient,
+            'email_recipient_found':                    email_recipient_found,
         }
         return results
 
@@ -968,7 +1210,7 @@ class ShareManager(models.Manager):
             status += "RETRIEVE_SUPER_SHARE_ITEM_NOT_FOUND "
         except Exception as e:
             success = False
-            status += 'FAILED_RETRIEVE_SUPER_SHARE_ITEM ' + str(e) + ' '
+            status += 'FAILED_RETRIEVE_SUPER_SHARE_ITEM: ' + str(e) + ' '
 
         results = {
             'success':                      success,
@@ -992,6 +1234,7 @@ class SuperShareItem(models.Model):
     campaignx_news_item_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
     campaignx_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
     date_created = models.DateTimeField(null=True, auto_now_add=True, db_index=True)
+    date_sent_to_email = models.DateTimeField(null=True, default=None)
     # The ending destination -- meaning the link that is being shared
     destination_full_url = models.URLField(max_length=255, blank=True, null=True)
     in_draft_mode = models.BooleanField(default=True, db_index=True)
@@ -1008,9 +1251,10 @@ class SuperShareEmailRecipient(models.Model):
     """
     # What is being shared
     campaignx_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
-    date_email_sent = models.DateTimeField(null=True, default=None)
+    date_sent_to_email = models.DateTimeField(null=True, default=None)
     email_address_text = models.TextField(null=True, blank=True, db_index=True)
     google_contact_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
+    recipient_display_name = models.CharField(max_length=255, default=None, null=True)
     recipient_first_name = models.CharField(max_length=255, default=None, null=True)
     recipient_last_name = models.CharField(max_length=255, default=None, null=True)
     recipient_state_code = models.CharField(max_length=2, default=None, null=True, db_index=True)

@@ -1,0 +1,30 @@
+
+
+{% if recipient_name %}
+Hello {{ recipient_name }},
+{% endif %}
+
+{% if politician_count > 0 %}
+{% if speaker_voter_name %}{{ speaker_voter_name }} shared an update{% else %}This is an update{% endif %} relating to{{ politician_full_sentence_string }}. This is the campaign you supported:
+{{ campaignx_title }}
+{% else %}
+{% if speaker_voter_name %}{{ speaker_voter_name }} shared an update{% else %}This is an update{% endif %} relating to {{ campaignx_title }}.
+{% endif %}
+
+{% if subject %}{{ subject }}{% endif %}
+
+{{ campaignx_news_text }}
+
+Click to see or share: {{ campaignx_news_item_url }}
+
+
+========================================
+You supported this campaign{% if speaker_voter_name %} from {{ speaker_voter_name }}{% endif %}{% if date_supported %} on {{ date_supported }}{% endif %}.
+
+This message was sent to {{ recipient_voter_email }} via the nonpartisan website WeVote.US. We Vote did not create this campaign, is not responsible for its content, and does not support or oppose any political candidate or party. If you don't want to receive emails from this campaign, please follow the link below to unsubscribe:
+{{ recipient_unsubscribe_url }}
+
+We Vote
+Attention: Campaigns Team
+1423 Broadway PMB 158,
+Oakland, CA 94612

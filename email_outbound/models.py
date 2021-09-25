@@ -11,6 +11,7 @@ from wevote_settings.models import fetch_next_we_vote_id_email_integer, fetch_si
 
 CAMPAIGNX_NEWS_ITEM_TEMPLATE = 'CAMPAIGNX_NEWS_ITEM_TEMPLATE'
 CAMPAIGNX_FRIEND_HAS_SUPPORTED_TEMPLATE = 'CAMPAIGNX_FRIEND_HAS_SUPPORTED_TEMPLATE'
+CAMPAIGNX_SUPER_SHARE_ITEM_TEMPLATE = 'CAMPAIGNX_SUPER_SHARE_ITEM_TEMPLATE'
 CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_TEMPLATE = 'CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_TEMPLATE'
 FRIEND_ACCEPTED_INVITATION_TEMPLATE = 'FRIEND_ACCEPTED_INVITATION_TEMPLATE'
 FRIEND_INVITATION_TEMPLATE = 'FRIEND_INVITATION_TEMPLATE'
@@ -862,7 +863,7 @@ class EmailManager(models.Manager):
         #     success = False
 
         if not positive_value_exists(email_scheduled.recipient_voter_email):
-            status += "MISSING_RECIPIENT_VOTER_EMAIL"
+            status += "MISSING_EMAIL_SCHEDULED_RECIPIENT_VOTER_EMAIL "
             success = False
 
         if not positive_value_exists(email_scheduled.subject):
@@ -878,6 +879,13 @@ class EmailManager(models.Manager):
         if success:
             return self.send_scheduled_email_via_sendgrid(email_scheduled)
         else:
+            status += "ERROR_DID_NOT_SEND: ["
+            try:
+                status += 'subject:' + str(email_scheduled.subject) + ' '
+                status += 'email_scheduled.id:' + str(email_scheduled.id)
+            except Exception as e:
+                pass
+            status += "] "
             email_scheduled_sent = False
             results = {
                 'success': success,
