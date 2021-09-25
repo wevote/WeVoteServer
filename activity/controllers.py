@@ -989,6 +989,10 @@ def process_activity_notice_seeds_triggered_by_batch_process():
                 activity_notice_seed = results['activity_notice_seed']
                 activity_notice_seed_id_already_reviewed_list.append(activity_notice_seed.id)
                 activity_notice_seed_count += 1
+                status += "[updated:: "
+                status += "activity_notice_seed_id: " + str(activity_notice_seed.id) + " "
+                status += "kind_of_seed: " + str(activity_notice_seed.kind_of_seed) + ""
+                status += "] "
                 update_activity_notices = False
 
                 if activity_notice_seed.kind_of_seed == NOTICE_ACTIVITY_POST_SEED:
@@ -1007,8 +1011,9 @@ def process_activity_notice_seeds_triggered_by_batch_process():
                 if update_activity_notices:
                     # Update the activity drop down in each voter touched (friends of the voter acting)
                     update_results = update_or_create_activity_notices_from_seed(activity_notice_seed)
-                    if not update_results['success']:
-                        status += update_results['status']
+                    status += update_results['status']  # Show all status for now
+                    # if not update_results['success']:
+                    #     status += update_results['status']
             else:
                 continue_retrieving_notices_to_be_updated = False
 
@@ -1030,6 +1035,10 @@ def process_activity_notice_seeds_triggered_by_batch_process():
             activity_notice_seed = results['activity_notice_seed']
             activity_notice_seed_id_already_reviewed_list.append(activity_notice_seed.id)
             activity_notice_seed_count += 1
+            status += "[created:: "
+            status += "activity_notice_seed_id: " + str(activity_notice_seed.id) + " "
+            status += "kind_of_seed: " + str(activity_notice_seed.kind_of_seed) + ""
+            status += "] "
 
             # Create the activity drop down in each voter's header for each voter touched (friends of the voter acting)
             create_results = update_or_create_activity_notices_from_seed(activity_notice_seed)
@@ -1058,12 +1067,16 @@ def process_activity_notice_seeds_triggered_by_batch_process():
             activity_notice_seed = results['activity_notice_seed']
             activity_notice_seed_id_already_reviewed_list.append(activity_notice_seed.id)
             activity_notice_seed_count += 1
+            status += "[daily_summary:: "
+            status += "activity_notice_seed_id: " + str(activity_notice_seed.id) + " "
+            status += "kind_of_seed: " + str(activity_notice_seed.kind_of_seed) + ""
+            status += "] "
             # Create the seeds (one for each voter touched) which will be used to send a daily summary
             #  to each voter touched. So we end up with new NOTICE_VOTER_DAILY_SUMMARY_SEED entries for the friends
             #  of the creators of these seeds: NOTICE_ACTIVITY_POST_SEED, NOTICE_FRIEND_ENDORSEMENTS_SEED
             update_results = update_or_create_voter_daily_summary_seeds_from_seed(activity_notice_seed)
-            if not update_results['success']:
-                status += update_results['status']
+            # if not update_results['success']:
+            status += update_results['status']
         else:
             continue_retrieving_to_be_added_to_voter_summary = False
 
@@ -1088,8 +1101,8 @@ def process_activity_notice_seeds_triggered_by_batch_process():
             # activity_notice_seed_count += 1
             schedule_results = schedule_activity_notices_from_seed(activity_notice_seed)
             # activity_notice_seed.activity_notices_scheduled = True  # Marked in function immediately above
-            if not schedule_results['success']:
-                status += schedule_results['status']
+            # if not schedule_results['success']:
+            status += schedule_results['status']
             # activity_notice_count += create_results['activity_notice_count']
         else:
             continue_retrieving_notices_to_be_scheduled = False
