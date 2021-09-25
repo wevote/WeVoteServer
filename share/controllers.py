@@ -11,6 +11,7 @@ from analytics.models import ACTION_VIEW_SHARED_BALLOT, ACTION_VIEW_SHARED_BALLO
     ACTION_VIEW_SHARED_READY, ACTION_VIEW_SHARED_READY_ALL_OPINIONS, \
     AnalyticsManager
 from follow.models import FOLLOWING, FollowOrganizationManager
+import json
 from organization.models import OrganizationManager
 import robot_detection
 from share.models import SharedItem, SharedLinkClicked, SharedPermissionsGranted
@@ -555,6 +556,8 @@ def super_share_item_save_for_api(  # superShareItemSave
         campaignx_we_vote_id='',
         campaignx_news_item_we_vote_id='',
         destination_full_url='',
+        email_recipient_list_serialized='',
+        email_recipient_list_changed=False,
         personalized_message='',
         personalized_message_changed=False,
         personalized_subject='',
@@ -595,14 +598,6 @@ def super_share_item_save_for_api(  # superShareItemSave
         status += "COULD_NOT_MODIFY_HOSTNAME: " + str(e) + " "
         success = False
 
-    # if positive_value_exists(ballot_item_we_vote_id):
-    #     if "cand" in ballot_item_we_vote_id:
-    #         candidate_we_vote_id = ballot_item_we_vote_id
-    #     elif "meas" in ballot_item_we_vote_id:
-    #         measure_we_vote_id = ballot_item_we_vote_id
-    #     elif "off" in ballot_item_we_vote_id:
-    #         office_we_vote_id = ballot_item_we_vote_id
-
     required_variables_for_new_entry = positive_value_exists(campaignx_we_vote_id) \
         and positive_value_exists(shared_by_voter_we_vote_id)
     if not required_variables_for_new_entry or not success:
@@ -619,6 +614,7 @@ def super_share_item_save_for_api(  # superShareItemSave
             'shared_by_voter_we_vote_id':           shared_by_voter_we_vote_id,
             'site_owner_organization_we_vote_id':   site_owner_organization_we_vote_id,
             'super_share_item_id':                  super_share_item_id,
+            'super_share_email_recipient_list':     [],
         }
         return results
 
@@ -643,17 +639,49 @@ def super_share_item_save_for_api(  # superShareItemSave
     status += create_results['status']
     personalized_message = ''
     personalized_subject = ''
+    super_share_email_recipient_list = []
     if create_results['super_share_item_found']:
         super_share_item = create_results['super_share_item']
         personalized_message = super_share_item.personalized_message
         personalized_subject = super_share_item.personalized_subject
         super_share_item_id = super_share_item.id
-        # super_share_item_code_no_opinions = super_share_item.super_share_item_code_no_opinions
-        # super_share_item_code_all_opinions = super_share_item.super_share_item_code_all_opinions
-        # url_with_super_share_item_code_no_opinions = "https://" + hostname + "/-" + super_share_item_code_no_opinions
-        # url_with_super_share_item_code_all_opinions = "https://" + hostname + "/-" +
-        # super_share_item_code_all_opinions
 
+        if email_recipient_list_changed:
+            if email_recipient_list_serialized:
+                email_recipient_list = json.loads(email_recipient_list_serialized)
+            else:
+                email_recipient_list = []
+
+            if len(email_recipient_list) > 0:
+                email_results = share_manager.add_and_remove_email_recipients(
+                    campaignx_we_vote_id=campaignx_we_vote_id,
+                    email_recipient_list=email_recipient_list,
+                    shared_by_voter_we_vote_id=shared_by_voter_we_vote_id,
+                    super_share_item_id=super_share_item_id,
+                )
+
+        recipients_results = share_manager.retrieve_super_share_email_recipient_list(
+            super_share_item_id=super_share_item_id,
+            read_only=True,
+        )
+        if recipients_results['email_recipient_list_found']:
+            email_recipient_list = recipients_results['email_recipient_list']
+            for super_share_email_recipient in email_recipient_list:
+                date_email_sent_string = ''
+                try:
+                    if super_share_email_recipient.date_email_sent:
+                        date_email_sent_string = super_share_email_recipient.date_email_sent.strftime('%Y-%m-%d %H:%M:%S')
+                except Exception as e:
+                    pass
+                email_recipient_dict = {
+                    'date_email_sent': date_email_sent_string,
+                    'email_address_text': super_share_email_recipient.email_address_text.lower(),
+                    'recipient_display_name': super_share_email_recipient.recipient_display_name,
+                    'recipient_first_name': super_share_email_recipient.recipient_first_name,
+                    'recipient_last_name': super_share_email_recipient.recipient_last_name,
+                    'recipient_state_code': super_share_email_recipient.recipient_state_code,
+                }
+                super_share_email_recipient_list.append(email_recipient_dict)
     results = {
         'status':                               status,
         'success':                              success,
@@ -666,5 +694,77 @@ def super_share_item_save_for_api(  # superShareItemSave
         'shared_by_voter_we_vote_id':           shared_by_voter_we_vote_id,
         'site_owner_organization_we_vote_id':   site_owner_organization_we_vote_id,
         'super_share_item_id':                  super_share_item_id,
+        'super_share_email_recipient_list':     super_share_email_recipient_list,
+    }
+    return results
+
+
+def super_share_item_send_for_api(  # superShareItemSave (for sending)
+        super_share_item_id='',
+        voter_device_id=''):
+    status = ''
+    success = True
+    date_sent_to_email_string = ''
+    in_draft_mode = True
+
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if not voter_results['voter_found']:
+        status += "SUPER_SHARE_ITEM_SEND_FAILED-SENDING_VOTER_NOT_FOUND "
+        results = {
+            'status':                   status,
+            'success':                  success,
+            'date_sent_to_email':       date_sent_to_email_string,
+            'in_draft_mode':            in_draft_mode,
+            'send_super_share_item':    True,
+            'super_share_item_id':      super_share_item_id,
+        }
+        return results
+
+    voter = voter_results['voter']
+    # shared_by_voter_we_vote_id = voter.we_vote_id
+    # shared_by_organization_we_vote_id = voter.linked_organization_we_vote_id
+    # shared_by_organization_type = INDIVIDUAL
+    speaker_name = voter.get_full_name(real_name_only=True)
+
+    share_manager = ShareManager()
+    results = share_manager.retrieve_super_share_item(
+        super_share_item_id=super_share_item_id,
+        read_only=False,
+    )
+    if results['super_share_item_found']:
+        super_share_item = results['super_share_item']
+
+        from activity.controllers import update_or_create_activity_notice_seed_for_super_share_item
+        activity_results = update_or_create_activity_notice_seed_for_super_share_item(
+            campaignx_news_item_we_vote_id=super_share_item.campaignx_news_item_we_vote_id,
+            campaignx_we_vote_id=super_share_item.campaignx_we_vote_id,
+            send_super_share_item=True,
+            speaker_name=speaker_name,
+            speaker_organization_we_vote_id=voter.linked_organization_we_vote_id,
+            speaker_voter_we_vote_id=voter.we_vote_id,
+            speaker_profile_image_url_medium=voter.we_vote_hosted_profile_image_url_medium,
+            speaker_profile_image_url_tiny=voter.we_vote_hosted_profile_image_url_tiny,
+            statement_subject=super_share_item.personalized_subject,
+            statement_text=super_share_item.personalized_message)
+        status += activity_results['status']
+        if activity_results['success']:
+            if activity_results['activity_notice_seed_found']:
+                activity_notice_seed = activity_results['activity_notice_seed']
+                super_share_item.in_draft_mode = False
+                super_share_item.date_sent_to_email = activity_notice_seed.date_sent_to_email
+                super_share_item.save()
+                try:
+                    date_sent_to_email_string = activity_notice_seed.date_sent_to_email.strftime('%Y-%m-%d %H:%M:%S')
+                except Exception as e:
+                    pass
+
+    results = {
+        'status':                   status,
+        'success':                  success,
+        'date_sent_to_email':       date_sent_to_email_string,
+        'in_draft_mode':            in_draft_mode,
+        'send_super_share_item':    True,
+        'super_share_item_id':      super_share_item_id,
     }
     return results

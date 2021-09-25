@@ -17,6 +17,7 @@ NOTICE_ACTIVITY_POST_SEED = 'NOTICE_ACTIVITY_POST_SEED'
 NOTICE_CAMPAIGNX_NEWS_ITEM_SEED = 'NOTICE_CAMPAIGNX_NEWS_ITEM_SEED'
 NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_SEED = 'NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_SEED'
 NOTICE_FRIEND_ENDORSEMENTS_SEED = 'NOTICE_FRIEND_ENDORSEMENTS_SEED'
+NOTICE_SUPER_SHARE_ITEM_SEED = 'NOTICE_SUPER_SHARE_ITEM_SEED'
 NOTICE_VOTER_DAILY_SUMMARY_SEED = 'NOTICE_VOTER_DAILY_SUMMARY_SEED'  # Activity that touches each voter, for each day
 
 # Kind of Notices (value should not exceed 50 chars)
@@ -26,6 +27,7 @@ NOTICE_CAMPAIGNX_NEWS_ITEM_AUTHORED = 'NOTICE_CAMPAIGNX_NEWS_ITEM_AUTHORED'
 NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE = 'NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE'
 NOTICE_FRIEND_ACTIVITY_POSTS = 'NOTICE_FRIEND_ACTIVITY_POSTS'  # Notice shown in header menu, no email sent
 NOTICE_FRIEND_ENDORSEMENTS = 'NOTICE_FRIEND_ENDORSEMENTS'
+NOTICE_SUPER_SHARE_ITEM_AUTHORED = 'NOTICE_SUPER_SHARE_ITEM_AUTHORED'
 NOTICE_VOTER_DAILY_SUMMARY = 'NOTICE_VOTER_DAILY_SUMMARY'  # Email sent, not shown in header menu
 
 FRIENDS_ONLY = 'FRIENDS_ONLY'
@@ -186,7 +188,8 @@ class ActivityManager(models.Manager):
             speaker_profile_image_url_medium='',
             speaker_profile_image_url_tiny='',
             statement_subject='',
-            statement_text_preview=''):
+            statement_text_preview='',
+            super_share_item_id=None):
         status = ''
 
         if not positive_value_exists(speaker_organization_we_vote_id):
@@ -232,6 +235,7 @@ class ActivityManager(models.Manager):
                 speaker_profile_image_url_tiny=speaker_profile_image_url_tiny,
                 statement_subject=statement_subject,
                 statement_text_preview=statement_text_preview,
+                super_share_item_id=super_share_item_id,
             )
             activity_notice_seed_found = True
             activity_notice_seed_saved = True
@@ -741,7 +745,8 @@ class ActivityManager(models.Manager):
             self,
             campaignx_news_item_we_vote_id=None,
             campaignx_we_vote_id=None,
-            kind_of_seed=''):
+            kind_of_seed='',
+            super_share_item_id=None):
         exception_does_not_exist = False
         exception_multiple_object_returned = False
         activity_notice_seed_found = False
@@ -761,6 +766,16 @@ class ActivityManager(models.Manager):
                 activity_notice_seed_found = True
                 success = True
                 status += "RETRIEVE_ACTIVITY_NOTICE_SEED_FOUND "
+            elif positive_value_exists(super_share_item_id):
+                activity_notice_seed = ActivityNoticeSeed.objects.get(
+                    super_share_item_id=super_share_item_id,
+                    deleted=False,
+                    kind_of_seed=kind_of_seed,
+                )
+                activity_notice_seed_id = activity_notice_seed.id
+                activity_notice_seed_found = True
+                success = True
+                status += "RETRIEVE_ACTIVITY_NOTICE_SUPER_SHARE_SEED_FOUND "
             else:
                 activity_notice_seed_found = False
                 success = False
@@ -1021,6 +1036,7 @@ class ActivityManager(models.Manager):
                         NOTICE_CAMPAIGNX_NEWS_ITEM_SEED,
                         NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_SEED,
                         NOTICE_FRIEND_ENDORSEMENTS_SEED,
+                        NOTICE_SUPER_SHARE_ITEM_SEED,
                         NOTICE_VOTER_DAILY_SUMMARY_SEED
                     ])
             elif positive_value_exists(notices_to_be_updated):
@@ -1637,6 +1653,7 @@ class ActivityNotice(models.Model):
     speaker_profile_image_url_tiny = models.TextField(blank=True, null=True)
     statement_subject = models.CharField(max_length=255, default=None, null=True)
     statement_text_preview = models.TextField(default=None, null=True)
+    # Needed? super_share_item_id = models.PositiveIntegerField(default=None, null=True)
 
 
 class ActivityNoticeSeed(models.Model):
@@ -1685,6 +1702,7 @@ class ActivityNoticeSeed(models.Model):
     speaker_twitter_followers_count = models.IntegerField(default=0)
     statement_subject = models.CharField(max_length=255, default=None, null=True)
     statement_text_preview = models.TextField(default=None, null=True)
+    super_share_item_id = models.PositiveIntegerField(default=None, null=True)
     # we_vote_id of this SEED
     we_vote_id = models.CharField(max_length=255, default=None, null=True, unique=True)
 
