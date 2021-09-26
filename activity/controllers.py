@@ -688,7 +688,7 @@ def assemble_voter_daily_summary(
     success = current_friends_results['success']
     status += current_friends_results['status']
     if not current_friends_results['friends_we_vote_id_list_found']:
-        status += "ASSEMBLE_VOTER_DAILY_SUMMARY-NO_FRIENDS_FOUND "
+        status += "ASSEMBLE_VOTER_DAILY_SUMMARY_NO_FRIENDS_FOUND "
         results = {
             'success':                      success,
             'status':                       status,
@@ -998,13 +998,22 @@ def process_activity_notice_seeds_triggered_by_batch_process():
                 if activity_notice_seed.kind_of_seed == NOTICE_ACTIVITY_POST_SEED:
                     # We are storing number_of_comments and number_of_likes in NOTICE_ACTIVITY_POST_SEED, so we need
                     #  to update in case there have been changes.
-                    update_activity_notices = True
+                    update_seed_results = \
+                        update_activity_notice_seed_date_of_notice_earlier_than_update_window(activity_notice_seed)
+                    status += update_seed_results['status']
+                    if update_seed_results['success']:
+                        activity_notice_seed = update_seed_results['activity_notice_seed']
+                    if not activity_notice_seed.date_of_notice_earlier_than_update_window:
+                        update_activity_notices = True
                 elif activity_notice_seed.kind_of_seed == NOTICE_FRIEND_ENDORSEMENTS_SEED:
-                    # Only update if the number of positions has changed
-                    update_seed_results = update_activity_notice_seed_with_positions(activity_notice_seed)
-                    if update_seed_results['success'] and \
-                            update_seed_results['activity_notice_seed_changed'] and not \
-                            update_seed_results['date_of_notice_earlier_than_update_window']:
+                    update_seed_results = \
+                        update_activity_notice_seed_date_of_notice_earlier_than_update_window(activity_notice_seed)
+                    status += update_seed_results['status']
+                    if update_seed_results['success']:
+                        activity_notice_seed = update_seed_results['activity_notice_seed']
+                    if not activity_notice_seed.date_of_notice_earlier_than_update_window:
+                        # Only update if the number of positions has changed
+                        update_seed_results = update_activity_notice_seed_with_positions(activity_notice_seed)
                         activity_notice_seed = update_seed_results['activity_notice_seed']
                         update_activity_notices = True
 
@@ -1186,14 +1195,13 @@ def update_or_create_activity_notices_from_seed(activity_notice_seed):
                 status += activity_results['status']
 
     # Seeds that require a friend list to be found
-    mark_activity_notices_updated = False
     if activity_notice_seed.kind_of_seed in [
         NOTICE_ACTIVITY_POST_SEED,
         NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_SEED,
         NOTICE_FRIEND_ENDORSEMENTS_SEED,
     ]:
         # Retrieve all friends of activity_notice_seed.speaker_voter_we_vote_id
-        status += "KIND_OF_LIST-CURRENT_FRIENDS "
+        status += "KIND_OF_LIST_CURRENT_FRIENDS_ACTIVITY_NOTICES "
         retrieve_current_friends_as_voters_results = \
             friend_manager.retrieve_current_friends_as_voters(activity_notice_seed.speaker_voter_we_vote_id)
         success = retrieve_current_friends_as_voters_results['success']
@@ -1365,13 +1373,7 @@ def update_or_create_activity_notices_from_seed(activity_notice_seed):
                     else:
                         status += activity_results['status']
         else:
-            status += "CREATE_ACTIVITY_NOTICES_FROM_SEED-NO_FRIENDS "
-            if activity_notice_seed.kind_of_seed in [
-                NOTICE_ACTIVITY_POST_SEED,
-                NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_SEED,
-                NOTICE_FRIEND_ENDORSEMENTS_SEED,
-            ]:
-                mark_activity_notices_updated = True
+            status += "CREATE_ACTIVITY_NOTICES_FROM_SEED_NO_FRIENDS "
 
     # These do not require friends for the notices
     if activity_notice_seed.kind_of_seed == NOTICE_CAMPAIGNX_NEWS_ITEM_SEED:
@@ -1422,17 +1424,10 @@ def update_or_create_activity_notices_from_seed(activity_notice_seed):
 
     try:
         activity_notice_seed.activity_notices_created = True
-        # NOTE: We might not need to mark activity_notices_updated True for all of these
-        if mark_activity_notices_updated:
-            activity_notice_seed.activity_notices_updated = True
         activity_notice_seed.save()
-        status += "CREATE_ACTIVITY_NOTICES_FROM_SEED-MARKED_CREATED "
-        if mark_activity_notices_updated:
-            status += "MARKED_UPDATED "
+        status += "CREATE_ACTIVITY_NOTICES_FROM_SEED_MARKED_CREATED "
     except Exception as e:
-        status += "CREATE_ACTIVITY_NOTICES_FROM_SEED-CANNOT_MARK_NOTICES_CREATED: " + str(e) + " "
-        if mark_activity_notices_updated:
-            status += "CANNOT_MARKED_UPDATED "
+        status += "CREATE_ACTIVITY_NOTICES_FROM_SEED_CANNOT_MARK_NOTICES_CREATED: " + str(e) + " "
         success = False
 
     results = {
@@ -1562,7 +1557,7 @@ def update_or_create_voter_daily_summary_seeds_from_seed(activity_notice_seed):
     # audience = 'ONE_FRIEND'
     if audience == 'FRIENDS':
         # Retrieve all friends of activity_notice_seed.speaker_voter_we_vote_id
-        status += "KIND_OF_LIST-CURRENT_FRIENDS "
+        status += "KIND_OF_LIST_CURRENT_FRIENDS_DAILY_SUMMARY "
         retrieve_current_friends_as_voters_results = \
             friend_manager.retrieve_current_friends_as_voters(activity_notice_seed.speaker_voter_we_vote_id)
         success = retrieve_current_friends_as_voters_results['success']
@@ -1606,7 +1601,7 @@ def update_or_create_voter_daily_summary_seeds_from_seed(activity_notice_seed):
                     )
                     status += results['status']
         else:
-            status += "CREATE_DAILY_SUMMARY_FROM_SEED-NO_FRIENDS "
+            status += "CREATE_DAILY_SUMMARY_FROM_SEED_NO_FRIENDS "
 
     try:
         activity_notice_seed.added_to_voter_daily_summary = True
@@ -2992,14 +2987,13 @@ def update_or_create_activity_notice_seed_for_voter_position(
     return results
 
 
-def update_activity_notice_seed_with_positions(activity_notice_seed):
+def update_activity_notice_seed_date_of_notice_earlier_than_update_window(activity_notice_seed):
     status = ''
     success = True
     activity_notice_seed_changed = False
 
     from activity.models import get_lifespan_of_seed
-    kind_of_seed = NOTICE_FRIEND_ENDORSEMENTS_SEED
-    lifespan_of_seed_in_seconds = get_lifespan_of_seed(kind_of_seed)  # In seconds
+    lifespan_of_seed_in_seconds = get_lifespan_of_seed(activity_notice_seed.kind_of_seed)  # In seconds
     earliest_date_of_notice = now() - timedelta(seconds=lifespan_of_seed_in_seconds)
     # Is this activity_notice_seed.date_of_notice older than earliest_date_of_notice?
     if activity_notice_seed.date_of_notice < earliest_date_of_notice:
@@ -3007,16 +3001,24 @@ def update_activity_notice_seed_with_positions(activity_notice_seed):
             activity_notice_seed.date_of_notice_earlier_than_update_window = True
             activity_notice_seed.save()
             activity_notice_seed_changed = True
+            status += "DATE_OF_NOTICE_EARLIER_THAN_UPDATE_WINDOW_SET_TRUE "
         except Exception as e:
             status += "COULD_NOT_UPDATE-date_of_notice_earlier_than_update_window: " + str(e) + ' '
-        results = {
-            'success':                                      success,
-            'status':                                       status,
-            'activity_notice_seed':                         activity_notice_seed,
-            'activity_notice_seed_changed':                 activity_notice_seed_changed,
-            'date_of_notice_earlier_than_update_window':    True,
-        }
-        return results
+            success = False
+    results = {
+        'success':                                      success,
+        'status':                                       status,
+        'activity_notice_seed':                         activity_notice_seed,
+        'activity_notice_seed_changed':                 activity_notice_seed_changed,
+        'date_of_notice_earlier_than_update_window':    activity_notice_seed.date_of_notice_earlier_than_update_window,
+    }
+    return results
+
+
+def update_activity_notice_seed_with_positions(activity_notice_seed):
+    status = ''
+    success = True
+    activity_notice_seed_changed = False
 
     # What values currently exist? We deserialize so we can compare with latest positions
     # Position names
@@ -3085,6 +3087,5 @@ def update_activity_notice_seed_with_positions(activity_notice_seed):
         'status':                                       status,
         'activity_notice_seed':                         activity_notice_seed,
         'activity_notice_seed_changed':                 activity_notice_seed_changed,
-        'date_of_notice_earlier_than_update_window':    False,
     }
     return results
