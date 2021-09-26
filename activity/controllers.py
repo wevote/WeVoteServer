@@ -1186,6 +1186,7 @@ def update_or_create_activity_notices_from_seed(activity_notice_seed):
                 status += activity_results['status']
 
     # Seeds that require a friend list to be found
+    mark_activity_notices_updated = False
     if activity_notice_seed.kind_of_seed in [
         NOTICE_ACTIVITY_POST_SEED,
         NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_SEED,
@@ -1365,6 +1366,12 @@ def update_or_create_activity_notices_from_seed(activity_notice_seed):
                         status += activity_results['status']
         else:
             status += "CREATE_ACTIVITY_NOTICES_FROM_SEED-NO_FRIENDS "
+            if activity_notice_seed.kind_of_seed in [
+                NOTICE_ACTIVITY_POST_SEED,
+                NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_SEED,
+                NOTICE_FRIEND_ENDORSEMENTS_SEED,
+            ]:
+                mark_activity_notices_updated = True
 
     # These do not require friends for the notices
     if activity_notice_seed.kind_of_seed == NOTICE_CAMPAIGNX_NEWS_ITEM_SEED:
@@ -1416,22 +1423,16 @@ def update_or_create_activity_notices_from_seed(activity_notice_seed):
     try:
         activity_notice_seed.activity_notices_created = True
         # NOTE: We might not need to mark activity_notices_updated True for all of these
-        if activity_notice_seed.kind_of_seed in [
-            NOTICE_ACTIVITY_POST_SEED,
-            NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_SEED,
-            NOTICE_FRIEND_ENDORSEMENTS_SEED,
-        ]:
+        if mark_activity_notices_updated:
             activity_notice_seed.activity_notices_updated = True
         activity_notice_seed.save()
         status += "CREATE_ACTIVITY_NOTICES_FROM_SEED-MARKED_CREATED "
-        if activity_notice_seed.kind_of_seed in [
-            NOTICE_ACTIVITY_POST_SEED,
-            NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_SEED,
-            NOTICE_FRIEND_ENDORSEMENTS_SEED,
-        ]:
+        if mark_activity_notices_updated:
             status += "MARKED_UPDATED "
     except Exception as e:
         status += "CREATE_ACTIVITY_NOTICES_FROM_SEED-CANNOT_MARK_NOTICES_CREATED: " + str(e) + " "
+        if mark_activity_notices_updated:
+            status += "CANNOT_MARKED_UPDATED "
         success = False
 
     results = {
