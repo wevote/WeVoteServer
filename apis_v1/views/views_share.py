@@ -81,11 +81,11 @@ def super_share_item_save_view(request):  # superShareItemSave
     personalized_message = request.POST.get('personalized_message', '')
     personalized_message_changed = positive_value_exists(request.POST.get('personalized_message_changed', False))
     send_now = positive_value_exists(request.POST.get('send_now', False))
-    supers_share_item_id = request.POST.get('supers_share_item_id', 0)
+    super_share_item_id = request.POST.get('super_share_item_id', 0)
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     if send_now:
         json_data = super_share_item_send_for_api(
-            supers_share_item_id=supers_share_item_id,
+            super_share_item_id=super_share_item_id,
             voter_device_id=voter_device_id,
         )
     else:

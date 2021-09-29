@@ -667,14 +667,14 @@ def super_share_item_save_for_api(  # superShareItemSave
         if recipients_results['email_recipient_list_found']:
             email_recipient_list = recipients_results['email_recipient_list']
             for super_share_email_recipient in email_recipient_list:
-                date_email_sent_string = ''
+                date_sent_to_email_string = ''
                 try:
-                    if super_share_email_recipient.date_email_sent:
-                        date_email_sent_string = super_share_email_recipient.date_email_sent.strftime('%Y-%m-%d %H:%M:%S')
+                    if super_share_email_recipient.date_sent_to_email:
+                        date_sent_to_email_string = super_share_email_recipient.date_sent_to_email.strftime('%Y-%m-%d %H:%M:%S')
                 except Exception as e:
                     pass
                 email_recipient_dict = {
-                    'date_email_sent': date_email_sent_string,
+                    'date_sent_to_email': date_sent_to_email_string,
                     'email_address_text': super_share_email_recipient.email_address_text.lower(),
                     'recipient_display_name': super_share_email_recipient.recipient_display_name,
                     'recipient_first_name': super_share_email_recipient.recipient_first_name,
@@ -711,6 +711,7 @@ def super_share_item_send_for_api(  # superShareItemSave (for sending)
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
     if not voter_results['voter_found']:
         status += "SUPER_SHARE_ITEM_SEND_FAILED-SENDING_VOTER_NOT_FOUND "
+        success = False
         results = {
             'status':                   status,
             'success':                  success,
@@ -746,11 +747,13 @@ def super_share_item_send_for_api(  # superShareItemSave (for sending)
             speaker_profile_image_url_medium=voter.we_vote_hosted_profile_image_url_medium,
             speaker_profile_image_url_tiny=voter.we_vote_hosted_profile_image_url_tiny,
             statement_subject=super_share_item.personalized_subject,
-            statement_text=super_share_item.personalized_message)
+            statement_text=super_share_item.personalized_message,
+            super_share_item_id=super_share_item_id)
         status += activity_results['status']
         if activity_results['success']:
             if activity_results['activity_notice_seed_found']:
                 activity_notice_seed = activity_results['activity_notice_seed']
+                in_draft_mode = False
                 super_share_item.in_draft_mode = False
                 super_share_item.date_sent_to_email = activity_notice_seed.date_sent_to_email
                 super_share_item.save()
@@ -758,6 +761,8 @@ def super_share_item_send_for_api(  # superShareItemSave (for sending)
                     date_sent_to_email_string = activity_notice_seed.date_sent_to_email.strftime('%Y-%m-%d %H:%M:%S')
                 except Exception as e:
                     pass
+        else:
+            success = activity_results['success']
 
     results = {
         'status':                   status,
