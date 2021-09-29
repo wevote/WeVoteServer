@@ -1,30 +1,34 @@
 
 
-{% if recipient_name %}
-Hello {{ recipient_name }},
+{% if recipient_first_name %}
+Hello {{ recipient_first_name }},
+
 {% endif %}
+{% if sender_name %}{{ sender_name }}{% else %}Your   friend{% endif %}{% if sender_email_address %} ({{ sender_email_address }}){% elif sms_phone_number %} ({{ sms_phone_number }}){% endif %} shared a campaign with you.
+{% if campaignx_title %}
+{{ campaignx_title }}{% endif %}
+{% if invitation_message_plain_text %}
+"{{ invitation_message_plain_text }}"{% endif %}
 
-{% if politician_count > 0 %}
-{% if speaker_voter_name %}{{ speaker_voter_name }} shared an update{% else %}This is an update{% endif %} relating to{{ politician_full_sentence_string }}. This is the campaign you supported:
-{{ campaignx_title }}
-{% else %}
-{% if speaker_voter_name %}{{ speaker_voter_name }} shared an update{% else %}This is an update{% endif %} relating to {{ campaignx_title }}.
+========================================{# Later we replace "Your   friend" with the sender name. #}
+{% if campaignx_url %}
+View Now
+{{ campaignx_url }}
+
 {% endif %}
+{% if view_home_page_url %}
+See Home Page
+{{ view_home_page_url }}
 
-{% if subject %}{{ subject }}{% endif %}
+{% endif %}
+========================================
 
-{{ campaignx_news_text }}
+Thank you,
+The We Vote Team
 
-Click to see or share: {{ campaignx_news_item_url }}
 
 
 ========================================
-You supported this campaign{% if speaker_voter_name %} from {{ speaker_voter_name }}{% endif %}{% if date_supported %} on {{ date_supported }}{% endif %}.
-
-This message was sent to {{ recipient_voter_email }} via the nonpartisan website WeVote.US. We Vote did not create this campaign, is not responsible for its content, and does not support or oppose any political candidate or party. If you don't want to receive emails from this campaign, please follow the link below to unsubscribe:
+This message was sent to {{ recipient_email_address }}. If you don't want to receive emails from We Vote, please follow the link below to unsubscribe:
 {{ recipient_unsubscribe_url }}
-
-We Vote
-Attention: Campaigns Team
-1423 Broadway PMB 158,
-Oakland, CA 94612
+We Vote, Attention: Campaigns Team, 1423 Broadway PMB 158, Oakland, CA 94612

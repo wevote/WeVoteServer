@@ -1157,12 +1157,10 @@ class ShareManager(models.Manager):
                 if positive_value_exists(read_only):
                     super_share_item = SuperShareItem.objects.using('readonly').get(
                         id=super_share_item_id,
-                        deleted=False
                     )
                 else:
                     super_share_item = SuperShareItem.objects.get(
                         id=super_share_item_id,
-                        deleted=False
                     )
                 super_share_item_id = super_share_item.id
                 super_share_item_found = True
@@ -1189,13 +1187,13 @@ class ShareManager(models.Manager):
                         super_share_item_found = True
                         super_share_item_list_found = False
                         success = True
-                        status += "RETRIEVE_SUPER_SHARE_ITEM_FOUND_BY_URL-ONLY_ONE_FOUND "
+                        status += "RETRIEVE_SUPER_SHARE_ITEM_FOUND_BY_CAMPAIGN-ONLY_ONE_FOUND "
                     else:
                         success = True
                         super_share_item = super_share_item_list[0]
                         super_share_item_found = True
                         super_share_item_list_found = True
-                        status += 'RETRIEVE_SUPER_SHARE_ITEM_FOUND_BY_URL-LIST_RETRIEVED '
+                        status += 'RETRIEVE_SUPER_SHARE_ITEM_FOUND_BY_CAMPAIGN-LIST_RETRIEVED '
                 else:
                     success = True
                     super_share_item_list_found = False

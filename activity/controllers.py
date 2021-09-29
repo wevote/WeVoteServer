@@ -6,10 +6,10 @@ from .models import ActivityComment, ActivityNoticeSeed, ActivityManager, Activi
     NOTICE_ACTIVITY_POST_SEED, \
     NOTICE_CAMPAIGNX_FRIEND_HAS_SUPPORTED, \
     NOTICE_CAMPAIGNX_NEWS_ITEM, NOTICE_CAMPAIGNX_NEWS_ITEM_AUTHORED, NOTICE_CAMPAIGNX_NEWS_ITEM_SEED, \
+    NOTICE_CAMPAIGNX_SUPER_SHARE_ITEM_AUTHORED, NOTICE_CAMPAIGNX_SUPER_SHARE_ITEM_SEED, \
     NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE, NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_SEED, \
     NOTICE_FRIEND_ACTIVITY_POSTS, \
     NOTICE_FRIEND_ENDORSEMENTS, NOTICE_FRIEND_ENDORSEMENTS_SEED, \
-    NOTICE_SUPER_SHARE_ITEM_AUTHORED, NOTICE_SUPER_SHARE_ITEM_SEED, \
     NOTICE_VOTER_DAILY_SUMMARY, NOTICE_VOTER_DAILY_SUMMARY_SEED
 from config.base import get_environment_variable
 from django.utils.timezone import now
@@ -1101,9 +1101,9 @@ def process_activity_notice_seeds_triggered_by_batch_process():
         if results['activity_notice_seed_found']:
             # We retrieve from these seed types:
             #  NOTICE_CAMPAIGNX_NEWS_ITEM_SEED
+            #  NOTICE_CAMPAIGNX_SUPER_SHARE_ITEM_SEED
             #  NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_SEED
             #  NOTICE_FRIEND_ENDORSEMENTS_SEED
-            #  NOTICE_SUPER_SHARE_ITEM_SEED
             #  NOTICE_VOTER_DAILY_SUMMARY_SEED
             activity_notice_seed = results['activity_notice_seed']
             activity_notice_seed_id_already_reviewed_list.append(activity_notice_seed.id)
@@ -1627,9 +1627,9 @@ def schedule_activity_notices_from_seed(activity_notice_seed):
 
     # This is a switch with different branches for:
     #  NOTICE_CAMPAIGNX_NEWS_ITEM_SEED
+    #  NOTICE_CAMPAIGNX_SUPER_SHARE_ITEM_SEED
     #  NOTICE_CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_SEED
     #  NOTICE_FRIEND_ENDORSEMENTS_SEED
-    #  NOTICE_SUPER_SHARE_ITEM_SEED
     #  NOTICE_VOTER_DAILY_SUMMARY_SEED
     if activity_notice_seed.kind_of_seed == NOTICE_CAMPAIGNX_NEWS_ITEM_SEED:
         from campaign.controllers_email_outbound import campaignx_news_item_send
@@ -1886,8 +1886,7 @@ def schedule_activity_notices_from_seed(activity_notice_seed):
         except Exception as e:
             status += "SCHEDULE_ACTIVITY_NOTICES_FRIEND_ENDORSEMENTS_SEED-CANNOT_MARK_NOTICES_CREATED: " + str(e) + " "
             success = False
-    elif activity_notice_seed.kind_of_seet == NOTICE_SUPER_SHARE_ITEM_SEED:
-        # TODO Still a work in progress -- not finished so a bug fix can be checked in elsewhere
+    elif activity_notice_seed.kind_of_seed == NOTICE_CAMPAIGNX_SUPER_SHARE_ITEM_SEED:
         from campaign.controllers_email_outbound import campaignx_super_share_item_send
         from campaign.controllers import fetch_sentence_string_from_politician_list
         from campaign.models import CampaignXManager
@@ -1909,23 +1908,18 @@ def schedule_activity_notices_from_seed(activity_notice_seed):
                 campaignx_url = campaigns_root_url_verified + '/c/' + campaignx.seo_friendly_path
             we_vote_hosted_campaign_photo_large_url = campaignx.we_vote_hosted_campaign_photo_large_url
 
+        speaker_email_address = ''
+        speaker_photo = ''
         speaker_voter_name = ''
         if positive_value_exists(activity_notice_seed.speaker_voter_we_vote_id):
             speaker_voter_results = \
                 voter_manager.retrieve_voter_by_we_vote_id(activity_notice_seed.speaker_voter_we_vote_id)
             if speaker_voter_results['voter_found']:
                 speaker_voter = speaker_voter_results['voter']
+                if positive_value_exists(speaker_voter.email_ownership_is_verified):
+                    speaker_email_address = speaker_voter.email
+                speaker_photo = speaker_voter.we_vote_hosted_profile_image_url_large
                 speaker_voter_name = speaker_voter.get_full_name(real_name_only=True)
-
-        politician_list = campaignx_manager.retrieve_campaignx_politician_list(
-            campaignx_we_vote_id=activity_notice_seed.campaignx_we_vote_id)
-        politician_count = len(politician_list)
-        if politician_count > 0:
-            politician_full_sentence_string = fetch_sentence_string_from_politician_list(
-                politician_list=politician_list,
-            )
-        else:
-            politician_full_sentence_string = ''
 
         if not positive_value_exists(activity_notice_seed.super_share_item_id):
             status += "MISSING_SUPER_SHARE_ITEM_ID_FROM_ACTIVITY_NOTICE_SEED "
@@ -1955,15 +1949,16 @@ def schedule_activity_notices_from_seed(activity_notice_seed):
                         campaignx_news_item_we_vote_id=activity_notice_seed.campaignx_news_item_we_vote_id,
                         campaigns_root_url_verified=campaigns_root_url_verified,
                         campaignx_title=campaignx_title,
-                        campaignx_url=campaignx_url,
-                        campaignx_we_vote_id=activity_notice_seed.campaignx_we_vote_id,
-                        politician_count=politician_count,
-                        politician_full_sentence_string=politician_full_sentence_string,
+                        recipient_email_address=super_share_email_recipient.email_address_text,
+                        recipient_first_name=super_share_email_recipient.recipient_first_name,
                         recipient_voter_we_vote_id=super_share_email_recipient.recipient_voter_we_vote_id,
+                        speaker_email_address=speaker_email_address,
+                        speaker_photo=speaker_photo,
                         speaker_voter_name=speaker_voter_name,
                         speaker_voter_we_vote_id=super_share_email_recipient.shared_by_voter_we_vote_id,
                         statement_subject=activity_notice_seed.statement_subject,
                         statement_text_preview=activity_notice_seed.statement_text_preview,
+                        view_shared_campaignx_url=campaignx_url,
                         we_vote_hosted_campaign_photo_large_url=we_vote_hosted_campaign_photo_large_url,
                     )
                     super_share_email_recipient_already_reviewed_list.append(super_share_email_recipient.id)
@@ -1990,7 +1985,7 @@ def schedule_activity_notices_from_seed(activity_notice_seed):
             activity_notice_seed.save()
             activity_notice_count += 1
         except Exception as e:
-            status += "FAILED_SAVING_NOTICE_SUPER_SHARE_ITEM_SEED_AS_SCHEDULED: " + str(e) + " "
+            status += "FAILED_SAVING_NOTICE_CAMPAIGNX_SUPER_SHARE_ITEM_SEED_AS_SCHEDULED: " + str(e) + " "
             success = False
         if success:
             try:
@@ -2000,7 +1995,7 @@ def schedule_activity_notices_from_seed(activity_notice_seed):
                 # We'll want to create a routine that connects up to the SendGrid API to tell us
                 #  when the message was received or bounced
             except Exception as e:
-                status += "FAILED_SAVING_NOTICE_SUPER_SHARE_ITEM_SEED_AS_SENT: " + str(e) + " "
+                status += "FAILED_SAVING_NOTICE_CAMPAIGNX_SUPER_SHARE_ITEM_SEED_AS_SENT: " + str(e) + " "
                 success = False
     elif activity_notice_seed.kind_of_seed == NOTICE_VOTER_DAILY_SUMMARY_SEED:
         # Make this either when the last SEED was created OR 24 hours ago
@@ -2788,7 +2783,7 @@ def update_or_create_activity_notice_seed_for_super_share_item(
     activity_manager = ActivityManager()
 
     results = activity_manager.retrieve_activity_notice_seed(
-        kind_of_seed=NOTICE_SUPER_SHARE_ITEM_SEED,
+        kind_of_seed=NOTICE_CAMPAIGNX_SUPER_SHARE_ITEM_SEED,
         super_share_item_id=super_share_item_id,
     )
     if results['activity_notice_seed_found']:
@@ -2813,16 +2808,13 @@ def update_or_create_activity_notice_seed_for_super_share_item(
             activity_notice_seed.save()
             activity_notice_seed_found = True
         except Exception as e:
-            status += "COULD_NOT_UPDATE_NOTICE_SUPER_SHARE_ITEM_SEED: " + str(e) + " "
+            status += "COULD_NOT_UPDATE_NOTICE_CAMPAIGNX_SUPER_SHARE_ITEM_SEED: " + str(e) + " "
             success = False
         status += results['status']
     elif results['success']:
         date_of_notice = now()
         if positive_value_exists(statement_text):
-            statement_text_preview = return_first_x_words(
-                statement_text,
-                number_of_words_to_return=40,
-                include_ellipses=True)
+            statement_text_preview = statement_text
         else:
             statement_text_preview = ''
 
@@ -2831,7 +2823,7 @@ def update_or_create_activity_notice_seed_for_super_share_item(
             campaignx_news_item_we_vote_id=campaignx_news_item_we_vote_id,
             campaignx_we_vote_id=campaignx_we_vote_id,
             date_of_notice=date_of_notice,
-            kind_of_seed=NOTICE_SUPER_SHARE_ITEM_SEED,
+            kind_of_seed=NOTICE_CAMPAIGNX_SUPER_SHARE_ITEM_SEED,
             send_to_email=positive_value_exists(send_super_share_item),
             speaker_name=speaker_name,
             speaker_organization_we_vote_id=speaker_organization_we_vote_id,
