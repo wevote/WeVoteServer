@@ -72,6 +72,7 @@ def retrieve_and_store_vote_usa_candidate_photo(candidate):
     }
     return results
 
+
 def retrieve_vote_usa_ballot_items_from_polling_location_api(
         google_civic_election_id,
         election_day_text="",

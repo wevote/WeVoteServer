@@ -94,6 +94,9 @@
   "VOTER_INFO_JSON_FILE":           "import_export_google_civic/import_data/voterinfo_sample.json",
   "REPRESENTATIVES_BY_ADDRESS_URL": "https://www.googleapis.com/civicinfo/v2/representatives",
 
+  "_comment":                       "import_export_targetsmart",
+  "TARGETSMART_API_KEY":            "",
+
   "_comment":                       "import_export_theunitedstatesio",
   "LEGISLATORS_CURRENT_CSV_FILE":   "import_export_theunitedstatesio/import_data/legislators-current.csv",
 

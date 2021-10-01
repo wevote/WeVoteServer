@@ -6,6 +6,7 @@ from django.db import (models, IntegrityError)
 from django.db.models import Q
 from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser)  # PermissionsMixin
 from django.core.validators import RegexValidator
+from django.utils.timezone import now
 from datetime import datetime, timedelta
 from apple.models import AppleUser
 from exception.models import handle_exception, handle_record_found_more_than_one_exception,\
@@ -142,6 +143,110 @@ class VoterManager(BaseUserManager):
         }
         return results
 
+    def update_or_create_contact_email_augmented(
+            self,
+            checked_against_sendgrid=None,
+            checked_against_targetsmart=None,
+            email_address_text='',
+            existing_contact_email_augmented_dict={},
+            has_known_bounces=None,
+            has_mx_or_a_record=None,
+            has_suspected_bounces=None,
+            is_invalid=None,
+            is_verified=None,
+            sendgrid_id=None,
+            targetsmart_id=None,
+            targetsmart_source_state=None,
+    ):
+        status = ""
+        success = True
+        contact_email_augmented = None
+        contact_email_augmented_found = False
+        contact_email_augmented_created = False
+        contact_email_augmented_updated = False
+
+        # Instead of retrieving emails one at a time, we retrieve a list based on the batch we are running
+        email_address_text_lower = email_address_text.lower()
+        if email_address_text_lower in existing_contact_email_augmented_dict:
+            contact_email_augmented_found = True
+            contact_email_augmented = existing_contact_email_augmented_dict[email_address_text_lower]
+
+        if not contact_email_augmented_found:
+            try:
+                contact_email_augmented, contact_email_augmented_created = ContactEmailAugmented.objects.get_or_create(
+                    email_address_text__iexact=email_address_text_lower,
+                    defaults={'email_address_text': email_address_text_lower}
+                )
+                contact_email_augmented_found = True
+                status += "CONTACT_EMAIL_AUGMENTED_GET_OR_CREATE_SUCCESS "
+            except Exception as e:
+                contact_email_augmented = None
+                success = False
+                status += "CONTACT_EMAIL_AUGMENTED_NOT_CREATED: " + str(e) + " "
+
+        if success:
+            try:
+                change_to_save = False
+                if checked_against_sendgrid is not None:
+                    if contact_email_augmented.checked_against_sendgrid != checked_against_sendgrid:
+                        contact_email_augmented.checked_against_sendgrid = checked_against_sendgrid
+                        contact_email_augmented.date_last_checked_against_sendgrid = now()
+                        change_to_save = True
+                if checked_against_targetsmart is not None:
+                    if contact_email_augmented.checked_against_targetsmart != checked_against_targetsmart:
+                        contact_email_augmented.checked_against_targetsmart = checked_against_targetsmart
+                        contact_email_augmented.date_last_checked_against_targetsmart = now()
+                        change_to_save = True
+                if has_known_bounces is not None:
+                    if contact_email_augmented.has_known_bounces != has_known_bounces:
+                        contact_email_augmented.has_known_bounces = has_known_bounces
+                        change_to_save = True
+                if has_mx_or_a_record is not None:
+                    if contact_email_augmented.has_mx_or_a_record != has_mx_or_a_record:
+                        contact_email_augmented.has_mx_or_a_record = has_mx_or_a_record
+                        change_to_save = True
+                if has_suspected_bounces is not None:
+                    if contact_email_augmented.has_suspected_bounces != has_suspected_bounces:
+                        contact_email_augmented.has_suspected_bounces = has_suspected_bounces
+                        change_to_save = True
+                if is_invalid is not None:
+                    if contact_email_augmented.is_invalid != is_invalid:
+                        contact_email_augmented.is_invalid = is_invalid
+                        change_to_save = True
+                if is_verified is not None:
+                    if contact_email_augmented.is_verified != is_verified:
+                        contact_email_augmented.is_verified = is_verified
+                        change_to_save = True
+                if targetsmart_id is not None:
+                    if contact_email_augmented.targetsmart_id != targetsmart_id:
+                        contact_email_augmented.targetsmart_id = targetsmart_id
+                        change_to_save = True
+                if targetsmart_source_state is not None:
+                    if contact_email_augmented.targetsmart_source_state != targetsmart_source_state:
+                        contact_email_augmented.targetsmart_source_state = targetsmart_source_state
+                        change_to_save = True
+                if change_to_save:
+                    contact_email_augmented.save()
+                    contact_email_augmented_updated = True
+                    success = True
+                    status += "CONTACT_EMAIL_AUGMENTED_UPDATED "
+                else:
+                    status += "NO_CHANGE_TO_CONTACT_EMAIL_AUGMENTED "
+            except Exception as e:
+                contact_email_augmented = None
+                success = False
+                status += "CONTACT_EMAIL_AUGMENTED_NOT_UPDATED: " + str(e) + " "
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'contact_email_augmented':          contact_email_augmented,
+            'contact_email_augmented_created':  contact_email_augmented_created,
+            'contact_email_augmented_found':    contact_email_augmented_found,
+            'contact_email_augmented_updated':  contact_email_augmented_updated,
+        }
+        return results
+
     def update_or_create_voter_contact_email(
             self,
             email_address_text='',
@@ -174,9 +279,10 @@ class VoterManager(BaseUserManager):
             }
             return results
 
-        if email_address_text.lower() in existing_voter_contact_email_dict:
+        email_address_text_lower = email_address_text.lower()
+        if email_address_text_lower in existing_voter_contact_email_dict:
             voter_contact_email_found = True
-            voter_contact_email = existing_voter_contact_email_dict[email_address_text.lower()]
+            voter_contact_email = existing_voter_contact_email_dict[email_address_text_lower]
 
         if voter_contact_email_found:
             try:
@@ -606,6 +712,88 @@ class VoterManager(BaseUserManager):
         }
         return results
 
+    def retrieve_contact_email_augmented_list(
+            self,
+            checked_against_sendgrid_more_than_x_days_ago=None,
+            checked_against_targetsmart_more_than_x_days_ago=None,
+            email_address_text_list=None,
+            read_only=True):
+        success = True
+        status = ""
+        contact_email_augmented_list = []
+
+        try:
+            if positive_value_exists(read_only):
+                list_query = ContactEmailAugmented.objects.using('readonly').all()
+            else:
+                list_query = ContactEmailAugmented.objects.all()
+
+            # Filter based on when record was last augmented by SendGrid or TargetSmart
+            if checked_against_sendgrid_more_than_x_days_ago == 0:
+                # Don't limit by if/when SendGrid data was retrieved previously
+                pass
+            elif checked_against_sendgrid_more_than_x_days_ago is not None:
+                # Only retrieve the record if it hasn't been retrieved, or was retrieved more than x days ago
+                the_date_x_days_ago = now() - timedelta(days=checked_against_sendgrid_more_than_x_days_ago)
+                list_query = list_query.filter(
+                    Q(checked_against_sendgrid=False) |
+                    Q(date_last_checked_against_sendgrid__isnull=True) |
+                    Q(date_last_checked_against_sendgrid__lt=the_date_x_days_ago))
+            elif checked_against_targetsmart_more_than_x_days_ago == 0:
+                # Don't limit by if/when TargetSmart data was retrieved previously
+                pass
+            elif checked_against_targetsmart_more_than_x_days_ago is not None:
+                # Only retrieve the record if it hasn't been retrieved, or was retrieved more than x days ago
+                the_date_x_days_ago = now() - timedelta(days=checked_against_targetsmart_more_than_x_days_ago)
+                list_query = list_query.filter(
+                    Q(checked_against_targetsmart=False) |
+                    Q(date_last_checked_against_targetsmart__isnull=True) |
+                    Q(date_last_checked_against_targetsmart__lt=the_date_x_days_ago))
+
+            # Limit the records we retrieve to this email list
+            if email_address_text_list is not None and len(email_address_text_list) > 0:
+                filters = []
+                for email_address_text in email_address_text_list:
+                    new_filter = Q(email_address_text__iexact=email_address_text)
+                    filters.append(new_filter)
+                if len(filters):
+                    final_filters = filters.pop()
+                    for item in filters:
+                        final_filters |= item
+                    list_query = list_query.filter(final_filters)
+
+            contact_email_augmented_list = list(list_query)
+            if len(contact_email_augmented_list) > 0:
+                status += "CONTACT_EMAIL_AUGMENTED_LIST_FOUND "
+                contact_email_augmented_list_found = True
+            else:
+                status += "NO_CONTACT_EMAIL_AUGMENTED_ITEMS_FOUND "
+                contact_email_augmented_list_found = False
+        except Exception as e:
+            contact_email_augmented_list_found = False
+            status += "CONTACT_EMAIL_AUGMENTED_LIST_NOT_FOUND-EXCEPTION: " + str(e) + ' '
+            success = False
+
+        email_addresses_returned_list = []
+        if contact_email_augmented_list_found:
+            for contact_email_augmented in contact_email_augmented_list:
+                email_addresses_returned_list.append(contact_email_augmented.email_address_text)
+
+        contact_email_augmented_list_as_dict = {}
+        for contact_email_augmented in contact_email_augmented_list:
+            email_address_text_lower = contact_email_augmented.email_address_text.lower()
+            contact_email_augmented_list_as_dict[email_address_text_lower] = contact_email_augmented
+
+        results = {
+            'success':                              success,
+            'status':                               status,
+            'contact_email_augmented_list':         contact_email_augmented_list,
+            'contact_email_augmented_list_as_dict': contact_email_augmented_list_as_dict,
+            'contact_email_augmented_list_found':   contact_email_augmented_list_found,
+            'email_addresses_returned_list':        email_addresses_returned_list,
+        }
+        return results
+
     def retrieve_voter_contact_email_list(self, imported_by_voter_we_vote_id='', read_only=True):
         success = True
         status = ""
@@ -639,9 +827,15 @@ class VoterManager(BaseUserManager):
             status += "VOTER_CONTACT_EMAIL_LIST_NOT_FOUND-EXCEPTION: " + str(e) + ' '
             success = False
 
+        email_addresses_returned_list = []
+        if voter_contact_email_list_found:
+            for voter_contact_email in voter_contact_email_list:
+                email_addresses_returned_list.append(voter_contact_email.email_address_text)
+
         results = {
             'success':                          success,
             'status':                           status,
+            'email_addresses_returned_list':    email_addresses_returned_list,
             'voter_contact_email_list':         voter_contact_email_list,
             'voter_contact_email_list_found':   voter_contact_email_list_found,
         }
@@ -2928,11 +3122,38 @@ class VoterContactEmail(models.Model):
 #     state_code = models.CharField(max_length=2, default=None, null=True, db_index=True)
 
 
-# class VoterFileInfo(models.Model):
-#     """
-#     What voter file information have we retrieved for one email address?
-#     """
-#     email_address_text = models.TextField(null=True, blank=True, db_index=True)
+class ContactEmailAugmented(models.Model):
+    """
+    What information have we retrieved to augment this one email address?
+    """
+    checked_against_sendgrid = models.BooleanField(db_index=True, default=False)
+    checked_against_targetsmart = models.BooleanField(db_index=True, default=False)
+    date_last_checked_against_sendgrid = models.DateTimeField(null=True)
+    date_last_checked_against_targetsmart = models.DateTimeField(null=True)
+    email_address_text = models.TextField(db_index=True, null=False, unique=True)
+    has_known_bounces = models.BooleanField(default=False)
+    has_mx_or_a_record = models.BooleanField(default=False)
+    has_suspected_bounces = models.BooleanField(default=False)
+    is_invalid = models.BooleanField(db_index=True, default=False)
+    is_verified = models.BooleanField(db_index=True, default=False)
+    targetsmart_id = models.CharField(max_length=255, null=True)
+    targetsmart_source_state = models.CharField(max_length=2, null=True)
+
+
+class ContactSMSAugmented(models.Model):
+    """
+    What information have we retrieved to augment what we know about this one phone number?
+    """
+    checked_against_sendgrid = models.BooleanField(db_index=True, default=False)
+    checked_against_targetsmart = models.BooleanField(db_index=True, default=False)
+    date_last_checked_against_sendgrid = models.DateTimeField(null=True)
+    date_last_checked_against_targetsmart = models.DateTimeField(null=True)
+    is_augmented = models.BooleanField(db_index=True, default=False)
+    is_invalid = models.BooleanField(db_index=True, default=False)
+    is_verified = models.BooleanField(db_index=True, default=False)
+    normalized_sms_phone_number = models.CharField(db_index=True, max_length=50, null=False, unique=True)
+    targetsmart_id = models.CharField(max_length=255, null=True)
+    targetsmart_source_state = models.CharField(max_length=2, null=True)
 
 
 class VoterDeviceLink(models.Model):

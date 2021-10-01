@@ -105,4 +105,44 @@
     <br />
 {% endif %}
 
+
+{% if sendgrid_daily_summary_list %}
+<h4>SendGrid API Calls</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th># of Calls</th>
+            </tr>
+        </thead>
+       {% for sendgrid_daily_summary in sendgrid_daily_summary_list %}
+        <tr>
+            <td>{{ sendgrid_daily_summary.date_string }}</td>
+            <td>{{ sendgrid_daily_summary.count|intcomma }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br />
+{% endif %}
+
+
+{% if targetsmart_daily_summary_list %}
+<h4>TargetSmart API Calls</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th># of Calls</th>
+            </tr>
+        </thead>
+       {% for targetsmart_daily_summary in targetsmart_daily_summary_list %}
+        <tr>
+            <td>{{ targetsmart_daily_summary.date_string }}</td>
+            <td>{{ targetsmart_daily_summary.count|intcomma }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br />
+{% endif %}
+
 {%  endblock %}

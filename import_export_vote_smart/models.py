@@ -105,7 +105,11 @@ class VoteSmartApiCounterManager(models.Manager):
                     counter_queryset = counter_queryset.filter(google_civic_election_id=google_civic_election_id)
 
                 # Find the number of these entries on that particular day
-                counter_queryset = counter_queryset.filter(datetime_of_action__contains=day_on_stage)
+                # counter_queryset = counter_queryset.filter(datetime_of_action__contains=day_on_stage)
+                counter_queryset = counter_queryset.filter(
+                    datetime_of_action__year=day_on_stage.year,
+                    datetime_of_action__month=day_on_stage.month,
+                    datetime_of_action__day=day_on_stage.day)
                 api_call_count = counter_queryset.count()
 
                 # If any api calls were found on that date, pass it out for display
