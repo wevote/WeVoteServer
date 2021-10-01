@@ -1,58 +1,53 @@
-# import_export_ballotpedia/models.py
+# import_export_targetsmart/models.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-
 from datetime import date, timedelta
 from django.db import models
+import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 
 
-class BallotpediaApiCounter(models.Model):
+logger = wevote_functions.admin.get_logger(__name__)
+
+
+class TargetSmartApiCounter(models.Model):
     datetime_of_action = models.DateTimeField(verbose_name='date and time of action', null=False, auto_now=True)
-    kind_of_action = models.CharField(verbose_name="kind of call to ballotpedia", max_length=50, null=True, blank=True)
-    google_civic_election_id = models.PositiveIntegerField(verbose_name="google civic election id", null=True)
-    ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True)
+    kind_of_action = models.CharField(max_length=50, null=True, blank=True, db_index=True)
+    number_of_items_sent_in_query = models.PositiveIntegerField(null=True, db_index=True)
 
 
-class BallotpediaApiCounterDailySummary(models.Model):
+class TargetSmartApiCounterDailySummary(models.Model):
     date_of_action = models.DateField(verbose_name='date of action', null=False, auto_now=False)
-    kind_of_action = models.CharField(verbose_name="kind of call to ballotpedia", max_length=50, null=True, blank=True)
-    google_civic_election_id = models.PositiveIntegerField(verbose_name="google civic election id", null=True)
-    ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True)
+    kind_of_action = models.CharField(verbose_name="kind of call", max_length=50, null=True, blank=True)
 
 
-class BallotpediaApiCounterWeeklySummary(models.Model):
+class TargetSmartApiCounterWeeklySummary(models.Model):
     year_of_action = models.SmallIntegerField(verbose_name='year of action', null=False)
     week_of_action = models.SmallIntegerField(verbose_name='number of the week', null=False)
-    kind_of_action = models.CharField(verbose_name="kind of call to ballotpedia", max_length=50, null=True, blank=True)
-    google_civic_election_id = models.PositiveIntegerField(verbose_name="google civic election id", null=True)
-    ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True)
+    kind_of_action = models.CharField(verbose_name="kind of call", max_length=50, null=True, blank=True)
 
 
-class BallotpediaApiCounterMonthlySummary(models.Model):
+class TargetSmartApiCounterMonthlySummary(models.Model):
     year_of_action = models.SmallIntegerField(verbose_name='year of action', null=False)
     month_of_action = models.SmallIntegerField(verbose_name='number of the month', null=False)
-    kind_of_action = models.CharField(verbose_name="kind of call to ballotpedia", max_length=50, null=True, blank=True)
-    google_civic_election_id = models.PositiveIntegerField(verbose_name="google civic election id", null=True)
-    ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True)
+    kind_of_action = models.CharField(verbose_name="kind of call", max_length=50, null=True, blank=True)
 
 
 # noinspection PyBroadException
-class BallotpediaApiCounterManager(models.Manager):
+class TargetSmartApiCounterManager(models.Manager):
 
-    def create_counter_entry(self, kind_of_action, google_civic_election_id=0, ballotpedia_election_id=0):
+    def create_counter_entry(self, kind_of_action, number_of_items_sent_in_query=0):
         """
-        Create an entry that records that a call to the Ballotpedia Api was made.
+        Create an entry that records that a call to the TargetSmart Api was made.
         """
         try:
-            google_civic_election_id = convert_to_int(google_civic_election_id)
+            number_of_items_sent_in_query = convert_to_int(number_of_items_sent_in_query)
 
             # TODO: We need to work out the timezone questions
-            BallotpediaApiCounter.objects.create(
+            TargetSmartApiCounter.objects.create(
                 kind_of_action=kind_of_action,
-                google_civic_election_id=google_civic_election_id,
-                ballotpedia_election_id=ballotpedia_election_id,
+                number_of_items_sent_in_query=number_of_items_sent_in_query,
             )
             success = True
             status = 'ENTRY_SAVED'
@@ -66,7 +61,7 @@ class BallotpediaApiCounterManager(models.Manager):
         }
         return results
 
-    def retrieve_daily_summaries(self, kind_of_action='', google_civic_election_id=0, ballotpedia_election_id=0):
+    def retrieve_daily_summaries(self, kind_of_action=''):
         # Start with today and cycle backwards in time
         daily_summaries = []
         day_on_stage = date.today()  # TODO: We need to work out the timezone questions
@@ -80,16 +75,11 @@ class BallotpediaApiCounterManager(models.Manager):
             #  OR 2) 30 days in the past, whichever comes first
             while number_found <= days_to_display and attempt_count <= maximum_attempts:
                 attempt_count += 1
-                counter_queryset = BallotpediaApiCounter.objects.all()
+                counter_queryset = TargetSmartApiCounter.objects.all()
                 if positive_value_exists(kind_of_action):
                     counter_queryset = counter_queryset.filter(kind_of_action=kind_of_action)
-                if positive_value_exists(google_civic_election_id):
-                    counter_queryset = counter_queryset.filter(google_civic_election_id=google_civic_election_id)
-                if positive_value_exists(ballotpedia_election_id):
-                    counter_queryset = counter_queryset.filter(ballotpedia_election_id=ballotpedia_election_id)
 
                 # Find the number of these entries on that particular day
-                # counter_queryset = counter_queryset.filter(datetime_of_action__contains=day_on_stage)
                 counter_queryset = counter_queryset.filter(
                     datetime_of_action__year=day_on_stage.year,
                     datetime_of_action__month=day_on_stage.month,

@@ -2898,6 +2898,7 @@ def voter_contact_list_retrieve_view(request):  # voterContactListRetrieve
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
+
 @csrf_exempt
 def voter_contact_list_save_view(request):  # voterContactListSave
     """
@@ -2919,6 +2920,16 @@ def voter_contact_list_save_view(request):  # voterContactListSave
         contacts = json.loads(contacts_string)
         contacts_stored = len(contacts)
         results = save_google_contacts(voter_we_vote_id=voter.we_vote_id, contacts=contacts)
+        status += results['status']
+
+    # 2021-09-30 Requires Pro account which costs $90/month
+    # from email_outbound.controllers import augment_emails_for_voter_with_sendgrid
+    # augment_results = augment_emails_for_voter_with_sendgrid(voter_we_vote_id=voter.we_vote_id)
+    # status += augment_results['status']
+
+    from import_export_targetsmart.controllers import augment_emails_for_voter_with_targetsmart
+    augment_results = augment_emails_for_voter_with_targetsmart(voter_we_vote_id=voter.we_vote_id)
+    status += augment_results['status']
 
     retrieve_results = voter_contact_list_retrieve_for_api(voter_we_vote_id=voter.we_vote_id)
     voter_contact_email_list = retrieve_results['voter_contact_email_list']
@@ -2934,4 +2945,3 @@ def voter_contact_list_save_view(request):  # voterContactListSave
         'voter_contact_email_list_count':   len(voter_contact_email_list),
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
-

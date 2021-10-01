@@ -136,6 +136,7 @@ def save_google_contacts(voter_we_vote_id='', contacts=[]):  # voterContactListS
                     last_name=last_name,
                     imported_by_voter_we_vote_id=voter_we_vote_id,
                 )
+                status += update_results['status']
 
     results = {
         'status': status,

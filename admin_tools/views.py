@@ -17,13 +17,14 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from election.models import Election
 from election.controllers import elections_import_from_sample_file
-from email_outbound.models import EmailAddress
+from email_outbound.models import EmailAddress, SendGridApiCounterManager
 from follow.models import FollowOrganizationList
 from friend.models import CurrentFriend, FriendManager, SuggestedFriend
 from import_export_ballotpedia.models import BallotpediaApiCounterManager
 from import_export_ctcl.models import CTCLApiCounterManager
 from import_export_facebook.models import FacebookLinkToVoter, FacebookManager
 from import_export_google_civic.models import GoogleCivicApiCounterManager
+from import_export_targetsmart.models import TargetSmartApiCounterManager
 from import_export_vote_smart.models import VoteSmartApiCounterManager
 from import_export_vote_usa.models import VoteUSAApiCounterManager
 from measure.models import ContestMeasure, ContestMeasureManager
@@ -1891,15 +1892,21 @@ def statistics_summary_view(request):
     ctcl_daily_summary_list = ctcl_api_counter_manager.retrieve_daily_summaries()
     google_civic_api_counter_manager = GoogleCivicApiCounterManager()
     google_civic_daily_summary_list = google_civic_api_counter_manager.retrieve_daily_summaries()
+    sendgrid_api_counter_manager = SendGridApiCounterManager()
+    sendgrid_daily_summary_list = sendgrid_api_counter_manager.retrieve_daily_summaries()
     # vote_smart_api_counter_manager = VoteSmartApiCounterManager()
     # vote_smart_daily_summary_list = vote_smart_api_counter_manager.retrieve_daily_summaries()
+    targetsmart_api_counter_manager = TargetSmartApiCounterManager()
+    targetsmart_daily_summary_list = targetsmart_api_counter_manager.retrieve_daily_summaries()
     vote_usa_api_counter_manager = VoteUSAApiCounterManager()
     vote_usa_daily_summary_list = vote_usa_api_counter_manager.retrieve_daily_summaries()
     template_values = {
         'ctcl_daily_summary_list':          ctcl_daily_summary_list,
         # 'ballotpedia_daily_summary_list':   ballotpedia_daily_summary_list,
         'google_civic_daily_summary_list':  google_civic_daily_summary_list,
+        'sendgrid_daily_summary_list':      sendgrid_daily_summary_list,
         # 'vote_smart_daily_summary_list':    vote_smart_daily_summary_list,
+        'targetsmart_daily_summary_list':   targetsmart_daily_summary_list,
         'vote_usa_daily_summary_list':      vote_usa_daily_summary_list,
     }
     response = render(request, 'admin_tools/statistics_summary.html', template_values)
