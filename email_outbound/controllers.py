@@ -177,7 +177,7 @@ def augment_emails_for_voter_with_sendgrid(voter_we_vote_id=''):
                     failed_api_count += 1
                     if failed_api_count >= 3:
                         safety_valve_triggered = True
-                        status += "TARGET_SMART_API_FAILED_3_TIMES "
+                        status += "SENDGRID_API_FAILED_3_TIMES "
                 elif sendgrid_results['augmented_email_list_found']:
                     # A dict of results from TargetSmart, with email_address_text as the key
                     sendgrid_augmented_email_list_dict = sendgrid_results['augmented_email_list_dict']
@@ -561,7 +561,7 @@ def query_sendgrid_api_to_augment_email_list(email_list=None):
             number_of_items_sent_in_query=number_of_items_sent_in_query)
     except Exception as e:
         success = False
-        status += 'QUERY_TARGETSMART_EMAIL_SEARCH_API_FAILED: ' + str(e) + ' '
+        status += 'QUERY_SENDGRID_EMAIL_SEARCH_API_FAILED: ' + str(e) + ' '
         handle_exception(e, logger=logger, exception_message=status)
 
     if 'results' in json_from_sendgrid:
