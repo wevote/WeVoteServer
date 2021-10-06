@@ -1033,6 +1033,10 @@ def extract_nickname_from_full_name(full_name):
     return ""
 
 
+def extract_vote_usa_measure_id(raw_vote_usa_measure_id):
+    return extract_vote_usa_office_id(raw_vote_usa_measure_id)
+
+
 def extract_vote_usa_office_id(raw_vote_usa_office_id):
     if positive_value_exists(raw_vote_usa_office_id):
         if '|' in raw_vote_usa_office_id:

@@ -373,36 +373,35 @@ BATCH_HEADER_MAP_MEASURES_TO_BALLOTPEDIA_MEASURES = {
     'state_code': 'state_code',
 }
 
-# TODO: Not updated from Ballotpedia yet
 BATCH_HEADER_MAP_MEASURES_TO_CTCL_MEASURES = {
-    'ballotpedia_district_id': 'ballotpedia_district_id',
-    'ballotpedia_election_id': 'ballotpedia_election_id',
-    'ballotpedia_measure_id': 'ballotpedia_measure_id',
-    'ballotpedia_measure_name': 'name',
-    'ballotpedia_measure_status': 'status',
-    'ballotpedia_measure_summary': 'summary',
-    'ballotpedia_measure_text': 'text',
-    'ballotpedia_measure_url': 'ballotpedia_measure_url',
-    'ballotpedia_yes_vote_description': 'ballotpedia_yes_vote_description',
-    'ballotpedia_no_vote_description': 'ballotpedia_no_vote_description',
+    'contest_measure_we_vote_id': 'contest_measure_we_vote_id',
+    'contest_measure_id': 'contest_measure_id',
+    'contest_measure_name': 'contest_measure_name',
+    'contest_measure_text': 'measure_text',
+    'contest_measure_url': 'measure_url',
+    'ctcl_uuid': 'ctcl_uuid',
     'election_day_text': 'election_day_text',
+    'local_ballot_order': 'local_ballot_order',
+    'no_vote_description': 'no_vote_description',
+    'yes_vote_description': 'yes_vote_description',
+    'polling_location_we_vote_id': 'polling_location_we_vote_id',
     'state_code': 'state_code',
+    'voter_id': 'voter_id',
 }
 
-# TODO: Not updated from Ballotpedia yet
 BATCH_HEADER_MAP_MEASURES_TO_VOTE_USA_MEASURES = {
-    'ballotpedia_district_id': 'ballotpedia_district_id',
-    'ballotpedia_election_id': 'ballotpedia_election_id',
-    'ballotpedia_measure_id': 'ballotpedia_measure_id',
-    'ballotpedia_measure_name': 'name',
-    'ballotpedia_measure_status': 'status',
-    'ballotpedia_measure_summary': 'summary',
-    'ballotpedia_measure_text': 'text',
-    'ballotpedia_measure_url': 'ballotpedia_measure_url',
-    'ballotpedia_yes_vote_description': 'ballotpedia_yes_vote_description',
-    'ballotpedia_no_vote_description': 'ballotpedia_no_vote_description',
+    'contest_measure_we_vote_id': 'contest_measure_we_vote_id',
+    'contest_measure_id': 'contest_measure_id',
+    'contest_measure_name': 'contest_measure_name',
+    'contest_measure_text': 'measure_text',
+    'contest_measure_url': 'measure_url',
     'election_day_text': 'election_day_text',
+    'local_ballot_order': 'local_ballot_order',
+    'no_vote_description': 'no_vote_description',
+    'yes_vote_description': 'yes_vote_description',
+    'polling_location_we_vote_id': 'polling_location_we_vote_id',
     'state_code': 'state_code',
+    'voter_id': 'voter_id',
 }
 
 BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS = {

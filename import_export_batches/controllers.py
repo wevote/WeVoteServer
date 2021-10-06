@@ -3972,22 +3972,26 @@ def import_measure_data_from_batch_row_actions(batch_header_id, batch_row_id,
                 positive_value_exists(google_civic_election_id):
             contest_measure_manager = ContestMeasureManager()
             if create_entry_flag:
-                results = contest_measure_manager.create_measure_row_entry(measure_title, measure_subtitle,
-                                                                           measure_text, state_code, ctcl_uuid,
-                                                                           google_civic_election_id,
-                                                                           defaults)
-                if results['new_measure_created']:
+                results = contest_measure_manager.create_measure_row_entry(
+                    ctcl_uuid=ctcl_uuid,
+                    google_civic_election_id=google_civic_election_id,
+                    measure_subtitle=measure_subtitle,
+                    measure_text=measure_text,
+                    measure_title=measure_title,
+                    state_code=state_code,
+                    defaults=defaults)
+                if results['contest_measure_created']:
                     number_of_measures_created += 1
                     success = True
                     # now update BatchRowActionMeasure table entry
                     try:
                         one_batch_row_action.kind_of_action = IMPORT_ADD_TO_EXISTING
-                        new_measure = results['new_measure']
+                        new_measure = results['contest_measure']
                         one_batch_row_action.measure_we_vote_id = new_measure.we_vote_id
                         one_batch_row_action.save()
                     except Exception as e:
                         success = False
-                        status += "MEASURE_RETRIEVE_ERROR"
+                        status += "MEASURE_RETRIEVE_ERROR:" + str(e) + " "
                         handle_exception(e, logger=logger, exception_message=status)
             elif update_entry_flag:
                 measure_we_vote_id = one_batch_row_action.measure_we_vote_id
@@ -3995,7 +3999,7 @@ def import_measure_data_from_batch_row_actions(batch_header_id, batch_row_id,
                                                                            measure_text, state_code, ctcl_uuid,
                                                                            google_civic_election_id, measure_we_vote_id,
                                                                            defaults)
-                if results['measure_updated']:
+                if results['contest_measure_updated']:
                     number_of_measures_updated += 1
                     success = True
             else:
