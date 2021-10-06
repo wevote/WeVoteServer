@@ -66,10 +66,8 @@ class ContestMeasure(models.Model):
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id",
         max_length=255, default=None, null=True, blank=True, unique=True, db_index=True)
-    maplight_id = models.CharField(verbose_name="maplight unique identifier",
-                                   max_length=255, null=True, blank=True, unique=False)
-    vote_smart_id = models.CharField(verbose_name="votesmart unique identifier",
-                                     max_length=200, null=True, blank=True, unique=False)
+    maplight_id = models.CharField(db_index=True, max_length=255, null=True, blank=True, unique=False)
+    vote_smart_id = models.CharField(db_index=True, max_length=200, null=True, blank=True, unique=False)
     # The title of the measure (e.g. 'Proposition 42').
     measure_title = models.CharField(verbose_name="measure title", max_length=255, null=False, blank=False)
     date_last_updated = models.DateTimeField(null=True, auto_now=True)
@@ -132,8 +130,7 @@ class ContestMeasure(models.Model):
         verbose_name="ballotpedia district id", default=0, null=False, blank=False)
     ballotpedia_election_id = models.PositiveIntegerField(
         verbose_name="ballotpedia election id", default=0, null=False, blank=False)
-    ballotpedia_measure_id = models.PositiveIntegerField(
-        verbose_name="ballotpedia measure id", default=0, null=False, blank=False)
+    ballotpedia_measure_id = models.PositiveIntegerField(db_index=True, default=0, null=False, blank=False)
     ballotpedia_measure_name = models.CharField(
         verbose_name="ballotpedia measure name", max_length=255, null=True, blank=True)
     ballotpedia_measure_status = models.CharField(
@@ -152,8 +149,9 @@ class ContestMeasure(models.Model):
         verbose_name="what a yes vote means", null=True, blank=True, default=None)
     ballotpedia_no_vote_description = models.TextField(
         verbose_name="what a no vote means", null=True, blank=True, default=None)
-    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True)
+    ctcl_uuid = models.CharField(db_index=True, max_length=36, null=True, blank=True)
     position_dates_set = models.BooleanField(default=False)  # Have we finished data update process?
+    vote_usa_measure_id = models.CharField(db_index=True, max_length=255, default=None, null=True)
 
     def get_measure_state(self):
         if positive_value_exists(self.state_code):
@@ -270,32 +268,43 @@ class ContestMeasureManager(models.Manager):
 
     def retrieve_contest_measure_from_id(self, contest_measure_id, read_only=False):
         contest_measure_manager = ContestMeasureManager()
-        return contest_measure_manager.retrieve_contest_measure(contest_measure_id, read_only=read_only)
+        return contest_measure_manager.retrieve_contest_measure(
+            contest_measure_id=contest_measure_id,
+            read_only=read_only)
 
     def retrieve_contest_measure_from_we_vote_id(self, contest_measure_we_vote_id, read_only=False):
         contest_measure_id = 0
         contest_measure_manager = ContestMeasureManager()
-        return contest_measure_manager.retrieve_contest_measure(contest_measure_id, contest_measure_we_vote_id,
-                                                                read_only=read_only)
+        return contest_measure_manager.retrieve_contest_measure(
+            contest_measure_id=contest_measure_id,
+            contest_measure_we_vote_id=contest_measure_we_vote_id,
+            read_only=read_only)
 
     def retrieve_contest_measure_from_maplight_id(self, maplight_id, read_only=False):
         contest_measure_id = 0
         contest_measure_we_vote_id = ''
         contest_measure_manager = ContestMeasureManager()
-        return contest_measure_manager.retrieve_contest_measure(contest_measure_id, contest_measure_we_vote_id,
-                                                                maplight_id, read_only=read_only)
+        return contest_measure_manager.retrieve_contest_measure(
+            contest_measure_id=contest_measure_id,
+            contest_measure_we_vote_id=contest_measure_we_vote_id,
+            maplight_id=maplight_id,
+            read_only=read_only)
 
     def retrieve_contest_measure_from_ballotpedia_measure_id(self, ballotpedia_measure_id, read_only=False):
         contest_measure_manager = ContestMeasureManager()
-        return contest_measure_manager.retrieve_contest_measure(ballotpedia_measure_id=ballotpedia_measure_id,
-                                                                read_only=read_only)
+        return contest_measure_manager.retrieve_contest_measure(
+            ballotpedia_measure_id=ballotpedia_measure_id,
+            read_only=read_only)
 
     def fetch_contest_measure_id_from_maplight_id(self, maplight_id):
         contest_measure_id = 0
         contest_measure_we_vote_id = ''
         contest_measure_manager = ContestMeasureManager()
         results = contest_measure_manager.retrieve_contest_measure(
-            contest_measure_id, contest_measure_we_vote_id, maplight_id, read_only=True)
+            contest_measure_id=contest_measure_id,
+            contest_measure_we_vote_id=contest_measure_we_vote_id,
+            maplight_id=maplight_id,
+            read_only=True)
         if results['success']:
             return results['contest_measure_id']
         return 0
@@ -305,7 +314,10 @@ class ContestMeasureManager(models.Manager):
         maplight_id = ''
         contest_measure_manager = ContestMeasureManager()
         results = contest_measure_manager.retrieve_contest_measure(
-            contest_measure_id, contest_measure_we_vote_id, maplight_id, read_only=True)
+            contest_measure_id=contest_measure_id,
+            contest_measure_we_vote_id=contest_measure_we_vote_id,
+            maplight_id=maplight_id,
+            read_only=True)
         if results['success']:
             return results['contest_measure_we_vote_id']
         return 0
@@ -332,8 +344,16 @@ class ContestMeasureManager(models.Manager):
         return google_civic_election_id
 
     def update_or_create_contest_measure(
-            self, we_vote_id='', google_civic_election_id='', measure_title='',
-            district_id='', district_name='', state_code='', ballotpedia_measure_id='',
+            self,
+            ballotpedia_measure_id='',
+            ctcl_uuid=None,
+            district_id='',
+            district_name='',
+            google_civic_election_id='',
+            measure_title='',
+            state_code='',
+            vote_usa_measure_id=None,
+            we_vote_id='',
             updated_contest_measure_values={}):
         """
         Either update or create an measure entry.
@@ -387,7 +407,7 @@ class ContestMeasureManager(models.Manager):
                 except ContestMeasure.MultipleObjectsReturned as e:
                     handle_record_found_more_than_one_exception(e, logger=logger)
                     success = False
-                    status += 'MULTIPLE_MATCHING_CONTEST_MEASURES_FOUND'
+                    status += 'MULTIPLE_MATCHING_CONTEST_MEASURES_FOUND_BY_WE_VOTE_ID: ' + str(e) + ' '
                     exception_multiple_object_returned = True
                 except Exception as e:
                     status += 'FAILED_TO_UPDATE_OR_CREATE ' \
@@ -405,10 +425,46 @@ class ContestMeasureManager(models.Manager):
                 except ContestMeasure.MultipleObjectsReturned as e:
                     handle_record_found_more_than_one_exception(e, logger=logger)
                     success = False
-                    status += 'MULTIPLE_MATCHING_CONTEST_MEASURES_FOUND ' + str(e) + ' '
+                    status += 'MULTIPLE_MATCHING_CONTEST_MEASURES_FOUND_BY_BALLOTPEDIA_MEASURE_ID: ' + str(e) + ' '
                     exception_multiple_object_returned = True
                 except Exception as e:
-                    status += 'FAILED_TO_UPDATE_OR_CREATE ' \
+                    status += 'FAILED_TO_UPDATE_OR_CREATE: ' \
+                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                    success = False
+            elif positive_value_exists(ctcl_uuid):
+                try:
+                    contest_measure_on_stage, new_measure_created = ContestMeasure.objects.update_or_create(
+                        google_civic_election_id=google_civic_election_id,
+                        ctcl_uuid=ctcl_uuid,
+                        defaults=updated_contest_measure_values)
+                    success = True
+                    status += 'CONTEST_UPDATE_OR_CREATE_SUCCEEDED_BY_CTCL_UUID '
+                    measure_updated = not new_measure_created
+                except ContestMeasure.MultipleObjectsReturned as e:
+                    handle_record_found_more_than_one_exception(e, logger=logger)
+                    success = False
+                    status += 'MULTIPLE_MATCHING_CONTEST_MEASURES_FOUND_BY_VOTE_USA_MEASURE_ID: ' + str(e) + ' '
+                    exception_multiple_object_returned = True
+                except Exception as e:
+                    status += 'FAILED_TO_UPDATE_OR_CREATE: ' \
+                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                    success = False
+            elif positive_value_exists(vote_usa_measure_id):
+                try:
+                    contest_measure_on_stage, new_measure_created = ContestMeasure.objects.update_or_create(
+                        google_civic_election_id=google_civic_election_id,
+                        vote_usa_measure_id=vote_usa_measure_id,
+                        defaults=updated_contest_measure_values)
+                    success = True
+                    status += 'CONTEST_UPDATE_OR_CREATE_SUCCEEDED_BY_VOTE_USA_MEASURE_ID '
+                    measure_updated = not new_measure_created
+                except ContestMeasure.MultipleObjectsReturned as e:
+                    handle_record_found_more_than_one_exception(e, logger=logger)
+                    success = False
+                    status += 'MULTIPLE_MATCHING_CONTEST_MEASURES_FOUND_BY_VOTE_USA_MEASURE_ID: ' + str(e) + ' '
+                    exception_multiple_object_returned = True
+                except Exception as e:
+                    status += 'FAILED_TO_UPDATE_OR_CREATE: ' \
                               '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
                     success = False
             else:
@@ -426,13 +482,13 @@ class ContestMeasureManager(models.Manager):
                     status += 'CONTEST_MEASURE_SAVED '
                 except ContestMeasure.MultipleObjectsReturned as e:
                     success = False
-                    status += 'MULTIPLE_MATCHING_CONTEST_MEASURES_FOUND_BY_GOOGLE_CIVIC_MEASURE_TITLE '
+                    status += 'MULTIPLE_MATCHING_CONTEST_MEASURES_FOUND_BY_GOOGLE_CIVIC_MEASURE_TITLE: ' + str(e) + ' '
                     exception_multiple_object_returned = True
                 except ContestMeasure.DoesNotExist:
                     exception_does_not_exist = True
                     status += "RETRIEVE_MEASURE_NOT_FOUND "
                 except Exception as e:
-                    status += 'FAILED_TO_RETRIEVE_OFFICE_BY_GOOGLE_CIVIC_MEASURE_TITLE ' \
+                    status += 'FAILED_TO_RETRIEVE_OFFICE_BY_GOOGLE_CIVIC_MEASURE_TITLE: ' \
                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
                     success = False
 
@@ -491,11 +547,13 @@ class ContestMeasureManager(models.Manager):
                         measure_updated = False
                         new_measure_created = False
                         contest_measure_on_stage = ContestMeasure.objects.create(
-                            google_civic_election_id=google_civic_election_id,
-                            measure_title=measure_title,
+                            ctcl_uuid=ctcl_uuid,
                             district_id=district_id,
                             district_name=district_name,
+                            google_civic_election_id=google_civic_election_id,
+                            measure_title=measure_title,
                             state_code=district_name,
+                            vote_usa_measure_id=vote_usa_measure_id,
                         )
                         if positive_value_exists(contest_measure_on_stage.id):
                             for key, value in updated_contest_measure_values.items():
@@ -510,7 +568,7 @@ class ContestMeasureManager(models.Manager):
                             success = False
                             status += "CONTEST_MEASURE_NOT_CREATED "
                     except Exception as e:
-                        status += 'FAILED_TO_CREATE_CONTEST_MEASURE ' \
+                        status += 'FAILED_TO_CREATE_CONTEST_MEASURE: ' \
                                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
                         success = False
 
@@ -527,8 +585,15 @@ class ContestMeasureManager(models.Manager):
         return results
 
     # NOTE: searching by all other variables seems to return a list of objects
-    def retrieve_contest_measure(self, contest_measure_id=0, contest_measure_we_vote_id='', maplight_id=None,
-                                 ballotpedia_measure_id=0, read_only=False):
+    def retrieve_contest_measure(
+            self,
+            ballotpedia_measure_id=0,
+            contest_measure_id=0,
+            contest_measure_we_vote_id='',
+            ctcl_uuid=None,
+            maplight_id=None,
+            read_only=False,
+            vote_usa_measure_id=None):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -554,6 +619,23 @@ class ContestMeasureManager(models.Manager):
                 contest_measure_id = contest_measure_on_stage.id
                 contest_measure_we_vote_id = contest_measure_on_stage.we_vote_id
                 status += "RETRIEVE_MEASURE_FOUND_BY_WE_VOTE_ID "
+            elif positive_value_exists(ballotpedia_measure_id):
+                if positive_value_exists(read_only):
+                    contest_measure_on_stage = ContestMeasure.objects.using('readonly').get(
+                        ballotpedia_measure_id=ballotpedia_measure_id)
+                else:
+                    contest_measure_on_stage = ContestMeasure.objects.get(ballotpedia_measure_id=ballotpedia_measure_id)
+                contest_measure_id = contest_measure_on_stage.id
+                contest_measure_we_vote_id = contest_measure_on_stage.we_vote_id
+                status += "RETRIEVE_MEASURE_FOUND_BY_BALLOTPEDIA_MEASURE_ID "
+            elif positive_value_exists(ctcl_uuid):
+                if positive_value_exists(read_only):
+                    contest_measure_on_stage = ContestMeasure.objects.using('readonly').get(ctcl_uuid=ctcl_uuid)
+                else:
+                    contest_measure_on_stage = ContestMeasure.objects.get(ctcl_uuid=ctcl_uuid)
+                contest_measure_id = contest_measure_on_stage.id
+                contest_measure_we_vote_id = contest_measure_on_stage.we_vote_id
+                status += "RETRIEVE_MEASURE_FOUND_BY_CTCL_UUID "
             elif positive_value_exists(maplight_id):
                 if positive_value_exists(read_only):
                     contest_measure_on_stage = ContestMeasure.objects.using('readonly').get(maplight_id=maplight_id)
@@ -562,12 +644,12 @@ class ContestMeasureManager(models.Manager):
                 contest_measure_id = contest_measure_on_stage.id
                 contest_measure_we_vote_id = contest_measure_on_stage.we_vote_id
                 status += "RETRIEVE_MEASURE_FOUND_BY_MAPLIGHT_ID "
-            elif positive_value_exists(ballotpedia_measure_id):
+            elif positive_value_exists(vote_usa_measure_id):
                 if positive_value_exists(read_only):
                     contest_measure_on_stage = ContestMeasure.objects.using('readonly').get(
-                        ballotpedia_measure_id=ballotpedia_measure_id)
+                        vote_usa_measure_id=vote_usa_measure_id)
                 else:
-                    contest_measure_on_stage = ContestMeasure.objects.get(ballotpedia_measure_id=ballotpedia_measure_id)
+                    contest_measure_on_stage = ContestMeasure.objects.get(vote_usa_measure_id=vote_usa_measure_id)
                 contest_measure_id = contest_measure_on_stage.id
                 contest_measure_we_vote_id = contest_measure_on_stage.we_vote_id
                 status += "RETRIEVE_MEASURE_FOUND_BY_BALLOTPEDIA_MEASURE_ID "
@@ -583,7 +665,7 @@ class ContestMeasureManager(models.Manager):
             exception_does_not_exist = True
             status += "RETRIEVE_MEASURE_NOT_FOUND "
         except Exception as e:
-            status += "RETRIEVE_MEASURE_EXCEPTION " + str(e) + " "
+            status += "RETRIEVE_MEASURE_EXCEPTION: " + str(e) + " "
             success = False
 
 
@@ -805,61 +887,63 @@ class ContestMeasureManager(models.Manager):
         results = self.retrieve_measures_are_not_duplicates_list(measure_we_vote_id)
         return results['contest_measures_are_not_duplicates_list_we_vote_ids']
 
-    def create_measure_row_entry(self, measure_title, measure_subtitle, measure_text, state_code, ctcl_uuid,
-                                 google_civic_election_id, defaults):
-        """
-        Create ContestMeasure table entry with Measure details from CTCL data
-        :param measure_title: 
-        :param measure_subtitle: 
-        :param measure_text: 
-        :param state_code: 
-        :param ctcl_uuid: 
-        :param google_civic_election_id: 
-        :param defaults:
-        :return:
-        """
-        success = False
+    def create_measure_row_entry(
+            self,
+            ctcl_uuid=None,
+            google_civic_election_id=None,
+            measure_subtitle=None,
+            measure_text=None,
+            measure_title='',
+            state_code=None,
+            vote_usa_measure_id=None,
+            defaults={}):
         status = ""
-        measure_updated = False
-        new_measure_created = False
-        new_measure = ''
+        contest_measure_updated = False
+        contest_measure_created = False
+        contest_measure = ''
 
         try:
-            new_measure = ContestMeasure.objects.create(
-                measure_title=measure_title, measure_subtitle=measure_subtitle, measure_text=measure_text,
-                state_code=state_code, ctcl_uuid=ctcl_uuid, google_civic_election_id=google_civic_election_id)
-            if new_measure:
+            contest_measure = ContestMeasure.objects.create(
+                ctcl_uuid=ctcl_uuid,
+                google_civic_election_id=google_civic_election_id,
+                measure_subtitle=measure_subtitle,
+                measure_text=measure_text,
+                measure_title=measure_title,
+                state_code=state_code,
+                vote_usa_measure_id=vote_usa_measure_id,
+            )
+            if contest_measure:
                 success = True
                 status += "CREATE_MEASURE_ROW_ENTRY-MEASURE_CREATED "
-                new_measure_created = True
-                if 'election_day_text' in defaults:
-                    new_measure.election_day_text = defaults['election_day_text']
+                contest_measure_created = True
                 if 'ballotpedia_district_id' in defaults:
-                    new_measure.ballotpedia_district_id = defaults['ballotpedia_district_id']
+                    contest_measure.ballotpedia_district_id = defaults['ballotpedia_district_id']
                 if 'ballotpedia_election_id' in defaults:
-                    new_measure.ballotpedia_election_id = defaults['ballotpedia_election_id']
+                    contest_measure.ballotpedia_election_id = defaults['ballotpedia_election_id']
                 if 'ballotpedia_measure_id' in defaults:
-                    new_measure.ballotpedia_measure_id = defaults['ballotpedia_measure_id']
+                    contest_measure.ballotpedia_measure_id = defaults['ballotpedia_measure_id']
                 if 'ballotpedia_measure_name' in defaults:
-                    new_measure.ballotpedia_measure_name = defaults['ballotpedia_measure_name']
+                    contest_measure.ballotpedia_measure_name = defaults['ballotpedia_measure_name']
                 if 'ballotpedia_measure_status' in defaults:
-                    new_measure.ballotpedia_measure_status = defaults['ballotpedia_measure_status']
+                    contest_measure.ballotpedia_measure_status = defaults['ballotpedia_measure_status']
                 if 'ballotpedia_measure_summary' in defaults:
-                    new_measure.ballotpedia_measure_summary = defaults['ballotpedia_measure_summary']
+                    contest_measure.ballotpedia_measure_summary = defaults['ballotpedia_measure_summary']
                 if 'ballotpedia_measure_text' in defaults:
-                    new_measure.ballotpedia_measure_text = defaults['ballotpedia_measure_text']
+                    contest_measure.ballotpedia_measure_text = defaults['ballotpedia_measure_text']
                 if 'ballotpedia_measure_url' in defaults:
-                    new_measure.ballotpedia_measure_url = defaults['ballotpedia_measure_url']
+                    contest_measure.ballotpedia_measure_url = defaults['ballotpedia_measure_url']
                 if 'ballotpedia_yes_vote_description' in defaults:
-                    new_measure.ballotpedia_yes_vote_description = defaults['ballotpedia_yes_vote_description']
+                    contest_measure.ballotpedia_yes_vote_description = defaults['ballotpedia_yes_vote_description']
                 if 'ballotpedia_no_vote_description' in defaults:
-                    new_measure.ballotpedia_no_vote_description = defaults['ballotpedia_no_vote_description']
+                    contest_measure.ballotpedia_no_vote_description = defaults['ballotpedia_no_vote_description']
+                if 'election_day_text' in defaults:
+                    contest_measure.election_day_text = defaults['election_day_text']
                 if 'measure_url' in defaults:
-                    new_measure.measure_url = defaults['measure_url']
+                    contest_measure.measure_url = defaults['measure_url']
                 if 'state_code' in defaults:
-                    new_measure.state_code = defaults['state_code']
-                if positive_value_exists(new_measure.we_vote_id):
-                    new_measure.save()
+                    contest_measure.state_code = defaults['state_code']
+                if positive_value_exists(contest_measure.we_vote_id):
+                    contest_measure.save()
                 else:
                     status += "COULD_NOT_SAVE-NO_WE_VOTE_ID "
             else:
@@ -867,16 +951,17 @@ class ContestMeasureManager(models.Manager):
                 status += "CREATE_MEASURE_ROW_ENTRY-MEASURE_CREATE_FAILED "
         except Exception as e:
             success = False
-            new_measure_created = False
-            status += "CREATE_MEASURE_ROW_ENTRY-MEASURE_CREATE_ERROR "
+            contest_measure_created = False
+            status += "CREATE_MEASURE_ROW_ENTRY-MEASURE_CREATE_ERROR: " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
 
         results = {
-                'success':               success,
-                'status':                status,
-                'new_measure_created':   new_measure_created,
-                'measure_updated':       measure_updated,
-                'new_measure':           new_measure,
+                'success':                  success,
+                'status':                   status,
+                'contest_measure_created':  contest_measure_created,
+                'contest_measure_found':    contest_measure_created or contest_measure_updated,
+                'contest_measure_updated':  contest_measure_updated,
+                'contest_measure':          contest_measure,
             }
         return results
 
@@ -1173,8 +1258,12 @@ class ContestMeasureListManager(models.Manager):
         return results
 
     def retrieve_contest_measures_from_non_unique_identifiers(
-            self, google_civic_election_id_list, incoming_state_code, contest_measure_title,
-            district_id='', district_name='',
+            self,
+            google_civic_election_id_list=[],
+            incoming_state_code='',
+            contest_measure_title='',
+            district_id='',
+            district_name='',
             ignore_measure_we_vote_id_list=[],
             read_only=False):
         keep_looking_for_duplicates = True

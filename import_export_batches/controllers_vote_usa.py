@@ -63,7 +63,6 @@ def store_vote_usa_json_response_to_import_batch_system(
         if state_code != "":
             filename += " for " + state_code.upper()
         organization_we_vote_id = ""
-        # BATCH_HEADER_MAP_BALLOT_ITEMS_TO_BALLOTPEDIA_VOTER_DISTRICTS was used, but didn't make sense
         results = create_batch_from_json_wrapper(
             filename, modified_json_list,
             BATCH_HEADER_MAP_BALLOT_ITEMS_TO_VOTE_USA_BALLOT_ITEMS, kind_of_batch,

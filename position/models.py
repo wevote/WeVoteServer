@@ -8786,7 +8786,8 @@ class PositionManager(models.Manager):
                         contest_measure_found = True
                     else:
                         results = contest_measure_manager.retrieve_contest_measure(
-                            position_object.contest_measure_id, position_object.contest_measure_we_vote_id)
+                            contest_measure_id=position_object.contest_measure_id,
+                            contest_measure_we_vote_id=position_object.contest_measure_we_vote_id)
                         if results['contest_measure_found']:
                             contest_measure = results['contest_measure']
                             contest_measure_found = True

@@ -2771,7 +2771,7 @@ class BallotReturnedManager(models.Manager):
                         status += 'BALLOT_RETURNED_UPDATED '
 
                 except Exception as e:
-                    status += 'UNABLE_TO_SAVE_BALLOT_RETURNED ' + str(e) + " "
+                    status += 'UNABLE_TO_SAVE_BALLOT_RETURNED: ' + str(e) + " "
                     handle_exception(e, logger=logger, exception_message=status)
                     success = False
 

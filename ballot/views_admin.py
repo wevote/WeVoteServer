@@ -742,7 +742,7 @@ def ballot_item_list_edit_process_view(request):
 
         # Contest Measure 1
         contest_measure_manager = ContestMeasureManager()
-        results = contest_measure_manager.retrieve_contest_measure(contest_measure1_id)
+        results = contest_measure_manager.retrieve_contest_measure(contest_measure_id=contest_measure1_id)
         if results['contest_measure_found']:
             contest_measure = results['contest_measure']
 

@@ -88,13 +88,10 @@ class ContestOffice(models.Model):
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=False, blank=False)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
-    maplight_id = models.CharField(
-        verbose_name="maplight unique identifier", max_length=255, null=True, blank=True, unique=True)
-    vote_usa_office_id = models.CharField(
-        verbose_name="Vote USA permanent id for this candidate", max_length=64, default=None, null=True, blank=True)
+    maplight_id = models.CharField(db_index=True, max_length=255, null=True, blank=True, unique=True)
+    vote_usa_office_id = models.CharField(db_index=True, max_length=255, default=None, null=True, blank=True)
     # 2018-02-16 It is unclear if we want to keep this field
-    ballotpedia_id = models.CharField(
-        verbose_name="ballotpedia unique identifier", max_length=255, null=True, blank=True)
+    ballotpedia_id = models.CharField(db_index=True, max_length=255, null=True, blank=True)
     ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True, blank=True)
     ballotpedia_is_marquee = models.BooleanField(default=None, null=True)
     is_battleground_race = models.BooleanField(default=None, null=True)
@@ -107,7 +104,7 @@ class ContestOffice(models.Model):
     is_ballotpedia_primary_runoff_election = models.BooleanField(default=False)
 
     # Equivalent to elected_office
-    ballotpedia_office_id = models.PositiveIntegerField(verbose_name="ballotpedia integer id", null=True, blank=True)
+    ballotpedia_office_id = models.PositiveIntegerField(db_index=True, null=True, blank=True)
     # The office's name as passed over by Ballotpedia. This helps us do exact matches when id is missing
     ballotpedia_office_name = models.CharField(verbose_name="office name exactly as received from ballotpedia",
                                                max_length=255, null=True, blank=True)
@@ -117,7 +114,7 @@ class ContestOffice(models.Model):
         verbose_name='url of race on ballotpedia', max_length=255, blank=True, null=True)
     ballotpedia_district_id = models.PositiveIntegerField(verbose_name="ballotpedia district id", null=True, blank=True)
     # Equivalent to contest_office
-    ballotpedia_race_id = models.PositiveIntegerField(verbose_name="ballotpedia integer id", null=True, blank=True)
+    ballotpedia_race_id = models.PositiveIntegerField(db_index=True, null=True, blank=True)
     # Federal, State, Local,
     ballotpedia_race_office_level = models.CharField(verbose_name="race office level", max_length=255, null=True,
                                                      blank=True)
@@ -161,7 +158,7 @@ class ContestOffice(models.Model):
                                                  max_length=255, null=True, blank=True)
     # "Yes" or "No" depending on whether this a contest being held outside the normal election cycle.
     special = models.CharField(verbose_name="google civic primary party", max_length=255, null=True, blank=True)
-    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True)
+    ctcl_uuid = models.CharField(db_index=True, max_length=36, null=True, blank=True)
     elected_office_name = models.CharField(verbose_name="name of the elected office", max_length=255, null=True,
                                            blank=True, default=None)
 
