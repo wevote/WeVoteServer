@@ -71,43 +71,6 @@
     {% endfor %}
     </select>
 
-    &nbsp;&nbsp;&nbsp;&nbsp;
-{#    {% if election_years_available %}#}
-{#    <select id="limit_to_opinions_in_this_year_id" name="limit_to_opinions_in_this_year">#}
-{#        <option value="0" {% if 0 == limit_to_opinions_in_this_year|convert_to_int %} selected="selected"{% endif %}>#}
-{#        {% if 0 == limit_to_opinions_in_this_year %}#}
-{#            -- Opinions in This Year --#}
-{#        {% else %}#}
-{#            -- Do Not Limit by Year --#}
-{#        {% endif %}#}
-{#        </option>#}
-{#        {% for year in election_years_available %}#}
-{#        <option value="{{ year }}"#}
-{#                {% if limit_to_opinions_in_this_year|slugify == year|slugify %} selected="selected"{% endif %}>#}
-{#            {% if limit_to_opinions_in_this_year|slugify == year|slugify %}Limited To {% endif %}#}
-{#            {{ year }}</option>#}
-{#        {% endfor %}#}
-{#    </select>#}
-{#    {% endif %}{# End of if election_list #}
-
-{#    {% if state_list %}#}
-{#    <select id="limit_to_opinions_in_state_code_id" name="limit_to_opinions_in_state_code">#}
-{#        <option value="" {% if '' == limit_to_opinions_in_state_code %} selected="selected"{% endif %}>#}
-{#        {% if '' == limit_to_opinions_in_state_code %}#}
-{#            -- Opinions in This State --#}
-{#        {% else %}#}
-{#            -- Do Not Limit by State --#}
-{#        {% endif %}#}
-{#        </option>#}
-{#    {% for key, state in state_list %}#}
-{#        <option value="{{ key }}"#}
-{#                {% if key|lower == limit_to_opinions_in_state_code|lower %} selected="selected"{% endif %}>#}
-{#            {% if key|lower == limit_to_opinions_in_state_code|lower %}Limited to Opinions About Candidates in {% endif %}#}
-{#            {{ state }}</option>#}
-{#    {% endfor %}#}
-{#    </select>#}
-{#    {% endif %}{# End of if state_list #}
-
     <br />
 
 {% if campaignx_search %}
@@ -117,8 +80,14 @@
     <input type="text" name="campaignx_search" id="campaignx_search_id" value="{{ campaignx_search }}" />
     <input type="submit" value="Search for Campaign" />
 
-</form>
+
+
 {% if campaignx_list %}
+    <div class="form-group pull-right">
+        <div class="col-xs-1">
+            <input type="submit" name="save_changes" value="Save Changes" />
+        </div>
+    </div>
     <table class="table">
     {% for campaignx in campaignx_list %}
     {% if forloop.counter == 1 or forloop.counter|divisibleby:16 %}
@@ -133,6 +102,9 @@
               </a>
             </th>
             <th>Owner(s)</th>
+        {% if campaignx_owner_organization_we_vote_id %}
+            <th>Order</th>
+        {% endif %}
             <th>
               {% if sort_by == "supporters_count" %}
                   <a href="{% url 'campaign:campaignx_list' %}?state_code={{ state_code }}&campaignx_type_filter={{ campaignx_type_filter }}&campaignx_search={{ campaignx_search }}&show_campaignxs_without_email={{ show_campaignxs_without_email }}&show_campaignxs_to_be_analyzed={{ show_campaignxs_to_be_analyzed }}" class="u-no-break">
@@ -195,6 +167,22 @@
             {% endfor %}
                 </a>
             </td>
+        {% if campaignx_owner_organization_we_vote_id %}
+            <td>
+            {% for campaignx_owner in campaignx.campaignx_owner_list %}
+                {% if campaignx_owner.organization_we_vote_id == campaignx_owner_organization_we_vote_id %}
+                    <input type="hidden" name="{{ campaignx.we_vote_id }}_order_changed" id="{{ campaignx.we_vote_id }}_order_changed_id" value="0">
+                    <input type="text" name="{{ campaignx.we_vote_id }}_order_in_list"
+                           maxlength="100"
+                           onChange="if (document.getElementById(`{{ campaignx.we_vote_id }}_order_changed_id`)) { document.getElementById(`{{ campaignx.we_vote_id }}_order_changed_id`).value = 1; }"
+                           size="3"
+                           value="{{ campaignx_owner.order_in_list|default_if_none:"" }}" /><br />
+                {% else %}
+                    <br />
+                {% endif %}
+            {% endfor %}
+            </td>
+        {% endif %}
             <td style="text-align: right">{% if campaignx.supporters_count %}
                 <a href="{% url 'campaign:supporters_list' campaignx.we_vote_id %}?campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}" target="_blank">
                     {{ campaignx.supporters_count|intcomma }} <span class="glyphicon glyphicon-new-window" style="font-size: .95rem"></span>
@@ -248,9 +236,12 @@
     {% endif %}
 
     <p></p>
+
 {% else %}
     <p>(no campaigns found with current filters)</p>
 {% endif %}
+
+</form>
 
     <p></p>
 

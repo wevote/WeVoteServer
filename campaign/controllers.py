@@ -141,7 +141,7 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
 
             campaignx_owner_list = []
             campaignx_owner_object_list = campaignx_manager.retrieve_campaignx_owner_list(
-                campaignx_we_vote_id=campaignx.we_vote_id, viewer_is_owner=viewer_is_owner)
+                campaignx_we_vote_id_list=[campaignx.we_vote_id], viewer_is_owner=viewer_is_owner)
             for campaignx_owner in campaignx_owner_object_list:
                 campaign_owner_dict = {
                     'feature_this_profile_image':               campaignx_owner.feature_this_profile_image,
@@ -241,6 +241,11 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
             supporters_count_next_goal = campaignx_manager.fetch_supporters_count_next_goal(
                 supporters_count=campaignx.supporters_count,
                 supporters_count_victory_goal=campaignx.supporters_count_victory_goal)
+            order_in_list = 0
+            try:
+                order_in_list = campaignx.order_in_list
+            except Exception as e:
+                pass
             one_campaignx = {
                 'campaign_description':                     campaignx.campaign_description,
                 'campaignx_owner_list':                     campaignx_owner_list,
@@ -256,6 +261,7 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
                 'is_blocked_by_we_vote_reason':             campaignx.is_blocked_by_we_vote_reason,
                 'is_in_team_review_mode':                   campaignx.is_in_team_review_mode,
                 'is_supporters_count_minimum_exceeded':     campaignx.is_supporters_count_minimum_exceeded(),
+                'order_in_list':                            order_in_list,
                 'seo_friendly_path':                        campaignx.seo_friendly_path,
                 'seo_friendly_path_list':                   seo_friendly_path_list,
                 'supporters_count':                         campaignx.supporters_count,

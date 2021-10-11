@@ -1553,21 +1553,36 @@ def batch_process_list_view(request):
     status = ""
     success = True
 
-    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-    include_frequent_processes = request.GET.get('include_frequent_processes', False)
-    kind_of_processes_to_show = request.GET.get('kind_of_processes_to_show', '')
-    state_code = request.GET.get('state_code', '')
-    show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
-    show_active_processes_only = request.GET.get('show_active_processes_only', False)
-    show_paused_processes_only = request.GET.get('show_paused_processes_only', False)
-    show_checked_out_processes_only = request.GET.get('show_checked_out_processes_only', False)
-    batch_process_id = convert_to_int(request.GET.get('batch_process_id', 0))
-    batch_process_search = request.GET.get('batch_process_search', '')
+    select_for_changing_batch_process_ids = []
+    which_marking = None
+    if request.method == 'POST':
+        batch_process_id = convert_to_int(request.POST.get('batch_process_id', 0))
+        batch_process_search = request.POST.get('batch_process_search', '')
+        google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
+        include_frequent_processes = request.POST.get('include_frequent_processes', False)
+        kind_of_processes_to_show = request.POST.get('kind_of_processes_to_show', '')
+        show_all_elections = positive_value_exists(request.POST.get('show_all_elections', False))
+        show_active_processes_only = request.POST.get('show_active_processes_only', False)
+        show_paused_processes_only = request.POST.get('show_paused_processes_only', False)
+        show_checked_out_processes_only = request.POST.get('show_checked_out_processes_only', False)
+        state_code = request.POST.get('state_code', '')
+
+        select_for_changing_batch_process_ids = request.POST.getlist('select_for_marking_checks[]')
+        which_marking = request.POST.get("which_marking", None)  # What to do with check marks
+    else:
+        batch_process_id = convert_to_int(request.GET.get('batch_process_id', 0))
+        batch_process_search = request.GET.get('batch_process_search', '')
+        google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+        include_frequent_processes = request.GET.get('include_frequent_processes', False)
+        kind_of_processes_to_show = request.GET.get('kind_of_processes_to_show', '')
+        show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
+        show_active_processes_only = request.GET.get('show_active_processes_only', False)
+        show_paused_processes_only = request.GET.get('show_paused_processes_only', False)
+        show_checked_out_processes_only = request.GET.get('show_checked_out_processes_only', False)
+        state_code = request.GET.get('state_code', '')
 
     batch_process_list = []
 
-    select_for_changing_batch_process_ids = request.POST.getlist('select_for_marking_checks[]')
-    which_marking = request.POST.get("which_marking", None)  # What to do with check marks
 
     # Make sure 'which_marking' is one of the allowed Filter fields
     if which_marking and which_marking not in ["pause_process", "unpause_process", None]:
@@ -1579,12 +1594,6 @@ def batch_process_list_view(request):
     error_count = 0
     items_processed_successfully = 0
     if which_marking and select_for_changing_batch_process_ids:
-        # Get these values from hidden POST fields
-        batch_process_search = request.POST.get('batch_process_search', '')
-        google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
-        show_all_elections = positive_value_exists(request.POST.get('show_all_elections', False))
-        state_code = request.POST.get('state_code', '')  # Already retrieved with GET, now retrieving with POST
-
         for one_batch_process_id in select_for_changing_batch_process_ids:
             try:
                 one_batch_process = BatchProcess.objects.get(id=one_batch_process_id)
