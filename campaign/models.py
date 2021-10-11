@@ -652,7 +652,7 @@ class CampaignXManager(models.Manager):
 
         if positive_value_exists(campaignx_found):
             campaignx_owner_object_list = campaignx_manager.retrieve_campaignx_owner_list(
-                campaignx_we_vote_id=campaignx_we_vote_id, viewer_is_owner=viewer_is_owner)
+                campaignx_we_vote_id_list=[campaignx_we_vote_id], viewer_is_owner=viewer_is_owner)
 
             for campaignx_owner in campaignx_owner_object_list:
                 campaignx_owner_organization_name = '' if campaignx_owner.organization_name is None \
@@ -763,7 +763,7 @@ class CampaignXManager(models.Manager):
                     campaignx_we_vote_id=campaignx_we_vote_id, voter_we_vote_id=voter_we_vote_id)
 
             campaignx_owner_object_list = campaignx_manager.retrieve_campaignx_owner_list(
-                campaignx_we_vote_id=campaignx_we_vote_id, viewer_is_owner=False)
+                campaignx_we_vote_id_list=[campaignx_we_vote_id], viewer_is_owner=False)
             for campaignx_owner in campaignx_owner_object_list:
                 campaign_owner_dict = {
                     'organization_name':                        campaignx_owner.organization_name,
@@ -834,6 +834,18 @@ class CampaignXManager(models.Manager):
         for one_link in campaignx_listed_by_organization_list:
             simple_list.append(one_link.campaignx_we_vote_id)
         simple_list = list(set(simple_list))
+        return simple_list
+
+    def retrieve_campaignx_we_vote_ids_in_order(self, site_owner_organization_we_vote_id=''):
+        simple_list = []
+        campaignx_owned_by_organization_list = \
+            self.retrieve_campaignx_owner_list(
+                organization_we_vote_id=site_owner_organization_we_vote_id,
+                has_order_in_list=True,
+                read_only=True)
+        for one_owner in campaignx_owned_by_organization_list:
+            simple_list.append(one_owner.campaignx_we_vote_id)
+
         return simple_list
 
     def retrieve_visible_on_this_site_campaignx_simple_list(
@@ -955,6 +967,7 @@ class CampaignXManager(models.Manager):
         status = ""
         visible_on_this_site_campaignx_we_vote_id_list = []
         campaignx_list_modified = []
+        campaignx_we_vote_ids_in_order = []
         voter_started_campaignx_we_vote_ids = []
         voter_supported_campaignx_we_vote_ids = []
 
@@ -967,6 +980,13 @@ class CampaignXManager(models.Manager):
             except Exception as e:
                 success = False
                 status += "RETRIEVE_CAMPAIGNX_LIST_FOR_PRIVATE_LABEL_FAILED: " + str(e) + " "
+
+            try:
+                campaignx_we_vote_ids_in_order = campaignx_manager.retrieve_campaignx_we_vote_ids_in_order(
+                    site_owner_organization_we_vote_id=site_owner_organization_we_vote_id)
+            except Exception as e:
+                success = False
+                status += "RETRIEVE_CAMPAIGNX_IN_ORDER_LIST_FOR_PRIVATE_LABEL_FAILED: " + str(e) + " "
 
         try:
             if read_only:
@@ -1023,7 +1043,27 @@ class CampaignXManager(models.Manager):
                 else:
                     one_campaignx.visible_on_this_site = False
                 campaignx_list_modified.append(one_campaignx)
+            campaignx_list = campaignx_list_modified
             status += "RETRIEVE_CAMPAIGNX_LIST_FOR_PRIVATE_LABEL_SUCCEEDED "
+
+            # Reorder the campaigns
+            if len(campaignx_we_vote_ids_in_order) > 0:
+                campaignx_list_modified = []
+                campaignx_we_vote_id_already_placed = []
+                order_in_list = 0
+                for campaignx_we_vote_id in campaignx_we_vote_ids_in_order:
+                    for campaignx in campaignx_list:
+                        if campaignx_we_vote_id == campaignx.we_vote_id:
+                            order_in_list += 1
+                            campaignx.order_in_list = order_in_list
+                            campaignx_list_modified.append(campaignx)
+                            campaignx_we_vote_id_already_placed.append(campaignx.we_vote_id)
+                # Now add the rest
+                for campaignx in campaignx_list:
+                    if campaignx.we_vote_id not in campaignx_we_vote_id_already_placed:
+                        campaignx_list_modified.append(campaignx)
+                        campaignx_we_vote_id_already_placed.append(campaignx.we_vote_id)
+                campaignx_list = campaignx_list_modified
         except Exception as e:
             success = False
             status += "RETRIEVE_CAMPAIGNX_LIST_FOR_PRIVATE_LABEL_FAILED: " + str(e) + " "
@@ -1034,7 +1074,7 @@ class CampaignXManager(models.Manager):
             'status':                                   status,
             'visible_on_this_site_campaignx_we_vote_id_list': visible_on_this_site_campaignx_we_vote_id_list,
             'campaignx_list_found':                     campaignx_list_found,
-            'campaignx_list':                           campaignx_list_modified,
+            'campaignx_list':                           campaignx_list,
             'voter_started_campaignx_we_vote_ids':      voter_started_campaignx_we_vote_ids,
             'voter_supported_campaignx_we_vote_ids':    voter_supported_campaignx_we_vote_ids,
         }
@@ -1248,7 +1288,8 @@ class CampaignXManager(models.Manager):
 
     def retrieve_campaignx_owner_list(
             self,
-            campaignx_we_vote_id='',
+            campaignx_we_vote_id_list=[],
+            has_order_in_list=False,
             organization_we_vote_id='',
             voter_we_vote_id='',
             viewer_is_owner=False,
@@ -1263,8 +1304,11 @@ class CampaignXManager(models.Manager):
             # if not positive_value_exists(viewer_is_owner):
             #     # If not already an owner, limit to owners who are visible to public
             #     campaignx_owner_query = campaignx_owner_query.filter(visible_to_public=True)
-            if positive_value_exists(campaignx_we_vote_id):
-                campaignx_owner_query = campaignx_owner_query.filter(campaignx_we_vote_id=campaignx_we_vote_id)
+            if positive_value_exists(len(campaignx_we_vote_id_list) > 0):
+                campaignx_owner_query = campaignx_owner_query.filter(campaignx_we_vote_id__in=campaignx_we_vote_id_list)
+            if positive_value_exists(has_order_in_list):
+                campaignx_owner_query = campaignx_owner_query.filter(order_in_list__gte=1)
+                campaignx_owner_query = campaignx_owner_query.order_by('order_in_list')
             if positive_value_exists(organization_we_vote_id):
                 campaignx_owner_query = campaignx_owner_query.filter(organization_we_vote_id=organization_we_vote_id)
             if positive_value_exists(voter_we_vote_id):
@@ -2780,14 +2824,15 @@ class CampaignXOwner(models.Model):
         return "CampaignXOwner"
 
     campaignx_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
-    voter_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
-    organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
-    organization_name = models.CharField(max_length=255, null=False, blank=False)
+    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True, db_index=True)
     feature_this_profile_image = models.BooleanField(default=True)
+    order_in_list = models.PositiveIntegerField(null=True, unique=False)
+    organization_name = models.CharField(max_length=255, null=False, blank=False)
+    organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
     visible_to_public = models.BooleanField(default=False)
+    voter_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False, db_index=True)
     we_vote_hosted_profile_image_url_medium = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
-    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True, db_index=True)
 
 
 class CampaignXPolitician(models.Model):

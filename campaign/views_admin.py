@@ -133,7 +133,7 @@ def campaign_edit_owners_process_view(request):
     # Deleting or editing a CampaignXOwner
     campaignx_manager = CampaignXManager()
     campaignx_owner_list = campaignx_manager.retrieve_campaignx_owner_list(
-        campaignx_we_vote_id=campaignx_we_vote_id,
+        campaignx_we_vote_id_list=[campaignx_we_vote_id],
         viewer_is_owner=True
     )
     for campaignx_owner in campaignx_owner_list:
@@ -225,7 +225,7 @@ def campaign_edit_owners_view(request, campaignx_id=0, campaignx_we_vote_id=""):
 
     campaignx_owner_list_modified = []
     campaignx_owner_list = campaignx_manager.retrieve_campaignx_owner_list(
-        campaignx_we_vote_id=campaignx_we_vote_id,
+        campaignx_we_vote_id_list=[campaignx_we_vote_id],
         viewer_is_owner=True
     )
 
@@ -443,8 +443,7 @@ def campaign_edit_process_view(request):
                 # Take a campaign out of draft mode. Do not support taking it back to draft mode.
                 campaignx.in_draft_mode = False
             campaignx.is_blocked_by_we_vote = positive_value_exists(is_blocked_by_we_vote)
-            if final_election_date_as_integer is not None:
-                campaignx.final_election_date_as_integer = final_election_date_as_integer
+            campaignx.final_election_date_as_integer = final_election_date_as_integer
             if is_blocked_by_we_vote_reason is not None:
                 campaignx.is_blocked_by_we_vote_reason = is_blocked_by_we_vote_reason.strip()
             campaignx.is_in_team_review_mode = positive_value_exists(is_in_team_review_mode)
@@ -538,6 +537,8 @@ def campaign_list_view(request):
         positive_value_exists(request.GET.get('hide_campaigns_not_visible_yet', False))
     include_campaigns_from_prior_elections = \
         positive_value_exists(request.GET.get('include_campaigns_from_prior_elections', False))
+    save_changes = request.GET.get('save_changes', False)
+    save_changes = positive_value_exists(save_changes)
     sort_by = request.GET.get('sort_by', '')
     state_code = request.GET.get('state_code', '')
     show_all = request.GET.get('show_all', False)
@@ -552,9 +553,60 @@ def campaign_list_view(request):
     election_years_available = [2022, 2021, 2020, 2019, 2018, 2017, 2016]
 
     messages_on_stage = get_messages(request)
-    campaignx_list_query = CampaignX.objects.all()
     campaignx_manager = CampaignXManager()
 
+    campaignx_we_vote_ids_in_order = []
+    if campaignx_owner_organization_we_vote_id:
+        # Find existing order
+        campaignx_owner_list_with_order = campaignx_manager.retrieve_campaignx_owner_list(
+            organization_we_vote_id=campaignx_owner_organization_we_vote_id,
+            has_order_in_list=True,
+            read_only=False)
+        for campaignx_owner in campaignx_owner_list_with_order:
+            campaignx_we_vote_ids_in_order.append(campaignx_owner.campaignx_we_vote_id)
+
+        if save_changes:
+            campaignx_we_vote_id_list_from_owner_organization_we_vote_id = \
+                campaignx_manager.fetch_campaignx_we_vote_id_list_from_owner_organization_we_vote_id(
+                    campaignx_owner_organization_we_vote_id)
+            for one_campaignx_we_vote_id in campaignx_we_vote_id_list_from_owner_organization_we_vote_id:
+                one_campaign_order_changed_name = str(one_campaignx_we_vote_id) + '_order_changed'
+                order_changed = positive_value_exists(request.GET.get(one_campaign_order_changed_name, 0))
+                if positive_value_exists(order_changed):
+                    # Remove existing
+                    try:
+                        campaignx_we_vote_ids_in_order.remove(one_campaignx_we_vote_id)
+                    except Exception as e:
+                        pass
+                    # Find out the new placement for this item
+                    one_campaign_order_in_list_name = str(one_campaignx_we_vote_id) + '_order_in_list'
+                    order_in_list = request.GET.get(one_campaign_order_in_list_name, '')
+                    if positive_value_exists(order_in_list):
+                        order_in_list = convert_to_int(order_in_list)
+                        index_from_order = order_in_list - 1
+                        campaignx_we_vote_ids_in_order.insert(index_from_order, one_campaignx_we_vote_id)
+                    else:
+                        # Reset existing value
+                        for campaignx_owner in campaignx_owner_list_with_order:
+                            if campaignx_owner.campaignx_we_vote_id == one_campaignx_we_vote_id:
+                                campaignx_owner.order_in_list = None
+                                campaignx_owner.save()
+
+        if len(campaignx_we_vote_ids_in_order) > 0:
+            # Re-save the order of all of the campaigns
+            campaignx_owner_list = campaignx_manager.retrieve_campaignx_owner_list(
+                campaignx_we_vote_id_list=campaignx_we_vote_ids_in_order,
+                organization_we_vote_id=campaignx_owner_organization_we_vote_id,
+                read_only=False)
+            new_order = 0
+            for campaignx_we_vote_id in campaignx_we_vote_ids_in_order:
+                for campaignx_owner in campaignx_owner_list:
+                    if campaignx_we_vote_id == campaignx_owner.campaignx_we_vote_id:
+                        new_order += 1
+                        campaignx_owner.order_in_list = new_order
+                        campaignx_owner.save()
+
+    campaignx_list_query = CampaignX.objects.all()
     if positive_value_exists(hide_campaigns_not_visible_yet):
         campaignx_list_query = campaignx_list_query.filter(
             Q(supporters_count__gte=SUPPORTERS_COUNT_MINIMUM_FOR_LISTING) |
@@ -636,11 +688,26 @@ def campaign_list_view(request):
     else:
         campaignx_list = campaignx_list_query[:50]
 
+    if len(campaignx_we_vote_ids_in_order) > 0:
+        modified_campaignx_list = []
+        campaignx_we_vote_id_already_placed = []
+        for campaignx_we_vote_id in campaignx_we_vote_ids_in_order:
+            for campaignx in campaignx_list:
+                if campaignx_we_vote_id == campaignx.we_vote_id:
+                    modified_campaignx_list.append(campaignx)
+                    campaignx_we_vote_id_already_placed.append(campaignx.we_vote_id)
+        # Now add the rest
+        for campaignx in campaignx_list:
+            if campaignx.we_vote_id not in campaignx_we_vote_id_already_placed:
+                modified_campaignx_list.append(campaignx)
+                campaignx_we_vote_id_already_placed.append(campaignx.we_vote_id)
+        campaignx_list = modified_campaignx_list
+
     # Now loop through these organizations and add owners
     modified_campaignx_list = []
     for campaignx in campaignx_list:
         campaignx.campaignx_owner_list = campaignx_manager.retrieve_campaignx_owner_list(
-            campaignx_we_vote_id=campaignx.we_vote_id,
+            campaignx_we_vote_id_list=[campaignx.we_vote_id],
             viewer_is_owner=True)
         campaignx.chip_in_total = StripeManager.retrieve_chip_in_total('', campaignx.we_vote_id)
         modified_campaignx_list.append(campaignx)
@@ -699,7 +766,7 @@ def campaign_summary_view(request, campaignx_we_vote_id=""):
 
     campaignx_owner_list_modified = []
     campaignx_owner_list = campaignx_manager.retrieve_campaignx_owner_list(
-        campaignx_we_vote_id=campaignx_we_vote_id,
+        campaignx_we_vote_id_list=[campaignx_we_vote_id],
         viewer_is_owner=True
     )
 

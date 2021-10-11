@@ -93,7 +93,7 @@
         {% endfor %}
         </select>
         {% if state_code != "" %}
-        <a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ google_civic_election_id }}&candidate_search={{ candidate_search }}{% if show_all_elections %}&show_all_elections=1{% endif %}">
+        <a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ google_civic_election_id }}&candidate_search={{ candidate_search }}{% if show_all_elections %}&show_all_elections=1{% endif %}{% if show_checked_out_processes_only %}&show_checked_out_processes_only=1{% endif %}{% if show_active_processes_only %}&show_active_processes_only=1{% endif %}{% if show_paused_processes_only %}&show_paused_processes_only=1{% endif %}">
             show all states</a>
         {% endif %}
     {# End of if state_list #}
@@ -236,12 +236,12 @@
     {# Pass along the url_variables this page is using, so we can return to the same page state #}
     <input type="hidden" name="batch_process_search" value="{{ batch_process_search }}">
     <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
-    <input type="hidden" name="include_frequent_processes" value="{{ include_frequent_processes }}">
+    {% if include_frequent_processes %}<input type="hidden" name="include_frequent_processes" value="1">{% endif %}
     <input type="hidden" name="kind_of_processes_to_show" value="{{ kind_of_processes_to_show }}">
-    <input type="hidden" name="show_active_processes_only" value="{{ show_active_processes_only }}">
+    {% if show_active_processes_only %}<input type="hidden" name="show_active_processes_only" value="1">{% endif %}
     <input type="hidden" name="show_all_elections" value="{{ show_all_elections }}">
-    <input type="hidden" name="show_checked_out_processes_only" value="{{ show_checked_out_processes_only }}">
-    <input type="hidden" name="show_paused_processes_only" value="{{ show_paused_processes_only }}">
+    {% if show_checked_out_processes_only %}<input type="hidden" name="show_checked_out_processes_only" value="1">{% endif %}
+    {% if show_paused_processes_only %}<input type="hidden" name="show_paused_processes_only" value="1">{% endif %}
     <input type="hidden" name="state_code" value="{{ state_code }}">
 
     <div class="form-group pull-right">
