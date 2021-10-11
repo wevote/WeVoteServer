@@ -239,7 +239,7 @@
     {% if include_frequent_processes %}<input type="hidden" name="include_frequent_processes" value="1">{% endif %}
     <input type="hidden" name="kind_of_processes_to_show" value="{{ kind_of_processes_to_show }}">
     {% if show_active_processes_only %}<input type="hidden" name="show_active_processes_only" value="1">{% endif %}
-    <input type="hidden" name="show_all_elections" value="{{ show_all_elections }}">
+    {% if show_all_elections %}<input type="hidden" name="show_all_elections" value="1">{% endif %}
     {% if show_checked_out_processes_only %}<input type="hidden" name="show_checked_out_processes_only" value="1">{% endif %}
     {% if show_paused_processes_only %}<input type="hidden" name="show_paused_processes_only" value="1">{% endif %}
     <input type="hidden" name="state_code" value="{{ state_code }}">
