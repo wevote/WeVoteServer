@@ -1283,7 +1283,11 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
         if keep_looking_for_duplicates and not positive_value_exists(ballotpedia_race_id):
             contest_office_list_manager = ContestOfficeListManager()
             matching_results = contest_office_list_manager.retrieve_contest_offices_from_non_unique_identifiers(
-                contest_office_name, google_civic_election_id, state_code, district_id, contest_office_district_name)
+                contest_office_name=contest_office_name,
+                google_civic_election_id=google_civic_election_id,
+                incoming_state_code=state_code,
+                district_id=district_id,
+                district_name=contest_office_district_name)
             if matching_results['contest_office_found']:
                 contest_office = matching_results['contest_office']
                 contest_office_name = contest_office.office_name
@@ -2243,7 +2247,10 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         # Find the office even though we haven't found candidate
         contest_office_list_manager = ContestOfficeListManager()
         matching_results = contest_office_list_manager.retrieve_contest_offices_from_non_unique_identifiers(
-                contest_office_name, google_civic_election_id, state_code, office_district_id)
+            contest_office_name=contest_office_name,
+            google_civic_election_id=google_civic_election_id,
+            incoming_state_code=state_code,
+            district_id=office_district_id)
         if matching_results['contest_office_found']:
             contest_office = matching_results['contest_office']
             contest_office_name = contest_office.office_name
@@ -2879,7 +2886,10 @@ def create_batch_row_action_ballot_item(batch_description,
         contest_office_list_manager = ContestOfficeListManager()
         # Needs to be read_only=False so we don't get "terminating connection due to conflict with recovery" error
         matching_results = contest_office_list_manager.retrieve_contest_offices_from_non_unique_identifiers(
-            contest_office_name, google_civic_election_id, state_code, read_only=False)
+            contest_office_name=contest_office_name,
+            google_civic_election_id=google_civic_election_id,
+            incoming_state_code=state_code,
+            read_only=False)
         if matching_results['contest_office_found']:
             keep_looking_for_duplicates = False
             contest_office = matching_results['contest_office']

@@ -491,6 +491,7 @@ class ContestOfficeManager(models.Manager):
             if positive_value_exists(ctcl_uuid):
                 try:
                     contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(
+                        google_civic_election_id__exact=google_civic_election_id,
                         ctcl_uuid__exact=ctcl_uuid,
                         defaults=updated_contest_office_values)
                     contest_office_found = True
@@ -551,6 +552,7 @@ class ContestOfficeManager(models.Manager):
             elif positive_value_exists(vote_usa_office_id):
                 try:
                     contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(
+                        google_civic_election_id__exact=google_civic_election_id,
                         vote_usa_office_id__iexact=vote_usa_office_id,
                         defaults=updated_contest_office_values)
                     contest_office_found = True
@@ -1474,10 +1476,10 @@ class ContestOfficeListManager(models.Manager):
 
             if len(office_list_objects):
                 office_list_found = True
-                status = 'OFFICES_RETRIEVED'
+                status = 'OFFICES_RETRIEVED '
                 success = True
             else:
-                status = 'NO_OFFICES_RETRIEVED'
+                status = 'NO_OFFICES_RETRIEVED '
                 success = True
         except ContestOffice.DoesNotExist:
             # No offices found. Not a problem.
@@ -1502,14 +1504,16 @@ class ContestOfficeListManager(models.Manager):
 
     def retrieve_contest_offices_from_non_unique_identifiers(
             self,
+            ballotpedia_race_id=0,
             contest_office_name='',
-            google_civic_election_id='',
-            incoming_state_code='',
+            ctcl_uuid=None,
             district_id='',
             district_name='',
-            ballotpedia_race_id=0,
+            google_civic_election_id='',
             ignore_office_we_vote_id_list=[],
-            read_only=False):
+            incoming_state_code='',
+            read_only=False,
+            vote_usa_office_id=None):
         keep_looking_for_duplicates = True
         success = False
         contest_office = ContestOffice()
@@ -1525,9 +1529,10 @@ class ContestOfficeListManager(models.Manager):
             else:
                 contest_office_query = ContestOffice.objects.all()
             # TODO Is there a way to filter with "dash" insensitivity? - vs --
-            contest_office_query = contest_office_query.filter(office_name__iexact=contest_office_name,
-                                                               state_code__iexact=incoming_state_code,
-                                                               google_civic_election_id=google_civic_election_id)
+            contest_office_query = contest_office_query.filter(
+                office_name__iexact=contest_office_name,
+                state_code__iexact=incoming_state_code,
+                google_civic_election_id=google_civic_election_id)
             if positive_value_exists(district_id):
                 contest_office_query = contest_office_query.filter(district_id=district_id)
             elif positive_value_exists(district_name):
@@ -1541,6 +1546,18 @@ class ContestOfficeListManager(models.Manager):
                 contest_office_query = contest_office_query.filter(Q(ballotpedia_race_id__isnull=True) |
                                                                    Q(ballotpedia_race_id=0) |
                                                                    Q(ballotpedia_race_id=ballotpedia_race_id))
+
+            if positive_value_exists(ctcl_uuid):
+                # If we pass in ctcl_uuid, we need to make sure not to return results with a different value
+                contest_office_query = contest_office_query.filter(Q(ctcl_uuid__isnull=True) |
+                                                                   Q(ctcl_uuid='') |
+                                                                   Q(ctcl_uuid=ctcl_uuid))
+
+            if positive_value_exists(vote_usa_office_id):
+                # If we pass in vote_usa_office_id, we need to make sure not to return results with a different value
+                contest_office_query = contest_office_query.filter(Q(vote_usa_office_id__isnull=True) |
+                                                                   Q(vote_usa_office_id='') |
+                                                                   Q(vote_usa_office_id=vote_usa_office_id))
 
             contest_office_list_filtered = list(contest_office_query)
             if len(contest_office_list_filtered):
@@ -1589,6 +1606,18 @@ class ContestOfficeListManager(models.Manager):
                                                                        Q(ballotpedia_race_id=0) |
                                                                        Q(ballotpedia_race_id=ballotpedia_race_id))
 
+                if positive_value_exists(ctcl_uuid):
+                    # If we pass in ctcl_uuid, we need to make sure not to return results with a different value
+                    contest_office_query = contest_office_query.filter(Q(ctcl_uuid__isnull=True) |
+                                                                       Q(ctcl_uuid='') |
+                                                                       Q(ctcl_uuid=ctcl_uuid))
+
+                if positive_value_exists(vote_usa_office_id):
+                    # If we pass in vote_usa_office_id, make sure not to return results with a different value
+                    contest_office_query = contest_office_query.filter(Q(vote_usa_office_id__isnull=True) |
+                                                                       Q(vote_usa_office_id='') |
+                                                                       Q(vote_usa_office_id=vote_usa_office_id))
+
                 # Start with the contest_office_name and remove OFFICE_NAME_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES
                 stripped_down_contest_office_name = contest_office_name.lower()
                 for remove_this in OFFICE_NAME_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES:
@@ -1601,8 +1630,12 @@ class ContestOfficeListManager(models.Manager):
 
                 # Remove leading state code, ex/ "CA "
                 for state_code, state_name in STATE_CODE_MAP.items():
-                    remove_this = state_code.lower() + " "
-                    stripped_down_contest_office_name = stripped_down_contest_office_name.replace(remove_this, "")
+                    if 'district ' in stripped_down_contest_office_name and state_code.lower() == 'ct':
+                        # Do not remove 'ct' for connecticut since it also converts "district X" into "distriX"
+                        pass
+                    else:
+                        remove_this = state_code.lower() + " "
+                        stripped_down_contest_office_name = stripped_down_contest_office_name.replace(remove_this, "")
 
                 # Remove leading state, ex/ "California "
                 for state_code, state_name in STATE_CODE_MAP.items():
@@ -1620,6 +1653,7 @@ class ContestOfficeListManager(models.Manager):
                 contest_office_query = contest_office_query.filter(
                     office_name__icontains=stripped_down_contest_office_name)
 
+                # We deal with offices with district number in them below in OFFICE_NAME_EQUIVALENT_PHRASE_PAIRS section
                 # icontains doesn't work when district ids are included
                 contest_office_query = contest_office_query.exclude(office_name__icontains="district")
 
@@ -1677,6 +1711,18 @@ class ContestOfficeListManager(models.Manager):
                                                                        Q(ballotpedia_race_id=0) |
                                                                        Q(ballotpedia_race_id=ballotpedia_race_id))
 
+                if positive_value_exists(ctcl_uuid):
+                    # If we pass in ctcl_uuid, we need to make sure not to return results with a different value
+                    contest_office_query = contest_office_query.filter(Q(ctcl_uuid__isnull=True) |
+                                                                       Q(ctcl_uuid='') |
+                                                                       Q(ctcl_uuid=ctcl_uuid))
+
+                if positive_value_exists(vote_usa_office_id):
+                    # If we pass in vote_usa_office_id, make sure not to return results with a different value
+                    contest_office_query = contest_office_query.filter(Q(vote_usa_office_id__isnull=True) |
+                                                                       Q(vote_usa_office_id='') |
+                                                                       Q(vote_usa_office_id=vote_usa_office_id))
+
                 # Start with the contest_office_name and remove OFFICE_NAME_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES
                 stripped_down_contest_office_name = contest_office_name.lower()
                 for remove_this in OFFICE_NAME_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES:
@@ -1690,7 +1736,7 @@ class ContestOfficeListManager(models.Manager):
                 # Remove leading state code, ex/ "CA "
                 for state_code, state_name in STATE_CODE_MAP.items():
                     if 'district ' in stripped_down_contest_office_name and state_code.lower() == 'ct':
-                        # Do not remove 'ct' for connecticut
+                        # Do not remove 'ct' for connecticut since it also converts "district X" into "distriX"
                         pass
                     else:
                         remove_this = state_code.lower() + " "

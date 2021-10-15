@@ -1100,8 +1100,13 @@ def find_and_merge_duplicate_offices_view(request):
 
     messages.add_message(request, messages.INFO, message)
 
-    return HttpResponseRedirect(reverse('office:office_list', args=()) + "?google_civic_election_id={var}"
-                                                                         "".format(var=google_civic_election_id))
+    return HttpResponseRedirect(reverse('office:office_list', args=()) +
+                                "?google_civic_election_id={google_civic_election_id}"
+                                "&state_code={state_code}"
+                                "".format(
+                                    google_civic_election_id=google_civic_election_id,
+                                    state_code=state_code,
+                                    ))
 
 
 def render_contest_office_merge_form(
