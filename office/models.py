@@ -471,7 +471,7 @@ class ContestOfficeManager(models.Manager):
         new_office_created = False
         contest_office_found = False
         contest_office_on_stage = ContestOffice()
-        success = False
+        success = True
         status = ""
         office_updated = False
 
@@ -635,7 +635,7 @@ class ContestOfficeManager(models.Manager):
                          '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
                 success = False
 
-        if not contest_office_found and not exception_multiple_object_returned:
+        if success and not contest_office_found and not exception_multiple_object_returned:
             # Try to find record based on office_name (instead of google_civic_office_name)
             try:
                 if positive_value_exists(district_id):
@@ -666,7 +666,10 @@ class ContestOfficeManager(models.Manager):
                          '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
                 success = False
 
-        if exception_multiple_object_returned:
+        if not success:
+            # Do not proceed with create or update
+            pass
+        elif exception_multiple_object_returned:
             # We can't proceed because there is an error with the data
             success = False
         elif contest_office_found:
