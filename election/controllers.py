@@ -145,7 +145,7 @@ def elections_import_from_structured_json(structured_json):  # Consumes election
 
     elections_results = {
         'success':          True,
-        'status':           "ELECTION_IMPORT_PROCESS_COMPLETE",
+        'status':           "ELECTION_IMPORT_PROCESS_COMPLETE ",
         'saved':            elections_saved,
         'updated':          elections_updated,
         'not_processed':    elections_not_processed,

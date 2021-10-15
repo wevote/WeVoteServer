@@ -41,12 +41,25 @@ def elections_sync_out_view(request):  # electionsSyncOut
     else:
         election_list = results['election_list']
         election_list_dict = election_list.values(
-            'ballotpedia_election_id', 'ballotpedia_kind_of_election', 'candidate_photos_finished', 'ctcl_uuid',
-            'election_day_text', 'election_name', 'election_preparation_finished',
-            'google_civic_election_id', 'ignore_this_election', 'include_in_list_for_voters', 'internal_notes',
-            'is_national_election', 'ocd_division_id', 'state_code', 'use_ballotpedia_as_data_source',
-            'use_ctcl_as_data_source', 'use_ctcl_as_data_source_by_state_code',
-            'use_google_civic_as_data_source', 'use_vote_usa_as_data_source')
+            'ballotpedia_election_id',
+            'ballotpedia_kind_of_election',
+            'candidate_photos_finished',
+            'ctcl_uuid',
+            'election_day_text',
+            'election_name',
+            'election_preparation_finished',
+            'google_civic_election_id',
+            'ignore_this_election',
+            'include_in_list_for_voters',
+            'internal_notes',
+            'is_national_election',
+            'ocd_division_id',
+            'state_code',
+            'use_ballotpedia_as_data_source',
+            'use_ctcl_as_data_source',
+            'use_ctcl_as_data_source_by_state_code',
+            'use_google_civic_as_data_source',
+            'use_vote_usa_as_data_source')
         if election_list_dict:
             election_list_json = list(election_list_dict)
             return HttpResponse(json.dumps(election_list_json), content_type='application/json')
