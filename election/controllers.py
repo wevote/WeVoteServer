@@ -105,6 +105,8 @@ def elections_import_from_structured_json(structured_json):  # Consumes election
             if "use_ballotpedia_as_data_source" in one_election else ''
         use_ctcl_as_data_source = one_election["use_ctcl_as_data_source"] \
             if "use_ctcl_as_data_source" in one_election else ''
+        use_ctcl_as_data_source_by_state_code = one_election["use_ctcl_as_data_source_by_state_code"] \
+            if "use_ctcl_as_data_source_by_state_code" in one_election else ''
         use_google_civic_as_data_source = one_election["use_google_civic_as_data_source"] \
             if "use_google_civic_as_data_source" in one_election else ''
         use_vote_usa_as_data_source = one_election["use_vote_usa_as_data_source"] \
@@ -129,6 +131,7 @@ def elections_import_from_structured_json(structured_json):  # Consumes election
             state_code=state_code,
             use_ballotpedia_as_data_source=use_ballotpedia_as_data_source,
             use_ctcl_as_data_source=use_ctcl_as_data_source,
+            use_ctcl_as_data_source_by_state_code=use_ctcl_as_data_source_by_state_code,
             use_google_civic_as_data_source=use_google_civic_as_data_source,
             use_vote_usa_as_data_source=use_vote_usa_as_data_source)
 
@@ -142,7 +145,7 @@ def elections_import_from_structured_json(structured_json):  # Consumes election
 
     elections_results = {
         'success':          True,
-        'status':           "ELECTION_IMPORT_PROCESS_COMPLETE",
+        'status':           "ELECTION_IMPORT_PROCESS_COMPLETE ",
         'saved':            elections_saved,
         'updated':          elections_updated,
         'not_processed':    elections_not_processed,

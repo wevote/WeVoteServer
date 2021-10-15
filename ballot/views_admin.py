@@ -297,6 +297,8 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
     google_civic_election_id = convert_to_int(google_civic_election_id)
     state_code = request.GET.get('state_code', '')
 
+    use_ctcl_as_data_source_override = False
+
     ballot_returned_found = False
     ballot_returned = BallotReturned()
 
@@ -342,6 +344,9 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
         if results['election_found']:
             election = results['election']
             election_state = election.get_election_state()
+            if positive_value_exists(state_code):
+                if state_code.lower() in election.use_ctcl_as_data_source_by_state_code.lower():
+                    use_ctcl_as_data_source_override = True
 
         # Get a list of offices for this election so we can create drop downs
         try:
@@ -474,6 +479,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
         'ballot_item_list':             ballot_item_list_modified,
         'google_civic_election_id':     google_civic_election_id,
         'state_code':                   state_code,
+        'use_ctcl_as_data_source_override': use_ctcl_as_data_source_override,
     }
     return render(request, 'ballot/ballot_item_list_edit.html', template_values)
 

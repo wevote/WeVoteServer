@@ -720,22 +720,25 @@ def candidates_import_from_structured_json(structured_json):  # Consumes candida
             proceed_to_update_or_create = False
         if proceed_to_update_or_create:
             updated_candidate_values = {
-                'google_civic_election_id': google_civic_election_id,
-                'ocd_division_id': ocd_division_id,
+                'candidate_name': candidate_name,
                 'contest_office_id': contest_office_id,
                 'contest_office_we_vote_id': contest_office_we_vote_id,
-                'candidate_name': candidate_name,
+                'google_civic_election_id': google_civic_election_id,
+                'ocd_division_id': ocd_division_id,
                 'we_vote_id': we_vote_id,
             }
+            if 'ballot_guide_official_statement' in one_candidate:
+                updated_candidate_values['ballot_guide_official_statement'] = \
+                    one_candidate['ballot_guide_official_statement']
             if 'ballotpedia_candidate_id' in one_candidate:
                 updated_candidate_values['ballotpedia_candidate_id'] = one_candidate['ballotpedia_candidate_id']
             if 'ballotpedia_candidate_name' in one_candidate:
                 updated_candidate_values['ballotpedia_candidate_name'] = one_candidate['ballotpedia_candidate_name']
+            if 'ballotpedia_candidate_url' in one_candidate:
+                updated_candidate_values['ballotpedia_candidate_url'] = one_candidate['ballotpedia_candidate_url']
             if 'ballotpedia_candidate_summary' in one_candidate:
                 updated_candidate_values['ballotpedia_candidate_summary'] = \
                     one_candidate['ballotpedia_candidate_summary']
-            if 'ballotpedia_candidate_url' in one_candidate:
-                updated_candidate_values['ballotpedia_candidate_url'] = one_candidate['ballotpedia_candidate_url']
             if 'ballotpedia_election_id' in one_candidate:
                 updated_candidate_values['ballotpedia_election_id'] = one_candidate['ballotpedia_election_id']
             if 'ballotpedia_image_id' in one_candidate:
@@ -744,19 +747,25 @@ def candidates_import_from_structured_json(structured_json):  # Consumes candida
                 updated_candidate_values['ballotpedia_office_id'] = one_candidate['ballotpedia_office_id']
             if 'ballotpedia_page_title' in one_candidate:
                 updated_candidate_values['ballotpedia_page_title'] = one_candidate['ballotpedia_page_title']
-            if 'ballotpedia_photo_url' in one_candidate:
-                updated_candidate_values['ballotpedia_photo_url'] = one_candidate['ballotpedia_photo_url']
             if 'ballotpedia_person_id' in one_candidate:
                 updated_candidate_values['ballotpedia_person_id'] = one_candidate['ballotpedia_person_id']
+            if 'ballotpedia_photo_url' in one_candidate:
+                updated_candidate_values['ballotpedia_photo_url'] = one_candidate['ballotpedia_photo_url']
+            if 'ballotpedia_profile_image_url_https' in one_candidate:
+                updated_candidate_values['ballotpedia_profile_image_url_https'] = \
+                    one_candidate['ballotpedia_profile_image_url_https']
             if 'ballotpedia_race_id' in one_candidate:
                 updated_candidate_values['ballotpedia_race_id'] = one_candidate['ballotpedia_race_id']
-            if 'ballot_guide_official_statement' in one_candidate:
-                updated_candidate_values['ballot_guide_official_statement'] = \
-                    one_candidate['ballot_guide_official_statement']
+            if 'birth_day_text' in one_candidate:
+                updated_candidate_values['birth_day_text'] = one_candidate['birth_day_text']
+            if 'candidate_contact_form_url' in one_candidate:
+                updated_candidate_values['candidate_contact_form_url'] = one_candidate['candidate_contact_form_url']
             if 'candidate_email' in one_candidate:
                 updated_candidate_values['candidate_email'] = one_candidate['candidate_email']
             if 'candidate_gender' in one_candidate:
                 updated_candidate_values['candidate_gender'] = one_candidate['candidate_gender']
+            if 'candidate_instagram_url' in one_candidate:
+                updated_candidate_values['candidate_instagram_url'] = one_candidate['candidate_instagram_url']
             if 'candidate_is_incumbent' in one_candidate:
                 updated_candidate_values['candidate_is_incumbent'] = one_candidate['candidate_is_incumbent']
             if 'candidate_is_top_ticket' in one_candidate:
@@ -769,20 +778,28 @@ def candidates_import_from_structured_json(structured_json):  # Consumes candida
             if 'candidate_twitter_handle' in one_candidate:
                 updated_candidate_values['candidate_twitter_handle'] = \
                     one_candidate['candidate_twitter_handle']
+            if 'candidate_ultimate_election_date' in one_candidate:
+                updated_candidate_values['candidate_ultimate_election_date'] = \
+                    one_candidate['candidate_ultimate_election_date']
             if 'candidate_url' in one_candidate:
                 updated_candidate_values['candidate_url'] = one_candidate['candidate_url']
             if 'candidate_year' in one_candidate:
                 updated_candidate_values['candidate_year'] = convert_to_int(one_candidate['candidate_year'])
-            if 'candidate_contact_form_url' in one_candidate:
-                updated_candidate_values['candidate_contact_form_url'] = one_candidate['candidate_contact_form_url']
             if 'contest_office_name' in one_candidate:
                 updated_candidate_values['contest_office_name'] = one_candidate['contest_office_name']
-            if 'ctcl_uuid' in one_candidate:
-                updated_candidate_values['ctcl_uuid'] = one_candidate['ctcl_uuid']
             if 'crowdpac_candidate_id' in one_candidate:
                 updated_candidate_values['crowdpac_candidate_id'] = one_candidate['crowdpac_candidate_id']
+            if 'ctcl_uuid' in one_candidate:
+                updated_candidate_values['ctcl_uuid'] = one_candidate['ctcl_uuid']
+            if 'do_not_display_on_ballot' in one_candidate:
+                updated_candidate_values['do_not_display_on_ballot'] = one_candidate['do_not_display_on_ballot']
+            if 'facebook_profile_image_url_https' in one_candidate:
+                updated_candidate_values['facebook_profile_image_url_https'] = \
+                    one_candidate['facebook_profile_image_url_https']
             if 'facebook_url' in one_candidate:
                 updated_candidate_values['facebook_url'] = one_candidate['facebook_url']
+            if 'facebook_url_is_broken' in one_candidate:
+                updated_candidate_values['facebook_url_is_broken'] = one_candidate['facebook_url_is_broken']
             if 'google_civic_candidate_name' in one_candidate:
                 updated_candidate_values['google_civic_candidate_name'] = \
                     one_candidate['google_civic_candidate_name']
@@ -792,16 +809,22 @@ def candidates_import_from_structured_json(structured_json):  # Consumes candida
             if 'google_civic_candidate_name3' in one_candidate:
                 updated_candidate_values['google_civic_candidate_name3'] = \
                     one_candidate['google_civic_candidate_name3']
+            if 'google_plus_url' in one_candidate:
+                updated_candidate_values['google_plus_url'] = one_candidate['google_plus_url']
+            if 'linkedin_url' in one_candidate:
+                updated_candidate_values['linkedin_url'] = one_candidate['linkedin_url']
+            if 'linkedin_photo_url' in one_candidate:
+                updated_candidate_values['linkedin_photo_url'] = one_candidate['linkedin_photo_url']
             if 'maplight_id' in one_candidate:
                 updated_candidate_values['maplight_id'] = one_candidate['maplight_id']
+            if 'other_source_url' in one_candidate:
+                updated_candidate_values['other_source_url'] = one_candidate['other_source_url']
+            if 'other_source_photo_url' in one_candidate:
+                updated_candidate_values['other_source_photo_url'] = one_candidate['other_source_photo_url']
             if 'order_on_ballot' in one_candidate:
                 updated_candidate_values['order_on_ballot'] = one_candidate['order_on_ballot']
             if 'party' in one_candidate:
                 updated_candidate_values['party'] = one_candidate['party']
-            if 'politician_we_vote_id' in one_candidate:
-                updated_candidate_values['politician_we_vote_id'] = one_candidate['politician_we_vote_id']
-            if 'state_code' in one_candidate:
-                updated_candidate_values['state_code'] = one_candidate['state_code']
             if 'photo_url' in one_candidate:
                 updated_candidate_values['photo_url'] = one_candidate['photo_url']
             if 'photo_url_from_maplight' in one_candidate:
@@ -810,23 +833,34 @@ def candidates_import_from_structured_json(structured_json):  # Consumes candida
                 updated_candidate_values['photo_url_from_vote_smart'] = one_candidate['photo_url_from_vote_smart']
             if 'photo_url_from_vote_usa' in one_candidate:
                 updated_candidate_values['photo_url_from_vote_usa'] = one_candidate['photo_url_from_vote_usa']
-            if 'twitter_url' in one_candidate:
-                updated_candidate_values['twitter_url'] = one_candidate['twitter_url']
-            if 'youtube_url' in one_candidate:
-                updated_candidate_values['youtube_url'] = one_candidate['youtube_url']
-            if 'twitter_user_id' in one_candidate:
-                updated_candidate_values['twitter_user_id'] = one_candidate['twitter_user_id']
-            if 'twitter_name' in one_candidate:
-                updated_candidate_values['twitter_name'] = one_candidate['twitter_name']
-            if 'twitter_location' in one_candidate:
-                updated_candidate_values['twitter_location'] = one_candidate['twitter_location']
+            if 'politician_we_vote_id' in one_candidate:
+                updated_candidate_values['politician_we_vote_id'] = one_candidate['politician_we_vote_id']
+            if 'profile_image_type_currently_active' in one_candidate:
+                updated_candidate_values['profile_image_type_currently_active'] = \
+                    one_candidate['profile_image_type_currently_active']
+            if 'state_code' in one_candidate:
+                updated_candidate_values['state_code'] = one_candidate['state_code']
+            if 'twitter_description' in one_candidate:
+                updated_candidate_values['twitter_description'] = one_candidate['twitter_description']
             if 'twitter_followers_count' in one_candidate:
                 updated_candidate_values['twitter_followers_count'] = one_candidate['twitter_followers_count']
+            if 'twitter_location' in one_candidate:
+                updated_candidate_values['twitter_location'] = one_candidate['twitter_location']
+            if 'twitter_name' in one_candidate:
+                updated_candidate_values['twitter_name'] = one_candidate['twitter_name']
+            if 'twitter_profile_background_image_url_https' in one_candidate:
+                updated_candidate_values['twitter_profile_background_image_url_https'] = \
+                    one_candidate['twitter_profile_background_image_url_https']
+            if 'twitter_profile_banner_image_url_https' in one_candidate:
+                updated_candidate_values['twitter_profile_banner_image_url_https'] = \
+                    one_candidate['twitter_profile_banner_image_url_https']
             if 'twitter_profile_image_url_https' in one_candidate:
                 updated_candidate_values['twitter_profile_image_url_https'] = \
                     one_candidate['twitter_profile_image_url_https']
-            if 'twitter_description' in one_candidate:
-                updated_candidate_values['twitter_description'] = one_candidate['twitter_description']
+            if 'twitter_url' in one_candidate:
+                updated_candidate_values['twitter_url'] = one_candidate['twitter_url']
+            if 'twitter_user_id' in one_candidate:
+                updated_candidate_values['twitter_user_id'] = one_candidate['twitter_user_id']
             if 'vote_smart_id' in one_candidate:
                 updated_candidate_values['vote_smart_id'] = one_candidate['vote_smart_id']
             if 'vote_usa_office_id' in one_candidate:
@@ -834,7 +868,17 @@ def candidates_import_from_structured_json(structured_json):  # Consumes candida
             if 'vote_usa_politician_id' in one_candidate:
                 updated_candidate_values['vote_usa_politician_id'] = one_candidate['vote_usa_politician_id']
             if 'vote_usa_profile_image_url_https' in one_candidate:
-                updated_candidate_values['vote_usa_profile_image_url_https'] = one_candidate['vote_usa_profile_image_url_https']
+                updated_candidate_values['vote_usa_profile_image_url_https'] = \
+                    one_candidate['vote_usa_profile_image_url_https']
+            if 'we_vote_hosted_profile_facebook_image_url_large' in one_candidate:
+                updated_candidate_values['we_vote_hosted_profile_facebook_image_url_large'] = \
+                    one_candidate['we_vote_hosted_profile_facebook_image_url_large']
+            if 'we_vote_hosted_profile_facebook_image_url_medium' in one_candidate:
+                updated_candidate_values['we_vote_hosted_profile_facebook_image_url_medium'] = \
+                    one_candidate['we_vote_hosted_profile_facebook_image_url_medium']
+            if 'we_vote_hosted_profile_facebook_image_url_tiny' in one_candidate:
+                updated_candidate_values['we_vote_hosted_profile_facebook_image_url_tiny'] = \
+                    one_candidate['we_vote_hosted_profile_facebook_image_url_tiny']
             if 'we_vote_hosted_profile_image_url_large' in one_candidate:
                 updated_candidate_values['we_vote_hosted_profile_image_url_large'] = \
                     one_candidate['we_vote_hosted_profile_image_url_large']
@@ -844,12 +888,45 @@ def candidates_import_from_structured_json(structured_json):  # Consumes candida
             if 'we_vote_hosted_profile_image_url_tiny' in one_candidate:
                 updated_candidate_values['we_vote_hosted_profile_image_url_tiny'] = \
                     one_candidate['we_vote_hosted_profile_image_url_tiny']
+            if 'we_vote_hosted_profile_twitter_image_url_large' in one_candidate:
+                updated_candidate_values['we_vote_hosted_profile_twitter_image_url_large'] = \
+                    one_candidate['we_vote_hosted_profile_twitter_image_url_large']
+            if 'we_vote_hosted_profile_twitter_image_url_medium' in one_candidate:
+                updated_candidate_values['we_vote_hosted_profile_twitter_image_url_medium'] = \
+                    one_candidate['we_vote_hosted_profile_twitter_image_url_medium']
+            if 'we_vote_hosted_profile_twitter_image_url_tiny' in one_candidate:
+                updated_candidate_values['we_vote_hosted_profile_twitter_image_url_tiny'] = \
+                    one_candidate['we_vote_hosted_profile_twitter_image_url_tiny']
+            if 'we_vote_hosted_profile_uploaded_image_url_large' in one_candidate:
+                updated_candidate_values['we_vote_hosted_profile_uploaded_image_url_large'] = \
+                    one_candidate['we_vote_hosted_profile_uploaded_image_url_large']
+            if 'we_vote_hosted_profile_uploaded_image_url_medium' in one_candidate:
+                updated_candidate_values['we_vote_hosted_profile_uploaded_image_url_medium'] = \
+                    one_candidate['we_vote_hosted_profile_uploaded_image_url_medium']
+            if 'we_vote_hosted_profile_uploaded_image_url_tiny' in one_candidate:
+                updated_candidate_values['we_vote_hosted_profile_uploaded_image_url_tiny'] = \
+                    one_candidate['we_vote_hosted_profile_uploaded_image_url_tiny']
+            if 'we_vote_hosted_profile_vote_usa_image_url_large' in one_candidate:
+                updated_candidate_values['we_vote_hosted_profile_vote_usa_image_url_large'] = \
+                    one_candidate['we_vote_hosted_profile_vote_usa_image_url_large']
+            if 'we_vote_hosted_profile_vote_usa_image_url_medium' in one_candidate:
+                updated_candidate_values['we_vote_hosted_profile_vote_usa_image_url_medium'] = \
+                    one_candidate['we_vote_hosted_profile_vote_usa_image_url_medium']
+            if 'we_vote_hosted_profile_vote_usa_image_url_tiny' in one_candidate:
+                updated_candidate_values['we_vote_hosted_profile_vote_usa_image_url_tiny'] = \
+                    one_candidate['we_vote_hosted_profile_vote_usa_image_url_tiny']
             if 'wikipedia_page_id' in one_candidate:
                 updated_candidate_values['wikipedia_page_id'] = one_candidate['wikipedia_page_id']
             if 'wikipedia_page_title' in one_candidate:
                 updated_candidate_values['wikipedia_page_title'] = one_candidate['wikipedia_page_title']
             if 'wikipedia_photo_url' in one_candidate:
                 updated_candidate_values['wikipedia_photo_url'] = one_candidate['wikipedia_photo_url']
+            if 'withdrawal_date' in one_candidate:
+                updated_candidate_values['withdrawal_date'] = one_candidate['withdrawal_date']
+            if 'withdrawn_from_election' in one_candidate:
+                updated_candidate_values['withdrawn_from_election'] = one_candidate['withdrawn_from_election']
+            if 'youtube_url' in one_candidate:
+                updated_candidate_values['youtube_url'] = one_candidate['youtube_url']
 
             results = candidate_manager.update_or_create_candidate(
                 we_vote_id, google_civic_election_id, ocd_division_id,
