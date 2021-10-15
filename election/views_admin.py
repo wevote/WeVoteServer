@@ -542,6 +542,12 @@ def election_edit_view(request, election_local_id):
             google_civic_election_id=google_civic_election_id)
         ballotpedia_election_list = list(ballotpedia_election_query)
 
+        use_ctcl_as_data_source_by_state_code = election_on_stage.use_ctcl_as_data_source_by_state_code
+        # use_ctcl_as_data_source_override = False
+        # if positive_value_exists(state_code):
+        #     if state_code.lower() in use_ctcl_as_data_source_by_state_code.lower():
+        #         use_ctcl_as_data_source_override = True
+
         template_values = {
             'ballotpedia_election_list': ballotpedia_election_list,
             'ctcl_uuid': ctcl_uuid,
@@ -549,6 +555,7 @@ def election_edit_view(request, election_local_id):
             'election': election_on_stage,
             'messages_on_stage': messages_on_stage,
             'state_code': state_code,
+            'use_ctcl_as_data_source_by_state_code':    use_ctcl_as_data_source_by_state_code,
         }
     else:
         template_values = {
@@ -640,6 +647,7 @@ def election_edit_process_view(request):
     use_ballotpedia_as_data_source = positive_value_exists(use_ballotpedia_as_data_source)
     use_ctcl_as_data_source = request.POST.get('use_ctcl_as_data_source', False)
     use_ctcl_as_data_source = positive_value_exists(use_ctcl_as_data_source)
+    use_ctcl_as_data_source_by_state_code = request.POST.get('use_ctcl_as_data_source_by_state_code', None)
     use_google_civic_as_data_source = request.POST.get('use_google_civic_as_data_source', False)
     use_google_civic_as_data_source = positive_value_exists(use_google_civic_as_data_source)
     use_vote_usa_as_data_source = request.POST.get('use_vote_usa_as_data_source', False)
@@ -743,6 +751,7 @@ def election_edit_process_view(request):
         election_on_stage.is_national_election = is_national_election
         election_on_stage.use_ballotpedia_as_data_source = use_ballotpedia_as_data_source
         election_on_stage.use_ctcl_as_data_source = use_ctcl_as_data_source
+        election_on_stage.use_ctcl_as_data_source_by_state_code = use_ctcl_as_data_source_by_state_code
         election_on_stage.use_google_civic_as_data_source = use_google_civic_as_data_source
         election_on_stage.use_vote_usa_as_data_source = use_vote_usa_as_data_source
 
@@ -778,6 +787,7 @@ def election_edit_process_view(request):
                 state_code=state_code,
                 use_ballotpedia_as_data_source=use_ballotpedia_as_data_source,
                 use_ctcl_as_data_source=use_ctcl_as_data_source,
+                use_ctcl_as_data_source_by_state_code=use_ctcl_as_data_source_by_state_code,
                 use_google_civic_as_data_source=use_google_civic_as_data_source,
                 use_vote_usa_as_data_source=use_vote_usa_as_data_source,
             )
@@ -1403,6 +1413,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
     election_local_id = convert_to_int(election_local_id)
     ballot_returned_search = request.GET.get('ballot_returned_search', '')
     ballot_returned_search = ballot_returned_search.strip() if positive_value_exists(ballot_returned_search) else ''
+    use_ctcl_as_data_source_override = False
     voter_ballot_saved_search = request.GET.get('voter_ballot_saved_search', '')
     merge_ballot_returned_duplicates = \
         positive_value_exists(request.GET.get('merge_ballot_returned_duplicates', False))
@@ -1422,6 +1433,10 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
         google_civic_election_id = election.google_civic_election_id
         if not positive_value_exists(state_code):
             state_code = election.state_code
+        use_ctcl_as_data_source_by_state_code = election.use_ctcl_as_data_source_by_state_code
+        if positive_value_exists(state_code):
+            if state_code.lower() in use_ctcl_as_data_source_by_state_code.lower():
+                use_ctcl_as_data_source_override = True
     except Election.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
     except Election.DoesNotExist:
@@ -1689,6 +1704,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
             'all_ballotpedia_elections_shown':          all_ballotpedia_elections_shown,
             'state_code':                               state_code,
             'state_list':                               sorted_state_list,
+            'use_ctcl_as_data_source_override':         use_ctcl_as_data_source_override,
             'voter_ballot_saved_list':                  voter_ballot_saved_list,
             'voter_ballot_saved_search':                voter_ballot_saved_search,
         }

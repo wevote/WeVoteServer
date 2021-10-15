@@ -189,7 +189,7 @@
                 (Oldest: {{ ballot_returned_voter_oldest_date }})
         </li>
     {% endif %}
-    {% if use_ctcl_as_data_source %}
+    {% if use_ctcl_as_data_source or use_ctcl_as_data_source_override %}
         <li>
             <a href="{% url 'import_export_batches:retrieve_ballots_for_polling_locations_api_v4' %}?use_ctcl=1&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&use_batch_process=1">
                 CTCL: <strong>Retrieve</strong> BallotItems from Brand New Map Points, up to 125 at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}

@@ -247,7 +247,7 @@
         <li>Prepare: <a href="{% url 'import_export_batches:import_ballot_items_for_location' %}?use_ballotpedia=1&google_civic_election_id={{ google_civic_election_id }}&polling_location_we_vote_id={{ polling_location_we_vote_id }}&state_code={{ state_code }}" target="_blank" >
             Ballotpedia: Retrieve Ballot Items for this Map Point <span class="glyphicon glyphicon-new-window"></span></a></li>
     {% endif %}
-    {% if election.use_ctcl_as_data_source %}
+    {% if election.use_ctcl_as_data_source or use_ctcl_as_data_source_override %}
         <li>Prepare: <a href="{% url 'import_export_batches:import_ballot_items_for_location' %}?use_ctcl=1&google_civic_election_id={{ google_civic_election_id }}&polling_location_we_vote_id={{ polling_location_we_vote_id }}&state_code={{ state_code }}" target="_blank" >
             CTCL: Retrieve Ballot Items for this Map Point <span class="glyphicon glyphicon-new-window"></span></a></li>
     {% endif %}

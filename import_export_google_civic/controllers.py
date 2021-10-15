@@ -368,51 +368,58 @@ def groom_and_store_google_civic_ballot_json_2021(
                 # Assume we are working with office
                 pass
             if contest_type_calculated == 'referendum':  # Referendum
-                process_contest_results = groom_and_store_google_civic_measure_json_2021(
-                    ballot_item_dict_list=ballot_item_dict_list,
-                    election_day_text=election_day_text,
-                    existing_measure_objects_dict=existing_measure_objects_dict,
-                    google_civic_election_id=google_civic_election_id,
-                    local_ballot_order=local_ballot_order,
-                    new_measure_we_vote_ids_list=new_measure_we_vote_ids_list,
-                    one_contest_json=one_contest_json,
-                    polling_location_we_vote_id=polling_location_we_vote_id,
-                    state_code=state_code,
-                    update_or_create_rules=update_or_create_rules,
-                    use_ctcl=use_ctcl,
-                    use_vote_usa=use_vote_usa,
-                    voter_id=voter_id,
-                )
-                existing_measure_objects_dict = process_contest_results['existing_measure_objects_dict']
-                new_measure_we_vote_ids_list = process_contest_results['new_measure_we_vote_ids_list']
+                try:
+                    process_contest_results = groom_and_store_google_civic_measure_json_2021(
+                        ballot_item_dict_list=ballot_item_dict_list,
+                        election_day_text=election_day_text,
+                        existing_measure_objects_dict=existing_measure_objects_dict,
+                        google_civic_election_id=google_civic_election_id,
+                        local_ballot_order=local_ballot_order,
+                        new_measure_we_vote_ids_list=new_measure_we_vote_ids_list,
+                        one_contest_json=one_contest_json,
+                        polling_location_we_vote_id=polling_location_we_vote_id,
+                        state_code=state_code,
+                        update_or_create_rules=update_or_create_rules,
+                        use_ctcl=use_ctcl,
+                        use_vote_usa=use_vote_usa,
+                        voter_id=voter_id,
+                    )
+                    existing_measure_objects_dict = process_contest_results['existing_measure_objects_dict']
+                    new_measure_we_vote_ids_list = process_contest_results['new_measure_we_vote_ids_list']
+                    ballot_item_dict_list = process_contest_results['ballot_item_dict_list']
+                except Exception as e:
+                    status += "REFERENDUM_FAIL: " + str(e) + ' '
             else:
-                process_contest_results = groom_and_store_google_civic_office_json_2021(
-                    one_contest_json=one_contest_json,
-                    google_civic_election_id=google_civic_election_id,
-                    election_day_text=election_day_text,
-                    state_code=state_code,
-                    election_year_integer=election_year_integer,
-                    election_ocd_division_id=ocd_division_id,
-                    local_ballot_order=local_ballot_order,
-                    voter_id=voter_id,
-                    polling_location_we_vote_id=polling_location_we_vote_id,
-                    ballot_item_dict_list=ballot_item_dict_list,
-                    existing_candidate_objects_dict=existing_candidate_objects_dict,
-                    existing_candidate_to_office_links_dict=existing_candidate_to_office_links_dict,
-                    existing_offices_by_election_dict=existing_offices_by_election_dict,
-                    new_office_we_vote_ids_list=new_office_we_vote_ids_list,
-                    new_candidate_we_vote_ids_list=new_candidate_we_vote_ids_list,
-                    use_ctcl=use_ctcl,
-                    use_vote_usa=use_vote_usa,
-                    update_or_create_rules=update_or_create_rules,
-                )
-                existing_candidate_objects_dict = process_contest_results['existing_candidate_objects_dict']
-                existing_candidate_to_office_links_dict = \
-                    process_contest_results['existing_candidate_to_office_links_dict']
-                existing_offices_by_election_dict = process_contest_results['existing_offices_by_election_dict']
-                new_office_we_vote_ids_list = process_contest_results['new_office_we_vote_ids_list']
-                new_candidate_we_vote_ids_list = process_contest_results['new_candidate_we_vote_ids_list']
-            ballot_item_dict_list = process_contest_results['ballot_item_dict_list']
+                try:
+                    process_contest_results = groom_and_store_google_civic_office_json_2021(
+                        one_contest_json=one_contest_json,
+                        google_civic_election_id=google_civic_election_id,
+                        election_day_text=election_day_text,
+                        state_code=state_code,
+                        election_year_integer=election_year_integer,
+                        election_ocd_division_id=ocd_division_id,
+                        local_ballot_order=local_ballot_order,
+                        voter_id=voter_id,
+                        polling_location_we_vote_id=polling_location_we_vote_id,
+                        ballot_item_dict_list=ballot_item_dict_list,
+                        existing_candidate_objects_dict=existing_candidate_objects_dict,
+                        existing_candidate_to_office_links_dict=existing_candidate_to_office_links_dict,
+                        existing_offices_by_election_dict=existing_offices_by_election_dict,
+                        new_office_we_vote_ids_list=new_office_we_vote_ids_list,
+                        new_candidate_we_vote_ids_list=new_candidate_we_vote_ids_list,
+                        use_ctcl=use_ctcl,
+                        use_vote_usa=use_vote_usa,
+                        update_or_create_rules=update_or_create_rules,
+                    )
+                    existing_candidate_objects_dict = process_contest_results['existing_candidate_objects_dict']
+                    existing_candidate_to_office_links_dict = \
+                        process_contest_results['existing_candidate_to_office_links_dict']
+                    existing_offices_by_election_dict = process_contest_results['existing_offices_by_election_dict']
+                    new_office_we_vote_ids_list = process_contest_results['new_office_we_vote_ids_list']
+                    new_candidate_we_vote_ids_list = process_contest_results['new_candidate_we_vote_ids_list']
+                    ballot_item_dict_list = process_contest_results['ballot_item_dict_list']
+                except Exception as e:
+                    status += "OFFICE_FAIL: " + str(e) + ' '
 
     results = {
         'success':                              success,
@@ -599,7 +606,8 @@ def groom_and_store_google_civic_candidates_json_2021(
                     # In the future, we will want to look for updated data to save
                 elif candidate_results['MultipleObjectsReturned']:
                     continue_searching_for_candidate = False
-                    status += "MORE_THAN_ONE_CANDIDATE_WITH_SAME_CTCL_UUID1 (" + str(ctcl_candidate_uuid) + ") "
+                    status += "MORE_THAN_ONE_CANDIDATE_WITH_SAME_CTCL_UUID1 (" + str(ctcl_candidate_uuid) + "/" + \
+                              str(candidate_name) + ")"
                     continue
                 elif not candidate_results['success']:
                     continue_searching_for_candidate = False
@@ -1265,6 +1273,7 @@ def groom_and_store_google_civic_office_json_2021(
         if ctcl_office_uuid in existing_offices_by_election_dict[google_civic_election_id_string]:
             contest_office = \
                 existing_offices_by_election_dict[google_civic_election_id_string][ctcl_office_uuid]
+            ballot_item_display_name = contest_office.office_name
             contest_office_we_vote_id = contest_office.we_vote_id
             contest_office_id = contest_office.id
             office_name = contest_office.office_name
@@ -1277,6 +1286,7 @@ def groom_and_store_google_civic_office_json_2021(
             if office_results['contest_office_found']:
                 continue_searching_for_office = False
                 contest_office = office_results['contest_office']
+                ballot_item_display_name = contest_office.office_name
                 contest_office_we_vote_id = contest_office.we_vote_id
                 contest_office_id = contest_office.id
                 office_name = contest_office.office_name
@@ -1307,6 +1317,7 @@ def groom_and_store_google_civic_office_json_2021(
         if vote_usa_office_id in existing_offices_by_election_dict[google_civic_election_id_string]:
             contest_office = \
                 existing_offices_by_election_dict[google_civic_election_id_string][vote_usa_office_id]
+            ballot_item_display_name = contest_office.office_name
             contest_office_we_vote_id = contest_office.we_vote_id
             contest_office_id = contest_office.id
             office_name = contest_office.office_name
@@ -1319,6 +1330,7 @@ def groom_and_store_google_civic_office_json_2021(
             if office_results['contest_office_found']:
                 continue_searching_for_office = False
                 contest_office = office_results['contest_office']
+                ballot_item_display_name = contest_office.office_name
                 contest_office_we_vote_id = contest_office.we_vote_id
                 contest_office_id = contest_office.id
                 office_name = contest_office.office_name
@@ -1367,6 +1379,7 @@ def groom_and_store_google_civic_office_json_2021(
         elif results['contest_office_found']:
             continue_searching_for_office = False
             contest_office = results['contest_office']
+            ballot_item_display_name = contest_office.office_name
             contest_office_we_vote_id = contest_office.we_vote_id
             contest_office_id = contest_office.id
             office_name = contest_office.office_name
@@ -1472,9 +1485,9 @@ def groom_and_store_google_civic_office_json_2021(
             if update_or_create_contest_office_results['success']:
                 if positive_value_exists(update_or_create_contest_office_results['contest_office_found']):
                     contest_office = update_or_create_contest_office_results['contest_office']
+                    ballot_item_display_name = contest_office.office_name
                     contest_office_id = contest_office.id
                     contest_office_we_vote_id = contest_office.we_vote_id
-                    ballot_item_display_name = contest_office.office_name
                     new_office_created = True
                     if contest_office_we_vote_id not in new_office_we_vote_ids_list:
                         new_office_we_vote_ids_list.append(contest_office_we_vote_id)
@@ -1486,9 +1499,9 @@ def groom_and_store_google_civic_office_json_2021(
                         existing_offices_by_election_dict[google_civic_election_id_string][vote_usa_office_id] = \
                             contest_office
             else:
+                ballot_item_display_name = ''
                 contest_office_id = 0
                 contest_office_we_vote_id = ''
-                ballot_item_display_name = ''
                 success = False
                 status += update_or_create_contest_office_results['status']
         else:
@@ -1505,6 +1518,13 @@ def groom_and_store_google_civic_office_json_2021(
                 'new_office_we_vote_ids_list': new_office_we_vote_ids_list,
             }
             return results
+    else:
+        if hasattr(contest_office, 'office_name'):
+            ballot_item_display_name = contest_office.office_name
+        if hasattr(contest_office, 'id'):
+            contest_office_id = contest_office.id
+        if hasattr(contest_office, 'we_vote_id'):
+            contest_office_we_vote_id = contest_office.we_vote_id
 
     if positive_value_exists(contest_office_we_vote_id):
         office_json = {
@@ -1521,25 +1541,29 @@ def groom_and_store_google_civic_office_json_2021(
         ballot_item_dict_list.append(office_json)
 
     if positive_value_exists(contest_office_we_vote_id):
-        candidates_results = groom_and_store_google_civic_candidates_json_2021(
-            candidates_structured_json=candidates_structured_json,
-            google_civic_election_id=google_civic_election_id,
-            office_ocd_division_id=office_ocd_division_id,
-            state_code=state_code,
-            contest_office_id=contest_office_id,
-            contest_office_we_vote_id=contest_office_we_vote_id,
-            contest_office_name=office_name,
-            election_year_integer=election_year_integer,
-            existing_candidate_objects_dict=existing_candidate_objects_dict,
-            existing_candidate_to_office_links_dict=existing_candidate_to_office_links_dict,
-            new_candidate_we_vote_ids_list=new_candidate_we_vote_ids_list,
-            update_or_create_rules=update_or_create_rules,
-            use_ctcl=use_ctcl,
-            use_vote_usa=use_vote_usa,
-            vote_usa_office_id=vote_usa_office_id)
-        existing_candidate_objects_dict = candidates_results['existing_candidate_objects_dict']
-        existing_candidate_to_office_links_dict = candidates_results['existing_candidate_to_office_links_dict']
-        new_candidate_we_vote_ids_list = candidates_results['new_candidate_we_vote_ids_list']
+        try:
+            candidates_results = groom_and_store_google_civic_candidates_json_2021(
+                candidates_structured_json=candidates_structured_json,
+                google_civic_election_id=google_civic_election_id,
+                office_ocd_division_id=office_ocd_division_id,
+                state_code=state_code,
+                contest_office_id=contest_office_id,
+                contest_office_we_vote_id=contest_office_we_vote_id,
+                contest_office_name=office_name,
+                election_year_integer=election_year_integer,
+                existing_candidate_objects_dict=existing_candidate_objects_dict,
+                existing_candidate_to_office_links_dict=existing_candidate_to_office_links_dict,
+                new_candidate_we_vote_ids_list=new_candidate_we_vote_ids_list,
+                update_or_create_rules=update_or_create_rules,
+                use_ctcl=use_ctcl,
+                use_vote_usa=use_vote_usa,
+                vote_usa_office_id=vote_usa_office_id)
+            existing_candidate_objects_dict = candidates_results['existing_candidate_objects_dict']
+            existing_candidate_to_office_links_dict = candidates_results['existing_candidate_to_office_links_dict']
+            new_candidate_we_vote_ids_list = candidates_results['new_candidate_we_vote_ids_list']
+        except Exception as e:
+            status += "COULD_NOT_STORE_CANDIDATES: " + str(e) + " "
+            pass
     results = {
         'success':                          success,
         'status':                           status,

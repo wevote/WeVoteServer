@@ -454,13 +454,22 @@ class ContestOfficeManager(models.Manager):
         return results['contest_office_visiting_list_we_vote_ids']
 
     def update_or_create_contest_office(
-            self, office_we_vote_id='', maplight_id='', google_civic_election_id='',
-            office_name='', district_id='', ballotpedia_race_id='', updated_contest_office_values={}):
+            self,
+            ballotpedia_race_id='',
+            ctcl_uuid=None,
+            district_id='',
+            google_civic_election_id='',
+            maplight_id='',
+            office_name='',
+            office_we_vote_id='',
+            vote_usa_office_id=None,
+            updated_contest_office_values={}):
         """
         Either update or create an office entry.
         """
         exception_multiple_object_returned = False
         new_office_created = False
+        contest_office_found = False
         contest_office_on_stage = ContestOffice()
         success = False
         status = ""
@@ -477,68 +486,113 @@ class ContestOfficeManager(models.Manager):
         elif not office_name:
             success = False
             status += 'MISSING_OFFICE_NAME '
-        elif positive_value_exists(office_we_vote_id):
-            try:
-                contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(
-                    google_civic_election_id__exact=google_civic_election_id,
-                    we_vote_id__iexact=office_we_vote_id,
-                    defaults=updated_contest_office_values)
-                office_updated = not new_office_created
-                success = True
-                status += 'CONTEST_OFFICE_SAVED '
-            except ContestOffice.MultipleObjectsReturned as e:
-                success = False
-                status += 'MULTIPLE_MATCHING_CONTEST_OFFICES_FOUND '
-                exception_multiple_object_returned = True
-            except ContestOffice.DoesNotExist:
-                exception_does_not_exist = True
-                status += "RETRIEVE_OFFICE_NOT_FOUND "
-            except Exception as e:
-                status += 'FAILED_TO_RETRIEVE_OFFICE_BY_WE_VOTE_ID ' \
-                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
-                success = False
-        elif positive_value_exists(maplight_id):
-            try:
-                contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(
-                    google_civic_election_id__exact=google_civic_election_id,
-                    maplight_id__exact=maplight_id,
-                    defaults=updated_contest_office_values)
-                office_updated = not new_office_created
-                success = True
-                status += 'CONTEST_OFFICE_SAVED '
-            except ContestOffice.MultipleObjectsReturned as e:
-                success = False
-                status += 'MULTIPLE_MATCHING_CONTEST_OFFICES_FOUND '
-                exception_multiple_object_returned = True
-            except ContestOffice.DoesNotExist:
-                exception_does_not_exist = True
-                status += "RETRIEVE_OFFICE_NOT_FOUND "
-            except Exception as e:
-                status += 'FAILED_TO_RETRIEVE_OFFICE_BY_MAPLIGHT_ID ' \
-                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
-                success = False
-        elif positive_value_exists(ballotpedia_race_id) and positive_value_exists(google_civic_election_id):
-            try:
-                ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
-                contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(
-                    google_civic_election_id__exact=google_civic_election_id,
-                    ballotpedia_race_id=ballotpedia_race_id,
-                    defaults=updated_contest_office_values)
-                office_updated = not new_office_created
-                success = True
-                status += 'CONTEST_OFFICE_SAVED_BY_BALLOTPEDIA_RACE_ID '
-            except ContestOffice.MultipleObjectsReturned as e:
-                success = False
-                status += 'MULTIPLE_MATCHING_CONTEST_OFFICES_FOUND-BALLOTPEDIA_RACE_ID '
-                exception_multiple_object_returned = True
-            except Exception as e:
-                status += 'FAILED_TO_CREATE_OFFICE_BY_BALLOTPEDIA_RACE_ID ' \
-                          '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
-                success = False
-        else:
+
+        if success:
+            if positive_value_exists(ctcl_uuid):
+                try:
+                    contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(
+                        ctcl_uuid__exact=ctcl_uuid,
+                        defaults=updated_contest_office_values)
+                    contest_office_found = True
+                    office_updated = not new_office_created
+                    success = True
+                    status += 'CONTEST_OFFICE_SAVED_CTCL '
+                except ContestOffice.MultipleObjectsReturned as e:
+                    success = False
+                    status += 'MULTIPLE_MATCHING_CONTEST_OFFICES_FOUND_CTCL '
+                    exception_multiple_object_returned = True
+                except ContestOffice.DoesNotExist:
+                    exception_does_not_exist = True
+                    status += "RETRIEVE_OFFICE_NOT_FOUND_CTCL "
+                except Exception as e:
+                    status += 'FAILED_TO_RETRIEVE_OFFICE_BY_CTCL ' \
+                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                    success = False
+            elif positive_value_exists(maplight_id):
+                try:
+                    contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(
+                        google_civic_election_id__exact=google_civic_election_id,
+                        maplight_id__exact=maplight_id,
+                        defaults=updated_contest_office_values)
+                    contest_office_found = True
+                    office_updated = not new_office_created
+                    success = True
+                    status += 'CONTEST_OFFICE_SAVED_MAPLIGHT '
+                except ContestOffice.MultipleObjectsReturned as e:
+                    success = False
+                    status += 'MULTIPLE_MATCHING_CONTEST_OFFICES_FOUND_MAPLIGHT '
+                    exception_multiple_object_returned = True
+                except ContestOffice.DoesNotExist:
+                    exception_does_not_exist = True
+                    status += "RETRIEVE_OFFICE_NOT_FOUND_MAPLIGHT "
+                except Exception as e:
+                    status += 'FAILED_TO_RETRIEVE_OFFICE_BY_MAPLIGHT_ID ' \
+                             '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                    success = False
+            elif positive_value_exists(ballotpedia_race_id) and positive_value_exists(google_civic_election_id):
+                try:
+                    ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
+                    contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(
+                        google_civic_election_id__exact=google_civic_election_id,
+                        ballotpedia_race_id=ballotpedia_race_id,
+                        defaults=updated_contest_office_values)
+                    contest_office_found = True
+                    office_updated = not new_office_created
+                    success = True
+                    status += 'CONTEST_OFFICE_SAVED_BY_BALLOTPEDIA_RACE_ID '
+                except ContestOffice.MultipleObjectsReturned as e:
+                    success = False
+                    status += 'MULTIPLE_MATCHING_CONTEST_OFFICES_FOUND-BALLOTPEDIA_RACE_ID '
+                    exception_multiple_object_returned = True
+                except Exception as e:
+                    status += 'FAILED_TO_CREATE_OFFICE_BY_BALLOTPEDIA_RACE_ID ' \
+                              '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
+                    success = False
+            elif positive_value_exists(vote_usa_office_id):
+                try:
+                    contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(
+                        vote_usa_office_id__iexact=vote_usa_office_id,
+                        defaults=updated_contest_office_values)
+                    contest_office_found = True
+                    office_updated = not new_office_created
+                    success = True
+                    status += 'CONTEST_OFFICE_SAVED_VOTE_USA '
+                except ContestOffice.MultipleObjectsReturned as e:
+                    success = False
+                    status += 'MULTIPLE_MATCHING_CONTEST_OFFICES_FOUND_VOTE_USA '
+                    exception_multiple_object_returned = True
+                except ContestOffice.DoesNotExist:
+                    exception_does_not_exist = True
+                    status += "RETRIEVE_OFFICE_NOT_FOUND_VOTE_USA "
+                except Exception as e:
+                    status += 'FAILED_TO_RETRIEVE_OFFICE_BY_VOTE_USA ' \
+                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                    success = False
+            elif positive_value_exists(office_we_vote_id):
+                try:
+                    contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(
+                        google_civic_election_id__exact=google_civic_election_id,
+                        we_vote_id__iexact=office_we_vote_id,
+                        defaults=updated_contest_office_values)
+                    contest_office_found = True
+                    office_updated = not new_office_created
+                    success = True
+                    status += 'CONTEST_OFFICE_SAVED '
+                except ContestOffice.MultipleObjectsReturned as e:
+                    success = False
+                    status += 'MULTIPLE_MATCHING_CONTEST_OFFICES_FOUND '
+                    exception_multiple_object_returned = True
+                except ContestOffice.DoesNotExist:
+                    exception_does_not_exist = True
+                    status += "RETRIEVE_OFFICE_NOT_FOUND "
+                except Exception as e:
+                    status += 'FAILED_TO_RETRIEVE_OFFICE_BY_WE_VOTE_ID ' \
+                             '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                    success = False
+
+        if success and not contest_office_found:
             # Given we might have the office listed by google_civic_office_name
             # OR office_name, we need to check both before we try to create a new entry
-            contest_office_found = False
             try:
                 # TODO DALE Note that Vermont data in 2016 did not provide district_id. The unique value was in the
                 # district_name. So all "VT State Senator" candidates were lumped into a single office. But I believe
@@ -581,119 +635,118 @@ class ContestOfficeManager(models.Manager):
                          '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
                 success = False
 
-            if not contest_office_found and not exception_multiple_object_returned:
-                # Try to find record based on office_name (instead of google_civic_office_name)
-                try:
-                    if positive_value_exists(district_id):
-                        contest_office_on_stage = ContestOffice.objects.get(
-                            google_civic_election_id__exact=google_civic_election_id,
-                            office_name__iexact=office_name,
-                            district_id__exact=district_id,
-                            state_code__iexact=updated_contest_office_values['state_code'],
-                        )
-                    else:
-                        contest_office_on_stage = ContestOffice.objects.get(
-                            google_civic_election_id__exact=google_civic_election_id,
-                            office_name__iexact=office_name,
-                            state_code__iexact=updated_contest_office_values['state_code'],
-                        )
-                    contest_office_found = True
-                    success = True
-                    status += 'CONTEST_OFFICE_SAVED '
-                except ContestOffice.MultipleObjectsReturned as e:
-                    success = False
-                    status += 'MULTIPLE_MATCHING_CONTEST_OFFICES_FOUND_BY_OFFICE_NAME '
-                    exception_multiple_object_returned = True
-                except ContestOffice.DoesNotExist:
-                    exception_does_not_exist = True
-                    status += "RETRIEVE_OFFICE_NOT_FOUND "
-                except Exception as e:
-                    status += 'FAILED retrieve_all_offices_for_upcoming_election ' \
-                             '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
-                    success = False
-
-            if exception_multiple_object_returned:
-                # We can't proceed because there is an error with the data
+        if not contest_office_found and not exception_multiple_object_returned:
+            # Try to find record based on office_name (instead of google_civic_office_name)
+            try:
+                if positive_value_exists(district_id):
+                    contest_office_on_stage = ContestOffice.objects.get(
+                        google_civic_election_id__exact=google_civic_election_id,
+                        office_name__iexact=office_name,
+                        district_id__exact=district_id,
+                        state_code__iexact=updated_contest_office_values['state_code'],
+                    )
+                else:
+                    contest_office_on_stage = ContestOffice.objects.get(
+                        google_civic_election_id__exact=google_civic_election_id,
+                        office_name__iexact=office_name,
+                        state_code__iexact=updated_contest_office_values['state_code'],
+                    )
+                contest_office_found = True
+                success = True
+                status += 'CONTEST_OFFICE_SAVED '
+            except ContestOffice.MultipleObjectsReturned as e:
                 success = False
-            elif contest_office_found:
-                # Update record
-                try:
-                    new_office_created = False
-                    office_updated = False
-                    office_has_changes = False
+                status += 'MULTIPLE_MATCHING_CONTEST_OFFICES_FOUND_BY_OFFICE_NAME '
+                exception_multiple_object_returned = True
+            except ContestOffice.DoesNotExist:
+                exception_does_not_exist = True
+                status += "RETRIEVE_OFFICE_NOT_FOUND "
+            except Exception as e:
+                status += 'FAILED retrieve_all_offices_for_upcoming_election ' \
+                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                success = False
+
+        if exception_multiple_object_returned:
+            # We can't proceed because there is an error with the data
+            success = False
+        elif contest_office_found:
+            # Update record
+            try:
+                new_office_created = False
+                office_updated = False
+                office_has_changes = False
+                for key, value in updated_contest_office_values.items():
+                    if hasattr(contest_office_on_stage, key):
+                        # Note, the incoming google_civic_office_name may need to go in _name, _name2, or _name3
+                        if key == "google_civic_office_name":
+                            # We actually don't want to update existing values, but put the value in the first
+                            # available "slot"
+                            if not positive_value_exists(contest_office_on_stage.google_civic_office_name):
+                                contest_office_on_stage.google_civic_office_name = value
+                                office_has_changes = True
+                            elif contest_office_on_stage.google_civic_office_name == value:
+                                pass
+                            elif not positive_value_exists(contest_office_on_stage.google_civic_office_name2):
+                                contest_office_on_stage.google_civic_office_name2 = value
+                                office_has_changes = True
+                            elif contest_office_on_stage.google_civic_office_name2 == value:
+                                pass
+                            elif not positive_value_exists(contest_office_on_stage.google_civic_office_name3):
+                                contest_office_on_stage.google_civic_office_name3 = value
+                                office_has_changes = True
+                            elif contest_office_on_stage.google_civic_office_name3 == value:
+                                pass
+                            elif not positive_value_exists(contest_office_on_stage.google_civic_office_name4):
+                                contest_office_on_stage.google_civic_office_name4 = value
+                                office_has_changes = True
+                            elif contest_office_on_stage.google_civic_office_name4 == value:
+                                pass
+                            elif not positive_value_exists(contest_office_on_stage.google_civic_office_name5):
+                                contest_office_on_stage.google_civic_office_name5 = value
+                                office_has_changes = True
+                            elif contest_office_on_stage.google_civic_office_name5 == value:
+                                pass
+                        else:
+                            setattr(contest_office_on_stage, key, value)
+                            office_has_changes = True
+                if office_has_changes and positive_value_exists(contest_office_on_stage.we_vote_id):
+                    contest_office_on_stage.save()
+                    office_updated = True
+                if office_updated:
+                    success = True
+                    status += "CONTEST_OFFICE_UPDATED "
+                else:
+                    success = True
+                    status += "CONTEST_OFFICE_NOT_UPDATED "
+            except Exception as e:
+                status += 'FAILED_TO_UPDATE_CONTEST_OFFICE ' \
+                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                success = False
+        else:
+            # Create record
+            try:
+                office_updated = False
+                new_office_created = False
+                contest_office_on_stage = ContestOffice.objects.create(
+                    google_civic_election_id=google_civic_election_id,
+                    office_name=office_name,
+                    district_id=district_id)
+                if positive_value_exists(contest_office_on_stage.id):
                     for key, value in updated_contest_office_values.items():
                         if hasattr(contest_office_on_stage, key):
-                            # Note, the incoming google_civic_office_name may need to go in _name, _name2, or _name3
-                            if key == "google_civic_office_name":
-                                # We actually don't want to update existing values, but put the value in the first
-                                # available "slot"
-                                if not positive_value_exists(contest_office_on_stage.google_civic_office_name):
-                                    contest_office_on_stage.google_civic_office_name = value
-                                    office_has_changes = True
-                                elif contest_office_on_stage.google_civic_office_name == value:
-                                    pass
-                                elif not positive_value_exists(contest_office_on_stage.google_civic_office_name2):
-                                    contest_office_on_stage.google_civic_office_name2 = value
-                                    office_has_changes = True
-                                elif contest_office_on_stage.google_civic_office_name2 == value:
-                                    pass
-                                elif not positive_value_exists(contest_office_on_stage.google_civic_office_name3):
-                                    contest_office_on_stage.google_civic_office_name3 = value
-                                    office_has_changes = True
-                                elif contest_office_on_stage.google_civic_office_name3 == value:
-                                    pass
-                                elif not positive_value_exists(contest_office_on_stage.google_civic_office_name4):
-                                    contest_office_on_stage.google_civic_office_name4 = value
-                                    office_has_changes = True
-                                elif contest_office_on_stage.google_civic_office_name4 == value:
-                                    pass
-                                elif not positive_value_exists(contest_office_on_stage.google_civic_office_name5):
-                                    contest_office_on_stage.google_civic_office_name5 = value
-                                    office_has_changes = True
-                                elif contest_office_on_stage.google_civic_office_name5 == value:
-                                    pass
-                            else:
-                                setattr(contest_office_on_stage, key, value)
-                                office_has_changes = True
-                    if office_has_changes and positive_value_exists(contest_office_on_stage.we_vote_id):
-                        contest_office_on_stage.save()
-                        office_updated = True
-                    if office_updated:
-                        success = True
-                        status += "CONTEST_OFFICE_UPDATED "
-                    else:
-                        success = True
-                        status += "CONTEST_OFFICE_NOT_UPDATED "
-                except Exception as e:
-                    status += 'FAILED_TO_UPDATE_CONTEST_OFFICE ' \
-                             '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                            setattr(contest_office_on_stage, key, value)
+                    contest_office_on_stage.save()
+                    new_office_created = True
+                if positive_value_exists(new_office_created):
+                    success = True
+                    status += "NEW_OFFICE_CREATED "
+                else:
                     success = False
-            else:
-                # Create record
-                try:
-                    office_updated = False
-                    new_office_created = False
-                    contest_office_on_stage = ContestOffice.objects.create(
-                        maplight_id=maplight_id,
-                        google_civic_election_id=google_civic_election_id,
-                        office_name=office_name,
-                        district_id=district_id)
-                    if positive_value_exists(contest_office_on_stage.id):
-                        for key, value in updated_contest_office_values.items():
-                            if hasattr(contest_office_on_stage, key):
-                                setattr(contest_office_on_stage, key, value)
-                        contest_office_on_stage.save()
-                        new_office_created = True
-                    if positive_value_exists(new_office_created):
-                        success = True
-                        status += "NEW_OFFICE_CREATED "
-                    else:
-                        success = False
-                        status += "NEW_OFFICE_NOT_CREATED "
-                except Exception as e:
-                    status += 'FAILED_TO_CREATE_CONTEST_OFFICE ' \
-                             '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
-                    success = False
+                    status += "NEW_OFFICE_NOT_CREATED "
+            except Exception as e:
+                status += 'FAILED_TO_CREATE_CONTEST_OFFICE ' \
+                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                success = False
 
         results = {
             'success':                  success,
@@ -1545,7 +1598,7 @@ class ContestOfficeListManager(models.Manager):
 
                 # Remove leading state code, ex/ "CA "
                 for state_code, state_name in STATE_CODE_MAP.items():
-                    remove_this = state_code + " "
+                    remove_this = state_code.lower() + " "
                     stripped_down_contest_office_name = stripped_down_contest_office_name.replace(remove_this, "")
 
                 # Remove leading state, ex/ "California "
@@ -1633,8 +1686,12 @@ class ContestOfficeListManager(models.Manager):
 
                 # Remove leading state code, ex/ "CA "
                 for state_code, state_name in STATE_CODE_MAP.items():
-                    remove_this = state_code + " "
-                    stripped_down_contest_office_name = stripped_down_contest_office_name.replace(remove_this, "")
+                    if 'district ' in stripped_down_contest_office_name and state_code.lower() == 'ct':
+                        # Do not remove 'ct' for connecticut
+                        pass
+                    else:
+                        remove_this = state_code.lower() + " "
+                        stripped_down_contest_office_name = stripped_down_contest_office_name.replace(remove_this, "")
 
                 # Remove leading state, ex/ "California "
                 for state_code, state_name in STATE_CODE_MAP.items():
@@ -1814,4 +1871,8 @@ def remove_office_district_false_positives(contest_office_name, contest_office_l
                     # return it because it looks like we have District 1 == District 18
                     continue
             contest_office_list_filtered.append(possible_match)
+    else:
+        for possible_match in contest_office_list:
+            contest_office_list_filtered.append(possible_match)
+
     return contest_office_list_filtered

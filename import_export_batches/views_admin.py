@@ -1777,6 +1777,7 @@ def batch_process_list_view(request):
     # Make sure we always include the current election in the election_list, even if it is older
     use_ballotpedia_as_data_source = False
     use_ctcl_as_data_source = False
+    use_ctcl_as_data_source_override = False
     use_vote_usa_as_data_source = False
     if positive_value_exists(google_civic_election_id):
         this_election_found = False
@@ -1785,6 +1786,10 @@ def batch_process_list_view(request):
                 this_election_found = True
                 use_ballotpedia_as_data_source = one_election.use_ballotpedia_as_data_source
                 use_ctcl_as_data_source = one_election.use_ctcl_as_data_source
+                use_ctcl_as_data_source_by_state_code = one_election.use_ctcl_as_data_source_by_state_code
+                if positive_value_exists(state_code):
+                    if state_code.lower() in use_ctcl_as_data_source_by_state_code.lower():
+                        use_ctcl_as_data_source_override = True
                 use_vote_usa_as_data_source = one_election.use_vote_usa_as_data_source
                 break
         if not this_election_found:
@@ -1793,6 +1798,10 @@ def batch_process_list_view(request):
                 election = results['election']
                 use_ballotpedia_as_data_source = election.use_ballotpedia_as_data_source
                 use_ctcl_as_data_source = election.use_ctcl_as_data_source
+                use_ctcl_as_data_source_by_state_code = election.use_ctcl_as_data_source_by_state_code
+                if positive_value_exists(state_code):
+                    if state_code.lower() in use_ctcl_as_data_source_by_state_code.lower():
+                        use_ctcl_as_data_source_override = True
                 use_vote_usa_as_data_source = election.use_vote_usa_as_data_source
                 election_list.append(election)
 
@@ -1876,6 +1885,7 @@ def batch_process_list_view(request):
         'toggle_system_url_variables':          toggle_system_url_variables,
         'use_ballotpedia_as_data_source':       use_ballotpedia_as_data_source,
         'use_ctcl_as_data_source':              use_ctcl_as_data_source,
+        'use_ctcl_as_data_source_override':     use_ctcl_as_data_source_override,
         'use_vote_usa_as_data_source':          use_vote_usa_as_data_source,
     }
     return render(request, 'import_export_batches/batch_process_list.html', template_values)
@@ -3122,6 +3132,11 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
             is_national_election = election_on_stage.is_national_election
             use_ballotpedia_as_data_source = election_on_stage.use_ballotpedia_as_data_source
             use_ctcl_as_data_source = election_on_stage.use_ctcl_as_data_source
+            use_ctcl_as_data_source_by_state_code = election_on_stage.use_ctcl_as_data_source_by_state_code
+            use_ctcl_as_data_source_override = False
+            if positive_value_exists(state_code):
+                if state_code.lower() in use_ctcl_as_data_source_by_state_code.lower():
+                    use_ctcl_as_data_source_override = True
             use_vote_usa_as_data_source = election_on_stage.use_vote_usa_as_data_source
         else:
             message = 'Could not retrieve (as opposed to refresh) ballots. ' \
@@ -3198,7 +3213,8 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
             }
             return results
     elif positive_value_exists(use_ctcl):
-        if not positive_value_exists(use_ctcl_as_data_source):
+        if not positive_value_exists(use_ctcl_as_data_source) \
+                and not positive_value_exists(use_ctcl_as_data_source_override):
             success = False
             status += "USE_CTCL-BUT_NOT_USE_CTCL_AS_DATA_SOURCE "
             results = {
@@ -3438,6 +3454,8 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
             batch_set_name += " (state " + str(state_code.upper()) + ")"
         if positive_value_exists(ballotpedia_election_id):
             batch_set_name += " - ballotpedia: " + str(ballotpedia_election_id)
+        elif positive_value_exists(use_ctcl):
+            batch_set_name += " - ctcl"
         elif positive_value_exists(use_vote_usa):
             batch_set_name += " - vote usa"
         batch_set_name += " - " + str(import_date)

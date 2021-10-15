@@ -967,7 +967,7 @@ def retrieve_ballotpedia_ballot_items_from_polling_location_api_v4(
                 status += "NO_INCOMING_BALLOT_ITEMS_FOUND "
         except Exception as e:
             success = False
-            status += 'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS_API_V4-ERROR: ' + str(e) + ' '
+            status += 'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS_API_V4-ERROR-BALLOTPEDIA: ' + str(e) + ' '
             handle_exception(e, logger=logger, exception_message=status)
     else:
         status += "POLLING_LOCATION_NOT_FOUND (" + str(polling_location_we_vote_id) + ") "

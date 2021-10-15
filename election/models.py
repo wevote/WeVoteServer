@@ -118,6 +118,8 @@ class Election(models.Model):
 
     use_ballotpedia_as_data_source = models.BooleanField(default=False)
     use_ctcl_as_data_source = models.BooleanField(default=True)
+    # We can override another default data_source state-by-state by adding state_code
+    use_ctcl_as_data_source_by_state_code = models.CharField(max_length=255, null=True, blank=True)
     use_google_civic_as_data_source = models.BooleanField(default=False)
     use_vote_usa_as_data_source = models.BooleanField(default=False)
 
@@ -200,6 +202,7 @@ class ElectionManager(models.Manager):
             state_code='',
             use_ballotpedia_as_data_source=None,
             use_ctcl_as_data_source=None,
+            use_ctcl_as_data_source_by_state_code=None,
             use_google_civic_as_data_source=None,
             use_vote_usa_as_data_source=None):
         """
@@ -269,6 +272,9 @@ class ElectionManager(models.Manager):
                 if use_ctcl_as_data_source is not None:
                     election_on_stage.use_ctcl_as_data_source = \
                         positive_value_exists(use_ctcl_as_data_source)
+                    election_changed = True
+                if use_ctcl_as_data_source_by_state_code is not None:
+                    election_on_stage.use_ctcl_as_data_source_by_state_code = use_ctcl_as_data_source_by_state_code
                     election_changed = True
                 if use_google_civic_as_data_source is not None:
                     election_on_stage.use_google_civic_as_data_source = \

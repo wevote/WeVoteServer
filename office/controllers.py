@@ -529,98 +529,106 @@ def offices_import_from_structured_json(structured_json):
     offices_updated = 0
     offices_not_processed = 0
     for one_office in structured_json:
+        updated_contest_office_values = {}
+        district_id = one_office['district_id'] if 'district_id' in one_office else ''
         google_civic_election_id = one_office['google_civic_election_id'] \
             if 'google_civic_election_id' in one_office else 0
+        ctcl_uuid = one_office['ctcl_uuid'] if 'ctcl_uuid' in one_office else None
+        maplight_id = one_office['maplight_id'] if 'maplight_id' in one_office else 0
+        office_name = one_office['office_name'] if 'office_name' in one_office else ''
+        vote_usa_office_id = one_office['vote_usa_office_id'] if 'vote_usa_office_id' in one_office else None
         we_vote_id = one_office['we_vote_id'] if 'we_vote_id' in one_office else ''
         if positive_value_exists(google_civic_election_id) and positive_value_exists(we_vote_id):
-            state_code = one_office['state_code'] if 'state_code' in one_office else ''
-            district_id = one_office['district_id'] if 'district_id' in one_office else ''
-            office_name = one_office['office_name'] if 'office_name' in one_office else ''
-            google_ballot_placement = one_office['google_ballot_placement'] \
-                if 'google_ballot_placement' in one_office else ''
-            google_civic_office_name = one_office['google_civic_office_name'] \
-                if 'google_civic_office_name' in one_office else ''
-            google_civic_office_name2 = one_office['google_civic_office_name2'] \
-                if 'google_civic_office_name2' in one_office else ''
-            google_civic_office_name3 = one_office['google_civic_office_name3'] \
-                if 'google_civic_office_name3' in one_office else ''
-            google_civic_office_name4 = one_office['google_civic_office_name4'] \
-                if 'google_civic_office_name4' in one_office else ''
-            google_civic_office_name5 = one_office['google_civic_office_name5'] \
-                if 'google_civic_office_name5' in one_office else ''
-            ocd_division_id = one_office['ocd_division_id'] if 'ocd_division_id' in one_office else ''
-            number_voting_for = one_office['number_voting_for'] if 'number_voting_for' in one_office else ''
-            number_elected = one_office['number_elected'] if 'number_elected' in one_office else ''
-            contest_level0 = one_office['contest_level0'] if 'contest_level0' in one_office else ''
-            contest_level1 = one_office['contest_level1'] if 'contest_level1' in one_office else ''
-            contest_level2 = one_office['contest_level2'] if 'contest_level2' in one_office else ''
-            primary_party = one_office['primary_party'] if 'primary_party' in one_office else ''
-            district_name = one_office['district_name'] if 'district_name' in one_office else ''
-            district_scope = one_office['district_scope'] if 'district_scope' in one_office else ''
-            electorate_specifications = one_office['electorate_specifications'] \
-                if 'electorate_specifications' in one_office else ''
-            special = one_office['special'] if 'special' in one_office else ''
-            maplight_id = one_office['maplight_id'] if 'maplight_id' in one_office else 0
-            ballotpedia_id = one_office['ballotpedia_id'] if 'ballotpedia_id' in one_office else ''
-            ballotpedia_district_id = one_office['ballotpedia_district_id'] \
+            updated_contest_office_values['ballotpedia_district_id'] = one_office['ballotpedia_district_id'] \
                 if 'ballotpedia_district_id' in one_office else ''
-            ballotpedia_is_marquee = one_office['ballotpedia_is_marquee'] \
+            updated_contest_office_values['ballotpedia_id'] = one_office['ballotpedia_id'] \
+                if 'ballotpedia_id' in one_office else ''
+            updated_contest_office_values['ballotpedia_is_marquee'] = one_office['ballotpedia_is_marquee'] \
                 if 'ballotpedia_is_marquee' in one_office else ''
             # Equivalent to elected_office
-            ballotpedia_office_id = one_office['ballotpedia_office_id'] if 'ballotpedia_office_id' in one_office else ''
-            ballotpedia_office_name = one_office['ballotpedia_office_name'] \
+            updated_contest_office_values['ballotpedia_office_id'] = one_office['ballotpedia_office_id'] \
+                if 'ballotpedia_office_id' in one_office else ''
+            updated_contest_office_values['ballotpedia_office_name'] = one_office['ballotpedia_office_name'] \
                 if 'ballotpedia_office_name' in one_office else ''
-            ballotpedia_office_url = one_office['ballotpedia_office_url'] \
+            updated_contest_office_values['ballotpedia_office_url'] = one_office['ballotpedia_office_url'] \
                 if 'ballotpedia_office_url' in one_office else ''
             # Equivalent to contest_office
-            ballotpedia_race_id = one_office['ballotpedia_race_id'] if 'ballotpedia_race_id' in one_office else ''
-            ballotpedia_race_office_level = one_office['ballotpedia_race_office_level'] \
-                if 'ballotpedia_race_office_level' in one_office else ''
-            is_battleground_race = one_office['is_battleground_race'] if 'is_battleground_race' in one_office else ''
-            wikipedia_id = one_office['wikipedia_id'] if 'wikipedia_id' in one_office else ''
-            vote_usa_office_id = one_office['vote_usa_office_id'] if 'vote_usa_office_id' in one_office else None
-            updated_contest_office_values = {
-                'we_vote_id': we_vote_id,
-                'google_civic_election_id': google_civic_election_id,
-                'state_code': state_code,
-                'district_id': district_id,
-                'district_name': district_name,
-                'office_name': office_name,
-                'google_ballot_placement': google_ballot_placement,
-                'google_civic_office_name': google_civic_office_name,
-                'google_civic_office_name2': google_civic_office_name2,
-                'google_civic_office_name3': google_civic_office_name3,
-                'google_civic_office_name4': google_civic_office_name4,
-                'google_civic_office_name5': google_civic_office_name5,
-                'is_battleground_race': is_battleground_race,
-                'ocd_division_id': ocd_division_id,
-                'number_voting_for': number_voting_for,
-                'number_elected': number_elected,
-                'contest_level0': contest_level0,
-                'contest_level1': contest_level1,
-                'contest_level2': contest_level2,
-                'primary_party': primary_party,
-                'district_scope': district_scope,
-                'electorate_specifications': electorate_specifications,
-                'special': special,
-                'maplight_id': maplight_id,
-                'ballotpedia_id': ballotpedia_id,
-                'ballotpedia_district_id': ballotpedia_district_id,
-                'ballotpedia_is_marquee': ballotpedia_is_marquee,
-                'ballotpedia_office_id': ballotpedia_office_id,
-                'ballotpedia_office_name': ballotpedia_office_name,
-                'ballotpedia_office_url': ballotpedia_office_url,
-                'ballotpedia_race_id': ballotpedia_race_id,
-                'ballotpedia_race_office_level': ballotpedia_race_office_level,
-                'wikipedia_id': wikipedia_id,
-                'vote_usa_office_id': vote_usa_office_id,
-            }
+            updated_contest_office_values['ballotpedia_race_id'] = one_office['ballotpedia_race_id'] \
+                if 'ballotpedia_race_id' in one_office else ''
+            updated_contest_office_values['ballotpedia_race_office_level'] = \
+                one_office['ballotpedia_race_office_level'] if 'ballotpedia_race_office_level' in one_office else ''
+            updated_contest_office_values['ballotpedia_race_url'] = \
+                one_office['ballotpedia_race_url'] if 'ballotpedia_race_url' in one_office else ''
+            updated_contest_office_values['contest_level0'] = one_office['contest_level0'] \
+                if 'contest_level0' in one_office else ''
+            updated_contest_office_values['contest_level1'] = one_office['contest_level1'] \
+                if 'contest_level1' in one_office else ''
+            updated_contest_office_values['contest_level2'] = one_office['contest_level2'] \
+                if 'contest_level2' in one_office else ''
+            updated_contest_office_values['ctcl_uuid'] = one_office['ctcl_uuid'] \
+                if 'ctcl_uuid' in one_office else ''
+            updated_contest_office_values['district_id'] = one_office['district_id'] \
+                if 'district_id' in one_office else ''
+            updated_contest_office_values['district_name'] = one_office['district_name'] \
+                if 'district_name' in one_office else ''
+            updated_contest_office_values['district_scope'] = one_office['district_scope'] \
+                if 'district_scope' in one_office else ''
+            updated_contest_office_values['electorate_specifications'] = one_office['electorate_specifications'] \
+                if 'electorate_specifications' in one_office else ''
+            updated_contest_office_values['google_ballot_placement'] = one_office['google_ballot_placement'] \
+                if 'google_ballot_placement' in one_office else ''
+            updated_contest_office_values['google_civic_election_id'] = one_office['google_civic_election_id'] \
+                if 'google_civic_election_id' in one_office else ''
+            updated_contest_office_values['google_civic_office_name'] = one_office['google_civic_office_name'] \
+                if 'google_civic_office_name' in one_office else ''
+            updated_contest_office_values['google_civic_office_name2'] = one_office['google_civic_office_name2'] \
+                if 'google_civic_office_name2' in one_office else ''
+            updated_contest_office_values['google_civic_office_name3'] = one_office['google_civic_office_name3'] \
+                if 'google_civic_office_name3' in one_office else ''
+            updated_contest_office_values['google_civic_office_name4'] = one_office['google_civic_office_name4'] \
+                if 'google_civic_office_name4' in one_office else ''
+            updated_contest_office_values['google_civic_office_name5'] = one_office['google_civic_office_name5'] \
+                if 'google_civic_office_name5' in one_office else ''
+            updated_contest_office_values['is_ballotpedia_general_election'] = \
+                one_office['is_ballotpedia_general_election'] if 'is_ballotpedia_general_election' in one_office else ''
+            updated_contest_office_values['is_ballotpedia_general_runoff_election'] = \
+                one_office['is_ballotpedia_general_runoff_election'] \
+                    if 'is_ballotpedia_general_runoff_election' in one_office else ''
+            updated_contest_office_values['is_ballotpedia_primary_election'] = \
+                one_office['is_ballotpedia_primary_election'] if 'is_ballotpedia_primary_election' in one_office else ''
+            updated_contest_office_values['is_ballotpedia_primary_runoff_election'] = \
+                one_office['is_ballotpedia_primary_runoff_election'] \
+                    if 'is_ballotpedia_primary_runoff_election' in one_office else ''
+            updated_contest_office_values['is_battleground_race'] = one_office['is_battleground_race'] \
+                if 'is_battleground_race' in one_office else ''
+            updated_contest_office_values['maplight_id'] = one_office['maplight_id'] \
+                if 'maplight_id' in one_office else 0
+            updated_contest_office_values['number_elected'] = one_office['number_elected'] \
+                if 'number_elected' in one_office else ''
+            updated_contest_office_values['number_voting_for'] = one_office['number_voting_for'] \
+                if 'number_voting_for' in one_office else ''
+            updated_contest_office_values['ocd_division_id'] = one_office['ocd_division_id'] \
+                if 'ocd_division_id' in one_office else ''
+            updated_contest_office_values['office_name'] = one_office['office_name'] \
+                if 'office_name' in one_office else ''
+            updated_contest_office_values['primary_party'] = one_office['primary_party'] \
+                if 'primary_party' in one_office else ''
+            updated_contest_office_values['special'] = one_office['special'] if 'special' in one_office else ''
+            updated_contest_office_values['state_code'] = one_office['state_code'] if 'state_code' in one_office else ''
+            updated_contest_office_values['vote_usa_office_id'] = one_office['vote_usa_office_id'] \
+                if 'vote_usa_office_id' in one_office else None
+            updated_contest_office_values['we_vote_id'] = one_office['we_vote_id'] \
+                if 'we_vote_id' in one_office else ''
+            updated_contest_office_values['wikipedia_id'] = one_office['wikipedia_id'] \
+                if 'wikipedia_id' in one_office else ''
             results = office_manager.update_or_create_contest_office(
-                office_we_vote_id=we_vote_id,
-                maplight_id=maplight_id,
-                google_civic_election_id=google_civic_election_id,
-                office_name=office_name,
+                ctcl_uuid=ctcl_uuid,
                 district_id=district_id,
+                google_civic_election_id=google_civic_election_id,
+                maplight_id=maplight_id,
+                office_name=office_name,
+                office_we_vote_id=we_vote_id,
+                vote_usa_office_id=vote_usa_office_id,
                 updated_contest_office_values=updated_contest_office_values)
         else:
             offices_not_processed += 1
