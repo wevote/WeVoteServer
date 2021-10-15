@@ -61,6 +61,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 # This page does not need to be protected.
 def candidates_sync_out_view(request):  # candidatesSyncOut
+    status = ''
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
     candidate_search = request.GET.get('candidate_search', '')
@@ -174,7 +175,7 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
             'twitter_location',
             'twitter_name',
             'twitter_profile_background_image_url_https',
-            'twitter_profile_banner_image_url_https',
+            'twitter_profile_banner_url_https',
             'twitter_profile_image_url_https',
             'twitter_url',
             'twitter_user_id',
@@ -209,11 +210,11 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
             candidate_list_json = list(candidate_list_dict)
             return HttpResponse(json.dumps(candidate_list_json), content_type='application/json')
     except Exception as e:
-        pass
+        status += "CANDIDATE_LIST_MISSING: " + str(e) + " "
 
     json_data = {
         'success': False,
-        'status': 'CANDIDATE_LIST_MISSING'
+        'status': status
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

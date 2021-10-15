@@ -70,9 +70,9 @@
 {% if office_list %}
     {% if google_civic_election_id %}
     <ul>
-        <li>Prepare: <a href="{% url 'election:election_summary_by_google_id' google_civic_election_id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
+        <li>Prepare: <a href="{% url 'election:election_summary_by_google_id' google_civic_election_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank" >
         Jump to Election so we can retrieve Offices and Candidates from Ballotpedia</a> (in new window)</li>
-        <li>Prepare: <a href="{% url 'office:find_and_merge_duplicate_offices' %}?google_civic_election_id={{ google_civic_election_id }}"
+        <li>Prepare: <a href="{% url 'office:find_and_merge_duplicate_offices' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
                         target="_blank" >
         Find and Merge Duplicate Contest Offices for this Election</a> (in new window - about 1 minute)</li>
     </ul>

@@ -85,11 +85,13 @@ def offices_import_from_master_server(request, google_civic_election_id='', stat
     )
 
     if import_results['success']:
-        results = filter_offices_structured_json_for_local_duplicates(structured_json)
-        filtered_structured_json = results['structured_json']
-        duplicates_removed = results['duplicates_removed']
+        # We shouldn't need to check for duplicates any more
+        # results = filter_offices_structured_json_for_local_duplicates(structured_json)
+        # filtered_structured_json = results['structured_json']
+        # duplicates_removed = results['duplicates_removed']
+        duplicates_removed = 0
 
-        import_results = offices_import_from_structured_json(filtered_structured_json)
+        import_results = offices_import_from_structured_json(structured_json)
         import_results['duplicates_removed'] = duplicates_removed
 
     return import_results
@@ -154,9 +156,15 @@ def find_duplicate_contest_office(contest_office, ignore_office_we_vote_id_list)
     contest_office_list_manager = ContestOfficeListManager()
     try:
         results = contest_office_list_manager.retrieve_contest_offices_from_non_unique_identifiers(
-            contest_office.office_name, contest_office.google_civic_election_id, contest_office.state_code,
-            contest_office.district_id, contest_office.district_name, contest_office.ballotpedia_race_id,
-            ignore_office_we_vote_id_list)
+            ballotpedia_race_id=contest_office.ballotpedia_race_id,
+            ctcl_uuid=contest_office.ctcl_uuid,
+            contest_office_name=contest_office.office_name,
+            district_id=contest_office.district_id,
+            district_name=contest_office.district_name,
+            google_civic_election_id=contest_office.google_civic_election_id,
+            ignore_office_we_vote_id_list=ignore_office_we_vote_id_list,
+            incoming_state_code=contest_office.state_code,
+            vote_usa_office_id=contest_office.vote_usa_office_id)
 
         if results['contest_office_found']:
             contest_office_merge_conflict_values = \
@@ -505,8 +513,11 @@ def filter_offices_structured_json_for_local_duplicates(structured_json):
         # Check to see if there is an entry that matches in all critical ways, minus the we_vote_id
         we_vote_id_from_master = we_vote_id
 
-        results = office_manager_list.retrieve_possible_duplicate_offices(google_civic_election_id, state_code,
-                                                                          office_name, we_vote_id_from_master)
+        results = office_manager_list.retrieve_possible_duplicate_offices(
+            google_civic_election_id,
+            state_code,
+            office_name,
+            we_vote_id_from_master)
 
         if results['office_list_found']:
             # There seems to be a duplicate already in this database using a different we_vote_id
