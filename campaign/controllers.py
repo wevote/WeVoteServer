@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .models import CampaignX, CampaignXListedByOrganization, CampaignXManager, CampaignXNewsItem, CampaignXOwner, \
-    CampaignXSupporter, FINAL_ELECTION_DATE_COOL_DOWN
+    CampaignXPolitician, CampaignXSupporter, FINAL_ELECTION_DATE_COOL_DOWN
 import base64
 from image.controllers import cache_campaignx_image, create_resized_images
 import json
@@ -1809,6 +1809,36 @@ def move_campaignx_to_another_organization(
         'to_organization_we_vote_id':       to_organization_we_vote_id,
         'campaignx_entries_moved':          campaignx_owner_entries_moved,
         'campaignx_owner_entries_moved':    campaignx_owner_entries_moved,
+    }
+    return results
+
+
+def move_campaignx_to_another_politician(
+        from_politician_we_vote_id='',
+        to_politician_we_vote_id=''):
+    """
+
+    :param from_politician_we_vote_id:
+    :param to_politician_we_vote_id:
+    :return:
+    """
+    status = ''
+    success = True
+    campaignx_entries_moved = 0
+
+    if positive_value_exists(from_politician_we_vote_id):
+        try:
+            campaignx_entries_moved += CampaignXPolitician.objects \
+                .filter(politician_we_vote_id__iexact=from_politician_we_vote_id) \
+                .update(politician_we_vote_id=to_politician_we_vote_id)
+        except Exception as e:
+            status += "FAILED_MOVE_CAMPAIGNX_BY_POLITICIAN_WE_VOTE_ID: " + str(e) + " "
+            success = False
+
+    results = {
+        'status':                   status,
+        'success':                  success,
+        'campaignx_entries_moved':  campaignx_entries_moved,
     }
     return results
 

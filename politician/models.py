@@ -11,7 +11,7 @@ from tag.models import Tag
 from wevote_functions.functions import convert_to_political_party_constant, \
     display_full_name_with_correct_capitalization, \
     extract_first_name_from_full_name, extract_middle_name_from_full_name, \
-    extract_last_name_from_full_name, positive_value_exists
+    extract_last_name_from_full_name, extract_twitter_handle_from_text_string, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_politician_integer, fetch_site_unique_id_prefix
 
 FEMALE = 'F'
@@ -26,6 +26,43 @@ GENDER_CHOICES = (
 )
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+# When merging candidates, these are the fields we check for figure_out_candidate_conflict_values
+POLITICIAN_UNIQUE_IDENTIFIERS = [
+    'ballotpedia_id',
+    'bioguide_id',
+    'birth_date',
+    'cspan_id',
+    'ctcl_uuid',
+    'first_name',
+    'gender',
+    'govtrack_id',
+    'house_history_id',
+    'icpsr_id',
+    'last_name',
+    'lis_id',
+    'maplight_id',
+    'middle_name',
+    'opensecrets_id',
+    'political_party',
+    'politician_email_address',
+    'politician_facebook_id',
+    'politician_googleplus_id',
+    'politician_name',
+    'politician_phone_number',
+    'politician_twitter_handle',
+    'politician_url',
+    'politician_youtube_id',
+    'state_code',
+    'thomas_id',
+    'vote_smart_id',
+    'vote_usa_politician_id',
+    'washington_post_id',
+    'we_vote_hosted_profile_image_url_large',
+    'we_vote_hosted_profile_image_url_medium',
+    'we_vote_hosted_profile_image_url_tiny',
+    'wikipedia_id',
+]
 
 
 class Politician(models.Model):
@@ -50,6 +87,8 @@ class Politician(models.Model):
     # This is the politician's name from GoogleCivicCandidateCampaign
     google_civic_candidate_name = models.CharField(verbose_name="full name from google civic",
                                                    max_length=255, default=None, null=True, blank=True)
+    google_civic_candidate_name2 = models.CharField(max_length=255, null=True)
+    google_civic_candidate_name3 = models.CharField(max_length=255, null=True)
     # This is the politician's name assembled from TheUnitedStatesIo first_name + last_name for quick search
     full_name_assembled = models.CharField(verbose_name="full name assembled from first_name + last_name",
                                            max_length=255, default=None, null=True, blank=True)
@@ -167,16 +206,35 @@ class Politician(models.Model):
             return ""
 
     def is_female(self):
-        return self.gender in self.FEMALE
+        return self.gender in [FEMALE]
 
     def is_gender_neutral(self):
-        return self.gender in self.GENDER_NEUTRAL
+        return self.gender in [GENDER_NEUTRAL]
 
     def is_male(self):
-        return self.gender in self.MALE
+        return self.gender in [MALE]
 
     def is_gender_specified(self):
-        return self.gender in (self.FEMALE, self.GENDER_NEUTRAL, self.MALE)
+        return self.gender in [FEMALE, GENDER_NEUTRAL, MALE]
+
+
+class PoliticiansAreNotDuplicates(models.Model):
+    """
+    When checking for duplicates, there are times when we want to explicitly mark two politicians as NOT duplicates
+    """
+    politician1_we_vote_id = models.CharField(
+        verbose_name="first politician we are tracking", max_length=255, null=True, unique=False)
+    politician2_we_vote_id = models.CharField(
+        verbose_name="second politician we are tracking", max_length=255, null=True, unique=False)
+
+    def fetch_other_politician_we_vote_id(self, one_we_vote_id):
+        if one_we_vote_id == self.politician1_we_vote_id:
+            return self.politician2_we_vote_id
+        elif one_we_vote_id == self.politician2_we_vote_id:
+            return self.politician1_we_vote_id
+        else:
+            # If the we_vote_id passed in wasn't found, don't return another we_vote_id
+            return ""
 
 
 class PoliticianManager(models.Manager):
@@ -252,12 +310,16 @@ class PoliticianManager(models.Manager):
 
     def retrieve_all_politicians_that_might_match_candidate(
             self,
-            vote_smart_id='',
-            maplight_id='',
-            candidate_twitter_handle='',
-            vote_usa_politician_id='',
             candidate_name='',
-            state_code=''):
+            candidate_twitter_handle='',
+            google_civic_candidate_name='',
+            google_civic_candidate_name2='',
+            google_civic_candidate_name3='',
+            maplight_id='',
+            state_code='',
+            vote_smart_id='',
+            vote_usa_politician_id='',
+    ):
         politician_list = []
         politician_list_found = False
         politician = Politician()
@@ -291,6 +353,24 @@ class PoliticianManager(models.Manager):
 
             if positive_value_exists(candidate_name) and positive_value_exists(state_code):
                 new_filter = Q(politician_name__iexact=candidate_name,
+                               state_code__iexact=state_code)
+                filter_set = True
+                filters.append(new_filter)
+
+            if positive_value_exists(google_civic_candidate_name) and positive_value_exists(state_code):
+                new_filter = Q(politician_name__iexact=google_civic_candidate_name,
+                               state_code__iexact=state_code)
+                filter_set = True
+                filters.append(new_filter)
+
+            if positive_value_exists(google_civic_candidate_name2) and positive_value_exists(state_code):
+                new_filter = Q(politician_name__iexact=google_civic_candidate_name2,
+                               state_code__iexact=state_code)
+                filter_set = True
+                filters.append(new_filter)
+
+            if positive_value_exists(google_civic_candidate_name3) and positive_value_exists(state_code):
+                new_filter = Q(politician_name__iexact=google_civic_candidate_name3,
                                state_code__iexact=state_code)
                 filter_set = True
                 filters.append(new_filter)
@@ -524,7 +604,7 @@ class PoliticianManager(models.Manager):
         }
 
         return self.update_or_create_politician(
-            updated_politician_values,
+            updated_politician_values=updated_politician_values,
             politician_we_vote_id=candidate.politician_we_vote_id,
             vote_usa_politician_id=candidate.vote_usa_politician_id,
             candidate_twitter_handle=candidate.candidate_twitter_handle,
@@ -533,7 +613,7 @@ class PoliticianManager(models.Manager):
 
     def update_or_create_politician(
             self,
-            updated_politician_values,
+            updated_politician_values={},
             politician_we_vote_id='',
             vote_smart_id=0,
             vote_usa_politician_id='',
@@ -579,7 +659,7 @@ class PoliticianManager(models.Manager):
             elif positive_value_exists(candidate_twitter_handle):
                 politician, new_politician_created = \
                     Politician.objects.update_or_create(
-                        politician_twitter_handle=candidate_twitter_handle,
+                        politician_twitter_handle__iexact=candidate_twitter_handle,
                         defaults=updated_politician_values)
                 politician_found = True
             elif positive_value_exists(candidate_name) and positive_value_exists(state_code):
@@ -639,6 +719,10 @@ class PoliticianManager(models.Manager):
             return results['politician_we_vote_id']
         return ''
 
+    def fetch_politicians_are_not_duplicates_list_we_vote_ids(self, politician_we_vote_id):
+        results = self.retrieve_politicians_are_not_duplicates_list(politician_we_vote_id)
+        return results['politicians_are_not_duplicates_list_we_vote_ids']
+
     def create_politician_row_entry(self, politician_name, politician_first_name, politician_middle_name,
                                     politician_last_name, ctcl_uuid, political_party, politician_email_address,
                                     politician_phone_number, politician_twitter_handle, politician_facebook_id,
@@ -680,15 +764,15 @@ class PoliticianManager(models.Manager):
                                                        politician_url=politician_website_url, ctcl_uuid=ctcl_uuid)
             if new_politician:
                 success = True
-                status = "POLITICIAN_CREATED"
+                status += "POLITICIAN_CREATED "
                 new_politician_created = True
             else:
                 success = False
-                status = "POLITICIAN_CREATE_FAILED"
+                status += "POLITICIAN_CREATE_FAILED "
         except Exception as e:
             success = False
             new_politician_created = False
-            status = "POLITICIAN_RETRIEVE_ERROR"
+            status += "POLITICIAN_RETRIEVE_ERROR "
             handle_exception(e, logger=logger, exception_message=status)
 
         results = {
@@ -777,6 +861,389 @@ class PoliticianManager(models.Manager):
 #             politician_entry = Politician.objects.order_by('last_name')[0]
 #             politician_entry.delete()
 
+    def retrieve_politicians(
+            self,
+            limit_to_this_state_code="",
+            read_only=False,
+    ):
+        """
+
+        :param limit_to_this_state_code:
+        :param read_only:
+        :return:
+        """
+        status = ""
+        politician_list = []
+        politician_list_found = False
+
+        try:
+            if positive_value_exists(read_only):
+                politician_query = Politician.objects.using('readonly').all()
+            else:
+                politician_query = Politician.objects.all()
+            if positive_value_exists(limit_to_this_state_code):
+                politician_query = politician_query.filter(state_code__iexact=limit_to_this_state_code)
+            politician_list = list(politician_query)
+
+            if len(politician_list):
+                politician_list_found = True
+                status += 'POLITICIANS_RETRIEVED '
+                success = True
+            else:
+                status += 'NO_POLITICIANS_RETRIEVED '
+                success = True
+        except Politician.DoesNotExist:
+            # No politicians found. Not a problem.
+            status += 'NO_POLITICIANS_FOUND_DoesNotExist '
+            politician_list_objects = []
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status += 'FAILED-retrieve_politicians_for_specific_elections: ' + str(e) + ' '
+            success = False
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'politician_list_found':    politician_list_found,
+            'politician_list':          politician_list,
+        }
+        return results
+
+    def retrieve_politicians_from_non_unique_identifiers(
+            self,
+            state_code='',
+            politician_twitter_handle='',
+            politician_name='',
+            ignore_politician_id_list=[],
+            read_only=False):
+        """
+
+        :param state_code:
+        :param politician_twitter_handle:
+        :param politician_name:
+        :param ignore_politician_id_list:
+        :param read_only:
+        :return:
+        """
+        keep_looking_for_duplicates = True
+        politician = None
+        politician_found = False
+        politician_list = []
+        politician_list_found = False
+        politician_twitter_handle = extract_twitter_handle_from_text_string(politician_twitter_handle)
+        multiple_entries_found = False
+        success = True
+        status = ""
+
+        if keep_looking_for_duplicates and positive_value_exists(politician_twitter_handle):
+            try:
+                if positive_value_exists(read_only):
+                    politician_query = Politician.objects.using('readonly').all()
+                else:
+                    politician_query = Politician.objects.all()
+
+                politician_query = politician_query.filter(politician_twitter_handle__iexact=politician_twitter_handle)
+                if positive_value_exists(state_code):
+                    politician_query = politician_query.filter(state_code__iexact=state_code)
+
+                if positive_value_exists(ignore_politician_id_list):
+                    politician_query = politician_query.exclude(we_vote_id__in=ignore_politician_id_list)
+
+                politician_list = list(politician_query)
+                if len(politician_list):
+                    # At least one entry exists
+                    status += 'RETRIEVE_POLITICIANS_FROM_NON_UNIQUE-POLITICIAN_LIST_RETRIEVED '
+                    # if a single entry matches, update that entry
+                    if len(politician_list) == 1:
+                        multiple_entries_found = False
+                        politician = politician_list[0]
+                        politician_found = True
+                        keep_looking_for_duplicates = False
+                        success = True
+                        status += "POLITICIAN_FOUND_BY_TWITTER "
+                    else:
+                        # more than one entry found
+                        politician_list_found = True
+                        multiple_entries_found = True
+                        keep_looking_for_duplicates = False  # Deal with multiple Twitter duplicates manually
+                        status += "MULTIPLE_TWITTER_MATCHES "
+            except Politician.DoesNotExist:
+                success = True
+                status += "RETRIEVE_POLITICIANS_FROM_NON_UNIQUE-POLITICIAN_NOT_FOUND "
+            except Exception as e:
+                status += "RETRIEVE_POLITICIANS_FROM_NON_UNIQUE-POLITICIAN_QUERY_FAILED1 " + str(e) + " "
+                success = False
+                keep_looking_for_duplicates = False
+
+        # twitter handle does not exist, next look up against other data that might match
+        if keep_looking_for_duplicates and positive_value_exists(politician_name):
+            # Search by Candidate name exact match
+            try:
+                if positive_value_exists(read_only):
+                    politician_query = Politician.objects.using('readonly').all()
+                else:
+                    politician_query = Politician.objects.all()
+
+                politician_query = politician_query.filter(
+                    Q(politician_name__iexact=politician_name) |
+                    Q(google_civic_candidate_name__iexact=politician_name) |
+                    Q(google_civic_candidate_name2__iexact=politician_name) |
+                    Q(google_civic_candidate_name3__iexact=politician_name)
+                )
+
+                if positive_value_exists(state_code):
+                    politician_query = politician_query.filter(state_code__iexact=state_code)
+
+                if positive_value_exists(ignore_politician_id_list):
+                    politician_query = politician_query.exclude(we_vote_id__in=ignore_politician_id_list)
+
+                politician_list = list(politician_query)
+                if len(politician_list):
+                    # entry exists
+                    status += 'POLITICIAN_ENTRY_EXISTS1 '
+                    success = True
+                    # if a single entry matches, update that entry
+                    if len(politician_list) == 1:
+                        politician = politician_list[0]
+                        politician_found = True
+                        status += politician.we_vote_id + " "
+                        keep_looking_for_duplicates = False
+                    else:
+                        # more than one entry found with a match in Politician
+                        politician_list_found = True
+                        keep_looking_for_duplicates = False
+                        multiple_entries_found = True
+                else:
+                    success = True
+                    status += 'POLITICIAN_ENTRY_NOT_FOUND-EXACT '
+
+            except Politician.DoesNotExist:
+                success = True
+                status += "RETRIEVE_POLITICIANS_FROM_NON_UNIQUE-POLITICIAN_NOT_FOUND-EXACT_MATCH "
+            except Exception as e:
+                status += "RETRIEVE_POLITICIANS_FROM_NON_UNIQUE-POLITICIAN_QUERY_FAILED2: " + str(e) + " "
+                success = False
+
+        if keep_looking_for_duplicates and positive_value_exists(politician_name):
+            # Search for Candidate(s) that contains the same first and last names
+            first_name = extract_first_name_from_full_name(politician_name)
+            last_name = extract_last_name_from_full_name(politician_name)
+            if positive_value_exists(first_name) and positive_value_exists(last_name):
+                try:
+                    if positive_value_exists(read_only):
+                        politician_query = Politician.objects.using('readonly').all()
+                    else:
+                        politician_query = Politician.objects.all()
+
+                    politician_query = politician_query.filter(
+                        (Q(politician_name__icontains=first_name) & Q(politician_name__icontains=last_name)) |
+                        (Q(google_civic_candidate_name__icontains=first_name) &
+                         Q(google_civic_candidate_name__icontains=last_name)) |
+                        (Q(google_civic_candidate_name2__icontains=first_name) &
+                         Q(google_civic_candidate_name2__icontains=last_name)) |
+                        (Q(google_civic_candidate_name3__icontains=first_name) &
+                         Q(google_civic_candidate_name3__icontains=last_name))
+                    )
+
+                    if positive_value_exists(state_code):
+                        politician_query = politician_query.filter(state_code__iexact=state_code)
+
+                    if positive_value_exists(ignore_politician_id_list):
+                        politician_query = politician_query.exclude(we_vote_id__in=ignore_politician_id_list)
+
+                    politician_list = list(politician_query)
+                    if len(politician_list):
+                        # entry exists
+                        status += 'POLITICIAN_ENTRY_EXISTS2 '
+                        success = True
+                        # if a single entry matches, update that entry
+                        if len(politician_list) == 1:
+                            politician = politician_list[0]
+                            politician_found = True
+                            status += politician.we_vote_id + " "
+                            keep_looking_for_duplicates = False
+                        else:
+                            # more than one entry found with a match in Politician
+                            politician_list_found = True
+                            keep_looking_for_duplicates = False
+                            multiple_entries_found = True
+                    else:
+                        status += 'POLITICIAN_ENTRY_NOT_FOUND-FIRST_OR_LAST '
+                        success = True
+                except Politician.DoesNotExist:
+                    status += "RETRIEVE_POLITICIANS_FROM_NON_UNIQUE-POLITICIAN_NOT_FOUND-FIRST_OR_LAST_NAME "
+                    success = True
+                except Exception as e:
+                    status += "RETRIEVE_POLITICIANS_FROM_NON_UNIQUE-POLITICIAN_QUERY_FAILED3: " + str(e) + " "
+                    success = False
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'politician_found':         politician_found,
+            'politician':               politician,
+            'politician_list_found':    politician_list_found,
+            'politician_list':          politician_list,
+            'multiple_entries_found':   multiple_entries_found,
+        }
+        return results
+
+    def fetch_politicians_from_non_unique_identifiers_count(
+            self,
+            state_code='',
+            politician_twitter_handle='',
+            politician_name='',
+            ignore_politician_id_list=[]):
+        keep_looking_for_duplicates = True
+        politician_twitter_handle = extract_twitter_handle_from_text_string(politician_twitter_handle)
+        status = ""
+
+        if keep_looking_for_duplicates and positive_value_exists(politician_twitter_handle):
+            try:
+                politician_query = Politician.objects.all()
+                politician_query = politician_query.filter(politician_twitter_handle__iexact=politician_twitter_handle)
+
+                if positive_value_exists(state_code):
+                    politician_query = politician_query.filter(state_code__iexact=state_code)
+
+                if positive_value_exists(ignore_politician_id_list):
+                    politician_query = politician_query.exclude(we_vote_id__in=ignore_politician_id_list)
+
+                politician_count = politician_query.count()
+                if positive_value_exists(politician_count):
+                    return politician_count
+            except Politician.DoesNotExist:
+                status += "FETCH_POLITICIANS_FROM_NON_UNIQUE_IDENTIFIERS_COUNT1 "
+                # twitter handle does not exist, next look up against other data that might match
+
+        if keep_looking_for_duplicates and positive_value_exists(politician_name):
+            # Search by Candidate name exact match
+            try:
+                politician_query = Politician.objects.all()
+                politician_query = politician_query.filter(
+                    Q(politician_name__iexact=politician_name) |
+                    Q(google_civic_candidate_name__iexact=politician_name) |
+                    Q(google_civic_candidate_name2__iexact=politician_name) |
+                    Q(google_civic_candidate_name3__iexact=politician_name)
+                )
+
+                if positive_value_exists(state_code):
+                    politician_query = politician_query.filter(state_code__iexact=state_code)
+
+                if positive_value_exists(ignore_politician_id_list):
+                    politician_query = politician_query.exclude(we_vote_id__in=ignore_politician_id_list)
+
+                politician_count = politician_query.count()
+                if positive_value_exists(politician_count):
+                    return politician_count
+            except Politician.DoesNotExist:
+                status += "FETCH_POLITICIANS_FROM_NON_UNIQUE_IDENTIFIERS_COUNT2 "
+
+        if keep_looking_for_duplicates and positive_value_exists(politician_name):
+            # Search for Candidate(s) that contains the same first and last names
+            first_name = extract_first_name_from_full_name(politician_name)
+            last_name = extract_last_name_from_full_name(politician_name)
+            if positive_value_exists(first_name) and positive_value_exists(last_name):
+                try:
+                    politician_query = Politician.objects.all()
+
+                    politician_query = politician_query.filter(
+                        (Q(politician_name__icontains=first_name) & Q(politician_name__icontains=last_name)) |
+                        (Q(google_civic_candidate_name__icontains=first_name) &
+                         Q(google_civic_candidate_name__icontains=last_name)) |
+                        (Q(google_civic_candidate_name2__icontains=first_name) &
+                         Q(google_civic_candidate_name2__icontains=last_name)) |
+                        (Q(google_civic_candidate_name3__icontains=first_name) &
+                         Q(google_civic_candidate_name3__icontains=last_name))
+                    )
+
+                    if positive_value_exists(state_code):
+                        politician_query = politician_query.filter(state_code__iexact=state_code)
+
+                    if positive_value_exists(ignore_politician_id_list):
+                        politician_query = politician_query.exclude(we_vote_id__in=ignore_politician_id_list)
+
+                    politician_count = politician_query.count()
+                    if positive_value_exists(politician_count):
+                        return politician_count
+                except Politician.DoesNotExist:
+                    status += "FETCH_POLITICIANS_FROM_NON_UNIQUE_IDENTIFIERS_COUNT3 "
+
+        return 0
+
+    def retrieve_politicians_are_not_duplicates_list(self, politician_we_vote_id, read_only=True):
+        """
+        Get a list of other politician_we_vote_id's that are not duplicates
+        :param politician_we_vote_id:
+        :param read_only:
+        :return:
+        """
+        # Note that the direction of the linkage does not matter
+        politicians_are_not_duplicates_list1 = []
+        politicians_are_not_duplicates_list2 = []
+        status = ""
+        try:
+            if positive_value_exists(read_only):
+                politicians_are_not_duplicates_list_query = \
+                    PoliticiansAreNotDuplicates.objects.using('readonly').filter(
+                        politician1_we_vote_id__iexact=politician_we_vote_id,
+                    )
+            else:
+                politicians_are_not_duplicates_list_query = PoliticiansAreNotDuplicates.objects.filter(
+                    politician1_we_vote_id__iexact=politician_we_vote_id,
+                )
+            politicians_are_not_duplicates_list1 = list(politicians_are_not_duplicates_list_query)
+            success = True
+            status += "POLITICIANS_NOT_DUPLICATES_LIST_UPDATED_OR_CREATED1 "
+        except PoliticiansAreNotDuplicates.DoesNotExist:
+            # No data found. Try again below
+            success = True
+            status += 'NO_POLITICIANS_NOT_DUPLICATES_LIST_RETRIEVED_DoesNotExist1 '
+        except Exception as e:
+            success = False
+            status += "POLITICIANS_NOT_DUPLICATES_LIST_NOT_UPDATED_OR_CREATED1: " + str(e) + ' '
+
+        if success:
+            try:
+                if positive_value_exists(read_only):
+                    politicians_are_not_duplicates_list_query = \
+                        PoliticiansAreNotDuplicates.objects.using('readonly').filter(
+                            politician2_we_vote_id__iexact=politician_we_vote_id,
+                        )
+                else:
+                    politicians_are_not_duplicates_list_query = \
+                        PoliticiansAreNotDuplicates.objects.filter(
+                            politician2_we_vote_id__iexact=politician_we_vote_id,
+                        )
+                politicians_are_not_duplicates_list2 = list(politicians_are_not_duplicates_list_query)
+                success = True
+                status += "POLITICIANS_NOT_DUPLICATES_LIST_UPDATED_OR_CREATED2 "
+            except PoliticiansAreNotDuplicates.DoesNotExist:
+                success = True
+                status += 'NO_POLITICIANS_NOT_DUPLICATES_LIST_RETRIEVED2_DoesNotExist2 '
+            except Exception as e:
+                success = False
+                status += "POLITICIANS_NOT_DUPLICATES_LIST_NOT_UPDATED_OR_CREATED2: " + str(e) + ' '
+
+        politicians_are_not_duplicates_list = \
+            politicians_are_not_duplicates_list1 + politicians_are_not_duplicates_list2
+        politicians_are_not_duplicates_list_found = positive_value_exists(len(politicians_are_not_duplicates_list))
+        politicians_are_not_duplicates_list_we_vote_ids = []
+        for one_entry in politicians_are_not_duplicates_list:
+            if one_entry.politician1_we_vote_id != politician_we_vote_id:
+                politicians_are_not_duplicates_list_we_vote_ids.append(one_entry.politician1_we_vote_id)
+            elif one_entry.politician2_we_vote_id != politician_we_vote_id:
+                politicians_are_not_duplicates_list_we_vote_ids.append(one_entry.politician2_we_vote_id)
+        results = {
+            'success':                                          success,
+            'status':                                           status,
+            'politicians_are_not_duplicates_list_found':        politicians_are_not_duplicates_list_found,
+            'politicians_are_not_duplicates_list':              politicians_are_not_duplicates_list,
+            'politicians_are_not_duplicates_list_we_vote_ids':  politicians_are_not_duplicates_list_we_vote_ids,
+        }
+        return results
+
     def retrieve_politicians_with_misformatted_names(self, start=0, count=15):
         """
         Get the first 15 records that have 3 capitalized letters in a row, as long as those letters
@@ -808,6 +1275,47 @@ class PoliticianManager(models.Manager):
             # out += name + ' = > ' + x.person_name_normalized + ', '
 
         return results_list, number_of_rows
+
+    def update_or_create_politicians_are_not_duplicates(self, politician1_we_vote_id, politician2_we_vote_id):
+        """
+        Either update or create a politician entry.
+        """
+        exception_multiple_object_returned = False
+        success = False
+        new_politicians_are_not_duplicates_created = False
+        politicians_are_not_duplicates = None
+        status = ""
+
+        if positive_value_exists(politician1_we_vote_id) and positive_value_exists(politician2_we_vote_id):
+            try:
+                updated_values = {
+                    'politician1_we_vote_id':    politician1_we_vote_id,
+                    'politician2_we_vote_id':    politician2_we_vote_id,
+                }
+                politicians_are_not_duplicates, new_politicians_are_not_duplicates_created = \
+                    PoliticiansAreNotDuplicates.objects.update_or_create(
+                        politician1_we_vote_id__exact=politician1_we_vote_id,
+                        politician2_we_vote_id__iexact=politician2_we_vote_id,
+                        defaults=updated_values)
+                success = True
+                status += "POLITICIANS_ARE_NOT_DUPLICATES_UPDATED_OR_CREATED "
+            except PoliticiansAreNotDuplicates.MultipleObjectsReturned as e:
+                success = False
+                status += 'MULTIPLE_MATCHING_POLITICIANS_ARE_NOT_DUPLICATES_FOUND_BY_POLITICIAN_WE_VOTE_ID '
+                exception_multiple_object_returned = True
+            except Exception as e:
+                status += 'EXCEPTION_UPDATE_OR_CREATE_POLITICIANS_ARE_NOT_DUPLICATES ' \
+                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                success = False
+
+        results = {
+            'success':                                      success,
+            'status':                                       status,
+            'MultipleObjectsReturned':                      exception_multiple_object_returned,
+            'new_politicians_are_not_duplicates_created':   new_politicians_are_not_duplicates_created,
+            'politicians_are_not_duplicates':               politicians_are_not_duplicates,
+        }
+        return results
 
 
 class PoliticianTagLink(models.Model):

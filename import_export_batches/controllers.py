@@ -1312,7 +1312,9 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                 candidate_list_manager = CandidateListManager()
                 google_civic_election_id_list = [google_civic_election_id]
                 matching_results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
-                    google_civic_election_id_list, state_code, '', candidate_name)
+                    google_civic_election_id_list=google_civic_election_id_list,
+                    state_code=state_code,
+                    candidate_name=candidate_name)
 
                 if matching_results['candidate_found']:
                     candidate = matching_results['candidate']
@@ -2159,7 +2161,10 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
     if keep_looking_for_duplicates and not positive_value_exists(ballotpedia_candidate_id):
         google_civic_election_id_list = [google_civic_election_id]
         matching_results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
-            google_civic_election_id_list, state_code, candidate_twitter_handle, candidate_name)
+            google_civic_election_id_list=google_civic_election_id_list,
+            state_code=state_code,
+            candidate_twitter_handle=candidate_twitter_handle,
+            candidate_name=candidate_name)
 
         if matching_results['candidate_found']:
             candidate = matching_results['candidate']
@@ -2572,7 +2577,10 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
         candidate_list_manager = CandidateListManager()
         google_civic_election_id_list = [google_civic_election_id]
         matching_results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
-            google_civic_election_id_list, state_code, candidate_twitter_handle, candidate_name)
+            google_civic_election_id_list=google_civic_election_id_list,
+            state_code=state_code,
+            candidate_twitter_handle=candidate_twitter_handle,
+            candidate_name=candidate_name)
 
         if matching_results['candidate_found']:
             candidate = matching_results['candidate']
@@ -2910,7 +2918,11 @@ def create_batch_row_action_ballot_item(batch_description,
         google_civic_election_id_list = [google_civic_election_id]
         # Needs to be read_only=False so we don't get "terminating connection due to conflict with recovery" error
         matching_results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
-            google_civic_election_id_list, state_code, candidate_twitter_handle, candidate_name, read_only=False)
+            google_civic_election_id_list=google_civic_election_id_list,
+            state_code=state_code,
+            candidate_twitter_handle=candidate_twitter_handle,
+            candidate_name=candidate_name,
+            read_only=False)
         if matching_results['candidate_found']:
             candidate = matching_results['candidate']
             keep_looking_for_duplicates = False

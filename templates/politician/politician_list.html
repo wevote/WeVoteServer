@@ -9,8 +9,14 @@
 
 <h1>Politicians</h1>
 
-<a href="{% url 'politician:politician_new' %}?state_code={{ state_code }}">Add New Politician</a>,&nbsp;&nbsp;&nbsp;
-<a href="{% url 'candidate:repair_imported_names' %}?is_candidate=false" >Repair Imported Candidate Names</a>
+    <ul>
+        <li><a href="{% url 'politician:politician_new' %}?state_code={{ state_code }}">Add New Politician</a></li>
+        <li><a href="{% url 'politician:find_and_merge_duplicate_politicians' %}?state_code={{ state_code }}"
+                        target="_blank" >
+            Find and Merge Duplicate Politicians <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
+        <li><a href="{% url 'candidate:repair_imported_names' %}?is_candidate=false" >Repair Imported Candidate Names</a></li>
+    </ul>
+
 <br /><br />
 
 <form name="state_code_form" method="get" action="{% url 'politician:politician_list' %}">
@@ -27,7 +33,7 @@
         {% endfor %}
         </select>
         {% if state_code != "" %}
-        <a href="{% url 'politician:politician_list' %}?candidate_search={{ candidate_search }}">
+        <a href="{% url 'politician:politician_list' %}?politician_search={{ politician_search }}">
             show all states</a>&nbsp;&nbsp;&nbsp;
         {% endif %}
     {% endif %}{# End of if state_list #}

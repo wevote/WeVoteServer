@@ -307,7 +307,10 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):  # tw
         candidate_list_manager = CandidateListManager()
         google_civic_election_id_list = [google_civic_election_id_voter_is_watching]
         candidate_results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
-            google_civic_election_id_list, state_code, twitter_handle, candidate_name)
+            google_civic_election_id_list=google_civic_election_id_list,
+            state_code=state_code,
+            candidate_twitter_handle=twitter_handle,
+            candidate_name=candidate_name)
         if candidate_results['candidate_list_found']:
             candidate_list = candidate_results['candidate_list']
 

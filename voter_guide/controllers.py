@@ -625,7 +625,9 @@ def augment_candidate_possible_position_data(
         possible_endorsement_matched = True
         # If here search for possible candidate matches
         matching_results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
-            google_civic_election_id_list, limit_to_this_state_code, '', possible_endorsement['ballot_item_name'])
+            google_civic_election_id_list=google_civic_election_id_list,
+            state_code=limit_to_this_state_code,
+            candidate_name=possible_endorsement['ballot_item_name'])
 
         if matching_results['candidate_found']:
             candidate = matching_results['candidate']
@@ -1875,8 +1877,10 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
                 limit_to_this_state_code=limit_to_this_state_code)
             candidate_list_manager = CandidateListManager()
             results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
-                google_civic_election_id_list, limit_to_this_state_code,
-                possible_candidate_twitter_handle, possible_candidate_name)
+                google_civic_election_id_list=google_civic_election_id_list,
+                state_code=limit_to_this_state_code,
+                candidate_twitter_handle=possible_candidate_twitter_handle,
+                candidate_name=possible_candidate_name)
             possible_candidate_list = []
             if results['candidate_list_found']:
                 possible_candidate_list = results['candidate_list']
