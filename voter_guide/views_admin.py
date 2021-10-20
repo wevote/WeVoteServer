@@ -512,7 +512,10 @@ def voter_guide_create_view(request):
         elif positive_value_exists(candidate_name) or positive_value_exists(candidate_twitter_handle) \
                 and not positive_value_exists(clear_candidate_options):
             results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
-                    google_civic_election_id_list, state_code, candidate_twitter_handle, candidate_name)
+                google_civic_election_id_list=google_civic_election_id_list,
+                state_code=state_code,
+                candidate_twitter_handle=candidate_twitter_handle,
+                candidate_name=candidate_name)
             if results['candidate_list_found']:
                 owner_of_website_candidate_list = results['candidate_list']
                 owner_of_website_candidate_list_count = len(owner_of_website_candidate_list)
@@ -1049,7 +1052,10 @@ def voter_guide_create_process_view(request):
         if not positive_value_exists(candidate_found):
             if positive_value_exists(candidate_twitter_handle):
                 results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
-                    google_civic_election_id_list, state_code, candidate_twitter_handle, candidate_name)
+                    google_civic_election_id_list=google_civic_election_id_list,
+                    state_code=state_code,
+                    candidate_twitter_handle=candidate_twitter_handle,
+                    candidate_name=candidate_name)
                 if results['candidate_found']:
                     candidate = results['candidate']
                     candidate_found = True

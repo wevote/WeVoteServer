@@ -18,8 +18,7 @@ from django.urls import reverse
 import wevote_functions.admin
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.controllers import retrieve_candidate_photos
-from candidate.models import CandidateCampaign
-from candidate.models import CandidateManager
+from candidate.models import CandidateCampaign, CandidateListManager, CandidateManager
 from config.base import get_environment_variable
 from election.models import Election
 from exception.models import handle_record_found_more_than_one_exception, \
@@ -34,13 +33,167 @@ from wevote_functions.functions import convert_to_int, convert_to_political_part
     extract_middle_name_from_full_name, \
     extract_last_name_from_full_name, extract_twitter_handle_from_text_string, \
     positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization
-from .controllers import politicians_import_from_master_server
-from .models import Politician, PoliticianManager
+from .controllers import fetch_duplicate_politician_count, figure_out_politician_conflict_values, \
+    find_duplicate_politician, \
+    merge_if_duplicate_politicians, merge_these_two_politicians, politicians_import_from_master_server
+from .models import Politician, PoliticianManager, POLITICIAN_UNIQUE_IDENTIFIERS
 
 POLITICIANS_SYNC_URL = get_environment_variable("POLITICIANS_SYNC_URL")  # politiciansSyncOut
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+
+@login_required
+def compare_two_politicians_for_merge_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    politician1_we_vote_id = request.GET.get('politician1_we_vote_id', 0)
+    politician2_we_vote_id = request.GET.get('politician2_we_vote_id', 0)
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(google_civic_election_id)
+
+    politician_manager = PoliticianManager()
+    politician_results = politician_manager.retrieve_politician(we_vote_id=politician1_we_vote_id)
+    if not politician_results['politician_found']:
+        messages.add_message(request, messages.ERROR, "Politician1 not found.")
+        return HttpResponseRedirect(reverse('politician:politician_list', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id))
+
+    politician_option1_for_template = politician_results['politician']
+
+    politician_results = politician_manager.retrieve_politician(we_vote_id=politician2_we_vote_id)
+    if not politician_results['politician_found']:
+        messages.add_message(request, messages.ERROR, "Politician2 not found.")
+        return HttpResponseRedirect(reverse('politician:politician_summary', args=(politician_option1_for_template.id,)) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id))
+
+    politician_option2_for_template = politician_results['politician']
+
+    politician_merge_conflict_values = figure_out_politician_conflict_values(
+        politician_option1_for_template, politician_option2_for_template)
+
+    # This view function takes us to displaying a template
+    remove_duplicate_process = False  # Do not try to find another office to merge after finishing
+    return render_politician_merge_form(
+        request,
+        politician_option1_for_template,
+        politician_option2_for_template,
+        politician_merge_conflict_values,
+        remove_duplicate_process)
+
+
+@login_required
+def find_and_merge_duplicate_politicians_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    find_number_of_duplicates = request.GET.get('find_number_of_duplicates', 0)
+    state_code = request.GET.get('state_code', "")
+    politician_manager = PoliticianManager()
+
+    results = politician_manager.retrieve_politicians(
+        limit_to_this_state_code=state_code,
+        read_only=False)
+    politician_list = results['politician_list']
+
+    # Loop through all of the politicians to see how many have possible duplicates
+    if positive_value_exists(find_number_of_duplicates):
+        ignore_politician_id_list = []
+        duplicate_politician_count = 0
+        for we_vote_politician in politician_list:
+            # Note that we don't reset the ignore_politician_list, so we don't search for a duplicate both directions
+            ignore_politician_id_list.append(we_vote_politician.we_vote_id)
+            duplicate_politician_count_temp = fetch_duplicate_politician_count(
+                we_vote_politician, ignore_politician_id_list)
+            duplicate_politician_count += duplicate_politician_count_temp
+
+        if positive_value_exists(duplicate_politician_count):
+            messages.add_message(request, messages.INFO, "There are approximately {duplicate_politician_count} "
+                                                         "possible duplicates."
+                                                         "".format(duplicate_politician_count=duplicate_politician_count))
+
+    # Loop through all of the politicians in this election
+    for we_vote_politician in politician_list:
+        ignore_politician_id_list = []
+        # Add current politician entry to the ignore list
+        ignore_politician_id_list.append(we_vote_politician.we_vote_id)
+        # Now check to for other politicians we have labeled as "not a duplicate"
+        not_a_duplicate_list = politician_manager.fetch_politicians_are_not_duplicates_list_we_vote_ids(
+            we_vote_politician.we_vote_id)
+
+        ignore_politician_id_list += not_a_duplicate_list
+
+        results = find_duplicate_politician(we_vote_politician, ignore_politician_id_list)
+
+        # If we find politicians to merge, stop and ask for confirmation
+        if results['politician_merge_possibility_found']:
+            politician_option1_for_template = we_vote_politician
+            politician_option2_for_template = results['politician_merge_possibility']
+
+            # Can we automatically merge these politicians?
+            merge_results = merge_if_duplicate_politicians(
+                politician_option1_for_template,
+                politician_option2_for_template,
+                results['politician_merge_conflict_values'])
+
+            if merge_results['politicians_merged']:
+                politician = merge_results['politician']
+                messages.add_message(request, messages.INFO, "Politician {politician_name} automatically merged."
+                                                             "".format(politician_name=politician.politician_name))
+                return HttpResponseRedirect(reverse('politician:find_and_merge_duplicate_politicians', args=()) +
+                                            "?state_code=" + str(state_code))
+            else:
+                # This view function takes us to displaying a template
+                remove_duplicate_process = True  # Try to find another politician to merge after finishing
+                return render_politician_merge_form(
+                    request,
+                    politician_option1_for_template,
+                    politician_option2_for_template,
+                    results['politician_merge_conflict_values'],
+                    remove_duplicate_process)
+
+    message = "No duplicate politicians found. State: {state_code}" \
+              "".format(state_code=state_code)
+
+    messages.add_message(request, messages.INFO, message)
+
+    return HttpResponseRedirect(reverse('politician:politician_list', args=()) +
+                                "?state_code={state_code}"
+                                "".format(
+                                    state_code=state_code))
+
+
+def render_politician_merge_form(
+        request, politician_option1_for_template,
+        politician_option2_for_template,
+        politician_merge_conflict_values,
+        remove_duplicate_process=True):
+    candidate_list_manager = CandidateListManager()
+
+    # Get number of candidates linked to each politician
+    politician_option1_for_template.linked_candidates_count = \
+        candidate_list_manager.fetch_candidate_count_for_politician(
+            politician_option1_for_template.id, politician_option1_for_template.we_vote_id)
+
+    politician_option2_for_template.linked_candidates_count = \
+        candidate_list_manager.fetch_candidate_count_for_politician(
+            politician_option2_for_template.id, politician_option2_for_template.we_vote_id)
+
+    messages_on_stage = get_messages(request)
+    template_values = {
+        'messages_on_stage':        messages_on_stage,
+        'politician_option1':       politician_option1_for_template,
+        'politician_option2':       politician_option2_for_template,
+        'conflict_values':          politician_merge_conflict_values,
+        'remove_duplicate_process': remove_duplicate_process,
+    }
+    return render(request, 'politician/politician_merge.html', template_values)
 
 
 @login_required
@@ -133,6 +286,7 @@ def politician_list_view(request):
 
                     politician_query = politician_query.filter(final_filters)
 
+        politician_list_count = politician_query.count()
         if not positive_value_exists(show_all):
             politician_query = politician_query.order_by('politician_name')[:25]
     except ObjectDoesNotExist:
@@ -145,7 +299,9 @@ def politician_list_view(request):
     for one_politician in politician_list:
         try:
             linked_candidate_query = CandidateCampaign.objects.all()
-            linked_candidate_query = linked_candidate_query.filter(politician_we_vote_id=one_politician.we_vote_id)
+            linked_candidate_query = linked_candidate_query.filter(
+                Q(politician_we_vote_id__iexact=one_politician.we_vote_id) |
+                Q(politician_id=one_politician.id))
             linked_candidate_list_count = linked_candidate_query.count()
             one_politician.linked_candidate_list_count = linked_candidate_list_count
 
@@ -186,6 +342,8 @@ def politician_list_view(request):
 
     election_list = Election.objects.order_by('-election_day_text')
 
+    messages.add_message(request, messages.INFO, "Politician Count: " + str(politician_list_count))
+
     template_values = {
         'messages_on_stage':        messages_on_stage,
         'google_civic_election_id': google_civic_election_id,
@@ -196,6 +354,100 @@ def politician_list_view(request):
         'state_list':               sorted_state_list,
     }
     return render(request, 'politician/politician_list.html', template_values)
+
+
+@login_required
+def politician_merge_process_view(request):
+    """
+    Process the merging of two politicians
+    :param request:
+    :return:
+    """
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    politician_manager = PoliticianManager()
+
+    merge = request.POST.get('merge', False)
+    skip = request.POST.get('skip', False)
+
+    # Politician 1 is the one we keep, and Politician 2 is the one we will merge into Politician 1
+    politician1_we_vote_id = request.POST.get('politician1_we_vote_id', 0)
+    politician2_we_vote_id = request.POST.get('politician2_we_vote_id', 0)
+    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    redirect_to_politician_list = request.POST.get('redirect_to_politician_list', False)
+    remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
+    state_code = request.POST.get('state_code', '')
+
+    if positive_value_exists(skip):
+        results = politician_manager.update_or_create_politicians_are_not_duplicates(
+            politician1_we_vote_id, politician2_we_vote_id)
+        if not results['new_politicians_are_not_duplicates_created']:
+            messages.add_message(request, messages.ERROR, 'Could not save politicians_are_not_duplicates entry: ' +
+                                 results['status'])
+        messages.add_message(request, messages.INFO, 'Prior politicians skipped, and not merged.')
+        return HttpResponseRedirect(reverse('politician:find_and_merge_duplicate_politicians', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
+
+    politician1_results = politician_manager.retrieve_politician(we_vote_id=politician1_we_vote_id)
+    if politician1_results['politician_found']:
+        politician1_on_stage = politician1_results['politician']
+    else:
+        messages.add_message(request, messages.ERROR, 'Could not retrieve politician 1.')
+        return HttpResponseRedirect(reverse('politician:politician_list', args=()) +
+                                    '?google_civic_election_id=' + str(google_civic_election_id) +
+                                    '&state_code=' + str(state_code))
+
+    politician2_results = politician_manager.retrieve_politician_from_we_vote_id(politician2_we_vote_id)
+    if politician2_results['politician_found']:
+        politician2_on_stage = politician2_results['politician']
+    else:
+        messages.add_message(request, messages.ERROR, 'Could not retrieve politician 2.')
+        return HttpResponseRedirect(reverse('politician:politician_list', args=()) +
+                                    '?google_civic_election_id=' + str(google_civic_election_id) +
+                                    '&state_code=' + str(state_code))
+
+    # Gather choices made from merge form
+    conflict_values = figure_out_politician_conflict_values(politician1_on_stage, politician2_on_stage)
+    admin_merge_choices = {}
+    for attribute in POLITICIAN_UNIQUE_IDENTIFIERS:
+        conflict_value = conflict_values.get(attribute, None)
+        if conflict_value == "CONFLICT":
+            choice = request.POST.get(attribute + '_choice', '')
+            if politician2_we_vote_id == choice:
+                admin_merge_choices[attribute] = getattr(politician2_on_stage, attribute)
+        elif conflict_value == "CANDIDATE2":
+            admin_merge_choices[attribute] = getattr(politician2_on_stage, attribute)
+
+    merge_results = merge_these_two_politicians(politician1_we_vote_id, politician2_we_vote_id, admin_merge_choices)
+
+    if positive_value_exists(merge_results['politicians_merged']):
+        politician = merge_results['politician']
+        messages.add_message(request, messages.INFO, "Politician '{politician_name}' merged."
+                                                     "".format(politician_name=politician.politician_name))
+    else:
+        # NOTE: We could also redirect to a page to look specifically at these two politicians, but this should
+        # also get you back to looking at the two politicians
+        messages.add_message(request, messages.ERROR, merge_results['status'])
+        return HttpResponseRedirect(reverse('politician:find_and_merge_duplicate_politicians', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&auto_merge_off=1" +
+                                    "&state_code=" + str(state_code))
+
+    if redirect_to_politician_list:
+        return HttpResponseRedirect(reverse('politician:politician_list', args=()) +
+                                    '?google_civic_election_id=' + str(google_civic_election_id) +
+                                    '&state_code=' + str(state_code))
+
+    if remove_duplicate_process:
+        return HttpResponseRedirect(reverse('politician:find_and_merge_duplicate_politicians', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
+
+    return HttpResponseRedirect(reverse('politician:politician_edit', args=(politician1_on_stage.id,)))
 
 
 @login_required
@@ -211,6 +463,8 @@ def politician_new_view(request):
     # These variables are here because there was an error on the edit_process_view and the voter needs to try again
     politician_name = request.GET.get('politician_name', "")
     google_civic_candidate_name = request.GET.get('google_civic_candidate_name', "")
+    google_civic_candidate_name2 = request.GET.get('google_civic_candidate_name2', "")
+    google_civic_candidate_name3 = request.GET.get('google_civic_candidate_name3', "")
     state_code = request.GET.get('state_code', "")
     politician_twitter_handle = request.GET.get('politician_twitter_handle', "")
     politician_url = request.GET.get('politician_url', "")
@@ -251,6 +505,8 @@ def politician_new_view(request):
         # Incoming variables, not saved yet
         'politician_name':                   politician_name,
         'google_civic_candidate_name':      google_civic_candidate_name,
+        'google_civic_candidate_name2':      google_civic_candidate_name2,
+        'google_civic_candidate_name3':      google_civic_candidate_name3,
         'state_code':                       state_code,
         'politician_twitter_handle':         politician_twitter_handle,
         'politician_url':                    politician_url,
@@ -281,6 +537,8 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
     politician_name = request.GET.get('politician_name', False)
     state_code = request.GET.get('state_code', False)
     google_civic_candidate_name = request.GET.get('google_civic_candidate_name', False)
+    google_civic_candidate_name2 = request.GET.get('google_civic_candidate_name2', False)
+    google_civic_candidate_name3 = request.GET.get('google_civic_candidate_name3', False)
     politician_twitter_handle = request.GET.get('politician_twitter_handle', False)
     politician_url = request.GET.get('politician_url', False)
     political_party = request.GET.get('political_party', False)
@@ -332,7 +590,8 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
         try:
             linked_candidate_list = CandidateCampaign.objects.all()
             linked_candidate_list = linked_candidate_list.filter(
-                politician_we_vote_id__iexact=politician_on_stage.we_vote_id)
+                Q(politician_we_vote_id__iexact=politician_on_stage.we_vote_id) |
+                Q(politician_id=politician_on_stage.id))
         except Exception as e:
             linked_candidate_list = []
 
@@ -340,7 +599,8 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
         try:
             related_candidate_list = CandidateCampaign.objects.all()
             related_candidate_list = related_candidate_list.exclude(
-                politician_we_vote_id__iexact=politician_on_stage.we_vote_id)
+                Q(politician_we_vote_id__iexact=politician_on_stage.we_vote_id) |
+                Q(politician_id=politician_on_stage.id))
 
             filters = []
             new_filter = Q(candidate_name__icontains=politician_on_stage.first_name) & \
@@ -433,6 +693,8 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             'politician_name':              politician_name,
             'state_code':                   state_code,
             'google_civic_candidate_name':  google_civic_candidate_name,
+            'google_civic_candidate_name2':  google_civic_candidate_name2,
+            'google_civic_candidate_name3':  google_civic_candidate_name3,
             'politician_twitter_handle':    politician_twitter_handle,
             'politician_url':               politician_url,
             'political_party':              political_party,
@@ -484,6 +746,8 @@ def politician_edit_process_view(request):
     politician_id = convert_to_int(request.POST['politician_id'])
     politician_name = request.POST.get('politician_name', False)
     google_civic_candidate_name = request.POST.get('google_civic_candidate_name', False)
+    google_civic_candidate_name2 = request.POST.get('google_civic_candidate_name2', False)
+    google_civic_candidate_name3 = request.POST.get('google_civic_candidate_name3', False)
     politician_twitter_handle = request.POST.get('politician_twitter_handle', False)
     if positive_value_exists(politician_twitter_handle):
         politician_twitter_handle = extract_twitter_handle_from_text_string(politician_twitter_handle)
@@ -539,6 +803,8 @@ def politician_edit_process_view(request):
             url_variables = "?politician_name=" + str(politician_name) + \
                             "&state_code=" + str(state_code) + \
                             "&google_civic_candidate_name=" + str(google_civic_candidate_name) + \
+                            "&google_civic_candidate_name2=" + str(google_civic_candidate_name2) + \
+                            "&google_civic_candidate_name3=" + str(google_civic_candidate_name3) + \
                             "&politician_twitter_handle=" + str(politician_twitter_handle) + \
                             "&politician_url=" + str(politician_url) + \
                             "&political_party=" + str(political_party) + \
@@ -558,6 +824,10 @@ def politician_edit_process_view(request):
                 politician_on_stage.state_code = state_code
             if google_civic_candidate_name is not False:
                 politician_on_stage.google_civic_candidate_name = google_civic_candidate_name
+            if google_civic_candidate_name2 is not False:
+                politician_on_stage.google_civic_candidate_name2 = google_civic_candidate_name2
+            if google_civic_candidate_name3 is not False:
+                politician_on_stage.google_civic_candidate_name3 = google_civic_candidate_name3
             if politician_twitter_handle is not False:
                 politician_on_stage.politician_twitter_handle = politician_twitter_handle
             if politician_url is not False:
@@ -590,6 +860,10 @@ def politician_edit_process_view(request):
                 politician_on_stage.last_name = extract_last_name_from_full_name(politician_name)
                 if google_civic_candidate_name is not False:
                     politician_on_stage.google_civic_candidate_name = google_civic_candidate_name
+                if google_civic_candidate_name2 is not False:
+                    politician_on_stage.google_civic_candidate_name2 = google_civic_candidate_name2
+                if google_civic_candidate_name3 is not False:
+                    politician_on_stage.google_civic_candidate_name3 = google_civic_candidate_name3
                 if politician_twitter_handle is not False:
                     politician_on_stage.politician_twitter_handle = politician_twitter_handle
                 if politician_url is not False:
@@ -616,6 +890,8 @@ def politician_edit_process_view(request):
                 url_variables = "?politician_name=" + str(politician_name) + \
                                 "&state_code=" + str(state_code) + \
                                 "&google_civic_candidate_name=" + str(google_civic_candidate_name) + \
+                                "&google_civic_candidate_name2=" + str(google_civic_candidate_name2) + \
+                                "&google_civic_candidate_name3=" + str(google_civic_candidate_name3) + \
                                 "&politician_twitter_handle=" + str(politician_twitter_handle) + \
                                 "&politician_url=" + str(politician_url) + \
                                 "&political_party=" + str(political_party) + \
@@ -633,6 +909,40 @@ def politician_edit_process_view(request):
         handle_record_not_saved_exception(e, logger=logger)
         messages.add_message(request, messages.ERROR, 'Could not save politician.')
         return HttpResponseRedirect(reverse('politician:politician_edit', args=(politician_id,)))
+
+    position_list_manager = PositionListManager()
+    # ##################################
+    # Unlink Candidates from this Politician
+    try:
+        linked_candidate_query = CandidateCampaign.objects.all()
+        linked_candidate_query = linked_candidate_query.filter(
+            Q(politician_we_vote_id__iexact=politician_on_stage.we_vote_id) |
+            Q(politician_id=politician_on_stage.id)
+        )
+        linked_candidate_list = list(linked_candidate_query)
+    except Exception as e:
+        messages.add_message(request, messages.ERROR, 'LINKED_CANDIDATE_PROBLEM: ' + str(e))
+        linked_candidate_list = []
+    for candidate in linked_candidate_list:
+        if positive_value_exists(candidate.id):
+            variable_name = "unlink_candidate_" + str(candidate.id) + "_from_politician"
+            unlink_candidate = positive_value_exists(request.POST.get(variable_name, False))
+            if positive_value_exists(unlink_candidate) and positive_value_exists(politician_we_vote_id):
+                candidate.politician_we_vote_id = None
+                candidate.politician_id = None
+                candidate.save()
+                # Now update positions
+                from candidate.models import CandidateListManager
+                results = position_list_manager.update_politician_we_vote_id_in_all_positions(
+                    candidate_we_vote_id=candidate.we_vote_id,
+                    new_politician_id=None,
+                    new_politician_we_vote_id=None)
+
+                messages.add_message(request, messages.INFO,
+                                     'Candidate unlinked, number of positions changed: {number_changed}'
+                                     ''.format(number_changed=results['number_changed']))
+            else:
+                pass
 
     # ##################################
     # Link Candidates to this Politician
@@ -674,7 +984,6 @@ def politician_edit_process_view(request):
     except Exception as e:
         messages.add_message(request, messages.ERROR, 'RELATED_CANDIDATE_PROBLEM: ' + str(e))
         related_candidate_list = []
-    position_list_manager = PositionListManager()
     for candidate in related_candidate_list:
         if positive_value_exists(candidate.id):
             variable_name = "link_candidate_" + str(candidate.id) + "_to_politician"
@@ -782,7 +1091,7 @@ def politician_delete_process_view(request):
         politician_on_stage.delete()
         messages.add_message(request, messages.INFO, 'Politician deleted.')
     except Exception as e:
-        messages.add_message(request, messages.ERROR, 'Could not delete politician -- exception.')
+        messages.add_message(request, messages.ERROR, 'Could not delete politician -- exception: ' + str(e))
         return HttpResponseRedirect(reverse('politician:politician_edit', args=(politician_id,)))
 
     return HttpResponseRedirect(reverse('politician:politician_list', args=()))
@@ -825,17 +1134,44 @@ def politicians_sync_out_view(request):  # politiciansSyncOut
                 politician_query = politician_query.filter(final_filters)
 
         politician_query = politician_query.values(
-            'we_vote_id', 'first_name', 'middle_name', 'last_name',
-            'politician_name', 'google_civic_candidate_name', 'full_name_assembled', 'gender',
-            'birth_date', 'bioguide_id', 'thomas_id', 'lis_id', 'govtrack_id',
-            'opensecrets_id', 'vote_smart_id', 'fec_id', 'cspan_id',
-            'wikipedia_id', 'ballotpedia_id', 'house_history_id',
-            'maplight_id', 'washington_post_id', 'icpsr_id',
-            'political_party', 'state_code', 'politician_url',
+            'we_vote_id',
+            'first_name',
+            'middle_name',
+            'last_name',
+            'politician_name',
+            'google_civic_candidate_name',
+            'google_civic_candidate_name2',
+            'google_civic_candidate_name3',
+            'full_name_assembled',
+            'gender',
+            'birth_date',
+            'bioguide_id',
+            'thomas_id',
+            'lis_id',
+            'govtrack_id',
+            'opensecrets_id',
+            'vote_smart_id',
+            'fec_id',
+            'cspan_id',
+            'wikipedia_id',
+            'ballotpedia_id',
+            'house_history_id',
+            'maplight_id',
+            'washington_post_id',
+            'icpsr_id',
+            'political_party',
+            'state_code',
+            'politician_url',
             'politician_twitter_handle',
-            'we_vote_hosted_profile_image_url_large', 'we_vote_hosted_profile_image_url_medium',
-            'we_vote_hosted_profile_image_url_tiny', 'ctcl_uuid', 'politician_facebook_id',
-            'politician_phone_number', 'politician_googleplus_id', 'politician_youtube_id', 'politician_email_address',
+            'we_vote_hosted_profile_image_url_large',
+            'we_vote_hosted_profile_image_url_medium',
+            'we_vote_hosted_profile_image_url_tiny',
+            'ctcl_uuid',
+            'politician_facebook_id',
+            'politician_phone_number',
+            'politician_googleplus_id',
+            'politician_youtube_id',
+            'politician_email_address',
             'vote_usa_politician_id')
         if politician_query:
             politician_list_json = list(politician_query)

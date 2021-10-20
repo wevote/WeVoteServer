@@ -69,6 +69,7 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'photo_url_from_vote_usa',
     'politician_id',
     'politician_we_vote_id',
+    'profile_image_type_currently_active',
     'state_code',
     'twitter_location',
     'twitter_name',
@@ -81,9 +82,21 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'vote_usa_office_id',
     'vote_usa_politician_id',
     'vote_usa_profile_image_url_https',
+    'we_vote_hosted_profile_facebook_image_url_large',
+    'we_vote_hosted_profile_facebook_image_url_medium',
+    'we_vote_hosted_profile_facebook_image_url_tiny',
     'we_vote_hosted_profile_image_url_large',
     'we_vote_hosted_profile_image_url_medium',
     'we_vote_hosted_profile_image_url_tiny',
+    'we_vote_hosted_profile_twitter_image_url_large',
+    'we_vote_hosted_profile_twitter_image_url_medium',
+    'we_vote_hosted_profile_twitter_image_url_tiny',
+    'we_vote_hosted_profile_uploaded_image_url_large',
+    'we_vote_hosted_profile_uploaded_image_url_medium',
+    'we_vote_hosted_profile_uploaded_image_url_tiny',
+    'we_vote_hosted_profile_vote_usa_image_url_large',
+    'we_vote_hosted_profile_vote_usa_image_url_medium',
+    'we_vote_hosted_profile_vote_usa_image_url_tiny',
     'wikipedia_page_title',
     'wikipedia_photo_url',
     'youtube_url',
@@ -849,10 +862,10 @@ class CandidateListManager(models.Manager):
 
     def retrieve_candidates_from_non_unique_identifiers(
             self,
-            google_civic_election_id_list,
-            state_code,
-            candidate_twitter_handle,
-            candidate_name,
+            google_civic_election_id_list=[],
+            state_code='',
+            candidate_twitter_handle='',
+            candidate_name='',
             ignore_candidate_id_list=[],
             read_only=False):
         """
@@ -886,13 +899,25 @@ class CandidateListManager(models.Manager):
             success = False
         candidate_we_vote_id_list = results['candidate_we_vote_id_list']
 
+        election_manager = ElectionManager()
+        year_list = []
+        results = election_manager.retrieve_year_list_by_election_list(
+            google_civic_election_id_list=google_civic_election_id_list)
+        if results['success']:
+            year_list = results['year_list']
+
         if keep_looking_for_duplicates and positive_value_exists(candidate_twitter_handle):
             try:
                 if positive_value_exists(read_only):
                     candidate_query = CandidateCampaign.objects.using('readonly').all()
                 else:
                     candidate_query = CandidateCampaign.objects.all()
-                candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+
+                # Only look for matches in candidates in the specified elections, or in the year(s) the elections are in
+                candidate_query = candidate_query.filter(
+                    Q(we_vote_id__in=candidate_we_vote_id_list) |
+                    Q(candidate_year__in=year_list)
+                )
 
                 candidate_query = candidate_query.filter(candidate_twitter_handle__iexact=candidate_twitter_handle)
                 if positive_value_exists(state_code):
@@ -926,8 +951,8 @@ class CandidateListManager(models.Manager):
                 status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_QUERY_FAILED1 " + str(e) + " "
                 success = False
                 keep_looking_for_duplicates = False
-        # twitter handle does not exist, next look up against other data that might match
 
+        # twitter handle does not exist, next look up against other data that might match
         if keep_looking_for_duplicates and positive_value_exists(candidate_name):
             # Search by Candidate name exact match
             try:
@@ -935,9 +960,16 @@ class CandidateListManager(models.Manager):
                     candidate_query = CandidateCampaign.objects.using('readonly').all()
                 else:
                     candidate_query = CandidateCampaign.objects.all()
-                candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+
+                # Only look for matches in candidates in the specified elections, or in the year(s) the elections are in
+                candidate_query = candidate_query.filter(
+                    Q(we_vote_id__in=candidate_we_vote_id_list) |
+                    Q(candidate_year__in=year_list)
+                )
+
                 if positive_value_exists(state_code):
                     candidate_query = candidate_query.filter(state_code__iexact=state_code)
+
                 candidate_query = candidate_query.filter(
                     Q(candidate_name__iexact=candidate_name) |
                     Q(google_civic_candidate_name__iexact=candidate_name) |
@@ -982,7 +1014,17 @@ class CandidateListManager(models.Manager):
                     candidate_query = CandidateCampaign.objects.using('readonly').all()
                 else:
                     candidate_query = CandidateCampaign.objects.all()
-                candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+
+                # We *could* convert to be an "or" -- or election_year matches, but may not want to
+                #  Given we might turn up more false positives. Worth trying.
+                # candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+
+                # Only look for matches in candidates in the specified elections, or in the year(s) the elections are in
+                candidate_query = candidate_query.filter(
+                    Q(we_vote_id__in=candidate_we_vote_id_list) |
+                    Q(candidate_year__in=year_list)
+                )
+
                 if positive_value_exists(state_code):
                     candidate_query = candidate_query.filter(state_code__iexact=state_code)
                 first_name = extract_first_name_from_full_name(candidate_name)
@@ -1036,8 +1078,43 @@ class CandidateListManager(models.Manager):
         }
         return results
 
+    @staticmethod
+    def fetch_candidate_count_for_politician(
+            politician_id=0,
+            politician_we_vote_id=''):
+
+        if not positive_value_exists(politician_id) and not \
+                positive_value_exists(politician_we_vote_id):
+            return 0
+
+        candidate_query = CandidateCampaign.objects.using('readonly').all()
+
+        # Retrieve the support positions for this politician_id
+        position_count = 0
+        try:
+            if positive_value_exists(politician_id) and positive_value_exists(politician_we_vote_id):
+                candidate_query = candidate_query.filter(
+                    Q(politician_we_vote_id__iexact=politician_we_vote_id) |
+                    Q(politician_id=politician_id)
+                )
+            elif positive_value_exists(politician_id):
+                candidate_query = candidate_query.filter(politician_id=politician_id)
+            else:
+                candidate_query = candidate_query.filter(
+                    politician_we_vote_id__iexact=politician_we_vote_id)
+
+            position_count = candidate_query.count()
+        except Exception as e:
+            pass
+
+        return position_count
+
     def fetch_candidates_from_non_unique_identifiers_count(
-            self, google_civic_election_id_list, state_code, candidate_twitter_handle, candidate_name,
+            self,
+            google_civic_election_id_list=[],
+            state_code='',
+            candidate_twitter_handle='',
+            candidate_name='',
             ignore_candidate_id_list=[]):
         keep_looking_for_duplicates = True
         candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle)
@@ -1047,11 +1124,24 @@ class CandidateListManager(models.Manager):
             google_civic_election_id_list=google_civic_election_id_list)
         candidate_we_vote_id_list = results['candidate_we_vote_id_list']
 
+        election_manager = ElectionManager()
+        year_list = []
+        results = election_manager.retrieve_year_list_by_election_list(
+            google_civic_election_id_list=google_civic_election_id_list)
+        if results['success']:
+            year_list = results['year_list']
+
         if keep_looking_for_duplicates and positive_value_exists(candidate_twitter_handle):
             try:
                 candidate_query = CandidateCampaign.objects.all()
                 candidate_query = candidate_query.filter(candidate_twitter_handle__iexact=candidate_twitter_handle)
-                candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+
+                # Only look for matches in candidates in the specified elections, or in the year(s) the elections are in
+                candidate_query = candidate_query.filter(
+                    Q(we_vote_id__in=candidate_we_vote_id_list) |
+                    Q(candidate_year__in=year_list)
+                )
+
                 if positive_value_exists(state_code):
                     candidate_query = candidate_query.filter(state_code__iexact=state_code)
 
@@ -1070,7 +1160,13 @@ class CandidateListManager(models.Manager):
             try:
                 candidate_query = CandidateCampaign.objects.all()
                 candidate_query = candidate_query.filter(candidate_name__iexact=candidate_name)
-                candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+
+                # Only look for matches in candidates in the specified elections, or in the year(s) the elections are in
+                candidate_query = candidate_query.filter(
+                    Q(we_vote_id__in=candidate_we_vote_id_list) |
+                    Q(candidate_year__in=year_list)
+                )
+
                 if positive_value_exists(state_code):
                     candidate_query = candidate_query.filter(state_code__iexact=state_code)
 
@@ -1087,7 +1183,13 @@ class CandidateListManager(models.Manager):
             # Search for Candidate(s) that contains the same first and last names
             try:
                 candidate_query = CandidateCampaign.objects.all()
-                candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+
+                # Only look for matches in candidates in the specified elections, or in the year(s) the elections are in
+                candidate_query = candidate_query.filter(
+                    Q(we_vote_id__in=candidate_we_vote_id_list) |
+                    Q(candidate_year__in=year_list)
+                )
+
                 if positive_value_exists(state_code):
                     candidate_query = candidate_query.filter(state_code__iexact=state_code)
                 first_name = extract_first_name_from_full_name(candidate_name)

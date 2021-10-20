@@ -904,6 +904,36 @@ class ElectionManager(models.Manager):
         }
         return results
 
+    def retrieve_year_list_by_election_list(
+            self,
+            google_civic_election_id_list=[]):
+        success = True
+        status = ""
+        year_list = []
+        year_list_found = False
+        try:
+            queryset = Election.objects.all()
+            queryset = queryset.filter(google_civic_election_id__in=google_civic_election_id_list)
+            queryset = queryset.values_list('election_day_text', flat=True).distinct()
+            election_day_text_list = list(queryset)
+            year_list_found = len(election_day_text_list) > 0
+            for election_day_text in election_day_text_list:
+                year = election_day_text[:4]
+                if year:
+                    year_integer = convert_to_int(year)
+                    if year_integer not in year_list:
+                        year_list.append(year_integer)
+        except Exception as e:
+            success = False
+            status += "COULD_NOT_RETRIEVE_YEAR_LIST: " + str(e) + ' '
+        results = {
+            'success':          success,
+            'status':           status,
+            'year_list':        year_list,
+            'year_list_found':  year_list_found,
+        }
+        return results
+
     def retrieve_we_vote_elections(self):
         """
         Only retrieve the elections we have entered without a Google Civic Election Id

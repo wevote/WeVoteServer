@@ -757,7 +757,6 @@ def groom_and_store_google_civic_candidates_json_2021(
                 if positive_value_exists(youtube_url):
                     updated_candidate_values['youtube_url'] = youtube_url
 
-                candidate_manager = CandidateManager()
                 candidate = None
                 candidate_we_vote_id = ''
 
@@ -1366,10 +1365,12 @@ def groom_and_store_google_civic_office_json_2021(
         read_only = not (allowed_to_create_offices or allowed_to_update_offices)  # In case we need to update source id
         results = office_list_manager.retrieve_contest_offices_from_non_unique_identifiers(
             contest_office_name=office_name,
+            ctcl_uuid=ctcl_office_uuid,
             google_civic_election_id=google_civic_election_id,
             incoming_state_code=state_code,
             district_id=district_id,
-            read_only=read_only)
+            read_only=read_only,
+            vote_usa_office_id=vote_usa_office_id)
         if not results['success']:
             continue_searching_for_office = False
             status += "FAILED_RETRIEVING_CONTEST_FROM_UNIQUE_IDS: " + results['status'] + " "
@@ -1602,18 +1603,21 @@ def process_contest_common_fields_from_structured_json(one_contest_structured_js
     # One of: national, statewide, congressional, stateUpper, stateLower, countywide, judicial, schoolBoard,
     # cityWide, township, countyCouncil, cityCouncil, ward, special
     results['district_scope'] = district_dict['scope'] if 'scope' in district_dict else ''
-    results['district_id'] = district_dict['id'] if 'id' in district_dict else ''
+    # results['district_id'] = district_dict['id'] if 'id' in district_dict else ''
 
-    if 'contest_ocd_division_id' in results:
+    if 'ocdid' in district_dict:
+        results['contest_ocd_division_id'] = district_dict['ocdid']
         # This is the OCD ID. The district integer is added to the end. For example,
         # Virginia's 8th congressional district 8 looks like this:
         # ocd-division/country:us/state:va/cd:8
         results['district'] = extract_district_from_ocd_division_id(results['contest_ocd_division_id']) \
             if 'contest_ocd_division_id' in results else ''
-        results['district_id'] = extract_district_id_from_ocd_division_id(results['contest_ocd_division_id']) \
-            if 'contest_ocd_division_id' in results else results['district_id']
+        results['district_id'] = extract_district_id_from_ocd_division_id(results['contest_ocd_division_id'])
+    else:
+        results['contest_ocd_division_id'] = ''
+        results['district_id'] = None
 
-    results['contest_ocd_division_id'] = district_dict['id'] if 'id' in district_dict else ''
+    # results['contest_ocd_division_id'] = district_dict['id'] if 'id' in district_dict else ''
 
     # A description of any additional eligibility requirements for voting in this contest.
     results['electorate_specifications'] = \

@@ -1138,6 +1138,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
             'vote_smart_id':                    vote_smart_id,
             'maplight_id':                      maplight_id,
             'page':                             page,
+            # 'vote_usa_profile_image_url_https': vote_usa_profile_image_url_https,
             'withdrawal_date':                  withdrawal_date,
             'withdrawn_from_election':          withdrawn_from_election,
             'do_not_display_on_ballot':         do_not_display_on_ballot,
@@ -1914,26 +1915,33 @@ def candidate_politician_match_view(request):
 
     candidate_id = request.GET.get('candidate_id', 0)
     candidate_id = convert_to_int(candidate_id)
+    candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
     # google_civic_election_id is included for interface usability reasons and isn't used in the processing
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     google_civic_election_id = convert_to_int(google_civic_election_id)
-
-    if not positive_value_exists(candidate_id):
-        messages.add_message(request, messages.ERROR, "The candidate_id variable was not passed in.")
-        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
+    we_vote_candidate = None
 
     candidate_manager = CandidateManager()
-
-    results = candidate_manager.retrieve_candidate_from_id(candidate_id)
-    if not positive_value_exists(results['candidate_found']):
-        messages.add_message(request, messages.ERROR,
-                             "Candidate '{candidate_id}' not found.".format(candidate_id=candidate_id))
+    if positive_value_exists(candidate_we_vote_id):
+        results = candidate_manager.retrieve_candidate(candidate_we_vote_id=candidate_we_vote_id)
+        if not positive_value_exists(results['candidate_found']):
+            messages.add_message(request, messages.ERROR,
+                                 "Candidate '{candidate_we_vote_id}' not found."
+                                 "".format(candidate_we_vote_id=candidate_we_vote_id))
+            return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id', args=(candidate_we_vote_id,)))
+        we_vote_candidate = results['candidate']
+    elif positive_value_exists(candidate_id):
+        results = candidate_manager.retrieve_candidate_from_id(candidate_id)
+        if not positive_value_exists(results['candidate_found']):
+            messages.add_message(request, messages.ERROR,
+                                 "Candidate '{candidate_id}' not found.".format(candidate_id=candidate_id))
+            return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
+        we_vote_candidate = results['candidate']
+    else:
+        messages.add_message(request, messages.ERROR, "Candidate identifier was not passed in.")
         return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 
-    we_vote_candidate = results['candidate']
-
-    # Make sure we have a politician for this candidate. If we don't, create a politician entry, and save the
-    # politician_we_vote_id in the candidate
+    # Try to find existing politician for this candidate. If none found, create politician.
     results = candidate_politician_match(we_vote_candidate)
 
     display_messages = True
@@ -1944,7 +1952,7 @@ def candidate_politician_match_view(request):
 
 
 @login_required
-def candidate_politician_match_for_this_election_view(request):
+def candidate_politician_match_this_election_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
@@ -1954,6 +1962,7 @@ def candidate_politician_match_for_this_election_view(request):
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     google_civic_election_id_list = [google_civic_election_id]
     google_civic_election_id = convert_to_int(google_civic_election_id)
+    state_code = request.GET.get('state_code', '')
 
     # We only want to process if a google_civic_election_id comes in
     if not positive_value_exists(google_civic_election_id):
@@ -1971,6 +1980,8 @@ def candidate_politician_match_for_this_election_view(request):
 
         candidate_query = CandidateCampaign.objects.order_by('candidate_name')
         candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+        if positive_value_exists(state_code):
+            candidate_query = candidate_query.filter(state_code__iexact=state_code)
         candidate_list = list(candidate_query)
     except CandidateCampaign.DoesNotExist:
         messages.add_message(request, messages.INFO, "No candidates found for this election: {id}.".format(
@@ -1992,10 +2003,10 @@ def candidate_politician_match_for_this_election_view(request):
     # Loop through all of the candidates in this election
     for we_vote_candidate in candidate_list:
         num_candidates_reviewed += 1
-        match_results = candidate_politician_match(we_vote_candidate)
         if we_vote_candidate.politician_we_vote_id:
             num_that_already_have_politician_we_vote_id += 1
-        elif match_results['politician_created']:
+        match_results = candidate_politician_match(we_vote_candidate)
+        if match_results['politician_created']:
             new_politician_created += 1
         elif match_results['politician_found']:
             existing_politician_found += 1
@@ -2022,8 +2033,12 @@ def candidate_politician_match_for_this_election_view(request):
     print_to_log(logger, exception_message_optional=message)
     messages.add_message(request, messages.INFO, message)
 
-    return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) + "?google_civic_election_id={var}".format(
-        var=google_civic_election_id))
+    return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
+                                "?google_civic_election_id={google_civic_election_id}"
+                                "&state_code={state_code}"
+                                "".format(
+                                google_civic_election_id=google_civic_election_id,
+                                state_code=state_code))
 
 
 @login_required
@@ -2234,8 +2249,12 @@ def find_and_merge_duplicate_candidates_view(request):
 
     messages.add_message(request, messages.INFO, message)
 
-    return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) + "?google_civic_election_id={var}"
-                                                                               "".format(var=google_civic_election_id))
+    return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
+                                "?google_civic_election_id={google_civic_election_id}"
+                                "&state_code={state_code}"
+                                "".format(
+                                    google_civic_election_id=google_civic_election_id,
+                                    state_code=state_code))
 
 
 def render_candidate_merge_form(

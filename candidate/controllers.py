@@ -42,10 +42,10 @@ class FakeFirefoxURLopener(urllib.request.FancyURLopener):
             + ' Gecko/20100101 Firefox/25.0'
 
 
-def add_candidate_name_to_next_spot(candidate_to_update, google_civic_candidate_name_to_add):
+def add_name_to_next_spot(candidate_or_politician, google_civic_candidate_name_to_add):
 
     if not positive_value_exists(google_civic_candidate_name_to_add):
-        return candidate_to_update
+        return candidate_or_politician
 
     # If an initial exists in the name (ex/ " A "), then search for the name
     # with a period added (ex/ " A. ") We check for an exact match AND a match with/without initial + period
@@ -78,51 +78,51 @@ def add_candidate_name_to_next_spot(candidate_to_update, google_civic_candidate_
             name_changed = True
             google_civic_candidate_name_modified = add_results['modified_name']
 
-    if not positive_value_exists(candidate_to_update.google_civic_candidate_name):
-        candidate_to_update.google_civic_candidate_name = google_civic_candidate_name_to_add
-    elif google_civic_candidate_name_to_add == candidate_to_update.google_civic_candidate_name:
-        # The value is already stored in candidate_to_update.google_civic_candidate_name so doesn't need
+    if not positive_value_exists(candidate_or_politician.google_civic_candidate_name):
+        candidate_or_politician.google_civic_candidate_name = google_civic_candidate_name_to_add
+    elif google_civic_candidate_name_to_add == candidate_or_politician.google_civic_candidate_name:
+        # The value is already stored in candidate_or_politician.google_civic_candidate_name so doesn't need
         # to be added anywhere below
         pass
-    elif name_changed and candidate_to_update.google_civic_candidate_name == google_civic_candidate_name_modified:
-        # If candidate_to_update.google_civic_candidate_name has a middle initial with/without a period
+    elif name_changed and candidate_or_politician.google_civic_candidate_name == google_civic_candidate_name_modified:
+        # If candidate_or_politician.google_civic_candidate_name has a middle initial with/without a period
         # don't store it if the alternate without/with the period already is stored
         pass
-    elif not positive_value_exists(candidate_to_update.google_civic_candidate_name2):
-        candidate_to_update.google_civic_candidate_name2 = google_civic_candidate_name_to_add
-    elif google_civic_candidate_name_to_add == candidate_to_update.google_civic_candidate_name2:
-        # The value is already stored in candidate_to_update.google_civic_candidate_name2 so doesn't need
-        # to be added to candidate_to_update.google_civic_candidate_name3
+    elif not positive_value_exists(candidate_or_politician.google_civic_candidate_name2):
+        candidate_or_politician.google_civic_candidate_name2 = google_civic_candidate_name_to_add
+    elif google_civic_candidate_name_to_add == candidate_or_politician.google_civic_candidate_name2:
+        # The value is already stored in candidate_or_politician.google_civic_candidate_name2 so doesn't need
+        # to be added to candidate_or_politician.google_civic_candidate_name3
         pass
-    elif name_changed and candidate_to_update.google_civic_candidate_name2 == google_civic_candidate_name_modified:
-        # If candidate_to_update.google_civic_candidate_name2 has a middle initial with/without a period
+    elif name_changed and candidate_or_politician.google_civic_candidate_name2 == google_civic_candidate_name_modified:
+        # If candidate_or_politician.google_civic_candidate_name2 has a middle initial with/without a period
         # don't store it if the alternate without/with the period already is stored
         pass
-    elif not positive_value_exists(candidate_to_update.google_civic_candidate_name3):
-        candidate_to_update.google_civic_candidate_name3 = google_civic_candidate_name_to_add
-    elif google_civic_candidate_name_to_add == candidate_to_update.google_civic_candidate_name3:
-        # The value is already stored in candidate_to_update.google_civic_candidate_name2 so doesn't need
-        # to be added to candidate_to_update.google_civic_candidate_name3
+    elif not positive_value_exists(candidate_or_politician.google_civic_candidate_name3):
+        candidate_or_politician.google_civic_candidate_name3 = google_civic_candidate_name_to_add
+    elif google_civic_candidate_name_to_add == candidate_or_politician.google_civic_candidate_name3:
+        # The value is already stored in candidate_or_politician.google_civic_candidate_name2 so doesn't need
+        # to be added to candidate_or_politician.google_civic_candidate_name3
         pass
-    elif name_changed and candidate_to_update.google_civic_candidate_name3 == google_civic_candidate_name_modified:
-        # If candidate_to_update.google_civic_candidate_name3 has a middle initial with/without a period
+    elif name_changed and candidate_or_politician.google_civic_candidate_name3 == google_civic_candidate_name_modified:
+        # If candidate_or_politician.google_civic_candidate_name3 has a middle initial with/without a period
         # don't store it if the alternate without/with the period already is stored
         pass
     # We only support 3 alternate candidate names so far
-    # elif not positive_value_exists(candidate_to_update.google_civic_candidate_name4):
-    #     candidate_to_update.google_civic_candidate_name4 = google_civic_candidate_name_to_add
-    # elif google_civic_candidate_name_to_add == candidate_to_update.google_civic_candidate_name4:
-    #     # The value is already stored in candidate_to_update.google_civic_candidate_name2 so doesn't need
-    #     # to be added to candidate_to_update.google_civic_candidate_name3
+    # elif not positive_value_exists(candidate_or_politician.google_civic_candidate_name4):
+    #     candidate_or_politician.google_civic_candidate_name4 = google_civic_candidate_name_to_add
+    # elif google_civic_candidate_name_to_add == candidate_or_politician.google_civic_candidate_name4:
+    #     # The value is already stored in candidate_or_politician.google_civic_candidate_name2 so doesn't need
+    #     # to be added to candidate_or_politician.google_civic_candidate_name3
     #     pass
-    # elif name_changed and candidate_to_update.google_civic_candidate_name4 == google_civic_candidate_name_modified:
-    #     # If candidate_to_update.google_civic_candidate_name4 has a middle initial with/without a period
+    # elif name_changed and candidate_or_politician.google_civic_candidate_name4 == google_civic_candidate_name_modified:
+    #     # If candidate_or_politician.google_civic_candidate_name4 has a middle initial with/without a period
     #     # don't store it if the alternate without/with the period already is stored
     #     pass
-    # elif not positive_value_exists(candidate_to_update.google_civic_candidate_name5):
-    #     candidate_to_update.google_civic_candidate_name5 = google_civic_candidate_name_to_add
+    # elif not positive_value_exists(candidate_or_politician.google_civic_candidate_name5):
+    #     candidate_or_politician.google_civic_candidate_name5 = google_civic_candidate_name_to_add
     # # We currently only support 5 alternate names
-    return candidate_to_update
+    return candidate_or_politician
 
 
 def candidates_import_from_sample_file():
@@ -198,8 +198,11 @@ def fetch_duplicate_candidate_count(we_vote_candidate, ignore_candidate_id_list)
 
     # Search for other candidates in any of the elections this candidate is in that match name and election
     return candidate_list_manager.fetch_candidates_from_non_unique_identifiers_count(
-        google_civic_election_id_list, we_vote_candidate.state_code,
-        we_vote_candidate.candidate_twitter_handle, we_vote_candidate.candidate_name, ignore_candidate_id_list)
+        google_civic_election_id_list=google_civic_election_id_list,
+        state_code=we_vote_candidate.state_code,
+        candidate_twitter_handle=we_vote_candidate.candidate_twitter_handle,
+        candidate_name=we_vote_candidate.candidate_name,
+        ignore_candidate_id_list=ignore_candidate_id_list)
 
 
 def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list):
@@ -220,8 +223,11 @@ def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list):
     # Search for other candidates that share the same elections that match name and election
     try:
         results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
-            google_civic_election_id_list, we_vote_candidate.state_code,
-            we_vote_candidate.candidate_twitter_handle, we_vote_candidate.candidate_name, ignore_candidate_id_list)
+            google_civic_election_id_list=google_civic_election_id_list,
+            state_code=we_vote_candidate.state_code,
+            candidate_twitter_handle=we_vote_candidate.candidate_twitter_handle,
+            candidate_name=we_vote_candidate.candidate_name,
+            ignore_candidate_id_list=ignore_candidate_id_list)
 
         if results['candidate_found']:
             candidate_merge_conflict_values = \
@@ -287,7 +293,22 @@ def figure_out_candidate_conflict_values(candidate1, candidate2):
             elif candidate2_attribute_value is None or candidate2_attribute_value == "":
                 candidate_merge_conflict_values[attribute] = 'CANDIDATE1'
             else:
-                if attribute == "candidate_name" or attribute == "state_code":
+                if attribute == "ballotpedia_candidate_url" \
+                        or attribute == "candidate_contact_form_url" \
+                        or attribute == "candidate_instagram_form_url" \
+                        or attribute == "candidate_url" \
+                        or attribute == "facebook_url" \
+                        or attribute == "linkedin_url" \
+                        or attribute == "youtube_url":
+                    # If there is a link with 'http' in candidate 2, and candidate 1 doesn't have 'http',
+                    #  use the one with 'http'
+                    if 'http' in candidate2_attribute_value and 'http' not in candidate1_attribute_value:
+                        candidate_merge_conflict_values[attribute] = 'CANDIDATE2'
+                    elif candidate1_attribute_value.lower() == candidate2_attribute_value.lower():
+                        candidate_merge_conflict_values[attribute] = 'MATCHING'
+                    else:
+                        candidate_merge_conflict_values[attribute] = 'CONFLICT'
+                elif attribute == "candidate_name" or attribute == "state_code":
                     if candidate1_attribute_value.lower() == candidate2_attribute_value.lower():
                         candidate_merge_conflict_values[attribute] = 'MATCHING'
                     else:
@@ -295,6 +316,13 @@ def figure_out_candidate_conflict_values(candidate1, candidate2):
                 elif attribute == "party":
                     if convert_to_political_party_constant(candidate1_attribute_value) == \
                             convert_to_political_party_constant(candidate2_attribute_value):
+                        candidate_merge_conflict_values[attribute] = 'MATCHING'
+                    else:
+                        candidate_merge_conflict_values[attribute] = 'CONFLICT'
+                elif attribute == "profile_image_type_currently_active":
+                    if candidate1_attribute_value == 'UNKNOWN' and candidate2_attribute_value != 'UNKNOWN':
+                        candidate_merge_conflict_values[attribute] = 'CANDIDATE2'
+                    elif candidate1_attribute_value == candidate2_attribute_value:
                         candidate_merge_conflict_values[attribute] = 'MATCHING'
                     else:
                         candidate_merge_conflict_values[attribute] = 'CONFLICT'
@@ -454,13 +482,13 @@ def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, adm
 
     # Preserve unique google_civic_candidate_name, _name2, _name3, _name4, and _name5
     if positive_value_exists(candidate2_on_stage.google_civic_candidate_name):
-        candidate1_on_stage = add_candidate_name_to_next_spot(
+        candidate1_on_stage = add_name_to_next_spot(
             candidate1_on_stage, candidate2_on_stage.google_civic_candidate_name)
     if positive_value_exists(candidate2_on_stage.google_civic_candidate_name2):
-        candidate1_on_stage = add_candidate_name_to_next_spot(
+        candidate1_on_stage = add_name_to_next_spot(
             candidate1_on_stage, candidate2_on_stage.google_civic_candidate_name2)
     if positive_value_exists(candidate2_on_stage.google_civic_candidate_name3):
-        candidate1_on_stage = add_candidate_name_to_next_spot(
+        candidate1_on_stage = add_name_to_next_spot(
             candidate1_on_stage, candidate2_on_stage.google_civic_candidate_name3)
 
     # Merge public positions
@@ -526,7 +554,8 @@ def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, adm
 
     # Note: wait to wrap in try/except block
     candidate1_on_stage.save()
-    refresh_candidate_data_from_master_tables(candidate1_on_stage.we_vote_id)
+    # 2021-10-16 Uses image data from master table which we aren't updating with the merge yet
+    # refresh_candidate_data_from_master_tables(candidate1_on_stage.we_vote_id)
 
     # Remove candidate 2
     candidate2_on_stage.delete()
@@ -621,6 +650,51 @@ def move_candidates_to_another_office(from_contest_office_id, from_contest_offic
         'to_contest_office_we_vote_id':     to_contest_office_we_vote_id,
         'candidate_entries_moved':          candidate_entries_moved,
         'candidate_entries_not_moved':      candidate_entries_not_moved,
+    }
+    return results
+
+
+def move_candidates_to_another_politician(
+        from_politician_id=0,
+        from_politician_we_vote_id='',
+        to_politician_id=0,
+        to_politician_we_vote_id=''):
+    """
+
+    :param from_politician_id:
+    :param from_politician_we_vote_id:
+    :param to_politician_id:
+    :param to_politician_we_vote_id:
+    :return:
+    """
+    status = ''
+    success = True
+    candidate_entries_moved = 0
+
+    if positive_value_exists(from_politician_we_vote_id):
+        try:
+            candidate_entries_moved += CandidateCampaign.objects \
+                .filter(politician_we_vote_id__iexact=from_politician_we_vote_id) \
+                .update(politician_id=to_politician_id,
+                        politician_we_vote_id=to_politician_we_vote_id)
+        except Exception as e:
+            status += "FAILED_MOVE_CANDIDATES_BY_POLITICIAN_WE_VOTE_ID: " + str(e) + " "
+            success = False
+
+    if positive_value_exists(from_politician_id):
+        try:
+            candidate_entries_moved += CandidateCampaign.objects \
+                .filter(politician_id=from_politician_id) \
+                .update(politician_id=to_politician_id,
+                        politician_we_vote_id=to_politician_we_vote_id)
+        except Exception as e:
+            status += "FAILED_MOVE_CANDIDATES_BY_POLITICIAN_ID: " + str(e) + " "
+            success = False
+
+    results = {
+        'status':                   status,
+        'success':                  success,
+        'candidate_entries_moved':  candidate_entries_moved,
     }
     return results
 
@@ -851,9 +925,9 @@ def candidates_import_from_structured_json(structured_json):  # Consumes candida
             if 'twitter_profile_background_image_url_https' in one_candidate:
                 updated_candidate_values['twitter_profile_background_image_url_https'] = \
                     one_candidate['twitter_profile_background_image_url_https']
-            if 'twitter_profile_banner_image_url_https' in one_candidate:
-                updated_candidate_values['twitter_profile_banner_image_url_https'] = \
-                    one_candidate['twitter_profile_banner_image_url_https']
+            if 'twitter_profile_banner_url_https' in one_candidate:
+                updated_candidate_values['twitter_profile_banner_url_https'] = \
+                    one_candidate['twitter_profile_banner_url_https']
             if 'twitter_profile_image_url_https' in one_candidate:
                 updated_candidate_values['twitter_profile_image_url_https'] = \
                     one_candidate['twitter_profile_image_url_https']
@@ -1347,7 +1421,7 @@ def refresh_candidate_data_from_master_tables(candidate_we_vote_id):
                 'description': twitter_user.twitter_description,
             }
 
-    # Retrieve organization images data from WeVoteImage table
+    # Retrieve images data from WeVoteImage table
     we_vote_image_list = retrieve_all_images_for_one_candidate(candidate_we_vote_id)
     if len(we_vote_image_list):
         # Retrieve all cached image for this organization
@@ -1448,54 +1522,26 @@ def retrieve_candidate_photos(we_vote_candidate, force_retrieve=False):
 
 def candidate_politician_match(we_vote_candidate):
     politician_manager = PoliticianManager()
+    status = ''
+    success = True
 
     # Does this candidate already have a we_vote_id for a politician?
     if positive_value_exists(we_vote_candidate.politician_we_vote_id):
-        # Synchronize data and exit
-        update_results = politician_manager.update_or_create_politician_from_candidate(we_vote_candidate)
-
-        if update_results['politician_found']:
-            politician = update_results['politician']
-            # Save politician_we_vote_id in we_vote_candidate
-            we_vote_candidate.politician_we_vote_id = politician.we_vote_id
-            we_vote_candidate.politician_id = politician.id
-            we_vote_candidate.save()
-
-        results = {
-            'success': update_results['success'],
-            'status': update_results['status'],
-            'politician_list_found': False,
-            'politician_list': [],
-            'politician_found': update_results['politician_found'],
-            'politician_created': update_results['politician_created'],
-            'politician': update_results['politician'],
-        }
-        return results
-    else:
-        # Search the politician table for a match
-        results = politician_manager.retrieve_all_politicians_that_might_match_candidate(
-            vote_smart_id=we_vote_candidate.vote_smart_id,
-            vote_usa_politician_id=we_vote_candidate.vote_usa_politician_id,
-            maplight_id=we_vote_candidate.maplight_id,
-            candidate_twitter_handle=we_vote_candidate.candidate_twitter_handle,
-            candidate_name=we_vote_candidate.candidate_name,
-            state_code=we_vote_candidate.state_code)
-        if results['politician_list_found']:
-            # If here, return
-            politician_list = results['politician_list']
-
+        # Find existing politician. No update here for now.
+        results = politician_manager.retrieve_politician(we_vote_id=we_vote_candidate.politician_we_vote_id)
+        status += results['status']
+        if not results['success']:
             results = {
-                'success':                  results['success'],
-                'status':                   results['status'],
-                'politician_list_found':    True,
-                'politician_list':          politician_list,
+                'success':                  False,
+                'status':                   status,
+                'politician_list_found':    False,
+                'politician_list':          [],
                 'politician_found':         False,
                 'politician_created':       False,
                 'politician':               None,
             }
             return results
         elif results['politician_found']:
-            # Save this politician_we_vote_id with the candidate
             politician = results['politician']
             # Save politician_we_vote_id in we_vote_candidate
             we_vote_candidate.politician_we_vote_id = politician.we_vote_id
@@ -1504,35 +1550,97 @@ def candidate_politician_match(we_vote_candidate):
 
             results = {
                 'success':                  results['success'],
-                'status':                   results['status'],
+                'status':                   status,
                 'politician_list_found':    False,
                 'politician_list':          [],
-                'politician_found':         True,
+                'politician_found':         results['politician_found'],
                 'politician_created':       False,
-                'politician':               politician,
+                'politician':               results['politician'],
             }
             return results
         else:
-            # Create new politician for this candidate
-            create_results = politician_manager.update_or_create_politician_from_candidate(we_vote_candidate)
+            # Politician wasn't found, so clear out politician_we_vote_id and politician_id
+            we_vote_candidate.politician_we_vote_id = None
+            we_vote_candidate.politician_id = None
+            we_vote_candidate.save()
 
-            if create_results['politician_found']:
-                politician = create_results['politician']
-                # Save politician_we_vote_id in we_vote_candidate
-                we_vote_candidate.politician_we_vote_id = politician.we_vote_id
-                we_vote_candidate.politician_id = politician.id
-                we_vote_candidate.save()
+    # Search the politician table for a match
+    results = politician_manager.retrieve_all_politicians_that_might_match_candidate(
+        candidate_name=we_vote_candidate.candidate_name,
+        candidate_twitter_handle=we_vote_candidate.candidate_twitter_handle,
+        google_civic_candidate_name=we_vote_candidate.google_civic_candidate_name,
+        google_civic_candidate_name2=we_vote_candidate.google_civic_candidate_name2,
+        google_civic_candidate_name3=we_vote_candidate.google_civic_candidate_name3,
+        maplight_id=we_vote_candidate.maplight_id,
+        state_code=we_vote_candidate.state_code,
+        vote_smart_id=we_vote_candidate.vote_smart_id,
+        vote_usa_politician_id=we_vote_candidate.vote_usa_politician_id,
+    )
+    status += results['status']
+    if not results['success']:
+        results = {
+            'success':                  False,
+            'status':                   status,
+            'politician_list_found':    False,
+            'politician_list':          [],
+            'politician_found':         False,
+            'politician_created':       False,
+            'politician':               None,
+        }
+        return results
+    elif results['politician_list_found']:
+        # If here, return the list but don't link the candidate
+        politician_list = results['politician_list']
 
-            results = {
-                'success':                      create_results['success'],
-                'status':                       create_results['status'],
-                'politician_list_found':        False,
-                'politician_list':              [],
-                'politician_found':             create_results['politician_found'],
-                'politician_created':           create_results['politician_created'],
-                'politician':                   create_results['politician'],
-            }
-            return results
+        results = {
+            'success':                  True,
+            'status':                   status,
+            'politician_list_found':    True,
+            'politician_list':          politician_list,
+            'politician_found':         False,
+            'politician_created':       False,
+            'politician':               None,
+        }
+        return results
+    elif results['politician_found']:
+        # Save this politician_we_vote_id with the candidate
+        politician = results['politician']
+        # Save politician_we_vote_id in we_vote_candidate
+        we_vote_candidate.politician_we_vote_id = politician.we_vote_id
+        we_vote_candidate.politician_id = politician.id
+        we_vote_candidate.save()
+
+        results = {
+            'success':                  True,
+            'status':                   status,
+            'politician_list_found':    False,
+            'politician_list':          [],
+            'politician_found':         True,
+            'politician_created':       False,
+            'politician':               politician,
+        }
+        return results
+    else:
+        # Create new politician for this candidate
+        create_results = politician_manager.update_or_create_politician_from_candidate(we_vote_candidate)
+        status += create_results['status']
+        if create_results['politician_found']:
+            politician = create_results['politician']
+            # Save politician_we_vote_id in we_vote_candidate
+            we_vote_candidate.politician_we_vote_id = politician.we_vote_id
+            we_vote_candidate.politician_id = politician.id
+            we_vote_candidate.save()
+
+        results = {
+            'success':                      create_results['success'],
+            'status':                       status,
+            'politician_list_found':        False,
+            'politician_list':              [],
+            'politician_found':             create_results['politician_found'],
+            'politician_created':           create_results['politician_created'],
+            'politician':                   create_results['politician'],
+        }
+        return results
 
 
 def retrieve_candidate_politician_match_options(
@@ -1551,12 +1659,13 @@ def retrieve_candidate_politician_match_options(
 
     # Search the politician table for a match
     results = politician_manager.retrieve_all_politicians_that_might_match_candidate(
+        candidate_name=candidate_name,
+        candidate_twitter_handle=candidate_twitter_handle,
+        maplight_id=maplight_id,
+        state_code=state_code,
         vote_smart_id=vote_smart_id,
         vote_usa_politician_id=vote_usa_politician_id,
-        maplight_id=maplight_id,
-        candidate_twitter_handle=candidate_twitter_handle,
-        candidate_name=candidate_name,
-        state_code=state_code)
+    )
     if results['politician_list_found']:
         # If here, return
         politician_list = results['politician_list']

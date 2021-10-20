@@ -1,0 +1,142 @@
+{# templates/politician/politician_merge.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if politician_option1 %}Merge {{ politician_option1.politician_name  }}{% else %}CANNOT MERGE{% endif %}{% endblock %}
+
+{%  block content %}
+<a href="{% url 'politician:politician_list' %}">< Back to Politicians</a>
+  <br /></r />
+<a href="{% url 'politician:find_and_merge_duplicate_politicians' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&find_number_of_duplicates=1" >Click to find out the number of possible duplicates</a> (takes 30-60 seconds)
+
+<h1>{% if politician_option1 %}Merge {{ politician_option1.politician_name }}{% else %}CANNOT MERGE{% endif %}</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form action="{% url 'politician:politician_merge_process' %}" method="post">
+{% csrf_token %}
+{% if politician_option1 and politician_option2 %}
+<table>
+    <tr>
+        <th>&nbsp;</th>
+        <th>Politician Option 1</th>
+        <th>Politician Option 2</th>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td><a href="{% url 'politician:politician_we_vote_id_edit' politician_we_vote_id=politician_option1.we_vote_id %}"
+               target="_blank">view politician 1 <span class="glyphicon glyphicon-new-window"></span></a></td>
+        <td><a href="{% url 'politician:politician_we_vote_id_edit' politician_we_vote_id=politician_option2.we_vote_id %}"
+               target="_blank">view politician 2 <span class="glyphicon glyphicon-new-window"></span></a></td>
+    </tr>
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="politician_name" field_label="Politician Name" conflict_status=conflict_values.politician_name politician1_field_value=politician_option1.politician_name politician2_field_value=politician_option2.politician_name politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="first_name" field_label="First Name" conflict_status=conflict_values.first_name politician1_field_value=politician_option1.first_name politician2_field_value=politician_option2.first_name politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="middle_name" field_label="Middle Name" conflict_status=conflict_values.middle_name politician1_field_value=politician_option1.middle_name politician2_field_value=politician_option2.middle_name politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="last_name" field_label="Last Name" conflict_status=conflict_values.last_name politician1_field_value=politician_option1.last_name politician2_field_value=politician_option2.last_name politician1=politician_option1 politician2=politician_option2 %}
+
+    <tr>
+        <td>Google&nbsp;Civic&nbsp;Politician&nbsp;Name</td>
+        <td>{{ politician_option1.google_civic_candidate_name|default_if_none:"" }}</td>
+        <td>{{ politician_option2.google_civic_candidate_name|default_if_none:"" }}</td>
+    </tr>
+
+    <tr>
+        <td>Google&nbsp;Civic&nbsp;Politician&nbsp;Name 2</td>
+        <td>{{ politician_option1.google_civic_candidate_name2|default_if_none:"" }}</td>
+        <td>{{ politician_option2.google_civic_candidate_name2|default_if_none:"" }}</td>
+    </tr>
+
+    <tr>
+        <td>Google&nbsp;Civic&nbsp;Politician&nbsp;Name 3</td>
+        <td>{{ politician_option1.google_civic_candidate_name3|default_if_none:"" }}</td>
+        <td>{{ politician_option2.google_civic_candidate_name3|default_if_none:"" }}</td>
+    </tr>
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="political_party" field_label="Party" conflict_status=conflict_values.political_party politician1_field_value=politician_option1.political_party politician2_field_value=politician_option2.political_party politician1=politician_option1 politician2=politician_option2 %}
+
+    {% if politician_option1.id != None or politician_option2.id != None %}
+    <tr>
+        <td>ID</td>
+        <td>{{ politician_option1.id|default_if_none:"" }}</td>
+        <td>{{ politician_option2.id|default_if_none:"" }}</td>
+    </tr>
+    {% endif %}
+    {% if politician_option1.we_vote_id != None or politician_option2.we_vote_id != None %}
+    <tr>
+        <td>We Vote ID</td>
+        <td>{{ politician_option1.we_vote_id|default_if_none:"" }}</td>
+        <td>{{ politician_option2.we_vote_id|default_if_none:"" }}</td>
+    </tr>
+    {% endif %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="ballotpedia_id" field_label="Ballotpedia ID" conflict_status=conflict_values.ballotpedia_id politician1_field_value=politician_option1.ballotpedia_id politician2_field_value=politician_option2.ballotpedia_id politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="bioguide_id" field_label="Bioguide ID" conflict_status=conflict_values.bioguide_id politician1_field_value=politician_option1.bioguide_id politician2_field_value=politician_option2.bioguide_id politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="birth_date" field_label="Birth Date" conflict_status=conflict_values.birth_date politician1_field_value=politician_option1.birth_date politician2_field_value=politician_option2.birth_date politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="cspan_id" field_label="CSPAN ID" conflict_status=conflict_values.cspan_id politician1_field_value=politician_option1.cspan_id politician2_field_value=politician_option2.cspan_id politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="ctcl_uuid" field_label="CTCL UUID" conflict_status=conflict_values.ctcl_uuid politician1_field_value=politician_option1.ctcl_uuid politician2_field_value=politician_option2.ctcl_uuid politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="gender" field_label="Gender" conflict_status=conflict_values.gender politician1_field_value=politician_option1.gender politician2_field_value=politician_option2.gender politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="politician_email_address" field_label="Politician Email" conflict_status=conflict_values.politician_email_address politician1_field_value=politician_option1.politician_email_address politician2_field_value=politician_option2.politician_email_address politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="politician_phone_number" field_label="Phone Number" conflict_status=conflict_values.politician_phone_number politician1_field_value=politician_option1.politician_phone_number politician2_field_value=politician_option2.politician_phone_number politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="politician_twitter_handle" field_label="Twitter Handle" conflict_status=conflict_values.politician_twitter_handle politician1_field_value=politician_option1.politician_twitter_handle politician2_field_value=politician_option2.politician_twitter_handle politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="politician_url" field_label="Politician URL" conflict_status=conflict_values.politician_url politician1_field_value=politician_option1.politician_url politician2_field_value=politician_option2.politician_url politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="maplight_id" field_label="MapLight ID" conflict_status=conflict_values.maplight_id politician1_field_value=politician_option1.maplight_id politician2_field_value=politician_option2.maplight_id politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="state_code" field_label="State Code" conflict_status=conflict_values.state_code politician1_field_value=politician_option1.state_code politician2_field_value=politician_option2.state_code politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="politician_facebook_id" field_label="Facebook ID" conflict_status=conflict_values.politician_facebook_id politician1_field_value=politician_option1.politician_facebook_id politician2_field_value=politician_option2.politician_facebook_id politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="vote_smart_id" field_label="Vote Smart ID" conflict_status=conflict_values.vote_smart_id politician1_field_value=politician_option1.vote_smart_id politician2_field_value=politician_option2.vote_smart_id politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="vote_usa_politician_id" field_label="Vote USA Politician" conflict_status=conflict_values.vote_usa_politician_id politician1_field_value=politician_option1.vote_usa_politician_id politician2_field_value=politician_option2.vote_usa_politician_id politician1=politician_option1 politician2=politician_option2 %}
+
+{# Displayed photo #}
+{% include "politician/politician_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_tiny" field_label="We Vote Image (Tiny)" conflict_status=conflict_values.we_vote_hosted_profile_image_url_tiny politician1_field_value=politician_option1.we_vote_hosted_profile_image_url_tiny politician2_field_value=politician_option2.we_vote_hosted_profile_image_url_tiny politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_medium" field_label="We Vote Image (Medium)" conflict_status=conflict_values.we_vote_hosted_profile_image_url_medium politician1_field_value=politician_option1.we_vote_hosted_profile_image_url_medium politician2_field_value=politician_option2.we_vote_hosted_profile_image_url_medium politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_large" field_label="We Vote Image (Large)" conflict_status=conflict_values.we_vote_hosted_profile_image_url_large politician1_field_value=politician_option1.we_vote_hosted_profile_image_url_large politician2_field_value=politician_option2.we_vote_hosted_profile_image_url_large politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="wikipedia_id" field_label="Wikipedia ID" conflict_status=conflict_values.wikipedia_id politician1_field_value=politician_option1.wikipedia_id politician2_field_value=politician_option2.wikipedia_id politician1=politician_option1 politician2=politician_option2 %}
+    <tr>
+        <td>Linked Candidates</td>
+        <td>{{ politician_option1.linked_candidates_count }}</td>
+        <td>{{ politician_option2.linked_candidates_count }}</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>
+          <a href="{% url 'politician:politician_list' %}">cancel</a>&nbsp; <input type="submit" value="Skip - Not Duplicates" name="skip" />&nbsp;
+        </td>
+        <td></td>
+        <td><input type="submit" value="Merge Politicians" name="merge" /></td>
+    </tr>
+</table>
+<input type="hidden" name="remove_duplicate_process" value="{{ remove_duplicate_process }}" />
+<input type="hidden" name="state_code" value="{{ politician_option2.state_code }}" />
+<input type="hidden" name="google_civic_election_id" value="{{ politician_option1.google_civic_election_id }}" />
+<input type="hidden" name="politician1_we_vote_id" value="{{ politician_option1.we_vote_id }}" />
+<input type="hidden" name="politician2_we_vote_id" value="{{ politician_option2.we_vote_id }}" />
+{% else %}
+<input type="submit" value="CANNOT MERGE" />
+{% endif %}
+</form>
+
+<br />
+
+{% endblock %}

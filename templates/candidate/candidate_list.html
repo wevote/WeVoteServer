@@ -11,7 +11,7 @@
 
 <p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CANDIDATE&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
       target="_blank">
-        Import New Candidates ></a> (open in new window)
+        Import New Candidates <span class="glyphicon glyphicon-new-window"></span></a>
 </p>
 
 {% csrf_token %}
@@ -189,15 +189,16 @@
 
 {% if candidate_list and google_civic_election_id and hide_candidate_tools != 1 and hide_candidate_tools != '1' %}
     <ul>
-        <li>Prepare: <a href="{% url 'election:election_summary_by_google_id' google_civic_election_id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
-        Jump to Election so we can retrieve Offices and Candidates from Ballotpedia</a> (in new window)</li>
+        <li>Prepare: <a href="{% url 'election:election_summary_by_google_id' google_civic_election_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank" >
+        Jump to Election so we can retrieve Offices and Candidates from Ballotpedia <span class="glyphicon glyphicon-new-window"></span></a></li>
 
-        <li>Prepare: <a href="{% url 'candidate:find_and_merge_duplicate_candidates' %}?google_civic_election_id={{ google_civic_election_id }}"
+        <li>Prepare: <a href="{% url 'candidate:find_and_merge_duplicate_candidates' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
                         target="_blank" >
-        Find and Merge Duplicate Candidates for this Election</a> (in new window - about 1 minute)</li>
+        Find and Merge Duplicate Candidates for this Election <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
 
-        <li>Prepare: <a href="{% url 'candidate:candidate_politician_match_for_this_election' %}?google_civic_election_id={{ google_civic_election_id }}" >
-        Match Candidates to Politicians (and Create Politicians)</a> (about 1 minute)</li>
+        <li>Prepare: <a href="{% url 'candidate:candidate_politician_match_for_this_election' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+        target="_blank">
+        Match Candidates to Politicians (and Create Politicians) <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
     </ul>
 
     <ol>

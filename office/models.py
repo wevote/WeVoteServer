@@ -53,6 +53,78 @@ CONTEST_OFFICE_UNIQUE_IDENTIFIERS = [
     'wikipedia_id',
 ]
 
+DISTRICT_LOW_NUMBERS_IN_MIDDLE_THAT_CAUSE_FALSE_DUPLICATES = {
+    '1': ' 1st district',
+    '2': ' 2nd district',
+    '3': ' 3rd district',
+    '4': ' 4th district',
+    '5': ' 5th district',
+    '6': ' 6th district',
+    '7': ' 7th district',
+    '8': ' 8th district',
+    '9': ' 9th district',
+}
+
+DISTRICT_LOW_NUMBERS_AT_END_THAT_CAUSE_FALSE_DUPLICATES = {
+    '1': ' district 1',
+    '2': ' district 2',
+    '3': ' district 3',
+    '4': ' district 4',
+    '5': ' district 5',
+    '6': ' district 6',
+    '7': ' district 7',
+    '8': ' district 8',
+    '9': ' district 9',
+    '10': ' district 10',
+}
+
+DISTRICT_NUMBER_STRINGS_AT_END_NOT_COMPATIBLE_WITH_INTEGER = {
+    '1': [' district 10', ' district 11', ' district 12', ' district 13', ' district 14',
+          ' district 15', ' district 16', ' district 17', ' district 18', ' district 19',
+          ' district 100'],
+    '2': [' district 20', ' district 21', ' district 22', ' district 23', ' district 24',
+          ' district 25', ' district 26', ' district 27', ' district 28', ' district 29'],
+    '3': [' district 30', ' district 31', ' district 32', ' district 33', ' district 34',
+          ' district 35', ' district 36', ' district 37', ' district 38', ' district 39'],
+    '4': [' district 40', ' district 41', ' district 42', ' district 43', ' district 44',
+          ' district 45', ' district 46', ' district 47', ' district 48', ' district 49'],
+    '5': [' district 50', ' district 51', ' district 52', ' district 53', ' district 54',
+          ' district 55', ' district 56', ' district 57', ' district 58', ' district 59'],
+    '6': [' district 60', ' district 61', ' district 62', ' district 63', ' district 64',
+          ' district 65', ' district 66', ' district 67', ' district 68', ' district 69'],
+    '7': [' district 70', ' district 71', ' district 72', ' district 73', ' district 74',
+          ' district 75', ' district 76', ' district 77', ' district 78', ' district 79'],
+    '8': [' district 80', ' district 81', ' district 82', ' district 83', ' district 84',
+          ' district 85', ' district 86', ' district 87', ' district 88', ' district 89'],
+    '9': [' district 90', ' district 91', ' district 92', ' district 93', ' district 94',
+          ' district 95', ' district 96', ' district 97', ' district 98', ' district 99'],
+    '10': [' district 100', ' district 101', ' district 102', ' district 103', ' district 104',
+           ' district 105', ' district 106', ' district 107', ' district 108', ' district 109',
+           ' district 110'],
+}
+
+DISTRICT_NUMBER_STRINGS_IN_MIDDLE_NOT_COMPATIBLE_WITH_INTEGER = {
+    '1': [' 21st district', ' 31st district', ' 41st district', ' 51st district', ' 61st district',
+          ' 71st district', ' 81st district', ' 91st district', ' 101st district'],
+    '2': [' 12th district', ' 22nd district', ' 32nd district', ' 42nd district', ' 52nd district', ' 62nd district',
+          ' 72nd district', ' 82nd district', ' 92nd district', ' 102nd district'],
+    '3': [' 13th district', ' 23rd district', ' 33rd district', ' 43rd district', ' 53rd district', ' 63rd district',
+          ' 73rd district', ' 83rd district', ' 93rd district', ' 103rd district'],
+    '4': [' 14th district', ' 24th district', ' 34th district', ' 44th district', ' 54th district', ' 64th district',
+          ' 74th district', ' 84th district', ' 94th district', ' 104th district'],
+    '5': [' 15th district', ' 25th district', ' 35th district', ' 45th district', ' 55th district', ' 65th district',
+          ' 75th district', ' 85th district', ' 95th district', ' 105th district'],
+    '6': [' 16th district', ' 26th district', ' 36th district', ' 46th district', ' 56th district', ' 66th district',
+          ' 76th district', ' 86th district', ' 96th district', ' 106th district'],
+    '7': [' 17th district', ' 27th district', ' 37th district', ' 47th district', ' 57th district', ' 67th district',
+          ' 77th district', ' 87th district', ' 97th district', ' 107th district'],
+    '8': [' 18th district', ' 28th district', ' 38th district', ' 48th district', ' 58th district', ' 68th district',
+          ' 78th district', ' 88th district', ' 98th district', ' 108th district'],
+    '9': [' 19th district', ' 29th district', ' 39th district', ' 49th district', ' 59th district', ' 69th district',
+          ' 79th district', ' 89th district', ' 99th district', ' 109th district'],
+    '10': [' 109th district'],
+}
+
 
 class ContestOffice(models.Model):
     # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our data with other
@@ -1904,22 +1976,64 @@ def remove_office_district_false_positives(contest_office_name, contest_office_l
     # We want to avoid matches like this:
     # U.S. House California District 1 == U.S. House California District 18
     contest_office_name_lower = contest_office_name.lower()
+    remove_from_contest_office_list = []
     if positive_value_exists(contest_office_name) and 'district' in contest_office_name_lower:
-        contest_office_name_length = len(contest_office_name)
+        # key = 1, value = ' 1st district'
+        for key, value in DISTRICT_LOW_NUMBERS_IN_MIDDLE_THAT_CAUSE_FALSE_DUPLICATES.items():
+            if value in contest_office_name_lower:
+                # We found a low number district which often has other offices get picked up
+                #  which need to be filtered out now
+                for possible_match in contest_office_list:
+                    # Look for possible matches to remove
+                    possible_match_office_name_lower = possible_match.office_name.lower()
+                    for incompatible_string in DISTRICT_NUMBER_STRINGS_IN_MIDDLE_NOT_COMPATIBLE_WITH_INTEGER[key]:
+                        if incompatible_string in possible_match_office_name_lower:
+                            if possible_match_office_name_lower not in remove_from_contest_office_list:
+                                remove_from_contest_office_list.append(possible_match_office_name_lower)
+                                continue
+                    for incompatible_string in DISTRICT_NUMBER_STRINGS_AT_END_NOT_COMPATIBLE_WITH_INTEGER[key]:
+                        if possible_match_office_name_lower.endswith(incompatible_string):
+                            if possible_match_office_name_lower not in remove_from_contest_office_list:
+                                remove_from_contest_office_list.append(possible_match_office_name_lower)
+                                continue
+        for key, value in DISTRICT_LOW_NUMBERS_AT_END_THAT_CAUSE_FALSE_DUPLICATES.items():
+            if contest_office_name_lower.endswith(value):
+                # We found a low number district which often has other offices get picked up
+                #  which need to be filtered out now
+                for possible_match in contest_office_list:
+                    # Look for possible matches to remove
+                    possible_match_office_name_lower = possible_match.office_name.lower()
+                    for incompatible_string in DISTRICT_NUMBER_STRINGS_IN_MIDDLE_NOT_COMPATIBLE_WITH_INTEGER[key]:
+                        if incompatible_string in possible_match_office_name_lower:
+                            if possible_match_office_name_lower not in remove_from_contest_office_list:
+                                remove_from_contest_office_list.append(possible_match_office_name_lower)
+                                continue
+                    for incompatible_string in DISTRICT_NUMBER_STRINGS_AT_END_NOT_COMPATIBLE_WITH_INTEGER[key]:
+                        if possible_match_office_name_lower.endswith(incompatible_string):
+                            if possible_match_office_name_lower not in remove_from_contest_office_list:
+                                remove_from_contest_office_list.append(possible_match_office_name_lower)
+                                continue
+        # Now only add possible matches back into contest_office_list_filtered in not flagged for removal
         for possible_match in contest_office_list:
-            possible_match_name_length = len(possible_match.office_name)
             possible_match_office_name_lower = possible_match.office_name.lower()
-            if contest_office_name_length < possible_match_name_length \
-                    and 'district' in possible_match_office_name_lower:
-                # If the incoming name is shorter than the final name, see if the beginning of
-                # possible match is identical.
-                possible_match_office_name_lower_cropped = \
-                    possible_match_office_name_lower[:contest_office_name_length]
-                if contest_office_name_lower == possible_match_office_name_lower_cropped:
-                    # If the possible match contains the full contest_office_name, then we don't
-                    # return it because it looks like we have District 1 == District 18
-                    continue
-            contest_office_list_filtered.append(possible_match)
+            if possible_match_office_name_lower not in remove_from_contest_office_list:
+                contest_office_list_filtered.append(possible_match)
+        # 2021-10-19 The old approach
+        # contest_office_name_length = len(contest_office_name)
+        # for possible_match in contest_office_list:
+        #     possible_match_name_length = len(possible_match.office_name)
+        #     possible_match_office_name_lower = possible_match.office_name.lower()
+        #     if contest_office_name_length < possible_match_name_length \
+        #             and 'district' in possible_match_office_name_lower:
+        #         # If the incoming name is shorter than the final name, see if the beginning of
+        #         # possible match is identical.
+        #         possible_match_office_name_lower_cropped = \
+        #             possible_match_office_name_lower[:contest_office_name_length]
+        #         if contest_office_name_lower == possible_match_office_name_lower_cropped:
+        #             # If the possible match contains the full contest_office_name, then we don't
+        #             # return it because it looks like we have District 1 == District 18
+        #             continue
+        #     contest_office_list_filtered.append(possible_match)
     else:
         for possible_match in contest_office_list:
             contest_office_list_filtered.append(possible_match)

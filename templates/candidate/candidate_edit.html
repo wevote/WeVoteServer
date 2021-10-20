@@ -74,18 +74,18 @@ th, td {
                     {{ candidate.we_vote_id }}
                     (<a href="{% url 'candidate:candidate_delete_process' %}?candidate_id={{ candidate.id }}&google_civic_election_id={{ google_civic_election_id }}">delete candidate</a>)
 
-                    {% if candidate.politician_id %}
+                    {% if candidate.politician_we_vote_id %}
                         &nbsp;&nbsp;&nbsp;&nbsp;Politician We Vote Id:
-                        <a href="{% url 'politician:politician_edit' candidate.politician_id %}?google_civic_election_id={{ google_civic_election_id }}">
-                        {{ candidate.politician_we_vote_id }}</a>
-                    {% endif %}
-                    {% if not candidate.politician_we_vote_id %}
-                        (<a href="{% url 'candidate:candidate_politician_match' %}?candidate_id={{ candidate.id }}&google_civic_election_id={{ google_civic_election_id }}"
-                            >match to politician</a>)
+                        <a href="{% url 'politician:politician_we_vote_id_edit' candidate.politician_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                            target="_blank">
+                        {{ candidate.politician_we_vote_id }} <span class="glyphicon glyphicon-new-window"></span></a>
+                    {% else %}
+                        &nbsp;&nbsp;&nbsp;&nbsp;(<a href="{% url 'candidate:candidate_politician_match' %}?candidate_id={{ candidate.id }}&google_civic_election_id={{ google_civic_election_id }}"
+                            target="_blank">match to politician <span class="glyphicon glyphicon-new-window"></span></a>)
                     {% endif %}
                     {% if candidate.candidate_merge_possibility_found %}
-                        (<a href="{% url 'candidate:find_duplicate_candidate' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                            target="_blank">check for duplicate candidates</a> - in new window)
+                        &nbsp;&nbsp;&nbsp;&nbsp;(<a href="{% url 'candidate:find_duplicate_candidate' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                            target="_blank">check for duplicate candidates <span class="glyphicon glyphicon-new-window"></span></a>)
                     {% endif %}
                 </span>
             {% else %}
@@ -561,8 +561,8 @@ th, td {
 
 <div class="form-group">
     <label for="photo_url_from_vote_usa_id" class="col-sm-3 control-label">
-        {% if candidate.we_vote_hosted_profile_vote_usa_image_url_tiny %}
-            <img src='{{ candidate.we_vote_hosted_profile_vote_usa_image_url_tiny }}' />
+        {% if candidate.photo_url_from_vote_usa %}
+            <img src='{{ candidate.photo_url_from_vote_usa }}' height="48" />
         {% endif %}
         Vote USA Image</label>
     <div class="col-sm-8">
@@ -777,7 +777,7 @@ th, td {
             <td>{{ candidate.election.election_name }}</td>
             <td>
         {% if candidate.office and candidate.office.id %}
-                <a href="{% url 'office:office_summary' candidate.office.id %}">{{ candidate.office.office_name }}</a>
+            <a href="{% url 'office:office_summary' candidate.office.id %}">{{ candidate.office.office_name }}</a>
         {% else %}
             (office missing)
         {% endif %}
@@ -790,7 +790,12 @@ th, td {
             <td>{{ candidate.id }}</td>
             <td>{{ candidate.we_vote_id }}
                 {% if candidate.politician_we_vote_id %}
+                    <a href="{% url 'politician:politician_we_vote_id_edit' candidate.politician_we_vote_id %}"
+                       target="_blank">
                     {{ candidate.politician_we_vote_id }}
+                    <span class="glyphicon glyphicon-new-window"></span></a>
+                {% else %}
+                    <a href="{% url 'candidate:candidate_politician_match' %}?candidate_we_vote_id=candidate.we_vote_id" target="_blank">Match to Politician  <span class="glyphicon glyphicon-new-window"></span></a>
                 {% endif %}
             </td>
             <td>{{ candidate.vote_smart_id }}</td>
