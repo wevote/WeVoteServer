@@ -2260,6 +2260,13 @@ def find_and_merge_duplicate_candidates_view(request):
 def render_candidate_merge_form(
         request, candidate_option1_for_template, candidate_option2_for_template,
         candidate_merge_conflict_values, remove_duplicate_process=True):
+
+    state_code = ''
+    if hasattr(candidate_option1_for_template, 'state_code'):
+        state_code = candidate_option1_for_template.state_code
+    if hasattr(candidate_option2_for_template, 'state_code'):
+        state_code = candidate_option2_for_template.state_code
+
     bookmark_item_list_manager = BookmarkItemList()
     candidate_list_manager = CandidateListManager()
     position_list_manager = PositionListManager()
@@ -2313,15 +2320,16 @@ def render_candidate_merge_form(
 
     messages_on_stage = get_messages(request)
     template_values = {
-        'messages_on_stage': messages_on_stage,
-        'candidate_option1': candidate_option1_for_template,
-        'candidate_option2': candidate_option2_for_template,
+        'candidate_option1':                                candidate_option1_for_template,
+        'candidate_option2':                                candidate_option2_for_template,
         'candidate_option1_candidate_to_office_link_list':  candidate_option1_candidate_to_office_link_list,
         'candidate_option2_candidate_to_office_link_list':  candidate_option2_candidate_to_office_link_list,
-        'conflict_values':          candidate_merge_conflict_values,
-        'contest_office_mismatch':  contest_office_mismatch,
-        'google_civic_election_id': candidate_option1_for_template.google_civic_election_id,
-        'remove_duplicate_process': remove_duplicate_process,
+        'conflict_values':                                  candidate_merge_conflict_values,
+        'contest_office_mismatch':                          contest_office_mismatch,
+        'google_civic_election_id':                         candidate_option1_for_template.google_civic_election_id,
+        'messages_on_stage':                                messages_on_stage,
+        'remove_duplicate_process':                         remove_duplicate_process,
+        'state_code':                                       state_code,
     }
     return render(request, 'candidate/candidate_merge.html', template_values)
 

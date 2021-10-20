@@ -1116,6 +1116,12 @@ def render_contest_office_merge_form(
 
     bookmark_item_list_manager = BookmarkItemList()
 
+    state_code = ''
+    if hasattr(contest_office_option1_for_template, 'state_code'):
+        state_code = contest_office_option1_for_template.state_code
+    if hasattr(contest_office_option2_for_template, 'state_code'):
+        state_code = contest_office_option1_for_template.state_code
+
     # Get positions counts for both offices
     contest_office_option1_for_template.public_positions_count = \
         position_list_manager.fetch_public_positions_count_for_contest_office(
@@ -1177,6 +1183,7 @@ def render_contest_office_merge_form(
         'conflict_values':          contest_office_merge_conflict_values,
         'google_civic_election_id': contest_office_option1_for_template.google_civic_election_id,
         'remove_duplicate_process': remove_duplicate_process,
+        'state_code':               state_code,
     }
     return render(request, 'office/office_merge.html', template_values)
 

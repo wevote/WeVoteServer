@@ -2,7 +2,6 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from campaign.controllers import move_campaignx_to_another_politician
 from candidate.controllers import add_name_to_next_spot, move_candidates_to_another_politician
 from elected_official.controllers import move_elected_officials_to_another_politician
 from politician.models import Politician, PoliticianManager, POLITICIAN_UNIQUE_IDENTIFIERS
@@ -285,6 +284,7 @@ def merge_these_two_politicians(politician1_we_vote_id, politician2_we_vote_id, 
         return results
 
     # Update CampaignX entries to new politician_we_vote_id
+    from campaign.controllers import move_campaignx_to_another_politician
     results = move_campaignx_to_another_politician(
         from_politician_we_vote_id=politician2_we_vote_id,
         to_politician_we_vote_id=politician1_we_vote_id)
