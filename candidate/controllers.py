@@ -391,8 +391,6 @@ def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, adm
     :param candidate1_we_vote_id:
     :param candidate2_we_vote_id:
     :param admin_merge_choices: Dictionary with the attribute name as the key, and the chosen value as the value
-    :param candidate1_on_stage: The first candidate object if we have it
-    :param candidate2_on_stage: The second candidate object if we have it
     :return:
     """
     status = ""
@@ -460,27 +458,27 @@ def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, adm
         candidate1_on_stage.politician_id = politician2_id
     # else do nothing (no parent politician for candidate 2)
 
-    # TODO: Migrate bookmarks
-    bookmark_item_list_manager = BookmarkItemList()
-    bookmark_results = bookmark_item_list_manager.retrieve_bookmark_item_list_for_candidate(candidate2_we_vote_id)
-    if bookmark_results['bookmark_item_list_found']:
-        status += "Bookmarks found for Candidate 2 - automatic merge not working yet. "
-        results = {
-            'success': True,
-            'status': status,
-            'candidates_merged': False,
-            'candidate': None,
-        }
-        return results
+    # # TODO: Migrate bookmarks
+    # bookmark_item_list_manager = BookmarkItemList()
+    # bookmark_results = bookmark_item_list_manager.retrieve_bookmark_item_list_for_candidate(candidate2_we_vote_id)
+    # if bookmark_results['bookmark_item_list_found']:
+    #     status += "Bookmarks found for Candidate 2 - automatic merge not working yet. "
+    #     results = {
+    #         'success': True,
+    #         'status': status,
+    #         'candidates_merged': False,
+    #         'candidate': None,
+    #     }
+    #     return results
 
     # Merge attribute values chosen by the admin
     for attribute in CANDIDATE_UNIQUE_IDENTIFIERS:
-        try:
-            if attribute in admin_merge_choices:
-                setattr(candidate1_on_stage, attribute, admin_merge_choices[attribute])
-        except Exception as e:
-            # Don't completely fail if in attribute can't be saved.
-            status += "ATTRIBUTE_SAVE_FAILED (" + str(attribute) + ") " + str(e) + " "
+        # try:
+        if attribute in admin_merge_choices:
+            setattr(candidate1_on_stage, attribute, admin_merge_choices[attribute])
+        # except Exception as e:
+        #     # Don't completely fail if in attribute can't be saved.
+        #     status += "ATTRIBUTE_SAVE_FAILED (" + str(attribute) + ") " + str(e) + " "
 
     # Preserve unique google_civic_candidate_name, _name2, _name3, _name4, and _name5
     if positive_value_exists(candidate2_on_stage.google_civic_candidate_name):
