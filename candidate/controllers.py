@@ -348,9 +348,11 @@ def merge_if_duplicate_candidates(candidate1_on_stage, candidate2_on_stage, conf
     # Are there any comparisons that require admin intervention?
     merge_choices = {}
     for attribute in CANDIDATE_UNIQUE_IDENTIFIERS:
-        if attribute == "we_vote_hosted_profile_image_url_large" \
+        if attribute == "twitter_url" \
+                or attribute == "we_vote_hosted_profile_image_url_large" \
                 or attribute == "we_vote_hosted_profile_image_url_medium" \
                 or attribute == "we_vote_hosted_profile_image_url_tiny":
+            # Don't worry about conflict with any of these fields
             if positive_value_exists(getattr(candidate1_on_stage, attribute)):
                 # We can proceed because candidate1 has a valid image, so we can default to choosing that one
                 pass
