@@ -1577,6 +1577,47 @@ class CandidateListManager(models.Manager):
 
         return results_list, number_of_rows
 
+    def retrieve_candidates_from_politician(self, politician_id=0, politician_we_vote_id=''):
+        success = True
+        status = ""
+        candidate_list = []
+        candidate_list_found = False
+
+        if not positive_value_exists(politician_we_vote_id) and not positive_value_exists(politician_id):
+            success = False
+            status += "POLITICIAN_ID_AND_WE_VOTE_ID_MISSING "
+            results = {
+                'success':              success,
+                'status':               status,
+                'candidate_list':       candidate_list,
+                'candidate_list_found': candidate_list_found,
+            }
+            return results
+
+        try:
+            candidate_query = CandidateCampaign.objects.all()
+            if positive_value_exists(politician_id) and positive_value_exists(politician_we_vote_id):
+                candidate_query = candidate_query.filter(
+                    Q(politician_id=politician_id) |
+                    Q(politician_we_vote_id=politician_we_vote_id)
+                )
+            elif positive_value_exists(politician_id):
+                candidate_query = candidate_query.filter(politician_id=politician_id)
+            else:
+                candidate_query = candidate_query.filter(politician_we_vote_id__iexact=politician_we_vote_id)
+            candidate_list = list(candidate_query)
+            candidate_list_found = len(candidate_list) > 0
+        except Exception as e:
+            success = False
+            status += "COULD_NOT_RETRIEVE_CANDIDATE_LIST_FROM_POLITICIAN_WE_VOTE_ID: " + str(e) + ' '
+        results = {
+            'success':              success,
+            'status':               status,
+            'candidate_list':       candidate_list,
+            'candidate_list_found': candidate_list_found,
+        }
+        return results
+
     def retrieve_politician_we_vote_id_list_from_candidate_we_vote_id_list(
             self,
             candidate_we_vote_id_list=[]):

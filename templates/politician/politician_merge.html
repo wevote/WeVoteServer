@@ -6,7 +6,8 @@
 {%  block content %}
 <a href="{% url 'politician:politician_list' %}">< Back to Politicians</a>
   <br /></r />
-<a href="{% url 'politician:find_and_merge_duplicate_politicians' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&find_number_of_duplicates=1" >Click to find out the number of possible duplicates</a> (takes 30-60 seconds)
+<a href="{% url 'politician:find_and_merge_duplicate_politicians' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&find_number_of_duplicates=1"
+   target="_blank">Click to find number of possible duplicates <span class="glyphicon glyphicon-new-window"></span></a> (takes 30-60 seconds)
 
 <h1>{% if politician_option1 %}Merge {{ politician_option1.politician_name }}{% else %}CANNOT MERGE{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
@@ -111,8 +112,21 @@
 {% include "politician/politician_merge_one_field_decision.html" with field_name="wikipedia_id" field_label="Wikipedia ID" conflict_status=conflict_values.wikipedia_id politician1_field_value=politician_option1.wikipedia_id politician2_field_value=politician_option2.wikipedia_id politician1=politician_option1 politician2=politician_option2 %}
     <tr>
         <td>Linked Candidates</td>
-        <td>{{ politician_option1.linked_candidates_count }}</td>
-        <td>{{ politician_option2.linked_candidates_count }}</td>
+        <td>
+            {{ politician_option1.linked_candidates_count }}
+        </td>
+        <td>
+            {{ politician_option2.linked_candidates_count }}
+        </td>
+    </tr>
+    <tr>
+        <td>Linked Candidate Names</td>
+        <td>
+            {{ politician_option1.linked_candidate_names }}
+        </td>
+        <td>
+            {{ politician_option2.linked_candidate_names }}
+        </td>
     </tr>
     <tr>
         <td>&nbsp;</td>

@@ -114,9 +114,10 @@ def find_and_merge_duplicate_politicians_view(request):
             duplicate_politician_count += duplicate_politician_count_temp
 
         if positive_value_exists(duplicate_politician_count):
-            messages.add_message(request, messages.INFO, "There are approximately {duplicate_politician_count} "
-                                                         "possible duplicates."
-                                                         "".format(duplicate_politician_count=duplicate_politician_count))
+            messages.add_message(request, messages.INFO,
+                                 "There are approximately {duplicate_politician_count} "
+                                 "possible duplicates."
+                                 "".format(duplicate_politician_count=duplicate_politician_count))
 
     # Loop through all of the politicians in this election
     for we_vote_politician in politician_list:
@@ -176,22 +177,55 @@ def render_politician_merge_form(
         remove_duplicate_process=True):
     candidate_list_manager = CandidateListManager()
 
-    # Get number of candidates linked to each politician
-    politician_option1_for_template.linked_candidates_count = \
-        candidate_list_manager.fetch_candidate_count_for_politician(
-            politician_option1_for_template.id, politician_option1_for_template.we_vote_id)
+    state_code = ''
+    if hasattr(politician_option1_for_template, 'state_code'):
+        state_code = politician_option1_for_template.state_code
+    if hasattr(politician_option2_for_template, 'state_code'):
+        state_code = politician_option2_for_template.state_code
 
-    politician_option2_for_template.linked_candidates_count = \
-        candidate_list_manager.fetch_candidate_count_for_politician(
-            politician_option2_for_template.id, politician_option2_for_template.we_vote_id)
+    # Get info about candidates linked to each politician
+    politician1_linked_candidates_count = 0
+    politician1_linked_candidate_names = ''
+    politician1_candidate_results = candidate_list_manager.retrieve_candidates_from_politician(
+        politician_id=politician_option1_for_template.id,
+        politician_we_vote_id=politician_option1_for_template.we_vote_id)
+    if politician1_candidate_results['candidate_list_found']:
+        is_first = True
+        for one_candidate in politician1_candidate_results['candidate_list']:
+            politician1_linked_candidates_count += 1
+            if is_first:
+                is_first = False
+            else:
+                politician1_linked_candidate_names += ', '
+            politician1_linked_candidate_names += one_candidate.candidate_name
+    politician_option1_for_template.linked_candidates_count = politician1_linked_candidates_count
+    politician_option1_for_template.linked_candidate_names = politician1_linked_candidate_names
+
+    politician2_linked_candidates_count = 0
+    politician2_linked_candidate_names = ''
+    politician2_candidate_results = candidate_list_manager.retrieve_candidates_from_politician(
+        politician_id=politician_option2_for_template.id,
+        politician_we_vote_id=politician_option2_for_template.we_vote_id)
+    if politician2_candidate_results['candidate_list_found']:
+        is_first = True
+        for one_candidate in politician2_candidate_results['candidate_list']:
+            politician2_linked_candidates_count += 1
+            if is_first:
+                is_first = False
+            else:
+                politician2_linked_candidate_names += ', '
+            politician2_linked_candidate_names += one_candidate.candidate_name
+    politician_option2_for_template.linked_candidates_count = politician2_linked_candidates_count
+    politician_option2_for_template.linked_candidate_names = politician2_linked_candidate_names
 
     messages_on_stage = get_messages(request)
     template_values = {
+        'conflict_values':          politician_merge_conflict_values,
         'messages_on_stage':        messages_on_stage,
         'politician_option1':       politician_option1_for_template,
         'politician_option2':       politician_option2_for_template,
-        'conflict_values':          politician_merge_conflict_values,
         'remove_duplicate_process': remove_duplicate_process,
+        'state_code':               state_code,
     }
     return render(request, 'politician/politician_merge.html', template_values)
 
