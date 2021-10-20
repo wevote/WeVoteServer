@@ -309,6 +309,85 @@ class CandidateListManager(models.Manager):
         }
         return results
 
+    def retrieve_all_offices_for_candidate(self, candidate_id=0, candidate_we_vote_id='', read_only=False):
+        office_list = []
+        office_list_found = False
+        office_we_vote_id_list = []
+        status = ""
+        success = True
+
+        if not positive_value_exists(candidate_id) and not positive_value_exists(candidate_we_vote_id):
+            status += 'VALID_CANDIDATE_ID_AND_CANDIDATE_WE_VOTE_ID_MISSING '
+            results = {
+                'success':                  False,
+                'status':                   status,
+                'candidate_id':             candidate_id,
+                'candidate_we_vote_id':     candidate_we_vote_id,
+                'office_list_found':        office_list_found,
+                'office_list':              office_list,
+                'office_we_vote_id_list':   office_we_vote_id_list,
+            }
+            return results
+
+        candidate_manager = CandidateManager()
+        if positive_value_exists(candidate_id) and not positive_value_exists(candidate_we_vote_id):
+            candidate_we_vote_id = candidate_manager.fetch_candidate_we_vote_id_from_id(candidate_id)
+
+        link_results = \
+            candidate_manager.retrieve_candidate_to_office_link(candidate_we_vote_id=candidate_we_vote_id)
+        if not positive_value_exists(link_results['success']):
+            status += link_results['status']
+            success = False
+            results = {
+                'success':                  success,
+                'status':                   status,
+                'candidate_id':             candidate_id,
+                'candidate_we_vote_id':     candidate_we_vote_id,
+                'office_list_found':        office_list_found,
+                'office_list':              office_list,
+                'office_we_vote_id_list':   office_we_vote_id_list,
+            }
+            return results
+        candidate_to_office_link_list = link_results['candidate_to_office_link_list']
+        for one_link in candidate_to_office_link_list:
+            if positive_value_exists(one_link.contest_office_we_vote_id):
+                office_we_vote_id_list.append(one_link.contest_office_we_vote_id)
+        try:
+            if read_only:
+                office_query = ContestOffice.objects.using('readonly').all()
+            else:
+                office_query = ContestOffice.objects.all()
+            office_query = office_query.filter(we_vote_id__in=office_we_vote_id_list)
+            office_list = list(office_query)
+
+            if len(office_list):
+                office_list_found = True
+                status += 'RETRIEVE_ALL_OFFICES_FOR_CANDIDATE-OFFICES_RETRIEVED '
+            else:
+                status += 'RETRIEVE_ALL_OFFICES_FOR_CANDIDATE-NO_OFFICES_RETRIEVED '
+        except ContestOffice.DoesNotExist:
+            # No offices found. Not a problem.
+            status += 'RETRIEVE_ALL_OFFICES_FOR_CANDIDATE-NO_OFFICES_FOUND_DoesNotExist '
+            office_list = []
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status += 'FAILED retrieve_all_offices_for_candidate ' + str(e) + ' '
+            success = False
+
+        for one_office in office_list:
+            office_we_vote_id_list.append(one_office.we_vote_id)
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'candidate_id':             candidate_id,
+            'candidate_we_vote_id':     candidate_we_vote_id,
+            'office_list_found':        office_list_found,
+            'office_list':              office_list,
+            'office_we_vote_id_list':   office_we_vote_id_list,
+        }
+        return results
+
     def retrieve_candidates_for_specific_elections(self, google_civic_election_id_list=[],
                                                    limit_to_this_state_code="",
                                                    return_list_of_objects=False,
@@ -1323,6 +1402,16 @@ class CandidateListManager(models.Manager):
             limit_to_this_state_code=limit_to_this_state_code)
         candidate_we_vote_id_list = results['candidate_we_vote_id_list']
         return candidate_we_vote_id_list
+
+    def fetch_office_we_vote_id_list_from_candidate_we_vote_id(self, candidate_we_vote_id):
+        results = self.retrieve_all_offices_for_candidate(candidate_we_vote_id=candidate_we_vote_id)
+        if not positive_value_exists(results['office_list_found']):
+            return []
+        office_list = results['office_list']
+        office_we_vote_id_list = []
+        for one_office in office_list:
+            office_we_vote_id_list.append(one_office.we_vote_id)
+        return office_we_vote_id_list
 
     def retrieve_google_civic_election_id_list_from_candidate_we_vote_id_list(
             self,

@@ -186,11 +186,14 @@ def render_politician_merge_form(
     # Get info about candidates linked to each politician
     politician1_linked_candidates_count = 0
     politician1_linked_candidate_names = ''
+    politician1_linked_candidate_offices = ''
+    politician1_linked_candidate_photos = []
     politician1_candidate_results = candidate_list_manager.retrieve_candidates_from_politician(
         politician_id=politician_option1_for_template.id,
         politician_we_vote_id=politician_option1_for_template.we_vote_id)
     if politician1_candidate_results['candidate_list_found']:
         is_first = True
+        is_first_office = True
         for one_candidate in politician1_candidate_results['candidate_list']:
             politician1_linked_candidates_count += 1
             if is_first:
@@ -198,16 +201,33 @@ def render_politician_merge_form(
             else:
                 politician1_linked_candidate_names += ', '
             politician1_linked_candidate_names += one_candidate.candidate_name
+            if positive_value_exists(one_candidate.we_vote_hosted_profile_image_url_large):
+                politician1_linked_candidate_photos.append(one_candidate.we_vote_hosted_profile_image_url_large)
+            results = candidate_list_manager.retrieve_all_offices_for_candidate(
+                candidate_we_vote_id=one_candidate.we_vote_id,
+                read_only=True)
+            if results['office_list_found']:
+                for one_office in results['office_list']:
+                    if is_first_office:
+                        is_first_office = False
+                    else:
+                        politician1_linked_candidate_offices += ', '
+                    politician1_linked_candidate_offices += one_office.office_name
     politician_option1_for_template.linked_candidates_count = politician1_linked_candidates_count
     politician_option1_for_template.linked_candidate_names = politician1_linked_candidate_names
+    politician_option1_for_template.linked_candidate_offices = politician1_linked_candidate_offices
+    politician_option1_for_template.linked_candidate_photos = politician1_linked_candidate_photos
 
     politician2_linked_candidates_count = 0
     politician2_linked_candidate_names = ''
+    politician2_linked_candidate_offices = ''
+    politician2_linked_candidate_photos = []
     politician2_candidate_results = candidate_list_manager.retrieve_candidates_from_politician(
         politician_id=politician_option2_for_template.id,
         politician_we_vote_id=politician_option2_for_template.we_vote_id)
     if politician2_candidate_results['candidate_list_found']:
         is_first = True
+        is_first_office = True
         for one_candidate in politician2_candidate_results['candidate_list']:
             politician2_linked_candidates_count += 1
             if is_first:
@@ -215,8 +235,22 @@ def render_politician_merge_form(
             else:
                 politician2_linked_candidate_names += ', '
             politician2_linked_candidate_names += one_candidate.candidate_name
+            if positive_value_exists(one_candidate.we_vote_hosted_profile_image_url_large):
+                politician2_linked_candidate_photos.append(one_candidate.we_vote_hosted_profile_image_url_large)
+            results = candidate_list_manager.retrieve_all_offices_for_candidate(
+                candidate_we_vote_id=one_candidate.we_vote_id,
+                read_only=True)
+            if results['office_list_found']:
+                for one_office in results['office_list']:
+                    if is_first_office:
+                        is_first_office = False
+                    else:
+                        politician2_linked_candidate_offices += ', '
+                    politician2_linked_candidate_offices += one_office.office_name
     politician_option2_for_template.linked_candidates_count = politician2_linked_candidates_count
     politician_option2_for_template.linked_candidate_names = politician2_linked_candidate_names
+    politician_option2_for_template.linked_candidate_offices = politician2_linked_candidate_offices
+    politician_option2_for_template.linked_candidate_photos = politician2_linked_candidate_photos
 
     messages_on_stage = get_messages(request)
     template_values = {
@@ -777,6 +811,9 @@ def politician_edit_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    first_name = request.POST.get('first_name', False)
+    middle_name = request.POST.get('middle_name', False)
+    last_name = request.POST.get('last_name', False)
     politician_id = convert_to_int(request.POST['politician_id'])
     politician_name = request.POST.get('politician_name', False)
     google_civic_candidate_name = request.POST.get('google_civic_candidate_name', False)
@@ -850,10 +887,12 @@ def politician_edit_process_view(request):
             # Update
             if politician_name is not False:
                 politician_on_stage.politician_name = politician_name
-                # Re-save first_name, middle name, and last name
-                politician_on_stage.first_name = extract_first_name_from_full_name(politician_name)
-                politician_on_stage.middle_name = extract_middle_name_from_full_name(politician_name)
-                politician_on_stage.last_name = extract_last_name_from_full_name(politician_name)
+            if first_name is not False:
+                politician_on_stage.first_name = first_name
+            if middle_name is not False:
+                politician_on_stage.middle_name = middle_name
+            if last_name is not False:
+                politician_on_stage.last_name = last_name
             if state_code is not False:
                 politician_on_stage.state_code = state_code
             if google_civic_candidate_name is not False:

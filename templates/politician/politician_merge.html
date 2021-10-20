@@ -129,6 +129,28 @@
         </td>
     </tr>
     <tr>
+        <td>Linked Candidate Photos</td>
+        <td>
+            {% for one_photo in politician_option1.linked_candidate_photos %}
+                <img src="{{ one_photo }}" width="80">
+            {% endfor %}
+        </td>
+        <td>
+            {% for one_photo in politician_option2.linked_candidate_photos %}
+                <img src="{{ one_photo }}" width="80">
+            {% endfor %}
+        </td>
+    </tr>
+    <tr>
+        <td>Linked Candidate Offices</td>
+        <td>
+            {{ politician_option1.linked_candidate_offices }}
+        </td>
+        <td>
+            {{ politician_option2.linked_candidate_offices }}
+        </td>
+    </tr>
+    <tr>
         <td>&nbsp;</td>
         <td>&nbsp;</td>
         <td>&nbsp;</td>

@@ -28,15 +28,25 @@
         <td><a href="{% url 'candidate:candidate_edit_we_vote_id' candidate_we_vote_id=candidate_option2.we_vote_id %}"
                target="_blank">view candidate 2 <span class="glyphicon glyphicon-new-window"></span></a></td>
     </tr>
-    {% if candidate_option1.politician_we_vote_id and candidate_option2.politician_we_vote_id and candidate_option1.politician_we_vote_id != candidate_option2.politician_we_vote_id %}
     <tr>
-        <td><strong><span style="color: red">Politician ***CONFLICT***</span></strong>&nbsp;</td>
-        <td><a href="{% url 'politician:politician_we_vote_id_edit' politician_we_vote_id=candidate_option1.politician_we_vote_id %}"
-               target="_blank">view politician 1 <span class="glyphicon glyphicon-new-window"></span></a></td>
-        <td><a href="{% url 'politician:politician_we_vote_id_edit' politician_we_vote_id=candidate_option2.politician_we_vote_id %}"
-               target="_blank">view politician 2 <span class="glyphicon glyphicon-new-window"></span></a></td>
+        <td>
+            {% if candidate_option1.politician_we_vote_id and candidate_option2.politician_we_vote_id and candidate_option1.politician_we_vote_id != candidate_option2.politician_we_vote_id %}
+            <strong><span style="color: red">Politician ***CONFLICT***</span></strong>&nbsp;
+            {% endif %}
+        </td>
+        <td>
+            {% if candidate_option1.politician_we_vote_id %}
+            <a href="{% url 'politician:politician_we_vote_id_edit' politician_we_vote_id=candidate_option1.politician_we_vote_id %}"
+               target="_blank">view politician 1 <span class="glyphicon glyphicon-new-window"></span></a>
+            {% endif %}
+        </td>
+        <td>
+            {% if candidate_option2.politician_we_vote_id %}
+            <a href="{% url 'politician:politician_we_vote_id_edit' politician_we_vote_id=candidate_option2.politician_we_vote_id %}"
+               target="_blank">view politician 2 <span class="glyphicon glyphicon-new-window"></span></a>
+            {% endif %}
+        </td>
     </tr>
-    {% endif %}
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="politician_we_vote_id" field_label="Politician We Vote ID" conflict_status=conflict_values.politician_we_vote_id candidate1_field_value=candidate_option1.politician_we_vote_id candidate2_field_value=candidate_option2.politician_we_vote_id candidate1=candidate_option1 candidate2=candidate_option2 %}
 
