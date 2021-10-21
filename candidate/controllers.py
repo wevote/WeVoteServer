@@ -307,6 +307,11 @@ def figure_out_candidate_conflict_values(candidate1, candidate2):
                         candidate_merge_conflict_values[attribute] = 'MATCHING'
                     else:
                         candidate_merge_conflict_values[attribute] = 'CONFLICT'
+                elif attribute == "candidate_twitter_handle":
+                    if candidate1_attribute_value.lower() == candidate2_attribute_value.lower():
+                        candidate_merge_conflict_values[attribute] = 'MATCHING'
+                    else:
+                        candidate_merge_conflict_values[attribute] = 'CONFLICT'
                 elif attribute == "candidate_url":
                     candidate1_attribute_value_trimmed = candidate1_attribute_value.rstrip('/')
                     candidate2_attribute_value_trimmed = candidate2_attribute_value.rstrip('/')

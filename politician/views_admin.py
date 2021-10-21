@@ -185,6 +185,7 @@ def render_politician_merge_form(
 
     # Get info about candidates linked to each politician
     politician1_linked_candidates_count = 0
+    politician1_linked_candidate_district_names = ''
     politician1_linked_candidate_names = ''
     politician1_linked_candidate_offices = ''
     politician1_linked_candidate_photos = []
@@ -212,13 +213,17 @@ def render_politician_merge_form(
                         is_first_office = False
                     else:
                         politician1_linked_candidate_offices += ', '
+                        politician1_linked_candidate_district_names += ', '
                     politician1_linked_candidate_offices += one_office.office_name
+                    politician1_linked_candidate_district_names += str(one_office.district_name)
     politician_option1_for_template.linked_candidates_count = politician1_linked_candidates_count
+    politician_option1_for_template.linked_candidate_district_names = politician1_linked_candidate_district_names
     politician_option1_for_template.linked_candidate_names = politician1_linked_candidate_names
     politician_option1_for_template.linked_candidate_offices = politician1_linked_candidate_offices
     politician_option1_for_template.linked_candidate_photos = politician1_linked_candidate_photos
 
     politician2_linked_candidates_count = 0
+    politician2_linked_candidate_district_names = ''
     politician2_linked_candidate_names = ''
     politician2_linked_candidate_offices = ''
     politician2_linked_candidate_photos = []
@@ -246,8 +251,11 @@ def render_politician_merge_form(
                         is_first_office = False
                     else:
                         politician2_linked_candidate_offices += ', '
+                        politician2_linked_candidate_district_names += ', '
                     politician2_linked_candidate_offices += one_office.office_name
+                    politician2_linked_candidate_district_names += str(one_office.district_name)
     politician_option2_for_template.linked_candidates_count = politician2_linked_candidates_count
+    politician_option2_for_template.linked_candidate_district_names = politician2_linked_candidate_district_names
     politician_option2_for_template.linked_candidate_names = politician2_linked_candidate_names
     politician_option2_for_template.linked_candidate_offices = politician2_linked_candidate_offices
     politician_option2_for_template.linked_candidate_photos = politician2_linked_candidate_photos
