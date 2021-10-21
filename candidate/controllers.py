@@ -348,16 +348,33 @@ def merge_if_duplicate_candidates(candidate1_on_stage, candidate2_on_stage, conf
     # Are there any comparisons that require admin intervention?
     merge_choices = {}
     for attribute in CANDIDATE_UNIQUE_IDENTIFIERS:
-        if attribute == "twitter_profile_background_image_url_https" \
+        if attribute == "facebook_profile_image_url_https" \
+                or attribute == "twitter_profile_background_image_url_https" \
                 or attribute == "twitter_profile_banner_url_https" \
                 or attribute == "twitter_profile_image_url_https" \
                 or attribute == "twitter_user_id" \
+                or attribute == "vote_usa_profile_image_url_https" \
+                or attribute == "we_vote_hosted_profile_facebook_image_url_large" \
+                or attribute == "we_vote_hosted_profile_facebook_image_url_medium" \
+                or attribute == "we_vote_hosted_profile_facebook_image_url_tiny" \
                 or attribute == "we_vote_hosted_profile_image_url_large" \
                 or attribute == "we_vote_hosted_profile_image_url_medium" \
-                or attribute == "we_vote_hosted_profile_image_url_tiny":
-            # Don't worry about conflict with any of these fields
-            if positive_value_exists(getattr(candidate1_on_stage, attribute)):
-                # We can proceed because candidate1 has a valid image, so we can default to choosing that one
+                or attribute == "we_vote_hosted_profile_image_url_tiny" \
+                or attribute == "we_vote_hosted_profile_twitter_image_url_large" \
+                or attribute == "we_vote_hosted_profile_twitter_image_url_medium" \
+                or attribute == "we_vote_hosted_profile_twitter_image_url_tiny" \
+                or attribute == "we_vote_hosted_profile_uploaded_image_image_url_large" \
+                or attribute == "we_vote_hosted_profile_uploaded_image_image_url_medium" \
+                or attribute == "we_vote_hosted_profile_uploaded_image_image_url_tiny" \
+                or attribute == "we_vote_hosted_profile_vote_usa_image_url_large" \
+                or attribute == "we_vote_hosted_profile_vote_usa_image_url_medium" \
+                or attribute == "we_vote_hosted_profile_vote_usa_image_url_tiny":
+            # Don't let conflict stop us with any of these fields
+            conflict_value = conflict_values.get(attribute, None)
+            if conflict_value == "CANDIDATE2":
+                merge_choices[attribute] = getattr(candidate2_on_stage, attribute)
+            elif positive_value_exists(getattr(candidate1_on_stage, attribute)):
+                # We can proceed because candidate1 has a valid field, so we can default to choosing that one
                 pass
             elif positive_value_exists(getattr(candidate2_on_stage, attribute)):
                 # If we are here candidate1 does NOT have image, but candidate2 does
