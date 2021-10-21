@@ -119,10 +119,8 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
         # print("Device ID: ")
         # print(device_entry)
 
-
-
         #### Generate a voter we vote id ####
-            # Requires a voter device id #
+        ## Requires a voter device id ##
         response2 = self.client2.get(self.voter_create_url, {'voter_device_id': voter_device_id})
         json_data2 = json.loads(response2.content.decode())
 
@@ -322,7 +320,9 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
         print(response2.content)
         print("\nVoter WVID: " + voter_we_vote_id)
 
-        response3 = self.client2.get(self.voter_retrieve_url, {'voter_device_id': voter_device_id})
+        #### Generate an organization we vote id ####
+        ## Requires a voter device id & voter we vote id ##
+        response3 = self.client2.get(self.voter_retrieve_url,{'voter_device_id': voter_device_id})
         json_data3 = json.loads(response3.content.decode())
 
         self.assertEqual('linked_organization_we_vote_id' in json_data3,
@@ -339,9 +339,11 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
 
         organization_we_vote_id = json_data3["linked_organization_we_vote_id"] if "linked_organization_we_vote_id" in json_data3 else ''
 
-        print("\nvoter_retrieve_url:" + "\n")
-        print(response3.content) 
+        # print("\nvoter_retrieve_url:" + "\n")
+        # print(response3.content) 
 
+        #### Generate a campaignx we vote id ####
+        ## Requires a voter device id, voter we vote id & organization we vote id ##
         response4 = self.client2.get(self.campaign_save_url, {'voter_device_id': voter_device_id, 'voter_we_vote_id': voter_we_vote_id, 'organization_we_vote_id': organization_we_vote_id, 'in_draft_mode': False, 'in_draft_mode_changed': True})
         json_data4 = json.loads(response4.content.decode())
 
@@ -358,17 +360,14 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
                          "success = {success} Expected success".format(success=json_data4['success']))
 
         campaignx_we_vote_id = json_data4["campaignx_we_vote_id"] if "campaignx_we_vote_id" in json_data4 else ''
-        print("\ncampaign_save_url:" + "\n")
-        # print(json_data4)
-        print(response4.content)
-        # Need an organization_we_vote_id???
 
+        # print("\ncampaign_save_url:" + "\n")
+        # # print(json_data4)
+        # print(response4.content)
+
+        #### Retrieve campaign ####
         response5 = self.client2.get(self.campaign_retrieve_url, {'voter_device_id': voter_device_id, 'campaignx_we_vote_id': campaignx_we_vote_id})
         json_data5 = json.loads(response5.content.decode())
-
-        self.assertEqual('campaignx_we_vote_id' in json_data5,
-                         True,
-                         "campaignx_we_vote_id expected in the json response, and not found")
 
         self.assertEqual(json_data5['status'],
                          "CAMPAIGNX_FOUND_WITH_WE_VOTE_ID ",
@@ -378,25 +377,109 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
                          True,
                          "success = {success} Expected success".format(success=json_data5['success']))
 
-        print("\ncampaign_retrieve_url:" + "\n")
-        # print(json_data5)
-        print(response5.content)
+        self.assertEqual(len(json_data5["campaignx_owner_list"]), 
+                         1,
+                         "Expected position_list to have length 1, "
+                         "actual length = {length}".format(length=len(json_data5["campaignx_owner_list"])))
 
+
+
+        # print("\ncampaign_retrieve_url:" + "\n")
+        # # print(json_data5)
+        # print(response5.content)
+
+        #### Retrieve campaign with voter-we-vote-id as an owner ####
         response6 = self.client2.get(self.campaign_retrieve_as_owner_url, {'voter_device_id': voter_device_id, 'campaignx_we_vote_id': campaignx_we_vote_id})
         json_data6 = json.loads(response6.content.decode())
 
-        self.assertEqual('campaignx_we_vote_id' in json_data6,
-                         True,
-                         "campaignx_we_vote_id expected in the json response, and not found")
 
+        ## TODO ## Check as owner status instead.
         self.assertEqual(json_data6['status'],
                          "RETRIEVE_CAMPAIGNX_AS_OWNER_FOUND_WITH_WE_VOTE_ID ",
                          "status = {status} Expected status RETRIEVE_CAMPAIGNX_AS_OWNER_FOUND_WITH_WE_VOTE_ID ".format(status=json_data6['status']))
 
         self.assertEqual(json_data6['success'],
                          True,
-                         "success = {success} Expected success".format(success=json_data6['success']))        
+                         "success = {success} Expected success".format(success=json_data6['success']))                         
 
-        print("\ncampaign_retrieve_as_owner:" + "\n")
+        self.assertEqual(json_data6['voter_can_send_updates_to_campaignx'],
+                         True,
+                         "voter_can_send_updates_to_campaignx = {voter_can_send_updates_to_campaignx} Expected true".format(voter_can_send_updates_to_campaignx=json_data6['voter_can_send_updates_to_campaignx']))
+       
+
+        # print("\ncampaign_retrieve_as_owner:" + "\n")
+        # # print(json_data6)
+        # print(response6.content)
+
+
+        #### Generate another set of voter entry variables: ####
+        ## voter device id ####
+        response7 = self.client2.get(self.generate_voter_device_id_url)
+        json_data7 = json.loads(response7.content.decode())
+
+        voter_device_id_2 = json_data7['voter_device_id'] if 'voter_device_id' in json_data7 else ''
+
+        ## voter we vote id ##
+        response8 = self.client2.get(self.voter_create_url, {'voter_device_id': voter_device_id_2})
+        json_data8 = json.loads(response8.content.decode())
+
+        voter_we_vote_id_2 = json_data8['voter_we_vote_id'] if 'voter_we_vote_id' in json_data8 else ''  
+
+        print('voter_we_vote_ids: ')
+        print(voter_we_vote_id)
+        print(voter_we_vote_id_2) 
+
+        #### Retrieve campaign with non-owner voter id ####
+        response9 = self.client2.get(self.campaign_retrieve_as_owner_url, {'voter_device_id': voter_device_id_2, 'campaignx_we_vote_id': campaignx_we_vote_id})
+        json_data9 = json.loads(response9.content.decode())
+
+        # print("\ncampaign_retrieve_as_owner:" + "\n")
+        # # print(json_data6)
+        # print(response9.content)
+        
+        self.assertEqual(json_data9['status'],
+                         "RETRIEVE_CAMPAIGNX_AS_OWNER_FOUND_WITH_WE_VOTE_ID ",
+                         "status = {status} Expected status RETRIEVE_CAMPAIGNX_AS_OWNER_FOUND_WITH_WE_VOTE_ID ".format(status=json_data9['status']))
+
+        self.assertEqual(json_data9['success'],
+                         True,
+                         "success = {success} Expected success".format(success=json_data9['success']))                         
+
+        self.assertEqual(json_data9['voter_can_send_updates_to_campaignx'],
+                         False,
+                         "voter_can_send_updates_to_campaignx = {voter_can_send_updates_to_campaignx} Expected false".format(voter_can_send_updates_to_campaignx=json_data9['voter_can_send_updates_to_campaignx']))        
+
+
+       #### Retrieve campaign with invalid campaign id ####
+        campaignx_we_vote_id_2 = "invalidID"
+
+        response10 = self.client2.get(self.campaign_retrieve_url, {'voter_device_id': voter_device_id, 'campaignx_we_vote_id': campaignx_we_vote_id_2})
+        json_data10 = json.loads(response10.content.decode())
+
+        print("\ncampaign_retrieve with invalid id:" + "\n")
         # print(json_data6)
-        print(response6.content)
+        print(response10.content)        
+
+        self.assertEqual(json_data10['status'],
+                         "CAMPAIGNX_NOT_FOUND_DoesNotExist CAMPAIGNX_NOT_FOUND: CAMPAIGNX_NOT_FOUND_DoesNotExist  ",
+                         "status = {status} Expected status CAMPAIGNX_NOT_FOUND_DoesNotExist CAMPAIGNX_NOT_FOUND: CAMPAIGNX_NOT_FOUND_DoesNotExist  ".format(status=json_data10['status']))
+
+        self.assertEqual(json_data10['success'],
+                         True,
+                         "success = {success} Expected success".format(success=json_data10['success']))
+
+        self.assertEqual(len(json_data10["campaignx_owner_list"]), 
+                         0,
+                         "Expected position_list to have length 0, "
+                         "actual length = {length}".format(length=len(json_data10["campaignx_owner_list"])))
+
+
+
+        '''
+        TODO
+        Generate another voter device and we vote id
+        Retrieve campaign as a non-owner
+        Retrieve campaign with non-valid campaign id
+        '''
+
+
