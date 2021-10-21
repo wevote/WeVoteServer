@@ -348,7 +348,9 @@ def merge_if_duplicate_candidates(candidate1_on_stage, candidate2_on_stage, conf
     # Are there any comparisons that require admin intervention?
     merge_choices = {}
     for attribute in CANDIDATE_UNIQUE_IDENTIFIERS:
-        if attribute == "twitter_url" \
+        if attribute == "twitter_profile_banner_url_https" \
+                or attribute == "twitter_profile_image_url_https" \
+                or attribute == "twitter_url" \
                 or attribute == "we_vote_hosted_profile_image_url_large" \
                 or attribute == "we_vote_hosted_profile_image_url_medium" \
                 or attribute == "we_vote_hosted_profile_image_url_tiny":
@@ -358,6 +360,14 @@ def merge_if_duplicate_candidates(candidate1_on_stage, candidate2_on_stage, conf
                 pass
             elif positive_value_exists(getattr(candidate2_on_stage, attribute)):
                 # If we are here candidate1 does NOT have image, but candidate2 does
+                merge_choices[attribute] = getattr(candidate2_on_stage, attribute)
+        elif attribute == "contest_office_id" \
+                or attribute == "contest_office_we_vote_id" \
+                or attribute == "google_civic_election_id":
+            # We are phasing these fields out
+            if positive_value_exists(getattr(candidate1_on_stage, attribute)):
+                pass
+            elif positive_value_exists(getattr(candidate2_on_stage, attribute)):
                 merge_choices[attribute] = getattr(candidate2_on_stage, attribute)
         else:
             conflict_value = conflict_values.get(attribute, None)
