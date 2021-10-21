@@ -2229,7 +2229,6 @@ def find_and_merge_duplicate_candidates_view(request):
                 candidate_option1_for_template,
                 candidate_option2_for_template,
                 results['candidate_merge_conflict_values'])
-            messages.add_message(request, messages.INFO, merge_results['status'])
 
             if merge_results['candidates_merged']:
                 candidate = merge_results['candidate']
@@ -2240,6 +2239,7 @@ def find_and_merge_duplicate_candidates_view(request):
                 #                             "&state_code=" + str(state_code))
             else:
                 # This view function takes us to displaying a template
+                messages.add_message(request, messages.INFO, merge_results['status'])
                 remove_duplicate_process = True  # Try to find another candidate to merge after finishing
                 return render_candidate_merge_form(request, candidate_option1_for_template,
                                                    candidate_option2_for_template,
