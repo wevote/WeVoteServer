@@ -2219,23 +2219,25 @@ def find_and_merge_duplicate_candidates_view(request):
         results = find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list)
         ignore_candidate_id_list = []
 
-        # If we find candidates to merge, stop and ask for confirmation
+        # If we find candidates to merge, stop and ask for confirmation (if we need to)
         if results['candidate_merge_possibility_found']:
             candidate_option1_for_template = we_vote_candidate
             candidate_option2_for_template = results['candidate_merge_possibility']
 
             # Can we automatically merge these candidates?
             merge_results = merge_if_duplicate_candidates(
-                candidate_option1_for_template, candidate_option2_for_template,
+                candidate_option1_for_template,
+                candidate_option2_for_template,
                 results['candidate_merge_conflict_values'])
+            messages.add_message(request, messages.INFO, merge_results['status'])
 
             if merge_results['candidates_merged']:
                 candidate = merge_results['candidate']
                 messages.add_message(request, messages.INFO, "Candidate {candidate_name} automatically merged."
                                                              "".format(candidate_name=candidate.candidate_name))
-                return HttpResponseRedirect(reverse('candidate:find_and_merge_duplicate_candidates', args=()) +
-                                            "?google_civic_election_id=" + str(google_civic_election_id) +
-                                            "&state_code=" + str(state_code))
+                # return HttpResponseRedirect(reverse('candidate:find_and_merge_duplicate_candidates', args=()) +
+                #                             "?google_civic_election_id=" + str(google_civic_election_id) +
+                #                             "&state_code=" + str(state_code))
             else:
                 # This view function takes us to displaying a template
                 remove_duplicate_process = True  # Try to find another candidate to merge after finishing
