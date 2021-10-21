@@ -296,7 +296,6 @@ def figure_out_candidate_conflict_values(candidate1, candidate2):
                 if attribute == "ballotpedia_candidate_url" \
                         or attribute == "candidate_contact_form_url" \
                         or attribute == "candidate_instagram_form_url" \
-                        or attribute == "candidate_url" \
                         or attribute == "facebook_url" \
                         or attribute == "linkedin_url" \
                         or attribute == "youtube_url":
@@ -306,6 +305,15 @@ def figure_out_candidate_conflict_values(candidate1, candidate2):
                         candidate_merge_conflict_values[attribute] = 'CANDIDATE2'
                     elif candidate1_attribute_value.lower() == candidate2_attribute_value.lower():
                         candidate_merge_conflict_values[attribute] = 'MATCHING'
+                    else:
+                        candidate_merge_conflict_values[attribute] = 'CONFLICT'
+                elif attribute == "candidate_url":
+                    candidate1_attribute_value_trimmed = candidate1_attribute_value.rstrip('/')
+                    candidate2_attribute_value_trimmed = candidate2_attribute_value.rstrip('/')
+                    if candidate1_attribute_value_trimmed.lower() == candidate2_attribute_value_trimmed.lower():
+                        candidate_merge_conflict_values[attribute] = 'MATCHING'
+                    elif 'http' in candidate2_attribute_value and 'http' not in candidate1_attribute_value:
+                        candidate_merge_conflict_values[attribute] = 'CANDIDATE2'
                     else:
                         candidate_merge_conflict_values[attribute] = 'CONFLICT'
                 elif attribute == "candidate_name" or attribute == "state_code":
@@ -348,7 +356,18 @@ def merge_if_duplicate_candidates(candidate1_on_stage, candidate2_on_stage, conf
     # Are there any comparisons that require admin intervention?
     merge_choices = {}
     for attribute in CANDIDATE_UNIQUE_IDENTIFIERS:
-        if attribute == "facebook_profile_image_url_https" \
+        if attribute == "candidate_url":
+            # Don't worry about CONFLICT with any of these fields, but honor CANDIDATE2
+            conflict_value = conflict_values.get(attribute, None)
+            if conflict_value == "CANDIDATE2":
+                merge_choices[attribute] = getattr(candidate2_on_stage, attribute)
+            elif positive_value_exists(getattr(candidate1_on_stage, attribute)):
+                # We can proceed because candidate1 has a valid image, so we can default to choosing that one
+                pass
+            elif positive_value_exists(getattr(candidate2_on_stage, attribute)):
+                # If we are here candidate1 does NOT have image, but candidate2 does
+                merge_choices[attribute] = getattr(candidate2_on_stage, attribute)
+        elif attribute == "facebook_profile_image_url_https" \
                 or attribute == "twitter_profile_background_image_url_https" \
                 or attribute == "twitter_profile_banner_url_https" \
                 or attribute == "twitter_profile_image_url_https" \
@@ -363,9 +382,9 @@ def merge_if_duplicate_candidates(candidate1_on_stage, candidate2_on_stage, conf
                 or attribute == "we_vote_hosted_profile_twitter_image_url_large" \
                 or attribute == "we_vote_hosted_profile_twitter_image_url_medium" \
                 or attribute == "we_vote_hosted_profile_twitter_image_url_tiny" \
-                or attribute == "we_vote_hosted_profile_uploaded_image_image_url_large" \
-                or attribute == "we_vote_hosted_profile_uploaded_image_image_url_medium" \
-                or attribute == "we_vote_hosted_profile_uploaded_image_image_url_tiny" \
+                or attribute == "we_vote_hosted_profile_uploaded_image_url_large" \
+                or attribute == "we_vote_hosted_profile_uploaded_image_url_medium" \
+                or attribute == "we_vote_hosted_profile_uploaded_image_url_tiny" \
                 or attribute == "we_vote_hosted_profile_vote_usa_image_url_large" \
                 or attribute == "we_vote_hosted_profile_vote_usa_image_url_medium" \
                 or attribute == "we_vote_hosted_profile_vote_usa_image_url_tiny":
