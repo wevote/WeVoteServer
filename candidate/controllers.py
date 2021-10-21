@@ -363,7 +363,7 @@ def merge_if_duplicate_candidates(candidate1_on_stage, candidate2_on_stage, conf
             conflict_value = conflict_values.get(attribute, None)
             if conflict_value == "CONFLICT":
                 decisions_required = True
-                break
+                status += 'CONFLICT: ' + str(attribute) + ' '
             elif conflict_value == "CANDIDATE2":
                 merge_choices[attribute] = getattr(candidate2_on_stage, attribute)
 
