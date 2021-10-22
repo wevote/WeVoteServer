@@ -2151,6 +2151,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         elif matching_results['MultipleObjectsReturned']:
             keep_looking_for_duplicates = False
             kind_of_action = IMPORT_TO_BE_DETERMINED
+            status += matching_results['status']
             status += "MORE_THAN_ONE_CANDIDATE_WITH_SAME_VOTE_USA_IDS ("
             status += str(vote_usa_politician_id)
             status += ") "

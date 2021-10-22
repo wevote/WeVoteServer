@@ -644,6 +644,7 @@ def groom_and_store_google_civic_candidates_json_2021(
                     # In the future, we will want to look for updated data to save
                 elif candidate_results['MultipleObjectsReturned']:
                     continue_searching_for_candidate = False
+                    status += candidate_results['status']
                     status += "MORE_THAN_ONE_CANDIDATE_WITH_SAME_VOTE_USA_POLITICIAN_ID " \
                               "(" + str(vote_usa_politician_id) + ") "
                     continue
@@ -1323,6 +1324,20 @@ def groom_and_store_google_civic_office_json_2021(
             office_name = contest_office.office_name
             continue_searching_for_office = False
         else:
+            if positive_value_exists(vote_usa_office_id):
+                strings_to_find = [
+                    'BoardOfSupervisors', 'CommissionerOfRevenue', 'CommonwealthSAttorney',
+                    'SchoolBoard',
+                ]
+                if vote_usa_office_id.endswith(tuple(strings_to_find)) or vote_usa_office_id in [
+                    'VA083BoardOfSupervisors', 'VA137BoardOfSupervisors', 'VA047BoardOfSupervisors',
+                    'VA013BoardOfSupervisors', 'VA005BoardOfSupervisors',
+                    'VA820CommissionerOfRevenue', 'VA540CommissionerOfRevenue', 'VA710CommissionerOfRevenue',
+                    'VA520CommissionerOfRevenue', 'VA683CommissionerOfRevenue', 'VA810CommissionerOfRevenue',
+                    'VA710CommonwealthSAttorney',
+                ]:
+                    # For debugging
+                    record_found = True
             office_results = office_manager.retrieve_contest_office(
                 vote_usa_office_id=vote_usa_office_id,
                 google_civic_election_id=google_civic_election_id,

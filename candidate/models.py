@@ -2491,13 +2491,17 @@ class CandidateManager(models.Manager):
                 vote_usa_politician_id=vote_usa_politician_id,
                 vote_usa_office_id=vote_usa_office_id,
             )
-            candidate_we_vote_id_list = candidate_query.values_list('we_vote_id', flat=True)
-            if len(candidate_we_vote_id_list) > 0:
+            candidate_we_vote_id_query = candidate_query.values_list('we_vote_id', flat=True).distinct()
+            candidate_we_vote_id_list = list(candidate_we_vote_id_query)
+            if len(candidate_we_vote_id_list) > 1:
                 candidate_options_found = True
                 status += "CANDIDATE_LIST_FROM_VOTE_USA_POLITICIAN_RETRIEVED "
+            elif len(candidate_we_vote_id_list) > 0:
+                candidate_options_found = True
+                status += "CANDIDATE_FROM_VOTE_USA_POLITICIAN_RETRIEVED "
             else:
                 exception_does_not_exist = True
-                status += "CANDIDATE_LIST_FROM_VOTE_USA_POLITICIAN_NOT_FOUND "
+                status += "CANDIDATE_FROM_VOTE_USA_POLITICIAN_NOT_FOUND "
         except Exception as e:
             candidate_found = False
             status += "CANDIDATE_LIST_FROM_VOTE_USA_POLITICIAN_EXCEPTION: " + str(e) + " "
