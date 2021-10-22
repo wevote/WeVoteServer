@@ -231,11 +231,12 @@ def office_list_view(request):
 
     status = ""
 
+    fix_office_district_ids = positive_value_exists(request.GET.get('fix_office_district_ids', False))
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-    state_code = request.GET.get('state_code', '')
+    office_search = request.GET.get('office_search', '')
     show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
     show_marquee_or_battleground = request.GET.get('show_marquee_or_battleground', False)
-    office_search = request.GET.get('office_search', '')
+    state_code = request.GET.get('state_code', '')
 
     office_list_found = False
     office_list = []
@@ -370,6 +371,19 @@ def office_list_view(request):
     status_print_list += "office_list_count: " + office_list_count_str + " "
 
     messages.add_message(request, messages.INFO, status_print_list)
+
+    if office_list_found and fix_office_district_ids:
+        # Do some data clean up
+        office_list = updated_office_list
+        updated_office_list = []
+        for office in office_list:
+            if not positive_value_exists(office.district_id):
+                if office.vote_usa_office_id and office.vote_usa_office_id.startswith('VAStateHouse'):
+                    calculated_district_id = office.vote_usa_office_id.replace('VAStateHouse', '')
+                    office.district_id = calculated_district_id
+                    office.ballotpedia_race_office_level = 'State'
+                    office.save()
+            updated_office_list.append(office)
 
     messages_on_stage = get_messages(request)
 

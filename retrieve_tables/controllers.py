@@ -14,14 +14,29 @@ from wevote_functions.functions import positive_value_exists
 logger = wevote_functions.admin.get_logger(__name__)
 
 # This api will only return the data from the following tables
+# Creating CampaignX's locally seems to be best testing strategy
+# 'campaign_campaignx',
+# 'campaign_campaignxlistedbyorganization',
+# 'campaign_campaignxnewsitem',
+# 'campaign_campaignx_politician',
+# 'campaign_campaignxseofriendlypath',
 allowable_tables = [
     'candidate_candidatecampaign',
+    'candidate_candidatesarenotduplicates',
     'candidate_candidatetoofficelink',
+    'elected_office_electedoffice',
+    'elected_official_electedofficial',
+    'elected_official_electedofficialsarenotduplicates',
+    'election_ballotpediaelection',
     'election_election',
+    'electoral_district_electoraldistrict',
+    'electoral_district_electoraldistrictlinktopolitician',
     'issue_issue',
     'issue_organizationlinktoissue',
     'measure_contestmeasure',
+    'measure_contestmeasurearenotduplicates',
     'office_contestoffice',
+    'office_contestofficearenotduplicates',
     'office_contestofficevisitingotherelection',
     'organization_organization',
     'organization_organizationreserveddomain',
@@ -37,6 +52,23 @@ allowable_tables = [
     'ballot_ballotitem',
     'ballot_ballotreturned',
 ]
+
+# allowable_tables = [
+#     'candidate_candidatesarenotduplicates',
+#     'candidate_candidatetoofficelink',
+#     'elected_office_electedoffice',
+#     'elected_official_electedofficial',
+#     'elected_official_electedofficialsarenotduplicates',
+#     'election_ballotpediaelection',
+#     'election_election',
+#     'electoral_district_electoraldistrict',
+#     'electoral_district_electoraldistrictlinktopolitician',
+#     'issue_issue',
+#     'issue_organizationlinktoissue',
+#     'measure_contestmeasure',
+#     'measure_contestmeasurearenotduplicates',
+#     'office_contestofficearenotduplicates',
+# ]
 
 dummy_unique_id = 10000000
 

@@ -13,8 +13,12 @@
 </p>
 
 <p><a href="{% url 'office:office_new' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Add New Office</a></p>
-<p><a href="{% url 'position:refresh_positions_with_contest_office_details_for_election' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-    Refresh Positions from Contest Office info for this election</a></p>
+<p>
+    <a href="{% url 'position:refresh_positions_with_contest_office_details_for_election' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    Refresh Positions from Contest Office info for this election</a>,
+    <a href="{% url 'office:office_list' %}?fix_office_district_ids=1&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&office_search={{ office_search }}">
+    Fix District IDs</a>
+</p>
 
 <form name="organization_position_choose_election" method="get" action="{% url 'office:office_list' %}">
     {% csrf_token %}
