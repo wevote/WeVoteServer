@@ -39,7 +39,7 @@
                     </span>
                 {% endif %}
                 <span style='display: inline-block; width: 44%; text-align: right;'>
-                    {{ politician.we_vote_id }}
+                    {{ politician.we_vote_id }} (politician id: {{ politician.id }})
                     (<a href="{% url 'politician:politician_delete_process' %}?politician_id={{ politician.id }}">delete politician</a>)
                     {{ we_vote_id }}
                 </span>
@@ -228,7 +228,7 @@
                 {% endif %}
             </td>
             <td class="padded">{{ candidate.vote_smart_id|default_if_none:"" }}</td>
-            <td class="padded">{{ politician.vote_usa_politician_id|default_if_none:"" }}</td>
+            <td class="padded">{{ candidate.vote_usa_politician_id|default_if_none:"" }}</td>
         </tr>
     {% endfor %}
     </table>

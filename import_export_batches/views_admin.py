@@ -1787,7 +1787,7 @@ def batch_process_list_view(request):
                 use_ballotpedia_as_data_source = one_election.use_ballotpedia_as_data_source
                 use_ctcl_as_data_source = one_election.use_ctcl_as_data_source
                 use_ctcl_as_data_source_by_state_code = one_election.use_ctcl_as_data_source_by_state_code
-                if positive_value_exists(state_code):
+                if positive_value_exists(state_code) and positive_value_exists(use_ctcl_as_data_source_by_state_code):
                     if state_code.lower() in use_ctcl_as_data_source_by_state_code.lower():
                         use_ctcl_as_data_source_override = True
                 use_vote_usa_as_data_source = one_election.use_vote_usa_as_data_source
@@ -1799,7 +1799,7 @@ def batch_process_list_view(request):
                 use_ballotpedia_as_data_source = election.use_ballotpedia_as_data_source
                 use_ctcl_as_data_source = election.use_ctcl_as_data_source
                 use_ctcl_as_data_source_by_state_code = election.use_ctcl_as_data_source_by_state_code
-                if positive_value_exists(state_code):
+                if positive_value_exists(state_code) and positive_value_exists(use_ctcl_as_data_source_by_state_code):
                     if state_code.lower() in use_ctcl_as_data_source_by_state_code.lower():
                         use_ctcl_as_data_source_override = True
                 use_vote_usa_as_data_source = election.use_vote_usa_as_data_source
@@ -3134,7 +3134,7 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
             use_ctcl_as_data_source = election_on_stage.use_ctcl_as_data_source
             use_ctcl_as_data_source_by_state_code = election_on_stage.use_ctcl_as_data_source_by_state_code
             use_ctcl_as_data_source_override = False
-            if positive_value_exists(state_code):
+            if positive_value_exists(state_code) and positive_value_exists(use_ctcl_as_data_source_by_state_code):
                 if state_code.lower() in use_ctcl_as_data_source_by_state_code.lower():
                     use_ctcl_as_data_source_override = True
             use_vote_usa_as_data_source = election_on_stage.use_vote_usa_as_data_source

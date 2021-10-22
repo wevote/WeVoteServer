@@ -9,7 +9,7 @@
 
 <p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CONTEST_OFFICE&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
       target="_blank">
-        Import New Offices ></a> (open in new window)
+        Import New Offices <span class="glyphicon glyphicon-new-window"></span></a>
 </p>
 
 <p><a href="{% url 'office:office_new' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Add New Office</a></p>
@@ -70,11 +70,12 @@
 {% if office_list %}
     {% if google_civic_election_id %}
     <ul>
-        <li>Prepare: <a href="{% url 'election:election_summary_by_google_id' google_civic_election_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank" >
-        Jump to Election so we can retrieve Offices and Candidates from Ballotpedia</a> (in new window)</li>
+        <li>Prepare: <a href="{% url 'election:election_summary_by_google_id' google_civic_election_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                        target="_blank" >
+        Jump to Election so we can retrieve Offices and Candidates from Ballotpedia <span class="glyphicon glyphicon-new-window"></span></a></li>
         <li>Prepare: <a href="{% url 'office:find_and_merge_duplicate_offices' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
                         target="_blank" >
-        Find and Merge Duplicate Contest Offices for this Election</a> (in new window - about 1 minute)</li>
+        Find and Merge Duplicate Contest Offices for this Election <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
     </ul>
     {% endif %}
 {% endif %}
@@ -132,9 +133,11 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ office.id }}</td>
-            <td>{{ office.we_vote_id }}</td>
-            <td><a href="{% url 'office:office_summary' office.id %}">{{ office.office_name }}
-            </a></td>
+            <td>
+                {{ office.we_vote_id }}
+                <a href="{% url 'office:office_edit' office.id %}" target="_blank">(edit <span class="glyphicon glyphicon-new-window"></span>)</a>
+            </td>
+            <td><a href="{% url 'office:office_summary' office.id %}">{{ office.office_name }}</a></td>
           {% if google_civic_election_id == 0 %}
             <td>{{ office.google_civic_election_id|default_if_none:"" }}</td>
           {% endif %}

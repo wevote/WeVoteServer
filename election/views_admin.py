@@ -544,7 +544,7 @@ def election_edit_view(request, election_local_id):
 
         use_ctcl_as_data_source_by_state_code = election_on_stage.use_ctcl_as_data_source_by_state_code
         # use_ctcl_as_data_source_override = False
-        # if positive_value_exists(state_code):
+        # if positive_value_exists(state_code) and positive_value_exists(use_ctcl_as_data_source_by_state_code):
         #     if state_code.lower() in use_ctcl_as_data_source_by_state_code.lower():
         #         use_ctcl_as_data_source_override = True
 
@@ -1434,7 +1434,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
         if not positive_value_exists(state_code):
             state_code = election.state_code
         use_ctcl_as_data_source_by_state_code = election.use_ctcl_as_data_source_by_state_code
-        if positive_value_exists(state_code):
+        if positive_value_exists(state_code) and positive_value_exists(use_ctcl_as_data_source_by_state_code):
             if state_code.lower() in use_ctcl_as_data_source_by_state_code.lower():
                 use_ctcl_as_data_source_override = True
     except Election.MultipleObjectsReturned as e:

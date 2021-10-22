@@ -24,7 +24,7 @@ import requests
 from voter.models import fetch_voter_id_from_voter_device_link, VoterAddressManager
 from wevote_functions.functions import convert_district_scope_to_ballotpedia_race_office_level, \
     convert_state_text_to_state_code, convert_to_int, \
-    extract_district_from_ocd_division_id, extract_district_id_from_ocd_division_id, \
+    extract_district_id_label_when_district_id_exists_from_ocd_id, extract_district_id_from_ocd_division_id, \
     extract_facebook_username_from_text_string, \
     extract_state_code_from_address_string, extract_state_from_ocd_division_id, \
     extract_twitter_handle_from_text_string, extract_vote_usa_measure_id, extract_vote_usa_office_id, \
@@ -420,7 +420,8 @@ def groom_and_store_google_civic_ballot_json_2021(
                     ballot_item_dict_list = process_contest_results['ballot_item_dict_list']
                 except Exception as e:
                     status += "OFFICE_FAIL: " + str(e) + ' '
-
+    else:
+        status += "NO_CONTESTS_IN_JSON "
     results = {
         'success':                              success,
         'status':                               status,
@@ -1180,7 +1181,7 @@ def groom_and_store_google_civic_office_json_2021(
         number_elected = str(1)
 
     # These are several fields that are shared in common between offices and measures
-    results = process_contest_common_fields_from_structured_json(one_contest_json)
+    results = process_contest_common_fields_from_structured_json(one_contest_json, is_ctcl=use_ctcl)
 
     # ballot_placement: A number specifying the position of this contest on the voter's ballot.
     google_ballot_placement = results['ballot_placement']
@@ -1585,7 +1586,7 @@ def extract_value_from_array(structured_json, index_key, default_value):
         return default_value
 
 
-def process_contest_common_fields_from_structured_json(one_contest_structured_json):
+def process_contest_common_fields_from_structured_json(one_contest_structured_json, is_ctcl=False):
     # These following fields exist for both candidates and referendum
 
     # ballot_placement is a number specifying the position of this contest on the voter's ballot.
@@ -1595,29 +1596,36 @@ def process_contest_common_fields_from_structured_json(one_contest_structured_js
         'primary_party': extract_value_from_array(one_contest_structured_json, 'primaryParty', '')
     }
 
+    # https://developers.google.com/civic-information/docs/v2/elections/voterInfoQuery
     district_dict = one_contest_structured_json['district'] if 'district' in one_contest_structured_json else {}
 
+    # contests[].district.name
     # The name of the district.
     results['district_name'] = district_dict['name'] if 'name' in district_dict else ''
+    # contests[].district.scope
     # The geographic scope of this district. If unspecified the district's geography is not known.
     # One of: national, statewide, congressional, stateUpper, stateLower, countywide, judicial, schoolBoard,
     # cityWide, township, countyCouncil, cityCouncil, ward, special
     results['district_scope'] = district_dict['scope'] if 'scope' in district_dict else ''
-    # results['district_id'] = district_dict['id'] if 'id' in district_dict else ''
-
-    if 'ocdid' in district_dict:
-        results['contest_ocd_division_id'] = district_dict['ocdid']
-        # This is the OCD ID. The district integer is added to the end. For example,
+    # contests[].district.id
+    # A string identifier for this district, relative to its scope. For example, the 34th State Senate district
+    #  would have id "34" and a scope of stateUpper.
+    results['district_id'] = district_dict['id'] if 'id' in district_dict else ''
+    # Added on by CTCL (not part of spec)
+    results['contest_ocd_division_id'] = district_dict['ocdid'] if 'ocdid' in district_dict else ''
+    if is_ctcl:
+        # 2021-10-22 CTCL has a bug where they are passing in 'ocd-division/country:us/state:va/sldl:59'
+        #  as the district.id instead of just the number
+        # For an OCD ID, the district integer is added to the end. For example,
         # Virginia's 8th congressional district 8 looks like this:
         # ocd-division/country:us/state:va/cd:8
-        results['district'] = extract_district_from_ocd_division_id(results['contest_ocd_division_id']) \
-            if 'contest_ocd_division_id' in results else ''
-        results['district_id'] = extract_district_id_from_ocd_division_id(results['contest_ocd_division_id'])
-    else:
-        results['contest_ocd_division_id'] = ''
-        results['district_id'] = None
-
-    # results['contest_ocd_division_id'] = district_dict['id'] if 'id' in district_dict else ''
+        if 'contest_ocd_division_id' in results:
+            results['district_id'] = extract_district_id_from_ocd_division_id(results['contest_ocd_division_id'])
+            # I think results['district'] is not correct and should be replaced
+            #  with name like 'contest_ocd_district_id_label'
+            results['district'] = \
+                extract_district_id_label_when_district_id_exists_from_ocd_id(results['contest_ocd_division_id']) \
+                if 'contest_ocd_division_id' in results else ''
 
     # A description of any additional eligibility requirements for voting in this contest.
     results['electorate_specifications'] = \
@@ -3172,7 +3180,7 @@ def groom_and_store_google_civic_measure_json_2021(
         'referendumText' in one_contest_json else ''
 
     # These following fields exist for both candidates and referendum
-    results = process_contest_common_fields_from_structured_json(one_contest_json)
+    results = process_contest_common_fields_from_structured_json(one_contest_json, is_ctcl=use_ctcl)
     google_ballot_placement = results['ballot_placement']  # A number specifying the position of this contest
     # on the voter's ballot.
     primary_party = results['primary_party']  # If this is a partisan election, the name of the party it is for.

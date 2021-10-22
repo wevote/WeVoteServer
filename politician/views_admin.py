@@ -202,6 +202,8 @@ def render_politician_merge_form(
             else:
                 politician1_linked_candidate_names += ', '
             politician1_linked_candidate_names += one_candidate.candidate_name
+            if positive_value_exists(one_candidate.candidate_year):
+                politician1_linked_candidate_names += ' (' + str(one_candidate.candidate_year) + ')'
             if positive_value_exists(one_candidate.we_vote_hosted_profile_image_url_large):
                 politician1_linked_candidate_photos.append(one_candidate.we_vote_hosted_profile_image_url_large)
             results = candidate_list_manager.retrieve_all_offices_for_candidate(
@@ -240,6 +242,8 @@ def render_politician_merge_form(
             else:
                 politician2_linked_candidate_names += ', '
             politician2_linked_candidate_names += one_candidate.candidate_name
+            if positive_value_exists(one_candidate.candidate_year):
+                politician2_linked_candidate_names += ' (' + str(one_candidate.candidate_year) + ')'
             if positive_value_exists(one_candidate.we_vote_hosted_profile_image_url_large):
                 politician2_linked_candidate_photos.append(one_candidate.we_vote_hosted_profile_image_url_large)
             results = candidate_list_manager.retrieve_all_offices_for_candidate(

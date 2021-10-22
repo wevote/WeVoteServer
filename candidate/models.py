@@ -946,7 +946,8 @@ class CandidateListManager(models.Manager):
             candidate_twitter_handle='',
             candidate_name='',
             ignore_candidate_id_list=[],
-            read_only=False):
+            read_only=False,
+            vote_usa_politician_id=''):
         """
         This function, retrieve_candidates_from_non_unique_identifiers, is built to find possible duplicate candidates
         with stricter parameters.
@@ -958,6 +959,7 @@ class CandidateListManager(models.Manager):
         :param candidate_name:
         :param ignore_candidate_id_list:
         :param read_only:
+        :param vote_usa_politician_id:
         :return:
         """
         keep_looking_for_duplicates = True
@@ -1004,6 +1006,16 @@ class CandidateListManager(models.Manager):
 
                 if positive_value_exists(ignore_candidate_id_list):
                     candidate_query = candidate_query.exclude(we_vote_id__in=ignore_candidate_id_list)
+
+                if positive_value_exists(vote_usa_politician_id):
+                    # If we have an existing Vote USA Politician ID, do not return candidates that have a value in
+                    #  vote_usa_politician_id which doesn't match
+                    # In other words, find candidates with the same vote_usa_politician_id OR don't have a value
+                    candidate_query = candidate_query.filter(
+                        Q(vote_usa_politician_id__iexact=vote_usa_politician_id) |
+                        (Q(vote_usa_politician_id__isnull=True) |
+                         Q(vote_usa_politician_id=''))
+                    )
 
                 candidate_list = list(candidate_query)
                 if len(candidate_list):
@@ -1058,6 +1070,16 @@ class CandidateListManager(models.Manager):
 
                 if positive_value_exists(ignore_candidate_id_list):
                     candidate_query = candidate_query.exclude(we_vote_id__in=ignore_candidate_id_list)
+
+                if positive_value_exists(vote_usa_politician_id):
+                    # If we have an existing Vote USA Politician ID, do not return candidates that have a value in
+                    #  vote_usa_politician_id which doesn't match
+                    # In other words, find candidates with the same vote_usa_politician_id OR don't have a value
+                    candidate_query = candidate_query.filter(
+                        Q(vote_usa_politician_id__iexact=vote_usa_politician_id) |
+                        (Q(vote_usa_politician_id__isnull=True) |
+                         Q(vote_usa_politician_id=''))
+                    )
 
                 candidate_list = list(candidate_query)
                 if len(candidate_list):
@@ -1118,6 +1140,16 @@ class CandidateListManager(models.Manager):
 
                 if positive_value_exists(ignore_candidate_id_list):
                     candidate_query = candidate_query.exclude(we_vote_id__in=ignore_candidate_id_list)
+
+                if positive_value_exists(vote_usa_politician_id):
+                    # If we have an existing Vote USA Politician ID, do not return candidates that have a value in
+                    #  vote_usa_politician_id which doesn't match
+                    # In other words, find candidates with the same vote_usa_politician_id OR don't have a value
+                    candidate_query = candidate_query.filter(
+                        Q(vote_usa_politician_id__iexact=vote_usa_politician_id) |
+                        (Q(vote_usa_politician_id__isnull=True) |
+                         Q(vote_usa_politician_id=''))
+                    )
 
                 candidate_list = list(candidate_query)
                 if len(candidate_list):

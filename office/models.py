@@ -1734,7 +1734,9 @@ class ContestOfficeListManager(models.Manager):
                 contest_office_list_filtered = []
                 if len(contest_office_list):
                     contest_office_list_filtered = remove_office_district_false_positives(
-                        contest_office_name, contest_office_list)
+                        contest_office_name=contest_office_name,
+                        contest_office_list=contest_office_list,
+                        district_id=district_id)
 
                 if len(contest_office_list_filtered):
                     keep_looking_for_duplicates = False
@@ -1895,7 +1897,9 @@ class ContestOfficeListManager(models.Manager):
                     contest_office_list_filtered = []
                     if len(contest_office_list):
                         contest_office_list_filtered = remove_office_district_false_positives(
-                            contest_office_name, contest_office_list)
+                            contest_office_name=contest_office_name,
+                            contest_office_list=contest_office_list,
+                            district_id=district_id)
 
                     if len(contest_office_list_filtered):
                         keep_looking_for_duplicates = False
@@ -1971,7 +1975,7 @@ class ContestOfficeVisitingOtherElection(models.Model):
         verbose_name="google civic election id where the office first originated", default=0, null=False, blank=False)
 
 
-def remove_office_district_false_positives(contest_office_name, contest_office_list):
+def remove_office_district_false_positives(contest_office_name='', contest_office_list=[], district_id=''):
     contest_office_list_filtered = []
     # We want to avoid matches like this:
     # U.S. House California District 1 == U.S. House California District 18
@@ -2018,24 +2022,24 @@ def remove_office_district_false_positives(contest_office_name, contest_office_l
             possible_match_office_name_lower = possible_match.office_name.lower()
             if possible_match_office_name_lower not in remove_from_contest_office_list:
                 contest_office_list_filtered.append(possible_match)
-        # 2021-10-19 The old approach
-        # contest_office_name_length = len(contest_office_name)
-        # for possible_match in contest_office_list:
-        #     possible_match_name_length = len(possible_match.office_name)
-        #     possible_match_office_name_lower = possible_match.office_name.lower()
-        #     if contest_office_name_length < possible_match_name_length \
-        #             and 'district' in possible_match_office_name_lower:
-        #         # If the incoming name is shorter than the final name, see if the beginning of
-        #         # possible match is identical.
-        #         possible_match_office_name_lower_cropped = \
-        #             possible_match_office_name_lower[:contest_office_name_length]
-        #         if contest_office_name_lower == possible_match_office_name_lower_cropped:
-        #             # If the possible match contains the full contest_office_name, then we don't
-        #             # return it because it looks like we have District 1 == District 18
-        #             continue
-        #     contest_office_list_filtered.append(possible_match)
     else:
-        for possible_match in contest_office_list:
-            contest_office_list_filtered.append(possible_match)
+        district_id_filtering_used = False
+        if positive_value_exists(district_id):
+            # We have an incoming district_id to use for filtering
+            # There is some bad data where district_id is a full ocd id, so we need to make sure we don't get a
+            #  zero back when we convert_to_int
+            district_id_integer = convert_to_int(district_id)
+            if positive_value_exists(district_id_integer):
+                for possible_match in contest_office_list:
+                    if positive_value_exists(possible_match.district_id):
+                        possible_match_district_id_integer = convert_to_int(possible_match.district_id)
+                        if positive_value_exists(possible_match_district_id_integer) and \
+                                district_id_integer == possible_match_district_id_integer:
+                            # We have a positive match, so ignore all of the other offices
+                            district_id_filtering_used = True
+                            contest_office_list_filtered.append(possible_match)
+        if not district_id_filtering_used:
+            for possible_match in contest_office_list:
+                contest_office_list_filtered.append(possible_match)
 
     return contest_office_list_filtered
