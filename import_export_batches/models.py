@@ -258,7 +258,7 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES = {
     'state_code': 'state_code',
     'voteusa office id': 'vote_usa_office_id',
     'office': 'vote_usa_office_name',
-    'district': 'vote_usa_district_number',
+    'district': 'vote_usa_district_number',  # The district number should be in 'district_id'
     'state code': 'vote_usa_state_code',
 }
 

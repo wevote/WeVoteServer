@@ -5,7 +5,7 @@
 from .models import ElectoralDistrict, ElectoralDistrictManager
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists, convert_to_int, extract_state_from_ocd_division_id, \
-    extract_district_from_ocd_division_id
+    extract_district_id_label_when_district_id_exists_from_ocd_id
 import xml.etree.ElementTree as ElementTree
 from exception.models import handle_exception
 from exception.models import handle_record_found_more_than_one_exception
@@ -94,7 +94,7 @@ def electoral_district_import_from_xml_data(electoral_district_xml_data):
             # ocd_division_id = ocd_id_external_id
             state_code = extract_state_from_ocd_division_id(ocd_id_external_id)
             if not positive_value_exists(state_code):
-                district_code = extract_district_from_ocd_division_id(ocd_id_external_id)
+                district_code = extract_district_id_label_when_district_id_exists_from_ocd_id(ocd_id_external_id)
                 district_code.lower()
                 # check if it is District of Columbia (DC). DC doesn't have state substring in ocd_id
                 if district_code == 'dc':

@@ -760,7 +760,7 @@ def extract_state_code_from_address_string(text_for_map_search):
     return ""
 
 
-def extract_district_from_ocd_division_id(ocd_division_id):
+def extract_district_id_label_when_district_id_exists_from_ocd_id(ocd_division_id):
     if not positive_value_exists(ocd_division_id):
         return ''
 
