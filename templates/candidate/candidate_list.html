@@ -216,11 +216,13 @@
 {#        <li><a href="{% url 'import_export_twitter:bulk_retrieve_possible_twitter_handles' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}" target="_blank" >#}
 {#        Retrieve Possible Twitter Handles</a> (25 at a time - about 30 seconds - Open in New Window)</li>#}
 
-        <li><a href="{% url 'import_export_facebook:bulk_retrieve_facebook_photos' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}" target="_blank" >
-            Retrieve Facebook Photos for up to <b>{{facebook_urls_without_picture_urls}}</b> Candidates</a> (If the count does not decrease with each click, you are done for this election - Opens in a new tab)</li>
+        <li><a href="{% url 'import_export_facebook:bulk_retrieve_facebook_photos' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}"
+               target="_blank" >
+            Retrieve Facebook Photos for up to <b>{{facebook_urls_without_picture_urls}}</b> Candidates <span class="glyphicon glyphicon-new-window"></span></a> (If the count does not decrease with each click, you are done for this election)</li>
 
-        <li><a href="{% url 'google_custom_search:bulk_retrieve_possible_google_search_users' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank" >
-        Retrieve Possible Candidates from Google</a> (20 at a time - 1-2 minutes - Open in New Window)</li>
+        <li><a href="{% url 'google_custom_search:bulk_retrieve_possible_google_search_users' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+               target="_blank" >
+        Retrieve Possible Candidates from Google <span class="glyphicon glyphicon-new-window"></span></a> (20 at a time - 1-2 minutes)</li>
 
         <li><a href="{% url 'import_export_twitter:refresh_twitter_candidate_details_for_election' google_civic_election_id %}?state_code={{ state_code }}" >
         Retrieve/Refresh Candidate Twitter Info for this Election</a> (1-2 minutes)</li>
@@ -241,8 +243,14 @@
 {% endif %}
 
 <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">To Add New Candidate Start from Office Page</a>,&nbsp;&nbsp;&nbsp;
-<a href="{% url 'apis_v1:candidatesSyncOutView' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}" target="_blank" >Export Candidates</a>,&nbsp;&nbsp;&nbsp;
-<a href="{% url 'candidate:repair_imported_names' %}?is_candidate=true" >Repair Imported Candidate Names</a>
+<a href="{% url 'apis_v1:candidatesSyncOutView' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}"
+   target="_blank" >Export Candidates <span class="glyphicon glyphicon-new-window"></span></a>,&nbsp;&nbsp;&nbsp;
+<a href="{% url 'candidate:repair_imported_names' %}?is_candidate=true" >Repair Imported Candidate Names</a>,&nbsp;&nbsp;&nbsp;
+{% if find_candidates_linked_to_multiple_offices %}
+    <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}" ><strong>Show All Candidates</strong></a>
+{% else %}
+    <a href="{% url 'candidate:candidate_list' %}?find_candidates_linked_to_multiple_offices=1&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}" >Show Candidates Linked to Two Offices</a>
+{% endif %}
 <br />
 
 <br />

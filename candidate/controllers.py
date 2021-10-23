@@ -354,7 +354,7 @@ def figure_out_candidate_conflict_values(candidate1, candidate2):
 
 def merge_if_duplicate_candidates(candidate1_on_stage, candidate2_on_stage, conflict_values):
     success = False
-    status = "MERGE_IF_DUPLICATE "
+    status = "MERGE_IF_DUPLICATE_CANDIDATES "
     candidates_merged = False
     decisions_required = False
     candidate1_we_vote_id = candidate1_on_stage.we_vote_id
@@ -406,6 +406,7 @@ def merge_if_duplicate_candidates(candidate1_on_stage, candidate2_on_stage, conf
                 # If we are here candidate1 does NOT have image, but candidate2 does
                 merge_choices[attribute] = getattr(candidate2_on_stage, attribute)
         elif attribute == "facebook_url" \
+                or attribute == "maplight_id" \
                 or attribute == "profile_image_type_currently_active" \
                 or attribute == "twitter_url":
             # Don't worry about CONFLICT with any of these fields, but honor CANDIDATE2

@@ -326,6 +326,7 @@ def create_batch_row_actions(
             # If we are here, then we are checking to see if there were previous ballot items
             # that have since been deleted
             # Note that we should not be here if we are looking at only one batch row
+            election_manager = ElectionManager()
             for existing_ballot_item in existing_ballot_item_list:
                 batch_row_action_found = False
                 batch_row_action_delete_exists = False
@@ -346,8 +347,36 @@ def create_batch_row_actions(
                 if not positive_value_exists(batch_row_action_found):
                     # If here we know that a ballot item already exists, and the current data would NOT be
                     #  creating/updating a ballot item. Create a delete action.
-                    results = create_batch_row_action_ballot_item_delete(batch_description, existing_ballot_item)
-                    batch_row_action_delete_exists = results['batch_row_action_delete_exists']
+                    ballot_item_deleting_turned_on = True
+                    election = None
+                    election_found = False
+                    google_civic_election_id = ''
+                    if hasattr(existing_ballot_item, 'google_civic_election_id'):
+                        google_civic_election_id = existing_ballot_item.google_civic_election_id
+                    state_code = ''
+                    if hasattr(existing_ballot_item, 'state_code'):
+                        state_code = existing_ballot_item.state_code
+                    if google_civic_election_id in election_objects_dict:
+                        election = election_objects_dict[google_civic_election_id]
+                        election_found = True
+                    else:
+                        results = election_manager.retrieve_election(google_civic_election_id)
+                        if results['election_found']:
+                            election = results['election']
+                            election_found = True
+                            election_objects_dict[google_civic_election_id] = election
+                    if positive_value_exists(state_code) and \
+                            election_found and \
+                            hasattr(election, 'use_ctcl_as_data_source_by_state_code') and \
+                            positive_value_exists(election.use_ctcl_as_data_source_by_state_code):
+                        # If we are pulling from two data sources, we don't want to delete ballot item entries
+                        if state_code.lower() in election.use_ctcl_as_data_source_by_state_code.lower():
+                            ballot_item_deleting_turned_on = False
+                    # Only schedule the deletion of the ballot_item when we are only using one data source
+                    #  (Like Vote USA, or CTCL exclusively)
+                    if positive_value_exists(ballot_item_deleting_turned_on):
+                        results = create_batch_row_action_ballot_item_delete(batch_description, existing_ballot_item)
+                        batch_row_action_delete_exists = results['batch_row_action_delete_exists']
 
                 if positive_value_exists(batch_row_action_delete_exists):
                     number_of_batch_action_deletes_created += 1

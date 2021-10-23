@@ -1329,13 +1329,7 @@ def groom_and_store_google_civic_office_json_2021(
                     'BoardOfSupervisors', 'CommissionerOfRevenue', 'CommonwealthSAttorney',
                     'SchoolBoard',
                 ]
-                if vote_usa_office_id.endswith(tuple(strings_to_find)) or vote_usa_office_id in [
-                    'VA083BoardOfSupervisors', 'VA137BoardOfSupervisors', 'VA047BoardOfSupervisors',
-                    'VA013BoardOfSupervisors', 'VA005BoardOfSupervisors',
-                    'VA820CommissionerOfRevenue', 'VA540CommissionerOfRevenue', 'VA710CommissionerOfRevenue',
-                    'VA520CommissionerOfRevenue', 'VA683CommissionerOfRevenue', 'VA810CommissionerOfRevenue',
-                    'VA710CommonwealthSAttorney',
-                ]:
+                if vote_usa_office_id.endswith(tuple(strings_to_find)):
                     # For debugging
                     record_found = True
             office_results = office_manager.retrieve_contest_office(

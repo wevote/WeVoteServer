@@ -42,6 +42,7 @@ allowable_tables = [
     'organization_organizationreserveddomain',
     'party_party',
     'politician_politician',
+    'politician_politiciansarenotduplicates',
     'polling_location_pollinglocation',
     'position_positionentered',
     'twitter_twitterlinktoorganization',
@@ -52,23 +53,6 @@ allowable_tables = [
     'ballot_ballotitem',
     'ballot_ballotreturned',
 ]
-
-# allowable_tables = [
-#     'candidate_candidatesarenotduplicates',
-#     'candidate_candidatetoofficelink',
-#     'elected_office_electedoffice',
-#     'elected_official_electedofficial',
-#     'elected_official_electedofficialsarenotduplicates',
-#     'election_ballotpediaelection',
-#     'election_election',
-#     'electoral_district_electoraldistrict',
-#     'electoral_district_electoraldistrictlinktopolitician',
-#     'issue_issue',
-#     'issue_organizationlinktoissue',
-#     'measure_contestmeasure',
-#     'measure_contestmeasurearenotduplicates',
-#     'office_contestofficearenotduplicates',
-# ]
 
 dummy_unique_id = 10000000
 
@@ -298,9 +282,10 @@ def retrieve_sql_files_from_master_server(request):
             data_tuple = cur.fetchone()
             print("... SQL executed: " + command + " and returned " + str(data_tuple[0]))
             conn.commit()
-            command = "ALTER SEQUENCE " + table_name + "_id_seq START WITH " + str(data_tuple[0])
-            cur.execute(command)
-            conn.commit()
+            if str(data_tuple[0]) != 'None':
+                command = "ALTER SEQUENCE " + table_name + "_id_seq START WITH " + str(data_tuple[0])
+                cur.execute(command)
+                conn.commit()
             conn.close()
             print("... SQL executed: " + command)
             # To confirm:  SELECT * FROM information_schema.sequences where sequence_name like 'org%'
