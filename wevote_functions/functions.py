@@ -906,11 +906,11 @@ def display_full_name_with_correct_capitalization(full_name):
 def convert_district_scope_to_ballotpedia_race_office_level(district_scope):
     federal_scope_list = ['congressional', 'national']
     local_scope_list = [
-        'cityCouncil', 'citywide', 'countyCouncil', 'countywide', 'schoolBoard', 'special',
+        'cityCouncil', 'citywide', 'cityWide', 'countyCouncil', 'countywide', 'countyWide', 'schoolBoard', 'special',
         'city', 'county', 'county-council',
     ]  # ids on second line from CTCL and not in specification
     state_scope_list = [
-        'judicial', 'stateLower', 'stateUpper', 'statewide', 'township', 'ward',
+        'judicial', 'stateLower', 'stateUpper', 'statewide', 'stateWide', 'township', 'ward',
         'state', 'state-house',
     ]  # ids on second line from CTCL and not in specification
     if district_scope in federal_scope_list:

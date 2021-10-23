@@ -147,7 +147,7 @@ def figure_out_politician_conflict_values(politician1, politician2):
 
 def merge_if_duplicate_politicians(politician1_on_stage, politician2_on_stage, conflict_values):
     success = False
-    status = "MERGE_IF_DUPLICATE "
+    status = "MERGE_IF_DUPLICATE_POLITICIANS "
     politicians_merged = False
     decisions_required = False
     politician1_we_vote_id = politician1_on_stage.we_vote_id

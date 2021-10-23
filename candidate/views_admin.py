@@ -313,6 +313,8 @@ def candidate_list_view(request):
 
     candidate_search = request.GET.get('candidate_search', '')
     current_page_url = request.get_full_path()
+    find_candidates_linked_to_multiple_offices = \
+        positive_value_exists(request.GET.get('find_candidates_linked_to_multiple_offices', 0))
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     hide_candidate_tools = positive_value_exists(request.GET.get('hide_candidate_tools', 0))
     hide_candidates_with_photos = \
@@ -358,33 +360,35 @@ def candidate_list_view(request):
     candidate_manager = CandidateManager()
     candidate_list_manager = CandidateListManager()
 
-    if positive_value_exists(google_civic_election_id) or positive_value_exists(migrate_to_candidate_link):
-        candidate_query = CandidateCampaign.objects.all()
-        if positive_value_exists(google_civic_election_id):
-            candidate_query = candidate_query.filter(google_civic_election_id=google_civic_election_id)
-        candidate_query = candidate_query.filter(migrated_to_link=False)
-        candidate_list = list(candidate_query)
-        candidates_migrated = 0
-        for one_candidate in candidate_list:
-            if positive_value_exists(one_candidate.we_vote_id) \
-                    and positive_value_exists(one_candidate.contest_office_we_vote_id) \
-                    and positive_value_exists(one_candidate.google_civic_election_id):
-                results = candidate_manager.get_or_create_candidate_to_office_link(
-                    candidate_we_vote_id=one_candidate.we_vote_id,
-                    contest_office_we_vote_id=one_candidate.contest_office_we_vote_id,
-                    google_civic_election_id=convert_to_int(one_candidate.google_civic_election_id),
-                    state_code=one_candidate.state_code)
-                if not positive_value_exists(results['success']):
-                    # Break out of loop
-                    messages.add_message(request, messages.ERROR, "Could not migrate: " + str(results['status']))
-                else:
-                    if positive_value_exists(results['new_candidate_to_office_link_created']):
-                        pass
-                    one_candidate.migrated_to_link = True
-                    one_candidate.save()
-                    candidates_migrated += 1
-        if positive_value_exists(candidates_migrated) or positive_value_exists(migrate_to_candidate_link):
-            messages.add_message(request, messages.INFO, "candidates_migrated: " + str(candidates_migrated))
+    # 2021-10-23 Turning off migration fix since the 'google_civic_election_id' and 'contest_office_we_vote_id'
+    #  data is no longer considered the master linkage between a candidate and office
+    # if positive_value_exists(google_civic_election_id) or positive_value_exists(migrate_to_candidate_link):
+    #     candidate_query = CandidateCampaign.objects.all()
+    #     if positive_value_exists(google_civic_election_id):
+    #         candidate_query = candidate_query.filter(google_civic_election_id=google_civic_election_id)
+    #     candidate_query = candidate_query.filter(migrated_to_link=False)
+    #     candidate_list = list(candidate_query)
+    #     candidates_migrated = 0
+    #     for one_candidate in candidate_list:
+    #         if positive_value_exists(one_candidate.we_vote_id) \
+    #                 and positive_value_exists(one_candidate.contest_office_we_vote_id) \
+    #                 and positive_value_exists(one_candidate.google_civic_election_id):
+    #             results = candidate_manager.get_or_create_candidate_to_office_link(
+    #                 candidate_we_vote_id=one_candidate.we_vote_id,
+    #                 contest_office_we_vote_id=one_candidate.contest_office_we_vote_id,
+    #                 google_civic_election_id=convert_to_int(one_candidate.google_civic_election_id),
+    #                 state_code=one_candidate.state_code)
+    #             if not positive_value_exists(results['success']):
+    #                 # Break out of loop
+    #                 messages.add_message(request, messages.ERROR, "Could not migrate: " + str(results['status']))
+    #             else:
+    #                 if positive_value_exists(results['new_candidate_to_office_link_created']):
+    #                     pass
+    #                 one_candidate.migrated_to_link = True
+    #                 one_candidate.save()
+    #                 candidates_migrated += 1
+    #     if positive_value_exists(candidates_migrated) or positive_value_exists(migrate_to_candidate_link):
+    #         messages.add_message(request, messages.INFO, "candidates_migrated: " + str(candidates_migrated))
 
     google_civic_election_id_list_generated = False
     if positive_value_exists(google_civic_election_id):
@@ -492,6 +496,8 @@ def candidate_list_view(request):
         filtered_candidate_we_vote_id_list = candidate_we_vote_id_list
     elif show_marquee_or_battleground:
         filtered_candidate_we_vote_id_list = battleground_candidate_we_vote_id_list
+
+    # Now retrieve the candidate_list from the filtered_candidate_we_vote_id_list
     try:
         candidate_query = CandidateCampaign.objects.all()
         if positive_value_exists(google_civic_election_id_list_generated) \
@@ -607,8 +613,8 @@ def candidate_list_view(request):
         candidate_list_count = candidate_query.count()
 
         candidate_count_start = 0
-        if positive_value_exists(show_all):
-            pass
+        if positive_value_exists(show_all) or positive_value_exists(find_candidates_linked_to_multiple_offices):
+            candidate_list = list(candidate_query)
         else:
             number_to_show_per_page = 10
             if candidate_list_count <= number_to_show_per_page:
@@ -620,8 +626,22 @@ def candidate_list_view(request):
                 candidate_count_end = candidate_count_start + number_to_show_per_page
                 candidate_list = candidate_query[candidate_count_start:candidate_count_end]
     except CandidateCampaign.DoesNotExist:
-        # This is fine, create new
         pass
+
+    if positive_value_exists(google_civic_election_id) and \
+            positive_value_exists(find_candidates_linked_to_multiple_offices):
+        # Only include candidates who are linked to two offices in the same election
+        results = candidate_list_manager.retrieve_candidate_to_office_link_duplicate_candidate_we_vote_ids(
+            google_civic_election_id=google_civic_election_id,
+            state_code=state_code,
+        )
+        if results['success']:
+            candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+            modified_candidate_list = []
+            for one_candidate in candidate_list:
+                if one_candidate.we_vote_id in candidate_we_vote_id_list:
+                    modified_candidate_list.append(one_candidate)
+            candidate_list = modified_candidate_list
 
     # How many facebook_url's don't have facebook_profile_image_url_https
     # SELECT * FROM public.candidate_candidatecampaign where google_civic_election_id = '1000052' and facebook_url
@@ -832,31 +852,32 @@ def candidate_list_view(request):
                 candidate.google_search_merge_possibility = None
 
     template_values = {
-        'candidate_count_start':    candidate_count_start,
-        'candidate_list':           candidate_list,
-        'candidate_search':         candidate_search,
-        'current_page_number':      page,
+        'candidate_count_start':                    candidate_count_start,
+        'candidate_list':                           candidate_list,
+        'candidate_search':                         candidate_search,
+        'current_page_number':                      page,
         'current_page_minus_candidate_tools_url':   current_page_minus_candidate_tools_url,
-        'election':                 election,
-        'election_list':            election_list,
+        'election':                                 election,
+        'election_list':                            election_list,
         'facebook_urls_without_picture_urls':       facebook_urls_without_picture_urls,
-        'google_civic_election_id': google_civic_election_id,
-        'hide_candidate_tools':     hide_candidate_tools,
-        'hide_candidates_with_photos':  hide_candidates_with_photos,
-        'hide_pagination':          hide_pagination,
-        'messages_on_stage':        messages_on_stage,
-        'next_page_url':            next_page_url,
-        'previous_page_url':        previous_page_url,
-        'review_mode':              review_mode,
-        'show_all_elections':       show_all_elections,
+        'find_candidates_linked_to_multiple_offices':   find_candidates_linked_to_multiple_offices,
+        'google_civic_election_id':                 google_civic_election_id,
+        'hide_candidate_tools':                     hide_candidate_tools,
+        'hide_candidates_with_photos':              hide_candidates_with_photos,
+        'hide_pagination':                          hide_pagination,
+        'messages_on_stage':                        messages_on_stage,
+        'next_page_url':                            next_page_url,
+        'previous_page_url':                        previous_page_url,
+        'review_mode':                              review_mode,
+        'show_all_elections':                       show_all_elections,
         'show_candidates_with_best_twitter_options':    show_candidates_with_best_twitter_options,
-        'show_candidates_with_twitter_options': show_candidates_with_twitter_options,
-        'show_candidates_without_twitter': show_candidates_without_twitter,
-        'show_election_statistics': show_election_statistics,
-        'show_marquee_or_battleground': show_marquee_or_battleground,
-        'state_code':               state_code,
-        'state_list':               sorted_state_list,
-        'total_twitter_handles':    total_twitter_handles,
+        'show_candidates_with_twitter_options':     show_candidates_with_twitter_options,
+        'show_candidates_without_twitter':          show_candidates_without_twitter,
+        'show_election_statistics':                 show_election_statistics,
+        'show_marquee_or_battleground':             show_marquee_or_battleground,
+        'state_code':                               state_code,
+        'state_list':                               sorted_state_list,
+        'total_twitter_handles':                    total_twitter_handles,
     }
     return render(request, 'candidate/candidate_list.html', template_values)
 

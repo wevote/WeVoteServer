@@ -1258,16 +1258,16 @@ def office_merge_process_view(request):
                                     '?google_civic_election_id=' + str(google_civic_election_id) +
                                     '&state_code=' + str(state_code))
 
-    # TODO: Migrate bookmarks - for now stop the merge process if there are bookmarks
-    bookmark_item_list_manager = BookmarkItemList()
-    bookmark_results = bookmark_item_list_manager.retrieve_bookmark_item_list_for_contest_office(
-        contest_office2_we_vote_id)
-    if bookmark_results['bookmark_item_list_found']:
-        messages.add_message(request, messages.ERROR, "Bookmarks found for Contest Office 2 - "
-                                                      "automatic merge not working yet.")
-        return HttpResponseRedirect(reverse('office:find_and_merge_duplicate_offices', args=()) +
-                                    "?google_civic_election_id=" + str(google_civic_election_id) +
-                                    "&state_code=" + str(state_code))
+    # # TODO: Migrate bookmarks
+    # bookmark_item_list_manager = BookmarkItemList()
+    # bookmark_results = bookmark_item_list_manager.retrieve_bookmark_item_list_for_contest_office(
+    #     contest_office2_we_vote_id)
+    # if bookmark_results['bookmark_item_list_found']:
+    #     messages.add_message(request, messages.ERROR, "Bookmarks found for Contest Office 2 - "
+    #                                                   "automatic merge not working yet.")
+    #     return HttpResponseRedirect(reverse('office:find_and_merge_duplicate_offices', args=()) +
+    #                                 "?google_civic_election_id=" + str(google_civic_election_id) +
+    #                                 "&state_code=" + str(state_code))
 
     # Merge attribute values
     conflict_values = figure_out_office_conflict_values(contest_office1_on_stage, contest_office2_on_stage)
@@ -1343,6 +1343,12 @@ def office_merge_process_view(request):
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 
+    # Save contest_office2_on_stage to remove maplight_id, which much be unique,
+    #  before we try to save contest_office1_on_stage below
+    if positive_value_exists(contest_office2_on_stage.maplight_id):
+        contest_office2_on_stage.maplight_id = None
+        contest_office2_on_stage.save()
+
     # Note: wait to wrap in try/except block
     contest_office1_on_stage.save()
     # There isn't any office data to refresh from other master tables
@@ -1360,4 +1366,4 @@ def office_merge_process_view(request):
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 
-    return HttpResponseRedirect(reverse('office:office_edit', args=(contest_office1_on_stage.id,)))
+    return HttpResponseRedirect(reverse('office:office_summary', args=(contest_office1_on_stage.id,)))

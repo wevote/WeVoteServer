@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
-from django.db.models import Q
+from django.db.models import Count, Q
 from election.models import Election, ElectionManager
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from office.models import ContestOffice, ContestOfficeManager
@@ -1318,6 +1318,40 @@ class CandidateListManager(models.Manager):
                 status += "FETCH_CANDIDATES_FROM_NON_UNIQUE_IDENTIFIERS_COUNT3 "
 
         return 0
+
+    def retrieve_candidate_to_office_link_duplicate_candidate_we_vote_ids(
+            self,
+            google_civic_election_id=0,
+            state_code=''):
+        """
+        Return list of candidate_we_vote_ids which have multiple links in the same election
+        """
+        candidate_we_vote_id_list = []
+        status = ""
+        success = True
+        google_civic_election_id = convert_to_int(google_civic_election_id)
+
+        try:
+            query = CandidateToOfficeLink.objects.using('readonly').all()
+            if positive_value_exists(google_civic_election_id):
+                query = query.filter(google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(state_code):
+                query = query.filter(state_code=state_code)
+            query = query.values('candidate_we_vote_id').annotate(office_count=Count('contest_office_we_vote_id'))\
+                .filter(office_count__gt=1)
+            query = query.values_list('candidate_we_vote_id', flat=True).distinct()
+
+            candidate_we_vote_id_list = list(query)
+        except Exception as e:
+            status += "RETRIEVE_CANDIDATE_TO_OFFICE_LINK_DUPLICATE_CANDIDATE_ERROR: " + str(e) + " "
+            success = False
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'candidate_we_vote_id_list': candidate_we_vote_id_list,
+        }
+        return results
 
     def retrieve_candidate_to_office_link_list(
             self,
