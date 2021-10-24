@@ -241,6 +241,16 @@
 <h3>Merge with Another Office</h3>
 <form name="find_another_to_merge" method="get" action="{% url 'office:office_summary' office.id %}">
     {% csrf_token %}
+    <div class="form-group pull-right">
+        <label for="which_marking_id" class="control-label">
+          <span class="u-no-break">Mark selected rows as:</span>
+        </label>
+        <select id="which_marking_id" name="which_marking">
+            {# note: option values match keys in updated_values parameter of update_or_create_voter_guide_possibility() #}
+            <option value="not_a_duplicate">Not Duplicates</option>
+        </select>
+        <input type="submit" value="Save" />
+    </div>
     {% if office_search %}
         <a href="{% url 'office:office_summary' office.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
              clear search</a>&nbsp;
@@ -250,25 +260,33 @@
     <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
     <input type="hidden" name="state_code" value="{{ state_code }}">
     <input type="submit" value="Search for Duplicate Offices" />
-</form>
 
 {% if office_search_results_list %}
-    <table border="1" cellpadding="5" cellspacing="5">
+    <table class="table">
+        <thead>
         <tr>
-            <td>&nbsp;</td>
-            <td>ID</td>
-            <td>We Vote ID</td>
-            <td>Office Name</td>
-            <td>State</td>
-            <td>Candidates</td>
-            <td>Ballotpedia Race ID</td>
-            <td>Ballotpedia Elected Office ID</td>
+            <th>&nbsp;</th>
+            <th>ID</th>
+            <th>We Vote ID</th>
+            <th>Office Name</th>
+            <th>State</th>
+            <th>Candidates</th>
+            <th>IDs</th>
+            <th>
+              all
+              <input type="checkbox" name="toggle_all" id="toggle_all_id" value="1"/>
+            </th>
         </tr>
+        </thead>
     {% for found_office in office_search_results_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ found_office.id }}</td>
-            <td>{{ found_office.we_vote_id }}</td>
+            <td>
+                {{ found_office.we_vote_id }}
+                {% if found_office.not_a_duplicate %}<br />NOT&nbsp;DUPLICATE{% endif %}
+
+            </td>
             <td>
               {% if found_office.candidates_match_root_office %}
                 <strong>{{ found_office.office_name }}</strong>
@@ -287,11 +305,20 @@
               {{ found_office.candidates_string }}
             {% endif %}
             </td>
-            <td>{{ found_office.ballotpedia_race_id|default_if_none:"" }}</td>
-            <td>{{ found_office.ballotpedia_office_id|default_if_none:"" }}</td>
+            <td>
+                {% if found_office.ctcl_uuid %}CTCL: {{ found_office.ctcl_uuid|default_if_none:"" }}<br />{% endif %}
+                {% if found_office.vote_usa_office_id %}Vote USA: {{ found_office.vote_usa_office_id|default_if_none:"" }}<br />{% endif %}
+                {% if found_office.ballotpedia_race_id %}BP Race: {{ found_office.ballotpedia_race_id|default_if_none:"" }}<br />{% endif %}
+                {% if found_office.ballotpedia_office_id %}BP Office: {{ found_office.ballotpedia_office_id|default_if_none:"" }}<br />{% endif %}
+                {% if found_office.district_name %}District Name: {{ found_office.district_name|default_if_none:"" }}<br />{% endif %}
+            </td>
+            <td>
+                <input type="checkbox" name="select_for_marking_office_we_vote_ids[]" id="select_for_marking_office_we_vote_ids_id" value="{{ found_office.we_vote_id }}"/>
+            </td>
         </tr>
     {% endfor %}
     </table>
+</form>
 {% endif %}
 
 {% endif %}
@@ -300,5 +327,19 @@
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
+<script>
+    $(function() {
+        $('#toggle_all_id').change(function() {
+            var inputs = document.getElementsByName("select_for_marking_office_we_vote_ids[]");
+            for(var i = 0; i < inputs.length; i++) {
+              if (inputs[i].checked === false) {
+                inputs[i].checked = true;
+              } else {
+                inputs[i].checked = false;
+              }
+            }
+        });
+    });
+</script>
 
 {% endblock %}

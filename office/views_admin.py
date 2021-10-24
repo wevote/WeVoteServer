@@ -739,6 +739,8 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', "")
     office_search = request.GET.get('office_search', "")
+    select_for_marking_office_we_vote_ids = request.GET.getlist('select_for_marking_office_we_vote_ids[]')
+    which_marking = request.GET.get('which_marking')
     office_manager = ContestOfficeManager()
 
     try:
@@ -808,6 +810,36 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
     if positive_value_exists(google_civic_election_id):
         election = Election.objects.get(google_civic_election_id=google_civic_election_id)
 
+    # Make sure 'which_marking' is one of the allowed Filter fields
+    if positive_value_exists(which_marking) \
+            and which_marking not in ["not_a_duplicate"]:
+        messages.add_message(request, messages.ERROR,
+                             'The filter you are trying to update is not recognized: {which_marking}'
+                             ''.format(which_marking=which_marking))
+    if positive_value_exists(which_marking):
+        items_processed_successfully = 0
+        update = False
+        not_a_duplicate = False
+        if which_marking == 'not_a_duplicate':
+            not_a_duplicate = True
+            update = True
+        if update:
+            if not_a_duplicate:
+                for not_a_duplicate_office_we_vote_id in select_for_marking_office_we_vote_ids:
+                    results = office_manager.update_or_create_contest_offices_are_not_duplicates(
+                        contest_office1_we_vote_id=contest_office_we_vote_id,
+                        contest_office2_we_vote_id=not_a_duplicate_office_we_vote_id,
+                    )
+                    if results['success']:
+                        items_processed_successfully += 1
+                    else:
+                        messages.add_message(request, messages.ERROR,
+                                             'ContestOfficesAreNotDuplicates: {status} '
+                                             ''.format(status=results['status']))
+        messages.add_message(request, messages.INFO,
+                             'ContestOfficesAreNotDuplicates added/updated: {items_processed_successfully}'
+                             ''.format(items_processed_successfully=items_processed_successfully))
+
     office_search_results_list = []
     if positive_value_exists(office_search):
         office_queryset = ContestOffice.objects.all()
@@ -820,7 +852,13 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
         search_words = office_search.split()
         for one_word in search_words:
             filters = []  # Reset for each search word
+            new_filter = Q(district_name__icontains=one_word)
+            filters.append(new_filter)
+
             new_filter = Q(office_name__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(vote_usa_office_id__iexact=one_word)
             filters.append(new_filter)
 
             new_filter = Q(we_vote_id__iexact=one_word)
@@ -863,6 +901,17 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
                     if candidate_last_name_lower in root_office_candidate_last_names:
                         one_office.candidates_match_root_office = True
 
+        office_search_results_list_modified.append(one_office)
+
+    results = office_manager.retrieve_offices_are_not_duplicates_list(
+        contest_office_we_vote_id=contest_office_we_vote_id,
+        read_only=True)
+    office_search_results_list = office_search_results_list_modified
+    office_search_results_list_modified = []
+    offices_are_not_duplicates_list_we_vote_ids = results['contest_offices_are_not_duplicates_list_we_vote_ids']
+    for one_office in office_search_results_list:
+        if one_office.we_vote_id in offices_are_not_duplicates_list_we_vote_ids:
+            one_office.not_a_duplicate = True
         office_search_results_list_modified.append(one_office)
 
     if contest_office_found:

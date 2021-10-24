@@ -23,8 +23,16 @@
     </tr>
     <tr>
         <td>&nbsp;</td>
-        <td><a href="{% url 'office:office_edit_we_vote_id' contest_office_we_vote_id=contest_office_option1.we_vote_id %}" target="_blank">view (in new window)</a></td>
-        <td><a href="{% url 'office:office_edit_we_vote_id' contest_office_we_vote_id=contest_office_option2.we_vote_id %}" target="_blank">view (in new window)</a></td>
+        <td>
+            <a href="{% url 'office:office_summary_we_vote_id' contest_office_we_vote_id=contest_office_option1.we_vote_id %}" target="_blank">view <span class="glyphicon glyphicon-new-window"></span></a>
+            &nbsp;
+            <a href="{% url 'office:office_edit_we_vote_id' contest_office_we_vote_id=contest_office_option1.we_vote_id %}" target="_blank">edit <span class="glyphicon glyphicon-new-window"></span></a>
+        </td>
+        <td>
+            <a href="{% url 'office:office_summary_we_vote_id' contest_office_we_vote_id=contest_office_option2.we_vote_id %}" target="_blank">view <span class="glyphicon glyphicon-new-window"></span></a>
+            &nbsp;
+            <a href="{% url 'office:office_edit_we_vote_id' contest_office_we_vote_id=contest_office_option2.we_vote_id %}" target="_blank">edit <span class="glyphicon glyphicon-new-window"></span></a>
+        </td>
     </tr>
 
 {% include "office/office_merge_one_field_decision.html" with field_name="office_name" field_label="Contest Office Name" conflict_status=conflict_values.office_name contest_office1_field_value=contest_office_option1.office_name contest_office2_field_value=contest_office_option2.office_name contest_office1=contest_office_option1 contest_office2=contest_office_option2 %}
