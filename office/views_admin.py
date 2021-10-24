@@ -48,13 +48,15 @@ def compare_two_offices_for_merge_view(request):
     contest_office2_we_vote_id = request.GET.get('contest_office2_we_vote_id', 0)
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     google_civic_election_id = convert_to_int(google_civic_election_id)
+    state_code = request.GET.get('state_code', 0)
 
     contest_office_manager = ContestOfficeManager()
     contest_office_results = contest_office_manager.retrieve_contest_office_from_we_vote_id(contest_office1_we_vote_id)
     if not contest_office_results['contest_office_found']:
         messages.add_message(request, messages.ERROR, "Contest Office1 not found.")
         return HttpResponseRedirect(reverse('office:office_list', args=()) +
-                                    "?google_civic_election_id=" + str(google_civic_election_id))
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
 
     contest_office_option1_for_template = contest_office_results['contest_office']
 
@@ -62,7 +64,8 @@ def compare_two_offices_for_merge_view(request):
     if not contest_office_results['contest_office_found']:
         messages.add_message(request, messages.ERROR, "Contest Office2 not found.")
         return HttpResponseRedirect(reverse('office:office_summary', args=(contest_office_option1_for_template.id,)) +
-                                    "?google_civic_election_id=" + str(google_civic_election_id))
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
 
     contest_office_option2_for_template = contest_office_results['contest_office']
 
@@ -1216,16 +1219,28 @@ def office_merge_process_view(request):
 
     contest_office_manager = ContestOfficeManager()
 
-    # merge = request.POST.get('merge', False)
-    skip = request.POST.get('skip', False)
+    is_post = True if request.method == 'POST' else False
 
-    # Contest office 1 is the one we keep, and Contest office 2 is the one we will merge into Contest office 1
-    contest_office1_we_vote_id = request.POST.get('contest_office1_we_vote_id', 0)
-    contest_office2_we_vote_id = request.POST.get('contest_office2_we_vote_id', 0)
-    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
-    redirect_to_contest_office_list = positive_value_exists(request.POST.get('redirect_to_contest_office_list', False))
-    remove_duplicate_process = positive_value_exists(request.POST.get('remove_duplicate_process', False))
-    state_code = request.POST.get('state_code', '')
+    if is_post:
+        # merge = request.POST.get('merge', False)
+        skip = request.POST.get('skip', False)
+        # Contest office 1 is the one we keep, and Contest office 2 is the one we will merge into Contest office 1
+        contest_office1_we_vote_id = request.POST.get('contest_office1_we_vote_id', 0)
+        contest_office2_we_vote_id = request.POST.get('contest_office2_we_vote_id', 0)
+        google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+        redirect_to_contest_office_list = positive_value_exists(request.POST.get('redirect_to_contest_office_list', False))
+        remove_duplicate_process = positive_value_exists(request.POST.get('remove_duplicate_process', False))
+        state_code = request.POST.get('state_code', '')
+    else:
+        # merge = request.GET.get('merge', False)
+        skip = request.GET.get('skip', False)
+        # Contest office 1 is the one we keep, and Contest office 2 is the one we will merge into Contest office 1
+        contest_office1_we_vote_id = request.GET.get('contest_office1_we_vote_id', 0)
+        contest_office2_we_vote_id = request.GET.get('contest_office2_we_vote_id', 0)
+        google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+        redirect_to_contest_office_list = positive_value_exists(request.GET.get('redirect_to_contest_office_list', False))
+        remove_duplicate_process = positive_value_exists(request.GET.get('remove_duplicate_process', False))
+        state_code = request.GET.get('state_code', '')
 
     if positive_value_exists(skip):
         results = contest_office_manager.update_or_create_contest_offices_are_not_duplicates(
@@ -1275,7 +1290,10 @@ def office_merge_process_view(request):
     for attribute in CONTEST_OFFICE_UNIQUE_IDENTIFIERS:
         conflict_value = conflict_values.get(attribute, None)
         if conflict_value == "CONFLICT":
-            choice = request.POST.get(attribute + '_choice', '')
+            if is_post:
+                choice = request.POST.get(attribute + '_choice', '')
+            else:
+                choice = request.GET.get(attribute + '_choice', '')
             if contest_office2_we_vote_id == choice:
                 setattr(contest_office1_on_stage, attribute, getattr(contest_office2_on_stage, attribute))
         elif conflict_value == "CONTEST_OFFICE2":

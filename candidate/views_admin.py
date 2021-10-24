@@ -628,6 +628,7 @@ def candidate_list_view(request):
     except CandidateCampaign.DoesNotExist:
         pass
 
+    candidates_linked_to_multiple_offices = 0
     if positive_value_exists(google_civic_election_id) and \
             positive_value_exists(find_candidates_linked_to_multiple_offices):
         # Only include candidates who are linked to two offices in the same election
@@ -642,6 +643,7 @@ def candidate_list_view(request):
                 if one_candidate.we_vote_id in candidate_we_vote_id_list:
                     modified_candidate_list.append(one_candidate)
             candidate_list = modified_candidate_list
+        candidates_linked_to_multiple_offices = len(candidate_list)
 
     # How many facebook_url's don't have facebook_profile_image_url_https
     # SELECT * FROM public.candidate_candidatecampaign where google_civic_election_id = '1000052' and facebook_url
@@ -669,6 +671,9 @@ def candidate_list_view(request):
 
     status_print_list = ""
     status_print_list += "candidate_list_count: " + str(candidate_list_count) + " "
+
+    if find_candidates_linked_to_multiple_offices:
+        status_print_list += "candidates_linked_to_multiple_offices: " + str(candidates_linked_to_multiple_offices) + " "
 
     messages.add_message(request, messages.INFO, status_print_list)
 
@@ -2104,16 +2109,30 @@ def candidate_merge_process_view(request):
 
     candidate_manager = CandidateManager()
 
-    merge = request.POST.get('merge', False)
-    skip = request.POST.get('skip', False)
+    is_post = True if request.method == 'POST' else False
 
-    # Candidate 1 is the one we keep, and Candidate 2 is the one we will merge into Candidate 1
-    candidate1_we_vote_id = request.POST.get('candidate1_we_vote_id', 0)
-    candidate2_we_vote_id = request.POST.get('candidate2_we_vote_id', 0)
-    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
-    redirect_to_candidate_list = request.POST.get('redirect_to_candidate_list', False)
-    remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
-    state_code = request.POST.get('state_code', '')
+    if is_post:
+        merge = request.POST.get('merge', False)
+        skip = request.POST.get('skip', False)
+
+        # Candidate 1 is the one we keep, and Candidate 2 is the one we will merge into Candidate 1
+        candidate1_we_vote_id = request.POST.get('candidate1_we_vote_id', 0)
+        candidate2_we_vote_id = request.POST.get('candidate2_we_vote_id', 0)
+        google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+        redirect_to_candidate_list = request.POST.get('redirect_to_candidate_list', False)
+        remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
+        state_code = request.POST.get('state_code', '')
+    else:
+        merge = request.GET.get('merge', False)
+        skip = request.GET.get('skip', False)
+
+        # Candidate 1 is the one we keep, and Candidate 2 is the one we will merge into Candidate 1
+        candidate1_we_vote_id = request.GET.get('candidate1_we_vote_id', 0)
+        candidate2_we_vote_id = request.GET.get('candidate2_we_vote_id', 0)
+        google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+        redirect_to_candidate_list = request.GET.get('redirect_to_candidate_list', False)
+        remove_duplicate_process = request.GET.get('remove_duplicate_process', False)
+        state_code = request.GET.get('state_code', '')
 
     if positive_value_exists(skip):
         results = candidate_manager.update_or_create_candidates_are_not_duplicates(
@@ -2150,7 +2169,10 @@ def candidate_merge_process_view(request):
     for attribute in CANDIDATE_UNIQUE_IDENTIFIERS:
         conflict_value = conflict_values.get(attribute, None)
         if conflict_value == "CONFLICT":
-            choice = request.POST.get(attribute + '_choice', '')
+            if is_post:
+                choice = request.POST.get(attribute + '_choice', '')
+            else:
+                choice = request.GET.get(attribute + '_choice', '')
             if candidate2_we_vote_id == choice:
                 admin_merge_choices[attribute] = getattr(candidate2_on_stage, attribute)
         elif conflict_value == "CANDIDATE2":
