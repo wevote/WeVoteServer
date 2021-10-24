@@ -896,8 +896,10 @@ class ContestOfficeManager(models.Manager):
         }
         return results
 
-    def update_or_create_contest_offices_are_not_duplicates(self, contest_office1_we_vote_id,
-                                                            contest_office2_we_vote_id):
+    def update_or_create_contest_offices_are_not_duplicates(
+            self,
+            contest_office1_we_vote_id='',
+            contest_office2_we_vote_id=''):
         """
         Either update or create a contest_office entry.
         """

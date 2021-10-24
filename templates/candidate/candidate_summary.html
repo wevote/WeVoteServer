@@ -4,6 +4,16 @@
 {% block title %}{% if candidate %}{{ candidate.candidate_name }} Summary{% else %}No Candidate Found{% endif %}{% endblock %}
 
 {%  block content %}
+<style>
+span.wrap_word { word-break: break-word; }
+table .lightgray_border th, table .lightgray_border td {
+  border: 1px solid lightgray;
+  border-collapse: collapse;
+}
+th, td {
+  padding: 3px;
+}
+</style>
 
 <a href="{% url 'candidate:candidate_list' %}">< Back to Candidates</a>
 
@@ -41,11 +51,16 @@
             {% if candidate.candidate_ultimate_election_date %}
             {{ candidate.candidate_ultimate_election_date }}
             {% endif %}
+            {% if candidate_to_office_link_list|length == 2 %}
+                <br />
+                <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_to_office_link_list.0.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_to_office_link_list.1.contest_office_we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                   target="_blank">Compare Offices <span class="glyphicon glyphicon-new-window"></span></a><br />
+            {% endif %}
         </span>
 
       </td>
       <td><strong>OLD Google Civic Election ID: {{ candidate.google_civic_election_id }}</strong>
-    <table border="1">
+    <table class="lightgray_border">
     {% for candidate_to_office_link in candidate_to_office_link_list %}
         <tr>
             <td>
@@ -60,7 +75,8 @@
             </td>
             <td>
                 <a href="{% url 'office:office_summary_we_vote_id' candidate_to_office_link.contest_office_we_vote_id %}"
-                   target="_blank">{% if candidate_to_office_link.office.office_name %}{{ candidate_to_office_link.office.office_name }}{% else %}MISSING OFFICE OBJECT{% endif %} ({{ candidate_to_office_link.contest_office_we_vote_id }}) <span class="glyphicon glyphicon-new-window"></span></a><br />
+                   target="_blank">{% if candidate_to_office_link.office.office_name %}{{ candidate_to_office_link.office.office_name }}{% else %}MISSING OFFICE OBJECT{% endif %} ({{ candidate_to_office_link.contest_office_we_vote_id }}) <span class="glyphicon glyphicon-new-window"></span></a>
+                    {% if candidate_to_office_link.office.vote_usa_office_id %}<br />{{ candidate_to_office_link.office.vote_usa_office_id }}{% endif %}
             </td>
         </tr>
     {% endfor %}
@@ -134,16 +150,18 @@
 {% endif %}
 
 {% if candidate_search_results_list %}
-    <table class="table-condensed">
+    <table class="table">
+    <thead>
         <tr>
-            <td>&nbsp;</td>
-            <td>ID</td>
-            <td>We Vote ID</td>
-            <td>Candidate Name</td>
-            <td>State</td>
-            <td>Ballotpedia Race ID</td>
-            <td>Ballotpedia Candidate ID</td>
+            <th>&nbsp;</th>
+            <th>ID</th>
+            <th>We Vote ID</th>
+            <th>Candidate Name</th>
+            <th>State</th>
+            <th>Ballotpedia Race ID</th>
+            <th>Ballotpedia Candidate ID</th>
         </tr>
+    </thead>
     {% for found_candidate in candidate_search_results_list %}
         <tr>
             <td>{{ forloop.counter }}</td>

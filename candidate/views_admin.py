@@ -2635,7 +2635,8 @@ def candidate_summary_view(request, candidate_id):
         # candidate_query = candidate_query.filter(
         #     Q(google_civic_election_id=google_civic_election_id) |
         #     Q(contest_office_we_vote_id__in=office_visiting_list_we_vote_ids))
-        # candidate_query = candidate_query.exclude(we_vote_id__iexact=candidate_we_vote_id)
+        # Don't include the candidate whose page this is
+        candidate_query = candidate_query.exclude(we_vote_id__iexact=candidate_we_vote_id)
 
         if positive_value_exists(state_code):
             candidate_query = candidate_query.filter(state_code__iexact=state_code)
