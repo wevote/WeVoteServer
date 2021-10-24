@@ -164,6 +164,11 @@ th, td {
             {% if candidate.candidate_ultimate_election_date %}
             {{ candidate.candidate_ultimate_election_date }}
             {% endif %}
+            {% if candidate_to_office_link_list|length == 2 %}
+                <br />
+                <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_to_office_link_list.0.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_to_office_link_list.1.contest_office_we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                   target="_blank">Compare Offices <span class="glyphicon glyphicon-new-window"></span></a><br />
+            {% endif %}
         </span>
     </label>
     <div class="col-sm-8">
@@ -186,7 +191,8 @@ th, td {
             </td>
             <td>
                 <a href="{% url 'office:office_summary_we_vote_id' candidate_to_office_link.contest_office_we_vote_id %}"
-                   target="_blank">{% if candidate_to_office_link.office.office_name %}{{ candidate_to_office_link.office.office_name }}{% else %}MISSING OFFICE OBJECT{% endif %} ({{ candidate_to_office_link.contest_office_we_vote_id }}) <span class="glyphicon glyphicon-new-window"></span></a><br />
+                   target="_blank">{% if candidate_to_office_link.office.office_name %}{{ candidate_to_office_link.office.office_name }}{% else %}MISSING OFFICE OBJECT{% endif %} ({{ candidate_to_office_link.contest_office_we_vote_id }}) <span class="glyphicon glyphicon-new-window"></span></a>
+                    {% if candidate_to_office_link.office.vote_usa_office_id %}<br />{{ candidate_to_office_link.office.vote_usa_office_id }}{% endif %}
             </td>
             <td>
                 <label for="delete_candidate_to_office_link_{{ candidate_to_office_link.id }}_id">
@@ -303,6 +309,22 @@ th, td {
     <div class="col-sm-8">
         <input type="text" name="state_code" id="state_code_id" class="form-control"
                value="{% if candidate %}{{ candidate.state_code|default_if_none:"" }}{% else %}{{ state_code|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="vote_usa_politician_id_id" class="col-sm-3 control-label">Vote USA Politician Id</label>
+    <div class="col-sm-8">
+        <input type="text" name="vote_usa_politician_id" id="vote_usa_politician_id_id" class="form-control"
+               value="{% if candidate %}{{ candidate.vote_usa_politician_id|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="vote_usa_office_id_id" class="col-sm-3 control-label">Vote USA Office Id</label>
+    <div class="col-sm-8">
+        <input type="text" name="vote_usa_office_id" id="vote_usa_office_id_id" class="form-control"
+               value="{% if candidate %}{{ candidate.vote_usa_office_id|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
 
@@ -540,22 +562,6 @@ th, td {
     <div class="col-sm-8">
         <input type="text" name="ballotpedia_person_id" id="ballotpedia_person_id_id" class="form-control"
                value="{% if candidate %}{{ candidate.ballotpedia_person_id|default_if_none:"" }}{% else %}{{ ballotpedia_person_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="vote_usa_politician_id_id" class="col-sm-3 control-label">Vote USA Politician Id</label>
-    <div class="col-sm-8">
-        <input type="text" name="vote_usa_politician_id" id="vote_usa_politician_id_id" class="form-control"
-               value="{% if candidate %}{{ candidate.vote_usa_politician_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="vote_usa_office_id_id" class="col-sm-3 control-label">Vote USA Office Id</label>
-    <div class="col-sm-8">
-        <input type="text" name="vote_usa_office_id" id="vote_usa_office_id_id" class="form-control"
-               value="{% if candidate %}{{ candidate.vote_usa_office_id|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
 
