@@ -1387,6 +1387,7 @@ def groom_and_store_google_civic_office_json_2021(
         elif results['multiple_entries_found']:
             continue_searching_for_office = False
             status += "RETRIEVING_CONTEST_FROM_UNIQUE_IDS-MULTIPLE_FOUND: " + results['status'] + " "
+            create_office_entry = True
         elif results['contest_office_found']:
             continue_searching_for_office = False
             contest_office = results['contest_office']
