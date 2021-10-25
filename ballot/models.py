@@ -2165,31 +2165,50 @@ class BallotReturnedManager(models.Manager):
             state_code=None):
         ballot_returned = None
         ballot_returned_id = 0
+        if positive_value_exists(google_civic_election_id):
+            google_civic_election_id = convert_to_int(google_civic_election_id)
         status = ''
         success = True
         try:
             if positive_value_exists(polling_location_we_vote_id) and positive_value_exists(google_civic_election_id):
-                ballot_returned, ballot_returned_created = BallotReturnedEmpty.objects.get_or_create(
+                query = BallotReturnedEmpty.objects.filter(
                     google_civic_election_id=google_civic_election_id,
                     polling_location_we_vote_id=polling_location_we_vote_id,
-                    state_code=state_code)
-                ballot_returned_id = ballot_returned.id
+                    state_code__iexact=state_code)
+                query = query.order_by('-date_last_updated')
+                ballot_returned_empty_list = list(query)
+                if len(ballot_returned_empty_list) > 0:
+                    ballot_returned = ballot_returned_empty_list[0]
+                    ballot_returned_id = ballot_returned.id
+                if len(ballot_returned_empty_list) > 1:
+                    # Delete all of the previous duplicates
+                    try:
+                        for index, value in enumerate(ballot_returned_empty_list):
+                            if index > 0:
+                                ballot_returned_empty_list[index].delete()
+                    except Exception as e:
+                        status += "FAILED_DELETING_PRIOR_BALLOT_RETURNED_EMPTY: " + str(e) + " "
             else:
                 ballot_returned_id = 0
             if not positive_value_exists(ballot_returned_id):
-                status += "UNABLE_TO_GET_OR_CREATE_BALLOT_RETURNED_EMPTY "
-                success = False
+                status += "UNABLE_TO_FIND_EXISTING_BALLOT_RETURNED_EMPTY "
         except Exception as e:
-            status += "UNABLE_TO_GET_OR_CREATE_BALLOT_RETURNED_EMPTY_EXCEPTION: " + str(e) + ' '
+            status += "UNABLE_TO_FIND_EXISTING_BALLOT_RETURNED_EMPTY_EXCEPTION: " + str(e) + ' '
             success = False
 
+        if success and not positive_value_exists(ballot_returned_id):
+            ballot_returned = BallotReturnedEmpty.objects.create(
+                google_civic_election_id=google_civic_election_id,
+                polling_location_we_vote_id=polling_location_we_vote_id,
+                state_code=state_code)
+            ballot_returned_id = ballot_returned.id
         try:
             if positive_value_exists(ballot_returned_id):
                 values_changed = False
-                if positive_value_exists(is_from_ctcl):
+                if positive_value_exists(is_from_ctcl) and ballot_returned.is_from_ctcl is not True:
                     ballot_returned.is_from_ctcl = True
                     values_changed = True
-                if positive_value_exists(is_from_vote_usa):
+                if positive_value_exists(is_from_vote_usa) and ballot_returned.is_from_vote_usa is not True:
                     ballot_returned.is_from_vote_usa = True
                     values_changed = True
                 if values_changed:
@@ -3042,28 +3061,30 @@ class BallotReturnedListManager(models.Manager):
         try:
             if positive_value_exists(state_code):
                 polling_location_we_vote_id_query = BallotReturned.objects.using('readonly')\
-                    .order_by('date_last_updated')\
+                    .order_by('-date_last_updated')\
                     .filter(google_civic_election_id=google_civic_election_id, normalized_state__iexact=state_code)\
-                    .exclude(Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id="")).\
-                    values_list('polling_location_we_vote_id', flat=True).distinct()
+                    .exclude(Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id=""))
                 if date_last_updated_should_not_exceed:
                     polling_location_we_vote_id_query = \
                         polling_location_we_vote_id_query.filter(
                             date_last_updated__lt=date_last_updated_should_not_exceed)
+                polling_location_we_vote_id_query = \
+                    polling_location_we_vote_id_query.values_list('polling_location_we_vote_id', flat=True).distinct()
                 if positive_value_exists(limit):
                     polling_location_we_vote_id_list = polling_location_we_vote_id_query[:limit]
                 else:
                     polling_location_we_vote_id_list = list(polling_location_we_vote_id_query)
             else:
                 polling_location_we_vote_id_query = BallotReturned.objects.using('readonly')\
-                    .order_by('date_last_updated') \
+                    .order_by('-date_last_updated') \
                     .filter(google_civic_election_id=google_civic_election_id) \
-                    .exclude(Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id="")). \
-                    values_list('polling_location_we_vote_id', flat=True).distinct()
+                    .exclude(Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id=""))
                 if date_last_updated_should_not_exceed:
                     polling_location_we_vote_id_query = \
                         polling_location_we_vote_id_query.filter(
                             date_last_updated__lt=date_last_updated_should_not_exceed)
+                polling_location_we_vote_id_query = \
+                    polling_location_we_vote_id_query.values_list('polling_location_we_vote_id', flat=True).distinct()
                 if positive_value_exists(limit):
                     polling_location_we_vote_id_list = polling_location_we_vote_id_query[:limit]
                 else:
@@ -3095,7 +3116,7 @@ class BallotReturnedListManager(models.Manager):
 
         try:
             polling_location_we_vote_id_query = BallotReturnedEmpty.objects.using('readonly')\
-                .order_by('date_last_updated')\
+                .order_by('-date_last_updated')\
                 .filter(google_civic_election_id=google_civic_election_id, )\
                 .exclude(Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id=""))
             if batch_process_date_started:
