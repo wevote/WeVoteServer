@@ -1324,9 +1324,9 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                 kind_of_action = IMPORT_ADD_TO_EXISTING
                 keep_looking_for_duplicates = False
             elif matching_results['contest_office_list_found']:
-                kind_of_action = IMPORT_TO_BE_DETERMINED
+                kind_of_action = IMPORT_CREATE
                 status += "RETRIEVE_OFFICE_FROM_NON_UNIQUE-MULTIPLE_POSSIBLE_OFFICES_FOUND "
-                keep_looking_for_duplicates = False
+                keep_looking_for_duplicates = True
             elif not matching_results['success']:
                 kind_of_action = IMPORT_TO_BE_DETERMINED
                 status += "RETRIEVE_OFFICE_FROM_NON_UNIQUE-NO_SUCCESS "
@@ -1352,9 +1352,9 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                     kind_of_action = IMPORT_ADD_TO_EXISTING
                     keep_looking_for_duplicates = False
                 elif matching_results['multiple_entries_found']:
-                    kind_of_action = IMPORT_TO_BE_DETERMINED
+                    kind_of_action = IMPORT_CREATE
                     status += "CREATE_BATCH_ROW_ACTION_OFFICE-MULTIPLE_CANDIDATES_FOUND "
-                    keep_looking_for_duplicates = False
+                    keep_looking_for_duplicates = True
                 elif not positive_value_exists(matching_results['success']):
                     kind_of_action = IMPORT_TO_BE_DETERMINED
                     status += "RETRIEVE_CANDIDATE_FROM_NON_UNIQUE-NO_SUCCESS "

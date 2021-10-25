@@ -23,6 +23,7 @@
     <input type="hidden" name="show_candidates_without_twitter" value="{{ show_candidates_without_twitter }}" />
     <input type="hidden" name="show_candidates_with_best_twitter_options" value="{{ show_candidates_with_best_twitter_options }}" />
     <input type="hidden" name="show_candidates_with_twitter_options" value="{{ show_candidates_with_twitter_options }}" />
+{% if find_candidates_linked_to_multiple_offices %}<input type="hidden" name="find_candidates_linked_to_multiple_offices" value="1" />{% endif %}
 
     {% if election_list %}
     <select id="google_civic_election_id" name="google_civic_election_id">
