@@ -964,7 +964,7 @@ def retrieve_ballotpedia_ballot_items_from_polling_location_api_v4(
             else:
                 # We need to at least to mark the BallotReturned entry with a new date_last_updated date so
                 #  we can more on to other ballot returned entries.
-                status += "NO_INCOMING_BALLOT_ITEMS_FOUND "
+                status += "NO_INCOMING_BALLOT_ITEMS_FOUND_BALLOTPEDIA "
         except Exception as e:
             success = False
             status += 'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS_API_V4-ERROR-BALLOTPEDIA: ' + str(e) + ' '
