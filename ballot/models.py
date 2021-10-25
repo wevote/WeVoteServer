@@ -1705,6 +1705,8 @@ class BallotReturnedEmpty(models.Model):
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=False, db_index=True)
+    is_from_ctcl = models.BooleanField(default=False)  # The ballot was returned empty from CTCL
+    is_from_vote_usa = models.BooleanField(default=False)  # The ballot was returned empty from Vote USA
 
     # latitude = models.FloatField(null=True, verbose_name='latitude returned from Google')
     # longitude = models.FloatField(null=True, verbose_name='longitude returned from Google')
@@ -2154,16 +2156,20 @@ class BallotReturnedManager(models.Manager):
         }
         return results
 
-    def create_ballot_returned_empty(
+    def update_or_create_ballot_returned_empty(
             self,
             google_civic_election_id=0,
+            is_from_ctcl=False,
+            is_from_vote_usa=False,
             polling_location_we_vote_id='',
             state_code=None):
+        ballot_returned = None
+        ballot_returned_id = 0
         status = ''
         success = True
         try:
             if positive_value_exists(polling_location_we_vote_id) and positive_value_exists(google_civic_election_id):
-                ballot_returned = BallotReturnedEmpty.objects.create(
+                ballot_returned, ballot_returned_created = BallotReturnedEmpty.objects.get_or_create(
                     google_civic_election_id=google_civic_election_id,
                     polling_location_we_vote_id=polling_location_we_vote_id,
                     state_code=state_code)
@@ -2171,12 +2177,25 @@ class BallotReturnedManager(models.Manager):
             else:
                 ballot_returned_id = 0
             if not positive_value_exists(ballot_returned_id):
-                status += "UNABLE_TO_CREATE_BALLOT_RETURNED_EMPTY1 "
+                status += "UNABLE_TO_GET_OR_CREATE_BALLOT_RETURNED_EMPTY "
                 success = False
         except Exception as e:
-            status += "UNABLE_TO_CREATE_BALLOT_RETURNED_EMPTY_EXCEPTION: " + str(e) + ' '
+            status += "UNABLE_TO_GET_OR_CREATE_BALLOT_RETURNED_EMPTY_EXCEPTION: " + str(e) + ' '
             success = False
 
+        try:
+            if positive_value_exists(ballot_returned_id):
+                values_changed = False
+                if positive_value_exists(is_from_ctcl):
+                    ballot_returned.is_from_ctcl = True
+                    values_changed = True
+                if positive_value_exists(is_from_vote_usa):
+                    ballot_returned.is_from_vote_usa = True
+                    values_changed = True
+                if values_changed:
+                    ballot_returned.save()
+        except Exception as e:
+            status += "NOT_ABLE_TO_UPDATE_BALLOT_RETURNED_EMPTY: " + str(e) + " "
         results = {
             'status':                   status,
             'success':                  success,
@@ -3062,7 +3081,12 @@ class BallotReturnedListManager(models.Manager):
         return results
 
     def retrieve_polling_location_we_vote_id_list_from_ballot_returned_empty(
-            self, google_civic_election_id, state_code='', batch_process_date_started=None):
+            self,
+            batch_process_date_started=None,
+            is_from_ctcl=False,
+            is_from_vote_usa=False,
+            google_civic_election_id='',
+            state_code=''):
         google_civic_election_id = convert_to_int(google_civic_election_id)
         polling_location_we_vote_id_list = []
         status = ''
@@ -3070,26 +3094,24 @@ class BallotReturnedListManager(models.Manager):
         status += "google_civic_election_id: " + str(google_civic_election_id) + " "
 
         try:
+            polling_location_we_vote_id_query = BallotReturnedEmpty.objects.using('readonly')\
+                .order_by('date_last_updated')\
+                .filter(google_civic_election_id=google_civic_election_id, )\
+                .exclude(Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id=""))
+            if batch_process_date_started:
+                polling_location_we_vote_id_query = \
+                    polling_location_we_vote_id_query.filter(date_last_updated__gt=batch_process_date_started)
+            if positive_value_exists(is_from_ctcl):
+                polling_location_we_vote_id_query = polling_location_we_vote_id_query.filter(is_from_ctcl=True)
+            if positive_value_exists(is_from_vote_usa):
+                polling_location_we_vote_id_query = \
+                    polling_location_we_vote_id_query.filter(is_from_vote_usa=True)
             if positive_value_exists(state_code):
-                polling_location_we_vote_id_query = BallotReturnedEmpty.objects.using('readonly')\
-                    .order_by('date_last_updated')\
-                    .filter(google_civic_election_id=google_civic_election_id, state_code__iexact=state_code)\
-                    .exclude(Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id="")).\
-                    values_list('polling_location_we_vote_id', flat=True).distinct()
-                if batch_process_date_started:
-                    polling_location_we_vote_id_query = \
-                        polling_location_we_vote_id_query.filter(date_last_updated__gt=batch_process_date_started)
-                polling_location_we_vote_id_list = list(polling_location_we_vote_id_query)
-            else:
-                polling_location_we_vote_id_query = BallotReturnedEmpty.objects.using('readonly')\
-                    .order_by('date_last_updated') \
-                    .filter(google_civic_election_id=google_civic_election_id) \
-                    .exclude(Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id="")). \
-                    values_list('polling_location_we_vote_id', flat=True).distinct()
-                if batch_process_date_started:
-                    polling_location_we_vote_id_query = \
-                        polling_location_we_vote_id_query.filter(date_last_updated__gt=batch_process_date_started)
-                polling_location_we_vote_id_list = list(polling_location_we_vote_id_query)
+                polling_location_we_vote_id_query = \
+                    polling_location_we_vote_id_query.filter(state_code__iexact=state_code)
+            polling_location_we_vote_id_query = \
+                polling_location_we_vote_id_query.values_list('polling_location_we_vote_id', flat=True).distinct()
+            polling_location_we_vote_id_list = list(polling_location_we_vote_id_query)
         except Exception as e:
             status += "COULD_NOT_RETRIEVE_POLLING_LOCATION_LIST-EMPTY: " + str(e) + " "
         # status += "PL_LIST: " + str(polling_location_we_vote_id_list) + " "

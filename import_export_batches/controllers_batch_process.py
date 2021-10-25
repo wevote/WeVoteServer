@@ -318,7 +318,8 @@ NUMBER_OF_SIMULTANEOUS_GENERAL_MAINTENANCE_BATCH_PROCESSES = 1
 #             try:
 #                 # Before saving batch_process, make sure we have the latest version. (For example, it might have been
 #                 #  paused since it was first retrieved.)
-#                 batch_process_results = batch_process_manager.retrieve_batch_process(batch_process.id)
+#                 batch_process_results =
+#                   batch_process_manager.retrieve_batch_process(batch_process_id=batch_process.id)
 #                 if positive_value_exists(batch_process_results['batch_process_found']):
 #                     batch_process = batch_process_results['batch_process']
 #
@@ -607,7 +608,8 @@ def process_next_ballot_items():
                 try:
                     # Before saving batch_process, make sure we have the latest version, since there were
                     #  updates in process_one_ballot_item_batch_process
-                    batch_process_results = batch_process_manager.retrieve_batch_process(batch_process.id)
+                    batch_process_results = \
+                        batch_process_manager.retrieve_batch_process(batch_process_id=batch_process.id)
                     if positive_value_exists(batch_process_results['batch_process_found']):
                         batch_process = batch_process_results['batch_process']
                     batch_process.date_checked_out = None
@@ -711,7 +713,8 @@ def process_next_ballot_items():
                         try:
                             # Before saving batch_process, make sure we have the latest version.
                             # (For example, it might have been paused since it was first retrieved.)
-                            batch_process_results = batch_process_manager.retrieve_batch_process(batch_process.id)
+                            batch_process_results = \
+                                batch_process_manager.retrieve_batch_process(batch_process_id=batch_process.id)
                             if positive_value_exists(batch_process_results['batch_process_found']):
                                 batch_process = batch_process_results['batch_process']
 
@@ -1189,7 +1192,8 @@ def process_one_analytics_batch_process(batch_process):
         try:
             # Before saving batch_process, make sure we have the latest version. (For example, it might have been
             #  paused since it was first retrieved.)
-            batch_process_results = batch_process_manager.retrieve_batch_process(batch_process.id)
+            batch_process_results = \
+                batch_process_manager.retrieve_batch_process(batch_process_id=batch_process.id)
             if positive_value_exists(batch_process_results['batch_process_found']):
                 batch_process = batch_process_results['batch_process']
 
@@ -1266,7 +1270,8 @@ def process_one_analytics_batch_process(batch_process):
     try:
         # Before saving batch_process as completed, make sure we have the latest version.
         #  (For example, it might have been paused since it was first retrieved.)
-        batch_process_results = batch_process_manager.retrieve_batch_process(batch_process.id)
+        batch_process_results = \
+            batch_process_manager.retrieve_batch_process(batch_process_id=batch_process.id)
         if positive_value_exists(batch_process_results['batch_process_found']):
             batch_process = batch_process_results['batch_process']
 
@@ -1428,7 +1433,8 @@ def process_one_ballot_item_batch_process(batch_process):
         # Before saving batch_process, make sure we have the latest version. (For example, it might have been
         #  paused since it was first retrieved.)
         # DALE 2020-October after transition to three batches roots, we can get rid of retrieving this again
-        batch_process_results = batch_process_manager.retrieve_batch_process(batch_process.id)
+        batch_process_results = \
+            batch_process_manager.retrieve_batch_process(batch_process_id=batch_process.id)
         if positive_value_exists(batch_process_results['batch_process_found']):
             batch_process = batch_process_results['batch_process']
 
@@ -1531,6 +1537,7 @@ def process_one_ballot_item_batch_process(batch_process):
             from import_export_batches.views_admin import \
                 retrieve_ballots_for_polling_locations_api_v4_internal_view
             results = retrieve_ballots_for_polling_locations_api_v4_internal_view(
+                batch_process_date_started=batch_process.date_started,
                 google_civic_election_id=batch_process.google_civic_election_id,
                 state_code=batch_process.state_code,
                 refresh_ballot_returned=True,
@@ -2734,7 +2741,8 @@ def mark_batch_process_as_complete(batch_process=None,
         try:
             # Before saving batch_process, make sure we have the latest version. (For example, it might have been
             #  paused since it was first retrieved.)
-            batch_process_results = batch_process_manager.retrieve_batch_process(batch_process.id)
+            batch_process_results = \
+                batch_process_manager.retrieve_batch_process(batch_process_id=batch_process.id)
             if positive_value_exists(batch_process_results['batch_process_found']):
                 batch_process = batch_process_results['batch_process']
 

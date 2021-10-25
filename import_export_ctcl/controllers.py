@@ -493,7 +493,7 @@ def retrieve_ctcl_ballot_items_for_one_voter_api(
         else:
             # We need to at least to mark the BallotReturned entry with a new date_last_updated date so
             #  we can more on to other ballot returned entries.
-            status += "NO_INCOMING_BALLOT_ITEMS_FOUND "
+            status += "NO_INCOMING_BALLOT_ITEMS_FOUND_CTCL_ONE_VOTER "
     except Exception as e:
         success = False
         status += 'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS_API_V4-ERROR-CTCL_ONE_VOTER: ' + str(e) + ' '
@@ -621,6 +621,7 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
 
         one_ballot_json = ''
         one_ballot_json_found = False
+        ballot_returned_manager = BallotReturnedManager()
         try:
             api_key = CTCL_API_KEY
             # Get the ballot info at this address
@@ -730,15 +731,26 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
                     except Exception as e:
                         status += "CRASH_IN_UPDATE_OR_CREATE_BALLOT_RETURNED: " + str(e) + ' '
                 else:
-                    # We need to at least to mark the BallotReturned entry with a new date_last_updated date so
-                    #  we can more on to other ballot returned entries.
-                    status += "NO_INCOMING_BALLOT_ITEMS_FOUND "
+                    # Create BallotReturnedEmpty entry so we don't keep retrieving this map point
+                    status += "NO_INCOMING_BALLOT_ITEMS_FOUND_CTCL_CREATE_EMPTY "
+                    results = ballot_returned_manager.update_or_create_ballot_returned_empty(
+                        google_civic_election_id=google_civic_election_id,
+                        is_from_ctcl=True,
+                        polling_location_we_vote_id=polling_location_we_vote_id,
+                        state_code=state_code,
+                    )
             except Exception as e:
                 success = False
                 status += 'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS_API_V4-ERROR-CTCL_POLLING_LOCATION: ' + str(e) + ' '
                 handle_exception(e, logger=logger, exception_message=status)
         else:
             status += "BALLOT_JSON_NOT_RETURNED_FROM_CTCL "
+            results = ballot_returned_manager.update_or_create_ballot_returned_empty(
+                google_civic_election_id=google_civic_election_id,
+                is_from_ctcl=True,
+                polling_location_we_vote_id=polling_location_we_vote_id,
+                state_code=state_code,
+            )
     else:
         status += "POLLING_LOCATION_NOT_FOUND (" + str(polling_location_we_vote_id) + ") "
     results = {

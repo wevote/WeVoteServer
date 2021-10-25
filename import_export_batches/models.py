@@ -4807,7 +4807,7 @@ class BatchProcessManager(models.Manager):
         batch_process_analytics_chunk_created = False
 
         if not batch_process:
-            results = self.retrieve_batch_process(batch_process_id)
+            results = self.retrieve_batch_process(batch_process_id=batch_process_id)
             if not results['batch_process_found']:
                 status += results['status'] + "BATCH_PROCESS_ANALYTICS_CHUNK_NOT_FOUND "
                 results = {
@@ -4846,7 +4846,7 @@ class BatchProcessManager(models.Manager):
         batch_process_ballot_item_chunk = None
         batch_process_ballot_item_chunk_created = False
 
-        results = self.retrieve_batch_process(batch_process_id)
+        results = self.retrieve_batch_process(batch_process_id=batch_process_id)
         if not results['batch_process_found']:
             status += results['status'] + "BATCH_PROCESS_BALLOT_ITEM_CHUNK_NOT_FOUND "
             results = {
@@ -5021,19 +5021,51 @@ class BatchProcessManager(models.Manager):
         }
         return results
 
-    def retrieve_batch_process(self, batch_process_id):
+    def retrieve_batch_process(
+            self,
+            batch_process_id=0,
+            google_civic_election_id=None,
+            kind_of_process='',
+            state_code='',
+            use_ctcl=False,
+            use_vote_usa=False):
         status = ""
         success = True
         batch_process = None
         batch_process_found = False
 
         try:
-            batch_process = BatchProcess.objects.get(id=batch_process_id)
-            if batch_process:
-                batch_process_found = True
-                status += 'BATCH_PROCESS_RETRIEVED '
+            if positive_value_exists(batch_process_id):
+                batch_process = BatchProcess.objects.get(id=batch_process_id)
+                if batch_process:
+                    batch_process_found = True
+                    status += 'BATCH_PROCESS_RETRIEVED_FROM_ID '
+                else:
+                    status += 'BATCH_PROCESS_NOT_RETRIEVED_FROM_ID '
+            elif positive_value_exists(google_civic_election_id) and \
+                    positive_value_exists(kind_of_process) and \
+                    positive_value_exists(state_code):
+                query = BatchProcess.objects.all()
+                query = query.filter(google_civic_election_id=google_civic_election_id)
+                query = query.filter(state_code__iexact=state_code)
+                if positive_value_exists(use_ctcl):
+                    query = query.filter(use_ctcl=True)
+                    query = query.exclude(use_vote_usa=True)
+                elif positive_value_exists(use_vote_usa):
+                    query = query.filter(use_vote_usa=True)
+                    query = query.exclude(use_ctcl=True)
+                query = query.exclude(batch_process_paused=True)
+                batch_process_list = list(query)
+                # Default to returning the oldest one
+                if len(batch_process_list) > 0:
+                    batch_process = batch_process_list[0]
+                    batch_process_found = True
+                    status += 'BATCH_PROCESS_RETRIEVED_FROM_MULTIPLE_VARIABLES '
+                else:
+                    batch_process_found = False
+                    status += 'BATCH_PROCESS_NOT_RETRIEVED_FROM_MULTIPLE_VARIABLES '
             else:
-                status += 'BATCH_PROCESS_NOT_RETRIEVED '
+                status += 'RETRIEVE_BATCH_PROCESS_MISSING_REQUIRED_VARIABLES '
         except BatchProcess.DoesNotExist:
             # No batch_process found. Not a problem.
             status += 'NO_BATCH_PROCESS_FOUND_DoesNotExist '
