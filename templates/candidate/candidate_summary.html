@@ -76,7 +76,8 @@ th, td {
             <td>
                 <a href="{% url 'office:office_summary_we_vote_id' candidate_to_office_link.contest_office_we_vote_id %}"
                    target="_blank">{% if candidate_to_office_link.office.office_name %}{{ candidate_to_office_link.office.office_name }}{% else %}MISSING OFFICE OBJECT{% endif %} ({{ candidate_to_office_link.contest_office_we_vote_id }}) <span class="glyphicon glyphicon-new-window"></span></a>
-                    {% if candidate_to_office_link.office.vote_usa_office_id %}<br />{{ candidate_to_office_link.office.vote_usa_office_id }}{% endif %}
+                {% if candidate_to_office_link.office.vote_usa_office_id %}<br />{{ candidate_to_office_link.office.vote_usa_office_id }}{% endif %}
+                {% if candidate_to_office_link.office.ctcl_uuid %}<br /><span style="font-size: 10px;">{{ candidate_to_office_link.office.ctcl_uuid }}</span>{% endif %}
             </td>
         </tr>
     {% endfor %}
