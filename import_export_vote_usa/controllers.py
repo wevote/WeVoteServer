@@ -10,7 +10,8 @@ from exception.models import handle_exception, handle_record_found_more_than_one
 from image.controllers import cache_master_and_resized_image, IMAGE_SOURCE_VOTE_USA
 from import_export_batches.controllers_vote_usa import store_vote_usa_json_response_to_import_batch_system
 import json
-from polling_location.models import PollingLocationManager
+from polling_location.models import KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR, KIND_OF_LOG_ENTRY_API_END_POINT_CRASH, \
+    KIND_OF_LOG_ENTRY_NO_CONTESTS, KIND_OF_LOG_ENTRY_NO_BALLOT_JSON, PollingLocationManager
 import requests
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
@@ -74,11 +75,12 @@ def retrieve_and_store_vote_usa_candidate_photo(candidate):
 
 
 def retrieve_vote_usa_ballot_items_from_polling_location_api(
-        google_civic_election_id,
+        google_civic_election_id=0,
         election_day_text="",
         polling_location_we_vote_id="",
         polling_location=None,
         state_code="",
+        batch_process_id=0,
         batch_set_id=0,
         existing_offices_by_election_dict={},
         existing_candidate_objects_dict={},
@@ -95,6 +97,7 @@ def retrieve_vote_usa_ballot_items_from_polling_location_api(
     :param polling_location_we_vote_id:
     :param polling_location:
     :param state_code:
+    :param batch_process_id:
     :param batch_set_id:
     :param existing_offices_by_election_dict:
     :param existing_candidate_objects_dict:
@@ -161,6 +164,7 @@ def retrieve_vote_usa_ballot_items_from_polling_location_api(
     latitude = 0.0
     longitude = 0.0
     text_for_map_search = ''
+    polling_location_manager = PollingLocationManager()
     if polling_location:
         polling_location_found = True
         polling_location_we_vote_id = polling_location.we_vote_id
@@ -168,7 +172,6 @@ def retrieve_vote_usa_ballot_items_from_polling_location_api(
         longitude = polling_location.longitude
         text_for_map_search = polling_location.get_text_for_map_search()
     elif positive_value_exists(polling_location_we_vote_id):
-        polling_location_manager = PollingLocationManager()
         results = polling_location_manager.retrieve_polling_location_by_id(0, polling_location_we_vote_id)
         if results['polling_location_found']:
             polling_location = results['polling_location']
@@ -232,7 +235,41 @@ def retrieve_vote_usa_ballot_items_from_polling_location_api(
                     "state": state_code,
                 })
             one_ballot_json = json.loads(response.text)
+        except Exception as e:
+            success = False
+            status += 'VOTE_USA_API_END_POINT_CRASH: ' + str(e) + ' '
+            log_entry_message = status
+            results = polling_location_manager.create_polling_location_log_entry(
+                batch_process_id=batch_process_id,
+                google_civic_election_id=google_civic_election_id,
+                is_from_vote_usa=True,
+                kind_of_log_entry=KIND_OF_LOG_ENTRY_API_END_POINT_CRASH,
+                log_entry_message=log_entry_message,
+                polling_location_we_vote_id=polling_location_we_vote_id,
+                state_code=state_code,
+                text_for_map_search=text_for_map_search,
+            )
+            status += results['status']
+            results = polling_location_manager.update_polling_location_with_error_count(
+                polling_location_we_vote_id=polling_location_we_vote_id,
+                is_from_vote_usa=True,
+            )
+            handle_exception(e, logger=logger, exception_message=status)
+            results = {
+                'success':                                  success,
+                'status':                                   status,
+                'batch_header_id':                          batch_header_id,
+                'existing_offices_by_election_dict':        existing_offices_by_election_dict,
+                'existing_candidate_objects_dict':          existing_candidate_objects_dict,
+                'existing_candidate_to_office_links_dict':  existing_candidate_to_office_links_dict,
+                'existing_measure_objects_dict':            existing_measure_objects_dict,
+                'new_office_we_vote_ids_list':              new_office_we_vote_ids_list,
+                'new_candidate_we_vote_ids_list':           new_candidate_we_vote_ids_list,
+                'new_measure_we_vote_ids_list':             new_measure_we_vote_ids_list,
+            }
+            return results
 
+        try:
             # Use Vote USA API call counter to track the number of queries we are doing each day
             api_counter_manager = VoteUSAApiCounterManager()
             api_counter_manager.create_counter_entry(
@@ -312,6 +349,44 @@ def retrieve_vote_usa_ballot_items_from_polling_location_api(
                     polling_location_we_vote_id=polling_location_we_vote_id,
                     state_code=state_code,
                 )
+                kind_of_log_entry = KIND_OF_LOG_ENTRY_NO_CONTESTS
+                log_entry_message = ''
+                try:
+                    error = one_ballot_json.get('error', {})
+                    errors = error.get('errors', {})
+                    if len(errors):
+                        log_entry_message = errors
+                        for one_error in errors:
+                            try:
+                                if 'reason' in one_error:
+                                    if one_error['reason'] == "notFound":
+                                        # Ballot data not found at this location
+                                        address_not_found = True
+                                    elif one_error['reason'] == "parseError":
+                                        kind_of_log_entry = KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR
+                                    else:
+                                        reason_not_found = True
+                            except Exception as e:
+                                status += "PROBLEM_PARSING_ERROR_VOTE_USA: " + str(e) + ' '
+                except Exception as e:
+                    status += "PROBLEM_GETTING_ERRORS_VOTE_USA: " + str(e) + " "
+                    log_entry_message += status
+                results = polling_location_manager.create_polling_location_log_entry(
+                    batch_process_id=batch_process_id,
+                    google_civic_election_id=google_civic_election_id,
+                    is_from_vote_usa=True,
+                    kind_of_log_entry=kind_of_log_entry,
+                    log_entry_message=log_entry_message,
+                    polling_location_we_vote_id=polling_location_we_vote_id,
+                    state_code=state_code,
+                    text_for_map_search=text_for_map_search,
+                )
+                status += results['status']
+                if kind_of_log_entry == KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR:
+                    results = polling_location_manager.update_polling_location_with_error_count(
+                        polling_location_we_vote_id=polling_location_we_vote_id,
+                        is_from_vote_usa=True,
+                    )
         except Exception as e:
             success = False
             status += 'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS_API_V4-VOTE_USA-ERROR: ' + str(e) + ' '

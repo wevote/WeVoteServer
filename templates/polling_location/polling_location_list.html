@@ -79,6 +79,16 @@
     <input type="text" name="polling_location_search" id="polling_location_id" value="{{ polling_location_search|default_if_none:"" }}" />
     <input type="submit" value="Search for Map Point" />&nbsp;&nbsp;&nbsp;
 
+    <label for="show_ctcl_errors_id">
+      <input type="checkbox" name="show_ctcl_errors" id="show_ctcl_errors_id" value="1" onChange="this.form.submit()"
+             {% if show_ctcl_errors %}checked{% endif %} /> show CTCL errors&nbsp;&nbsp;&nbsp;
+    </label>
+
+    <label for="show_vote_usa_errors_id">
+      <input type="checkbox" name="show_vote_usa_errors" id="show_vote_usa_errors_id" value="1" onChange="this.form.submit()"
+             {% if show_vote_usa_errors %}checked{% endif %} /> show Vote USA errors&nbsp;&nbsp;&nbsp;
+    </label>
+
     <label for="show_bulk_retrieve_id">
       <input type="checkbox" name="show_bulk_retrieve" id="show_bulk_retrieve_id" value="1" onChange="this.form.submit()"
              {% if show_bulk_retrieve %}checked{% endif %} /> show bulk retrieve locations
@@ -93,11 +103,15 @@
             <th>Name</th>
             <th>Address</th>
             <th>we_vote_id</th>
+        {% if not show_ctcl_errors and not show_vote_usa_errors %}
             <th>lat/long</th>
             <th>Source Code</th>
             <th>County</th>
             <th>Precinct</th>
             <th>Bulk retrieve?</th>
+        {% else %}
+            <th>Errors</th>
+        {% endif %}
             <th></th>
         </tr>
     </thead>
@@ -118,6 +132,7 @@
             <td>
                 {% if polling_location.we_vote_id %}&nbsp;&nbsp;&nbsp;{{ polling_location.we_vote_id }}{% endif %}
             </td>
+        {% if not show_ctcl_errors and not show_vote_usa_errors %}
             <td>{% if polling_location.latitude %}&nbsp;&nbsp;Lat/Long:&nbsp;{{ polling_location.latitude }}/{{ polling_location.longitude }}{% endif %}</td>
             <td>
                 {{ polling_location.source_code|default_if_none:"" }}
@@ -132,6 +147,28 @@
               {% if polling_location.use_for_bulk_retrieve %}bulk{% endif %}
               {% if polling_location.polling_location_deleted %} <strong>DELETED</strong>{% endif %}
             </td>
+        {% else %}
+            <td>
+                <table class="table">
+                    {% for log_entry in polling_location.polling_location_log_entry_list %}
+                        <tr>
+                            {% if show_ctcl_errors and show_vote_usa_errors %}
+                            <td>
+                                {% if log_entry.is_from_ctcl %}CTCL {% endif %}
+                                {% if log_entry.is_from_vote_usa %}Vote USA {% endif %}
+                            </td>
+                            {% endif %}
+                            <td>
+                                {{ log_entry.kind_of_log_entry }}
+                            </td>
+    {#                        <td> #}
+    {#                            {{ log_entry.log_entry_message }} #}
+    {#                        </td> #}
+                        </tr>
+                    {% endfor %}
+                </table>
+            </td>
+        {% endif %}
             <td><a href="{% url 'polling_location:polling_location_edit' polling_location.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" style="font-size: .65em">(edit)</a></td>
         </tr>
     {% endfor %}

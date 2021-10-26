@@ -12,7 +12,9 @@ from import_export_batches.controllers_ctcl import store_ctcl_json_response_to_i
 from import_export_google_civic.controllers import groom_and_store_google_civic_ballot_json_2021
 import json
 from party.controllers import party_import_from_xml_data
-from polling_location.models import PollingLocationManager
+from polling_location.models import KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR, \
+    KIND_OF_LOG_ENTRY_API_END_POINT_CRASH, KIND_OF_LOG_ENTRY_NO_CONTESTS, \
+    KIND_OF_LOG_ENTRY_NO_BALLOT_JSON, PollingLocationManager
 import requests
 import wevote_functions.admin
 from wevote_functions.functions import extract_state_code_from_address_string, positive_value_exists
@@ -515,12 +517,13 @@ def retrieve_ctcl_ballot_items_for_one_voter_api(
 
 
 def retrieve_ctcl_ballot_items_from_polling_location_api(
-        google_civic_election_id,
+        google_civic_election_id=0,
         ctcl_election_uuid="",
         election_day_text="",
         polling_location_we_vote_id="",
         polling_location=None,
         state_code="",
+        batch_process_id=0,
         batch_set_id=0,
         existing_offices_by_election_dict={},
         existing_candidate_objects_dict={},
@@ -582,13 +585,13 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
     if 'update_measures' not in update_or_create_rules:
         update_or_create_rules['update_measures'] = False
 
+    polling_location_manager = PollingLocationManager()
     text_for_map_search = ''
     if polling_location:
         polling_location_found = True
         polling_location_we_vote_id = polling_location.we_vote_id
         text_for_map_search = polling_location.get_text_for_map_search()
     elif positive_value_exists(polling_location_we_vote_id):
-        polling_location_manager = PollingLocationManager()
         results = polling_location_manager.retrieve_polling_location_by_id(0, polling_location_we_vote_id)
         if results['polling_location_found']:
             polling_location = results['polling_location']
@@ -641,6 +644,22 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
         except Exception as e:
             success = False
             status += 'CTCL_API_END_POINT_CRASH: ' + str(e) + ' '
+            log_entry_message = status
+            results = polling_location_manager.create_polling_location_log_entry(
+                batch_process_id=batch_process_id,
+                google_civic_election_id=google_civic_election_id,
+                is_from_ctcl=True,
+                kind_of_log_entry=KIND_OF_LOG_ENTRY_API_END_POINT_CRASH,
+                log_entry_message=log_entry_message,
+                polling_location_we_vote_id=polling_location_we_vote_id,
+                state_code=state_code,
+                text_for_map_search=text_for_map_search,
+            )
+            status += results['status']
+            results = polling_location_manager.update_polling_location_with_error_count(
+                polling_location_we_vote_id=polling_location_we_vote_id,
+                is_from_ctcl=True,
+            )
             handle_exception(e, logger=logger, exception_message=status)
             results = {
                 'success':                                  success,
@@ -739,6 +758,45 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
                         polling_location_we_vote_id=polling_location_we_vote_id,
                         state_code=state_code,
                     )
+                    status += results['status']
+                    kind_of_log_entry = KIND_OF_LOG_ENTRY_NO_CONTESTS
+                    log_entry_message = ''
+                    try:
+                        error = one_ballot_json.get('error', {})
+                        errors = error.get('errors', {})
+                        if len(errors):
+                            log_entry_message = errors
+                            for one_error in errors:
+                                try:
+                                    if 'reason' in one_error:
+                                        if one_error['reason'] == "notFound":
+                                            # Ballot data not found at this location
+                                            address_not_found = True
+                                        elif one_error['reason'] == "parseError":
+                                            kind_of_log_entry = KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR
+                                        else:
+                                            reason_not_found = True
+                                except Exception as e:
+                                    status += "PROBLEM_PARSING_ERROR_CTCL: " + str(e) + ' '
+                    except Exception as e:
+                        status += "PROBLEM_GETTING_ERRORS_CTCL: " + str(e) + " "
+                        log_entry_message += status
+                    results = polling_location_manager.create_polling_location_log_entry(
+                        batch_process_id=batch_process_id,
+                        google_civic_election_id=google_civic_election_id,
+                        is_from_ctcl=True,
+                        kind_of_log_entry=kind_of_log_entry,
+                        log_entry_message=log_entry_message,
+                        polling_location_we_vote_id=polling_location_we_vote_id,
+                        state_code=state_code,
+                        text_for_map_search=text_for_map_search,
+                    )
+                    status += results['status']
+                    if kind_of_log_entry == KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR:
+                        results = polling_location_manager.update_polling_location_with_error_count(
+                            polling_location_we_vote_id=polling_location_we_vote_id,
+                            is_from_ctcl=True,
+                        )
             except Exception as e:
                 success = False
                 status += 'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS_API_V4-ERROR-CTCL_POLLING_LOCATION: ' + str(e) + ' '
@@ -750,6 +808,23 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
                 is_from_ctcl=True,
                 polling_location_we_vote_id=polling_location_we_vote_id,
                 state_code=state_code,
+            )
+            status += results['status']
+            log_entry_message = status
+            results = polling_location_manager.create_polling_location_log_entry(
+                batch_process_id=batch_process_id,
+                google_civic_election_id=google_civic_election_id,
+                is_from_ctcl=True,
+                kind_of_log_entry=KIND_OF_LOG_ENTRY_NO_BALLOT_JSON,
+                log_entry_message=log_entry_message,
+                polling_location_we_vote_id=polling_location_we_vote_id,
+                state_code=state_code,
+                text_for_map_search=text_for_map_search,
+            )
+            status += results['status']
+            results = polling_location_manager.update_polling_location_with_error_count(
+                polling_location_we_vote_id=polling_location_we_vote_id,
+                is_from_ctcl=True,
             )
     else:
         status += "POLLING_LOCATION_NOT_FOUND (" + str(polling_location_we_vote_id) + ") "

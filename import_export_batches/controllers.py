@@ -30,7 +30,7 @@ from organization.models import Organization, OrganizationListManager, Organizat
     NONPROFIT_501C3, NONPROFIT_501C4, POLITICAL_ACTION_COMMITTEE, PUBLIC_FIGURE, \
     CORPORATION, NEWS_ORGANIZATION, UNKNOWN
 from politician.models import Politician, PoliticianManager
-from polling_location.models import PollingLocationListManager, PollingLocationManager
+from polling_location.models import PollingLocationManager
 from position.models import PositionManager, INFORMATION_ONLY, OPPOSE, SUPPORT
 from twitter.models import TwitterUserManager
 from voter.models import VoterManager
@@ -1735,7 +1735,6 @@ def create_batch_row_action_polling_location(batch_description, batch_header_map
     """
     batch_manager = BatchManager()
     polling_location_manager = PollingLocationManager()
-    polling_location_list_manager = PollingLocationListManager()
     success = False
     status = ""
     batch_row_action_updated = False
@@ -1827,7 +1826,7 @@ def create_batch_row_action_polling_location(batch_description, batch_header_map
     address_field_exists = \
         positive_value_exists(state) or positive_value_exists(line1) or positive_value_exists(zip_long)
     if keep_looking_for_duplicates and address_field_exists:
-        matching_results = polling_location_list_manager.retrieve_duplicate_polling_locations(
+        matching_results = polling_location_manager.retrieve_duplicate_polling_locations(
             state=state,
             line1=line1,
             zip_long=zip_long,
@@ -1851,7 +1850,7 @@ def create_batch_row_action_polling_location(batch_description, batch_header_map
 
     latitude_and_longitude_exist = latitude and latitude != "" and longitude and longitude != ""
     if keep_looking_for_duplicates and latitude_and_longitude_exist:
-        matching_results = polling_location_list_manager.retrieve_duplicate_polling_locations(
+        matching_results = polling_location_manager.retrieve_duplicate_polling_locations(
             latitude=latitude,
             longitude=longitude,
         )
