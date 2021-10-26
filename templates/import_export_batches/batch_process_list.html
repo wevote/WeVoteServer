@@ -310,7 +310,7 @@
                  target="_blank">batch log</a>)
               {% if batch_process.polling_location_count %}
                 <br />
-                Should not exceed {{ batch_process.ballot_item_chunks_expected|intcomma }} steps ({{ batch_process.polling_location_count|intcomma }} total map points)
+                {{ batch_process.ballot_item_chunk_count|intcomma }} steps exist: Should not exceed {{ batch_process.ballot_item_chunks_expected|intcomma }} steps ({{ batch_process.polling_location_count|intcomma }} total map points)
               {% endif %}
               {% if batch_process.completion_summary or batch_process.analytics_date_as_integer %}
                 <br />

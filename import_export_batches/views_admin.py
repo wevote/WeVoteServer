@@ -1501,6 +1501,7 @@ def batch_process_system_toggle_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    batch_process_search = request.GET.get('batch_process_search', '')
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
     # ACTIVITY_NOTICE_PROCESS, API_REFRESH_REQUEST, BALLOT_ITEMS, SEARCH_TWITTER
@@ -1508,6 +1509,7 @@ def batch_process_system_toggle_view(request):
     kind_of_processes_to_show = request.GET.get('kind_of_processes_to_show', '')
     show_checked_out_processes_only = request.GET.get('show_checked_out_processes_only', '')
     show_active_processes_only = request.GET.get('show_active_processes_only', '')
+    show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
     show_paused_processes_only = request.GET.get('show_paused_processes_only', '')
     include_frequent_processes = request.GET.get('include_frequent_processes', '')
 
@@ -1535,11 +1537,13 @@ def batch_process_system_toggle_view(request):
 
     return HttpResponseRedirect(reverse('import_export_batches:batch_process_list', args=()) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
-                                "&state_code=" + str(state_code) +
+                                "&batch_process_search=" + str(batch_process_search) +
                                 "&kind_of_processes_to_show=" + str(kind_of_processes_to_show) +
-                                "&show_checked_out_processes_only=" + str(show_checked_out_processes_only) +
                                 "&show_active_processes_only=" + str(show_active_processes_only) +
+                                "&show_all_elections=" + str(show_all_elections) +
+                                "&show_checked_out_processes_only=" + str(show_checked_out_processes_only) +
                                 "&show_paused_processes_only=" + str(show_paused_processes_only) +
+                                "&state_code=" + str(state_code) +
                                 "&include_frequent_processes=" + str(include_frequent_processes)
                                 )
 
@@ -1772,6 +1776,7 @@ def batch_process_list_view(request):
             status += 'FAILED BatchProcessBallotItemChunk ' + str(e) + ' '
         batch_process.batch_process_ballot_item_chunk_list = batch_process_ballot_item_chunk_list
         batch_process.batch_process_ballot_item_chunk_list_found = batch_process_ballot_item_chunk_list_found
+        batch_process.ballot_item_chunk_count = len(batch_process.batch_process_ballot_item_chunk_list)
 
         if not positive_value_exists(batch_process_ballot_item_chunk_list_found):
             # Now check to see if this is an analytics
@@ -1864,16 +1869,24 @@ def batch_process_list_view(request):
             google_civic_election_id, state_code, for_voter=True)
 
     toggle_system_url_variables = "s=1"  # Add a dummy variable at the start so all remaining variables have &
+    if positive_value_exists(batch_process_search):
+        toggle_system_url_variables += "&batch_process_search=" + str(batch_process_search)
+    if positive_value_exists(google_civic_election_id):
+        toggle_system_url_variables += "&google_civic_election_id=" + str(google_civic_election_id)
     if positive_value_exists(include_frequent_processes):
         toggle_system_url_variables += "&include_frequent_processes=1"
     if positive_value_exists(kind_of_processes_to_show):
         toggle_system_url_variables += "&kind_of_processes_to_show=" + str(kind_of_processes_to_show)
     if positive_value_exists(show_active_processes_only):
         toggle_system_url_variables += "&show_active_processes_only=1"
+    if positive_value_exists(show_all_elections):
+        toggle_system_url_variables += "&show_all_elections=1"
     if positive_value_exists(show_checked_out_processes_only):
         toggle_system_url_variables += "&show_checked_out_processes_only=1"
     if positive_value_exists(show_paused_processes_only):
         toggle_system_url_variables += "&show_paused_processes_only=1"
+    if positive_value_exists(state_code):
+        toggle_system_url_variables += "&state_code=" + str(state_code)
 
     template_values = {
         'messages_on_stage':                    messages_on_stage,
