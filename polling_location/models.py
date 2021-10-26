@@ -108,6 +108,22 @@ class PollingLocation(models.Model):
 
 class PollingLocationManager(models.Manager):
 
+    def fetch_polling_location_count(
+            self,
+            state_code=''):
+        status = ''
+        try:
+            polling_location_queryset = PollingLocation.objects.using('readonly').all()
+            polling_location_queryset = polling_location_queryset.exclude(polling_location_deleted=True)
+            if positive_value_exists(state_code):
+                polling_location_queryset = polling_location_queryset.filter(state__iexact=state_code)
+            polling_location_count = polling_location_queryset.count()
+        except Exception as e:
+            status += 'FAILED fetch_polling_location_count: ' + str(e) + ' '
+            polling_location_count = 0
+
+        return polling_location_count
+
     def update_or_create_polling_location(
             self,
             we_vote_id,

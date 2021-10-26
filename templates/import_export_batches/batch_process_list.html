@@ -5,6 +5,7 @@
 {% block title %}Batch Processes{% endblock %}
 
 {%  block content %}
+{% load humanize %}
 
 <h1>
   Batch Processes{% if batch_process_list %} ({{ batch_process_list|length }}){% endif %}
@@ -307,6 +308,10 @@
                   target="_blank">batch set list</a>)
               (<a href="{% url 'import_export_batches:batch_process_log_entry_list' %}?batch_process_id={{ batch_process.id }}&google_civic_election_id={{ batch_process.google_civic_election_id }}&state_code={{ batch_process.state_code }}"
                  target="_blank">batch log</a>)
+              {% if batch_process.polling_location_count %}
+                <br />
+                Should not exceed {{ batch_process.ballot_item_chunks_expected|intcomma }} steps ({{ batch_process.polling_location_count|intcomma }} total map points)
+              {% endif %}
               {% if batch_process.completion_summary or batch_process.analytics_date_as_integer %}
                 <br />
                 {% if batch_process.analytics_date_as_integer %}

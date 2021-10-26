@@ -42,6 +42,7 @@ from import_export_ballotpedia.controllers import groom_ballotpedia_data_for_pro
 from import_export_ctcl.controllers import CTCL_VOTER_INFO_URL
 from import_export_vote_usa.controllers import VOTE_USA_VOTER_INFO_URL
 import json
+import math
 from polling_location.models import PollingLocation, PollingLocationManager
 from position.models import POSITION
 import random
@@ -1583,7 +1584,6 @@ def batch_process_list_view(request):
 
     batch_process_list = []
 
-
     # Make sure 'which_marking' is one of the allowed Filter fields
     if which_marking and which_marking not in ["pause_process", "unpause_process", None]:
         messages.add_message(request, messages.ERROR,
@@ -1736,8 +1736,24 @@ def batch_process_list_view(request):
         status += 'FAILED retrieve_all_offices_for_upcoming_election: ' + str(e) + ' '
         success = False
 
-    # Add the processing "chunks" under each Batch Process
+    state_codes_map_point_counts_dict = {}
+    polling_location_manager = PollingLocationManager()
     for batch_process in batch_process_list:
+        if batch_process.kind_of_process in [
+            RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,
+        ]:
+            state_code_lower_case = ''
+            if positive_value_exists(batch_process.state_code):
+                state_code_lower_case = batch_process.state_code.lower()
+            if state_code_lower_case in state_codes_map_point_counts_dict:
+                batch_process.polling_location_count = state_codes_map_point_counts_dict[state_code_lower_case]
+                batch_process.ballot_item_chunks_expected = int(math.ceil(batch_process.polling_location_count / 125))
+            else:
+                state_codes_map_point_counts_dict[state_code_lower_case] = \
+                    polling_location_manager.fetch_polling_location_count(state_code=state_code_lower_case)
+                batch_process.polling_location_count = state_codes_map_point_counts_dict[state_code_lower_case]
+                batch_process.ballot_item_chunks_expected = int(math.ceil(batch_process.polling_location_count / 125))
+        # Add the processing "chunks" under each Batch Process
         batch_process_ballot_item_chunk_list = []
         batch_process_ballot_item_chunk_list_found = False
         batch_process_analytics_chunk_list = []
