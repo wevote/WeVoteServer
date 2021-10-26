@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import PollingLocationListManager, PollingLocationManager
+from .models import PollingLocationManager
 from config.base import get_environment_variable
 from django.contrib import messages
 import glob
@@ -51,7 +51,7 @@ def filter_polling_locations_structured_json_for_local_duplicates(structured_jso
     """
     duplicates_removed = 0
     filtered_structured_json = []
-    polling_location_list_manager = PollingLocationListManager()
+    polling_location_manager = PollingLocationManager()
     for one_polling_location in structured_json:
         polling_location_id = one_polling_location['polling_location_id'] \
             if 'polling_location_id' in one_polling_location else ''
@@ -64,7 +64,7 @@ def filter_polling_locations_structured_json_for_local_duplicates(structured_jso
         # Check to see if there is an entry that matches in all critical ways, minus the we_vote_id
         we_vote_id_from_master = we_vote_id
 
-        results = polling_location_list_manager.retrieve_possible_duplicate_polling_locations(
+        results = polling_location_manager.retrieve_possible_duplicate_polling_locations(
             polling_location_id, state, location_name, line1, zip_long,
             we_vote_id_from_master)
 

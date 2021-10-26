@@ -2,7 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import PollingLocation, PollingLocationManager
+from .models import KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR, KIND_OF_LOG_ENTRY_API_END_POINT_CRASH, \
+    KIND_OF_LOG_ENTRY_NO_BALLOT_JSON, PollingLocation, PollingLocationManager
 from .controllers import filter_polling_locations_structured_json_for_local_duplicates, \
     import_and_save_all_polling_locations_data, polling_locations_import_from_structured_json
 from admin_tools.views import redirect_to_sign_in_page
@@ -504,6 +505,8 @@ def polling_location_list_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     limit = convert_to_int(request.GET.get('limit', 100))
     show_bulk_retrieve = request.GET.get('show_bulk_retrieve', 0)
+    show_ctcl_errors = request.GET.get('show_ctcl_errors', 0)
+    show_vote_usa_errors = request.GET.get('show_vote_usa_errors', 0)
     state_code = request.GET.get('state_code', '')
     polling_location_search = request.GET.get('polling_location_search', '')
 
@@ -517,6 +520,23 @@ def polling_location_list_view(request):
     if positive_value_exists(show_bulk_retrieve):
         polling_location_count_query = polling_location_count_query.filter(use_for_bulk_retrieve=True)
         polling_location_query = polling_location_query.filter(use_for_bulk_retrieve=True)
+
+    if positive_value_exists(show_ctcl_errors) and positive_value_exists(show_vote_usa_errors):
+        polling_location_count_query = polling_location_count_query.filter(
+            Q(ctcl_error_count__gt=0) | Q(vote_usa_error_count__gt=0)
+        )
+        polling_location_query = polling_location_query.filter(
+            Q(ctcl_error_count__gt=0) | Q(vote_usa_error_count__gt=0)
+        )
+        polling_location_query = polling_location_query.order_by('-ctcl_error_count', '-vote_usa_error_count')
+    elif positive_value_exists(show_ctcl_errors):
+        polling_location_count_query = polling_location_count_query.filter(ctcl_error_count__gt=0)
+        polling_location_query = polling_location_query.filter(ctcl_error_count__gt=0)
+        polling_location_query = polling_location_query.order_by('-ctcl_error_count')
+    elif positive_value_exists(show_vote_usa_errors):
+        polling_location_count_query = polling_location_count_query.filter(vote_usa_error_count__gt=0)
+        polling_location_query = polling_location_query.filter(vote_usa_error_count__gt=0)
+        polling_location_query = polling_location_query.order_by('-vote_usa_error_count')
 
     if positive_value_exists(state_code):
         polling_location_count_query = polling_location_count_query.filter(state__iexact=state_code)
@@ -602,6 +622,24 @@ def polling_location_list_view(request):
 
     polling_location_list = polling_location_query.order_by('location_name')[:limit]
 
+    if positive_value_exists(show_ctcl_errors) or positive_value_exists(show_vote_usa_errors):
+        polling_location_list_modified = []
+        polling_location_manager = PollingLocationManager()
+        for polling_location in polling_location_list:
+            polling_location.polling_location_log_entry_list = \
+                polling_location_manager.retrieve_polling_location_log_entry_list(
+                    polling_location_we_vote_id=polling_location.we_vote_id,
+                    is_from_ctcl=show_ctcl_errors,
+                    is_from_vote_usa=show_vote_usa_errors,
+                    kind_of_log_entry_list=[
+                        KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR,
+                        KIND_OF_LOG_ENTRY_API_END_POINT_CRASH,
+                        KIND_OF_LOG_ENTRY_NO_BALLOT_JSON,
+                    ],
+                )
+            polling_location_list_modified.append(polling_location)
+        polling_location_list = polling_location_list_modified
+
     state_list = STATE_LIST_IMPORT
     sorted_state_list = sorted(state_list.items())
 
@@ -614,6 +652,8 @@ def polling_location_list_view(request):
         'polling_location_count':   polling_location_count,
         'polling_location_search':  polling_location_search,
         'show_bulk_retrieve':       show_bulk_retrieve,
+        'show_ctcl_errors':         show_ctcl_errors,
+        'show_vote_usa_errors':     show_vote_usa_errors,
         'state_code':               state_code,
         'state_name':               convert_state_code_to_state_text(state_code),
         'state_list':               sorted_state_list,

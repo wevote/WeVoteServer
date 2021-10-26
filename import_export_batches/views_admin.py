@@ -2019,7 +2019,7 @@ def import_ballot_items_for_location_view(request):
         elif positive_value_exists(use_ctcl):
             from import_export_ctcl.controllers import retrieve_ctcl_ballot_items_from_polling_location_api
             results = retrieve_ctcl_ballot_items_from_polling_location_api(
-                google_civic_election_id,
+                google_civic_election_id=google_civic_election_id,
                 ctcl_election_uuid=ctcl_election_uuid,
                 election_day_text=election_day_text,
                 polling_location_we_vote_id=polling_location_we_vote_id,
@@ -3607,7 +3607,8 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
                 )
             elif positive_value_exists(use_ctcl):
                 one_ballot_results = retrieve_ctcl_ballot_items_from_polling_location_api(
-                    google_civic_election_id,
+                    batch_process_id=batch_process_id,
+                    google_civic_election_id=google_civic_election_id,
                     ctcl_election_uuid=ctcl_election_uuid,
                     election_day_text=election_day_text,
                     polling_location_we_vote_id=polling_location.we_vote_id,
@@ -3625,11 +3626,12 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
                 )
             elif positive_value_exists(use_vote_usa):
                 one_ballot_results = retrieve_vote_usa_ballot_items_from_polling_location_api(
-                    google_civic_election_id,
+                    google_civic_election_id=google_civic_election_id,
                     election_day_text=election_day_text,
                     polling_location_we_vote_id=polling_location.we_vote_id,
                     polling_location=polling_location,
                     state_code=state_code,
+                    batch_process_id=batch_process_id,
                     batch_set_id=batch_set_id,
                     existing_offices_by_election_dict=existing_offices_by_election_dict,
                     existing_candidate_objects_dict=existing_candidate_objects_dict,

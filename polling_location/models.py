@@ -5,7 +5,7 @@
 from config.base import get_environment_variable
 from django.db import models
 from django.db.models import Q
-from exception.models import handle_record_found_more_than_one_exception
+from exception.models import handle_record_not_found_exception
 from geopy.geocoders import get_geocoder_for_service
 from geopy.exc import GeocoderQuotaExceeded
 import wevote_functions.admin
@@ -14,6 +14,10 @@ from wevote_settings.models import fetch_next_we_vote_id_polling_location_intege
 
 GEOCODE_TIMEOUT = 10
 GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
+KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR = 'ADDRESS_PARSE_ERROR'
+KIND_OF_LOG_ENTRY_API_END_POINT_CRASH = 'API_END_POINT_CRASH'
+KIND_OF_LOG_ENTRY_NO_CONTESTS = 'NO_CONTESTS'
+KIND_OF_LOG_ENTRY_NO_BALLOT_JSON = 'NO_BALLOT_JSON'
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -47,8 +51,10 @@ class PollingLocation(models.Model):
     latitude = models.FloatField(default=None, null=True)
     longitude = models.FloatField(default=None, null=True)
 
+    ctcl_error_count = models.PositiveIntegerField(default=None, null=True)
     google_response_address_not_found = models.PositiveIntegerField(
         verbose_name="how many times Google can't find address", default=None, null=True)
+    vote_usa_error_count = models.PositiveIntegerField(default=None, null=True)
 
     # Where did we get this map point from?
     source_code = models.CharField(default=None, max_length=50, null=True)
@@ -106,7 +112,94 @@ class PollingLocation(models.Model):
         super(PollingLocation, self).save(*args, **kwargs)
 
 
+class PollingLocationLogEntry(models.Model):
+    batch_process_id = models.PositiveIntegerField(null=True, unique=False)
+    date_time = models.DateTimeField(null=False, auto_now_add=True)
+    google_civic_election_id = models.PositiveIntegerField(null=True, unique=False)
+    is_from_ballotpedia = models.BooleanField(default=False, null=True)  # Error from retrieving data from Ballotpedia
+    is_from_ctcl = models.BooleanField(default=False, null=True)  # Error from retrieving data from CTCL
+    is_from_vote_usa = models.BooleanField(default=False, null=True)  # Error from retrieving data from Vote USA
+    kind_of_log_entry = models.CharField(max_length=50, default=None, null=True)
+    log_entry_message = models.TextField(null=True)
+    polling_location_we_vote_id = models.CharField(db_index=True, max_length=255, null=True, unique=False)
+    state_code = models.CharField(db_index=True, max_length=2, null=True)
+    text_for_map_search = models.CharField(max_length=255, null=True, unique=False)
+    voter_we_vote_id = models.CharField(db_index=True, max_length=255, null=True, unique=False)
+
+
 class PollingLocationManager(models.Manager):
+
+    def create_polling_location_log_entry(
+            self,
+            batch_process_id=None,
+            google_civic_election_id=None,
+            is_from_ballotpedia=None,
+            is_from_ctcl=None,
+            is_from_vote_usa=None,
+            kind_of_log_entry=None,
+            log_entry_message=None,
+            polling_location_we_vote_id=None,
+            state_code=None,
+            text_for_map_search=None,
+    ):
+        """
+        Create PollingLocationLogEntry data
+        """
+        success = True
+        status = " "
+        polling_location_log_entry_saved = False
+        polling_location_log_entry = None
+        missing_required_variable = False
+
+        if not is_from_ballotpedia and not is_from_ctcl and not is_from_vote_usa:
+            missing_required_variable = True
+            status += 'MISSING_IS_FROM_SOURCE '
+        if not kind_of_log_entry:
+            missing_required_variable = True
+            status += 'MISSING_KIND_OF_LOG_ENTRY '
+        if not polling_location_we_vote_id:
+            missing_required_variable = True
+            status += 'MISSING_POLLING_LOCATION_WE_VOTE_ID '
+        if not state_code:
+            missing_required_variable = True
+            status += 'MISSING_STATE_CODE '
+
+        if missing_required_variable:
+            results = {
+                'success':                          success,
+                'status':                           status,
+                'polling_location_log_entry_saved': polling_location_log_entry_saved,
+                'polling_location_log_entry':       polling_location_log_entry,
+            }
+            return results
+
+        try:
+            polling_location_log_entry = PollingLocationLogEntry.objects.using('analytics').create(
+                batch_process_id=batch_process_id,
+                google_civic_election_id=google_civic_election_id,
+                is_from_ballotpedia=is_from_ballotpedia,
+                is_from_ctcl=is_from_ctcl,
+                is_from_vote_usa=is_from_vote_usa,
+                kind_of_log_entry=kind_of_log_entry,
+                log_entry_message=log_entry_message,
+                polling_location_we_vote_id=polling_location_we_vote_id,
+                state_code=state_code,
+                text_for_map_search=text_for_map_search,
+            )
+            success = True
+            polling_location_log_entry_saved = True
+            status += 'POLLING_LOCATION_LOG_ENTRY_SAVED '
+        except Exception as e:
+            success = False
+            status += 'COULD_NOT_SAVE_POLLING_LOCATION_LOG_ENTRY: ' + str(e) + ' '
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'polling_location_log_entry_saved': polling_location_log_entry_saved,
+            'polling_location_log_entry':       polling_location_log_entry,
+        }
+        return results
 
     def fetch_polling_location_count(
             self,
@@ -238,6 +331,99 @@ class PollingLocationManager(models.Manager):
             'MultipleObjectsReturned':      exception_multiple_object_returned,
             'polling_location':             polling_location,
             'polling_location_created':     polling_location_created,
+        }
+        return results
+
+    def update_polling_location_with_error_count(
+            self,
+            is_from_ctcl=False,
+            is_from_vote_usa=False,
+            polling_location_we_vote_id=''):
+        status = ''
+        update_values = {}
+        try:
+            if not positive_value_exists(is_from_ctcl) and not positive_value_exists(is_from_vote_usa):
+                update_ctcl_error_count = True
+                update_vote_usa_error_count = True
+            else:
+                update_ctcl_error_count = positive_value_exists(is_from_ctcl)
+                update_vote_usa_error_count = positive_value_exists(is_from_vote_usa)
+
+            # ##############
+            # We only count errors which shouldn't be happening, and can be fixed:
+            # KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR = 'ADDRESS_PARSE_ERROR'
+            # KIND_OF_LOG_ENTRY_API_END_POINT_CRASH = 'API_END_POINT_CRASH'
+            # KIND_OF_LOG_ENTRY_NO_BALLOT_JSON = 'NO_BALLOT_JSON'
+
+            # We don't count these errors:
+            # KIND_OF_LOG_ENTRY_NO_CONTESTS = 'NO_CONTESTS'
+
+            if positive_value_exists(update_ctcl_error_count):
+                count_query = PollingLocationLogEntry.objects.using('analytics').all()
+                count_query = count_query.filter(polling_location_we_vote_id__iexact=polling_location_we_vote_id)
+                count_query = count_query.filter(is_from_ctcl=True)
+                count_query = count_query.filter(kind_of_log_entry__in=[
+                    KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR,
+                    KIND_OF_LOG_ENTRY_API_END_POINT_CRASH,
+                    KIND_OF_LOG_ENTRY_NO_BALLOT_JSON,
+                ])
+                update_values['ctcl_error_count'] = count_query.count()
+
+            if positive_value_exists(update_vote_usa_error_count):
+                count_query = PollingLocationLogEntry.objects.using('analytics').all()
+                count_query = count_query.filter(polling_location_we_vote_id__iexact=polling_location_we_vote_id)
+                count_query = count_query.filter(is_from_vote_usa=True)
+                count_query = count_query.filter(kind_of_log_entry__in=[
+                    KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR,
+                    KIND_OF_LOG_ENTRY_API_END_POINT_CRASH,
+                    KIND_OF_LOG_ENTRY_NO_BALLOT_JSON,
+                ])
+                update_values['vote_usa_error_count'] = count_query.count()
+        except Exception as e:
+            status += "FAILED_RETRIEVING_ERROR_COUNTS: " + str(e) + ' '
+            results = {
+                'success': False,
+                'status': status,
+            }
+            return results
+
+        update_results = self.update_polling_location_row(
+            polling_location_we_vote_id=polling_location_we_vote_id,
+            update_values=update_values,
+        )
+        status = update_results['status']
+        success = update_results['success']
+
+        results = {
+            'success':          success,
+            'status':           status,
+        }
+        return results
+
+    def update_polling_location_row(
+            self,
+            polling_location_we_vote_id='',
+            update_values={}):
+        polling_location = None
+        polling_location_found = False
+        success = True
+        status = ''
+        try:
+            polling_location = PollingLocation.objects.get(we_vote_id__iexact=polling_location_we_vote_id)
+            polling_location_found = True
+        except Exception as e:
+            status += "POLLING_LOCATION_GET: " + str(e) + ' '
+
+        if polling_location_found:
+            try:
+                for key, value in update_values.items():
+                    setattr(polling_location, key, value)
+                polling_location.save()
+            except Exception as e:
+                status += "POLLING_LOCATION_SAVE: " + str(e) + ' '
+        results = {
+            'status':   status,
+            'success':  success,
         }
         return results
 
@@ -646,6 +832,42 @@ class PollingLocationManager(models.Manager):
             }
             return results
 
+    def retrieve_polling_location_log_entry_list(
+            self,
+            is_from_ctcl=False,
+            is_from_vote_usa=False,
+            kind_of_log_entry_list=[],
+            polling_location_we_vote_id='',
+            read_only=True):
+        polling_location_log_entry_list_found = False
+        polling_location_log_entry_list = []
+        try:
+            if positive_value_exists(read_only):
+                query = PollingLocationLogEntry.objects.using('readonly').all()
+            else:
+                query = PollingLocationLogEntry.objects.all()
+            if positive_value_exists(is_from_ctcl) and positive_value_exists(is_from_vote_usa):
+                query = query.filter(Q(is_from_ctcl=True) | Q(is_from_vote_usa=True))
+            elif positive_value_exists(is_from_ctcl):
+                query = query.filter(is_from_ctcl=True)
+            elif positive_value_exists(is_from_vote_usa):
+                query = query.filter(is_from_vote_usa=True)
+            if positive_value_exists(len(kind_of_log_entry_list) > 0):
+                query = query.filter(kind_of_log_entry__in=kind_of_log_entry_list)
+            if positive_value_exists(polling_location_we_vote_id):
+                query = query.filter(polling_location_we_vote_id__iexact=polling_location_we_vote_id)
+            polling_location_log_entry_list = list(query)
+            if len(polling_location_log_entry_list):
+                polling_location_log_entry_list_found = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+
+        if polling_location_log_entry_list_found:
+            return polling_location_log_entry_list
+        else:
+            polling_location_log_entry_list = []
+            return polling_location_log_entry_list
+
     def retrieve_polling_locations_in_city_or_state(self, state='', city='', polling_location_zip=''):
         # Retrieve a list of polling_location entries
         polling_location_list_found = False
@@ -693,9 +915,6 @@ class PollingLocationManager(models.Manager):
                 'polling_location_list':        [],
             }
             return results
-
-
-class PollingLocationListManager(models.Manager):
 
     def retrieve_duplicate_polling_locations(
             self,
