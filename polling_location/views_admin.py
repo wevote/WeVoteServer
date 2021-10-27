@@ -662,6 +662,54 @@ def polling_location_list_view(request):
 
 
 @login_required
+def polling_location_list_process_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    clear_errors_for_polling_location_we_vote_id = request.GET.get('clear_errors_for_polling_location_we_vote_id', '')
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    polling_location_search = request.GET.get('polling_location_search', "")
+    polling_location_we_vote_id = request.GET.get('polling_location_we_vote_id', '')
+    show_ctcl_errors = request.GET.get('show_ctcl_errors', "")
+    show_vote_usa_errors = request.GET.get('show_vote_usa_errors', "")
+    state_code = request.GET.get('state_code', "")
+    status = ""
+
+    if positive_value_exists(clear_errors_for_polling_location_we_vote_id):
+        polling_location_manager = PollingLocationManager()
+        results = polling_location_manager.soft_delete_polling_location_log_entry_list(
+            kind_of_log_entry_list=[
+                KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR,
+                KIND_OF_LOG_ENTRY_API_END_POINT_CRASH,
+                KIND_OF_LOG_ENTRY_NO_BALLOT_JSON,
+            ],
+            polling_location_we_vote_id=clear_errors_for_polling_location_we_vote_id,
+        )
+        number_deleted = results['number_deleted']
+        results = polling_location_manager.update_polling_location_with_error_count(
+            polling_location_we_vote_id=clear_errors_for_polling_location_we_vote_id,
+        )
+        messages.add_message(request, messages.INFO,
+                             'Cleared {number_deleted} fixable errors for {polling_location_we_vote_id}.'
+                             ''.format(
+                                 number_deleted=number_deleted,
+                                 polling_location_we_vote_id=clear_errors_for_polling_location_we_vote_id))
+
+    url_variables = "?google_civic_election_id=" + str(google_civic_election_id)
+    url_variables += "&state_code=" + str(state_code)
+    url_variables += "&polling_location_search=" + str(polling_location_search)
+    url_variables += "&show_ctcl_errors=" + str(show_ctcl_errors)
+    url_variables += "&show_vote_usa_errors=" + str(show_vote_usa_errors)
+    if positive_value_exists(polling_location_we_vote_id):
+        return HttpResponseRedirect(reverse('polling_location:polling_location_summary_by_we_vote_id',
+                                    args=(polling_location_we_vote_id,)) + url_variables)
+    else:
+        return HttpResponseRedirect(reverse('polling_location:polling_location_list', args=()) + url_variables)
+
+
+@login_required
 def polling_locations_add_address_from_latitude_and_longitude_view(request):
     """
     Find map point entries that don't have state, but do have latitude/longitude, and update them

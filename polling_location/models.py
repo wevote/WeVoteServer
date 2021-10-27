@@ -120,6 +120,7 @@ class PollingLocationLogEntry(models.Model):
     is_from_ctcl = models.BooleanField(default=False, null=True)  # Error from retrieving data from CTCL
     is_from_vote_usa = models.BooleanField(default=False, null=True)  # Error from retrieving data from Vote USA
     kind_of_log_entry = models.CharField(max_length=50, default=None, null=True)
+    log_entry_deleted = models.BooleanField(db_index=True, default=False)
     log_entry_message = models.TextField(null=True)
     polling_location_we_vote_id = models.CharField(db_index=True, max_length=255, null=True, unique=False)
     state_code = models.CharField(db_index=True, max_length=2, null=True)
@@ -367,6 +368,7 @@ class PollingLocationManager(models.Manager):
                     KIND_OF_LOG_ENTRY_API_END_POINT_CRASH,
                     KIND_OF_LOG_ENTRY_NO_BALLOT_JSON,
                 ])
+                count_query = count_query.filter(log_entry_deleted=False)
                 update_values['ctcl_error_count'] = count_query.count()
 
             if positive_value_exists(update_vote_usa_error_count):
@@ -378,6 +380,7 @@ class PollingLocationManager(models.Manager):
                     KIND_OF_LOG_ENTRY_API_END_POINT_CRASH,
                     KIND_OF_LOG_ENTRY_NO_BALLOT_JSON,
                 ])
+                count_query = count_query.filter(log_entry_deleted=False)
                 update_values['vote_usa_error_count'] = count_query.count()
         except Exception as e:
             status += "FAILED_RETRIEVING_ERROR_COUNTS: " + str(e) + ' '
@@ -424,6 +427,34 @@ class PollingLocationManager(models.Manager):
         results = {
             'status':   status,
             'success':  success,
+        }
+        return results
+
+    def soft_delete_polling_location_log_entry_list(
+            self,
+            kind_of_log_entry_list=[],
+            polling_location_we_vote_id=''):
+        status = ''
+        success = True
+        number_deleted = 0
+        try:
+            query = PollingLocationLogEntry.objects.all()
+            query = query.exclude(log_entry_deleted=True)
+            if positive_value_exists(len(kind_of_log_entry_list) > 0):
+                query = query.filter(kind_of_log_entry__in=kind_of_log_entry_list)
+            query = query.filter(polling_location_we_vote_id__iexact=polling_location_we_vote_id)
+            number_deleted = query.update(
+                log_entry_deleted=True,
+            )
+        except Exception as e:
+            status += "PollingLocationLogEntry_SOFT_DELETE_FAILED: " + str(e) + ' '
+            handle_record_not_found_exception(e, logger=logger)
+            success = False
+
+        results = {
+            'status':           status,
+            'success':          success,
+            'number_deleted':   number_deleted,
         }
         return results
 
@@ -834,6 +865,7 @@ class PollingLocationManager(models.Manager):
 
     def retrieve_polling_location_log_entry_list(
             self,
+            exclude_deleted=True,
             is_from_ctcl=False,
             is_from_vote_usa=False,
             kind_of_log_entry_list=[],
@@ -846,6 +878,8 @@ class PollingLocationManager(models.Manager):
                 query = PollingLocationLogEntry.objects.using('readonly').all()
             else:
                 query = PollingLocationLogEntry.objects.all()
+            if positive_value_exists(exclude_deleted):
+                query = query.exclude(log_entry_deleted=True)
             if positive_value_exists(is_from_ctcl) and positive_value_exists(is_from_vote_usa):
                 query = query.filter(Q(is_from_ctcl=True) | Q(is_from_vote_usa=True))
             elif positive_value_exists(is_from_ctcl):

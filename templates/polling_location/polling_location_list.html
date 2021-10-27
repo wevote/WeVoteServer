@@ -149,27 +149,35 @@
             </td>
         {% else %}
             <td>
-                <table class="table">
+                <table class="table table-bordered table-condensed">
                     {% for log_entry in polling_location.polling_location_log_entry_list %}
                         <tr>
-                            {% if show_ctcl_errors and show_vote_usa_errors %}
-                            <td>
-                                {% if log_entry.is_from_ctcl %}CTCL {% endif %}
-                                {% if log_entry.is_from_vote_usa %}Vote USA {% endif %}
-                            </td>
-                            {% endif %}
                             <td>
                                 {{ log_entry.kind_of_log_entry }}
+                                {% if show_ctcl_errors and show_vote_usa_errors %}
+                                    {% if log_entry.is_from_ctcl %} / CTCL{% endif %}
+                                    {% if log_entry.is_from_vote_usa %} / Vote USA{% endif %}
+                                {% endif %}
                             </td>
-    {#                        <td> #}
-    {#                            {{ log_entry.log_entry_message }} #}
-    {#                        </td> #}
+                            <td>
+                                {{ log_entry.google_civic_election_id }}
+                            </td>
                         </tr>
                     {% endfor %}
+                    {% if polling_location.polling_location_log_entry_list %}
+                        <tr>
+                            <td colspan="2">
+                                <a href="{% url 'polling_location:polling_location_list_process' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&polling_location_search={{ polling_location_search }}&show_ctcl_errors={{ show_ctcl_errors }}&show_vote_usa_errors={{ show_vote_usa_errors }}&clear_errors_for_polling_location_we_vote_id={{ polling_location.we_vote_id }}" style="font-size: .65em"
+                                    >(mark as fixed now)</a>
+                            </td>
+                        </tr>
+
+                    {% endif %}
                 </table>
             </td>
         {% endif %}
-            <td><a href="{% url 'polling_location:polling_location_edit' polling_location.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" style="font-size: .65em">(edit)</a></td>
+            <td><a href="{% url 'polling_location:polling_location_edit' polling_location.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" style="font-size: .65em"
+                   target="_blank" >(edit <span class="glyphicon glyphicon-new-window"></span>)</a></td>
         </tr>
     {% endfor %}
     </table>
