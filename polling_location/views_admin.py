@@ -17,6 +17,7 @@ from django.contrib.messages import get_messages
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import render
+from election.models import Election, ElectionManager
 from exception.models import handle_record_found_more_than_one_exception
 from voter.models import voter_has_authority
 from wevote_functions.functions import convert_state_code_to_state_text, convert_to_float, convert_to_int, \
@@ -906,36 +907,19 @@ def polling_location_statistics_view(request):
 
 @login_required
 def polling_location_summary_view(request, polling_location_local_id):
-    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'partner_organization', 'political_data_viewer', 'verified_volunteer'}
-    if not voter_has_authority(request, authority_required):
-        return redirect_to_sign_in_page(request, authority_required)
-
-    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-
-    messages_on_stage = get_messages(request)
     polling_location_local_id = convert_to_int(polling_location_local_id)
-    polling_location_on_stage_found = False
-    polling_location_on_stage = PollingLocation()
-    try:
-        polling_location_on_stage = PollingLocation.objects.get(id=polling_location_local_id)
-        polling_location_on_stage_found = True
-    except PollingLocation.MultipleObjectsReturned as e:
-        handle_record_found_more_than_one_exception(e, logger=logger)
-    except PollingLocation.DoesNotExist:
-        # This is fine, create new
-        pass
-
-    template_values = {
-        'google_civic_election_id': google_civic_election_id,
-        'messages_on_stage':        messages_on_stage,
-        'polling_location':         polling_location_on_stage,
-    }
-    return render(request, 'polling_location/polling_location_summary.html', template_values)
+    return polling_location_summary_internal_view(request, polling_location_id=polling_location_local_id)
 
 
 @login_required
 def polling_location_summary_by_we_vote_id_view(request, polling_location_we_vote_id):
+    return polling_location_summary_internal_view(request, polling_location_we_vote_id=polling_location_we_vote_id)
+
+
+def polling_location_summary_internal_view(
+        request,
+        polling_location_id='',
+        polling_location_we_vote_id=''):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
@@ -946,8 +930,14 @@ def polling_location_summary_by_we_vote_id_view(request, polling_location_we_vot
     messages_on_stage = get_messages(request)
     polling_location_on_stage_found = False
     polling_location_on_stage = PollingLocation()
+    state_code = ''
+    use_ctcl_as_data_source_override = False
     try:
-        polling_location_on_stage = PollingLocation.objects.get(we_vote_id=polling_location_we_vote_id)
+        if positive_value_exists(polling_location_id):
+            polling_location_on_stage = PollingLocation.objects.get(id=polling_location_id)
+        else:
+            polling_location_on_stage = PollingLocation.objects.get(we_vote_id=polling_location_we_vote_id)
+        state_code = polling_location_on_stage.state
         polling_location_on_stage_found = True
     except PollingLocation.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
@@ -970,12 +960,29 @@ def polling_location_summary_by_we_vote_id_view(request, polling_location_we_vot
         if len(ballot_returned_list):
             ballot_returned_list_found = True
 
+    election = None
+    if positive_value_exists(google_civic_election_id):
+        election_manager = ElectionManager()
+        results = election_manager.retrieve_election(google_civic_election_id)
+        if results['election_found']:
+            election = results['election']
+            if positive_value_exists(state_code):
+                if state_code.lower() in election.use_ctcl_as_data_source_by_state_code.lower():
+                    use_ctcl_as_data_source_override = True
+
+    election_query = Election.objects.using('readonly').all()
+    election_query = election_query.order_by('-election_day_text')
+    election_list = list(election_query)
+
     template_values = {
         'ballot_returned_list':         ballot_returned_list,
         'ballot_returned_list_found':   ballot_returned_list_found,
+        'election':                     election,
+        'election_list':                election_list,
         'google_civic_election_id':     google_civic_election_id,
         'messages_on_stage':            messages_on_stage,
         'polling_location':             polling_location_on_stage,
+        'use_ctcl_as_data_source_override': use_ctcl_as_data_source_override,
     }
     return render(request, 'polling_location/polling_location_summary.html', template_values)
 

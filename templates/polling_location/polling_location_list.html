@@ -119,8 +119,9 @@
     {% for polling_location in polling_location_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td><a href="{% url 'polling_location:polling_location_summary' polling_location.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-            {% if polling_location.location_name %}{{ polling_location.location_name }}{% else %}(no location name)&nbsp;&nbsp;{% endif %}</a>
+            <td><a href="{% url 'polling_location:polling_location_summary' polling_location.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                   target="_blank">
+            {% if polling_location.location_name %}{{ polling_location.location_name }}{% else %}(no location name)&nbsp;&nbsp;{% endif %} <span class="glyphicon glyphicon-new-window"></span></a>
             </td>
             <td>
                 {{ polling_location.get_text_for_map_search }}

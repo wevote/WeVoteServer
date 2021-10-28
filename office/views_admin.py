@@ -236,6 +236,8 @@ def office_list_view(request):
 
     fix_office_district_ids = positive_value_exists(request.GET.get('fix_office_district_ids', False))
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    has_ctcl_data = positive_value_exists(request.GET.get('has_ctcl_data', False))
+    has_vote_usa_data = positive_value_exists(request.GET.get('has_vote_usa_data', False))
     office_search = request.GET.get('office_search', '')
     show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
     show_marquee_or_battleground = request.GET.get('show_marquee_or_battleground', False)
@@ -269,6 +271,15 @@ def office_list_view(request):
             for one_election in election_list:
                 google_civic_election_id_list.append(one_election.google_civic_election_id)
             office_queryset = office_queryset.filter(google_civic_election_id__in=google_civic_election_id_list)
+        from django.db.models.functions import Length
+        if positive_value_exists(has_ctcl_data):
+            office_queryset = \
+                office_queryset.annotate(ctcl_uuid_length=Length('ctcl_uuid'))\
+                .filter(ctcl_uuid_length__gt=1)
+        if positive_value_exists(has_vote_usa_data):
+            office_queryset = \
+                office_queryset.annotate(vote_usa_office_id_length=Length('vote_usa_office_id'))\
+                .filter(vote_usa_office_id_length__gt=1)
         if positive_value_exists(state_code):
             office_queryset = office_queryset.filter(state_code__iexact=state_code)
         if positive_value_exists(show_marquee_or_battleground):
@@ -391,15 +402,17 @@ def office_list_view(request):
     messages_on_stage = get_messages(request)
 
     template_values = {
+        'election_list':            election_list,
+        'google_civic_election_id': google_civic_election_id,
+        'has_ctcl_data':            has_ctcl_data,
+        'has_vote_usa_data':        has_vote_usa_data,
         'messages_on_stage':        messages_on_stage,
         'office_list':              updated_office_list,
         'office_search':            office_search,
-        'election_list':            election_list,
-        'state_code':               state_code,
         'show_all_elections':       show_all_elections,
         'show_marquee_or_battleground': show_marquee_or_battleground,
+        'state_code':               state_code,
         'state_list':               sorted_state_list,
-        'google_civic_election_id': google_civic_election_id,
     }
     return render(request, 'office/office_list.html', template_values)
 

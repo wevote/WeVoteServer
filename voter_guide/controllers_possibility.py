@@ -139,7 +139,7 @@ def organizations_found_on_url(url_to_scan, state_code=''):
             one_organization_found = False
             results = twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_handle(
                 one_twitter_handle)
-            if results['twitter_link_to_organization_found']:
+            if 'twitter_link_to_organization_found' in results and results['twitter_link_to_organization_found']:
                 twitter_link_to_organization = results['twitter_link_to_organization']
                 organization_results = organization_manager.retrieve_organization_from_we_vote_id(
                     twitter_link_to_organization.organization_we_vote_id)

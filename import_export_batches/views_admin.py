@@ -1959,17 +1959,37 @@ def import_ballot_items_for_location_view(request):
     election_manager = ElectionManager()
     ctcl_election_uuid = ''
     election_day_text = ''
+    election_found = False
     use_ballotpedia_as_data_source = False
     use_ctcl_as_data_source = False
+    use_ctcl_as_data_source_override = False
     use_vote_usa_as_data_source = False
     results = election_manager.retrieve_election(google_civic_election_id=google_civic_election_id)
     if results['election_found']:
+        election_found = True
         election = results['election']
         ctcl_election_uuid = election.ctcl_uuid
         election_day_text = election.election_day_text
         use_ballotpedia_as_data_source = election.use_ballotpedia_as_data_source
         use_ctcl_as_data_source = election.use_ctcl_as_data_source
         use_vote_usa_as_data_source = election.use_vote_usa_as_data_source
+        if positive_value_exists(state_code):
+            if state_code.lower() in election.use_ctcl_as_data_source_by_state_code.lower():
+                use_ctcl_as_data_source_override = True
+
+    polling_location_manager = PollingLocationManager()
+    polling_location_state_code = ""
+    if positive_value_exists(polling_location_we_vote_id):
+        results = polling_location_manager.retrieve_polling_location_by_id(0, polling_location_we_vote_id)
+        if results['polling_location_found']:
+            polling_location = results['polling_location']
+            polling_location_we_vote_id = polling_location.we_vote_id
+            polling_location_state_code = polling_location.state
+
+    if positive_value_exists(polling_location_state_code) and positive_value_exists(election_found):
+        if not positive_value_exists(use_ctcl_as_data_source_override):
+            if polling_location_state_code.lower() in election.use_ctcl_as_data_source_by_state_code.lower():
+                use_ctcl_as_data_source_override = True
 
     if positive_value_exists(use_ballotpedia):
         if not positive_value_exists(use_ballotpedia_as_data_source):
@@ -1980,7 +2000,8 @@ def import_ballot_items_for_location_view(request):
                 'success': success,
             }
     elif positive_value_exists(use_ctcl):
-        if not positive_value_exists(use_ctcl_as_data_source):
+        if not positive_value_exists(use_ctcl_as_data_source) \
+                and not positive_value_exists(use_ctcl_as_data_source_override):
             success = False
             status += "USE_CTCL-BUT_NOT_USE_CTCL_AS_DATA_SOURCE "
             results = {
@@ -2026,6 +2047,15 @@ def import_ballot_items_for_location_view(request):
                 state_code=state_code,
                 update_or_create_rules=update_or_create_rules,
             )
+        elif positive_value_exists(use_vote_usa):
+            from import_export_vote_usa.controllers import retrieve_vote_usa_ballot_items_from_polling_location_api
+            results = retrieve_vote_usa_ballot_items_from_polling_location_api(
+                google_civic_election_id=google_civic_election_id,
+                election_day_text=election_day_text,
+                polling_location_we_vote_id=polling_location_we_vote_id,
+                state_code=state_code,
+                update_or_create_rules=update_or_create_rules,
+            )
         else:
             # Should not be possible to get here
             pass
@@ -2046,6 +2076,15 @@ def import_ballot_items_for_location_view(request):
                                                      'election saved, batch_header_id.'
                                                      ''.format(google_civic_election_id=google_civic_election_id))
         batch_header_id = results['batch_header_id']
+    elif 'ballot_items_count' in results and results['ballot_items_count'] == 0:
+        messages.add_message(request, messages.INFO, 'No ballot_items found. ' + results['status'])
+        if positive_value_exists(polling_location_we_vote_id):
+            return HttpResponseRedirect(reverse('polling_location:polling_location_summary_by_we_vote_id',
+                                                args=(polling_location_we_vote_id,)) +
+                                        "?google_civic_election_id=" + str(google_civic_election_id) +
+                                        "&polling_location_we_vote_id=" + str(polling_location_we_vote_id) +
+                                        "&state_code=" + str(state_code)
+                                        )
     else:
         messages.add_message(request, messages.ERROR, results['status'])
 

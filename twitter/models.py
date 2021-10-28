@@ -426,6 +426,7 @@ class TwitterUserManager(models.Manager):
             results = {
                 'success':  False,
                 'status':   status,
+                'twitter_link_to_organization_found': False,
             }
             return results
 
