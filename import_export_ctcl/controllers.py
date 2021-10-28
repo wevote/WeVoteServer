@@ -536,6 +536,7 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
     success = True
     status = ""
     polling_location_found = False
+    ballot_items_count = 0
     batch_header_id = 0
 
     if not positive_value_exists(google_civic_election_id) or not positive_value_exists(ctcl_election_uuid):
@@ -543,6 +544,7 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
         results = {
             'success':                                  False,
             'status':                                   status,
+            'ballot_items_count':                       ballot_items_count,
             'batch_header_id':                          batch_header_id,
             'existing_offices_by_election_dict':        existing_offices_by_election_dict,
             'existing_candidate_objects_dict':          existing_candidate_objects_dict,
@@ -559,6 +561,7 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
         results = {
             'success':                                  False,
             'status':                                   status,
+            'ballot_items_count':                       ballot_items_count,
             'batch_header_id':                          batch_header_id,
             'existing_offices_by_election_dict':        existing_offices_by_election_dict,
             'existing_candidate_objects_dict':          existing_candidate_objects_dict,
@@ -605,6 +608,7 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
             results = {
                 'success':                                  success,
                 'status':                                   status,
+                'ballot_items_count':                       ballot_items_count,
                 'batch_header_id':                          batch_header_id,
                 'existing_offices_by_election_dict':        existing_offices_by_election_dict,
                 'existing_candidate_objects_dict':          existing_candidate_objects_dict,
@@ -664,6 +668,7 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
             results = {
                 'success':                                  success,
                 'status':                                   status,
+                'ballot_items_count':                       ballot_items_count,
                 'batch_header_id':                          batch_header_id,
                 'existing_offices_by_election_dict':        existing_offices_by_election_dict,
                 'existing_candidate_objects_dict':          existing_candidate_objects_dict,
@@ -714,6 +719,7 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
 
                 # If we successfully save a ballot, create/update a BallotReturned entry
                 if ballot_item_dict_list and len(ballot_item_dict_list) > 0:
+                    ballot_items_count = len(ballot_item_dict_list)
                     ballot_returned_manager = BallotReturnedManager()
                     results = polling_location.get_text_for_map_search_results()
                     text_for_map_search = results['text_for_map_search']
@@ -829,15 +835,16 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
     else:
         status += "POLLING_LOCATION_NOT_FOUND (" + str(polling_location_we_vote_id) + ") "
     results = {
-        'success': success,
-        'status': status,
-        'batch_header_id': batch_header_id,
-        'existing_offices_by_election_dict': existing_offices_by_election_dict,
-        'existing_candidate_objects_dict': existing_candidate_objects_dict,
-        'existing_candidate_to_office_links_dict': existing_candidate_to_office_links_dict,
-        'existing_measure_objects_dict': existing_measure_objects_dict,
-        'new_office_we_vote_ids_list': new_office_we_vote_ids_list,
-        'new_candidate_we_vote_ids_list': new_candidate_we_vote_ids_list,
-        'new_measure_we_vote_ids_list': new_measure_we_vote_ids_list,
+        'success':                                  success,
+        'status':                                   status,
+        'ballot_items_count':                       ballot_items_count,
+        'batch_header_id':                          batch_header_id,
+        'existing_offices_by_election_dict':        existing_offices_by_election_dict,
+        'existing_candidate_objects_dict':          existing_candidate_objects_dict,
+        'existing_candidate_to_office_links_dict':  existing_candidate_to_office_links_dict,
+        'existing_measure_objects_dict':            existing_measure_objects_dict,
+        'new_office_we_vote_ids_list':              new_office_we_vote_ids_list,
+        'new_candidate_we_vote_ids_list':           new_candidate_we_vote_ids_list,
+        'new_measure_we_vote_ids_list':             new_measure_we_vote_ids_list,
     }
     return results

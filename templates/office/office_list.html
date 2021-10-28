@@ -62,16 +62,32 @@
         <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&candidate_search={{ candidate_search }}{% if show_all_elections %}&show_all_elections=1{% endif %}">
             show all states</a>
         {% endif %}
-        {% endif %}
-        <br />
-        {% if office_search %}
-            <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-                 clear search</a>&nbsp;
-        {% endif %}
-        <input type="text" name="office_search" id="office_search_id" value="{{ office_search }}" style="width: 450px" />
-        <input type="submit" value="Search for Office" />
-        {# End of if state_list #}
-{% if office_list %}
+    {% endif %}{# End of if state_list #}
+    <br />
+
+    {% if office_search %}
+        <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+             clear search</a>&nbsp;
+    {% endif %}
+    <input type="text" name="office_search" id="office_search_id" value="{{ office_search }}" style="width: 450px" />
+    <input type="submit" value="Search for Office" />
+    &nbsp;&nbsp;&nbsp;&nbsp;
+
+    {# Show offices which have ctcl_uuid #}
+    <label for="has_ctcl_data_id">
+      <input type="checkbox" name="has_ctcl_data" id="has_ctcl_data_id" value="1"
+             {% if has_ctcl_data %}checked{% endif %} /> has CTCL data
+    </label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+
+    {# Show offices which have vote_usa_office_id #}
+    <label for="has_vote_usa_data_id">
+      <input type="checkbox" name="has_vote_usa_data" id="has_vote_usa_data_id" value="1"
+             {% if has_vote_usa_data %}checked{% endif %} /> has Vote USA data
+    </label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+
+    {% if office_list %}
     {% if google_civic_election_id %}
     <ul>
         <li>Prepare: <a href="{% url 'election:election_summary_by_google_id' google_civic_election_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
@@ -176,6 +192,16 @@
     <script>
     $(function() {
         $('#google_civic_election_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#has_ctcl_data_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#has_vote_usa_data_id').change(function() {
             this.form.submit();
         });
     });

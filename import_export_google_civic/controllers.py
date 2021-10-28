@@ -575,26 +575,28 @@ def groom_and_store_google_civic_candidates_json_2021(
         #   Google Civic contest_office name changed so we generated another contest)
 
         # candidate_dict
-        ctcl_candidate_uuid = ''
+        candidate_ctcl_uuid = ''
         vote_usa_politician_id = ''
-        if 'id' in one_candidate and positive_value_exists(one_candidate['id']):
-            if positive_value_exists(use_ctcl):
-                ctcl_candidate_uuid = one_candidate['id']
-            elif positive_value_exists(use_vote_usa):
+        if positive_value_exists(use_ctcl):
+            if 'uuid' in one_candidate and positive_value_exists(one_candidate['uuid']):
+                candidate_ctcl_uuid = one_candidate['uuid']
+            elif 'id' in one_candidate and positive_value_exists(one_candidate['id']):
+                candidate_ctcl_uuid = one_candidate['id']
+        elif positive_value_exists(use_vote_usa):
+            if 'id' in one_candidate and positive_value_exists(one_candidate['id']):
                 vote_usa_politician_id = one_candidate['id']
 
         continue_searching_for_candidate = True
         create_candidate = False
-        if positive_value_exists(use_ctcl):  # and positive_value_exists(ctcl_candidate_uuid)
-            if candidate_name in existing_candidate_objects_dict:
-                candidate = existing_candidate_objects_dict[candidate_name]  # ctcl_candidate_uuid
+        if positive_value_exists(use_ctcl) and positive_value_exists(candidate_ctcl_uuid):
+            if candidate_ctcl_uuid in existing_candidate_objects_dict:
+                candidate = existing_candidate_objects_dict[candidate_ctcl_uuid]
                 candidate_we_vote_id = candidate.we_vote_id
                 continue_searching_for_candidate = False
             else:
                 # Does candidate already exist?
-                # Until we know if CTCL can provide a unique ctcl_candidate_uuid, we search by name (exact match)
                 candidate_results = candidate_manager.retrieve_candidate(
-                    candidate_name=candidate_name,
+                    candidate_ctcl_uuid=candidate_ctcl_uuid,
                     candidate_year=election_year_integer,
                     read_only=True
                 )
@@ -602,12 +604,12 @@ def groom_and_store_google_civic_candidates_json_2021(
                     continue_searching_for_candidate = False
                     candidate = candidate_results['candidate']
                     candidate_we_vote_id = candidate.we_vote_id
-                    if candidate_name not in existing_candidate_objects_dict:
-                        existing_candidate_objects_dict[candidate_name] = candidate  # ctcl_candidate_uuid
+                    if candidate_ctcl_uuid not in existing_candidate_objects_dict:
+                        existing_candidate_objects_dict[candidate_ctcl_uuid] = candidate
                     # In the future, we will want to look for updated data to save
                 elif candidate_results['MultipleObjectsReturned']:
                     continue_searching_for_candidate = False
-                    status += "MORE_THAN_ONE_CANDIDATE_WITH_SAME_CTCL_UUID1 (" + str(ctcl_candidate_uuid) + "/" + \
+                    status += "MORE_THAN_ONE_CANDIDATE_WITH_SAME_CTCL_UUID1 (" + str(candidate_ctcl_uuid) + "/" + \
                               str(candidate_name) + ")"
                     continue
                 elif not candidate_results['success']:
@@ -675,10 +677,27 @@ def groom_and_store_google_civic_candidates_json_2021(
                 candidate = results['candidate']
                 candidate_we_vote_id = candidate.we_vote_id
                 if use_ctcl:
-                    if candidate_name not in existing_candidate_objects_dict:
-                        existing_candidate_objects_dict[candidate_name] = candidate  # ctcl_candidate_uuid
+                    if positive_value_exists(candidate_ctcl_uuid) and not positive_value_exists(candidate.ctcl_uuid):
+                        candidate.ctcl_uuid = candidate_ctcl_uuid
+                        try:
+                            candidate.save()
+                            if candidate_ctcl_uuid not in existing_candidate_objects_dict:
+                                existing_candidate_objects_dict[candidate_ctcl_uuid] = candidate
+                        except Exception as e:
+                            status += "SAVING_CTCL_UUID_FAILED: " + str(e) + ' '
+                    elif candidate_ctcl_uuid not in existing_candidate_objects_dict:
+                        existing_candidate_objects_dict[candidate_ctcl_uuid] = candidate
                 elif use_vote_usa:
-                    if vote_usa_politician_id not in existing_candidate_objects_dict:
+                    if positive_value_exists(vote_usa_politician_id) \
+                            and not positive_value_exists(candidate.vote_usa_politician_id):
+                        candidate.vote_usa_politician_id = vote_usa_politician_id
+                        try:
+                            candidate.save()
+                            if vote_usa_politician_id not in existing_candidate_objects_dict:
+                                existing_candidate_objects_dict[vote_usa_politician_id] = candidate
+                        except Exception as e:
+                            status += "SAVING_VOTE_USA_POLITICIAN_ID_FAILED: " + str(e) + ' '
+                    elif vote_usa_politician_id not in existing_candidate_objects_dict:
                         existing_candidate_objects_dict[vote_usa_politician_id] = candidate
             else:
                 create_candidate = True
@@ -774,8 +793,8 @@ def groom_and_store_google_civic_candidates_json_2021(
                             if candidate_we_vote_id not in new_candidate_we_vote_ids_list:
                                 new_candidate_we_vote_ids_list.append(candidate_we_vote_id)
                             if positive_value_exists(use_ctcl):
-                                if positive_value_exists(candidate_name):
-                                    existing_candidate_objects_dict[candidate_name] = candidate  # ctcl_candidate_uuid
+                                if positive_value_exists(candidate_ctcl_uuid):
+                                    existing_candidate_objects_dict[candidate_ctcl_uuid] = candidate
                             elif positive_value_exists(use_vote_usa):
                                 if positive_value_exists(candidate.photo_url_from_vote_usa):
                                     from import_export_vote_usa.controllers import \
@@ -805,7 +824,7 @@ def groom_and_store_google_civic_candidates_json_2021(
                         candidate = candidate_results['candidate']
                         candidate_we_vote_id = candidate.we_vote_id
                     if positive_value_exists(use_ctcl):
-                        existing_candidate_objects_dict[candidate_name] = candidate  # ctcl_candidate_uuid
+                        existing_candidate_objects_dict[candidate_ctcl_uuid] = candidate
                     elif positive_value_exists(use_vote_usa):
                         existing_candidate_objects_dict[vote_usa_politician_id] = candidate
 

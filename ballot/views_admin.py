@@ -334,7 +334,8 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
                                  'polling_location_we_vote_id: {polling_location_we_vote_id}'
                                  ''.format(polling_location_we_vote_id=polling_location_we_vote_id))
 
-    election = Election()
+    election = None
+    election_found = False
     election_state = ''
     contest_measure_list = []
     contest_office_list = []
@@ -342,6 +343,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
         election_manager = ElectionManager()
         results = election_manager.retrieve_election(google_civic_election_id)
         if results['election_found']:
+            election_found = True
             election = results['election']
             election_state = election.get_election_state()
             if positive_value_exists(state_code):
@@ -366,7 +368,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
                                                       'a google_civic_election_id is required.')
 
     polling_location_found = False
-    polling_location = PollingLocation()
+    polling_location = None
     polling_location_manager = PollingLocationManager()
     polling_location_state_code = ""
     polling_location_deleted = False
@@ -389,6 +391,11 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
             polling_location_deleted = polling_location.polling_location_deleted
             polling_location_found = True
 
+    if positive_value_exists(polling_location_state_code) and positive_value_exists(election_found):
+        if not positive_value_exists(use_ctcl_as_data_source_override):
+            if polling_location_state_code.lower() in election.use_ctcl_as_data_source_by_state_code.lower():
+                use_ctcl_as_data_source_override = True
+
     polling_location_list = []
     if not polling_location_found:
         results = polling_location_manager.retrieve_polling_locations_in_city_or_state(
@@ -397,6 +404,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
             polling_location_list = results['polling_location_list']
 
     messages_on_stage = get_messages(request)
+    ballot_item_list_found = False
     ballot_item_list = []
     ballot_item_list_modified = []
     candidate_list_manager = CandidateListManager()
@@ -411,37 +419,34 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
                 polling_location_we_vote_id=ballot_returned.polling_location_we_vote_id,
                 google_civic_election_id_list=google_civic_election_id_list)
             if results['ballot_item_list_found']:
+                ballot_item_list_found = True
                 ballot_item_list = results['ballot_item_list']
-                ballot_item_list_modified = []
-                for one_ballot_item in ballot_item_list:
-                    one_ballot_item.candidates_string = ""
-                    if positive_value_exists(one_ballot_item.contest_office_we_vote_id):
-                        contest_office_we_vote_ids_already_on_ballot.append(one_ballot_item.contest_office_we_vote_id)
-                        candidate_results = candidate_list_manager.retrieve_all_candidates_for_office(
-                            office_we_vote_id=one_ballot_item.contest_office_we_vote_id)
-                        if candidate_results['candidate_list_found']:
-                            candidate_list = candidate_results['candidate_list']
-                            for one_candidate in candidate_list:
-                                one_ballot_item.candidates_string += one_candidate.display_candidate_name() + ", "
-                    ballot_item_list_modified.append(one_ballot_item)
         elif positive_value_exists(ballot_returned.voter_id):
             results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(
                 voter_id=ballot_returned.voter_id,
                 google_civic_election_id_list=google_civic_election_id_list)
             if results['ballot_item_list_found']:
+                ballot_item_list_found = True
                 ballot_item_list = results['ballot_item_list']
-                ballot_item_list_modified = []
-                for one_ballot_item in ballot_item_list:
-                    one_ballot_item.candidates_string = ""
-                    if positive_value_exists(one_ballot_item.contest_office_we_vote_id):
-                        contest_office_we_vote_ids_already_on_ballot.append(one_ballot_item.contest_office_we_vote_id)
-                        candidate_results = candidate_list_manager.retrieve_all_candidates_for_office(
-                            office_we_vote_id=one_ballot_item.contest_office_we_vote_id)
-                        if candidate_results['candidate_list_found']:
-                            candidate_list = candidate_results['candidate_list']
-                            for one_candidate in candidate_list:
-                                one_ballot_item.candidates_string += one_candidate.display_candidate_name() + ", "
-                    ballot_item_list_modified.append(one_ballot_item)
+        if positive_value_exists(ballot_item_list_found):
+            office_manager = ContestOfficeManager()
+            ballot_item_list_modified = []
+            for one_ballot_item in ballot_item_list:
+                one_ballot_item.candidates_string = ""
+                if positive_value_exists(one_ballot_item.contest_office_we_vote_id):
+                    contest_office_we_vote_ids_already_on_ballot.append(one_ballot_item.contest_office_we_vote_id)
+                    candidate_results = candidate_list_manager.retrieve_all_candidates_for_office(
+                        office_we_vote_id=one_ballot_item.contest_office_we_vote_id)
+                    if candidate_results['candidate_list_found']:
+                        candidate_list = candidate_results['candidate_list']
+                        for one_candidate in candidate_list:
+                            one_ballot_item.candidates_string += one_candidate.display_candidate_name() + ", "
+                    office_results = office_manager.retrieve_contest_office_from_we_vote_id(
+                        one_ballot_item.contest_office_we_vote_id)
+                    if office_results['contest_office_found']:
+                        one_ballot_item.vote_usa_office_id = office_results['contest_office'].vote_usa_office_id
+                        one_ballot_item.ctcl_uuid = office_results['contest_office'].ctcl_uuid
+                ballot_item_list_modified.append(one_ballot_item)
 
     # Remove the offices that are already attached to this ballot location
     for one_contest_office in contest_office_list:
@@ -478,6 +483,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
         'polling_location_deleted':     polling_location_deleted,
         'ballot_item_list':             ballot_item_list_modified,
         'google_civic_election_id':     google_civic_election_id,
+        'polling_location_state_code':  polling_location_state_code,
         'state_code':                   state_code,
         'use_ctcl_as_data_source_override': use_ctcl_as_data_source_override,
     }

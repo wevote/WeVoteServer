@@ -2325,6 +2325,7 @@ class CandidateManager(models.Manager):
             candidate_maplight_id=None,
             candidate_name=None,
             candidate_vote_smart_id=None,
+            candidate_ctcl_uuid=None,
             ballotpedia_candidate_id=None,
             google_civic_election_id=None,
             candidate_year=None,
@@ -2358,6 +2359,16 @@ class CandidateManager(models.Manager):
                 candidate_we_vote_id = candidate_on_stage.we_vote_id
                 candidate_found = True
                 status += "RETRIEVE_CANDIDATE_FOUND_BY_WE_VOTE_ID "
+            elif positive_value_exists(candidate_ctcl_uuid):
+                if positive_value_exists(read_only):
+                    candidate_on_stage = CandidateCampaign.objects.using('readonly').get(
+                        ctcl_uuid=candidate_ctcl_uuid)
+                else:
+                    candidate_on_stage = CandidateCampaign.objects.get(ctcl_uuid=candidate_ctcl_uuid)
+                candidate_id = candidate_on_stage.id
+                candidate_we_vote_id = candidate_on_stage.we_vote_id
+                candidate_found = True
+                status += "RETRIEVE_CANDIDATE_FOUND_BY_CTCL_UUID "
             elif positive_value_exists(candidate_maplight_id):
                 if positive_value_exists(read_only):
                     candidate_on_stage = CandidateCampaign.objects.using('readonly').get(
