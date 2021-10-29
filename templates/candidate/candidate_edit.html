@@ -166,8 +166,28 @@ th, td {
             {% endif %}
             {% if candidate_to_office_link_list|length == 2 %}
                 <br />
-                <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_to_office_link_list.0.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_to_office_link_list.1.contest_office_we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-                   target="_blank">Compare Offices <span class="glyphicon glyphicon-new-window"></span></a><br />
+                {% if candidate_to_office_link_list.0.google_civic_election_id == candidate_to_office_link_list.1.google_civic_election_id %}
+                    <br />
+                    <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_to_office_link_list.0.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_to_office_link_list.1.contest_office_we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                       target="_blank">Compare Offices <span class="glyphicon glyphicon-new-window"></span></a><br />
+                {% endif %}
+            {% elif candidate_to_office_link_list|length == 3 %}
+                <br />
+                {% if candidate_to_office_link_list.0.google_civic_election_id == candidate_to_office_link_list.1.google_civic_election_id %}
+                    <br />
+                    <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_to_office_link_list.0.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_to_office_link_list.1.contest_office_we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                       target="_blank">Compare Offices 1 &amp; 2 <span class="glyphicon glyphicon-new-window"></span></a><br />
+                {% endif %}
+                {% if candidate_to_office_link_list.0.google_civic_election_id == candidate_to_office_link_list.2.google_civic_election_id %}
+                    <br />
+                    <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_to_office_link_list.0.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_to_office_link_list.2.contest_office_we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                       target="_blank">Compare Offices 1 &amp; 3 <span class="glyphicon glyphicon-new-window"></span></a><br />
+                {% endif %}
+                {% if candidate_to_office_link_list.1.google_civic_election_id == candidate_to_office_link_list.2.google_civic_election_id %}
+                    <br />
+                    <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_to_office_link_list.1.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_to_office_link_list.2.contest_office_we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                       target="_blank">Compare Offices 2 &amp; 3 <span class="glyphicon glyphicon-new-window"></span></a><br />
+                {% endif %}
             {% endif %}
         </span>
     </label>
@@ -336,13 +356,16 @@ th, td {
         {% if candidate.we_vote_hosted_profile_twitter_image_url_tiny %}
             <img src='{{ candidate.we_vote_hosted_profile_twitter_image_url_tiny }}' />
         {% endif %}
-        Twitter Handle</label>
+        Twitter Handle
+    </label>
     <div class="col-sm-8">
         <input type="text" name="candidate_twitter_handle" id="candidate_twitter_handle_id" class="form-control"
                value="{% if candidate %}{{ candidate.candidate_twitter_handle|default_if_none:"" }}{% else %}{{ candidate_twitter_handle|default_if_none:"" }}{% endif %}" />
     {% if candidate.candidate_twitter_handle %}
-        (<a href="{% url 'import_export_twitter:refresh_twitter_candidate_details' candidate.id %}">refresh Twitter details</a>)
-        (<a href="{% url 'import_export_twitter:delete_images_view'%}?candidate_id={{ candidate.id }}">Delete Cached Images</a>)<br />
+        <a href="https://twitter.com/{{ candidate.candidate_twitter_handle|iriencode }}"
+           target="_blank">view on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
+        <a href="{% url 'import_export_twitter:refresh_twitter_candidate_details' candidate.id %}">refresh Twitter details</a>&nbsp;&nbsp;&nbsp;
+        <a href="{% url 'import_export_twitter:delete_images_view'%}?candidate_id={{ candidate.id }}">Delete Cached Images</a><br />
         Twitter Name: {{ candidate.twitter_name }}<br />
         Twitter Description: {{ candidate.twitter_description }}<br />
         Twitter Location: {{ candidate.twitter_location }}<br />

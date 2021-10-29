@@ -11,7 +11,8 @@ from image.controllers import cache_master_and_resized_image, IMAGE_SOURCE_VOTE_
 from import_export_batches.controllers_vote_usa import store_vote_usa_json_response_to_import_batch_system
 import json
 from polling_location.models import KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR, KIND_OF_LOG_ENTRY_API_END_POINT_CRASH, \
-    KIND_OF_LOG_ENTRY_NO_CONTESTS, KIND_OF_LOG_ENTRY_NO_BALLOT_JSON, PollingLocationManager
+    KIND_OF_LOG_ENTRY_BALLOT_RECEIVED, KIND_OF_LOG_ENTRY_NO_CONTESTS, KIND_OF_LOG_ENTRY_NO_BALLOT_JSON, \
+    PollingLocationManager
 import requests
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
@@ -342,6 +343,18 @@ def retrieve_vote_usa_ballot_items_from_polling_location_api(
                         state_code=state_code)
                     status += results['status']
                     batch_header_id = results['batch_header_id']
+                    # Store that we have reviewed this polling_location so we don't retrieve it again in the next chunk
+                    results = polling_location_manager.create_polling_location_log_entry(
+                        batch_process_id=batch_process_id,
+                        google_civic_election_id=google_civic_election_id,
+                        is_from_vote_usa=True,
+                        kind_of_log_entry=KIND_OF_LOG_ENTRY_BALLOT_RECEIVED,
+                        polling_location_we_vote_id=polling_location_we_vote_id,
+                        state_code=state_code,
+                        text_for_map_search=text_for_map_search,
+                    )
+                    if not results['success']:
+                        status += results['status']
                 else:
                     # We need to at least to mark the BallotReturned entry with a new date_last_updated date so
                     #  we can move on to other ballot returned entries.
@@ -350,12 +363,14 @@ def retrieve_vote_usa_ballot_items_from_polling_location_api(
                 # Create BallotReturnedEmpty entry so we don't keep retrieving this map point
                 status += "NO_INCOMING_BALLOT_ITEMS_FOUND_VOTE_USA "
                 ballot_returned_manager = BallotReturnedManager()
-                results = ballot_returned_manager.update_or_create_ballot_returned_empty(
+                results = ballot_returned_manager.create_ballot_returned_empty(
                     google_civic_election_id=google_civic_election_id,
                     is_from_vote_usa=True,
                     polling_location_we_vote_id=polling_location_we_vote_id,
                     state_code=state_code,
                 )
+                if not results['success']:
+                    status += results['status']
                 kind_of_log_entry = KIND_OF_LOG_ENTRY_NO_CONTESTS
                 log_entry_message = ''
                 try:

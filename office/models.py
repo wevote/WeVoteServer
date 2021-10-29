@@ -1734,13 +1734,13 @@ class ContestOfficeListManager(models.Manager):
                 contest_office_list = list(contest_office_query)
 
                 contest_office_list_filtered = []
-                if len(contest_office_list):
+                if len(contest_office_list) > 1:
                     contest_office_list_filtered = remove_office_district_false_positives(
                         contest_office_name=contest_office_name,
                         contest_office_list=contest_office_list,
                         district_id=district_id)
 
-                if len(contest_office_list_filtered):
+                if len(contest_office_list_filtered) > 0:
                     keep_looking_for_duplicates = False
                     # if a single entry matches, update that entry
                     if len(contest_office_list_filtered) == 1:
@@ -1897,13 +1897,13 @@ class ContestOfficeListManager(models.Manager):
                     contest_office_list = list(contest_office_query)
 
                     contest_office_list_filtered = []
-                    if len(contest_office_list):
+                    if len(contest_office_list) > 1:
                         contest_office_list_filtered = remove_office_district_false_positives(
                             contest_office_name=contest_office_name,
                             contest_office_list=contest_office_list,
                             district_id=district_id)
 
-                    if len(contest_office_list_filtered):
+                    if len(contest_office_list_filtered) > 0:
                         keep_looking_for_duplicates = False
                         # if a single entry matches, update that entry
                         if len(contest_office_list_filtered) == 1:

@@ -25,7 +25,11 @@
 </div>
 
 <div class="form-group">
-    <label for="line1_id" class="col-sm-3 control-label">Line 1</label>
+    <label for="line1_id" class="col-sm-3 control-label">
+        Line 1
+        (<a href="https://www.google.com/maps/place/{{ polling_location.get_text_for_map_search|iriencode }}"
+            target="_blank">map <span class="glyphicon glyphicon-new-window"></span></a>)&nbsp;&nbsp;
+    </label>
     <div class="col-sm-8">
         <input type="text" name="line1" id="line1_id" class="form-control"
                value="{% if polling_location %}{{ polling_location.line1|default_if_none:"" }}{% endif %}" />

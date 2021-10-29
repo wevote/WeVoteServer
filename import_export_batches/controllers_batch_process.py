@@ -1440,6 +1440,7 @@ def process_one_ballot_item_batch_process(batch_process):
 
         batch_process.date_checked_out = now()
         batch_process.save()
+        batch_process_id = batch_process.id
     except Exception as e:
         status += "ERROR-CHECKED_OUT_TIME_NOT_SAVED: " + str(e) + " "
         handle_exception(e, logger=logger, exception_message=status)
@@ -1458,10 +1459,10 @@ def process_one_ballot_item_batch_process(batch_process):
 
     # Retrieve BatchProcessBallotItemChunk that has started but not completed
     results = batch_process_manager.retrieve_active_ballot_item_chunk_not_completed(
-        batch_process_id=batch_process.id)
+        batch_process_id=batch_process_id)
     if not results['success']:
         batch_process_manager.create_batch_process_log_entry(
-            batch_process_id=batch_process.id,
+            batch_process_id=batch_process_id,
             google_civic_election_id=google_civic_election_id,
             kind_of_process=kind_of_process,
             state_code=state_code,
@@ -1480,12 +1481,12 @@ def process_one_ballot_item_batch_process(batch_process):
         # We don't consider a batch_process completed until
         # a batch_process_ballot_item_chunk reports that there are no more items retrieved
         results = \
-            batch_process_manager.create_batch_process_ballot_item_chunk(batch_process_id=batch_process.id)
+            batch_process_manager.create_batch_process_ballot_item_chunk(batch_process_id=batch_process_id)
         if results['batch_process_ballot_item_chunk_created']:
             batch_process_ballot_item_chunk = results['batch_process_ballot_item_chunk']
         else:
             batch_process_manager.create_batch_process_log_entry(
-                batch_process_id=batch_process.id,
+                batch_process_id=batch_process_id,
                 google_civic_election_id=google_civic_election_id,
                 kind_of_process=kind_of_process,
                 state_code=state_code,
@@ -1510,7 +1511,7 @@ def process_one_ballot_item_batch_process(batch_process):
             batch_process_ballot_item_chunk.save()
             status += "RETRIEVE_DATE_STARTED_SAVED "
             batch_process_manager.create_batch_process_log_entry(
-                batch_process_id=batch_process.id,
+                batch_process_id=batch_process_id,
                 batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                 google_civic_election_id=google_civic_election_id,
                 kind_of_process=kind_of_process,
@@ -1521,7 +1522,7 @@ def process_one_ballot_item_batch_process(batch_process):
             status += "ERROR-RETRIEVE_DATE_STARTED-CANNOT_SAVE_RETRIEVE_DATE_STARTED: " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
             batch_process_manager.create_batch_process_log_entry(
-                batch_process_id=batch_process.id,
+                batch_process_id=batch_process_id,
                 batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                 google_civic_election_id=google_civic_election_id,
                 kind_of_process=kind_of_process,
@@ -1537,6 +1538,7 @@ def process_one_ballot_item_batch_process(batch_process):
             from import_export_batches.views_admin import \
                 retrieve_ballots_for_polling_locations_api_v4_internal_view
             results = retrieve_ballots_for_polling_locations_api_v4_internal_view(
+                batch_process_id=batch_process_id,
                 batch_process_date_started=batch_process.date_started,
                 google_civic_election_id=batch_process.google_civic_election_id,
                 state_code=batch_process.state_code,
@@ -1612,7 +1614,7 @@ def process_one_ballot_item_batch_process(batch_process):
                     batch_process_ballot_item_chunk.save()
                     status += "RETRIEVE_DATE_STARTED-RETRIEVE_DATE_COMPLETED_SAVED "
                     batch_process_manager.create_batch_process_log_entry(
-                        batch_process_id=batch_process.id,
+                        batch_process_id=batch_process_id,
                         batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                         batch_set_id=batch_set_id,
                         google_civic_election_id=google_civic_election_id,
@@ -1624,7 +1626,7 @@ def process_one_ballot_item_batch_process(batch_process):
                     status += "ERROR-RETRIEVE_DATE_STARTED-CANNOT_SAVE_RETRIEVE_DATE_COMPLETED: " + str(e) + " "
                     handle_exception(e, logger=logger, exception_message=status)
                     batch_process_manager.create_batch_process_log_entry(
-                        batch_process_id=batch_process.id,
+                        batch_process_id=batch_process_id,
                         batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                         batch_set_id=batch_set_id,
                         google_civic_election_id=google_civic_election_id,
@@ -1678,7 +1680,7 @@ def process_one_ballot_item_batch_process(batch_process):
                     batch_process_ballot_item_chunk.retrieve_date_started = None
                     batch_process_ballot_item_chunk.save()
                     batch_process_manager.create_batch_process_log_entry(
-                        batch_process_id=batch_process.id,
+                        batch_process_id=batch_process_id,
                         batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                         batch_set_id=batch_set_id,
                         critical_failure=True,
@@ -1691,7 +1693,7 @@ def process_one_ballot_item_batch_process(batch_process):
                     status += "ERROR-CANNOT_SAVE_RETRIEVE_DATE_STARTED: " + str(e) + " "
                     handle_exception(e, logger=logger, exception_message=status)
                     batch_process_manager.create_batch_process_log_entry(
-                        batch_process_id=batch_process.id,
+                        batch_process_id=batch_process_id,
                         batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                         batch_set_id=batch_set_id,
                         google_civic_election_id=google_civic_election_id,
@@ -1708,7 +1710,7 @@ def process_one_ballot_item_batch_process(batch_process):
                 try:
                     status += results['status']
                     batch_process_manager.create_batch_process_log_entry(
-                        batch_process_id=batch_process.id,
+                        batch_process_id=batch_process_id,
                         batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                         batch_set_id=batch_set_id,
                         critical_failure=True,
@@ -1756,7 +1758,7 @@ def process_one_ballot_item_batch_process(batch_process):
             else:
                 status += "PROBLEM-BATCH_SET_ID_IS_MISSING_FROM_BALLOT_ITEM_CHUNK "
                 batch_process_manager.create_batch_process_log_entry(
-                    batch_process_id=batch_process.id,
+                    batch_process_id=batch_process_id,
                     batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                     batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
                     google_civic_election_id=google_civic_election_id,
@@ -1776,7 +1778,7 @@ def process_one_ballot_item_batch_process(batch_process):
                 status += "ERROR-RETRIEVE_DATE_COMPLETED-CANNOT_SAVE_RETRIEVE_DATE_COMPLETED: " + str(e) + " "
                 handle_exception(e, logger=logger, exception_message=status)
                 batch_process_manager.create_batch_process_log_entry(
-                    batch_process_id=batch_process.id,
+                    batch_process_id=batch_process_id,
                     batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                     batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
                     google_civic_election_id=google_civic_election_id,
@@ -1808,7 +1810,7 @@ def process_one_ballot_item_batch_process(batch_process):
                 batch_process_ballot_item_chunk.analyze_date_completed = now()
                 batch_process_ballot_item_chunk.save()
                 batch_process_manager.create_batch_process_log_entry(
-                    batch_process_id=batch_process.id,
+                    batch_process_id=batch_process_id,
                     batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                     batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
                     google_civic_election_id=google_civic_election_id,
@@ -1820,7 +1822,7 @@ def process_one_ballot_item_batch_process(batch_process):
                 status += "ERROR-ANALYZE_DATE_STARTED-CANNOT_SAVE_ANALYZE_DATE_COMPLETED: " + str(e) + " "
                 handle_exception(e, logger=logger, exception_message=status)
                 batch_process_manager.create_batch_process_log_entry(
-                    batch_process_id=batch_process.id,
+                    batch_process_id=batch_process_id,
                     batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                     batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
                     google_civic_election_id=google_civic_election_id,
@@ -1848,7 +1850,7 @@ def process_one_ballot_item_batch_process(batch_process):
             batch_process_ballot_item_chunk.save()
             status += "ANALYZE_DATE_STARTED-ANALYZE_DATE_STARTED_SAVED "
             batch_process_manager.create_batch_process_log_entry(
-                batch_process_id=batch_process.id,
+                batch_process_id=batch_process_id,
                 batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                 batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
                 google_civic_election_id=google_civic_election_id,
@@ -1860,7 +1862,7 @@ def process_one_ballot_item_batch_process(batch_process):
             status += "ERROR-ANALYZE_DATE_STARTED-CANNOT_SAVE_ANALYZE_DATE_STARTED: " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
             batch_process_manager.create_batch_process_log_entry(
-                batch_process_id=batch_process.id,
+                batch_process_id=batch_process_id,
                 batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                 batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
                 google_civic_election_id=google_civic_election_id,
@@ -1903,7 +1905,7 @@ def process_one_ballot_item_batch_process(batch_process):
             pass
         else:
             batch_process_manager.create_batch_process_log_entry(
-                batch_process_id=batch_process.id,
+                batch_process_id=batch_process_id,
                 batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                 batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
                 critical_failure=True,
@@ -1923,7 +1925,7 @@ def process_one_ballot_item_batch_process(batch_process):
             batch_process_ballot_item_chunk.save()
             status += "ANALYZE_DATE_STARTED-ANALYZE_DATE_COMPLETED_SAVED "
             batch_process_manager.create_batch_process_log_entry(
-                batch_process_id=batch_process.id,
+                batch_process_id=batch_process_id,
                 batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                 batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
                 google_civic_election_id=google_civic_election_id,
@@ -1935,7 +1937,7 @@ def process_one_ballot_item_batch_process(batch_process):
             status += "ERROR-ANALYZE_DATE_STARTED-CANNOT_SAVE_ANALYZE_DATE_COMPLETED: " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
             batch_process_manager.create_batch_process_log_entry(
-                batch_process_id=batch_process.id,
+                batch_process_id=batch_process_id,
                 batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                 batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
                 google_civic_election_id=google_civic_election_id,
@@ -1960,7 +1962,7 @@ def process_one_ballot_item_batch_process(batch_process):
                 batch_process_ballot_item_chunk.analyze_date_completed = now()
                 batch_process_ballot_item_chunk.save()
                 batch_process_manager.create_batch_process_log_entry(
-                    batch_process_id=batch_process.id,
+                    batch_process_id=batch_process_id,
                     batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                     batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
                     google_civic_election_id=google_civic_election_id,
@@ -1972,7 +1974,7 @@ def process_one_ballot_item_batch_process(batch_process):
                 status += "ERROR-ANALYZE_DATE_COMPLETED-CANNOT_SAVE_ANALYZE_DATE_COMPLETED: " + str(e) + " "
                 handle_exception(e, logger=logger, exception_message=status)
                 batch_process_manager.create_batch_process_log_entry(
-                    batch_process_id=batch_process.id,
+                    batch_process_id=batch_process_id,
                     batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                     batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
                     google_civic_election_id=google_civic_election_id,
@@ -2022,7 +2024,7 @@ def process_one_ballot_item_batch_process(batch_process):
                     try:
                         status += "RESTARTED_FAILED_ANALYZE_PROCESS-STILL_HAS_ROWS_TO_ANALYZE "
                         batch_process_manager.create_batch_process_log_entry(
-                            batch_process_id=batch_process.id,
+                            batch_process_id=batch_process_id,
                             batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                             batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
                             google_civic_election_id=google_civic_election_id,
@@ -2049,7 +2051,7 @@ def process_one_ballot_item_batch_process(batch_process):
                         batch_process_ballot_item_chunk.save()
                         status += "ANALYZE_DATE_COMPLETED-ANALYZE_DATE_COMPLETED_SAVED "
                         batch_process_manager.create_batch_process_log_entry(
-                            batch_process_id=batch_process.id,
+                            batch_process_id=batch_process_id,
                             batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                             batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
                             google_civic_election_id=google_civic_election_id,
@@ -2068,7 +2070,7 @@ def process_one_ballot_item_batch_process(batch_process):
             else:
                 status += "PROCESS_BATCH_SET-FALSE "
                 batch_process_manager.create_batch_process_log_entry(
-                    batch_process_id=batch_process.id,
+                    batch_process_id=batch_process_id,
                     batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                     batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
                     critical_failure=True,
@@ -2096,7 +2098,7 @@ def process_one_ballot_item_batch_process(batch_process):
             batch_process_ballot_item_chunk.save()
             status += "CREATE_DATE_STARTED-SAVED "
             batch_process_manager.create_batch_process_log_entry(
-                batch_process_id=batch_process.id,
+                batch_process_id=batch_process_id,
                 batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                 batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
                 google_civic_election_id=google_civic_election_id,
@@ -2108,7 +2110,7 @@ def process_one_ballot_item_batch_process(batch_process):
             status += "ERROR-CREATE_DATE_STARTED-CANNOT_SAVE_CREATE_DATE_STARTED: " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
             batch_process_manager.create_batch_process_log_entry(
-                batch_process_id=batch_process.id,
+                batch_process_id=batch_process_id,
                 batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                 batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
                 google_civic_election_id=google_civic_election_id,
@@ -2127,7 +2129,7 @@ def process_one_ballot_item_batch_process(batch_process):
         status += results['status']
         if not positive_value_exists(results['success']):
             batch_process_manager.create_batch_process_log_entry(
-                batch_process_id=batch_process.id,
+                batch_process_id=batch_process_id,
                 batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                 batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
                 critical_failure=True,
@@ -2146,7 +2148,7 @@ def process_one_ballot_item_batch_process(batch_process):
         status += results['status']
         if not positive_value_exists(results['success']):
             batch_process_manager.create_batch_process_log_entry(
-                batch_process_id=batch_process.id,
+                batch_process_id=batch_process_id,
                 batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                 batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
                 critical_failure=True,
@@ -2190,7 +2192,7 @@ def process_one_ballot_item_batch_process(batch_process):
 
             status += "CREATE_DATE_STARTED-CREATE_DATE_COMPLETED_SAVED "
             batch_process_manager.create_batch_process_log_entry(
-                batch_process_id=batch_process.id,
+                batch_process_id=batch_process_id,
                 batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                 batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
                 google_civic_election_id=google_civic_election_id,
@@ -2202,7 +2204,7 @@ def process_one_ballot_item_batch_process(batch_process):
             status += "ERROR-CREATE_DATE_STARTED-CANNOT_SAVE_CREATE_DATE_COMPLETED: " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
             batch_process_manager.create_batch_process_log_entry(
-                batch_process_id=batch_process.id,
+                batch_process_id=batch_process_id,
                 batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                 batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
                 google_civic_election_id=google_civic_election_id,
@@ -2256,7 +2258,7 @@ def process_one_ballot_item_batch_process(batch_process):
 
                 status += "CREATE_DATE_STARTED-CREATE_DATE_COMPLETED_SAVED "
                 batch_process_manager.create_batch_process_log_entry(
-                    batch_process_id=batch_process.id,
+                    batch_process_id=batch_process_id,
                     batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                     batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
                     google_civic_election_id=google_civic_election_id,
@@ -2268,7 +2270,7 @@ def process_one_ballot_item_batch_process(batch_process):
                 status += "ERROR-CREATE_DATE_STARTED-CANNOT_SAVE_CREATE_DATE_COMPLETED: " + str(e) + " "
                 handle_exception(e, logger=logger, exception_message=status)
                 batch_process_manager.create_batch_process_log_entry(
-                    batch_process_id=batch_process.id,
+                    batch_process_id=batch_process_id,
                     batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk.id,
                     batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
                     google_civic_election_id=google_civic_election_id,

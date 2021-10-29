@@ -18,6 +18,8 @@
         {% if polling_location.city %}{{ polling_location.city }},{% endif %}
         {% if polling_location.state %}{{ polling_location.state }} {% endif %}
         {% if polling_location.zip_long %}{{ polling_location.get_formatted_zip }}{% endif %}
+        (<a href="https://www.google.com/maps/place/{{ polling_location.get_text_for_map_search|iriencode }}"
+            target="_blank">map <span class="glyphicon glyphicon-new-window"></span></a>)&nbsp;&nbsp;
         <br />
     {% endif %}
     {% if polling_location.polling_hours_text %}Hours: {{ polling_location.polling_hours_text }},<br />{% endif %}
