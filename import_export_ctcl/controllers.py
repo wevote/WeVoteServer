@@ -13,7 +13,7 @@ from import_export_google_civic.controllers import groom_and_store_google_civic_
 import json
 from party.controllers import party_import_from_xml_data
 from polling_location.models import KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR, \
-    KIND_OF_LOG_ENTRY_API_END_POINT_CRASH, KIND_OF_LOG_ENTRY_NO_CONTESTS, \
+    KIND_OF_LOG_ENTRY_API_END_POINT_CRASH, KIND_OF_LOG_ENTRY_BALLOT_RECEIVED, KIND_OF_LOG_ENTRY_NO_CONTESTS, \
     KIND_OF_LOG_ENTRY_NO_BALLOT_JSON, PollingLocationManager
 import requests
 import wevote_functions.admin
@@ -755,16 +755,29 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
                             status += "CRASH_IN_STORE_CTCL_JSON_RESPONSE: " + str(e) + ' '
                     except Exception as e:
                         status += "CRASH_IN_UPDATE_OR_CREATE_BALLOT_RETURNED: " + str(e) + ' '
+                    # Store that we have reviewed this polling_location so we don't retrieve it again in the next chunk
+                    results = polling_location_manager.create_polling_location_log_entry(
+                        batch_process_id=batch_process_id,
+                        google_civic_election_id=google_civic_election_id,
+                        is_from_ctcl=True,
+                        kind_of_log_entry=KIND_OF_LOG_ENTRY_BALLOT_RECEIVED,
+                        polling_location_we_vote_id=polling_location_we_vote_id,
+                        state_code=state_code,
+                        text_for_map_search=text_for_map_search,
+                    )
+                    if not results['success']:
+                        status += results['status']
                 else:
                     # Create BallotReturnedEmpty entry so we don't keep retrieving this map point
                     status += "NO_INCOMING_BALLOT_ITEMS_FOUND_CTCL_CREATE_EMPTY "
-                    results = ballot_returned_manager.update_or_create_ballot_returned_empty(
+                    results = ballot_returned_manager.create_ballot_returned_empty(
                         google_civic_election_id=google_civic_election_id,
                         is_from_ctcl=True,
                         polling_location_we_vote_id=polling_location_we_vote_id,
                         state_code=state_code,
                     )
-                    status += results['status']
+                    if not results['success']:
+                        status += results['status']
                     kind_of_log_entry = KIND_OF_LOG_ENTRY_NO_CONTESTS
                     log_entry_message = ''
                     try:
@@ -809,13 +822,14 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
                 handle_exception(e, logger=logger, exception_message=status)
         else:
             status += "BALLOT_JSON_NOT_RETURNED_FROM_CTCL "
-            results = ballot_returned_manager.update_or_create_ballot_returned_empty(
+            results = ballot_returned_manager.create_ballot_returned_empty(
                 google_civic_election_id=google_civic_election_id,
                 is_from_ctcl=True,
                 polling_location_we_vote_id=polling_location_we_vote_id,
                 state_code=state_code,
             )
-            status += results['status']
+            if not results['success']:
+                status += results['status']
             log_entry_message = status
             results = polling_location_manager.create_polling_location_log_entry(
                 batch_process_id=batch_process_id,

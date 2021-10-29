@@ -43,7 +43,7 @@ from import_export_ctcl.controllers import CTCL_VOTER_INFO_URL
 from import_export_vote_usa.controllers import VOTE_USA_VOTER_INFO_URL
 import json
 import math
-from polling_location.models import PollingLocation, PollingLocationManager
+from polling_location.models import KIND_OF_LOG_ENTRY_BALLOT_RECEIVED, PollingLocation, PollingLocationManager
 from position.models import POSITION
 import random
 import requests
@@ -3168,6 +3168,7 @@ def retrieve_ballots_for_polling_locations_api_v4_view(request):
 
 def retrieve_ballots_for_polling_locations_api_v4_internal_view(
         request=None,
+        batch_process_id=0,
         from_browser=False,
         google_civic_election_id="",
         state_code="",
@@ -3181,7 +3182,6 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
     status = ""
     success = True
 
-    batch_process_id = 0
     batch_process_ballot_item_chunk_id = 0
     batch_set_id = 0
     retrieve_row_count = 0
@@ -3329,18 +3329,15 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
     try:
         if positive_value_exists(refresh_ballot_returned):
             kind_of_process = REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS
-            limit_polling_locations_retrieved = MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK  # 125. Formerly 250 and 111
         else:
             kind_of_process = RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS
-            # When retrieving (as opposed to refreshing) we set the "number retrieved" limit
-            # below with MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK
-            limit_polling_locations_retrieved = 0
 
         ballot_returned_list_manager = BallotReturnedListManager()
         batch_process_manager = BatchProcessManager()
-        if not positive_value_exists(batch_process_date_started):
+        if not positive_value_exists(batch_process_date_started) or not positive_value_exists(batch_process_id):
             try:
-                batch_process_id = batch_process_ballot_item_chunk.batch_process_id
+                if not positive_value_exists(batch_process_id):
+                    batch_process_id = batch_process_ballot_item_chunk.batch_process_id
                 results = batch_process_manager.retrieve_batch_process(
                     batch_process_id=batch_process_id,
                     google_civic_election_id=google_civic_election_id,
@@ -3368,32 +3365,40 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
                     batch_process_date_started = batch_process.date_started
             except Exception as e:
                 status += "COULD_NOT_GET_BATCH_PROCESS_FROM_ASSORTED_VARIABLES: " + str(e) + ' '
-        # Retrieve the map points already in ballot_returned table
+
+        # Retrieve the polling locations/map points already in ballot_returned table
         if positive_value_exists(is_national_election) and positive_value_exists(state_code):
             status += "NATIONAL_WITH_STATE (" + str(state_code) + ") "
-            status += "date_last_updated_should_not_exceed: " + str(date_last_updated_should_not_exceed) + ' '
-            results = ballot_returned_list_manager.retrieve_polling_location_we_vote_id_list_from_ballot_returned(
-                google_civic_election_id=google_civic_election_id,
-                state_code=state_code,
-                limit=limit_polling_locations_retrieved,
-                date_last_updated_should_not_exceed=date_last_updated_should_not_exceed,
-            )
         else:
             status += "WITHOUT_STATE "
-            status += "date_last_updated_should_not_exceed: " + str(date_last_updated_should_not_exceed) + ' '
-            results = ballot_returned_list_manager.retrieve_polling_location_we_vote_id_list_from_ballot_returned(
-                google_civic_election_id=google_civic_election_id,
-                limit=limit_polling_locations_retrieved,
-                date_last_updated_should_not_exceed=date_last_updated_should_not_exceed,
-            )
+        results = ballot_returned_list_manager.retrieve_polling_location_we_vote_id_list_from_ballot_returned(
+            google_civic_election_id=google_civic_election_id,
+            state_code=state_code,
+            limit=0,
+        )
         status += results['status']
         if results['polling_location_we_vote_id_list_found']:
-            polling_location_we_vote_id_list = results['polling_location_we_vote_id_list']
+            polling_location_we_vote_id_list_from_ballot_returned = results['polling_location_we_vote_id_list']
         else:
-            polling_location_we_vote_id_list = []
+            polling_location_we_vote_id_list_from_ballot_returned = []
 
-        # Filter out ballot_returned entries which came up empty since when this process started
-        polling_location_we_vote_id_list_to_exclude = []
+        # Find polling_location_we_vote_ids already used in this batch_process, which returned a ballot
+        polling_location_we_vote_id_list_already_retrieved = []
+        if positive_value_exists(batch_process_id):
+            polling_location_manager = PollingLocationManager()
+            polling_location_log_entry_list = polling_location_manager.retrieve_polling_location_log_entry_list(
+                batch_process_id=batch_process_id,
+                is_from_ctcl=use_ctcl,
+                is_from_vote_usa=use_vote_usa,
+                kind_of_log_entry_list=[KIND_OF_LOG_ENTRY_BALLOT_RECEIVED],
+            )
+            for one_log_entry in polling_location_log_entry_list:
+                if one_log_entry.polling_location_we_vote_id not in polling_location_we_vote_id_list_already_retrieved:
+                    polling_location_we_vote_id_list_already_retrieved.append(one_log_entry.polling_location_we_vote_id)
+
+        # For both REFRESH and RETRIEVE, find polling locations/map points which have came up empty
+        #  (from this data source) in previous chunks since when this process started
+        polling_location_we_vote_id_list_returned_empty = []
         results = ballot_returned_list_manager.\
             retrieve_polling_location_we_vote_id_list_from_ballot_returned_empty(
                 batch_process_date_started=batch_process_date_started,
@@ -3403,29 +3408,30 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
                 state_code=state_code,
             )
         if results['polling_location_we_vote_id_list_found']:
-            polling_location_we_vote_id_list_to_exclude = results['polling_location_we_vote_id_list']
+            polling_location_we_vote_id_list_returned_empty = results['polling_location_we_vote_id_list']
 
         status += "REFRESH_BALLOT_RETURNED: " + str(refresh_ballot_returned) + " "
+        refresh_or_retrieve_limit = MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK  # 125. Formerly 250 and 111
         if positive_value_exists(refresh_ballot_returned):
+            # REFRESH branch
             polling_location_query = PollingLocation.objects.using('readonly').all()
-            polling_location_query = polling_location_query.filter(we_vote_id__in=polling_location_we_vote_id_list)
+            # In this "Refresh" branch, use polling locations we already have a ballot returned entry for, and
+            # exclude map points already retrieved in this batch and those returned empty since this process started
+            polling_location_we_vote_id_list_to_exclude = \
+                list(set(polling_location_we_vote_id_list_already_retrieved +
+                         polling_location_we_vote_id_list_returned_empty))
+            polling_location_we_vote_id_list_to_retrieve = \
+                list(set(polling_location_we_vote_id_list_from_ballot_returned) -
+                     set(polling_location_we_vote_id_list_to_exclude))
+            polling_location_we_vote_id_list_to_retrieve_limited = \
+                polling_location_we_vote_id_list_to_retrieve[:refresh_or_retrieve_limit]
             polling_location_query = \
-                polling_location_query.exclude(we_vote_id__in=polling_location_we_vote_id_list_to_exclude)
+                polling_location_query.filter(we_vote_id__in=polling_location_we_vote_id_list_to_retrieve_limited)
             # We don't exclude the deleted map points because we need to know to delete the ballot returned entry
             # polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
             polling_location_list = list(polling_location_query)
-            polling_location_count = len(polling_location_list)
         else:
-            # polling_location_we_vote_id_list from above are all of the polling locations we already have
-            #  ballot_returned entries for, so we don't want to retrieve then since this branch only tries to pull in
-            #  polling_locations which haven't been checked yet for this ballot data source.
-
-            # If here, we are starting a fresh retrieve so we want to also exclude entries which came back as empty
-            #  for this ballot data provider since this process started.
-            if polling_location_we_vote_id_list_to_exclude and len(polling_location_we_vote_id_list_to_exclude) > 0:
-                polling_location_we_vote_id_list = \
-                    list(set(polling_location_we_vote_id_list + polling_location_we_vote_id_list_to_exclude))
-
+            # RETRIEVE branch
             polling_location_query = PollingLocation.objects.using('readonly').all()
             polling_location_query = \
                 polling_location_query.exclude(Q(latitude__isnull=True) | Q(latitude__exact=0.0))
@@ -3433,27 +3439,31 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
                 polling_location_query.exclude(Q(zip_long__isnull=True) | Q(zip_long__exact='0') |
                                                Q(zip_long__exact=''))
             polling_location_query = polling_location_query.filter(state__iexact=state_code)
-            # Exclude map points already retrieved, deleted, or returned empty since this process started
-            polling_location_query = polling_location_query.exclude(we_vote_id__in=polling_location_we_vote_id_list)
+            # In this "Retrieve" branch, exclude polling locations we already have a ballot returned entry for, and
+            # exclude map points already retrieved in this batch and those returned empty since this process started
+            polling_location_we_vote_id_list_to_exclude = \
+                list(set(polling_location_we_vote_id_list_from_ballot_returned +
+                         polling_location_we_vote_id_list_already_retrieved +
+                         polling_location_we_vote_id_list_returned_empty))
+            polling_location_query = \
+                polling_location_query.exclude(we_vote_id__in=polling_location_we_vote_id_list_to_exclude)
             polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
 
             # Randomly change the sort order so we over time load different map points (before timeout)
             random_sorting = random.randint(1, 5)
-            first_retrieve_limit = MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK  # 125. Formerly 250 and 111
             if random_sorting == 1:
                 # Ordering by "line1" creates a bit of (locational) random order
-                polling_location_list = polling_location_query.order_by('line1')[:first_retrieve_limit]
+                polling_location_list = polling_location_query.order_by('line1')[:refresh_or_retrieve_limit]
                 status += "RANDOM_SORTING-LINE1-ASC: " + str(random_sorting) + " "
             elif random_sorting == 2:
-                polling_location_list = polling_location_query.order_by('-line1')[:first_retrieve_limit]
+                polling_location_list = polling_location_query.order_by('-line1')[:refresh_or_retrieve_limit]
                 status += "RANDOM_SORTING-LINE1-DESC: " + str(random_sorting) + " "
             elif random_sorting == 3:
-                polling_location_list = polling_location_query.order_by('city')[:first_retrieve_limit]
+                polling_location_list = polling_location_query.order_by('city')[:refresh_or_retrieve_limit]
                 status += "RANDOM_SORTING-CITY-ASC: " + str(random_sorting) + " "
             else:
-                polling_location_list = polling_location_query.order_by('-city')[:first_retrieve_limit]
+                polling_location_list = polling_location_query.order_by('-city')[:refresh_or_retrieve_limit]
                 status += "RANDOM_SORTING-CITY-DESC: " + str(random_sorting) + " "
-            polling_location_count = len(polling_location_list)
         # Cycle through -- if the polling_location is deleted, delete the associated ballot_returned,
         #  and then remove the polling_location from the list
         modified_polling_location = []
@@ -3626,6 +3636,8 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
             from import_export_ctcl.controllers import retrieve_ctcl_ballot_items_from_polling_location_api
         elif positive_value_exists(use_vote_usa):
             from import_export_vote_usa.controllers import retrieve_vote_usa_ballot_items_from_polling_location_api
+        contest_not_returned_from_data_source_polling_location_we_vote_id_list = []
+        contest_returned_from_data_source_polling_location_we_vote_id_list = []
         for polling_location in polling_location_list:
             one_ballot_results = {}
             if positive_value_exists(use_ballotpedia):
@@ -3698,12 +3710,24 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
 
             if one_ballot_results['batch_header_id']:
                 ballots_retrieved += 1
+                contest_returned_from_data_source_polling_location_we_vote_id_list.append(
+                    polling_location.we_vote_id)
                 if ballots_retrieved < 5:
+                    # Only show this error message status for the first 4 times so we don't overwhelm the log
                     status += "BALLOT_ITEMS_RETRIEVED: [[[" + one_ballot_results['status'] + "]]] "
             else:
                 ballots_not_retrieved += 1
+                contest_not_returned_from_data_source_polling_location_we_vote_id_list.append(
+                    polling_location.we_vote_id)
                 if ballots_not_retrieved < 5:
+                    # Only show this error message status for the first 4 times so we don't overwhelm the log
                     status += "BALLOT_ITEMS_NOT_RETRIEVED: [[[" + one_ballot_results['status'] + "]]] "
+        if positive_value_exists(len(contest_returned_from_data_source_polling_location_we_vote_id_list)):
+            status += "contest_returned_from_data_source_polling_location_we_vote_id_list: " + \
+                      str(contest_returned_from_data_source_polling_location_we_vote_id_list) + " "
+        if positive_value_exists(len(contest_not_returned_from_data_source_polling_location_we_vote_id_list)):
+            status += "contest_not_returned_from_data_source_polling_location_we_vote_id_list: " + \
+                      str(contest_not_returned_from_data_source_polling_location_we_vote_id_list) + " "
     else:
         status += "CANNOT_CALL_RETRIEVE_BECAUSE_OF_ERRORS " \
                   "[retrieve_ballots_for_polling_locations_api_v4_internal_view] "

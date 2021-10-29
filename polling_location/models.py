@@ -16,6 +16,7 @@ GEOCODE_TIMEOUT = 10
 GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
 KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR = 'ADDRESS_PARSE_ERROR'
 KIND_OF_LOG_ENTRY_API_END_POINT_CRASH = 'API_END_POINT_CRASH'
+KIND_OF_LOG_ENTRY_BALLOT_RECEIVED = 'BALLOT_RECEIVED'
 KIND_OF_LOG_ENTRY_NO_CONTESTS = 'NO_CONTESTS'
 KIND_OF_LOG_ENTRY_NO_BALLOT_JSON = 'NO_BALLOT_JSON'
 
@@ -113,13 +114,13 @@ class PollingLocation(models.Model):
 
 
 class PollingLocationLogEntry(models.Model):
-    batch_process_id = models.PositiveIntegerField(null=True, unique=False)
+    batch_process_id = models.PositiveIntegerField(db_index=True, null=True, unique=False)
     date_time = models.DateTimeField(null=False, auto_now_add=True)
-    google_civic_election_id = models.PositiveIntegerField(null=True, unique=False)
-    is_from_ballotpedia = models.BooleanField(default=False, null=True)  # Error from retrieving data from Ballotpedia
-    is_from_ctcl = models.BooleanField(default=False, null=True)  # Error from retrieving data from CTCL
-    is_from_vote_usa = models.BooleanField(default=False, null=True)  # Error from retrieving data from Vote USA
-    kind_of_log_entry = models.CharField(max_length=50, default=None, null=True)
+    google_civic_election_id = models.PositiveIntegerField(db_index=True, null=True, unique=False)
+    is_from_ballotpedia = models.BooleanField(db_index=True, default=False, null=True)  # Error from Ballotpedia
+    is_from_ctcl = models.BooleanField(db_index=True, default=False, null=True)  # Error from retrieving data from CTCL
+    is_from_vote_usa = models.BooleanField(db_index=True, default=False, null=True)  # Error retrieving from Vote USA
+    kind_of_log_entry = models.CharField(db_index=True, max_length=50, default=None, null=True)
     log_entry_deleted = models.BooleanField(db_index=True, default=False)
     log_entry_message = models.TextField(null=True)
     polling_location_we_vote_id = models.CharField(db_index=True, max_length=255, null=True, unique=False)
@@ -865,6 +866,7 @@ class PollingLocationManager(models.Manager):
 
     def retrieve_polling_location_log_entry_list(
             self,
+            batch_process_id=0,
             exclude_deleted=True,
             is_from_ctcl=False,
             is_from_vote_usa=False,
@@ -878,6 +880,8 @@ class PollingLocationManager(models.Manager):
                 query = PollingLocationLogEntry.objects.using('readonly').all()
             else:
                 query = PollingLocationLogEntry.objects.all()
+            if positive_value_exists(batch_process_id):
+                query = query.filter(batch_process_id=batch_process_id)
             if positive_value_exists(exclude_deleted):
                 query = query.exclude(log_entry_deleted=True)
             if positive_value_exists(is_from_ctcl) and positive_value_exists(is_from_vote_usa):

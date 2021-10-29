@@ -155,7 +155,7 @@
             <td>{{ office.id }}</td>
             <td>
                 {{ office.we_vote_id }}
-                <a href="{% url 'office:office_edit' office.id %}" target="_blank">(edit <span class="glyphicon glyphicon-new-window"></span>)</a>
+                <a href="{% url 'office:office_edit' office.id %}" target="_blank">edit&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
             </td>
             <td><a href="{% url 'office:office_summary' office.id %}">{{ office.office_name }}</a></td>
           {% if google_civic_election_id == 0 %}
