@@ -2037,6 +2037,7 @@ def import_ballot_items_for_location_view(request):
                 polling_location_we_vote_id=polling_location_we_vote_id,
                 state_code=state_code,
             )
+            status += results['status']
         elif positive_value_exists(use_ctcl):
             from import_export_ctcl.controllers import retrieve_ctcl_ballot_items_from_polling_location_api
             results = retrieve_ctcl_ballot_items_from_polling_location_api(
@@ -2047,6 +2048,7 @@ def import_ballot_items_for_location_view(request):
                 state_code=state_code,
                 update_or_create_rules=update_or_create_rules,
             )
+            status += results['status']
         elif positive_value_exists(use_vote_usa):
             from import_export_vote_usa.controllers import retrieve_vote_usa_ballot_items_from_polling_location_api
             results = retrieve_vote_usa_ballot_items_from_polling_location_api(
@@ -2056,6 +2058,7 @@ def import_ballot_items_for_location_view(request):
                 state_code=state_code,
                 update_or_create_rules=update_or_create_rules,
             )
+            status += results['status']
         else:
             # Should not be possible to get here
             pass
@@ -2066,6 +2069,7 @@ def import_ballot_items_for_location_view(request):
             kind_of_batch = IMPORT_BALLOT_ITEM
 
     batch_header_id = 0
+    messages.add_message(request, messages.INFO, status)
     if 'batch_saved' in results and results['batch_saved']:
         messages.add_message(request, messages.INFO, 'Ballot items import batch for {google_civic_election_id} '
                                                      'election saved.'
@@ -2086,7 +2090,7 @@ def import_ballot_items_for_location_view(request):
                                         "&state_code=" + str(state_code)
                                         )
     else:
-        messages.add_message(request, messages.ERROR, results['status'])
+        messages.add_message(request, messages.ERROR, status)
 
     if positive_value_exists(batch_header_id):
         # Go straight to the new batch

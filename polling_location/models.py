@@ -57,6 +57,7 @@ class PollingLocation(models.Model):
         verbose_name="how many times Google can't find address", default=None, null=True)
     vote_usa_error_count = models.PositiveIntegerField(default=None, null=True)
 
+    no_contests_count = models.PositiveIntegerField(default=None, null=True)
     # Where did we get this map point from?
     source_code = models.CharField(default=None, max_length=50, null=True)
     successful_retrieve_count = models.PositiveIntegerField(default=None, null=True)
@@ -337,29 +338,35 @@ class PollingLocationManager(models.Manager):
         }
         return results
 
-    def update_polling_location_with_error_count(
+    def update_polling_location_with_log_counts(
             self,
             is_from_ctcl=False,
             is_from_vote_usa=False,
-            polling_location_we_vote_id=''):
+            is_no_contests=False,
+            is_successful_retrieve=False,
+            polling_location_we_vote_id='',
+            update_data_counts=False,
+            update_error_counts=False):
         status = ''
+        update_ctcl_error_count = False
+        update_no_contests_count = False
+        update_successful_retrieve_count = False
+        update_vote_usa_error_count = False
         update_values = {}
+
+        # ##############
+        # Count errors which shouldn't be happening, and can be fixed:
+        # KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR = 'ADDRESS_PARSE_ERROR'
+        # KIND_OF_LOG_ENTRY_API_END_POINT_CRASH = 'API_END_POINT_CRASH'
+        # KIND_OF_LOG_ENTRY_NO_BALLOT_JSON = 'NO_BALLOT_JSON'
         try:
-            if not positive_value_exists(is_from_ctcl) and not positive_value_exists(is_from_vote_usa):
-                update_ctcl_error_count = True
-                update_vote_usa_error_count = True
-            else:
-                update_ctcl_error_count = positive_value_exists(is_from_ctcl)
-                update_vote_usa_error_count = positive_value_exists(is_from_vote_usa)
-
-            # ##############
-            # We only count errors which shouldn't be happening, and can be fixed:
-            # KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR = 'ADDRESS_PARSE_ERROR'
-            # KIND_OF_LOG_ENTRY_API_END_POINT_CRASH = 'API_END_POINT_CRASH'
-            # KIND_OF_LOG_ENTRY_NO_BALLOT_JSON = 'NO_BALLOT_JSON'
-
-            # We don't count these errors:
-            # KIND_OF_LOG_ENTRY_NO_CONTESTS = 'NO_CONTESTS'
+            if positive_value_exists(update_error_counts):
+                if not positive_value_exists(is_from_ctcl) and not positive_value_exists(is_from_vote_usa):
+                    update_ctcl_error_count = True
+                    update_vote_usa_error_count = True
+                else:
+                    update_ctcl_error_count = positive_value_exists(is_from_ctcl)
+                    update_vote_usa_error_count = positive_value_exists(is_from_vote_usa)
 
             if positive_value_exists(update_ctcl_error_count):
                 count_query = PollingLocationLogEntry.objects.using('analytics').all()
@@ -386,6 +393,40 @@ class PollingLocationManager(models.Manager):
                 update_values['vote_usa_error_count'] = count_query.count()
         except Exception as e:
             status += "FAILED_RETRIEVING_ERROR_COUNTS: " + str(e) + ' '
+            results = {
+                'success': False,
+                'status': status,
+            }
+            return results
+
+        try:
+            if positive_value_exists(update_data_counts):
+                if not positive_value_exists(is_no_contests) and not positive_value_exists(is_successful_retrieve):
+                    update_no_contests_count = True
+                    update_successful_retrieve_count = True
+                else:
+                    update_no_contests_count = positive_value_exists(is_no_contests)
+                    update_successful_retrieve_count = positive_value_exists(is_successful_retrieve)
+
+            if positive_value_exists(update_no_contests_count):
+                count_query = PollingLocationLogEntry.objects.using('analytics').all()
+                count_query = count_query.filter(polling_location_we_vote_id__iexact=polling_location_we_vote_id)
+                count_query = count_query.filter(kind_of_log_entry__in=[
+                    KIND_OF_LOG_ENTRY_NO_CONTESTS,
+                ])
+                count_query = count_query.filter(log_entry_deleted=False)
+                update_values['no_contests_count'] = count_query.count()
+
+            if positive_value_exists(update_successful_retrieve_count):
+                count_query = PollingLocationLogEntry.objects.using('analytics').all()
+                count_query = count_query.filter(polling_location_we_vote_id__iexact=polling_location_we_vote_id)
+                count_query = count_query.filter(kind_of_log_entry__in=[
+                    KIND_OF_LOG_ENTRY_BALLOT_RECEIVED,
+                ])
+                count_query = count_query.filter(log_entry_deleted=False)
+                update_values['successful_retrieve_count'] = count_query.count()
+        except Exception as e:
+            status += "FAILED_RETRIEVING_DATA_COUNTS: " + str(e) + ' '
             results = {
                 'success': False,
                 'status': status,
@@ -871,11 +912,23 @@ class PollingLocationManager(models.Manager):
             exclude_deleted=True,
             is_from_ctcl=False,
             is_from_vote_usa=False,
+            is_no_contests=False,
+            google_civic_election_id=False,
             is_successful_retrieve=False,
             kind_of_log_entry_list=[],
             polling_location_we_vote_id='',
             read_only=True,
+            show_errors=False,
             state_code=False):
+        if positive_value_exists(show_errors):
+            kind_of_log_entry_list.append(KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR)
+            kind_of_log_entry_list.append(KIND_OF_LOG_ENTRY_API_END_POINT_CRASH)
+            kind_of_log_entry_list.append(KIND_OF_LOG_ENTRY_NO_BALLOT_JSON)
+        if positive_value_exists(is_no_contests):
+            kind_of_log_entry_list.append(KIND_OF_LOG_ENTRY_NO_CONTESTS)
+        if positive_value_exists(is_successful_retrieve):
+            kind_of_log_entry_list.append(KIND_OF_LOG_ENTRY_BALLOT_RECEIVED)
+
         polling_location_log_entry_list_found = False
         polling_location_log_entry_list = []
         try:
@@ -885,10 +938,11 @@ class PollingLocationManager(models.Manager):
                 query = PollingLocationLogEntry.objects.all()
             if positive_value_exists(batch_process_id):
                 query = query.filter(batch_process_id=batch_process_id)
+            if positive_value_exists(google_civic_election_id):
+                query = query.filter(google_civic_election_id=google_civic_election_id)
             if positive_value_exists(exclude_deleted):
                 query = query.exclude(log_entry_deleted=True)
-            if positive_value_exists(is_from_ctcl) or positive_value_exists(is_from_vote_usa) or \
-                    positive_value_exists(is_successful_retrieve):
+            if positive_value_exists(is_from_ctcl) or positive_value_exists(is_from_vote_usa):
                 filters = []
                 if positive_value_exists(is_from_ctcl):
                     new_filter = Q(is_from_ctcl=True)
@@ -896,14 +950,15 @@ class PollingLocationManager(models.Manager):
                 if positive_value_exists(is_from_vote_usa):
                     new_filter = Q(is_from_vote_usa=True)
                     filters.append(new_filter)
+                # We need these as options with Q filters so they aren't excluded
+                if positive_value_exists(is_no_contests):
+                    new_filter = Q(kind_of_log_entry__in=[KIND_OF_LOG_ENTRY_NO_CONTESTS])
+                    filters.append(new_filter)
                 if positive_value_exists(is_successful_retrieve):
                     new_filter = Q(kind_of_log_entry__in=[KIND_OF_LOG_ENTRY_BALLOT_RECEIVED])
                     filters.append(new_filter)
-
-                # Add the first query
                 if len(filters):
                     final_filters = filters.pop()
-                    # ...and "OR" the remaining items in the list
                     for item in filters:
                         final_filters |= item
                     query = query.filter(final_filters)
@@ -913,6 +968,7 @@ class PollingLocationManager(models.Manager):
                 query = query.filter(polling_location_we_vote_id__iexact=polling_location_we_vote_id)
             if positive_value_exists(state_code):
                 query = query.filter(state_code__iexact=state_code)
+            query = query.order_by('-id')
             polling_location_log_entry_list = list(query)
             if len(polling_location_log_entry_list):
                 polling_location_log_entry_list_found = True
