@@ -59,6 +59,7 @@ class PollingLocation(models.Model):
 
     # Where did we get this map point from?
     source_code = models.CharField(default=None, max_length=50, null=True)
+    successful_retrieve_count = models.PositiveIntegerField(default=None, null=True)
 
     use_for_bulk_retrieve = models.BooleanField(verbose_name="this provides geographical coverage", default=False)
     polling_location_deleted = models.BooleanField(verbose_name="removed from usage", default=False)
@@ -870,9 +871,11 @@ class PollingLocationManager(models.Manager):
             exclude_deleted=True,
             is_from_ctcl=False,
             is_from_vote_usa=False,
+            is_successful_retrieve=False,
             kind_of_log_entry_list=[],
             polling_location_we_vote_id='',
-            read_only=True):
+            read_only=True,
+            state_code=False):
         polling_location_log_entry_list_found = False
         polling_location_log_entry_list = []
         try:
@@ -884,16 +887,32 @@ class PollingLocationManager(models.Manager):
                 query = query.filter(batch_process_id=batch_process_id)
             if positive_value_exists(exclude_deleted):
                 query = query.exclude(log_entry_deleted=True)
-            if positive_value_exists(is_from_ctcl) and positive_value_exists(is_from_vote_usa):
-                query = query.filter(Q(is_from_ctcl=True) | Q(is_from_vote_usa=True))
-            elif positive_value_exists(is_from_ctcl):
-                query = query.filter(is_from_ctcl=True)
-            elif positive_value_exists(is_from_vote_usa):
-                query = query.filter(is_from_vote_usa=True)
+            if positive_value_exists(is_from_ctcl) or positive_value_exists(is_from_vote_usa) or \
+                    positive_value_exists(is_successful_retrieve):
+                filters = []
+                if positive_value_exists(is_from_ctcl):
+                    new_filter = Q(is_from_ctcl=True)
+                    filters.append(new_filter)
+                if positive_value_exists(is_from_vote_usa):
+                    new_filter = Q(is_from_vote_usa=True)
+                    filters.append(new_filter)
+                if positive_value_exists(is_successful_retrieve):
+                    new_filter = Q(kind_of_log_entry__in=[KIND_OF_LOG_ENTRY_BALLOT_RECEIVED])
+                    filters.append(new_filter)
+
+                # Add the first query
+                if len(filters):
+                    final_filters = filters.pop()
+                    # ...and "OR" the remaining items in the list
+                    for item in filters:
+                        final_filters |= item
+                    query = query.filter(final_filters)
             if positive_value_exists(len(kind_of_log_entry_list) > 0):
                 query = query.filter(kind_of_log_entry__in=kind_of_log_entry_list)
             if positive_value_exists(polling_location_we_vote_id):
                 query = query.filter(polling_location_we_vote_id__iexact=polling_location_we_vote_id)
+            if positive_value_exists(state_code):
+                query = query.filter(state_code__iexact=state_code)
             polling_location_log_entry_list = list(query)
             if len(polling_location_log_entry_list):
                 polling_location_log_entry_list_found = True
