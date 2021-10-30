@@ -78,6 +78,41 @@
     <li><a href="{% url 'ballot:ballot_item_list_edit' 0 %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ polling_location.state|default_if_none:"" }}&polling_location_we_vote_id={{ polling_location.we_vote_id }}">
        Create Ballot for this Election for one Location</a> (so voters can find a ballot before Google Civic data is live)</li>
 </ul>
+<br />
+{% if polling_location.polling_location_log_entry_list %}
+    <table class="table table-bordered table-condensed">
+        <thead>
+            <tr>
+                <th>Date/Time</th>
+                <th>Kind of Log Entry</th>
+            {% if not google_civic_election_id %}
+                <th>Election</th>
+            {% endif %}
+            </tr>
+        </thead>
+        {% for log_entry in polling_location.polling_location_log_entry_list %}
+            <tr>
+                <td>{{ log_entry.date_time|date:"M d, Y H:i" }}</td>
+                <td>
+                    {{ log_entry.kind_of_log_entry }}{% if log_entry.is_from_ctcl %}/CTCL{% endif %}{% if log_entry.is_from_vote_usa %}/Vote&nbsp;USA{% endif %}
+                </td>
+            {% if not google_civic_election_id %}
+                <td>
+                    {{ log_entry.election_name }} - {{ log_entry.google_civic_election_id }} - {{ log_entry.election_day_text }}
+                </td>
+            {% endif %}
+            </tr>
+        {% endfor %}
+        {% if polling_location.polling_location_log_entry_list and polling_location.polling_location_log_entry_list_has_error %}
+            <tr>
+                <td colspan="3">
+                    <a href="{% url 'polling_location:polling_location_list_process' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&polling_location_search={{ polling_location_search }}&show_ctcl_errors={{ show_ctcl_errors }}&show_no_contests={{ show_no_contests }}&show_vote_usa_errors={{ show_vote_usa_errors }}&show_successful_retrieves={{ show_successful_retrieves }}&clear_errors_for_polling_location_we_vote_id={{ polling_location.we_vote_id }}" style="font-size: .65em"
+                        >(mark as fixed now)</a>
+                </td>
+            </tr>
+        {% endif %}
+    </table>
+{% endif %}
 
   <br />
   <br />

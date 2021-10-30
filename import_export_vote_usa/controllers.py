@@ -256,10 +256,12 @@ def retrieve_vote_usa_ballot_items_from_polling_location_api(
                 text_for_map_search=text_for_map_search,
             )
             status += results['status']
-            results = polling_location_manager.update_polling_location_with_error_count(
-                polling_location_we_vote_id=polling_location_we_vote_id,
+            results = polling_location_manager.update_polling_location_with_log_counts(
                 is_from_vote_usa=True,
+                polling_location_we_vote_id=polling_location_we_vote_id,
+                update_error_counts=True,
             )
+            status += results['status']
             handle_exception(e, logger=logger, exception_message=status)
             results = {
                 'success':                                  success,
@@ -355,6 +357,12 @@ def retrieve_vote_usa_ballot_items_from_polling_location_api(
                     )
                     if not results['success']:
                         status += results['status']
+                    results = polling_location_manager.update_polling_location_with_log_counts(
+                        polling_location_we_vote_id=polling_location_we_vote_id,
+                        update_data_counts=True,
+                        is_successful_retrieve=True,
+                    )
+                    status += results['status']
                 else:
                     # We need to at least to mark the BallotReturned entry with a new date_last_updated date so
                     #  we can move on to other ballot returned entries.
@@ -405,10 +413,19 @@ def retrieve_vote_usa_ballot_items_from_polling_location_api(
                 )
                 status += results['status']
                 if kind_of_log_entry == KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR:
-                    results = polling_location_manager.update_polling_location_with_error_count(
-                        polling_location_we_vote_id=polling_location_we_vote_id,
+                    results = polling_location_manager.update_polling_location_with_log_counts(
                         is_from_vote_usa=True,
+                        polling_location_we_vote_id=polling_location_we_vote_id,
+                        update_error_counts=True,
                     )
+                    status += results['status']
+                else:
+                    results = polling_location_manager.update_polling_location_with_log_counts(
+                        is_no_contests=True,
+                        polling_location_we_vote_id=polling_location_we_vote_id,
+                        update_data_counts=True,
+                    )
+                    status += results['status']
         except Exception as e:
             success = False
             status += 'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS_API_V4-VOTE_USA-ERROR: ' + str(e) + ' '
