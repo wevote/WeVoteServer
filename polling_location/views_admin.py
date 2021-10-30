@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .models import KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR, KIND_OF_LOG_ENTRY_API_END_POINT_CRASH, \
-    KIND_OF_LOG_ENTRY_NO_BALLOT_JSON, PollingLocation, PollingLocationManager
+    KIND_OF_LOG_ENTRY_BALLOT_RECEIVED, KIND_OF_LOG_ENTRY_NO_BALLOT_JSON, PollingLocation, PollingLocationManager
 from .controllers import filter_polling_locations_structured_json_for_local_duplicates, \
     import_and_save_all_polling_locations_data, polling_locations_import_from_structured_json
 from admin_tools.views import redirect_to_sign_in_page
@@ -508,8 +508,27 @@ def polling_location_list_view(request):
     show_bulk_retrieve = request.GET.get('show_bulk_retrieve', 0)
     show_ctcl_errors = request.GET.get('show_ctcl_errors', 0)
     show_vote_usa_errors = request.GET.get('show_vote_usa_errors', 0)
+    show_successful_retrieves = request.GET.get('show_successful_retrieves', 0)
     state_code = request.GET.get('state_code', '')
     polling_location_search = request.GET.get('polling_location_search', '')
+    polling_location_manager = PollingLocationManager()
+
+    # Temp update of successful_retrieve_count
+    # if positive_value_exists(state_code):
+    #     successful_retrieves_update_dict = {}
+    #     log_entry_list = polling_location_manager.retrieve_polling_location_log_entry_list(
+    #             is_successful_retrieve=True,
+    #             state_code=state_code,
+    #         )
+    #     for log_entry in log_entry_list:
+    #         if log_entry.polling_location_we_vote_id not in successful_retrieves_update_dict:
+    #             successful_retrieves_update_dict[log_entry.polling_location_we_vote_id] = 1
+    #         else:
+    #             successful_retrieves_update_dict[log_entry.polling_location_we_vote_id] += 1
+    #     for key, value in successful_retrieves_update_dict.items():
+    #         polling_location_manager.update_polling_location_row(
+    #             polling_location_we_vote_id=key,
+    #             update_values={'successful_retrieve_count': value})
 
     polling_location_count_query = PollingLocation.objects.all()
     polling_location_without_latitude_count = 0
@@ -522,22 +541,32 @@ def polling_location_list_view(request):
         polling_location_count_query = polling_location_count_query.filter(use_for_bulk_retrieve=True)
         polling_location_query = polling_location_query.filter(use_for_bulk_retrieve=True)
 
-    if positive_value_exists(show_ctcl_errors) and positive_value_exists(show_vote_usa_errors):
-        polling_location_count_query = polling_location_count_query.filter(
-            Q(ctcl_error_count__gt=0) | Q(vote_usa_error_count__gt=0)
-        )
-        polling_location_query = polling_location_query.filter(
-            Q(ctcl_error_count__gt=0) | Q(vote_usa_error_count__gt=0)
-        )
-        polling_location_query = polling_location_query.order_by('-ctcl_error_count', '-vote_usa_error_count')
-    elif positive_value_exists(show_ctcl_errors):
-        polling_location_count_query = polling_location_count_query.filter(ctcl_error_count__gt=0)
-        polling_location_query = polling_location_query.filter(ctcl_error_count__gt=0)
-        polling_location_query = polling_location_query.order_by('-ctcl_error_count')
-    elif positive_value_exists(show_vote_usa_errors):
-        polling_location_count_query = polling_location_count_query.filter(vote_usa_error_count__gt=0)
-        polling_location_query = polling_location_query.filter(vote_usa_error_count__gt=0)
-        polling_location_query = polling_location_query.order_by('-vote_usa_error_count')
+    if positive_value_exists(show_ctcl_errors) or positive_value_exists(show_vote_usa_errors) or \
+            positive_value_exists(show_successful_retrieves):
+        filters = []
+        if positive_value_exists(show_ctcl_errors):
+            new_filter = Q(ctcl_error_count__gt=0)
+            filters.append(new_filter)
+        if positive_value_exists(show_vote_usa_errors):
+            new_filter = Q(vote_usa_error_count__gt=0)
+            filters.append(new_filter)
+        if positive_value_exists(show_successful_retrieves):
+            new_filter = Q(successful_retrieve_count__gt=0)
+            filters.append(new_filter)
+
+        # Add the first query
+        if len(filters):
+            final_filters = filters.pop()
+            # ...and "OR" the remaining items in the list
+            for item in filters:
+                final_filters |= item
+
+            polling_location_query = polling_location_query.filter(final_filters)
+            polling_location_count_query = polling_location_count_query.filter(final_filters)
+        polling_location_query = polling_location_query\
+            .order_by('-successful_retrieve_count', '-vote_usa_error_count', '-ctcl_error_count')
+    else:
+        polling_location_query = polling_location_query.order_by('location_name')
 
     if positive_value_exists(state_code):
         polling_location_count_query = polling_location_count_query.filter(state__iexact=state_code)
@@ -621,23 +650,35 @@ def polling_location_list_view(request):
 
     messages.add_message(request, messages.INFO, info_message)
 
-    polling_location_list = polling_location_query.order_by('location_name')[:limit]
+    polling_location_list = polling_location_query[:limit]
 
-    if positive_value_exists(show_ctcl_errors) or positive_value_exists(show_vote_usa_errors):
+    if positive_value_exists(show_ctcl_errors) or positive_value_exists(show_vote_usa_errors) or \
+            positive_value_exists(show_successful_retrieves):
+        kind_of_log_entry_list = []
+        if positive_value_exists(show_ctcl_errors) or positive_value_exists(show_vote_usa_errors):
+            kind_of_log_entry_list.append(KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR)
+            kind_of_log_entry_list.append(KIND_OF_LOG_ENTRY_API_END_POINT_CRASH)
+            kind_of_log_entry_list.append(KIND_OF_LOG_ENTRY_NO_BALLOT_JSON)
+        if positive_value_exists(show_successful_retrieves):
+            kind_of_log_entry_list.append(KIND_OF_LOG_ENTRY_BALLOT_RECEIVED)
         polling_location_list_modified = []
-        polling_location_manager = PollingLocationManager()
         for polling_location in polling_location_list:
             polling_location.polling_location_log_entry_list = \
                 polling_location_manager.retrieve_polling_location_log_entry_list(
                     polling_location_we_vote_id=polling_location.we_vote_id,
                     is_from_ctcl=show_ctcl_errors,
                     is_from_vote_usa=show_vote_usa_errors,
-                    kind_of_log_entry_list=[
-                        KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR,
-                        KIND_OF_LOG_ENTRY_API_END_POINT_CRASH,
-                        KIND_OF_LOG_ENTRY_NO_BALLOT_JSON,
-                    ],
+                    is_successful_retrieve=show_successful_retrieves,
+                    kind_of_log_entry_list=kind_of_log_entry_list,
                 )
+            polling_location.polling_location_log_entry_list_has_error = False
+            for log_entry in polling_location.polling_location_log_entry_list:
+                if log_entry.kind_of_log_entry in [
+                    KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR,
+                    KIND_OF_LOG_ENTRY_API_END_POINT_CRASH,
+                    KIND_OF_LOG_ENTRY_NO_BALLOT_JSON,
+                ]:
+                    polling_location.polling_location_log_entry_list_has_error = True
             polling_location_list_modified.append(polling_location)
         polling_location_list = polling_location_list_modified
 
@@ -654,6 +695,7 @@ def polling_location_list_view(request):
         'polling_location_search':  polling_location_search,
         'show_bulk_retrieve':       show_bulk_retrieve,
         'show_ctcl_errors':         show_ctcl_errors,
+        'show_successful_retrieves': show_successful_retrieves,
         'show_vote_usa_errors':     show_vote_usa_errors,
         'state_code':               state_code,
         'state_name':               convert_state_code_to_state_text(state_code),
