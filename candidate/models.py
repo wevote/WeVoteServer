@@ -1707,9 +1707,12 @@ class CandidateListManager(models.Manager):
         Get the first 15 records that have 3 capitalized letters in a row, as long as those letters
         are not 'III' i.e. King Henry III.  Also exclude the names where the word "WITHDRAWN" has been appended when
         the candidate withdrew from the race
-        SELECT * FROM public.politician_politician WHERE politician_name ~ '.*?[A-Z][A-Z][A-Z].*?' and politician_name !~ '.*?III.*?'
+        SELECT * FROM public.politician_politician
+        WHERE politician_name ~ '.*?[A-Z][A-Z][A-Z].*?'
+        and politician_name !~ '.*?III.*?'
 
         :param start:
+        :param count:
         :return:
         """
         candidate_query = CandidateCampaign.objects.all()
@@ -1725,7 +1728,7 @@ class CandidateListManager(models.Manager):
         for x in candidate_list_objects:
             name = x.candidate_name
             if name.endswith('WITHDRAWN') and not bool(re.match('^[A-Z]+$', name)):
-                continue
+                name = name.rstrip('WITHDRAWN')
             x.person_name_normalized = display_full_name_with_correct_capitalization(name)
             results_list.append(x)
             # out += name + ' = > ' + x.person_name_normalized + ', '

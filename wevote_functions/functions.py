@@ -15,8 +15,9 @@ from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from django.utils.timezone import localtime, now
 from nameparser import HumanName
-
+from nameparser.config import CONSTANTS
 import wevote_functions.admin
+CONSTANTS.string_format = "{title} {first} {middle} \"{nickname}\" {last} {suffix}"
 
 # We don't want to include the actual constants from organization/models.py, since that can cause include conflicts
 CORPORATION = 'C'
@@ -854,6 +855,7 @@ def extract_zip_formatted_from_zip9(zip9):
 pattern_quotes = re.compile(r'"([A-Z]+)\s?""([A-Z]+)""\s?([A-Z]+)"')
 pattern_nick_in_middle = re.compile(r'(.*?)(?:[`\'])([A-Z.]+)(?:[`\'])(.*?)$')
 pattern_nick_in_middle_paren = re.compile(r'(.*?)(?:\()([A-Z]+)(?:\) )(.*?)$')
+pattern_nick_in_middle_quotes = re.compile(r'(.*?)(?:[`\"])([A-Z.]+)(?:[`\"])(.*?)$')
 pattern_nick_at_end = re.compile(r'(.*?)\s+(.*?)\s+\((.*?)\)$')
 
 
@@ -870,22 +872,31 @@ def display_full_name_with_correct_capitalization(full_name):
             # Special case for nicknames from Google civic ... "MARY ""MELL"" FLYNN"
             nick = pattern_quotes.search(full_name)
             if nick and len(nick.groups()) == 3:
-                return nick.group(1).title() + ' "' + nick.group(2).title() + '" ' + nick.group(3).title()
+                return_string = nick.group(1).title() + ' "' + nick.group(2).title() + '" ' + nick.group(3).title()
+                return return_string.replace("  ", " ")
             # Special case for nicknames from Google civic ...
             # BEATRICE `BEA` E. GUNN PHILLIPS  ...  CARLOS 'CHUCK' TAYLOR   ...  CAROL 'C.J.' KEAVNEY
             nick2 = pattern_nick_in_middle.search(full_name)
             if nick2 and len(nick2.groups()) == 3:
-                return nick2.group(1).title() + ' "' + nick2.group(2).title() + '" ' + nick2.group(3).title()
+                return_string = nick2.group(1).title() + ' "' + nick2.group(2).title() + '" ' + nick2.group(3).title()
+                return return_string.replace("  ", " ")
             # Special case for nicknames from Google civic ...  LORRAINE (LORI) GEITTMANN
             nick3 = pattern_nick_in_middle_paren.search(full_name)
             if nick3 and len(nick3.groups()) == 3:
-                return nick3.group(1).title() + ' "' + nick3.group(2).title() + '" ' + nick3.group(3).title()
+                return_string = nick3.group(1).title() + ' "' + nick3.group(2).title() + '" ' + nick3.group(3).title()
+                return return_string.replace("  ", " ")
+            # Special case for nicknames with correct nickname quotes ...  LORRAINE "LORI" GEITTMANN
+            nick3 = pattern_nick_in_middle_quotes.search(full_name)
+            if nick3 and len(nick3.groups()) == 3:
+                return_string = nick3.group(1).title() + ' "' + nick3.group(2).title() + '" ' + nick3.group(3).title()
+                return return_string.replace("  ", " ")
 
             # Special case for nicknames from Google civic ...  ISRAEL RODRIGUEZ (IROD)
             # This will not work for someone with a middle name, wouldn't know where to put the nickname
             nick4 = pattern_nick_at_end.search(full_name)
             if nick4 and len(nick4.groups()) == 3 and nick4.group(3) != "WITHDRAWN":
-                return nick4.group(1).title() + ' "' + nick4.group(3).title() + '" ' + nick4.group(2).title()
+                return_string = nick4.group(1).title() + ' "' + nick4.group(3).title() + '" ' + nick4.group(2).title()
+                return return_string.replace("  ", " ")
         except Exception as e:
             logger.error('Parsing/regex error in display_full_name_with_correct_capitalization: ', e)
         pattern = r'^([A-Z]\.[A-Z]\.).*?'
@@ -898,6 +909,8 @@ def display_full_name_with_correct_capitalization(full_name):
 
         if " del " in full_name_str:  # Handle "EVE FRANCES DEL CASTELLO" so it is not " => "Eve Frances del Castello"
             full_name_str = full_name_str.replace(' del ', ' Del ')
+
+        full_name_str = full_name_str.replace("  ", " ")
 
         return full_name_str
     return ""
