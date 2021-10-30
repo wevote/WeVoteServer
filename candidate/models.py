@@ -1729,6 +1729,8 @@ class CandidateListManager(models.Manager):
             name = x.candidate_name
             if name.endswith('WITHDRAWN') and not bool(re.match('^[A-Z]+$', name)):
                 name = name.rstrip('WITHDRAWN')
+            if name.endswith('(WITHDRAWN)') and not bool(re.match('^[A-Z]+$', name)):
+                name = name.rstrip('(WITHDRAWN)')
             x.person_name_normalized = display_full_name_with_correct_capitalization(name)
             results_list.append(x)
             # out += name + ' = > ' + x.person_name_normalized + ', '
