@@ -71,7 +71,7 @@ class VoteUSAApiCounterManager(models.Manager):
         daily_summaries = []
         day_on_stage = date.today()  # TODO: We need to work out the timezone questions
         number_found = 0
-        maximum_attempts = 45
+        maximum_attempts = 365
         attempt_count = 0
 
         try:
