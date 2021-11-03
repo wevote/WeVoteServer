@@ -1899,7 +1899,7 @@ def statistics_summary_view(request):
     targetsmart_api_counter_manager = TargetSmartApiCounterManager()
     targetsmart_daily_summary_list = targetsmart_api_counter_manager.retrieve_daily_summaries()
     vote_usa_api_counter_manager = VoteUSAApiCounterManager()
-    vote_usa_daily_summary_list = vote_usa_api_counter_manager.retrieve_daily_summaries(days_to_display=90)
+    vote_usa_daily_summary_list = vote_usa_api_counter_manager.retrieve_daily_summaries(days_to_display=365)
     template_values = {
         'ctcl_daily_summary_list':          ctcl_daily_summary_list,
         # 'ballotpedia_daily_summary_list':   ballotpedia_daily_summary_list,
