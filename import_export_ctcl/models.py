@@ -76,12 +76,11 @@ class CTCLApiCounterManager(models.Manager):
         }
         return results
 
-    def retrieve_daily_summaries(self, kind_of_action='', google_civic_election_id=0):
+    def retrieve_daily_summaries(self, kind_of_action='', google_civic_election_id=0, days_to_display=30):
         # Start with today and cycle backwards in time
         daily_summaries = []
         day_on_stage = date.today()  # TODO: We need to work out the timezone questions
         number_found = 0
-        days_to_display = 30
         maximum_attempts = 45
         attempt_count = 0
 

@@ -237,6 +237,7 @@ def measure_retrieve_for_api(measure_id, measure_we_vote_id):  # measureRetrieve
             'status':                   status,
             'success':                  True,
             'ballot_item_display_name': contest_measure.measure_title,
+            'ballotpedia_measure_url':  contest_measure.ballotpedia_measure_url,
             'district_name':            contest_measure.district_name,
             'election_display_name':    election_display_name,
             'google_civic_election_id': contest_measure.google_civic_election_id,

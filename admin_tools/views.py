@@ -1889,7 +1889,7 @@ def statistics_summary_view(request):
     # ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
     # ballotpedia_daily_summary_list = ballotpedia_api_counter_manager.retrieve_daily_summaries()
     ctcl_api_counter_manager = CTCLApiCounterManager()
-    ctcl_daily_summary_list = ctcl_api_counter_manager.retrieve_daily_summaries()
+    ctcl_daily_summary_list = ctcl_api_counter_manager.retrieve_daily_summaries(days_to_display=90)
     google_civic_api_counter_manager = GoogleCivicApiCounterManager()
     google_civic_daily_summary_list = google_civic_api_counter_manager.retrieve_daily_summaries()
     sendgrid_api_counter_manager = SendGridApiCounterManager()
@@ -1899,7 +1899,7 @@ def statistics_summary_view(request):
     targetsmart_api_counter_manager = TargetSmartApiCounterManager()
     targetsmart_daily_summary_list = targetsmart_api_counter_manager.retrieve_daily_summaries()
     vote_usa_api_counter_manager = VoteUSAApiCounterManager()
-    vote_usa_daily_summary_list = vote_usa_api_counter_manager.retrieve_daily_summaries()
+    vote_usa_daily_summary_list = vote_usa_api_counter_manager.retrieve_daily_summaries(days_to_display=90)
     template_values = {
         'ctcl_daily_summary_list':          ctcl_daily_summary_list,
         # 'ballotpedia_daily_summary_list':   ballotpedia_daily_summary_list,
