@@ -445,6 +445,7 @@ def organization_list_view(request):
     show_more = request.GET.get('show_more', False)  # Show up to 1,000 organizations
     show_issues = request.GET.get('show_issues', '')
     show_organizations_without_email = positive_value_exists(request.GET.get('show_organizations_without_email', False))
+    show_twitter_updates_failing = positive_value_exists(request.GET.get('show_twitter_updates_failing', False))
     show_organizations_to_be_analyzed = \
         positive_value_exists(request.GET.get('show_organizations_to_be_analyzed', False))
 
@@ -466,6 +467,9 @@ def organization_list_view(request):
             Q(organization_email__isnull=True) |
             Q(organization_email__exact='')
         )
+
+    if positive_value_exists(show_twitter_updates_failing):
+        organization_list_query = organization_list_query.filter(organization_twitter_updates_failing=True)
 
     if positive_value_exists(show_organizations_to_be_analyzed):
         organization_list_query = organization_list_query.filter(issue_analysis_done=False)
@@ -649,6 +653,7 @@ def organization_list_view(request):
         'show_more':                show_more,
         'show_organizations_without_email': show_organizations_without_email,
         'show_organizations_to_be_analyzed': show_organizations_to_be_analyzed,
+        'show_twitter_updates_failing': show_twitter_updates_failing,
         'sort_by':                  sort_by,
         'state_code':               state_code,
         'state_list':               sorted_state_list,
@@ -1184,6 +1189,7 @@ def organization_edit_process_view(request):
     organization_name = request.POST.get('organization_name', '')
     organization_contact_form_url = request.POST.get('organization_contact_form_url', False)
     organization_twitter_handle = request.POST.get('organization_twitter_handle', False)
+    organization_twitter_updates_failing = positive_value_exists(request.POST.get('organization_twitter_updates_failing', False))
     organization_email = request.POST.get('organization_email', False)
     organization_facebook = request.POST.get('organization_facebook', False)
     organization_type = request.POST.get('organization_type', GROUP)
@@ -1305,6 +1311,7 @@ def organization_edit_process_view(request):
             if organization_twitter_handle is not False:
                 if twitter_handle_can_be_saved_without_conflict:
                     organization_on_stage.organization_twitter_handle = organization_twitter_handle.strip()
+            organization_on_stage.organization_twitter_updates_failing = organization_twitter_updates_failing
             if organization_contact_form_url is not False:
                 organization_on_stage.organization_contact_form_url = organization_contact_form_url.strip()
             if organization_email is not False:

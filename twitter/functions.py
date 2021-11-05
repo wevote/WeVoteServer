@@ -18,14 +18,15 @@ TWITTER_CONSUMER_SECRET = get_environment_variable("TWITTER_CONSUMER_SECRET")
 TWITTER_ACCESS_TOKEN = get_environment_variable("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = get_environment_variable("TWITTER_ACCESS_TOKEN_SECRET")
 
-EXCLUDE_FROM_LOG = [
+TWITTER_USER_NOT_FOUND_LOG_RESPONSES = [
     "{'code': 50, 'message': 'User not found.'}",
     "User not found."
 ]
 
 def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
     status = ""
-    write_to_error_logs = False
+    twitter_user_not_found_in_twitter = False
+    write_to_server_logs = False
     auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
     auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
 
@@ -70,13 +71,23 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
         success = False
         status += twitter_handle + " " if positive_value_exists(twitter_handle) else ""
         status += str(twitter_user_id) + " " if positive_value_exists(twitter_user_id) else " "
-        error_tuple = error_instance.args
-        for error_dict in error_tuple:
-            for one_error in error_dict:
-                status += '[' + one_error['message'] + '] '
-                if one_error['message'] not in EXCLUDE_FROM_LOG:
-                    write_to_error_logs = True
-        if write_to_error_logs:
+        status += str(error_instance) + " "
+        if hasattr(error_instance, 'args'):
+            try:
+                error_tuple = error_instance.args
+                for error_dict in error_tuple:
+                    for one_error in error_dict:
+                        status += '[' + one_error['message'] + '] '
+                        if one_error['message'] in TWITTER_USER_NOT_FOUND_LOG_RESPONSES:
+                            twitter_user_not_found_in_twitter = True
+                        else:
+                            write_to_server_logs = True
+            except Exception as e:
+                status += "PROBLEM_PARSING_TWEEP_ERROR: " + str(e) + " "
+                write_to_server_logs = True
+        else:
+            write_to_server_logs = True
+        if write_to_server_logs:
             handle_exception(error_instance, logger=logger, exception_message=status)
 
     try:
@@ -90,9 +101,10 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
     results = {
         'status':               status,
         'success':              success,
-        'twitter_user_id':      twitter_user_id,
         'twitter_handle':       twitter_handle,
         'twitter_handle_found': twitter_handle_found,
         'twitter_json':         twitter_json,
+        'twitter_user_id':      twitter_user_id,
+        'twitter_user_not_found_in_twitter':   twitter_user_not_found_in_twitter,
     }
     return results

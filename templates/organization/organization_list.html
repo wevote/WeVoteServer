@@ -88,6 +88,12 @@
     </label>
 
     {#  #}
+    <label for="show_twitter_updates_failing_id">
+      <input type="checkbox" name="show_twitter_updates_failing" id="show_twitter_updates_failing_id" value="1"
+             {% if show_twitter_updates_failing %}checked{% endif %} /> Show Twitter Failing&nbsp;&nbsp;&nbsp;
+    </label>
+
+    {#  #}
     <label for="show_organizations_to_be_analyzed_id">
       <input type="checkbox" name="show_organizations_to_be_analyzed" id="show_organizations_to_be_analyzed_id" value="1"
              {% if show_organizations_to_be_analyzed %}checked{% endif %} /> To Be Analyzed
@@ -266,6 +272,9 @@
                 this.form.submit();
             });
             $('#show_organizations_without_email_id').change(function() {
+                this.form.submit();
+            });
+            $('#show_twitter_updates_failing_id').change(function() {
                 this.form.submit();
             });
             $('#show_organizations_to_be_analyzed_id').change(function() {

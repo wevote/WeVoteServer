@@ -10,6 +10,7 @@ import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, generate_random_string, positive_value_exists
 
 
+RETRIEVE_UPDATE_DATA_FROM_TWITTER = 'RETRIEVE_UPDATE_DATA_FROM_TWITTER'
 SUGGESTED_VOTER_GUIDE_FROM_PRIOR = 'SUGGESTED_VOTER_GUIDE_FROM_PRIOR'
 RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS = 'RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS'
 RETRIEVE_POSSIBLE_GOOGLE_LINKS = 'RETRIEVE_POSSIBLE_GOOGLE_LINKS'
@@ -17,6 +18,7 @@ RETRIEVE_POSSIBLE_TWITTER_HANDLES = 'RETRIEVE_POSSIBLE_TWITTER_HANDLES'
 STOP_BULK_SEARCH_TWITTER_LINK_POSSIBILITY = 'STOP_BULK_SEARCH_TWITTER_LINK_POSSIBILITY'
 
 KIND_OF_ACTION_CHOICES = (
+    (RETRIEVE_UPDATE_DATA_FROM_TWITTER, 'Retrieve updated data from Twitter'),
     (RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS, 'Retrieve possible Facebook photos'),
     (RETRIEVE_POSSIBLE_GOOGLE_LINKS, 'Retrieve possible google links'),
     (RETRIEVE_POSSIBLE_TWITTER_HANDLES, 'Retrieve possible twitter handles'),
@@ -323,6 +325,23 @@ def fetch_batch_process_system_search_twitter_on():
         return False
 
 
+def fetch_batch_process_system_update_twitter_on():
+    we_vote_settings_manager = WeVoteSettingsManager()
+    results = we_vote_settings_manager.fetch_setting_results('batch_process_system_update_twitter_on', read_only=True)
+    if results['success']:
+        if results['we_vote_setting_found']:
+            return results['setting_value']
+        else:
+            # Create the setting the first time
+            results = we_vote_settings_manager.save_setting(
+                setting_name='batch_process_system_update_twitter_on',
+                setting_value=True,
+                value_type=WeVoteSetting.BOOLEAN)
+            return results['success']
+    else:
+        return False
+
+
 def fetch_site_unique_id_prefix():
     we_vote_settings_manager = WeVoteSettingsManager()
     site_unique_id_prefix = we_vote_settings_manager.fetch_setting('site_unique_id_prefix')
@@ -487,9 +506,14 @@ class RemoteRequestHistoryManager(models.Manager):
     def __unicode__(self):
         return "RemoteRequestHistoryManager"
 
-    def create_remote_request_history_entry(self, kind_of_action, google_civic_election_id,
-                                            candidate_campaign_we_vote_id='', organization_we_vote_id='',
-                                            number_of_results=0, status=''):
+    def create_remote_request_history_entry(
+            self,
+            kind_of_action='',
+            google_civic_election_id=0,
+            candidate_campaign_we_vote_id='',
+            organization_we_vote_id='',
+            number_of_results=0,
+            status=''):
         """
         Create a new entry for twitter link search request in the RemoteRequestHistory
         :param kind_of_action: 
@@ -509,9 +533,11 @@ class RemoteRequestHistoryManager(models.Manager):
         # save this entry
         try:
             remote_request_history_entry = RemoteRequestHistory.objects.create(
-                kind_of_action=kind_of_action, google_civic_election_id=google_civic_election_id,
+                kind_of_action=kind_of_action,
+                google_civic_election_id=google_civic_election_id,
                 candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
-                organization_we_vote_id=organization_we_vote_id, number_of_results=number_of_results,
+                organization_we_vote_id=organization_we_vote_id,
+                number_of_results=number_of_results,
                 status=status)
             if remote_request_history_entry:
                 success = True
@@ -521,14 +547,14 @@ class RemoteRequestHistoryManager(models.Manager):
                 success = False
                 create_status += "CREATE_REMOTE_REQUEST_HISTORY_ENTRY_FAILED"
         except Exception as e:
-            status += "REMOTE_REQUEST_HISTORY_ENTRY_ERROR"
+            status += "REMOTE_REQUEST_HISTORY_ENTRY_ERROR: " + str(e) + " "
             handle_record_not_saved_exception(e, logger=logger)
 
         results = {
-            'success': success,
-            'status': create_status,
+            'success':                              success,
+            'status':                               create_status,
             'remote_request_history_entry_created': remote_request_history_entry_created,
-            'remote_request_history_entry': remote_request_history_entry,
+            'remote_request_history_entry':         remote_request_history_entry,
         }
         return results
 

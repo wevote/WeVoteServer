@@ -102,6 +102,9 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'youtube_url',
 ]
 
+KIND_OF_LOG_ENTRY_HANDLE_NOT_FOUND_BY_TWITTER = 'HANDLE_NOT_FOUND_BY_TWITTER'
+KIND_OF_LOG_ENTRY_DATA_UPDATED_FROM_TWITTER = 'DATA_UPDATED_FROM_TWITTER'
+
 PROFILE_IMAGE_TYPE_FACEBOOK = 'FACEBOOK'
 PROFILE_IMAGE_TYPE_TWITTER = 'TWITTER'
 PROFILE_IMAGE_TYPE_UNKNOWN = 'UNKNOWN'
@@ -114,6 +117,24 @@ PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES = (
     (PROFILE_IMAGE_TYPE_UPLOADED, 'Uploaded'),
     (PROFILE_IMAGE_TYPE_VOTE_USA, 'Vote-USA'),
 )
+
+
+# KIND_OF_LOG_ENTRY_HANDLE_NOT_FOUND_BY_TWITTER = 'HANDLE_NOT_FOUND_BY_TWITTER'
+# KIND_OF_LOG_ENTRY_DATA_UPDATED_FROM_TWITTER = 'DATA_UPDATED_FROM_TWITTER'
+class CandidateLogEntry(models.Model):
+    """
+    We learn something about a candidate field. For example, Twitter tells us it cannot find candidate_twitter_handle.
+    """
+    batch_process_id = models.PositiveIntegerField(db_index=True, null=True, unique=False)
+    candidate_we_vote_id = models.CharField(max_length=255, null=False, unique=False)
+    candidate_field_name = models.CharField(max_length=255, null=True, unique=False)
+    date_time = models.DateTimeField(null=False, auto_now_add=True)
+    google_civic_election_id = models.PositiveIntegerField(db_index=True, null=True, unique=False)
+    is_from_twitter = models.BooleanField(db_index=True, default=False, null=True)  # Error retrieving from Twitter
+    kind_of_log_entry = models.CharField(db_index=True, max_length=50, default=None, null=True)
+    log_entry_deleted = models.BooleanField(db_index=True, default=False)
+    log_entry_message = models.TextField(null=True)
+    state_code = models.CharField(db_index=True, max_length=2, null=True)
 
 
 class CandidateListManager(models.Manager):
@@ -1401,18 +1422,21 @@ class CandidateListManager(models.Manager):
         office_we_vote_id_list_by_candidate_we_vote_id = {}
         status = ''
         success = True
-        results = self.retrieve_candidate_to_office_link_list(
-            google_civic_election_id_list=google_civic_election_id_list,
-            state_code=limit_to_this_state_code)
-        if not positive_value_exists(results['success']):
-            status += results['status']
-            success = False
+        if len(google_civic_election_id_list) > 0:
+            results = self.retrieve_candidate_to_office_link_list(
+                google_civic_election_id_list=google_civic_election_id_list,
+                state_code=limit_to_this_state_code)
+            if not positive_value_exists(results['success']):
+                status += results['status']
+                success = False
+            else:
+                candidate_to_office_link_list = results['candidate_to_office_link_list']
+                for candidate_to_office_link in candidate_to_office_link_list:
+                    candidate_we_vote_id_list.append(candidate_to_office_link.candidate_we_vote_id)
+                    office_we_vote_id_list_by_candidate_we_vote_id[candidate_to_office_link.candidate_we_vote_id]\
+                        = candidate_to_office_link.contest_office_we_vote_id
         else:
-            candidate_to_office_link_list = results['candidate_to_office_link_list']
-            for candidate_to_office_link in candidate_to_office_link_list:
-                candidate_we_vote_id_list.append(candidate_to_office_link.candidate_we_vote_id)
-                office_we_vote_id_list_by_candidate_we_vote_id[candidate_to_office_link.candidate_we_vote_id]\
-                    = candidate_to_office_link.contest_office_we_vote_id
+            status += "RETRIEVE_CANDIDATE_WE_VOTE_ID_LIST_NO_ELECTION_PROVIDED "
         results = {
             'status':                       status,
             'success':                      success,
@@ -1930,8 +1954,11 @@ class CandidateCampaign(models.Model):
 
     twitter_url = models.URLField(verbose_name='twitter url of candidate', blank=True, null=True)
     twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)
-    candidate_twitter_handle = models.CharField(
-        verbose_name='candidate twitter screen_name', max_length=255, null=True, unique=False)
+    # TODO Update whole system to handle candidate_twitter_handle2 and 3
+    candidate_twitter_handle = models.CharField(max_length=255, null=True, unique=False)
+    candidate_twitter_handle2 = models.CharField(max_length=255, null=True, unique=False)
+    candidate_twitter_handle3 = models.CharField(max_length=255, null=True, unique=False)
+    candidate_twitter_updates_failing = models.BooleanField(default=False)
     twitter_name = models.CharField(
         verbose_name="candidate plain text name from twitter", max_length=255, null=True, blank=True)
     twitter_location = models.CharField(
@@ -3688,6 +3715,74 @@ class CandidateManager(models.Manager):
             candidate_object.save()
 
         return candidate_object
+
+    def create_candidate_log_entry(
+            self,
+            batch_process_id=None,
+            candidate_field_name=None,
+            candidate_we_vote_id=None,
+            google_civic_election_id=None,
+            is_from_twitter=None,
+            kind_of_log_entry=None,
+            log_entry_message=None,
+            state_code=None,
+    ):
+        """
+        Create CandidateLogEntry data
+        """
+        success = True
+        status = " "
+        candidate_log_entry_saved = False
+        candidate_log_entry = None
+        missing_required_variable = False
+
+        if not is_from_twitter:
+            missing_required_variable = True
+            status += 'MISSING_IS_FROM_SOURCE '
+        if not kind_of_log_entry:
+            missing_required_variable = True
+            status += 'MISSING_KIND_OF_LOG_ENTRY '
+        if not candidate_we_vote_id:
+            missing_required_variable = True
+            status += 'MISSING_CANDIDATE_WE_VOTE_ID '
+        if not state_code:
+            missing_required_variable = True
+            status += 'MISSING_STATE_CODE '
+
+        if missing_required_variable:
+            results = {
+                'success':                      success,
+                'status':                       status,
+                'candidate_log_entry_saved':    candidate_log_entry_saved,
+                'candidate_log_entry':          candidate_log_entry,
+            }
+            return results
+
+        try:
+            candidate_log_entry = CandidateLogEntry.objects.using('analytics').create(
+                batch_process_id=batch_process_id,
+                candidate_field_name=candidate_field_name,
+                candidate_we_vote_id=candidate_we_vote_id,
+                google_civic_election_id=google_civic_election_id,
+                is_from_twitter=is_from_twitter,
+                kind_of_log_entry=kind_of_log_entry,
+                log_entry_message=log_entry_message,
+                state_code=state_code,
+            )
+            success = True
+            candidate_log_entry_saved = True
+            status += 'CANDIDATE_LOG_ENTRY_SAVED '
+        except Exception as e:
+            success = False
+            status += 'COULD_NOT_SAVE_CANDIDATE_LOG_ENTRY: ' + str(e) + ' '
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'candidate_log_entry_saved':    candidate_log_entry_saved,
+            'candidate_log_entry':          candidate_log_entry,
+        }
+        return results
 
     def create_candidate_row_entry(self, update_values):
         """

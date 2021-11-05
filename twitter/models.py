@@ -536,6 +536,53 @@ class TwitterUserManager(models.Manager):
         }
         return results
 
+    def retrieve_twitter_link_to_organization_list(self, read_only=True, return_we_vote_id_list_only=False):
+        """
+
+        :param read_only:
+        :param return_we_vote_id_list_only:
+        :return:
+        """
+        organization_we_vote_id_list = []
+        organization_we_vote_id_list_found = False
+        status = ''
+        twitter_link_to_organization_list = []
+        twitter_link_to_organization_list_found = False
+        try:
+            if read_only:
+                queryset = TwitterLinkToOrganization.objects.using('readonly').all()
+            else:
+                queryset = TwitterLinkToOrganization.objects.all()
+            if positive_value_exists(return_we_vote_id_list_only):
+                queryset = queryset.values_list('organization_we_vote_id', flat=True).distinct()
+                organization_we_vote_id_list = list(queryset)
+                if len(organization_we_vote_id_list):
+                    status += "RETRIEVE_TWITTER_LINK_TO_ORGANIZATION_WE_VOTE_ID_LIST_FOUND "
+                    organization_we_vote_id_list_found = True
+                else:
+                    status += "RETRIEVE_TWITTER_LINK_TO_ORGANIZATION_WE_VOTE_ID_LIST_NOT_FOUND "
+            else:
+                twitter_link_to_organization_list = list(queryset)
+                if len(twitter_link_to_organization_list):
+                    status += "RETRIEVE_TWITTER_LINK_TO_ORGANIZATION_LIST_FOUND "
+                    twitter_link_to_organization_list_found = True
+                else:
+                    status += "RETRIEVE_TWITTER_LINK_TO_ORGANIZATION_LIST_NOT_FOUND "
+            success = True
+        except Exception as e:
+            success = False
+            status = 'FAILED retrieve_twitter_link_to_organization_list: ' + str(e) + " "
+
+        results = {
+            'success':                                  success,
+            'status':                                   status,
+            'organization_we_vote_id_list':             organization_we_vote_id_list,
+            'organization_we_vote_id_list_found':       organization_we_vote_id_list_found,
+            'twitter_link_to_organization_list_found':  twitter_link_to_organization_list_found,
+            'twitter_link_to_organization_list':        twitter_link_to_organization_list,
+        }
+        return results
+
     def retrieve_twitter_link_to_voter_from_twitter_user_id(self, twitter_user_id, read_only=False):
         return self.retrieve_twitter_link_to_voter(twitter_user_id, read_only=read_only)
 

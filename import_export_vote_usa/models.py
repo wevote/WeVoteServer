@@ -75,8 +75,6 @@ class VoteUSAApiCounterManager(models.Manager):
         attempt_count = 0
 
         try:
-            # Limit the number of times this runs to EITHER 1) 5 positive numbers
-            #  OR 2) 30 days in the past, whichever comes first
             while number_found <= days_to_display and attempt_count <= maximum_attempts:
                 attempt_count += 1
                 counter_queryset = VoteUSAApiCounter.objects.all()
