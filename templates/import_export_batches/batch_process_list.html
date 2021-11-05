@@ -14,7 +14,8 @@
     {% if not batch_process_system_api_refresh_on %} <span style="color: darkred;">[API Refresh OFF]</span>{% endif %}
     {% if not batch_process_system_ballot_items_on %} <span style="color: darkred;">[Ballot Item Processing OFF]</span>{% endif %}
     {% if not batch_process_system_calculate_analytics_on %} <span style="color: darkred;">[Analytics Processing OFF]</span>{% endif %}
-    {% if not batch_process_system_search_twitter_on %} <span style="color: darkred;">[Twitter Processing OFF]</span>{% endif %}
+    {% if not batch_process_system_search_twitter_on %} <span style="color: darkred;">[Twitter Searching OFF]</span>{% endif %}
+    {% if not batch_process_system_update_twitter_on %} <span style="color: darkred;">[Twitter Updates OFF]</span>{% endif %}
 </h1>
 
 <ul>
@@ -40,7 +41,11 @@
         </a>
         &nbsp;&nbsp;&nbsp;
         <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=SEARCH_TWITTER&{{ toggle_system_url_variables }}" >
-        {% if batch_process_system_search_twitter_on %}Turn OFF Twitter Processing{% else %}<strong>Turn ON Twitter Processing</strong>{% endif %}
+        {% if batch_process_system_search_twitter_on %}Turn OFF Twitter Search{% else %}<strong>Turn ON Twitter Search</strong>{% endif %}
+        </a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=UPDATE_TWITTER_DATA&{{ toggle_system_url_variables }}" >
+        {% if batch_process_system_update_twitter_on %}Turn OFF Twitter Updates{% else %}<strong>Turn ON Twitter Updates</strong>{% endif %}
         </a>
     </li>
     <li><a href="{% url 'import_export_batches:batch_set_list' %}" target="_blank" >
@@ -135,6 +140,9 @@
         <option value="SEARCH_TWITTER"
         {% if kind_of_processes_to_show == "SEARCH_TWITTER" %} selected="selected"{% endif %}>
             Search Twitter</option>
+        <option value="UPDATE_TWITTER_DATA"
+        {% if kind_of_processes_to_show == "UPDATE_TWITTER_DATA" %} selected="selected"{% endif %}>
+            Update Twitter Data</option>
     </select>
 &nbsp;&nbsp;&nbsp;
     <label for="show_checked_out_processes_only_id">

@@ -158,6 +158,12 @@
     <div class="col-sm-8">
         <input type="text" name="organization_twitter_handle" id="organization_twitter_handle_id" class="form-control"
                value="{% if organization %}{{ organization.organization_twitter_handle }}{% else %}{{ organization_twitter_handle }}{% endif %}" />
+        {% if organization.organization_twitter_updates_failing %}
+            <input type="checkbox" name="organization_twitter_updates_failing" id="organization_twitter_updates_failing_id" value="1"
+                    checked />
+            <label for="organization_twitter_updates_failing_id" style="font-weight: normal !important;">Twitter Updates Failing. <span style="color: darkgray">Our automated Twitter data update script had trouble retrieving a handle. Uncheck when fixed.</span></label>
+        {% endif %}
+
     </div>
 </div>
 

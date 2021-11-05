@@ -81,12 +81,10 @@ class CTCLApiCounterManager(models.Manager):
         daily_summaries = []
         day_on_stage = date.today()  # TODO: We need to work out the timezone questions
         number_found = 0
-        maximum_attempts = 45
+        maximum_attempts = 365
         attempt_count = 0
 
         try:
-            # Limit the number of times this runs to EITHER 1) 5 positive numbers
-            #  OR 2) 30 days in the past, whichever comes first
             while number_found <= days_to_display and attempt_count <= maximum_attempts:
                 attempt_count += 1
                 counter_queryset = CTCLApiCounter.objects.all()

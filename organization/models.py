@@ -1853,18 +1853,21 @@ class OrganizationManager(models.Manager):
         }
         return results
 
-    def update_organization_twitter_details(self, organization, twitter_json,
-                                            cached_twitter_profile_image_url_https=False,
-                                            cached_twitter_profile_background_image_url_https=False,
-                                            cached_twitter_profile_banner_url_https=False,
-                                            we_vote_hosted_profile_image_url_large=False,
-                                            we_vote_hosted_profile_image_url_medium=False,
-                                            we_vote_hosted_profile_image_url_tiny=False):
+    def update_organization_twitter_details(
+            self,
+            organization,
+            twitter_json,
+            cached_twitter_profile_image_url_https=False,
+            cached_twitter_profile_background_image_url_https=False,
+            cached_twitter_profile_banner_url_https=False,
+            we_vote_hosted_profile_image_url_large=False,
+            we_vote_hosted_profile_image_url_medium=False,
+            we_vote_hosted_profile_image_url_tiny=False):
         """
         Update an organization entry with details retrieved from the Twitter API.
         """
         success = False
-        status = "ENTERING_UPDATE_ORGANIZATION_TWITTER_DETAILS"
+        status = "ENTERING_UPDATE_ORGANIZATION_TWITTER_DETAILS "
         values_changed = False
 
         # TODO DALE We should stop saving organization_twitter_handle without saving a TwitterLinkToOrganization
@@ -1944,10 +1947,10 @@ class OrganizationManager(models.Manager):
             if values_changed:
                 organization.save()
                 success = True
-                status = "SAVED_ORG_TWITTER_DETAILS"
+                status += "SAVED_ORG_TWITTER_DETAILS "
             else:
                 success = True
-                status = "NO_CHANGES_SAVED_TO_ORG_TWITTER_DETAILS"
+                status += "NO_CHANGES_SAVED_TO_ORG_TWITTER_DETAILS "
 
         results = {
             'success':                  success,
@@ -2857,6 +2860,7 @@ class Organization(models.Model):
         verbose_name='organization twitter screen_name', max_length=255, null=True, unique=False)
     # organization_twitter_handle2 = models.CharField(
     #     verbose_name='organization twitter screen_name2', max_length=255, null=True, unique=False)
+    organization_twitter_updates_failing = models.BooleanField(default=False)
     twitter_name = models.CharField(
         verbose_name="org name from twitter", max_length=255, null=True, blank=True)
     twitter_location = models.CharField(
