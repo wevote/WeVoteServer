@@ -421,7 +421,8 @@ def process_next_general_maintenance():
         search_twitter_process_list = [SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE]
         kind_of_processes_to_run = kind_of_processes_to_run + search_twitter_process_list
     if fetch_batch_process_system_update_twitter_on():
-        kind_of_processes_to_run = kind_of_processes_to_run + [UPDATE_TWITTER_DATA_FROM_TWITTER]
+        update_twitter_process_list = [UPDATE_TWITTER_DATA_FROM_TWITTER]
+        kind_of_processes_to_run = kind_of_processes_to_run + update_twitter_process_list
 
     if not fetch_batch_process_system_on():
         status += "BATCH_PROCESS_SYSTEM_TURNED_OFF-GENERAL "
