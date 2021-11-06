@@ -5324,6 +5324,8 @@ class BatchProcessManager(models.Manager):
                         checked_out_expiration_time = 600  # 10 minutes * 60 seconds
                     elif batch_process.kind_of_process == SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE:
                         checked_out_expiration_time = 300  # 5 minutes * 60 seconds - See SEARCH_TWITTER_TIMED_OUT
+                    elif batch_process.kind_of_process == UPDATE_TWITTER_DATA_FROM_TWITTER:
+                        checked_out_expiration_time = 600  # 10 minutes * 60 seconds - See UPDATE_TWITTER_TIMED_OUT
                     else:
                         checked_out_expiration_time = 1800  # 30 minutes * 60 seconds
                     date_checked_out_time_out = \
