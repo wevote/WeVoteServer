@@ -273,11 +273,12 @@ def fetch_number_of_candidates_needing_twitter_search():
 
 
 def fetch_number_of_candidates_needing_twitter_update():
+    candidate_we_vote_id_list_to_exclude = []
     candidate_list_manager = CandidateListManager()
     election_manager = ElectionManager()
     status = ''
     # Run Twitter account search and analysis on candidates without a linked or possible Twitter account
-    candidate_queryset = CandidateCampaign.objects.using('readonly').all()
+
     # Limit this search to upcoming_elections only
     results = election_manager.retrieve_upcoming_google_civic_election_id_list()
     if not positive_value_exists(results['success']):
@@ -288,31 +289,39 @@ def fetch_number_of_candidates_needing_twitter_update():
         google_civic_election_id_list)
     if not positive_value_exists(results['success']):
         status += results['status']
-    candidate_we_vote_id_list = results['candidate_we_vote_id_list']
-    candidate_queryset = candidate_queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
-    candidate_queryset = candidate_queryset.exclude(candidate_twitter_updates_failing=True)
-    candidate_queryset = candidate_queryset.exclude(
-        Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle=""))
-    # Exclude candidates we have requested information for in the last month
-    try:
-        # Exclude candidates searched for in the last month
-        remote_request_query = RemoteRequestHistory.objects.using('readonly').all()
-        one_month_of_seconds = 60 * 60 * 24 * 30  # 60 seconds, 60 minutes, 24 hours, 30 days
-        one_month_ago = now() - timedelta(seconds=one_month_of_seconds)
-        remote_request_query = remote_request_query.filter(datetime_of_action__gt=one_month_ago)
-        remote_request_query = remote_request_query.filter(kind_of_action__iexact=RETRIEVE_UPDATE_DATA_FROM_TWITTER)
-        remote_request_query = remote_request_query.exclude(
-            Q(candidate_campaign_we_vote_id__isnull=True) | Q(candidate_campaign_we_vote_id=""))
-        remote_request_list = remote_request_query.values_list('candidate_campaign_we_vote_id', flat=True).distinct()
-        if len(remote_request_list):
-            candidate_queryset = candidate_queryset.exclude(we_vote_id__in=remote_request_list)
-    except Exception as e:
-        status += "FAILED_FETCHING_CANDIDATES_FROM_REMOTE_REQUEST_HISTORY: " + str(e) + " "
+    upcoming_candidate_we_vote_id_list_to_include = results['candidate_we_vote_id_list']
 
-    try:
-        candidate_count = candidate_queryset.count()
-    except Exception as e:
-        candidate_count = 0
+    if len(upcoming_candidate_we_vote_id_list_to_include) > 0:
+        # Exclude candidates we have requested information for in the last month
+        try:
+            # Exclude candidates searched for in the last month
+            remote_request_query = RemoteRequestHistory.objects.using('readonly').all()
+            one_month_of_seconds = 60 * 60 * 24 * 30  # 60 seconds, 60 minutes, 24 hours, 30 days
+            one_month_ago = now() - timedelta(seconds=one_month_of_seconds)
+            remote_request_query = remote_request_query.filter(datetime_of_action__gt=one_month_ago)
+            remote_request_query = remote_request_query.filter(kind_of_action__iexact=RETRIEVE_UPDATE_DATA_FROM_TWITTER)
+            remote_request_query = remote_request_query.exclude(
+                Q(candidate_campaign_we_vote_id__isnull=True) | Q(candidate_campaign_we_vote_id=""))
+            remote_request_query = \
+                remote_request_query.values_list('candidate_campaign_we_vote_id', flat=True).distinct()
+            candidate_we_vote_id_list_to_exclude = list(remote_request_query)
+        except Exception as e:
+            status += "FAILED_FETCHING_CANDIDATES_FROM_REMOTE_REQUEST_HISTORY: " + str(e) + " "
+
+    candidate_we_vote_id_list = \
+        list(set(upcoming_candidate_we_vote_id_list_to_include) - set(candidate_we_vote_id_list_to_exclude))
+
+    candidate_count = 0
+    if len(candidate_we_vote_id_list) > 0:
+        try:
+            candidate_queryset = CandidateCampaign.objects.using('readonly').all()
+            candidate_queryset = candidate_queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
+            candidate_queryset = candidate_queryset.exclude(candidate_twitter_updates_failing=True)
+            candidate_queryset = candidate_queryset.exclude(
+                Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle=""))
+            candidate_count = candidate_queryset.count()
+        except Exception as e:
+            candidate_count = 0
 
     return candidate_count
 
@@ -638,7 +647,7 @@ def refresh_twitter_organization_details(organization, twitter_user_id=0):
 
     twitter_user_found = False
     if positive_value_exists(twitter_user_id):
-        status += "ORGANIZATION_TWITTER_DETAILS-REACHING_OUT_TO_TWITTER-BY_USER_ID "
+        status += "REACHING_OUT_TO_TWITTER-BY_USER_ID "
         results = retrieve_twitter_user_info(twitter_user_id)
         if results['success']:
             twitter_user_found = True
@@ -649,7 +658,7 @@ def refresh_twitter_organization_details(organization, twitter_user_id=0):
             except Exception as e:
                 status += "COULD_NOT_MARK_ORGANIZATION_TWITTER_UPDATES_FAILING1: " + str(e) + " "
     if not twitter_user_found and positive_value_exists(organization.organization_twitter_handle):
-        status += "ORGANIZATION_TWITTER_DETAILS-REACHING_OUT_TO_TWITTER-BY_HANDLE "
+        status += "REACHING_OUT_TO_TWITTER-BY_HANDLE "
         # organization_twitter_handle = organization.organization_twitter_handle
         twitter_user_id_zero = 0
         results = retrieve_twitter_user_info(twitter_user_id_zero, organization.organization_twitter_handle)
@@ -663,7 +672,7 @@ def refresh_twitter_organization_details(organization, twitter_user_id=0):
                 status += "COULD_NOT_MARK_ORGANIZATION_TWITTER_UPDATES_FAILING2: " + str(e) + " "
 
     if twitter_user_found:
-        status += "ORGANIZATION_TWITTER_DETAILS_RETRIEVED_FROM_TWITTER "
+        status += str(organization.organization_twitter_handle) + "-RETRIEVED_FROM_TWITTER "
         twitter_user_id = results['twitter_user_id']
 
         # Get original image url for cache original size image
@@ -764,13 +773,16 @@ def refresh_twitter_organization_details(organization, twitter_user_id=0):
             voter_guide_manager = VoterGuideManager()
             voter_guide_results = \
                 voter_guide_manager.update_organization_voter_guides_with_organization_data(organization)
+        else:
+            status += "ORGANIZATION_TWITTER_DETAILS_RETRIEVED_FROM_TWITTER_BUT_NOT_SAVED "
     else:
-        status += "ORGANIZATION_TWITTER_DETAILS-CLEARING_DETAILS "
+        status += str(organization.organization_twitter_handle) + "-CLEARING_TWITTER_DETAILS "
         save_organization_results = organization_manager.clear_organization_twitter_details(organization)
 
         if save_organization_results['success']:
             results = update_social_media_statistics_in_other_tables(organization)
-            status += "ORGANIZATION_TWITTER_DETAILS_CLEARED_FROM_DB "
+        else:
+            status += "ORGANIZATION_TWITTER_DETAILS_NOT_CLEARED_FROM_DB "
 
     results = {
         'success':              True,
@@ -958,9 +970,9 @@ def retrieve_and_update_candidates_needing_twitter_update(
     if not positive_value_exists(results['success']):
         status += results['status']
         success = False
-    candidate_we_vote_id_list_to_include = results['candidate_we_vote_id_list']
+    upcoming_candidate_we_vote_id_list_to_include = results['candidate_we_vote_id_list']
 
-    if len(candidate_we_vote_id_list_to_include):
+    if len(upcoming_candidate_we_vote_id_list_to_include):
         try:
             # Exclude candidates we have requested updates from in the last month
             remote_request_query = RemoteRequestHistory.objects.all()
@@ -979,7 +991,7 @@ def retrieve_and_update_candidates_needing_twitter_update(
 
     candidates_to_update = 0
     candidates_updated = 0
-    if not success or len(candidate_we_vote_id_list_to_include) == 0:
+    if not success or len(upcoming_candidate_we_vote_id_list_to_include) == 0:
         results = {
             'success':              success,
             'status':               status,
@@ -989,7 +1001,7 @@ def retrieve_and_update_candidates_needing_twitter_update(
         return results
 
     candidate_we_vote_id_list = \
-        list(set(candidate_we_vote_id_list_to_include) - set(candidate_we_vote_id_list_to_exclude))
+        list(set(upcoming_candidate_we_vote_id_list_to_include) - set(candidate_we_vote_id_list_to_exclude))
 
     try:
         candidate_queryset = candidate_queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
