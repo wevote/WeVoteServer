@@ -237,8 +237,8 @@ this step.  To see if postgres is already running, check with lsof in a terminal
 
     or
    
-    **If you don't mind fully deleting any Postgres database data that you have already installed**, then delete the existing Postgres now.  Postgres
-    can be setup in many ways, so there are no instructions here on how to delete Postgres. You can start with running `which postgres`
+    **If you don't mind fully deleting any Postgres database data that you have already installed**, then delete the existing Postgres now.  If you installed postgres with homebrew try `brew uninstall posgresql`, 
+    but if that fails Postgres can be setup in many ways, so there are no detailed instructions here on how to delete Postgres (but. You can start with running `which postgres`
     in a terminal and going to that directory and deleting the instance or the symbolic links to the instance.  
     Next step is to reboot your Mac to see if Postgres starts up again.
 
@@ -247,18 +247,58 @@ this step.  To see if postgres is already running, check with lsof in a terminal
     **If you have to keep some data that is already stored in the Postgres instance on your Mac** that you absolutely need to 
     retain, then you will need to manually upgrade Postgres.  This is a ton of work, and is rarely necessary.
    
-1. Install PostgreSQL by running the following command:
+3. Install PostgreSQL by running the following command:
 
     `(venv) $ brew install postgresql`
 
-1. Start PostgreSQL (this is actually instructing the macOS [launchd](https://en.wikipedia.org/wiki/Launchd) to start 
+4. Start PostgreSQL (this is actually instructing the macOS [launchd](https://en.wikipedia.org/wiki/Launchd) to start 
     Postgres every time you start your Mac):
 
     `(venv) $ brew services start postgresql`
 
-1. Create a default database, and a default user, and then log into the 'psql' PostgreSQL command interpreter:
+5. Create a default database, and a default user, and then log into the 'psql postgres' PostgreSQL command interpreter:
 
+    _New way: November 2021, using Postgres 14.0_
     ```
+   (PycharmEnvironments) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 ~ % psql postgres
+   psql (14.0)
+   Type "help" for help.
+   
+   postgres=# createdb
+   postgres-# createuser -s postgres
+   postgres-# \du
+                                        List of roles
+      Role name  |                         Attributes                         | Member of 
+    -------------+------------------------------------------------------------+-----------
+     stevepodell | Superuser, Create role, Create DB, Replication, Bypass RLS | {}
+    
+   postgres-#
+   postgres=# create database WeVoteServerDb;
+   CREATE DATABASE
+   postgres=# grant all privileges on database WeVoteServerDB to postgres;
+   GRANT
+   postgres=# 
+   postgres=# \l
+                                        List of databases
+          Name      |    Owner    | Encoding | Collate | Ctype |      Access privileges      
+   ----------------+-------------+----------+---------+-------+-----------------------------
+     WeVoteServerDB | stevepodell | UTF8     | C       | C     | 
+     postgres       | stevepodell | UTF8     | C       | C     | 
+     template0      | stevepodell | UTF8     | C       | C     | =c/stevepodell             +
+                    |             |          |         |       | stevepodell=CTc/stevepodell
+     template1      | stevepodell | UTF8     | C       | C     | =c/stevepodell             +
+                    |             |          |         |       | stevepodell=CTc/stevepodell
+     wevoteserverdb | stevepodell | UTF8     | C       | C     | =Tc/stevepodell            +
+                    |             |          |         |       | stevepodell=CTc/stevepodell+
+                    |             |          |         |       | postgres=CTc/stevepodell
+   (5 rows)
+   postgres=#
+   ```
+   brew created a superuser 'stevepodell' with no password, you can add a password within psql if you wish.
+
+   _old way ..._
+
+    ```   
     (venv) $ createdb
     (venv) $ createuser -s postgres
     (venv) $ psql
@@ -288,26 +328,26 @@ this step.  To see if postgres is already running, check with lsof in a terminal
 
     That `\du` command confirms that we have a 'postgres' role.  The `\q` command quits psql.
 
- 1. Now you are ready to install pgAdmin4 (a powerful WYSIWYG database administration tool that is open source 
+6. Now you are ready to install pgAdmin4 (a powerful WYSIWYG database administration tool that is open source 
  and built by volunteers (Many thanks to the pgAdmin team!)). Run:
 
-    `(venv) $ brew install --cask pgadmin4`
+   `(venv) $ brew install --cask pgadmin4`
     
-    This can take a few minutes to complete.  When `brew install --cask pgadmin4` finishes, it prints out `Moving App 'pgAdmin 4.app' to '/Applications/pgAdmin 4.app'.`
+   This can take a few minutes to complete.  When `brew install --cask pgadmin4` finishes, it prints out `Moving App 'pgAdmin 4.app' to '/Applications/pgAdmin 4.app'.`
 
-    The latest pgAdmin4 has a webapp architecture (it is not a compiled program).  The app you start from the Application folder is actually a 
-    single purpose web server, and the UI for the app appears in Chrome as a local website.
+   The latest pgAdmin4 has a webapp architecture (it is not a compiled program).  The app you start from the Application folder is actually a 
+   single purpose web server, and the UI for the app appears in Chrome as a local website.
 
-1. Use Spotlight to find and launch the pgAdmin4 app.  Once launched, the pgAdmin4 webapp will display in a new tab within Chrome.
+7. Use Spotlight to find and launch the pgAdmin4 app.  Once launched, the pgAdmin4 webapp will display in a new tab within Chrome.
    On that new tab, Right-click on "Servers" and choose "Create > Server"
    
    <img width="800" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/CreateServerInPgAdmin2.png"> 
 
-1. On the first tab of the "Create - Server" dialog, add into the Name field: WeVoteServer
+8. On the first tab of the "Create - Server" dialog, add into the Name field: WeVoteServer
 
    <img width="500" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/CreateServerDialog.png"> 
 
-1. Switch to "Connection" tab, and enter the following information:
+9. Switch to "Connection" tab, and enter the following information:
    * Host name: localhost
    * Port: 5432
    * Maintenance database: postgres
@@ -317,17 +357,17 @@ this step.  To see if postgres is already running, check with lsof in a terminal
 
     ![ScreenShot](images/CreateServerConnection2.png)
 
-1. Press Save
+10. Press Save
 
-1. Create the Database by right-clicking on Databases in the server tree on the left. Then select  
-   Create > Database on the cascading menu
-   <img width="800" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/CreateDatabase.png"> 
+11. Create the Database by right-clicking on Databases in the server tree on the left. Then select  
+    Create > Database on the cascading menu
+    <img width="800" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/CreateDatabase.png"> 
 
-1. Name the new database WeVoteServerDB and press save.
+12. Name the new database WeVoteServerDB and press save.
 
-   <img width="800" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/NameDatabase.png"> 
+    <img width="800" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/NameDatabase.png"> 
    
-   <!-- owner is 'admin' in the picture, but defaulted to 'postgres' in my install -->
+    <!-- owner is 'admin' in the picture, but defaulted to 'postgres' in my install -->
 
 ## Initialize an empty WeVoteServerDB
 

@@ -15,6 +15,15 @@ waiting for server to start.... done
 server started
 (WeVoteServerPy3.7) Steves-MacBook-Pro-32GB-Oct-2018:WeVoteServer stevepodell$ 
 ```
+in a later setup (2021)
+```
+(PycharmEnvironments) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % postgres --version
+postgres (PostgreSQL) 14.0
+(PycharmEnvironments) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % psql --version
+psql (PostgreSQL) 14.0
+(PycharmEnvironments) stevepodell@Steves-MacBook-Pro-32GB-Oct-2109 WeVoteServer % 
+```
+
 #### Setting up ngrok to send stripe webhooks to your local python server
 ```
 (WeVoteServerPy3.7) Steves-MacBook-Pro-32GB-Oct-2018:PycharmProjects stevepodell$ ~/PythonProjects/ngrok http 8000 -host-header="localhost:8000"
