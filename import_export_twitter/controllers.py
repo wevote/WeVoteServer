@@ -595,7 +595,7 @@ def refresh_twitter_candidate_details(candidate):
             save_politician_details_results = politician_manager.update_politician_details_from_candidate(
                 candidate)
             save_position_from_candidate_results = update_all_position_details_from_candidate(candidate)
-        elif results['twitter_user_not_found_in_twitter']:
+        elif results['twitter_user_not_found_in_twitter'] or results['twitter_user_suspended_by_twitter']:
             try:
                 candidate.candidate_twitter_updates_failing = True
                 candidate.save()
@@ -651,20 +651,20 @@ def refresh_twitter_organization_details(organization, twitter_user_id=0):
         results = retrieve_twitter_user_info(twitter_user_id)
         if results['success']:
             twitter_user_found = True
-        elif results['twitter_user_not_found_in_twitter']:
+        elif results['twitter_user_not_found_in_twitter'] or results['twitter_user_suspended_by_twitter']:
             try:
                 organization.organization_twitter_updates_failing = True
                 organization.save()
             except Exception as e:
                 status += "COULD_NOT_MARK_ORGANIZATION_TWITTER_UPDATES_FAILING1: " + str(e) + " "
     if not twitter_user_found and positive_value_exists(organization.organization_twitter_handle):
-        status += "REACHING_OUT_TO_TWITTER-BY_HANDLE "
+        # status += "REACHING_OUT_TO_TWITTER-BY_HANDLE "
         # organization_twitter_handle = organization.organization_twitter_handle
         twitter_user_id_zero = 0
         results = retrieve_twitter_user_info(twitter_user_id_zero, organization.organization_twitter_handle)
         if results['success']:
             twitter_user_found = True
-        elif results['twitter_user_not_found_in_twitter']:
+        elif results['twitter_user_not_found_in_twitter'] or results['twitter_user_suspended_by_twitter']:
             try:
                 organization.organization_twitter_updates_failing = True
                 organization.save()
@@ -738,7 +738,7 @@ def refresh_twitter_organization_details(organization, twitter_user_id=0):
             we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
             we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
         if save_organization_results['success']:
-            status += "ORGANIZATION_TWITTER_DETAILS_RETRIEVED_FROM_TWITTER_AND_SAVED "
+            # status += "ORGANIZATION_TWITTER_DETAILS_SUCCESS "
 
             # Now update the Twitter statistics information in other We Vote tables
             organization = save_organization_results['organization']
@@ -776,7 +776,7 @@ def refresh_twitter_organization_details(organization, twitter_user_id=0):
         else:
             status += "ORGANIZATION_TWITTER_DETAILS_RETRIEVED_FROM_TWITTER_BUT_NOT_SAVED "
     else:
-        status += str(organization.organization_twitter_handle) + "-CLEARING_TWITTER_DETAILS "
+        status += str(organization.organization_twitter_handle) + "-NOT_RETRIEVED_CLEARING_TWITTER_DETAILS "
         save_organization_results = organization_manager.clear_organization_twitter_details(organization)
 
         if save_organization_results['success']:
@@ -1057,6 +1057,7 @@ def retrieve_and_update_candidates_needing_twitter_update(
 
 def retrieve_and_update_organizations_needing_twitter_update():
     organization_we_vote_id_list_to_exclude = []
+    organizations_not_updated = 0
     status = ''
     success = True
 
@@ -1090,6 +1091,7 @@ def retrieve_and_update_organizations_needing_twitter_update():
             'status':                   status,
             'organizations_to_update':  organizations_to_update,
             'organizations_updated':    organizations_updated,
+            'organizations_not_updated':    organizations_not_updated,
         }
         return results
 
@@ -1121,10 +1123,16 @@ def retrieve_and_update_organizations_needing_twitter_update():
         status += "RETRIEVE_ORGANIZATION_UPDATE_DATA_FROM_TWITTER_LOOP-TOTAL: " + str(organizations_to_update) + " "
         remote_request_history_manager = RemoteRequestHistoryManager()
         for organization in organization_list:
-            results = refresh_twitter_organization_details(organization)
-            status += results['status']
-            if results['twitter_user_found']:
-                organizations_updated += 1
+            try:
+                results = refresh_twitter_organization_details(organization)
+                status += results['status']
+                if results['twitter_user_found']:
+                    organizations_updated += 1
+                else:
+                    organizations_not_updated += 1
+            except Exception as e:
+                status += "REFRESH_TWITTER_ORGANIZATION_DETAILS_FAILED: " + str(e) + " "
+                organizations_not_updated += 1
 
             # Create a record denoting that we have retrieved from Twitter for this candidate
             save_results_history = remote_request_history_manager.create_remote_request_history_entry(
@@ -1139,6 +1147,7 @@ def retrieve_and_update_organizations_needing_twitter_update():
         'status':                   status,
         'organizations_to_update':  organizations_to_update,
         'organizations_updated':    organizations_updated,
+        'organizations_not_updated': organizations_not_updated,
     }
 
     return results

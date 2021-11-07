@@ -149,7 +149,7 @@
     <br />
 
 {% if organization_search %}
-    <a href="{% url 'organization:organization_list' %}?state_code={{ state_code }}">
+    <a href="{% url 'organization:organization_list' %}?state_code={{ state_code }}&show_organizations_without_email={{ show_organizations_without_email }}&show_twitter_updates_failing={{ show_twitter_updates_failing }}&show_organizations_to_be_analyzed={{ show_organizations_to_be_analyzed }}">
          clear search</a>&nbsp;
 {% endif %}
     <input type="text" name="organization_search" id="organization_search_id" value="{{ organization_search }}" />
@@ -173,21 +173,21 @@
             </th>
             <th>
               {% if sort_by == "twitter" %}
-                  <a href="{% url 'organization:organization_list' %}?state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}&show_organizations_without_email={{ show_organizations_without_email }}&show_organizations_to_be_analyzed={{ show_organizations_to_be_analyzed }}">
+                  <a href="{% url 'organization:organization_list' %}?state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}&show_organizations_without_email={{ show_organizations_without_email }}&show_twitter_updates_failing={{ show_twitter_updates_failing }}&show_organizations_to_be_analyzed={{ show_organizations_to_be_analyzed }}">
                   Twitter <span class="glyphicon glyphicon-triangle-bottom"></span>
                   </a>
               {% else %}
-              <a href="{% url 'organization:organization_list' %}?sort_by=twitter&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}&show_organizations_without_email={{ show_organizations_without_email }}&show_organizations_to_be_analyzed={{ show_organizations_to_be_analyzed }}">
+              <a href="{% url 'organization:organization_list' %}?sort_by=twitter&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}&show_organizations_without_email={{ show_organizations_without_email }}&show_twitter_updates_failing={{ show_twitter_updates_failing }}&show_organizations_to_be_analyzed={{ show_organizations_to_be_analyzed }}">
                   Twitter (click to sort)
                   </a>
               {% endif %}
             </th>
             <th>Type</th>
             <th>Values/Issues {% if show_issues %}
-              <a href="{% url 'organization:organization_list' %}?sort_by={{ sort_by }}&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}">
+              <a href="{% url 'organization:organization_list' %}?sort_by={{ sort_by }}&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}&show_organizations_without_email={{ show_organizations_without_email }}&show_twitter_updates_failing={{ show_twitter_updates_failing }}&show_organizations_to_be_analyzed={{ show_organizations_to_be_analyzed }}">
               (hide)</a>
             {% else %}
-              <a href="{% url 'organization:organization_list' %}?sort_by={{ sort_by }}&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}&show_issues=1">
+              <a href="{% url 'organization:organization_list' %}?sort_by={{ sort_by }}&state_code={{ state_code }}&organization_type_filter={{ organization_type_filter }}&organization_search={{ organization_search }}&show_issues=1&show_organizations_without_email={{ show_organizations_without_email }}&show_twitter_updates_failing={{ show_twitter_updates_failing }}&show_organizations_to_be_analyzed={{ show_organizations_to_be_analyzed }}">
               (show)</a>
             {% endif %}</th>
 {#            <th>Vote Smart</th>#}
