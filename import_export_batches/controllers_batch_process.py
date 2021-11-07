@@ -446,7 +446,7 @@ def process_next_general_maintenance():
     results = batch_process_manager.retrieve_batch_process_list(
         kind_of_process_list=kind_of_processes_to_run,
         process_needs_to_be_run=True,
-        for_upcoming_elections=False)
+        for_upcoming_elections=True)
     if not positive_value_exists(results['success']):
         success = False
         batch_process_manager.create_batch_process_log_entry(
@@ -596,11 +596,10 @@ def process_next_general_maintenance():
         for batch_process in batch_process_list_already_running:
             if batch_process.kind_of_process in [UPDATE_TWITTER_DATA_FROM_TWITTER]:
                 local_batch_process_id = batch_process.id
-                status += "DO_NOT_CREATE_UPDATE_TWITTER-ALREADY_RUNNING(" + str(batch_process.id) + ") "
+                status += "DO_NOT_CREATE_UPDATE_TWITTER_ALREADY_RUNNING(" + str(batch_process.id) + ") "
                 update_twitter_process_is_already_in_queue = True
 
         if update_twitter_process_is_already_in_queue:  # See UPDATE_TWITTER_TIMED_OUT
-            # status += "DO_NOT_CREATE_UPDATE_TWITTER-ALREADY_RUNNING(" + str(local_batch_process_id) + ") "
             batch_process_manager.create_batch_process_log_entry(
                 batch_process_id=local_batch_process_id,
                 kind_of_process=UPDATE_TWITTER_DATA_FROM_TWITTER,
@@ -2303,7 +2302,7 @@ def process_one_update_twitter_batch_process(batch_process, status=""):
 
     # If there weren't any candidates to update, move on to organizations
     try:
-        retrieve_results = retrieve_and_update_organizations_needing_twitter_update()
+        retrieve_results = retrieve_and_update_organizations_needing_twitter_update(batch_process_id=batch_process.id)
         status += retrieve_results['status']
     except Exception as e:
         status += "FAILED_retrieve_and_update_organizations_needing_twitter_update: " + str(e) + " "
