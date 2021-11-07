@@ -5304,7 +5304,11 @@ class BatchProcessManager(models.Manager):
 
             # Cycle through all processes retrieved and make sure they aren't being worked on by other processes
             for batch_process in batch_process_list:
-                if batch_process.date_checked_out is None:
+                if positive_value_exists(process_active):
+                    # Skip this check if just looking for which processes are still active
+                    filtered_batch_process_list.append(batch_process)
+                elif batch_process.date_checked_out is None:
+                    # If not checked out, then it can't time out
                     filtered_batch_process_list.append(batch_process)
                 else:
                     # See also longest_activity_notice_processing_run_time_allowed

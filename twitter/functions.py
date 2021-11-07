@@ -23,9 +23,15 @@ TWITTER_USER_NOT_FOUND_LOG_RESPONSES = [
     "User not found."
 ]
 
+TWITTER_USER_SUSPENDED_LOG_RESPONSES = [
+    "{'code': 63, 'message': 'User has been suspended.'}",
+    "User has been suspended."
+]
+
 def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
     status = ""
     twitter_user_not_found_in_twitter = False
+    twitter_user_suspended_by_twitter = False
     write_to_server_logs = False
     auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
     auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
@@ -80,6 +86,8 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
                         status += '[' + one_error['message'] + '] '
                         if one_error['message'] in TWITTER_USER_NOT_FOUND_LOG_RESPONSES:
                             twitter_user_not_found_in_twitter = True
+                        elif one_error['message'] in TWITTER_USER_SUSPENDED_LOG_RESPONSES:
+                            twitter_user_suspended_by_twitter = True
                         else:
                             write_to_server_logs = True
             except Exception as e:
@@ -99,12 +107,13 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
         status += "FAILED_PROFILE_BANNER_URL: " + str(e) + " "
 
     results = {
-        'status':               status,
-        'success':              success,
-        'twitter_handle':       twitter_handle,
-        'twitter_handle_found': twitter_handle_found,
-        'twitter_json':         twitter_json,
-        'twitter_user_id':      twitter_user_id,
-        'twitter_user_not_found_in_twitter':   twitter_user_not_found_in_twitter,
+        'status':                               status,
+        'success':                              success,
+        'twitter_handle':                       twitter_handle,
+        'twitter_handle_found':                 twitter_handle_found,
+        'twitter_json':                         twitter_json,
+        'twitter_user_id':                      twitter_user_id,
+        'twitter_user_not_found_in_twitter':    twitter_user_not_found_in_twitter,
+        'twitter_user_suspended_by_twitter':    twitter_user_suspended_by_twitter,
     }
     return results

@@ -109,7 +109,7 @@ def process_next_activity_notices():
     if positive_value_exists(results['batch_process_list_found']):
         batch_process_list_already_in_queue = results['batch_process_list']
 
-    status += "BATCH_PROCESS_LIST_QUEUED_AT_START_COUNT: " + str(len(batch_process_list_already_in_queue)) + ", "
+    status += "BATCH_PROCESSES_ALREADY_IN_QUEUED: " + str(len(batch_process_list_already_in_queue)) + ", "
 
     # ##################################
     # Generate or Update ActivityNotice entries from ActivityNoticeSeed entries
@@ -440,8 +440,9 @@ def process_next_general_maintenance():
         }
         return results
 
-    # Retrieve list of all active General Maintenance BatchProcess so we can decide what new batches to schedule
+    # Retrieve list of all General Maintenance BatchProcess scheduled or running
     #  NOTE: We do not run directly from this list below
+    batch_process_list_already_scheduled = []
     results = batch_process_manager.retrieve_batch_process_list(
         kind_of_process_list=kind_of_processes_to_run,
         process_needs_to_be_run=True,
@@ -458,11 +459,30 @@ def process_next_general_maintenance():
             'status': status,
         }
         return results
+    elif positive_value_exists(results['batch_process_list_found']):
+        batch_process_list_already_scheduled = results['batch_process_list']
+    status += "BATCH_PROCESSES_ALREADY_SCHEDULED: " + str(len(batch_process_list_already_scheduled)) + ", "
 
-    batch_process_list_already_in_queue = []
-    if positive_value_exists(results['batch_process_list_found']):
-        batch_process_list_already_in_queue = results['batch_process_list']
-    status += "BATCH_PROCESS_LIST_QUEUED_AT_START_COUNT: " + str(len(batch_process_list_already_in_queue)) + ", "
+    batch_process_list_already_running = []
+    results = batch_process_manager.retrieve_batch_process_list(
+        kind_of_process_list=kind_of_processes_to_run,
+        process_active=True,
+        for_upcoming_elections=False)
+    if not positive_value_exists(results['success']):
+        success = False
+        batch_process_manager.create_batch_process_log_entry(
+            critical_failure=True,
+            status=results['status'],
+        )
+        status += results['status']
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+    elif positive_value_exists(results['batch_process_list_found']):
+        batch_process_list_already_running = results['batch_process_list']
+    status += "BATCH_PROCESSES_ALREADY_RUNNING: " + str(len(batch_process_list_already_running)) + ", "
 
     # ############################
     # Are there any API's that need to have their internal cache updated?
@@ -472,7 +492,10 @@ def process_next_general_maintenance():
         # We only want one API Refresh process to be running at a time
         # Check to see if one of the existing batches is for API Refresh. If so, skip creating a new one.
         api_refresh_process_is_already_in_queue = False
-        for batch_process in batch_process_list_already_in_queue:
+        for batch_process in batch_process_list_already_scheduled:
+            if batch_process.kind_of_process in [API_REFRESH_REQUEST]:
+                api_refresh_process_is_already_in_queue = True
+        for batch_process in batch_process_list_already_running:
             if batch_process.kind_of_process in [API_REFRESH_REQUEST]:
                 api_refresh_process_is_already_in_queue = True
         if not api_refresh_process_is_already_in_queue:
@@ -516,17 +539,18 @@ def process_next_general_maintenance():
     else:
         # We only want one SEARCH_TWITTER process to be running at a time
         # Check to see if one of the existing batches is for SEARCH_TWITTER. If so, skip creating a new one.
-        local_batch_process_id = 0
         search_twitter_process_is_already_in_queue = False
-        for batch_process in batch_process_list_already_in_queue:
+        for batch_process in batch_process_list_already_scheduled:
             if batch_process.kind_of_process in [SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE]:
-                local_batch_process_id = batch_process.id
-                status += "SEARCH_TWITTER_ALREADY_RUNNING(" + str(local_batch_process_id) + ") "
+                status += "SEARCH_TWITTER_ALREADY_SCHEDULED(" + str(batch_process.id) + ") "
                 search_twitter_process_is_already_in_queue = True
-            if batch_process.date_checked_out is not None:
-                status += "SEARCH_TWITTER_TIMED_OUT_AND_BEING_RE_PROCESSED "  # See SEARCH_TWITTER_TIMED_OUT
+        for batch_process in batch_process_list_already_running:
+            if batch_process.kind_of_process in [SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE]:
+                status += "SEARCH_TWITTER_ALREADY_RUNNING(" + str(batch_process.id) + ") "
+                search_twitter_process_is_already_in_queue = True
         if search_twitter_process_is_already_in_queue:
-            status += "DO_NOT_CREATE_SEARCH_TWITTER-ALREADY_RUNNING "
+            pass  # See SEARCH_TWITTER_TIMED_OUT
+            # status += "DO_NOT_CREATE_SEARCH_TWITTER-ALREADY_RUNNING "
             # batch_process_manager.create_batch_process_log_entry(
             #     batch_process_id=local_batch_process_id,
             #     kind_of_process=SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE,
@@ -564,18 +588,24 @@ def process_next_general_maintenance():
         # Check to see if one of the existing batches is for UPDATE_TWITTER. If so, skip creating a new one.
         local_batch_process_id = 0
         update_twitter_process_is_already_in_queue = False
-        for batch_process in batch_process_list_already_in_queue:
+        for batch_process in batch_process_list_already_scheduled:
             if batch_process.kind_of_process in [UPDATE_TWITTER_DATA_FROM_TWITTER]:
                 local_batch_process_id = batch_process.id
+                status += "DO_NOT_CREATE_UPDATE_TWITTER-ALREADY_SCHEDULED(" + str(batch_process.id) + ") "
+                update_twitter_process_is_already_in_queue = True
+        for batch_process in batch_process_list_already_running:
+            if batch_process.kind_of_process in [UPDATE_TWITTER_DATA_FROM_TWITTER]:
+                local_batch_process_id = batch_process.id
+                status += "DO_NOT_CREATE_UPDATE_TWITTER-ALREADY_RUNNING(" + str(batch_process.id) + ") "
                 update_twitter_process_is_already_in_queue = True
 
         if update_twitter_process_is_already_in_queue:  # See UPDATE_TWITTER_TIMED_OUT
-            status += "DO_NOT_CREATE_UPDATE_TWITTER-ALREADY_RUNNING(" + str(local_batch_process_id) + ") "
-            # batch_process_manager.create_batch_process_log_entry(
-            #     batch_process_id=local_batch_process_id,
-            #     kind_of_process=UPDATE_TWITTER_DATA_FROM_TWITTER,
-            #     status=status,
-            # )
+            # status += "DO_NOT_CREATE_UPDATE_TWITTER-ALREADY_RUNNING(" + str(local_batch_process_id) + ") "
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=local_batch_process_id,
+                kind_of_process=UPDATE_TWITTER_DATA_FROM_TWITTER,
+                status=status,
+            )
         else:
             number_of_candidates_to_analyze = fetch_number_of_candidates_needing_twitter_update()
             number_of_organizations_to_analyze = 0
@@ -615,7 +645,7 @@ def process_next_general_maintenance():
         # We only want one analytics process to be running at a time
         # Check to see if one of the existing batches is for analytics. If so,
         analytics_process_is_already_in_queue = False
-        for batch_process in batch_process_list_already_in_queue:
+        for batch_process in batch_process_list_already_running:
             if batch_process.kind_of_process in [
                     AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID, AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT,
                     CALCULATE_ORGANIZATION_DAILY_METRICS, CALCULATE_ORGANIZATION_ELECTION_METRICS,
@@ -710,14 +740,14 @@ def process_next_general_maintenance():
     if positive_value_exists(results['batch_process_list_found']):
         batch_process_found = True
         batch_process_full_list = results['batch_process_list']
-        status += "KINDS_OF_BATCH_PROCESSES_IN_QUEUE [ "
+        status += "KINDS_OF_BATCH_PROCESSES_IN_QUEUE: [ "
         for temp_batch in batch_process_full_list:
             if temp_batch.kind_of_process:
                 status += str(temp_batch.kind_of_process) + " "
         status += "] (ONLY_USING_FIRST) "
         # Only use the first one
         batch_process = batch_process_full_list[0]
-    status += "BATCH_PROCESS_LIST_NEEDS_TO_BE_RUN_GENERAL_MAINT_COUNT: " + str(len(batch_process_full_list)) + ", "
+    status += "BATCH_PROCESSES_NEED_TO_BE_RUN_GENERAL_MAINT: " + str(len(batch_process_full_list)) + ", "
 
     # We should only start one per minute
     if batch_process_found:
@@ -2272,10 +2302,20 @@ def process_one_update_twitter_batch_process(batch_process, status=""):
         return results
 
     # If there weren't any candidates to update, move on to organizations
-    retrieve_results = retrieve_and_update_organizations_needing_twitter_update()
-    status += retrieve_results['status']
+    try:
+        retrieve_results = retrieve_and_update_organizations_needing_twitter_update()
+        status += retrieve_results['status']
+    except Exception as e:
+        status += "FAILED_retrieve_and_update_organizations_needing_twitter_update: " + str(e) + " "
+        success = False
+        handle_exception(e, logger=logger, exception_message=status)
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=kind_of_process,
+            status=status,
+        )
 
-    if retrieve_results['success']:
+    if success and retrieve_results['success']:
         organizations_updated = retrieve_results['organizations_updated']
         organizations_to_update = retrieve_results['organizations_to_update']
         try:

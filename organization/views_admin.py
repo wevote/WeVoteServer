@@ -1189,7 +1189,8 @@ def organization_edit_process_view(request):
     organization_name = request.POST.get('organization_name', '')
     organization_contact_form_url = request.POST.get('organization_contact_form_url', False)
     organization_twitter_handle = request.POST.get('organization_twitter_handle', False)
-    organization_twitter_updates_failing = positive_value_exists(request.POST.get('organization_twitter_updates_failing', False))
+    organization_twitter_updates_failing = \
+        positive_value_exists(request.POST.get('organization_twitter_updates_failing', False))
     organization_email = request.POST.get('organization_email', False)
     organization_facebook = request.POST.get('organization_facebook', False)
     organization_type = request.POST.get('organization_type', GROUP)
@@ -1240,7 +1241,15 @@ def organization_edit_process_view(request):
             organization_we_vote_id=organization_we_vote_id)
         if not delete_results['success']:
             messages.add_message(request, messages.ERROR, 'Could not delete TwitterLinkToOrganization 1.')
-    else:
+    elif organization_twitter_handle != organization_on_stage.organization_twitter_handle:
+        # Delete existing TwitterLinkToOrganization since we are switching to a different twitter handle
+        delete_results = twitter_user_manager.delete_twitter_link_to_organization(
+            twitter_id=0,
+            organization_we_vote_id=organization_we_vote_id)
+        if not delete_results['success']:
+            messages.add_message(request, messages.ERROR, 'Could not delete TwitterLinkToOrganization 2.')
+
+    if positive_value_exists(organization_twitter_handle):
         # Check to see if there is a TwitterLinkToOrganization entry tied to this twitter_handle
         link_results = twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_handle(
             twitter_handle=organization_twitter_handle)
@@ -1288,7 +1297,7 @@ def organization_edit_process_view(request):
                     twitter_id=0,
                     organization_we_vote_id=organization_we_vote_id)
                 if not delete_results['success']:
-                    messages.add_message(request, messages.ERROR, 'Could not delete TwitterLinkToOrganization.')
+                    messages.add_message(request, messages.ERROR, 'Could not delete TwitterLinkToOrganization 3.')
 
     if twitter_handle_can_be_saved_without_conflict and create_twitter_link_to_organization_for_handle \
             and positive_value_exists(twitter_link_to_organization_from_handle_twitter_id):
