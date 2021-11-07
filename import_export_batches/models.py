@@ -5304,14 +5304,21 @@ class BatchProcessManager(models.Manager):
 
             # Cycle through all processes retrieved and make sure they aren't being worked on by other processes
             for batch_process in batch_process_list:
-                if positive_value_exists(process_active):
-                    # Skip this check if just looking for which processes are still active
-                    filtered_batch_process_list.append(batch_process)
-                elif batch_process.date_checked_out is None:
-                    # If not checked out, then it can't time out
-                    filtered_batch_process_list.append(batch_process)
+                if batch_process.date_checked_out is None:
+                    if positive_value_exists(process_active):
+                        # If no date_checked_out, then process cannot be active
+                        pass
+                    elif positive_value_exists(process_queued):
+                        # If no date_checked_out, then process can be considered queued
+                        filtered_batch_process_list.append(batch_process)
+                    else:
+                        # This is for "needs_to_be_run"
+                        # If no date_checked_out, then process needs_to_run
+                        filtered_batch_process_list.append(batch_process)
                 else:
                     # See also longest_activity_notice_processing_run_time_allowed
+                    # If this kind_of_process has run longer than allowed (i.e. probably crashed or timed out)
+                    #  consider it to no longer be active
                     if batch_process.kind_of_process == ACTIVITY_NOTICE_PROCESS:
                         checked_out_expiration_time = 270  # 4.5 minutes * 60 seconds
                     elif batch_process.kind_of_process == API_REFRESH_REQUEST:
@@ -5335,9 +5342,17 @@ class BatchProcessManager(models.Manager):
                     date_checked_out_time_out = \
                         batch_process.date_checked_out + timedelta(seconds=checked_out_expiration_time)
                     status += "CHECKED_OUT_PROCESS_FOUND "
-                    if now() > date_checked_out_time_out:
-                        filtered_batch_process_list.append(batch_process)
-                        status += "CHECKED_OUT_PROCESS_FOUND-HAS_TIMED_OUT "
+                    if positive_value_exists(process_active):
+                        # When checking to see if the process is active, only consider it such before the timeout time
+                        if now() < date_checked_out_time_out:
+                            filtered_batch_process_list.append(batch_process)
+                            status += "CHECKED_OUT_PROCESS_FOUND_CONSIDER_STILL_ACTIVE "
+                    else:
+                        # This is for "process_queued". If it has passed the timeout point, then we can consider queued
+                        #  "needs_to_be_run" shouldn't be able to get here
+                        if now() > date_checked_out_time_out:
+                            filtered_batch_process_list.append(batch_process)
+                            status += "CHECKED_OUT_PROCESS_FOUND_HAS_TIMED_OUT "
 
             if len(filtered_batch_process_list):
                 batch_process_list_found = True

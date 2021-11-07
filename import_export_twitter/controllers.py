@@ -19,6 +19,7 @@ from django.utils.timezone import now
 from election.models import ElectionManager
 from image.controllers import TWITTER, cache_master_and_resized_image
 from image.models import WeVoteImageManager
+from import_export_batches.models import BatchProcessManager, UPDATE_TWITTER_DATA_FROM_TWITTER
 from import_export_twitter.models import TwitterAuthManager
 from office.models import ContestOfficeManager
 from organization.controllers import move_organization_to_another_complete, \
@@ -1055,7 +1056,7 @@ def retrieve_and_update_candidates_needing_twitter_update(
     return results
 
 
-def retrieve_and_update_organizations_needing_twitter_update():
+def retrieve_and_update_organizations_needing_twitter_update(batch_process_id=0):
     organization_we_vote_id_list_to_exclude = []
     organizations_not_updated = 0
     status = ''
@@ -1087,10 +1088,10 @@ def retrieve_and_update_organizations_needing_twitter_update():
     organizations_updated = 0
     if not success or len(organization_we_vote_id_list_to_include) == 0:
         results = {
-            'success':                  success,
-            'status':                   status,
-            'organizations_to_update':  organizations_to_update,
-            'organizations_updated':    organizations_updated,
+            'success':                      success,
+            'status':                       status,
+            'organizations_to_update':      organizations_to_update,
+            'organizations_updated':        organizations_updated,
             'organizations_not_updated':    organizations_not_updated,
         }
         return results
@@ -1120,7 +1121,13 @@ def retrieve_and_update_organizations_needing_twitter_update():
         organization_list = organization_queryset[:number_of_organizations_limit]
 
         organizations_updated = 0
-        status += "RETRIEVE_ORGANIZATION_UPDATE_DATA_FROM_TWITTER_LOOP-TOTAL: " + str(organizations_to_update) + " "
+        status += "RETRIEVE_ORGANIZATION_UPDATE_DATA_FROM_TWITTER_LOOP_TOTAL: " + str(organizations_to_update) + " "
+        batch_process_manager = BatchProcessManager()
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process_id,
+            kind_of_process=UPDATE_TWITTER_DATA_FROM_TWITTER,
+            status=status,
+        )
         remote_request_history_manager = RemoteRequestHistoryManager()
         for organization in organization_list:
             try:
@@ -1133,6 +1140,12 @@ def retrieve_and_update_organizations_needing_twitter_update():
             except Exception as e:
                 status += "REFRESH_TWITTER_ORGANIZATION_DETAILS_FAILED: " + str(e) + " "
                 organizations_not_updated += 1
+
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process_id,
+                kind_of_process=UPDATE_TWITTER_DATA_FROM_TWITTER,
+                status=status,
+            )
 
             # Create a record denoting that we have retrieved from Twitter for this candidate
             save_results_history = remote_request_history_manager.create_remote_request_history_entry(
