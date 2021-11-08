@@ -69,6 +69,7 @@ def voter_retrieve_doc_template_values(url_root):
                    '  "last_name": string,\n' \
                    '  "linked_organization_we_vote_id": string,\n' \
                    '  "notification_settings_flags": integer,\n' \
+                   '  "signed_in": boolean,\n' \
                    '  "signed_in_facebook": boolean,\n' \
                    '  "signed_in_google": boolean,\n' \
                    '  "signed_in_twitter": boolean,\n' \

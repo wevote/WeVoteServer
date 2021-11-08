@@ -35,7 +35,7 @@ class FacebookAuthResponse(models.Model):
 
     # Comes from Facebook authResponse FACEBOOK_LOGGED_IN
     facebook_access_token = models.CharField(
-        verbose_name="accessToken from Facebook", max_length=255, null=True, blank=True, unique=False)
+        verbose_name="accessToken from Facebook", max_length=512, null=True, blank=True, unique=False)
     facebook_expires_in = models.IntegerField(verbose_name="expiresIn from Facebook", null=True, blank=True)
     facebook_signed_request = models.TextField(verbose_name="signedRequest from Facebook", null=True, blank=True)
     facebook_user_id = models.BigIntegerField(verbose_name="facebook big integer id", null=True, blank=True)
