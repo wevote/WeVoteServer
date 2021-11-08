@@ -36,7 +36,7 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
     auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
     auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
 
-    api = tweepy.API(auth)
+    api = tweepy.API(auth, timeout=10)
 
     # Strip out the twitter handles "False" or "None"
     if twitter_handle is False:
@@ -50,6 +50,8 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
 
     twitter_handle_found = False
     twitter_json = []
+    tweepy_error = False
+    error_instance = ''
     try:
         if positive_value_exists(twitter_user_id):
             twitter_user = api.get_user(user_id=twitter_user_id)
@@ -74,6 +76,21 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
         status += 'TWITTER_RATE_LIMIT_ERROR '
         handle_exception(rate_limit_error, logger=logger, exception_message=status)
     except tweepy.error.TweepError as error_instance:
+        tweepy_error = True
+    # Tweepy API 2
+    # except tweepy.TooManyRequests as rate_limit_error:
+    #     success = False
+    #     status += 'TWITTER_RATE_LIMIT_ERROR '
+    #     handle_exception(rate_limit_error, logger=logger, exception_message=status)
+    # except tweepy.error.TweepyException as error_instance:
+    #     tweepy_error = True
+    # except tweepy.error.HTTPException as error_instance:
+    #     tweepy_error = True
+    except Exception as error_instance:
+        tweepy_error = True
+        status += "TWEEPY_EXCEPTION: " + str(error_instance) + " "
+
+    if tweepy_error:
         success = False
         status += twitter_handle + " " if positive_value_exists(twitter_handle) else ""
         status += str(twitter_user_id) + " " if positive_value_exists(twitter_user_id) else " "
@@ -91,7 +108,7 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
                         else:
                             write_to_server_logs = True
             except Exception as e:
-                status += "PROBLEM_PARSING_TWEEP_ERROR: " + str(e) + " "
+                status += "PROBLEM_PARSING_TWEEPY_ERROR: " + str(e) + " "
                 write_to_server_logs = True
         else:
             write_to_server_logs = True

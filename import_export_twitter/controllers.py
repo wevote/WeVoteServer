@@ -854,7 +854,7 @@ def retrieve_possible_twitter_handles(candidate):
 
     auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
     auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
-    api = tweepy.API(auth)
+    api = tweepy.API(auth, timeout=20)
     # results = {'possible_twitter_handles_list': []}
     possible_twitter_handles_list = []
 
@@ -1798,10 +1798,21 @@ def twitter_sign_in_start_for_api(voter_device_id, return_url, cordova):  # twit
     #         success = True
     #     # What is the error situation where the twitter_access_token and twitter_access_secret are no longer valid?
     #     # We need to deal with this (wipe them from the database and rewind to the right place in the process
+    #     # Tweepy API 1
     #     except tweepy.RateLimitError:
     #         success = False
     #         status = 'TWITTER_RATE_LIMIT_ERROR'
     #     except tweepy.error.TweepError as error_instance:
+    #         success = False
+    #         status = error_instance.reason
+    #     # Tweepy API 2
+    #     except tweepy.TooManyRequests:
+    #         success = False
+    #         status = 'TWITTER_RATE_LIMIT_ERROR'
+    #     except tweepy.error.TweepyException as error_instance:
+    #         success = False
+    #         status = error_instance.reason
+    #     except tweepy.error.HTTPException as error_instance:
     #         success = False
     #         status = error_instance.reason
     #
@@ -1870,6 +1881,16 @@ def twitter_sign_in_start_for_api(voter_device_id, return_url, cordova):  # twit
     except tweepy.error.TweepError as error_instance:
         success = False
         status = 'TWITTER_SIGN_IN_START: {}'.format(error_instance.reason)
+    # Tweepy API 2
+    # except tweepy.TooManyRequests:
+    #     success = False
+    #     status = 'TWITTER_RATE_LIMIT_ERROR'
+    # except tweepy.error.TweepyException as error_instance:
+    #     success = False
+    #     status = 'TWITTER_SIGN_IN_START_TweepyException: {}'.format(error_instance.reason)
+    # except tweepy.error.HTTPException as error_instance:
+    #     success = False
+    #     status = 'TWITTER_SIGN_IN_START_HTTPException: {}'.format(error_instance.reason)
 
     if success:
         results = {
@@ -2016,12 +2037,13 @@ def twitter_sign_in_request_access_token_for_api(voter_device_id,
     :param cordova:
     :return:
     """
+    status = ''
     # Get voter_id from the voter_device_id
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         results = {
             'success':                          False,
-            'status':                           "VALID_VOTER_DEVICE_ID_MISSING",
+            'status':                           "VALID_VOTER_DEVICE_ID_MISSING ",
             'voter_device_id':                  voter_device_id,
             'access_token_and_secret_returned': False,
             'return_url':                       return_url,
@@ -2048,7 +2070,7 @@ def twitter_sign_in_request_access_token_for_api(voter_device_id,
     auth_response_results = twitter_auth_manager.retrieve_twitter_auth_response(voter_device_id)
     if not auth_response_results['twitter_auth_response_found']:
         results = {
-            'status':                           "REQUEST_ACCESS_TOKEN-TWITTER_AUTH_RESPONSE_NOT_FOUND",
+            'status':                           "REQUEST_ACCESS_TOKEN-TWITTER_AUTH_RESPONSE_NOT_FOUND ",
             'success':                          False,
             'voter_device_id':                  voter_device_id,
             'access_token_and_secret_returned': False,
@@ -2061,7 +2083,7 @@ def twitter_sign_in_request_access_token_for_api(voter_device_id,
 
     if not twitter_auth_response.twitter_request_token == incoming_request_token:
         results = {
-            'status':                           "TWITTER_REQUEST_TOKEN_DOES_NOT_MATCH_STORED_VOTER_VALUE",
+            'status':                           "TWITTER_REQUEST_TOKEN_DOES_NOT_MATCH_STORED_VOTER_VALUE ",
             'success':                          False,
             'voter_device_id':                  voter_device_id,
             'access_token_and_secret_returned': False,
@@ -2088,6 +2110,19 @@ def twitter_sign_in_request_access_token_for_api(voter_device_id,
     except tweepy.error.TweepError as error_instance:
         success = False
         status = 'TWITTER_SIGN_IN_REQUEST_ACCESS_TOKEN: {}'.format(error_instance.reason)
+    # Tweepy API 2
+    # except tweepy.TooManyRequests:
+    #     success = False
+    #     status += 'TWITTER_RATE_LIMIT_ERROR '
+    # except tweepy.error.TweepyException as error_instance:
+    #     success = False
+    #     status += 'TWITTER_SIGN_IN_REQUEST_ACCESS_TOKEN_TweepyException: {} '.format(error_instance.reason)
+    # except tweepy.error.HTTPException as error_instance:
+    #     success = False
+    #     status += 'TWITTER_SIGN_IN_REQUEST_ACCESS_TOKEN_HTTPException: {} '.format(error_instance.reason)
+    except Exception as e:
+        success = False
+        status += "TWEEPY_EXCEPTION: " + str(e) + " "
 
     try:
         # We save these values in the TwitterAuthResponse table
@@ -2097,13 +2132,13 @@ def twitter_sign_in_request_access_token_for_api(voter_device_id,
             twitter_auth_response.save()
 
             success = True
-            status = "TWITTER_ACCESS_TOKEN_RETRIEVED_AND_SAVED"
+            status += "TWITTER_ACCESS_TOKEN_RETRIEVED_AND_SAVED "
         else:
             success = False
-            status = "TWITTER_ACCESS_TOKEN_NOT_RETRIEVED"
+            status += "TWITTER_ACCESS_TOKEN_NOT_RETRIEVED "
     except Exception as e:
         success = False
-        status = "TWITTER_ACCESS_TOKEN_NOT_SAVED"
+        status += "TWITTER_ACCESS_TOKEN_NOT_SAVED "
 
     if success:
         results = {
@@ -2134,7 +2169,7 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
     :param return_url: Where to return the browser when sign in process is complete
     :return:
     """
-
+    status = ''
     twitter_handle = ''
     twitter_handle_found = False
     tweepy_user_object = None
@@ -2148,7 +2183,7 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
     if not results['success']:
         results = {
             'success':              False,
-            'status':               "VALID_VOTER_DEVICE_ID_MISSING",
+            'status':               "VALID_VOTER_DEVICE_ID_MISSING ",
             'voter_device_id':      voter_device_id,
             'twitter_handle':       twitter_handle,
             'twitter_handle_found': twitter_handle_found,
@@ -2163,7 +2198,7 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
     results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if not positive_value_exists(results['voter_found']):
         results = {
-            'status':               "VALID_VOTER_MISSING",
+            'status':               "VALID_VOTER_MISSING ",
             'success':              False,
             'voter_device_id':      voter_device_id,
             'twitter_handle':       twitter_handle,
@@ -2182,7 +2217,7 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
     auth_response_results = twitter_auth_manager.retrieve_twitter_auth_response(voter_device_id)
     if not auth_response_results['twitter_auth_response_found']:
         results = {
-            'status':               "TWITTER_AUTH_RESPONSE_NOT_FOUND",
+            'status':               "TWITTER_AUTH_RESPONSE_NOT_FOUND ",
             'success':              False,
             'voter_device_id':      voter_device_id,
             'twitter_handle':       twitter_handle,
@@ -2206,7 +2241,7 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
         twitter_json = tweepy_user_object._json
 
         success = True
-        status = 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_SUCCESSFUL '
+        status += 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_SUCCESSFUL '
         twitter_handle = tweepy_user_object.screen_name
         twitter_handle_found = True
         twitter_user_object_found = True
@@ -2216,6 +2251,19 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
     except tweepy.error.TweepError as error_instance:
         success = False
         status = 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_TWEEPY_ERROR: {}'.format(error_instance.reason)
+    # Tweepy API 2
+    # except tweepy.TooManyRequests:
+    #     success = False
+    #     status += 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_RATE_LIMIT_ERROR '
+    # except tweepy.error.TweepyException as error_instance:
+    #     success = False
+    #     status += 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_TweepyException: {} '.format(error_instance.reason)
+    # except tweepy.error.HTTPException as error_instance:
+    #     success = False
+    #     status += 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_HTTPException: {} '.format(error_instance.reason)
+    except Exception as e:
+        success = False
+        status += "TWEEPY_EXCEPTION: " + str(e) + " "
 
     if twitter_user_object_found:
         status += "TWITTER_SIGN_IN-ALREADY_LINKED_TO_OTHER_ACCOUNT "

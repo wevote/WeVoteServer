@@ -613,6 +613,25 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id):
             'tweets_not_saved': tweets_not_saved
         }
         return results
+    # Tweepy API 2
+    # except tweepy.error.TweepyException as e:
+    #     status = "ORGANIZATION_RETRIEVE_TWEETS_FROM_TWITTER_AUTH_FAIL_TweepyException: " + str(e) + " "
+    #     results = {
+    #         'success': success,
+    #         'status': status,
+    #         'tweets_saved': tweets_saved,
+    #         'tweets_not_saved': tweets_not_saved
+    #     }
+    #     return results
+    # except tweepy.error.HTTPException as e:
+    #     status = "ORGANIZATION_RETRIEVE_TWEETS_FROM_TWITTER_AUTH_FAIL_HTTPException: " + str(e) + " "
+    #     results = {
+    #         'success': success,
+    #         'status': status,
+    #         'tweets_saved': tweets_saved,
+    #         'tweets_not_saved': tweets_not_saved
+    #     }
+    #     return results
 
     twitter_user_manager = TwitterUserManager()
     tweets_saved = 0

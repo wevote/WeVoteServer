@@ -794,7 +794,7 @@ class TwitterUserManager(models.Manager):
         """
         auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
         auth.set_access_token(twitter_access_token, twitter_access_secret)
-        api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True, compression=True)
+        api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True, compression=True, timeout=60)
 
         twitter_next_cursor_state_results = self.retrieve_twitter_next_cursor_state(twitter_id_of_me)
         status = twitter_next_cursor_state_results['status']
@@ -817,11 +817,25 @@ class TwitterUserManager(models.Manager):
             success = False
             status += ' RETRIEVE_TWITTER_IDS_I_FOLLOW_RATE_LIMIT_ERROR '
         except tweepy.error.TweepError as error_instance:
-            success = 'RETRIEVE_TWITTER_IDS_I_FOLLOW_TWEEPY_ERROR: {} '.format(error_instance.reason)
+            success = False
+            status += 'RETRIEVE_TWITTER_IDS_I_FOLLOW_TWEEPY_ERROR: {} '.format(error_instance.reason)
+        # Tweepy API 2
+        # except tweepy.TooManyRequests:
+        #     success = False
+        #     status += ' RETRIEVE_TWITTER_IDS_I_FOLLOW_RATE_LIMIT_ERROR '
+        # except tweepy.error.TweepyException as error_instance:
+        #     success = False
+        #     status += 'RETRIEVE_TWITTER_IDS_I_FOLLOW_TWEEPY_ERROR_TweepyException: {} '.format(error_instance.reason)
+        # except tweepy.error.HTTPException as error_instance:
+        #     success = False
+        #     status += 'RETRIEVE_TWITTER_IDS_I_FOLLOW_TWEEPY_ERROR_HTTPException: {} '.format(error_instance.reason)
+        except Exception as e:
+            success = False
+            status += "TWEEPY_EXCEPTION: " + str(e) + " "
 
         results = {
             'success':              success,
-            'status':               status + ' RETRIEVE_TWITTER_IDS_I_FOLLOW_COMPLETED',
+            'status':               status + ' RETRIEVE_TWITTER_IDS_I_FOLLOW_COMPLETED ',
             'twitter_next_cursor':  twitter_next_cursor,
             'twitter_ids_i_follow': twitter_ids_i_follow,
         }

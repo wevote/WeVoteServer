@@ -1448,9 +1448,10 @@ def organization_edit_process_view(request):
         return HttpResponseRedirect(reverse('organization:organization_list', args=()))
 
     # Pull the latest Twitter information
-    results = refresh_twitter_organization_details(organization_on_stage)
-    status += results['status']
-    organization_on_stage = results['organization']
+    if not organization_twitter_updates_failing and not organization_on_stage.organization_twitter_updates_failing:
+        results = refresh_twitter_organization_details(organization_on_stage)
+        status += results['status']
+        organization_on_stage = results['organization']
 
     if positive_value_exists(organization_we_vote_id):
         push_organization_data_to_other_table_caches(organization_we_vote_id)
