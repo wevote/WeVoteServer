@@ -647,135 +647,154 @@ def refresh_twitter_organization_details(organization, twitter_user_id=0):
         return results
 
     twitter_user_found = False
+    twitter_json = {}
     if positive_value_exists(twitter_user_id):
-        status += "REACHING_OUT_TO_TWITTER-BY_USER_ID "
-        results = retrieve_twitter_user_info(twitter_user_id)
-        if results['success']:
-            twitter_user_found = True
-        elif results['twitter_user_not_found_in_twitter'] or results['twitter_user_suspended_by_twitter']:
-            try:
-                organization.organization_twitter_updates_failing = True
-                organization.save()
-            except Exception as e:
-                status += "COULD_NOT_MARK_ORGANIZATION_TWITTER_UPDATES_FAILING1: " + str(e) + " "
+        try:
+            status += "REACHING_OUT_TO_TWITTER_BY_USER_ID "
+            results = retrieve_twitter_user_info(twitter_user_id)
+            if results['success']:
+                twitter_json = results['twitter_json']
+                twitter_user_found = True
+                twitter_user_id = results['twitter_user_id']
+            elif results['twitter_user_not_found_in_twitter'] or results['twitter_user_suspended_by_twitter']:
+                try:
+                    organization.organization_twitter_updates_failing = True
+                    organization.save()
+                except Exception as e:
+                    status += "COULD_NOT_MARK_ORGANIZATION_TWITTER_UPDATES_FAILING1: " + str(e) + " "
+        except Exception as e:
+            status += "RETRIEVE_TWITTER_USER_INFO_BY_USER_ID_FAILS: " + str(e) + " "
+
     if not twitter_user_found and positive_value_exists(organization.organization_twitter_handle):
         # status += "REACHING_OUT_TO_TWITTER-BY_HANDLE "
         # organization_twitter_handle = organization.organization_twitter_handle
         twitter_user_id_zero = 0
-        results = retrieve_twitter_user_info(twitter_user_id_zero, organization.organization_twitter_handle)
-        if results['success']:
-            twitter_user_found = True
-        elif results['twitter_user_not_found_in_twitter'] or results['twitter_user_suspended_by_twitter']:
-            try:
-                organization.organization_twitter_updates_failing = True
-                organization.save()
-            except Exception as e:
-                status += "COULD_NOT_MARK_ORGANIZATION_TWITTER_UPDATES_FAILING2: " + str(e) + " "
+        try:
+            results = retrieve_twitter_user_info(twitter_user_id_zero, organization.organization_twitter_handle)
+            if results['success']:
+                twitter_json = results['twitter_json']
+                twitter_user_found = True
+                twitter_user_id = results['twitter_user_id']
+            elif results['twitter_user_not_found_in_twitter'] or results['twitter_user_suspended_by_twitter']:
+                try:
+                    organization.organization_twitter_updates_failing = True
+                    organization.save()
+                except Exception as e:
+                    status += "COULD_NOT_MARK_ORGANIZATION_TWITTER_UPDATES_FAILING2: " + str(e) + " "
+        except Exception as e:
+            status += "RETRIEVE_TWITTER_USER_INFO_BY_HANDLE_FAILS: " + str(e) + " "
 
     if twitter_user_found:
         status += str(organization.organization_twitter_handle) + "-RETRIEVED_FROM_TWITTER "
-        twitter_user_id = results['twitter_user_id']
 
         # Get original image url for cache original size image
+        profile_image_url_https = twitter_json['profile_image_url_https'] \
+            if 'profile_image_url_https' in twitter_json else None
         twitter_profile_image_url_https = we_vote_image_manager.twitter_profile_image_url_https_original(
-            results['twitter_json']['profile_image_url_https'])
-        twitter_profile_background_image_url_https = results['twitter_json']['profile_background_image_url_https'] \
-            if 'profile_background_image_url_https' in results['twitter_json'] else None
-        twitter_profile_banner_url_https = results['twitter_json']['profile_banner_url'] \
-            if 'profile_banner_url' in results['twitter_json'] else None
-        # Cache original and resized images
-        cache_results = cache_master_and_resized_image(
-            organization_id=organization.id, organization_we_vote_id=organization.we_vote_id,
-            twitter_id=organization.twitter_user_id,
-            twitter_screen_name=organization.organization_twitter_handle,
-            twitter_profile_image_url_https=twitter_profile_image_url_https,
-            twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
-            twitter_profile_banner_url_https=twitter_profile_banner_url_https, image_source=TWITTER)
-        cached_twitter_profile_image_url_https = cache_results['cached_twitter_profile_image_url_https']
-        cached_twitter_profile_background_image_url_https = \
-            cache_results['cached_twitter_profile_background_image_url_https']
-        cached_twitter_profile_banner_url_https = cache_results['cached_twitter_profile_banner_url_https']
-        we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
-        we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
-        we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
-
-        # If we didn't just generate image urls for tiny, medium or large, we want to retrieve them from the image
-        # cache so we can store them in the organization table below in update_organization_twitter_details
-        # NOTE: In the future, we may only want to update the organization with these photos if there isn't
-        # already a we_vote_hosted_profile_image already stored in the organization.
-        # For now, we overwrite with a resized We Vote image if we have one
-        if not positive_value_exists(we_vote_hosted_profile_image_url_tiny) or \
-                not positive_value_exists(we_vote_hosted_profile_image_url_medium) or \
-                not positive_value_exists(we_vote_hosted_profile_image_url_large):
-            # TODO ANISHA Consider adding an option to only retrieve active images from
-            # the function retrieve_we_vote_image_list_from_we_vote_id (That is, if a "retrieve_active_only"
-            # setting is passed into the function, then don't return images that are active=False)
-            voter_we_vote_id = None
-            candidate_we_vote_id = None
-            image_results = we_vote_image_manager.retrieve_we_vote_image_list_from_we_vote_id(
-                voter_we_vote_id, candidate_we_vote_id, organization.we_vote_id)
-            if image_results['we_vote_image_list_found']:
-                we_vote_image_list = image_results['we_vote_image_list']
-                for one_image in we_vote_image_list:
-                    # For now we aren't checking to see if the image is marked active or not
-                    # TODO ANISHA The we_vote_image_url is always coming back empty
-                    if not positive_value_exists(we_vote_hosted_profile_image_url_tiny):
-                        if one_image.kind_of_image_tiny:
-                            we_vote_hosted_profile_image_url_tiny = one_image.we_vote_image_url
-                    if not positive_value_exists(we_vote_hosted_profile_image_url_medium):
-                        if one_image.kind_of_image_medium:
-                            we_vote_hosted_profile_image_url_tiny = one_image.we_vote_image_url
-                    if not positive_value_exists(we_vote_hosted_profile_image_url_large):
-                        if one_image.kind_of_image_large:
-                            we_vote_hosted_profile_image_url_large = one_image.we_vote_image_url
-
-        save_organization_results = organization_manager.update_organization_twitter_details(
-            organization,
-            results['twitter_json'],
-            cached_twitter_profile_image_url_https=cached_twitter_profile_image_url_https,
-            cached_twitter_profile_background_image_url_https=cached_twitter_profile_background_image_url_https,
-            cached_twitter_profile_banner_url_https=cached_twitter_profile_banner_url_https,
-            we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
-            we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
-            we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
-        if save_organization_results['success']:
-            # status += "ORGANIZATION_TWITTER_DETAILS_SUCCESS "
-
-            # Now update the Twitter statistics information in other We Vote tables
-            organization = save_organization_results['organization']
-            save_voter_guide_from_organization_results = update_social_media_statistics_in_other_tables(
-                organization)
-
-            # Make sure we have a TwitterUser
-            save_twitter_user_results = twitter_user_manager.update_or_create_twitter_user(
-                twitter_json=results['twitter_json'],
+            profile_image_url_https)
+        twitter_profile_background_image_url_https = twitter_json['profile_background_image_url_https'] \
+            if 'profile_background_image_url_https' in twitter_json else None
+        twitter_profile_banner_url_https = twitter_json['profile_banner_url'] \
+            if 'profile_banner_url' in twitter_json else None
+        try:
+            # Cache original and resized images
+            cache_results = cache_master_and_resized_image(
+                organization_id=organization.id,
+                organization_we_vote_id=organization.we_vote_id,
                 twitter_id=organization.twitter_user_id,
+                twitter_screen_name=organization.organization_twitter_handle,
+                twitter_profile_image_url_https=twitter_profile_image_url_https,
+                twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
+                twitter_profile_banner_url_https=twitter_profile_banner_url_https, image_source=TWITTER)
+            cached_twitter_profile_image_url_https = cache_results['cached_twitter_profile_image_url_https']
+            cached_twitter_profile_background_image_url_https = \
+                cache_results['cached_twitter_profile_background_image_url_https']
+            cached_twitter_profile_banner_url_https = cache_results['cached_twitter_profile_banner_url_https']
+            we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+            we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+            we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+
+            # If we didn't just generate image urls for tiny, medium or large, we want to retrieve them from the image
+            # cache so we can store them in the organization table below in update_organization_twitter_details
+            # NOTE: In the future, we may only want to update the organization with these photos if there isn't
+            # already a we_vote_hosted_profile_image already stored in the organization.
+            # For now, we overwrite with a resized We Vote image if we have one
+            if not positive_value_exists(we_vote_hosted_profile_image_url_tiny) or \
+                    not positive_value_exists(we_vote_hosted_profile_image_url_medium) or \
+                    not positive_value_exists(we_vote_hosted_profile_image_url_large):
+                # TODO ANISHA Consider adding an option to only retrieve active images from
+                # the function retrieve_we_vote_image_list_from_we_vote_id (That is, if a "retrieve_active_only"
+                # setting is passed into the function, then don't return images that are active=False)
+                voter_we_vote_id = None
+                candidate_we_vote_id = None
+                image_results = we_vote_image_manager.retrieve_we_vote_image_list_from_we_vote_id(
+                    voter_we_vote_id, candidate_we_vote_id, organization.we_vote_id)
+                if image_results['we_vote_image_list_found']:
+                    we_vote_image_list = image_results['we_vote_image_list']
+                    for one_image in we_vote_image_list:
+                        # For now we aren't checking to see if the image is marked active or not
+                        # TODO ANISHA The we_vote_image_url is always coming back empty
+                        if not positive_value_exists(we_vote_hosted_profile_image_url_tiny):
+                            if one_image.kind_of_image_tiny:
+                                we_vote_hosted_profile_image_url_tiny = one_image.we_vote_image_url
+                        if not positive_value_exists(we_vote_hosted_profile_image_url_medium):
+                            if one_image.kind_of_image_medium:
+                                we_vote_hosted_profile_image_url_tiny = one_image.we_vote_image_url
+                        if not positive_value_exists(we_vote_hosted_profile_image_url_large):
+                            if one_image.kind_of_image_large:
+                                we_vote_hosted_profile_image_url_large = one_image.we_vote_image_url
+        except Exception as e:
+            status += "ERROR_CACHING_TWITTER_IMAGES: " + str(e) + " "
+
+        try:
+            save_organization_results = organization_manager.update_organization_twitter_details(
+                organization,
+                twitter_json,
                 cached_twitter_profile_image_url_https=cached_twitter_profile_image_url_https,
                 cached_twitter_profile_background_image_url_https=cached_twitter_profile_background_image_url_https,
                 cached_twitter_profile_banner_url_https=cached_twitter_profile_banner_url_https,
                 we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
                 we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
                 we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
+            if save_organization_results['success']:
+                # status += "ORGANIZATION_TWITTER_DETAILS_SUCCESS "
 
-            # If there is a voter with this Twitter id, then update the voter information in other tables
-            save_voter_twitter_details_results = voter_manager.update_voter_twitter_details(
-                twitter_id=organization.twitter_user_id,
-                twitter_json=results['twitter_json'],
-                cached_twitter_profile_image_url_https=cached_twitter_profile_image_url_https,
-                we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
-                we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
-                we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
-            if save_voter_twitter_details_results['success']:
-                save_position_from_voter_results = update_position_for_friends_details_from_voter(
-                    save_voter_twitter_details_results['voter'])
-            save_position_from_organization_results = \
-                update_position_entered_details_from_organization(organization)
-            from voter_guide.models import VoterGuideManager
-            voter_guide_manager = VoterGuideManager()
-            voter_guide_results = \
-                voter_guide_manager.update_organization_voter_guides_with_organization_data(organization)
-        else:
-            status += "ORGANIZATION_TWITTER_DETAILS_RETRIEVED_FROM_TWITTER_BUT_NOT_SAVED "
+                # Now update the Twitter statistics information in other We Vote tables
+                organization = save_organization_results['organization']
+                save_voter_guide_from_organization_results = update_social_media_statistics_in_other_tables(
+                    organization)
+
+                # Make sure we have a TwitterUser
+                save_twitter_user_results = twitter_user_manager.update_or_create_twitter_user(
+                    twitter_json=twitter_json,
+                    twitter_id=organization.twitter_user_id,
+                    cached_twitter_profile_image_url_https=cached_twitter_profile_image_url_https,
+                    cached_twitter_profile_background_image_url_https=cached_twitter_profile_background_image_url_https,
+                    cached_twitter_profile_banner_url_https=cached_twitter_profile_banner_url_https,
+                    we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
+                    we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
+                    we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
+
+                # If there is a voter with this Twitter id, then update the voter information in other tables
+                save_voter_twitter_details_results = voter_manager.update_voter_twitter_details(
+                    twitter_id=organization.twitter_user_id,
+                    twitter_json=twitter_json,
+                    cached_twitter_profile_image_url_https=cached_twitter_profile_image_url_https,
+                    we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
+                    we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
+                    we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
+                if save_voter_twitter_details_results['success']:
+                    save_position_from_voter_results = update_position_for_friends_details_from_voter(
+                        save_voter_twitter_details_results['voter'])
+                update_positions_results = update_position_entered_details_from_organization(organization)
+                from voter_guide.models import VoterGuideManager
+                voter_guide_manager = VoterGuideManager()
+                voter_guide_results = \
+                    voter_guide_manager.update_organization_voter_guides_with_organization_data(organization)
+            else:
+                status += "ORGANIZATION_TWITTER_DETAILS_RETRIEVED_FROM_TWITTER_BUT_NOT_SAVED "
+        except Exception as e:
+            status += "UPDATE_TWITTER_ORGANIZATION_DETAILS_FAILED: " + str(e) + " "
     else:
         status += str(organization.organization_twitter_handle) + "-NOT_RETRIEVED_CLEARING_TWITTER_DETAILS "
         save_organization_results = organization_manager.clear_organization_twitter_details(organization)
@@ -1122,6 +1141,9 @@ def retrieve_and_update_organizations_needing_twitter_update(batch_process_id=0)
 
         organizations_updated = 0
         status += "RETRIEVE_ORGANIZATION_UPDATE_DATA_FROM_TWITTER_LOOP_TOTAL: " + str(organizations_to_update) + " "
+        for organization in organization_list:
+            status += "[" + str(organization.organization_twitter_handle) + "]"
+
         batch_process_manager = BatchProcessManager()
         batch_process_manager.create_batch_process_log_entry(
             batch_process_id=batch_process_id,
@@ -1524,7 +1546,7 @@ def refresh_twitter_data_for_organizations(state_code='', google_civic_election_
             if retrieved_twitter_data:
                 number_of_organizations_updated += 1
                 # save_results = organization_manager.update_organization_twitter_details(
-                #     organization, results['twitter_json'])
+                #     organization, twitter_json)
 
                 # if save_results['success']:
                 update_results = update_social_media_statistics_in_other_tables(organization)
