@@ -3024,6 +3024,7 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
             'last_name':                        voter.last_name,
             'linked_organization_we_vote_id':   voter.linked_organization_we_vote_id,
             'notification_settings_flags':      voter.notification_settings_flags,
+            'signed_in':                        voter.is_signed_in(),            # Extra field for debugging the WebApp
             'signed_in_facebook':               voter.signed_in_facebook(),
             'signed_in_google':                 voter.signed_in_google(),
             'signed_in_twitter':                voter.signed_in_twitter(),
