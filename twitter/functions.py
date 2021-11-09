@@ -28,8 +28,10 @@ TWITTER_USER_SUSPENDED_LOG_RESPONSES = [
     "User has been suspended."
 ]
 
+
 def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
     status = ""
+    success = True
     twitter_user_not_found_in_twitter = False
     twitter_user_suspended_by_twitter = False
     write_to_server_logs = False
@@ -49,9 +51,7 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
             twitter_handle = ''
 
     twitter_handle_found = False
-    twitter_json = []
-    tweepy_error = False
-    error_instance = ''
+    twitter_json = {}
     try:
         if positive_value_exists(twitter_user_id):
             twitter_user = api.get_user(user_id=twitter_user_id)
@@ -73,29 +73,15 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
             twitter_handle_found = False
     except tweepy.RateLimitError as rate_limit_error:
         success = False
-        status += 'TWITTER_RATE_LIMIT_ERROR '
+        status += 'TWITTER_RATE_LIMIT_ERROR: ' + str(rate_limit_error) + " "
         handle_exception(rate_limit_error, logger=logger, exception_message=status)
     except tweepy.error.TweepError as error_instance:
-        tweepy_error = True
-    # Tweepy API 2
-    # except tweepy.TooManyRequests as rate_limit_error:
-    #     success = False
-    #     status += 'TWITTER_RATE_LIMIT_ERROR '
-    #     handle_exception(rate_limit_error, logger=logger, exception_message=status)
-    # except tweepy.error.TweepyException as error_instance:
-    #     tweepy_error = True
-    # except tweepy.error.HTTPException as error_instance:
-    #     tweepy_error = True
-    except Exception as error_instance:
-        tweepy_error = True
-        status += "TWEEPY_EXCEPTION: " + str(error_instance) + " "
-
-    if tweepy_error:
         success = False
         status += twitter_handle + " " if positive_value_exists(twitter_handle) else ""
         status += str(twitter_user_id) + " " if positive_value_exists(twitter_user_id) else " "
-        status += str(error_instance) + " "
-        if hasattr(error_instance, 'args'):
+        if error_instance:
+            status += str(error_instance) + " "
+        if error_instance and hasattr(error_instance, 'args'):
             try:
                 error_tuple = error_instance.args
                 for error_dict in error_tuple:
@@ -114,6 +100,18 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
             write_to_server_logs = True
         if write_to_server_logs:
             handle_exception(error_instance, logger=logger, exception_message=status)
+    # Tweepy API 2
+    # except tweepy.TooManyRequests as rate_limit_error:
+    #     success = False
+    #     status += 'TWITTER_RATE_LIMIT_ERROR '
+    #     handle_exception(rate_limit_error, logger=logger, exception_message=status)
+    # except tweepy.error.TweepyException as error_instance:
+    #     tweepy_error = True
+    # except tweepy.error.HTTPException as error_instance:
+    #     tweepy_error = True
+    except Exception as e:
+        status += "TWEEPY_EXCEPTION: " + str(e) + " "
+        success = False
 
     try:
         if positive_value_exists(twitter_json.get('profile_banner_url')):
