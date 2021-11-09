@@ -57,13 +57,13 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
             twitter_user = api.get_user(user_id=twitter_user_id)
             twitter_json = twitter_user._json
             success = True
-            status += 'TWITTER_RETRIEVE_SUCCESSFUL-TWITTER_USER_ID ' + str(twitter_user_id) + " "
+            # status += 'TWITTER_USER_ID_SUCCESS-' + str(twitter_user_id) + " "
             twitter_handle_found = True
         elif positive_value_exists(twitter_handle):
             twitter_user = api.get_user(screen_name=twitter_handle)
             twitter_json = twitter_user._json
             success = True
-            status += 'TWITTER_RETRIEVE_SUCCESSFUL-TWITTER_HANDLE ' + str(twitter_handle) + " "
+            # status += 'TWITTER_HANDLE_SUCCESS-' + str(twitter_handle) + " "
             twitter_handle_found = True
             twitter_user_id = twitter_user.id  # Integer value. id_str would be the String value
         else:
@@ -77,6 +77,7 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
         handle_exception(rate_limit_error, logger=logger, exception_message=status)
     except tweepy.error.TweepError as error_instance:
         success = False
+        status += "[TWEEP_ERROR: "
         status += twitter_handle + " " if positive_value_exists(twitter_handle) else ""
         status += str(twitter_user_id) + " " if positive_value_exists(twitter_user_id) else " "
         if error_instance:
@@ -98,6 +99,7 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
                 write_to_server_logs = True
         else:
             write_to_server_logs = True
+        status += "]"
         if write_to_server_logs:
             handle_exception(error_instance, logger=logger, exception_message=status)
     # Tweepy API 2
