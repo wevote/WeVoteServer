@@ -671,6 +671,7 @@ def refresh_twitter_organization_details(organization, twitter_user_id=0):
         twitter_user_id_zero = 0
         try:
             results = retrieve_twitter_user_info(twitter_user_id_zero, organization.organization_twitter_handle)
+            status += results['status']
             if results['success']:
                 twitter_json = results['twitter_json']
                 twitter_user_found = True
