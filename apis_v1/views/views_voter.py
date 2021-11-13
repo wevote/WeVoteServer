@@ -1954,24 +1954,28 @@ def voter_update_view(request):  # voterUpdate
         json_data = {
             'status': status,
             'success': False,
-            'voter_device_id': False,
             'facebook_email': False,
             'facebook_profile_image_url_https': False,
             'first_name': '',
-            'middle_name': '',
+            'flag_integer_to_set': 0,
+            'flag_integer_to_unset': 0,
+            'interface_status_flags': 0,
             'last_name': '',
+            'middle_name': '',
+            'notification_flag_integer_to_set': 0,
+            'notification_flag_integer_to_unset': 0,
+            'notification_settings_flags': 0,
+            'profile_image_type_currently_active': '',
             'twitter_profile_image_url_https': '',
+            'voter_device_id': False,
+            'voter_photo_too_big': True,
+            'voter_updated': False,
             'we_vote_hosted_profile_image_url_large': '',
             'we_vote_hosted_profile_image_url_medium': '',
             'we_vote_hosted_profile_image_url_tiny': '',
-            'voter_updated': False,
-            'interface_status_flags': 0,
-            'flag_integer_to_set': 0,
-            'flag_integer_to_unset': 0,
-            'notification_settings_flags': 0,
-            'notification_flag_integer_to_set': 0,
-            'notification_flag_integer_to_unset': 0,
-            'voter_photo_too_big': True,
+            'we_vote_hosted_profile_facebook_image_url_large': '',
+            'we_vote_hosted_profile_twitter_image_url_large': '',
+            'we_vote_hosted_profile_uploaded_image_url_large': '',
         }
 
         response = HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -2063,23 +2067,27 @@ def voter_update_view(request):  # voterUpdate
         json_data = {
                 'status':                           status,
                 'success':                          False,
-                'voter_device_id':                  voter_device_id,
                 'facebook_email':                   facebook_email,
                 'facebook_profile_image_url_https': facebook_profile_image_url_https,
                 'first_name':                       first_name,
-                'middle_name':                      middle_name,
-                'last_name':                        last_name,
-                'twitter_profile_image_url_https':  twitter_profile_image_url_https,
-                'we_vote_hosted_profile_image_url_large': "",
-                'we_vote_hosted_profile_image_url_medium': "",
-                'we_vote_hosted_profile_image_url_tiny': "",
-                'voter_updated':                    voter_updated,
-                'interface_status_flags':           interface_status_flags,
                 'flag_integer_to_set':              flag_integer_to_set,
                 'flag_integer_to_unset':            flag_integer_to_unset,
+                'interface_status_flags':           interface_status_flags,
+                'last_name':                        last_name,
+                'middle_name':                      middle_name,
                 'notification_settings_flags':      notification_settings_flags,
                 'notification_flag_integer_to_set': notification_flag_integer_to_set,
                 'notification_flag_integer_to_unset': notification_flag_integer_to_unset,
+                'profile_image_type_currently_active': profile_image_type_currently_active,
+                'twitter_profile_image_url_https':  twitter_profile_image_url_https,
+                'voter_device_id':                  voter_device_id,
+                'voter_updated':                    voter_updated,
+                'we_vote_hosted_profile_image_url_large': "",
+                'we_vote_hosted_profile_image_url_medium': "",
+                'we_vote_hosted_profile_image_url_tiny': "",
+                'we_vote_hosted_profile_facebook_image_url_large': '',
+                'we_vote_hosted_profile_twitter_image_url_large': '',
+                'we_vote_hosted_profile_uploaded_image_url_large': '',
             }
         response = HttpResponse(json.dumps(json_data), content_type='application/json')
         return response
@@ -2113,23 +2121,27 @@ def voter_update_view(request):  # voterUpdate
         json_data = {
             'status':                           status,
             'success':                          False,
-            'voter_device_id':                  voter_device_id,
             'facebook_email':                   facebook_email,
             'facebook_profile_image_url_https': facebook_profile_image_url_https,
             'first_name':                       first_name,
-            'middle_name':                      middle_name,
+            'flag_integer_to_set':              flag_integer_to_set,
+            'flag_integer_to_unset':            flag_integer_to_unset,
+            'interface_status_flags':           interface_status_flags,
             'last_name':                        last_name,
+            'middle_name':                      middle_name,
+            'notification_flag_integer_to_set': notification_flag_integer_to_set,
+            'notification_flag_integer_to_unset': notification_flag_integer_to_unset,
+            'notification_settings_flags':      notification_settings_flags,
+            'profile_image_type_currently_active': profile_image_type_currently_active,
             'twitter_profile_image_url_https':  twitter_profile_image_url_https,
+            'voter_device_id':                  voter_device_id,
+            'voter_updated':                    voter_updated,
             'we_vote_hosted_profile_image_url_large':   "",
             'we_vote_hosted_profile_image_url_medium':  "",
             'we_vote_hosted_profile_image_url_tiny':    "",
-            'voter_updated':                    voter_updated,
-            'interface_status_flags':           interface_status_flags,
-            'flag_integer_to_set':              flag_integer_to_set,
-            'flag_integer_to_unset':            flag_integer_to_unset,
-            'notification_settings_flags':      notification_settings_flags,
-            'notification_flag_integer_to_set': notification_flag_integer_to_set,
-            'notification_flag_integer_to_unset': notification_flag_integer_to_unset,
+            'we_vote_hosted_profile_facebook_image_url_large': '',
+            'we_vote_hosted_profile_twitter_image_url_large': '',
+            'we_vote_hosted_profile_uploaded_image_url_large': '',
         }
         response = HttpResponse(json.dumps(json_data), content_type='application/json')
         return response
@@ -2143,39 +2155,43 @@ def voter_update_view(request):  # voterUpdate
         pass
     else:
         # If here, we want to return the latest data from the voter object
-        status += "MISSING_VARIABLE-NO_VARIABLES_PASSED_IN_TO_CHANGE "
+        status += "MISSING_VARIABLE_NO_VARIABLES_PASSED_IN_TO_CHANGE "
         json_data = {
                 'status':                                   status,
                 'success':                                  True,
-                'voter_device_id':                          voter_device_id,
                 'facebook_email':                           voter.facebook_email,
                 'facebook_profile_image_url_https':         voter.facebook_profile_image_url_https,
                 'first_name':                               voter.first_name,
-                'middle_name':                              voter.middle_name,
+                'flag_integer_to_set':                      flag_integer_to_set,
+                'flag_integer_to_unset':                    flag_integer_to_unset,
+                'interface_status_flags':                   voter.interface_status_flags,
                 'last_name':                                voter.last_name,
+                'middle_name':                              voter.middle_name,
+                'notification_flag_integer_to_set':         notification_flag_integer_to_set,
+                'notification_flag_integer_to_unset':       notification_flag_integer_to_unset,
+                'notification_settings_flags':              voter.notification_settings_flags,
+                'profile_image_type_currently_active':      voter.profile_image_type_currently_active,
                 'twitter_profile_image_url_https':          voter.twitter_profile_image_url_https,
+                'voter_device_id':                          voter_device_id,
+                'voter_updated':                            voter_updated,
                 'we_vote_hosted_profile_image_url_large':   voter.we_vote_hosted_profile_image_url_large,
                 'we_vote_hosted_profile_image_url_medium':  voter.we_vote_hosted_profile_image_url_medium,
                 'we_vote_hosted_profile_image_url_tiny':    voter.we_vote_hosted_profile_image_url_tiny,
-                'voter_updated':                            voter_updated,
-                'interface_status_flags':                   voter.interface_status_flags,
-                'flag_integer_to_set':                      flag_integer_to_set,
-                'flag_integer_to_unset':                    flag_integer_to_unset,
-                'notification_settings_flags':              voter.notification_settings_flags,
-                'notification_flag_integer_to_set':         notification_flag_integer_to_set,
-                'notification_flag_integer_to_unset':       notification_flag_integer_to_unset,
+                'we_vote_hosted_profile_facebook_image_url_large': voter.we_vote_hosted_profile_facebook_image_url_large,
+                'we_vote_hosted_profile_twitter_image_url_large': voter.we_vote_hosted_profile_twitter_image_url_large,
+                'we_vote_hosted_profile_uploaded_image_url_large': voter.we_vote_hosted_profile_uploaded_image_url_large,
             }
         response = HttpResponse(json.dumps(json_data), content_type='application/json')
         return response
 
     # These variables will contain copy of default profile photo
-    we_vote_hosted_profile_image_url_large = False
-    we_vote_hosted_profile_image_url_medium = False
-    we_vote_hosted_profile_image_url_tiny = False
+    we_vote_hosted_profile_image_url_large = voter.we_vote_hosted_profile_image_url_large
+    we_vote_hosted_profile_image_url_medium = voter.we_vote_hosted_profile_image_url_medium
+    we_vote_hosted_profile_image_url_tiny = voter.we_vote_hosted_profile_image_url_tiny
 
-    we_vote_hosted_profile_twitter_image_url_large = False
-    we_vote_hosted_profile_twitter_image_url_medium = False
-    we_vote_hosted_profile_twitter_image_url_tiny = False
+    we_vote_hosted_profile_twitter_image_url_large = voter.we_vote_hosted_profile_twitter_image_url_large
+    we_vote_hosted_profile_twitter_image_url_medium = voter.we_vote_hosted_profile_twitter_image_url_medium
+    we_vote_hosted_profile_twitter_image_url_tiny = voter.we_vote_hosted_profile_twitter_image_url_tiny
     if twitter_profile_image_url_https:
         # Cache original and resized images
         # TODO: Replace voter.twitter_id with value from twitter link to voter
@@ -2192,9 +2208,9 @@ def voter_update_view(request):  # voterUpdate
         if positive_value_exists(cached_twitter_profile_image_url_https):
             twitter_profile_image_url_https = cached_twitter_profile_image_url_https
 
-    we_vote_hosted_profile_facebook_image_url_large = False
-    we_vote_hosted_profile_facebook_image_url_medium = False
-    we_vote_hosted_profile_facebook_image_url_tiny = False
+    we_vote_hosted_profile_facebook_image_url_large = voter.we_vote_hosted_profile_facebook_image_url_large
+    we_vote_hosted_profile_facebook_image_url_medium = voter.we_vote_hosted_profile_facebook_image_url_medium
+    we_vote_hosted_profile_facebook_image_url_tiny = voter.we_vote_hosted_profile_facebook_image_url_tiny
     if facebook_profile_image_url_https:
         # Cache original and resized images
         # TODO: Replace voter.facebook_id with value from facebook link to voter
@@ -2212,9 +2228,9 @@ def voter_update_view(request):  # voterUpdate
 
     #
     # Save voter_photo_from_file_reader and get back we_vote_hosted_voter_photo_original_url
-    we_vote_hosted_profile_uploaded_image_url_large = False
-    we_vote_hosted_profile_uploaded_image_url_medium = False
-    we_vote_hosted_profile_uploaded_image_url_tiny = False
+    we_vote_hosted_profile_uploaded_image_url_large = voter.we_vote_hosted_profile_uploaded_image_url_large
+    we_vote_hosted_profile_uploaded_image_url_medium = voter.we_vote_hosted_profile_uploaded_image_url_medium
+    we_vote_hosted_profile_uploaded_image_url_tiny = voter.we_vote_hosted_profile_uploaded_image_url_tiny
     if voter_photo_changed and voter_photo_from_file_reader:
         photo_results = voter_save_photo_from_file_reader(
             voter_we_vote_id=voter_we_vote_id,
@@ -2244,7 +2260,20 @@ def voter_update_view(request):  # voterUpdate
     # We need profile_image_type_currently_active setting
     if profile_image_type_currently_active_changed:
         # In this case it is coming in from API call and does not need to be calculated
-        pass
+        if profile_image_type_currently_active in \
+                [PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UPLOADED]:
+            if profile_image_type_currently_active == PROFILE_IMAGE_TYPE_FACEBOOK:
+                we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_facebook_image_url_large
+                we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_facebook_image_url_medium
+                we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_facebook_image_url_tiny
+            elif profile_image_type_currently_active == PROFILE_IMAGE_TYPE_TWITTER:
+                we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_twitter_image_url_large
+                we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_twitter_image_url_medium
+                we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_twitter_image_url_tiny
+            elif profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UPLOADED:
+                we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_uploaded_image_url_large
+                we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_uploaded_image_url_medium
+                we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_uploaded_image_url_tiny
     else:
         profile_image_type_currently_active = voter.profile_image_type_currently_active
         if profile_image_type_currently_active not in \
@@ -2437,23 +2466,27 @@ def voter_update_view(request):  # voterUpdate
     json_data = {
         'status':                                   status,
         'success':                                  success,
-        'voter_device_id':                          voter_device_id,
         'facebook_email':                           facebook_email,
         'facebook_profile_image_url_https':         facebook_profile_image_url_https,
         'first_name':                               first_name,
-        'middle_name':                              middle_name,
-        'last_name':                                last_name,
-        'twitter_profile_image_url_https':          twitter_profile_image_url_https,
-        'we_vote_hosted_profile_image_url_large':   we_vote_hosted_profile_image_url_large,
-        'we_vote_hosted_profile_image_url_medium':  we_vote_hosted_profile_image_url_medium,
-        'we_vote_hosted_profile_image_url_tiny':    we_vote_hosted_profile_image_url_tiny,
-        'voter_updated':                            voter_updated,
-        'interface_status_flags':                   voter.interface_status_flags,
         'flag_integer_to_set':                      flag_integer_to_set,
         'flag_integer_to_unset':                    flag_integer_to_unset,
+        'interface_status_flags':                   voter.interface_status_flags,
+        'last_name':                                last_name,
+        'middle_name':                              middle_name,
         'notification_settings_flags':              voter.notification_settings_flags,
         'notification_flag_integer_to_set':         notification_flag_integer_to_set,
         'notification_flag_integer_to_unset':       notification_flag_integer_to_unset,
+        'profile_image_type_currently_active':      voter.profile_image_type_currently_active,
+        'twitter_profile_image_url_https':          twitter_profile_image_url_https,
+        'voter_device_id':                          voter_device_id,
+        'voter_updated':                            voter_updated,
+        'we_vote_hosted_profile_image_url_large':   we_vote_hosted_profile_image_url_large,
+        'we_vote_hosted_profile_image_url_medium':  we_vote_hosted_profile_image_url_medium,
+        'we_vote_hosted_profile_image_url_tiny':    we_vote_hosted_profile_image_url_tiny,
+        'we_vote_hosted_profile_facebook_image_url_large':  we_vote_hosted_profile_facebook_image_url_large,
+        'we_vote_hosted_profile_twitter_image_url_large':   we_vote_hosted_profile_twitter_image_url_large,
+        'we_vote_hosted_profile_uploaded_image_url_large':  we_vote_hosted_profile_uploaded_image_url_large,
     }
 
     response = HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -2618,7 +2651,7 @@ def voter_notification_settings_update_view(request):  # voterNotificationSettin
         pass
     else:
         # If here, there is nothing to change and we just want to return the latest data from the voter object
-        status += "MISSING_VARIABLE-NO_VARIABLES_PASSED_IN_TO_CHANGE "
+        status += "MISSING_NOTIFICATION_VARIABLE_NO_VARIABLES_PASSED_IN_TO_CHANGE "
         json_data = {
                 'status':                           status,
                 'success':                          True,
