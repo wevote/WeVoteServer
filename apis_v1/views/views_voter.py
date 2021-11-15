@@ -2960,9 +2960,10 @@ def voter_contact_list_save_view(request):  # voterContactListSave
     # augment_results = augment_emails_for_voter_with_sendgrid(voter_we_vote_id=voter.we_vote_id)
     # status += augment_results['status']
 
-    from import_export_targetsmart.controllers import augment_emails_for_voter_with_targetsmart
-    augment_results = augment_emails_for_voter_with_targetsmart(voter_we_vote_id=voter.we_vote_id)
-    status += augment_results['status']
+    # Did not find any matches out of 750 sent and costs $39/month
+    # from import_export_snovio.controllers import augment_emails_for_voter_with_snovio
+    # augment_results = augment_emails_for_voter_with_snovio(voter_we_vote_id=voter.we_vote_id)
+    # status += augment_results['status']
 
     retrieve_results = voter_contact_list_retrieve_for_api(voter_we_vote_id=voter.we_vote_id)
     voter_contact_email_list = retrieve_results['voter_contact_email_list']
