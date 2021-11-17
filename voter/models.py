@@ -146,6 +146,7 @@ class VoterManager(BaseUserManager):
     def update_or_create_contact_email_augmented(
             self,
             checked_against_sendgrid=None,
+            checked_against_snovio=None,
             checked_against_targetsmart=None,
             email_address_text='',
             existing_contact_email_augmented_dict={},
@@ -155,6 +156,9 @@ class VoterManager(BaseUserManager):
             is_invalid=None,
             is_verified=None,
             sendgrid_id=None,
+            snovio_id=None,
+            snovio_locality=None,
+            snovio_source_state=None,
             targetsmart_id=None,
             targetsmart_source_state=None,
     ):
@@ -192,6 +196,11 @@ class VoterManager(BaseUserManager):
                         contact_email_augmented.checked_against_sendgrid = checked_against_sendgrid
                         contact_email_augmented.date_last_checked_against_sendgrid = now()
                         change_to_save = True
+                if checked_against_snovio is not None:
+                    if contact_email_augmented.checked_against_snovio != checked_against_snovio:
+                        contact_email_augmented.checked_against_snovio = checked_against_snovio
+                        contact_email_augmented.date_last_checked_against_snovio = now()
+                        change_to_save = True
                 if checked_against_targetsmart is not None:
                     if contact_email_augmented.checked_against_targetsmart != checked_against_targetsmart:
                         contact_email_augmented.checked_against_targetsmart = checked_against_targetsmart
@@ -216,6 +225,18 @@ class VoterManager(BaseUserManager):
                 if is_verified is not None:
                     if contact_email_augmented.is_verified != is_verified:
                         contact_email_augmented.is_verified = is_verified
+                        change_to_save = True
+                if snovio_id is not None:
+                    if contact_email_augmented.snovio_id != snovio_id:
+                        contact_email_augmented.snovio_id = snovio_id
+                        change_to_save = True
+                if snovio_locality is not None:
+                    if contact_email_augmented.snovio_locality != snovio_locality:
+                        contact_email_augmented.snovio_locality = snovio_locality
+                        change_to_save = True
+                if snovio_source_state is not None:
+                    if contact_email_augmented.snovio_source_state != snovio_source_state:
+                        contact_email_augmented.snovio_source_state = snovio_source_state
                         change_to_save = True
                 if targetsmart_id is not None:
                     if contact_email_augmented.targetsmart_id != targetsmart_id:
@@ -715,6 +736,7 @@ class VoterManager(BaseUserManager):
     def retrieve_contact_email_augmented_list(
             self,
             checked_against_sendgrid_more_than_x_days_ago=None,
+            checked_against_snovio_more_than_x_days_ago=None,
             checked_against_targetsmart_more_than_x_days_ago=None,
             email_address_text_list=None,
             read_only=True):
@@ -739,6 +761,16 @@ class VoterManager(BaseUserManager):
                     Q(checked_against_sendgrid=False) |
                     Q(date_last_checked_against_sendgrid__isnull=True) |
                     Q(date_last_checked_against_sendgrid__lt=the_date_x_days_ago))
+            elif checked_against_snovio_more_than_x_days_ago == 0:
+                # Don't limit by if/when SnovIO data was retrieved previously
+                pass
+            elif checked_against_snovio_more_than_x_days_ago is not None:
+                # Only retrieve the record if it hasn't been retrieved, or was retrieved more than x days ago
+                the_date_x_days_ago = now() - timedelta(days=checked_against_snovio_more_than_x_days_ago)
+                list_query = list_query.filter(
+                    Q(checked_against_snovio=False) |
+                    Q(date_last_checked_against_snovio__isnull=True) |
+                    Q(date_last_checked_against_snovio__lt=the_date_x_days_ago))
             elif checked_against_targetsmart_more_than_x_days_ago == 0:
                 # Don't limit by if/when TargetSmart data was retrieved previously
                 pass
@@ -3127,8 +3159,10 @@ class ContactEmailAugmented(models.Model):
     What information have we retrieved to augment this one email address?
     """
     checked_against_sendgrid = models.BooleanField(db_index=True, default=False)
+    checked_against_snovio = models.BooleanField(db_index=True, default=False)
     checked_against_targetsmart = models.BooleanField(db_index=True, default=False)
     date_last_checked_against_sendgrid = models.DateTimeField(null=True)
+    date_last_checked_against_snovio = models.DateTimeField(null=True)
     date_last_checked_against_targetsmart = models.DateTimeField(null=True)
     email_address_text = models.TextField(db_index=True, null=False, unique=True)
     has_known_bounces = models.BooleanField(default=False)
@@ -3136,6 +3170,9 @@ class ContactEmailAugmented(models.Model):
     has_suspected_bounces = models.BooleanField(default=False)
     is_invalid = models.BooleanField(db_index=True, default=False)
     is_verified = models.BooleanField(db_index=True, default=False)
+    snovio_id = models.CharField(max_length=255, null=True)
+    snovio_locality = models.CharField(max_length=255, null=True)
+    snovio_source_state = models.CharField(max_length=2, null=True)
     targetsmart_id = models.CharField(max_length=255, null=True)
     targetsmart_source_state = models.CharField(max_length=2, null=True)
 
@@ -3152,6 +3189,9 @@ class ContactSMSAugmented(models.Model):
     is_invalid = models.BooleanField(db_index=True, default=False)
     is_verified = models.BooleanField(db_index=True, default=False)
     normalized_sms_phone_number = models.CharField(db_index=True, max_length=50, null=False, unique=True)
+    snovio_id = models.CharField(max_length=255, null=True)
+    snovio_locality = models.CharField(max_length=255, null=True)
+    snovio_source_state = models.CharField(max_length=2, null=True)
     targetsmart_id = models.CharField(max_length=255, null=True)
     targetsmart_source_state = models.CharField(max_length=2, null=True)
 

@@ -5292,7 +5292,8 @@ class BatchProcessManager(models.Manager):
                 # Limit this search to upcoming_elections only, or no election specified
                 google_civic_election_id_list = [0]
                 for one_election in election_list:
-                    google_civic_election_id_list.append(one_election.google_civic_election_id)
+                    google_civic_election_id_integer = convert_to_int(one_election.google_civic_election_id)
+                    google_civic_election_id_list.append(google_civic_election_id_integer)
                 batch_process_queryset = batch_process_queryset.filter(
                     google_civic_election_id__in=google_civic_election_id_list)
             else:
@@ -5305,16 +5306,8 @@ class BatchProcessManager(models.Manager):
             # Cycle through all processes retrieved and make sure they aren't being worked on by other processes
             for batch_process in batch_process_list:
                 if batch_process.date_checked_out is None:
-                    if positive_value_exists(process_active):
-                        # If no date_checked_out, then process cannot be active
-                        pass
-                    elif positive_value_exists(process_queued):
-                        # If no date_checked_out, then process can be considered queued
-                        filtered_batch_process_list.append(batch_process)
-                    else:
-                        # This is for "needs_to_be_run"
-                        # If no date_checked_out, then process needs_to_run
-                        filtered_batch_process_list.append(batch_process)
+                    # If no date_checked_out, then process can be considered "active", "queued" or "needs_to_be_run"
+                    filtered_batch_process_list.append(batch_process)
                 else:
                     # See also longest_activity_notice_processing_run_time_allowed
                     # If this kind_of_process has run longer than allowed (i.e. probably crashed or timed out)

@@ -197,10 +197,11 @@
              {% if election.use_google_civic_as_data_source %}checked{% endif %} />
         Use Google Civic
       &nbsp;&nbsp;&nbsp;
-      <input type="checkbox" name="use_ballotpedia_as_data_source" id="use_ballotpedia_as_data_source_id" disabled
-             value="True"
-             {% if election.use_ballotpedia_as_data_source %}checked{% endif %} />
-        Use Ballotpedia
+      <span class="u-no-break">
+        <input type="checkbox" name="use_ballotpedia_as_data_source" id="use_ballotpedia_as_data_source_id" disabled
+               value="True"
+               {% if election.use_ballotpedia_as_data_source %}checked{% endif %} />
+          Use Ballotpedia</span>
       &nbsp;&nbsp;&nbsp;
       <span class="u-no-break">
             <input type="checkbox" name="use_vote_usa_as_data_source" id="use_vote_usa_as_data_source_id" disabled
