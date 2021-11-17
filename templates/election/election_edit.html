@@ -43,10 +43,11 @@
              {% if election.election_preparation_finished %}checked{% endif %} />
         Election data import finished (Offices, Candidates, Ballots)
       &nbsp;&nbsp;&nbsp;
-      <input type="checkbox" name="candidate_photos_finished" id="candidate_photos_finished_id"
-             value="True"
-             {% if election.candidate_photos_finished %}checked{% endif %} />
-        Candidate photos finished
+      <span class="u-no-break">
+          <input type="checkbox" name="candidate_photos_finished" id="candidate_photos_finished_id"
+                 value="True"
+                 {% if election.candidate_photos_finished %}checked{% endif %} />
+          Candidate photos finished</span>
       &nbsp;&nbsp;&nbsp;
       <input type="checkbox" name="is_national_election" id="is_national_election_id"
            value="True"
@@ -67,10 +68,10 @@
              {% if election.use_google_civic_as_data_source %}checked{% endif %} />
         Use Google Civic
       &nbsp;&nbsp;&nbsp;
-      <input type="checkbox" name="use_ballotpedia_as_data_source" id="use_ballotpedia_as_data_source_id"
+      <span class="u-no-break">
+        <input type="checkbox" name="use_ballotpedia_as_data_source" id="use_ballotpedia_as_data_source_id"
              value="True"
-             {% if election.use_ballotpedia_as_data_source %}checked{% endif %} />
-        Use Ballotpedia
+             {% if election.use_ballotpedia_as_data_source %}checked{% endif %} />&nbsp;Use&nbsp;Ballotpedia</span>
       &nbsp;&nbsp;&nbsp;
       <span class="u-no-break">
       <input type="checkbox" name="use_vote_usa_as_data_source" id="use_vote_usa_as_data_source_id"
@@ -84,6 +85,14 @@
     <div class="col-sm-8">
         <input type="text" name="google_civic_election_id" id="google_civic_election_id_id" class="form-control"
                value="{% if election %}{{ election.google_civic_election_id|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="vote_usa_election_id_id" class="col-sm-3 control-label">Vote USA Election Id</label>
+    <div class="col-sm-8">
+        <input type="text" name="vote_usa_election_id" id="vote_usa_election_id_id" class="form-control"
+               value="{% if election %}{{ election.vote_usa_election_id|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
 

@@ -248,7 +248,7 @@ def process_next_ballot_items():
         batch_process_list = results['batch_process_list']
     status += "BATCH_PROCESSES_TO_BE_RESTARTED: " + str(len(batch_process_list)) + ", "
 
-    # If there are any started processes that are not checked out, or checked out but timed out
+    # If there are any started processes that are not currently checked out, or checked out but timed out
     process_restarted = False
     if batch_process_list and len(batch_process_list) > 0:
         for batch_process in batch_process_list:
@@ -1339,6 +1339,14 @@ def process_one_ballot_item_batch_process(batch_process):
                         'status': status,
                     }
                     return results
+
+                # Now clear out date_checked_out so it can be picked up by the next step
+                try:
+                    batch_process.date_checked_out = None
+                    batch_process.save()
+                except Exception as e:
+                    status += "CANNOT_CLEAR_OUT_DATE_CHECKED_OUT: " + str(e) + " "
+
                 # We don't want to stop these processes this way any more
                 # if not positive_value_exists(retrieve_row_count):
                 #     if batch_process.kind_of_process == RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS \

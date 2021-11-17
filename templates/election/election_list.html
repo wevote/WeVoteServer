@@ -300,8 +300,9 @@
         <a href="{% url 'election:election_edit' 0 %}" target="_blank" >Add Upcoming Election Manually <span class="glyphicon glyphicon-new-window"></span></a>
     </p>
 {# ############## List of many election dates ############## #}
-    <p><a href="{% url 'election:election_remote_retrieve' %}">Retrieve all elections from Google Civic</a>.
-        <a href="https://votinginfoproject.org/news/vip-continues-support-elections-through-2018/" target="_blank">VIP elections supported <span class="glyphicon glyphicon-new-window"></span></a>.</p>
+    <p>
+        <a href="{% url 'election:election_remote_retrieve' %}">Retrieve upcoming elections from Vote USA</a>
+    </p>
 
 <script>
     $(function() {

@@ -20,6 +20,7 @@ from wevote_functions.functions import positive_value_exists
 logger = wevote_functions.admin.get_logger(__name__)
 
 VOTE_USA_API_KEY = get_environment_variable("VOTE_USA_API_KEY", no_exception=True)
+VOTE_USA_ELECTION_QUERY_URL = "https://vote-usa.org/api/v1.asmx/electionQuery"
 VOTE_USA_VOTER_INFO_URL = "https://vote-usa.org/api/v1.asmx/voterInfoQuery"
 VOTE_USA_VOTER_INFO_QUERY_TYPE = "voterinfo"
 
@@ -72,6 +73,43 @@ def retrieve_and_store_vote_usa_candidate_photo(candidate):
         'status': status,
         'candidate': candidate,
     }
+    return results
+
+
+def retrieve_from_vote_usa_api_election_query():
+    logger.info("Loading json data from Vote USA servers, API call electionQuery")
+    print("Loading json data from Vote USA servers, API call electionQuery")
+
+    if not positive_value_exists(VOTE_USA_ELECTION_QUERY_URL):
+        results = {
+            'success':  False,
+            'status':   'VOTE_USA_ELECTION_QUERY_URL missing ',
+        }
+        return results
+
+    response = requests.get(
+        VOTE_USA_ELECTION_QUERY_URL,
+        headers=HEADERS_FOR_VOTE_USA_API_CALL,
+        params={
+            "accessKey": VOTE_USA_API_KEY,
+        })
+
+    # Use API call counter to track the number of queries we are doing each day
+    api_counter_manager = VoteUSAApiCounterManager()
+    api_counter_manager.create_counter_entry('election')
+
+    structured_json = json.loads(response.text)
+    if 'success' in structured_json and structured_json['success'] is False:
+        results = {
+            'success': False,
+            'status': "Error: " + structured_json['status'],
+        }
+    else:
+        results = {
+            'structured_json':  structured_json,
+            'success':          True,
+            'status':           'structured_json retrieved',
+        }
     return results
 
 
@@ -445,4 +483,23 @@ def retrieve_vote_usa_ballot_items_from_polling_location_api(
         'new_candidate_we_vote_ids_list':           new_candidate_we_vote_ids_list,
         'new_measure_we_vote_ids_list':             new_measure_we_vote_ids_list,
     }
+    return results
+
+
+def store_results_from_vote_usa_api_election_query(structured_json):
+    if 'elections' in structured_json:
+        elections_list_json = structured_json['elections']
+    else:
+        elections_list_json = {}
+    results = {}
+    from election.models import ElectionManager
+    election_manager = ElectionManager()
+    for one_election in elections_list_json:
+        results = election_manager.update_or_create_election(
+            election_day_text=one_election['electionDay'],
+            election_name=one_election['name'],
+            state_code=one_election['state'],
+            use_vote_usa_as_data_source=True,
+            vote_usa_election_id=one_election['id'])
+
     return results

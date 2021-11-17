@@ -652,6 +652,7 @@ def election_edit_process_view(request):
     use_google_civic_as_data_source = positive_value_exists(use_google_civic_as_data_source)
     use_vote_usa_as_data_source = request.POST.get('use_vote_usa_as_data_source', False)
     use_vote_usa_as_data_source = positive_value_exists(use_vote_usa_as_data_source)
+    vote_usa_election_id = request.POST.get('vote_usa_election_id', False)
 
     election_on_stage = Election()
 
@@ -739,6 +740,9 @@ def election_edit_process_view(request):
                 ctcl_uuid = None
             election_on_stage.ctcl_uuid = ctcl_uuid
 
+        if internal_notes is not False:
+            election_on_stage.internal_notes = internal_notes
+
         if ocd_division_id is not False:
             if not positive_value_exists(ocd_division_id):
                 ocd_division_id = None
@@ -755,8 +759,8 @@ def election_edit_process_view(request):
         election_on_stage.use_google_civic_as_data_source = use_google_civic_as_data_source
         election_on_stage.use_vote_usa_as_data_source = use_vote_usa_as_data_source
 
-        if internal_notes is not False:
-            election_on_stage.internal_notes = internal_notes
+        if vote_usa_election_id is not False:
+            election_on_stage.vote_usa_election_id = vote_usa_election_id
 
         election_on_stage.save()
         status += "UPDATED_EXISTING_ELECTION "
@@ -805,6 +809,8 @@ def election_edit_process_view(request):
                 election_on_stage.internal_notes = internal_notes
             if positive_value_exists(ocd_division_id):
                 election_on_stage.ocd_division_id = ocd_division_id
+            if positive_value_exists(vote_usa_election_id):
+                election_on_stage.vote_usa_election_id = vote_usa_election_id
             election_on_stage.save()
             election_local_id = election_on_stage.id
             status += "CREATED_NEW_ELECTION "
@@ -1393,7 +1399,7 @@ def election_remote_retrieve_view(request):
     if not results['success']:
         messages.add_message(request, messages.INFO, results['status'])
     else:
-        messages.add_message(request, messages.INFO, 'Upcoming elections retrieved from Google Civic.')
+        messages.add_message(request, messages.INFO, 'Upcoming elections retrieved from Vote USA.')
     return HttpResponseRedirect(reverse('election:election_list', args=()))
 
 

@@ -3,7 +3,9 @@
     {% load static %}
 
     <div class="we-vote-logo">
-      <img src="{% static "apis_v1/we-vote-logo-horizontal-color.svg" %}" height="48px" />
+      <a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+        <img src="{% static "apis_v1/we-vote-logo-horizontal-color.svg" %}" height="48px" />
+      </a>
 
       <div class="navbar-right">
       {% if user and not user.is_anonymous %}
