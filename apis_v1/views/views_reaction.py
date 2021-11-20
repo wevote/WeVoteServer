@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from config.base import get_environment_variable
+from django.views.decorators.csrf import csrf_exempt
 from reaction.controllers import reaction_like_count_for_api, voter_reaction_like_off_save_for_api, \
     voter_reaction_like_on_save_for_api, reaction_like_status_retrieve_for_api
 import wevote_functions.admin
@@ -57,6 +58,7 @@ def voter_reaction_like_on_save_view(request):  # voterReactionLikeOnSave
         activity_tidbit_we_vote_id=activity_tidbit_we_vote_id)
 
 
+@csrf_exempt
 def reaction_like_status_retrieve_view(request):  # reactionLikeStatusRetrieve
     """
     Retrieve whether or not a reaction is marked for position (reactionLikeStatusRetrieve)

@@ -408,7 +408,7 @@
                             (<a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&show_all_twitter_search_results=1#twitter_link_possibility_list" target="_blank">
                                 Best Guess: {{ candidate.candidate_merge_possibility.likelihood_score }} <span class="glyphicon glyphicon-new-window"></span></a>)
                             </span><br />
-                            {% if candidate.candidate_name %}<strong>{{ candidate.candidate_name }}.</strong> {% endif %}
+                            <strong>{{ candidate.candidate_merge_possibility.twitter_name }}.</strong>
                             {{ candidate.candidate_merge_possibility.twitter_description }}<br />
                             {% if candidate.candidate_merge_possibility.likelihood_score >= 60 %}
                                 <form action="{% url 'candidate:candidate_edit_process' %}" id="candidate_edit" method="post" class="form-horizontal" target="_blank">
