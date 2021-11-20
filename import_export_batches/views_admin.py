@@ -1756,12 +1756,14 @@ def batch_process_list_view(request):
                 state_code_lower_case = batch_process.state_code.lower()
             if state_code_lower_case in state_codes_map_point_counts_dict:
                 batch_process.polling_location_count = state_codes_map_point_counts_dict[state_code_lower_case]
-                batch_process.ballot_item_chunks_expected = int(math.ceil(batch_process.polling_location_count / 125))
+                batch_process.ballot_item_chunks_expected = \
+                    int(math.ceil(batch_process.polling_location_count / 125)) + 1
             else:
                 state_codes_map_point_counts_dict[state_code_lower_case] = \
                     polling_location_manager.fetch_polling_location_count(state_code=state_code_lower_case)
                 batch_process.polling_location_count = state_codes_map_point_counts_dict[state_code_lower_case]
-                batch_process.ballot_item_chunks_expected = int(math.ceil(batch_process.polling_location_count / 125))
+                batch_process.ballot_item_chunks_expected = \
+                    int(math.ceil(batch_process.polling_location_count / 125)) + 1
         # Add the processing "chunks" under each Batch Process
         batch_process_ballot_item_chunk_list = []
         batch_process_ballot_item_chunk_list_found = False
