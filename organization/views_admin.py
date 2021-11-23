@@ -521,6 +521,13 @@ def organization_list_view(request):
         search_words = organization_search.split()
         for one_word in search_words:
             filters = []
+
+            new_filter = Q(chosen_domain_string__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(chosen_subdomain_string__icontains=one_word)
+            filters.append(new_filter)
+
             new_filter = Q(organization_name__icontains=one_word)
             filters.append(new_filter)
 
