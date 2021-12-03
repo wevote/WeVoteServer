@@ -117,10 +117,11 @@
             {% if organization.generate_facebook_link %}
                 <tr>
                     <th>Facebook: </th>
-                    <td>{% if organization.generate_facebook_link %}
-                            <a href="{{ organization.generate_facebook_link }}" target="_blank">{{ organization.organization_facebook }}</a>
+                    <td>
+                        {% if organization.generate_facebook_link %}
+                            <a href="{{ organization.generate_facebook_link }}" target="_blank">{{ organization.organization_facebook }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
                         {% else %}
-                        {{ organization.organization_facebook|default_if_none:"" }}
+                            {{ organization.organization_facebook|default_if_none:"" }}
                         {% endif %}
                     </td>
                 </tr>

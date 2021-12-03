@@ -3109,7 +3109,10 @@ class Organization(models.Model):
 
     def generate_facebook_link(self):
         if self.organization_facebook:
-            return "https://facebook.com/{facebook_page}".format(facebook_page=self.organization_facebook)
+            if 'http' in self.organization_facebook or 'facebook' in self.organization_facebook:
+                return self.organization_facebook
+            else:
+                return "https://facebook.com/{facebook_page}".format(facebook_page=self.organization_facebook)
         else:
             return ''
 

@@ -41,7 +41,7 @@ from organization.controllers import figure_out_organization_conflict_values, \
     organization_retrieve_tweets_from_twitter, organization_analyze_tweets
 from position.models import PositionEntered, PositionForFriends, PositionListManager, PositionManager, \
     INFORMATION_ONLY, OPPOSE, STILL_DECIDING, SUPPORT
-from twitter.models import TwitterUserManager
+from twitter.models import TwitterLinkToOrganization, TwitterUserManager
 from voter.models import retrieve_voter_authority, voter_has_authority, VoterManager
 from voter_guide.models import VoterGuideManager
 import wevote_functions.admin
@@ -723,21 +723,52 @@ def organization_merge_process_view(request):
                                     "&organization1_we_vote_id=" + str(organization1_we_vote_id) +
                                     "&organization2_we_vote_id=" + str(organization2_we_vote_id))
 
-    # We want to check to see if organization2_we_vote_id has a TwitterLinkToOrganization entry.
-    #  If it does, it means that someone has signed in with that Twitter account for that organization.
-    #  As of Oct 2020 we have not set up the code to merge org2 data for voter with org1 data.
     twitter_user_manager = TwitterUserManager()
-    twitter_link_to_organization_results = \
+    organization1_results = \
+        twitter_user_manager.retrieve_twitter_link_to_organization_from_organization_we_vote_id(
+            organization1_we_vote_id)
+
+    organization2_results = \
         twitter_user_manager.retrieve_twitter_link_to_organization_from_organization_we_vote_id(
             organization2_we_vote_id)
-    if twitter_link_to_organization_results['twitter_link_to_organization_found']:
-        messages.add_message(request, messages.ERROR, 'Organization2 has TwitterLinkToOrganization entry. '
-                                                      'Merge cannot proceed.')
+    if not organization1_results['success'] or not organization2_results['success']:
+        status += organization1_results['status']
+        status += organization2_results['status']
+        messages.add_message(request, messages.ERROR,
+                             status +
+                             'Failed to retrieve TwitterLinkToOrganization entries. '
+                             'Merge cannot proceed.')
         return HttpResponseRedirect(reverse('organization:compare_two_organizations_for_merge', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code) +
                                     "&organization1_we_vote_id=" + str(organization1_we_vote_id) +
                                     "&organization2_we_vote_id=" + str(organization2_we_vote_id))
+    elif organization1_results['twitter_link_to_organization_found'] and \
+            organization2_results['twitter_link_to_organization_found']:
+        messages.add_message(request, messages.ERROR,
+                             'Organization1 and Organization2 both have TwitterLinkToOrganization entries. '
+                             'Merge cannot proceed.')
+        return HttpResponseRedirect(reverse('organization:compare_two_organizations_for_merge', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code) +
+                                    "&organization1_we_vote_id=" + str(organization1_we_vote_id) +
+                                    "&organization2_we_vote_id=" + str(organization2_we_vote_id))
+    elif not organization1_results['twitter_link_to_organization_found'] and \
+            organization2_results['twitter_link_to_organization_found']:
+        # Move organization2 twitter link to organization1
+        try:
+            twitter_link_to_organization = TwitterLinkToOrganization.objects.get(
+                organization_we_vote_id=organization2_we_vote_id)
+            twitter_link_to_organization.organization_we_vote_id = organization1_we_vote_id
+            twitter_link_to_organization.save()
+        except Exception as e:
+            status += "FAILED_TO_MIGRATE_TWITTER_LINK_TO_ORGANIZATION_TO_ORG1: " + str(e) + " "
+            messages.add_message(request, messages.ERROR, status)
+            return HttpResponseRedirect(reverse('organization:compare_two_organizations_for_merge', args=()) +
+                                        "?google_civic_election_id=" + str(google_civic_election_id) +
+                                        "&state_code=" + str(state_code) +
+                                        "&organization1_we_vote_id=" + str(organization1_we_vote_id) +
+                                        "&organization2_we_vote_id=" + str(organization2_we_vote_id))
 
     organization1_results = organization_manager.retrieve_organization_from_we_vote_id(organization1_we_vote_id)
     if organization1_results['organization_found']:
@@ -1144,11 +1175,23 @@ def organization_delete_process_view(request):
         organization = results['organization']
 
         organization_link_to_issue_list = OrganizationLinkToIssueList()
-        issue_count = organization_link_to_issue_list.fetch_issue_count_for_organization(0, organization.we_vote_id)
+        link_list = organization_link_to_issue_list.retrieve_issue_list_by_organization_we_vote_id(
+            organization_we_vote_id=organization.we_vote_id,
+            show_hidden_issues=True,
+            read_only=False)
+        link_to_issue_could_not_be_deleted = False
+        if len(link_list) > 0:
+            for one_link in link_list:
+                try:
+                    one_link.delete()
+                except Exception as e:
+                    link_to_issue_could_not_be_deleted = True
+                    status += "COULD_NOT_DELETE_LINK: " + str(e) + " "
 
-        if positive_value_exists(issue_count):
-            messages.add_message(request, messages.ERROR, 'Could not delete -- '
-                                                          'issues still attached to this organization.')
+        if positive_value_exists(link_to_issue_could_not_be_deleted):
+            messages.add_message(request, messages.ERROR,
+                                 status +
+                                 'Could not delete -- issues still attached to this organization.')
             return HttpResponseRedirect(reverse('organization:organization_edit', args=(organization_id,)) +
                                         "?google_civic_election_id=" + str(google_civic_election_id) +
                                         "&state_code=" + str(state_code))
