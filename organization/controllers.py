@@ -797,10 +797,15 @@ def merge_these_two_organizations(organization1_we_vote_id, organization2_we_vot
     # TODO: Migrate images?
 
     # Merge attribute values chosen by the admin
+    org2_attributes_to_be_removed = False
     for attribute in ORGANIZATION_UNIQUE_IDENTIFIERS:
         try:
             if attribute in admin_merge_choices:
                 setattr(organization1_on_stage, attribute, admin_merge_choices[attribute])
+                # Clear out the attributes in organization2_on_stage which need to be unique in the database
+                if hasattr(organization2_on_stage, attribute) and attribute in ['vote_smart_id', 'fb_username']:
+                    org2_attributes_to_be_removed = True
+                    setattr(organization2_on_stage, attribute, None)
         except Exception as e:
             # Break out
             status += "ATTRIBUTE_SETATTR_FAILED (" + str(attribute) + "): " + str(e) + " "
@@ -811,6 +816,13 @@ def merge_these_two_organizations(organization1_we_vote_id, organization2_we_vot
                 'organization': None,
             }
             return results
+
+    # Remove attributes in organization2 which must be unique
+    if org2_attributes_to_be_removed:
+        try:
+            organization2_on_stage.save()
+        except Exception as e:
+            status += "ORG2_ATTRIBUTE_CLEAR_FAILED: " + str(e) + " "
 
     # Merge public positions
     public_positions_results = move_positions_to_another_organization(

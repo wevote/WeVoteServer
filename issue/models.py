@@ -617,12 +617,19 @@ class OrganizationLinkToIssue(models.Model):
 class OrganizationLinkToIssueList(models.Manager):
     # A way to retrieve all of the organization and issue linking information
 
-    def retrieve_issue_list_by_organization_we_vote_id(self, organization_we_vote_id, show_hidden_issues=False,
-                                                       read_only=False):
+    def retrieve_issue_list_by_organization_we_vote_id(
+            self,
+            organization_we_vote_id,
+            show_hidden_issues=False,
+            read_only=False):
         # Retrieve a list of active issues linked to organization
         link_issue_list_found = False
         link_active = True
         link_issue_list = {}
+
+        if not positive_value_exists(organization_we_vote_id):
+            link_issue_list = {}
+            return link_issue_list
 
         try:
             if read_only:
@@ -693,12 +700,11 @@ class OrganizationLinkToIssueList(models.Manager):
         return organization_we_vote_id_list
 
     def fetch_issue_count_for_organization(self, organization_id=0, organization_we_vote_id=''):
-        link_active = True
         link_issue_list_count = 0
         try:
             link_issue_list = OrganizationLinkToIssue.objects.using('readonly').all()
             link_issue_list = link_issue_list.filter(organization_we_vote_id__iexact=organization_we_vote_id)
-            link_issue_list = link_issue_list.filter(link_active=link_active)
+            link_issue_list = link_issue_list.filter(link_active=True)
             link_issue_list_count = link_issue_list.count()
 
         except Exception as e:
