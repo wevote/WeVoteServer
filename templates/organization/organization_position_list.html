@@ -94,10 +94,10 @@
                         ({{ organization.twitter_followers_count|intcomma }} Followers)
                     {% endif %}
                     {% if twitter_handle_mismatch %}
-                        (cannot refresh Twitter details with mismatch)
+                        (cannot Refresh Twitter Details with mismatch)
                     {% else %}
                         (<a href="{% url 'import_export_twitter:refresh_twitter_organization_details' organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                            >{% if organization.organization_twitter_handle %}refresh{% else %}clear{% endif %} Twitter details</a>)
+                            >{% if organization.organization_twitter_handle %}Refresh{% else %}Clear{% endif %} Twitter Details</a>)
                     {% endif %}
                     (<a href="{% url 'import_export_twitter:delete_images_view'%}?organization_id={{ organization.id }}&google_civic_election_id={{ google_civic_election_id }}">Delete Cached Images</a>)
                     </td>

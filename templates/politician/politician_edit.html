@@ -110,7 +110,7 @@
         <input type="text" name="politician_twitter_handle" id="politician_twitter_handle_id" class="form-control"
                value="{% if politician %}{{ politician.politician_twitter_handle|default_if_none:"" }}{% else %}{{ politician_twitter_handle|default_if_none:"" }}{% endif %}" />
     {% if politician.politician_twitter_handle %}
-        (<a href="{% url 'import_export_twitter:refresh_twitter_politician_details' politician.id %}">refresh Twitter details</a>)<br />
+        (<a href="{% url 'import_export_twitter:refresh_twitter_politician_details' politician.id %}">Refresh Twitter Details</a>)<br />
         Twitter Name: {{ politician.twitter_name }}<br />
         Twitter Description: {{ politician.twitter_description }}<br />
         Twitter Location: {{ politician.twitter_location }}<br />

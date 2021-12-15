@@ -153,6 +153,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 class OrganizationLinkToHashtag(models.Model):
 
+    objects = None
     organization_we_vote_id = models.CharField(verbose_name="we vote permanent id", max_length=255, unique=False)
     hashtag_text = models.CharField(verbose_name="hashtag text", max_length=255, unique=False)
     # tweet_id = models.BigIntegerField(verbose_name="tweet id", unique=True)
@@ -182,6 +183,7 @@ class OrganizationMembershipLinkToVoter(models.Model):
     This is the link between an Organization and a We Vote voter account, so we can show organizations
     data about their members.
     """
+    objects = None
     organization_we_vote_id = models.CharField(verbose_name="we vote id for organization", max_length=255, unique=False)
     voter_we_vote_id = models.CharField(verbose_name="we vote id for the voter owner", max_length=255, unique=False)
     external_voter_id = models.CharField(
@@ -2814,6 +2816,8 @@ class Organization(models.Model):
     # It starts with "wv" then we add on a database specific identifier like "3v" (WeVoteSetting.site_unique_id_prefix)
     # then the string "org", and then a sequential integer like "123".
     # We keep the last value in WeVoteSetting.we_vote_id_last_org_integer
+    MultipleObjectsReturned = None
+    DoesNotExist = None
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=True, db_index=True)
     organization_name = models.CharField(
@@ -3131,6 +3135,8 @@ class Organization(models.Model):
 
 
 class OrganizationReservedDomain(models.Model):
+    objects = None
+
     def __unicode__(self):
         return "OrganizationReservedDomain"
 

@@ -54,7 +54,7 @@
         <input type="text" name="elected_official_twitter_handle" id="elected_official_twitter_handle_id" class="form-control"
                value="{% if elected_official %}{{ elected_official.elected_official_twitter_handle|default_if_none:"" }}{% else %}{{ elected_official_twitter_handle|default_if_none:"" }}{% endif %}" />
     {% if elected_official.elected_official_twitter_handle %}
-        (<a href="{% url 'import_export_twitter:refresh_twitter_elected_official_details' elected_official.id %}">refresh Twitter details</a>)<br />
+        (<a href="{% url 'import_export_twitter:refresh_twitter_elected_official_details' elected_official.id %}">Refresh Twitter Details</a>)<br />
         Twitter Name: {{ elected_official.twitter_name }}<br />
         Twitter Description: {{ elected_official.twitter_description }}<br />
         Twitter Location: {{ elected_official.twitter_location }}<br />

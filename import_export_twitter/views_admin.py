@@ -1,21 +1,14 @@
 # import_export_twitter/views_admin.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-
-from .controllers import delete_possible_twitter_handles, retrieve_possible_twitter_handles, \
-    retrieve_possible_twitter_handles_in_bulk
-import wevote_functions.admin
+import time
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.urls import reverse
 from django.http import HttpResponseRedirect
+from django.urls import reverse
 
-from .controllers import refresh_twitter_candidate_details, refresh_twitter_data_for_organizations, \
-    refresh_twitter_organization_details, \
-    scrape_social_media_from_one_site, refresh_twitter_candidate_details_for_election, \
-    scrape_and_save_social_media_for_candidates_in_one_election, scrape_and_save_social_media_from_all_organizations, \
-    transfer_candidate_twitter_handles_from_google_civic
+import wevote_functions.admin
 import wevote_functions.admin
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateManager
@@ -26,6 +19,13 @@ from organization.models import OrganizationManager
 from twitter.functions import retrieve_twitter_user_info
 from voter.models import voter_has_authority, VoterManager
 from wevote_functions.functions import convert_to_int, positive_value_exists
+from .controllers import delete_possible_twitter_handles, retrieve_possible_twitter_handles, \
+    retrieve_possible_twitter_handles_in_bulk
+from .controllers import refresh_twitter_candidate_details, refresh_twitter_data_for_organizations, \
+    refresh_twitter_organization_details, \
+    scrape_social_media_from_one_site, refresh_twitter_candidate_details_for_election, \
+    scrape_and_save_social_media_for_candidates_in_one_election, scrape_and_save_social_media_from_all_organizations, \
+    transfer_candidate_twitter_handles_from_google_civic
 
 logger = wevote_functions.admin.get_logger(__name__)
 

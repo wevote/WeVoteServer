@@ -364,7 +364,7 @@ th, td {
     {% if candidate.candidate_twitter_handle %}
         <a href="https://twitter.com/{{ candidate.candidate_twitter_handle|iriencode }}"
            target="_blank">view on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
-        <a href="{% url 'import_export_twitter:refresh_twitter_candidate_details' candidate.id %}">refresh Twitter details</a>&nbsp;&nbsp;&nbsp;
+        <a href="{% url 'import_export_twitter:refresh_twitter_candidate_details' candidate.id %}">Refresh Twitter Details</a>&nbsp;&nbsp;&nbsp;
         <a href="{% url 'import_export_twitter:delete_images_view'%}?candidate_id={{ candidate.id }}">Delete Cached Images</a><br />
         Twitter Name: {{ candidate.twitter_name }}<br />
         Twitter Description: {{ candidate.twitter_description }}<br />
