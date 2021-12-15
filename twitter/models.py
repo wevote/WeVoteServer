@@ -4,13 +4,13 @@
 
 # See also WeVoteServer/import_export_twitter/models.py for the code that interfaces with twitter (or other) servers
 import tweepy
+from django.db import models
+
 import wevote_functions.admin
 from config.base import get_environment_variable
-from django.db import models
 from exception.models import handle_record_found_more_than_one_exception
 from twitter.functions import retrieve_twitter_user_info
 from wevote_functions.functions import convert_to_int, generate_random_string, positive_value_exists
-import json
 
 TWITTER_CONSUMER_KEY = get_environment_variable("TWITTER_CONSUMER_KEY")
 TWITTER_CONSUMER_SECRET = get_environment_variable("TWITTER_CONSUMER_SECRET")
@@ -794,7 +794,7 @@ class TwitterUserManager(models.Manager):
         """
         auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
         auth.set_access_token(twitter_access_token, twitter_access_secret)
-        api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True, compression=True, timeout=60)
+        api = tweepy.API(auth, wait_on_rate_limit=True, timeout=60)
 
         twitter_next_cursor_state_results = self.retrieve_twitter_next_cursor_state(twitter_id_of_me)
         status = twitter_next_cursor_state_results['status']
@@ -813,22 +813,15 @@ class TwitterUserManager(models.Manager):
             twitter_next_cursor_state = self.create_twitter_next_cursor_state(
                 twitter_id_of_me, TWITTER_API_NAME_FRIENDS_ID, twitter_next_cursor)
             status = status + ' ' + twitter_next_cursor_state['status']
-        except tweepy.RateLimitError:
+        except tweepy.TooManyRequests:
             success = False
             status += ' RETRIEVE_TWITTER_IDS_I_FOLLOW_RATE_LIMIT_ERROR '
-        except tweepy.error.TweepError as error_instance:
+        except tweepy.errors.HTTPException as error_instance:
             success = False
-            status += 'RETRIEVE_TWITTER_IDS_I_FOLLOW_TWEEPY_ERROR: {} '.format(error_instance.reason)
-        # Tweepy API 2
-        # except tweepy.TooManyRequests:
-        #     success = False
-        #     status += ' RETRIEVE_TWITTER_IDS_I_FOLLOW_RATE_LIMIT_ERROR '
-        # except tweepy.error.TweepyException as error_instance:
-        #     success = False
-        #     status += 'RETRIEVE_TWITTER_IDS_I_FOLLOW_TWEEPY_ERROR_TweepyException: {} '.format(error_instance.reason)
-        # except tweepy.error.HTTPException as error_instance:
-        #     success = False
-        #     status += 'RETRIEVE_TWITTER_IDS_I_FOLLOW_TWEEPY_ERROR_HTTPException: {} '.format(error_instance.reason)
+            status += 'RETRIEVE_TWITTER_IDS_I_FOLLOW_TWEEPY_ERROR_HTTPException: {} '.format('GENERAL_ERROR')
+        except tweepy.TweepyException as error_instance:
+            success = False
+            status += 'RETRIEVE_TWITTER_IDS_I_FOLLOW_TWEEPY_ERROR: {} '.format('GENERAL_ERROR')
         except Exception as e:
             success = False
             status += "TWEEPY_EXCEPTION: " + str(e) + " "

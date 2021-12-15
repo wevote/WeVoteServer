@@ -3,19 +3,25 @@
 # -*- coding: UTF-8 -*-
 
 # See also WeVoteServer/twitter/controllers.py for routines that manage internal twitter data
-import re
 import os
+import re
 import ssl
-import tweepy
 import urllib.request
+from datetime import timedelta
+from math import floor, log2
+from re import sub
+from socket import timeout
+from time import time
+
+import tweepy
+from django.db.models import Q
+from django.utils.timezone import now
+
 import wevote_functions.admin
 from ballot.controllers import figure_out_google_civic_election_id_voter_is_watching
 from candidate.controllers import refresh_candidate_data_from_master_tables
 from candidate.models import CandidateCampaign, CandidateManager, CandidateListManager
 from config.base import get_environment_variable
-from datetime import timedelta
-from django.db.models import Q
-from django.utils.timezone import now
 from election.models import ElectionManager
 from image.controllers import TWITTER, cache_master_and_resized_image
 from image.models import WeVoteImageManager
@@ -28,7 +34,6 @@ from organization.models import Organization, OrganizationListManager, Organizat
 from politician.models import PoliticianManager
 from position.controllers import update_all_position_details_from_candidate, \
     update_position_entered_details_from_organization, update_position_for_friends_details_from_voter
-from socket import timeout
 from twitter.functions import retrieve_twitter_user_info
 from twitter.models import TwitterLinkPossibility, TwitterUserManager
 from voter.models import VoterManager
@@ -40,9 +45,6 @@ from wevote_functions.functions import convert_to_int, extract_twitter_handle_fr
     POSITIVE_TWITTER_HANDLE_SEARCH_KEYWORDS, NEGATIVE_TWITTER_HANDLE_SEARCH_KEYWORDS
 from wevote_settings.models import RemoteRequestHistory, RemoteRequestHistoryManager, \
     RETRIEVE_POSSIBLE_TWITTER_HANDLES, RETRIEVE_UPDATE_DATA_FROM_TWITTER
-from math import floor, log2
-from re import sub
-from time import time
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -795,6 +797,7 @@ def refresh_twitter_organization_details(organization, twitter_user_id=0):
             else:
                 status += "ORGANIZATION_TWITTER_DETAILS_RETRIEVED_FROM_TWITTER_BUT_NOT_SAVED "
         except Exception as e:
+            print(e)
             status += "UPDATE_TWITTER_ORGANIZATION_DETAILS_FAILED: " + str(e) + " "
     else:
         status += str(organization.organization_twitter_handle) + "-NOT_RETRIEVED_CLEARING_TWITTER_DETAILS "
@@ -1783,62 +1786,6 @@ def twitter_sign_in_start_for_api(voter_device_id, return_url, cordova):  # twit
 
         twitter_auth_response = auth_create_results['twitter_auth_response']
 
-    # ### This whole block causes a "No 'Access-Control-Allow-Origin'" error:
-    #   XMLHttpRequest cannot load http://localhost:3000/twitter_sign_in. No 'Access-Control-Allow-Origin' header is
-    #   present on the requested resource. Origin 'null' is therefore not allowed access.
-    # I think it is good to ask them to authenticate again
-    # if twitter_auth_response.twitter_access_token and twitter_auth_response.twitter_access_secret:
-    #     # If here the voter might already be signed in, so we don't want to ask them to approve again
-    #     auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
-    #     auth.set_access_token(twitter_auth_response.twitter_access_token, twitter_auth_response.twitter_access_secret)
-    #
-    #     api = tweepy.API(auth)
-    #
-    #     try:
-    #         tweepy_user_object = api.me()
-    #         success = True
-    #     # What is the error situation where the twitter_access_token and twitter_access_secret are no longer valid?
-    #     # We need to deal with this (wipe them from the database and rewind to the right place in the process
-    #     # Tweepy API 1
-    #     except tweepy.RateLimitError:
-    #         success = False
-    #         status = 'TWITTER_RATE_LIMIT_ERROR'
-    #     except tweepy.error.TweepError as error_instance:
-    #         success = False
-    #         status = error_instance.reason
-    #     # Tweepy API 2
-    #     except tweepy.TooManyRequests:
-    #         success = False
-    #         status = 'TWITTER_RATE_LIMIT_ERROR'
-    #     except tweepy.error.TweepyException as error_instance:
-    #         success = False
-    #         status = error_instance.reason
-    #     except tweepy.error.HTTPException as error_instance:
-    #         success = False
-    #         status = error_instance.reason
-    #
-    #     if success:
-    #         # Reach out to the twitterSignInRequestVoterInfo -- no need to redirect
-    #         empty_return_url = ""  # We set this to empty so we get a response instead of a redirection
-    #         voter_info_results = twitter_sign_in_request_voter_info_for_api(voter_device_id, empty_return_url)
-    #
-    #         success = voter_info_results['success']
-    #         status = "SKIPPED_AUTH_DIRECT_REQUEST_VOTER_INFO: " + voter_info_results['status'] + " "
-    #         results = {
-    #             'status':                       status,
-    #             'success':                      success,
-    #             'voter_device_id':              voter_device_id,
-    #             'twitter_redirect_url':         '',
-    #             'voter_info_retrieved':         voter_info_results['voter_info_retrieved'],
-    #             'switch_accounts':              voter_info_results['switch_accounts'],
-    #             'jump_to_request_voter_info':   True,
-    #             'return_url':                   return_url,
-    #         }
-    #         return results
-    #     else:
-    #         # Somehow reset tokens and start over.
-    #         pass
-
     callback_url = WE_VOTE_SERVER_ROOT_URL + "/apis/v1/twitterSignInRequest/"  # twitterSignInRequestAccessToken
     callback_url += "?voter_info_mode=0"
     callback_url += "&voter_device_id=" + voter_device_id
@@ -1876,22 +1823,22 @@ def twitter_sign_in_start_for_api(voter_device_id, return_url, cordova):  # twit
             success = False
             status = "TWITTER_REDIRECT_URL_NOT_RETRIEVED"
 
-    except tweepy.RateLimitError:
+    except tweepy.TooManyRequests:
         success = False
         status = 'TWITTER_RATE_LIMIT_ERROR'
-    except tweepy.error.TweepError as error_instance:
+    except tweepy.TweepyException as error_instance:
         success = False
-        status = 'TWITTER_SIGN_IN_START: {}'.format(error_instance.reason)
-    # Tweepy API 2
-    # except tweepy.TooManyRequests:
-    #     success = False
-    #     status = 'TWITTER_RATE_LIMIT_ERROR'
-    # except tweepy.error.TweepyException as error_instance:
-    #     success = False
-    #     status = 'TWITTER_SIGN_IN_START_TweepyException: {}'.format(error_instance.reason)
-    # except tweepy.error.HTTPException as error_instance:
-    #     success = False
-    #     status = 'TWITTER_SIGN_IN_START_HTTPException: {}'.format(error_instance.reason)
+        err_string = 'GENERAL_TWEEPY_EXCEPTION'
+        try:
+            # Yuck, we should iterate down until we get the first string
+            err_string = error_instance.args[0].args[0].args[0]
+        except Exception:
+            pass
+        print(err_string)
+        status = 'TWITTER_SIGN_IN_START: {}'.format(err_string)
+    except Exception as e1:
+        success = False
+        status = 'TWITTER_SIGN_IN_START: {}'.format(e1)
 
     if success:
         results = {
@@ -2105,22 +2052,19 @@ def twitter_sign_in_request_access_token_for_api(voter_device_id,
             twitter_access_token = auth.access_token
             twitter_access_token_secret = auth.access_token_secret
 
-    except tweepy.RateLimitError:
+    except tweepy.TooManyRequests:
         success = False
         status = 'TWITTER_RATE_LIMIT_ERROR'
-    except tweepy.error.TweepError as error_instance:
+    except tweepy.TweepyException as error_instance:
         success = False
-        status = 'TWITTER_SIGN_IN_REQUEST_ACCESS_TOKEN: {}'.format(error_instance.reason)
-    # Tweepy API 2
-    # except tweepy.TooManyRequests:
-    #     success = False
-    #     status += 'TWITTER_RATE_LIMIT_ERROR '
-    # except tweepy.error.TweepyException as error_instance:
-    #     success = False
-    #     status += 'TWITTER_SIGN_IN_REQUEST_ACCESS_TOKEN_TweepyException: {} '.format(error_instance.reason)
-    # except tweepy.error.HTTPException as error_instance:
-    #     success = False
-    #     status += 'TWITTER_SIGN_IN_REQUEST_ACCESS_TOKEN_HTTPException: {} '.format(error_instance.reason)
+        err_string = 'GENERAL_TWEEPY_EXCEPTION'
+        try:
+            # Dec 2012: Tweepy V$ (Twitter V2) returns these errors as (yuck): List[dict[str, Union[int, str]]]
+            err_string = error_instance.args[0].args[0].args[0]
+        except Exception:
+            pass
+        print(err_string)
+        status = 'TWITTER_SIGN_IN_REQUEST_ACCESS_TOKEN: {}'.format(err_string)
     except Exception as e:
         success = False
         status += "TWEEPY_EXCEPTION: " + str(e) + " "
@@ -2238,7 +2182,7 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
     api = tweepy.API(auth)
 
     try:
-        tweepy_user_object = api.me()
+        tweepy_user_object = api.verify_credentials()
         twitter_json = tweepy_user_object._json
 
         success = True
@@ -2246,22 +2190,18 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
         twitter_handle = tweepy_user_object.screen_name
         twitter_handle_found = True
         twitter_user_object_found = True
-    except tweepy.RateLimitError:
+    except tweepy.TooManyRequests:
         success = False
         status = 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_RATE_LIMIT_ERROR '
-    except tweepy.error.TweepError as error_instance:
-        success = False
-        status = 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_TWEEPY_ERROR: {}'.format(error_instance.reason)
-    # Tweepy API 2
-    # except tweepy.TooManyRequests:
-    #     success = False
-    #     status += 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_RATE_LIMIT_ERROR '
-    # except tweepy.error.TweepyException as error_instance:
-    #     success = False
-    #     status += 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_TweepyException: {} '.format(error_instance.reason)
-    # except tweepy.error.HTTPException as error_instance:
-    #     success = False
-    #     status += 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_HTTPException: {} '.format(error_instance.reason)
+    except tweepy.TweepyException as error_instance:
+        err_string = 'GENERAL_TWEEPY_EXCEPTION'
+        try:
+            # Dec 2012: Tweepy V$ (Twitter V2) returns these errors as (yuck): List[dict[str, Union[int, str]]]
+            err_string = error_instance.args[0].args[0].args[0]
+        except Exception:
+            pass
+        print(err_string)
+        status = 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_TWEEPY_ERROR: {}'.format(err_string)
     except Exception as e:
         success = False
         status += "TWEEPY_EXCEPTION: " + str(e) + " "

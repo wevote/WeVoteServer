@@ -2,10 +2,11 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+import tweepy
+
+import wevote_functions.admin
 from config.base import get_environment_variable
 from exception.models import handle_exception
-import tweepy
-import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -71,11 +72,15 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
             success = False
             status += 'TWITTER_RETRIEVE_NOT_SUCCESSFUL-MISSING_VARIABLE '
             twitter_handle_found = False
-    except tweepy.RateLimitError as rate_limit_error:
+    except tweepy.TooManyRequests as rate_limit_error:
         success = False
         status += 'TWITTER_RATE_LIMIT_ERROR: ' + str(rate_limit_error) + " "
         handle_exception(rate_limit_error, logger=logger, exception_message=status)
-    except tweepy.error.TweepError as error_instance:
+    except tweepy.errors.HTTPException as error_instance:
+        success = False
+        status += 'TWITTER_HTTP_ERROR '
+        handle_exception(error_instance, logger=logger, exception_message=status)
+    except tweepy.errors.TweepyException as error_instance:
         success = False
         status += "[TWEEP_ERROR: "
         status += twitter_handle + " " if positive_value_exists(twitter_handle) else ""
@@ -102,18 +107,10 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
         status += "]"
         if write_to_server_logs:
             handle_exception(error_instance, logger=logger, exception_message=status)
-    # Tweepy API 2
-    # except tweepy.TooManyRequests as rate_limit_error:
-    #     success = False
-    #     status += 'TWITTER_RATE_LIMIT_ERROR '
-    #     handle_exception(rate_limit_error, logger=logger, exception_message=status)
-    # except tweepy.error.TweepyException as error_instance:
-    #     tweepy_error = True
-    # except tweepy.error.HTTPException as error_instance:
-    #     tweepy_error = True
     except Exception as e:
-        status += "TWEEPY_EXCEPTION: " + str(e) + " "
         success = False
+        status += "TWEEPY_EXCEPTION: " + str(e) + " "
+        handle_exception(e, logger=logger, exception_message=status)
 
     try:
         if positive_value_exists(twitter_json.get('profile_banner_url')):

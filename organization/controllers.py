@@ -598,13 +598,22 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id):
     auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
     api = tweepy.API(auth)
 
-    number_to_retrieve = 200  # TODO Remove this
     organization_manager = OrganizationManager()
+    new_tweets = []
     try:
         organization_twitter_id = organization_manager.fetch_twitter_handle_from_organization_we_vote_id(
             organization_we_vote_id)
-        new_tweets = api.user_timeline(organization_twitter_id, count=number_to_retrieve)
-    except tweepy.error.TweepError as e:
+        new_tweets = api.user_timeline(screen_name=organization_twitter_id)
+    except tweepy.errors.HTTPException as e:
+        status = "ORGANIZATION_RETRIEVE_TWEETS_FROM_TWITTER_AUTH_FAIL_HTTPException: " + str(e) + " "
+        results = {
+            'success': success,
+            'status': status,
+            'tweets_saved': tweets_saved,
+            'tweets_not_saved': tweets_not_saved
+        }
+        return results
+    except tweepy.TweepyException as e:
         status = "ORGANIZATION_RETRIEVE_TWEETS_FROM_TWITTER_AUTH_FAIL "
         results = {
             'success': success,
@@ -613,25 +622,9 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id):
             'tweets_not_saved': tweets_not_saved
         }
         return results
-    # Tweepy API 2
-    # except tweepy.error.TweepyException as e:
-    #     status = "ORGANIZATION_RETRIEVE_TWEETS_FROM_TWITTER_AUTH_FAIL_TweepyException: " + str(e) + " "
-    #     results = {
-    #         'success': success,
-    #         'status': status,
-    #         'tweets_saved': tweets_saved,
-    #         'tweets_not_saved': tweets_not_saved
-    #     }
-    #     return results
-    # except tweepy.error.HTTPException as e:
-    #     status = "ORGANIZATION_RETRIEVE_TWEETS_FROM_TWITTER_AUTH_FAIL_HTTPException: " + str(e) + " "
-    #     results = {
-    #         'success': success,
-    #         'status': status,
-    #         'tweets_saved': tweets_saved,
-    #         'tweets_not_saved': tweets_not_saved
-    #     }
-    #     return results
+    except Exception as e:
+        success = False
+        status += "ORGANIZATION_RETRIEVE_TWEETS_FROM_TWITTER_AUTH_FAIL_TWEEPY_EXCEPTION: " + str(e) + " "
 
     twitter_user_manager = TwitterUserManager()
     tweets_saved = 0

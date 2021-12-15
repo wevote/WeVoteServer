@@ -28,8 +28,8 @@ httplib2==0.19.1
 oauth2client==4.1.3
 oauthlib==3.1.1
 nameparser==1.0.6
-phonenumbers==8.12.25
-Pillow==8.3.2
+phonenumbers==8.12.39
+Pillow==8.4.0
 psycopg2-binary==2.8.6
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
@@ -54,7 +54,7 @@ social-auth-app-django==3.1.0
 social-auth-core==3.2.0
 static3==0.7.0
 stripe==2.58.0
-tweepy==3.10.0
+tweepy==4.4.0
 twilio==6.59.1
 # Unipath==1.1s
 uritemplate==3.0.1
