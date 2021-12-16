@@ -859,6 +859,27 @@ pattern_nick_in_middle_quotes = re.compile(r'(.*?)(?:[`\"])([A-Z.]+)(?:[`\"])(.*
 pattern_nick_at_end = re.compile(r'(.*?)\s+(.*?)\s+\((.*?)\)$')
 
 
+def display_city_with_correct_capitalization(original_city):
+    if original_city is not None and not callable(original_city):
+        city = str(original_city)
+        city.strip()
+
+        city_array = city.split()
+        modified_city_string = ''
+        for word in city_array:
+            modified_city_string += word.capitalize() + ' '
+
+        city = modified_city_string.strip()
+
+        if " Del " in city:
+            city = city.replace(' Del ', ' del ')
+
+        city = city.replace("  ", " ")
+
+        return city
+    return original_city
+
+
 def display_full_name_with_correct_capitalization(full_name):
     """
     See documentation here: https://github.com/derek73/python-nameparser
@@ -1477,6 +1498,8 @@ def convert_state_text_to_state_code(state_text):
         return ""
     for state_code, state_name in STATE_CODE_MAP.items():
         if state_text.lower() == state_name.lower():
+            return state_code
+        elif state_text.lower() == state_code.lower():
             return state_code
     else:
         return ""

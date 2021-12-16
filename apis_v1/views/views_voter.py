@@ -2955,6 +2955,10 @@ def voter_contact_list_save_view(request):  # voterContactListSave
         results = save_google_contacts(voter_we_vote_id=voter.we_vote_id, contacts=contacts)
         status += results['status']
 
+    from email_outbound.controllers import augment_emails_for_voter_with_we_vote_data
+    augment_results = augment_emails_for_voter_with_we_vote_data(voter_we_vote_id=voter.we_vote_id)
+    status += augment_results['status']
+
     # 2021-09-30 Requires Pro account which costs $90/month
     # from email_outbound.controllers import augment_emails_for_voter_with_sendgrid
     # augment_results = augment_emails_for_voter_with_sendgrid(voter_we_vote_id=voter.we_vote_id)
@@ -2964,6 +2968,10 @@ def voter_contact_list_save_view(request):  # voterContactListSave
     # from import_export_snovio.controllers import augment_emails_for_voter_with_snovio
     # augment_results = augment_emails_for_voter_with_snovio(voter_we_vote_id=voter.we_vote_id)
     # status += augment_results['status']
+
+    from import_export_open_people.controllers import augment_emails_for_voter_with_open_people
+    augment_results = augment_emails_for_voter_with_open_people(voter_we_vote_id=voter.we_vote_id)
+    status += augment_results['status']
 
     retrieve_results = voter_contact_list_retrieve_for_api(voter_we_vote_id=voter.we_vote_id)
     voter_contact_email_list = retrieve_results['voter_contact_email_list']

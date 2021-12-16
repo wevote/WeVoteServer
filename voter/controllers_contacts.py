@@ -6,6 +6,24 @@ from wevote_functions.functions import positive_value_exists
 from .models import VoterContactEmail, VoterManager
 
 
+def assemble_contact_display_name(
+        first_name=None,
+        last_name=None,
+        middle_name=None):
+    new_display_name = ''
+    if first_name is not None:
+        new_display_name += first_name
+    if middle_name is not None and middle_name != '':
+        if positive_value_exists(new_display_name):
+            new_display_name += " "
+        new_display_name += middle_name
+    if last_name is not None:
+        if positive_value_exists(new_display_name):
+            new_display_name += " "
+        new_display_name += last_name
+    return new_display_name
+
+
 def move_voter_contact_email_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
     status = ''
     success = True
@@ -41,6 +59,13 @@ def move_voter_contact_email_to_another_voter(from_voter_we_vote_id, to_voter_we
         voter_contact_email_entries_moved += VoterContactEmail.objects\
             .filter(imported_by_voter_we_vote_id__iexact=from_voter_we_vote_id)\
             .update(imported_by_voter_we_vote_id=to_voter_we_vote_id)
+    except Exception as e:
+        status += "FAILED-VOTER_CONTACT_EMAIL_UPDATE_IMPORTED_BY: " + str(e) + " "
+
+    try:
+        voter_contact_email_entries_moved += VoterContactEmail.objects\
+            .filter(voter_we_vote_id__iexact=from_voter_we_vote_id)\
+            .update(voter_we_vote_id=to_voter_we_vote_id)
     except Exception as e:
         status += "FAILED-VOTER_CONTACT_EMAIL_UPDATE: " + str(e) + " "
 
@@ -84,9 +109,19 @@ def delete_google_contacts(voter_we_vote_id=''):  # voterContactListSave - Delet
 def filter_google_contacts(contacts):
     filtered_contacts = []
     strings_to_filter_out = [
+        'aws-nonprofit-credits@amazon.com',
+        'tickets@countable.uservoice.com',
+        'billing@nationbuilder.com',
         '@noreply.github.com',
         '@reply.github.com',
+        '@support.facebook.com',
+        'ra@godaddy.com',
+        'noreply',
+        'no-reply',
+        'support+',
         '.zendesk.com',
+        'info@',
+        'support@',
     ]
     for contact in contacts:
         email_address_text = contact['email'] if 'email' in contact else ''
@@ -116,24 +151,24 @@ def save_google_contacts(voter_we_vote_id='', contacts=[]):  # voterContactListS
         for contact in contacts:
             email_address_text = contact['email'] if 'email' in contact else ''
             if positive_value_exists(email_address_text):
-                display_name = contact['display_name'] if 'display_name' in contact else ''
-                first_name = contact['given_name'] if 'given_name' in contact else ''
                 google_contact_id = contact['id'] if 'id' in contact else ''
                 update_time = contact['update_time'] if 'update_time' in contact else ''
                 if positive_value_exists(update_time):
                     google_date_last_updated = parser.parse(update_time)
                 else:
                     google_date_last_updated = None
-                last_name = contact['family_name'] if 'family_name' in contact else ''
+                google_display_name = contact['display_name'] if 'display_name' in contact else ''
+                google_first_name = contact['given_name'] if 'given_name' in contact else ''
+                google_last_name = contact['family_name'] if 'family_name' in contact else ''
                 update_results = voter_manager.update_or_create_voter_contact_email(
                     email_address_text=email_address_text,
                     existing_voter_contact_email_dict=existing_voter_contact_email_dict,
                     from_google_people_api=True,
                     google_contact_id=google_contact_id,
                     google_date_last_updated=google_date_last_updated,
-                    display_name=display_name,
-                    first_name=first_name,
-                    last_name=last_name,
+                    google_display_name=google_display_name,
+                    google_first_name=google_first_name,
+                    google_last_name=google_last_name,
                     imported_by_voter_we_vote_id=voter_we_vote_id,
                 )
                 status += update_results['status']
@@ -143,6 +178,13 @@ def save_google_contacts(voter_we_vote_id='', contacts=[]):  # voterContactListS
         'success': success,
     }
     return results
+
+
+def get_voter_contact_email_value(voter_contact_email=None, best_option='', fallback_option=''):
+    if hasattr(voter_contact_email, best_option) and positive_value_exists(getattr(voter_contact_email, best_option)):
+        return getattr(voter_contact_email, best_option)
+    else:
+        return getattr(voter_contact_email, fallback_option)
 
 
 def voter_contact_list_retrieve_for_api(voter_we_vote_id=''):  # voterContactListRetrieve
@@ -169,17 +211,21 @@ def voter_contact_list_retrieve_for_api(voter_we_vote_id=''):  # voterContactLis
         except Exception as e:
             status += "DATE_CONVERSION_ERROR: " + str(e) + " "
         voter_contact_email_dict = {
+            'city': voter_contact_email.city,
             'date_last_changed': date_last_changed_string,
+            'display_name': get_voter_contact_email_value(voter_contact_email, 'display_name', 'google_display_name'),
             'email_address_text': voter_contact_email.email_address_text,
+            'first_name': get_voter_contact_email_value(voter_contact_email, 'first_name', 'google_first_name'),
             'google_contact_id': voter_contact_email.google_contact_id,
             'google_date_last_updated': google_date_last_updated_string,
-            'google_display_name': voter_contact_email.google_display_name,
-            'google_first_name': voter_contact_email.google_first_name,
-            'google_last_name': voter_contact_email.google_last_name,
             'has_data_from_google_people_api': voter_contact_email.has_data_from_google_people_api,
             'ignore_contact': voter_contact_email.ignore_contact,
             'imported_by_voter_we_vote_id': voter_contact_email.imported_by_voter_we_vote_id,
+            'last_name': get_voter_contact_email_value(voter_contact_email, 'last_name', 'google_last_name'),
             'state_code': voter_contact_email.state_code,
+            'voter_we_vote_id': voter_contact_email.voter_we_vote_id,
+            'we_vote_hosted_profile_image_url_medium': voter_contact_email.we_vote_hosted_profile_image_url_medium,
+            'zip_code': voter_contact_email.zip_code,
         }
         voter_contact_email_list_for_json.append(voter_contact_email_dict)
     results = {

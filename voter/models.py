@@ -145,6 +145,7 @@ class VoterManager(BaseUserManager):
 
     def update_or_create_contact_email_augmented(
             self,
+            checked_against_open_people=None,
             checked_against_sendgrid=None,
             checked_against_snovio=None,
             checked_against_targetsmart=None,
@@ -155,6 +156,12 @@ class VoterManager(BaseUserManager):
             has_suspected_bounces=None,
             is_invalid=None,
             is_verified=None,
+            open_people_city=None,
+            open_people_first_name=None,
+            open_people_last_name=None,
+            open_people_middle_name=None,
+            open_people_state_code=None,
+            open_people_zip_code=None,
             sendgrid_id=None,
             snovio_id=None,
             snovio_locality=None,
@@ -191,6 +198,11 @@ class VoterManager(BaseUserManager):
         if success:
             try:
                 change_to_save = False
+                if checked_against_open_people is not None:
+                    if contact_email_augmented.checked_against_open_people != checked_against_open_people:
+                        contact_email_augmented.checked_against_open_people = checked_against_open_people
+                        contact_email_augmented.date_last_checked_against_open_people = now()
+                        change_to_save = True
                 if checked_against_sendgrid is not None:
                     if contact_email_augmented.checked_against_sendgrid != checked_against_sendgrid:
                         contact_email_augmented.checked_against_sendgrid = checked_against_sendgrid
@@ -225,6 +237,30 @@ class VoterManager(BaseUserManager):
                 if is_verified is not None:
                     if contact_email_augmented.is_verified != is_verified:
                         contact_email_augmented.is_verified = is_verified
+                        change_to_save = True
+                if open_people_city is not None:
+                    if contact_email_augmented.open_people_city != open_people_city:
+                        contact_email_augmented.open_people_city = open_people_city
+                        change_to_save = True
+                if open_people_first_name is not None:
+                    if contact_email_augmented.open_people_first_name != open_people_first_name:
+                        contact_email_augmented.open_people_first_name = open_people_first_name
+                        change_to_save = True
+                if open_people_last_name is not None:
+                    if contact_email_augmented.open_people_last_name != open_people_last_name:
+                        contact_email_augmented.open_people_last_name = open_people_last_name
+                        change_to_save = True
+                if open_people_middle_name is not None:
+                    if contact_email_augmented.open_people_middle_name != open_people_middle_name:
+                        contact_email_augmented.open_people_middle_name = open_people_middle_name
+                        change_to_save = True
+                if open_people_state_code is not None:
+                    if contact_email_augmented.open_people_state_code != open_people_state_code:
+                        contact_email_augmented.open_people_state_code = open_people_state_code
+                        change_to_save = True
+                if open_people_zip_code is not None:
+                    if contact_email_augmented.open_people_zip_code != open_people_zip_code:
+                        contact_email_augmented.open_people_zip_code = open_people_zip_code
                         change_to_save = True
                 if snovio_id is not None:
                     if contact_email_augmented.snovio_id != snovio_id:
@@ -270,18 +306,45 @@ class VoterManager(BaseUserManager):
 
     def update_or_create_voter_contact_email(
             self,
+            city=None,
+            display_name=None,
             email_address_text='',
             existing_voter_contact_email_dict={},
+            first_name=None,
             from_google_people_api=False,
             google_contact_id=None,
             google_date_last_updated=None,
-            display_name=None,
-            first_name=None,
-            last_name=None,
+            google_display_name=None,
+            google_first_name=None,
+            google_last_name=None,
             ignore_contact=None,
             imported_by_voter_we_vote_id='',
+            last_name=None,
+            middle_name=None,
             state_code=None,
+            zip_code=None,
     ):
+        """
+
+        :param city:
+        :param display_name:
+        :param email_address_text:
+        :param existing_voter_contact_email_dict:
+        :param first_name:
+        :param from_google_people_api:
+        :param google_contact_id:
+        :param google_date_last_updated:
+        :param google_display_name:
+        :param google_first_name:
+        :param google_last_name:
+        :param ignore_contact:
+        :param imported_by_voter_we_vote_id:
+        :param last_name:
+        :param middle_name:
+        :param state_code:
+        :param zip_code:
+        :return:
+        """
         status = ""
         success = True
         voter_contact_email = None
@@ -312,14 +375,6 @@ class VoterManager(BaseUserManager):
                     if not positive_value_exists(voter_contact_email.has_data_from_google_people_api):
                         voter_contact_email.has_data_from_google_people_api = True
                         change_to_save = True
-                    if display_name is not None:
-                        if voter_contact_email.google_display_name != display_name:
-                            voter_contact_email.google_display_name = display_name
-                            change_to_save = True
-                    if first_name is not None:
-                        if voter_contact_email.google_first_name != first_name:
-                            voter_contact_email.google_first_name = first_name
-                            change_to_save = True
                     if google_contact_id is not None:
                         if voter_contact_email.google_contact_id != google_contact_id:
                             voter_contact_email.google_contact_id = google_contact_id
@@ -328,17 +383,50 @@ class VoterManager(BaseUserManager):
                         if voter_contact_email.google_date_last_updated != google_date_last_updated:
                             voter_contact_email.google_date_last_updated = google_date_last_updated
                             change_to_save = True
-                    if last_name is not None:
-                        if voter_contact_email.google_last_name != last_name:
-                            voter_contact_email.google_last_name = last_name
+                    if google_display_name is not None:
+                        if voter_contact_email.google_display_name != google_display_name:
+                            voter_contact_email.google_display_name = google_display_name
                             change_to_save = True
+                    if google_first_name is not None:
+                        if voter_contact_email.google_first_name != google_first_name:
+                            voter_contact_email.google_first_name = google_first_name
+                            change_to_save = True
+                    if google_last_name is not None:
+                        if voter_contact_email.google_last_name != google_last_name:
+                            voter_contact_email.google_last_name = google_last_name
+                            change_to_save = True
+                if city is not None:
+                    if voter_contact_email.city != city:
+                        voter_contact_email.city = city
+                        change_to_save = True
+                if display_name is not None:
+                    # If we force a specific display_name...
+                    if voter_contact_email.display_name != display_name:
+                        voter_contact_email.display_name = display_name
+                        change_to_save = True
+                if first_name is not None:
+                    if voter_contact_email.first_name != first_name:
+                        voter_contact_email.first_name = first_name
+                        change_to_save = True
                 if ignore_contact is not None:
                     if voter_contact_email.ignore_contact != ignore_contact:
                         voter_contact_email.ignore_contact = ignore_contact
                         change_to_save = True
+                if last_name is not None:
+                    if voter_contact_email.last_name != last_name:
+                        voter_contact_email.last_name = last_name
+                        change_to_save = True
+                if middle_name is not None:
+                    if voter_contact_email.middle_name != middle_name:
+                        voter_contact_email.middle_name = middle_name
+                        change_to_save = True
                 if state_code is not None:
                     if voter_contact_email.state_code != state_code:
                         voter_contact_email.state_code = state_code
+                        change_to_save = True
+                if zip_code is not None:
+                    if voter_contact_email.zip_code != zip_code:
+                        voter_contact_email.zip_code = zip_code
                         change_to_save = True
                 if change_to_save:
                     voter_contact_email.save()
@@ -357,15 +445,15 @@ class VoterManager(BaseUserManager):
                 change_to_save = False
                 if positive_value_exists(from_google_people_api):
                     voter_contact_email = VoterContactEmail.objects.create(
-                        email_address_text=email_address_text,
-                        has_data_from_google_people_api=True,
-                        google_contact_id=google_contact_id,
                         google_date_last_updated=google_date_last_updated,
-                        google_display_name=display_name,
-                        google_first_name=first_name,
-                        google_last_name=last_name,
+                        email_address_text=email_address_text,
+                        google_contact_id=google_contact_id,
+                        google_display_name=google_display_name,
+                        google_first_name=google_first_name,
+                        google_last_name=google_last_name,
+                        has_data_from_google_people_api=True,
                         imported_by_voter_we_vote_id=imported_by_voter_we_vote_id,
-                        state_code=state_code,
+                        # state_code=state_code,
                     )
                 else:
                     status += "NOT_A_RECOGNIZED_CONTACT_TYPE "
@@ -735,6 +823,7 @@ class VoterManager(BaseUserManager):
 
     def retrieve_contact_email_augmented_list(
             self,
+            checked_against_open_people_more_than_x_days_ago=None,
             checked_against_sendgrid_more_than_x_days_ago=None,
             checked_against_snovio_more_than_x_days_ago=None,
             checked_against_targetsmart_more_than_x_days_ago=None,
@@ -750,8 +839,18 @@ class VoterManager(BaseUserManager):
             else:
                 list_query = ContactEmailAugmented.objects.all()
 
-            # Filter based on when record was last augmented by SendGrid or TargetSmart
-            if checked_against_sendgrid_more_than_x_days_ago == 0:
+            # Filter based on when record was last augmented
+            if checked_against_open_people_more_than_x_days_ago == 0:
+                # Don't limit by if/when data was retrieved previously
+                pass
+            elif checked_against_open_people_more_than_x_days_ago is not None:
+                # Only retrieve the record if it hasn't been retrieved, or was retrieved more than x days ago
+                the_date_x_days_ago = now() - timedelta(days=checked_against_open_people_more_than_x_days_ago)
+                list_query = list_query.filter(
+                    Q(checked_against_open_people=False) |
+                    Q(date_last_checked_against_open_people__isnull=True) |
+                    Q(date_last_checked_against_open_people__lt=the_date_x_days_ago))
+            elif checked_against_sendgrid_more_than_x_days_ago == 0:
                 # Don't limit by if/when SendGrid data was retrieved previously
                 pass
             elif checked_against_sendgrid_more_than_x_days_ago is not None:
@@ -2097,6 +2196,51 @@ class VoterManager(BaseUserManager):
         }
         return results
 
+    def update_contact_email_augmented_list_not_found(
+            self,
+            checked_against_open_people=None,
+            checked_against_sendgrid=None,
+            checked_against_snovio=None,
+            checked_against_targetsmart=None,
+            email_address_text_list=None):
+        success = True
+        status = ""
+        contact_email_augmented_list_updated = False
+        number_updated = 0
+
+        try:
+            list_query = ContactEmailAugmented.objects.all()
+            list_query = list_query.filter(email_address_text__in=email_address_text_list)
+
+            if checked_against_open_people:
+                number_updated = list_query.update(checked_against_open_people=True,
+                                                   date_last_checked_against_open_people=now())
+                contact_email_augmented_list_updated = True
+            elif checked_against_sendgrid:
+                number_updated = list_query.update(checked_against_sendgrid=True,
+                                                   date_last_checked_against_sendgrid=now())
+                contact_email_augmented_list_updated = True
+            elif checked_against_snovio:
+                number_updated = list_query.update(checked_against_snovio=True,
+                                                   date_last_checked_against_snovio=now())
+                contact_email_augmented_list_updated = True
+            elif checked_against_targetsmart:
+                number_updated = list_query.update(checked_against_targetsmart=True,
+                                                   date_last_checked_against_targetsmart=now())
+                contact_email_augmented_list_updated = True
+            status += "CONTACT_EMAIL_AUGMENTED_LIST_NUMBER_UPDATED: " + str(number_updated) + ' '
+        except Exception as e:
+            status += "CONTACT_EMAIL_AUGMENTED_LIST_NOT_UPDATED: " + str(e) + ' '
+            success = False
+
+        results = {
+            'success':                              success,
+            'status':                               status,
+            'contact_email_augmented_list_updated': contact_email_augmented_list_updated,
+            'number_updated':                       number_updated,
+        }
+        return results
+
     def update_issues_interface_status(self, voter_we_vote_id, number_of_issues_followed):
         """
         Based on the number of issues the voter has followed, and set the
@@ -3125,8 +3269,11 @@ class VoterContactEmail(models.Model):
     """
     One contact imported from third-party voter address book. Voter may delete at any time.
     """
+    city = models.CharField(max_length=255, default=None, null=True)
     date_last_changed = models.DateTimeField(null=True, auto_now=True, db_index=True)
+    display_name = models.CharField(max_length=255, default=None, null=True)
     email_address_text = models.TextField(null=True, blank=True, db_index=True)
+    first_name = models.CharField(max_length=255, default=None, null=True)
     google_contact_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
     google_date_last_updated = models.DateTimeField(null=True)
     google_display_name = models.CharField(max_length=255, default=None, null=True)
@@ -3135,7 +3282,12 @@ class VoterContactEmail(models.Model):
     has_data_from_google_people_api = models.BooleanField(default=False)
     ignore_contact = models.BooleanField(default=False)
     imported_by_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
+    last_name = models.CharField(max_length=255, default=None, null=True)
+    middle_name = models.CharField(max_length=255, default=None, null=True)
     state_code = models.CharField(max_length=2, default=None, null=True, db_index=True)
+    voter_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
+    we_vote_hosted_profile_image_url_medium = models.TextField(blank=True, null=True)
+    zip_code = models.CharField(max_length=10, default=None, null=True)
 
 
 # class VoterContactSMS(models.Model):
@@ -3158,9 +3310,11 @@ class ContactEmailAugmented(models.Model):
     """
     What information have we retrieved to augment this one email address?
     """
+    checked_against_open_people = models.BooleanField(db_index=True, default=False)
     checked_against_sendgrid = models.BooleanField(db_index=True, default=False)
     checked_against_snovio = models.BooleanField(db_index=True, default=False)
     checked_against_targetsmart = models.BooleanField(db_index=True, default=False)
+    date_last_checked_against_open_people = models.DateTimeField(null=True)
     date_last_checked_against_sendgrid = models.DateTimeField(null=True)
     date_last_checked_against_snovio = models.DateTimeField(null=True)
     date_last_checked_against_targetsmart = models.DateTimeField(null=True)
@@ -3170,6 +3324,12 @@ class ContactEmailAugmented(models.Model):
     has_suspected_bounces = models.BooleanField(default=False)
     is_invalid = models.BooleanField(db_index=True, default=False)
     is_verified = models.BooleanField(db_index=True, default=False)
+    open_people_first_name = models.CharField(max_length=255, null=True)
+    open_people_last_name = models.CharField(max_length=255, null=True)
+    open_people_middle_name = models.CharField(max_length=255, null=True)
+    open_people_city = models.CharField(max_length=255, null=True)
+    open_people_state_code = models.CharField(max_length=2, null=True)
+    open_people_zip_code = models.CharField(max_length=10, null=True)
     snovio_id = models.CharField(max_length=255, null=True)
     snovio_locality = models.CharField(max_length=255, null=True)
     snovio_source_state = models.CharField(max_length=2, null=True)
@@ -3181,14 +3341,19 @@ class ContactSMSAugmented(models.Model):
     """
     What information have we retrieved to augment what we know about this one phone number?
     """
+    checked_against_open_people = models.BooleanField(db_index=True, default=False)
     checked_against_sendgrid = models.BooleanField(db_index=True, default=False)
     checked_against_targetsmart = models.BooleanField(db_index=True, default=False)
+    date_last_checked_against_open_people = models.DateTimeField(null=True)
     date_last_checked_against_sendgrid = models.DateTimeField(null=True)
     date_last_checked_against_targetsmart = models.DateTimeField(null=True)
     is_augmented = models.BooleanField(db_index=True, default=False)
     is_invalid = models.BooleanField(db_index=True, default=False)
     is_verified = models.BooleanField(db_index=True, default=False)
     normalized_sms_phone_number = models.CharField(db_index=True, max_length=50, null=False, unique=True)
+    open_people_city = models.CharField(max_length=255, null=True)
+    open_people_state_code = models.CharField(max_length=2, null=True)
+    open_people_zip_code = models.CharField(max_length=10, null=True)
     snovio_id = models.CharField(max_length=255, null=True)
     snovio_locality = models.CharField(max_length=255, null=True)
     snovio_source_state = models.CharField(max_length=2, null=True)

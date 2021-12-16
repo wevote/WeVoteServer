@@ -197,13 +197,81 @@ def augment_emails_for_voter_with_sendgrid(voter_we_vote_id=''):
                             )
                             if results['success']:
                                 # Now update all of the VoterContactEmail entries, irregardless of whose contact it is
-                                defaults = {
-                                    'state_code': 'TBD',
-                                }
-                                number_updated = VoterContactEmail.objects.filter(
-                                    email_address_text__iexact=contact_email_augmented.email_address_text) \
-                                    .update(defaults)
-                                status += "NUMBER_OF_VOTER_CONTACT_EMAIL_UPDATED: " + str(number_updated) + " "
+                                try:
+                                    number_updated = VoterContactEmail.objects.filter(
+                                        email_address_text__iexact=contact_email_augmented.email_address_text) \
+                                        .update(state_code='')
+                                    status += "NUMBER_OF_VOTER_CONTACT_EMAIL_UPDATED: " + str(number_updated) + " "
+                                except Exception as e:
+                                    status += "NUMBER_OF_VOTER_CONTACT_EMAIL_NOT_UPDATED: " + str(e) + " "
+
+    results = {
+        'success': success,
+        'status': status,
+    }
+    return results
+
+
+def augment_emails_for_voter_with_we_vote_data(voter_we_vote_id=''):
+    status = ''
+    success = True
+
+    from voter.models import VoterManager
+    voter_manager = VoterManager()
+    # Augment all voter contacts with updated data from We Vote
+    voter_contact_results = voter_manager.retrieve_voter_contact_email_list(
+        imported_by_voter_we_vote_id=voter_we_vote_id)
+    if voter_contact_results['voter_contact_email_list_found']:
+        email_addresses_returned_list = voter_contact_results['email_addresses_returned_list']
+
+        # Get list of emails which need to be augmented (updated) with data
+        #  We need to do this for later steps where we reach out to other services like Open People Search and Twilio
+        contact_email_augmented_list_as_dict = {}
+        results = voter_manager.retrieve_contact_email_augmented_list(
+            email_address_text_list=email_addresses_returned_list,
+            read_only=False,
+        )
+        if results['contact_email_augmented_list_found']:
+            # We retrieve all existing at once so we don't need 200 separate queries
+            #  within update_or_create_contact_email_augmented
+            contact_email_augmented_list_as_dict = results['contact_email_augmented_list_as_dict']
+
+        # Make sure we have an augmented entry for each email
+        for email_address_text in email_addresses_returned_list:
+            if email_address_text.lower() not in contact_email_augmented_list_as_dict:
+                voter_manager.update_or_create_contact_email_augmented(
+                    email_address_text=email_address_text,
+                    existing_contact_email_augmented_dict=contact_email_augmented_list_as_dict)
+
+        # Now augment VoterContactEmail table with data from the We Vote database to help find friends
+        # Start by retrieving checking EmailAddress table (in one query) for all entries we currently have in our db
+        email_addresses_found_list = []
+        try:
+            queryset = EmailAddress.objects.filter(normalized_email_address__in=email_addresses_returned_list)
+            queryset = queryset.filter(email_ownership_is_verified=True)
+            email_addresses_found_list = list(queryset)
+        except Exception as e:
+            status += "FAILED_TO_RETRIEVE_EMAIL_ADDRESSES: " + str(e) + ' '
+
+        for email_address_object in email_addresses_found_list:
+            # Retrieve the voter to see if there is data to use in the VoterContactEmail table
+            results = voter_manager.retrieve_voter_by_we_vote_id(email_address_object.voter_we_vote_id)
+            if results['voter_found']:
+                voter = results['voter']
+                voter_data_found = positive_value_exists(voter.we_vote_hosted_profile_image_url_medium) or \
+                    positive_value_exists(voter.we_vote_id)
+                if results['success'] and voter_data_found:
+                    # Now update all of the VoterContactEmail entries, irregardless of whose contact it is
+                    try:
+                        number_updated = VoterContactEmail.objects.filter(
+                            email_address_text__iexact=email_address_object.normalized_email_address) \
+                            .update(
+                                voter_we_vote_id=voter.we_vote_id,
+                                we_vote_hosted_profile_image_url_medium=voter.we_vote_hosted_profile_image_url_medium)
+                        status += "NUMBER_OF_VOTER_CONTACT_EMAIL_UPDATED: " + str(number_updated) + " "
+                    except Exception as e:
+                        status += "FAILED_TO_UPDATE_VOTER_CONTACT_EMAIL: " + str(e) + ' '
+
     results = {
         'success': success,
         'status': status,
