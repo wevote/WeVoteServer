@@ -104,10 +104,14 @@ def augment_emails_for_voter_with_snovio(voter_we_vote_id=''):
                                 defaults = {
                                     'state_code': snovio_source_state,
                                 }
-                                number_updated = VoterContactEmail.objects.filter(
-                                    email_address_text__iexact=contact_email_augmented.email_address_text) \
-                                    .update(defaults)
-                                status += "NUMBER_OF_VOTER_CONTACT_EMAIL_UPDATED: " + str(number_updated) + " "
+                                try:
+                                    number_updated = VoterContactEmail.objects.filter(
+                                        email_address_text__iexact=contact_email_augmented.email_address_text) \
+                                        .update(**defaults)
+                                    status += "SNOVIO_NUMBER_OF_VOTER_CONTACT_EMAIL_UPDATED: " + str(number_updated) + " "
+                                except Exception as e:
+                                    status += "SNOVIO_NUMBER_OF_VOTER_CONTACT_EMAIL_NOT_UPDATED: " + str(e) + " "
+
     results = {
         'success': success,
         'status': status,
