@@ -856,6 +856,8 @@ def retrieve_possible_twitter_handles(candidate):
         'nickname': sub(name_handling_regex, "", candidate.extract_nickname()),
     }
 
+    # December 2021: Using the Twitter 1.1 API for search_users, since it is not yet available in 2.0
+    # https://developer.twitter.com/en/docs/twitter-api/migrate/twitter-api-endpoint-map
     auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
     auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
     api = tweepy.API(auth, timeout=20)
@@ -2176,6 +2178,8 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
 
     twitter_auth_response = auth_response_results['twitter_auth_response']
 
+    # December 2021: Using the Twitter 1.1 API for verify_credentials, since it is not yet available in 2.0
+    # https://developer.twitter.com/en/docs/twitter-api/migrate/twitter-api-endpoint-map
     auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
     auth.set_access_token(twitter_auth_response.twitter_access_token, twitter_auth_response.twitter_access_secret)
 
