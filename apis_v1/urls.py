@@ -274,6 +274,8 @@ urlpatterns = [
       #     views_twitter.twitter_sign_in_request_voter_info_view, name='twitterSignInRequestVoterInfoView'),
       re_path(r'^twitterSignInStart/', views_twitter.twitter_sign_in_start_view,
               name='twitterSignInStartView'),
+      re_path(r'^twitterProcessDeferredImages/', views_twitter.twitter_process_deferred_images_view,
+              name='twitterProcessDeferredImages'),
       re_path(r'^twitterSignInRetrieve/', views_twitter.twitter_sign_in_retrieve_view,
               name='twitterSignInRetrieveView'),
       re_path(r'^twitterRetrieveIdsIFollow/',

@@ -71,8 +71,8 @@ You have to terminate all the backend connections before this will work:
 
 Then in pgAdmin 4,
 1) Select the WeVoteServerDB and right-click and drop
-2) Then select Databases and right-click create ‘WeVoteServerDB’
-3) Then in Terminal, recreate the database (it will be empty)
+2) Then in pgAdmin select Databases and right-click to recreate an empty‘WeVoteServerDB’
+3) Then in Terminal, initialize the newly created database with 'migrate'
 ```
 (WeVoteServer3.6) Steves-MacBook-Pro-2017:WeVoteServer stevepodell$ python manage.py migrate
 ```

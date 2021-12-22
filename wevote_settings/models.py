@@ -32,6 +32,9 @@ class WeVoteSetting(models.Model):
     """
     Settings needed for the operation of this site
     """
+    DoesNotExist = None
+    MultipleObjectsReturned = None
+    objects = None
     name = models.CharField(verbose_name='setting name', blank=True, null=True, max_length=255)
 
     # We store in the settings database values of many different kind of data types
@@ -486,6 +489,7 @@ class RemoteRequestHistory(models.Model):
     Keep a log of events when reaching out to Remote servers with requests
     """
     # The data and time we reached out to the Remote server
+    objects = None
     datetime_of_action = models.DateTimeField(verbose_name='date and time of action', auto_now=True)
     # If a 'ballot' entry, store the election this is for
     google_civic_election_id = models.PositiveIntegerField(verbose_name="google civic election id", null=True)
