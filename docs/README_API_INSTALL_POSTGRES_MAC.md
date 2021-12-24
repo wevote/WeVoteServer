@@ -38,10 +38,10 @@ ALTER USER  postgres  WITH PASSWORD '<your-password-here>';
 Now you are ready to install pgAdmin4. Run:
 
 ```
-brew cask install pgadmin4
+brew install pgadmin4
 ```
 
-Now open pgAdmin by clicking on the icon in your applications folder. From here on, you may follow the instructions in the `Setup - Install pgAdmin 4` section of this README starting from step 1: Right-click on "Servers" and choose "Create > Server".
+Now open pgAdmin by clicking on the icon in your Applications folder. From here on, you may follow the instructions in the `Setup - Install pgAdmin 4` section of this README starting from step 1: Right-click on "Servers" and choose "Create > Server".
 
 Note that you may terminate your PostgreSQL once done with:
 

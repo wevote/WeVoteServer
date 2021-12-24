@@ -273,7 +273,7 @@ this step.  To see if postgres is already running, check with lsof in a terminal
      stevepodell | Superuser, Create role, Create DB, Replication, Bypass RLS | {}
     
    postgres-#
-   postgres=# create database WeVoteServerDb;
+   postgres=# create database WeVoteServerDB;
    CREATE DATABASE
    postgres=# grant all privileges on database WeVoteServerDB to postgres;
    GRANT

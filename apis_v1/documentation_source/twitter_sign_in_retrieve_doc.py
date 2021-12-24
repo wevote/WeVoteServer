@@ -20,6 +20,13 @@ def twitter_sign_in_retrieve_doc_template_values(url_root):
         },
     ]
     optional_query_parameter_list = [
+        {
+            'name': 'image_load_deferred',
+            'value': 'boolean',  # boolean, integer, long, string
+            'description': 'Process new images from twitter asynchronously with ' \
+                           'twitter_process_deferred_images_for_api.  If false process images inline (adds many '
+                           'seconds to sign in with twitter)',
+        }
     ]
 
     potential_status_codes_list = [
@@ -39,20 +46,21 @@ def twitter_sign_in_retrieve_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
-                   '  "voter_device_id": string (88 characters long),\n' \
-                   '  "voter_we_vote_id_attached_to_twitter": string,\n' \
-                   '  "voter_we_vote_id_attached_to_twitter_email": string,\n' \
+                   '  "twitter_access_token": string,\n' \
+                   '  "twitter_email": string,\n' \
+                   '  "twitter_first_name": string,\n' \
+                   '  "twitter_image_load_info: object,\n' \
+                   '  "twitter_last_name": string,\n' \
+                   '  "twitter_middle_name": string,\n' \
+                   '  "twitter_profile_image_url_https": string,\n' \
                    '  "twitter_retrieve_attempted": boolean,\n' \
                    '  "twitter_sign_in_found": boolean,\n' \
                    '  "twitter_sign_in_verified": boolean,\n' \
-                   '  "twitter_access_token": string,\n' \
                    '  "twitter_signed_request": string,\n' \
                    '  "twitter_user_id": string,\n' \
-                   '  "twitter_email": string,\n' \
-                   '  "twitter_first_name": string,\n' \
-                   '  "twitter_middle_name": string,\n' \
-                   '  "twitter_last_name": string,\n' \
-                   '  "twitter_profile_image_url_https": string,\n' \
+                   '  "voter_device_id": string (88 characters long),\n' \
+                   '  "voter_we_vote_id_attached_to_twitter": string,\n' \
+                   '  "voter_we_vote_id_attached_to_twitter_email": string,\n' \
                    '  "we_vote_hosted_profile_image_url_large": string,\n' \
                    '  "we_vote_hosted_profile_image_url_medium": string,\n' \
                    '  "we_vote_hosted_profile_image_url_tny": string,\n' \

@@ -1905,27 +1905,30 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                 }
                 return error_results
 
+        # Dec 2021 Steve: Removed a redundant cache_master_and_resized_image call for the merged voter.
+        # Did we ever need this, or was it a "just in case" (This added 5 seconds to each twitter signin in the WebApp)
+        # If it needs to be revived, please revive it for just the most specific case
         # Cache original and resized images
-        cache_results = cache_master_and_resized_image(
-            voter_we_vote_id=twitter_owner_voter.we_vote_id,
-            twitter_id=twitter_auth_response.twitter_id,
-            twitter_screen_name=twitter_auth_response.twitter_screen_name,
-            twitter_profile_image_url_https=twitter_auth_response.twitter_profile_image_url_https,
-            image_source=TWITTER)
-        cached_twitter_profile_image_url_https = cache_results['cached_twitter_profile_image_url_https']
-        we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
-        we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
-        we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
-
+        # cache_results = cache_master_and_resized_image(
+        #     voter_we_vote_id=twitter_owner_voter.we_vote_id,
+        #     twitter_id=twitter_auth_response.twitter_id,
+        #     twitter_screen_name=twitter_auth_response.twitter_screen_name,
+        #     twitter_profile_image_url_https=twitter_auth_response.twitter_profile_image_url_https,
+        #     image_source=TWITTER)
+        # cached_twitter_profile_image_url_https = cache_results['cached_twitter_profile_image_url_https']
+        # we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+        # we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+        # we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+        #
         # Update the Twitter photo in the voter
-        save_twitter_results = voter_manager.save_twitter_user_values_from_twitter_auth_response(
-            twitter_owner_voter, twitter_auth_response,
-            cached_twitter_profile_image_url_https=cached_twitter_profile_image_url_https,
-            we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
-            we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
-            we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
-        status += " " + save_twitter_results['status']
-        twitter_owner_voter = save_twitter_results['voter']
+        # save_twitter_results = voter_manager.save_twitter_user_values_from_twitter_auth_response(
+        #     twitter_owner_voter, twitter_auth_response,
+        #     cached_twitter_profile_image_url_https=cached_twitter_profile_image_url_https,
+        #     we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
+        #     we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
+        #     we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
+        # status += " " + save_twitter_results['status']
+        # twitter_owner_voter = save_twitter_results['voter']
 
         # Make sure we have a twitter_link_to_organization entry for the destination voter
         if positive_value_exists(twitter_owner_voter.linked_organization_we_vote_id):
@@ -2037,9 +2040,6 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                     organization_name=twitter_owner_voter.get_full_name(),
                     organization_image=twitter_owner_voter.voter_photo_url(),
                     organization_type=INDIVIDUAL,
-                    we_vote_hosted_profile_image_url_large=twitter_owner_voter.we_vote_hosted_profile_image_url_large,
-                    we_vote_hosted_profile_image_url_medium=twitter_owner_voter.we_vote_hosted_profile_image_url_medium,
-                    we_vote_hosted_profile_image_url_tiny=twitter_owner_voter.we_vote_hosted_profile_image_url_tiny
                 )
                 if create_results['organization_created']:
                     # Add value to twitter_owner_voter.linked_organization_we_vote_id when done.
@@ -2999,6 +2999,8 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
         for team_member in team_member_list:
             can_edit_campaignx_owned_by_organization_list.append(team_member.organization_we_vote_id)
 
+        # print('voterRetrieve status', status, ', voter.email ', voter.email, ', full name ', voter.get_full_name(), ',
+        #   voter_photo_url_medium', we_vote_hosted_profile_image_url_medium )
         json_data = {
             'status':                           status,
             'success':                          True,

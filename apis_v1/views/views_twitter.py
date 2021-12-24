@@ -6,7 +6,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from import_export_twitter.controllers import twitter_identity_retrieve_for_api, twitter_sign_in_start_for_api, \
     twitter_sign_in_request_access_token_for_api, twitter_sign_in_request_voter_info_for_api, \
-    twitter_sign_in_retrieve_for_api, twitter_retrieve_ids_i_follow_for_api, twitter_native_sign_in_save_for_api
+    twitter_process_deferred_images_for_api, twitter_sign_in_retrieve_for_api, twitter_retrieve_ids_i_follow_for_api, \
+    twitter_native_sign_in_save_for_api
 import json
 from urllib.parse import quote
 from urllib.parse import urlencode
@@ -237,19 +238,44 @@ def twitter_cordova_signin_response(request, json_data):
                   content_type='text/html')
 
 
+def twitter_process_deferred_images_view(request):  # twitterProcessDeferredImages
+    """
+    Deferred processing of the twitter image URLs, to save 5 or 10 seconds on initial sign in
+    :param request:
+    :return:
+    """
+    results = twitter_process_deferred_images_for_api(
+        request.GET.get('status'),
+        request.GET.get('success'),
+        request.GET.get('twitter_id'),
+        request.GET.get('twitter_name'),
+        request.GET.get('twitter_profile_banner_url_https'),
+        request.GET.get('twitter_profile_image_url_https'),
+        request.GET.get('twitter_secret_key'),
+        request.GET.get('twitter_screen_name'),
+        request.GET.get('voter_we_vote_id_for_cache')
+    )
+
+    return HttpResponse(json.dumps(results), content_type='application/json')
+
+
 def twitter_sign_in_retrieve_view(request):  # twitterSignInRetrieve
     """
     :param request:
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    image_load_deferred = request.GET.get('image_load_deferred'),
+    load_deferred = image_load_deferred and image_load_deferred[0] == 'true'
 
-    results = twitter_sign_in_retrieve_for_api(voter_device_id=voter_device_id)
+
+    results = twitter_sign_in_retrieve_for_api(voter_device_id=voter_device_id, image_load_deferred=load_deferred)
 
     json_data = {
         'status':                                   results['status'],
         'success':                                  results['success'],
         'existing_twitter_account_found':           results['existing_twitter_account_found'],
+        'twitter_image_load_info':                  results['twitter_image_load_info'],
         'twitter_profile_image_url_https':          results['twitter_profile_image_url_https'],
         'twitter_retrieve_attempted':               True,
         'twitter_secret_key':                       results['twitter_secret_key'],
@@ -268,6 +294,7 @@ def twitter_sign_in_retrieve_view(request):  # twitterSignInRetrieve
     }
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
 
 def twitter_retrieve_ids_i_follow_view(request): # twitterRetrieveIdsIFollow
     """
