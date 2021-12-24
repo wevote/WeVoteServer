@@ -2,14 +2,16 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+import re
+
 from django.db import models
 from django.db.models import Count, Q
+
+import wevote_functions.admin
 from election.models import Election, ElectionManager
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
+from image.models import ORGANIZATION_ENDORSEMENTS_IMAGE_NAME
 from office.models import ContestOffice, ContestOfficeManager
-import re
-from wevote_settings.models import fetch_next_we_vote_id_candidate_campaign_integer, fetch_site_unique_id_prefix
-import wevote_functions.admin
 from wevote_functions.functions import add_period_to_middle_name_initial, add_period_to_name_prefix_and_suffix, \
     convert_to_int, \
     display_full_name_with_correct_capitalization, \
@@ -17,7 +19,7 @@ from wevote_functions.functions import add_period_to_middle_name_initial, add_pe
     extract_last_name_from_full_name, extract_suffix_from_full_name, extract_nickname_from_full_name, \
     extract_state_from_ocd_division_id, extract_twitter_handle_from_text_string, \
     positive_value_exists, remove_period_from_middle_name_initial, remove_period_from_name_prefix_and_suffix
-from image.models import ORGANIZATION_ENDORSEMENTS_IMAGE_NAME
+from wevote_settings.models import fetch_next_we_vote_id_candidate_campaign_integer, fetch_site_unique_id_prefix
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -309,7 +311,7 @@ class CandidateListManager(models.Manager):
             status += 'FAILED retrieve_all_candidates_for_upcoming_election ' + str(e) + ' '
             success = False
 
-        if candidate_list_found:
+        if candidate_list_found and len(office_we_vote_id_list_by_candidate_we_vote_id):
             for candidate in candidate_list_objects:
                 one_candidate = {
                     'ballot_item_display_name': candidate.display_candidate_name(),

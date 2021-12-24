@@ -2,19 +2,14 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+import time
+
 import requests
+from django.db.models import Q
+
 import wevote_functions.admin
-from .functions import analyze_remote_url, analyze_image_file, analyze_image_in_memory
-from .models import WeVoteImageManager, WeVoteImage, \
-    CHOSEN_FAVICON_NAME, CHOSEN_LOGO_NAME, CHOSEN_SOCIAL_SHARE_IMAGE_NAME, \
-    FACEBOOK_PROFILE_IMAGE_NAME, FACEBOOK_BACKGROUND_IMAGE_NAME, \
-    TWITTER_PROFILE_IMAGE_NAME, TWITTER_BACKGROUND_IMAGE_NAME, TWITTER_BANNER_IMAGE_NAME, MAPLIGHT_IMAGE_NAME, \
-    MASTER_IMAGE, ISSUE_IMAGE_NAME, BALLOTPEDIA_IMAGE_NAME, CAMPAIGNX_PHOTO_IMAGE_NAME, \
-    LINKEDIN_IMAGE_NAME, VOTE_SMART_IMAGE_NAME, VOTE_USA_PROFILE_IMAGE_NAME, VOTER_UPLOADED_IMAGE_NAME, \
-    WIKIPEDIA_IMAGE_NAME
 from candidate.models import CandidateManager
 from config.base import get_environment_variable
-from django.db.models import Q
 from import_export_facebook.models import FacebookManager
 from issue.models import IssueManager
 from organization.models import OrganizationManager
@@ -27,6 +22,14 @@ from twitter.models import TwitterUserManager
 from voter.models import VoterManager, VoterDeviceLink, VoterDeviceLinkManager, VoterAddressManager, VoterAddress, Voter
 from voter_guide.models import VoterGuideManager
 from wevote_functions.functions import positive_value_exists, convert_to_int
+from .functions import analyze_remote_url, analyze_image_file, analyze_image_in_memory
+from .models import WeVoteImageManager, WeVoteImage, \
+    CHOSEN_FAVICON_NAME, CHOSEN_LOGO_NAME, CHOSEN_SOCIAL_SHARE_IMAGE_NAME, \
+    FACEBOOK_PROFILE_IMAGE_NAME, FACEBOOK_BACKGROUND_IMAGE_NAME, \
+    TWITTER_PROFILE_IMAGE_NAME, TWITTER_BACKGROUND_IMAGE_NAME, TWITTER_BANNER_IMAGE_NAME, MAPLIGHT_IMAGE_NAME, \
+    MASTER_IMAGE, ISSUE_IMAGE_NAME, BALLOTPEDIA_IMAGE_NAME, CAMPAIGNX_PHOTO_IMAGE_NAME, CTCL_PROFILE_IMAGE_NAME, \
+    LINKEDIN_IMAGE_NAME, VOTE_SMART_IMAGE_NAME, VOTE_USA_PROFILE_IMAGE_NAME, VOTER_UPLOADED_IMAGE_NAME, \
+    WIKIPEDIA_IMAGE_NAME
 
 logger = wevote_functions.admin.get_logger(__name__)
 HTTP_OK = 200
@@ -99,12 +102,27 @@ except Exception:
     SOCIAL_BACKGROUND_IMAGE_HEIGHT = 200    # HTML x
     SOCIAL_BACKGROUND_IMAGE_WIDTH = 900     # HTML y
 
+log_time = False
+
+
+def log_and_time_cache_action(start, time0, name):
+    if log_time:
+        if start:
+            print('image/controllers process timing start for', name)
+            return time.time()
+        else:
+            dt = time.time() - time0
+            print('image/controllers process timing start for', name, '-- took {:.3f}'.format(dt),
+                  'seconds to complete.')
+            return 0
+
 
 def cache_all_kind_of_images_locally_for_all_organizations():
     """
     Cache all kind of images locally for all organizations
     :return:
     """
+    time0 = log_and_time_cache_action(True, 0, 'cache_all_kind_of_images_locally_for_all_organizations')
     cache_images_locally_for_all_organizations_results = []
 
     # TODO Update this for organizations
@@ -133,6 +151,7 @@ def cache_all_kind_of_images_locally_for_all_organizations():
     #     cache_images_for_one_organization_results = migrate_remote_voter_image_urls_to_local_cache(voter.id)
     #     cache_images_locally_for_all_organizations_results.append(cache_images_for_one_organization_results)
 
+    log_and_time_cache_action(False, time0, 'cache_all_kind_of_images_locally_for_all_organizations')
     return cache_images_locally_for_all_organizations_results
 
 
@@ -141,6 +160,7 @@ def cache_all_kind_of_images_locally_for_all_voters():
     Cache all kind of images locally for all voters
     :return:
     """
+    time0 = log_and_time_cache_action(True, 0, 'cache_all_kind_of_images_locally_for_all_voters')
     cache_images_locally_for_all_voters_results = []
 
     voter_list = Voter.objects.all()
@@ -168,6 +188,7 @@ def cache_all_kind_of_images_locally_for_all_voters():
         cache_images_for_a_voter_results = cache_voter_master_images(voter.id)
         cache_images_locally_for_all_voters_results.append(cache_images_for_a_voter_results)
 
+    log_and_time_cache_action(False, time0, 'cache_all_kind_of_images_locally_for_all_voters')
     return cache_images_locally_for_all_voters_results
 
 
@@ -238,6 +259,7 @@ def cache_image_if_not_cached(
     :param vote_smart_id:
     :return:
     """
+    time0 = log_and_time_cache_action(True, 0, 'cache_image_if_not_cached')
     we_vote_image_manager = WeVoteImageManager()
     cached_we_vote_image_results = we_vote_image_manager.retrieve_recent_cached_we_vote_image(
         candidate_we_vote_id=candidate_we_vote_id,
@@ -341,6 +363,7 @@ def cache_image_if_not_cached(
                 kind_of_image_vote_usa_profile=kind_of_image_vote_usa_profile,
                 kind_of_image_voter_uploaded_profile=kind_of_image_voter_uploaded_profile,
                 kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,)
+    log_and_time_cache_action(False, time0, 'cache_image_if_not_cached')
     return cache_image_results
 
 
@@ -350,6 +373,7 @@ def cache_organization_master_images(organization_we_vote_id):
     :param organization_we_vote_id:
     :return:
     """
+    time0 = log_and_time_cache_action(True, 0, 'cache_organization_master_images')
     cache_all_kind_of_images_results = {
         'organization_we_vote_id':          "",
         'cached_twitter_profile_image':     False,
@@ -425,6 +449,7 @@ def cache_organization_master_images(organization_we_vote_id):
             twitter_screen_name=twitter_screen_name, is_active_version=True,
             kind_of_image_twitter_banner=True, kind_of_image_original=True)
 
+    log_and_time_cache_action(False, time0, 'cache_organization_master_images')
     return cache_all_kind_of_images_results
 
 
@@ -434,6 +459,7 @@ def cache_voter_master_images(voter_id):
     :param voter_id:
     :return:
     """
+    time0 = log_and_time_cache_action(True, 0, 'cache_voter_master_images')
     cache_all_kind_of_images_results = {
         'cached_facebook_background_image':     False,
         'cached_facebook_profile_image':        False,
@@ -455,6 +481,7 @@ def cache_voter_master_images(voter_id):
 
     voter_results = voter_manager.retrieve_voter_by_id(voter_id)
     if not voter_results['voter_found']:
+        log_and_time_cache_action(False, time0, 'cache_voter_master_images - voter does not exist')
         return cache_all_kind_of_images_results
 
     voter = voter_results['voter']
@@ -480,6 +507,7 @@ def cache_voter_master_images(voter_id):
         results = choose_election_from_existing_data(voter_device_link, 0, voter_address)
         google_civic_election_id = results['google_civic_election_id']
     else:
+        log_and_time_cache_action(False, time0, 'cache_voter_master_images - voter.we_vote_id does not exist')
         return cache_all_kind_of_images_results
 
     # DALE NOTE 2017-04-23 I don't think we want to use the twitter_id stored in the voter table
@@ -518,6 +546,8 @@ def cache_voter_master_images(voter_id):
             'voter_object':                         voter,
             'voter_we_vote_id':                     voter.we_vote_id,
         }
+        log_and_time_cache_action(False, time0, 'cache_voter_master_images - If we dont have a Twitter or '
+                                                'Facebook photo to update, then no need to update this voter further')
         return cache_all_kind_of_images_results
 
     if not positive_value_exists(twitter_id):
@@ -605,6 +635,7 @@ def cache_voter_master_images(voter_id):
                 kind_of_image_facebook_background=True,
                 kind_of_image_original=True)
 
+    log_and_time_cache_action(False, time0, 'cache_voter_master_images - final exit')
     return cache_all_kind_of_images_results
 
 
@@ -681,6 +712,7 @@ def cache_image_locally(
     :param voter_we_vote_id:
     :return:
     """
+    time0 = log_and_time_cache_action(True, 0, 'cache_image_locally')
     we_vote_parent_image_id = None
 
     success = False
@@ -734,6 +766,7 @@ def cache_image_locally(
             'image_stored_locally':         image_stored_locally,
             'image_stored_to_aws':          image_stored_to_aws,
         }
+        log_and_time_cache_action(False, time0, 'cache_image_locally -- create_we_vote_image_results, was not saved')
         return error_results
 
     we_vote_image_created = True
@@ -776,6 +809,7 @@ def cache_image_locally(
             'image_stored_to_aws':          image_stored_to_aws,
         }
         delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+        log_and_time_cache_action(False, time0, 'cache_image_locally -- analyze_image_url_results problem')
         return error_results
 
     image_url_valid = True
@@ -927,6 +961,7 @@ def cache_image_locally(
                 'image_stored_to_aws':          image_stored_to_aws,
             }
             delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+            log_and_time_cache_action(False, time0, 'cache_image_locally -- IMAGE_NOT_STORED_LOCALLY problem')
             return error_results
 
         status += " IMAGE_STORED_LOCALLY "
@@ -944,6 +979,7 @@ def cache_image_locally(
                 'image_stored_to_aws':          False,
             }
             delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+            log_and_time_cache_action(False, time0, 'cache_image_locally -- IMAGE_NOT_STORED_TO_AWS problem')
             return error_results
         we_vote_image_url = "https://{bucket_name}.s3.amazonaws.com/{we_vote_image_file_location}" \
                             "".format(bucket_name=AWS_STORAGE_BUCKET_NAME,
@@ -964,6 +1000,7 @@ def cache_image_locally(
                 'image_stored_to_aws':      image_stored_to_aws,
             }
             delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+            log_and_time_cache_action(False, time0, 'cache_image_locally -- IMAGE_STORED_TO_AWS with error')
             return error_results
 
     else:
@@ -977,6 +1014,8 @@ def cache_image_locally(
             'image_stored_to_aws':          image_stored_to_aws,
         }
         delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+        log_and_time_cache_action(False, time0, 'cache_image_locally -- save_source_info_results problem')
+        save_source_info_results
         return error_results
 
     results = {
@@ -988,6 +1027,7 @@ def cache_image_locally(
         'image_stored_locally':         image_stored_locally,
         'image_stored_to_aws':          image_stored_to_aws,
     }
+    log_and_time_cache_action(False, time0, 'cache_image_locally -- final')
     return results
 
 
@@ -1240,6 +1280,7 @@ def create_resized_images_for_all_organizations():
     Create resized images for all organizations
     :return:
     """
+    time0 = log_and_time_cache_action(True, 0, 'create_resized_images_for_all_organizations')
     create_all_resized_images_results = []
     we_vote_image_list = WeVoteImage.objects.all()
     # TODO Limit this to organizations only
@@ -1248,6 +1289,7 @@ def create_resized_images_for_all_organizations():
         # Iterate through all cached images
         create_resized_images_results = create_resized_image_if_not_created(we_vote_image)
         create_all_resized_images_results.append(create_resized_images_results)
+    log_and_time_cache_action(True, time0, 'create_resized_images_for_all_organizations')
     return create_all_resized_images_results
 
 
@@ -1256,6 +1298,7 @@ def create_resized_images_for_all_voters():
     Create resized images for all voters
     :return:
     """
+    time0 = log_and_time_cache_action(True, 0, 'create_resized_images_for_all_voters')
     create_all_resized_images_results = []
     we_vote_image_list = WeVoteImage.objects.all()
     # TODO Limit this to voters only
@@ -1264,6 +1307,7 @@ def create_resized_images_for_all_voters():
         # Iterate through all cached images
         create_resized_images_results = create_resized_image_if_not_created(we_vote_image)
         create_all_resized_images_results.append(create_resized_images_results)
+    log_and_time_cache_action(False, time0, 'create_resized_images_for_all_voters')
     return create_all_resized_images_results
 
 
@@ -1471,6 +1515,7 @@ def delete_cached_images_for_organization(organization):
 
 
 def delete_cached_images_for_voter(voter):
+    time0 = log_and_time_cache_action(True, 0, 'delete_cached_images_for_voter')
     original_twitter_profile_image_url_https = None
     original_twitter_profile_background_image_url_https = None
     original_twitter_profile_banner_url_https = None
@@ -1555,6 +1600,7 @@ def delete_cached_images_for_voter(voter):
         'delete_image_count':       delete_image_count,
         'not_deleted_image_count':  not_deleted_image_count,
     }
+    log_and_time_cache_action(True, time0, 'delete_cached_images_for_voter')
     return results
 
 
@@ -1564,6 +1610,7 @@ def delete_stored_images_for_voter(voter):
     Call delete_cached_images_for_voter() before calling this one, to remove all the cached images from AWS, otherwise
     the cached images will stay in AWS as unreferenced wasted storage
     """
+    time0 = log_and_time_cache_action(True, 0, 'delete_stored_images_for_voter')
     success = False
 
     # Delete Voter images
@@ -1626,6 +1673,7 @@ def delete_stored_images_for_voter(voter):
         'success':                  success,
         'status':                   status,
     }
+    log_and_time_cache_action(True, time0, 'delete_stored_images_for_voter')
     return results
 
 
@@ -1679,7 +1727,7 @@ def cache_and_create_resized_images_for_organization(organization_we_vote_id):
     :param organization_we_vote_id:
     :return:
     """
-    create_all_resized_images_results = []
+    time0 = log_and_time_cache_action(True, 0, 'cache_and_create_resized_images_for_organization')
     organization_manager = OrganizationManager()
     we_vote_image_manager = WeVoteImageManager()
 
@@ -1697,8 +1745,10 @@ def cache_and_create_resized_images_for_organization(organization_we_vote_id):
             # Iterate through all cached images
             create_resized_images_results = create_resized_image_if_not_created(we_vote_image)
             create_resized_images_results.update(cache_images_for_one_organization_results)
-            create_all_resized_images_results.append(create_resized_images_results)
-        return create_all_resized_images_results
+            # TODO: Steve 12/15/21, this is a shot in the dark fix for changes that don't look like they could ever run
+            create_resized_images_results.append(create_resized_images_results)
+    log_and_time_cache_action(False, time0, 'cache_and_create_resized_images_for_organization')
+    return create_resized_images_results
 
 
 def cache_and_create_resized_images_for_voter(voter_id):
@@ -1707,6 +1757,7 @@ def cache_and_create_resized_images_for_voter(voter_id):
     :param voter_id:
     :return:
     """
+    time0 = log_and_time_cache_action(True, 0, 'cache_and_create_resized_images_for_voter')
     create_all_resized_images_results = []
     voter_manager = VoterManager()
     we_vote_image_manager = WeVoteImageManager()
@@ -1725,7 +1776,9 @@ def cache_and_create_resized_images_for_voter(voter_id):
             create_resized_images_results = create_resized_image_if_not_created(we_vote_image)
             create_resized_images_results.update(cache_images_for_a_voter_results)
             create_all_resized_images_results.append(create_resized_images_results)
+        log_and_time_cache_action(False, time0, 'create_resized_images_for_all_organizations')
         return create_all_resized_images_results
+    log_and_time_cache_action(False, time0, 'cache_and_create_resized_images_for_voter FAILURE')
 
 
 def cache_campaignx_image(
@@ -1741,6 +1794,7 @@ def cache_campaignx_image(
     :param kind_of_image_campaignx_photo:
     :return:
     """
+    time0 = log_and_time_cache_action(True, 0, 'cache_campaignx_image')
     we_vote_parent_image_id = None
     success = False
     status = ''
@@ -1768,6 +1822,7 @@ def cache_campaignx_image(
             'image_stored_to_aws':          image_stored_to_aws,
             'we_vote_image':                None
         }
+        log_and_time_cache_action(True, time0, 'cache_campaignx_image -- did not create image')
         return error_results
 
     we_vote_image_created = True
@@ -1787,6 +1842,7 @@ def cache_campaignx_image(
             'we_vote_image':                None
         }
         delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+        log_and_time_cache_action(True, time0, 'cache_campaignx_image -- analyze failed')
         return error_results
 
     image_url_valid = True
@@ -1853,6 +1909,7 @@ def cache_campaignx_image(
             'image_stored_to_aws': image_stored_to_aws,
         }
         delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+        log_and_time_cache_action(True, time0, 'cache_campaignx_image -- not image_stored_locally')
         return error_results
 
     image_stored_to_aws = we_vote_image_manager.store_image_to_aws(
@@ -1868,6 +1925,7 @@ def cache_campaignx_image(
             'we_vote_image':                None
         }
         delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+        log_and_time_cache_action(True, time0, 'cache_campaignx_image -- not image_stored_to_aws')
         return error_results
 
     we_vote_image_url = "https://{bucket_name}.s3.amazonaws.com/{we_vote_image_file_location}" \
@@ -1890,6 +1948,7 @@ def cache_campaignx_image(
             'we_vote_image':            None
         }
         delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+        log_and_time_cache_action(True, time0, 'cache_campaignx_image -- not save_aws_info')
         return error_results
 
     kind_of_image_large = not kind_of_image_original
@@ -1912,6 +1971,7 @@ def cache_campaignx_image(
             'we_vote_image':            None
         }
         delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+        log_and_time_cache_action(True, time0, 'cache_campaignx_image -- not save_source_info_results')
         return error_results
 
     # set active version False for other master images for same campaignx
@@ -1930,6 +1990,7 @@ def cache_campaignx_image(
         'image_stored_to_aws':          image_stored_to_aws,
         'we_vote_image':                we_vote_image
     }
+    log_and_time_cache_action(False, time0, 'cache_campaignx_image')
     return results
 
 
@@ -1942,6 +2003,7 @@ def cache_voter_master_uploaded_image(
     :param voter_we_vote_id:
     :return:
     """
+    time0 = log_and_time_cache_action(True, 0, 'cache_voter_master_uploaded_image')
     we_vote_parent_image_id = None
     success = False
     status = ''
@@ -1969,6 +2031,7 @@ def cache_voter_master_uploaded_image(
             'image_stored_to_aws':          image_stored_to_aws,
             'we_vote_image':                None
         }
+        log_and_time_cache_action(True, time0, 'cache_voter_master_uploaded_image -- not we_vote_image_saved')
         return error_results
 
     we_vote_image_created = True
@@ -1988,6 +2051,7 @@ def cache_voter_master_uploaded_image(
             'we_vote_image':                None
         }
         delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+        log_and_time_cache_action(True, time0, 'cache_voter_master_uploaded_image -- not image_url_valid')
         return error_results
 
     image_url_valid = True
@@ -2048,6 +2112,7 @@ def cache_voter_master_uploaded_image(
             'image_stored_to_aws': image_stored_to_aws,
         }
         delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+        log_and_time_cache_action(True, time0, 'cache_voter_master_uploaded_image -- not image_stored_locally')
         return error_results
 
     image_stored_to_aws = we_vote_image_manager.store_image_to_aws(
@@ -2063,6 +2128,7 @@ def cache_voter_master_uploaded_image(
             'we_vote_image':                None
         }
         delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+        log_and_time_cache_action(True, time0, 'cache_voter_master_uploaded_image -- not image_stored_to_aws')
         return error_results
 
     we_vote_image_url = "https://{bucket_name}.s3.amazonaws.com/{we_vote_image_file_location}" \
@@ -2085,6 +2151,7 @@ def cache_voter_master_uploaded_image(
             'we_vote_image':            None
         }
         delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+        log_and_time_cache_action(True, time0, 'cache_voter_master_uploaded_image -- not save_aws_info')
         return error_results
 
     save_source_info_results = we_vote_image_manager.save_we_vote_image_voter_uploaded_info(
@@ -2124,6 +2191,7 @@ def cache_voter_master_uploaded_image(
         'image_stored_to_aws':          image_stored_to_aws,
         'we_vote_image':                we_vote_image
     }
+    log_and_time_cache_action(False, time0, 'cache_voter_master_uploaded_image')
     return results
 
 
@@ -2175,6 +2243,7 @@ def create_resized_image_if_not_created(we_vote_image):
     :param we_vote_image:
     :return:
     """
+    time0 = log_and_time_cache_action(True, 0, 'create_resized_image_if_not_created')
 
     if positive_value_exists(we_vote_image.we_vote_image_file_location):
         image_format = we_vote_image.we_vote_image_file_location.split(".")[-1]
@@ -2376,6 +2445,7 @@ def create_resized_image_if_not_created(we_vote_image):
             create_resized_image_results['cached_tiny_image'] = cache_resized_image_locally_results['success']
         else:
             create_resized_image_results['cached_tiny_image'] = IMAGE_ALREADY_CACHED
+    log_and_time_cache_action(False, time0, 'create_resized_image_if_not_created')
     return create_resized_image_results
 
 
@@ -2629,6 +2699,7 @@ def cache_resized_image_locally(
     :param we_vote_parent_image_id:
     :return:
     """
+    time0 = log_and_time_cache_action(True, 0, 'cache_resized_image_locally')
     success = False
     status = ''
     we_vote_image_created = False
@@ -3029,6 +3100,7 @@ def cache_resized_image_locally(
         'resized_image_created':        resized_image_created,
         'image_stored_to_aws':          image_stored_to_aws,
     }
+    log_and_time_cache_action(False, time0, 'cache_resized_image_locally')
     return results
 
 
@@ -3075,6 +3147,7 @@ def create_resized_images(
     :param wikipedia_profile_image_url:
     :return:
     """
+    time0 = log_and_time_cache_action(True, 0, 'cache_resized_images')
     cached_master_image_url = None
     cached_resized_image_url_large = None
     cached_resized_image_url_medium = None
@@ -3199,6 +3272,7 @@ def create_resized_images(
         'cached_resized_image_url_medium':  cached_resized_image_url_medium,
         'cached_resized_image_url_tiny':    cached_resized_image_url_tiny
     }
+    log_and_time_cache_action(False, time0, 'cache_resized_images')
     return results
 
 
@@ -3264,6 +3338,7 @@ def cache_master_and_resized_image(
     :param wikipedia_profile_image_url:
     :return:
     """
+    time0 = log_and_time_cache_action(True, 0, 'cache_master_and_resized_image')
     status = ''
     cached_ballotpedia_image_url_https = None
     cached_ctcl_profile_image_url_https = None
@@ -3534,6 +3609,7 @@ def cache_master_and_resized_image(
         'we_vote_hosted_profile_image_url_medium':              we_vote_hosted_profile_image_url_medium,
         'we_vote_hosted_profile_image_url_tiny':                we_vote_hosted_profile_image_url_tiny
     }
+    log_and_time_cache_action(False, time0, 'cache_master_and_resized_image')
     return results
 
 
@@ -3599,6 +3675,7 @@ def cache_master_images(
     :param wikipedia_profile_image_url:
     :return:
     """
+    time0 = log_and_time_cache_action(True, 0, 'cache_master_images')
     cache_all_kind_of_images_results = {
         'candidate_id':                     candidate_id,
         'candidate_we_vote_id':             candidate_we_vote_id,
@@ -3761,6 +3838,7 @@ def cache_master_images(
             organization_we_vote_id=organization_we_vote_id, is_active_version=True,
             kind_of_image_wikipedia_profile=True, kind_of_image_original=True)
 
+    log_and_time_cache_action(False, time0, 'cache_master_images')
     return cache_all_kind_of_images_results
 
 
@@ -3776,6 +3854,7 @@ def cache_issue_image_master(google_civic_election_id, issue_image_file, issue_w
     :param kind_of_image_original:
     :return:
     """
+    time0 = log_and_time_cache_action(True, 0, 'cache_issue_image_master')
     we_vote_parent_image_id = None
     success = False
     status = ''
@@ -3930,6 +4009,7 @@ def cache_issue_image_master(google_civic_election_id, issue_image_file, issue_w
         'image_stored_to_aws':          image_stored_to_aws,
         'we_vote_image':                we_vote_image
     }
+    log_and_time_cache_action(False, time0, 'cache_issue_image_master')
     return results
 
 
@@ -3951,6 +4031,7 @@ def cache_organization_sharing_image(
     :param kind_of_image_chosen_social_share_master:
     :return:
     """
+    time0 = log_and_time_cache_action(True, 0, 'cache_organization_sharing_image')
     we_vote_parent_image_id = None
     success = False
     status = ''
@@ -4146,4 +4227,5 @@ def cache_organization_sharing_image(
         'image_stored_to_aws':          image_stored_to_aws,
         'we_vote_image':                we_vote_image
     }
+    log_and_time_cache_action(False, time0, 'cache_organization_sharing_image')
     return results

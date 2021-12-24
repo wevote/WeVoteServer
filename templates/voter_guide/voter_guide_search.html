@@ -8,32 +8,46 @@
 <h1>Find Voter Guide</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
+<style>
+    th {
+        font-weight: 600;
+    }
+    table, th, td {
+        border: 1px solid darkgray;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 5px;
+    }
+</style>
 
 {% if organizations_list %}
     <h3>Is the organization you are adding one of these?</h3>
-    <table cellpadding="5" cellspacing="5" border="1">
-        <tr>
-            <td></td>
-            <td>Endorser Management (open in new window)</td>
-            <td>Twitter</td>
-            <td>Facebook</td>
-            <td>Website (open in new window)</td>
-            <td></td>
-        </tr>
-    {% for possible_organization in organizations_list %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td><a href="{% url 'organization:organization_position_list' possible_organization.organization_id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">{{ possible_organization.organization_name }}</a></td>
-            <td>{% if possible_organization.organization_twitter_handle %}{{ possible_organization.organization_twitter_handle }}{% endif %}</td>
-            <td>{% if possible_organization.organization_facebook %}{{ possible_organization.organization_facebook }}{% endif %}</td>
-            <td>{% if possible_organization.organization_website %}
-                <a href="{{ possible_organization.organization_website }}" target="_blank">{{ possible_organization.organization_website }}</a>
-            {% endif %}</td>
-            <td><a href="{% url 'organization:organization_position_new' possible_organization.organization_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-                Enter Position</a></td>
-        </tr>
-    {% endfor %}
-    </table>
+    <div style="padding: 15px 0">
+        <table>
+            <tr>
+                <td></td>
+                <td>Endorser Management (open in new window)</td>
+                <td>Twitter</td>
+                <td>Facebook</td>
+                <td>Website (open in new window)</td>
+                <td></td>
+            </tr>
+        {% for possible_organization in organizations_list %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td><a href="{% url 'organization:organization_position_list' possible_organization.organization_id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">{{ possible_organization.organization_name }}</a></td>
+                <td>{% if possible_organization.organization_twitter_handle %}{{ possible_organization.organization_twitter_handle }}{% endif %}</td>
+                <td>{% if possible_organization.organization_facebook %}{{ possible_organization.organization_facebook }}{% endif %}</td>
+                <td>{% if possible_organization.organization_website %}
+                    <a href="{{ possible_organization.organization_website }}" target="_blank">{{ possible_organization.organization_website }}</a>
+                {% endif %}</td>
+                <td><a href="{% url 'organization:organization_position_new' possible_organization.organization_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+                    Enter Position</a></td>
+            </tr>
+        {% endfor %}
+        </table>
+    </div>
     <p></p>
 {% endif %}
 
@@ -82,7 +96,7 @@
 <div class="form-group">
     <label for="organization_type_id" class="col-sm-3 control-label">Endorser Type</label>
     <div class="col-sm-8">
-        <select id="organization_type_id" name="organization_type" class="form-control">
+        <select id="organization_type_id" name="organization_type" class="form-control"  style="height: auto !important">
             <option value="">-- Choose Endorser Type --</option>
         {% for organization_type_from_list in organization_type_list %}
             <option value="{{ organization_type_from_list.organization_type_key }}"
@@ -97,7 +111,7 @@
 <div class="form-group">
     <label for="google_civic_election_id" class="col-sm-3 control-label">Election</label>
     <div class="col-sm-8">
-        <select id="google_civic_election_id" name="google_civic_election_id" class="form-control">
+        <select id="google_civic_election_id" name="google_civic_election_id" class="form-control"  style="height: auto !important">
             <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
                 -- Election --</option>
         {% for election in upcoming_election_list %}
@@ -114,7 +128,7 @@
 <div class="form-group">
     <label for="state_code_id" class="col-sm-3 control-label">State Served (if only one State)</label>
     <div class="col-sm-8">
-        <select id="state_code_id" name="state_code">
+        <select id="state_code_id" name="state_code"  style="height: 34px">
             <option value="" {% if '' == state_code %} selected="selected"{% endif %}>
                 -- State Served (Defaults to National) --</option>
         {% for key, state in state_list %}
