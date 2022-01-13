@@ -2098,6 +2098,8 @@ class OrganizationListManager(models.Manager):
                                                    exact_match=False):
         """
         We want to find *any* possible organization that includes any of the search terms
+        We do "OR" across the incoming fields like name, twitter_handle, website, etc.
+        We do "AND" with multiple words coming in for organization_search_term
         :param organization_name:
         :param organization_twitter_handle:
         :param organization_website:
@@ -2110,34 +2112,33 @@ class OrganizationListManager(models.Manager):
         :return:
         """
         organization_list_for_json = {}
+        if positive_value_exists(organization_search_term):
+            organization_search_term_array = organization_search_term.split()
+        else:
+            organization_search_term_array = []
         try:
             filters = []
+            and_filters = []
             organization_list_for_json = []
             organization_objects_list = []
-            organization_twitter_search = extract_twitter_handle_from_text_string(organization_search_term)
             if positive_value_exists(organization_search_term):
-                if positive_value_exists(exact_match):
-                    new_filter = Q(organization_name__iexact=organization_search_term)
-                    filters.append(new_filter)
-                    new_filter = Q(organization_twitter_handle__iexact=organization_twitter_search)
-                    filters.append(new_filter)
-                    new_filter = Q(organization_website__iexact=organization_search_term)
-                    filters.append(new_filter)
-                    new_filter = Q(organization_email__iexact=organization_search_term)
-                    filters.append(new_filter)
-                    new_filter = Q(organization_facebook__iexact=organization_search_term)
-                    filters.append(new_filter)
-                else:
-                    new_filter = Q(organization_name__icontains=organization_search_term)
-                    filters.append(new_filter)
-                    new_filter = Q(organization_twitter_handle__icontains=organization_twitter_search)
-                    filters.append(new_filter)
-                    new_filter = Q(organization_website__icontains=organization_search_term)
-                    filters.append(new_filter)
-                    new_filter = Q(organization_email__icontains=organization_search_term)
-                    filters.append(new_filter)
-                    new_filter = Q(organization_facebook__icontains=organization_search_term)
-                    filters.append(new_filter)
+                for search_term in organization_search_term_array:
+                    if positive_value_exists(exact_match):
+                        organization_twitter_search = extract_twitter_handle_from_text_string(search_term)
+                        new_filter = Q(organization_name__iexact=search_term) | \
+                            Q(organization_website__iexact=search_term) | \
+                            Q(organization_email__iexact=search_term) | \
+                            Q(organization_facebook__iexact=search_term) | \
+                            Q(organization_twitter_handle__iexact=organization_twitter_search)
+                        and_filters.append(new_filter)
+                    else:
+                        organization_twitter_search = extract_twitter_handle_from_text_string(search_term)
+                        new_filter = Q(organization_name__icontains=search_term) | \
+                            Q(organization_website__icontains=search_term) | \
+                            Q(organization_email__icontains=search_term) | \
+                            Q(organization_facebook__icontains=search_term) | \
+                            Q(organization_twitter_handle__icontains=organization_twitter_search)
+                        and_filters.append(new_filter)
 
             if positive_value_exists(organization_name):
                 if positive_value_exists(exact_match):
@@ -2195,15 +2196,30 @@ class OrganizationListManager(models.Manager):
                     new_filter = Q(organization_facebook__icontains=organization_facebook)
                 filters.append(new_filter)
 
-            # Add the first query
-            if len(filters):
+            organization_query = Organization.objects.all()
+            # "OR" filters
+            or_filters_found = False
+            if len(filters) > 0:
+                or_filters_found = True
                 final_filters = filters.pop()
-
                 # ...and "OR" the remaining items in the list
                 for item in filters:
                     final_filters |= item
 
-                organization_objects_list = Organization.objects.filter(final_filters)
+                organization_query = organization_query.filter(final_filters)
+            # "AND" filters
+            and_filters_found = False
+            if len(and_filters) > 0:
+                and_filters_found = True
+                final_and_filters = and_filters.pop()
+                # ...and "AND" the remaining items in the list
+                for item in and_filters:
+                    final_and_filters &= item
+                organization_query = organization_query.filter(final_and_filters)
+
+            if or_filters_found or and_filters_found:
+                organization_query = organization_query[:250]
+                organization_objects_list = list(organization_query)
 
             if len(organization_objects_list):
                 organizations_found = True
@@ -2220,7 +2236,8 @@ class OrganizationListManager(models.Manager):
                             if positive_value_exists(organization.organization_type) else '',
                         'organization_twitter_description':
                             organization.twitter_description
-                            if positive_value_exists(organization.twitter_description) else '',
+                            if positive_value_exists(organization.twitter_description) and
+                            len(organization.twitter_description) > 1 else '',
                         'organization_twitter_followers_count':
                             organization.twitter_followers_count
                             if positive_value_exists(organization.twitter_followers_count) else 0,

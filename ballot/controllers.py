@@ -2121,7 +2121,9 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
                                 'state_code':                   candidate_state_code_lower_case,
                                 # 'twitter_url':                  candidate.twitter_url,
                                 'twitter_handle':               candidate.fetch_twitter_handle(),
-                                'twitter_description':          candidate.twitter_description,
+                                'twitter_description':          candidate.twitter_description
+                                if positive_value_exists(candidate.twitter_description) or
+                                len(candidate.twitter_description) > 1 else '',
                                 'twitter_followers_count':      candidate.twitter_followers_count,
                                 # 'youtube_url':                  candidate.youtube_url,
                                 'withdrawn_from_election':      candidate.withdrawn_from_election,
@@ -2627,7 +2629,9 @@ def voter_ballot_items_retrieve_for_one_election_for_api(
                                 'state_code':                   candidate.state_code,
                                 'twitter_url':                  candidate.twitter_url,
                                 'twitter_handle':               candidate.fetch_twitter_handle(),
-                                'twitter_description':          candidate.twitter_description,
+                                'twitter_description':          candidate.twitter_description
+                                if positive_value_exists(candidate.twitter_description) or
+                                len(candidate.twitter_description) > 1 else '',
                                 'twitter_followers_count':      candidate.twitter_followers_count,
                                 'youtube_url':                  candidate.youtube_url,
                                 'withdrawn_from_election':      candidate.withdrawn_from_election,

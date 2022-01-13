@@ -2934,7 +2934,9 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                 'pledge_count':                 voter_guide.pledge_count,
                 'public_figure_we_vote_id':     voter_guide.public_figure_we_vote_id,
                 'time_span':                    voter_guide.vote_smart_time_span,
-                'twitter_description':          voter_guide.twitter_description,
+                'twitter_description':          voter_guide.twitter_description
+                if positive_value_exists(voter_guide.twitter_description) or
+                len(voter_guide.twitter_description) > 1 else '',
                 'twitter_followers_count':      voter_guide.twitter_followers_count,
                 'twitter_handle':               voter_guide.twitter_handle,
                 'voter_guide_display_name':     voter_guide.voter_guide_display_name(),
@@ -3510,7 +3512,9 @@ def voter_guides_upcoming_retrieve_for_api(  # voterGuidesUpcomingRetrieve && vo
             'pledge_count':                 voter_guide.pledge_count,
             'public_figure_we_vote_id':     voter_guide.public_figure_we_vote_id,
             'time_span':                    voter_guide.vote_smart_time_span,
-            'twitter_description':          voter_guide.twitter_description,
+            'twitter_description':          voter_guide.twitter_description
+            if positive_value_exists(voter_guide.twitter_description) or
+            len(voter_guide.twitter_description) > 1 else '',
             'twitter_followers_count':      voter_guide.twitter_followers_count,
             'twitter_handle':               voter_guide.twitter_handle,
             'voter_guide_display_name':     voter_guide.voter_guide_display_name(),
@@ -3899,7 +3903,9 @@ def voter_guide_save_for_api(voter_device_id, voter_guide_we_vote_id, google_civ
         'voter_guide_owner_type': voter_guide.voter_guide_owner_type,
         'organization_we_vote_id': linked_organization_we_vote_id,
         'public_figure_we_vote_id': voter_guide.public_figure_we_vote_id,
-        'twitter_description': voter_guide.twitter_description,
+        'twitter_description': voter_guide.twitter_description
+        if positive_value_exists(voter_guide.twitter_description) or
+        len(voter_guide.twitter_description) > 1 else '',
         'twitter_followers_count': voter_guide.twitter_followers_count,
         'twitter_handle': voter_guide.twitter_handle,
         'owner_voter_id': voter_guide.owner_voter_id,
@@ -3974,7 +3980,9 @@ def voter_guides_followed_retrieve_for_api(voter_device_id, maximum_number_to_re
                 'voter_guide_owner_type':       voter_guide.voter_guide_owner_type,
                 'organization_we_vote_id':      voter_guide.organization_we_vote_id,
                 'public_figure_we_vote_id':     voter_guide.public_figure_we_vote_id,
-                'twitter_description':          voter_guide.twitter_description,
+                'twitter_description':          voter_guide.twitter_description
+                if positive_value_exists(voter_guide.twitter_description) or
+                len(voter_guide.twitter_description) > 1 else '',
                 'twitter_followers_count':      voter_guide.twitter_followers_count,
                 'twitter_handle':               voter_guide.twitter_handle,
                 'owner_voter_id':               voter_guide.owner_voter_id,
@@ -4062,7 +4070,9 @@ def voter_guides_retrieve_for_api(organization_we_vote_id="", voter_we_vote_id="
                 'voter_guide_image_url_tiny':   voter_guide.we_vote_hosted_profile_image_url_tiny,
                 'voter_guide_owner_type':       voter_guide.voter_guide_owner_type,
                 'organization_we_vote_id':      voter_guide.organization_we_vote_id,
-                'twitter_description':          voter_guide.twitter_description,
+                'twitter_description':          voter_guide.twitter_description
+                if positive_value_exists(voter_guide.twitter_description) or
+                len(voter_guide.twitter_description) > 1 else '',
                 'twitter_followers_count':      voter_guide.twitter_followers_count,
                 'twitter_handle':               voter_guide.twitter_handle,
                 'pledge_goal':                  voter_guide.pledge_goal,
@@ -4287,7 +4297,9 @@ def voter_guides_followed_by_organization_retrieve_for_api(voter_device_id,  # v
                 'voter_guide_owner_type':       voter_guide.voter_guide_owner_type,
                 'organization_we_vote_id':      voter_guide.organization_we_vote_id,
                 'public_figure_we_vote_id':     voter_guide.public_figure_we_vote_id,
-                'twitter_description':          voter_guide.twitter_description,
+                'twitter_description':          voter_guide.twitter_description
+                if positive_value_exists(voter_guide.twitter_description) or
+                len(voter_guide.twitter_description) > 1 else '',
                 'twitter_followers_count':      voter_guide.twitter_followers_count,
                 'twitter_handle':               voter_guide.twitter_handle,
                 'owner_voter_id':               voter_guide.owner_voter_id,
@@ -4398,7 +4410,9 @@ def voter_guide_followers_retrieve_for_api(voter_device_id, organization_we_vote
                 'voter_guide_image_url_medium': one_organization.we_vote_hosted_profile_image_url_medium,
                 'voter_guide_image_url_tiny':   one_organization.we_vote_hosted_profile_image_url_tiny,
                 'organization_we_vote_id':      one_organization.we_vote_id,
-                'twitter_description':          one_organization.twitter_description,
+                'twitter_description':          one_organization.twitter_description
+                if positive_value_exists(one_organization.twitter_description) or
+                len(one_organization.twitter_description) > 1 else '',
                 'twitter_followers_count':      one_organization.twitter_followers_count,
                 'twitter_handle':               one_organization.organization_twitter_handle,
                 # 'pledge_goal':                  pledge_goal,
@@ -5013,7 +5027,9 @@ def voter_guides_ignored_retrieve_for_api(voter_device_id, maximum_number_to_ret
                 'voter_guide_owner_type':       voter_guide.voter_guide_owner_type,
                 'organization_we_vote_id':      voter_guide.organization_we_vote_id,
                 'public_figure_we_vote_id':     voter_guide.public_figure_we_vote_id,
-                'twitter_description':          voter_guide.twitter_description,
+                'twitter_description':          voter_guide.twitter_description
+                if positive_value_exists(voter_guide.twitter_description) or
+                len(voter_guide.twitter_description) > 1 else '',
                 'twitter_followers_count':      voter_guide.twitter_followers_count,
                 'twitter_handle':               voter_guide.twitter_handle,
                 'owner_voter_id':               voter_guide.owner_voter_id,
