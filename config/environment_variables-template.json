@@ -1,4 +1,6 @@
 {
+  "_comment":                       "Please see Password and Access key document for details about how to reset.",
+
   "_comment":                       "Note that WE_VOTE_SERVER_ROOT_URL should end without slash",
   "WE_VOTE_SERVER_ROOT_URL":        "http://localhost:8000",
   "WEB_APP_ROOT_URL":               "http://localhost:3000",
@@ -57,107 +59,6 @@
   "_comment":                       "emails separated by spaces for error alerts",
   "ADMIN_EMAIL_ADDRESSES":          "",
 
-  "_comment":                       "import_export",
-  "WE_VOTE_API_KEY":                "",
-  "BALLOT_ITEMS_SYNC_URL":          "https://api.wevoteusa.org/apis/v1/ballotItemsSyncOut/",
-  "BALLOT_RETURNED_SYNC_URL":       "https://api.wevoteusa.org/apis/v1/ballotReturnedSyncOut/",
-  "ELECTIONS_SYNC_URL":             "https://api.wevoteusa.org/apis/v1/electionsSyncOut/",
-  "OFFICES_SYNC_URL":               "https://api.wevoteusa.org/apis/v1/officesSyncOut/",
-  "ORGANIZATIONS_SYNC_URL":         "https://api.wevoteusa.org/apis/v1/organizationsSyncOut/",
-  "ORGANIZATION_LINK_TO_ISSUE_SYNC_URL":  "https://api.wevoteusa.org/apis/v1/organizationLinkToIssueSyncOut/",
-  "CANDIDATES_SYNC_URL":            "https://api.wevoteusa.org/apis/v1/candidatesSyncOut/",
-  "ISSUES_SYNC_URL":                "https://api.wevoteusa.org/apis/v1/issuesSyncOut/",
-  "MEASURES_SYNC_URL":              "https://api.wevoteusa.org/apis/v1/measuresSyncOut/",
-  "POLITICIANS_SYNC_URL":           "https://api.wevoteusa.org/apis/v1/politiciansSyncOut/",
-  "POLLING_LOCATIONS_SYNC_URL":     "https://api.wevoteusa.org/apis/v1/pollingLocationsSyncOut/",
-  "POSITIONS_SYNC_URL":             "https://api.wevoteusa.org/apis/v1/positionsSyncOut/",
-  "QUICK_INFO_URL":                 "https://api.wevoteusa.org/import_export/quick_info/",
-  "VOTER_GUIDES_SYNC_URL":          "https://api.wevoteusa.org/apis/v1/voterGuidesSyncOut/",
-
-  "_comment":                       "import_export_ballotpedia",
-  "BALLOTPEDIA_API_KEY":            "",
-  "BALLOTPEDIA_API_CANDIDATES_URL": "https://api.ballotpedia.org/v3/api/1.1/tables/candidates/rows",
-  "BALLOTPEDIA_API_CONTAINS_URL":   "https://api.ballotpedia.org/v3/api/contains",
-  "BALLOTPEDIA_API_ELECTIONS_URL":  "https://api.ballotpedia.org/v3/api/1.1/tables/election_dates/rows",
-  "BALLOTPEDIA_API_FILES_URL":      "https://api.ballotpedia.org/v3/api/1.1/files",
-  "BALLOTPEDIA_API_MEASURES_URL":   "https://api.ballotpedia.org/v3/api/1.1/tables/ballot_measures/rows",
-  "BALLOTPEDIA_API_RACES_URL":      "https://api.ballotpedia.org/v3/api/1.1/tables/races/rows",
-
-  "_comment":                       "import_export_ctcl",
-  "CTCL_API_KEY":                   "",
-
-  "_comment":                       "import_export_google_civic",
-  "GOOGLE_CIVIC_API_KEY":           "",
-  "GOOGLE_MAPS_API_KEY":            "",
-  "ELECTION_QUERY_URL":             "https://www.googleapis.com/civicinfo/v2/elections",
-  "VOTER_INFO_URL":                 "https://www.googleapis.com/civicinfo/v2/voterinfo",
-  "VOTER_INFO_JSON_FILE":           "import_export_google_civic/import_data/voterinfo_sample.json",
-  "REPRESENTATIVES_BY_ADDRESS_URL": "https://www.googleapis.com/civicinfo/v2/representatives",
-
-  "_comment":                       "import_export_open_people",
-  "OPEN_PEOPLE_USERNAME":           "",
-  "OPEN_PEOPLE_PASSWORD":           "",
-
-  "_comment":                       "import_export_snovio",
-  "SNOVIO_CLIENT_ID":               "",
-  "SNOVIO_CLIENT_SECRET":           "",
-
-  "_comment":                       "import_export_targetsmart",
-  "TARGETSMART_API_KEY":            "",
-
-  "_comment":                       "import_export_theunitedstatesio",
-  "LEGISLATORS_CURRENT_CSV_FILE":   "import_export_theunitedstatesio/import_data/legislators-current.csv",
-
-  "_comment":                       "import_export_twitter",
-  "TWITTER_CONSUMER_KEY":           "",
-  "TWITTER_CONSUMER_SECRET":        "",
-  "TWITTER_ACCESS_TOKEN":           "",
-  "TWITTER_ACCESS_TOKEN_SECRET":    "",
-
-  "_comment":                       "import_export_vote_smart",
-  "VOTE_SMART_API_KEY":             "",
-  "VOTE_SMART_API_URL":             "http://api.votesmart.org",
-
-  "_comment":                       "import_export_voting_info_project",
-  "VOTING_INFO_PROJECT_SAMPLE_XML_FILE": "import_export_voting_info_project/import_data/sample_feed.xml",
-
-  "_comment":                       "Login settings",
-  "LOGIN_URL":                      "http://localhost:8000/login/",
-  "LOGIN_ERROR_URL":                "http://localhost:8000/login/",
-  "LOGIN_REDIRECT_URL":             "http://localhost:8000/admin/",
-
-  "_comment":                        "Django social sign in",
-  "SOCIAL_AUTH_APPLE_KEY_ID":        "",
-  "SOCIAL_AUTH_APPLE_TEAM_ID":       "",
-  "SOCIAL_AUTH_APPLE_PRIVATE_KEY":   "",
-  "SOCIAL_AUTH_APPLE_CLIENT_ID_WEB": "us.wevote.webapp",
-  "SOCIAL_AUTH_APPLE_CLIENT_ID_IOS": "org.wevote.cordova",
-  "SOCIAL_AUTH_FACEBOOK_APP_ID":     "",
-  "SOCIAL_AUTH_FACEBOOK_APP_SECRET": "",
-  "live-SOCIAL_AUTH_TWITTER_KEY":    "",
-  "live-SOCIAL_AUTH_TWITTER_SECRET": "",
-  "SOCIAL_AUTH_TWITTER_KEY":         "",
-  "SOCIAL_AUTH_TWITTER_SECRET":      "",
-  "SOCIAL_AUTH_LOGIN_URL":           "http://localhost:8000/login/",
-  "SOCIAL_AUTH_LOGIN_ERROR_URL":     "http://localhost:8000/login/",
-  "SOCIAL_AUTH_LOGIN_REDIRECT_URL":  "http://localhost:8000/voter/login_complete/",
-
-  "_comment":                       "google_custom_search",
-  "GOOGLE_SEARCH_API_KEY":          "",
-  "GOOGLE_SEARCH_ENGINE_ID":        "",
-  "GOOGLE_SEARCH_API_NAME":         "customsearch",
-  "GOOGLE_SEARCH_API_VERSION":      "v1",
-
-  "_comment":                       "Google Firebase Admin API (for Firebase Cloud Messaging send/receive)",
-  "GOOGLE_APPLICATION_CREDENTIALS": "/etc/wevoteapps-f4b59fec8c57.json",
-
-  "_comment":                       "django secret key",
-  "SECRET_KEY":                     "REALLYANYTHINGYOUWANT",
-
-  "_comment":                       "stripe test 'Secret Key' (The 'Publishable key' is only used on the WebApp!)",
-  "STRIPE_SECRET_KEY":              "API Secret key begins with - pk_...",
-  "STRIPE_REFUND_DAYS":             10,
-
   "_comment":                       "Image server (Amazon Web Service AWS s3) settings",
   "AWS_ACCESS_KEY_ID":              "",
   "AWS_SECRET_ACCESS_KEY":          "",
@@ -179,16 +80,17 @@
   "ISSUES_IMAGE_LARGE_WIDTH":       200,
   "ISSUES_IMAGE_LARGE_HEIGHT":      200,
 
-  "_comment":                       "GeoLite2 IP address database location",
-  "GEOLITE2_DATABASE_LOCATION":     "geoip2/city-db/GeoLite2-City.mmdb",
+  "_comment":                       "import_export_ballotpedia",
+  "BALLOTPEDIA_API_KEY":            "",
+  "BALLOTPEDIA_API_CANDIDATES_URL": "https://api.ballotpedia.org/v3/api/1.1/tables/candidates/rows",
+  "BALLOTPEDIA_API_CONTAINS_URL":   "https://api.ballotpedia.org/v3/api/contains",
+  "BALLOTPEDIA_API_ELECTIONS_URL":  "https://api.ballotpedia.org/v3/api/1.1/tables/election_dates/rows",
+  "BALLOTPEDIA_API_FILES_URL":      "https://api.ballotpedia.org/v3/api/1.1/files",
+  "BALLOTPEDIA_API_MEASURES_URL":   "https://api.ballotpedia.org/v3/api/1.1/tables/ballot_measures/rows",
+  "BALLOTPEDIA_API_RACES_URL":      "https://api.ballotpedia.org/v3/api/1.1/tables/races/rows",
 
-  "_comment":                       "Scheduled Tasks, Retain History of completed tasks for n days",
-  "SCHEDULED_TASKS_RETAIN_HISTORY":  90,
-
-  "_comment":                       "Twilio SMS Credentials",
-  "TWILIO_ACCOUNT_SID":             "",
-  "TWILIO_AUTH_TOKEN":              "",
-  "SYSTEM_SENDER_SMS_PHONE_NUMBER": "",
+  "_comment":                       "import_export_ctcl",
+  "CTCL_API_KEY":                   "",
 
   "_comment":                       "Fastly Content Delivery Network Settings",
   "FASTLY_API_HOSTNAME":            "https://api.fastly.com",
@@ -196,5 +98,109 @@
   "FASTLY_API_TOKEN":               "",
   "FASTLY_WILDCARD_CNAME":          "",
 
-  "_comment":                       "End of json_environment_variables.json"
+  "_comment":                       "Google Firebase Admin API (for Firebase Cloud Messaging send/receive)",
+  "GOOGLE_APPLICATION_CREDENTIALS": "/etc/wevoteapps-f4b59fec8c57.json",
+
+  "_comment":                       "import_export_google_civic",
+  "GOOGLE_CIVIC_API_KEY":           "",
+  "GOOGLE_MAPS_API_KEY":            "",
+  "ELECTION_QUERY_URL":             "https://www.googleapis.com/civicinfo/v2/elections",
+  "VOTER_INFO_URL":                 "https://www.googleapis.com/civicinfo/v2/voterinfo",
+  "VOTER_INFO_JSON_FILE":           "import_export_google_civic/import_data/voterinfo_sample.json",
+  "REPRESENTATIVES_BY_ADDRESS_URL": "https://www.googleapis.com/civicinfo/v2/representatives",
+
+  "_comment":                       "google_custom_search",
+  "GOOGLE_SEARCH_API_KEY":          "",
+  "GOOGLE_SEARCH_ENGINE_ID":        "",
+  "GOOGLE_SEARCH_API_NAME":         "customsearch",
+  "GOOGLE_SEARCH_API_VERSION":      "v1",
+
+  "_comment":                       "import_export_open_people",
+  "OPEN_PEOPLE_USERNAME":           "",
+  "OPEN_PEOPLE_PASSWORD":           "",
+
+  "_comment":                       "Scheduled Tasks, Retain History of completed tasks for n days",
+  "SCHEDULED_TASKS_RETAIN_HISTORY": 90,
+
+  "_comment":                       "django secret key",
+  "SECRET_KEY":                     "REALLYANYTHINGYOUWANT",
+
+  "_comment":                       "import_export_snovio",
+  "SNOVIO_CLIENT_ID":               "",
+  "SNOVIO_CLIENT_SECRET":           "",
+
+  "_comment":                       "Django social sign in",
+  "SOCIAL_AUTH_APPLE_KEY_ID":       "",
+  "SOCIAL_AUTH_APPLE_TEAM_ID":      "",
+  "SOCIAL_AUTH_APPLE_PRIVATE_KEY":  "",
+  "SOCIAL_AUTH_APPLE_CLIENT_ID_WEB":  "us.wevote.webapp",
+  "SOCIAL_AUTH_APPLE_CLIENT_ID_IOS":  "org.wevote.cordova",
+  "SOCIAL_AUTH_FACEBOOK_APP_ID":      "",
+  "SOCIAL_AUTH_FACEBOOK_APP_SECRET":  "",
+  "live-SOCIAL_AUTH_TWITTER_KEY":     "",
+  "live-SOCIAL_AUTH_TWITTER_SECRET":  "",
+  "SOCIAL_AUTH_TWITTER_KEY":        "",
+  "SOCIAL_AUTH_TWITTER_SECRET":     "",
+  "SOCIAL_AUTH_LOGIN_URL":          "http://localhost:8000/login/",
+  "SOCIAL_AUTH_LOGIN_ERROR_URL":    "http://localhost:8000/login/",
+  "SOCIAL_AUTH_LOGIN_REDIRECT_URL": "http://localhost:8000/voter/login_complete/",
+
+  "_comment":                       "stripe test 'Secret Key' (The 'Publishable key' is only used on the WebApp!)",
+  "STRIPE_SECRET_KEY":              "API Secret key begins with - pk_...",
+  "STRIPE_SIGNING_SECRET":          "",
+  "STRIPE_REFUND_DAYS":             10,
+
+  "_comment":                       "import_export_targetsmart",
+  "TARGETSMART_API_KEY":            "",
+
+  "_comment":                       "import_export_theunitedstatesio",
+  "LEGISLATORS_CURRENT_CSV_FILE":   "import_export_theunitedstatesio/import_data/legislators-current.csv",
+
+  "_comment":                       "Twilio SMS Credentials",
+  "TWILIO_ACCOUNT_SID":             "",
+  "TWILIO_AUTH_TOKEN":              "",
+  "SYSTEM_SENDER_SMS_PHONE_NUMBER": "",
+
+  "_comment":                       "import_export_twitter",
+  "TWITTER_CONSUMER_KEY":           "",
+  "TWITTER_CONSUMER_SECRET":        "",
+  "TWITTER_ACCESS_TOKEN":           "",
+  "TWITTER_ACCESS_TOKEN_SECRET":    "",
+
+  "_comment":                       "import_export_vote_smart",
+  "VOTE_SMART_API_KEY":             "",
+  "VOTE_SMART_API_URL":             "http://api.votesmart.org",
+
+  "_comment":                       "import_export_vote_usa",
+  "VOTE_USA_API_KEY":               "",
+
+  "_comment":                       "import_export_voting_info_project",
+  "VOTING_INFO_PROJECT_SAMPLE_XML_FILE": "import_export_voting_info_project/import_data/sample_feed.xml",
+
+  "_comment":                       "Login settings",
+  "LOGIN_URL":                      "http://localhost:8000/login/",
+  "LOGIN_ERROR_URL":                "http://localhost:8000/login/",
+  "LOGIN_REDIRECT_URL":             "http://localhost:8000/admin/",
+
+  "_comment":                       "GeoLite2 IP address database location",
+  "GEOLITE2_DATABASE_LOCATION":     "geoip2/city-db/GeoLite2-City.mmdb",
+
+  "_comment":                       "import_export",
+  "WE_VOTE_API_KEY":                "",
+  "BALLOT_ITEMS_SYNC_URL":          "https://api.wevoteusa.org/apis/v1/ballotItemsSyncOut/",
+  "BALLOT_RETURNED_SYNC_URL":       "https://api.wevoteusa.org/apis/v1/ballotReturnedSyncOut/",
+  "ELECTIONS_SYNC_URL":             "https://api.wevoteusa.org/apis/v1/electionsSyncOut/",
+  "OFFICES_SYNC_URL":               "https://api.wevoteusa.org/apis/v1/officesSyncOut/",
+  "ORGANIZATIONS_SYNC_URL":         "https://api.wevoteusa.org/apis/v1/organizationsSyncOut/",
+  "ORGANIZATION_LINK_TO_ISSUE_SYNC_URL": "https://api.wevoteusa.org/apis/v1/organizationLinkToIssueSyncOut/",
+  "CANDIDATES_SYNC_URL":            "https://api.wevoteusa.org/apis/v1/candidatesSyncOut/",
+  "ISSUES_SYNC_URL":                "https://api.wevoteusa.org/apis/v1/issuesSyncOut/",
+  "MEASURES_SYNC_URL":              "https://api.wevoteusa.org/apis/v1/measuresSyncOut/",
+  "POLITICIANS_SYNC_URL":           "https://api.wevoteusa.org/apis/v1/politiciansSyncOut/",
+  "POLLING_LOCATIONS_SYNC_URL":     "https://api.wevoteusa.org/apis/v1/pollingLocationsSyncOut/",
+  "POSITIONS_SYNC_URL":             "https://api.wevoteusa.org/apis/v1/positionsSyncOut/",
+  "QUICK_INFO_URL":                 "https://api.wevoteusa.org/import_export/quick_info/",
+  "VOTER_GUIDES_SYNC_URL":          "https://api.wevoteusa.org/apis/v1/voterGuidesSyncOut/",
+
+  "_comment":                       "End of environment_variables.json"
 }
