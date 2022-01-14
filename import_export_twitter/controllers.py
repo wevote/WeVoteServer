@@ -617,12 +617,12 @@ def refresh_twitter_candidate_details(candidate):
 
 def process_twitter_images(twitter_image_load_info):
     status = ''
-    organization = twitter_image_load_info.organization
+    organization = twitter_image_load_info['organization']
     twitter_user_id = twitter_image_load_info
-    twitter_profile_image_url_https = twitter_image_load_info.twitter_profile_image_url_https
-    twitter_profile_background_image_url_https = twitter_image_load_info.twitter_profile_background_image_url_https
-    twitter_profile_banner_url_https = twitter_image_load_info.twitter_profile_banner_url_https
-    twitter_json = twitter_image_load_info.twitter_json
+    twitter_profile_image_url_https = twitter_image_load_info['twitter_profile_image_url_https']
+    twitter_profile_background_image_url_https = twitter_image_load_info['twitter_profile_background_image_url_https']
+    twitter_profile_banner_url_https = twitter_image_load_info['twitter_profile_banner_url_https']
+    twitter_json = twitter_image_load_info['twitter_json']
     cached_twitter_profile_image_url_https = None
     cached_twitter_profile_background_image_url_https = None
     cached_twitter_profile_banner_url_https = None
@@ -756,7 +756,7 @@ def refresh_twitter_organization_details(organization, twitter_user_id=0):
     we_vote_image_manager = WeVoteImageManager()
     status = ""
     organization_twitter_handle = ""
-    twitter_image_load_info = ""
+    twitter_image_load_info = {}
 
     if not organization:
         status += "ORGANIZATION_TWITTER_DETAILS_NOT_RETRIEVED-ORG_MISSING "
