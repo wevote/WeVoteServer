@@ -26,6 +26,7 @@ from admin_tools.views import login_we_vote, logout_we_vote
 
 urlpatterns = [
     re_path(r'^$', views.start_view),  # Default page if none of the other patterns work
+    re_path(r'^favicon.ico$', views.favicon_view),
     re_path(r'^robots.txt$', views.robots_view),
     re_path(r'^admin/', include(('admin_tools.urls', 'admin_tools'), namespace="admin_tools")),
     re_path(r'^apis/v1/', include(('apis_v1.urls', 'apis_v1'), namespace="apis_v1")),

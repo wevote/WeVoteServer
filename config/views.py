@@ -3,8 +3,19 @@
 # -*- coding: UTF-8 -*-
 
 from django.urls import reverse
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import FileResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
+
+
+def favicon_view(request):
+    """
+    Response for favicon.ico requests
+    :param request:
+    :return:
+    """
+    img = open('apis_v1/static/apis_v1/favicon.ico', 'rb')
+    response = FileResponse(img)
+    return response
 
 
 def health_view(request):

@@ -1076,6 +1076,7 @@ class WeVoteImageManager(models.Manager):
         :param we_vote_image_id:
         :return:
         """
+        status = ''
         we_vote_image_on_stage = WeVoteImage()
         error_result = False
         exception_does_not_exist = False
@@ -1101,8 +1102,15 @@ class WeVoteImageManager(models.Manager):
             error_result = True
             exception_does_not_exist = True
             success = True
+        except Exception as e:
+            status += "ERROR_retrieve_we_vote_image_from_id:" + str(e) + ' '
+            print(status)
+            error_result = True
+            exception_does_not_exist = True
+            success = False
 
         results = {
+            'status':                   status,
             'success':                  success,
             'error_result':             error_result,
             'DoesNotExist':             exception_does_not_exist,

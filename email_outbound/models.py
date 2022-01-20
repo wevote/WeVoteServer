@@ -928,7 +928,7 @@ class EmailManager(models.Manager):
             results = {
                 'success':                  success,
                 'status':                   status,
-                'email_scheduled_sent':     True,
+                'email_scheduled_sent':     False,
             }
             return results
 
@@ -953,11 +953,11 @@ class EmailManager(models.Manager):
         try:
             mail.send()
             status += "SENDING_VIA_SENDGRID "
+            email_scheduled_sent = True
         except Exception as e:
-            status += "ERROR_COULD_NOT_SEND_VIA_SENDGRID " + str(e) + ' '
+            status += "ERROR_COULD_NOT_SEND_VIA_SENDGRID: " + str(e) + ' '
             print(status)
-
-        email_scheduled_sent = True
+            email_scheduled_sent = False
 
         results = {
             'success':                  success,
