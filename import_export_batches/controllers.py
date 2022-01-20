@@ -5395,9 +5395,12 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
                 else:
                     status += results['status']
             elif update_entry_flag:
-                results = ballot_item_manager.update_ballot_item_row_entry(ballot_item_display_name,
-                                                                           local_ballot_order, state_code,
-                                                                           google_civic_election_id, defaults)
+                results = ballot_item_manager.update_ballot_item_row_entry(
+                    ballot_item_display_name,
+                    local_ballot_order,
+                    state_code,
+                    google_civic_election_id,
+                    defaults)
                 if results['ballot_item_updated']:
                     number_of_ballot_items_updated += 1
                 else:
