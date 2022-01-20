@@ -182,7 +182,8 @@ class EmailManager(models.Manager):
             status += "EMAIL_ADDRESS_NOT_FOUND "
         except Exception as e:
             success = False
-            status += 'EMAIL_ADDRESS_DB_RETRIEVE_ERROR ' + str(e) + ' '
+            status += 'ERROR_EMAIL_ADDRESS_DB_RETRIEVE_ERROR: ' + str(e) + ' '
+            print(status)
 
         if email_address_found:
             try:
@@ -190,7 +191,8 @@ class EmailManager(models.Manager):
                 email_address.save()
             except Exception as e:
                 success = False
-                status += 'EMAIL_ADDRESS_DB_SAVE_ERROR ' + str(e) + ' '
+                status += 'ERROR_EMAIL_ADDRESS_DB_SAVE_ERROR: ' + str(e) + ' '
+                print(status)
 
         results = {
             'success':                      success,
@@ -233,7 +235,8 @@ class EmailManager(models.Manager):
             email_address_object_saved = False
             email_address_object = EmailAddress()
             success = False
-            status += "EMAIL_ADDRESS_FOR_VOTER_NOT_CREATED " + str(e) + ' '
+            status += "ERROR_EMAIL_ADDRESS_FOR_VOTER_NOT_CREATED: " + str(e) + ' '
+            print(status)
 
         results = {
             'success':                    success,
@@ -270,7 +273,8 @@ class EmailManager(models.Manager):
             email_outbound_description_saved = False
             email_outbound_description = EmailOutboundDescription()
             success = False
-            status += "EMAIL_OUTBOUND_DESCRIPTION_NOT_CREATED " + str(e) + " "
+            status += "ERROR_EMAIL_OUTBOUND_DESCRIPTION_NOT_CREATED: " + str(e) + " "
+            print(status)
 
         results = {
             'success':                          success,
@@ -353,7 +357,8 @@ class EmailManager(models.Manager):
                             already_merged_email_we_vote_ids.append(comparison_email_address_object.we_vote_id)
                             comparison_email_address_object.delete()
                         except Exception as e:
-                            status += "COULD_NOT_DELETE_UNVERIFIED_EMAIL " + str(e) + " "
+                            status += "ERROR_COULD_NOT_DELETE_UNVERIFIED_EMAIL: " + str(e) + " "
+                            print(status)
         results = {
             'success': success,
             'status': status,
@@ -375,7 +380,8 @@ class EmailManager(models.Manager):
             test_we_vote_id = email_address_object1.we_vote_id
             test_we_vote_id = email_address_object2.we_vote_id
         except Exception as e:
-            status += 'PROBLEM_WITH_EMAIL1_OR_EMAIL2 ' + str(e) + ' '
+            status += 'ERROR_PROBLEM_WITH_EMAIL1_OR_EMAIL2: ' + str(e) + ' '
+            print(status)
             success = False
             results = {
                 'success': success,
@@ -411,7 +417,8 @@ class EmailManager(models.Manager):
             email_address_object1.email_permanent_bounce = both_are_bouncing
             email_address_object1.save()
         except Exception as e:
-            status += "COULD_NOT_SAVE_EMAIL1 " + str(e) + " "
+            status += "ERROR_COULD_NOT_SAVE_EMAIL1: " + str(e) + " "
+            print(status)
 
         # We don't need to handle repairing the primary email link here
         # because it is done in heal_primary_email_data_for_voter
@@ -421,7 +428,8 @@ class EmailManager(models.Manager):
         try:
             email_address_object2.delete()
         except Exception as e:
-            status += "COULD_NOT_DELETE_EMAIL2 " + str(e) + " "
+            status += "ERROR_COULD_NOT_DELETE_EMAIL2: " + str(e) + " "
+            print(status)
             success = False
 
         results = {
@@ -525,7 +533,8 @@ class EmailManager(models.Manager):
             status += "RETRIEVE_EMAIL_ADDRESS_NOT_FOUND "
         except Exception as e:
             success = False
-            status += 'FAILED retrieve_email_address_object EmailAddress ' + str(e) + ' '
+            status += 'ERROR_FAILED retrieve_email_address_object EmailAddress: ' + str(e) + ' '
+            print(status)
 
         results = {
             'success':                          success,
@@ -581,7 +590,8 @@ class EmailManager(models.Manager):
             status += "RETRIEVE_EMAIL_ADDRESS_BY_SECRET_KEY_NOT_FOUND "
         except Exception as e:
             success = False
-            status += 'FAILED retrieve_email_address_object_from_secret_key EmailAddress ' + str(e) + ' '
+            status += 'ERROR_FAILED retrieve_email_address_object_from_secret_key EmailAddress: ' + str(e) + ' '
+            print(status)
 
         results = {
             'success':                          success,
@@ -626,7 +636,8 @@ class EmailManager(models.Manager):
             status += "VERIFY_EMAIL_ADDRESS_NOT_FOUND "
         except Exception as e:
             success = False
-            status += 'FAILED verify_email_address_object_from_secret_key EmailAddress '
+            status += 'ERROR_FAILED verify_email_address_object_from_secret_key EmailAddress: ' + str(e) + ' '
+            print(status)
 
         email_ownership_is_verified = False
         if email_address_object_found:
@@ -637,7 +648,8 @@ class EmailManager(models.Manager):
                 email_ownership_is_verified = True
             except Exception as e:
                 success = False
-                status += 'FAILED_TO_SAVE_EMAIL_OWNERSHIP_IS_VERIFIED ' + str(e) + " "
+                status += 'ERROR_FAILED_TO_SAVE_EMAIL_OWNERSHIP_IS_VERIFIED: ' + str(e) + " "
+                print(status)
         else:
             status += 'EMAIL_ADDRESS_OBJECT_NOT_FOUND '
 
@@ -698,7 +710,8 @@ class EmailManager(models.Manager):
         except Exception as e:
             success = False
             email_address_list_found = False
-            status += 'FAILED retrieve_voter_email_address_list EmailAddress '
+            status += 'ERROR_FAILED retrieve_voter_email_address_list EmailAddress: ' + str(e) + ' '
+            print(status)
 
         results = {
             'success': success,
@@ -749,7 +762,8 @@ class EmailManager(models.Manager):
             status += "RETRIEVE_PRIMARY_EMAIL_ADDRESS_NOT_FOUND "
         except Exception as e:
             success = False
-            status += 'FAILED retrieve_primary_email_with_ownership_verified EmailAddress ' + str(e) + " "
+            status += 'ERROR_FAILED retrieve_primary_email_with_ownership_verified EmailAddress: ' + str(e) + " "
+            print(status)
 
         if email_address_list_found:
             email_address_object_found = True
@@ -799,7 +813,8 @@ class EmailManager(models.Manager):
         except Exception as e:
             success = False
             scheduled_email_list_found = False
-            status += 'FAILED retrieve_scheduled_email_list_from_send_status EmailAddress ' + str(e) + " "
+            status += 'FAILED retrieve_scheduled_email_list_from_send_status EmailAddress: ' + str(e) + " "
+            print(status)
 
         results = {
             'success':                      success,
@@ -815,6 +830,8 @@ class EmailManager(models.Manager):
             email_scheduled_object.save()
             return email_scheduled_object
         except Exception as e:
+            status = "ERROR_UPDATE_SCHEDULED_EMAIL_WITH_NEW_SEND_STATUS:" + str(e) + ' '
+            print(status)
             return email_scheduled_object
 
     def schedule_email(self, email_outbound_description, subject, message_text, message_html,
@@ -843,7 +860,8 @@ class EmailManager(models.Manager):
             email_scheduled = EmailScheduled()
             email_scheduled_id = 0
             success = False
-            status += "SCHEDULE_EMAIL_NOT_CREATED " + str(e) + ' '
+            status += "ERROR_SCHEDULE_EMAIL_NOT_CREATED " + str(e) + ' '
+            print(status)
 
         results = {
             'success':                  success,
@@ -905,7 +923,8 @@ class EmailManager(models.Manager):
         success = True
         sendgrid_turned_off_for_testing = False
         if sendgrid_turned_off_for_testing:
-            status += "SENDGRID_TURNED_OFF_FOR_TESTING "
+            status += "ERROR_SENDGRID_TURNED_OFF_FOR_TESTING "
+            print(status)
             results = {
                 'success':                  success,
                 'status':                   status,
@@ -935,7 +954,8 @@ class EmailManager(models.Manager):
             mail.send()
             status += "SENDING_VIA_SENDGRID "
         except Exception as e:
-            status += "COULD_NOT_SEND_VIA_SENDGRID " + str(e) + ' '
+            status += "ERROR_COULD_NOT_SEND_VIA_SENDGRID " + str(e) + ' '
+            print(status)
 
         email_scheduled_sent = True
 
@@ -990,20 +1010,21 @@ class EmailManager(models.Manager):
                             scheduled_email.message_text = \
                                 scheduled_email.message_text.replace('Your   friend', sender_name)
                     except Exception as e:
-                        status += "COULD_NOT_REPLACE_NAME_IN_MESSAGE_TEXT " + str(e) + " "
+                        status += "COULD_NOT_REPLACE_NAME_IN_MESSAGE_TEXT: " + str(e) + " "
                     try:
                         if scheduled_email.message_html:
                             save_scheduled_email = True
                             scheduled_email.message_html = \
                                 scheduled_email.message_html.replace('Your   friend', sender_name)
                     except Exception as e:
-                        status += "COULD_NOT_REPLACE_NAME_IN_HTML " + str(e) + " "
+                        status += "COULD_NOT_REPLACE_NAME_IN_HTML: " + str(e) + " "
                     if save_scheduled_email:
                         try:
                             scheduled_email.save()
                             status += "SCHEDULED_EMAIL_SAVED "
                         except Exception as e:
-                            status += "COULD_NOT_SAVE_SCHEDULED_EMAIL " + str(e) + " "
+                            status += "ERROR_COULD_NOT_SAVE_SCHEDULED_EMAIL: " + str(e) + " "
+                            print(status)
                 send_results = self.send_scheduled_email(scheduled_email)
                 email_scheduled_sent = send_results['email_scheduled_sent']
                 status += send_results['status']
@@ -1014,7 +1035,8 @@ class EmailManager(models.Manager):
                         scheduled_email.send_status = send_status
                         scheduled_email.save()
                     except Exception as e:
-                        status += "FAILED_TO_UPDATE_SEND_STATUS: " + str(e) + ' '
+                        status += "ERROR_FAILED_TO_UPDATE_SEND_STATUS: " + str(e) + ' '
+                        print(status)
         results = {
             'success':                  success,
             'status':                   status,
@@ -1031,6 +1053,8 @@ class EmailManager(models.Manager):
                 email_address_object.save()
                 return email_address_object.secret_key
             except Exception as e:
+                status = "ERROR_UPDATE_EMAIL_ADDRESS_WITH_NEW_SECRET_KEY: " + str(e) + " "
+                print(status)
                 return ""
         else:
             return ""
@@ -1044,6 +1068,8 @@ class EmailManager(models.Manager):
                 email_address_object.save()
                 return email_address_object.subscription_secret_key
             except Exception as e:
+                status = "ERROR_UPDATE_EMAIL_ADDRESS_WITH_NEW_SUBSCRIPTION_SECRET_KEY: " + str(e) + " "
+                print(status)
                 return ""
         else:
             return ""
@@ -1054,6 +1080,8 @@ class EmailManager(models.Manager):
             email_address_object.save()
             return email_address_object
         except Exception as e:
+            status = "ERROR_UPDATE_EMAIL_ADDRESS_AS_VERIFIED: " + str(e) + " "
+            print(status)
             return email_address_object
 
 
@@ -1067,10 +1095,12 @@ def update_friend_invitation_email_link_with_new_email(deleted_email_we_vote_id,
             FriendInvitationEmailLink.objects.filter(recipient_email_we_vote_id=deleted_email_we_vote_id).\
                 update(recipient_email_we_vote_id=updated_email_we_vote_id)
         except Exception as e:
-            status += "FAILED_TO_UPDATE-FriendInvitationEmailLink " + str(e) + ' '
+            status += "ERROR_FAILED_TO_UPDATE-FriendInvitationEmailLink: " + str(e) + ' '
+            print(status)
 
     except Exception as e:
-        status += "FAILED_TO_LOAD-FriendInvitationEmailLink " + str(e) + ' '
+        status += "ERROR_FAILED_TO_LOAD-FriendInvitationEmailLink: " + str(e) + ' '
+        print(status)
     results = {
         'success':              success,
         'status':               status,
