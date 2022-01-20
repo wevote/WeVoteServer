@@ -649,6 +649,7 @@ class EmailManager(models.Manager):
             except Exception as e:
                 success = False
                 status += 'ERROR_FAILED_TO_SAVE_EMAIL_OWNERSHIP_IS_VERIFIED: ' + str(e) + " "
+                print(status)
         else:
             status += 'EMAIL_ADDRESS_OBJECT_NOT_FOUND '
 
