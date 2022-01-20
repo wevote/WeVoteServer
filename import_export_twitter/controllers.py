@@ -732,8 +732,8 @@ def process_twitter_images(twitter_image_load_info):
         else:
             status += "ORGANIZATION_TWITTER_DETAILS_RETRIEVED_FROM_TWITTER_BUT_NOT_SAVED "
     except Exception as e:
-        print(e)
         status += "UPDATE_TWITTER_ORGANIZATION_DETAILS_FAILED: " + str(e) + " "
+        print(status)
 
     results = {
         'success':              True,
@@ -831,7 +831,12 @@ def refresh_twitter_organization_details(organization, twitter_user_id=0):
             'twitter_profile_banner_url_https': twitter_profile_banner_url_https,
             'twitter_json': twitter_json,
         }
-        process_twitter_images(twitter_image_load_info)
+        try:
+            results = process_twitter_images(twitter_image_load_info)
+            status += results['status']
+        except Exception as e:
+            status += "FAILURE_WITHIN_PROCESS_TWITTER_IMAGES: " + str(e) + " "
+            print(status)
     else:
         status += str(organization.organization_twitter_handle) + "-NOT_RETRIEVED_CLEARING_TWITTER_DETAILS "
         save_organization_results = organization_manager.clear_organization_twitter_details(organization)
