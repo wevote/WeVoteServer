@@ -5398,7 +5398,6 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
                 results = ballot_item_manager.update_ballot_item_row_entry(
                     ballot_item_display_name,
                     local_ballot_order,
-                    state_code,
                     google_civic_election_id,
                     defaults)
                 if results['ballot_item_updated']:

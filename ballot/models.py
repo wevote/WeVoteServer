@@ -732,13 +732,16 @@ class BallotItemManager(models.Manager):
             }
         return results
 
-    def update_ballot_item_row_entry(self, ballot_item_display_name, local_ballot_order, state_code,
-                                     google_civic_election_id, defaults):
+    def update_ballot_item_row_entry(
+            self,
+            ballot_item_display_name,
+            local_ballot_order,
+            google_civic_election_id,
+            defaults):
         """
         Update BallotItem table entry with matching we_vote_id
         :param ballot_item_display_name:
         :param local_ballot_order:
-        :param state_code:
         :param google_civic_election_id:
         :param defaults:
         :return:
@@ -746,35 +749,122 @@ class BallotItemManager(models.Manager):
 
         success = False
         status = ""
-        ballot_item_updated = False
-        existing_ballot_item_entry = ''
         ballot_item_found = False
+        ballot_item_updated = False
+        change_to_save = False
+        existing_ballot_item_entry = ''
+        existing_ballot_item_entry_id = 0
 
         try:
-
+            # Removed the "__iexact" to gain db query speed
             if positive_value_exists(defaults['polling_location_we_vote_id']) and \
                     positive_value_exists(google_civic_election_id):
                 if positive_value_exists(defaults['contest_office_we_vote_id']):
-                    existing_ballot_item_entry = BallotItem.objects.get(
-                        contest_office_we_vote_id__iexact=defaults['contest_office_we_vote_id'],
-                        polling_location_we_vote_id__iexact=defaults['polling_location_we_vote_id'],
+                    existing_ballot_item_entry = BallotItem.objects.using('readonly').get(
+                        contest_office_we_vote_id=defaults['contest_office_we_vote_id'],
+                        polling_location_we_vote_id=defaults['polling_location_we_vote_id'],
                         google_civic_election_id=google_civic_election_id)
                     ballot_item_found = True
+                    existing_ballot_item_entry_id = existing_ballot_item_entry.id
                 elif positive_value_exists(defaults['contest_measure_we_vote_id']):
-                    existing_ballot_item_entry = BallotItem.objects.get(
-                        contest_measure_we_vote_id__iexact=defaults['contest_measure_we_vote_id'],
-                        polling_location_we_vote_id__iexact=defaults['polling_location_we_vote_id'],
+                    existing_ballot_item_entry = BallotItem.objects.using('readonly').get(
+                        contest_measure_we_vote_id=defaults['contest_measure_we_vote_id'],
+                        polling_location_we_vote_id=defaults['polling_location_we_vote_id'],
                         google_civic_election_id=google_civic_election_id)
                     ballot_item_found = True
+                    existing_ballot_item_entry_id = existing_ballot_item_entry.id
 
-            if ballot_item_found:
-                # found the existing entry, update the values
+            if ballot_item_found and positive_value_exists(existing_ballot_item_entry_id):
+                # Found an existing entry, now check for differences
+                if existing_ballot_item_entry.ballot_item_display_name != ballot_item_display_name:
+                    change_to_save = True
+                if existing_ballot_item_entry.local_ballot_order != local_ballot_order:
+                    change_to_save = True
+                if existing_ballot_item_entry.contest_office_id != str(defaults['contest_office_id']):
+                    change_to_save = True
+                if existing_ballot_item_entry.contest_office_we_vote_id != defaults['contest_office_we_vote_id']:
+                    change_to_save = True
+                if existing_ballot_item_entry.contest_measure_id != str(defaults['contest_measure_id']):
+                    change_to_save = True
+                if existing_ballot_item_entry.contest_measure_we_vote_id != defaults['contest_measure_we_vote_id']:
+                    change_to_save = True
+                if existing_ballot_item_entry.measure_subtitle != defaults['measure_subtitle']:
+                    change_to_save = True
+                if 'measure_url' in defaults:
+                    if existing_ballot_item_entry.measure_url != defaults['measure_url']:
+                        change_to_save = True
+                if 'yes_vote_description' in defaults:
+                    if existing_ballot_item_entry.yes_vote_description != defaults['yes_vote_description']:
+                        change_to_save = True
+                if 'no_vote_description' in defaults:
+                    if existing_ballot_item_entry.no_vote_description != defaults['no_vote_description']:
+                        change_to_save = True
+                if 'state_code' in defaults and positive_value_exists(defaults['state_code']):
+                    state_code = defaults['state_code']
+                    state_code = state_code.lower()
+                    if existing_ballot_item_entry.state_code != state_code:
+                        change_to_save = True
+                success = True
+                if change_to_save:
+                    status += "BALLOT_ITEM_CHANGES_TO_SAVE "
+                else:
+                    status += "BALLOT_ITEM_HAS_NO_CHANGES_TO_SAVE "
+        except Exception as e:
+            success = False
+            ballot_item_list = []
+            ballot_item_list_found = False
+            ballot_item_updated = False
+            status += "BALLOT_ITEM_COMPARISON_ERROR: " + str(e) + " "
+            handle_exception(e, logger=logger, exception_message=status)
+            # Delete duplicates after the first entry
+            if positive_value_exists(defaults['polling_location_we_vote_id']) and \
+                    positive_value_exists(google_civic_election_id):
+                if positive_value_exists(defaults['contest_office_we_vote_id']):
+                    existing_ballot_item_query = BallotItem.objects.filter(
+                        contest_office_we_vote_id=defaults['contest_office_we_vote_id'],
+                        polling_location_we_vote_id=defaults['polling_location_we_vote_id'],
+                        google_civic_election_id=google_civic_election_id)
+                    ballot_item_list = list(existing_ballot_item_query)
+                    ballot_item_list_found = len(ballot_item_list) > 1
+                elif positive_value_exists(defaults['contest_measure_we_vote_id']):
+                    existing_ballot_item_query = BallotItem.objects.filter(
+                        contest_measure_we_vote_id=defaults['contest_measure_we_vote_id'],
+                        polling_location_we_vote_id=defaults['polling_location_we_vote_id'],
+                        google_civic_election_id=google_civic_election_id)
+                    ballot_item_list = list(existing_ballot_item_query)
+                    ballot_item_list_found = len(ballot_item_list) > 1
+                if ballot_item_list_found:
+                    ballot_item_list.pop(0)  # Remove first item, so we don't delete it
+                    # Now delete all remaining duplicate entries
+                    item_deleted = False
+                    for ballot_item in ballot_item_list:
+                        ballot_item.delete()
+                        item_deleted = True
+                    if item_deleted:
+                        return self.update_ballot_item_row_entry(
+                            ballot_item_display_name,
+                            local_ballot_order,
+                            google_civic_election_id,
+                            defaults)
+
+        try:
+            if change_to_save and positive_value_exists(existing_ballot_item_entry_id):
+                # Now retrieve an editable version from the main database
+                existing_ballot_item_entry = BallotItem.objects.get(id=existing_ballot_item_entry_id)
+                # Found an existing entry, now check for differences
                 existing_ballot_item_entry.ballot_item_display_name = ballot_item_display_name
                 existing_ballot_item_entry.local_ballot_order = local_ballot_order
-                existing_ballot_item_entry.state_code = state_code
-                existing_ballot_item_entry.contest_office_id = defaults['contest_office_id']
+                contest_office_id = defaults['contest_office_id']
+                if positive_value_exists(contest_office_id):
+                    existing_ballot_item_entry.contest_office_id = str(contest_office_id)
+                else:
+                    existing_ballot_item_entry.contest_office_id = None
                 existing_ballot_item_entry.contest_office_we_vote_id = defaults['contest_office_we_vote_id']
-                existing_ballot_item_entry.contest_measure_id = defaults['contest_measure_id']
+                contest_measure_id = defaults['contest_measure_id']
+                if positive_value_exists(contest_measure_id):
+                    existing_ballot_item_entry.contest_measure_id = str(contest_measure_id)
+                else:
+                    existing_ballot_item_entry.contest_measure_id = None
                 existing_ballot_item_entry.contest_measure_we_vote_id = defaults['contest_measure_we_vote_id']
                 existing_ballot_item_entry.measure_subtitle = defaults['measure_subtitle']
                 if 'measure_url' in defaults:
@@ -798,7 +888,7 @@ class BallotItemManager(models.Manager):
         except Exception as e:
             success = False
             ballot_item_updated = False
-            status += "BALLOT_ITEM_RETRIEVE_ERROR "
+            status += "BALLOT_ITEM_RETRIEVE_ERROR: " + str(e) + " "
             handle_exception(e, logger=logger, exception_message=status)
 
         results = {
