@@ -1272,7 +1272,7 @@ def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):  # candidate
             'twitter_url':                  candidate.twitter_url,
             'twitter_handle':               candidate.fetch_twitter_handle(),
             'twitter_description':          candidate.twitter_description
-            if positive_value_exists(candidate.twitter_description) or
+            if positive_value_exists(candidate.twitter_description) and
             len(candidate.twitter_description) > 1 else '',
             'twitter_followers_count':      candidate.twitter_followers_count,
             'we_vote_id':                   candidate.we_vote_id,
@@ -1415,7 +1415,7 @@ def candidates_retrieve_for_api(office_id=0, office_we_vote_id=''):  # candidate
                 'twitter_url':                  candidate.twitter_url,
                 'twitter_handle':               candidate.fetch_twitter_handle(),
                 'twitter_description':          candidate.twitter_description
-                if positive_value_exists(candidate.twitter_description) or
+                if positive_value_exists(candidate.twitter_description) and
                 len(candidate.twitter_description) > 1 else '',
                 'twitter_followers_count':      candidate.twitter_followers_count,
                 'youtube_url':                  candidate.youtube_url,

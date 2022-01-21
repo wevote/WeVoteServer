@@ -1713,7 +1713,7 @@ class CandidateListManager(models.Manager):
                     'twitter_url':                  candidate.twitter_url,
                     'twitter_handle':               candidate.fetch_twitter_handle(),
                     'twitter_description':          candidate.twitter_description
-                    if positive_value_exists(candidate.twitter_description) or
+                    if positive_value_exists(candidate.twitter_description) and
                     len(candidate.twitter_description) > 1 else '',
                     'twitter_followers_count':      candidate.twitter_followers_count,
                     'youtube_url':                  candidate.youtube_url,

@@ -2122,7 +2122,7 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
                                 # 'twitter_url':                  candidate.twitter_url,
                                 'twitter_handle':               candidate.fetch_twitter_handle(),
                                 'twitter_description':          candidate.twitter_description
-                                if positive_value_exists(candidate.twitter_description) or
+                                if positive_value_exists(candidate.twitter_description) and
                                 len(candidate.twitter_description) > 1 else '',
                                 'twitter_followers_count':      candidate.twitter_followers_count,
                                 # 'youtube_url':                  candidate.youtube_url,
@@ -2630,7 +2630,7 @@ def voter_ballot_items_retrieve_for_one_election_for_api(
                                 'twitter_url':                  candidate.twitter_url,
                                 'twitter_handle':               candidate.fetch_twitter_handle(),
                                 'twitter_description':          candidate.twitter_description
-                                if positive_value_exists(candidate.twitter_description) or
+                                if positive_value_exists(candidate.twitter_description) and
                                 len(candidate.twitter_description) > 1 else '',
                                 'twitter_followers_count':      candidate.twitter_followers_count,
                                 'youtube_url':                  candidate.youtube_url,
