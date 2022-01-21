@@ -1966,8 +1966,9 @@ def import_ballot_items_for_location_view(request):
                              'Google Civic Election Id missing.')
         return HttpResponseRedirect(reverse('election:election_list', args=()))
 
-    election_manager = ElectionManager()
     ctcl_election_uuid = ''
+    election = None
+    election_manager = ElectionManager()
     election_day_text = ''
     election_found = False
     use_ballotpedia_as_data_source = False
@@ -1983,7 +1984,7 @@ def import_ballot_items_for_location_view(request):
         use_ballotpedia_as_data_source = election.use_ballotpedia_as_data_source
         use_ctcl_as_data_source = election.use_ctcl_as_data_source
         use_vote_usa_as_data_source = election.use_vote_usa_as_data_source
-        if positive_value_exists(state_code):
+        if positive_value_exists(state_code) and positive_value_exists(election.use_ctcl_as_data_source_by_state_code):
             if state_code.lower() in election.use_ctcl_as_data_source_by_state_code.lower():
                 use_ctcl_as_data_source_override = True
 
@@ -1997,7 +1998,8 @@ def import_ballot_items_for_location_view(request):
             polling_location_state_code = polling_location.state
 
     if positive_value_exists(polling_location_state_code) and positive_value_exists(election_found):
-        if not positive_value_exists(use_ctcl_as_data_source_override):
+        if not positive_value_exists(use_ctcl_as_data_source_override) \
+                and positive_value_exists(election.use_ctcl_as_data_source_by_state_code):
             if polling_location_state_code.lower() in election.use_ctcl_as_data_source_by_state_code.lower():
                 use_ctcl_as_data_source_override = True
 

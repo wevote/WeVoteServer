@@ -346,7 +346,8 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
             election_found = True
             election = results['election']
             election_state = election.get_election_state()
-            if positive_value_exists(state_code):
+            if positive_value_exists(state_code) and \
+                    positive_value_exists(election.use_ctcl_as_data_source_by_state_code):
                 if state_code.lower() in election.use_ctcl_as_data_source_by_state_code.lower():
                     use_ctcl_as_data_source_override = True
 
@@ -393,7 +394,8 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
 
     if positive_value_exists(polling_location_state_code) and positive_value_exists(election_found):
         if not positive_value_exists(use_ctcl_as_data_source_override):
-            if polling_location_state_code.lower() in election.use_ctcl_as_data_source_by_state_code.lower():
+            if positive_value_exists(election.use_ctcl_as_data_source_by_state_code) and \
+                    polling_location_state_code.lower() in election.use_ctcl_as_data_source_by_state_code.lower():
                 use_ctcl_as_data_source_override = True
 
     polling_location_list = []
