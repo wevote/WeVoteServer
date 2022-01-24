@@ -41,8 +41,6 @@ class WeVoteTasks(TaskSet):
                                    "".format(voter_device_id=voter_device_id), name="searchAll")
         response = self.client.get("/apis/v1/voterAllPositionsRetrieve/?voter_device_id={voter_device_id}"
                                    "".format(voter_device_id=voter_device_id), name="voterAllPositionsRetrieve")
-        response = self.client.get("/apis/v1/positionsCountForAllBallotItems/?voter_device_id={voter_device_id}"
-                                   "".format(voter_device_id=voter_device_id), name="positionsCountForAllBallotItems")
         response = self.client.get("/apis/v1/voterGuidesToFollowRetrieve/?voter_device_id={voter_device_id}"
                                    "&google_civic_election_id={google_civic_election_id}"
                                    "&maximum_number_to_retrieve=350&search_string="
@@ -53,8 +51,6 @@ class WeVoteTasks(TaskSet):
         response = self.client.get("/apis/v1/voterBallotItemsRetrieve/?voter_device_id={voter_device_id}"
                                    "&use_test_election=false"
                                    "".format(voter_device_id=voter_device_id), name="voterBallotItemsRetrieve")
-        response = self.client.get("/apis/v1/positionsCountForAllBallotItems/?voter_device_id={voter_device_id}"
-                                   "".format(voter_device_id=voter_device_id), name="positionsCountForAllBallotItems")
 
     # @task(1)
     # def organizationCount(self):

@@ -6,9 +6,8 @@ from django.http import HttpResponse
 import json
 from ballot.controllers import figure_out_google_civic_election_id_voter_is_watching
 from ballot.models import OFFICE, CANDIDATE, MEASURE
-from position.controllers import calculate_positions_count_for_all_ballot_items_for_api, \
-    count_for_all_ballot_items_from_position_network_score_for_api, \
-    position_list_for_ballot_item_for_api, position_list_for_ballot_item_from_friends_for_api, \
+from position.controllers import position_list_for_ballot_item_for_api, \
+    position_list_for_ballot_item_from_friends_for_api, \
     position_list_for_opinion_maker_for_api, \
     position_list_for_voter_for_api, \
     position_retrieve_for_api, position_save_for_api
@@ -17,8 +16,7 @@ from position.models import ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONL
 from support_oppose_deciding.controllers import position_oppose_count_for_ballot_item_for_api, \
     position_support_count_for_ballot_item_for_api, \
     position_public_oppose_count_for_ballot_item_for_api, \
-    position_public_support_count_for_ballot_item_for_api, \
-    positions_count_for_one_ballot_item_for_api
+    position_public_support_count_for_ballot_item_for_api
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_bool, get_voter_device_id,  \
     is_speaker_type_organization, is_speaker_type_public_figure, positive_value_exists
@@ -397,61 +395,3 @@ def position_public_support_count_for_ballot_item_view(request):
     return position_public_support_count_for_ballot_item_for_api(
         candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
         measure_id=measure_id, measure_we_vote_id=measure_we_vote_id)
-
-
-def positions_count_for_all_ballot_items_view(request):  # positionsCountForAllBallotItems
-    """
-    Retrieve the number of support/oppose positions from the voter's network
-    :param request:
-    :return:
-    """
-    status = ""
-
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
-    force_recount = request.GET.get('force_recount', 0)
-
-    if positive_value_exists(force_recount):
-        # Calculate the positions from source tables
-        calculate_results = calculate_positions_count_for_all_ballot_items_for_api(
-            voter_device_id=voter_device_id,
-            google_civic_election_id=google_civic_election_id)
-        if not positive_value_exists(google_civic_election_id):
-            google_civic_election_id = calculate_results['google_civic_election_id']
-        status += calculate_results['status']
-
-    # Pull the positions count from cache tables
-    results = count_for_all_ballot_items_from_position_network_score_for_api(
-        voter_device_id=voter_device_id,
-        google_civic_election_id=google_civic_election_id)
-
-    status += results['status']
-
-    json_data = {
-        'status':                   status,
-        'success':                  results['success'],
-        'google_civic_election_id': results['google_civic_election_id'],
-        'position_counts_list':     results['position_counts_list'],
-    }
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
-
-
-def positions_count_for_one_ballot_item_view(request):  # positionsCountForOneBallotItem
-    """
-    Retrieve the number of support/oppose positions from the voter's network for one ballot item
-    We return results in the same format as positions_count_for_all_ballot_items_view
-    :param request:
-    :return:
-    """
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', "")
-
-    results = positions_count_for_one_ballot_item_for_api(
-        voter_device_id=voter_device_id,
-        ballot_item_we_vote_id=ballot_item_we_vote_id)
-    json_data = {
-        'status':               results['status'],
-        'success':              results['success'],
-        'position_counts_list': results['position_counts_list'],
-    }
-    return HttpResponse(json.dumps(json_data), content_type='application/json')

@@ -2589,16 +2589,6 @@ def election_migration_view(request):
                     status += we_vote_image_results['status'] + str(e) + ' '
 
     # ########################################
-    # PositionNetworkScore
-    position_network_scores_migrated = 0
-    if not positive_value_exists(from_state_code):  # Only move if we are NOT moving just one state
-        position_network_score_results = position_list_manager.migrate_position_network_scores_to_new_election_id(
-            from_election_id, to_election_id, change_now)
-        position_network_scores_migrated = position_network_score_results['position_network_scores_migrated']
-        if not position_network_score_results['success']:
-            status += position_network_score_results['status']
-
-    # ########################################
     # BatchDescription
     if not positive_value_exists(from_state_code):  # Only move if we are NOT moving just one state
         batch_query = BatchDescription.objects.filter(google_civic_election_id=from_election_id)

@@ -254,32 +254,6 @@ def elected_office_summary_view(request, elected_office_id):
     candidate_list_modified = []
     # position_list_manager = PositionListManager()
 
-    # TODO Get elected officials count instead candidate
-    # try:
-    #     candidate_list = CandidateCampaign.objects.filter(contest_office_id=elected_office_id)
-    #     if positive_value_exists(google_civic_election_id):
-    #         candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
-    #     candidate_list = candidate_list.order_by('candidate_name')
-    #     support_total = 0
-    #     for one_candidate in candidate_list:
-    #         # Find the count of Voters that support this candidate (Endorsers are not included in this)
-    #         one_candidate.support_count = position_list_manager.fetch_voter_positions_count_for_candidate(
-    #             one_candidate.id, "", SUPPORT)
-    #         one_candidate.oppose_count = position_list_manager.fetch_voter_positions_count_for_candidate(
-    #             one_candidate.id, "", OPPOSE)
-    #         support_total += one_candidate.support_count
-    #
-    #     for one_candidate in candidate_list:
-    #         if positive_value_exists(support_total):
-    #             percentage_of_support_number = one_candidate.support_count / support_total * 100
-    #             one_candidate.percentage_of_support = "%.1f" % percentage_of_support_number
-    #
-    #         candidate_list_modified.append(one_candidate)
-    #
-    # except CandidateCampaign.DoesNotExist:
-    #     # This is fine, create new
-    #     pass
-
     election_list = Election.objects.order_by('-election_day_text')
 
     if positive_value_exists(google_civic_election_id):

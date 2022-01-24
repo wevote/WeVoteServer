@@ -2444,16 +2444,6 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
     transfer_voter_images_results = transfer_voter_images_to_organization(voter=new_owner_voter)
     status += " " + transfer_voter_images_results['status']
 
-    # Delete all existing PositionNetworkScore entries for both the old account and the new account, so they
-    # have to be regenerated
-    delete_score_results = \
-        position_list_manager.delete_all_position_network_scores_for_voter(from_voter.id, from_voter.we_vote_id)
-    status += " " + delete_score_results['status']
-    delete_score_results = \
-        position_list_manager.delete_all_position_network_scores_for_voter(
-            new_owner_voter.id, new_owner_voter.we_vote_id)
-    status += " " + delete_score_results['status']
-
     # Send any friend invitations set up before sign in
     email_manager = EmailManager()
     real_name_only = True
