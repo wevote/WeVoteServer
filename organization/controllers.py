@@ -27,8 +27,7 @@ from image.controllers import cache_master_and_resized_image, \
     FACEBOOK
 from image.controllers import cache_organization_sharing_image, retrieve_all_images_for_one_organization
 from import_export_facebook.models import FacebookManager
-from position.controllers import add_position_network_count_entries_for_one_organization, \
-    delete_positions_for_organization, move_positions_to_another_organization, \
+from position.controllers import delete_positions_for_organization, move_positions_to_another_organization, \
     update_position_entered_details_from_organization
 from position.models import PositionListManager
 from stripe_donations.controllers import move_donation_info_to_another_organization
@@ -1483,10 +1482,6 @@ def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, 
             organization_id = follow_organization.organization_id
             organization_we_vote_id = follow_organization.organization_we_vote_id
 
-            add_results = add_position_network_count_entries_for_one_organization(
-                voter_id, organization_we_vote_id)
-            status += add_results['status'] + ' '
-
             analytics_results = analytics_manager.save_action(
                 ACTION_ORGANIZATION_FOLLOW, voter_we_vote_id, voter_id, is_signed_in, state_code,
                 organization_we_vote_id, organization_id, user_agent_string=user_agent_string, is_bot=is_bot,
@@ -1507,11 +1502,6 @@ def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, 
             organization_id = follow_organization.organization_id
             organization_we_vote_id = follow_organization.organization_we_vote_id
 
-            # Remove all position_network_scores from this organization for voter
-            remove_results = position_list_manager.remove_position_network_scores_when_voter_stops_following(
-                    voter_id, organization_we_vote_id)
-            status += remove_results['status'] + ' '
-
             analytics_results = analytics_manager.save_action(
                 ACTION_ORGANIZATION_FOLLOW_IGNORE, voter_we_vote_id, voter_id, is_signed_in, state_code,
                 organization_we_vote_id, organization_id, user_agent_string=user_agent_string, is_bot=is_bot,
@@ -1531,11 +1521,6 @@ def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, 
             organization_id = follow_organization.organization_id
             organization_we_vote_id = follow_organization.organization_we_vote_id
 
-            # Remove all position_network_scores from this organization for voter
-            remove_results = position_list_manager.remove_position_network_scores_when_voter_stops_following(
-                    voter_id, organization_we_vote_id)
-            status += remove_results['status'] + ' '
-
             analytics_results = analytics_manager.save_action(
                 ACTION_ORGANIZATION_STOP_FOLLOWING, voter_we_vote_id, voter_id, is_signed_in, state_code,
                 organization_we_vote_id, organization_id, user_agent_string=user_agent_string, is_bot=is_bot,
@@ -1554,11 +1539,6 @@ def organization_follow_or_unfollow_or_ignore(voter_device_id, organization_id, 
             follow_organization = results['follow_organization']
             organization_id = follow_organization.organization_id
             organization_we_vote_id = follow_organization.organization_we_vote_id
-
-            # Remove all position_network_scores from this organization for voter
-            # remove_results = position_list_manager.remove_position_network_scores_when_voter_stops_following(
-            #     voter_id, organization_we_vote_id)
-            # status += remove_results['status']
 
             analytics_results = analytics_manager.save_action(
                 ACTION_ORGANIZATION_STOP_IGNORING, voter_we_vote_id, voter_id, is_signed_in, state_code,

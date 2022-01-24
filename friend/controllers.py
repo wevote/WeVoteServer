@@ -15,7 +15,6 @@ from import_export_facebook.models import FacebookManager
 import json
 from organization.controllers import transform_web_app_url
 from organization.models import OrganizationManager, INDIVIDUAL
-from position.controllers import add_position_network_count_entries_for_one_friend
 from position.models import PositionMetricsManager
 from validate_email import validate_email
 from voter.models import Voter, VoterManager
@@ -1111,12 +1110,6 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
                                                   web_app_root_url=web_app_root_url)
         status += results['status']
 
-        # Update the PositionNetworkCount entries for both friends
-        add_position_network_count_entries_for_one_friend(
-            0, accepting_voter_we_vote_id, voter_we_vote_id=original_sender_we_vote_id)
-        add_position_network_count_entries_for_one_friend(
-            0, original_sender_we_vote_id, voter_we_vote_id=accepting_voter_we_vote_id)
-
         # Now that a CurrentFriend entry exists, update the FriendInvitation...
         if friend_results['success']:
             try:
@@ -1246,12 +1239,6 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
         results = friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_we_vote_id,
                                                   web_app_root_url=web_app_root_url)
         status = results['status']
-
-        # Update the PositionNetworkCount entries for both friends
-        add_position_network_count_entries_for_one_friend(
-            0, accepting_voter_we_vote_id, voter_we_vote_id=original_sender_we_vote_id)
-        add_position_network_count_entries_for_one_friend(
-            0, original_sender_we_vote_id, voter_we_vote_id=accepting_voter_we_vote_id)
 
         if friend_results['success']:
             try:
@@ -1510,12 +1497,6 @@ def friend_invitation_by_facebook_verify_for_api(voter_device_id, facebook_reque
 
     friend_manager.update_suggested_friends_starting_with_one_voter(sender_voter_we_vote_id)
     friend_manager.update_suggested_friends_starting_with_one_voter(voter_we_vote_id_accepting_invitation)
-
-    # Update the PositionNetworkCount entries for both friends
-    add_position_network_count_entries_for_one_friend(
-        0, voter_we_vote_id_accepting_invitation, voter_we_vote_id=sender_voter_we_vote_id)
-    add_position_network_count_entries_for_one_friend(
-        0, sender_voter_we_vote_id, voter_we_vote_id=voter_we_vote_id_accepting_invitation)
 
     if friend_results['success']:
         try:
@@ -1828,11 +1809,6 @@ def friend_invite_response_for_api(  # friendInviteResponse
         original_sender_we_vote_id = other_voter.we_vote_id
         friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_we_vote_id,
                                         web_app_root_url=web_app_root_url)
-        # Update both friends
-        results1 = add_position_network_count_entries_for_one_friend(accepting_voter_id, original_sender_we_vote_id)
-        status += results1['status']
-        results2 = add_position_network_count_entries_for_one_friend(original_sender_id, accepting_voter_we_vote_id)
-        status += results2['status']
 
     success = results['success']
 
