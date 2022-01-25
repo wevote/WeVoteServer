@@ -1894,6 +1894,7 @@ def friend_list_for_api(voter_device_id,  # friendList
     }
     return results
 
+
 def friend_lists_all_for_api(voter_device_id,  # friendListsAll
                              state_code=''):
     """
@@ -2000,8 +2001,10 @@ def get_current_friends_list(status, voter):
                         status += "VOTER_COULD_NOT_BE_HEALED " + heal_results['status']
                 else:
                     status += "COULD_NOT_RETRIEVE_VOTER_THAT_CAN_BE_SAVED " + voter_results['status']
-            mutual_friends = friend_manager.fetch_mutual_friends_count(voter.we_vote_id, friend_voter.we_vote_id)
-            positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(friend_voter)
+            # mutual_friends = friend_manager.fetch_mutual_friends_count(voter.we_vote_id, friend_voter.we_vote_id)
+            # positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(friend_voter)
+            mutual_friends = 0
+            positions_taken = 0
             one_friend = {
                 "voter_we_vote_id":                 friend_voter.we_vote_id,
                 "voter_date_last_changed":          friend_voter.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
