@@ -2110,9 +2110,9 @@ def get_friend_invitations_sent_to_me(status, voter, read_only=True):
             voter_we_vote_id_list=sent_to_me_voter_we_vote_id_list,
             read_only=read_only)
         if results['voter_list_found']:
-            friend_list = results['voter_list']
+            sent_to_me_friend_list = results['voter_list']
             # Augment the line with voter information
-            for friend_voter in friend_list:  # This is the voter who sent the invitation to me
+            for friend_voter in sent_to_me_friend_list:  # This is the voter who sent the invitation to me
                 mutual_friends = friend_manager.fetch_mutual_friends_count(
                     voter.we_vote_id, friend_voter.we_vote_id)
                 # Removed for now for speed
@@ -2220,8 +2220,8 @@ def get_friend_invitations_sent_by_me(status, voter, read_only=True):
             voter_we_vote_id_list=recipient_voter_we_vote_id_list,
             read_only=read_only)
         if results['voter_list_found']:
-            friend_list = results['voter_list']
-            for friend_voter in friend_list:
+            sent_by_me_friend_list = results['voter_list']
+            for friend_voter in sent_by_me_friend_list:
                 # Removed for now for speed
                 # positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(friend_voter)
                 mutual_friends = friend_manager.fetch_mutual_friends_count(
