@@ -1203,7 +1203,8 @@ def update_or_create_activity_notices_from_seed(activity_notice_seed):
         # Retrieve all friends of activity_notice_seed.speaker_voter_we_vote_id
         status += "KIND_OF_LIST_CURRENT_FRIENDS_ACTIVITY_NOTICES "
         retrieve_current_friends_as_voters_results = \
-            friend_manager.retrieve_current_friends_as_voters(activity_notice_seed.speaker_voter_we_vote_id)
+            friend_manager.retrieve_current_friends_as_voters(
+                voter_we_vote_id=activity_notice_seed.speaker_voter_we_vote_id, read_only=True)
         success = retrieve_current_friends_as_voters_results['success']
         status += retrieve_current_friends_as_voters_results['status']
         if retrieve_current_friends_as_voters_results['friend_list_found']:
@@ -1559,7 +1560,8 @@ def update_or_create_voter_daily_summary_seeds_from_seed(activity_notice_seed):
         # Retrieve all friends of activity_notice_seed.speaker_voter_we_vote_id
         status += "KIND_OF_LIST_CURRENT_FRIENDS_DAILY_SUMMARY "
         retrieve_current_friends_as_voters_results = \
-            friend_manager.retrieve_current_friends_as_voters(activity_notice_seed.speaker_voter_we_vote_id)
+            friend_manager.retrieve_current_friends_as_voters(
+                voter_we_vote_id=activity_notice_seed.speaker_voter_we_vote_id, read_only=True)
         success = retrieve_current_friends_as_voters_results['success']
         status += retrieve_current_friends_as_voters_results['status']
         if retrieve_current_friends_as_voters_results['friend_list_found']:

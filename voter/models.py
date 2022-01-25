@@ -1739,6 +1739,32 @@ class VoterManager(BaseUserManager):
         }
         return result
 
+    def retrieve_voter_list_by_we_vote_id_list(self, voter_we_vote_id_list=[], read_only=True):
+        status = ''
+        voter_list = []
+
+        try:
+            if read_only:
+                query = Voter.objects.using('readonly').filter(we_vote_id__in=voter_we_vote_id_list)
+            else:
+                query = Voter.objects.filter(we_vote_id__in=voter_we_vote_id_list)
+            voter_list = list(query)
+            success = True
+            voter_list_found = True
+            status += "VOTER_LIST_RETRIEVED_BY_VOTER_WE_VOTE_ID_LIST "
+        except Exception as e:
+            success = False
+            voter_list_found = False
+            status += "VOTER_LIST_NOT_RETRIEVED_BY_VOTER_WE_VOTE_ID_LIST: " + str(e) + " "
+
+        result = {
+            'status':           status,
+            'success':          success,
+            'voter_list':       voter_list,
+            'voter_list_found': voter_list_found,
+        }
+        return result
+
     def retrieve_voter_plan_list(self, google_civic_election_id=0, voter_we_vote_id='', read_only=True):
         success = True
         status = ""
