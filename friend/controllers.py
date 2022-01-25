@@ -1970,37 +1970,38 @@ def get_current_friends_list(status, voter):
     position_metrics_manager = PositionMetricsManager()
     friend_list = []
     status += "KIND_OF_LIST-CURRENT_FRIENDS "
-    retrieve_current_friends_as_voters_results = friend_manager.retrieve_current_friends_as_voters(voter.we_vote_id)
+    retrieve_current_friends_as_voters_results = friend_manager.retrieve_current_friends_as_voters(
+        voter_we_vote_id=voter.we_vote_id, read_only=True)
     success = retrieve_current_friends_as_voters_results['success']
     status += retrieve_current_friends_as_voters_results['status']
     if retrieve_current_friends_as_voters_results['friend_list_found']:
         current_friend_list = retrieve_current_friends_as_voters_results['friend_list']
         for friend_voter in current_friend_list:
-            if not positive_value_exists(friend_voter.linked_organization_we_vote_id):
-                # We need to retrieve another voter object that can be saved
-                organization_manager = OrganizationManager()
-                voter_results = voter_manager.retrieve_voter_by_we_vote_id(friend_voter.we_vote_id, read_only=False)
-                if voter_results['voter_found']:
-                    friend_voter = voter_results['voter']
-                    heal_results = \
-                        organization_manager.heal_voter_missing_linked_organization_we_vote_id(friend_voter)
-                    if heal_results['voter_healed']:
-                        status += "FRIEND_HEALED-MISSING_LINKED_ORGANIZATION_WE_VOTE_ID: " \
-                                  "" + friend_voter.we_vote_id + " "
-                        friend_voter = heal_results['voter']
-                        # Now we need to make sure the friend entry gets updated
-                        friend_results = friend_manager.retrieve_current_friend(
-                            voter.we_vote_id, friend_voter.we_vote_id, read_only=False)
-                        if friend_results['current_friend_found']:
-                            status += "HEAL_CURRENT_FRIEND-FOUND "
-                            current_friend = friend_results['current_friend']
-                            heal_current_friend(current_friend)
-                        else:
-                            status += "COULD_NOT_RETRIEVE_CURRENT_FRIEND_FOR_HEALING "
-                    else:
-                        status += "VOTER_COULD_NOT_BE_HEALED " + heal_results['status']
-                else:
-                    status += "COULD_NOT_RETRIEVE_VOTER_THAT_CAN_BE_SAVED " + voter_results['status']
+            # if not positive_value_exists(friend_voter.linked_organization_we_vote_id):
+            #     # We need to retrieve another voter object that can be saved
+            #     organization_manager = OrganizationManager()
+            #     voter_results = voter_manager.retrieve_voter_by_we_vote_id(friend_voter.we_vote_id, read_only=False)
+            #     if voter_results['voter_found']:
+            #         friend_voter = voter_results['voter']
+            #         heal_results = \
+            #             organization_manager.heal_voter_missing_linked_organization_we_vote_id(friend_voter)
+            #         if heal_results['voter_healed']:
+            #             status += "FRIEND_HEALED-MISSING_LINKED_ORGANIZATION_WE_VOTE_ID: " \
+            #                       "" + friend_voter.we_vote_id + " "
+            #             friend_voter = heal_results['voter']
+            #             # Now we need to make sure the friend entry gets updated
+            #             friend_results = friend_manager.retrieve_current_friend(
+            #                 voter.we_vote_id, friend_voter.we_vote_id, read_only=False)
+            #             if friend_results['current_friend_found']:
+            #                 status += "HEAL_CURRENT_FRIEND-FOUND "
+            #                 current_friend = friend_results['current_friend']
+            #                 heal_current_friend(current_friend)
+            #             else:
+            #                 status += "COULD_NOT_RETRIEVE_CURRENT_FRIEND_FOR_HEALING "
+            #         else:
+            #             status += "VOTER_COULD_NOT_BE_HEALED " + heal_results['status']
+            #     else:
+            #         status += "COULD_NOT_RETRIEVE_VOTER_THAT_CAN_BE_SAVED " + voter_results['status']
             # mutual_friends = friend_manager.fetch_mutual_friends_count(voter.we_vote_id, friend_voter.we_vote_id)
             # positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(friend_voter)
             mutual_friends = 0

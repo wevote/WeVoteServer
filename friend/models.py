@@ -887,10 +887,11 @@ class FriendManager(models.Manager):
         }
         return results
 
-    def retrieve_current_friends_as_voters(self, voter_we_vote_id):
+    def retrieve_current_friends_as_voters(self, voter_we_vote_id, read_only=True):
         """
         This function is used to return the current friends of the viewer as a list of voters via the api.
         :param voter_we_vote_id:
+        :param read_only:
         :return:
         """
         status = ""
@@ -911,14 +912,15 @@ class FriendManager(models.Manager):
             return results
 
         try:
-            # Note that since we are ultimately returning a list of voter objects (which are always retrieved from the
-            #  master database, as opposed to the readonly database), we don't need to retrieve editable objects.
+            # Note that since we are ultimately returning a list of voter objects, so we don't need to retrieve
+            # editable CurrentFriend objects.
             current_friend_queryset = CurrentFriend.objects.using('readonly').all()
             current_friend_queryset = current_friend_queryset.filter(
                 Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
                 Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))
-            current_friend_queryset = current_friend_queryset.order_by('-date_last_changed')
-            current_friend_list = current_friend_queryset
+            # We can sort on the client
+            # current_friend_queryset = current_friend_queryset.order_by('-date_last_changed')
+            current_friend_list = list(current_friend_queryset)
 
             if len(current_friend_list):
                 success = True
@@ -940,15 +942,17 @@ class FriendManager(models.Manager):
             status += 'AS_VOTERS_FAILED retrieve_current_friends_as_voters ' + str(e) + " "
 
         if current_friend_list_found:
-            voter_manager = VoterManager()
+            current_friend_we_vote_id_list = []
             for current_friend_entry in current_friend_list:
                 we_vote_id_of_friend = current_friend_entry.fetch_other_voter_we_vote_id(voter_we_vote_id)
-                # This is the voter you are friends with
-                friend_voter_results = voter_manager.retrieve_voter_by_we_vote_id(we_vote_id_of_friend)
-                if friend_voter_results['voter_found']:
-                    friend_voter = friend_voter_results['voter']
-                    friend_list.append(friend_voter)
-                    friend_list_found = True
+                current_friend_we_vote_id_list.append(we_vote_id_of_friend)
+            voter_manager = VoterManager()
+            results = voter_manager.retrieve_voter_list_by_we_vote_id_list(
+                voter_we_vote_id_list=current_friend_we_vote_id_list,
+                read_only=read_only)
+            if results['voter_list_found']:
+                friend_list = results['voter_list']
+                friend_list_found = True
 
         results = {
             'success':              success,

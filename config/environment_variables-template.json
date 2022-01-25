@@ -47,14 +47,18 @@
 
   "_comment":                       "Email server settings",
   "EMAIL_HOST":                     "smtp.sendgrid.net",
-  "EMAIL_HOST_USER":                "sendgrid_username",
-  "EMAIL_HOST_PASSWORD":            "sendgrid_password",
+  "EMAIL_HOST_USER":                "apikey",
+  "EMAIL_HOST_PASSWORD_KEY_ID":     "API Key ID: reference id provided by SendGrid",
+  "EMAIL_HOST_PASSWORD":            "EMAIL_HOST_PASSWORD Private API Key",
   "EMAIL_PORT":                     "587",
   "EMAIL_USE_TLS":                  "True",
 
   "_comment":                       "sendgrid-django API settings",
   "EMAIL_BACKEND":                  "sgbackend.SendGridBackend",
-  "SENDGRID_API_KEY":               "",
+  "SENDGRID_API_KEY_ID":            "API Key ID: reference id provided by SendGrid",
+  "SENDGRID_API_KEY":               "SENDGRID_API_KEY Private API Key",
+  "SENDGRID_EMAIL_VALIDATION_API_KEY_ID": "API Key ID: reference id provided by SendGrid",
+  "SENDGRID_EMAIL_VALIDATION_API_KEY": "SENDGRID_EMAIL_VALIDATION_API_KEY Private API Key",
 
   "_comment":                       "emails separated by spaces for error alerts",
   "ADMIN_EMAIL_ADDRESSES":          "",
