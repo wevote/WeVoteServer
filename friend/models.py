@@ -2057,10 +2057,11 @@ class FriendManager(models.Manager):
         }
         return results
 
-    def retrieve_suggested_friend_list_as_voters(self, voter_we_vote_id):
+    def retrieve_suggested_friend_list_as_voters(self, voter_we_vote_id='', read_only=True):
         """
         This function is used to return the current friends of the viewer as a list of voters via the api.
         :param voter_we_vote_id:
+        :param read_only:
         :return:
         """
         status = ''
@@ -2090,8 +2091,8 @@ class FriendManager(models.Manager):
                 Q(voter_we_vote_id_deleted_second__iexact=voter_we_vote_id))
             suggested_friend_queryset = suggested_friend_queryset.exclude(friend_invite_sent=True)
             suggested_friend_queryset = suggested_friend_queryset.exclude(current_friends=True)
-            suggested_friend_queryset = suggested_friend_queryset.order_by('-date_last_changed')
-            suggested_friend_list = suggested_friend_queryset
+            # suggested_friend_queryset = suggested_friend_queryset.order_by('-date_last_changed')
+            suggested_friend_list = list(suggested_friend_queryset)
 
             if len(suggested_friend_list):
                 success = True
@@ -2147,14 +2148,14 @@ class FriendManager(models.Manager):
                 else:
                     filtered_suggested_friend_list_we_vote_ids[we_vote_id_of_friend] = 1
 
+            # Note: 2022-01-25 I'm not sure the results are actually sorted as claimed
             ordered_suggested_friend_list_we_vote_ids = sorted(filtered_suggested_friend_list_we_vote_ids)
-            for we_vote_id_of_friend in ordered_suggested_friend_list_we_vote_ids:
-                # This is the voter you are friends with
-                friend_voter_results = voter_manager.retrieve_voter_by_we_vote_id(we_vote_id_of_friend)
-                if friend_voter_results['voter_found']:
-                    friend_voter = friend_voter_results['voter']
-                    friend_list.append(friend_voter)
-                    friend_list_found = True
+            results = voter_manager.retrieve_voter_list_by_we_vote_id_list(
+                voter_we_vote_id_list=ordered_suggested_friend_list_we_vote_ids,
+                read_only=read_only)
+            if results['voter_list_found']:
+                friend_list = results['voter_list']
+                friend_list_found = True
 
         results = {
             'success':              success,
