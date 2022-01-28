@@ -2279,12 +2279,14 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
     return results
 
 
-def twitter_process_deferred_images_for_api(status, success, twitter_id, twitter_name, twitter_profile_banner_url_https,
-                                            twitter_profile_image_url_https, twitter_secret_key, twitter_screen_name,
-                                            voter_we_vote_id_for_cache):
-    # After the voter signs in, and the ballot page (or other) is displayed, then we process the images, to speed up signin
+def twitter_process_deferred_images_for_api(
+        status, success, twitter_id, twitter_name, twitter_profile_banner_url_https,
+        twitter_profile_image_url_https, twitter_secret_key, twitter_screen_name,
+        voter_we_vote_id_for_cache):
+    # After the voter signs in, and the ballot page (or other) is displayed,
+    # then we process the images, to speed up signin
     status = ''
-    if (not positive_value_exists(success)):
+    if not positive_value_exists(success):
         return {
             'status': 'twitter_process_deferred_images_for_api_received_empty_dictionary',
             'success': False,
@@ -2346,11 +2348,12 @@ def twitter_process_deferred_images_for_api(status, success, twitter_id, twitter
             pass
 
         try:
-            OrganizationManager.update_organization_single_voter_data(twitter_id,
-                                                                      we_vote_hosted_profile_image_url_large,
-                                                                      we_vote_hosted_profile_image_url_medium,
-                                                                      we_vote_hosted_profile_image_url_tiny,
-                                                                      twitter_profile_banner_url_https)
+            OrganizationManager.update_organization_single_voter_data(
+                twitter_user_id=twitter_id,
+                we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
+                we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
+                we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny,
+                twitter_profile_banner_url_https=twitter_profile_banner_url_https)
         except Exception as e:
             logger.error('twitter_process_deferred_images caught exception calling '
                          'update_organization_single_voter_data: '
@@ -2564,19 +2567,23 @@ def twitter_sign_in_retrieve_for_api(voter_device_id, image_load_deferred):  # t
         'twitter_id': twitter_id,
         'twitter_name': twitter_auth_response.twitter_name,
         'twitter_profile_banner_url_https': twitter_auth_response.twitter_profile_banner_url_https,
-        'twitter_profile_image_url_https': twitter_auth_response.twitter_profile_banner_url_https,
+        'twitter_profile_image_url_https': twitter_auth_response.twitter_profile_image_url_https,
         'twitter_secret_key': twitter_secret_key,
         'twitter_screen_name': twitter_auth_response.twitter_screen_name,
         'voter_we_vote_id_for_cache': voter_we_vote_id_for_cache,
     }
     if not positive_value_exists(image_load_deferred):
         # For compatibility with legacy apps, load the images inline (ie not deferred)
-        twitter_process_deferred_images_for_api(status, success, twitter_id, twitter_auth_response.twitter_name,
-                                                twitter_auth_response.twitter_profile_banner_url_https,
-                                                twitter_auth_response.twitter_profile_banner_url_https,
-                                                twitter_secret_key,
-                                                twitter_auth_response.twitter_screen_name,
-                                                voter_we_vote_id_for_cache)
+        twitter_process_deferred_images_for_api(
+            status=status,
+            success=success,
+            twitter_id=twitter_id,
+            twitter_name=twitter_auth_response.twitter_name,
+            twitter_profile_banner_url_https=twitter_auth_response.twitter_profile_banner_url_https,
+            twitter_profile_image_url_https=twitter_auth_response.twitter_profile_image_url_https,
+            twitter_secret_key=twitter_secret_key,
+            twitter_screen_name=twitter_auth_response.twitter_screen_name,
+            voter_we_vote_id_for_cache=voter_we_vote_id_for_cache)
 
     # Retrieve twitter user details from twitter
     results = retrieve_twitter_user_info(twitter_id, twitter_auth_response.twitter_screen_name)

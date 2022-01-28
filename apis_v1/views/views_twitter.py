@@ -245,15 +245,15 @@ def twitter_process_deferred_images_view(request):  # twitterProcessDeferredImag
     :return:
     """
     results = twitter_process_deferred_images_for_api(
-        request.GET.get('status'),
-        request.GET.get('success'),
-        request.GET.get('twitter_id'),
-        request.GET.get('twitter_name'),
-        request.GET.get('twitter_profile_banner_url_https'),
-        request.GET.get('twitter_profile_image_url_https'),
-        request.GET.get('twitter_secret_key'),
-        request.GET.get('twitter_screen_name'),
-        request.GET.get('voter_we_vote_id_for_cache')
+        status=request.GET.get('status'),
+        success=request.GET.get('success'),
+        twitter_id=request.GET.get('twitter_id'),
+        twitter_name=request.GET.get('twitter_name'),
+        twitter_profile_banner_url_https=request.GET.get('twitter_profile_banner_url_https'),
+        twitter_profile_image_url_https=request.GET.get('twitter_profile_image_url_https'),
+        twitter_secret_key=request.GET.get('twitter_secret_key'),
+        twitter_screen_name=request.GET.get('twitter_screen_name'),
+        voter_we_vote_id_for_cache=request.GET.get('voter_we_vote_id_for_cache')
     )
 
     return HttpResponse(json.dumps(results), content_type='application/json')
@@ -267,7 +267,6 @@ def twitter_sign_in_retrieve_view(request):  # twitterSignInRetrieve
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     image_load_deferred = request.GET.get('image_load_deferred'),
     load_deferred = image_load_deferred and image_load_deferred[0] == 'true'
-
 
     results = twitter_sign_in_retrieve_for_api(voter_device_id=voter_device_id, image_load_deferred=load_deferred)
 
