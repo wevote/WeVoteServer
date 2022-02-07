@@ -124,7 +124,6 @@ Feel free to add any other PyCharm tools that you would like!  When done press '
     ![ScreenShot](images/AcceptZShell.png)
 
     The terminal opens up with the project root directory set as the pwd (which is handy).
-    
 
 1. In the PyCharm terminal window download [Homebrew]( https://brew.sh/) ("the missing package manager for macOS") by entering
 the following command:
@@ -139,7 +138,7 @@ the following command:
 
     This script can take a few minutes to complete.
 
-1. Install the latest version of Python
+2. Install the latest version of Python
 
     ```
     $ brew install python
@@ -155,7 +154,7 @@ the following command:
     ```
     $ export PATH="/usr/local/opt/python/libexec/bin:$PATH"
     ```
-1. Test that the newly installed Python is in the path. macOS comes with Python 2 preinstalled, so
+3. Test that the newly installed Python is in the path. macOS comes with Python 2 preinstalled, so
 if the reported version is 2, then add the newly loaded python to the path with the export command. 
 Then confirm that the default python is now version 3.9 or later.  (Version 3.6 has problems with macOS Big Sur or later)
 
@@ -167,13 +166,22 @@ Then confirm that the default python is now version 3.9 or later.  (Version 3.6 
     Python 3.9.5
     Steve@Vickies-MacBook-Pro-2037 WeVoteServer % 
     ```   
+    2021: For an 'Apple M1 Max' ARM-64 Processor...
+    ```
+    stevepodell@Steves-MBP-M1-Dec2021 WeVoteServer % python --version
+    Python 2.7.18
+    stevepodell@Steves-MBP-M1-Dec2021 WeVoteServer % export PATH="/opt/homebrew/opt/python@3.9/libexec/bin:$PATH"
+    stevepodell@Steves-MBP-M1-Dec2021 WeVoteServer % python --version                                            
+    Python 3.9.9
+    stevepodell@Steves-MBP-M1-Dec2021 WeVoteServer % 
+    ```
 
-1. Set up a Virtual Environment with the new Python Interpreter.  
+5. Set up a Virtual Environment with the new Python Interpreter.  
 Navigate to: PyCharm/Preferences/Project: WeVoteServer/Python Interpreter.
 
    <img width="800" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/NoVENV.png"> 
 
-1. Click the Gear icon, then select "Add".  PyCharm will detect the latest interpreter from the PATH environment variable, 
+6. Click the Gear icon, then select "Add".  PyCharm will detect the latest interpreter from the PATH environment variable, 
    and pre-populate the dialog.  Check the two checkboxes `Inherit global site-packages` and `make available to all projects`.
    
    <img width="800" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/Py3-9Selected.png"> 
@@ -183,38 +191,38 @@ Navigate to: PyCharm/Preferences/Project: WeVoteServer/Python Interpreter.
    
    ![ScreenShot](images/VenvCompleted.png)
 
-1. Confirm that the new virtual environment is in effect, by closing all open Terminal windows within
+7. Confirm that the new virtual environment is in effect, by closing all open Terminal windows within
 PyCharm and opening a new one.
 
    <img width="700" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/VenvConfirm2.png"> 
 
    If you see '(venv)' at the beginning of the command line, all is well.
    
-1. Install OpenSSL, the pyopenssl and https clients:
+8. Install OpenSSL, the pyopenssl and https clients:
  
     `(WeVoteServerPy3.7) $ brew install openssl`
     If it is already installed, no worries!
 
-1.  Link libssl and libcrypto so that pip can find them:
+9. Link libssl and libcrypto so that pip can find them:
     ```
     $ ln -s /usr/local/opt/openssl/lib/libcrypto.dylib /usr/local/lib/libcrypto.dylib
     $ ln -s /usr/local/opt/openssl/lib/libssl.dylib /usr/local/lib/libssl.dylib
     ```
-1. Install libmagic
+10. Install libmagic
 
-    `(WeVoteServerPy3.7) $ brew install libmagic`
+     `(WeVoteServerPy3.7) $ brew install libmagic`
 
-1. Install all the other Python packages required by the WeVoteServer project (there are a lot of them!)
+11. Install all the other Python packages required by the WeVoteServer project (there are a lot of them!)
 
-    `(WeVoteServer3.7) $ pip3 install -r requirements.txt`
+     `(WeVoteServer3.7) $ pip3 install -r requirements.txt`
 
-    This is a big operation that loads a number of wheels definitions and then compiles them.   Wheels are
-    linux/macOS binary libraries based on c language packages and compiled with gcc. 
-    Wheels allow python library developers to speed up execution by coding critical or complex sections the c language.
-    Interpreted Python code runs slower than compiled c. 
+     This is a big operation that loads a number of wheels definitions and then compiles them.   Wheels are
+     linux/macOS binary libraries based on c language packages and compiled with gcc. 
+     Wheels allow python library developers to speed up execution by coding critical or complex sections the c language.
+     Interpreted Python code runs slower than compiled c. 
     
-    If this installation succeeds with no missing libraries, or other compiler errors, we are
-    almost done.  If this installation fails, please ask for help.
+     If this installation succeeds with no missing libraries, or other compiler errors, we are
+     almost done.  If this installation fails, please ask for help.
 
 
 ## Install and set up PostgreSQL and pgAdmin4
@@ -237,7 +245,7 @@ this step.  To see if postgres is already running, check with lsof in a terminal
 
     or
    
-    **If you don't mind fully deleting any Postgres database data that you have already installed**, then delete the existing Postgres now.  If you installed postgres with homebrew try `brew uninstall posgresql`, 
+    **If you don't mind fully deleting any Postgres database data that you have already installed**, then delete the existing Postgres now.  If you installed postgres with homebrew try `brew uninstall postgresql`, 
     but if that fails Postgres can be setup in many ways, so there are no detailed instructions here on how to delete Postgres (but. You can start with running `which postgres`
     in a terminal and going to that directory and deleting the instance or the symbolic links to the instance.  
     Next step is to reboot your Mac to see if Postgres starts up again.

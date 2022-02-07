@@ -72,7 +72,7 @@ ORGANIZATION_UNIQUE_IDENTIFIERS = [
     'chosen_domain_string',
     'chosen_favicon_url_https',
     'chosen_feature_package',
-    'chosen_google_analytics_account_number',
+    'chosen_google_analytics_tracking_id',
     'chosen_hide_we_vote_logo',
     'chosen_html_verification_string',
     'chosen_logo_url_https',
@@ -1099,7 +1099,7 @@ class OrganizationManager(models.Manager):
             facebook_profile_image_url_https=False,
             facebook_background_image_url_https=False,
             chosen_domain_string=False,
-            chosen_google_analytics_account_number=False,
+            chosen_google_analytics_tracking_id=False,
             chosen_html_verification_string=False,
             chosen_hide_we_vote_logo=None,
             chosen_prevent_sharing_opinions=None,
@@ -1130,7 +1130,7 @@ class OrganizationManager(models.Manager):
         :param facebook_profile_image_url_https:
         :param facebook_background_image_url_https:
         :param chosen_domain_string:
-        :param chosen_google_analytics_account_number:
+        :param chosen_google_analytics_tracking_id:
         :param chosen_html_verification_string:
         :param chosen_hide_we_vote_logo:
         :param chosen_prevent_sharing_opinions:
@@ -1168,8 +1168,8 @@ class OrganizationManager(models.Manager):
         organization_image = organization_image.strip() if organization_image is not False else False
         organization_type = organization_type.strip() if organization_type is not False else False
         chosen_domain_string = chosen_domain_string.strip() if chosen_domain_string is not False else False
-        chosen_google_analytics_account_number = chosen_google_analytics_account_number.strip() \
-            if chosen_google_analytics_account_number is not False else False
+        chosen_google_analytics_tracking_id = chosen_google_analytics_tracking_id.strip() \
+            if chosen_google_analytics_tracking_id is not False else False
         chosen_html_verification_string = chosen_html_verification_string.strip() \
             if chosen_html_verification_string is not False else False
         # if isinstance(chosen_ready_introduction_text, str):
@@ -1272,10 +1272,10 @@ class OrganizationManager(models.Manager):
                 if chosen_domain_string is not False:
                     value_changed = True
                     organization_on_stage.chosen_domain_string = chosen_domain_string
-                if chosen_google_analytics_account_number is not False:
+                if chosen_google_analytics_tracking_id is not False:
                     value_changed = True
-                    organization_on_stage.chosen_google_analytics_account_number = \
-                        chosen_google_analytics_account_number
+                    organization_on_stage.chosen_google_analytics_tracking_id = \
+                        chosen_google_analytics_tracking_id
                 if chosen_html_verification_string is not False:
                     value_changed = True
                     organization_on_stage.chosen_html_verification_string = chosen_html_verification_string
@@ -1496,10 +1496,10 @@ class OrganizationManager(models.Manager):
                     if chosen_domain_string is not False:
                         value_changed = True
                         organization_on_stage.chosen_domain_string = chosen_domain_string
-                    if chosen_google_analytics_account_number is not False:
+                    if chosen_google_analytics_tracking_id is not False:
                         value_changed = True
-                        organization_on_stage.chosen_google_analytics_account_number = \
-                            chosen_google_analytics_account_number
+                        organization_on_stage.chosen_google_analytics_tracking_id = \
+                            chosen_google_analytics_tracking_id
                     if chosen_html_verification_string is not False:
                         value_changed = True
                         organization_on_stage.chosen_html_verification_string = chosen_html_verification_string
@@ -1660,10 +1660,10 @@ class OrganizationManager(models.Manager):
                     if chosen_domain_string is not False:
                         value_changed = True
                         organization_on_stage.chosen_domain_string = chosen_domain_string
-                    if chosen_google_analytics_account_number is not False:
+                    if chosen_google_analytics_tracking_id is not False:
                         value_changed = True
-                        organization_on_stage.chosen_google_analytics_account_number = \
-                            chosen_google_analytics_account_number
+                        organization_on_stage.chosen_google_analytics_tracking_id = \
+                            chosen_google_analytics_tracking_id
                     if chosen_html_verification_string is not False:
                         value_changed = True
                         organization_on_stage.chosen_html_verification_string = chosen_html_verification_string
@@ -2937,7 +2937,7 @@ class Organization(models.Model):
         verbose_name="client domain name for we vote site", max_length=255, null=True, blank=True)
     chosen_favicon_url_https = models.TextField(
         verbose_name='url of client favicon', blank=True, null=True)
-    chosen_google_analytics_account_number = models.CharField(max_length=255, null=True, blank=True)
+    chosen_google_analytics_tracking_id = models.CharField(max_length=255, null=True, blank=True)
     chosen_html_verification_string = models.CharField(max_length=255, null=True, blank=True)
     # Set to True to hide We Vote logo
     chosen_hide_we_vote_logo = models.BooleanField(default=False)

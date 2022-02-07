@@ -2178,7 +2178,7 @@ def organization_retrieve_for_api(  # organizationRetrieve
             'chosen_domain_string':             '',
             'chosen_favicon_url_https':         '',
             'chosen_feature_package':           '',
-            'chosen_google_analytics_account_number': '',
+            'chosen_google_analytics_tracking_id': '',
             'chosen_html_verification_string':  '',
             'chosen_hide_we_vote_logo':         '',
             'chosen_logo_url_https':            '',
@@ -2255,7 +2255,7 @@ def organization_retrieve_for_api(  # organizationRetrieve
             'chosen_domain_string':             organization.chosen_domain_string,
             'chosen_favicon_url_https':         organization.chosen_favicon_url_https,
             'chosen_feature_package':           organization.chosen_feature_package,
-            'chosen_google_analytics_account_number': organization.chosen_google_analytics_account_number,
+            'chosen_google_analytics_tracking_id': organization.chosen_google_analytics_tracking_id,
             'chosen_html_verification_string':  organization.chosen_html_verification_string,
             'chosen_hide_we_vote_logo':         organization.chosen_hide_we_vote_logo,
             'chosen_logo_url_https':            organization.chosen_logo_url_https,
@@ -2312,7 +2312,7 @@ def organization_retrieve_for_api(  # organizationRetrieve
             'success':                          False,
             'chosen_domain_string':             '',
             'chosen_favicon_url_https':         '',
-            'chosen_google_analytics_account_number': '',
+            'chosen_google_analytics_tracking_id': '',
             'chosen_html_verification_string':  '',
             'chosen_hide_we_vote_logo':         '',
             'chosen_logo_url_https':            '',
@@ -2368,7 +2368,7 @@ def organization_save_for_api(  # organizationSave
         facebook_email=False,
         facebook_profile_image_url_https=False,
         chosen_domain_string=False,
-        chosen_google_analytics_account_number=False,
+        chosen_google_analytics_tracking_id=False,
         chosen_html_verification_string=False,
         chosen_hide_we_vote_logo=None,
         chosen_prevent_sharing_opinions=None,
@@ -2397,7 +2397,7 @@ def organization_save_for_api(  # organizationSave
     :param facebook_email:
     :param facebook_profile_image_url_https:
     :param chosen_domain_string:
-    :param chosen_google_analytics_account_number:
+    :param chosen_google_analytics_tracking_id:
     :param chosen_html_verification_string:
     :param chosen_hide_we_vote_logo:
     :param chosen_prevent_sharing_opinions:
@@ -2431,7 +2431,7 @@ def organization_save_for_api(  # organizationSave
             'success':                      False,
             'chosen_domain_string':         chosen_domain_string,
             'chosen_favicon_url_https':     '',
-            'chosen_google_analytics_account_number': chosen_google_analytics_account_number,
+            'chosen_google_analytics_tracking_id': chosen_google_analytics_tracking_id,
             'chosen_html_verification_string':  chosen_html_verification_string,
             'chosen_hide_we_vote_logo':     chosen_hide_we_vote_logo,
             'chosen_logo_url_https':        '',
@@ -2469,7 +2469,7 @@ def organization_save_for_api(  # organizationSave
             'success':                      False,
             'chosen_domain_string':         chosen_domain_string,
             'chosen_favicon_url_https':     '',
-            'chosen_google_analytics_account_number': chosen_google_analytics_account_number,
+            'chosen_google_analytics_tracking_id': chosen_google_analytics_tracking_id,
             'chosen_html_verification_string':  chosen_html_verification_string,
             'chosen_hide_we_vote_logo':     chosen_hide_we_vote_logo,
             'chosen_logo_url_https':        '',
@@ -2570,7 +2570,7 @@ def organization_save_for_api(  # organizationSave
         facebook_profile_image_url_https=facebook_profile_image_url_https,
         facebook_background_image_url_https=facebook_background_image_url_https,
         chosen_domain_string=chosen_domain_string,
-        chosen_google_analytics_account_number=chosen_google_analytics_account_number,
+        chosen_google_analytics_tracking_id=chosen_google_analytics_tracking_id,
         chosen_html_verification_string=chosen_html_verification_string,
         chosen_hide_we_vote_logo=chosen_hide_we_vote_logo,
         chosen_prevent_sharing_opinions=chosen_prevent_sharing_opinions,
@@ -2699,7 +2699,7 @@ def organization_save_for_api(  # organizationSave
             'voter_device_id':              voter_device_id,
             'chosen_domain_string':             organization.chosen_domain_string,
             'chosen_favicon_url_https':         organization.chosen_favicon_url_https,
-            'chosen_google_analytics_account_number': organization.chosen_google_analytics_account_number,
+            'chosen_google_analytics_tracking_id': organization.chosen_google_analytics_tracking_id,
             'chosen_html_verification_string':  organization.chosen_html_verification_string,
             'chosen_hide_we_vote_logo':         organization.chosen_hide_we_vote_logo,
             'chosen_logo_url_https':            organization.chosen_logo_url_https,
@@ -2756,7 +2756,7 @@ def organization_save_for_api(  # organizationSave
             'voter_device_id':          voter_device_id,
             'chosen_domain_string':             chosen_domain_string,
             'chosen_favicon_url_https':         '',
-            'chosen_google_analytics_account_number': chosen_google_analytics_account_number,
+            'chosen_google_analytics_tracking_id': chosen_google_analytics_tracking_id,
             'chosen_html_verification_string':  chosen_html_verification_string,
             'chosen_hide_we_vote_logo':            chosen_hide_we_vote_logo,
             'chosen_logo_url_https':            '',
@@ -3078,6 +3078,7 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
     status = ""
     success = True
     chosen_about_organization_external_url = ''
+    chosen_google_analytics_tracking_id = False
     chosen_hide_we_vote_logo = False
     chosen_logo_url_https = ''
     chosen_prevent_sharing_opinions = False
@@ -3093,6 +3094,7 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
             'success':                          success,
             'status':                           status,
             'chosen_about_organization_external_url': chosen_about_organization_external_url,
+            'chosen_google_analytics_tracking_id':    chosen_google_analytics_tracking_id,
             'chosen_hide_we_vote_logo':         chosen_hide_we_vote_logo,
             'chosen_logo_url_https':            chosen_logo_url_https,
             'chosen_prevent_sharing_opinions':  chosen_prevent_sharing_opinions,
@@ -3119,6 +3121,7 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
             'success':                          success,
             'status':                           status,
             'chosen_about_organization_external_url': chosen_about_organization_external_url,
+            'chosen_google_analytics_tracking_id': chosen_google_analytics_tracking_id,
             'chosen_hide_we_vote_logo':         chosen_hide_we_vote_logo,
             'chosen_logo_url_https':            chosen_logo_url_https,
             'chosen_prevent_sharing_opinions':  chosen_prevent_sharing_opinions,
@@ -3138,6 +3141,7 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
 
     if organization_found:
         chosen_about_organization_external_url = organization.chosen_about_organization_external_url
+        chosen_google_analytics_tracking_id = organization.chosen_google_analytics_tracking_id
         chosen_hide_we_vote_logo = organization.chosen_hide_we_vote_logo
         chosen_logo_url_https = organization.chosen_logo_url_https
         chosen_prevent_sharing_opinions = organization.chosen_prevent_sharing_opinions
@@ -3162,6 +3166,7 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
         'success':                          success,
         'status':                           status,
         'chosen_about_organization_external_url': chosen_about_organization_external_url,
+        'chosen_google_analytics_tracking_id': chosen_google_analytics_tracking_id,
         'chosen_hide_we_vote_logo':         chosen_hide_we_vote_logo,
         'chosen_logo_url_https':            chosen_logo_url_https,
         'chosen_prevent_sharing_opinions':  chosen_prevent_sharing_opinions,

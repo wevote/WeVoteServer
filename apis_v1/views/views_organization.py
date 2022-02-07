@@ -115,24 +115,15 @@ def organization_follow_ignore_api_view(request):  # organizationFollowIgnore
 
 def organization_index_view(request, organization_incoming_domain='', campaign_main=''):  # organizationIndex
     status = ""
-    success = True
-    organization = None
-    organization_found = False
-    # is_campaign = positive_value_exists(campaign_main)
 
-    if positive_value_exists(organization_incoming_domain):
-        organization_incoming_domain = organization_incoming_domain.strip().lower()
-        organization_manager = OrganizationManager()
-        results = organization_manager.retrieve_organization_from_incoming_hostname(
-            organization_incoming_domain, read_only=True)
-        organization_found = results['organization_found']
-        organization = results['organization']
-        status += results['status']
+    if not positive_value_exists(organization_incoming_domain):
+        organization_incoming_domain = request.GET.get('organization_incoming_domain', 'campaign.wevote.us')
+    organization_incoming_domain = organization_incoming_domain.strip().lower()
 
     # Default values
     chosen_domain_type_is_campaign = True
     chosen_favicon_url_https = None
-    chosen_google_analytics_account_number = ''
+    chosen_google_analytics_tracking_id = ''
     chosen_html_verification_string = None
     chosen_prevent_sharing_opinions = None
     chosen_social_share_description = \
@@ -144,111 +135,125 @@ def organization_index_view(request, organization_incoming_domain='', campaign_m
     hide_social_share_image = False
     html_title = "We Vote"
 
-    if organization_found:
-        master_features_provided_bitmap = 0
-        chosen_domain_type_is_campaign = organization.chosen_domain_type_is_campaign
-        if positive_value_exists(chosen_domain_type_is_campaign):
-            # Change the default
-            chosen_social_share_description = "Vote for candidates you like. Oppose candidates you don't."
-        features_provided_bitmap = organization.features_provided_bitmap
-        chosen_hide_we_vote_logo = organization.chosen_hide_we_vote_logo
-        chosen_html_verification_string = organization.chosen_html_verification_string
-        chosen_prevent_sharing_opinions = organization.chosen_prevent_sharing_opinions
-        if not positive_value_exists(features_provided_bitmap) \
-                and positive_value_exists(organization.chosen_feature_package) \
-                and organization.chosen_feature_package not in 'FREE':
-            try:
-                donation_manager = DonationManager()
-                results = donation_manager.retrieve_master_feature_package(organization.chosen_feature_package)
-                if results['master_feature_package_found']:
-                    master_feature_package = results['master_feature_package']
-                    master_features_provided_bitmap = master_feature_package.features_provided_bitmap
-            except Exception as e:
-                # Could not retrieve master_feature_package
-                pass
-            if positive_value_exists(master_features_provided_bitmap):
+    if organization_incoming_domain == 'wevote.us':             # Only used to test the doc page
+        chosen_domain_type_is_campaign = False
+    elif organization_incoming_domain == 'campaigns.wevote.us':    # Only used to test the doc page
+        chosen_domain_type_is_campaign = True
+    else:
+        organization_manager = OrganizationManager()
+        results = organization_manager.retrieve_organization_from_incoming_hostname(
+            organization_incoming_domain, read_only=True)
+        organization_found = results['organization_found']
+        organization = results['organization']
+        status += results['status']
+
+        if organization_found:
+            master_features_provided_bitmap = 0
+            chosen_domain_type_is_campaign = organization.chosen_domain_type_is_campaign
+            if positive_value_exists(chosen_domain_type_is_campaign):
+                # Change the default
+                chosen_social_share_description = "Vote for candidates you like. Oppose candidates you don't."
+            features_provided_bitmap = organization.features_provided_bitmap
+            chosen_hide_we_vote_logo = organization.chosen_hide_we_vote_logo
+            chosen_html_verification_string = organization.chosen_html_verification_string
+            chosen_prevent_sharing_opinions = organization.chosen_prevent_sharing_opinions
+            if not positive_value_exists(features_provided_bitmap) \
+                    and positive_value_exists(organization.chosen_feature_package) \
+                    and organization.chosen_feature_package not in 'FREE':
                 try:
-                    features_provided_bitmap = master_features_provided_bitmap
-                    organization.features_provided_bitmap = master_features_provided_bitmap
-                    organization.save()
+                    donation_manager = DonationManager()
+                    results = donation_manager.retrieve_master_feature_package(organization.chosen_feature_package)
+                    if results['master_feature_package_found']:
+                        master_feature_package = results['master_feature_package']
+                        master_features_provided_bitmap = master_feature_package.features_provided_bitmap
                 except Exception as e:
-                    # Could not save features_provided_bitmap update to organization
+                    # Could not retrieve master_feature_package
                     pass
+                if positive_value_exists(master_features_provided_bitmap):
+                    try:
+                        features_provided_bitmap = master_features_provided_bitmap
+                        organization.features_provided_bitmap = master_features_provided_bitmap
+                        organization.save()
+                    except Exception as e:
+                        # Could not save features_provided_bitmap update to organization
+                        pass
 
-        if features_provided_bitmap & CHOSEN_FAVICON_ALLOWED:
-            if positive_value_exists(organization.chosen_favicon_url_https):
-                chosen_favicon_url_https = organization.chosen_favicon_url_https
-                hide_favicon = False
-            elif positive_value_exists(chosen_hide_we_vote_logo):
-                chosen_favicon_url_https = None
-                hide_favicon = True
-            else:
-                # Show the We Vote favicon if a new favicon has not been uploaded and We Vote logo not hidden
-                chosen_favicon_url_https = None
-                hide_favicon = False
+            if features_provided_bitmap & CHOSEN_FAVICON_ALLOWED:
+                if positive_value_exists(organization.chosen_favicon_url_https):
+                    chosen_favicon_url_https = organization.chosen_favicon_url_https
+                    hide_favicon = False
+                elif positive_value_exists(chosen_hide_we_vote_logo):
+                    chosen_favicon_url_https = None
+                    hide_favicon = True
+                else:
+                    # Show the We Vote favicon if a new favicon has not been uploaded and We Vote logo not hidden
+                    chosen_favicon_url_https = None
+                    hide_favicon = False
 
-        if features_provided_bitmap & CHOSEN_SOCIAL_SHARE_IMAGE_ALLOWED:
-            if positive_value_exists(organization.chosen_social_share_master_image_url_https):
-                chosen_social_share_master_image_url_https = organization.chosen_social_share_master_image_url_https
-                hide_social_share_image = False
-            elif positive_value_exists(organization.chosen_logo_url_https):
-                chosen_social_share_master_image_url_https = organization.chosen_logo_url_https
-                hide_social_share_image = False
-            elif positive_value_exists(chosen_hide_we_vote_logo):
-                chosen_social_share_master_image_url_https = None
-                hide_social_share_image = True
-            else:
-                # Show the We Vote social share image if a new image has not been uploaded and We Vote logo not hidden
-                chosen_social_share_master_image_url_https = None
-                hide_social_share_image = False
+            if features_provided_bitmap & CHOSEN_SOCIAL_SHARE_IMAGE_ALLOWED:
+                if positive_value_exists(organization.chosen_social_share_master_image_url_https):
+                    chosen_social_share_master_image_url_https = organization.chosen_social_share_master_image_url_https
+                    hide_social_share_image = False
+                elif positive_value_exists(organization.chosen_logo_url_https):
+                    chosen_social_share_master_image_url_https = organization.chosen_logo_url_https
+                    hide_social_share_image = False
+                elif positive_value_exists(chosen_hide_we_vote_logo):
+                    chosen_social_share_master_image_url_https = None
+                    hide_social_share_image = True
+                else:
+                    # Show the We Vote social share image if a new image has not been uploaded and We Vote logo not hidden
+                    chosen_social_share_master_image_url_https = None
+                    hide_social_share_image = False
 
-        if features_provided_bitmap & CHOSEN_SOCIAL_SHARE_DESCRIPTION_ALLOWED:
-            html_title = organization.organization_name
-            chosen_social_share_description = organization.chosen_social_share_description
+            if features_provided_bitmap & CHOSEN_SOCIAL_SHARE_DESCRIPTION_ALLOWED:
+                html_title = organization.organization_name
+                chosen_social_share_description = organization.chosen_social_share_description
 
-        if features_provided_bitmap & CHOSEN_GOOGLE_ANALYTICS_ALLOWED:
-            chosen_google_analytics_account_number = organization.chosen_google_analytics_account_number
-            google_analytics_valid = False
-            # Make sure this is a valid account number
-            if positive_value_exists(chosen_google_analytics_account_number) \
-                    and isinstance(chosen_google_analytics_account_number, str):
-                chosen_google_analytics_account_number = chosen_google_analytics_account_number.strip()
-                if chosen_google_analytics_account_number.startswith('UA-') \
-                        and len(chosen_google_analytics_account_number) < 20:
-                    # We do these primitive validity checks
-                    google_analytics_valid = True
-            if not google_analytics_valid:
-                chosen_google_analytics_account_number = None
+            if features_provided_bitmap & CHOSEN_GOOGLE_ANALYTICS_ALLOWED:
+                chosen_google_analytics_tracking_id = organization.chosen_google_analytics_tracking_id
+                google_analytics_valid = False
+                # Make sure this is a valid account number
+                if positive_value_exists(chosen_google_analytics_tracking_id) \
+                        and isinstance(chosen_google_analytics_tracking_id, str):
+                    chosen_google_analytics_tracking_id = chosen_google_analytics_tracking_id.strip()
+                    if chosen_google_analytics_tracking_id.startswith('UA-') \
+                            and len(chosen_google_analytics_tracking_id) < 20:
+                        # We do these primitive validity checks
+                        google_analytics_valid = True
+                if not google_analytics_valid:
+                    chosen_google_analytics_tracking_id = None
 
-    campaign_main_js = ''
+    # Regardless of the number and varieties of customized sites, immediately after a WebApp or Campaigns build update,
+    # a main.name.html will be in the build directory for both the base WebApp or Campaigns sites.  For any site,
+    # customized or un-customized, we need to get the full name of the build's main.[hash].js and feed that to Fastly
+    # when it requests a customized index.html
+
     if chosen_domain_type_is_campaign:
         req_url = 'https://campaigns.wevote.us/main.name.html'
-        # req_url = 'https://' + organization_incoming_domain + '/' + campaign_main
-        print(req_url)
-        verify_bool = not ('localhost' in organization_incoming_domain or '127.0.0.1' in organization_incoming_domain)
-        text = requests.get(req_url, verify=verify_bool).text
-        # text = '<!DOCTYPE html><html><body>main.3bdb849a6b28de49eb2e.js</body></html>'
-        campaign_main_js = re.search(r"<body>(.*?)<\/body>", text)[1]
+    else:
+        req_url = 'https://wevote.us/main.name.html'
+
+    verify_bool = not ('localhost' in organization_incoming_domain or '127.0.0.1' in organization_incoming_domain)
+    text = requests.get(req_url, verify=verify_bool).text
+    main_js = re.search(r"<body>(.*?)<\/body>", text)[1]
 
     template_values = {
-        'chosen_favicon_url_https':         chosen_favicon_url_https,
-        'chosen_google_analytics_account_number': chosen_google_analytics_account_number,
-        'chosen_html_verification_string':  chosen_html_verification_string,
-        'chosen_prevent_sharing_opinions':  chosen_prevent_sharing_opinions,
-        'chosen_social_share_description':  chosen_social_share_description,
+        'chosen_domain_type_is_campaign':             chosen_domain_type_is_campaign,
+        'chosen_favicon_url_https':                   chosen_favicon_url_https,
+        'chosen_google_analytics_tracking_id':        chosen_google_analytics_tracking_id,
+        'chosen_html_verification_string':            chosen_html_verification_string,
+        'chosen_prevent_sharing_opinions':            chosen_prevent_sharing_opinions,
+        'chosen_social_share_description':            chosen_social_share_description,
         'chosen_social_share_master_image_url_https': chosen_social_share_master_image_url_https,
-        'hide_favicon':                     hide_favicon,
-        'hide_social_share_image':          hide_social_share_image,
-        'html_title':                       html_title,
-        'organization_incoming_domain':     organization_incoming_domain,
-        'some_numerical_string':            '12345hi',
-        'campaign_main_js':                 campaign_main_js,
+        'hide_favicon':                               hide_favicon,
+        'hide_social_share_image':                    hide_social_share_image,
+        'html_title':                                 html_title,
+        'organization_incoming_domain':               organization_incoming_domain,
+        'some_numerical_string':                      '12345hi',
+        'main_js':                                    main_js,
     }
 
-    if chosen_domain_type_is_campaign:
-        return render(request, 'campaign/campaignx_index.html', template_values)
-    else:
-        return render(request, 'organization/organization_index.html', template_values)
+    return render(request, 'organization/organization_index.html', template_values)
 
 
 def organizations_found_on_url_api_view(request):  # organizationsFoundOnUrl
@@ -416,7 +421,7 @@ def organization_save_view(request):  # organizationSave
         chosen_domain_string = extract_website_from_url(chosen_domain_string)
     chosen_subdomain_string = request.GET.get('chosen_subdomain_string', False)
 
-    chosen_google_analytics_account_number = request.GET.get('chosen_google_analytics_account_number', False)
+    chosen_google_analytics_tracking_id = request.GET.get('chosen_google_analytics_tracking_id', False)
     chosen_html_verification_string = request.GET.get('chosen_html_verification_string', False)
     chosen_hide_we_vote_logo = request.GET.get('chosen_hide_we_vote_logo', None)
     chosen_prevent_sharing_opinions = request.GET.get('chosen_prevent_sharing_opinions', None)
@@ -469,7 +474,7 @@ def organization_save_view(request):  # organizationSave
             'chosen_domain_string': '',
             'full_domain_string_already_taken': None,
             'chosen_favicon_url_https': '',
-            'chosen_google_analytics_account_number': '',
+            'chosen_google_analytics_tracking_id': '',
             'chosen_html_verification_string': '',
             'chosen_hide_we_vote_logo': '',
             'chosen_logo_url_https': '',
@@ -568,7 +573,7 @@ def organization_save_view(request):  # organizationSave
         facebook_email=facebook_email,
         facebook_profile_image_url_https=facebook_profile_image_url_https,
         chosen_domain_string=chosen_domain_string,
-        chosen_google_analytics_account_number=chosen_google_analytics_account_number,
+        chosen_google_analytics_tracking_id=chosen_google_analytics_tracking_id,
         chosen_html_verification_string=chosen_html_verification_string,
         chosen_hide_we_vote_logo=chosen_hide_we_vote_logo,
         chosen_prevent_sharing_opinions=chosen_prevent_sharing_opinions,
@@ -665,6 +670,7 @@ def site_configuration_retrieve_view(request):  # siteConfigurationRetrieve
         'success':                          results['success'],
         'status':                           results['status'],
         'chosen_about_organization_external_url': results['chosen_about_organization_external_url'],
+        'chosen_google_analytics_tracking_id': results['chosen_google_analytics_tracking_id'],
         'chosen_hide_we_vote_logo':         results['chosen_hide_we_vote_logo'],
         'chosen_logo_url_https':            results['chosen_logo_url_https'],
         'chosen_prevent_sharing_opinions':  results['chosen_prevent_sharing_opinions'],

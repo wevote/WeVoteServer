@@ -43,7 +43,7 @@ def organization_save_doc_template_values(url_root):
                             'It is changed by a client in Settings section.',
         },
         {
-            'name':         'chosen_google_analytics_account_number',
+            'name':         'chosen_google_analytics_tracking_id',
             'value':        'string',  # boolean, integer, long, string
             'description':  'This is the value of client\'s Google Analytics code. '
                             'It is changed by a client in Settings section.',

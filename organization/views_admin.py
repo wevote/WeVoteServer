@@ -1587,7 +1587,7 @@ def organization_edit_account_process_view(request):
     chosen_domain_string = request.POST.get('chosen_domain_string', None)
     chosen_domain_type_is_campaign = request.POST.get('chosen_domain_type_is_campaign', None)
     chosen_favicon_url_https = request.POST.get('chosen_favicon_url_https', None)
-    chosen_google_analytics_account_number = request.POST.get('chosen_google_analytics_account_number', None)
+    chosen_google_analytics_tracking_id = request.POST.get('chosen_google_analytics_tracking_id', None)
     chosen_html_verification_string = request.POST.get('chosen_html_verification_string', None)
     chosen_hide_we_vote_logo = request.POST.get('chosen_hide_we_vote_logo', None)
     chosen_logo_url_https = request.POST.get('chosen_logo_url_https', None)
@@ -1642,9 +1642,9 @@ def organization_edit_account_process_view(request):
                 organization_on_stage.chosen_domain_type_is_campaign = chosen_domain_type_is_campaign
             if chosen_favicon_url_https is not None:
                 organization_on_stage.chosen_favicon_url_https = chosen_favicon_url_https
-            if chosen_google_analytics_account_number is not None:
-                organization_on_stage.chosen_google_analytics_account_number = \
-                    chosen_google_analytics_account_number.strip()
+            if chosen_google_analytics_tracking_id is not None:
+                organization_on_stage.chosen_google_analytics_tracking_id = \
+                    chosen_google_analytics_tracking_id.strip()
             if chosen_html_verification_string is not None:
                 organization_on_stage.chosen_html_verification_string = chosen_html_verification_string.strip()
             if chosen_hide_we_vote_logo is not None:

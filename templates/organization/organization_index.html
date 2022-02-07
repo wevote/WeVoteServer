@@ -1,22 +1,28 @@
 <!DOCTYPE html>
 {# templates/organization/organization_index.html #}
 <!--
-    organization_index.html for We Vote WebApp
+    organization_index.html for We Vote Campaigns and WebApp
     organization_incoming_domain = {{ organization_incoming_domain }}
+    chosen_domain_type_is_campaign = {{  chosen_domain_type_is_campaign }}
 -->
 <html lang="en">
   <head>
+    <title>{{ html_title }}</title>
     <meta
       name="description"
       content="{{ chosen_social_share_description|default_if_none:'' }}"
     />
-    <title>{{ html_title }}</title>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
+  {% if chosen_domain_type_is_campaign  %}
+   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
+  {% else %}
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  {% endif %}
   {% if chosen_html_verification_string %}  <!-- chosen_html_verification_string //-->
-    {{ chosen_html_verification_string|safe }}{% endif %}
+    {{ chosen_html_verification_string|safe }}
+  {% endif %}
     <meta charset="utf-8">
     <meta property="og:url"           content="https://{{ organization_incoming_domain }}" />
     <meta property="og:type"          content="website" />
@@ -26,11 +32,15 @@
   {% elif chosen_social_share_master_image_url_https %}
     <meta property="og:image"         content="{{ chosen_social_share_master_image_url_https }}" />
   {% else %}
-    <meta property="og:image"         content="https://WeVote.US/img/global/logos/we-vote-logo-wordmark-vertical-color-on-white-256x256.png" />
+    {% if chosen_domain_type_is_campaign  %}
+      <meta property="og:image"       content="https://campaigns.WeVote.US/img/global/logos/we-vote-logo-wordmark-vertical-color-on-white-256x256.png" />
+      <meta property="og:image"        content="https://WeVote.US/img/global/logos/we-vote-logo-wordmark-vertical-color-on-white-256x256.png" />
+      <link rel="icon" sizes="48x48"   href="https://campaigns.WeVote.US/img/global/icons/favicon.ico" >
+    {% else %}
+      <link href="/css/main.css" rel="stylesheet" type="text/css" />
+    {% endif %}
   {% endif %}
     <base href="/">
-    <link href="/css/main.css" rel="stylesheet" type="text/css" />
-
   {% if hide_favicon %}  <!-- Favicon hidden //-->
   {% elif chosen_favicon_url_https %}
     <link rel="icon" sizes="32x32" href="{{ chosen_favicon_url_https }}" >
@@ -42,11 +52,11 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/img/global/icons/favicon-16x16.png" >
     <link rel="icon" sizes="48x48" href="/img/global/icons/favicon.ico" >
   {% endif %}
-    <script defer="defer" src="main.10ca7a798c423fd8f3df.js"></script>
   </head>
   <body>
     <div>
       <div id="app"></div>
     </div>
+    <script defer="defer" src="{{ main_js }}"></script>
   </body>
 </html>
