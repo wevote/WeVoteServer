@@ -8,6 +8,12 @@ def organization_index_doc_template_values(url_root):
     Show documentation about organizationIndex
     """
     required_query_parameter_list = [
+        {
+            'name': 'organization_incoming_domain',
+            'value': 'string',  # boolean, integer, long, string
+            'description': 'The domain of the site. Example: ballot.newvirginiamajority.org, etc',
+        },
+
     ]
     optional_query_parameter_list = [
     ]
@@ -27,7 +33,7 @@ def organization_index_doc_template_values(url_root):
             "Return a customized index.html (as text). Add /ORGANIZATION_URL after organizationIndex in the URL. "
             "Ex/ https://api.wevoteusa.org/apis/v1/organizationIndex/www.domain.org",
         'try_now_link': 'apis_v1:organizationIndexView',
-        'try_now_link_additional_path': 'www.domain.org',
+        # 'try_now_link_additional_path': organization_incoming_domain,
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',

@@ -192,6 +192,8 @@ def retrieve_sql_files_from_master_server(request):
 
     for table_name in allowable_tables:
         print('Starting on the ' + table_name + ' table, requesting up to 1,000,000 rows')
+        # if table_name != 'ballot_ballotitem':
+        #     continue
         t1 = time.time()
         dt = 0
         start = 0
@@ -347,7 +349,7 @@ def csv_file_to_clean_csv_file2(table_name):
                     clean_row(row, 14)                      # measure_text
                     clean_row(row, 16)                      # no_vote_description
                     clean_row(row, 17)                      # yes_vote_description
-                    # dump_row_col_labels_and_errors(table_name, header, row, '2000060')
+                    # dump_row_col_labels_and_errors(table_name, header, row, '3000150')
                 elif table_name == "ballot_ballotreturned":
                     clean_row(row, 6)                       # text_for_map_search
                     substitute_null(row, 7, '0.0')          # latitude

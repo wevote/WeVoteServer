@@ -270,10 +270,10 @@
                     <th>Prevent&nbsp;Sharing&nbsp;Opinions:</th>
                     <td>{{organization.chosen_prevent_sharing_opinions|default_if_none:""}}</td>
                 </tr>
-            {% if organization.chosen_google_analytics_account_number %}
+            {% if organization.chosen_google_analytics_tracking_id %}
                 <tr>
                     <th>Google Analytics account number:</th>
-                    <td>{{organization.chosen_google_analytics_account_number|default_if_none:""}}</td>
+                    <td>{{organization.chosen_google_analytics_tracking_id|default_if_none:""}}</td>
                 </tr>
             {% endif %}
             {% if organization.chosen_html_verification_string %}
