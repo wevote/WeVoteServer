@@ -10,13 +10,13 @@
     <title>{{ html_title }}</title>
     <meta
       name="description"
-      content="{{ chosen_social_share_description|default_if_none:'' }}"
+      content="{{ chosen_social_share_description|default_if_none:"Vote for candidates you like. Oppose candidates you don't." }}"
     />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
   {% if chosen_domain_type_is_campaign  %}
-   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
   {% else %}
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   {% endif %}
@@ -27,7 +27,7 @@
     <meta property="og:url"           content="https://{{ organization_incoming_domain }}" />
     <meta property="og:type"          content="website" />
     <meta property="og:title"         content="{{ html_title }}" />
-    <meta property="og:description"   content="{{ chosen_social_share_description|default_if_none:'' }}" />
+    <meta property="og:description"   content="{{ chosen_social_share_description|default_if_none:"Vote for candidates you like. Oppose candidates you don't." }}" />
   {% if hide_social_share_image %}  <!-- Social Share image hidden //-->
   {% elif chosen_social_share_master_image_url_https %}
     <meta property="og:image"         content="{{ chosen_social_share_master_image_url_https }}" />
@@ -36,8 +36,12 @@
   {% else %}
     <meta property="og:image"        content="https://WeVote.US/img/global/logos/we-vote-logo-wordmark-vertical-color-on-white-256x256.png" />
   {% endif %}
-  <base href="/">
-  <link href="/css/main.css" rel="stylesheet" type="text/css" />
+    <base href="/">
+  {% if chosen_domain_type_is_campaign %}
+    <link href="https://campaigns.WeVote.US/css/main.css" rel="stylesheet" type="text/css" />
+  {% else %}
+    <link href="https://WeVote.US/css/main.css" rel="stylesheet" type="text/css" />
+  {% endif %}
   {% if hide_favicon %}  <!-- Favicon hidden //-->
   {% elif chosen_favicon_url_https %}
     <link rel="icon" sizes="32x32" href="{{ chosen_favicon_url_https }}" >

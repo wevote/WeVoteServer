@@ -206,7 +206,8 @@ def organization_index_view(request, organization_incoming_domain='', campaign_m
                     hide_social_share_image = False
 
             if features_provided_bitmap & CHOSEN_SOCIAL_SHARE_DESCRIPTION_ALLOWED:
-                html_title = organization.organization_name
+                html_title = organization.chosen_website_name if organization.chosen_website_name \
+                    else organization.organization_name
                 chosen_social_share_description = organization.chosen_social_share_description
 
             if features_provided_bitmap & CHOSEN_GOOGLE_ANALYTICS_ALLOWED:
