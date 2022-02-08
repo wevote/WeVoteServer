@@ -31,19 +31,18 @@
   {% if hide_social_share_image %}  <!-- Social Share image hidden //-->
   {% elif chosen_social_share_master_image_url_https %}
     <meta property="og:image"         content="{{ chosen_social_share_master_image_url_https }}" />
+  {% elif chosen_domain_type_is_campaign  %}
+    <meta property="og:image"       content="https://campaigns.WeVote.US/img/global/logos/we-vote-logo-wordmark-vertical-color-on-white-256x256.png" />
   {% else %}
-    {% if chosen_domain_type_is_campaign  %}
-      <meta property="og:image"       content="https://campaigns.WeVote.US/img/global/logos/we-vote-logo-wordmark-vertical-color-on-white-256x256.png" />
-      <meta property="og:image"        content="https://WeVote.US/img/global/logos/we-vote-logo-wordmark-vertical-color-on-white-256x256.png" />
-      <link rel="icon" sizes="48x48"   href="https://campaigns.WeVote.US/img/global/icons/favicon.ico" >
-    {% else %}
-      <link href="/css/main.css" rel="stylesheet" type="text/css" />
-    {% endif %}
+    <meta property="og:image"        content="https://WeVote.US/img/global/logos/we-vote-logo-wordmark-vertical-color-on-white-256x256.png" />
   {% endif %}
-    <base href="/">
+  <base href="/">
+  <link href="/css/main.css" rel="stylesheet" type="text/css" />
   {% if hide_favicon %}  <!-- Favicon hidden //-->
   {% elif chosen_favicon_url_https %}
     <link rel="icon" sizes="32x32" href="{{ chosen_favicon_url_https }}" >
+  {% elif chosen_domain_type_is_campaign %}
+    <link rel="icon" sizes="48x48"   href="https://campaigns.WeVote.US/img/global/icons/favicon.ico" >
   {% else %}
     <link rel="apple-touch-icon" sizes="180x180" href="/img/global/icons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="256x256" href="/img/global/icons/android-chrome-256x256.png">
@@ -57,6 +56,10 @@
     <div>
       <div id="app"></div>
     </div>
-    <script defer="defer" src="{{ main_js }}"></script>
+  {% if chosen_domain_type_is_campaign %}
+    <script defer="defer" src="https://campaigns.WeVote.US{{ main_js }}"></script>
+  {% else %}
+    <script defer="defer" src="https://WeVote.US{{ main_js }}"></script>
+  {% endif %}
   </body>
 </html>
