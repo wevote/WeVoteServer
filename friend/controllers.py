@@ -865,7 +865,7 @@ def friend_invitation_information_for_api(voter_device_id, invitation_secret_key
     friend_invitation_results = friend_manager.retrieve_friend_invitation_from_secret_key(
         invitation_secret_key, for_retrieving_information=True, read_only=True)
     if not friend_invitation_results['friend_invitation_found']:
-        status += "INVITATION_NOT_FOUND_FROM_SECRET_KEY "
+        status += "INVITATION_NOT_FOUND_FROM_SECRET_KEY-RETRIEVING_INFO "
         error_results = {
             'status':                   status,
             'success':                  True,
@@ -1054,7 +1054,7 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
     friend_invitation_results = friend_manager.retrieve_friend_invitation_from_secret_key(
         invitation_secret_key, for_accepting_friendship=True, read_only=False)
     if not friend_invitation_results['friend_invitation_found']:
-        status += "INVITATION_NOT_FOUND_FROM_SECRET_KEY "
+        status += "INVITATION_NOT_FOUND_FROM_SECRET_KEY2-ACCEPTING_FRIENDSHIP "
         error_results = {
             'status':                                       status,
             'success':                                      True,

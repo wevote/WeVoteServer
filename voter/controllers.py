@@ -1482,7 +1482,10 @@ def voter_address_retrieve_for_api(voter_device_id):  # voterAddressRetrieve
             'voter_device_id': voter_device_id,
         }
         return voter_address_retrieve_results
+    return voter_address_retrieve_for_voter_id(voter_id, voter_device_id)
 
+
+def voter_address_retrieve_for_voter_id(voter_id, voter_device_id=''):
     voter_address_manager = VoterAddressManager()
     results = voter_address_manager.retrieve_ballot_address_from_voter_id(voter_id)
 
@@ -2970,17 +2973,7 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
             we_vote_hosted_profile_image_url_medium = \
             get_displayable_images(voter, facebook_user)
 
-        # Make a best effort to get the text_for_map_search.  Adds 7ms to this API call with WeVoteServer running
-        # locally on a Mac, vs 500ms as a separate API call with queuing due to too many request channels from a browser
-        text_for_map_search = ""
-        try:
-            voter_address_manager = VoterAddressManager()
-            results = voter_address_manager.retrieve_ballot_address_from_voter_id(voter_id)
-            if results['voter_address_found']:
-                voter_address = results['voter_address']
-                text_for_map_search = voter_address.text_for_map_search if voter_address.text_for_map_search[0] else '',
-        except Exception as e:
-            pass
+        address_results = voter_address_retrieve_for_voter_id(voter_id)
 
         team_member_list = organization_manager.retrieve_team_member_list(
             can_edit_campaignx_owned_by_organization=True,
@@ -2994,6 +2987,7 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
         json_data = {
             'status':                           status,
             'success':                          True,
+            'address':                          address_results,
             'can_edit_campaignx_owned_by_organization_list': can_edit_campaignx_owned_by_organization_list,
             'date_joined':                      voter.date_joined.strftime('%Y-%m-%d %H:%M:%S'),
             'email':                            voter.email,
@@ -3025,7 +3019,7 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
             'signed_in_with_email':             voter.signed_in_with_email(),
             'signed_in_with_sms_phone_number':  voter.signed_in_with_sms_phone_number(),
             'state_code_from_ip_address':       state_code_from_ip_address,
-            'text_for_map_search':              text_for_map_search,
+            'text_for_map_search':              address_results['text_for_map_search'],
             'twitter_screen_name':              voter.twitter_screen_name,
             'voter_created':                    voter_created,
             'voter_device_id':                  voter_device_id,
