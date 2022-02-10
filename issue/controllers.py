@@ -296,7 +296,7 @@ def issue_descriptions_retrieve_for_api():  # issuesDescriptionsRetrieve
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def issues_retrieve_for_api(  # issuesRetrieve
+def issues_retrieve_for_api(  # issuesRetrieve  # DEPRECATED
         voter_device_id, sort_formula, google_civic_election_id=0,
         voter_issues_only=None,  # Deprecated
         include_voter_follow_status=None,
@@ -512,7 +512,8 @@ def issues_followed_retrieve_for_api(voter_device_id):  # issuesFollowedRetrieve
 
 def issues_under_ballot_items_retrieve_for_api(  # issuesUnderBallotItemsRetrieve
         google_civic_election_id=0,
-        ballot_location_shortcut=None, ballot_returned_we_vote_id=None):
+        ballot_location_shortcut=None,
+        ballot_returned_we_vote_id=None):
     """
     Used by the api
     :return:
@@ -583,7 +584,6 @@ def issues_under_ballot_items_retrieve_for_api(  # issuesUnderBallotItemsRetriev
 
     if positive_value_exists(all_issue_we_vote_ids) \
             and positive_value_exists(google_civic_election_id):
-        # Retrieve the issue_score_list for issues that the voter is following
         issue_list_results = retrieve_issues_under_ballot_items_list(all_issue_we_vote_ids, google_civic_election_id)
         issues_under_ballot_items_list = issue_list_results['issues_under_ballot_items_list']
 
@@ -761,6 +761,8 @@ def retrieve_issues_under_ballot_items_list(all_issue_we_vote_ids, google_civic_
     cached_issue_we_vote_ids_under_each_organization = {}  # key organization_we_vote_id, value list issue_we_vote_ids
     organizations_included_by_issue_list = {}  # key is issue_we_vote_id, value is list of organizations
     issue_we_vote_id_list_by_ballot_item_list = {}  # key is ballot_item_we_vote_id, value is list of issue_we_vote_ids
+    oppose_issue_we_vote_id_list = {}  # key is ballot_item_we_vote_id, value is list of issue_we_vote_ids opposing
+    support_issue_we_vote_id_list = {}  # key is ballot_item_we_vote_id, value is list of issue_we_vote_ids supporting
 
     organization_link_to_issue_list = OrganizationLinkToIssueList()
     # By issue, return a list of organization_we_vote_ids tagged with that issue
@@ -797,14 +799,33 @@ def retrieve_issues_under_ballot_items_list(all_issue_we_vote_ids, google_civic_
                         organization_link_to_issue_list.fetch_issue_we_vote_id_list_by_organization_we_vote_id(
                             one_position.organization_we_vote_id)
 
+                # Deprecate in late 2022
                 if one_position.candidate_campaign_we_vote_id not in issue_we_vote_id_list_by_ballot_item_list:
                     issue_we_vote_id_list_by_ballot_item_list[one_position.candidate_campaign_we_vote_id] = []
                 for issue_we_vote_id in \
                         cached_issue_we_vote_ids_under_each_organization[one_position.organization_we_vote_id]:
-                    if issue_we_vote_id \
-                            not \
-                            in issue_we_vote_id_list_by_ballot_item_list[one_position.candidate_campaign_we_vote_id]:
+                    if issue_we_vote_id not in \
+                            issue_we_vote_id_list_by_ballot_item_list[one_position.candidate_campaign_we_vote_id]:
                         issue_we_vote_id_list_by_ballot_item_list[one_position.candidate_campaign_we_vote_id].append(
+                            issue_we_vote_id)
+
+            if one_position.is_support_or_positive_rating():
+                if one_position.candidate_campaign_we_vote_id not in support_issue_we_vote_id_list:
+                    support_issue_we_vote_id_list[one_position.candidate_campaign_we_vote_id] = []
+                for issue_we_vote_id in \
+                        cached_issue_we_vote_ids_under_each_organization[one_position.organization_we_vote_id]:
+                    if issue_we_vote_id not in \
+                            support_issue_we_vote_id_list[one_position.candidate_campaign_we_vote_id]:
+                        support_issue_we_vote_id_list[one_position.candidate_campaign_we_vote_id].append(
+                            issue_we_vote_id)
+            elif one_position.is_oppose_or_negative_rating():
+                if one_position.candidate_campaign_we_vote_id not in oppose_issue_we_vote_id_list:
+                    oppose_issue_we_vote_id_list[one_position.candidate_campaign_we_vote_id] = []
+                for issue_we_vote_id in \
+                        cached_issue_we_vote_ids_under_each_organization[one_position.organization_we_vote_id]:
+                    if issue_we_vote_id not in \
+                            oppose_issue_we_vote_id_list[one_position.candidate_campaign_we_vote_id]:
+                        oppose_issue_we_vote_id_list[one_position.candidate_campaign_we_vote_id].append(
                             issue_we_vote_id)
 
         elif positive_value_exists(one_position.contest_measure_we_vote_id):
@@ -814,9 +835,18 @@ def retrieve_issues_under_ballot_items_list(all_issue_we_vote_ids, google_civic_
         issue_we_vote_id_list_for_one_ballot_item = \
             issue_we_vote_id_list_by_ballot_item_list[one_ballot_item_we_vote_id] \
             if one_ballot_item_we_vote_id in issue_we_vote_id_list_by_ballot_item_list else []
+        oppose_by_ballot_item_list = \
+            oppose_issue_we_vote_id_list[one_ballot_item_we_vote_id] \
+            if one_ballot_item_we_vote_id in oppose_issue_we_vote_id_list else []
+        support_by_ballot_item_list = \
+            support_issue_we_vote_id_list[one_ballot_item_we_vote_id] \
+            if one_ballot_item_we_vote_id in support_issue_we_vote_id_list else []
         one_ballot_item = {
-            "ballot_item_we_vote_id":               one_ballot_item_we_vote_id,
-            "issue_we_vote_id_list":                issue_we_vote_id_list_for_one_ballot_item,
+            "ballot_item_we_vote_id":   one_ballot_item_we_vote_id,  # DEPRECATE in late 2022
+            "ballot_item":              one_ballot_item_we_vote_id,
+            "issue_we_vote_id_list":    issue_we_vote_id_list_for_one_ballot_item,  # DEPRECATE in late 2022
+            "oppose":                   oppose_by_ballot_item_list,
+            "support":                  support_by_ballot_item_list,
         }
         issues_under_ballot_items_list.append(one_ballot_item)
 

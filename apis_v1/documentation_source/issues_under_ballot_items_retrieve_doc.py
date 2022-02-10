@@ -23,8 +23,17 @@ def issues_under_ballot_items_retrieve_doc_template_values(url_root):
                    '  "status": string,\n' \
                    '  "issues_under_ballot_items_list": list\n' \
                    '   [\n' \
-                   '     "ballot_item_we_vote_id": string,\n' \
-                   '     "issue_we_vote_id_list": list\n' \
+                   '     "ballot_item_we_vote_id": string DEPRECATE,\n' \
+                   '     "ballot_item": string,\n' \
+                   '     "issue_we_vote_id_list": list DEPRECATE\n' \
+                   '      [\n' \
+                   '         "issue_we_vote_id": string,\n' \
+                   '      ],\n' \
+                   '     "oppose": list\n' \
+                   '      [\n' \
+                   '         "issue_we_vote_id": string,\n' \
+                   '      ],\n' \
+                   '     "support": list\n' \
                    '      [\n' \
                    '         "issue_we_vote_id": string,\n' \
                    '      ],\n' \
