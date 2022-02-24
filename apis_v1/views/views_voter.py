@@ -396,9 +396,11 @@ def voter_address_save_view(request):  # voterAddressSave
     # Save the address value, and clear out ballot_saved information
     voter_address_manager = VoterAddressManager()
     voter_address_save_results = voter_address_manager.update_or_create_voter_address(
-        voter_id, BALLOT_ADDRESS, text_for_map_search, google_civic_election_id, voter_entered_address)
-    # TODO DALE 2017-07-17 This needs a fresh look:
-    # , google_civic_election_id
+        voter_id=voter_id,
+        address_type=BALLOT_ADDRESS,
+        raw_address_text=text_for_map_search,
+        google_civic_election_id=google_civic_election_id,
+        voter_entered_address=voter_entered_address)
 
     status += voter_address_save_results['status']
     # If simple_save is passed in only save address and then send response (you must pass in a google_civic_election_id)
@@ -421,8 +423,15 @@ def voter_address_save_view(request):  # voterAddressSave
         voter_address = voter_address_save_results['voter_address']
         use_test_election = False
 
-        turn_off_direct_voter_ballot_retrieve = False  # Search for this variable elsewhere
-        default_election_data_source_is_ballotpedia = True
+        # This code is for voterAddressSave. Similar code in voterBallotItemsRetrieve.
+        # Search for these variables elsewhere when updating code
+        turn_off_direct_voter_ballot_retrieve = False
+        default_election_data_source_is_ballotpedia = False
+        default_election_data_source_is_ctcl = False
+        default_election_data_source_is_google_civic = False
+        default_election_data_source_is_vote_usa = True
+        was_refreshed_from_ballotpedia_just_now = False
+        was_refreshed_from_vote_usa_just_now = False
         if positive_value_exists(simple_save):
             # Do not retrieve / return a ballot
             pass
@@ -435,12 +444,11 @@ def voter_address_save_view(request):  # voterAddressSave
             length_of_text_for_map_search = 0
             if isinstance(text_for_map_search, str):
                 length_of_text_for_map_search = len(text_for_map_search)
-            was_refreshed_from_ballotpedia_just_now = False
 
             # We don't want to call Ballotpedia when we just have "City, State ZIP". Since we don't always know
             #  whether we have a street address or not, then we use a simple string length cut-off.
             if length_of_text_for_map_search > length_at_which_we_suspect_address_has_street:
-                status += "TEXT_FOR_MAP_SEARCH_LONG_ENOUGH "
+                status += "ADDRESS_SAVE_BALLOTPEDIA_TEXT_FOR_MAP_SEARCH_LONG_ENOUGH "
                 # 1a) Get ballot data from Ballotpedia for the actual VoterAddress
                 ballotpedia_retrieve_results = voter_ballot_items_retrieve_from_ballotpedia_for_api_v4(
                     voter_device_id,
@@ -459,7 +467,7 @@ def voter_address_save_view(request):  # voterAddressSave
                     ballot_location_display_name = ballotpedia_retrieve_results['ballot_location_display_name']
                     ballot_returned_we_vote_id = ballotpedia_retrieve_results['ballot_returned_we_vote_id']
 
-                    # We update the voter_address with this google_civic_election_id outside of this function
+                    # We update the voter_address with this google_civic_election_id outside this function
 
                     # Save the meta information for this ballot data
                     save_results = voter_ballot_saved_manager.update_or_create_voter_ballot_saved(
@@ -483,9 +491,88 @@ def voter_address_save_view(request):  # voterAddressSave
                     status += save_results['status']
                     google_civic_election_id = ballotpedia_retrieve_results['google_civic_election_id']
             else:
-                status += "NOT_REACHING_OUT_TO_BALLOTPEDIA "
+                status += "NOT_REACHING_OUT_TO_BALLOTPEDIA_TEXT_NOT_LONG_ENOUGH "
+        elif default_election_data_source_is_vote_usa:
+            status += "VOTER_ADDRESS_SAVE-USING_VOTE_USA "
+            length_at_which_we_suspect_address_has_street = 25
+            length_of_text_for_map_search = 0
+            if isinstance(text_for_map_search, str):
+                length_of_text_for_map_search = len(text_for_map_search)
 
-            if not was_refreshed_from_ballotpedia_just_now:
+            # We don't want to call Vote USA when we just have "City, State ZIP".
+            # Since we don't always know whether we have a street address or not, then we use a
+            # simple string length cut-off.
+            if length_of_text_for_map_search > length_at_which_we_suspect_address_has_street:
+                status += "ADDRESS_SAVE_VOTE_USA_TEXT_FOR_MAP_SEARCH_LONG_ENOUGH "
+                # 1a) Get ballot data for the actual VoterAddress
+                from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_2021
+                vote_usa_results = voter_ballot_items_retrieve_from_google_civic_2021(
+                    voter_device_id,
+                    google_civic_election_id=google_civic_election_id,
+                    text_for_map_search=text_for_map_search,
+                    use_vote_usa=True)
+                status += vote_usa_results['status']
+                if not vote_usa_results['success']:
+                    pass
+                elif vote_usa_results['google_civic_election_id'] \
+                        and vote_usa_results['ballot_returned_found']:
+                    was_refreshed_from_vote_usa_just_now = True
+                    is_from_substituted_address = False
+                    substituted_address_nearby = ''
+                    is_from_test_address = False
+                    polling_location_we_vote_id_source = ''  # Not used when retrieving directly for the voter
+
+                    # These variables are needed below
+                    ballot_location_display_name = vote_usa_results['ballot_location_display_name']
+                    ballot_returned_we_vote_id = vote_usa_results['ballot_returned_we_vote_id']
+
+                    # We update the voter_address with this google_civic_election_id outside this function
+
+                    # Save the meta information for this ballot data
+                    save_results = voter_ballot_saved_manager.update_or_create_voter_ballot_saved(
+                        voter_id=voter_id,
+                        google_civic_election_id=vote_usa_results['google_civic_election_id'],
+                        state_code=vote_usa_results['state_code'],
+                        election_day_text=vote_usa_results['election_day_text'],
+                        election_description_text=vote_usa_results['election_description_text'],
+                        original_text_for_map_search=vote_usa_results['text_for_map_search'],
+                        substituted_address_nearby=substituted_address_nearby,
+                        is_from_substituted_address=is_from_substituted_address,
+                        is_from_test_ballot=is_from_test_address,
+                        polling_location_we_vote_id_source=polling_location_we_vote_id_source,
+                        ballot_location_display_name=vote_usa_results['ballot_location_display_name'],
+                        ballot_returned_we_vote_id=vote_usa_results['ballot_returned_we_vote_id'],
+                        ballot_location_shortcut=vote_usa_results['ballot_location_shortcut'],
+                        original_text_city=vote_usa_results['original_text_city'],
+                        original_text_state=vote_usa_results['original_text_state'],
+                        original_text_zip=vote_usa_results['original_text_zip'],
+                    )
+                    status += save_results['status']
+                    google_civic_election_id = save_results['google_civic_election_id'],
+            else:
+                status += "NOT_REACHING_OUT_TO_VOTE_USA "
+        elif default_election_data_source_is_google_civic:
+            # Reach out to Google and populate ballot items in the database with fresh ballot data
+            google_retrieve_results = voter_ballot_items_retrieve_from_google_civic_for_api(  # DEBUG=1
+                voter_device_id, text_for_map_search, use_test_election)
+
+            # Update voter_address with the google_civic_election_id retrieved from Google Civic
+            # and clear out ballot_saved information IFF we got a valid google_civic_election_id back
+            if google_retrieve_results['google_civic_election_id']:
+                google_civic_election_id = convert_to_int(google_retrieve_results['google_civic_election_id'])
+            else:
+                # Leave google_civic_election_id as it was at the top of this function
+                pass
+
+            if google_retrieve_results['ballot_location_display_name']:
+                ballot_location_display_name = google_retrieve_results['ballot_location_display_name']
+
+            if google_retrieve_results['ballot_returned_we_vote_id']:
+                ballot_returned_we_vote_id = google_retrieve_results['ballot_returned_we_vote_id']
+
+        if default_election_data_source_is_ballotpedia or default_election_data_source_is_vote_usa:
+            # If we did not retrieve a ballot from these ballot sources, then find a nearby ballot to return
+            if not was_refreshed_from_ballotpedia_just_now and not was_refreshed_from_vote_usa_just_now:
                 # 2) Find ballot data previously stored from a nearby address
                 ballot_returned_results = find_best_previously_stored_ballot_returned(voter_id, text_for_map_search)
                 status += ballot_returned_results['status']
@@ -544,25 +631,6 @@ def voter_address_save_view(request):  # voterAddressSave
                     )
                     status += save_results['status']
 
-        else:
-            # Reach out to Google and populate ballot items in the database with fresh ballot data
-            google_retrieve_results = voter_ballot_items_retrieve_from_google_civic_for_api(  # DEBUG=1
-                voter_device_id, text_for_map_search, use_test_election)
-
-            # Update voter_address with the google_civic_election_id retrieved from Google Civic
-            # and clear out ballot_saved information IFF we got a valid google_civic_election_id back
-            if google_retrieve_results['google_civic_election_id']:
-                google_civic_election_id = convert_to_int(google_retrieve_results['google_civic_election_id'])
-            else:
-                # Leave google_civic_election_id as it was at the top of this function
-                pass
-
-            if google_retrieve_results['ballot_location_display_name']:
-                ballot_location_display_name = google_retrieve_results['ballot_location_display_name']
-
-            if google_retrieve_results['ballot_returned_we_vote_id']:
-                ballot_returned_we_vote_id = google_retrieve_results['ballot_returned_we_vote_id']
-
         # At this point proceed to update google_civic_election_id whether it is a positive integer or zero
         # First retrieve the latest address, since it gets saved when we retrieve from google civic
         updated_address_results = voter_address_manager.retrieve_address(voter_address.id)
@@ -602,11 +670,11 @@ def voter_address_save_view(request):  # voterAddressSave
             'ballot_item_list':             [],
         }
     else:
-        # This does return the data twice, since the WebApp requests
-        # voterBallotItemRetrieve when voterAddressSave completes
-        json_data = voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_id,
-                                                        ballot_returned_we_vote_id)
-        json_data['simple_save'] = simple_save
+        json_data = voter_ballot_items_retrieve_for_api(
+            voter_device_id=voter_device_id,
+            google_civic_election_id=google_civic_election_id,
+            ballot_returned_we_vote_id=ballot_returned_we_vote_id)
+        json_data['simple_save'] = False
 
     json_data['address'] = {
         'text_for_map_search':          text_for_map_search_saved,

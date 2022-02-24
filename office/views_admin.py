@@ -4,9 +4,8 @@
 
 from .controllers import add_contest_office_name_to_next_spot, fetch_duplicate_office_count, \
     find_duplicate_contest_office, figure_out_office_conflict_values, merge_if_duplicate_offices, \
-    offices_import_from_master_server, offices_visiting_import_from_master_server
-from .models import ContestOffice, ContestOfficeListManager, ContestOfficeManager, CONTEST_OFFICE_UNIQUE_IDENTIFIERS, \
-    ContestOfficeVisitingOtherElection
+    offices_import_from_master_server
+from .models import ContestOffice, ContestOfficeListManager, ContestOfficeManager, CONTEST_OFFICE_UNIQUE_IDENTIFIERS
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.controllers import move_ballot_items_to_another_office
 from bookmark.models import BookmarkItemList
@@ -154,31 +153,6 @@ def offices_sync_out_view(request):  # officesSyncOut
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-# This page does not need to be protected.
-def offices_visiting_sync_out_view(request):  # officesVisitingSyncOut
-    host_google_civic_election_id = convert_to_int(request.GET.get('host_google_civic_election_id', 0))
-
-    try:
-        query = ContestOfficeVisitingOtherElection.objects.using('readonly').all()
-        if positive_value_exists(host_google_civic_election_id):
-            query = query.filter(host_google_civic_election_id=host_google_civic_election_id)
-        # get the data using values_list
-        contest_office_visiting_list_dict = query.values(
-            'contest_office_we_vote_id', 'ballotpedia_race_id',
-            'host_google_civic_election_id', 'origin_google_civic_election_id')
-        if contest_office_visiting_list_dict:
-            contest_office_visiting_list_json = list(contest_office_visiting_list_dict)
-            return HttpResponse(json.dumps(contest_office_visiting_list_json), content_type='application/json')
-    except ContestOfficeVisitingOtherElection.DoesNotExist:
-        pass
-
-    json_data = {
-        'success': False,
-        'status': 'OFFICES_VISITING_SYNC_OUT_VIEW-CONTEST_OFFICE_LIST_MISSING '
-    }
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
-
-
 @login_required
 def offices_import_from_master_server_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
@@ -194,18 +168,6 @@ def offices_import_from_master_server_view(request):
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
-
-    results = offices_visiting_import_from_master_server(
-        request, host_google_civic_election_id=google_civic_election_id)
-    if results['success']:
-        messages.add_message(request, messages.INFO, 'Offices Visiting import completed. '
-                                                     'Saved: {saved}, Updated: {updated}, '
-                                                     'Not processed: {not_processed}'
-                                                     ''.format(saved=results['saved'],
-                                                               updated=results['updated'],
-                                                               not_processed=results['not_processed']))
-    else:
-        messages.add_message(request, messages.ERROR, results['status'])
 
     results = offices_import_from_master_server(request, google_civic_election_id, state_code)
     if results['success']:
@@ -771,16 +733,6 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
         # This is fine, create new
         pass
 
-    # DALE 2020 We are going to leave this in place during the transition for debugging
-    contest_office_visiting_election_list = []
-    results = office_manager.retrieve_election_ids_office_is_visiting(
-        contest_office_we_vote_id=contest_office_we_vote_id)
-    if results['contest_office_visiting_list_found']:
-        contest_office_visiting_election_id_list = results['contest_office_visiting_election_id_list']
-        election_query = Election.objects.filter(google_civic_election_id__in=contest_office_visiting_election_id_list)\
-            .using('readonly')
-        contest_office_visiting_election_list = list(election_query)
-
     candidate_list_modified = []
     position_list_manager = PositionListManager()
     # Cache the full names of candidates for the root contest_office so we can check to see if possible duplicate
@@ -938,7 +890,6 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
             'office_search':            office_search,
             'office_search_results_list':   office_search_results_list_modified,
             'google_civic_election_id': google_civic_election_id,
-            'contest_office_visiting_election_list': contest_office_visiting_election_list,
         }
     else:
         template_values = {
@@ -946,28 +897,6 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
             'state_code':           state_code_for_template,
         }
     return render(request, 'office/office_summary.html', template_values)
-
-
-@login_required
-def delete_office_visiting_process_view(request):
-    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'political_data_manager'}
-    if not voter_has_authority(request, authority_required):
-        return redirect_to_sign_in_page(request, authority_required)
-
-    office_id = request.GET.get('office_id', '')
-    office_we_vote_id = request.GET.get('office_we_vote_id', '')
-    host_google_civic_election_id = convert_to_int(request.GET.get('host_google_civic_election_id', 0))
-
-    try:
-        ContestOfficeVisitingOtherElection.objects.filter(
-            contest_office_we_vote_id__iexact=office_we_vote_id,
-            host_google_civic_election_id=host_google_civic_election_id).delete()
-    except ContestOffice.MultipleObjectsReturned as e:
-        pass
-    except ContestOffice.DoesNotExist:
-        pass
-    return HttpResponseRedirect(reverse('office:office_summary', args=(office_id,)))
 
 
 @login_required

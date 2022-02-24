@@ -2140,6 +2140,7 @@ def find_candidate_endorsements_on_one_candidate_web_page(site_url, endorsement_
                                  'twitter.com',
                                  'wix.com',
                                  'wixsite.com',
+                                 'wordpress.com',
                                  'youtube.com'):
                             # We strip out straight 'wixsite.com', but not 'candidate.wixsite.com'
                             if organization_website_stripped in all_html_lower_case:
@@ -2256,6 +2257,7 @@ def find_candidate_endorsements_on_one_candidate_web_page(site_url, endorsement_
                                  'twitter.com',
                                  'wix.com',
                                  'wixsite.com',
+                                 'wordpress.com',
                                  'youtube.com'):
                             # We strip out straight 'wixsite.com', but not 'candidate.wixsite.com'
                             if organization_website_stripped in all_html_lower_case:
@@ -2425,6 +2427,7 @@ def organization_endorsements_scanner(endorsement_list_light, text_to_search_low
                              'twitter.com',
                              'wix.com',
                              'wixsite.com',
+                             'wordpress.com',
                              'youtube.com'):
                         # We strip out straight 'wixsite.com', but not 'candidate.wixsite.com'
                         if ballot_item_website_stripped in text_to_search_lower_case:

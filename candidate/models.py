@@ -2547,6 +2547,7 @@ class CandidateManager(models.Manager):
 
     def retrieve_candidate_from_vote_usa_variables(
             self,
+            candidate_year=0,
             vote_usa_politician_id='',
             vote_usa_office_id='',
             google_civic_election_id=0,
@@ -2558,8 +2559,10 @@ class CandidateManager(models.Manager):
         candidate_id = 0
         candidate_on_stage = None
         candidate_options_found = False
+        candidate_to_office_link_missing = False
         candidate_we_vote_id = ''
         candidate_we_vote_id_list = []
+        candidate_we_vote_id_to_link = None
         status = ""
         success = True
 
@@ -2569,6 +2572,7 @@ class CandidateManager(models.Manager):
             else:
                 candidate_query = CandidateCampaign.objects.all()
             candidate_query = candidate_query.filter(
+                candidate_year=candidate_year,
                 vote_usa_politician_id=vote_usa_politician_id,
                 vote_usa_office_id=vote_usa_office_id,
             )
@@ -2576,6 +2580,7 @@ class CandidateManager(models.Manager):
             candidate_we_vote_id_list = list(candidate_we_vote_id_query)
             if len(candidate_we_vote_id_list) > 1:
                 candidate_options_found = True
+                exception_multiple_object_returned = True
                 status += "CANDIDATE_LIST_FROM_VOTE_USA_POLITICIAN_RETRIEVED "
             elif len(candidate_we_vote_id_list) > 0:
                 candidate_options_found = True
@@ -2609,17 +2614,25 @@ class CandidateManager(models.Manager):
                             candidate_to_office_link.candidate_we_vote_id)
                 else:
                     candidate_found = False
+                    candidate_to_office_link_missing = True
+                    # Link to the first candidate found for this year
+                    try:
+                        candidate_we_vote_id_to_link = candidate_we_vote_id_list[0]
+                    except Exception as e:
+                        status += "NO_CANDIDATE_WE_VOTE_ID_FOUND_TO_LINK_TO: " + str(e) + " "
 
         results = {
-            'success':                  success,
-            'status':                   status,
-            'error_result':             error_result,
-            'DoesNotExist':             exception_does_not_exist,
-            'MultipleObjectsReturned':  exception_multiple_object_returned,
-            'candidate_found':          candidate_found,
-            'candidate_id':             candidate_id,
-            'candidate_we_vote_id':     candidate_we_vote_id,
-            'candidate':                candidate_on_stage,
+            'success':                          success,
+            'status':                           status,
+            'error_result':                     error_result,
+            'DoesNotExist':                     exception_does_not_exist,
+            'MultipleObjectsReturned':          exception_multiple_object_returned,
+            'candidate_found':                  candidate_found,
+            'candidate_id':                     candidate_id,
+            'candidate_to_office_link_missing': candidate_to_office_link_missing,
+            'candidate_we_vote_id':             candidate_we_vote_id,
+            'candidate_we_vote_id_to_link':     candidate_we_vote_id_to_link,
+            'candidate':                        candidate_on_stage,
         }
         return results
 
