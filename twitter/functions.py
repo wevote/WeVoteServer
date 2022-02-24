@@ -37,7 +37,7 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
     twitter_user_suspended_by_twitter = False
     write_to_server_logs = False
 
-    # December 2021: Using the Twitter 1.1 API for OAuthHandler, since since all other 2.0 apis that we need are not
+    # December 2021: Using the Twitter 1.1 API for OAuthHandler, since all other 2.0 apis that we need are not
     # yet available.
     # client = tweepy.Client(
     #     consumer_key=TWITTER_CONSUMER_KEY,

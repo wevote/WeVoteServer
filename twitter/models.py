@@ -24,6 +24,8 @@ class TwitterLinkToOrganization(models.Model):
     """
     This is the link between a Twitter account and an organization
     """
+    DoesNotExist = None
+    objects = None
     organization_we_vote_id = models.CharField(verbose_name="we vote id for the org owner", max_length=255, unique=True)
     twitter_id = models.BigIntegerField(verbose_name="twitter big integer id", null=True, unique=True)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=False, auto_now=True)
@@ -63,6 +65,8 @@ class TwitterLinkToVoter(models.Model):
     """
     This is the link between a Twitter account and a We Vote voter account
     """
+    DoesNotExist = None
+    objects = None
     voter_we_vote_id = models.CharField(verbose_name="we vote id for the voter owner", max_length=255, unique=True)
     twitter_id = models.BigIntegerField(verbose_name="twitter big integer id", null=False, unique=True)
     secret_key = models.CharField(
@@ -102,6 +106,8 @@ class TwitterLinkPossibility(models.Model):
     """
     These are Twitter Accounts that might match a candidate or organization
     """
+    MultipleObjectsReturned = None
+    objects = None
     candidate_campaign_we_vote_id = models.CharField(verbose_name="candidate we vote id", max_length=255, unique=False)
 
     search_term_used = models.CharField(verbose_name="", max_length=255, unique=False)
@@ -127,6 +133,9 @@ class TwitterUser(models.Model):
     """
     We cache the Twitter info for one handle here.
     """
+    DoesNotExist = None
+    MultipleObjectsReturned = None
+    objects = None
     twitter_id = models.BigIntegerField(verbose_name="twitter big integer id", null=True, blank=True)
     twitter_handle = models.CharField(verbose_name='twitter screen name / handle',
                                       max_length=255, null=False, unique=True)
@@ -225,7 +234,9 @@ class TwitterUserManager(models.Manager):
             twitter_link_possibility_id=0,
             candidate_campaign_we_vote_id='',
             twitter_handle='',
-            defaults={}):
+            defaults=None):
+        if defaults is None:
+            defaults = {}
         status = ""
         try:
             if positive_value_exists(twitter_link_possibility_id):
@@ -805,7 +816,10 @@ class TwitterUserManager(models.Manager):
         twitter_ids_i_follow = list()
         try:
             cursor = tweepy.Cursor(
-                api.friends_ids, id=twitter_id_of_me, count=TWITTER_FRIENDS_IDS_MAX_LIMIT, since_id=twitter_next_cursor)
+                api.get_friend_ids,
+                user_id=twitter_id_of_me,
+                count=TWITTER_FRIENDS_IDS_MAX_LIMIT,
+                cursor=twitter_next_cursor)
             for twitter_ids in cursor.pages():
                 twitter_next_cursor += len(twitter_ids)
                 twitter_ids_i_follow.extend(twitter_ids)
@@ -1116,7 +1130,7 @@ class TwitterUserManager(models.Manager):
 
     def update_or_create_twitter_user(
             self,
-            twitter_json={},
+            twitter_json=None,
             twitter_id=None,
             cached_twitter_profile_image_url_https=None,
             cached_twitter_profile_background_image_url_https=None,
@@ -1137,6 +1151,8 @@ class TwitterUserManager(models.Manager):
         :param we_vote_hosted_profile_image_url_tiny
         :return:
         """
+        if twitter_json is None:
+            twitter_json = {}
         status = ""
         values_changed = False
 
@@ -1316,6 +1332,7 @@ class Tweet(models.Model):
     """
     # twitter_tweet_id # (unique id from twitter for tweet?) - TODO ADD This
     # author_twitter_id - TODO ADD This
+    objects = None
     author_handle = models.CharField(default='', max_length=15, verbose_name='twitter handle of this tweet\'s author')
     twitter_id = models.BigIntegerField(default=0, verbose_name='twitter user\'s id of this tweet\'s author')
     tweet_id = models.BigIntegerField(default=0, verbose_name='id of this tweet\'s author')
@@ -1351,6 +1368,8 @@ class TwitterWhoIFollow(models.Model):
     """
     Other Twitter ids that I follow, from the perspective of twitter id of me
     """
+    DoesNotExist = None
+    objects = None
     twitter_id_of_me = models.BigIntegerField(verbose_name="twitter id of viewer", null=False, unique=False)
     twitter_id_i_follow = models.BigIntegerField(verbose_name="twitter id of the friend", null=False, unique=False)
     # organization_found = models.BooleanField(verbose_name="organization found in twitterLinkToOrganization",
@@ -1361,6 +1380,8 @@ class TwitterCursorState(models.Model):
     """
     Maintaining next cursor state of twitter ids that i follow
     """
+    DoesNotExist = None
+    objects = None
     twitter_id_of_me = models.BigIntegerField(verbose_name="twitter id of viewer", null=False, unique=False)
     twitter_api_name = models.CharField(verbose_name="twitter api name", max_length=255, null=False, unique=False)
     twitter_next_cursor = models.BigIntegerField(verbose_name="twitter next cursor state", null=False, unique=False)
