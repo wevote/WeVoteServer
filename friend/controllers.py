@@ -954,14 +954,14 @@ def friend_invitation_information_for_api(voter_device_id, invitation_secret_key
             return error_results
 
     if positive_value_exists(sender_voter_we_vote_id):
-        voter_results = voter_manager.retrieve_voter_by_we_vote_id(sender_voter_we_vote_id)
-        if voter_results['voter_found']:
+        voter_friend_results = voter_manager.retrieve_voter_by_we_vote_id(sender_voter_we_vote_id)
+        if voter_friend_results['voter_found']:
             friend_we_vote_id = sender_voter_we_vote_id
-            voter = voter_results['voter']
-            friend_first_name = voter.first_name
-            friend_last_name = voter.last_name
-            friend_image_url_https_tiny = voter.we_vote_hosted_profile_image_url_tiny
-            friend_organization_we_vote_id = voter.linked_organization_we_vote_id
+            voter_friend = voter_friend_results['voter']
+            friend_first_name = voter_friend.first_name
+            friend_last_name = voter_friend.last_name
+            friend_image_url_https_tiny = voter_friend.we_vote_hosted_profile_image_url_tiny
+            friend_organization_we_vote_id = voter_friend.linked_organization_we_vote_id
 
             follow_issue_list_manager = FollowIssueList()
             friend_issue_we_vote_id_list = \

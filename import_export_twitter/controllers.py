@@ -536,7 +536,7 @@ def refresh_twitter_candidate_details(candidate):
     we_vote_image_manager = WeVoteImageManager()
 
     if not candidate:
-        status += "TWITTER_CANDIDATE_DETAILS_NOT_RETRIEVED-CANDIDATE_MISSING "
+        status += "TWITTER_DETAILS_NOT_RETRIEVED-CANDIDATE_MISSING "
         results = {
             'success':                  False,
             'status':                   status,
@@ -544,12 +544,12 @@ def refresh_twitter_candidate_details(candidate):
         return results
 
     if candidate.candidate_twitter_handle:
-        status += "TWITTER_CANDIDATE_DETAILS-REACHING_OUT_TO_TWITTER "
+        status += "CANDIDATE_REACHING_OUT_TO_TWITTER: " + str(candidate.candidate_twitter_handle) + " "
         twitter_user_id = 0
         results = retrieve_twitter_user_info(twitter_user_id, candidate.candidate_twitter_handle)
 
         if results['success']:
-            status += "TWITTER_CANDIDATE_DETAILS_RETRIEVED_FROM_TWITTER "
+            status += "DETAILS_RETRIEVED_FROM_TWITTER "
 
             # Get original image url for cache original size image
             twitter_profile_image_url_https = we_vote_image_manager.twitter_profile_image_url_https_original(
@@ -602,10 +602,13 @@ def refresh_twitter_candidate_details(candidate):
             try:
                 candidate.candidate_twitter_updates_failing = True
                 candidate.save()
+                status += "HANDLE_NOT_FOUND_OR_SUSPENDED "
             except Exception as e:
                 status += "COULD_NOT_MARK_TWITTER_UPDATES_FAILING: " + str(e) + " "
+        else:
+            status += "ERROR_RETRIEVE_NOT_SUCCESSFUL "
     else:
-        status += "TWITTER_CANDIDATE_DETAILS-CLEARING_DETAILS "
+        status += "TWITTER_CANDIDATE_DETAILS_CLEARING "
         save_candidate_results = candidate_manager.clear_candidate_twitter_details(candidate)
 
     results = {
@@ -1094,7 +1097,7 @@ def retrieve_and_update_candidates_needing_twitter_update(
         candidate_list = candidate_queryset[:number_of_candidates_limit]
 
         candidates_updated = 0
-        status += "RETRIEVE_UPDATE_DATA_FROM_TWITTER_LOOP-TOTAL: " + str(candidates_to_update) + " "
+        status += "UPDATE_FROM_TWITTER_LOOP_TOTAL: " + str(candidates_to_update) + " "
         remote_request_history_manager = RemoteRequestHistoryManager()
         for candidate in candidate_list:
             results = refresh_twitter_candidate_details(candidate)

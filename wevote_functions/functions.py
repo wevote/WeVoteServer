@@ -1484,12 +1484,12 @@ def positive_value_exists(value):
             return bool(value is not None)
         if isinstance(value, str):
             return bool(len(value))
-
-        value = float(value)
-        if value <= 0:
-            return False
+        if not isinstance(value, tuple):
+            value = float(value)
+            if value <= 0:
+                return False
     except ValueError:
-        pass
+        return False
     return bool(value)
 
 

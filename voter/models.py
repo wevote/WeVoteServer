@@ -3405,6 +3405,7 @@ class VoterDeviceLink(models.Model):
     state_code = models.CharField(verbose_name="us state the device is most recently active in",
                                   max_length=255, null=True)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)  # last_updated
+    date_election_last_changed = models.DateTimeField(null=True)  # last_updated
     # secret_code is a six digit number that can be sent via text or email to sign in
     secret_code = models.CharField(verbose_name="single use secret code tied to this device", max_length=6, null=True)
     # We store a random string for email and another for sms that allows us to tie an unverified email or sms to a voter
@@ -3769,9 +3770,16 @@ class VoterDeviceLinkManager(models.Manager):
     def update_voter_device_link_with_sms_secret_key(self, voter_device_link, sms_secret_key=False):
         return self.update_voter_device_link(voter_device_link, sms_secret_key=sms_secret_key)
 
-    def update_voter_device_link(self, voter_device_link, voter_object=None, google_civic_election_id=0, state_code='',
-                                 generate_new_secret_code=False, delete_secret_code=False,
-                                 email_secret_key=False, sms_secret_key=False):
+    def update_voter_device_link(
+            self,
+            voter_device_link,
+            voter_object=None,
+            google_civic_election_id=0,
+            state_code='',
+            generate_new_secret_code=False,
+            delete_secret_code=False,
+            email_secret_key=False,
+            sms_secret_key=False):
         """
         Update existing voter_device_link with a new voter_id or google_civic_election_id
         """
@@ -3787,9 +3795,11 @@ class VoterDeviceLinkManager(models.Manager):
                 if voter_object and positive_value_exists(voter_object.id):
                     voter_device_link.voter_id = voter_object.id
                 if positive_value_exists(google_civic_election_id):
+                    voter_device_link.date_election_last_changed = now()
                     voter_device_link.google_civic_election_id = google_civic_election_id
                 elif google_civic_election_id == 0:
                     # If set literally to 0, save it
+                    voter_device_link.date_election_last_changed = None
                     voter_device_link.google_civic_election_id = 0
                 if positive_value_exists(state_code):
                     voter_device_link.state_code = state_code

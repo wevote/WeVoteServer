@@ -113,6 +113,167 @@ def retrieve_from_vote_usa_api_election_query():
     return results
 
 
+def retrieve_vote_usa_ballot_items_for_one_voter_api(
+        google_civic_election_id,
+        election_day_text="",
+        ballot_returned=None,
+        state_code=""):
+    """
+    We are telling the server to explicitly reach out to the Vote USA API and retrieve the ballot items
+    for this voter.
+    """
+    status = ""
+    success = True
+    ballot_items_count = 0
+    ballot_returned_we_vote_id = ''
+    try:
+        latitude = ballot_returned.latitude
+        longitude = ballot_returned.longitude
+        text_for_map_search = ballot_returned.text_for_map_search
+        voter_id = ballot_returned.voter_id
+    except Exception as e:
+        status += "FAILED_TO_GET_VALUES_FROM_BALLOT_RETURNED: " + str(e) + " "
+        success = False
+        latitude = 0.0
+        longitude = 0.0
+        text_for_map_search = ''
+        voter_id = 0
+
+    if not positive_value_exists(VOTE_USA_VOTER_INFO_URL):
+        status += 'NO VOTE_USA_API_SAMPLE_BALLOT_ELECTIONS_URL '
+        success = False
+
+    if not success:
+        results = {
+            'status':                       status,
+            'success':                      False,
+            'google_civic_election_id':     google_civic_election_id,
+            'state_code':                   "",
+            'election_day_text':            "",
+            'election_description_text':    "",
+            'election_data_retrieved':      False,
+            'text_for_map_search':          text_for_map_search,
+            'original_text_city':           '',
+            'original_text_state':          '',
+            'original_text_zip':            '',
+            'polling_location_retrieved':   False,
+            'ballot_returned_found':        False,
+            'ballot_location_display_name': "",
+            'ballot_location_shortcut':     "",
+            'ballot_returned':              None,
+            'ballot_returned_we_vote_id':   "",
+        }
+        return results
+
+    # ######
+    # ############
+    try:
+        api_key = VOTE_USA_API_KEY
+        # Get the ballot info at this address
+        response = requests.get(
+            VOTE_USA_VOTER_INFO_URL,
+            headers=HEADERS_FOR_VOTE_USA_API_CALL,
+            params={
+                "accessKey": api_key,
+                "electionDay": election_day_text,
+                "latitude": latitude,
+                "longitude": longitude,
+                "state": state_code,
+            })
+        one_ballot_json = json.loads(response.text)
+    except Exception as e:
+        one_ballot_json = {}
+        success = False
+        status += 'VOTE_USA_API_END_POINT_CRASH: ' + str(e) + ' '
+        log_entry_message = status
+
+    ballot_returned_found = False
+    try:
+        # Use Vote USA API call counter to track the number of queries we are doing each day
+        api_counter_manager = VoteUSAApiCounterManager()
+        api_counter_manager.create_counter_entry(
+            VOTE_USA_VOTER_INFO_QUERY_TYPE,
+            google_civic_election_id=google_civic_election_id)
+
+        if 'contests' in one_ballot_json:
+            update_or_create_rules = {
+                'create_candidates': True,
+                'create_offices': True,
+                'create_measures': True,
+                'update_candidates': False,
+                'update_offices': False,
+                'update_measures': False,
+            }
+            from import_export_google_civic.controllers import groom_and_store_google_civic_ballot_json_2021
+            groom_results = groom_and_store_google_civic_ballot_json_2021(
+                one_ballot_json,
+                google_civic_election_id=google_civic_election_id,
+                state_code=state_code,
+                voter_id=voter_id,
+                election_day_text=election_day_text,
+                # existing_offices_by_election_dict=existing_offices_by_election_dict,
+                # existing_candidate_objects_dict=existing_candidate_objects_dict,
+                # existing_candidate_to_office_links_dict=existing_candidate_to_office_links_dict,
+                # existing_measure_objects_dict=existing_measure_objects_dict,
+                # new_office_we_vote_ids_list=new_office_we_vote_ids_list,
+                # new_candidate_we_vote_ids_list=new_candidate_we_vote_ids_list,
+                # new_measure_we_vote_ids_list=new_measure_we_vote_ids_list,
+                update_or_create_rules=update_or_create_rules,
+                use_vote_usa=True,
+                )
+            success = groom_results['success']
+            status += groom_results['status']
+            ballot_item_dict_list = groom_results['ballot_item_dict_list']
+
+            ballot_returned_manager = BallotReturnedManager()
+            ballot_items_count = len(ballot_item_dict_list)
+            results = ballot_returned_manager.retrieve_ballot_returned_from_voter_id(
+                voter_id=voter_id,
+                google_civic_election_id=google_civic_election_id,
+            )
+            status += results['status']
+            if results['ballot_returned_found']:
+                status += "UPDATE_OR_CREATE_BALLOT_RETURNED1-VOTE_USA-SUCCESS "
+                ballot_returned = results['ballot_returned']
+                ballot_returned_we_vote_id = ballot_returned.we_vote_id
+                ballot_returned_found = True
+            else:
+                status += "UPDATE_OR_CREATE_BALLOT_RETURNED1-VOTE_USA-BALLOT_RETURNED_FOUND-FALSE "
+
+            from import_export_google_civic.controllers import store_ballot_item_dict_list
+            results = store_ballot_item_dict_list(
+                ballot_item_dict_list=ballot_item_dict_list,
+                google_civic_election_id=google_civic_election_id,
+                voter_id=voter_id,
+                state_code=state_code
+            )
+    except Exception as e:
+        success = False
+        status += 'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS_API_V4-VOTE_USA-ERROR: ' + str(e) + ' '
+        handle_exception(e, logger=logger, exception_message=status)
+
+    results = {
+        'status': status,
+        'success': success,
+        'google_civic_election_id': google_civic_election_id,
+        'state_code': state_code,
+        'election_day_text': election_day_text,
+        'election_description_text': "",
+        'election_data_retrieved': bool(ballot_items_count),
+        'text_for_map_search': text_for_map_search,
+        'original_text_city': '',
+        'original_text_state': '',
+        'original_text_zip': '',
+        'polling_location_retrieved': False,
+        'ballot_returned_found': ballot_returned_found,
+        'ballot_location_display_name': "",
+        'ballot_location_shortcut': "",
+        'ballot_returned': ballot_returned,
+        'ballot_returned_we_vote_id': ballot_returned_we_vote_id,
+    }
+    return results
+
+
 def retrieve_vote_usa_ballot_items_from_polling_location_api(
         google_civic_election_id=0,
         election_day_text="",

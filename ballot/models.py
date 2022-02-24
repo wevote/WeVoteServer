@@ -266,7 +266,7 @@ class BallotItemManager(models.Manager):
 
     def update_or_create_ballot_item_for_voter(
             self,
-            voter_id,
+            voter_id=0,
             google_civic_election_id='',
             google_ballot_placement=None,
             ballot_item_display_name='',
@@ -1871,9 +1871,10 @@ class BallotReturnedManager(models.Manager):
     def retrieve_ballot_returned_from_voter_id(self, voter_id, google_civic_election_id):
         ballot_returned_id = 0
         ballot_returned_manager = BallotReturnedManager()
-        return ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(ballot_returned_id,
-                                                                                       google_civic_election_id,
-                                                                                       voter_id)
+        return ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(
+            ballot_returned_id,
+            google_civic_election_id,
+            voter_id)
 
     def retrieve_ballot_returned_from_polling_location_we_vote_id(self, polling_location_we_vote_id,
                                                                   google_civic_election_id):
@@ -1997,7 +1998,7 @@ class BallotReturnedManager(models.Manager):
             status += "BALLOT_RETURNED_NOT_FOUND "
         except Exception as e:
             success = False
-            status += "COULD_NOT_RETRIEVE_BALLOT_RETURNED-EXCEPTION "
+            status += "COULD_NOT_RETRIEVE_BALLOT_RETURNED-EXCEPTION: " + str(e) + " "
 
         results = {
             'success':                  success,
@@ -2182,6 +2183,7 @@ class BallotReturnedManager(models.Manager):
             }
             return results
 
+        google_civic_election_id = convert_to_int(google_civic_election_id)
         # We assume that we tried to find an entry for this voter or polling_location
         try:
             ballot_returned_id = 0
@@ -2209,10 +2211,12 @@ class BallotReturnedManager(models.Manager):
                 if 'normalized_line2' in updates:
                     ballot_returned.normalized_line2 = updates['normalized_line2']
                     text_for_map_search += ballot_returned.normalized_line2 + ", "
-                ballot_returned.normalized_city = updates['normalized_city']
-                text_for_map_search += ballot_returned.normalized_city + ", "
-                ballot_returned.normalized_state = updates['normalized_state']
-                text_for_map_search += ballot_returned.normalized_state + " "
+                if 'normalized_city' in updates:
+                    ballot_returned.normalized_city = updates['normalized_city']
+                    text_for_map_search += ballot_returned.normalized_city + ", "
+                if 'normalized_state' in updates:
+                    ballot_returned.normalized_state = updates['normalized_state']
+                    text_for_map_search += ballot_returned.normalized_state + " "
                 if 'zip' in updates:
                     ballot_returned.normalized_zip = updates['normalized_zip']
                     text_for_map_search += ballot_returned.normalized_zip
@@ -2338,7 +2342,7 @@ class BallotReturnedManager(models.Manager):
                 success = False
 
         except Exception as e:
-            status += "UNABLE_TO_UPDATE_BALLOT_RETURNED_WITH_NORMALIZED_VALUES_EXCEPTION "
+            status += "UNABLE_TO_UPDATE_BALLOT_RETURNED_WITH_NORMALIZED_VALUES_EXCEPTION: " + str(e) + " "
             success = False
 
         results = {
@@ -2695,7 +2699,7 @@ class BallotReturnedManager(models.Manager):
             ballot_returned_found = True
             status += 'BALLOT_RETURNED_FOUND '
         else:
-            status += 'NO_STORED_BALLOT_MATCHES_STATE {}. '.format(state_code)
+            status += 'NO_STORED_BALLOT_MATCHES_STATE: {}. '.format(state_code)
             # Now Try the search again without the limitation of the state_code
             if location is not None and positive_value_exists(google_civic_election_id):
                 # If here, then the geocoder successfully found the address

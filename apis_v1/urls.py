@@ -25,7 +25,7 @@ from issue.views_admin import issue_descriptions_retrieve_view, issues_followed_
     issues_sync_out_view, issues_retrieve_view, issues_under_ballot_items_retrieve_view, \
     retrieve_issues_to_follow_view, organization_link_to_issue_sync_out_view, test_real_time_update
 from measure.views_admin import measures_sync_out_view
-from office.views_admin import offices_sync_out_view, offices_visiting_sync_out_view
+from office.views_admin import offices_sync_out_view
 from organization.views_admin import organizations_sync_out_view
 from politician.views_admin import politicians_sync_out_view
 from polling_location.views_admin import polling_locations_sync_out_view
@@ -154,8 +154,6 @@ urlpatterns = [
               name='measureListForUpcomingElectionsRetrieveView'),
       re_path(r'^officeRetrieve/', views_misc.office_retrieve_view, name='officeRetrieveView'),
       re_path(r'^officesSyncOut/', offices_sync_out_view, name='officesSyncOutView'),
-      re_path(r'^officesVisitingSyncOut/', offices_visiting_sync_out_view,
-              name='officesVisitingSyncOutView'),
       re_path(r'^organizationAnalyticsByVoter/',
               views_organization.organization_analytics_by_voter_view,
               name='organizationAnalyticsByVoterView'),
