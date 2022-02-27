@@ -716,7 +716,10 @@ class TwitterUserManager(models.Manager):
         # Is this twitter_handle already stored locally? If so, return that
         twitter_results = self.retrieve_twitter_user(twitter_user_id, twitter_handle, read_only=read_only)
         if twitter_results['twitter_user_found']:
-            return twitter_results
+            twitter_user = twitter_results['twitter_user']
+            if positive_value_exists(twitter_user.twitter_profile_image_url_https):
+                # If we have sufficient values, stop here. Otherwise, retrieve from Twitter again.
+                return twitter_results
         else:
             status += "TWITTER_USER_NOT_FOUND_LOCALLY "
 
@@ -731,6 +734,7 @@ class TwitterUserManager(models.Manager):
                 twitter_second_results = self.retrieve_twitter_user(twitter_user.twitter_id,
                                                                     twitter_user.twitter_handle)
                 if twitter_second_results['twitter_user_found']:
+                    status += "TWITTER_USER_FOUND_LOCALLY2: " + twitter_second_results['status']
                     return twitter_second_results
                 else:
                     status += "TWITTER_USER_NOT_FOUND_LOCALLY2: " + twitter_second_results['status']

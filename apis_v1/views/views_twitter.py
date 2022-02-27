@@ -53,7 +53,6 @@ def twitter_identity_retrieve_view(request):  # twitterIdentityRetrieve
         'owner_we_vote_id':                         results['owner_we_vote_id'],
         'owner_id':                                 results['owner_id'],
         'google_civic_election_id':                 results['google_civic_election_id'],
-        # These values only returned if kind_of_owner == TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE
         'twitter_description':                      results['twitter_description'],
         'twitter_followers_count':                  results['twitter_followers_count'],
         'twitter_photo_url':                        results['twitter_photo_url'],
@@ -62,6 +61,7 @@ def twitter_identity_retrieve_view(request):  # twitterIdentityRetrieve
         'we_vote_hosted_profile_image_url_tiny':    results['we_vote_hosted_profile_image_url_tiny'],
         'twitter_profile_banner_url_https':         results['twitter_profile_banner_url_https'],
         'twitter_user_website':                     results['twitter_user_website'],
+        'twitter_id':                               results['twitter_id'],
         'twitter_name':                             results['twitter_name'],
         }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -245,6 +245,7 @@ def twitter_process_deferred_images_view(request):  # twitterProcessDeferredImag
     :return:
     """
     results = twitter_process_deferred_images_for_api(
+        organization_we_vote_id=request.GET.get('organization_we_vote_id'),
         status=request.GET.get('status'),
         success=request.GET.get('success'),
         twitter_id=request.GET.get('twitter_id'),
