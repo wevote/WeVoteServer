@@ -321,6 +321,9 @@ class OrganizationManager(models.Manager):
             twitter_id='',
             organization_type='',
             state_served_code=None,
+            twitter_profile_background_image_url_https=None,
+            twitter_profile_banner_url_https=None,
+            twitter_profile_image_url_https=None,
             we_vote_hosted_profile_image_url_large='',
             we_vote_hosted_profile_image_url_medium='',
             we_vote_hosted_profile_image_url_tiny=''):
@@ -344,7 +347,7 @@ class OrganizationManager(models.Manager):
                 twitter_location = twitter_user.twitter_location
                 twitter_followers_count = twitter_user.twitter_followers_count if \
                     positive_value_exists(twitter_user.twitter_followers_count) else 0
-                twitter_profile_image_url_https = twitter_user.twitter_profile_background_image_url_https
+                twitter_profile_image_url_https = twitter_user.twitter_profile_image_url_https
                 twitter_profile_background_image_url_https = twitter_user.twitter_profile_background_image_url_https
                 twitter_profile_banner_url_https = twitter_user.twitter_profile_banner_url_https
                 twitter_description = twitter_user.twitter_description
@@ -384,6 +387,9 @@ class OrganizationManager(models.Manager):
                     organization_image=organization_image,
                     organization_type=organization_type,
                     state_served_code=state_served_code,
+                    twitter_profile_image_url_https=twitter_profile_image_url_https,
+                    twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
+                    twitter_profile_banner_url_https=twitter_profile_banner_url_https,
                     we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
                     we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
                     we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny

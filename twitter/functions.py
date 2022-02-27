@@ -62,20 +62,22 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
 
     twitter_handle_found = False
     twitter_json = {}
+    from wevote_functions.functions import convert_to_int
+    twitter_user_id = convert_to_int(twitter_user_id)
     try:
-        if positive_value_exists(twitter_user_id):
-            twitter_user = api.get_user(user_id=twitter_user_id)
-            twitter_json = twitter_user._json
-            success = True
-            # status += 'TWITTER_USER_ID_SUCCESS-' + str(twitter_user_id) + " "
-            twitter_handle_found = True
-        elif positive_value_exists(twitter_handle):
+        if positive_value_exists(twitter_handle):
             twitter_user = api.get_user(screen_name=twitter_handle)
             twitter_json = twitter_user._json
             success = True
             # status += 'TWITTER_HANDLE_SUCCESS-' + str(twitter_handle) + " "
             twitter_handle_found = True
             twitter_user_id = twitter_user.id  # Integer value. id_str would be the String value
+        elif positive_value_exists(twitter_user_id):
+            twitter_user = api.get_user(user_id=twitter_user_id)
+            twitter_json = twitter_user._json
+            success = True
+            # status += 'TWITTER_USER_ID_SUCCESS-' + str(twitter_user_id) + " "
+            twitter_handle_found = True
         else:
             twitter_json = {}
             success = False

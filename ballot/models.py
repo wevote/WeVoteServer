@@ -2680,19 +2680,22 @@ class BallotReturnedManager(models.Manager):
                             else:
                                 more_elections_exist = False
                 else:
-                    past_google_civic_election_id = self.fetch_last_election_in_this_state(state_code)
-                    if positive_value_exists(past_google_civic_election_id):
-                        # Limit the search to the most recent election with ballot items
-                        ballot_returned_query = ballot_returned_query.filter(
-                            google_civic_election_id=past_google_civic_election_id)
-                    try:
-                        ballot = ballot_returned_query.first()
-                    except Exception as e:
-                        ballot = None
-                        status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_HAS_PAST_GOOGLE_CIVIC_ID: " + str(e) + ' '
-                    # ballot_returned_list = list(ballot_returned_query)
-                    # if len(ballot_returned_list):
-                    #     ballot = ballot_returned_list[0]
+                    ballot = None
+                    status += "NOT_LOOKING_FOR_PREVIOUS_ELECTION "
+                    # We no longer want to automatically return the previous election for this voter
+                    # past_google_civic_election_id = self.fetch_last_election_in_this_state(state_code)
+                    # if positive_value_exists(past_google_civic_election_id):
+                    #     # Limit the search to the most recent election with ballot items
+                    #     ballot_returned_query = ballot_returned_query.filter(
+                    #         google_civic_election_id=past_google_civic_election_id)
+                    # try:
+                    #     ballot = ballot_returned_query.first()
+                    # except Exception as e:
+                    #     ballot = None
+                    #     status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_HAS_PAST_GOOGLE_CIVIC_ID: " + str(e) + ' '
+                    # # ballot_returned_list = list(ballot_returned_query)
+                    # # if len(ballot_returned_list):
+                    # #     ballot = ballot_returned_list[0]
 
         if ballot is not None:
             ballot_returned = ballot
