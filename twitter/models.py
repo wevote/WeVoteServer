@@ -816,7 +816,6 @@ class TwitterUserManager(models.Manager):
                 if response and response.data:
                     lst = response.data
                     for i in range(len(lst)):
-                        print (lst[i].username)
                         list_of_usernames.append(lst[i].username)
             status = "TWEEPY_LOADED_" + str(len(list_of_usernames)) + "_TWITTER_USERNAMES "
             success = True
