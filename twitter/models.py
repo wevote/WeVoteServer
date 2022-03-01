@@ -811,8 +811,8 @@ class TwitterUserManager(models.Manager):
         list_of_usernames = []
         client = tweepy.Client(bearer_token=TWITTER_BEARER_TOKEN, wait_on_rate_limit=True)
         try:
-            id = twitter_id_of_me
-            for response in tweepy.Paginator(client.get_users_following, id, max_results=1000, limit=5000):
+            tid = twitter_id_of_me
+            for response in tweepy.Paginator(client.get_users_following, tid, max_results=1000, limit=5000):
                 if response and response.data:
                     lst = response.data
                     for i in range(len(lst)):
