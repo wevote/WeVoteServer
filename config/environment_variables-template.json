@@ -170,6 +170,7 @@
   "TWITTER_CONSUMER_SECRET":        "",
   "TWITTER_ACCESS_TOKEN":           "",
   "TWITTER_ACCESS_TOKEN_SECRET":    "",
+  "TWITTER_BEARER_TOKEN":           "",
 
   "_comment":                       "import_export_vote_smart",
   "VOTE_SMART_API_KEY":             "",
