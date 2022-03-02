@@ -12,10 +12,7 @@ from exception.models import handle_record_found_more_than_one_exception
 from twitter.functions import retrieve_twitter_user_info
 from wevote_functions.functions import convert_to_int, generate_random_string, positive_value_exists
 
-TWITTER_CONSUMER_KEY = get_environment_variable("TWITTER_CONSUMER_KEY")
-TWITTER_CONSUMER_SECRET = get_environment_variable("TWITTER_CONSUMER_SECRET")
-TWITTER_FRIENDS_IDS_MAX_LIMIT = 5000
-TWITTER_API_NAME_FRIENDS_ID = "friends_ids"
+TWITTER_BEARER_TOKEN = get_environment_variable("TWITTER_BEARER_TOKEN")
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -800,37 +797,29 @@ class TwitterUserManager(models.Manager):
 
     def retrieve_twitter_ids_i_follow_from_twitter(self, twitter_id_of_me, twitter_access_token, twitter_access_secret):
         """
-        We use this routine to retrieve twitter ids who i follow and updating the next cursor state in
-        TwitterCursorState table
+        We use this routine to retrieve twitter ids who i (the voter) follow
+        3/1/22: TwitterCursorState and Cursor is not currently used, we load the first 5000 "follows" in line
+        3/1/22: This can take a 1/4 to 2 seconds to execute, but does not block/slow down login on the WebApp
         :param twitter_id_of_me:
         :param twitter_access_token:
         :param twitter_access_secret:
         :return: twitter_ids_i_follow
         """
-        auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
-        auth.set_access_token(twitter_access_token, twitter_access_secret)
-        api = tweepy.API(auth, wait_on_rate_limit=True, timeout=60)
 
-        twitter_next_cursor_state_results = self.retrieve_twitter_next_cursor_state(twitter_id_of_me)
-        status = twitter_next_cursor_state_results['status']
-        twitter_next_cursor = twitter_next_cursor_state_results['twitter_next_cursor']
-        if TWITTER_FRIENDS_IDS_MAX_LIMIT <= twitter_next_cursor:
-            twitter_next_cursor = 0
-
-        twitter_ids_i_follow = list()
+        status = ""
+        success = False
+        list_of_usernames = []
+        client = tweepy.Client(bearer_token=TWITTER_BEARER_TOKEN, wait_on_rate_limit=True)
         try:
-            cursor = tweepy.Cursor(
-                api.get_friend_ids,
-                user_id=twitter_id_of_me,
-                count=TWITTER_FRIENDS_IDS_MAX_LIMIT,
-                cursor=twitter_next_cursor)
-            for twitter_ids in cursor.pages():
-                twitter_next_cursor += len(twitter_ids)
-                twitter_ids_i_follow.extend(twitter_ids)
+            tid = twitter_id_of_me
+            for response in tweepy.Paginator(client.get_users_following, tid, max_results=1000, limit=5000):
+                if response and response.data:
+                    lst = response.data
+                    for i in range(len(lst)):
+                        list_of_usernames.append(lst[i].username)
+            status = "TWEEPY_LOADED_" + str(len(list_of_usernames)) + "_TWITTER_USERNAMES "
             success = True
-            twitter_next_cursor_state = self.create_twitter_next_cursor_state(
-                twitter_id_of_me, TWITTER_API_NAME_FRIENDS_ID, twitter_next_cursor)
-            status = status + ' ' + twitter_next_cursor_state['status']
+
         except tweepy.TooManyRequests:
             success = False
             status += ' RETRIEVE_TWITTER_IDS_I_FOLLOW_RATE_LIMIT_ERROR '
@@ -847,8 +836,8 @@ class TwitterUserManager(models.Manager):
         results = {
             'success':              success,
             'status':               status + ' RETRIEVE_TWITTER_IDS_I_FOLLOW_COMPLETED ',
-            'twitter_next_cursor':  twitter_next_cursor,
-            'twitter_ids_i_follow': twitter_ids_i_follow,
+            'twitter_next_cursor':  "",
+            'twitter_ids_i_follow': list_of_usernames,
         }
         return results
 
