@@ -1,34 +1,22 @@
-{# templates/office/office_list.html #}
+{# templates/office/offices_copy.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Offices{% endblock %}
+{% block title %}Copy Offices &amp; Candidates{% endblock %}
 
 {%  block content %}
 
-<h1>Offices</h1>
+<h1>Copy Offices &amp; Candidates to Another Election</h1>
 
-<p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CONTEST_OFFICE&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-      target="_blank">
-        Import New Offices <span class="glyphicon glyphicon-new-window"></span></a>
-</p>
-
-<p><a href="{% url 'office:office_new' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Add New Office</a></p>
-<p>
-    <a href="{% url 'position:refresh_positions_with_contest_office_details_for_election' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-    Refresh Positions from Contest Office info for this election</a>,
-    <a href="{% url 'office:office_list' %}?fix_office_district_ids=1&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&office_search={{ office_search }}">
-    Fix District IDs</a>
-</p>
-
-<form name="organization_position_choose_election" method="get" action="{% url 'office:office_list' %}">
+<form name="organization_position_choose_election" method="get" action="{% url 'office:offices_copy_to_another_election' %}">
     {% csrf_token %}
     {% if election_list %}
-        <select id="google_civic_election_id" name="google_civic_election_id">
-            <option value="0" {% if 0 == google_civic_election_id %} selected="selected"{% endif %}>
+        Copy From:
+        <select id="from_google_civic_election_id" name="from_google_civic_election_id">
+            <option value="0" {% if 0 == from_google_civic_election_id %} selected="selected"{% endif %}>
                 -- Filter by Election --</option>
         {% for election in election_list %}
             <option value="{{ election.google_civic_election_id }}"
-                    {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+                    {% if election.google_civic_election_id|slugify == from_google_civic_election_id|slugify %} selected="selected"{% endif %}>
                 {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
         {% endfor %}
         </select>
@@ -101,24 +89,56 @@
     </label>
     &nbsp;&nbsp;&nbsp;&nbsp;
 
-    {% if office_list %}
-    {% if google_civic_election_id %}
+    {#  #}
+    <label for="show_offices_with_zero_candidates_in_to_election_id">
+      <input type="checkbox" name="show_offices_with_zero_candidates_in_to_election" id="show_offices_with_zero_candidates_in_to_election_id" value="1"
+             {% if show_offices_with_zero_candidates_in_to_election %}checked{% endif %} /> Show "no candidate" offices (in "to" election)
+    </label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <div style='clear:both'></div>
+    <br />
+
+    {% if election_list %}
+        Copy To:
+        <select id="to_google_civic_election_id" name="to_google_civic_election_id">
+            <option value="0" {% if 0 == to_google_civic_election_id %} selected="selected"{% endif %}>
+                -- Filter by Election --</option>
+        {% for election in election_list %}
+            <option value="{{ election.google_civic_election_id }}"
+                    {% if election.google_civic_election_id|slugify == to_google_civic_election_id|slugify %} selected="selected"{% endif %}>
+                {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
+        {% endfor %}
+        </select>
+    {% endif %}{# End of if election_list #}
+    {% if to_google_civic_election_id and from_google_civic_election_id != to_google_civic_election_id %}
+        <label for="confirm_copy_offices_id">
+            <input type="checkbox" name="confirm_copy_offices" id="confirm_copy_offices_id" value="1"/>
+            Confirm and start copying offices?
+        </label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+        <label for="confirm_copy_candidates_id">
+            <input type="checkbox" name="confirm_copy_candidates" id="confirm_copy_candidates_id" value="1"/>
+            Start copying candidates?
+        </label>
+    {% endif %}
+    <div style='clear:both'></div>
+    <br />
+
+    {% if office_display_list %}
+        {% if google_civic_election_id %}
     <ul>
         <li>Prepare: <a href="{% url 'election:election_summary_by_google_id' google_civic_election_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
                         target="_blank" >
-          Jump to Election so we can retrieve Offices and Candidates from Ballotpedia <span class="glyphicon glyphicon-new-window"></span></a></li>
+        Jump to Election so we can retrieve Offices and Candidates from Ballotpedia <span class="glyphicon glyphicon-new-window"></span></a></li>
         <li>Prepare: <a href="{% url 'office:find_and_merge_duplicate_offices' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
                         target="_blank" >
-          Find and Merge Duplicate Contest Offices for this Election <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
-        <li>Prepare: <a href="{% url 'office:offices_copy_to_another_election' %}?from_google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}{% if show_all_elections %}&show_all_elections=1{% endif %}"
-                        target="_blank" >
-          Copy Offices from this Election to another <span class="glyphicon glyphicon-new-window"></span></a></li>
+        Find and Merge Duplicate Contest Offices for this Election <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
     </ul>
+        {% endif %}
     {% endif %}
-{% endif %}
 </form>{#  End of organization_position_choose_election form #}
 
-{% if office_list %}
+{% if office_display_list %}
 <form name="office_list_markings" method="post" action="{% url 'office:office_list_process' %}">
     {% csrf_token %}
     <div class="form-group pull-right">
@@ -145,7 +165,7 @@
     <input type="hidden" name="office_search" value="{{ office_search }}">
 
     <table class="table">
-    {% for office in office_list %}
+    {% for office in office_display_list %}
     {% if forloop.counter == 1 or forloop.counter|divisibleby:16 %}
     {# Show the header every ~15 lines #}
       <thead>
@@ -160,7 +180,6 @@
             <th>State</th>
             <th>District</th>
             <th># of Candidates</th>
-            <th>Public Positions</th>
             <th>Battleground</th>
             <th>IDs</th>
             <th>Select</th>
@@ -187,7 +206,6 @@
                 {% if office.ballotpedia_district_id %}BP: {{ office.ballotpedia_district_id|default_if_none:"" }}<br />{% endif %}
             </td>
             <td>{{ office.candidate_count }}</td>
-            <td>{{ office.positions_count }}</td>
             <td>{{ office.is_battleground_race|default_if_none:"" }}</td>
             <td>
                 {% if office.ocd_division_id %}{{ office.ocd_division_id|default_if_none:"" }}<br />{% endif %}
@@ -211,7 +229,22 @@
 
     <script>
     $(function() {
-        $('#google_civic_election_id').change(function() {
+        $('#confirm_copy_candidates_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#confirm_copy_offices_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#from_google_civic_election_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#to_google_civic_election_id').change(function() {
             this.form.submit();
         });
     });
@@ -237,6 +270,11 @@
     });
     $(function() {
         $('#show_marquee_or_battleground_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#show_offices_with_zero_candidates_in_to_election_id').change(function() {
             this.form.submit();
         });
     });

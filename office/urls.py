@@ -22,6 +22,8 @@ urlpatterns = [
         views_admin.offices_import_from_master_server_view, name='offices_import_from_master_server'),
     re_path(r'^merge/$', views_admin.office_merge_process_view, name='office_merge_process'),
     re_path(r'^new/$', views_admin.office_new_view, name='office_new'),
+    re_path(r'^offices_copy/$',
+        views_admin.offices_copy_to_another_election_view, name='offices_copy_to_another_election'),
     re_path(r'^(?P<office_id>[0-9]+)/edit/$', views_admin.office_edit_view, name='office_edit'),
     re_path(r'^(?P<contest_office_we_vote_id>wv[\w]{2}off[\w]+)/edit/$',
         views_admin.office_edit_view, name='office_edit_we_vote_id'),

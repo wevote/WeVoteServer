@@ -381,12 +381,23 @@
                 <td>
                 <span class="u-no-break">
                   {% if candidate.office %}
-                    <a href="{% url 'office:office_summary' candidate.office.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">{{ candidate.office.office_name }}
-                    {% if candidate.office.district_id %}
-                        - District {{ candidate.office.district_id }}
-                    {% endif %}
+                    <a href="{% url 'office:office_summary' candidate.office.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+                        {{ candidate.office.office_name }}
                     </a><br />
                     {{ candidate.office.we_vote_id }}
+                    {% if candidate.office.district_name or candidate.office.district_id %}
+                      <br />
+                      <span style="color: darkgray">
+                    {% endif %}
+                        {% if candidate.office.district_name %}
+                            {{ candidate.office.district_name }}
+                        {% endif %}
+                        {% if candidate.office.district_id %}
+                            - District {{ candidate.office.district_id }}
+                        {% endif %}
+                    {% if candidate.office.district_name or candidate.office.district_id %}
+                      </span>
+                    {% endif %}
                   {% else %}
                       (office missing)
                   {% endif %}
