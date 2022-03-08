@@ -10,7 +10,7 @@ from admin_tools.views import redirect_to_sign_in_page
 from ballot.controllers import move_ballot_items_to_another_office
 from bookmark.models import BookmarkItemList
 from candidate.controllers import move_candidates_to_another_office
-from candidate.models import CandidateCampaign, CandidateListManager, fetch_candidate_count_for_office
+from candidate.models import CandidateCampaign, CandidateListManager, CandidateManager, fetch_candidate_count_for_office
 from config.base import get_environment_variable
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -154,6 +154,316 @@ def offices_sync_out_view(request):  # officesSyncOut
 
 
 @login_required
+def offices_copy_to_another_election_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    confirm_copy_candidates = positive_value_exists(request.GET.get('confirm_copy_candidates', False))
+    confirm_copy_offices = positive_value_exists(request.GET.get('confirm_copy_offices', False))
+    from_google_civic_election_id = request.GET.get('from_google_civic_election_id', 0)
+    from_google_civic_election_id = convert_to_int(from_google_civic_election_id)
+    has_ctcl_data = positive_value_exists(request.GET.get('has_ctcl_data', False))
+    has_vote_usa_data = positive_value_exists(request.GET.get('has_vote_usa_data', False))
+    office_search = request.GET.get('office_search', '')
+    race_office_level = request.GET.get('race_office_level', '')
+    show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
+    show_marquee_or_battleground = request.GET.get('show_marquee_or_battleground', False)
+    show_offices_with_zero_candidates_in_to_election = \
+        positive_value_exists(request.GET.get('show_offices_with_zero_candidates_in_to_election', False))
+    state_code = request.GET.get('state_code', "")
+    to_google_civic_election_id = request.GET.get('to_google_civic_election_id', 0)
+    to_google_civic_election_id = convert_to_int(to_google_civic_election_id)
+
+    office_display_list = []
+    office_display_list_found = False
+    office_list_count = 0
+    office_processing_list = []
+    status = ''
+
+    # We only want to process if a google_civic_election_id comes in
+    if not positive_value_exists(from_google_civic_election_id):
+        messages.add_message(request, messages.ERROR, "Google Civic Election ID required.")
+        return HttpResponseRedirect(reverse('office:office_list', args=()))
+
+    # Whether we are just displaying some offices, or actually doing the conversion, we want to retrieve
+    try:
+        office_queryset = ContestOffice.objects.all()
+
+        if show_offices_with_zero_candidates_in_to_election:
+            office_queryset = office_queryset.filter(google_civic_election_id=to_google_civic_election_id)
+        else:
+            office_queryset = office_queryset.filter(google_civic_election_id=from_google_civic_election_id)
+
+        from django.db.models.functions import Length
+        if positive_value_exists(has_ctcl_data):
+            office_queryset = \
+                office_queryset.annotate(ctcl_uuid_length=Length('ctcl_uuid'))\
+                .filter(ctcl_uuid_length__gt=1)
+        if positive_value_exists(has_vote_usa_data):
+            office_queryset = \
+                office_queryset.annotate(vote_usa_office_id_length=Length('vote_usa_office_id'))\
+                .filter(vote_usa_office_id_length__gt=1)
+        if positive_value_exists(race_office_level):
+            office_queryset = office_queryset.filter(ballotpedia_race_office_level__iexact=race_office_level)
+        if positive_value_exists(state_code):
+            office_queryset = office_queryset.filter(state_code__iexact=state_code)
+        if positive_value_exists(show_marquee_or_battleground):
+            office_queryset = office_queryset.filter(Q(ballotpedia_is_marquee=True) | Q(is_battleground_race=True))
+        office_queryset = office_queryset.order_by("office_name")
+
+        if positive_value_exists(office_search):
+            search_words = office_search.split()
+            for one_word in search_words:
+                filters = []  # Reset for each search word
+                new_filter = Q(ballotpedia_office_id__iexact=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(ballotpedia_race_id__iexact=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(office_name__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(vote_usa_office_id__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(we_vote_id__iexact=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(wikipedia_id__icontains=one_word)
+                filters.append(new_filter)
+
+                # Add the first query
+                if len(filters):
+                    final_filters = filters.pop()
+
+                    # ...and "OR" the remaining items in the list
+                    for item in filters:
+                        final_filters |= item
+
+                    office_queryset = office_queryset.filter(final_filters)
+
+        office_list_count = office_queryset.count()
+        office_processing_list = list(office_queryset)
+
+        office_display_list = list(office_queryset[:50])
+
+        if len(office_display_list):
+            office_display_list_found = True
+            status += 'OFFICES_RETRIEVED '
+            success = True
+        else:
+            status += 'NO_OFFICES_RETRIEVED '
+            success = True
+    except ContestOffice.DoesNotExist:
+        # No offices found. Not a problem.
+        status += 'NO_OFFICES_FOUND_DoesNotExist '
+        office_display_list = []
+        success = True
+    except Exception as e:
+        status += 'FAILED retrieve_all_offices_for_upcoming_election ' \
+                 '{error} [type: {error_type}]'.format(error=e, error_type=type(e)) + " "
+        success = False
+
+    updated_office_display_list = []
+    offices_with_zero_candidates_count = 0
+    if show_offices_with_zero_candidates_in_to_election:
+        if office_processing_list:
+            for office in office_processing_list:
+                office.candidate_count = fetch_candidate_count_for_office(office.id)
+                if office.candidate_count == 0:
+                    offices_with_zero_candidates_count += 1
+                    if offices_with_zero_candidates_count <= 50:
+
+                        updated_office_display_list.append(office)
+    else:
+        if office_display_list_found:
+            for office in office_display_list:
+                office.candidate_count = fetch_candidate_count_for_office(office.id)
+                updated_office_display_list.append(office)
+
+    candidates_linked_count = 0
+    offices_copied_count = 0
+    if positive_value_exists(to_google_civic_election_id) and \
+            (positive_value_exists(confirm_copy_candidates) or positive_value_exists(confirm_copy_offices)):
+        import copy
+        # Loop through the contest offices in this election
+        candidate_list_manager = CandidateListManager()
+        candidate_manager = CandidateManager()
+        office_list_manager = ContestOfficeListManager()
+        office_save_status = ''
+        office_save_success = True
+        if show_offices_with_zero_candidates_in_to_election:
+            pass
+        else:
+            for contest_office in office_processing_list:
+                if not office_save_success:
+                    break
+                from_contest_office_we_vote_id = contest_office.we_vote_id
+                to_contest_office_we_vote_id = ''
+                to_state_code = None
+                office_created = False
+                office_found = False
+
+                # Search in the new "to" election for this office
+                results = office_list_manager.retrieve_contest_offices_from_non_unique_identifiers(
+                    ballotpedia_race_id=contest_office.ballotpedia_race_id,
+                    ctcl_uuid=contest_office.ctcl_uuid,
+                    contest_office_name=contest_office.office_name,
+                    google_civic_election_id=to_google_civic_election_id,
+                    incoming_state_code=contest_office.state_code,
+                    vote_usa_office_id=contest_office.vote_usa_office_id,
+                    read_only=True,
+                )
+                if results['success']:
+                    office_found = results['contest_office_found'] or results['contest_office_list_found']
+                    if office_found:
+                        to_contest_office_we_vote_id = results['contest_office'].we_vote_id
+                    office_search_success = True
+                else:
+                    office_search_success = False
+                    status += results['status']
+
+                if office_search_success and not office_found:
+                    if confirm_copy_offices:
+                        try:
+                            new_contest_office = copy.deepcopy(contest_office)
+                            new_contest_office.ballotpedia_election_id = None
+                            new_contest_office.ballotpedia_id = None
+                            new_contest_office.ballotpedia_race_id = None
+                            new_contest_office.google_civic_election_id = to_google_civic_election_id
+                            new_contest_office.google_civic_election_id_new = convert_to_int(to_google_civic_election_id)
+                            new_contest_office.is_ballotpedia_general_election = False
+                            new_contest_office.is_ballotpedia_general_runoff_election = False
+                            new_contest_office.is_ballotpedia_primary_election = False
+                            new_contest_office.is_ballotpedia_primary_runoff_election = False
+                            new_contest_office.pk = None
+                            new_contest_office.we_vote_id = None
+                            new_contest_office.save()
+
+                            to_contest_office_we_vote_id = new_contest_office.we_vote_id
+                            office_created = True
+
+                            offices_copied_count += 1
+                        except Exception as e:
+                            office_save_success = False
+                            office_save_status += "FAILED_COPY: " + str(e) + " "
+                            success = False
+                if office_search_success and (office_found or office_created) and \
+                        positive_value_exists(to_contest_office_we_vote_id):
+                    if confirm_copy_candidates:
+                        # How many "from" candidates? If only one, proceed
+                        candidate_to_copy_we_vote_id = ''
+                        only_one_to_copy = False
+                        # Retrieve from "from" election
+                        candidate_results = candidate_list_manager.retrieve_all_candidates_for_office(
+                            office_we_vote_id=from_contest_office_we_vote_id)
+                        if candidate_results['success']:
+                            if candidate_results['candidate_list_found']:
+                                candidate_list = candidate_results['candidate_list']
+                                if len(candidate_list) == 1:
+                                    only_one_to_copy = True
+                                    candidate_to_copy_we_vote_id = candidate_list[0].we_vote_id
+                                    to_state_code = candidate_list[0].state_code
+
+                        if only_one_to_copy and positive_value_exists(candidate_to_copy_we_vote_id):
+                            # See if the "from" candidate is linked to the "to" election. If not, link.
+                            link_results = candidate_manager.retrieve_candidate_to_office_link(
+                                candidate_we_vote_id=candidate_to_copy_we_vote_id,
+                                contest_office_we_vote_id=to_contest_office_we_vote_id,
+                                google_civic_election_id=to_google_civic_election_id,
+                            )
+                            if link_results['success']:
+                                if not link_results['list_found'] and not link_results['only_one_found']:
+                                    # Link not found. Create new link.
+                                    new_link_results = candidate_manager.get_or_create_candidate_to_office_link(
+                                        candidate_we_vote_id=candidate_to_copy_we_vote_id,
+                                        contest_office_we_vote_id=to_contest_office_we_vote_id,
+                                        google_civic_election_id=to_google_civic_election_id,
+                                        state_code=to_state_code,
+                                    )
+                                    if new_link_results['success']:
+                                        candidates_linked_count += 1
+                                    else:
+                                        status += "FAILED_LINK: " + new_link_results['status']
+                            else:
+                                status += "FAILED_LINK_RETRIEVE: " + link_results['status']
+
+    election_manager = ElectionManager()
+    if positive_value_exists(show_all_elections):
+        results = election_manager.retrieve_elections()
+        election_list = results['election_list']
+    else:
+        results = election_manager.retrieve_upcoming_elections()
+        election_list = results['election_list']
+
+    # Make sure we always include the current election in the election_list, even if it is older
+    if positive_value_exists(from_google_civic_election_id):
+        this_election_found = False
+        for one_election in election_list:
+            if convert_to_int(one_election.google_civic_election_id) == convert_to_int(from_google_civic_election_id):
+                this_election_found = True
+                break
+        if not this_election_found:
+            results = election_manager.retrieve_election(from_google_civic_election_id)
+            if results['election_found']:
+                election = results['election']
+                election_list.append(election)
+
+    state_list = STATE_CODE_MAP
+    state_list_modified = {}
+    office_list_manager = ContestOfficeListManager()
+    for one_state_code, one_state_name in state_list.items():
+        office_count = office_list_manager.fetch_office_count(from_google_civic_election_id, one_state_code)
+        state_name_modified = one_state_name
+        if positive_value_exists(office_count):
+            state_name_modified += " - " + str(office_count)
+            state_list_modified[one_state_code] = state_name_modified
+        elif str(one_state_code.lower()) == str(state_code.lower()):
+            state_name_modified += " - 0"
+            state_list_modified[one_state_code] = state_name_modified
+        else:
+            # Do not include state in drop-down if there aren't any offices in that state
+            pass
+    sorted_state_list = sorted(state_list_modified.items())
+
+    office_list_count_str = f'{office_list_count:,}'
+
+    status_print_list = ""
+    status_print_list += "office_list_count: " + office_list_count_str + " "
+
+    if confirm_copy_offices:
+        status_print_list += "offices_copied_count: " + str(offices_copied_count) + " "
+    if confirm_copy_candidates:
+        status_print_list += "candidates_linked_count: " + str(candidates_linked_count) + " "
+    if show_offices_with_zero_candidates_in_to_election:
+        status_print_list += "offices_with_zero_candidates_count: " + str(offices_with_zero_candidates_count) + " "
+    if not success:
+        status_print_list += "NOT success: " + status + " "
+
+    messages.add_message(request, messages.INFO, status_print_list)
+
+    template_values = {
+        'election_list':                    election_list,
+        'from_google_civic_election_id':    from_google_civic_election_id,
+        'has_ctcl_data':                    has_ctcl_data,
+        'has_vote_usa_data':                has_vote_usa_data,
+        'office_display_list':              updated_office_display_list,
+        'office_search':                    office_search,
+        'race_office_level':                race_office_level,
+        'show_all_elections':               show_all_elections,
+        'show_offices_with_zero_candidates_in_to_election': show_offices_with_zero_candidates_in_to_election,
+        'show_marquee_or_battleground':     show_marquee_or_battleground,
+        'state_code':                       state_code,
+        'state_list':                       sorted_state_list,
+        'to_google_civic_election_id':      to_google_civic_election_id,
+    }
+    return render(request, 'office/offices_copy.html', template_values)
+
+
+@login_required
 def offices_import_from_master_server_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'admin'}
@@ -201,6 +511,7 @@ def office_list_view(request):
     has_ctcl_data = positive_value_exists(request.GET.get('has_ctcl_data', False))
     has_vote_usa_data = positive_value_exists(request.GET.get('has_vote_usa_data', False))
     office_search = request.GET.get('office_search', '')
+    race_office_level = request.GET.get('race_office_level', '')
     show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
     show_marquee_or_battleground = request.GET.get('show_marquee_or_battleground', False)
     state_code = request.GET.get('state_code', '')
@@ -242,6 +553,8 @@ def office_list_view(request):
             office_queryset = \
                 office_queryset.annotate(vote_usa_office_id_length=Length('vote_usa_office_id'))\
                 .filter(vote_usa_office_id_length__gt=1)
+        if positive_value_exists(race_office_level):
+            office_queryset = office_queryset.filter(ballotpedia_race_office_level__iexact=race_office_level)
         if positive_value_exists(state_code):
             office_queryset = office_queryset.filter(state_code__iexact=state_code)
         if positive_value_exists(show_marquee_or_battleground):
@@ -282,7 +595,7 @@ def office_list_view(request):
 
         office_list_count = office_queryset.count()
 
-        office_queryset = office_queryset[:500]
+        office_queryset = office_queryset[:200]
         office_list = list(office_queryset)
 
         if len(office_list):
@@ -371,6 +684,7 @@ def office_list_view(request):
         'messages_on_stage':        messages_on_stage,
         'office_list':              updated_office_list,
         'office_search':            office_search,
+        'race_office_level':        race_office_level,
         'show_all_elections':       show_all_elections,
         'show_marquee_or_battleground': show_marquee_or_battleground,
         'state_code':               state_code,

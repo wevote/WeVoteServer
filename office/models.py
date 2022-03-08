@@ -1419,6 +1419,21 @@ class ContestOfficeListManager(models.Manager):
             incoming_state_code='',
             read_only=False,
             vote_usa_office_id=None):
+        """
+        This function is for when we are looking for one office. See 'retrieve_possible_duplicate_offices'
+        when searching for duplicates using less strict criteria.
+        :param ballotpedia_race_id:
+        :param contest_office_name:
+        :param ctcl_uuid:
+        :param district_id:
+        :param district_name:
+        :param google_civic_election_id:
+        :param ignore_office_we_vote_id_list:
+        :param incoming_state_code:
+        :param read_only:
+        :param vote_usa_office_id:
+        :return:
+        """
         keep_looking_for_duplicates = True
         success = False
         contest_office = ContestOffice()
@@ -1462,7 +1477,7 @@ class ContestOfficeListManager(models.Manager):
                 # If we pass in vote_usa_office_id, we need to make sure not to return results with a different value
                 contest_office_query = contest_office_query.filter(Q(vote_usa_office_id__isnull=True) |
                                                                    Q(vote_usa_office_id='') |
-                                                                   Q(vote_usa_office_id=vote_usa_office_id))
+                                                                   Q(vote_usa_office_id__iexact=vote_usa_office_id))
 
             contest_office_list_filtered = list(contest_office_query)
             if len(contest_office_list_filtered):
@@ -1521,7 +1536,7 @@ class ContestOfficeListManager(models.Manager):
                     # If we pass in vote_usa_office_id, make sure not to return results with a different value
                     contest_office_query = contest_office_query.filter(Q(vote_usa_office_id__isnull=True) |
                                                                        Q(vote_usa_office_id='') |
-                                                                       Q(vote_usa_office_id=vote_usa_office_id))
+                                                                       Q(vote_usa_office_id__iexact=vote_usa_office_id))
 
                 # Start with the contest_office_name and remove OFFICE_NAME_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES
                 stripped_down_contest_office_name = contest_office_name.lower()
@@ -1628,7 +1643,7 @@ class ContestOfficeListManager(models.Manager):
                     # If we pass in vote_usa_office_id, make sure not to return results with a different value
                     contest_office_query = contest_office_query.filter(Q(vote_usa_office_id__isnull=True) |
                                                                        Q(vote_usa_office_id='') |
-                                                                       Q(vote_usa_office_id=vote_usa_office_id))
+                                                                       Q(vote_usa_office_id__iexact=vote_usa_office_id))
 
                 # Start with the contest_office_name and remove OFFICE_NAME_COMMON_PHRASES_TO_REMOVE_FROM_SEARCHES
                 stripped_down_contest_office_name = contest_office_name.lower()
