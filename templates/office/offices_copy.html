@@ -25,14 +25,14 @@
     {# Default to showing only upcoming elections #}
     <label for="show_all_elections_id">
       <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
-             {% if show_all_elections %}checked{% endif %} /> Include Past Elections
+             {% if show_all_elections %}checked{% endif %} /> Past Elections
     </label>
     &nbsp;&nbsp;&nbsp;&nbsp;
 
     {# Show offices which are either marquee or battleground #}
     <label for="show_marquee_or_battleground_id">
       <input type="checkbox" name="show_marquee_or_battleground" id="show_marquee_or_battleground_id" value="1"
-             {% if show_marquee_or_battleground %}checked{% endif %} /> Show Battleground Races
+             {% if show_marquee_or_battleground %}checked{% endif %} /> Battleground Races
     </label>
     &nbsp;&nbsp;&nbsp;&nbsp;
 
@@ -48,7 +48,7 @@
         </select>
         {% if state_code != "" %}
         <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&candidate_search={{ candidate_search }}{% if show_all_elections %}&show_all_elections=1{% endif %}">
-            show all states</a>
+            show all</a>
         {% endif %}
     {% endif %}{# End of if state_list #}
     &nbsp;&nbsp;&nbsp;&nbsp;
@@ -113,7 +113,7 @@
     {% if to_google_civic_election_id and from_google_civic_election_id != to_google_civic_election_id %}
         <label for="confirm_copy_offices_id">
             <input type="checkbox" name="confirm_copy_offices" id="confirm_copy_offices_id" value="1"/>
-            Confirm and start copying offices?
+            Start copying offices?
         </label>
     &nbsp;&nbsp;&nbsp;&nbsp;
         <label for="confirm_copy_candidates_id">
@@ -157,6 +157,11 @@
             <input type="submit" value="Save" />
         </div>
     </div>
+    {% if election_shown_name %}
+    <div style="font-size: 1.4em">
+        <strong>Election Shown: {{ election_shown_name }}</strong>
+    </div>
+    {% endif %}
     {# Pass along the url_variables this page is using, so we can return to the same page state #}
     <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
     <input type="hidden" name="state_code" value="{{ state_code }}">
@@ -166,9 +171,9 @@
 
     <table class="table">
     {% for office in office_display_list %}
-    {% if forloop.counter == 1 or forloop.counter|divisibleby:16 %}
-    {# Show the header every ~15 lines #}
-      <thead>
+        {% if forloop.counter == 1 or forloop.counter|divisibleby:16 %}
+        {# Show the header every ~15 lines #}
+        <thead>
         <tr>
             <th>&nbsp;</th>
             <th>ID</th>
@@ -184,8 +189,8 @@
             <th>IDs</th>
             <th>Select</th>
         </tr>
-      </thead>
-    {% endif %}
+        </thead>
+        {% endif %}
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ office.id }}</td>
@@ -218,6 +223,74 @@
                 <input type="checkbox" name="select_for_marking_checks[]" id="select_for_marking_id" value="{{ office.we_vote_id }}"/>
             </td>
         </tr>
+        {% for candidate in office.prior_candidate_list %}
+        <tr>
+            <td colspan="3">&nbsp;</td>
+            <td colspan="7">
+                <table>
+                    <tr>
+                <td>
+                    {% if candidate.candidate_photo_url %}
+                    <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ from_google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}"
+                       target="_blank">
+                        <img src='{{ candidate.candidate_photo_url }}' height="25px" />
+                    </a>
+                    {% else %}
+                        <div style="min-width: 25px;">&nbsp;</div>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="u-no-break">
+                      <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ from_google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}"
+                         class="u-no-break"
+                         target="_blank">
+                          <strong>{{ candidate.candidate_name }}</strong> <span class="glyphicon glyphicon-new-window"></span>
+                      </a>
+                    </span>
+                    {% if candidate.withdrawn_from_election %}
+                        <br />
+                        <span><b>Withdrew {% if candidate.withdrawal_date %}({{ candidate.withdrawal_date }}){% endif %}</b></span>
+                    {% endif %}
+                    {% if candidate.do_not_display_on_ballot %}
+                        <br />
+                        <span><b>Don't Display on Ballot</b></span>
+                    {% endif %}
+                    <br />
+                    {{ candidate.we_vote_id }}
+                </td>
+                <td>
+                    {{ candidate.political_party_display }}
+                </td>
+                <td>
+                    {% if candidate.ballotpedia_candidate_id %}
+                        {% if candidate.ballotpedia_candidate_url %}
+                          BP: <a href="{{ candidate.ballotpedia_candidate_url }}" target="_blank">{{ candidate.ballotpedia_candidate_id|default_if_none:"" }}</a>
+                        {% else %}
+                          BP: {{ candidate.ballotpedia_candidate_id|default_if_none:"" }}
+                        {% endif %}
+                        <br />
+                    {% endif %}
+                    {% if candidate.vote_smart_id %}
+                        Vote Smart: <a href="https://votesmart.org/candidate/biography/{{ candidate.vote_smart_id }}" target="_blank">{{ candidate.vote_smart_id|default_if_none:"" }}</a>
+                        <br />
+                    {% endif %}
+                    {% if candidate.ctcl_uuid %}CTCL: <span style="font-size: 10px;">{{ candidate.ctcl_uuid|default_if_none:"" }}</span><br />{% endif %}
+                    {% if candidate.vote_usa_politician_id %}{{ candidate.vote_usa_politician_id|default_if_none:"" }}<br />{% endif %}
+                </td>
+                <td>
+                   <span class="u-no-break">
+                      <a href="{% url 'candidate:candidate_edit_process' %}?candidate_id={{ candidate.id }}&candidate_to_office_link_add_election={{ to_google_civic_election_id }}&candidate_to_office_link_add_state_code={{ candidate.state_code }}&candidate_to_office_link_add_office_we_vote_id={{ office.we_vote_id }}"
+                         class="u-no-break"
+                         target="_blank">
+                          <strong>WON PRIMARY</strong> <span class="glyphicon glyphicon-new-window"></span>
+                      </a>
+                    </span>
+                </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        {% endfor %}
     {% endfor %}
     </table>
 </form>

@@ -346,22 +346,22 @@
                     {% endif %}
                 </td>
                 <td>
-                <span class="u-no-break">
-                  <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}"
-                     class="u-no-break"
-                     target="_blank">
-                      <strong>{{ candidate.candidate_name }}</strong> <span class="glyphicon glyphicon-new-window"></span>
-                  </a>
-                </span>
-                {% if candidate.withdrawn_from_election %}
+                    <span class="u-no-break">
+                      <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}"
+                         class="u-no-break"
+                         target="_blank">
+                          <strong>{{ candidate.candidate_name }}</strong> <span class="glyphicon glyphicon-new-window"></span>
+                      </a>
+                    </span>
+                    {% if candidate.withdrawn_from_election %}
+                        <br />
+                        <span><b>Withdrew {% if candidate.withdrawal_date %}({{ candidate.withdrawal_date }}){% endif %}</b></span>
+                    {% endif %}
+                    {% if candidate.do_not_display_on_ballot %}
+                        <br />
+                        <span><b>Don't Display on Ballot</b></span>
+                    {% endif %}
                     <br />
-                    <span><b>Withdrew {% if candidate.withdrawal_date %}({{ candidate.withdrawal_date }}){% endif %}</b></span>
-                {% endif %}
-                {% if candidate.do_not_display_on_ballot %}
-                    <br />
-                    <span><b>Don't Display on Ballot</b></span>
-                {% endif %}
-                <br />
                     {{ candidate.we_vote_id }}
                     {% if candidate.politician_we_vote_id %}
                         <br />
@@ -508,21 +508,21 @@
                   {% if candidate.candidate_email %}{{ candidate.candidate_email }}{% endif %}
                 </td>
                 <td>
-                {% if candidate.ballotpedia_candidate_id %}
-                    {% if candidate.ballotpedia_candidate_url %}
-                      BP: <a href="{{ candidate.ballotpedia_candidate_url }}" target="_blank">{{ candidate.ballotpedia_candidate_id|default_if_none:"" }}</a>
-                    {% else %}
-                      BP: {{ candidate.ballotpedia_candidate_id|default_if_none:"" }}
+                    {% if candidate.ballotpedia_candidate_id %}
+                        {% if candidate.ballotpedia_candidate_url %}
+                          BP: <a href="{{ candidate.ballotpedia_candidate_url }}" target="_blank">{{ candidate.ballotpedia_candidate_id|default_if_none:"" }}</a>
+                        {% else %}
+                          BP: {{ candidate.ballotpedia_candidate_id|default_if_none:"" }}
+                        {% endif %}
+                        <br />
                     {% endif %}
-                    <br />
-                {% endif %}
-                {% if candidate.vote_smart_id %}
-                    Vote Smart: <a href="https://votesmart.org/candidate/biography/{{ candidate.vote_smart_id }}" target="_blank">{{ candidate.vote_smart_id|default_if_none:"" }}</a>
-                    <br />
-                {% endif %}
-                {% if candidate.ctcl_uuid %}CTCL: <span style="font-size: 10px;">{{ candidate.ctcl_uuid|default_if_none:"" }}</span><br />{% endif %}
-                {% if candidate.vote_usa_politician_id %}{{ candidate.vote_usa_politician_id|default_if_none:"" }}<br />{% endif %}
-                {% if candidate.vote_usa_office_id %}{{ candidate.vote_usa_office_id|default_if_none:"" }}<br />{% endif %}
+                    {% if candidate.vote_smart_id %}
+                        Vote Smart: <a href="https://votesmart.org/candidate/biography/{{ candidate.vote_smart_id }}" target="_blank">{{ candidate.vote_smart_id|default_if_none:"" }}</a>
+                        <br />
+                    {% endif %}
+                    {% if candidate.ctcl_uuid %}CTCL: <span style="font-size: 10px;">{{ candidate.ctcl_uuid|default_if_none:"" }}</span><br />{% endif %}
+                    {% if candidate.vote_usa_politician_id %}{{ candidate.vote_usa_politician_id|default_if_none:"" }}<br />{% endif %}
+                    {% if candidate.vote_usa_office_id %}{{ candidate.vote_usa_office_id|default_if_none:"" }}<br />{% endif %}
                 </td>
             </tr>
         {% endfor %}
