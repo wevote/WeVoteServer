@@ -1285,6 +1285,8 @@ def candidate_edit_process_view(request):
     refresh_from_twitter = request.POST.get('refresh_from_twitter', False)
 
     candidate_id = convert_to_int(request.POST.get('candidate_id', 0))
+    if not positive_value_exists(candidate_id):
+        candidate_id = convert_to_int(request.GET.get('candidate_id', 0))
     reject_twitter_link_possibility_id = convert_to_int(request.POST.get('reject_twitter_link_possibility_id', 0))
     redirect_to_candidate_list = positive_value_exists(request.POST.get('redirect_to_candidate_list', False))
     candidate_name = request.POST.get('candidate_name', False)
@@ -1389,9 +1391,17 @@ def candidate_edit_process_view(request):
             messages.add_message(request, messages.INFO, 'Deleted Candidate-to-Office Link.')
 
     candidate_to_office_link_add_election = request.POST.get('candidate_to_office_link_add_election', False)
+    if not positive_value_exists(candidate_to_office_link_add_election):
+        candidate_to_office_link_add_election = request.GET.get('candidate_to_office_link_add_election', False)
     candidate_to_office_link_add_state_code = request.POST.get('candidate_to_office_link_add_state_code', False)
-    candidate_to_office_link_add_office_we_vote_id = request.POST.get('candidate_to_office_link_add_office_we_vote_id',
-                                                                      False)
+    if not positive_value_exists(candidate_to_office_link_add_state_code):
+        candidate_to_office_link_add_state_code = request.GET.get('candidate_to_office_link_add_state_code', False)
+    candidate_to_office_link_add_office_we_vote_id = \
+        request.POST.get('candidate_to_office_link_add_office_we_vote_id', False)
+    if not positive_value_exists(candidate_to_office_link_add_office_we_vote_id):
+        candidate_to_office_link_add_office_we_vote_id = \
+            request.GET.get('candidate_to_office_link_add_office_we_vote_id', False)
+
     if positive_value_exists(candidate_to_office_link_add_election) and \
             positive_value_exists(candidate_to_office_link_add_state_code) and \
             positive_value_exists(candidate_to_office_link_add_office_we_vote_id):

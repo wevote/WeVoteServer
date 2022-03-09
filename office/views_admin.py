@@ -162,6 +162,7 @@ def offices_copy_to_another_election_view(request):
 
     confirm_copy_candidates = positive_value_exists(request.GET.get('confirm_copy_candidates', False))
     confirm_copy_offices = positive_value_exists(request.GET.get('confirm_copy_offices', False))
+    from_election_name = ''
     from_google_civic_election_id = request.GET.get('from_google_civic_election_id', 0)
     from_google_civic_election_id = convert_to_int(from_google_civic_election_id)
     has_ctcl_data = positive_value_exists(request.GET.get('has_ctcl_data', False))
@@ -173,12 +174,16 @@ def offices_copy_to_another_election_view(request):
     show_offices_with_zero_candidates_in_to_election = \
         positive_value_exists(request.GET.get('show_offices_with_zero_candidates_in_to_election', False))
     state_code = request.GET.get('state_code', "")
+    to_election_name = ''
     to_google_civic_election_id = request.GET.get('to_google_civic_election_id', 0)
     to_google_civic_election_id = convert_to_int(to_google_civic_election_id)
 
+    candidate_list_manager = CandidateListManager()
+    candidate_manager = CandidateManager()
     office_display_list = []
     office_display_list_found = False
     office_list_count = 0
+    office_list_manager = ContestOfficeListManager()
     office_processing_list = []
     status = ''
 
@@ -271,13 +276,31 @@ def offices_copy_to_another_election_view(request):
     offices_with_zero_candidates_count = 0
     if show_offices_with_zero_candidates_in_to_election:
         if office_processing_list:
-            for office in office_processing_list:
-                office.candidate_count = fetch_candidate_count_for_office(office.id)
-                if office.candidate_count == 0:
+            for contest_office in office_processing_list:
+                contest_office.candidate_count = fetch_candidate_count_for_office(contest_office.id)
+                if contest_office.candidate_count == 0:
                     offices_with_zero_candidates_count += 1
-                    if offices_with_zero_candidates_count <= 50:
+                    if offices_with_zero_candidates_count <= 20:
+                        # Search in the "from" election for this office
+                        results = office_list_manager.retrieve_contest_offices_from_non_unique_identifiers(
+                            ballotpedia_race_id=contest_office.ballotpedia_race_id,
+                            ctcl_uuid=contest_office.ctcl_uuid,
+                            contest_office_name=contest_office.office_name,
+                            google_civic_election_id=from_google_civic_election_id,
+                            incoming_state_code=contest_office.state_code,
+                            vote_usa_office_id=contest_office.vote_usa_office_id,
+                            read_only=True,
+                        )
+                        if results['success']:
+                            if results['contest_office_found']:
+                                from_contest_office_we_vote_id = results['contest_office'].we_vote_id
+                                candidate_results = candidate_list_manager.retrieve_all_candidates_for_office(
+                                    office_we_vote_id=from_contest_office_we_vote_id)
+                                if candidate_results['success']:
+                                    if candidate_results['candidate_list_found']:
+                                        contest_office.prior_candidate_list = candidate_results['candidate_list']
 
-                        updated_office_display_list.append(office)
+                        updated_office_display_list.append(contest_office)
     else:
         if office_display_list_found:
             for office in office_display_list:
@@ -290,10 +313,6 @@ def offices_copy_to_another_election_view(request):
             (positive_value_exists(confirm_copy_candidates) or positive_value_exists(confirm_copy_offices)):
         import copy
         # Loop through the contest offices in this election
-        candidate_list_manager = CandidateListManager()
-        candidate_manager = CandidateManager()
-        office_list_manager = ContestOfficeListManager()
-        office_save_status = ''
         office_save_success = True
         if show_offices_with_zero_candidates_in_to_election:
             pass
@@ -319,7 +338,7 @@ def offices_copy_to_another_election_view(request):
                 )
                 if results['success']:
                     office_found = results['contest_office_found'] or results['contest_office_list_found']
-                    if office_found:
+                    if results['contest_office_found']:
                         to_contest_office_we_vote_id = results['contest_office'].we_vote_id
                     office_search_success = True
                 else:
@@ -349,7 +368,7 @@ def offices_copy_to_another_election_view(request):
                             offices_copied_count += 1
                         except Exception as e:
                             office_save_success = False
-                            office_save_status += "FAILED_COPY: " + str(e) + " "
+                            status += "FAILED_COPY: " + str(e) + " "
                             success = False
                 if office_search_success and (office_found or office_created) and \
                         positive_value_exists(to_contest_office_we_vote_id):
@@ -401,15 +420,28 @@ def offices_copy_to_another_election_view(request):
 
     # Make sure we always include the current election in the election_list, even if it is older
     if positive_value_exists(from_google_civic_election_id):
-        this_election_found = False
+        from_election_found = False
         for one_election in election_list:
             if convert_to_int(one_election.google_civic_election_id) == convert_to_int(from_google_civic_election_id):
-                this_election_found = True
-                break
-        if not this_election_found:
+                from_election_found = True
+                from_election_name = one_election.election_name
+        if not from_election_found:
             results = election_manager.retrieve_election(from_google_civic_election_id)
             if results['election_found']:
                 election = results['election']
+                from_election_name = election.election_name
+                election_list.append(election)
+    if positive_value_exists(to_google_civic_election_id):
+        to_election_found = False
+        for one_election in election_list:
+            if convert_to_int(one_election.google_civic_election_id) == convert_to_int(to_google_civic_election_id):
+                to_election_found = True
+                to_election_name = one_election.election_name
+        if not to_election_found:
+            results = election_manager.retrieve_election(to_google_civic_election_id)
+            if results['election_found']:
+                election = results['election']
+                to_election_name = election.election_name
                 election_list.append(election)
 
     state_list = STATE_CODE_MAP
@@ -443,10 +475,16 @@ def offices_copy_to_another_election_view(request):
     if not success:
         status_print_list += "NOT success: " + status + " "
 
+    if show_offices_with_zero_candidates_in_to_election:
+        election_shown_name = to_election_name
+    else:
+        election_shown_name = from_election_name
+
     messages.add_message(request, messages.INFO, status_print_list)
 
     template_values = {
         'election_list':                    election_list,
+        'election_shown_name':              election_shown_name,
         'from_google_civic_election_id':    from_google_civic_election_id,
         'has_ctcl_data':                    has_ctcl_data,
         'has_vote_usa_data':                has_vote_usa_data,
