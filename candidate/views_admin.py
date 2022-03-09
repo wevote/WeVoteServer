@@ -131,7 +131,6 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
             'candidate_contact_form_url',
             'candidate_email',
             'candidate_gender',
-            'candidate_instagram_url',
             'candidate_is_incumbent',
             'candidate_is_top_ticket',
             'candidate_name',
@@ -154,6 +153,8 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
             'google_civic_candidate_name3',
             'google_civic_election_id',
             'google_plus_url',
+            'instagram_followers_count',
+            'instagram_handle',
             'linkedin_url',
             'linkedin_photo_url',
             'maplight_id',
@@ -787,6 +788,11 @@ def candidate_list_view(request):
             candidate.contest_office_name = contest_office.office_name
             if not election_id_found_from_link:
                 candidate.google_civic_election_id = contest_office.google_civic_election_id
+            if positive_value_exists(candidate.instagram_handle):
+                url = candidate.instagram_handle
+                if not url.startswith('https://'):
+                    url = ('https://www.instagram.com/' + candidate.instagram_handle).strip().replace('@', '')
+                candidate.instagram_url = url
         modified_candidate_list.append(candidate)
     candidate_list = modified_candidate_list
 
@@ -1008,6 +1014,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
     candidate_url = request.GET.get('candidate_url', False)
     candidate_contact_form_url = request.GET.get('candidate_contact_form_url', False)
     facebook_url = request.GET.get('facebook_url', False)
+    instagram_handle = request.GET.get('instagram_handle', False)
     candidate_email = request.GET.get('candidate_email', False)
     candidate_phone = request.GET.get('candidate_phone', False)
     party = request.GET.get('party', False)
@@ -1151,6 +1158,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
             'candidate_url':                    candidate_url,
             'candidate_contact_form_url':       candidate_contact_form_url,
             'facebook_url':                     facebook_url,
+            'instagram_handle':                 instagram_handle,
             'candidate_email':                  candidate_email,
             'candidate_phone':                  candidate_phone,
             'party':                            party,
@@ -1301,6 +1309,7 @@ def candidate_edit_process_view(request):
     candidate_url = request.POST.get('candidate_url', False)
     candidate_contact_form_url = request.POST.get('candidate_contact_form_url', False)
     facebook_url = request.POST.get('facebook_url', False)
+    instagram_handle = request.POST.get('instagram_handle', False)
     candidate_email = request.POST.get('candidate_email', False)
     candidate_phone = request.POST.get('candidate_phone', False)
     contest_office_id = request.POST.get('contest_office_id', False)
@@ -1348,6 +1357,7 @@ def candidate_edit_process_view(request):
                             "&candidate_url=" + str(candidate_url) + \
                             "&candidate_contact_form_url=" + str(candidate_contact_form_url) + \
                             "&facebook_url=" + str(facebook_url) + \
+                            "&instagram_handle=" + str(instagram_handle) + \
                             "&candidate_email=" + str(candidate_email) + \
                             "&candidate_phone=" + str(candidate_phone) + \
                             "&party=" + str(party) + \
@@ -1514,6 +1524,7 @@ def candidate_edit_process_view(request):
                         "&candidate_url=" + str(candidate_url) + \
                         "&candidate_contact_form_url=" + str(candidate_contact_form_url) + \
                         "&facebook_url=" + str(facebook_url) + \
+                        "&instagram_handle=" + str(instagram_handle) + \
                         "&candidate_email=" + str(candidate_email) + \
                         "&candidate_phone=" + str(candidate_phone) + \
                         "&party=" + str(party) + \
@@ -1575,6 +1586,7 @@ def candidate_edit_process_view(request):
                             "&candidate_url=" + str(candidate_url) + \
                             "&candidate_contact_form_url=" + str(candidate_contact_form_url) + \
                             "&facebook_url=" + str(facebook_url) + \
+                            "&instagram_handle=" + str(instagram_handle) + \
                             "&candidate_email=" + str(candidate_email) + \
                             "&candidate_phone=" + str(candidate_phone) + \
                             "&party=" + str(party) + \
@@ -1598,6 +1610,8 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.candidate_contact_form_url = candidate_contact_form_url
             if facebook_url is not False:
                 candidate_on_stage.facebook_url = facebook_url
+            if instagram_handle is not False:
+                candidate_on_stage.instagram_handle = instagram_handle
             if candidate_email is not False:
                 candidate_on_stage.candidate_email = candidate_email
             if candidate_phone is not False:
@@ -1754,6 +1768,8 @@ def candidate_edit_process_view(request):
                     candidate_on_stage.candidate_contact_form_url = candidate_contact_form_url
                 if facebook_url is not False:
                     candidate_on_stage.facebook_url = facebook_url
+                if instagram_handle is not False:
+                    candidate_on_stage.instagram_handle = instagram_handle
                 if candidate_email is not False:
                     candidate_on_stage.candidate_email = candidate_email
                 if candidate_phone is not False:
@@ -1815,6 +1831,7 @@ def candidate_edit_process_view(request):
                                 "&candidate_url=" + str(candidate_url) + \
                                 "&candidate_contact_form_url=" + str(candidate_contact_form_url) + \
                                 "&facebook_url=" + str(facebook_url) + \
+                                "&instagram_handle=" + str(instagram_handle) + \
                                 "&candidate_email=" + str(candidate_email) + \
                                 "&candidate_phone=" + str(candidate_phone) + \
                                 "&party=" + str(party) + \

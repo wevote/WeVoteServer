@@ -906,8 +906,10 @@ def candidates_import_from_structured_json(structured_json):  # Consumes candida
                 updated_candidate_values['candidate_email'] = one_candidate['candidate_email']
             if 'candidate_gender' in one_candidate:
                 updated_candidate_values['candidate_gender'] = one_candidate['candidate_gender']
-            if 'candidate_instagram_url' in one_candidate:
-                updated_candidate_values['candidate_instagram_url'] = one_candidate['candidate_instagram_url']
+            if 'instagram_handle' in one_candidate:
+                updated_candidate_values['instagram_handle'] = one_candidate['instagram_handle']
+            if 'instagram_followers_count' in one_candidate:
+                updated_candidate_values['instagram_followers_count'] = one_candidate['instagram_followers_count']
             if 'candidate_is_incumbent' in one_candidate:
                 updated_candidate_values['candidate_is_incumbent'] = one_candidate['candidate_is_incumbent']
             if 'candidate_is_top_ticket' in one_candidate:
@@ -1259,6 +1261,8 @@ def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):  # candidate
             'facebook_url':                 candidate.facebook_url,
             # 'google_civic_candidate_name': candidate.google_civic_candidate_name,
             'google_civic_election_id':     candidate.google_civic_election_id,
+            'instagram_handle':             candidate.instagram_handle,
+            'instagram_followers_count':    candidate.instagram_followers_count,
             'id':                           candidate.id,
             'kind_of_ballot_item':          CANDIDATE,
             'last_updated':                 date_last_updated,
@@ -1402,6 +1406,8 @@ def candidates_retrieve_for_api(office_id=0, office_we_vote_id=''):  # candidate
                 'contest_office_name':          candidate.contest_office_name,  # Deprecate
                 'contest_office_we_vote_id':    office_we_vote_id,
                 'facebook_url':                 candidate.facebook_url,
+                'instagram_followers_count':    candidate.instagram_followers_count,
+                'instagram_handle':             candidate.instagram_handle,
                 'google_civic_election_id':     candidate.google_civic_election_id,  # Deprecate
                 'kind_of_ballot_item':          CANDIDATE,
                 'last_updated':                 date_last_updated,

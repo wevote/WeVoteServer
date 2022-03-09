@@ -1536,8 +1536,8 @@ class CandidateListManager(models.Manager):
     def search_candidates_in_specific_elections(self, google_civic_election_id_list, search_string='', state_code='',
                                                 candidate_name='', candidate_twitter_handle='',
                                                 candidate_website='', candidate_email='',
-                                                candidate_facebook='', twitter_handle_list='', facebook_page_list='',
-                                                exact_match=False):
+                                                candidate_facebook='', candidate_instagram='', twitter_handle_list='',
+                                                facebook_page_list='', exact_match=False):
         """
         This function, search_candidates_in_specific_elections, is meant to cast a wider net for any
         possible candidates that might match.
@@ -1548,11 +1548,12 @@ class CandidateListManager(models.Manager):
         :param google_civic_election_id_list:
         :param search_string:
         :param state_code:
-        :param candidate_name:
-        :param candidate_twitter_handle:
+        :param candidate_name:            Not used yet
+        :param candidate_twitter_handle:  Not used yet
         :param candidate_website:
         :param candidate_email:
-        :param candidate_facebook:
+        :param candidate_facebook:        Not used yet
+        :param candidate_instagram:       Not used yet
         :param twitter_handle_list:
         :param facebook_page_list:
         :param exact_match:
@@ -1935,7 +1936,9 @@ class CandidateCampaign(models.Model):
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=True, blank=True)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
-    candidate_instagram_url = models.TextField(blank=True, null=True)
+    instagram_handle = models.TextField(verbose_name="candidate's instagram handle", blank=True, null=True)
+    instagram_followers_count = models.IntegerField(verbose_name="count of candidate's instagram followers",
+                                                    null=False, blank=True, default=0)
     # The date of the last election this candidate relates to, converted to integer, ex/ 20201103
     candidate_ultimate_election_date = models.PositiveIntegerField(default=None, null=True)
     # The year this candidate is running for office
@@ -3643,7 +3646,7 @@ class CandidateManager(models.Manager):
                                       twitter_profile_background_image_url_https,
                                       twitter_profile_banner_url_https):
         """
-        Reset an candidate entry with original image details from we vote image.
+        Reset a candidate entry with original image details from we vote image.
         """
         success = False
         status = "ENTERING_RESET_CANDIDATE_IMAGE_DETAILS"
@@ -3803,7 +3806,7 @@ class CandidateManager(models.Manager):
 
     def create_candidate_row_entry(self, update_values):
         """
-        Create CandidateCampaign table entry with CandidateCampaign details 
+        Create CandidateCampaign table entry with CandidateCampaign details
         :param update_values:
         :return:
         """
@@ -3854,8 +3857,6 @@ class CandidateManager(models.Manager):
             if 'candidate_url' in update_values else ''
         candidate_contact_form_url = update_values['candidate_contact_form_url'] \
             if 'candidate_contact_form_url' in update_values else ''
-        candidate_instagram_url = update_values['candidate_instagram_url'] \
-            if 'candidate_instagram_url' in update_values else ''
         contest_office_we_vote_id = update_values['contest_office_we_vote_id'] \
             if 'contest_office_we_vote_id' in update_values else ''
         contest_office_id = update_values['contest_office_id'] \
@@ -3871,6 +3872,10 @@ class CandidateManager(models.Manager):
             if 'google_civic_candidate_name' in update_values else ''
         google_civic_election_id = update_values['google_civic_election_id'] \
             if 'google_civic_election_id' in update_values else ''
+        instagram_followers_count = update_values['instagram_followers_count'] \
+            if 'instagram_followers_count' in update_values else ''
+        instagram_handle = update_values['instagram_handle'] \
+            if 'instagram_handle' in update_values else ''
         photo_url = update_values['photo_url'] if 'photo_url' in update_values else ''
         photo_url_from_ctcl = update_values['photo_url_from_ctcl'] if 'photo_url_from_ctcl' in update_values else ''
         photo_url_from_vote_usa = update_values['photo_url_from_vote_usa'] \
@@ -3931,7 +3936,6 @@ class CandidateManager(models.Manager):
                 new_candidate.birth_day_text = birth_day_text
                 new_candidate.candidate_email = candidate_email
                 new_candidate.candidate_gender = candidate_gender
-                new_candidate.candidate_instagram_url = candidate_instagram_url
                 new_candidate.candidate_is_incumbent = candidate_is_incumbent
                 new_candidate.candidate_is_top_ticket = candidate_is_top_ticket
                 new_candidate.candidate_participation_status = candidate_participation_status
@@ -3945,6 +3949,8 @@ class CandidateManager(models.Manager):
                 new_candidate.ctcl_uuid = ctcl_uuid
                 new_candidate.facebook_url = facebook_url
                 new_candidate.google_civic_candidate_name = google_civic_candidate_name
+                new_candidate.instagram_followers_count = instagram_followers_count
+                new_candidate.instagram_handle = instagram_handle
                 new_candidate.party = candidate_party_name
                 new_candidate.photo_url = photo_url
                 new_candidate.photo_url_from_ctcl = photo_url_from_ctcl
@@ -4029,9 +4035,6 @@ class CandidateManager(models.Manager):
                 if 'candidate_contact_form_url' in update_values:
                     existing_candidate_entry.candidate_contact_form_url = update_values['candidate_contact_form_url']
                     values_changed = True
-                if 'candidate_instagram_url' in update_values:
-                    existing_candidate_entry.candidate_instagram_url = update_values['candidate_instagram_url']
-                    values_changed = True
                 if 'candidate_email' in update_values:
                     existing_candidate_entry.candidate_email = update_values['candidate_email']
                     values_changed = True
@@ -4082,6 +4085,12 @@ class CandidateManager(models.Manager):
                     values_changed = True
                 if 'google_civic_election_id' in update_values:
                     existing_candidate_entry.google_civic_election_id = update_values['google_civic_election_id']
+                    values_changed = True
+                if 'instagram_followers_count' in update_values:
+                    existing_candidate_entry.instagram_followers_count = update_values['instagram_followers_count']
+                    values_changed = True
+                if 'instagram_handle' in update_values:
+                    existing_candidate_entry.instagram_handle = update_values['instagram_handle']
                     values_changed = True
                 if 'party' in update_values:
                     existing_candidate_entry.party = update_values['party']
