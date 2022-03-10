@@ -39,7 +39,7 @@
     {% if state_list %}
         <select id="state_code_id" name="state_code">
             <option value="">
-                -- Filter by State Served --</option>
+                -- State Served --</option>
         {% for key, state in state_list %}
             <option value="{{ key }}"
                     {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
@@ -54,7 +54,7 @@
     &nbsp;&nbsp;&nbsp;&nbsp;
     <select id="race_office_level_id" name="race_office_level">
         <option value="">
-            -- Filter by Office Levels --</option>
+            -- Office Levels --</option>
         <option value="Federal"
                 {% if 'Federal'|lower == race_office_level|lower %} selected="selected"{% endif %}>
             Federal</option>
