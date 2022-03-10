@@ -330,7 +330,7 @@
                 <th>Office</th>
                 <th>Twitter Handle</th>
                 <th>Google Search Results</th>
-                <th>Website / Facebook / Email</th>
+                <th>Website / Facebook / Instagram / Email</th>
                 <th>IDs</th>
             </tr>
           </thead>
@@ -505,6 +505,7 @@
                   {% if candidate.candidate_contact_form_url %}<a href="{{ candidate.candidate_contact_form_url }}" target="_blank">{{ candidate.candidate_contact_form_url }}</a><br />{% endif %}
                 </span>
                   {% if candidate.facebook_url %}<a href="{{ candidate.facebook_url }}" target="_blank">{{ candidate.facebook_url }}</a><br />{% endif %}
+                  {% if candidate.instagram_url %}<a href="{{ candidate.instagram_url }}" target="_blank">{{ candidate.instagram_url }}</a><br />{% endif %}
                   {% if candidate.candidate_email %}{{ candidate.candidate_email }}{% endif %}
                 </td>
                 <td>

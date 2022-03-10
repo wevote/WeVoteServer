@@ -117,6 +117,8 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
                    '        "contest_office_we_vote_id": string,\n' \
                    '        "facebook_url": string,\n' \
                    '        "google_civic_election_id": integer,\n' \
+                   '        "instagram_handle": string,\n' \
+                   '        "instagram_followers_count": string,\n' \
                    '        "kind_of_ballot_item": string,\n' \
                    '        "maplight_id": string,\n' \
                    '        "ocd_division_id": string,\n' \

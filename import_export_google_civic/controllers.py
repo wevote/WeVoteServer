@@ -515,11 +515,11 @@ def groom_and_store_google_civic_candidates_json_2021(
         # Make sure we start with empty channel values
         ballotpedia_candidate_url = ''
         blogger_url = ''
-        candidate_instagram_url = ''
         candidate_twitter_handle = ''
         facebook_url = ''
         flickr_url = ''
         google_plus_url = ''
+        instagram_handle = ''
         instagram_url = ''
         linkedin_url = ''
         twitter_url = ''
@@ -552,10 +552,7 @@ def groom_and_store_google_civic_candidates_json_2021(
                     if one_channel['type'] == 'GooglePlus':
                         google_plus_url = one_channel['id'] if 'id' in one_channel else ''
                     if one_channel['type'] == 'Instagram':
-                        candidate_instagram_url = one_channel['id'] if 'id' in one_channel else ''
-                        if positive_value_exists(candidate_instagram_url):
-                            if 'http' not in candidate_instagram_url:
-                                candidate_instagram_url = 'https://' + candidate_instagram_url
+                        instagram_handle = one_channel['id'] if 'id' in one_channel else ''
                     if one_channel['type'] == 'LinkedIn':
                         linkedin_url = one_channel['id'] if 'id' in one_channel else ''
                     if one_channel['type'] == 'Twitter':
@@ -761,8 +758,8 @@ def groom_and_store_google_civic_candidates_json_2021(
                     updated_candidate_values['candidate_year'] = election_year_integer
                 if positive_value_exists(candidate_contact_form_url):
                     updated_candidate_values['candidate_contact_form_url'] = candidate_contact_form_url
-                if positive_value_exists(candidate_instagram_url):
-                    updated_candidate_values['candidate_instagram_url'] = candidate_instagram_url
+                if positive_value_exists(instagram_handle):
+                    updated_candidate_values['instagram_handle'] = instagram_handle
                 if positive_value_exists(candidate_email):
                     updated_candidate_values['candidate_email'] = candidate_email
                 if positive_value_exists(candidate_phone):

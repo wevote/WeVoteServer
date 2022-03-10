@@ -71,6 +71,8 @@ def candidate_retrieve_doc_template_values(url_root):
                    '  "candidate_contact_form_url": string,\n' \
                    '  "facebook_url": string,\n' \
                    '  "google_civic_election_id": integer,\n' \
+                   '  "instagram_handle": string,\n' \
+                   '  "instagram_followers_count": string,\n' \
                    '  "id": integer,\n' \
                    '  "kind_of_ballot_item": string (CANDIDATE),\n' \
                    '  "last_updated": string (time in this format %Y-%m-%d %H:%M:%S),\n' \
