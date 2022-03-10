@@ -1174,6 +1174,35 @@ def extract_and_replace_facebook_page_id(facebook_full_graph_url):
     return reassembled_url
 
 
+def extract_instagram_handle_from_text_string(instagram_text_string):
+    """
+
+    :param instagram_text_string:
+    :return:
+    """
+    if not instagram_text_string:
+        return ""
+    if not positive_value_exists(instagram_text_string):
+        return ""
+    instagram_text_string = str(instagram_text_string)
+    instagram_text_string.strip()
+    instagram_text_string = instagram_text_string.lower()
+    instagram_text_string = instagram_text_string.replace("http://instagram.com", "")
+    instagram_text_string = instagram_text_string.replace("http://www.instagram.com", "")
+    instagram_text_string = instagram_text_string.replace("http://m.instagram.com", "")
+    instagram_text_string = instagram_text_string.replace("https://instagram.com", "")
+    instagram_text_string = instagram_text_string.replace("https://www.instagram.com", "")
+    instagram_text_string = instagram_text_string.replace("https://m.instagram.com", "")
+    instagram_text_string = instagram_text_string.replace("/www.instagram.com", "")
+    instagram_text_string = instagram_text_string.replace("www.instagram.com", "")
+    instagram_text_string = instagram_text_string.replace("/instagram.com", "")
+    instagram_text_string = instagram_text_string.replace("instagram.com", "")
+    instagram_text_string = instagram_text_string.replace("@", "")
+    instagram_text_string = instagram_text_string.replace("/", "")
+    instagram_text_string = instagram_text_string.split("?", 1)[0]  # Remove everything after first "?" (including "?")
+    return instagram_text_string
+
+
 def extract_twitter_handle_from_text_string(twitter_text_string):
     """
 

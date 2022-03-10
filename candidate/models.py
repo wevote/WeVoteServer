@@ -14,7 +14,7 @@ from image.models import ORGANIZATION_ENDORSEMENTS_IMAGE_NAME
 from office.models import ContestOffice, ContestOfficeManager
 from wevote_functions.functions import add_period_to_middle_name_initial, add_period_to_name_prefix_and_suffix, \
     convert_to_int, \
-    display_full_name_with_correct_capitalization, \
+    display_full_name_with_correct_capitalization, extract_instagram_handle_from_text_string, \
     extract_title_from_full_name, extract_first_name_from_full_name, extract_middle_name_from_full_name, \
     extract_last_name_from_full_name, extract_suffix_from_full_name, extract_nickname_from_full_name, \
     extract_state_from_ocd_division_id, extract_twitter_handle_from_text_string, \
@@ -969,6 +969,7 @@ class CandidateListManager(models.Manager):
             candidate_twitter_handle='',
             candidate_name='',
             ignore_candidate_id_list=[],
+            instagram_handle='',
             read_only=False,
             vote_usa_politician_id=''):
         """
@@ -981,6 +982,7 @@ class CandidateListManager(models.Manager):
         :param candidate_twitter_handle:
         :param candidate_name:
         :param ignore_candidate_id_list:
+        :param instagram_handle:
         :param read_only:
         :param vote_usa_politician_id:
         :return:
@@ -991,6 +993,7 @@ class CandidateListManager(models.Manager):
         candidate_list = []
         candidate_list_found = False
         candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle)
+        instagram_handle = extract_instagram_handle_from_text_string(instagram_handle)
         multiple_entries_found = False
         success = True
         status = ""
@@ -1010,6 +1013,7 @@ class CandidateListManager(models.Manager):
         if results['success']:
             year_list = results['year_list']
 
+        # We want to let candidate_twitter_handle be the dominant search factor if it exists
         if keep_looking_for_duplicates and positive_value_exists(candidate_twitter_handle):
             try:
                 if positive_value_exists(read_only):
@@ -1063,6 +1067,63 @@ class CandidateListManager(models.Manager):
                 status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_NOT_FOUND "
             except Exception as e:
                 status += "RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_QUERY_FAILED1 " + str(e) + " "
+                success = False
+                keep_looking_for_duplicates = False
+
+        # Since candidate wasn't found with Twitter, instagram_handle can be next dominant search criteria
+        if keep_looking_for_duplicates and positive_value_exists(instagram_handle):
+            try:
+                if positive_value_exists(read_only):
+                    candidate_query = CandidateCampaign.objects.using('readonly').all()
+                else:
+                    candidate_query = CandidateCampaign.objects.all()
+
+                # Only look for matches in candidates in the specified elections, or in the year(s) the elections are in
+                candidate_query = candidate_query.filter(
+                    Q(we_vote_id__in=candidate_we_vote_id_list) |
+                    Q(candidate_year__in=year_list)
+                )
+
+                candidate_query = candidate_query.filter(instagram_handle__iexact=instagram_handle)
+                if positive_value_exists(state_code):
+                    candidate_query = candidate_query.filter(state_code__iexact=state_code)
+
+                if positive_value_exists(ignore_candidate_id_list):
+                    candidate_query = candidate_query.exclude(we_vote_id__in=ignore_candidate_id_list)
+
+                if positive_value_exists(vote_usa_politician_id):
+                    # If we have an existing Vote USA Politician ID, do not return candidates that have a value in
+                    #  vote_usa_politician_id which doesn't match
+                    # In other words, find candidates with the same vote_usa_politician_id OR don't have a value
+                    candidate_query = candidate_query.filter(
+                        Q(vote_usa_politician_id__iexact=vote_usa_politician_id) |
+                        (Q(vote_usa_politician_id__isnull=True) |
+                         Q(vote_usa_politician_id=''))
+                    )
+
+                candidate_list = list(candidate_query)
+                if len(candidate_list):
+                    # At least one entry exists
+                    status += 'RETRIEVE_CANDIDATES_FROM_INSTAGRAM-CANDIDATE_LIST_RETRIEVED '
+                    # if a single entry matches, update that entry
+                    if len(candidate_list) == 1:
+                        multiple_entries_found = False
+                        candidate = candidate_list[0]
+                        candidate_found = True
+                        keep_looking_for_duplicates = False
+                        success = True
+                        status += "CANDIDATE_FOUND_BY_INSTAGRAM "
+                    else:
+                        # more than one entry found
+                        candidate_list_found = True
+                        multiple_entries_found = True
+                        keep_looking_for_duplicates = False  # Deal with multiple Twitter duplicates manually
+                        status += "MULTIPLE_INSTAGRAM_MATCHES "
+            except CandidateCampaign.DoesNotExist:
+                success = True
+                status += "RETRIEVE_CANDIDATES_FROM_INSTAGRAM-CANDIDATE_NOT_FOUND "
+            except Exception as e:
+                status += "RETRIEVE_CANDIDATES_FROM_INSTAGRAM-CANDIDATE_QUERY_FAILED1 " + str(e) + " "
                 success = False
                 keep_looking_for_duplicates = False
 

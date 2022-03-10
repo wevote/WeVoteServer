@@ -44,14 +44,14 @@
     {# Show offices which are either marquee or battleground #}
     <label for="show_marquee_or_battleground_id">
       <input type="checkbox" name="show_marquee_or_battleground" id="show_marquee_or_battleground_id" value="1"
-             {% if show_marquee_or_battleground %}checked{% endif %} /> Show Battleground Races
+             {% if show_marquee_or_battleground %}checked{% endif %} /> Battleground Races
     </label>
     &nbsp;&nbsp;&nbsp;&nbsp;
 
     {% if state_list %}
         <select id="state_code_id" name="state_code">
             <option value="">
-                -- Filter by State Served --</option>
+                -- State Served --</option>
         {% for key, state in state_list %}
             <option value="{{ key }}"
                     {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
@@ -60,13 +60,13 @@
         </select>
         {% if state_code != "" %}
         <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&candidate_search={{ candidate_search }}{% if show_all_elections %}&show_all_elections=1{% endif %}">
-            show all states</a>
+            show all</a>
         {% endif %}
     {% endif %}{# End of if state_list #}
     &nbsp;&nbsp;&nbsp;&nbsp;
     <select id="race_office_level_id" name="race_office_level">
         <option value="">
-            -- Filter by Office Levels --</option>
+            -- Office Levels --</option>
         <option value="Federal"
                 {% if 'Federal'|lower == race_office_level|lower %} selected="selected"{% endif %}>
             Federal</option>

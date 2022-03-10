@@ -686,6 +686,7 @@ def groom_and_store_google_civic_candidates_json_2021(
                 state_code=state_code,
                 candidate_twitter_handle=None,
                 candidate_name=candidate_name,
+                instagram_handle=None,
                 read_only=True)
             if not results['success']:
                 continue_searching_for_candidate = False
