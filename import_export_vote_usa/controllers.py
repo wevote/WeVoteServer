@@ -659,6 +659,7 @@ def store_results_from_vote_usa_api_election_query(structured_json):
         results = election_manager.update_or_create_election(
             election_day_text=one_election['electionDay'],
             election_name=one_election['name'],
+            election_name_do_not_override=True,
             state_code=one_election['state'],
             use_vote_usa_as_data_source=True,
             vote_usa_election_id=one_election['id'])

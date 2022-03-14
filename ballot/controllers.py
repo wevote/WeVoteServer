@@ -967,6 +967,8 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
         ballot_location_shortcut=''):
     status = ''
 
+    next_national_election_day_text = '2022/11/08'
+
     specific_ballot_requested = positive_value_exists(ballot_returned_we_vote_id) or \
         positive_value_exists(ballot_location_shortcut)
 
@@ -978,22 +980,23 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
         error_json_data = {
             'status':                               status,
             'success':                              False,
-            'voter_device_id':                      voter_device_id,
+            'ballot_caveat':                        '',
             'ballot_found':                         False,
             'ballot_item_list':                     [],
+            'ballot_location_display_name':         '',
+            'ballot_location_shortcut':             ballot_location_shortcut,
+            'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
             'google_civic_election_id':             google_civic_election_id,
-            'text_for_map_search':                  '',
+            'is_from_substituted_address':          False,
+            'is_from_test_ballot':                  False,
+            'next_national_election_day_text':      '',
+            'polling_location_we_vote_id_source':   '',
             'substituted_address_nearby':           '',
             'substituted_address_city':             '',
             'substituted_address_state':            '',
             'substituted_address_zip':              '',
-            'ballot_caveat':                        '',
-            'is_from_substituted_address':          False,
-            'is_from_test_ballot':                  False,
-            'ballot_location_display_name':         '',
-            'ballot_location_shortcut':             ballot_location_shortcut,
-            'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
-            'polling_location_we_vote_id_source':   '',
+            'text_for_map_search':                  '',
+            'voter_device_id':                      voter_device_id,
         }
         return error_json_data
 
@@ -1005,22 +1008,23 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
         error_json_data = {
             'status':                       status,
             'success':                      False,
-            'voter_device_id':              voter_device_id,
+            'ballot_caveat':                '',
             'ballot_found':                 False,
             'ballot_item_list':             [],
+            'ballot_location_display_name':         '',
+            'ballot_location_shortcut':             ballot_location_shortcut,
+            'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
             'google_civic_election_id':     google_civic_election_id,
-            'text_for_map_search':          '',
+            'is_from_substituted_address':  False,
+            'is_from_test_ballot':          False,
+            'next_national_election_day_text':      '',
             'substituted_address_nearby':   '',
             'substituted_address_city':     '',
             'substituted_address_state':    '',
             'substituted_address_zip':      '',
-            'ballot_caveat':                '',
-            'is_from_substituted_address':  False,
-            'is_from_test_ballot':          False,
-            'ballot_location_display_name':         '',
-            'ballot_location_shortcut':             ballot_location_shortcut,
-            'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
+            'text_for_map_search':          '',
             'polling_location_we_vote_id_source':   '',
+            'voter_device_id': voter_device_id,
         }
         return error_json_data
 
@@ -1059,22 +1063,23 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
         error_json_data = {
             'status':                       status,
             'success':                      True,
-            'voter_device_id':              voter_device_id,
+            'ballot_caveat':                ballot_caveat,
             'ballot_found':                 False,
             'ballot_item_list':             [],
+            'ballot_location_display_name':         '',
+            'ballot_location_shortcut':             ballot_location_shortcut,
+            'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
             'google_civic_election_id':     google_civic_election_id,
-            'text_for_map_search':          voter_address.text_for_map_search,
+            'is_from_substituted_address':  False,
+            'is_from_test_ballot':          False,
+            'next_national_election_day_text':      next_national_election_day_text,
+            'polling_location_we_vote_id_source': '',
             'substituted_address_nearby':   '',
             'substituted_address_city':     '',
             'substituted_address_state':    '',
             'substituted_address_zip':      '',
-            'ballot_caveat':                ballot_caveat,
-            'is_from_substituted_address':  False,
-            'is_from_test_ballot':          False,
-            'ballot_location_display_name':         '',
-            'ballot_location_shortcut':             ballot_location_shortcut,
-            'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
-            'polling_location_we_vote_id_source': '',
+            'text_for_map_search':          voter_address.text_for_map_search,
+            'voter_device_id': voter_device_id,
         }
         return error_json_data
 
@@ -1152,49 +1157,51 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
         json_data = {
             'status':                       status,
             'success':                      True,
-            'voter_device_id':              voter_device_id,
+            'ballot_caveat':                voter_ballot_saved.ballot_caveat(),
             'ballot_found':                 True,
             'ballot_item_list':             results['ballot_item_list'],
-            'google_civic_election_id':     google_civic_election_id,
+            'ballot_location_display_name': voter_ballot_saved.ballot_location_display_name,
+            'ballot_location_shortcut':     voter_ballot_saved.ballot_location_shortcut,
+            'ballot_returned_we_vote_id':   voter_ballot_saved.ballot_returned_we_vote_id,
             'election_name':                voter_ballot_saved.election_description_text,
             'election_day_text':            voter_ballot_saved.election_day_text(),
-            'text_for_map_search':          voter_ballot_saved.original_text_for_map_search,
+            'google_civic_election_id':     google_civic_election_id,
+            'is_from_substituted_address':  voter_ballot_saved.is_from_substituted_address,
+            'is_from_test_ballot':          voter_ballot_saved.is_from_test_ballot,
+            'next_national_election_day_text':      next_national_election_day_text,
+            'polling_location_we_vote_id_source': voter_ballot_saved.polling_location_we_vote_id_source,
             'substituted_address_nearby':   voter_ballot_saved.substituted_address_nearby,
             'substituted_address_city':     voter_ballot_saved.substituted_address_city,
             'substituted_address_state':    voter_ballot_saved.substituted_address_state,
             'substituted_address_zip':      voter_ballot_saved.substituted_address_zip,
-            'ballot_caveat':                voter_ballot_saved.ballot_caveat(),
-            'is_from_substituted_address':  voter_ballot_saved.is_from_substituted_address,
-            'is_from_test_ballot':          voter_ballot_saved.is_from_test_ballot,
-            'ballot_location_display_name': voter_ballot_saved.ballot_location_display_name,
-            'ballot_location_shortcut':     voter_ballot_saved.ballot_location_shortcut,
-            'ballot_returned_we_vote_id':   voter_ballot_saved.ballot_returned_we_vote_id,
-            'polling_location_we_vote_id_source': voter_ballot_saved.polling_location_we_vote_id_source,
+            'text_for_map_search':          voter_ballot_saved.original_text_for_map_search,
+            'voter_device_id': voter_device_id,
         }
         return json_data
 
     status += " " + "NO_VOTER_BALLOT_SAVED_FOUND"
-    error_json_data = {
-        'status':                       status,
-        'success':                      True,
-        'voter_device_id':              voter_device_id,
-        'ballot_found':                 False,
-        'ballot_item_list':             [],
-        'google_civic_election_id':     0,
-        'text_for_map_search':          '',
-        'substituted_address_nearby':   '',
-        'substituted_address_city':     '',
-        'substituted_address_state':    '',
-        'substituted_address_zip':      '',
-        'ballot_caveat':                '',
-        'is_from_substituted_address':  False,
-        'is_from_test_ballot':          False,
+    json_data = {
+        'status':                               status,
+        'success':                              True,
+        'ballot_caveat':                        '',
+        'ballot_found':                         False,
+        'ballot_item_list':                     [],
         'ballot_location_display_name':         '',
         'ballot_location_shortcut':             ballot_location_shortcut,
         'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
+        'google_civic_election_id':             0,
+        'is_from_substituted_address':          False,
+        'is_from_test_ballot':                  False,
+        'next_national_election_day_text':      next_national_election_day_text,
         'polling_location_we_vote_id_source':   '',
+        'substituted_address_nearby':           '',
+        'substituted_address_city':             '',
+        'substituted_address_state':            '',
+        'substituted_address_zip':              '',
+        'text_for_map_search':                  '',
+        'voter_device_id':                      voter_device_id,
     }
-    return error_json_data
+    return json_data
 
 
 def choose_election_and_prepare_ballot_data(

@@ -198,6 +198,7 @@ class ElectionManager(models.Manager):
             ballotpedia_kind_of_election=None,
             candidate_photos_finished=None,
             ctcl_uuid=None,
+            election_name_do_not_override=False,
             election_preparation_finished=None,
             ignore_this_election=None,
             include_in_list_for_voters=None,
@@ -227,7 +228,6 @@ class ElectionManager(models.Manager):
 
             try:
                 updated_values = {
-                    'election_name':            election_name,
                     'election_day_text':        election_day_text,
                     'state_code':               state_code,
                 }
@@ -260,6 +260,15 @@ class ElectionManager(models.Manager):
                         election_changed = True
                     if ctcl_uuid is not None:
                         election_on_stage.ctcl_uuid = ctcl_uuid
+                        election_changed = True
+                    if new_election_created:
+                        election_on_stage.election_name = election_name
+                        election_changed = True
+                    elif election_name_do_not_override:
+                        # Do not replace existing election_name with new name
+                        pass
+                    else:
+                        election_on_stage.election_name = election_name
                         election_changed = True
                     if election_preparation_finished is not None:
                         election_on_stage.election_preparation_finished = election_preparation_finished
