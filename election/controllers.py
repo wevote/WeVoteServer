@@ -126,6 +126,7 @@ def elections_import_from_structured_json(structured_json):  # Consumes election
             ballotpedia_kind_of_election=ballotpedia_kind_of_election,
             candidate_photos_finished=candidate_photos_finished,
             ctcl_uuid=ctcl_uuid,
+            election_name_do_not_override=True,
             election_preparation_finished=election_preparation_finished,
             ignore_this_election=ignore_this_election,
             include_in_list_for_voters=include_in_list_for_voters,

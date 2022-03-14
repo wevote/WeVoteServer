@@ -2339,7 +2339,8 @@ def store_results_from_google_civic_api_election_query(structured_json):
 
         election_manager = ElectionManager()
         results = election_manager.update_or_create_election(
-            google_civic_election_id, election_name, election_day_text, raw_ocd_division_id)
+            google_civic_election_id, election_name, election_day_text, raw_ocd_division_id,
+            election_name_do_not_override=True)
 
     return results
 
