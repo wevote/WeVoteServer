@@ -421,6 +421,7 @@ def voter_address_save_view(request):  # voterAddressSave
         # # Remove the former google_civic_election_id from this voter_device_id
         # voter_device_link_manager.update_voter_device_link_with_election_id(voter_device_link, 0)
         voter_address = voter_address_save_results['voter_address']
+        text_for_map_search_saved = voter_address.text_for_map_search
         use_test_election = False
 
         # This code is for voterAddressSave. Similar code in voterBallotItemsRetrieve.
@@ -548,7 +549,7 @@ def voter_address_save_view(request):  # voterAddressSave
                         original_text_zip=vote_usa_results['original_text_zip'],
                     )
                     status += save_results['status']
-                    google_civic_election_id = save_results['google_civic_election_id'],
+                    google_civic_election_id = save_results['google_civic_election_id']
             else:
                 status += "NOT_REACHING_OUT_TO_VOTE_USA "
         elif default_election_data_source_is_google_civic:

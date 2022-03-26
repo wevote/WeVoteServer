@@ -2615,10 +2615,14 @@ class BallotReturnedManager(models.Manager):
 
             try:
                 ballot_returned_query = ballot_returned_query.annotate(
-                    distance=ExpressionWrapper(((F('latitude') - location.latitude) ** 2 +
-                              (F('longitude') - location.longitude) ** 2), output_field=FloatField()))
+                    distance=ExpressionWrapper(
+                        ((F('latitude') - location.latitude) ** 2 + (F('longitude') - location.longitude) ** 2),
+                        output_field=FloatField()))
             except Exception as e:
                 status += "EXCEPTION_IN_ANNOTATE_CALCULATION1-" + str(e) + ' '
+
+            # Do not return ballots more than ~40 miles away
+            ballot_returned_query = ballot_returned_query.filter(distance__lte=2)
 
             ballot_returned_query = ballot_returned_query.order_by('distance')
 
@@ -2627,6 +2631,9 @@ class BallotReturnedManager(models.Manager):
                 ballot_returned_query = ballot_returned_query.filter(google_civic_election_id=google_civic_election_id)
                 try:
                     ballot = ballot_returned_query.first()
+                    distance = (((ballot.latitude - location.latitude) ** 2) +
+                                ((ballot.longitude - location.longitude) ** 2))
+                    status += "SUBSTITUTED_BALLOT_DISTANCE1: " + str(distance) + " "
                 except Exception as e:
                     ballot = None
                     status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_HAS_LOCATION_AND_POSITIVE_GOOGLE_CIVIC_ID: " + str(e) + ' '
@@ -2644,6 +2651,9 @@ class BallotReturnedManager(models.Manager):
                         google_civic_election_id=upcoming_google_civic_election_id)
                     try:
                         ballot = ballot_returned_query.first()
+                        distance = (((ballot.latitude - location.latitude) ** 2) +
+                                    ((ballot.longitude - location.longitude) ** 2))
+                        status += "SUBSTITUTED_BALLOT_DISTANCE2: " + str(distance) + " "
                     except Exception as e:
                         ballot = None
                         status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_HAS_LOCATION_AND_POSITIVE_UPCOMING_GOOGLE_CIVIC_ID: " + str(e) + ' '
@@ -2669,6 +2679,9 @@ class BallotReturnedManager(models.Manager):
                                     google_civic_election_id=upcoming_google_civic_election_id)
                                 try:
                                     ballot = ballot_returned_query.first()
+                                    distance = (((ballot.latitude - location.latitude) ** 2) +
+                                                ((ballot.longitude - location.longitude) ** 2))
+                                    status += "SUBSTITUTED_BALLOT_DISTANCE3: " + str(distance) + " "
                                 except Exception as e:
                                     ballot = None
                                     status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_BALLOT_NONE_POSITIVE_UPCOMING_GOOGLE_CIVIC_ID: " + str(e) + ' '
@@ -2722,11 +2735,15 @@ class BallotReturnedManager(models.Manager):
 
                 try:
                     ballot_returned_query = ballot_returned_query.annotate(
-                        distance=ExpressionWrapper(((F('latitude') - location.latitude) ** 2 +
-                                                    (F('longitude') - location.longitude) ** 2),
-                                                   output_field=FloatField()))
+                        distance=ExpressionWrapper(
+                            ((F('latitude') - location.latitude) ** 2 + (F('longitude') - location.longitude) ** 2),
+                            output_field=FloatField()))
                 except Exception as e:
                     status += "EXCEPTION_IN_ANNOTATE_CALCULATION2-" + str(e) + ' '
+
+                # Do not return ballots more than ~40 miles away
+                ballot_returned_query = ballot_returned_query.filter(distance__lte=2)
+
                 ballot_returned_query = ballot_returned_query.order_by('distance')
 
                 status += "SEARCHING_BY_GOOGLE_CIVIC_ID-ATTEMPT2 "
@@ -2734,6 +2751,9 @@ class BallotReturnedManager(models.Manager):
                     google_civic_election_id=google_civic_election_id)
                 try:
                     ballot_returned = ballot_returned_query.first()
+                    distance = (((ballot.latitude - location.latitude) ** 2) +
+                                ((ballot.longitude - location.longitude) ** 2))
+                    status += "SUBSTITUTED_BALLOT_DISTANCE4: " + str(distance) + " "
                 except Exception as e:
                     ballot_returned = None
                     status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_HAS_BALLOT_LOCATION_AND_POSITIVE_GOOGLE_CIVIC_ID: " + str(e) + ' '
@@ -3639,8 +3659,13 @@ class VoterBallotSavedManager(models.Manager):
         voter_ballot_saved_id = 0
         return self.delete_voter_ballot_saved(voter_ballot_saved_id, voter_id, google_civic_election_id)
 
-    def delete_voter_ballot_saved(self, voter_ballot_saved_id=0, voter_id=0, google_civic_election_id=0,
-                                  ballot_returned_we_vote_id="", ballot_location_shortcut=""):
+    def delete_voter_ballot_saved(
+            self,
+            voter_ballot_saved_id=0,
+            voter_id=0,
+            google_civic_election_id=0,
+            ballot_returned_we_vote_id="",
+            ballot_location_shortcut=""):
         """
 
         :param voter_ballot_saved_id:
@@ -3951,7 +3976,8 @@ class VoterBallotSavedManager(models.Manager):
         return results
 
     def update_or_create_voter_ballot_saved(
-            self, voter_id=0,
+            self,
+            voter_id=0,
             google_civic_election_id='',
             state_code='',
             election_day_text='',
@@ -4041,25 +4067,29 @@ class VoterBallotSavedManager(models.Manager):
             status += "EXCEPTION-MultipleObjectsReturned "
             voter_ballot_saved = None
             voter_ballot_saved_manager = VoterBallotSavedManager()
-            voter_ballot_saved_manager.delete_voter_ballot_saved(0, voter_id, google_civic_election_id,
-                                                                 ballot_returned_we_vote_id, ballot_location_shortcut)
+            voter_ballot_saved_manager.delete_voter_ballot_saved(
+                voter_ballot_saved_id=0,
+                voter_id=voter_id,
+                google_civic_election_id=google_civic_election_id,
+                ballot_returned_we_vote_id=ballot_returned_we_vote_id,
+                ballot_location_shortcut=ballot_location_shortcut)
             if not positive_value_exists(called_recursively):
                 called_recursively = True
                 return self.update_or_create_voter_ballot_saved(
-                    voter_id,
-                    google_civic_election_id,
-                    state_code,
-                    election_day_text,
-                    election_description_text,
-                    original_text_for_map_search,
-                    substituted_address_nearby,
-                    is_from_substituted_address,
-                    is_from_test_ballot,
-                    polling_location_we_vote_id_source,
-                    ballot_location_display_name,
-                    ballot_returned_we_vote_id,
-                    ballot_location_shortcut,
-                    called_recursively,
+                    voter_id=voter_id,
+                    google_civic_election_id=google_civic_election_id,
+                    state_code=state_code,
+                    election_day_text=election_day_text,
+                    election_description_text=election_description_text,
+                    original_text_for_map_search=original_text_for_map_search,
+                    substituted_address_nearby=substituted_address_nearby,
+                    is_from_substituted_address=is_from_substituted_address,
+                    is_from_test_ballot=is_from_test_ballot,
+                    polling_location_we_vote_id_source=polling_location_we_vote_id_source,
+                    ballot_location_display_name=ballot_location_display_name,
+                    ballot_returned_we_vote_id=ballot_returned_we_vote_id,
+                    ballot_location_shortcut=ballot_location_shortcut,
+                    called_recursively=called_recursively,
                     original_text_city=original_text_city,
                     original_text_state=original_text_state,
                     original_text_zip=original_text_zip,

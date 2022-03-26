@@ -72,15 +72,17 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
                    '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
                    '  "google_civic_election_id": integer (if an error response),\n' \
+                   '  "original_text_city": string,\n' \
+                   '  "original_text_state": string,\n' \
+                   '  "original_text_zip": string,\n' \
                    '  "text_for_map_search": string (if an error response),\n' \
-                   '  "substituted_address_nearby": string (if an error response),\n' \
-                   '  "substituted_address_city": string (if an error response),\n' \
-                   '  "substituted_address_state": string (if an error response),\n' \
-                   '  "substituted_address_zip": integer (if an error response),\n' \
-                   '  "substituted_address_nearby": string (if an error response),\n' \
+                   '  "substituted_address_nearby": string,\n' \
+                   '  "substituted_address_city": string,\n' \
+                   '  "substituted_address_state": string,\n' \
+                   '  "substituted_address_zip": string,\n' \
                    '  "ballot_found": boolean (if an error response),\n' \
                    '  "ballot_caveat": string (if an error response),\n' \
-                   '  "is_from_substituted_address": boolean (if an error response),\n' \
+                   '  "is_from_substituted_address": boolean,\n' \
                    '  "is_from_test_ballot": boolean (if an error response),\n' \
                    '  "ballot_item_list": list\n' \
                    '   [\n' \
