@@ -1999,7 +1999,7 @@ class CandidateCampaign(models.Model):
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
     instagram_handle = models.TextField(verbose_name="candidate's instagram handle", blank=True, null=True)
     instagram_followers_count = models.IntegerField(verbose_name="count of candidate's instagram followers",
-                                                    null=False, blank=True, default=0)
+                                                    null=True, blank=True)
     # The date of the last election this candidate relates to, converted to integer, ex/ 20201103
     candidate_ultimate_election_date = models.PositiveIntegerField(default=None, null=True)
     # The year this candidate is running for office
@@ -3934,7 +3934,7 @@ class CandidateManager(models.Manager):
         google_civic_election_id = update_values['google_civic_election_id'] \
             if 'google_civic_election_id' in update_values else ''
         instagram_followers_count = update_values['instagram_followers_count'] \
-            if 'instagram_followers_count' in update_values else ''
+            if 'instagram_followers_count' in update_values else None
         instagram_handle = update_values['instagram_handle'] \
             if 'instagram_handle' in update_values else ''
         photo_url = update_values['photo_url'] if 'photo_url' in update_values else ''

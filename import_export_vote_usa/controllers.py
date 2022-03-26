@@ -20,6 +20,8 @@ from wevote_functions.functions import positive_value_exists
 logger = wevote_functions.admin.get_logger(__name__)
 
 VOTE_USA_API_KEY = get_environment_variable("VOTE_USA_API_KEY", no_exception=True)
+# https://vote-usa.org/api/v1.asmx/candidatesQuery?electionDay=2021-11-02&accessKey=YYY&state=pa
+VOTE_USA_CANDIDATE_QUERY_URL = "https://vote-usa.org/api/v1.asmx/candidatesQuery"
 VOTE_USA_ELECTION_QUERY_URL = "https://vote-usa.org/api/v1.asmx/electionQuery"
 VOTE_USA_VOTER_INFO_URL = "https://vote-usa.org/api/v1.asmx/voterInfoQuery"
 VOTE_USA_VOTER_INFO_QUERY_TYPE = "voterinfo"
