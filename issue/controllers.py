@@ -244,7 +244,7 @@ def issue_retrieve_for_api(issue_id, issue_we_vote_id):  # issueRetrieve
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def issue_descriptions_retrieve_for_api():  # issuesDescriptionsRetrieve
+def issue_descriptions_retrieve_for_api():  # issueDescriptionsRetrieve
     issue_list = []
     issues_to_display = []
 
@@ -270,21 +270,20 @@ def issue_descriptions_retrieve_for_api():  # issuesDescriptionsRetrieve
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     for issue in issue_list:
+        linked_organization_preview_list = []
+        results = retrieve_organization_preview_list(issue.we_vote_id)
+        if results['success']:
+            linked_organization_preview_list = results['linked_organization_preview_list']
         one_issue = {
-            'considered_left':          issue.considered_left,
-            'considered_right':         issue.considered_right,
-            'issue_we_vote_id':         issue.we_vote_id,
-            'issue_name':               issue.issue_name,
-            'issue_description':        issue.issue_description,
-            'issue_followers_count':    issue.issue_followers_count,
-            'issue_icon_local_path':    issue.issue_icon_local_path,
-            'issue_image_url':          issue.we_vote_hosted_image_url_medium
-            if positive_value_exists(issue.we_vote_hosted_image_url_medium)
-            else issue.we_vote_hosted_image_url_large,
-            'issue_photo_url_large':    issue.we_vote_hosted_image_url_large,
-            'issue_photo_url_medium':   issue.we_vote_hosted_image_url_medium,
-            'issue_photo_url_tiny':     issue.we_vote_hosted_image_url_tiny,
-            'linked_organization_count': issue.linked_organization_count,
+            'considered_left':                  issue.considered_left,
+            'considered_right':                 issue.considered_right,
+            'issue_we_vote_id':                 issue.we_vote_id,
+            'issue_name':                       issue.issue_name,
+            'issue_description':                issue.issue_description,
+            'issue_followers_count':            issue.issue_followers_count,
+            'issue_icon_local_path':            issue.issue_icon_local_path,
+            'linked_organization_count':        issue.linked_organization_count,
+            'linked_organization_preview_list': linked_organization_preview_list,
         }
         issues_to_display.append(one_issue)
 
@@ -1090,6 +1089,51 @@ def retrieve_issues_not_linked_to_organization_for_api(organization_we_vote_id):
 
     issues_linked_result['issue_list'] = issues_not_linked
     return issues_linked_result
+
+
+def retrieve_organization_preview_list(issue_we_vote_id):
+    status = ''
+    success = True
+    issue_we_vote_id_list = [issue_we_vote_id]
+    linked_organization_preview_list = []
+    organization_list_found = False
+
+    link_manager = OrganizationLinkToIssueList()
+    results = link_manager.retrieve_organization_we_vote_id_list_from_issue_we_vote_id_list(issue_we_vote_id_list)
+    if results['organization_we_vote_id_list_found']:
+        organization_we_vote_id_list = results['organization_we_vote_id_list']
+        from organization.models import Organization
+        try:
+            organization_queryset = Organization.objects.all()
+            organization_queryset = organization_queryset.filter(we_vote_id__in=organization_we_vote_id_list)
+            organization_queryset = organization_queryset.order_by('-twitter_followers_count')
+            organization_list = organization_queryset[:5]
+
+            if len(organization_list):
+                organization_list_found = True
+                status += 'ORGANIZATIONS_FOUND '
+            else:
+                status += 'NO_ORGANIZATIONS_FOUND '
+        except Exception as e:
+            status += 'retrieve_organizations_by_id_list: Unable to retrieve organizations from db. ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        if organization_list_found:
+            for organization in organization_list:
+                organization_dict = {
+                    'organization_name':                        organization.organization_name,
+                    'organization_we_vote_id':                  organization.we_vote_id,
+                    'we_vote_hosted_profile_image_url_tiny':    organization.we_vote_hosted_profile_image_url_tiny,
+                }
+                linked_organization_preview_list.append(organization_dict)
+
+    results = {
+        'success':                                  success,
+        'status':                                   status,
+        'linked_organization_preview_list':         linked_organization_preview_list,
+    }
+    return results
 
 
 # Steve, Temporary location for this function, as of July 16, 2018 --

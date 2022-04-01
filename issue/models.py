@@ -742,6 +742,7 @@ class OrganizationLinkToIssueList(models.Manager):
         return number_of_organizations_following_this_issue
 
     def retrieve_organization_we_vote_id_list_from_issue_we_vote_id_list(self, issue_we_vote_id_list):
+        success = True
         organization_we_vote_id_list = []
         organization_we_vote_id_list_found = False
         link_active = True
@@ -764,12 +765,13 @@ class OrganizationLinkToIssueList(models.Manager):
             status = 'NO_ORGANIZATION_WE_VOTE_IDS_DO_NOT_EXIST '
             organization_we_vote_id_list = []
         except Exception as e:
+            success = False
             handle_exception(e, logger=logger)
             status = 'FAILED retrieve_organization_we_vote_id_list_from_issue_we_vote_id_list' \
                      '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
 
         results = {
-            'success': True if organization_we_vote_id_list else False,
+            'success': success,
             'status': status,
             'organization_we_vote_id_list_found': organization_we_vote_id_list_found,
             'organization_we_vote_id_list': organization_we_vote_id_list,
