@@ -18,9 +18,9 @@ firebase_admin==4.5.3
 future==0.18.2
 geoip2==2.9.0
 geopy==1.23.0
-google-api-core==1.30.0
-google-api-python-client==2.9.0
-google-auth==1.31.0
+google-api-core==2.7.1
+google-api-python-client==2.43.0
+google-auth==2.6.2
 google-cloud-firestore==1.9.0
 google-cloud-storage==1.31.0
 gunicorn==19.10.0

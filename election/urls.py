@@ -15,6 +15,8 @@ urlpatterns = [
         views_admin.election_summary_view, name='election_summary_by_google_id'),
     re_path(r'^ballotpedia_election_delete_process/$',
         views_admin.ballotpedia_election_delete_process_view, name='ballotpedia_election_delete_process'),
+    re_path(r'^election_ballot_location_visualize/$', views_admin.election_ballot_location_visualize_view,
+            name='election_ballot_location_visualize'),
     re_path(r'^election_delete_process/$', views_admin.election_delete_process_view, name='election_delete_process'),
     re_path(r'^edit_process/$', views_admin.election_edit_process_view, name='election_edit_process'),
     re_path(r'^(?P<election_local_id>[0-9]+)/election_all_ballots_retrieve/$',

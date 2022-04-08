@@ -53,7 +53,7 @@ from voter_guide.models import VoterGuide, VoterGuidePossibility, \
     VoterGuideListManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, convert_we_vote_date_string_to_date, positive_value_exists,\
-    STATE_CODE_MAP
+    STATE_CODE_MAP, STATE_GEOGRAPHIC_CENTER
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -2180,6 +2180,13 @@ def election_migration_view(request):
 
     # ########################################
     # Offices Hosted From Other Elections - We don't move, but include the count for error checking
+    # TODO: April 6, 2022 restored the following 5 lines, to eliminate the undefined variable errors
+    office_visiting_list_we_vote_ids = office_manager.fetch_office_visiting_list_we_vote_ids(
+        host_google_civic_election_id_list=[from_election_id])
+    contest_office_visiting_host_count = 0
+    position_network_scores_migrated = 0
+    contest_office_visiting_origin_count = 0
+    # End of restore TODO
     from_election_hosted_office_count = 0
     try:
         if positive_value_exists(from_state_code):
@@ -2689,7 +2696,6 @@ def election_migration_view(request):
 
         messages.add_message(request, messages.ERROR, error_message)
     else:
-
         current_counts = "\'from\' counts: " \
                          "\n" \
                          'office_count: {office_count}, ' \
@@ -2772,3 +2778,54 @@ def election_migration_view(request):
     }
 
     return render(request, 'election/election_migration.html', template_values)
+
+@login_required
+def election_ballot_location_visualize_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+    show_base_pins = request.GET.get('show_base_pins', True)
+    show_no_pins = request.GET.get('show_no_pins', True)
+
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    state_code = request.GET.get('state_code', 'CA').upper()
+    if state_code == '':
+        state_code = 'CA'
+    election_id = 0
+    is_national_election = False
+    election_name = ''
+    if positive_value_exists(google_civic_election_id):
+        election_manager = ElectionManager()
+        results = election_manager.retrieve_election(google_civic_election_id, read_only=False)
+        if results['election_found']:
+            election = results['election']
+            election_name = election.election_name
+            election_id = election.id
+            is_national_election = election.is_national_election
+            if not positive_value_exists(is_national_election):
+                is_national_election = False
+
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
+
+    #  Predefined Google Maps marker icons are listed at http://kml4earth.appspot.com/icons.html
+    template_values = {
+        'election_id':              election_id,
+        'election_name':            election_name,
+        'geo_center_lat':           request.GET.get('geo_center_lat', STATE_GEOGRAPHIC_CENTER.get(state_code)[0]),
+        'geo_center_lng':           request.GET.get('geo_center_lng', STATE_GEOGRAPHIC_CENTER.get(state_code)[1]),
+        'geo_center_zoom':          request.GET.get('geo_center_zoom', STATE_GEOGRAPHIC_CENTER.get(state_code)[2]),
+        'google_civic_election_id': google_civic_election_id,
+        'icon_scale_base':          25,                # 25 percent of full size
+        'icon_scale_no':            25,                # 25 percent of full size
+        'icon_url_base':            'https://maps.google.com/mapfiles/kml/paddle/grn-circle.png',
+        'icon_url_no':              'http://maps.google.com/mapfiles/kml/paddle/red-stars.png',
+        'is_national_election':     is_national_election,
+        'show_base_pins':           show_base_pins,
+        'show_no_pins':             show_no_pins,
+        'state_code':               state_code,
+        'state_list':               sorted_state_list,
+    }
+
+    return render(request, 'election/election_ballot_location_visualize.html', template_values)

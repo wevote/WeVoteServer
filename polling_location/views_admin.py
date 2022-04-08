@@ -492,6 +492,9 @@ def polling_location_visualize_view(request, polling_location_local_id=0, pollin
         'geo_center_zoom': STATE_GEOGRAPHIC_CENTER.get(state_code)[2],
         'state_code': state_code,
         'state_list': sorted_state_list,
+        #  Predefined Google Maps marker icons are listed at http://kml4earth.appspot.com/icons.html
+        'icon_url_base': 'http://maps.google.com/mapfiles/kml/shapes/placemark_circle_highlight.png',
+        'icon_scale_base': 25,                # 100 percent of full size
     }
 
     return render(request, 'polling_location/polling_location_visualize.html', template_values)
