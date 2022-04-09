@@ -43,8 +43,10 @@ function createSelect () {
 
 
 function setStateVariable () {
-  stateHtml = $('#state_code').val().toUpperCase();
-
+  stateCodeSelector = $('#state_code');
+  if (stateCodeSelector.length) {
+    stateHtml = stateCodeSelector.val().toUpperCase();
+  }
   if (stateHtml.length === 2) {
     state = stateHtml;
   } else {
@@ -91,8 +93,8 @@ window.initMap = () => {
   const geoCenterLatSelector = $('#geo_center_lat');
   const geoCenterLngSelector = $('#geo_center_lng');
   const geoCenterZoomSelector = $('#geo_center_zoom');
-  const geoLat = parseInt(geoCenterLatSelector.val());
-  const geoLng = parseInt(geoCenterLngSelector.val());
+  const geoLat = parseFloat(geoCenterLatSelector.val());
+  const geoLng = parseFloat(geoCenterLngSelector.val());
   const geoZoom = parseInt(geoCenterZoomSelector.val());
   const myLatLng = { lat: geoLat, lng: geoLng };
 
@@ -149,28 +151,30 @@ window.initMap = () => {
   $.getJSON(apiURL, { state, google_civic_election_id: googleCivicID }, (results) => {
     pollingLocResults = results;
     const resultsMap = new Map();
-    for (const pollLocObj of pollingLocResults) {
-      const {we_vote_id: pollLocId} = pollLocObj;
-      const icon = googleCivicID === 0 ? iconBase : iconNo;  // If all are base fill with base, if all start as exception, fill with 'no'
-      resultsMap.set(pollLocId, {...pollLocObj, icon: icon, showPin: showBasePins });
-    }
-    if (googleCivicID === 0) {
-      addMarkers(resultsMap);
-    } else {
-      let ballotReturnedLocResults;
-      const apiURLBallot = `${window.location.origin}/apis/v1/ballotReturnedSyncOut`;
-      $.getJSON(apiURLBallot, { state_code: state, google_civic_election_id: googleCivicID }, (results) => {
-        ballotReturnedLocResults = results;
-        for (const ballotLocObj of ballotReturnedLocResults) {
-          const {polling_location_we_vote_id: ballotLocId} = ballotLocObj;
-          const pollLocObj = resultsMap.get(ballotLocId);
-          resultsMap.delete(ballotLocId);
-          resultsMap.set(ballotLocId, {...pollLocObj, icon: iconBase, showPin: showNoPins });
-        }
+    if ( !('success' in results) && !(results.success) ) {
+      for (const pollLocObj of pollingLocResults) {
+        const {we_vote_id: pollLocId} = pollLocObj;
+        const icon = googleCivicID === 0 ? iconBase : iconNo;  // If all are base fill with base, if all start as exception, fill with 'no'
+        resultsMap.set(pollLocId, {...pollLocObj, icon: icon, showPin: showBasePins});
+      }
+      if (googleCivicID === 0) {
         addMarkers(resultsMap);
-      }).fail((err) => {
-        console.log('error ballotReturnedSyncOut', err);
-      });
+      } else {
+        let ballotReturnedLocResults;
+        const apiURLBallot = `${window.location.origin}/apis/v1/ballotReturnedSyncOut`;
+        $.getJSON(apiURLBallot, {state_code: state, google_civic_election_id: googleCivicID}, (results) => {
+          ballotReturnedLocResults = results;
+          for (const ballotLocObj of ballotReturnedLocResults) {
+            const {polling_location_we_vote_id: ballotLocId} = ballotLocObj;
+            const pollLocObj = resultsMap.get(ballotLocId);
+            resultsMap.delete(ballotLocId);
+            resultsMap.set(ballotLocId, {...pollLocObj, icon: iconBase, showPin: showNoPins});
+          }
+          addMarkers(resultsMap);
+        }).fail((err) => {
+          console.log('error ballotReturnedSyncOut', err);
+        });
+      }
     }
   });
 };

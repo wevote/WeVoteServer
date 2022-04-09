@@ -2809,7 +2809,7 @@ def election_ballot_location_visualize_view(request):
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
 
-    #  Predefined Google Maps marker icons are listed at http://kml4earth.appspot.com/icons.html
+    #  Predefined Google Maps marker icons are listed at https://kml4earth.appspot.com/icons.html
     template_values = {
         'election_id':              election_id,
         'election_name':            election_name,
@@ -2820,7 +2820,7 @@ def election_ballot_location_visualize_view(request):
         'icon_scale_base':          25,                # 25 percent of full size
         'icon_scale_no':            25,                # 25 percent of full size
         'icon_url_base':            'https://maps.google.com/mapfiles/kml/paddle/grn-circle.png',
-        'icon_url_no':              'http://maps.google.com/mapfiles/kml/paddle/red-stars.png',
+        'icon_url_no':              'https://maps.google.com/mapfiles/kml/paddle/red-stars.png',
         'is_national_election':     is_national_election,
         'show_base_pins':           show_base_pins,
         'show_no_pins':             show_no_pins,
