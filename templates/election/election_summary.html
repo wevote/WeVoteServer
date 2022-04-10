@@ -486,6 +486,11 @@
           Repair Ballot Item Text for this Election (Update Voter Ballot Items with Latest Cached Office/Measure info)</a>
       </li>
 
+      <li>
+        <a href="{% url 'election:election_ballot_location_visualize' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">
+          Visualize the Locations of Current Ballot Items</a>
+      </li>
+
 {% if election.use_ballotpedia_as_data_source %}
       <li>
         <a href="{% url 'import_export_batches:retrieve_ballots_for_polling_locations_api_v4' %}?use_ballotpedia=1&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&refresh_ballot_returned=1&use_batch_process=1" target="_blank">
