@@ -79,8 +79,9 @@ function addMarkers (resultsMap) {
     const { latitude, longitude, location_name: locationName, line1, city, state: resultsState, we_vote_id: weVoteId,
       id: pollingLocTableId, icon, showPin  } = item;
     let { href } = window.location;
-    href = `${href.substring(0, href.lastIndexOf('/pl/') + 4) + pollingLocTableId}/summary/`;
-    const link = `<a href='${href}' target='_blank'>Open ${weVoteId}</a>`;
+    const offset = href.lastIndexOf('/pl/') > 0 ? href.lastIndexOf('/pl/') : href.lastIndexOf('/e/');
+    const url = `${href.substring(0, offset)}/pl/${pollingLocTableId}/summary/`;
+    const link = `<a href='${url}' target='_blank'>Open ${weVoteId}</a>`;
     const address = `${line1}, ${city} ${resultsState.toUpperCase()}<br/>${link}`;
     createMarker(new google.maps.LatLng(latitude, longitude), locationName, address, icon, showPin);
   }
@@ -105,6 +106,10 @@ window.initMap = () => {
     url: iconUrlBase,
     scaledSize: new google.maps.Size(iconScaleBase, iconScaleBase), // scaled size
   };
+
+  if (googleCivicID === 0) {
+    googleCivicID = parseInt($('#google_civic_election_id').val()) || 0;
+  }
 
   let iconNo;
   if (googleCivicID > 0) {
