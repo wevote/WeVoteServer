@@ -37,6 +37,7 @@ GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
 GEOCODE_TIMEOUT = 10
 RADIUS_OF_EARTH_IN_MILES = 3958.756
 DEG_TO_RADS = 0.0174533
+DISTANCE_LIMIT_IN_MILES = 25
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -2650,7 +2651,7 @@ class BallotReturnedManager(models.Manager):
                 status += "EXCEPTION_IN_ANNOTATE_CALCULATION1-" + str(e) + ' '
 
             # Do not return ballots more than 25 miles away
-            ballot_returned_query = ballot_returned_query.filter(distance__lte=25)
+            ballot_returned_query = ballot_returned_query.filter(distance__lte=DISTANCE_LIMIT_IN_MILES)
 
             ballot_returned_query = ballot_returned_query.order_by('distance')
 
@@ -2788,7 +2789,7 @@ class BallotReturnedManager(models.Manager):
                     status += "EXCEPTION_IN_ANNOTATE_CALCULATION2-" + str(e) + ' '
 
                 # Do not return ballots more than 25 miles away
-                ballot_returned_query = ballot_returned_query.filter(distance__lte=25)
+                ballot_returned_query = ballot_returned_query.filter(distance__lte=DISTANCE_LIMIT_IN_MILES)
 
                 ballot_returned_query = ballot_returned_query.order_by('distance')
 
