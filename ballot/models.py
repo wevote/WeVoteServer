@@ -2664,7 +2664,8 @@ class BallotReturnedManager(models.Manager):
                         status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_HAS_LOCATION_AND_POSITIVE_GOOGLE_CIVIC_ID__BALLOT_NONE "
                     else:
                         status += "SUBSTITUTED_BALLOT_DISTANCE1: " + str(ballot.distance) + " "
-                        # print('====== 1 ==== ballot.distance', ballot.distance)
+                        # print('===== 1 ===== ballot.distance', ballot.distance, ballot.latitude, ballot.longitude,
+                        #       text_for_map_search)
                 except Exception as e:
                     ballot = None
                     status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_HAS_LOCATION_AND_POSITIVE_GOOGLE_CIVIC_ID: " + str(e) + ' '
@@ -2686,7 +2687,8 @@ class BallotReturnedManager(models.Manager):
                             status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_HAS_LOCATION_AND_POSITIVE_UPCOMING_GOOGLE_CIVIC_ID__BALLOT_NONE "
                         else:
                             status += "SUBSTITUTED_BALLOT_DISTANCE2: " + str(ballot.distance) + " "
-                            # print('===== 2 ===== ballot.distance', ballot.distance, ballot.latitude, ballot.longitude, text_for_map_search)
+                            # print('===== 2 ===== ballot.distance', ballot.distance, ballot.latitude, ballot.longitude,
+                            #       text_for_map_search)
                     except Exception as e:
                         ballot = None
                         status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_HAS_LOCATION_AND_POSITIVE_UPCOMING_GOOGLE_CIVIC_ID: " + str(e) + ' '
@@ -2716,7 +2718,8 @@ class BallotReturnedManager(models.Manager):
                                         status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_BALLOT_NONE_POSITIVE_UPCOMING_GOOGLE_CIVIC_ID__BALLOT_NONE "
                                     else:
                                         status += "SUBSTITUTED_BALLOT_DISTANCE3: " + str(ballot.distance) + " "
-                                        # print('==== 3 ====== ballot.distance', ballot.distance)
+                                        # print('===== 3 ===== ballot.distance', ballot.distance, ballot.latitude,
+                                        #       ballot.longitude, text_for_map_search)
                                 except Exception as e:
                                     ballot = None
                                     status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_BALLOT_NONE_POSITIVE_UPCOMING_GOOGLE_CIVIC_ID: " + str(e) + ' '
