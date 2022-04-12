@@ -2,20 +2,22 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+import sys
+from datetime import date, datetime
+
+from django.db import models
+from django.db.models import F, Q, Count, FloatField, ExpressionWrapper, Func
+from geopy.exc import GeocoderQuotaExceeded
+from geopy.geocoders import get_geocoder_for_service
+
+import wevote_functions.admin
 from candidate.models import CandidateCampaign
 from config.base import get_environment_variable
-from datetime import date, datetime
-from django.db import models
-from django.db.models import F, Q, Count, FloatField, ExpressionWrapper
 from election.models import ElectionManager
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
-from geopy.geocoders import get_geocoder_for_service
-from geopy.exc import GeocoderQuotaExceeded
 from measure.models import ContestMeasureManager
 from office.models import ContestOfficeManager
 from polling_location.models import PollingLocationManager
-import sys
-import wevote_functions.admin
 from wevote_functions.functions import convert_date_to_date_as_integer, convert_to_int, \
     extract_state_code_from_address_string, positive_value_exists, STATE_CODE_MAP
 from wevote_settings.models import fetch_next_we_vote_id_ballot_returned_integer, fetch_site_unique_id_prefix
@@ -33,8 +35,19 @@ KIND_OF_BALLOT_ITEM_CHOICES = (
 
 GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
 GEOCODE_TIMEOUT = 10
+RADIUS_OF_EARTH_IN_MILES = 3958.756
+DEG_TO_RADS = 0.0174533
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+class Sin(Func):
+    function = 'SIN'
+
+class Cos(Func):
+    function = 'COS'
+
+class ACos(Func):
+    function = 'ACOS'
 
 
 class BallotItem(models.Model):
@@ -2506,7 +2519,10 @@ class BallotReturnedManager(models.Manager):
 
         if not hasattr(self, 'google_client') or not self.google_client:
             self.google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
-
+        # Note April 2022:  If you get vague error messages from GeoPy that you can't figure out, it is easy to install
+        # Google's google-maps-services-python and then doing the same query with better messages.  I guess we want to
+        # keep using the GeoPy as a wrapper to make it easier to swap out using google for geoloc, if a better
+        # competitor comes along.
         try:
             location = self.google_client.geocode(text_for_map_search, sensor=False, timeout=GEOCODE_TIMEOUT)
         except GeocoderQuotaExceeded:
@@ -2614,15 +2630,27 @@ class BallotReturnedManager(models.Manager):
                 ballot_returned_query = ballot_returned_query.filter(normalized_state__iexact=state_code)
 
             try:
+                lat_rads_ploc = location.latitude * DEG_TO_RADS
+                lon_rads_ploc = location.longitude * DEG_TO_RADS
                 ballot_returned_query = ballot_returned_query.annotate(
+                    # Calculate the approximate great circle distance between two coordinates
+                    # https://medium.com/@petehouston/calculate-distance-of-two-locations-on-earth-using-python-1501b1944d97
                     distance=ExpressionWrapper(
-                        ((F('latitude') - location.latitude) ** 2 + (F('longitude') - location.longitude) ** 2),
-                        output_field=FloatField()))
+                         (RADIUS_OF_EARTH_IN_MILES * (
+                             ACos(
+                                 (Sin(F('latitude') * DEG_TO_RADS) *
+                                  Sin(lat_rads_ploc)) +
+                                 (Cos(F('latitude') * DEG_TO_RADS) *
+                                  Cos(lat_rads_ploc) *
+                                  Cos((F('longitude') * DEG_TO_RADS) - lon_rads_ploc))
+                             )
+                           )),
+                         output_field=FloatField()))
             except Exception as e:
                 status += "EXCEPTION_IN_ANNOTATE_CALCULATION1-" + str(e) + ' '
 
-            # Do not return ballots more than ~40 miles away
-            ballot_returned_query = ballot_returned_query.filter(distance__lte=2)
+            # Do not return ballots more than 25 miles away
+            ballot_returned_query = ballot_returned_query.filter(distance__lte=25)
 
             ballot_returned_query = ballot_returned_query.order_by('distance')
 
@@ -2631,9 +2659,11 @@ class BallotReturnedManager(models.Manager):
                 ballot_returned_query = ballot_returned_query.filter(google_civic_election_id=google_civic_election_id)
                 try:
                     ballot = ballot_returned_query.first()
-                    distance = (((ballot.latitude - location.latitude) ** 2) +
-                                ((ballot.longitude - location.longitude) ** 2))
-                    status += "SUBSTITUTED_BALLOT_DISTANCE1: " + str(distance) + " "
+                    if ballot == None:
+                        status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_HAS_LOCATION_AND_POSITIVE_GOOGLE_CIVIC_ID__BALLOT_NONE "
+                    else:
+                        status += "SUBSTITUTED_BALLOT_DISTANCE1: " + str(ballot.distance) + " "
+                        # print('====== 1 ==== ballot.distance', ballot.distance)
                 except Exception as e:
                     ballot = None
                     status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_HAS_LOCATION_AND_POSITIVE_GOOGLE_CIVIC_ID: " + str(e) + ' '
@@ -2651,9 +2681,11 @@ class BallotReturnedManager(models.Manager):
                         google_civic_election_id=upcoming_google_civic_election_id)
                     try:
                         ballot = ballot_returned_query.first()
-                        distance = (((ballot.latitude - location.latitude) ** 2) +
-                                    ((ballot.longitude - location.longitude) ** 2))
-                        status += "SUBSTITUTED_BALLOT_DISTANCE2: " + str(distance) + " "
+                        if ballot == None:
+                            status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_HAS_LOCATION_AND_POSITIVE_UPCOMING_GOOGLE_CIVIC_ID__BALLOT_NONE "
+                        else:
+                            status += "SUBSTITUTED_BALLOT_DISTANCE2: " + str(ballot.distance) + " "
+                            # print('===== 2 ===== ballot.distance', ballot.distance, ballot.latitude, ballot.longitude, text_for_map_search)
                     except Exception as e:
                         ballot = None
                         status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_HAS_LOCATION_AND_POSITIVE_UPCOMING_GOOGLE_CIVIC_ID: " + str(e) + ' '
@@ -2679,9 +2711,11 @@ class BallotReturnedManager(models.Manager):
                                     google_civic_election_id=upcoming_google_civic_election_id)
                                 try:
                                     ballot = ballot_returned_query.first()
-                                    distance = (((ballot.latitude - location.latitude) ** 2) +
-                                                ((ballot.longitude - location.longitude) ** 2))
-                                    status += "SUBSTITUTED_BALLOT_DISTANCE3: " + str(distance) + " "
+                                    if ballot == None:
+                                        status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_BALLOT_NONE_POSITIVE_UPCOMING_GOOGLE_CIVIC_ID__BALLOT_NONE "
+                                    else:
+                                        status += "SUBSTITUTED_BALLOT_DISTANCE3: " + str(ballot.distance) + " "
+                                        # print('==== 3 ====== ballot.distance', ballot.distance)
                                 except Exception as e:
                                     ballot = None
                                     status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_BALLOT_NONE_POSITIVE_UPCOMING_GOOGLE_CIVIC_ID: " + str(e) + ' '
@@ -2734,15 +2768,27 @@ class BallotReturnedManager(models.Manager):
                     Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id=""))
 
                 try:
+                    lat_rads_ploc = location.latitude * DEG_TO_RADS
+                    lon_rads_ploc = location.longitude * DEG_TO_RADS
                     ballot_returned_query = ballot_returned_query.annotate(
+                        # Calculate the approximate great circle distance between two coordinates
+                        # https://medium.com/@petehouston/calculate-distance-of-two-locations-on-earth-using-python-1501b1944d97
                         distance=ExpressionWrapper(
-                            ((F('latitude') - location.latitude) ** 2 + (F('longitude') - location.longitude) ** 2),
+                            (RADIUS_OF_EARTH_IN_MILES * (
+                                ACos(
+                                    (Sin(F('latitude') * DEG_TO_RADS) *
+                                     Sin(lat_rads_ploc)) +
+                                    (Cos(F('latitude') * DEG_TO_RADS) *
+                                     Cos(lat_rads_ploc) *
+                                     Cos((F('longitude') * DEG_TO_RADS) - lon_rads_ploc))
+                                )
+                            )),
                             output_field=FloatField()))
                 except Exception as e:
                     status += "EXCEPTION_IN_ANNOTATE_CALCULATION2-" + str(e) + ' '
 
-                # Do not return ballots more than ~40 miles away
-                ballot_returned_query = ballot_returned_query.filter(distance__lte=2)
+                # Do not return ballots more than 25 miles away
+                ballot_returned_query = ballot_returned_query.filter(distance__lte=25)
 
                 ballot_returned_query = ballot_returned_query.order_by('distance')
 
@@ -2751,9 +2797,7 @@ class BallotReturnedManager(models.Manager):
                     google_civic_election_id=google_civic_election_id)
                 try:
                     ballot_returned = ballot_returned_query.first()
-                    distance = (((ballot.latitude - location.latitude) ** 2) +
-                                ((ballot.longitude - location.longitude) ** 2))
-                    status += "SUBSTITUTED_BALLOT_DISTANCE4: " + str(distance) + " "
+                    status += "SUBSTITUTED_BALLOT_DISTANCE4: " + str(ballot_returned.distance) + " "
                 except Exception as e:
                     ballot_returned = None
                     status += "BALLOT_RETURNED_QUERY_FIRST_FAILED_HAS_BALLOT_LOCATION_AND_POSITIVE_GOOGLE_CIVIC_ID: " + str(e) + ' '
