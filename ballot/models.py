@@ -2522,8 +2522,8 @@ class BallotReturnedManager(models.Manager):
             self.google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
         # Note April 2022:  If you get vague error messages from GeoPy that you can't figure out, it is easy to install
         # Google's google-maps-services-python and then do the same query and get better messages.  I guess we want to
-        # keep using the GeoPy as a wrapper, in case some day we want ti swap out google for geoloc, with a better
-        # competitor.  (I came close to just eliminating GeoPy)
+        # keep using the GeoPy as a wrapper, in case some day we want to swap out google for geolocation, with a better
+        # competitor.  (GeoPy doesn't have much value in our use case.)
         try:
             location = self.google_client.geocode(text_for_map_search, sensor=False, timeout=GEOCODE_TIMEOUT)
         except GeocoderQuotaExceeded:
