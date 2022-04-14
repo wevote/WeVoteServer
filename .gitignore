@@ -34,7 +34,6 @@ venv/
 *.egg-info/
 .installed.cfg
 *.egg
-wevote_settings/migrations/__init__.py
 
 # PyInstaller #
 #  Usually these files are written by a python script from a template
