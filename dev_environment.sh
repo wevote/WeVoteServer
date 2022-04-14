@@ -78,9 +78,9 @@ if [ "$CMD" = "create" ]; then
 		echo "Creating develop configuration file in config/environment_variables.json..."
 		cp config/environment_variables-template.json config/environment_variables.json
 		# configure database name
-		sed -i "s/WeVoteServerDB/$DB_NAME/" config/environment_variables.json
+		sed -ibak "s/WeVoteServerDB/$DB_NAME/" config/environment_variables.json
 		# configure database host to use docker container name
-		sed -E -i "s/(DATABASE_HOST.*\":.*)\"\"/\1\"${DOCKER_DB_NAME}\"/" config/environment_variables.json
+		sed -E -ibak "s/(DATABASE_HOST.*\":.*)\"\"/\1\"${DOCKER_DB_NAME}\"/" config/environment_variables.json
 		
 	fi
 
