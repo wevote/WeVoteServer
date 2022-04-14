@@ -1,8 +1,10 @@
-FROM python:3.9-alpine
+FROM python:3.9-slim-buster
 
-RUN apk add g++ gcc
-RUN apk add musl-dev postgresql-dev zlib-dev libffi-dev jpeg-dev
-RUN apk add postgresql-libs libmagic
+RUN apt update && \
+	apt install -y g++ gcc \
+		libpq-dev zlib1g-dev \
+		libffi-dev libjpeg-dev \
+		libmagic-dev
 
 COPY requirements.txt .
 
