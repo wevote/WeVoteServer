@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+set -e
+
 usage() {
 	echo ""
 	echo "Summary: Create or remove WeVoteServer development environment"
