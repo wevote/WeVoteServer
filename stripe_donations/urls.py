@@ -9,4 +9,5 @@ from . import views_admin
 
 urlpatterns = [
     url(r'^plan_list/$', views_admin.organization_subscription_list_view, name='plan_list'),
+    url(r'^dispute_list/$', views_admin.dispute_list_view, name='dispute_list'),
 ]

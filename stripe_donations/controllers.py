@@ -5,17 +5,18 @@
 
 import json
 import textwrap
+import time
 from datetime import datetime, timezone
 
+import pytz
 import stripe
 
 from campaign.models import CampaignXManager
 from config.base import get_environment_variable, get_environment_variable_default
-from stripe_donations.models import StripeManager
+from stripe_donations.models import StripeManager, StripeDispute
 from voter.models import VoterManager
 from wevote_functions.admin import get_logger
 from wevote_functions.functions import convert_pennies_integer_to_dollars_string, get_voter_device_id
-# from organization.models import OrganizationManager
 from wevote_functions.functions import positive_value_exists
 
 logger = get_logger(__name__)
@@ -599,7 +600,7 @@ def donation_process_stripe_webhook_event(event):  # donationStripeWebhook
     api_version = event.api_version
     logger.info("WEBHOOK received: donation_process_stripe_webhook_event: " + etype)
     print("WEBHOOK received: donation_process_stripe_webhook_event: " + etype)
-    # write_event_to_local_file(event);
+    # write_event_to_local_file(event)      # for debugging
 
     if etype == 'charge.succeeded':
         return donation_process_charge(event)
@@ -611,11 +612,11 @@ def donation_process_stripe_webhook_event(event):  # donationStripeWebhook
         return donation_process_subscription_payment(event)
     elif etype == 'charge.refunded':
         return donation_process_refund_payment(event)
-    # elif etype == 'invoice.created':  Abandoned March 2021, not needed with new api
-    #     return donation_process_invoice_created(event)
+    elif event['type'] == 'charge.dispute.created' or 'charge.dispute.funds_withdrawn':
+        return donation_process_dispute(event)
 
-    print("WEBHOOK ignored: donation_process_stripe_webhook_event: " + event.type)
-    logger.info("WEBHOOK ignored: donation_process_stripe_webhook_event: " + event.type)
+    print("WEBHOOK ignored: donation_process_stripe_webhook_event: " + event['type'])
+    logger.info("WEBHOOK ignored: donation_process_stripe_webhook_event: " + event['type'])
     return
 
 
@@ -662,6 +663,8 @@ def donation_process_charge(event):           # 'charge.succeeded' webhook
                 voter_we_vote_id = metadata['voter_we_vote_id']
             else:
                 not_loggedin_voter_we_vote_id = metadata['voter_we_vote_id']
+
+        # if both not_loggedin_voter_we_vote_id and voter_we_vote_id are '', then fraud is likely
 
         payment = {
             'address_zip': source['address_zip'],
@@ -1202,3 +1205,66 @@ def donation_subscription_cancellation_for_api(voter_we_vote_id, premium_plan_ty
         'donation_payments_list': donation_payments_list
     }
     return json_returned
+
+
+def local_datetime_string_from_utc_timestamp(utc_timestamp):
+    now_timestamp = time.time()
+    offset = datetime.fromtimestamp(now_timestamp) - datetime.utcfromtimestamp(now_timestamp)
+    utc_datetime = datetime.utcfromtimestamp(utc_timestamp)
+    naive_local_datetime = utc_datetime + offset
+    time_zone = pytz.timezone("America/Los_Angeles")
+    local_datetime = time_zone.localize(naive_local_datetime)
+    dt_string = local_datetime.strftime('%Y-%m-%d %H:%M:%S%z')
+    return dt_string
+
+
+def donation_process_dispute(event):           # 'charge.dispute.created' and 'charge.dispute.funds_withdrawn' webhooks
+    try:
+        dispute = {}
+        dispute['created'] = local_datetime_string_from_utc_timestamp(event['created'])
+
+        dispute['etype'] = event['type']
+        is_create = event['type'] == "charge.dispute.created"
+        dispute['livemode'] = event['livemode']
+
+        data_object = event['data']['object']
+        dispute['balance_transaction_id'] = data_object['balance_transaction']
+        dispute['charge_id'] = data_object['charge']
+        dispute['reason'] = data_object['reason']
+        dispute['transaction_state'] = data_object['status']
+
+
+        balance_transaction = data_object['balance_transactions'][0]
+        dispute['transaction_status'] = balance_transaction['status']
+        dispute['amount'] = str(balance_transaction['amount'])
+        dispute['description'] = balance_transaction['description']
+        dispute['total_cost'] = str(balance_transaction['net'])
+        dispute['fee'] = str(balance_transaction['fee'])
+        dispute['dispute_source_id'] = balance_transaction['source']
+
+        fee_details = balance_transaction['fee_details'][0]
+        dispute['fee_description'] = fee_details['description'] + ": " + fee_details['type']
+
+        evidence = data_object['evidence']
+        dispute['billing_address'] = evidence['billing_address']
+        dispute['customer_email_address'] = evidence['customer_email_address']
+        dispute['customer_name'] = evidence['customer_name']
+        dispute['customer_purchase_ip'] = evidence['customer_purchase_ip']
+
+        evidence_details = data_object['evidence_details']
+        dispute['evidence_due_by'] = local_datetime_string_from_utc_timestamp(evidence_details['due_by'])
+        dispute['evidence_has_evidence'] = evidence_details['has_evidence']
+        dispute['evidence_past_due'] = evidence_details['past_due']
+        dispute['evidence_submission_count'] = evidence_details['submission_count']
+
+        StripeDispute.save_dispute_transaction(dispute)
+
+    except stripe.error.StripeError as e:
+        body = e.json_body
+        error_from_json = body['error']
+        logger.error("donation_process_dispute, Stripe: " + error_from_json)
+
+    except Exception as err:
+        logger.error("donation_process_dispute, general: " + str(err))
+
+    return

@@ -71,6 +71,7 @@ urlpatterns = [
     re_path(r'^retrieve_tables/', include(('retrieve_tables.urls', 'retrieve_tables'), namespace="retrieve_tables")),
     re_path(r'^scheduled_tasks/', include(('scheduled_tasks.urls', 'scheduled_tasks'), namespace="scheduled_tasks")),
     re_path(r'^sod/', include(('support_oppose_deciding.urls', 'support_oppose_deciding'), namespace="support_oppose_deciding")),
+    re_path(r'^stripe_donations/', include(('stripe_donations.urls', 'stripe'), namespace="stripe_donations")),
     re_path(r'^tag/', include(('tag.urls', 'tag'), namespace="tag")),
     re_path(r'^twitter/', include(('import_export_twitter.urls', 'twitter'), namespace="twitter")),
     re_path(r'^twitter2/', include(('twitter.urls', 'twitter2'), namespace="twitter2")),
