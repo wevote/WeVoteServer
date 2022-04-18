@@ -2,17 +2,20 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+import textwrap
+from datetime import datetime, timezone
+
+import stripe
 from django.db import models, transaction
 from django.db.models import Sum, Q
-from datetime import datetime, timezone
-from exception.models import handle_exception, handle_record_found_more_than_one_exception
-# from organization.models import CHOSEN_FAVICON_ALLOWED, CHOSEN_FULL_DOMAIN_ALLOWED, CHOSEN_GOOGLE_ANALYTICS_ALLOWED, \
-#     CHOSEN_SOCIAL_SHARE_IMAGE_ALLOWED, CHOSEN_SOCIAL_SHARE_DESCRIPTION_ALLOWED, CHOSEN_PROMOTED_ORGANIZATIONS_ALLOWED
+
 import wevote_functions.admin
+from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from voter.models import VoterManager
 from wevote_functions.functions import positive_value_exists
-import stripe
-import textwrap
+
+# from organization.models import CHOSEN_FAVICON_ALLOWED, CHOSEN_FULL_DOMAIN_ALLOWED, CHOSEN_GOOGLE_ANALYTICS_ALLOWED, \
+#     CHOSEN_SOCIAL_SHARE_IMAGE_ALLOWED, CHOSEN_SOCIAL_SHARE_DESCRIPTION_ALLOWED, CHOSEN_PROMOTED_ORGANIZATIONS_ALLOWED
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -2079,3 +2082,56 @@ class StripeManager(models.Manager):
         except Exception as e:
             logger.info("FAILED_TO RETRIEVE_DONATION_PAYMENT_LIST ", e)
             return 'none'
+
+
+class StripeDispute(models.Model):
+    """
+    This table tracks disputed stripe transactions, which are usually due to credit card fraud
+    """
+    objects = None
+    DoesNotExist = None
+
+    created = models.DateTimeField(verbose_name="stripe dispute creation timestamp",
+                                    auto_now=False, auto_now_add=False, null=True)
+    etype = models.CharField(verbose_name="stripe transaction type", max_length=32, null=True, blank=True)
+    reason = models.CharField(verbose_name="stripe dispute cause", max_length=32, null=True, blank=True)
+    transaction_status = models.CharField(verbose_name="stripe transaction status", max_length=32, null=True,
+                                          blank=True)
+    amount = models.IntegerField(verbose_name="disputed stripe charge amount", default=0, null=False)
+    description = models.CharField(verbose_name="stripe dispute description", max_length=64, null=True, blank=True)
+    fee = models.IntegerField(verbose_name="disputed stripe charge fee amount", default=0, null=False)
+    total_cost = models.IntegerField(verbose_name="net charge by stripe including fees", default=0, null=False)
+    fee_description = models.CharField(verbose_name="stripe dispute fee description", max_length=32, null=True,
+                                       blank=True)
+    evidence_due_by = models.DateTimeField(verbose_name="stripe deadline for submitting evidence",
+                                                    auto_now=False, auto_now_add=False, null=True)
+    billing_address = models.CharField(verbose_name="stripe returns the fraud initiator's zip code", max_length=32,
+                                       default="", null=True, blank=True)
+    customer_email_address = models.CharField(verbose_name="stripe returns fraud initiator's email address as a name",
+                                              max_length=255, default="", null=True, blank=True)
+    customer_name = models.CharField(verbose_name="stripe returns the disputed customer's name", max_length=32,
+                                     default="", null=True, blank=True)
+    customer_purchase_ip = models.CharField(verbose_name="Client IP address as seen by Stripe", max_length=32,
+                                 null=True, blank=True)
+    charge_id = models.CharField(verbose_name="Stripe charge id", max_length=32, null=True, blank=True)
+    dispute_source_id = models.CharField(verbose_name="Stripe dispute id", max_length=32, null=True, blank=True)
+    balance_transaction_id = models.CharField(verbose_name="Stripe transaction id", max_length=32, null=True, blank=True)
+    transaction_state = models.CharField(verbose_name="Stripe transaction state", max_length=32, null=True, blank=True)
+    evidence_has_evidence = models.BooleanField(verbose_name="We vote has submitted evidence about the transaction",
+                                                default=False)
+    evidence_past_due = models.BooleanField(verbose_name="We vote did not submit evidence in time", default=False)
+    evidence_submission_count  = models.IntegerField(verbose_name="Number of times evidence has been submitted",
+                                                     default=0, null=False)
+    livemode = models.BooleanField(verbose_name="True: Live transaction, False: Test transaction", default=False,
+                                   blank=False)
+
+    def save_dispute_transaction(dispute):
+        try:
+            new_dispute = StripeDispute()
+            for key, value in dispute.items():
+                setattr(new_dispute, key, value)
+            new_dispute.save()
+        except Exception as err:
+            logger.error('%s', "save_dispute_transaction: " + str(err))
+
+        return
