@@ -1,0 +1,176 @@
+{# templates/stripe_donations/suspects_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Stripe Fraudulent and Suspect Charges{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+{% load humanize %}
+
+<style>
+h2, h3 {
+    margin: 18px 0;
+}
+tr, th, td {
+    font-size: 14px;
+}
+</style>
+
+<h3 >Stripe Fraudulent and Suspect Charges</h3>
+<div style="min-height: 90px">
+    <div id="suspect1">
+        There are {{ number_of_suspects }} suspect charges in our database, {{ number_of_suspects_month }} from the last month.
+        <br />
+        These transactions (charge.succeeded) are cached at the moment they are received, and are not updated with current status.
+    </div>
+    <div id="disputed1">
+        There are {{ number_of_disputes }} disputes in our database, {{ number_of_disputes_month }} from the last month.
+        <br />
+        We have two working weeks, to provide evidence that the charge is fraudulent.  Evidence due dates that are in the past are <span style="color: red">shown in red.</span>
+        <br />
+        These transactions (charge.dispute.funds_withdrawn) are cached at the moment they are received, and are not updated with current status.
+    </div>
+    <div style="padding-top: 10px">
+        Click the link on the <b>Charge ID</b> field in any row, to go to the associated Stripe charge details page (you must have Stripe.com authentication for WeVote to see the page).
+    </div>
+</div>
+
+<br />
+
+<div id="tabs">
+    <ul>
+        <li><a href="#tabs-1">Disputed as Fraudulent</a></li>
+        <li><a href="#tabs-2">Suspect Charges (with no we_vote_voter_ids)</a></li>
+    </ul>
+    <div id="tabs-1">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Created</th>
+                    <th>Amount</th>
+                    <th>Fee</th>
+                    <th>Total</th>
+                    <th>Evidence Due By</th>
+                    <th>Zip Code</th>
+                    <th>Reason</th>
+                    <th>Charge ID</th>
+                    <th>Live Data</th>
+                </tr>
+            </thead>
+        {% for dispute in disputes_list %}
+            <tr>
+                <td id="line_dispute_{{ forloop.counter }}">{{ forloop.counter }}</td>
+                <td>{{ dispute.created }}</td>
+                <td>{{ dispute.amount|pennies_to_money }}</td>
+                <td>{{ dispute.fee|pennies_to_money }}</td>
+                <td>{{ dispute.total_cost|pennies_to_money }}</td>
+                <td id="evidence_{{ forloop.counter }}">{{ dispute.evidence_due_by }}</td>
+                <td>{{ dispute.billing_address }}</td>
+                <td>{{ dispute.reason }}</td>
+                <td><a href="https://dashboard.stripe.com/payments/{{ dispute.charge_id}}" style="color: #007bff;" target="_blank">{{ dispute.charge_id}}</a>
+                <td>{{ dispute.livemode}}</td>
+            </tr>
+        {% endfor %}
+        </table>
+        <div style="margin: 10px 0">
+            <span style="margin: 10px">
+                <a {% if prev_page_url_disputes %} style="color: #007bff;" href="{{ prev_page_url_disputes }}" {% endif %}>Previous page</a>
+            </span>
+            <span style="margin: 10px">
+                <a {% if next_page_url_disputes %} style="color: #007bff;" href="{{ next_page_url_disputes }}"{%  endif %}>Next page</a>
+            </span>
+        </div>
+    </div>
+
+    <div id="tabs-2">
+        <table class="table">
+            <thead>
+                <tr>
+                  <th></th>
+                  <th>Created</th>
+                  <th>Amount</th>
+                  <th>Paid</th>
+                  <th>Refunded</th>
+                  <th>Email</th>
+                  <th>Zipcode</th>
+                  <th>Brand</th>
+                  <th>Country</th>
+                  <th>Last 4</th>
+                  <th>Charge ID</th>
+                  <th>Live Data</th>
+                </tr>
+            </thead>
+        {% for suspect in suspects_list %}
+            <tr>
+                <td id="line_suspect_{{ forloop.counter }}">{{ forloop.counter }}</td>
+                <td>{{ suspect.created }}</td>
+                <td>{{ suspect.amount|pennies_to_money }}</td>
+                <td>{{ suspect.is_paid }}</td>
+                <td>{{ suspect.is_refunded }}</td>
+                <td>{{ suspect.email }}</td>
+                <td>{{ suspect.address_zip }}</td>
+                <td>{{ suspect.brand }}</td>
+                <td>{{ suspect.country }}</td>
+                <td>{{ suspect.last4 }}</td>
+                <td><a href="https://dashboard.stripe.com/payments/{{ suspect.stripe_charge_id }}" style="color: #007bff;" target="_blank">{{ suspect.stripe_charge_id }}</a>
+                <td>{{ suspect.livemode}}</td>
+            </tr>
+        {% endfor %}
+        </table>
+        <div style="margin: 10px 0">
+            <span style="margin: 10px">
+                <a {% if prev_page_url_suspects %} style="color: #007bff;" href="{{ prev_page_url_suspects }}" {% endif %}>Previous page</a>
+            </span>
+            <span style="margin: 10px">
+                <a {% if next_page_url_suspects %} style="color: #007bff;" href="{{ next_page_url_suspects }}"{%  endif %}>Next page</a>
+            </span>
+        </div>
+    </div>
+</div>
+
+
+<script>
+  const isInPast = (strDate) => {
+    const parts = strDate.split(',')  ;
+    const newStr = parts[0] +', ' + parts[1];
+    const dt = new Date(newStr);
+    dt.setHours( dt.getHours() + 17 );  // End of the work day 5pm
+    return dt < Date.now();
+  }
+  $('[id^="evidence_"]').each(function(){
+    const idEl = $(this);
+    console.log(idEl.text());
+    if (isInPast(idEl.text())) $(this).css('color', 'red');
+  });
+  $('[id^="line_"]').each(function(){
+    const idEl = $(this);
+    const lineOffset = idEl.attr('id').includes('dispute') ? parseInt({{ page_offset_disputes }}) :  parseInt({{ page_offset_suspects }});
+    const lineNumber = parseInt(idEl.text()) + lineOffset;
+    $(this).text(lineNumber);
+  });
+  const setDisplayedTab = (isTab1) => {
+    if (isTab1) {
+      $('[id^="suspect"]').css("display", "none");
+      $('[id^="disputed"]').css("display", "inherit")
+      $('#ui-id-1').trigger('click');
+    } else {
+      $('[id^="suspect"]').css("display", "inherit").trigger('click');
+      $('[id^="disputed"]').css("display", "none");
+      $('#ui-id-2').trigger('click');
+    }
+  }
+
+  $("#tabs").tabs({
+    activate: function(event, ui) {
+      const { id } = event.currentTarget;
+      setDisplayedTab(id === "ui-id-1")
+    }
+  });
+  $(function() {
+    const dispute = {{ dispute|lower }};
+    setDisplayedTab(dispute);
+  })
+</script>
+
+{% endblock %}
