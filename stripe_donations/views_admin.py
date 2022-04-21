@@ -1,17 +1,19 @@
 # donate/views_admin.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
+from datetime import timedelta
 
 import pytz
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.shortcuts import render
+from django.utils.timezone import now
 
 import wevote_functions.admin
 from admin_tools.views import redirect_to_sign_in_page
 from config.base import get_environment_variable
 from donate.models import DonationManager
-from stripe_donations.models import StripeDispute
+from stripe_donations.models import StripeDispute, StripePayments
 from voter.models import voter_has_authority
 from wevote_functions.functions import convert_to_int
 
@@ -69,32 +71,45 @@ def organization_subscription_list_view(request):
 
     return render(request, 'organization_plans/plan_list.html', template_values)
 
+
 @login_required
-def dispute_list_view(request):
+def suspect_charges_list_view(request):
     authority_required = {'partner_organization', 'political_data_viewer', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
-
-    number_of_disputes = StripeDispute.objects.filter(Q(etype="charge.dispute.funds_withdrawn")).count()
-    page_offset = convert_to_int(request.GET.get('page_offset', '0'))
+    template_values = {}
     page_limit = 10
+    server_root = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
+    template_values['dispute'] = request.GET.get('dispute', True)
+    month_ago = now() - timedelta(days=30)
 
-    WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
-    prev_page_url = None if page_offset == 0 else \
-        WE_VOTE_SERVER_ROOT_URL + '/stripe_donations/dispute_list?page_offset=' + str(page_offset - page_limit)
-
-    next_page_url = None if number_of_disputes < page_limit or page_offset + page_limit >= number_of_disputes else \
-        WE_VOTE_SERVER_ROOT_URL + '/stripe_donations/dispute_list?page_offset=' + str(page_offset + page_limit)
-
+    # Disputes ########################
+    number_of_disputes = StripeDispute.objects.filter(Q(etype="charge.dispute.funds_withdrawn")).count()
+    template_values['number_of_disputes_month'] = StripeDispute.objects.filter(Q(created__gt=month_ago) & Q(etype="charge.dispute.funds_withdrawn")).count()
+    template_values['number_of_disputes'] = StripeDispute.objects.filter(Q(etype="charge.dispute.funds_withdrawn")).count()
+    page_offset_disputes = convert_to_int(request.GET.get('page_offset_disputes', '0'))
+    template_values['page_offset_disputes'] = page_offset_disputes
+    template_values['prev_page_url_disputes'] = None if page_offset_disputes == 0 else \
+        server_root + '/stripe_donations/suspects_list?dispute=true&page_offset_disputes=' + str(page_offset_disputes - page_limit)
+    template_values['next_page_url_disputes'] = None if number_of_disputes < page_limit or page_offset_disputes + page_limit >= number_of_disputes else \
+        server_root + '/stripe_donations/suspects_list?dispute=true&page_offset_disputes=' + str(page_offset_disputes + page_limit)
     disputes = StripeDispute.objects.all().order_by('-created')
-    disputes_funds_withdrawn = disputes.filter(Q(etype="charge.dispute.funds_withdrawn"))[page_offset:page_offset+page_limit]
-    disputes_list = list(disputes_funds_withdrawn)
+    disputes_funds_withdrawn = disputes.filter(Q(etype="charge.dispute.funds_withdrawn"))[page_offset_disputes:page_offset_disputes+page_limit]
+    template_values['disputes_list'] = list(disputes_funds_withdrawn)
 
-    template_values = {
-         'disputes_list': disputes_list,
-         'number_of_disputes': number_of_disputes,
-         'page_offset': page_offset,
-         'next_page_url': next_page_url,
-         'prev_page_url': prev_page_url,
-    }
-    return render(request, 'stripe_donations/disputes_list.html', template_values)
+    # Suspect Charges  #############
+    page_offset_suspects = convert_to_int(request.GET.get('page_offset_suspects', '0'))
+    number_of_suspects = StripePayments.objects.all().count()
+    template_values['number_of_suspects_month'] = StripePayments.objects.all().filter(Q(created__gt=month_ago)).count()
+    template_values['page_offset_suspects'] = page_offset_suspects
+    template_values['number_of_suspects'] = number_of_suspects
+    suspects_query = StripePayments.objects.all().order_by('-created')
+    suspects_query = suspects_query.exclude((Q(voter_we_vote_id__isnull=True) | Q(voter_we_vote_id__iexact="")) &
+        (Q(not_loggedin_voter_we_vote_id__isnull=True) | Q(not_loggedin_voter_we_vote_id__iexact="")))[page_offset_suspects:page_offset_suspects+page_limit]
+    template_values['suspects_list'] = list(suspects_query)
+    template_values['prev_page_url_suspects'] = None if page_offset_suspects == 0 else \
+        server_root + '/stripe_donations/suspects_list?dispute=false&page_offset_suspects=' + str(page_offset_suspects - page_limit)
+    template_values['next_page_url_suspects'] = None if number_of_suspects < page_limit or page_offset_suspects + page_limit >= number_of_suspects else \
+        server_root + '/stripe_donations/suspects_list?dispute=false&page_offset_suspects=' + str(page_offset_suspects + page_limit)
+
+    return render(request, 'stripe_donations/suspects_list.html', template_values)

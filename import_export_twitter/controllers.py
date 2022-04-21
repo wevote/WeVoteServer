@@ -2146,7 +2146,7 @@ def twitter_sign_in_request_access_token_for_api(voter_device_id,
         success = False
         err_string = 'GENERAL_TWEEPY_EXCEPTION'
         try:
-            # Dec 2012: Tweepy V$ (Twitter V2) returns these errors as (yuck): List[dict[str, Union[int, str]]]
+            # Dec 2021: Tweepy V$ (Twitter V2) returns these errors as (yuck): List[dict[str, Union[int, str]]]
             err_string = error_instance.args[0].args[0].args[0]
         except Exception:
             pass
