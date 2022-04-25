@@ -47,7 +47,7 @@ robot-detection==0.4
 rsa==4.7.2
 selenium==3.141.0
 sendgrid-django==4.2.0
-setuptools==57.0.0
+setuptools
 simplejson==3.17.2
 six==1.14.0
 social-auth-app-django==3.1.0
