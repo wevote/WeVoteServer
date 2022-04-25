@@ -82,7 +82,7 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
         csv_files = {}
         if table_name in allowable_tables:
             cur = conn.cursor()
-            csv_name = table_name + '.csvTemp'
+            csv_name = os.path.join(get_environment_variable('TEMP_PATH'), table_name + '.csvTemp')
             print("exporting to: " + csv_name)
             with open(csv_name, 'w') as file:
                 if positive_value_exists(end):
@@ -238,7 +238,7 @@ def retrieve_sql_files_from_master_server(request):
                         conn.commit()
                         print("... SQL executed: DELETE (all) FROM " + table_name)
 
-                    with open(table_name + '.csvTemp', 'w') as csv_file:
+                    with open(os.path.join(get_environment_variable('TEMP_PATH'), table_name + '.csvTemp'), 'w') as csv_file:
                         for s in lines:
                             csv_file.write("%s\n" % s)
                         csv_file.close()
@@ -246,7 +246,7 @@ def retrieve_sql_files_from_master_server(request):
                     header = csv_file_to_clean_csv_file2(table_name)
 
                     try:
-                        with open(table_name + '2.csvTemp', 'r') as file:
+                        with open(os.path.join(get_environment_variable('TEMP_PATH'), table_name + '2.csvTemp'), 'r') as file:
                             cur.copy_from(file, table_name, sep='|', size=16384, columns=header)
                             file.close()
                     except Exception as e0:
@@ -305,7 +305,7 @@ def retrieve_sql_files_from_master_server(request):
     minutes = (time.time() - t0)/60
     print("Processing and loading " + str(len(allowable_tables)) + " tables took {:.1f}".format(minutes) + ' minutes')
 
-    os.system('rm *.csvTemp')    # Clean up all the temp files
+    os.system('rm ' + os.path.join(get_environment_variable('TEMP_PATH'), '*.csvTemp'))    # Clean up all the temp files
 
     results = {
         'status': status,
@@ -328,7 +328,7 @@ def retrieve_sql_files_from_master_server(request):
 # hint: Access https://pg.admin.wevote.us/  (view access to the production server Postgres) can really help, ask Dale
 def csv_file_to_clean_csv_file2(table_name):
     csv_rows = []
-    with open(table_name + '.csvTemp', 'r') as csv_file2:
+    with open(os.path.join(get_environment_variable('TEMP_PATH'), table_name + '.csvTemp'), 'r') as csv_file2:
         line_reader = csv.reader(csv_file2, delimiter='|')
         header = None
 
@@ -496,7 +496,7 @@ def csv_file_to_clean_csv_file2(table_name):
         if ',' in skipped_rows:
             print(skipped_rows + ' were skipped since they had pipe characters in the data')
 
-    with open(table_name + '2.csvTemp', 'w') as csv_file:
+    with open(os.path.join(get_environment_variable('TEMP_PATH'), table_name + '2.csvTemp'), 'w') as csv_file:
         csvwriter = csv.writer(csv_file, delimiter='|')
         for row in csv_rows:
             csvwriter.writerow(row)
