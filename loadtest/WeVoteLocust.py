@@ -1,6 +1,6 @@
 import os
 import json
-from locust import HttpLocust, TaskSet, task
+from locust import HttpUser, TaskSet, task
 
 
 class WeVoteTasks(TaskSet):
@@ -65,7 +65,7 @@ class WeVoteTasks(TaskSet):
     #     pass
 
 
-class WeVoteLocust(HttpLocust):
-    task_set = WeVoteTasks
+class WeVoteLocust(HttpUser):
+    tasks = {WeVoteTasks:5}
     min_wait = 500  # 0.5s
     max_wait = 1500
