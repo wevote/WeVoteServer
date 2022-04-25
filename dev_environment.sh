@@ -72,7 +72,7 @@ if [ "$CMD" = "create" ]; then
 	fi
 
 	# build API docker container
-	docker build -t $DOCKER_API_TAG -f docker/Dockerfile.api .
+	docker build --pull -t $DOCKER_API_TAG -f docker/Dockerfile.api .
 
 	if [ ! -e config/environment_variables.json ]; then
 		echo "Creating develop configuration file in config/environment_variables.json..."
