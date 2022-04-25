@@ -9,6 +9,7 @@ django-background-tasks==1.2.5
 django-bootstrap3==15.0.0
 django-cors-headers==3.7.0
 django-crispy-forms==1.12.0
+django-sslserver==0.22
 django-twitter-bootstrap==3.3.0
 django-user_agents==0.4.0
 djangorestframework==3.12.4
