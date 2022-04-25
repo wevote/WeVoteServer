@@ -23,7 +23,7 @@ google-api-python-client==2.44.0
 google-auth==1.35.0
 google-cloud-firestore==2.4.0
 google-cloud-storage==2.3.0
-gunicorn==19.10.0
+gunicorn==20.1.0
 httplib2==0.19.1
 oauth2client==4.1.3
 oauthlib==3.1.1
@@ -47,7 +47,7 @@ robot-detection==0.4
 rsa==4.7.2
 selenium==3.141.0
 sendgrid-django==4.2.0
-setuptools==57.0.0
+setuptools
 simplejson==3.17.2
 six==1.14.0
 social-auth-app-django==3.1.0
