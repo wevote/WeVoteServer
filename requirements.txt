@@ -36,10 +36,10 @@ pyasn1-modules==0.2.8
 py3dns==3.2.1
 pygeoip==0.3.2
 pyjwkest==1.4.2
-PyJWT==1.7.1          # We are stuck at 1.7.1 until twillio can handle a newer version  (as of 6/15/21)
+# 4/21/22, needed to update for PyJWT==1.7.1          # We are stuck at 1.7.1 until twillio can handle a newer version  (as of 6/15/21)
+PyJWT==2.3.0          # We are stuck at 1.7.1 until twillio can handle a newer version  (as of 6/15/21)
 python-magic==0.4.24  # Requires "brew install libmagic" or "brew upgrade libmagic" or "pip install libmagic"
 python3-openid -e git+git://github.com/wevote/python3-openid.git@master#egg=python3-openid
-# python-social-auth==0.2.21
 pytz==2021.1
 requests==2.25.1
 requests-oauthlib==1.3.0
@@ -50,12 +50,12 @@ sendgrid-django==4.2.0
 setuptools
 simplejson==3.17.2
 six==1.14.0
-social-auth-app-django==3.1.0
-social-auth-core==3.2.0
+social-auth-app-django==5.0.0
+social-auth-core==4.2.0
 static3==0.7.0
 stripe==2.58.0
 tweepy==4.4.0
-twilio==6.59.1
+twilio==7.8.2
 # Unipath==1.1s
 uritemplate==3.0.1
 usaddress==0.5.10
