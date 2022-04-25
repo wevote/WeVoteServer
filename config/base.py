@@ -137,12 +137,14 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # only used for developer environments
+    'sslserver',
+
     # third party
     'background_task',
     'bootstrap3',
     'corsheaders',  # cross origin requests
-    # 'social.apps.django_app.default',
-    'social_django',
+    'social_django',  # Installed with `pip install social-auth-app-django`
 
     # project specific
     'activity',
@@ -417,6 +419,13 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.user.user_details',
     'wevote_social.utils.switch_user'  # Order in this pipeline matters
 )
+
+SOCIAL_AUTH_FACEBOOK_EXTRA_DATA = [
+    ('name', 'name'),
+    ('email', 'email'),
+    ('picture', 'picture'),
+    ('link', 'profile_url'),
+]
 
 EMAIL_BACKEND = get_environment_variable("EMAIL_BACKEND")
 SENDGRID_API_KEY = get_environment_variable("SENDGRID_API_KEY")
