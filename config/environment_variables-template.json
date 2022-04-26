@@ -209,7 +209,7 @@
   "VOTER_GUIDES_SYNC_URL":          "https://api.wevoteusa.org/apis/v1/voterGuidesSyncOut/",
 
   "_comment":                       "Directory path to store temporary files",
-  "PATH_FOR_TEMP_FILES":                  ".",
+  "PATH_FOR_TEMP_FILES":            ".",
 
   "_comment":                       "End of environment_variables.json"
 }
