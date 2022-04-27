@@ -502,7 +502,7 @@ class RemoteRequestHistory(models.Model):
     organization_we_vote_id = models.CharField(verbose_name="we vote id for the org owner", max_length=255,
                                                unique=False, null=True)
     number_of_results = models.PositiveIntegerField(verbose_name="number of results", null=True, default=0)
-    status = models.CharField(verbose_name="Request status message", max_length=255, default="", null=True, blank=True)
+    status = models.TextField(verbose_name="Request status message", default="", null=True, blank=True)
 
 
 class RemoteRequestHistoryManager(models.Manager):
