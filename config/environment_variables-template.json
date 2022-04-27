@@ -147,6 +147,7 @@
   "SOCIAL_AUTH_LOGIN_URL":          "http://localhost:8000/login/",
   "SOCIAL_AUTH_LOGIN_ERROR_URL":    "http://localhost:8000/login/",
   "SOCIAL_AUTH_LOGIN_REDIRECT_URL": "http://localhost:8000/voter/login_complete/",
+  "SOCIAL_AUTH_REDIRECT_IS_HTTPS":  true,
 
   "_comment":                       "stripe test 'Secret Key' (The 'Publishable key' is only used on the WebApp!)",
   "STRIPE_SECRET_KEY":              "API Secret key begins with - pk_...",

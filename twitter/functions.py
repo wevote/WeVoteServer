@@ -89,11 +89,11 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
         handle_exception(rate_limit_error, logger=logger, exception_message=status)
     except tweepy.errors.HTTPException as error_instance:
         success = False
-        status += 'TWITTER_HTTP_ERROR '
+        status += 'TWITTER_HTTP_EXCEPTION '
         handle_exception(error_instance, logger=logger, exception_message=status)
     except tweepy.errors.TweepyException as error_instance:
         success = False
-        status += "[TWEEP_ERROR: "
+        status += "[TWEEPY_EXCEPTION_ERROR: "
         status += twitter_handle + " " if positive_value_exists(twitter_handle) else ""
         status += str(twitter_user_id) + " " if positive_value_exists(twitter_user_id) else " "
         if error_instance:
