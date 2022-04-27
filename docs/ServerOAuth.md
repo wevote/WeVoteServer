@@ -82,3 +82,18 @@ Sign in with Facebook   https://api.wevoteusa.org/login/facebook/?next=.
 https://python-social-auth.readthedocs.io/en/latest/backends/facebook.html
 
 https://medium.com/@kennethjiang/python-social-auth-for-django-tutorial-16bbe792659f
+
+## Twitter
+
+  "SOCIAL_AUTH_TWITTER_KEY":        "w...w",   Twitter calls this the "API Key" from the "Consumer Keys" section
+  "SOCIAL_AUTH_TWITTER_SECRET":     "4...H",   Twitter calls this the "Secret" from the "Consumer Keys" section
+
+### Debugging Twitter Oauth
+
+Terminology could be more consistent in the Twitter and social_django docs 
+* App Key === API Key === Consumer API Key === Consumer Key === Customer Key === oauth_consumer_key
+* App Key Secret === API Secret Key === Consumer Secret === Consumer Key === Customer Key === oauth_consumer_secret
+* Callback URL === oauth_callback
+
+https://developer.twitter.com/en/docs/authentication/oauth-1-0a/obtaining-user-access-tokens
+https://developer.twitter.com/en/docs/authentication/api-reference/request_token
