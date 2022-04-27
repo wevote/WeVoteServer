@@ -53,9 +53,9 @@ def get_environment_variable(var_name, json_environment_vars=json_environment_va
         # Environment variables can be set with this for example: export GOOGLE_CIVIC_API_KEY=<API KEY HERE>
         val = os.environ[var_name]
         # handle boolean variables; return bool value when string is "true" or "false"
-        if type(val) is str and val.lower() == 'true':
+        if val.lower() == 'true':
             return True
-        elif type(val) is str and val.lower() == 'false':
+        elif val.lower() == 'false':
             return False
         return val
     except KeyError:
