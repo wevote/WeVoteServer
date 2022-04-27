@@ -51,7 +51,13 @@ def get_environment_variable(var_name, json_environment_vars=json_environment_va
 
     try:
         # Environment variables can be set with this for example: export GOOGLE_CIVIC_API_KEY=<API KEY HERE>
-        return os.environ[var_name]
+        val = os.environ[var_name]
+        # handle boolean variables; return bool value when string is "true" or "false"
+        if type(val) is str and val.lower() == 'true':
+            return True
+        elif type(val) is str and val.lower() == 'false':
+            return False
+        return val
     except KeyError:
         # Can't use logger in the settings file due to loading sequence
         error_msg = "Unable to set the {} variable from os.environ or JSON file".format(var_name)
