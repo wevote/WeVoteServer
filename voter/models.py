@@ -3295,11 +3295,11 @@ class VoterContactEmail(models.Model):
     """
     One contact imported from third-party voter address book. Voter may delete at any time.
     """
-    city = models.CharField(max_length=255, default=None, null=True)
+    # city = models.CharField(max_length=255, default=None, null=True)
     date_last_changed = models.DateTimeField(null=True, auto_now=True, db_index=True)
-    display_name = models.CharField(max_length=255, default=None, null=True)
+    # display_name = models.CharField(max_length=255, default=None, null=True)
     email_address_text = models.TextField(null=True, blank=True, db_index=True)
-    first_name = models.CharField(max_length=255, default=None, null=True)
+    # first_name = models.CharField(max_length=255, default=None, null=True)
     google_contact_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
     google_date_last_updated = models.DateTimeField(null=True)
     google_display_name = models.CharField(max_length=255, default=None, null=True)
@@ -3308,12 +3308,12 @@ class VoterContactEmail(models.Model):
     has_data_from_google_people_api = models.BooleanField(default=False)
     ignore_contact = models.BooleanField(default=False)
     imported_by_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
-    last_name = models.CharField(max_length=255, default=None, null=True)
-    middle_name = models.CharField(max_length=255, default=None, null=True)
+    # last_name = models.CharField(max_length=255, default=None, null=True)
+    # middle_name = models.CharField(max_length=255, default=None, null=True)
     state_code = models.CharField(max_length=2, default=None, null=True, db_index=True)
-    voter_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
-    we_vote_hosted_profile_image_url_medium = models.TextField(blank=True, null=True)
-    zip_code = models.CharField(max_length=10, default=None, null=True)
+    # voter_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
+    # we_vote_hosted_profile_image_url_medium = models.TextField(blank=True, null=True)
+    # zip_code = models.CharField(max_length=10, default=None, null=True)
 
 
 # class VoterContactSMS(models.Model):
