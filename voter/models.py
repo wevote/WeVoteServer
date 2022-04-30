@@ -4182,7 +4182,7 @@ class VoterAddressManager(models.Manager):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
-        voter_address_on_stage = VoterAddress()
+        voter_address_on_stage = None
         voter_address_has_value = False
 
         if not positive_value_exists(address_type):
@@ -4389,34 +4389,40 @@ class VoterAddressManager(models.Manager):
         voter_address_id = 0
         address_type = BALLOT_ADDRESS
         results = self.retrieve_address(voter_address_id, voter_id, address_type)
+        status = ''
 
         if results['success']:
             voter_address = results['voter_address']
+            voter_address_exists = \
+                voter_address and hasattr(voter_address, 'voter_id') and positive_value_exists(voter_address.voter_id)
 
-            try:
-                voter_address.normalized_line1 = voter_address_dict['line1']
-                voter_address.normalized_city = voter_address_dict['city']
-                voter_address.normalized_state = voter_address_dict['state']
-                voter_address.normalized_zip = voter_address_dict['zip']
-                voter_address.refreshed_from_google = True
-                voter_address.save()
-                status = "SAVED_VOTER_ADDRESS_WITH_NORMALIZED_VALUES"
-                success = True
-            except Exception as e:
-                status = "UNABLE_TO_SAVE_VOTER_ADDRESS_WITH_NORMALIZED_VALUES"
+            if voter_address_exists:
+                try:
+                    voter_address.normalized_line1 = voter_address_dict['line1']
+                    voter_address.normalized_city = voter_address_dict['city']
+                    voter_address.normalized_state = voter_address_dict['state']
+                    voter_address.normalized_zip = voter_address_dict['zip']
+                    voter_address.refreshed_from_google = True
+                    voter_address.save()
+                    status += "SAVED_VOTER_ADDRESS_WITH_NORMALIZED_VALUES "
+                    success = True
+                except Exception as e:
+                    status += "UNABLE_TO_SAVE_VOTER_ADDRESS_WITH_NORMALIZED_VALUES "
+                    success = False
+                    handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
+            else:
+                status += "VOTER_ADDRESS_DOES_NOT_EXIST "
                 success = False
-                handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
-
         else:
             # If here, we were unable to find pre-existing VoterAddress
             status = "UNABLE_TO_FIND_VOTER_ADDRESS"
-            voter_address = VoterAddress()  # TODO Finish this for "create new" case
+            voter_address = None  # TODO Finish this for "create new" case
             success = False
 
         results = {
-            'status':   status,
-            'success':  success,
-            'voter_address': voter_address,
+            'status':           status,
+            'success':          success,
+            'voter_address':    voter_address,
         }
         return results
 
@@ -4530,7 +4536,7 @@ class VoterAddressManager(models.Manager):
             'success':                  False,
             'status':                   "EXISTING_VOTER_ADDRESS_NOT_FOUND",
             'voter_address_duplicated': False,
-            'voter_address':            VoterAddress(),
+            'voter_address':            None,
         }
         return results
 

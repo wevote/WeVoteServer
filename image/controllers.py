@@ -497,7 +497,7 @@ def cache_voter_master_images(voter_id):
         if voter_address_results['voter_address_found']:
             voter_address = voter_address_results['voter_address']
         else:
-            voter_address = VoterAddress()
+            voter_address = None
 
         if voter.we_vote_hosted_profile_uploaded_image_url_large:
             cached_voter_uploaded_profile_image = True

@@ -96,7 +96,7 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
         if voter_address_results['voter_address_found']:
             voter_address = voter_address_results['voter_address']
         else:
-            voter_address = VoterAddress()
+            voter_address = None
 
         results = choose_election_and_prepare_ballot_data(voter_device_link, google_civic_election_id,
                                                           voter_address)
@@ -225,7 +225,7 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
             if voter_address_results['voter_address_found']:
                 voter_address = voter_address_results['voter_address']
             else:
-                voter_address = VoterAddress()
+                voter_address = None
 
             results = choose_election_and_prepare_ballot_data(voter_device_link, google_civic_election_id,
                                                               voter_address)
@@ -1610,9 +1610,14 @@ def voter_retrieve_view(request):  # voterRetrieve
     voter_location_results = voter_location_retrieve_from_ip_for_api(request)
     state_code_from_ip_address = voter_location_results['region']
 
-    results = voter_retrieve_for_api(voter_device_id=voter_device_id,
-                                     state_code_from_ip_address=state_code_from_ip_address,
-                                     user_agent_string=user_agent_string, user_agent_object=user_agent_object)
+    results = voter_retrieve_for_api(
+        request=request,
+        state_code_from_ip_address=state_code_from_ip_address,
+        user_agent_string=user_agent_string,
+        user_agent_object=user_agent_object,
+        voter_device_id=voter_device_id,
+        voter_location_results=voter_location_results,
+    )
     return HttpResponse(json.dumps(results), content_type='application/json')
 
 
