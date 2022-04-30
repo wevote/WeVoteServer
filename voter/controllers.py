@@ -42,6 +42,7 @@ from friend.controllers import delete_friend_invitations_for_voter, delete_frien
     retrieve_voter_and_email_address, \
     store_internal_friend_invitation_with_two_voters, store_internal_friend_invitation_with_unknown_email
 from friend.models import FriendManager
+from geoip.controllers import voter_location_retrieve_from_ip_for_api
 from image.controllers import cache_master_and_resized_image, cache_voter_master_uploaded_image, FACEBOOK, \
     PROFILE_IMAGE_ORIGINAL_MAX_WIDTH, PROFILE_IMAGE_ORIGINAL_MAX_HEIGHT, TWITTER
 from import_export_facebook.models import FacebookManager
@@ -1488,6 +1489,7 @@ def voter_address_retrieve_for_api(voter_device_id):  # voterAddressRetrieve
 def voter_address_retrieve_for_voter_id(voter_id, voter_device_id=''):
     voter_address_manager = VoterAddressManager()
     results = voter_address_manager.retrieve_ballot_address_from_voter_id(voter_id)
+    success = results['success']
 
     if results['voter_address_found']:
         voter_address = results['voter_address']
@@ -1513,14 +1515,14 @@ def voter_address_retrieve_for_voter_id(voter_id, voter_device_id=''):
             'voter_entered_address': voter_address.voter_entered_address,
             'voter_specific_ballot_from_google_civic': voter_address.refreshed_from_google,
             'address_found': True,
-            'success': True,
+            'success': success,
             'status': status,
         }
         return voter_address_retrieve_results
     else:
         voter_address_retrieve_results = {
             'status': "VOTER_ADDRESS_NOT_FOUND",
-            'success': False,
+            'success': success,
             'address_found': False,
             'voter_device_id': voter_device_id,
             'address_type': '',
@@ -2566,14 +2568,22 @@ def voter_photo_save_for_api(voter_device_id, facebook_profile_image_url_https, 
     return results
 
 
-def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
-                           user_agent_string='', user_agent_object=None):  # voterRetrieve
+def voter_retrieve_for_api(
+        request=None,
+        state_code_from_ip_address='',
+        user_agent_string='',
+        user_agent_object=None,
+        voter_device_id='',
+        voter_location_results={},
+    ):  # voterRetrieve
     """
     Used by the api
+    :param request:
     :param voter_device_id:
     :param state_code_from_ip_address:
     :param user_agent_string:
     :param user_agent_object:
+    :param voter_location_results:
     :return:
     """
     organization_manager = OrganizationManager()
@@ -2974,6 +2984,23 @@ def voter_retrieve_for_api(voter_device_id, state_code_from_ip_address='',
             get_displayable_images(voter, facebook_user)
 
         address_results = voter_address_retrieve_for_voter_id(voter_id)
+        if address_results['success'] and not address_results['address_found']:
+            # Create new address
+            if 'voter_location_found' not in voter_location_results:
+                voter_location_results = voter_location_retrieve_from_ip_for_api(request)
+            if voter_location_results['voter_location_found']:
+                status += 'VOTER_RETRIEVE-VOTER_LOCATION_FOUND_FROM_IP '
+                text_for_map_search = voter_location_results['voter_location']
+                status += '*** ' + text_for_map_search + ' ***, '
+
+                from voter.models import VoterAddressManager
+                voter_address_manager = VoterAddressManager()
+                voter_address_save_results = voter_address_manager.update_or_create_voter_address(
+                    voter_id, BALLOT_ADDRESS, text_for_map_search)
+                status += voter_address_save_results['status'] + ", "
+
+                if voter_address_save_results['success'] and voter_address_save_results['voter_address_found']:
+                    address_results = voter_address_retrieve_for_voter_id(voter_id)
 
         team_member_list = organization_manager.retrieve_team_member_list(
             can_edit_campaignx_owned_by_organization=True,

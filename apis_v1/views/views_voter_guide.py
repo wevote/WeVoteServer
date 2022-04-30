@@ -273,9 +273,9 @@ def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetriev
                 if voter_address_results['voter_address_found']:
                     voter_address = voter_address_results['voter_address']
                 else:
-                    voter_address = VoterAddress()
+                    voter_address = None
             else:
-                voter_address = VoterAddress()
+                voter_address = None
             results = choose_election_from_existing_data(voter_device_link, google_civic_election_id, voter_address)
             google_civic_election_id = results['google_civic_election_id']
 

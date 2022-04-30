@@ -211,21 +211,26 @@ def voter_contact_list_retrieve_for_api(voter_we_vote_id=''):  # voterContactLis
         except Exception as e:
             status += "DATE_CONVERSION_ERROR: " + str(e) + " "
         voter_contact_email_dict = {
-            'city': voter_contact_email.city,
+            'city': voter_contact_email.city if hasattr(voter_contact_email, 'city') else '',
             'date_last_changed': date_last_changed_string,
             'display_name': get_voter_contact_email_value(voter_contact_email, 'display_name', 'google_display_name'),
-            'email_address_text': voter_contact_email.email_address_text,
+            'email_address_text': voter_contact_email.email_address_text
+            if hasattr(voter_contact_email, 'email_address_text') else '',
             'first_name': get_voter_contact_email_value(voter_contact_email, 'first_name', 'google_first_name'),
-            'google_contact_id': voter_contact_email.google_contact_id,
+            'google_contact_id': voter_contact_email.google_contact_id
+            if hasattr(voter_contact_email, 'google_contact_id') else '',
             'google_date_last_updated': google_date_last_updated_string,
             'has_data_from_google_people_api': voter_contact_email.has_data_from_google_people_api,
             'ignore_contact': voter_contact_email.ignore_contact,
-            'imported_by_voter_we_vote_id': voter_contact_email.imported_by_voter_we_vote_id,
+            'imported_by_voter_we_vote_id': voter_contact_email.imported_by_voter_we_vote_id
+            if hasattr(voter_contact_email, 'imported_by_voter_we_vote_id') else '',
             'last_name': get_voter_contact_email_value(voter_contact_email, 'last_name', 'google_last_name'),
-            'state_code': voter_contact_email.state_code,
-            'voter_we_vote_id': voter_contact_email.voter_we_vote_id,
-            'we_vote_hosted_profile_image_url_medium': voter_contact_email.we_vote_hosted_profile_image_url_medium,
-            'zip_code': voter_contact_email.zip_code,
+            'state_code': voter_contact_email.state_code if hasattr(voter_contact_email, 'state_code') else '',
+            'voter_we_vote_id': voter_contact_email.voter_we_vote_id
+            if hasattr(voter_contact_email, 'voter_we_vote_id') else '',
+            'we_vote_hosted_profile_image_url_medium': voter_contact_email.we_vote_hosted_profile_image_url_medium
+            if hasattr(voter_contact_email, 'we_vote_hosted_profile_image_url_medium') else '',
+            'zip_code': voter_contact_email.zip_code if hasattr(voter_contact_email, 'zip_code') else '',
         }
         voter_contact_email_list_for_json.append(voter_contact_email_dict)
     results = {
