@@ -420,6 +420,12 @@ def voter_address_save_view(request):  # voterAddressSave
     if voter_address_save_results['success'] and voter_address_save_results['voter_address_found']:
         # # Remove the former google_civic_election_id from this voter_device_id
         # voter_device_link_manager.update_voter_device_link_with_election_id(voter_device_link, 0)
+        original_text_city = ''
+        original_text_state = ''
+        original_text_zip = ''
+        substituted_address_city = ''
+        substituted_address_state = ''
+        substituted_address_zip = ''
         voter_address = voter_address_save_results['voter_address']
         text_for_map_search_saved = voter_address.text_for_map_search
         use_test_election = False
@@ -488,7 +494,17 @@ def voter_address_save_view(request):  # voterAddressSave
                         original_text_city=ballotpedia_retrieve_results['original_text_city'],
                         original_text_state=ballotpedia_retrieve_results['original_text_state'],
                         original_text_zip=ballotpedia_retrieve_results['original_text_zip'],
+                        substituted_address_city='',
+                        substituted_address_state='',
+                        substituted_address_zip='',
                     )
+                    original_text_city = ballotpedia_retrieve_results['original_text_city']
+                    original_text_state = ballotpedia_retrieve_results['original_text_state']
+                    original_text_zip = ballotpedia_retrieve_results['original_text_zip']
+                    substituted_address_city = ''
+                    substituted_address_state = ''
+                    substituted_address_zip = ''
+
                     status += save_results['status']
                     google_civic_election_id = ballotpedia_retrieve_results['google_civic_election_id']
             else:
@@ -548,6 +564,12 @@ def voter_address_save_view(request):  # voterAddressSave
                         original_text_state=vote_usa_results['original_text_state'],
                         original_text_zip=vote_usa_results['original_text_zip'],
                     )
+                    original_text_city = vote_usa_results['original_text_city']
+                    original_text_state = vote_usa_results['original_text_state']
+                    original_text_zip = vote_usa_results['original_text_zip']
+                    substituted_address_city = ''
+                    substituted_address_state = ''
+                    substituted_address_zip = ''
                     status += save_results['status']
                     google_civic_election_id = save_results['google_civic_election_id']
             else:
@@ -612,24 +634,33 @@ def voter_address_save_view(request):  # voterAddressSave
                     is_from_substituted_address = True
                     is_from_test_address = False
                     save_results = voter_ballot_saved_manager.update_or_create_voter_ballot_saved(
-                        voter_id=voter_id,
-                        google_civic_election_id=ballot_returned_results['google_civic_election_id'],
-                        state_code=ballot_returned_results['state_code'],
-                        election_day_text=ballot_returned_results['election_day_text'],
-                        election_description_text=ballot_returned_results['election_description_text'],
-                        original_text_for_map_search=text_for_map_search,
-                        substituted_address_nearby=ballot_returned_results['substituted_address_nearby'],
-                        is_from_substituted_address=is_from_substituted_address,
-                        is_from_test_ballot=is_from_test_address,
-                        polling_location_we_vote_id_source=ballot_returned_results[
-                            'polling_location_we_vote_id_source'],
                         ballot_location_display_name=ballot_returned_results['ballot_location_display_name'],
                         ballot_returned_we_vote_id=ballot_returned_results['ballot_returned_we_vote_id'],
                         ballot_location_shortcut=ballot_returned_results['ballot_location_shortcut'],
+                        election_day_text=ballot_returned_results['election_day_text'],
+                        election_description_text=ballot_returned_results['election_description_text'],
+                        google_civic_election_id=ballot_returned_results['google_civic_election_id'],
+                        is_from_substituted_address=is_from_substituted_address,
+                        is_from_test_ballot=is_from_test_address,
+                        original_text_city='',
+                        original_text_state='',
+                        original_text_zip='',
+                        original_text_for_map_search=text_for_map_search,
+                        polling_location_we_vote_id_source=ballot_returned_results[
+                            'polling_location_we_vote_id_source'],
+                        state_code=ballot_returned_results['state_code'],
                         substituted_address_city=ballot_returned_results['original_text_city'],
+                        substituted_address_nearby=ballot_returned_results['substituted_address_nearby'],
                         substituted_address_state=ballot_returned_results['original_text_state'],
                         substituted_address_zip=ballot_returned_results['original_text_zip'],
+                        voter_id=voter_id,
                     )
+                    original_text_city = ''
+                    original_text_state = ''
+                    original_text_zip = ''
+                    substituted_address_city = ballot_returned_results['original_text_city']
+                    substituted_address_state = ballot_returned_results['original_text_state']
+                    substituted_address_zip = ballot_returned_results['original_text_zip']
                     status += save_results['status']
 
         # At this point proceed to update google_civic_election_id whether it is a positive integer or zero
@@ -640,6 +671,9 @@ def voter_address_save_view(request):  # voterAddressSave
             voter_address.google_civic_election_id = google_civic_election_id
             voter_address.ballot_location_display_name = ballot_location_display_name
             voter_address.ballot_returned_we_vote_id = ballot_returned_we_vote_id
+            voter_address.normalized_city = original_text_city
+            voter_address.normalized_state = original_text_state
+            voter_address.normalized_zip = original_text_zip
             voter_entered_address = voter_address.voter_entered_address
             voter_specific_ballot_from_google_civic = voter_address.refreshed_from_google
             voter_address_update_results = voter_address_manager.update_existing_voter_address_object(voter_address)
@@ -672,9 +706,11 @@ def voter_address_save_view(request):  # voterAddressSave
         }
     else:
         json_data = voter_ballot_items_retrieve_for_api(
-            voter_device_id=voter_device_id,
+            ballot_returned_we_vote_id=ballot_returned_we_vote_id,
+            incoming_status=status,
             google_civic_election_id=google_civic_election_id,
-            ballot_returned_we_vote_id=ballot_returned_we_vote_id)
+            voter_device_id=voter_device_id,
+        )
         json_data['simple_save'] = False
 
     json_data['address'] = {

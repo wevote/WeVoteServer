@@ -249,6 +249,8 @@ def retrieve_vote_usa_ballot_items_for_one_voter_api(
                 voter_id=voter_id,
                 state_code=state_code
             )
+            if not results['success']:
+                status += results['status']
     except Exception as e:
         success = False
         status += 'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS_API_V4-VOTE_USA-ERROR: ' + str(e) + ' '

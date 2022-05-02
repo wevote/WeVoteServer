@@ -3165,6 +3165,9 @@ def voter_ballot_items_retrieve_from_google_civic_2021(
             election_day_text=election_day_text,
             ballot_returned=ballot_returned,
             state_code=state_code)
+        original_text_city = ballot_returned.normalized_city
+        original_text_state = ballot_returned.normalized_state
+        original_text_zip = ballot_returned.normalized_zip
     elif positive_value_exists(use_vote_usa):
         from import_export_vote_usa.controllers import retrieve_vote_usa_ballot_items_for_one_voter_api
         one_ballot_results = retrieve_vote_usa_ballot_items_for_one_voter_api(
@@ -3172,6 +3175,9 @@ def voter_ballot_items_retrieve_from_google_civic_2021(
             election_day_text=election_day_text,
             ballot_returned=ballot_returned,
             state_code=state_code)
+        original_text_city = ballot_returned.normalized_city
+        original_text_state = ballot_returned.normalized_state
+        original_text_zip = ballot_returned.normalized_zip
     else:
         # Should not be possible to get here
         pass
