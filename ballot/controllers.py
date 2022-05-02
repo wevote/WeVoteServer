@@ -962,11 +962,12 @@ def all_ballot_items_retrieve_for_api(google_civic_election_id, state_code=''): 
 
 
 def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
-        voter_device_id,
+        voter_device_id='',
         google_civic_election_id=0,
         ballot_returned_we_vote_id='',
-        ballot_location_shortcut=''):
-    status = ''
+        ballot_location_shortcut='',
+        incoming_status=''):
+    status = incoming_status
 
     next_national_election_day_text = '2022/11/08'
 
