@@ -405,6 +405,10 @@ class ElectionManager(models.Manager):
             status += 'NO_ELECTIONS_FOUND '
             success = True
             election_list = []
+        except Exception as e:
+            status += 'ERROR_RETRIEVING_ELECTIONS_BETWEEN_DATES: ' + str(e) + ' '
+            success = False
+            election_list = []
 
         results = {
             'success':              success,

@@ -1789,6 +1789,36 @@ def retrieve_candidate_politician_match_options(
     return results
 
 
+def retrieve_candidate_list_for_entire_year(
+        candidate_year=0,
+        limit_to_this_state_code=''):
+    candidate_list_found = False
+    candidate_list_light = []
+    status = ''
+    success = True
+
+    candidate_list_manager = CandidateListManager()
+    results = candidate_list_manager.retrieve_all_candidates_for_one_year(
+            candidate_year=candidate_year,
+            limit_to_this_state_code=limit_to_this_state_code,
+            search_string=False,
+            return_list_of_objects=False)
+    if results['candidate_list_found']:
+        candidate_list_found = True
+        candidate_list_light = results['candidate_list_light']
+    else:
+        status += results['status']
+        success = results['success']
+
+    results = {
+        'candidate_list_found': candidate_list_found,
+        'candidate_list_light': candidate_list_light,
+        'status':               status,
+        'success':              success,
+    }
+    return results
+
+
 def retrieve_candidate_list_for_all_upcoming_elections(upcoming_google_civic_election_id_list=[],
                                                        limit_to_this_state_code="",
                                                        return_list_of_objects=False,
@@ -2400,19 +2430,27 @@ def organization_endorsements_scanner(endorsement_list_light, text_to_search_low
             #  shortened alternative names that we should check against all_html_lower_case
             if positive_value_exists(one_ballot_item_dict['measure_we_vote_id']) \
                     and one_ballot_item_dict['measure_we_vote_id'] not in measure_we_vote_ids_list:
-                alternate_names = one_ballot_item_dict['alternate_names']
-                for ballot_item_display_name_alternate in alternate_names:
-                    if ballot_item_display_name_alternate in text_to_search_lower_case:
+                if positive_value_exists(one_ballot_item_dict['ballot_item_display_name']):
+                    ballot_item_display_name_lower = one_ballot_item_dict['ballot_item_display_name'].lower()
+                    if ballot_item_display_name_lower in text_to_search_lower_case:
                         measure_we_vote_ids_list.append(one_ballot_item_dict['measure_we_vote_id'])
                         endorsement_list_light_modified.append(one_ballot_item_dict)
                         continue
+                if 'alternate_names' in one_ballot_item_dict:
+                    alternate_names = one_ballot_item_dict['alternate_names']
+                    for ballot_item_display_name_alternate in alternate_names:
+                        if ballot_item_display_name_alternate in text_to_search_lower_case:
+                            measure_we_vote_ids_list.append(one_ballot_item_dict['measure_we_vote_id'])
+                            endorsement_list_light_modified.append(one_ballot_item_dict)
+                            continue
             elif positive_value_exists(one_ballot_item_dict['candidate_we_vote_id']) \
                     and one_ballot_item_dict['candidate_we_vote_id'] not in candidate_we_vote_ids_list:
-                if positive_value_exists(one_ballot_item_dict['ballot_item_display_name']) and \
-                        one_ballot_item_dict['ballot_item_display_name'].lower() in text_to_search_lower_case:
-                    candidate_we_vote_ids_list.append(one_ballot_item_dict['candidate_we_vote_id'])
-                    endorsement_list_light_modified.append(one_ballot_item_dict)
-                    continue
+                if positive_value_exists(one_ballot_item_dict['ballot_item_display_name']):
+                    ballot_item_display_name_lower = one_ballot_item_dict['ballot_item_display_name'].lower()
+                    if ballot_item_display_name_lower in text_to_search_lower_case:
+                        candidate_we_vote_ids_list.append(one_ballot_item_dict['candidate_we_vote_id'])
+                        endorsement_list_light_modified.append(one_ballot_item_dict)
+                        continue
                 if 'ballot_item_website' in one_ballot_item_dict and \
                         positive_value_exists(one_ballot_item_dict['ballot_item_website']):
                     ballot_item_website = one_ballot_item_dict['ballot_item_website'].lower()
@@ -2440,7 +2478,7 @@ def organization_endorsements_scanner(endorsement_list_light, text_to_search_low
                             candidate_we_vote_ids_list.append(one_ballot_item_dict['candidate_we_vote_id'])
                             endorsement_list_light_modified.append(one_ballot_item_dict)
                             continue
-                if one_ballot_item_dict['alternate_names']:
+                if 'alternate_names' in one_ballot_item_dict:
                     alternate_name_found = False
                     for ballot_item_display_name_alternate in one_ballot_item_dict['alternate_names']:
                         if ballot_item_display_name_alternate.lower() in text_to_search_lower_case:

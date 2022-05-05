@@ -439,9 +439,10 @@ def push_contest_measure_data_to_other_table_caches(contest_measure_id=0, contes
         return results
 
 
-def retrieve_measure_list_for_all_upcoming_elections(upcoming_google_civic_election_id_list=[],
-                                                     limit_to_this_state_code="",
-                                                     return_list_of_objects=False):
+def retrieve_measure_list_for_all_upcoming_elections(
+        google_civic_election_id_list=[],
+        limit_to_this_state_code="",
+        return_list_of_objects=False):
 
     status = ""
     success = True
@@ -449,18 +450,18 @@ def retrieve_measure_list_for_all_upcoming_elections(upcoming_google_civic_elect
     measure_list_light = []
     measure_list_found = False
 
-    if not upcoming_google_civic_election_id_list \
-            or not positive_value_exists(len(upcoming_google_civic_election_id_list)):
+    if not google_civic_election_id_list \
+            or not positive_value_exists(len(google_civic_election_id_list)):
         election_manager = ElectionManager()
         election_list_results = \
             election_manager.retrieve_upcoming_google_civic_election_id_list(limit_to_this_state_code)
-        upcoming_google_civic_election_id_list = election_list_results['upcoming_google_civic_election_id_list']
+        google_civic_election_id_list = election_list_results['upcoming_google_civic_election_id_list']
         status += election_list_results['status']
 
-    if len(upcoming_google_civic_election_id_list):
+    if len(google_civic_election_id_list):
         measure_list_manager = ContestMeasureListManager()
         results = measure_list_manager.retrieve_measures_for_specific_elections(
-            upcoming_google_civic_election_id_list,
+            google_civic_election_id_list,
             limit_to_this_state_code=limit_to_this_state_code,
             return_list_of_objects=return_list_of_objects)
         if results['measure_list_found']:
@@ -473,11 +474,11 @@ def retrieve_measure_list_for_all_upcoming_elections(upcoming_google_civic_elect
     results = {
         'success': success,
         'status': status,
-        'measure_list_found':     measure_list_found,
-        'measure_list_objects':   measure_list_objects if return_list_of_objects else [],
-        'measure_list_light':     measure_list_light,
-        'return_list_of_objects':   return_list_of_objects,
-        'google_civic_election_id_list': upcoming_google_civic_election_id_list,
+        'measure_list_found':               measure_list_found,
+        'measure_list_objects':             measure_list_objects if return_list_of_objects else [],
+        'measure_list_light':               measure_list_light,
+        'return_list_of_objects':           return_list_of_objects,
+        'google_civic_election_id_list':    google_civic_election_id_list,
     }
     return results
 
