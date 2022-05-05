@@ -2,6 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from datetime import datetime
 import re
 
 from django.db import models
@@ -332,6 +333,128 @@ class CandidateListManager(models.Manager):
         }
         return results
 
+    def retrieve_all_candidates_for_one_year(
+            self,
+            candidate_year=0,
+            limit_to_this_state_code='',
+            search_string=False,
+            return_list_of_objects=False):
+        candidate_list_objects = []
+        candidate_list_light = []
+        candidate_list_found = False
+        if not positive_value_exists(candidate_year):
+            today = datetime.now().date()
+            candidate_year = today.year
+        candidate_year_integer = convert_to_int(candidate_year)
+        status = ""
+        if positive_value_exists(search_string):
+            try:
+                search_words = search_string.split()
+            except Exception as e:
+                status += "SEARCH_STRING_INVALID: " + str(e) + ' '
+                search_words = []
+        else:
+            search_words = []
+
+        election_manager = ElectionManager()
+        starting_date = str(candidate_year) + '0101'
+        starting_date_as_integer = convert_to_int(starting_date)
+        ending_date = str(candidate_year) + '1231'
+        ending_date_as_integer = convert_to_int(ending_date)
+        results = election_manager.retrieve_elections_between_dates(
+            starting_date_as_integer=starting_date_as_integer,
+            ending_date_as_integer=ending_date_as_integer,
+        )
+        google_civic_election_id_list = []
+        if results['election_list_found']:
+            election_list = results['election_list']
+            for one_election in election_list:
+                google_civic_election_id_list.append(one_election.google_civic_election_id)
+
+        results = self.retrieve_candidate_we_vote_id_list_from_election_list(
+            google_civic_election_id_list=google_civic_election_id_list,
+            limit_to_this_state_code=limit_to_this_state_code)
+        if not positive_value_exists(results['success']):
+            status += results['status']
+        office_we_vote_id_list_by_candidate_we_vote_id = results['office_we_vote_id_list_by_candidate_we_vote_id']
+
+        try:
+            candidate_query = CandidateCampaign.objects.all()
+            if positive_value_exists(candidate_year_integer):
+                candidate_query = candidate_query.filter(candidate_year=candidate_year_integer)
+            if positive_value_exists(limit_to_this_state_code):
+                candidate_query = candidate_query.filter(state_code__iexact=limit_to_this_state_code)
+            if positive_value_exists(search_string):
+                # This is an "OR" search for each term, but an "AND" search across all search_words
+                for search_word in search_words:
+                    filters = []
+
+                    # We want to find candidates with *any* of these values
+                    new_filter = Q(ballotpedia_candidate_name__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(google_civic_candidate_name__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(candidate_name__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(candidate_twitter_handle__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(contest_office_name__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(twitter_name__icontains=search_word)
+                    filters.append(new_filter)
+
+                    # Add the first query
+                    final_filters = filters.pop()
+
+                    # ...and "OR" the remaining items in the list
+                    for item in filters:
+                        final_filters |= item
+
+                    # Add as new filter for "AND"
+                    candidate_query = candidate_query.filter(final_filters)
+            candidate_query = candidate_query.order_by("candidate_name")
+            candidate_list_objects = list(candidate_query)
+
+            if len(candidate_list_objects):
+                candidate_list_found = True
+                status += 'CANDIDATES_RETRIEVED '
+                success = True
+            else:
+                status += 'NO_CANDIDATES_RETRIEVED '
+                success = True
+        except CandidateCampaign.DoesNotExist:
+            # No candidates found. Not a problem.
+            status += 'NO_CANDIDATES_FOUND_DoesNotExist '
+            candidate_list_objects = []
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status += 'FAILED retrieve_all_candidates_for_upcoming_election ' + str(e) + ' '
+            success = False
+
+        for candidate in candidate_list_objects:
+            one_candidate = {
+                'ballot_item_display_name': candidate.display_candidate_name(),
+                'candidate_we_vote_id':     candidate.we_vote_id,
+                'office_we_vote_id':
+                    office_we_vote_id_list_by_candidate_we_vote_id[candidate.we_vote_id],
+                'measure_we_vote_id':       '',
+            }
+            alternate_names = candidate.display_alternate_names_list()
+            if len(alternate_names):
+                one_candidate['alternate_names'] = alternate_names
+            candidate_list_light.append(one_candidate.copy())
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'google_civic_election_id_list':    google_civic_election_id_list,
+            'candidate_list_found':             candidate_list_found,
+            'candidate_list_objects':           candidate_list_objects if return_list_of_objects else [],
+            'candidate_list_light':             candidate_list_light,
+        }
+        return results
+
     def retrieve_all_offices_for_candidate(self, candidate_id=0, candidate_we_vote_id='', read_only=False):
         office_list = []
         office_list_found = False
@@ -411,10 +534,12 @@ class CandidateListManager(models.Manager):
         }
         return results
 
-    def retrieve_candidates_for_specific_elections(self, google_civic_election_id_list=[],
-                                                   limit_to_this_state_code="",
-                                                   return_list_of_objects=False,
-                                                   super_light_candidate_list=False):
+    def retrieve_candidates_for_specific_elections(
+            self,
+            google_civic_election_id_list=[],
+            limit_to_this_state_code="",
+            return_list_of_objects=False,
+            super_light_candidate_list=False):
         """
         This function is needed for our scraping tools.
         :param google_civic_election_id_list:

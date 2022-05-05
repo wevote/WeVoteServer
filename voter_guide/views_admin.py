@@ -18,8 +18,7 @@ from .models import INDIVIDUAL, VoterGuide, VoterGuideListManager, VoterGuideMan
     ORGANIZATION_ENDORSING_CANDIDATES, ENDORSEMENTS_FOR_CANDIDATE, UNKNOWN_TYPE
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.controllers import find_candidate_endorsements_on_one_candidate_web_page, \
-    retrieve_candidate_list_for_all_upcoming_elections, \
-    find_organization_endorsements_of_candidates_on_one_web_page
+    find_organization_endorsements_of_candidates_on_one_web_page, retrieve_candidate_list_for_entire_year
 from candidate.models import CandidateManager, CandidateListManager
 from config.base import get_environment_variable
 from datetime import date, datetime, timedelta, time
@@ -30,7 +29,7 @@ from django.contrib.messages import get_messages
 from django.http import HttpResponseRedirect
 from django.db.models import Q
 from django.shortcuts import render
-from election.controllers import retrieve_upcoming_election_id_list
+from election.controllers import retrieve_this_years_election_id_list
 from election.models import Election, ElectionManager, TIME_SPAN_LIST
 from import_export_batches.models import BATCH_HEADER_MAP_FOR_POSITIONS, BatchManager, POSITION
 from import_export_twitter.controllers import refresh_twitter_organization_details, scrape_social_media_from_one_site
@@ -328,7 +327,7 @@ def voter_guide_create_view(request):
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
 
     # Figure out the elections we care about
-    google_civic_election_id_list = retrieve_upcoming_election_id_list(limit_to_this_state_code=state_code)
+    google_civic_election_id_list_this_year = retrieve_this_years_election_id_list()
 
     if positive_value_exists(voter_guide_possibility_id):
         try:
@@ -387,7 +386,9 @@ def voter_guide_create_view(request):
                     if is_organization_endorsing_candidates:
                         # Match incoming endorsements to candidates already in the database
                         results = match_endorsement_list_with_candidates_in_database(
-                            possible_endorsement_list, google_civic_election_id_list, state_code)
+                            possible_endorsement_list,
+                            google_civic_election_id_list=google_civic_election_id_list_this_year,
+                            state_code=state_code)
                         if results['possible_endorsement_list_found']:
                             possible_endorsement_list = results['possible_endorsement_list']
 
@@ -397,7 +398,9 @@ def voter_guide_create_view(request):
 
                         # Match incoming endorsements to measures already in the database
                         results = match_endorsement_list_with_measures_in_database(
-                            possible_endorsement_list, google_civic_election_id_list, state_code)
+                            possible_endorsement_list,
+                            google_civic_election_id_list=google_civic_election_id_list_this_year,
+                            state_code=state_code)
                         if results['possible_endorsement_list_found']:
                             possible_endorsement_list = results['possible_endorsement_list']
 
@@ -407,7 +410,9 @@ def voter_guide_create_view(request):
                     else:
                         # Match possible_endorsement_list to candidates already in the database
                         results = match_endorsement_list_with_candidates_in_database(
-                            possible_endorsement_list, google_civic_election_id_list, state_code)
+                            possible_endorsement_list,
+                            google_civic_election_id_list=google_civic_election_id_list_this_year,
+                            state_code=state_code)
                         if results['possible_endorsement_list_found']:
                             possible_endorsement_list = results['possible_endorsement_list']
 
@@ -443,7 +448,6 @@ def voter_guide_create_view(request):
     organization_manager = OrganizationManager()
     organizations_list = []
     owner_of_website_candidate_list = []  # A list of candidates who might be the subject of the webpage
-    twitter_user_manager = TwitterUserManager()
     # ###############################
     # Find the subject of the page:
     # 1) the organization that is making the endorsements, or
@@ -512,7 +516,7 @@ def voter_guide_create_view(request):
         elif positive_value_exists(candidate_name) or positive_value_exists(candidate_twitter_handle) \
                 and not positive_value_exists(clear_candidate_options):
             results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
-                google_civic_election_id_list=google_civic_election_id_list,
+                google_civic_election_id_list=google_civic_election_id_list_this_year,
                 state_code=state_code,
                 candidate_twitter_handle=candidate_twitter_handle,
                 candidate_name=candidate_name)
@@ -532,8 +536,10 @@ def voter_guide_create_view(request):
                                          ''.format(count=owner_of_website_candidate_list_count))
         elif positive_value_exists(voter_guide_possibility_url) \
                 and not positive_value_exists(clear_organization_options):
-            scrape_results = candidates_found_on_url(voter_guide_possibility_url, google_civic_election_id_list,
-                                                     state_code)
+            scrape_results = candidates_found_on_url(
+                voter_guide_possibility_url,
+                google_civic_election_id_list=google_civic_election_id_list_this_year,
+                state_code=state_code)
 
             owner_of_website_candidate_list = scrape_results['candidate_list']
             owner_of_website_candidate_list_count = scrape_results['candidate_count']
@@ -784,7 +790,7 @@ def voter_guide_create_process_view(request):
         is_list_of_endorsements_for_candidate = False
 
     # Figure out the elections we care about
-    google_civic_election_id_list = retrieve_upcoming_election_id_list(limit_to_this_state_code=state_code)
+    google_civic_election_id_list_this_year = retrieve_this_years_election_id_list()
 
     # #########################################
     # Figure out the Organization making the endorsements or Candidate listing their endorsements
@@ -870,20 +876,24 @@ def voter_guide_create_process_view(request):
         #  the possible voter guide for these names
         all_possible_candidates_list_light_found = False
         all_possible_candidates_list_light = []
-        if positive_value_exists(google_civic_election_id_list):
-            results = retrieve_candidate_list_for_all_upcoming_elections(google_civic_election_id_list,
-                                                                         limit_to_this_state_code=state_code)
-            if results['candidate_list_found']:
-                all_possible_candidates_list_light_found = True
-                all_possible_candidates_list_light = results['candidate_list_light']
+        today = datetime.now().date()
+        candidate_year = today.year
+        results = retrieve_candidate_list_for_entire_year(
+            candidate_year=candidate_year,
+            limit_to_this_state_code=state_code,
+        )
+        if results['candidate_list_found']:
+            all_possible_candidates_list_light_found = True
+            all_possible_candidates_list_light = results['candidate_list_light']
 
         # We need all measures for all upcoming elections
         all_possible_measures_list_light_found = False
         all_possible_measures_list_light = []
-        if positive_value_exists(google_civic_election_id_list):
+        if positive_value_exists(google_civic_election_id_list_this_year):
             # TODO: Add "shortened_identifier" to the model and this retrieve
-            results = retrieve_measure_list_for_all_upcoming_elections(google_civic_election_id_list,
-                                                                       limit_to_this_state_code=state_code)
+            results = retrieve_measure_list_for_all_upcoming_elections(
+                google_civic_election_id_list=google_civic_election_id_list_this_year,
+                limit_to_this_state_code=state_code)
             if results['measure_list_found']:
                 all_possible_measures_list_light_found = True
                 all_possible_measures_list_light = results['measure_list_light']
@@ -987,13 +997,14 @@ def voter_guide_create_process_view(request):
         if len(possible_endorsement_list):
             # Match possible_endorsement_list to candidates already in the database
             results = match_endorsement_list_with_candidates_in_database(
-                possible_endorsement_list, google_civic_election_id_list,
+                possible_endorsement_list,
+                google_civic_election_id_list=google_civic_election_id_list_this_year,
                 all_possible_candidates_list_light=all_possible_candidates_list_light)
             if results['possible_endorsement_list_found']:
                 possible_endorsement_list = results['possible_endorsement_list']
 
             results = match_endorsement_list_with_measures_in_database(
-                possible_endorsement_list, google_civic_election_id_list,
+                possible_endorsement_list, google_civic_election_id_list_this_year,
                 all_possible_measures_list_light=all_possible_measures_list_light)
             if results['possible_endorsement_list_found']:
                 possible_endorsement_list = results['possible_endorsement_list']
@@ -1052,7 +1063,7 @@ def voter_guide_create_process_view(request):
         if not positive_value_exists(candidate_found):
             if positive_value_exists(candidate_twitter_handle):
                 results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
-                    google_civic_election_id_list=google_civic_election_id_list,
+                    google_civic_election_id_list=google_civic_election_id_list_this_year,
                     state_code=state_code,
                     candidate_twitter_handle=candidate_twitter_handle,
                     candidate_name=candidate_name)
@@ -1178,7 +1189,8 @@ def voter_guide_create_process_view(request):
         if len(possible_endorsement_list):
             # Match possible_endorsement_list to candidates already in the database
             results = match_endorsement_list_with_candidates_in_database(
-                possible_endorsement_list, google_civic_election_id_list)
+                possible_endorsement_list,
+                google_civic_election_id_list=google_civic_election_id_list_this_year)
             if results['possible_endorsement_list_found']:
                 possible_endorsement_list = results['possible_endorsement_list']
 
@@ -2034,11 +2046,12 @@ def voter_guide_list_view(request):
                 state_code=state_code,
                 retrieve_public_positions=True)
             # How many Friends-only visible positions are there in this election on this voter guide?
-            one_voter_guide.number_of_friends_only_positions = position_list_manager.fetch_positions_count_for_voter_guide(
-                organization_we_vote_id_list=organization_we_vote_id_list,
-                google_civic_election_id_list=google_civic_election_id_list,
-                state_code=state_code,
-                retrieve_public_positions=False)
+            one_voter_guide.number_of_friends_only_positions = \
+                position_list_manager.fetch_positions_count_for_voter_guide(
+                    organization_we_vote_id_list=organization_we_vote_id_list,
+                    google_civic_election_id_list=google_civic_election_id_list,
+                    state_code=state_code,
+                    retrieve_public_positions=False)
             # What Issues are associated with this voter_guide?
             one_voter_guide.issue_list = issue_list_manager.fetch_organization_issue_list(
                 one_voter_guide.organization_we_vote_id)

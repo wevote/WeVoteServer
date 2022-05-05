@@ -10,7 +10,7 @@ from config.base import get_environment_variable
 import copy
 from datetime import datetime, timedelta
 from django.http import HttpResponse
-from election.controllers import retrieve_upcoming_election_id_list
+from election.controllers import retrieve_this_years_election_id_list, retrieve_upcoming_election_id_list
 from election.models import ElectionManager
 from exception.models import handle_record_not_found_exception
 from follow.models import FollowOrganizationList, FollowIssueList, FOLLOWING
@@ -177,11 +177,11 @@ def augment_with_voter_guide_possibility_position_data(voter_guide_possibility_l
     # Identify how many endorsements already have positions stored
     voter_guide_possibility_list_modified = []
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
+    google_civic_election_id_list_this_year = retrieve_this_years_election_id_list()
     for one_voter_guide_possibility in voter_guide_possibility_list:
         one_voter_guide_possibility.number_of_endorsements_with_position = 0
         possible_endorsement_list = []
         possible_endorsement_list_found = False
-        google_civic_election_id_list = []
         # (ORGANIZATION_ENDORSING_CANDIDATES, 'Organization or News Website Endorsing Candidates'),
         # (ENDORSEMENTS_FOR_CANDIDATE, 'List of Endorsements for One Candidate'),
         # (UNKNOWN_TYPE, 'List of Endorsements for One Candidate'),
@@ -194,13 +194,13 @@ def augment_with_voter_guide_possibility_position_data(voter_guide_possibility_l
 
                 # Match incoming endorsements to candidates already in the database
                 results = match_endorsement_list_with_candidates_in_database(
-                    possible_endorsement_list, google_civic_election_id_list)
+                    possible_endorsement_list, google_civic_election_id_list=google_civic_election_id_list_this_year)
                 if results['possible_endorsement_list_found']:
                     possible_endorsement_list = results['possible_endorsement_list']
                     possible_endorsement_list_found = True
                 # Match incoming endorsements to measures already in the database
                 results = match_endorsement_list_with_measures_in_database(
-                    possible_endorsement_list, google_civic_election_id_list)
+                    possible_endorsement_list, google_civic_election_id_list=google_civic_election_id_list_this_year)
                 if results['possible_endorsement_list_found']:
                     possible_endorsement_list = results['possible_endorsement_list']
                     possible_endorsement_list_found = True
@@ -212,7 +212,7 @@ def augment_with_voter_guide_possibility_position_data(voter_guide_possibility_l
 
                 # Match incoming endorsements to candidates already in the database
                 results = match_endorsement_list_with_candidates_in_database(
-                    possible_endorsement_list, google_civic_election_id_list)
+                    possible_endorsement_list, google_civic_election_id_list=google_civic_election_id_list_this_year)
                 if results['possible_endorsement_list_found']:
                     possible_endorsement_list = results['possible_endorsement_list']
                     possible_endorsement_list_found = True
@@ -578,8 +578,11 @@ def extract_voter_guide_possibility_position_list_from_database(
 
 
 def augment_candidate_possible_position_data(
-        possible_endorsement, google_civic_election_id_list, limit_to_this_state_code="",
-        all_possible_candidates=[], attach_objects=True):
+        possible_endorsement,
+        google_civic_election_id_list=[],
+        limit_to_this_state_code="",
+        all_possible_candidates=[],
+        attach_objects=True):
     status = ""
     success = True
     candidate_manager = CandidateManager()
@@ -890,8 +893,8 @@ def augment_organization_possible_position_data(possible_endorsement, attach_obj
 
 
 def match_endorsement_list_with_candidates_in_database(
-        possible_endorsement_list,
-        google_civic_election_id_list,
+        possible_endorsement_list=[],
+        google_civic_election_id_list=[],
         state_code='',
         all_possible_candidates_list_light=[],
         attach_objects=True):
@@ -911,8 +914,11 @@ def match_endorsement_list_with_candidates_in_database(
     possible_endorsement_list_modified = []
     for possible_endorsement in possible_endorsement_list:
         results = augment_candidate_possible_position_data(
-            possible_endorsement, google_civic_election_id_list, limit_to_this_state_code=state_code,
-            all_possible_candidates=all_possible_candidates_list_light, attach_objects=attach_objects)
+            possible_endorsement,
+            google_civic_election_id_list=google_civic_election_id_list,
+            limit_to_this_state_code=state_code,
+            all_possible_candidates=all_possible_candidates_list_light,
+            attach_objects=attach_objects)
         if results['possible_endorsement_count'] > 0:
             possible_endorsement_list_modified += results['possible_endorsement_return_list']
         else:
@@ -2117,15 +2123,7 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
         if results['possible_endorsement_list_found']:
             possible_endorsement_list = results['possible_endorsement_list']
 
-            # Do we want to analyze the stored possible_endorsement_list here?
-            #  I don't think so -- I think we want to analyze on save.
-            # if google_civic_election_id_list and len(google_civic_election_id_list):
-            #     google_civic_election_id_list = []
-            # else:
-            #     google_civic_election_id_list = retrieve_upcoming_election_id_list(
-            #         limit_to_this_state_code=state_code)
-
-            google_civic_election_id_list = []
+            google_civic_election_id_list_this_year = retrieve_this_years_election_id_list()
 
             if voter_guide_possibility_type == ORGANIZATION_ENDORSING_CANDIDATES \
                     or voter_guide_possibility_type == UNKNOWN_TYPE:
@@ -2133,15 +2131,17 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
                 # Match incoming endorsements to candidates already in the database
                 results = match_endorsement_list_with_candidates_in_database(
                     possible_endorsement_list,
-                    google_civic_election_id_list,
-                    limit_to_this_state_code,
+                    google_civic_election_id_list=google_civic_election_id_list_this_year,
+                    state_code=limit_to_this_state_code,
                     attach_objects=False)
                 if results['possible_endorsement_list_found']:
                     possible_endorsement_list = results['possible_endorsement_list']
 
                 # Match incoming endorsements to measures already in the database
                 results = match_endorsement_list_with_measures_in_database(
-                    possible_endorsement_list, google_civic_election_id_list, limit_to_this_state_code,
+                    possible_endorsement_list,
+                    google_civic_election_id_list=google_civic_election_id_list_this_year,
+                    state_code=limit_to_this_state_code,
                     attach_objects=False)
                 if results['possible_endorsement_list_found']:
                     possible_endorsement_list = results['possible_endorsement_list']
@@ -2606,8 +2606,11 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
 
         attach_objects = False
         augment_results = augment_candidate_possible_position_data(
-            possible_endorsement_dict, google_civic_election_id_list, limit_to_this_state_code=limit_to_this_state_code,
-            all_possible_candidates=all_possible_candidates_list_light, attach_objects=attach_objects)
+            possible_endorsement_dict,
+            google_civic_election_id_list=google_civic_election_id_list,
+            limit_to_this_state_code=limit_to_this_state_code,
+            all_possible_candidates=all_possible_candidates_list_light,
+            attach_objects=attach_objects)
         candidate_possible_endorsement_count = augment_results['possible_endorsement_count']
         if augment_results['possible_endorsement_count'] > 0:
             possible_endorsement_list = augment_results['possible_endorsement_return_list']

@@ -7,6 +7,7 @@ from ballot.models import BallotReturned, BallotReturnedListManager
 from config.base import get_environment_variable
 # from import_export_google_civic.controllers import retrieve_from_google_civic_api_election_query, \
 #     store_results_from_google_civic_api_election_query
+from datetime import datetime
 import json
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, process_request_from_master
@@ -312,6 +313,16 @@ def elections_sync_out_list_for_api(voter_device_id):
     return results
 
 
+def retrieve_this_years_election_id_list(require_include_in_list_for_voters=False):
+    today = datetime.now().date()
+    candidate_year = today.year
+    google_civic_election_id_list = retrieve_election_id_list_by_year_list(
+        election_year_list_to_show=[candidate_year],
+        restrict_to_elections_visible_to_voters=require_include_in_list_for_voters)
+
+    return google_civic_election_id_list
+
+
 def retrieve_upcoming_election_id_list(limit_to_this_state_code='', require_include_in_list_for_voters=False):
     # There is a parallel function in election_manager.retrieve_upcoming_google_civic_election_id_list(
     # Figure out the elections we care about
@@ -342,7 +353,9 @@ def retrieve_upcoming_election_id_list(limit_to_this_state_code='', require_incl
     return google_civic_election_id_list
 
 
-def retrieve_election_id_list_by_year_list(election_year_list_to_show=[]):
+def retrieve_election_id_list_by_year_list(
+        election_year_list_to_show=[],
+        restrict_to_elections_visible_to_voters=True):
     # Figure out the elections we care about
     google_civic_election_id_list = []
     election_manager = ElectionManager()
@@ -354,7 +367,7 @@ def retrieve_election_id_list_by_year_list(election_year_list_to_show=[]):
         results = election_manager.retrieve_elections_between_dates(
             starting_date_as_integer=starting_date_as_integer,
             ending_date_as_integer=ending_date_as_integer,
-            restrict_to_elections_visible_to_voters=True)
+            restrict_to_elections_visible_to_voters=restrict_to_elections_visible_to_voters)
         if results['election_list_found']:
             upcoming_election_list = results['election_list']
             for one_election in upcoming_election_list:
