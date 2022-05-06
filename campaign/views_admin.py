@@ -550,8 +550,6 @@ def campaign_list_view(request):
     show_issues = request.GET.get('show_issues', '')
     show_organizations_without_email = positive_value_exists(request.GET.get('show_organizations_without_email', False))
 
-    election_years_available = [2022, 2021, 2020, 2019, 2018, 2017, 2016]
-
     messages_on_stage = get_messages(request)
     campaignx_manager = CampaignXManager()
 
@@ -722,7 +720,6 @@ def campaign_list_view(request):
         'campaignx_type_filter':                    campaignx_type_filter,
         'campaignx_types':                          [],
         'client_organization_list':                 client_organization_list,
-        'election_years_available':                 election_years_available,
         'final_election_date_plus_cool_down':       final_election_date_plus_cool_down,
         'google_civic_election_id':                 google_civic_election_id,
         'hide_campaigns_not_visible_yet':           hide_campaigns_not_visible_yet,
@@ -833,8 +830,6 @@ def campaign_supporters_list_view(request, campaignx_we_vote_id=""):
     show_supporters_not_visible_to_public = \
         positive_value_exists(request.GET.get('show_supporters_not_visible_to_public', False))
 
-    election_years_available = [2022, 2021, 2020, 2019, 2018, 2017, 2016]
-
     messages_on_stage = get_messages(request)
 
     campaignx = CampaignX.objects.get(we_vote_id__iexact=campaignx_we_vote_id)
@@ -927,7 +922,6 @@ def campaign_supporters_list_view(request, campaignx_we_vote_id=""):
         'campaignx_search':                         campaignx_search,
         'campaignx_we_vote_id':                     campaignx_we_vote_id,
         'campaignx_title':                          campaignx_title,
-        'election_years_available':                 election_years_available,
         'google_civic_election_id':                 google_civic_election_id,
         'limit_to_opinions_in_state_code':          limit_to_opinions_in_state_code,
         'limit_to_opinions_in_this_year':           limit_to_opinions_in_this_year,

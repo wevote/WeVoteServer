@@ -44,6 +44,20 @@
     </label>
     &nbsp;&nbsp;&nbsp;&nbsp;
 
+    {% if election_years_available %}
+    <select id="show_this_year_of_candidates_id" name="show_this_year_of_candidates">
+        <option value="0" {% if 0 == show_this_year_of_candidates|convert_to_int %} selected="selected"{% endif %}>
+            -- Choose Year --</option>
+        {% for year in election_years_available %}
+        <option value="{{ year }}"
+                {% if show_this_year_of_candidates|slugify == year|slugify %} selected="selected"{% endif %}>
+            {% if show_this_year_of_candidates|slugify == year|slugify %}Limited To {% endif %}
+            {{ year }}</option>
+        {% endfor %}
+    </select>
+    {% endif %}{# End of if election_years_available #}
+    &nbsp;&nbsp;&nbsp;&nbsp;
+
     {# Show candidates which are either marquee or battleground #}
     <label for="show_marquee_or_battleground_id">
       <input type="checkbox" name="show_marquee_or_battleground" id="show_marquee_or_battleground_id" value="1"
@@ -257,7 +271,7 @@
 <br />
 <form name="candidate_search" method="get" action="{% url 'candidate:candidate_list' %}">
     {% if candidate_search %}
-    <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&show_all_elections={{ show_all_elections }}&show_this_year_of_candidates={{ show_this_year_of_candidates }}&state_code={{ state_code }}">
          clear search</a>&nbsp;
     {% endif %}
     <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}" />
@@ -267,6 +281,7 @@
     <input type="hidden" name="show_all_elections" id="show_all_elections_id" value="{{ show_all_elections }}" />
     <input type="hidden" name="show_election_statistics" value="{{ show_election_statistics }}" />
     <input type="hidden" name="show_marquee_or_battleground" value="{{ show_marquee_or_battleground }}" />
+    <input type="hidden" name="show_this_year_of_candidates" value="{{ show_this_year_of_candidates }}" />
 
     <input type="submit" value="Search for Candidate" />
 
@@ -687,6 +702,11 @@
     });
     $(function() {
         $('#show_marquee_or_battleground_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#show_this_year_of_candidates_id').change(function() {
             this.form.submit();
         });
     });

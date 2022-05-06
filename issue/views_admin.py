@@ -23,6 +23,7 @@ from voter.models import fetch_api_voter_from_request, voter_has_authority
 from voter_guide.models import VoterGuideListManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, get_voter_device_id, STATE_CODE_MAP
+from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from django.http import HttpResponse
 import json
 
@@ -833,7 +834,6 @@ def issue_partisan_analysis_view(request):
 
     issue_search = request.GET.get('issue_search', '')
     show_hidden_issues = False
-    election_years_available = [2022, 2021, 2020, 2019, 2018, 2017, 2016]
 
     organization_we_vote_id_in_this_election_list = []
     organization_retrieved_list = {}
@@ -842,7 +842,7 @@ def issue_partisan_analysis_view(request):
     voter_guide_list_manager = VoterGuideListManager()
 
     if show_statistics_for_all_elections:
-        election_year_list_to_show = election_years_available
+        election_year_list_to_show = ELECTION_YEARS_AVAILABLE
         show_stats_for_this_google_civic_election_id_list = \
             retrieve_election_id_list_by_year_list(election_year_list_to_show=election_year_list_to_show)
         google_civic_election_id_list_for_dropdown = show_stats_for_this_google_civic_election_id_list
@@ -1099,7 +1099,7 @@ def issue_partisan_analysis_view(request):
 
     template_values = {
         'election_list':                election_list,
-        'election_years_available':     election_years_available,
+        'election_years_available':     ELECTION_YEARS_AVAILABLE,
         'endorsement_count_left':       endorsement_count_left,
         'endorsement_with_commentary_count_left': endorsement_with_commentary_count_left,
         'endorsement_count_center':     endorsement_count_center,

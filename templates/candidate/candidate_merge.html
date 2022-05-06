@@ -113,6 +113,12 @@
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="party" field_label="Party" conflict_status=conflict_values.party candidate1_field_value=candidate_option1.party candidate2_field_value=candidate_option2.party candidate1=candidate_option1 candidate2=candidate_option2 %}
 
+    <tr>
+        <td>Candidate Year</td>
+        <td>{{ candidate_option1.candidate_year|default_if_none:"" }}</td>
+        <td>{{ candidate_option2.candidate_year|default_if_none:"" }}</td>
+    </tr>
+
     {% if candidate_option1.id != None or candidate_option2.id != None %}
     <tr>
         <td>ID</td>

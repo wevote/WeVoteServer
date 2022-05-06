@@ -20,7 +20,7 @@ from admin_tools.views import redirect_to_sign_in_page
 from ballot.models import BallotReturnedListManager
 from bookmark.models import BookmarkItemList
 from config.base import get_environment_variable
-from election.controllers import retrieve_upcoming_election_id_list
+from election.controllers import retrieve_election_id_list_by_year_list, retrieve_upcoming_election_id_list
 from election.models import ElectionManager
 from exception.models import handle_record_found_more_than_one_exception, \
     handle_record_not_found_exception, print_to_log
@@ -38,6 +38,7 @@ from voter.models import voter_has_authority
 from voter_guide.models import VoterGuide
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, list_intersection, \
     positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization
+from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from wevote_settings.models import RemoteRequestHistory, \
     RETRIEVE_POSSIBLE_GOOGLE_LINKS, RETRIEVE_POSSIBLE_TWITTER_HANDLES
 from .controllers import candidates_import_from_master_server, candidates_import_from_sample_file, \
@@ -332,6 +333,7 @@ def candidate_list_view(request):
         positive_value_exists(request.GET.get('show_candidates_with_twitter_options', False))
     show_election_statistics = positive_value_exists(request.GET.get('show_election_statistics', False))
     show_marquee_or_battleground = positive_value_exists(request.GET.get('show_marquee_or_battleground', False))
+    show_this_year_of_candidates = convert_to_int(request.GET.get('show_this_year_of_candidates', 0))
 
     review_mode = positive_value_exists(request.GET.get('review_mode', False))
 
@@ -392,9 +394,13 @@ def candidate_list_view(request):
     #         messages.add_message(request, messages.INFO, "candidates_migrated: " + str(candidates_migrated))
 
     google_civic_election_id_list_generated = False
+    show_this_year_of_candidates_restriction = False
     if positive_value_exists(google_civic_election_id):
         google_civic_election_id_list = [convert_to_int(google_civic_election_id)]
         google_civic_election_id_list_generated = True
+    elif positive_value_exists(show_this_year_of_candidates):
+        google_civic_election_id_list = retrieve_election_id_list_by_year_list([show_this_year_of_candidates])
+        show_this_year_of_candidates_restriction = True
     elif positive_value_exists(show_all_elections):
         google_civic_election_id_list = []
     else:
@@ -403,7 +409,12 @@ def candidate_list_view(request):
         google_civic_election_id_list = retrieve_upcoming_election_id_list()
 
     candidate_we_vote_id_list = []
-    if google_civic_election_id_list_generated:
+    if show_this_year_of_candidates_restriction:
+        results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_year_list(
+            year_list=[show_this_year_of_candidates],
+            limit_to_this_state_code=state_code)
+        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+    elif google_civic_election_id_list_generated:
         results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
             google_civic_election_id_list=google_civic_election_id_list,
             limit_to_this_state_code=state_code)
@@ -490,10 +501,12 @@ def candidate_list_view(request):
 
     # Figure out the subset of candidate_we_vote_ids to look up
     filtered_candidate_we_vote_id_list = []
-    if google_civic_election_id_list_generated and show_marquee_or_battleground:
+    # show_this_year_of_candidates_restriction
+    if (google_civic_election_id_list_generated or show_this_year_of_candidates_restriction) \
+            and show_marquee_or_battleground:
         filtered_candidate_we_vote_id_list = list_intersection(
             candidate_we_vote_id_list, battleground_candidate_we_vote_id_list)
-    elif google_civic_election_id_list_generated:
+    elif google_civic_election_id_list_generated or show_this_year_of_candidates_restriction:
         filtered_candidate_we_vote_id_list = candidate_we_vote_id_list
     elif show_marquee_or_battleground:
         filtered_candidate_we_vote_id_list = battleground_candidate_we_vote_id_list
@@ -502,7 +515,8 @@ def candidate_list_view(request):
     try:
         candidate_query = CandidateCampaign.objects.all()
         if positive_value_exists(google_civic_election_id_list_generated) \
-                or positive_value_exists(show_marquee_or_battleground):
+                or positive_value_exists(show_marquee_or_battleground) \
+                or positive_value_exists(show_this_year_of_candidates_restriction):
             candidate_query = candidate_query.filter(we_vote_id__in=filtered_candidate_we_vote_id_list)
         if positive_value_exists(state_code):
             candidate_query = candidate_query.filter(state_code__iexact=state_code)
@@ -870,6 +884,7 @@ def candidate_list_view(request):
         'current_page_minus_candidate_tools_url':   current_page_minus_candidate_tools_url,
         'election':                                 election,
         'election_list':                            election_list,
+        'election_years_available':                 ELECTION_YEARS_AVAILABLE,
         'facebook_urls_without_picture_urls':       facebook_urls_without_picture_urls,
         'find_candidates_linked_to_multiple_offices':   find_candidates_linked_to_multiple_offices,
         'google_civic_election_id':                 google_civic_election_id,
@@ -886,6 +901,7 @@ def candidate_list_view(request):
         'show_candidates_without_twitter':          show_candidates_without_twitter,
         'show_election_statistics':                 show_election_statistics,
         'show_marquee_or_battleground':             show_marquee_or_battleground,
+        'show_this_year_of_candidates':             show_this_year_of_candidates,
         'state_code':                               state_code,
         'state_list':                               sorted_state_list,
         'total_twitter_handles':                    total_twitter_handles,

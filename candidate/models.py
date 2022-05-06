@@ -339,6 +339,14 @@ class CandidateListManager(models.Manager):
             limit_to_this_state_code='',
             search_string=False,
             return_list_of_objects=False):
+        """
+        This might generate different results than retrieve_candidate_we_vote_id_list_from_year_list.
+        :param candidate_year:
+        :param limit_to_this_state_code:
+        :param search_string:
+        :param return_list_of_objects:
+        :return:
+        """
         candidate_list_objects = []
         candidate_list_light = []
         candidate_list_found = False
@@ -1658,6 +1666,38 @@ class CandidateListManager(models.Manager):
             'success':                      success,
             'candidate_we_vote_id_list':    candidate_we_vote_id_list,
             'office_we_vote_id_list_by_candidate_we_vote_id':   office_we_vote_id_list_by_candidate_we_vote_id,
+        }
+        return results
+
+    def retrieve_candidate_we_vote_id_list_from_year_list(
+            self,
+            limit_to_this_state_code='',
+            year_list=[]):
+        """
+        This might return different results than retrieve_all_candidates_for_one_year.
+        :param limit_to_this_state_code:
+        :param year_list:
+        :return:
+        """
+        status = ''
+        success = True
+        candidate_we_vote_id_list = []
+
+        candidate_query = CandidateCampaign.objects.all()
+        candidate_query = candidate_query.filter(candidate_year__in=year_list)
+        if positive_value_exists(limit_to_this_state_code):
+            candidate_query = candidate_query.filter(state_code__iexact=limit_to_this_state_code)
+
+        try:
+            candidate_we_vote_id_list = candidate_query.values_list('we_vote_id', flat=True).distinct()
+        except Exception as e:
+            status += 'ERROR_WITH_DATABASE_QUERY: ' + str(e) + ' '
+            success = False
+
+        results = {
+            'status':                       status,
+            'success':                      success,
+            'candidate_we_vote_id_list':    candidate_we_vote_id_list,
         }
         return results
 
