@@ -47,6 +47,7 @@ from voter_guide.models import VoterGuideManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists, \
     STATE_CODE_MAP
+from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 
 
 ORGANIZATION_STANCE_CHOICES = (
@@ -449,8 +450,6 @@ def organization_list_view(request):
     show_organizations_to_be_analyzed = \
         positive_value_exists(request.GET.get('show_organizations_to_be_analyzed', False))
 
-    election_years_available = [2022, 2021, 2020, 2019, 2018, 2017, 2016]
-
     messages_on_stage = get_messages(request)
     organization_list_query = Organization.objects.all()
     if positive_value_exists(sort_by):
@@ -644,7 +643,7 @@ def organization_list_view(request):
 
     template_values = {
         'candidate_we_vote_id':     candidate_we_vote_id,
-        'election_years_available': election_years_available,
+        'election_years_available': ELECTION_YEARS_AVAILABLE,
         'google_civic_election_id': google_civic_election_id,
         'issue_list':               issue_list,
         'issues_selected':          issues_selected,

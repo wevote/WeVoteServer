@@ -31,6 +31,7 @@ from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, convert_integer_to_string_with_comma_for_thousands_separator, \
     positive_value_exists, STATE_CODE_MAP
+from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from django.http import HttpResponse
 import json
 
@@ -251,7 +252,6 @@ def position_list_view(request):
     state_code = request.GET.get('state_code', '')
     state_list = STATE_CODE_MAP
     state_list_modified = {}
-    election_years_available = [2022, 2021, 2020, 2019, 2018, 2017, 2016]
 
     position_search = request.GET.get('position_search', '')
 
@@ -565,7 +565,7 @@ def position_list_view(request):
         'position_list':            position_list,
         'position_search':          position_search,
         'election_list':            election_list,
-        'election_years_available': election_years_available,
+        'election_years_available': ELECTION_YEARS_AVAILABLE,
         'google_civic_election_id': google_civic_election_id,
         'show_all_elections':       show_all_elections,
         'show_statistics':          show_statistics,

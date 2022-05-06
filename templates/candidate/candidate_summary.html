@@ -86,6 +86,12 @@ th, td {
       </td>
     </tr>
     <tr>
+      <td>Candidate Year:</td>
+      <td>
+        <strong>{{ candidate.candidate_year }}</strong>
+      </td>
+    </tr>
+    <tr>
       <td>Contest Office:</td>
       <td>
         <strong>{{ candidate.contest_office_name }}</strong>
@@ -158,6 +164,7 @@ th, td {
             <th>ID</th>
             <th>We Vote ID</th>
             <th>Candidate Name</th>
+            <th>Year</th>
             <th>State</th>
             <th>Ballotpedia Race ID</th>
             <th>Ballotpedia Candidate ID</th>
@@ -178,6 +185,7 @@ th, td {
               (<a href="{% url 'candidate:candidate_summary' found_candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank">view&nbsp;summary</a>,
               <a href="{% url 'candidate:compare_two_candidates_for_merge' %}?candidate1_we_vote_id={{ candidate.we_vote_id }}&candidate2_we_vote_id={{ found_candidate.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank">compare&nbsp;for&nbsp;merge</a>)
             </td>
+            <td>{{ found_candidate.candidate_year }}</td>
             <td>{{ found_candidate.state_code }}</td>
             <td>{{ found_candidate.ballotpedia_race_id|default_if_none:"" }}</td>
             <td>{{ found_candidate.ballotpedia_candidate_id|default_if_none:"" }}</td>
