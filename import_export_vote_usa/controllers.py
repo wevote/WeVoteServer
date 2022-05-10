@@ -102,15 +102,18 @@ def retrieve_from_vote_usa_api_election_query():
 
     structured_json = json.loads(response.text)
     if 'success' in structured_json and structured_json['success'] is False:
+        logger.error("VOTE_USA_ELECTION_QUERY_URL: " + str(VOTE_USA_ELECTION_QUERY_URL) +
+                     ", VOTE_USA_API_KEY:" + str(VOTE_USA_API_KEY))
         results = {
-            'success': False,
             'status': "Error from Vote USA: " + structured_json['status'],
+            'structured_json':  structured_json,
+            'success': False,
         }
     else:
         results = {
+            'status':           'structured_json retrieved',
             'structured_json':  structured_json,
             'success':          True,
-            'status':           'structured_json retrieved',
         }
     return results
 
