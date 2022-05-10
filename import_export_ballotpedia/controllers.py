@@ -2996,7 +2996,7 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api_v4(
                 voter_ballot_saved_manager.delete_voter_ballot_saved(
                     voter_ballot_saved_id, voter_id, google_civic_election_id_to_delete)
         else:
-            status += "BALLOT_RETURNED_MISSING: "
+            status += "BALLOT_RETURNED_MISSING-BP: "
             status += one_ballot_results['status']
 
     # VoterBallotSaved gets created outside of this function

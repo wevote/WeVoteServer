@@ -104,7 +104,7 @@ def retrieve_from_vote_usa_api_election_query():
     if 'success' in structured_json and structured_json['success'] is False:
         results = {
             'success': False,
-            'status': "Error: " + structured_json['status'],
+            'status': "Error from Vote USA: " + structured_json['status'],
         }
     else:
         results = {
