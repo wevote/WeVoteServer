@@ -27,9 +27,9 @@ def election_remote_retrieve(use_vote_usa=True):
     error = structured_json.get('error', {})
     errors = error.get('errors', {})
     if not retrieve_results['success'] or len(errors):  # Success refers to http success, not an error free response
-        logger.error("Loading Election from Vote USA failed: " + json.dumps(errors) +
-                     ", structured_json:" + structured_json +
-                     ", retrieve_results['status']:" + retrieve_results['status'])
+        logger.error("Loading Election from Vote USA failed: " + str(json.dumps(errors)) +
+                     ", structured_json:" + str(structured_json) +
+                     ", retrieve_results['status']:" + str(retrieve_results['status']))
         results = {
             'success':  False,
             'status':   retrieve_results['status']
