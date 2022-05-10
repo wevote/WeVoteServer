@@ -3010,8 +3010,9 @@ def voter_ballot_items_retrieve_from_google_civic_2021(
                 google_civic_election_id = election.google_civic_election_id
                 election_day_text = election.election_day_text
                 election_description_text = election.election_name
-
-            status += "NEXT_ELECTION_FOR_STATE: " + str(google_civic_election_id) + " "
+                status += "NEXT_ELECTION_FOUND_FOR_STATE: " + str(google_civic_election_id) + " "
+            else:
+                status += "NEXT_ELECTION_NOT_FOUND "
 
     # Load up ballot_returned so we can use below functions
     ballot_returned_manager = BallotReturnedManager()
@@ -3108,7 +3109,7 @@ def voter_ballot_items_retrieve_from_google_civic_2021(
                         if positive_value_exists(route):
                             normalized_line1 += " " + route
     except Exception as e:
-        status += "RETRIEVE_FROM_VOTE_USA-EXCEPTION with get_geocoder_for_service: " + str(e) + " "
+        status += "RETRIEVE_FROM_VOTE_USA-EXCEPTION with get_geocoder_for_service ERROR: " + str(e) + " "
         success = False
 
     if not success:

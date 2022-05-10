@@ -18,7 +18,7 @@ WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 ELECTIONS_SYNC_URL = get_environment_variable("ELECTIONS_SYNC_URL")  # electionsSyncOut
 
 
-def election_remote_retrieve():
+def election_remote_retrieve(use_vote_usa=True):
     # retrieve_results = retrieve_from_google_civic_api_election_query()
     from import_export_vote_usa.controllers import retrieve_from_vote_usa_api_election_query, \
         store_results_from_vote_usa_api_election_query
@@ -27,7 +27,9 @@ def election_remote_retrieve():
     error = structured_json.get('error', {})
     errors = error.get('errors', {})
     if not retrieve_results['success'] or len(errors):  # Success refers to http success, not an error free response
-        logger.error("Loading Election from Vote USA failed: " + json.dumps(errors))
+        logger.error("Loading Election from Vote USA failed: " + json.dumps(errors) +
+                     ", structured_json:" + structured_json +
+                     ", retrieve_results['status']:" + retrieve_results['status'])
         results = {
             'success':  False,
             'status':   retrieve_results['status']

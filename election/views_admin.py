@@ -1384,7 +1384,7 @@ def nationwide_election_list_view(request):
 @login_required()
 def election_remote_retrieve_view(request):
     """
-    Reach out to Google and retrieve the latest list of available elections
+    Reach out to one of our data sources and retrieve the latest list of available elections
     :param request:
     :return:
     """
@@ -1393,7 +1393,7 @@ def election_remote_retrieve_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    results = election_remote_retrieve()
+    results = election_remote_retrieve(use_vote_usa=True)
 
     if not results['success']:
         messages.add_message(request, messages.INFO, results['status'])
