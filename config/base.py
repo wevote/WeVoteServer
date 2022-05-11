@@ -12,9 +12,6 @@ import re
 from django.core.exceptions import ImproperlyConfigured
 from django.db import connection
 
-# Consider switching to the way that Two Scoops of Django 1.8 suggests file path handling, section 5.6
-# from unipath import Path
-
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # Override in local.py for development
@@ -33,35 +30,54 @@ except Exception as e:
 
 def get_environment_variable(var_name, json_environment_vars=json_environment_variables, no_exception=False):
     """
-    Get the environment variable or return exception.
-    From Two Scoops of Django 1.8, section 5.3.4
+    Get the environment variable or return exception. Don't return exception if no_exception is True
     """
-    if no_exception:
-        if var_name in json_environment_vars:
-            return json_environment_vars[var_name]
-        else:
-            return ''
-
-    try:
-        return json_environment_vars[var_name]  # Loaded from array above
-    except KeyError:
-        # variable wasn't found in the JSON environment variables file, so now look in the server environment variables
-        pass
-        # print "base.py: failed to load {} from JSON file".format(var_name)  # Can't use logger in the settings file
-
     try:
         # Environment variables can be set with this for example: export GOOGLE_CIVIC_API_KEY=<API KEY HERE>
         val = os.environ[var_name]
         # handle boolean variables; return bool value when string is "true" or "false"
-        if val.lower() == 'true':
-            return True
-        elif val.lower() == 'false':
-            return False
+        try:
+            if val.lower() == 'true':
+                return True
+            elif val.lower() == 'false':
+                return False
+        except Exception as e:
+            pass
         return val
     except KeyError:
+        pass
+
+    if json_environment_vars:
+        if var_name in json_environment_vars:
+            val = json_environment_vars[var_name]
+            # handle boolean variables; return bool value when string is "true" or "false"
+            try:
+                if val.lower() == 'true':
+                    return True
+                elif val.lower() == 'false':
+                    return False
+            except Exception as e:
+                pass
+            return val
+        else:
+            variable_not_found = True
+    else:
+        variable_not_found = True
+
+    if variable_not_found:
         # Can't use logger in the settings file due to loading sequence
-        error_msg = "Unable to set the {} variable from os.environ or JSON file".format(var_name)
-        raise ImproperlyConfigured(error_msg)
+        error_message = "ERROR: Unable to set the {} variable from os.environ or JSON file".format(var_name)
+        try:
+            import logging
+            logging.error(error_message)
+        except Exception as e:
+            pass
+        if no_exception:
+            return ''
+        else:
+            raise ImproperlyConfigured(error_message)
+    else:
+        return ''
 
 
 def get_environment_variable_default(var_name, default_value):

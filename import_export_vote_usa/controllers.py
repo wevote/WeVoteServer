@@ -89,6 +89,13 @@ def retrieve_from_vote_usa_api_election_query():
         }
         return results
 
+    if not positive_value_exists(VOTE_USA_API_KEY):
+        results = {
+            'success':  False,
+            'status':   'VOTE_USA_API_KEY missing ',
+        }
+        return results
+
     response = requests.get(
         VOTE_USA_ELECTION_QUERY_URL,
         headers=HEADERS_FOR_VOTE_USA_API_CALL,
