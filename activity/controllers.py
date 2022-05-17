@@ -582,30 +582,31 @@ def notice_friend_endorsements_send(
             subject = "Your friend"
 
         activity_description = ''
+        subject += " is getting ready to vote"
         if position_name_list and len(position_name_list) > 0:
             if len(position_name_list) == 1:
-                subject += " added opinion about "
-                subject += position_name_list[0]
+                # subject += " added opinion about "
+                # subject += position_name_list[0]
 
                 activity_description += "added opinion about "
                 activity_description += position_name_list[0]
             elif len(position_name_list) == 2:
-                subject += " added opinions about "
-                subject += position_name_list[0]
-                subject += " and "
-                subject += position_name_list[1]
+                # subject += " added opinions about "
+                # subject += position_name_list[0]
+                # subject += " and "
+                # subject += position_name_list[1]
 
                 activity_description += "added opinions about "
                 activity_description += position_name_list[0]
                 activity_description += " and "
                 activity_description += position_name_list[1]
             elif len(position_name_list) >= 3:
-                subject += " added opinions about "
-                subject += position_name_list[0]
-                subject += ", "
-                subject += position_name_list[1]
-                subject += " and "
-                subject += position_name_list[2]
+                # subject += " added opinions about "
+                # subject += position_name_list[0]
+                # subject += ", "
+                # subject += position_name_list[1]
+                # subject += " and "
+                # subject += position_name_list[2]
 
                 activity_description += "added opinions about "
                 activity_description += position_name_list[0]
@@ -614,8 +615,11 @@ def notice_friend_endorsements_send(
                 activity_description += " and "
                 activity_description += position_name_list[2]
             else:
-                subject += " has added new opinion"
+                # subject += " has added new opinion"
                 activity_description += "has added new opinion"
+        else:
+            # subject += " is getting ready to vote"
+            activity_description += "is reviewing the ballot"
 
         # Variables used by templates/email_outbound/email_templates/notice_friend_endorsements.txt and .html
         template_variables_for_json = {
