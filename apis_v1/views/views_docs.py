@@ -25,7 +25,7 @@ from apis_v1.documentation_source import \
     issues_followed_retrieve_doc, issues_retrieve_doc, issues_under_ballot_items_retrieve_doc, issues_sync_out_doc, \
     issues_linked_to_organization_doc, issues_to_link_to_for_organization_doc, \
     measure_retrieve_doc, measures_sync_out_doc, measure_list_for_upcoming_elections_retrieve_doc, \
-    office_retrieve_doc, offices_sync_out_doc, organization_analytics_by_voter_doc, \
+    message_to_friend_send_doc, office_retrieve_doc, offices_sync_out_doc, organization_analytics_by_voter_doc, \
     organization_count_doc, organization_daily_metrics_sync_out_doc, \
     organization_election_metrics_sync_out_doc, organizations_followed_retrieve_doc, \
     organization_follow_doc, organization_follow_ignore_doc, organization_index_doc, organizations_found_on_url_doc, \
@@ -78,11 +78,25 @@ from apis_v1.documentation_source import \
     voter_update_doc, voter_verify_secret_code_doc, email_ballot_data_doc
 from config.base import get_environment_variable
 from django.contrib.messages import get_messages
+import importlib
 from django.shortcuts import render
 from voter.models import voter_setup
 from wevote_functions.functions import get_voter_api_device_id, set_voter_api_device_id, positive_value_exists
 
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
+
+
+# def api_doc_view(request, api_name=''):
+#     """
+#     TODO: I would like to figure this out so we don't have to have so many custom doc functions!
+#     """
+#     url_root = WE_VOTE_SERVER_ROOT_URL
+#     full_doc_file_name = "{api_name}_doc".format(api_name=api_name)
+#     doc_file = importlib.import_module(full_doc_file_name)
+#     from apis_v1.documentation_source import doc_file
+#     template_values = full_doc_file_name.doc_template_values(url_root)
+#     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+#     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
 def activity_comment_save_doc_view(request):
@@ -647,6 +661,16 @@ def measure_list_for_upcoming_elections_retrieve_doc_view(request):
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = \
         measure_list_for_upcoming_elections_retrieve_doc.doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def message_to_friend_send_doc_view(request):
+    """
+    Show documentation about messageToFriendSend
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = message_to_friend_send_doc.doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
