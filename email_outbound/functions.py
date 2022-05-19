@@ -5,7 +5,7 @@
 from .models import CAMPAIGNX_FRIEND_HAS_SUPPORTED_TEMPLATE, CAMPAIGNX_NEWS_ITEM_TEMPLATE, \
     CAMPAIGNX_SUPER_SHARE_ITEM_TEMPLATE, CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_TEMPLATE, \
     FRIEND_ACCEPTED_INVITATION_TEMPLATE, FRIEND_INVITATION_TEMPLATE, LINK_TO_SIGN_IN_TEMPLATE, \
-    NOTICE_FRIEND_ENDORSEMENTS_TEMPLATE, NOTICE_VOTER_DAILY_SUMMARY_TEMPLATE, \
+    MESSAGE_TO_FRIEND_TEMPLATE, NOTICE_FRIEND_ENDORSEMENTS_TEMPLATE, NOTICE_VOTER_DAILY_SUMMARY_TEMPLATE, \
     SEND_BALLOT_TO_SELF, SEND_BALLOT_TO_FRIENDS, SIGN_IN_CODE_EMAIL_TEMPLATE, VERIFY_EMAIL_ADDRESS_TEMPLATE
 from django.template.loader import get_template
 from django.template import Context
@@ -53,6 +53,11 @@ def get_template_filename(kind_of_email_template, text_or_html):
             return "link_to_sign_in.html"
         else:
             return "link_to_sign_in.txt"
+    elif kind_of_email_template == MESSAGE_TO_FRIEND_TEMPLATE:
+        if text_or_html == "HTML":
+            return "message_to_friend.html"
+        else:
+            return "message_to_friend.txt"
     elif kind_of_email_template == NOTICE_FRIEND_ENDORSEMENTS_TEMPLATE:
         if text_or_html == "HTML":
             return "notice_friend_endorsements.html"
