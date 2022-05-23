@@ -29,7 +29,8 @@
         {% for one_election in election_list %}
         <option value="{{ one_election.google_civic_election_id }}"
                 {% if one_election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
-            {{ one_election.election_name }} - {{ one_election.google_civic_election_id }} - {{ one_election.election_day_text }}</option>
+            {% if one_election.state_code %}{{ one_election.state_code }} {% endif %}
+            {{ one_election.election_day_text }}: {{ one_election.election_name }} - {{ one_election.google_civic_election_id }}</option>
         {% endfor %}
         </select>
     {% else %}
