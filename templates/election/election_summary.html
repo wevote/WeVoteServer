@@ -330,6 +330,11 @@
 <strong>Retrieve Data for Election</strong><br />
 
 <ol>
+    <li>
+        <a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ election.state_code }}"
+           target="_blank">
+            Review Batch Process Status List (for this election) <span class="glyphicon glyphicon-new-window"></span></a>
+    </li>
 {% if election.use_ballotpedia_as_data_source %}
     {% if not is_national_election or is_national_election and state_code %}
       <li>
@@ -461,11 +466,6 @@
     {% if election.use_ballotpedia_as_data_source %}
     {% endif %}{# if election.use_ballotpedia_as_data_source #}
 
-    <li>
-        <a href="{% url 'import_export_batches:batch_process_list' %}"
-           target="_blank">
-            Watch Batch Process Status List <span class="glyphicon glyphicon-new-window"></span></a> (for all states/elections)
-    </li>
 </ol>
 
 <strong>Data Grooming Tools</strong>

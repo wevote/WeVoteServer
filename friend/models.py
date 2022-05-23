@@ -967,7 +967,6 @@ class FriendManager(models.Manager):
         """
         This is similar to retrieve_current_friends, but only returns the we_vote_id
         :param voter_we_vote_id:
-        :param read_only:
         :return:
         """
         status = ""
@@ -1576,6 +1575,70 @@ class FriendManager(models.Manager):
                 if hasattr(friend_invitation, "sender_voter_we_vote_id"):
                     we_vote_id_list.append(friend_invitation.sender_voter_we_vote_id)
         return we_vote_id_list
+
+    def fetch_friend_related_voter_we_vote_id_list(self, voter_we_vote_id):
+        """
+        Find any other voter_we_vote_id related to voter_we_vote_id. Used for maintenance function.
+        :param voter_we_vote_id:
+        :return:
+        """
+        status = ''
+        success = True
+
+        try:
+            queryset = CurrentFriend.objects.using('readonly').all()
+            queryset = queryset.filter(
+                Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
+                Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))
+            current_friends_list_one = list(queryset.values_list('viewer_voter_we_vote_id', flat=True).distinct())
+            current_friends_list_two = list(queryset.values_list('viewee_voter_we_vote_id', flat=True).distinct())
+        except Exception as e:
+            current_friends_list_one = []
+            current_friends_list_two = []
+            status += "CurrentFriend e: " + str(e) + ' '
+
+        try:
+            queryset = FriendInvitationVoterLink.objects.using('readonly').all()
+            queryset = queryset.filter(recipient_voter_we_vote_id__iexact=voter_we_vote_id)
+            queryset = queryset.filter(deleted=False)
+            queryset = queryset.exclude(invitation_status__iexact=ACCEPTED)
+            queryset = queryset.exclude(invitation_status__iexact=IGNORED)
+            friend_invitation_sender_list = list(queryset.values_list('sender_voter_we_vote_id', flat=True).distinct())
+        except Exception as e:
+            friend_invitation_sender_list = []
+            status += "FriendInvitationVoterLink1 e: " + str(e) + ' '
+
+        try:
+            queryset = FriendInvitationVoterLink.objects.using('readonly').all()
+            queryset = queryset.filter(sender_voter_we_vote_id__iexact=voter_we_vote_id)
+            queryset = queryset.filter(deleted=False)
+            queryset = queryset.exclude(invitation_status__iexact=ACCEPTED)
+            queryset = queryset.exclude(invitation_status__iexact=IGNORED)
+            friend_invitation_recipient_list = \
+                list(queryset.values_list('recipient_voter_we_vote_id', flat=True).distinct())
+        except Exception as e:
+            friend_invitation_recipient_list = []
+            status += "FriendInvitationVoterLink2 e: " + str(e) + ' '
+
+        try:
+            queryset = SuggestedFriend.objects.using('readonly').all()
+            queryset = queryset.filter(
+                Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
+                Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))
+            suggested_friends_list_one = list(queryset.values_list('viewer_voter_we_vote_id', flat=True).distinct())
+            suggested_friends_list_two = list(queryset.values_list('viewee_voter_we_vote_id', flat=True).distinct())
+        except Exception as e:
+            suggested_friends_list_one = []
+            suggested_friends_list_two = []
+            status += "SuggestedFriend e: " + str(e) + ' '
+
+        try:
+            friend_related_voter_we_vote_id_list = \
+                list(set(current_friends_list_one + current_friends_list_two + friend_invitation_sender_list +
+                         friend_invitation_recipient_list + suggested_friends_list_one + suggested_friends_list_two))
+        except Exception as e:
+            friend_related_voter_we_vote_id_list = []
+        return friend_related_voter_we_vote_id_list
 
     def fetch_voter_friendships_count(self):
         current_friend_count = 0

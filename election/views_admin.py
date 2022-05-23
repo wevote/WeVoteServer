@@ -1015,6 +1015,18 @@ def election_list_view(request):
                         pass
         election_list_modified.append(election)
 
+    try:
+        from import_export_vote_usa.controllers import VOTE_USA_ELECTION_QUERY_URL
+        VOTE_USA_API_KEY = get_environment_variable("VOTE_USA_API_KEY", no_exception=True)
+        vote_usa_elections_api_url = \
+            "{url}?accessKey={accessKey}" \
+            "".format(
+                url=VOTE_USA_ELECTION_QUERY_URL,
+                accessKey=VOTE_USA_API_KEY,
+            )
+    except Exception as e:
+        vote_usa_elections_api_url = "FAILED: " + str(e) + " "
+
     template_values = {
         'messages_on_stage':            messages_on_stage,
         'election_list':                election_list_modified,
@@ -1025,6 +1037,7 @@ def election_list_view(request):
         'show_election_statistics':     show_election_statistics,
         'show_ignored_elections':       show_ignored_elections,
         'state_code':                   state_code,
+        'vote_usa_elections_api_url':   vote_usa_elections_api_url,
     }
     return render(request, 'election/election_list.html', template_values)
 

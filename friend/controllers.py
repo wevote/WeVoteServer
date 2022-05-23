@@ -1941,6 +1941,11 @@ def friend_lists_all_for_api(voter_device_id,  # friendListsAll
         }
         return error_results
     voter = voter_results['voter']
+    friend_manager = FriendManager()
+    friend_we_vote_id_list = \
+        friend_manager.fetch_friend_related_voter_we_vote_id_list(voter_we_vote_id=voter.we_vote_id)
+    from voter.controllers import add_state_code_for_display_to_voter_list
+    add_state_code_for_display_to_voter_list(voter_we_vote_id_list=friend_we_vote_id_list)
 
     current_friends, status, success = get_current_friends_list(status, voter)
     invitations_processed, status, success = get_friend_invitations_processed(status, voter)
@@ -2018,7 +2023,7 @@ def get_current_friends_list(status, voter):
                 "voter_twitter_description":        "",  # To be implemented
                 "voter_twitter_followers_count":    0,  # To be implemented
                 "linked_organization_we_vote_id":   friend_voter.linked_organization_we_vote_id,
-                "voter_state_code":                 "",  # To be implemented
+                "state_code_for_display":           friend_voter.state_code_for_display,
                 "invitation_status":                "",  # Not used with CurrentFriends
                 "invitation_sent_to":               "",  # Not used with CurrentFriends
                 "mutual_friends":                   mutual_friends,
@@ -2067,7 +2072,7 @@ def get_friend_invitations_processed(status, voter):
                     "voter_twitter_description":        "", # To be implemented
                     "voter_twitter_followers_count":    0,  # To be implemented
                     "linked_organization_we_vote_id":   friend_voter.linked_organization_we_vote_id,
-                    "voter_state_code":                 "",  # To be implemented
+                    "state_code_for_display":           friend_voter.state_code_for_display,
                     "invitation_status":                one_friend_invitation.invitation_status,
                     "invitation_sent_to":               recipient_voter_email,
                     "mutual_friends":                   mutual_friends,
@@ -2130,7 +2135,7 @@ def get_friend_invitations_sent_to_me(status, voter, read_only=True):
                     "voter_twitter_description":        "",  # To be implemented
                     "voter_twitter_followers_count":    0,  # To be implemented
                     "linked_organization_we_vote_id":   friend_voter.linked_organization_we_vote_id,
-                    "voter_state_code":                 "",  # To be implemented
+                    "state_code_for_display":           friend_voter.state_code_for_display,
                     "invitation_status":                "",  # Not used for invitations sent to me
                     "invitation_sent_to":               recipient_voter_email_dict[friend_voter.we_vote_id],
                     "invitation_table":                 invitation_table_dict[friend_voter.we_vote_id],
@@ -2163,7 +2168,7 @@ def get_friend_invitations_waiting_for_verification(status, voter):
                 "voter_twitter_handle":             "",
                 "voter_twitter_description":        "",
                 "voter_twitter_followers_count":    0,
-                "voter_state_code":                 "",
+                "state_code_for_display":           "",
                 "voter_email_address":              "",
                 "invitation_status":                scheduled_email.send_status,
                 "invitation_sent_to":               scheduled_email.recipient_voter_email,
@@ -2239,7 +2244,7 @@ def get_friend_invitations_sent_by_me(status, voter, read_only=True):
                     "voter_twitter_description":        "",  # To be implemented
                     "voter_twitter_followers_count":    0,  # To be implemented
                     "linked_organization_we_vote_id":   friend_voter.linked_organization_we_vote_id,
-                    "voter_state_code":                 "",  # To be implemented
+                    "state_code_for_display":           friend_voter.state_code_for_display,
                     "invitation_status":                invitation_status_dict[friend_voter.we_vote_id],
                     "invitation_table":                 invitation_table_dict[friend_voter.we_vote_id],
                     "invitation_sent_to":               recipient_voter_email_dict[friend_voter.we_vote_id],
@@ -2260,7 +2265,7 @@ def get_friend_invitations_sent_by_me(status, voter, read_only=True):
                         "voter_twitter_handle":             "",
                         "voter_twitter_description":        "",  # To be implemented
                         "voter_twitter_followers_count":    0,  # To be implemented
-                        "voter_state_code":                 "",  # To be implemented
+                        "state_code_for_display":           friend_voter.state_code_for_display,
                         "voter_email_address":              one_friend_invitation.recipient_voter_email,
                         "invitation_status":                one_friend_invitation.invitation_status,
                         "invitation_table":                 one_friend_invitation.invitation_table,
@@ -2320,7 +2325,7 @@ def get_suggested_friends_list(status, voter):
                 "voter_twitter_description":        "",  # To be implemented
                 "voter_twitter_followers_count":    0,  # To be implemented
                 "linked_organization_we_vote_id":   suggested_friend.linked_organization_we_vote_id,
-                "voter_state_code":                 "",  # To be implemented
+                "state_code_for_display":           suggested_friend.state_code_for_display,
                 "invitation_status":                "",  # Not used with SuggestedFriendList
                 "invitation_sent_to":               "",  # Not used with SuggestedFriendList
                 "mutual_friends":                   mutual_friends,

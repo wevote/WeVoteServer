@@ -93,6 +93,7 @@
     <div class="col-sm-8">
         <input type="text" name="vote_usa_election_id" id="vote_usa_election_id_id" class="form-control"
                value="{% if election %}{{ election.vote_usa_election_id|default_if_none:"" }}{% endif %}" />
+        {{ election.vote_usa_same_day_election_suffix_list }}
     </div>
 </div>
 

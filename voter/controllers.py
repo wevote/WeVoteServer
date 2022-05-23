@@ -7,7 +7,7 @@ from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, \
     NOTIFICATION_FRIEND_REQUESTS_EMAIL, NOTIFICATION_SUGGESTED_FRIENDS_EMAIL, \
     NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_EMAIL, NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS, \
     NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL, \
-    Voter, VoterAddressManager, \
+    Voter, VoterAddress, VoterAddressManager, \
     VoterDeviceLink, VoterDeviceLinkManager, VoterManager
 from activity.controllers import delete_activity_comments_for_voter, delete_activity_notices_for_voter, \
     delete_activity_posts_for_voter, \
@@ -70,6 +70,70 @@ from wevote_functions.functions import generate_voter_device_id, is_voter_device
 
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+
+def add_state_code_for_display_to_voter_list(voter_we_vote_id_list=[]):
+    status = ''
+    success = True
+    address_list_found = False
+    voter_list = []
+    voter_list_found = False
+
+    try:
+        voter_queryset = Voter.objects.all()
+        voter_queryset = voter_queryset.filter(state_code_for_display_updated=False)
+        if voter_we_vote_id_list and len(voter_we_vote_id_list) > 0:
+            voter_queryset = voter_queryset.filter(we_vote_id__in=voter_we_vote_id_list)
+
+        voter_list = voter_queryset[:1000]
+        voter_list_found = len(voter_list)
+    except Exception as e:
+        status += "PROBLEM_RETRIEVING_VOTER_LIST: " + str(e) + " "
+
+    address_dict_by_voter_id = {}
+    if voter_list_found:
+        updated_voter_id_list = []
+        for one_voter in voter_list:
+            updated_voter_id_list.append(one_voter.id)
+        # Now retrieve all addresses related to any of these voter_we_vote_id's
+        if updated_voter_id_list and len(updated_voter_id_list) > 0:
+            try:
+                address_queryset = VoterAddress.objects.all()
+                address_queryset = address_queryset.filter(voter_id__in=updated_voter_id_list)
+                address_queryset = address_queryset.order_by('-date_last_changed')
+
+                address_list = list(address_queryset)
+                address_list_found = len(address_list)
+                if address_list_found:
+                    for voter_address in address_list:
+                        # Only use the most recently saved address
+                        if voter_address.voter_id not in address_dict_by_voter_id:
+                            address_dict_by_voter_id[voter_address.voter_id] = voter_address
+            except Exception as e:
+                status += "PROBLEM_RETRIEVING_VOTER_ADDRESS_LIST: " + str(e) + " "
+
+    if voter_list_found and address_list_found:
+        for one_voter in voter_list:
+            one_voter_changed = False
+            if one_voter.id in address_dict_by_voter_id:
+                voter_address = address_dict_by_voter_id[one_voter.id]
+                if hasattr(voter_address, 'normalized_state') and positive_value_exists(voter_address.normalized_state):
+                    one_voter.state_code_for_display = voter_address.normalized_state
+                    one_voter.state_code_for_display_updated = True
+                    one_voter_changed = True
+                elif hasattr(voter_address, 'text_for_map_search') and \
+                        positive_value_exists(voter_address.text_for_map_search):
+                    one_voter.state_code_for_display = voter_address.get_state_code_from_text_for_map_search()
+                    one_voter.state_code_for_display_updated = True
+                    one_voter_changed = True
+            if one_voter_changed:
+                one_voter.save()
+
+    results = {
+        'status':                       status,
+        'success':                      success,
+    }
+    return results
 
 
 def delete_all_voter_information_permanently(voter_to_delete=None):  # voterDeleteAccount
