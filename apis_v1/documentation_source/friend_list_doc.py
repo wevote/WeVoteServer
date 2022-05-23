@@ -70,7 +70,7 @@ def friend_list_doc_template_values(url_root):
                    '     "voter_twitter_description": string,\n' \
                    '     "voter_twitter_followers_count": number,\n' \
                    '     "linked_organization_we_vote_id": string,\n' \
-                   '     "voter_state_code": string,\n' \
+                   '     "state_code_for_display": string,\n' \
                    '     "invitation_status": string,\n' \
                    '     "invitation_sent_to": string,\n' \
                    '     "positions_taken": number,\n' \

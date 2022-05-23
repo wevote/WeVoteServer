@@ -123,6 +123,11 @@ class Election(models.Model):
     use_google_civic_as_data_source = models.BooleanField(default=False)
     use_vote_usa_as_data_source = models.BooleanField(default=False)
     vote_usa_election_id = models.CharField(max_length=255, null=True)
+    # Vote USA election ids like this -- we collapse into one election, and put PD, PR, SA into suffix_list:
+    #  * GA20220524PD (Democratic Party Primary)
+    #  * GA20220524PR (Republican Party Primary)
+    #  * GA20220524SA (Special General)
+    vote_usa_same_day_election_suffix_list = models.CharField(max_length=255, null=True)
 
     def election_is_upcoming(self):
         if not positive_value_exists(self.election_day_text):
@@ -210,7 +215,8 @@ class ElectionManager(models.Manager):
             use_ctcl_as_data_source_by_state_code=None,
             use_google_civic_as_data_source=None,
             use_vote_usa_as_data_source=None,
-            vote_usa_election_id=None):
+            vote_usa_election_id=None,
+            vote_usa_same_day_election_suffix_list=None):
         """
         Either update or create an election entry.
         """
@@ -318,6 +324,10 @@ class ElectionManager(models.Manager):
                         election_changed = True
                     if vote_usa_election_id is not None:
                         election_on_stage.vote_usa_election_id = vote_usa_election_id
+                        election_changed = True
+                    if vote_usa_same_day_election_suffix_list is not None:
+                        election_on_stage.vote_usa_same_day_election_suffix_list = \
+                            vote_usa_same_day_election_suffix_list
                         election_changed = True
                     if election_changed:
                         election_on_stage.save()
@@ -442,7 +452,12 @@ class ElectionManager(models.Manager):
         }
         return results
 
-    def retrieve_election(self, google_civic_election_id=0, election_id=0, read_only=True):
+    def retrieve_election(
+            self,
+            google_civic_election_id=0,
+            election_id=0,
+            read_only=True,
+            vote_usa_election_id=''):
         google_civic_election_id = convert_to_int(google_civic_election_id)
 
         ctcl_uuid = ''
@@ -474,6 +489,20 @@ class ElectionManager(models.Manager):
                     election_found = False
                     status = "ELECTION_NOT_FOUND_WITH_ID "
                 success = True
+            elif positive_value_exists(vote_usa_election_id):
+                if positive_value_exists(read_only):
+                    election = Election.objects.using('readonly').get(
+                        vote_usa_election_id=vote_usa_election_id)
+                else:
+                    election = Election.objects.get(vote_usa_election_id=vote_usa_election_id)
+                if election.id:
+                    ctcl_uuid = election.ctcl_uuid
+                    election_found = True
+                    status = "ELECTION_FOUND_WITH_VOTE_USA_ELECTION_ID "
+                else:
+                    election_found = False
+                    status = "ELECTION_NOT_FOUND_WITH_VOTE_USA_ELECTION_ID "
+                success = True
             else:
                 election_found = False
                 status = "Insufficient variables included to retrieve one election."
@@ -488,12 +517,12 @@ class ElectionManager(models.Manager):
             success = True
 
         results = {
-            'success':                  success,
-            'status':                   status,
-            'election_found':           election_found,
             'ctcl_uuid':                ctcl_uuid,
-            'google_civic_election_id': google_civic_election_id,
             'election':                 election,
+            'election_found':           election_found,
+            'google_civic_election_id': google_civic_election_id,
+            'status':                   status,
+            'success':                  success,
         }
         return results
 

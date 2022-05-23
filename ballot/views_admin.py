@@ -298,6 +298,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
     state_code = request.GET.get('state_code', '')
 
     use_ctcl_as_data_source_override = False
+    election_day_text = ''
 
     ballot_returned_found = False
     ballot_returned = BallotReturned()
@@ -345,6 +346,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
         if results['election_found']:
             election_found = True
             election = results['election']
+            election_day_text = election.election_day_text
             election_state = election.get_election_state()
             if positive_value_exists(state_code) and \
                     positive_value_exists(election.use_ctcl_as_data_source_by_state_code):
@@ -466,6 +468,23 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
         election_query = election_query.order_by('-election_day_text')
         election_list = list(election_query)
 
+    try:
+        VOTE_USA_API_KEY = get_environment_variable("VOTE_USA_API_KEY", no_exception=True)
+        from import_export_vote_usa.controllers import VOTE_USA_VOTER_INFO_URL
+        vote_usa_api_url = \
+            "{url}?accessKey={accessKey}&electionDay={electionDay}" \
+            "&latitude={latitude}&longitude={longitude}" \
+            "&state={state}".format(
+                url=VOTE_USA_VOTER_INFO_URL,
+                accessKey=VOTE_USA_API_KEY,
+                electionDay=election_day_text,
+                latitude=ballot_returned.latitude,
+                longitude=ballot_returned.longitude,
+                state=ballot_returned.state_code,
+            )
+    except Exception as e:
+        vote_usa_api_url = 'FAILED: ' + str(e) + ' '
+
     template_values = {
         'messages_on_stage':            messages_on_stage,
         'ballot_returned':              ballot_returned,
@@ -488,6 +507,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id=0, ballot_returned_we
         'polling_location_state_code':  polling_location_state_code,
         'state_code':                   state_code,
         'use_ctcl_as_data_source_override': use_ctcl_as_data_source_override,
+        'vote_usa_api_url':             vote_usa_api_url,
     }
     return render(request, 'ballot/ballot_item_list_edit.html', template_values)
 

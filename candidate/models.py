@@ -2238,7 +2238,10 @@ class CandidateCampaign(models.Model):
     we_vote_hosted_profile_image_url_medium = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
 
+    flickr_url = models.TextField(blank=True, null=True)
+    go_fund_me_url = models.TextField(blank=True, null=True)
     google_plus_url = models.URLField(verbose_name='google plus url of candidate', blank=True, null=True)
+    vimeo_url = models.TextField(blank=True, null=True)
     youtube_url = models.URLField(verbose_name='youtube url of candidate', blank=True, null=True)
     # The email address for the candidate's campaign.
     candidate_email = models.CharField(verbose_name="candidate email", max_length=255, null=True, blank=True)
@@ -3613,7 +3616,7 @@ class CandidateManager(models.Manager):
             exception_multiple_object_returned = True
             handle_exception(e, logger=logger, exception_message=status)
         except Exception as e:
-            status += 'EXCEPTION_UPDATE_OR_CREATE_CANDIDATE_TO_OFFICE_LINK ' + str(e) + ' '
+            status += 'EXCEPTION_UPDATE_OR_CREATE_CANDIDATE_TO_OFFICE_LINK: ' + str(e) + ' '
             success = False
 
         if new_candidate_to_office_link_created:

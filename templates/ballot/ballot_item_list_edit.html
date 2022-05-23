@@ -163,6 +163,9 @@
             CTCL: Retrieve Ballot Items for this Map Point <span class="glyphicon glyphicon-new-window"></span></a></li>
     {% endif %}
     {% if election.use_vote_usa_as_data_source %}
+        <li>Preview: <a href="{{ vote_usa_api_url }}"
+                        target="_blank" >
+            Vote USA: View Raw API call this Map Point <span class="glyphicon glyphicon-new-window"></span></a></li>
         <li>Prepare: <a href="{% url 'import_export_batches:import_ballot_items_for_location' %}?use_vote_usa=1&google_civic_election_id={{ google_civic_election_id }}&polling_location_we_vote_id={{ polling_location_we_vote_id }}&state_code={{ state_code }}"
                         target="_blank" >
             Vote USA: Retrieve Ballot Items for this Map Point <span class="glyphicon glyphicon-new-window"></span></a></li>

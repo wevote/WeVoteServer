@@ -68,7 +68,7 @@ def friend_invite_response_doc_template_values(url_root):
                    '     "voter_twitter_handle": string,\n' \
                    '     "voter_twitter_description": string,\n' \
                    '     "voter_twitter_followers_count": number,\n' \
-                   '     "voter_state_code": string,\n' \
+                   '     "state_code_for_display": string,\n' \
                    '   },\n' \
                    '}'
 

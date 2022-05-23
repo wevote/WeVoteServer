@@ -518,6 +518,7 @@ def groom_and_store_google_civic_candidates_json_2021(
         candidate_twitter_handle = ''
         facebook_url = ''
         flickr_url = ''
+        go_fund_me_url = ''
         google_plus_url = ''
         instagram_handle = ''
         instagram_url = ''
@@ -549,22 +550,45 @@ def groom_and_store_google_civic_candidates_json_2021(
                             facebook_url = ''
                     if one_channel['type'] == 'Flickr':
                         flickr_url = one_channel['id'] if 'id' in one_channel else ''
+                        if positive_value_exists(flickr_url):
+                            if 'http' not in flickr_url:
+                                flickr_url = 'https://' + flickr_url
                     if one_channel['type'] == 'GooglePlus':
                         google_plus_url = one_channel['id'] if 'id' in one_channel else ''
+                    if one_channel['type'] == 'GoFundMe':
+                        go_fund_me_url = one_channel['id'] if 'id' in one_channel else ''
+                        if positive_value_exists(go_fund_me_url):
+                            if 'http' not in go_fund_me_url:
+                                go_fund_me_url = 'https://' + go_fund_me_url
                     if one_channel['type'] == 'Instagram':
                         instagram_handle = one_channel['id'] if 'id' in one_channel else ''
                     if one_channel['type'] == 'LinkedIn':
                         linkedin_url = one_channel['id'] if 'id' in one_channel else ''
+                        if positive_value_exists(linkedin_url):
+                            if 'http' not in linkedin_url:
+                                linkedin_url = 'https://' + linkedin_url
                     if one_channel['type'] == 'Twitter':
                         twitter_url = one_channel['id'] if 'id' in one_channel else ''
                         if positive_value_exists(twitter_url):
                             candidate_twitter_handle = extract_twitter_handle_from_text_string(twitter_url)
                     if one_channel['type'] == 'Vimeo':
                         vimeo_url = one_channel['id'] if 'id' in one_channel else ''
+                        if positive_value_exists(vimeo_url):
+                            if 'http' not in vimeo_url:
+                                vimeo_url = 'https://' + vimeo_url
                     if one_channel['type'] == 'Wikipedia':
                         wikipedia_url = one_channel['id'] if 'id' in one_channel else ''
+                        if positive_value_exists(wikipedia_url):
+                            if 'http' not in wikipedia_url:
+                                wikipedia_url = 'https://' + wikipedia_url
+                        if not positive_value_exists(ballotpedia_candidate_url):
+                            if "ballotpedia.org" in wikipedia_url:
+                                ballotpedia_candidate_url = wikipedia_url
                     if one_channel['type'] == 'YouTube':
                         youtube_url = one_channel['id'] if 'id' in one_channel else ''
+                        if positive_value_exists(youtube_url):
+                            if 'http' not in youtube_url:
+                                youtube_url = 'https://' + youtube_url
 
         # DALE 2016-02-20 It would be helpful to call a service here that disambiguated the candidate
         # ...and linked to a politician
@@ -650,6 +674,8 @@ def groom_and_store_google_civic_candidates_json_2021(
                             contest_office_we_vote_id=contest_office_we_vote_id,
                             google_civic_election_id=google_civic_election_id,
                             state_code=state_code)
+                        if not link_results['success']:
+                            status += link_results['status']
                     else:
                         status += "CANDIDATE_TO_OFFICE_LINK_MISSING-NO_CANDIDATE_WE_VOTE_ID "
                 elif candidate_results['candidate_found']:
@@ -779,8 +805,14 @@ def groom_and_store_google_civic_candidates_json_2021(
                     updated_candidate_values['contest_office_name'] = contest_office_name
                 if positive_value_exists(facebook_url):
                     updated_candidate_values['facebook_url'] = facebook_url
+                if positive_value_exists(flickr_url):
+                    updated_candidate_values['flickr_url'] = flickr_url
+                if positive_value_exists(go_fund_me_url):
+                    updated_candidate_values['go_fund_me_url'] = go_fund_me_url
                 if positive_value_exists(google_plus_url):
                     updated_candidate_values['google_plus_url'] = google_plus_url
+                if positive_value_exists(linkedin_url):
+                    updated_candidate_values['linkedin_url'] = linkedin_url
                 if positive_value_exists(order_on_ballot):
                     updated_candidate_values['order_on_ballot'] = order_on_ballot
                 if positive_value_exists(party):
@@ -793,6 +825,8 @@ def groom_and_store_google_civic_candidates_json_2021(
                     updated_candidate_values['photo_url_from_vote_usa'] = photo_url_from_vote_usa
                 if positive_value_exists(state_code):
                     updated_candidate_values['state_code'] = state_code.lower()
+                if positive_value_exists(vimeo_url):
+                    updated_candidate_values['vimeo_url'] = vimeo_url
                 if positive_value_exists(vote_usa_office_id):
                     updated_candidate_values['vote_usa_office_id'] = vote_usa_office_id
                 if positive_value_exists(vote_usa_politician_id):

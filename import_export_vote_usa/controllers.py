@@ -670,12 +670,42 @@ def store_results_from_vote_usa_api_election_query(structured_json):
     from election.models import ElectionManager
     election_manager = ElectionManager()
     for one_election in elections_list_json:
+        # If there is an existing election with the vote_usa_election_id including base and modifier,
+        #  then do not alter it at this time. May 22, 2022
+        one_result = election_manager.retrieve_election(vote_usa_election_id=one_election['id'], read_only=True)
+        if one_result['election_found']:
+            continue
+
+        # We alter the vote_usa_election_id. We collapse into one election, and put PD, PR, SA into suffix_list:
+        #  * GA20220524PD (Democratic Party Primary)
+        #  * GA20220524PR (Republican Party Primary)
+        #  * GA20220524SA (Special General)
+        election_id_base = one_election['id'][:-2]
+        election_modifier = one_election['id'][-2:]
+        one_result = election_manager.retrieve_election(vote_usa_election_id=election_id_base, read_only=True)
+        if one_result['election_found']:
+            election = one_result['election']
+            if positive_value_exists(election.vote_usa_same_day_election_suffix_list):
+                vote_usa_same_day_election_suffix_list = election.vote_usa_same_day_election_suffix_list.split(",")
+            else:
+                vote_usa_same_day_election_suffix_list = []
+        else:
+            vote_usa_same_day_election_suffix_list = []
+        if election_modifier not in vote_usa_same_day_election_suffix_list:
+            vote_usa_same_day_election_suffix_list.append(election_modifier)
+
+        if len(vote_usa_same_day_election_suffix_list):
+            vote_usa_same_day_election_suffix_list_string = ",".join(vote_usa_same_day_election_suffix_list)
+        else:
+            vote_usa_same_day_election_suffix_list_string = None
+
         results = election_manager.update_or_create_election(
             election_day_text=one_election['electionDay'],
             election_name=one_election['name'],
             election_name_do_not_override=True,
             state_code=one_election['state'],
             use_vote_usa_as_data_source=True,
-            vote_usa_election_id=one_election['id'])
+            vote_usa_election_id=election_id_base,
+            vote_usa_same_day_election_suffix_list=vote_usa_same_day_election_suffix_list_string)
 
     return results
