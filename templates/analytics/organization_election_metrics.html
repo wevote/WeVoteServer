@@ -22,10 +22,11 @@
     <select id="google_civic_election_id" name="google_civic_election_id">
         <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
             -- Filter by Election --</option>
-        {% for election in election_list %}
-        <option value="{{ election.google_civic_election_id }}"
-                {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
-            {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
+        {% for one_election in election_list %}
+        <option value="{{ one_election.google_civic_election_id }}"
+                {% if one_election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+            {% if one_election.state_code %}{{ one_election.state_code }} {% endif %}
+            {{ one_election.election_day_text }}: {{ one_election.election_name }} - {{ one_election.google_civic_election_id }}</option>
         {% endfor %}
     </select>
     {% endif %}{# End of if election_list #}
