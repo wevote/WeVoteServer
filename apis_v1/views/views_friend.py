@@ -153,6 +153,7 @@ def friend_invitation_information_view(request):  # friendInvitationInformation
         'voter_device_id':                  voter_device_id,
         'friend_first_name':                results['friend_first_name'],
         'friend_last_name':                 results['friend_last_name'],
+        'friend_image_url_https_large':     results['friend_image_url_https_large'],
         'friend_image_url_https_tiny':      results['friend_image_url_https_tiny'],
         'friend_issue_we_vote_id_list':     results['friend_issue_we_vote_id_list'],
         'friend_we_vote_id':                results['friend_we_vote_id'],

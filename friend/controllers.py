@@ -789,6 +789,7 @@ def friend_invitation_information_for_api(voter_device_id, invitation_secret_key
     sender_voter_we_vote_id = ''
     friend_first_name = ''
     friend_last_name = ''
+    friend_image_url_https_large = ''
     friend_image_url_https_tiny = ''
     friend_issue_we_vote_id_list = []
     friend_we_vote_id = ''
@@ -807,6 +808,7 @@ def friend_invitation_information_for_api(voter_device_id, invitation_secret_key
             'voter_device_id':          voter_device_id,
             'friend_first_name':        '',
             'friend_last_name':         '',
+            'friend_image_url_https_large': '',
             'friend_image_url_https_tiny': '',
             'friend_issue_we_vote_id_list': [],
             'friend_we_vote_id':        '',
@@ -826,6 +828,7 @@ def friend_invitation_information_for_api(voter_device_id, invitation_secret_key
             'voter_device_id':                              voter_device_id,
             'friend_first_name':        '',
             'friend_last_name':         '',
+            'friend_image_url_https_large': '',
             'friend_image_url_https_tiny': '',
             'friend_issue_we_vote_id_list': [],
             'friend_we_vote_id':        '',
@@ -848,6 +851,7 @@ def friend_invitation_information_for_api(voter_device_id, invitation_secret_key
             'voter_device_id':                              voter_device_id,
             'friend_first_name':        '',
             'friend_last_name':         '',
+            'friend_image_url_https_large': '',
             'friend_image_url_https_tiny': '',
             'friend_issue_we_vote_id_list': [],
             'friend_we_vote_id':        '',
@@ -872,6 +876,7 @@ def friend_invitation_information_for_api(voter_device_id, invitation_secret_key
             'voter_device_id':          voter_device_id,
             'friend_first_name':        '',
             'friend_last_name':         '',
+            'friend_image_url_https_large': '',
             'friend_image_url_https_tiny': '',
             'friend_issue_we_vote_id_list': [],
             'friend_we_vote_id':        '',
@@ -897,6 +902,7 @@ def friend_invitation_information_for_api(voter_device_id, invitation_secret_key
                 'voter_device_id':          voter_device_id,
                 'friend_first_name':        '',
                 'friend_last_name':         '',
+                'friend_image_url_https_large': '',
                 'friend_image_url_https_tiny': '',
                 'friend_issue_we_vote_id_list': [],
                 'friend_we_vote_id':        '',
@@ -916,6 +922,7 @@ def friend_invitation_information_for_api(voter_device_id, invitation_secret_key
                 'voter_device_id':          voter_device_id,
                 'friend_first_name':        '',
                 'friend_last_name':         '',
+                'friend_image_url_https_large': '',
                 'friend_image_url_https_tiny': '',
                 'friend_issue_we_vote_id_list': [],
                 'friend_we_vote_id':        '',
@@ -942,6 +949,7 @@ def friend_invitation_information_for_api(voter_device_id, invitation_secret_key
                 'voter_device_id': voter_device_id,
                 'friend_first_name': '',
                 'friend_last_name': '',
+                'friend_image_url_https_large': '',
                 'friend_image_url_https_tiny': '',
                 'friend_issue_we_vote_id_list': [],
                 'friend_we_vote_id': '',
@@ -960,6 +968,7 @@ def friend_invitation_information_for_api(voter_device_id, invitation_secret_key
             voter_friend = voter_friend_results['voter']
             friend_first_name = voter_friend.first_name
             friend_last_name = voter_friend.last_name
+            friend_image_url_https_large = voter_friend.we_vote_hosted_profile_image_url_large
             friend_image_url_https_tiny = voter_friend.we_vote_hosted_profile_image_url_tiny
             friend_organization_we_vote_id = voter_friend.linked_organization_we_vote_id
 
@@ -979,6 +988,7 @@ def friend_invitation_information_for_api(voter_device_id, invitation_secret_key
         'voter_device_id':                  voter_device_id,
         'friend_first_name':                friend_first_name,
         'friend_last_name':                 friend_last_name,
+        'friend_image_url_https_large':     friend_image_url_https_large,
         'friend_image_url_https_tiny':      friend_image_url_https_tiny,
         'friend_issue_we_vote_id_list':     friend_issue_we_vote_id_list,
         'friend_we_vote_id':                friend_we_vote_id,
