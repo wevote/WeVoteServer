@@ -48,6 +48,7 @@ def friend_invitation_information_doc_template_values(url_root):
                    '  "voter_device_id": string (88 characters long),\n' \
                    '  "friend_first_name": string,\n' \
                    '  "friend_last_name": string,\n' \
+                   '  "friend_image_url_https_large": string,\n' \
                    '  "friend_image_url_https_tiny": string,\n' \
                    '  "friend_issue_we_vote_id_list": list,\n' \
                    '  "friend_we_vote_id": string,\n' \
