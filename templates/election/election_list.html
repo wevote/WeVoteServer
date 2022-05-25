@@ -95,7 +95,7 @@
         {% endif %}
             <th>State(s)</th>
         {% if not is_national_election %}
-            <th>Google Civic ID</th>
+            <th>Election ID</th>
         {% endif %}
             <th align="middle">
                 Offices
@@ -104,11 +104,11 @@
               (w/o Candidates)
               {% endif %}
             </th>
-        {% if is_national_election %}
+        {% if is_national_election or show_election_statistics %}
             <th>Last Refresh</th>
             <th>Refresh Added to Queue</th>
-            <th>Last Election</th>
-            <th>Next Election</th>
+{#            <th>Last Election</th>#}
+{#            <th>Next Election</th>#}
         {% endif %}
         {% if show_election_statistics %}
             <th align="middle">Candidates<br />
@@ -172,7 +172,10 @@
               {% endif %}
             </td>
         {% if not is_national_election %}
-            <td align="middle">{{ election.google_civic_election_id }}</td>
+            <td align="middle">
+                {{ election.google_civic_election_id }}
+                {% if election.vote_usa_election_id %} / {{ election.vote_usa_election_id }}{% endif %}
+            </td>
         {% endif %}
             <td align="middle">
             {% if not show_election_statistics and election.office_count %}
@@ -188,7 +191,7 @@
                 <span style="color: darkgray">({{ election.offices_without_candidates_count|default_if_none:"" }})</span>
             {% endif %}
             </td>
-        {% if is_national_election %}{# Last Retrieve / Refresh #}
+        {% if is_national_election or show_election_statistics %} {# Last Retrieve / Refresh #}
             <td>
 {#                {% if election.retrieve_date_completed %}#}
 {#                    retrieve: {{ election.retrieve_date_completed }}#}
@@ -220,22 +223,22 @@
                 </span>
                 {% endif %}
             </td>
-            <td>
-            {% if election.prior_election_in_state and election.prior_election_in_state.election_day_text %}
-                {{ election.prior_election_in_state_date|date:"N j, Y" }}
-            {% endif %}
-            </td>
-            <td>
-            {% if election.next_election_in_state and election.next_election_in_state.election_day_text %}
-                {% if election.next_election_in_state.election_day_text == election.election_day_text %}
-                <span style="color: darkgray">
-                    This election
-                </span>
-                {% else %}
-                    {{ election.next_election_in_state_date|date:"N j, Y" }}
-                {% endif %}
-            {% endif %}
-            </td>
+{#            <td>#}
+{#            {% if election.prior_election_in_state and election.prior_election_in_state.election_day_text %}#}
+{#                {{ election.prior_election_in_state_date|date:"N j, Y" }}#}
+{#            {% endif %}#}
+{#            </td>#}
+{#            <td>#}
+{#            {% if election.next_election_in_state and election.next_election_in_state.election_day_text %}#}
+{#                {% if election.next_election_in_state.election_day_text == election.election_day_text %}#}
+{#                <span style="color: darkgray">#}
+{#                    This election#}
+{#                </span>#}
+{#                {% else %}#}
+{#                    {{ election.next_election_in_state_date|date:"N j, Y" }}#}
+{#                {% endif %}#}
+{#            {% endif %}#}
+{#            </td>#}
         {% endif %}
         {% if show_election_statistics %}
             <td align="middle">

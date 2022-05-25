@@ -897,6 +897,9 @@ def election_list_view(request):
         new_filter = Q(state_code__icontains=election_search)
         filters.append(new_filter)
 
+        new_filter = Q(vote_usa_election_id__iexact=election_search)
+        filters.append(new_filter)
+
         # Add the first query
         if len(filters):
             final_filters = filters.pop()
@@ -911,6 +914,7 @@ def election_list_view(request):
     election_list_modified = []
     ballot_returned_list_manager = BallotReturnedListManager()
     candidate_list_manager = CandidateListManager()
+    data_stale_if_older_than = now() - timedelta(days=30)
     for election in election_list:
         if positive_value_exists(election.election_day_text):
             try:
@@ -1000,6 +1004,110 @@ def election_list_view(request):
             # As of Aug 2018 we are no longer using PERCENT_RATING
             position_query = position_query.exclude(stance__iexact='PERCENT_RATING')
             election.public_positions_count = position_query.count()
+
+            # ############################
+            # Figure out the last dates we retrieved data
+            refresh_date_started = None
+            refresh_date_completed = None
+            retrieve_date_started = None
+            retrieve_date_completed = None
+            try:
+                batch_process_queryset = BatchProcess.objects.all()
+                batch_process_queryset = \
+                    batch_process_queryset.filter(google_civic_election_id=election.google_civic_election_id)
+                batch_process_queryset = batch_process_queryset.filter(date_started__isnull=False)
+                batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)
+                ballot_item_processes = [
+                    'REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS',
+                    'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS']
+                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=ballot_item_processes)
+                batch_process_queryset = batch_process_queryset.order_by("-id")
+
+                batch_process_queryset = batch_process_queryset[:3]
+                batch_process_list = list(batch_process_queryset)
+
+                if len(batch_process_list):
+                    for one_batch_process in batch_process_list:
+                        if one_batch_process.kind_of_process == 'REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS':
+                            if not refresh_date_completed and one_batch_process.date_completed:
+                                refresh_date_completed = one_batch_process.date_completed
+                            if not refresh_date_started and one_batch_process.date_started:
+                                refresh_date_started = one_batch_process.date_started
+                        elif one_batch_process.kind_of_process == 'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS':
+                            if not retrieve_date_completed and one_batch_process.date_completed:
+                                retrieve_date_completed = one_batch_process.date_completed
+                            if not retrieve_date_started and one_batch_process.date_started:
+                                retrieve_date_started = one_batch_process.date_started
+                        # if refresh_date_completed and retrieve_date_completed:
+                        #     break  # Break out of this batch_process loop only
+            except BatchProcess.DoesNotExist:
+                # No offices found. Not a problem.
+                batch_process_list = []
+            except Exception as e:
+                pass
+
+            # Upcoming refresh date scheduled?
+            refresh_date_added_to_queue = None
+            try:
+                batch_process_queryset = BatchProcess.objects.all()
+                batch_process_queryset = \
+                    batch_process_queryset.filter(google_civic_election_id=election.google_civic_election_id)
+                batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
+                batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)
+                ballot_item_processes = [
+                    'REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS']
+                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=ballot_item_processes)
+                batch_process_queryset = batch_process_queryset.order_by("-id")
+
+                batch_process_queryset = batch_process_queryset[:3]
+                batch_process_list = list(batch_process_queryset)
+
+                if len(batch_process_list):
+                    for one_batch_process in batch_process_list:
+                        if one_batch_process.kind_of_process == 'REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS':
+                            if not refresh_date_added_to_queue and one_batch_process.date_added_to_queue:
+                                refresh_date_added_to_queue = one_batch_process.date_added_to_queue
+            except BatchProcess.DoesNotExist:
+                # No offices found. Not a problem.
+                batch_process_list = []
+            except Exception as e:
+                pass
+
+            # election_for_one_state = copy.deepcopy(national_election)
+            election.refresh_date_completed = refresh_date_completed
+            election.refresh_date_started = refresh_date_started
+            election.refresh_date_added_to_queue = refresh_date_added_to_queue
+            election.retrieve_date_completed = retrieve_date_completed
+            election.retrieve_date_started = retrieve_date_started
+
+            if refresh_date_completed:
+                most_recent_time = refresh_date_completed
+            elif refresh_date_started:
+                most_recent_time = refresh_date_started
+            elif retrieve_date_completed:
+                most_recent_time = retrieve_date_completed
+            elif retrieve_date_started:
+                most_recent_time = retrieve_date_started
+            else:
+                most_recent_time = None
+
+            if most_recent_time:
+                if refresh_date_completed and refresh_date_completed > most_recent_time:
+                    most_recent_time = refresh_date_completed
+                if refresh_date_started and refresh_date_started > most_recent_time:
+                    most_recent_time = refresh_date_started
+                if retrieve_date_completed and retrieve_date_completed > most_recent_time:
+                    most_recent_time = retrieve_date_completed
+                if retrieve_date_started and retrieve_date_started > most_recent_time:
+                    most_recent_time = retrieve_date_started
+
+                if most_recent_time > data_stale_if_older_than:
+                    election.data_getting_stale = False
+                else:
+                    election.data_getting_stale = True
+            else:
+                election.data_getting_stale = True
+
         if positive_value_exists(refresh_states):
             if election and positive_value_exists(election.google_civic_election_id) \
                     and hasattr(election, 'state_code_list_raw'):
@@ -1081,12 +1189,12 @@ def nationwide_election_list_view(request):
             if not positive_value_exists(is_national_election):
                 national_election = None
 
+    data_stale_if_older_than = now() - timedelta(days=30)
     if is_national_election:
         from election.models import fetch_next_election_for_state, fetch_prior_election_for_state
         state_list = STATE_CODE_MAP
         election_list = []
         cached_national_election_list = False
-        data_stale_if_older_than = now() - timedelta(days=30)
         for one_state_code, one_state_name in state_list.items():
             # ############################
             # Figure out the last dates we retrieved data for this state
