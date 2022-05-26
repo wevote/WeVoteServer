@@ -314,11 +314,14 @@ class CandidateListManager(models.Manager):
 
         if candidate_list_found and len(office_we_vote_id_list_by_candidate_we_vote_id):
             for candidate in candidate_list_objects:
+                try:
+                    office_we_vote_id = office_we_vote_id_list_by_candidate_we_vote_id[candidate.we_vote_id]
+                except Exception as e:
+                    office_we_vote_id = ''
                 one_candidate = {
                     'ballot_item_display_name': candidate.display_candidate_name(),
                     'candidate_we_vote_id':     candidate.we_vote_id,
-                    'office_we_vote_id':
-                        office_we_vote_id_list_by_candidate_we_vote_id[candidate.we_vote_id],
+                    'office_we_vote_id':        office_we_vote_id,
                     'measure_we_vote_id':       '',
                 }
                 candidate_list_light.append(one_candidate.copy())
@@ -441,11 +444,14 @@ class CandidateListManager(models.Manager):
             success = False
 
         for candidate in candidate_list_objects:
+            try:
+                office_we_vote_id = office_we_vote_id_list_by_candidate_we_vote_id[candidate.we_vote_id]
+            except Exception as e:
+                office_we_vote_id = ''
             one_candidate = {
                 'ballot_item_display_name': candidate.display_candidate_name(),
                 'candidate_we_vote_id':     candidate.we_vote_id,
-                'office_we_vote_id':
-                    office_we_vote_id_list_by_candidate_we_vote_id[candidate.we_vote_id],
+                'office_we_vote_id':        office_we_vote_id,
                 'measure_we_vote_id':       '',
             }
             alternate_names = candidate.display_alternate_names_list()
