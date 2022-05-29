@@ -84,7 +84,7 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
     voter_can_vote_for_politician_we_vote_ids = []
     # TODO: Creates excessive slow-down. We need a more optimized solution.
     # if voter_can_vote_for_politicians_list_returned:
-    #     # We need to know all of the politicians this voter can vote for so we can figure out
+    #     # We need to know all the politicians this voter can vote for so we can figure out
     #     #  if the voter can vote for any politicians in the election
     #     from ballot.controllers import what_voter_can_vote_for
     #     results = what_voter_can_vote_for(request=request, voter_device_id=voter_device_id)
@@ -732,7 +732,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
         campaignx_we_vote_id=campaignx.we_vote_id,
     )
 
-    # We need to know all of the politicians this voter can vote for so we can figure out
+    # We need to know all the politicians this voter can vote for so we can figure out
     #  if the voter can vote for any politicians in the election
     from ballot.controllers import what_voter_can_vote_for
     results = what_voter_can_vote_for(request=request, voter_device_id=voter_device_id)

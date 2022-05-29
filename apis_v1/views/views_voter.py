@@ -36,7 +36,8 @@ from support_oppose_deciding.controllers import voter_opposing_save, voter_stop_
 from voter.controllers import voter_address_retrieve_for_api, voter_create_for_api, voter_merge_two_accounts_for_api, \
     voter_merge_two_accounts_action, voter_photo_save_for_api, voter_retrieve_for_api, \
     voter_save_photo_from_file_reader, voter_sign_out_for_api, voter_split_into_two_accounts_for_api
-from voter.controllers_contacts import delete_google_contacts, save_google_contacts, voter_contact_list_retrieve_for_api
+from voter.controllers_contacts import delete_all_voter_contact_emails_for_voter, save_google_contacts, \
+    voter_contact_list_retrieve_for_api
 from voter.models import BALLOT_ADDRESS, fetch_voter_we_vote_id_from_voter_device_link, \
     PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, PROFILE_IMAGE_TYPE_UPLOADED, \
     VoterAddress, VoterAddressManager, VoterDeviceLink, VoterDeviceLinkManager, VoterManager, Voter, \
@@ -1446,7 +1447,7 @@ def voter_plan_save_view(request):  # voterPlanSave
 
 def voter_position_retrieve_view(request):
     """
-    Retrieve all of the details about a single position based on unique identifier. voterPositionRetrieve
+    Retrieve all the details about a single position based on unique identifier. voterPositionRetrieve
     :param request:
     :return:
     """
@@ -1993,7 +1994,7 @@ def voter_bookmark_status_retrieve_view(request):
 
 def voter_all_bookmarks_status_retrieve_view(request):  # voterAllBookmarksStatusRetrieve
     """
-    A list of all of the bookmarks that the voter has marked.
+    A list of all the bookmarks that the voter has marked.
     :param request:
     :return:
     """
@@ -3055,11 +3056,12 @@ def voter_contact_list_save_view(request):  # voterContactListSave
 
     status, voter, voter_found, voter_device_link = views_voter_utils.get_voter_from_request(request, status)
     contacts_string = request.POST.get('contacts', None)
-    delete_from_google_people_api = request.POST.get('delete_from_google_people_api', False)
+    delete_all_voter_contact_emails = request.POST.get('delete_all_voter_contact_emails', False)
+    google_api_key_type = request.POST.get('google_api_key_type', 'ballot')
 
-    if positive_value_exists(delete_from_google_people_api):
-        results = delete_google_contacts(voter_we_vote_id=voter.we_vote_id)
-    elif hasattr(voter, 'we_vote_id'):
+    if positive_value_exists(delete_all_voter_contact_emails):
+        results = delete_all_voter_contact_emails_for_voter(voter_we_vote_id=voter.we_vote_id)
+    elif hasattr(voter, 'we_vote_id') and contacts_string:
         contacts = json.loads(contacts_string)
         contacts_stored = len(contacts)
         results = save_google_contacts(voter_we_vote_id=voter.we_vote_id, contacts=contacts)

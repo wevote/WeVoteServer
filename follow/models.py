@@ -636,7 +636,7 @@ class FollowMetricsManager(models.Manager):
                         timezone = pytz.timezone("America/Los_Angeles")
                         date_of_election = timezone.localize(datetime.strptime(election.election_day_text, "%Y-%m-%d"))
                         date_of_election += timedelta(days=1)  # Add one day, to catch the entire election day
-                        # Find all of the follow entries before or on the day of the election
+                        # Find all the follow entries before or on the day of the election
                         count_query = count_query.filter(date_last_changed__lte=date_of_election)
                 else:
                     # Failed retrieving date, so we return 0
@@ -685,7 +685,7 @@ class FollowMetricsManager(models.Manager):
 
 class FollowIssueList(models.Model):
     """
-    A way to retrieve all of the follow_issue information
+    A way to retrieve all the follow_issue information
     """
 
     def fetch_follow_issue_count_by_issue_we_vote_id(self, issue_we_vote_id):
@@ -1237,7 +1237,7 @@ class FollowOrganizationManager(models.Manager):
 
 class FollowOrganizationList(models.Model):
     """
-    A way to retrieve all of the follow_organization information
+    A way to retrieve all the follow_organization information
     """
 
     def fetch_follow_organization_by_voter_id_count(self, voter_id):

@@ -139,7 +139,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     """
     Reach out to Google and retrieve (for one election):
     1) Polling locations (so we can use those addresses to retrieve a representative set of ballots)
-    2) Cycle through a portion of those map points, enough that we are caching all of the possible ballot items
+    2) Cycle through a portion of those map points, enough that we are caching all the possible ballot items
     :param request:
     :param election_local_id:
     :return:
@@ -241,7 +241,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
                     ballot_returned_id = ballot_returned.id
                     # NOTE: This routine won't work because we are caching new ballot items, so they aren't
                     #  ready to copy here
-                    # # Now refresh all of the other copies of this ballot
+                    # # Now refresh all the other copies of this ballot
                     # if positive_value_exists(polling_location.we_vote_id) \
                     #         and positive_value_exists(google_civic_election_id):
                     #     refresh_ballot_results = refresh_voter_ballots_from_polling_location(
@@ -451,7 +451,7 @@ def election_one_ballot_retrieve_view(request, election_local_id=0):
             if store_one_ballot_results['ballot_returned_found']:
                 ballot_returned = store_one_ballot_results['ballot_returned']
                 ballot_returned_id = ballot_returned.id
-                # Now refresh all of the other copies of this ballot
+                # Now refresh all the other copies of this ballot
                 # DALE NOTE Feb 2020 I don't think this is correct
                 # if positive_value_exists(polling_location_we_vote_id) \
                 #         and positive_value_exists(google_civic_election_id):

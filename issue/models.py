@@ -615,7 +615,7 @@ class OrganizationLinkToIssue(models.Model):
 
 
 class OrganizationLinkToIssueList(models.Manager):
-    # A way to retrieve all of the organization and issue linking information
+    # A way to retrieve all the organization and issue linking information
 
     def retrieve_issue_list_by_organization_we_vote_id(
             self,

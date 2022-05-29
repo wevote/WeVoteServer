@@ -1863,7 +1863,7 @@ def organizations_import_from_structured_json(structured_json):
                     organization_name=one_organization["organization_name"],
                 )
 
-            # Now save all of the fields in common to updating an existing entry vs. creating a new entry
+            # Now save all the fields in common to updating an existing entry vs. creating a new entry
             if organization_website is not False:
                 organization_on_stage.organization_website = organization_website
             if organization_email is not False:

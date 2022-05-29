@@ -220,7 +220,7 @@ def position_list_for_voter_view(request):  # positionListForVoter
 
 def position_retrieve_view(request):
     """
-    Retrieve all of the details about a single position based on unique identifier (positionRetrieve)
+    Retrieve all the details about a single position based on unique identifier (positionRetrieve)
     :param request:
     :return:
     """

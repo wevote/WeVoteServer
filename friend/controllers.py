@@ -520,7 +520,7 @@ def friend_invitation_by_email_send_for_api(voter_device_id,  # friendInvitation
             status += send_results['status']
 
     else:
-        # Break apart all of the emails in email_addresses_raw input from the voter
+        # Break apart all the emails in email_addresses_raw input from the voter
         results = email_manager.parse_raw_emails_into_list(email_addresses_raw)
         if results['at_least_one_email_found']:
             raw_email_list_to_invite = results['email_list']
@@ -2658,7 +2658,7 @@ def move_friend_invitations_to_another_voter(from_voter_we_vote_id, to_voter_we_
         for from_sender_entry in friend_invitation_email_link_from_sender_list:
             # See if the "to_voter" already has an invitation
             to_sender_invitation_found = False
-            # Cycle through all of the "to_voter" entries and if there isn't one, move it
+            # Cycle through all the "to_voter" entries and if there isn't one, move it
             for to_sender_entry in friend_invitation_email_link_to_sender_list:
                 if to_sender_entry.recipient_voter_email == from_sender_entry.recipient_voter_email:
                     to_sender_invitation_found = True
@@ -2697,7 +2697,7 @@ def move_friend_invitations_to_another_voter(from_voter_we_vote_id, to_voter_we_
         for from_sender_entry in friend_invitation_voter_link_from_sender_list:
             # See if the "to_voter" already has an invitation
             to_sender_invitation_found = False
-            # Cycle through all of the "to_voter" entries and if there isn't one, move it
+            # Cycle through all the "to_voter" entries and if there isn't one, move it
             for to_sender_entry in friend_invitation_voter_link_to_sender_list:
                 if to_sender_entry.recipient_voter_we_vote_id == from_sender_entry.recipient_voter_we_vote_id:
                     to_sender_invitation_found = True
@@ -2735,7 +2735,7 @@ def move_friend_invitations_to_another_voter(from_voter_we_vote_id, to_voter_we_
         for from_sender_entry in friend_invitation_voter_link_from_recipient_list:
             # See if the "to_voter" already has an invitation
             to_sender_invitation_found = False
-            # Cycle through all of the "to_voter" entries and if there isn't one, move it
+            # Cycle through all the "to_voter" entries and if there isn't one, move it
             for to_sender_entry in friend_invitation_voter_link_to_recipient_list:
                 if to_sender_entry.sender_voter_we_vote_id == from_sender_entry.sender_voter_we_vote_id:
                     to_sender_invitation_found = True
@@ -2815,7 +2815,7 @@ def move_friends_to_another_voter(
         # See if the "to_voter" already has a matching entry
         to_friend_found = False
         from_friend_other_friend = from_friend_entry.fetch_other_voter_we_vote_id(from_voter_we_vote_id)
-        # Cycle through all of the "to_voter" current_friend entries and if there isn't one, create it
+        # Cycle through all the "to_voter" current_friend entries and if there isn't one, create it
         for to_friend_entry in to_friend_list:
             to_friend_other_friend = to_friend_entry.fetch_other_voter_we_vote_id(to_voter_we_vote_id)
             if to_friend_other_friend == from_friend_other_friend:
@@ -2901,7 +2901,7 @@ def move_suggested_friends_to_another_voter(
         # See if the "to_voter" already has a matching entry
         to_friend_found = False
         from_friend_other_friend = from_friend_entry.fetch_other_voter_we_vote_id(from_voter_we_vote_id)
-        # Cycle through all of the "to_voter" current_friend entries and if there isn't one, create it
+        # Cycle through all the "to_voter" current_friend entries and if there isn't one, create it
         for to_friend_entry in to_friend_list:
             to_friend_other_friend = to_friend_entry.fetch_other_voter_we_vote_id(to_voter_we_vote_id)
             if to_friend_other_friend == from_friend_other_friend:

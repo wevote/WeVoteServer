@@ -247,7 +247,7 @@ class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
                              organization_id=json_data17['organization_id']))
 
         #######################################
-        # Add an organization so we can test all of the 'follow' states
+        # Add an organization so we can test all the 'follow' states
         organization1 = Organization.objects.create_organization_simple(
             organization_name="Org1",
             organization_website="www.org1.org",

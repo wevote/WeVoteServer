@@ -49,7 +49,7 @@ def login_complete_view(request):
             return HttpResponseRedirect(reverse('admin_tools:admin_home', args=()))
 
         # TODO Write the Twitter or Facebook information to the voter table so we can access it via the APIs
-        # Currently all of the twitter authentication for Django is in the separate social_auth* tables
+        # Currently all the twitter authentication for Django is in the separate social_auth* tables
 
         # Relink this voter_api_device_id to this Voter account
         voter_device_manager = VoterDeviceLinkManager()
@@ -752,7 +752,7 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
         )
         sms_phone_numbers_list = list(sms_phone_numbers_query)
 
-        # Do some checks on all of the public positions owned by this voter
+        # Do some checks on all the public positions owned by this voter
         position_filters = []
         new_filter = Q(voter_we_vote_id__iexact=voter_on_stage.we_vote_id)
         position_filters.append(new_filter)

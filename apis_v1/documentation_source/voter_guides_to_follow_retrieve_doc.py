@@ -30,7 +30,7 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
             'name':         'ballot_item_we_vote_id',
             'value':        'string',  # boolean, integer, long, string
             'description':  'The unique identifier for a particular ballot item. If this variable is provided, '
-                            'we want to retrieve all of the voter guides that have something to say about this '
+                            'we want to retrieve all the voter guides that have something to say about this '
                             'particular ballot item.',
         },
         {

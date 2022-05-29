@@ -21,7 +21,7 @@ def reaction_like_status_retrieve_doc_template_values(url_root):
         {
             'name':         'liked_item_we_vote_id_list[]',
             'value':        'stringlist',  # boolean, integer, long, string
-            'description':  'Get all of the likes for all liked_item_we_vote_id\'s in this list.',
+            'description':  'Get all the likes for all liked_item_we_vote_id\'s in this list.',
         },
     ]
     optional_query_parameter_list = [

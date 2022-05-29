@@ -1108,7 +1108,7 @@ class VoterManager(BaseUserManager):
             # Is there an official FacebookLinkToVoter for this Twitter account? If so, update the information.
             facebook_link_to_voter = facebook_link_results['facebook_link_to_voter']
 
-            # Loop through all of the voters that have any of these fields set:
+            # Loop through all the voters that have any of these fields set:
             # - voter.facebook_id
             # - voter.fb_username -- possibly in future. Not supported now
             try:
@@ -1233,7 +1233,7 @@ class VoterManager(BaseUserManager):
             else:
                 twitter_user = twitter_results['twitter_user']
 
-                # Loop through all of the voters that have any of these fields set:
+                # Loop through all the voters that have any of these fields set:
                 # - voter.twitter_id
                 # - voter.twitter_screen_name
                 try:
@@ -2992,7 +2992,7 @@ class Voter(AbstractBaseUser):
     #  to the latest defaults, for example
     # For example, have we updated a voter's notification_settings_flags after adding new feature?
     # We update the default value for maintenance_status_flags for new voters with MAINTENANCE_STATUS_FLAGS_COMPLETED
-    #  since we updated the NOTIFICATION_SETTINGS_FLAGS_DEFAULT to match what we want after all of the maintenance
+    #  since we updated the NOTIFICATION_SETTINGS_FLAGS_DEFAULT to match what we want after all the maintenance
     #  tasks have run.
     # As all previous voters are updated with the newest NOTIFICATION_SETTINGS defaults,
     #  we AND maintenance_status_flags with the new MAINTENANCE_STATUS_FLAGS_TASK_... so it ends up matching
@@ -4107,7 +4107,7 @@ def voter_has_authority(request, authority_required, authority_results=None):
 
 # class VoterJurisdictionLink(models.Model):
 #     """
-#     All of the jurisdictions the Voter is in
+#     all the jurisdictions the Voter is in
 #     """
 #     voter = models.ForeignKey(Voter, null=False, blank=False, verbose_name='voter')
 #     jurisdiction = models.ForeignKey(Jurisdiction,

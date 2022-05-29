@@ -106,7 +106,7 @@ def find_and_merge_duplicate_measures_view(request):
     except ContestMeasure.DoesNotExist:
         pass
 
-    # Loop through all of the measures in this election to see how many have possible duplicates
+    # Loop through all the measures in this election to see how many have possible duplicates
     if positive_value_exists(find_number_of_duplicates):
         duplicate_measure_count = 0
         for contest_measure in contest_measure_list:
@@ -122,7 +122,7 @@ def find_and_merge_duplicate_measures_view(request):
                                                          "possible duplicates."
                                                          "".format(duplicate_measure_count=duplicate_measure_count))
 
-    # Loop through all of the contest measures in this election
+    # Loop through all the contest measures in this election
     ignore_measure_we_vote_id_list = []
     for contest_measure in contest_measure_list:
         # Add current contest measure entry to the ignore list

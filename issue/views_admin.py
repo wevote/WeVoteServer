@@ -882,7 +882,7 @@ def issue_partisan_analysis_view(request):
         voter_guide_list = results['voter_guide_list']
         for one_voter_guide in voter_guide_list:
             organization_we_vote_id_in_this_election_list.append(one_voter_guide.organization_we_vote_id)
-        # Retrieve all of the linkages between organizations and issues
+        # Retrieve all the linkages between organizations and issues
         if positive_value_exists(len(organization_we_vote_id_in_this_election_list)):
             organization_link_to_issue_list_query = OrganizationLinkToIssue.objects.all()
             organization_link_to_issue_list_query = organization_link_to_issue_list_query.filter(

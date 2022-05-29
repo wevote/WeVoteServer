@@ -63,6 +63,7 @@ from share.controllers import move_shared_items_to_another_voter
 from sms.controllers import delete_sms_phone_number_entries_for_voter, move_sms_phone_number_entries_to_another_voter
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
 from validate_email import validate_email
+from voter.controllers_contacts import delete_all_voter_contact_emails_for_voter
 from voter_guide.controllers import delete_voter_guides_for_voter, duplicate_voter_guides, \
     move_voter_guides_to_another_voter
 import wevote_functions.admin
@@ -279,6 +280,11 @@ def delete_all_voter_information_permanently(voter_to_delete=None):  # voterDele
     delete_activity_comment_results = delete_activity_comments_for_voter(
         voter_to_delete_we_vote_id, voter_to_delete_linked_organization_we_vote_id)
     status += " " + delete_activity_comment_results['status']
+
+    # Delete VoterContactEmail entries
+    delete_voter_contact_email_results = delete_all_voter_contact_emails_for_voter(
+        voter_we_vote_id=voter_to_delete_we_vote_id)
+    status += " " + delete_voter_contact_email_results['status']
 
     # Delete Analytics information
     delete_analytics_results = delete_analytics_info_for_voter(voter_to_delete_we_vote_id)
@@ -702,7 +708,7 @@ def email_ballot_data_for_api(voter_device_id, email_address_array, first_name_a
             status += send_results['status']
 
     else:
-        # Break apart all of the emails in email_addresses_raw input from the voter
+        # Break apart all the emails in email_addresses_raw input from the voter
         results = email_manager.parse_raw_emails_into_list(email_addresses_raw)
         if results['at_least_one_email_found']:
             raw_email_list_to_invite = results['email_list']

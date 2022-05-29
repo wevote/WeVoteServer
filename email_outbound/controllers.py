@@ -196,7 +196,7 @@ def augment_emails_for_voter_with_sendgrid(voter_we_vote_id=''):
                                 sendgrid_id=sendgrid_id,
                             )
                             if results['success']:
-                                # Now update all of the VoterContactEmail entries, irregardless of whose contact it is
+                                # Now update all the VoterContactEmail entries, regardless of whose contact it is
                                 try:
                                     number_updated = VoterContactEmail.objects.filter(
                                         email_address_text__iexact=contact_email_augmented.email_address_text) \
@@ -243,7 +243,7 @@ def augment_emails_for_voter_with_we_vote_data(voter_we_vote_id=''):
                     email_address_text=email_address_text,
                     existing_contact_email_augmented_dict=contact_email_augmented_list_as_dict)
 
-        # Now augment VoterContactEmail table with data from the We Vote database to help find friends
+        # Now augment VoterContactEmail table with data from We Vote database to help find friends
         # Start by retrieving checking EmailAddress table (in one query) for all entries we currently have in our db
         email_addresses_found_list = []
         try:
@@ -261,13 +261,23 @@ def augment_emails_for_voter_with_we_vote_data(voter_we_vote_id=''):
                 voter_data_found = positive_value_exists(voter.we_vote_hosted_profile_image_url_medium) or \
                     positive_value_exists(voter.we_vote_id)
                 if results['success'] and voter_data_found:
-                    # Now update all of the VoterContactEmail entries, irregardless of whose contact it is
+                    # Now update all the VoterContactEmail entries, regardless of whose contact it is
                     try:
-                        number_updated = VoterContactEmail.objects.filter(
-                            email_address_text__iexact=email_address_object.normalized_email_address) \
-                            .update(
-                                voter_we_vote_id=voter.we_vote_id,
-                                we_vote_hosted_profile_image_url_medium=voter.we_vote_hosted_profile_image_url_medium)
+                        if positive_value_exists(voter.state_code_for_display):
+                            number_updated = VoterContactEmail.objects.filter(
+                                email_address_text__iexact=email_address_object.normalized_email_address) \
+                                .update(
+                                    state_code=voter.state_code_for_display,
+                                    voter_we_vote_id=voter.we_vote_id,
+                                    we_vote_hosted_profile_image_url_medium=
+                                    voter.we_vote_hosted_profile_image_url_medium)
+                        else:
+                            number_updated = VoterContactEmail.objects.filter(
+                                email_address_text__iexact=email_address_object.normalized_email_address) \
+                                .update(
+                                    voter_we_vote_id=voter.we_vote_id,
+                                    we_vote_hosted_profile_image_url_medium=
+                                    voter.we_vote_hosted_profile_image_url_medium)
                         status += "NUMBER_OF_VOTER_CONTACT_EMAIL_UPDATED: " + str(number_updated) + " "
                     except Exception as e:
                         status += "FAILED_TO_UPDATE_VOTER_CONTACT_EMAIL: " + str(e) + ' '

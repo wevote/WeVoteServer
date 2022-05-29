@@ -100,7 +100,7 @@ def augment_emails_for_voter_with_snovio(voter_we_vote_id=''):
                                 snovio_source_state=snovio_source_state,
                             )
                             if results['success'] and positive_value_exists(snovio_source_state):
-                                # Now update all of the VoterContactEmail entries, irregardless of whose contact it is
+                                # Now update all the VoterContactEmail entries, regardless of whose contact it is
                                 defaults = {
                                     'state_code': snovio_source_state,
                                 }

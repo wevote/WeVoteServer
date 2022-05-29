@@ -1493,7 +1493,7 @@ def generate_voter_guide_possibility_batch_view(request):
         voter_guide_possibility_list.append(voter_guide_possibility)
 
     if voter_guide_possibility_found:
-        # Create structured_json_list with all of the positions we want to save
+        # Create structured_json_list with all the positions we want to save
         for one_voter_guide_possibility in voter_guide_possibility_list:
             results = extract_import_position_list_from_voter_guide_possibility(one_voter_guide_possibility)
             if results['position_json_list_found']:
@@ -1641,7 +1641,7 @@ def label_vote_smart_voter_guides_view(request):
                 positions_exist_query = positions_exist_query.exclude(vote_smart_rating="")
                 vote_smart_positions_count = positions_exist_query.count()
                 if vote_smart_positions_count == positions_count:
-                    # If all of the positions have a positive value in "vote_smart_rating", then label the voter
+                    # If all the positions have a positive value in "vote_smart_rating", then label the voter
                     # guide as "vote_smart_ratings_only"
                     voter_guide.vote_smart_ratings_only = True
                     voter_guide.save()
@@ -2126,7 +2126,7 @@ def voter_guide_possibility_list_view(request):
     election_manager = ElectionManager()
 
     # ######################
-    # Calculate all of the counts
+    # Calculate all the counts
     # To Review Count
     results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_list(
         search_string=voter_guide_possibility_search,

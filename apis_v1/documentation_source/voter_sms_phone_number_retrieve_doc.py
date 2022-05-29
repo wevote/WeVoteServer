@@ -58,7 +58,7 @@ def voter_sms_phone_number_retrieve_doc_template_values(url_root):
         'api_name': 'voterSMSPhoneNumberRetrieve',
         'api_slug': 'voterSMSPhoneNumberRetrieve',
         'api_introduction':
-            "Retrieve a list of all of the sms phone numbers for voter using voter_device_id.",
+            "Retrieve a list of all the sms phone numbers for voter using voter_device_id.",
         'try_now_link': 'apis_v1:voterSMSPhoneNumberRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,

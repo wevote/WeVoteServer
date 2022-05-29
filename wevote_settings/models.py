@@ -56,7 +56,7 @@ class WeVoteSetting(models.Model):
 
 class WeVoteSettingsManager(models.Manager):
     """
-    Manage all of the site settings
+    Manage all the site settings
     """
 
     def fetch_setting(self, setting_name):

@@ -868,7 +868,7 @@ def repair_ballot_items_for_election(google_civic_election_id, refresh_from_goog
         number_of_ballot_items_updated += results['number_of_ballot_items_updated']
 
     # Separately from this function, we need to go through the ballot_returned entries that we already retrieved
-    # data for, and make sure we have all of the needed ballot item data
+    # data for, and make sure we have all the needed ballot item data
     # results = refresh_voter_ballots_copied_from_any_polling_location(google_civic_election_id)
     # voter_ballots_copied_count = results['voter_ballots_copied']
     # voter_ballots_copied_count = 0
@@ -1806,7 +1806,7 @@ def voter_ballot_list_retrieve_for_api(voter_id):  # voterBallotListRetrieve
     election_ids_in_voter_ballot_saved_list = []
     final_ballot_list = []
 
-    # Retrieve all of the upcoming elections
+    # Retrieve all the upcoming elections
     election_manager = ElectionManager()
     results = election_manager.retrieve_listed_elections()
     election_list = results['election_list']

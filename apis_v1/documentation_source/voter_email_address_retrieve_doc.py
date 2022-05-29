@@ -58,7 +58,7 @@ def voter_email_address_retrieve_doc_template_values(url_root):
         'api_name': 'voterEmailAddressRetrieve',
         'api_slug': 'voterEmailAddressRetrieve',
         'api_introduction':
-            "Retrieve a list of all of the email addresses for voter using voter_device_id.",
+            "Retrieve a list of all the email addresses for voter using voter_device_id.",
         'try_now_link': 'apis_v1:voterEmailAddressRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,

@@ -725,7 +725,7 @@ def organization_suggestion_tasks_for_api(voter_device_id,
     # i follow however successfully retrieved in second call
     if kind_of_suggestion_task == UPDATE_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW:
         # If here, we want to
-        # A) get all of the twitter_ids of all twitter accounts I follow (on Twitter)
+        # A) get all the twitter_ids of all twitter accounts I follow (on Twitter)
         # B) then check to see if any of those twitter accounts have voter guides on We Vote
         twitter_who_i_follow_list_results = twitter_user_manager.retrieve_twitter_who_i_follow_list(twitter_id_of_me)
         status += twitter_who_i_follow_list_results['status']
@@ -830,7 +830,7 @@ def organization_suggestion_tasks_for_api(voter_device_id,
     # Not getting twitter_id during first Calling from webapp due to which not geting suggestions from twitter who
     # i follow however successfully retrieved in second call
     if kind_of_follow_task == FOLLOW_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW:
-        # If here, we want to retrieve from the local database all of the organizations that we are following on Twitter
+        # If here, we want to retrieve from the local database all the organizations that we are following on Twitter
         auto_followed_from_twitter_suggestion = True
         suggested_organization_to_follow_list_results = follow_organization_manager. \
             retrieve_suggested_organization_to_follow_list(voter_we_vote_id, auto_followed_from_twitter_suggestion)

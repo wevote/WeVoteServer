@@ -41,7 +41,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 #     except StarItem.DoesNotExist:
 #         pass
 #
-#     # Loop through all of the bookmarks in this list
+#     # Loop through all the bookmarks in this list
 #     for star_item in star_item_list:
 #         if star_item.star_status == 'STARRED':
 #             bookmark_status = ITEM_BOOKMARKED

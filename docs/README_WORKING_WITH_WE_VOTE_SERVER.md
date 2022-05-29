@@ -28,7 +28,7 @@ Here are some commands we use quite a lot:
 
 Find API admin tools here [http://localhost:8000/admin](http://localhost:8000/admin)
 
-Find documentation for all of the APIs here [http://localhost:8000/apis/v1/docs](http://localhost:8000/apis/v1/docs)
+Find documentation for all the APIs here [http://localhost:8000/apis/v1/docs](http://localhost:8000/apis/v1/docs)
 
 ## Test Data
 

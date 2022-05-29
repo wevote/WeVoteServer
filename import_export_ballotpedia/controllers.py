@@ -233,7 +233,7 @@ def attach_ballotpedia_election_by_district_from_api(election, google_civic_elec
             continue
         # The url we send to Ballotpedia can only be so long. If too long, we stop adding districts to the
         #  office_district_string, but capture the districts not used
-        # 3796 = 4096 - 300 (300 gives us room for all of the other url variables we need)
+        # 3796 = 4096 - 300 (300 gives us room for all the other url variables we need)
         if len(district_string) < 3796:
             district_string += str(one_district) + ","
             count_of_districts_sent += 1
@@ -247,7 +247,7 @@ def attach_ballotpedia_election_by_district_from_api(election, google_civic_elec
         district_string = district_string[:-1]
     chunks_of_district_strings.append(district_string)
 
-    # Now add all of the districts that were missed from the first retrieve
+    # Now add all the districts that were missed from the first retrieve
     while len(ballotpedia_district_id_not_used_list):
         district_string = ""
         count_of_districts_sent = 0
@@ -257,7 +257,7 @@ def attach_ballotpedia_election_by_district_from_api(election, google_civic_elec
                 continue
             # The url we send to Ballotpedia can only be so long. If too long, we stop adding districts to the
             #  office_district_string, but capture the districts not used
-            # 3796 = 4096 - 300 (300 gives us room for all of the other url variables we need)
+            # 3796 = 4096 - 300 (300 gives us room for all the other url variables we need)
             if len(district_string) < 3796:
                 district_string += str(one_district) + ","
                 count_of_districts_sent += 1
@@ -523,7 +523,7 @@ def retrieve_ballotpedia_candidates_by_district_from_api(google_civic_election_i
                 kind_of_election_by_race[one_office.ballotpedia_race_id] = one_office.get_kind_of_ballotpedia_election()
                 # The url we send to Ballotpedia can only be so long. If too long, we stop adding districts to the
                 #  ballotpedia_race_ids_string, but capture the races not used
-                # 3796 = 4096 - 300 (300 gives us room for all of the other url variables we need)
+                # 3796 = 4096 - 300 (300 gives us room for all the other url variables we need)
                 if len(ballotpedia_race_ids_string) < 3796:
                     ballotpedia_race_ids_string += str(one_office.ballotpedia_race_id) + ","
                 else:
@@ -532,7 +532,7 @@ def retrieve_ballotpedia_candidates_by_district_from_api(google_civic_election_i
                     
         chunks_of_race_id_strings.append(ballotpedia_race_ids_string)
 
-        # Now add all of the districts that were missed from the first retrieve
+        # Now add all the districts that were missed from the first retrieve
         while len(ballotpedia_race_id_not_used_list):
             ballotpedia_race_ids_string = ""
             ballotpedia_race_count = 0
@@ -540,7 +540,7 @@ def retrieve_ballotpedia_candidates_by_district_from_api(google_civic_election_i
             for one_race_id in ballotpedia_race_id_not_used_list:
                 # The url we send to Ballotpedia can only be so long. If too long, we stop adding districts to the
                 #  office_district_string, but capture the districts not used
-                # 3796 = 4096 - 300 (300 gives us room for all of the other url variables we need)
+                # 3796 = 4096 - 300 (300 gives us room for all the other url variables we need)
                 if len(ballotpedia_race_ids_string) < 3796:
                     ballotpedia_race_ids_string += str(one_race_id) + ","
                     ballotpedia_race_count += 1
@@ -875,7 +875,7 @@ def retrieve_ballotpedia_ballot_items_from_polling_location_api_v4(
             for one_district in ballotpedia_district_id_list:
                 # The url we send to Ballotpedia can only be so long. If too long, we stop adding districts to the
                 #  office_district_string, but capture the districts not used
-                # 3796 = 4096 - 300 (300 gives us room for all of the other url variables we need)
+                # 3796 = 4096 - 300 (300 gives us room for all the other url variables we need)
                 if len(office_district_string) < 3796:
                     office_district_string += str(one_district) + ","
                     office_district_count += 1
@@ -1142,7 +1142,7 @@ def retrieve_ballotpedia_ballot_items_for_one_voter_api_v4(
         for one_district in ballotpedia_district_id_list:
             # The url we send to Ballotpedia can only be so long. If too long, we stop adding districts to the
             #  office_district_string, but capture the districts not used
-            # 3796 = 4096 - 300 (300 gives us room for all of the other url variables we need)
+            # 3796 = 4096 - 300 (300 gives us room for all the other url variables we need)
             if len(office_district_string) < 3796:
                 office_district_string += str(one_district) + ","
                 office_district_count += 1
@@ -1437,7 +1437,7 @@ def retrieve_ballotpedia_offices_by_district_from_api(google_civic_election_id, 
     for one_district in ballotpedia_district_id_list:
         # The url we send to Ballotpedia can only be so long. If too long, we stop adding districts to the
         #  office_district_string, but capture the districts not used
-        # 3796 = 4096 - 300 (300 gives us room for all of the other url variables we need)
+        # 3796 = 4096 - 300 (300 gives us room for all the other url variables we need)
         if len(office_district_string) < 3796:
             office_district_string += str(one_district) + ","
             office_district_count += 1
@@ -1450,7 +1450,7 @@ def retrieve_ballotpedia_offices_by_district_from_api(google_civic_election_id, 
         office_district_string = office_district_string[:-1]
     chunks_of_district_strings.append(office_district_string)
 
-    # Now add all of the districts that were missed from the first retrieve
+    # Now add all the districts that were missed from the first retrieve
     while len(ballotpedia_district_id_not_used_list):
         office_district_string = ""
         office_district_count = 0
@@ -1458,7 +1458,7 @@ def retrieve_ballotpedia_offices_by_district_from_api(google_civic_election_id, 
         for one_district in ballotpedia_district_id_not_used_list:
             # The url we send to Ballotpedia can only be so long. If too long, we stop adding districts to the
             #  office_district_string, but capture the districts not used
-            # 3796 = 4096 - 300 (300 gives us room for all of the other url variables we need)
+            # 3796 = 4096 - 300 (300 gives us room for all the other url variables we need)
             if len(office_district_string) < 3796:
                 office_district_string += str(one_district) + ","
                 office_district_count += 1
@@ -1665,7 +1665,7 @@ def retrieve_ballotpedia_measures_by_district_from_api(google_civic_election_id,
     for one_district in ballotpedia_district_id_list:
         # The url we send to Ballotpedia can only be so long. If too long, we stop adding districts to the
         #  measure_district_string, but capture the districts not used
-        # 3796 = 4096 - 300 (300 gives us room for all of the other url variables we need)
+        # 3796 = 4096 - 300 (300 gives us room for all the other url variables we need)
         if len(measure_district_string) < 3796:
             measure_district_string += str(one_district) + ","
             measure_district_count += 1
@@ -1678,7 +1678,7 @@ def retrieve_ballotpedia_measures_by_district_from_api(google_civic_election_id,
         measure_district_string = measure_district_string[:-1]
     chunks_of_district_strings.append(measure_district_string)
 
-    # Now add all of the districts that were missed from the first retrieve
+    # Now add all the districts that were missed from the first retrieve
     while len(ballotpedia_district_id_not_used_list):
         measure_district_string = ""
         measure_district_count = 0
@@ -1686,7 +1686,7 @@ def retrieve_ballotpedia_measures_by_district_from_api(google_civic_election_id,
         for one_district in ballotpedia_district_id_not_used_list:
             # The url we send to Ballotpedia can only be so long. If too long, we stop adding districts to the
             #  measure_district_string, but capture the districts not used
-            # 3796 = 4096 - 300 (300 gives us room for all of the other url variables we need)
+            # 3796 = 4096 - 300 (300 gives us room for all the other url variables we need)
             if len(measure_district_string) < 3796:
                 measure_district_string += str(one_district) + ","
                 measure_district_count += 1
@@ -3184,7 +3184,7 @@ def retrieve_one_ballot_from_ballotpedia_api_v4(latitude, longitude, google_civi
         for one_district in ballotpedia_district_id_list:
             # The url we send to Ballotpedia can only be so long. If too long, we stop adding districts to the
             #  office_district_string, but capture the districts not used
-            # 3796 = 4096 - 300 (300 gives us room for all of the other url variables we need)
+            # 3796 = 4096 - 300 (300 gives us room for all the other url variables we need)
             if len(office_district_string) < 3796:
                 office_district_string += str(one_district) + ","
                 office_district_count += 1

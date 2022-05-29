@@ -88,7 +88,7 @@ def voter_guide_possibility_highlights_retrieve_doc_template_values(url_root):
         'api_name': 'voterGuidePossibilityHighlightsRetrieve',
         'api_slug': 'voterGuidePossibilityHighlightsRetrieve',
         'api_introduction':
-            "Retrieve all of the candidates that might be highlighted on an endorsement guide. "
+            "Retrieve all the candidates that might be highlighted on an endorsement guide. "
             "DEFAULT = there is no entry in this organization's Voter Guide Possibility yet.",
         'try_now_link': 'apis_v1:voterGuidePossibilityHighlightsRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
