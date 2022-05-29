@@ -44,7 +44,7 @@ def ballot_item_highlights_retrieve_doc_template_values(url_root):
         'api_name': 'ballotItemHighlightsRetrieve',
         'api_slug': 'ballotItemHighlightsRetrieve',
         'api_introduction':
-            "Retrieve all of the candidates that might be highlighted on an endorsement guide. ",
+            "Retrieve all the candidates that might be highlighted on an endorsement guide. ",
         'try_now_link': 'apis_v1:ballotItemHighlightsRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,

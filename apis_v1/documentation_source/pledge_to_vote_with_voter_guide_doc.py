@@ -16,7 +16,7 @@ def pledge_to_vote_with_voter_guide_doc_template_values(url_root):
         {
             'name':         'voter_guide_we_vote_id',
             'value':        'string',  # boolean, integer, long, string
-            'description':  'Pledge to support or oppose all of the things listed on this voter guide',
+            'description':  'Pledge to support or oppose all the things listed on this voter guide',
         },
         {
             'name':         'delete_pledge',

@@ -146,7 +146,7 @@ Now, you should be able to access the admin tools here:
 
     http://localhost:8000/admin
 
-Find documentation for all of the APIs here:
+Find documentation for all the APIs here:
 
     http://localhost:8000/apis/v1/docs
 

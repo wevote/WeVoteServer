@@ -1064,7 +1064,7 @@ def process_contest_office_from_structured_json(
 
     we_vote_id = ''
     maplight_id = 0
-    # Note that all of the information saved here is independent of a particular voter
+    # Note that all the information saved here is independent of a particular voter
     if google_civic_election_id and (district_id or district_name) and office_name:
         updated_contest_office_values = {
             'google_civic_election_id': google_civic_election_id,
@@ -1498,7 +1498,7 @@ def groom_and_store_google_civic_office_json_2021(
     proceed_to_update_office = allowed_to_update_offices
 
     if proceed_to_create_office or proceed_to_update_office:
-        # Note that all of the information saved here is independent of a particular voter
+        # Note that all the information saved here is independent of a particular voter
         if google_civic_election_id and \
                 (district_id or district_name or ctcl_office_uuid or vote_usa_office_id) and \
                 office_name:
@@ -2524,7 +2524,7 @@ def refresh_voter_ballot_items_from_google_civic_from_voter_ballot_saved(voter_b
             election_day_text = one_ballot_json['election']['electionDay']
             election_description_text = one_ballot_json['election']['name']
 
-            # We may receive some election data, but not all of the data we need
+            # We may receive some election data, but not all the data we need
             if one_ballot_results['election_data_retrieved']:
                 election_data_retrieved = True
                 success = True
@@ -2866,7 +2866,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
             election_day_text = one_ballot_json['election']['electionDay']
             election_description_text = one_ballot_json['election']['name']
 
-            # We may receive some election data, but not all of the data we need
+            # We may receive some election data, but not all the data we need
             if one_ballot_results['election_data_retrieved']:
                 election_data_retrieved = True
                 success = True
@@ -3300,7 +3300,7 @@ def process_contest_referendum_from_structured_json(
     # countywide, judicial, schoolBoard, cityWide, township, countyCouncil, cityCouncil, ward, special
     district_id = results['district_id']
 
-    # Note that all of the information saved here is independent of a particular voter
+    # Note that all the information saved here is independent of a particular voter
     we_vote_id = ''
     if google_civic_election_id and (district_id or district_name) and referendum_title:
         # We want to only add values, and never clear out existing values that may have been
@@ -3600,7 +3600,7 @@ def groom_and_store_google_civic_measure_json_2021(
 
     ballot_item_display_name = ''
     if proceed_to_create_measure or proceed_to_update_measure:
-        # Note that all of the information saved here is independent of a particular voter
+        # Note that all the information saved here is independent of a particular voter
         if google_civic_election_id and \
                 (district_id or district_name or ctcl_measure_uuid or vote_usa_measure_id) and \
                 referendum_title:

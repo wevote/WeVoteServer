@@ -96,7 +96,7 @@ def ballot_items_search_retrieve_doc_template_values(url_root):
         'api_name': 'ballotItemsSearchRetrieve',
         'api_slug': 'ballotItemsSearchRetrieve',
         'api_introduction':
-            "Request a skeleton of ballot data for this election, so that the web_app has all of the ids "
+            "Request a skeleton of ballot data for this election, so that the web_app has all the ids "
             "it needs to make more requests for data about each ballot item.",
         'try_now_link': 'apis_v1:ballotItemsSearchRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,

@@ -9,7 +9,7 @@
 
 ## Clone WeVoteServer from github
 
-Create a place to put all of the code from Github (this example is for Mac):
+Create a place to put all the code from Github (this example is for Mac):
 
     $ mkdir /Users/<YOUR NAME HERE>/PythonProjects/
     

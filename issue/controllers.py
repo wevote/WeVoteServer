@@ -135,7 +135,7 @@ def issues_import_from_structured_json(structured_json):
                     issue_name=issue_name,
                 )
 
-            # Now save all of the fields in common to updating an existing entry vs. creating a new entry
+            # Now save all the fields in common to updating an existing entry vs. creating a new entry
             if issue_description is not False:
                 issue_on_stage.issue_description = issue_description
             if issue_icon_local_path is not False:
@@ -1000,7 +1000,7 @@ def organization_link_to_issue_import_from_structured_json(structured_json):
                     issue_we_vote_id=issue_we_vote_id,
                 )
 
-            # Now save all of the fields in common to updating an existing entry vs. creating a new entry
+            # Now save all the fields in common to updating an existing entry vs. creating a new entry
             if not positive_value_exists(organization_link.issue_id):
                 issue_id = issue_manager.fetch_issue_id_from_we_vote_id(organization_link.issue_we_vote_id)
                 if issue_id != 0:

@@ -2644,7 +2644,7 @@ class VoterGuidePossibilityManager(models.Manager):
 
     def number_of_candidates_in_database(self, voter_guide_possibility_id):
         """
-        Out of all of the VoterGuidePossibilityPosition entries, how many have been tied to candidates?
+        Out of all the VoterGuidePossibilityPosition entries, how many have been tied to candidates?
         :param voter_guide_possibility_id:
         :return:
         """
@@ -2661,7 +2661,7 @@ class VoterGuidePossibilityManager(models.Manager):
 
     def number_of_measures_in_database(self, voter_guide_possibility_id):
         """
-        Out of all of the VoterGuidePossibilityPosition entries, how many have been tied to measures?
+        Out of all the VoterGuidePossibilityPosition entries, how many have been tied to measures?
         :param voter_guide_possibility_id:
         :return:
         """
@@ -2678,7 +2678,7 @@ class VoterGuidePossibilityManager(models.Manager):
 
     def number_of_possible_organizations_in_database(self, voter_guide_possibility_id):
         """
-        Out of all of the VoterGuidePossibilityPosition entries, how many have been tied to candidates?
+        Out of all the VoterGuidePossibilityPosition entries, how many have been tied to candidates?
         :param voter_guide_possibility_id:
         :return:
         """
@@ -2695,7 +2695,7 @@ class VoterGuidePossibilityManager(models.Manager):
 
     def number_of_ballot_items_not_matched(self, voter_guide_possibility_id):
         """
-        Out of all of the VoterGuidePossibilityPosition entries, how many have not been matched to ballot items?
+        Out of all the VoterGuidePossibilityPosition entries, how many have not been matched to ballot items?
         :param voter_guide_possibility_id:
         :return:
         """
@@ -2823,10 +2823,10 @@ class VoterGuidePossibility(models.Model):
     # Data manager cannot find upcoming endorsements (may not be posted yet)
     cannot_find_endorsements = models.BooleanField(default=False)
 
-    # Data manager will need to put more work into this in order to capture all of the details
+    # Data manager will need to put more work into this in order to capture all the details
     capture_detailed_comments = models.BooleanField(default=False)
 
-    # Data manager will need to put more work into this in order to capture all of the details
+    # Data manager will need to put more work into this in order to capture all the details
     from_prior_election = models.BooleanField(default=False)
 
     # While processing and reviewing this organization's endorsements, leave out positions already stored

@@ -3846,7 +3846,7 @@ def cache_issue_image_master(google_civic_election_id, issue_image_file, issue_w
                              kind_of_image_issue=False, kind_of_image_original=False):
     """
     Cache master issue image to AWS. This function is a more focused version of cache_image_locally (which deals with
-    all of the standard photos like Facebook, or Twitter).
+    all the standard photos like Facebook, or Twitter).
     :param google_civic_election_id:
     :param issue_image_file:
     :param issue_we_vote_id:
@@ -4022,7 +4022,7 @@ def cache_organization_sharing_image(
         kind_of_image_chosen_social_share_master=False):
     """
     Cache master "chosen" images to AWS. This function is a more focused version of cache_image_locally
-    (which deals with all of the standard profile photos like Facebook, or Twitter).
+    (which deals with all the standard profile photos like Facebook, or Twitter).
     :param python_image_library_image:
     :param organization_we_vote_id:
     :param kind_of_image_original:

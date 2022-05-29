@@ -99,7 +99,7 @@ class Election(models.Model):
     # entering elections manually.
     state_code = models.CharField(verbose_name="state code for the election",
                                   max_length=2, null=True, blank=True, db_index=True)
-    # We generate a string with all of the state codes. Ex/ CA,CO,UT
+    # We generate a string with all the state codes. Ex/ CA,CO,UT
     state_code_list_raw = models.CharField(max_length=255, null=True, blank=True)
     include_in_list_for_voters = models.BooleanField(default=False)
 
@@ -108,7 +108,7 @@ class Election(models.Model):
 
     # Not an election we will be supporting
     ignore_this_election = models.BooleanField(default=False)
-    # Have we finished all of the election preparation related to Offices, Candidates, Measures and Ballot Locations?
+    # Have we finished all the election preparation related to Offices, Candidates, Measures and Ballot Locations?
     election_preparation_finished = models.BooleanField(default=False)
     # Have we finished all of the election preparation related to Candidate photos?
     candidate_photos_finished = models.BooleanField(default=False)

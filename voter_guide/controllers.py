@@ -1441,7 +1441,7 @@ def move_voter_guides_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_i
         # See if the "to_voter" already has a matching entry
         to_voter_guide_found = False
         from_voter_guide_google_civic_election_id = from_voter_guide.google_civic_election_id
-        # Cycle through all of the "to_voter" current_friend entries and if there isn't one, create it
+        # Cycle through all the "to_voter" current_friend entries and if there isn't one, create it
         for to_voter_guide in to_voter_guide_list:
             to_voter_guide_google_civic_election_id = to_voter_guide.google_civic_election_id
             if to_voter_guide_google_civic_election_id == from_voter_guide_google_civic_election_id:

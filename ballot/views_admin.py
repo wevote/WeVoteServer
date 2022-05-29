@@ -877,7 +877,7 @@ def ballot_items_repair_view(request):
 @login_required
 def update_ballot_returned_with_latitude_and_longitude_view(request):
     """
-    Cycle through all of the specified BallotReturned entries and look up latitude and longitude
+    Cycle through all the specified BallotReturned entries and look up latitude and longitude
     :param request:
     :return:
     """

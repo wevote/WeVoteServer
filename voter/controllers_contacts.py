@@ -79,18 +79,14 @@ def move_voter_contact_email_to_another_voter(from_voter_we_vote_id, to_voter_we
     return results
 
 
-def delete_google_contacts(voter_we_vote_id=''):  # voterContactListSave - Delete
+def delete_all_voter_contact_emails_for_voter(voter_we_vote_id=''):  # voterContactListSave - Delete
     status = ''
     success = True
     google_contacts_deleted_count = 0
 
     try:
-        # When we support other kinds of imports, don't delete entries which also have data from another source
-        # We will need to update remaining entries to set 'has_data_from_google_people_api' to False
-        # and clear other fields
         google_contacts_deleted_tuple = VoterContactEmail.objects\
             .filter(
-                has_data_from_google_people_api=True,
                 imported_by_voter_we_vote_id__iexact=voter_we_vote_id,
             )\
             .delete()

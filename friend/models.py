@@ -1323,7 +1323,7 @@ class FriendManager(models.Manager):
         friend_invitation_to_email_list = []
         friend_invitation_to_email_list_found = False
         try:
-            # Cycle through all of the viewer_voter_we_vote_id email addresses so we can retrieve invitations sent
+            # Cycle through all the viewer_voter_we_vote_id email addresses so we can retrieve invitations sent
             #  to this voter when we didn't know the voter_we_vote_id
 
             # First, find the verified email for viewer_voter_we_vote_id. # TODO DALE

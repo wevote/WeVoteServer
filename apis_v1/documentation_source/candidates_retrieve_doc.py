@@ -76,7 +76,7 @@ def candidates_retrieve_doc_template_values(url_root):
         'api_name': 'candidatesRetrieve',
         'api_slug': 'candidatesRetrieve',
         'api_introduction':
-            "Retrieve all of the candidates competing for a particular office.",
+            "Retrieve all the candidates competing for a particular office.",
         'try_now_link': 'apis_v1:candidatesRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,

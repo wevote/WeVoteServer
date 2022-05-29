@@ -142,7 +142,7 @@ def augment_emails_for_voter_with_open_people(voter_we_vote_id=''):
                     'EmailAddressSearch',
                     number_of_items_sent_in_query=number_of_items_sent_in_query)
 
-            # Mark as checked all of the email addresses where augmentation wasn't found
+            # Mark as checked all the email addresses where augmentation wasn't found
             email_not_found_list_unique = list(set(email_not_found_list))
             if len(email_not_found_list_unique) > 0:
                 results = voter_manager.update_contact_email_augmented_list_not_found(
@@ -152,7 +152,7 @@ def augment_emails_for_voter_with_open_people(voter_we_vote_id=''):
                 status += results['status']
 
     # #########
-    # Finally, retrieve all of the augmented data we have collected and update VoterContactEmail entries
+    # Finally, retrieve all the augmented data we have collected and update VoterContactEmail entries
     results = voter_manager.retrieve_contact_email_augmented_list(
         email_address_text_list=email_addresses_returned_list,
         read_only=True,
@@ -197,7 +197,7 @@ def augment_emails_for_voter_with_open_people(voter_we_vote_id=''):
                     defaults['display_name'] = display_full_name_with_correct_capitalization(display_name_raw)
                 else:
                     defaults['display_name'] = display_name_raw
-            # Now update all of the VoterContactEmail entries, regardless of whose contact it is
+            # Now update all the VoterContactEmail entries, regardless of whose contact it is
             if location_data_found or contact_name_data_found:
                 try:
                     number_updated = VoterContactEmail.objects.filter(
@@ -257,7 +257,7 @@ def query_open_people_email_search(email='', authentication_token=''):
         data=data,
     )
     structured_json = json.loads(response.text)
-    # print(structured_json)
+    # print("STRUCTURED_JSON: " + structured_json)
 
     return structured_json
 
@@ -343,7 +343,7 @@ def query_open_people_email_from_list(email_list=[], authentication_token=''):
         for task in as_completed(threads):
             try:
                 one_result = task.result()
-                # print(one_result)
+                # print("ONE_RESULT: " + one_result)
                 email_address = one_result['email_address_text']
                 email_address = email_address.lower()
                 email_results_dict[email_address] = one_result
@@ -450,7 +450,7 @@ def query_and_extract_from_open_people_email_address_search(email='', authentica
         # Address with higher score is...
         address_dict_with_highest_score = most_recent_address_dict
         name_dict_with_highest_score = most_recent_name_dict
-        print(json_from_open_people)
+        # print("HIGHEST_SCORE: " + json_from_open_people)
 
     results = {
         'success':                  success,

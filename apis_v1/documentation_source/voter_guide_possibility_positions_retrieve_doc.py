@@ -101,7 +101,7 @@ def voter_guide_possibility_positions_retrieve_doc_template_values(url_root):
         'api_name': 'voterGuidePossibilityPositionsRetrieve',
         'api_slug': 'voterGuidePossibilityPositionsRetrieve',
         'api_introduction':
-            "Retrieve all of the possible endorsements scraped from this particular page.",
+            "Retrieve all the possible endorsements scraped from this particular page.",
         'try_now_link': 'apis_v1:voterGuidePossibilityPositionsRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,

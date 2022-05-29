@@ -19,7 +19,7 @@ def voter_guides_upcoming_retrieve_doc_template_values(url_root):
             'name':         'google_civic_election_id_list[]',
             'value':        'integerlist',  # boolean, integer, long, string
             'description':  'The unique identifier for one or more elections. If not provided, '
-                            'use all of the upcoming elections.',
+                            'use all the upcoming elections.',
         },
         {
             'name':         'start_retrieve_at_this_number',

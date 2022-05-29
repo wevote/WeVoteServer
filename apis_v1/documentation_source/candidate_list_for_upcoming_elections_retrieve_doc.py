@@ -59,7 +59,7 @@ def doc_template_values(url_root):
         'api_name': 'candidateListForUpcomingElectionsRetrieve',
         'api_slug': 'candidateListForUpcomingElectionsRetrieve',
         'api_introduction':
-            "Retrieve all of the candidates competing in upcoming offices. "
+            "Retrieve all the candidates competing in upcoming offices. "
             "This shares the same response package format with measureListForUpcomingElectionsRetrieve.",
         'try_now_link': 'apis_v1:candidateListForUpcomingElectionsRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,

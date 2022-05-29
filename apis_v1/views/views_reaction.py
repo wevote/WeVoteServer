@@ -49,7 +49,7 @@ def voter_reaction_like_on_save_view(request):  # voterReactionLikeOnSave
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    # We track activity_tidbit_we_vote_id so we can get all of the likes under on major item
+    # We track activity_tidbit_we_vote_id so we can get all the likes under on major item
     activity_tidbit_we_vote_id = request.GET.get('activity_tidbit_we_vote_id', '')
     liked_item_we_vote_id = request.GET.get('liked_item_we_vote_id', '')
     return voter_reaction_like_on_save_for_api(

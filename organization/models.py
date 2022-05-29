@@ -2327,7 +2327,7 @@ class OrganizationListManager(models.Manager):
             else:
                 twitter_user = twitter_results['twitter_user']
 
-                # Loop through all of the organizations that have any of these fields set:
+                # Loop through all the organizations that have any of these fields set:
                 # - organization.twitter_user_id
                 # - organization.organization_twitter_handle
                 try:
