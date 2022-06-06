@@ -3072,6 +3072,7 @@ def voter_contact_list_save_view(request):  # voterContactListSave
     status += augment_results['status']
 
     # 2021-09-30 Requires Pro account which costs $90/month
+    # 2022-06-06 We are currently paying for this SendGrid account, so we can implement this
     # from email_outbound.controllers import augment_emails_for_voter_with_sendgrid
     # augment_results = augment_emails_for_voter_with_sendgrid(voter_we_vote_id=voter.we_vote_id)
     # status += augment_results['status']
@@ -3097,5 +3098,66 @@ def voter_contact_list_save_view(request):  # voterContactListSave
         'voter_contact_email_google_count': voter_contact_email_google_count,
         'voter_contact_email_list':         voter_contact_email_list,
         'voter_contact_email_list_count':   len(voter_contact_email_list),
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+@csrf_exempt
+def voter_contact_save_view(request):  # voterContactSave
+    success = True
+    status = ''
+    email_ignored = False
+
+    status, voter, voter_found, voter_device_link = views_voter_utils.get_voter_from_request(request, status)
+    email_address_text = request.GET.get('email_address_text', None)
+    ignore_voter_contact = positive_value_exists(request.GET.get('ignore_voter_contact', False))
+
+    try:
+        voter_we_vote_id = voter.we_vote_id
+    except Exception as e:
+        status += "VOTER_CONTACT_SAVE_NO_VOTER_WE_VOTE_ID: " + str(e) + " "
+        voter_we_vote_id = ''
+
+    action_variable_found = positive_value_exists(ignore_voter_contact)
+    if not positive_value_exists(action_variable_found) or not positive_value_exists(email_address_text) or \
+            not positive_value_exists(voter_we_vote_id):
+        email_ignored = False
+        status += "VOTER_CONTACT_SAVE_MISSING_KEY_VARIABLE "
+        success = False
+        json_data = {
+            'status':                   status,
+            'success':                  success,
+            'email_address_text':       email_address_text,
+            'email_ignored':            email_ignored,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_contact_email(
+        email_address_text=email_address_text,
+        imported_by_voter_we_vote_id=voter_we_vote_id,
+        read_only=False,
+    )
+    if results['voter_contact_email_found']:
+        voter_contact_email = results['voter_contact_email']
+        if ignore_voter_contact:
+            try:
+                voter_contact_email.ignore_contact = True
+                voter_contact_email.save()
+                email_ignored = True
+            except Exception as e:
+                success = False
+                status += "VOTER_CONTACT_EMAIL_FAILED_TO_SAVE_IGNORE: " + str(e) + ' '
+        else:
+            status += "VOTER_CONTACT_EMAIL_ACTION_MISSING "
+    else:
+        status += "VOTER_CONTACT_EMAIL_NOT_FOUND "
+    json_data = {
+        'status':                   status,
+        'success':                  success,
+        'action_variable_found':    action_variable_found,
+        'email_address_text':       email_address_text,
+        'email_ignored':            email_ignored,
+        'ignore_voter_contact':     ignore_voter_contact,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
