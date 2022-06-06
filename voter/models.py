@@ -925,6 +925,66 @@ class VoterManager(BaseUserManager):
         }
         return results
 
+    def retrieve_voter_contact_email(
+            self,
+            email_address_text='',
+            imported_by_voter_we_vote_id='',
+            read_only=False):
+        success = True
+        status = ""
+        voter_contact_email = None
+        voter_contact_email_found = False
+
+        if not positive_value_exists(email_address_text) or \
+                not positive_value_exists(imported_by_voter_we_vote_id):
+            status += "MISSING_IMPORTED_BY_VOTER_WE_VOTE_ID "
+            results = {
+                'success':                      False,
+                'status':                       status,
+                'voter_contact_email':          voter_contact_email,
+                'voter_contact_email_found':    voter_contact_email_found,
+            }
+            return results
+
+        try:
+            if positive_value_exists(read_only):
+                query = VoterContactEmail.objects.using('readonly').all()
+            else:
+                query = VoterContactEmail.objects.all()
+            query = query.filter(imported_by_voter_we_vote_id=imported_by_voter_we_vote_id)
+            query = query.filter(email_address_text__iexact=email_address_text)
+            list_of_voter_contact_emails = list(query)
+            if len(list_of_voter_contact_emails) > 1:
+                first_saved = False
+                for one_voter_contact_email in list_of_voter_contact_emails:
+                    if first_saved:
+                        if positive_value_exists(read_only):
+                            try:
+                                voter_contact_email.delete()
+                            except Exception as e:
+                                status += "VOTER_CONTACT_EMAIL_DELETE-EXCEPTION: " + str(e) + ' '
+                    else:
+                        voter_contact_email = one_voter_contact_email
+                        voter_contact_email_found = True
+            elif len(list_of_voter_contact_emails) == 1:
+                voter_contact_email = list_of_voter_contact_emails[0]
+                voter_contact_email_found = True
+            else:
+                voter_contact_email_found = False
+                status += "VOTER_CONTACT_EMAIL_NOT_FOUND "
+        except Exception as e:
+            voter_contact_email_found = False
+            status += "VOTER_CONTACT_EMAIL_NOT_FOUND-EXCEPTION: " + str(e) + ' '
+            success = False
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'voter_contact_email':              voter_contact_email,
+            'voter_contact_email_found':        voter_contact_email_found,
+        }
+        return results
+
     def retrieve_voter_contact_email_list(self, imported_by_voter_we_vote_id='', read_only=True):
         success = True
         status = ""
