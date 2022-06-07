@@ -2842,7 +2842,6 @@ def move_friends_to_another_voter(
     for from_friend_entry in from_friend_list_remaining:
         # Delete the remaining friendship values
         try:
-            # Leave this turned off until testing is finished
             from_friend_entry.delete()
         except Exception as e:
             status += "PROBLEM_DELETING_FRIEND " + str(e) + ' '

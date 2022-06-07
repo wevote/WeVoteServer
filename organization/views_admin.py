@@ -461,7 +461,11 @@ def organization_list_view(request):
     else:
         organization_list_query = organization_list_query.order_by('organization_name')
 
-    if positive_value_exists(show_organizations_without_email):
+    # wv02org35759
+    if positive_value_exists(organization_search):
+        # Do not limit search
+        pass
+    elif positive_value_exists(show_organizations_without_email):
         organization_list_query = organization_list_query.filter(
             Q(organization_email__isnull=True) |
             Q(organization_email__exact='')
@@ -486,6 +490,9 @@ def organization_list_view(request):
             )
         else:
             organization_list_query = organization_list_query.filter(organization_type__iexact=organization_type_filter)
+    elif positive_value_exists(organization_search):
+        # Do not remove individuals from search
+        pass
     else:
         # By default, don't show individuals
         organization_list_query = organization_list_query.exclude(organization_type__iexact=INDIVIDUAL)

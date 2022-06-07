@@ -2302,8 +2302,9 @@ def position_list_for_ballot_item_from_friends_for_api(  # positionListForBallot
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         position_list = []
+        status += 'VALID_VOTER_DEVICE_ID_MISSING '
         json_data = {
-            'status':               'VALID_VOTER_DEVICE_ID_MISSING',
+            'status':               status,
             'success':              False,
             'count':                0,
             'friends_vs_public':    friends_vs_public,

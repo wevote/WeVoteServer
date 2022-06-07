@@ -2983,6 +2983,8 @@ class Voter(AbstractBaseUser):
     last_name = models.CharField(verbose_name='last name', max_length=255, null=True, blank=True)
     date_joined = models.DateTimeField(verbose_name='date joined', auto_now_add=True)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+    # friend_count helps us quickly identify voters who have friends
+    friend_count = models.PositiveIntegerField(default=None, null=True)
     state_code_for_display = models.CharField(max_length=2, null=True, blank=True)
     state_code_for_display_hidden = models.BooleanField(default=False)
     state_code_for_display_updated = models.BooleanField(default=False)  # Meant to be a transitory field during update
