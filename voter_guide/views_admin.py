@@ -1974,7 +1974,10 @@ def voter_guide_list_view(request):
     else:
         voter_guide_query = voter_guide_query.filter(google_civic_election_id__in=google_civic_election_id_list)
 
-    if not positive_value_exists(show_individuals):
+    if positive_value_exists(voter_guide_search):
+        # Allow individuals to be found during voter guide search
+        pass
+    elif not positive_value_exists(show_individuals):
         voter_guide_query = voter_guide_query.exclude(voter_guide_owner_type__iexact=INDIVIDUAL)
 
     if positive_value_exists(voter_guide_search):
