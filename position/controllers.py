@@ -2306,6 +2306,7 @@ def position_list_for_ballot_item_from_friends_for_api(  # positionListForBallot
             'status':               'VALID_VOTER_DEVICE_ID_MISSING',
             'success':              False,
             'count':                0,
+            'friends_vs_public':    friends_vs_public,
             'kind_of_ballot_item':  "UNKNOWN",
             'ballot_item_id':       0,
             'position_list':        position_list,
@@ -2323,10 +2324,12 @@ def position_list_for_ballot_item_from_friends_for_api(  # positionListForBallot
         voter_we_vote_id = ""
     if not positive_value_exists(voter_id):
         position_list = []
+        status += "VALID_VOTER_ID_MISSING "
         json_data = {
-            'status':               "VALID_VOTER_ID_MISSING ",
+            'status':               status,
             'success':              False,
             'count':                0,
+            'friends_vs_public':    friends_vs_public,
             'kind_of_ballot_item':  "UNKNOWN",
             'ballot_item_id':       0,
             'position_list':        position_list,
@@ -2457,6 +2460,7 @@ def position_list_for_ballot_item_from_friends_for_api(  # positionListForBallot
         'status':                   status,
         'success':                  success,
         'count':                    positions_count,
+        'friends_vs_public':        friends_vs_public,
         'kind_of_ballot_item':      kind_of_ballot_item,
         'ballot_item_id':           ballot_item_id,
         'ballot_item_we_vote_id':   ballot_item_we_vote_id,

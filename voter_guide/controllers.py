@@ -4677,13 +4677,14 @@ def retrieve_voter_guides_from_friends(
     voter_guide_list = []
     voter_guide_list_found = False
     if not positive_value_exists(maximum_number_to_retrieve):
-        maximum_number_to_retrieve = 30
+        maximum_number_to_retrieve = 50
 
     friend_manager = FriendManager()
     friend_results = friend_manager.retrieve_current_friends(voter_we_vote_id)
     organization_we_vote_ids_from_friends = []
     if friend_results['current_friend_list_found']:
         current_friend_list = friend_results['current_friend_list']
+        status += "CURRENT_FRIEND_LIST: "
         for one_friend in current_friend_list:
             if one_friend.viewer_voter_we_vote_id == voter_we_vote_id:
                 # If viewer is the voter, the friend is the viewee
@@ -4691,16 +4692,20 @@ def retrieve_voter_guides_from_friends(
                     one_friend = heal_current_friend(one_friend)
                 try:
                     organization_we_vote_ids_from_friends.append(one_friend.viewee_organization_we_vote_id)
+                    status += "(viewee: " + one_friend.viewee_voter_we_vote_id + \
+                              "/" + one_friend.viewee_organization_we_vote_id + ")"
                 except Exception as e:
-                    pass
+                    status += "APPEND_PROBLEM1: " + str(e) + ' '
             else:
                 # If viewer is NOT the voter, the friend is the viewer
                 if not positive_value_exists(one_friend.viewer_organization_we_vote_id):
                     one_friend = heal_current_friend(one_friend)
                 try:
                     organization_we_vote_ids_from_friends.append(one_friend.viewer_organization_we_vote_id)
+                    status += "(viewer: " + one_friend.viewer_voter_we_vote_id + \
+                              "/" + one_friend.viewer_organization_we_vote_id + ")"
                 except Exception as e:
-                    pass
+                    status += "APPEND_PROBLEM2: " + str(e) + ' '
 
     if len(organization_we_vote_ids_from_friends) == 0:
         success = True

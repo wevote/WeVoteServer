@@ -322,7 +322,8 @@ def voter_guides_from_friends_upcoming_retrieve_view(request):  # voterGuidesFro
         return HttpResponse(json.dumps(results), content_type='application/json')
 
     results = voter_guides_upcoming_retrieve_for_api(
-        google_civic_election_id_list=google_civic_election_id_list, friends_vs_public=FRIENDS_AND_PUBLIC,
+        google_civic_election_id_list=google_civic_election_id_list,
+        friends_vs_public=FRIENDS_AND_PUBLIC,
         voter_we_vote_id=voter_we_vote_id)
     status += results['status']
 
