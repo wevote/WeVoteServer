@@ -2250,6 +2250,7 @@ class PositionListManager(models.Manager):
         candidate_we_vote_id_list = results['candidate_we_vote_id_list']
 
         # Retrieve the support positions for this contest_office_id
+        position_list = []
         position_list_found = False
         try:
             if retrieve_public_positions:
@@ -2281,11 +2282,11 @@ class PositionListManager(models.Manager):
                 # for contest_office (like we do for candidate) because we don't have to deal with
                 # PERCENT_RATING data with measures
             if friends_we_vote_id_list is not False:
-                # Find positions from friends. Look for we_vote_id case insensitive.
+                # Find positions from friends. Look for we_vote_id case-insensitive.
                 we_vote_id_filter = Q()
                 for we_vote_id in friends_we_vote_id_list:
                     we_vote_id_filter |= Q(voter_we_vote_id__iexact=we_vote_id)
-                    position_list_query = position_list_query.filter(we_vote_id_filter)
+                position_list_query = position_list_query.filter(we_vote_id_filter)
             # Limit to positions in the last x years - currently we are not limiting
             # position_list = position_list.filter(election_id=election_id)
 

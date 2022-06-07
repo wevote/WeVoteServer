@@ -198,7 +198,7 @@ class CandidateListManager(models.Manager):
             candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
             candidate_query = candidate_query.exclude(do_not_display_on_ballot=True)
             candidate_query = candidate_query.order_by('-twitter_followers_count')
-            candidate_list = candidate_query
+            candidate_list = list(candidate_query)
 
             if len(candidate_list):
                 candidate_list_found = True
@@ -214,8 +214,8 @@ class CandidateListManager(models.Manager):
             status += 'FAILED retrieve_all_candidates_for_office ' + str(e) + ' '
             success = False
 
-        for one_candidate in candidate_list:
-            candidate_we_vote_id_list.append(one_candidate.we_vote_id)
+        # for one_candidate in candidate_list:
+        #     candidate_we_vote_id_list.append(one_candidate.we_vote_id)
 
         results = {
             'success':              success,
