@@ -2275,7 +2275,7 @@ def get_friend_invitations_sent_by_me(status, voter, read_only=True):
                         "voter_twitter_handle":             "",
                         "voter_twitter_description":        "",  # To be implemented
                         "voter_twitter_followers_count":    0,  # To be implemented
-                        "state_code_for_display":           friend_voter.state_code_for_display,
+                        "state_code_for_display":           "",  # To be implemented
                         "voter_email_address":              one_friend_invitation.recipient_voter_email,
                         "invitation_status":                one_friend_invitation.invitation_status,
                         "invitation_table":                 one_friend_invitation.invitation_table,
