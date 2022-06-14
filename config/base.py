@@ -121,6 +121,7 @@ def get_git_merge_date():
         tm = datetime.datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
         err = '[startupSteve] files: ' + fi + ' --- ' + tm + '\n'
         sys.stderr.write(err)
+        sys.stdout.write(err)
     latest_file_string = max(list_of_files, key=os.path.getctime)
     posix_filepath = pathlib.Path(latest_file_string)
     stat_of_file = posix_filepath.stat()
