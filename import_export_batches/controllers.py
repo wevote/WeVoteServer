@@ -63,7 +63,7 @@ def create_batch_row_actions(
         office_objects_dict={}):
     """
     Cycle through all BatchRow entries for this batch_header_id and move the values we can find into
-    the BatchRowActionYYY table so we can review it before importing it
+    the BatchRowActionYYY table, so we can review it before importing it
     :param batch_header_id:
     :param batch_description:
     :param batch_row_id:
@@ -254,6 +254,9 @@ def create_batch_row_actions(
                     # batch_row_action_politician = results['batch_row_action_politician']
                     number_of_batch_actions_created += 1
                     success = True
+                status += "CREATE_BATCH_ROW_ACTION_POSITION-START: "
+                status += results['status']
+                print_to_log(logger=logger, exception_message_optional=status)
             elif kind_of_batch == IMPORT_BALLOT_ITEM:
                 results = create_batch_row_action_ballot_item(
                     batch_description=batch_description,
@@ -2755,6 +2758,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
         kind_of_action = IMPORT_CREATE
     else:
         kind_of_action = IMPORT_TO_BE_DETERMINED
+        print_to_log(logger=logger, exception_message_optional=status)
 
     try:
         batch_row_action_position.batch_set_id = batch_description.batch_set_id
