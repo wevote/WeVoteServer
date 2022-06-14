@@ -9,6 +9,8 @@ import json
 import os
 import pathlib
 import re
+import sys
+
 from django.core.exceptions import ImproperlyConfigured
 from django.db import connection
 
@@ -111,7 +113,14 @@ def get_git_merge_date():
     pattern = '""gm'
     list_of_files = [fn for fn in glob.glob('./*/**')
                      if not os.path.basename(fn).endswith(('/', '_')) and
-                     re.search(r"/+.*?\..*?$", fn)]  # exclude new directories
+                     re.search(r"/+.*?\..*?$", fn)]  # exclude directories entries
+    for fi in list_of_files:    # TODO: Test code, remove asap, 6/14/22
+        posix_filepath = pathlib.Path(fi)
+        stat_of_file = posix_filepath.stat()
+        ts = int(stat_of_file.st_atime)
+        tm = datetime.datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+        err = '[startupSteve] files: ' + fi + ' --- ' + tm + '\n'
+        sys.stderr.write(err)
     latest_file_string = max(list_of_files, key=os.path.getctime)
     posix_filepath = pathlib.Path(latest_file_string)
     stat_of_file = posix_filepath.stat()

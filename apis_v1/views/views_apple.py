@@ -264,6 +264,9 @@ def sign_in_with_apple_oauth_redirect_view(request):  # appleSignInOauthRedirect
         critical_variable_missing = True
     try:
         state_dict = json.loads(request.POST['state'])
+
+        logger.error('awsApple post params on redirect:' + json.dump(state_dict))
+
         voter_device_id = state_dict['voter_device_id']
         return_url = state_dict['return_url']
     except Exception as e:
