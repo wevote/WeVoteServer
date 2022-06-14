@@ -390,6 +390,7 @@ def batch_action_list_view(request):
 
     batch_set_list = []
     polling_location_we_vote_id = ""
+    status = ""
 
     batch_header_id = convert_to_int(request.GET.get('batch_header_id', 0))
     kind_of_batch = request.GET.get('kind_of_batch', '')
@@ -563,6 +564,7 @@ def batch_action_list_view(request):
                 modified_batch_row_list.append(one_batch_row)
             elif kind_of_batch == POSITION:
                 existing_results = batch_manager.retrieve_batch_row_action_position(batch_header_id, one_batch_row.id)
+                status += existing_results['status']
                 if existing_results['batch_row_action_found']:
                     one_batch_row.batch_row_action = existing_results['batch_row_action_position']
                     one_batch_row.kind_of_batch = POSITION
@@ -599,8 +601,8 @@ def batch_action_list_view(request):
         if one_state[0].lower() in active_state_codes:
             filtered_state_list.append(one_state)
 
-    messages.add_message(request, messages.INFO, 'Batch Row Count: {batch_row_count}'
-                                                 ''.format(batch_row_count=batch_row_count))
+    messages.add_message(request, messages.INFO, 'Batch Row Count: {batch_row_count}, status: {status}'
+                                                 ''.format(batch_row_count=batch_row_count, status=status))
 
     messages_on_stage = get_messages(request)
 
@@ -900,7 +902,7 @@ def batch_action_list_export_voters_view(request):
 @login_required
 def batch_action_list_analyze_process_view(request):
     """
-    Create BatchRowActions for either all of the BatchRows for batch_header_id, or only one with batch_row_id
+    Create BatchRowActions for either all the BatchRows for batch_header_id, or only one with batch_row_id
     :param request:
     :return:
     """
@@ -3132,7 +3134,7 @@ def retrieve_ballots_for_polling_locations_api_v4_view(request):
     from lat/long, and then the ballot items. Ballotpedia API v4
     Reach out to Ballotpedia and retrieve (for one election):
     1) Polling locations (so we can use those addresses to retrieve a representative set of ballots)
-    2) Cycle through a portion of those map points, enough that we are caching all of the possible ballot items
+    2) Cycle through a portion of those map points, enough that we are caching all the possible ballot items
     :param request:
     :return:
     """
