@@ -7,6 +7,7 @@ import wevote_functions.admin
 logger = wevote_functions.admin.get_logger(__name__)
 DEBUG_LOGGING = True
 
+
 class AppleResolver(object):
     # https://gist.github.com/davidhariri/b053787aabc9a8a9cc0893244e1549fe
 

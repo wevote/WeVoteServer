@@ -52,7 +52,8 @@ def sign_in_with_apple_view(request):  # appleSignInSave appleSignInSaveView
             user_code = results['subject_registered_claim']
             email = results['email']
             if DEBUG_LOGGING:
-                logger.error("awsApple Not an error: Sign in with Apple iOS, (no email decrypted jwt: " + user_code + "  " + email)
+                logger.error("awsApple Not an error: Sign in with Apple iOS, (no email decrypted jwt: " + user_code +
+                             "  " + email)
 
     voter_manager = VoterManager()
     voter_device_link_manager = VoterDeviceLinkManager()
@@ -344,7 +345,7 @@ def sign_in_with_apple_oauth_redirect_view(request):  # appleSignInOauthRedirect
 
     if not positive_value_exists(voter_starting_process_we_vote_id):
         logger.error(
-            'awsApple did not receive a voter_we_vote_id from voter_device_id in sign_in_with_apple_oauth_redirect_view ')
+            'awsApple didnt receive a voter_we_vote_id from voter_device_id in sign_in_with_apple_oauth_redirect_view')
 
     results = sign_in_with_apple_for_api(
         user_code=user_code,

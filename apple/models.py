@@ -2,10 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from datetime import date
 from django.db import models
-from wevote_functions.functions import positive_value_exists
-from exception.models import handle_exception, print_to_log
 import wevote_functions.admin
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -21,6 +18,7 @@ class AppleUser(models.Model):
     # objects = None
     # voter_device_id = models.CharField(verbose_name='voter device id',
     #                                    max_length=255, null=False, blank=False, unique=True, default='DELETE_ME')
+    objects = None
     voter_we_vote_id = models.CharField(verbose_name="we vote id for the Apple ID owner", max_length=255, unique=True)
     user_code = models.CharField(verbose_name="User's apple id code", max_length=255, null=False, unique=False)
     email = models.EmailField(verbose_name='apple email address', max_length=255, unique=False,
@@ -32,7 +30,7 @@ class AppleUser(models.Model):
     last_name = models.CharField(
         verbose_name="User's last_name from Apple", max_length=255, null=True, blank=True, unique=False)
 
-    # The next three are for debugging/statistics are are not necessary for sign in
+    # The next three are for debugging/statistics are not necessary for sign in
     apple_platform = models.CharField(
         verbose_name="Platform of Apple Device", max_length=32, null=True, blank=True, unique=False)
     apple_os_version = models.CharField(
