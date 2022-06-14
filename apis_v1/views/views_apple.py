@@ -224,7 +224,7 @@ def sign_in_with_apple_for_api(
         success_siwa = False
         status += "ERROR_APPLE_USER_NOT_CREATED_OR_UPDATED: " + str(e) + ' '
         if DEBUG_LOGGING:
-            logger.error(status)
+            logger.error("awsApple: ", status)
         handle_exception(e, logger=logger, exception_message=status)
 
     results = {
