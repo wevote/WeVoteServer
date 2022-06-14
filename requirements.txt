@@ -37,8 +37,7 @@ pyasn1-modules==0.2.8
 py3dns==3.2.1
 pygeoip==0.3.2
 pyjwkest==1.4.2
-# 4/21/22, needed to update for PyJWT==1.7.1          # We are stuck at 1.7.1 until twillio can handle a newer version  (as of 6/15/21)
-PyJWT==2.4.0          # We are stuck at 1.7.1 until twillio can handle a newer version  (as of 6/15/21)
+PyJWT==2.4.0
 python-magic==0.4.24  # Requires "brew install libmagic" or "brew upgrade libmagic" or "pip install libmagic"
 python3-openid -e git+git://github.com/wevote/python3-openid.git@master#egg=python3-openid
 pytz==2021.1
