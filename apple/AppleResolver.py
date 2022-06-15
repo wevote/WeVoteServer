@@ -48,7 +48,8 @@ class AppleResolver(object):
 
             verified_payload = jwt.decode(access_token, apple_public_key_as_string,
                                           audience=client_id,
-                                          algorithm="RS256")
+                                          algorithms=["RS256"])
+                                          # algorithm="RS256")
                                           # algorithm=public_key_info['alg'])
             if DEBUG_LOGGING:
                 logger.error('awsApple AppleResolver verified_payload: ', verified_payload)

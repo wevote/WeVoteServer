@@ -114,18 +114,21 @@ def get_git_merge_date():
     list_of_files = [fn for fn in glob.glob('./*/**')
                      if not os.path.basename(fn).endswith(('/', '_')) and
                      re.search(r"/+.*?\..*?$", fn)]  # exclude directories entries
-    for fi in list_of_files:    # TODO: Test code, remove asap, 6/14/22
-        posix_filepath = pathlib.Path(fi)
-        stat_of_file = posix_filepath.stat()
-        ts = int(stat_of_file.st_atime)
-        tm = datetime.datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-        err = '[startupSteve] files: ' + fi + ' --- ' + tm + '\n'
-        sys.stderr.write(err)
-        sys.stdout.write(err)
+    # for fi in list_of_files:    # TODO: Test code, remove asap, 6/14/22
+    #     posix_filepath = pathlib.Path(fi)
+    #     stat_of_file = posix_filepath.stat()
+    #     ts = int(stat_of_file.st_ctime)
+    #     tm = datetime.datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+    #     err = '[startupSteve] files: ' + fi + ' --- ' + tm + '\n'
+    #     sys.stderr.write(err)
+    #     sys.stdout.write(err)
     latest_file_string = max(list_of_files, key=os.path.getctime)
     posix_filepath = pathlib.Path(latest_file_string)
     stat_of_file = posix_filepath.stat()
-    git_merge_date = str(datetime.datetime.fromtimestamp(stat_of_file.st_mtime)).split('.', 1)[0]
+    git_merge_date = str(datetime.datetime.fromtimestamp(stat_of_file.st_atime)).split('.', 1)[0] + '  '
+    git_merge_date += str(datetime.datetime.fromtimestamp(stat_of_file.st_mtime)).split('.', 1)[0] + '  '
+    git_merge_date += str(datetime.datetime.fromtimestamp(stat_of_file.st_ctime)).split('.', 1)[0]
+
     out_string = git_merge_date + '  (' + latest_file_string + ')'
     # print(out_string)
     return out_string
