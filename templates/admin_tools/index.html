@@ -172,8 +172,12 @@
             <td>{{ postgres_version }}</td>
         </tr>
         <tr>
-            <td>Git date: (experiment 5)&nbsp;</td>
-            <td>{{git_merge_date}}</td>
+            <td>Git date: (experiment 6)&nbsp;</td>
+{#            <td>{{git_merge_date}}</td>#}
+            {% for line in git_merge_date %}
+                <p>{{ line.date }} --- {{  line.file }}</p>
+            {% endfor %}
+
         </tr>
      </table>
 </p>
