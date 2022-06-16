@@ -5,7 +5,7 @@ from jwt.algorithms import RSAAlgorithm     # pragma: no cover
 import wevote_functions.admin
 
 logger = wevote_functions.admin.get_logger(__name__)
-DEBUG_LOGGING = True
+DEBUG_LOGGING = False
 
 
 class AppleResolver(object):
@@ -49,8 +49,6 @@ class AppleResolver(object):
             verified_payload = jwt.decode(access_token, apple_public_key_as_string,
                                           audience=client_id,
                                           algorithms=["RS256"])
-                                          # algorithm="RS256")
-                                          # algorithm=public_key_info['alg'])
             if DEBUG_LOGGING:
                 logger.error('awsApple AppleResolver verified_payload: ', verified_payload)
 

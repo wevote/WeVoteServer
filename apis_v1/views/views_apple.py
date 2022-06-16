@@ -18,7 +18,7 @@ import wevote_functions.admin
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
-DEBUG_LOGGING = True
+DEBUG_LOGGING = False
 
 
 def sign_in_with_apple_view(request):  # appleSignInSave appleSignInSaveView
@@ -264,8 +264,8 @@ def sign_in_with_apple_oauth_redirect_view(request):  # appleSignInOauthRedirect
         critical_variable_missing = True
     try:
         state_dict = json.loads(request.POST['state'])
-
-        logger.error('awsApple post params on redirect:' + json.dumps(state_dict))
+        if DEBUG_LOGGING:
+            logger.error('awsApple post params on redirect:' + json.dumps(state_dict))
 
         voter_device_id = state_dict['voter_device_id']
         return_url = state_dict['return_url']
