@@ -78,6 +78,11 @@ def current_friends_data_healing_view(request):
 def generate_mutual_friends_for_all_voters_view(request):
     status = ""
 
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}  # We may want to add a "voter_admin"
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     results = generate_mutual_friends_for_all_voters()
     status += results['status']
     messages.add_message(request, messages.INFO, 'status: ' + str(status))
@@ -88,6 +93,12 @@ def generate_mutual_friends_for_all_voters_view(request):
 @login_required
 def generate_mutual_friends_for_one_voter_view(request):
     status = ""
+
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}  # We may want to add a "voter_admin"
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     voter_id = request.GET.get('voter_id', 0)
     voter_id = convert_to_int(voter_id)
     voter_we_vote_id = request.GET.get('voter_we_vote_id', '')
