@@ -4680,7 +4680,7 @@ def retrieve_voter_guides_from_friends(
         maximum_number_to_retrieve = 50
 
     friend_manager = FriendManager()
-    friend_results = friend_manager.retrieve_current_friends(voter_we_vote_id)
+    friend_results = friend_manager.retrieve_current_friend_list(voter_we_vote_id)
     organization_we_vote_ids_from_friends = []
     if friend_results['current_friend_list_found']:
         current_friend_list = friend_results['current_friend_list']

@@ -57,7 +57,8 @@ def friend_lists_all_doc_template_values(url_root):
         'api_slug': 'friendListsAll',
         'api_introduction':
             "Request information about a voter's friends, including invitations to become a friend, "
-            "a list of current friends, and friends you share in common with another voter.  This API differs from friendList in that it "
+            "a list of current friends, and friends you share in common with another voter. "
+            "This API differs from friendList in that it "
             "returns six different lists at once.",
         'try_now_link': 'apis_v1:friendListsAllView',
         'url_root': url_root,

@@ -59,7 +59,7 @@ def friend_list_doc_template_values(url_root):
                    '  "state_code": string,\n' \
                    '  "kind_of_list": string, \n' \
                    '  "friend_list": list\n' \
-                   '   [\n' \
+                   '   [{\n' \
                    '     "voter_we_vote_id": string,\n' \
                    '     "voter_display_name": string,\n' \
                    '     "voter_photo_url_large": string,\n' \
@@ -74,8 +74,14 @@ def friend_list_doc_template_values(url_root):
                    '     "invitation_status": string,\n' \
                    '     "invitation_sent_to": string,\n' \
                    '     "positions_taken": number,\n' \
+                   '     "mutual_friend_count": number,\n' \
+                   '     "mutual_friend_preview_list": list\n' \
+                   '     [{\n' \
+                   '       "friend_display_name": string,\n' \
+                   '       "friend_photo_url_medium": string,\n' \
+                   '     }],\n' \
                    '     "mutual_friends": number,\n' \
-                   '   ],\n' \
+                   '   }],\n' \
                    '}'
 
     template_values = {

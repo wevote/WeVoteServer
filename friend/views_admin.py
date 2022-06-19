@@ -7,10 +7,11 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
+from .controllers import generate_mutual_friends_for_all_voters, generate_mutual_friends_for_one_voter
 from .models import CurrentFriend, FriendManager
 import wevote_functions.admin
 from admin_tools.views import redirect_to_sign_in_page
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists
 from voter.models import Voter, voter_has_authority, VoterManager, voter_setup
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -71,6 +72,42 @@ def current_friends_data_healing_view(request):
                              'number_of_voters_missing_linked_org: ' + str(number_of_voters_missing_linked_org))
 
     return HttpResponseRedirect(reverse('voter:voter_list', args=()))
+
+
+@login_required
+def generate_mutual_friends_for_all_voters_view(request):
+    status = ""
+
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}  # We may want to add a "voter_admin"
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    results = generate_mutual_friends_for_all_voters()
+    status += results['status']
+    messages.add_message(request, messages.INFO, 'status: ' + str(status))
+
+    return HttpResponseRedirect(reverse('voter:voter_list', args=()))
+
+
+@login_required
+def generate_mutual_friends_for_one_voter_view(request):
+    status = ""
+
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}  # We may want to add a "voter_admin"
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    voter_id = request.GET.get('voter_id', 0)
+    voter_id = convert_to_int(voter_id)
+    voter_we_vote_id = request.GET.get('voter_we_vote_id', '')
+
+    results = generate_mutual_friends_for_one_voter(voter_we_vote_id=voter_we_vote_id)
+    status += results['status']
+    messages.add_message(request, messages.INFO, 'status: ' + str(status))
+
+    return HttpResponseRedirect(reverse('voter:voter_edit', args=(voter_id,)))
 
 
 @login_required
