@@ -2043,7 +2043,9 @@ def generate_mutual_friends_for_one_voter(voter_we_vote_id='', update_existing_d
     friend_manager = FriendManager()
     voter_manager = VoterManager()
     # Retrieve list of all CurrentFriend entries connected to voter_we_vote_id
-    current_friend_list_results = friend_manager.retrieve_current_friend_list(voter_we_vote_id=voter_we_vote_id)
+    current_friend_list_results = friend_manager.retrieve_current_friend_list(
+        voter_we_vote_id=voter_we_vote_id,
+        read_only=False)
     if not current_friend_list_results['success']:
         status += current_friend_list_results['status']
         success = False
