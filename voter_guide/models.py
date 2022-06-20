@@ -2236,21 +2236,23 @@ class VoterGuidePossibilityManager(models.Manager):
         }
         return results
 
-    def retrieve_voter_guide_possibility_list(self,
-                                              order_by='',
-                                              start_number=0,
-                                              end_number=25,
-                                              search_string='',
-                                              google_civic_election_id=0,
-                                              hide_from_active_review=False,
-                                              cannot_find_endorsements=False,
-                                              candidates_missing_from_we_vote=False,
-                                              capture_detailed_comments=False,
-                                              from_prior_election=False,
-                                              ignore_this_source=False,
-                                              show_prior_years=False,
-                                              assigned_to_voter_we_vote_id=False,
-                                              return_count_only=False):
+    def retrieve_voter_guide_possibility_list(
+            self,
+            order_by='',
+            start_number=0,
+            end_number=25,
+            search_string='',
+            google_civic_election_id=0,
+            hide_from_active_review=False,
+            cannot_find_endorsements=False,
+            candidates_missing_from_we_vote=False,
+            capture_detailed_comments=False,
+            from_prior_election=False,
+            ignore_this_source=False,
+            show_prior_years=False,
+            assigned_to_no_one=False,
+            assigned_to_voter_we_vote_id=False,
+            return_count_only=False):
         start_number = convert_to_int(start_number)
         end_number = convert_to_int(end_number)
         hide_from_active_review = positive_value_exists(hide_from_active_review)
@@ -2273,7 +2275,11 @@ class VoterGuidePossibilityManager(models.Manager):
                 # Default to only showing this year
                 now = datetime.now()
                 voter_guide_query = voter_guide_query.filter(date_last_changed__year=now.year)
-            if positive_value_exists(assigned_to_voter_we_vote_id):
+            if positive_value_exists(assigned_to_no_one):
+                voter_guide_query = voter_guide_query.filter(
+                    Q(assigned_to_voter_we_vote_id__isnull=True) |
+                    Q(assigned_to_voter_we_vote_id=""))
+            elif positive_value_exists(assigned_to_voter_we_vote_id):
                 voter_guide_query = voter_guide_query.filter(
                     assigned_to_voter_we_vote_id__iexact=assigned_to_voter_we_vote_id)
 
