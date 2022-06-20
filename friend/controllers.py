@@ -2355,7 +2355,7 @@ def generate_mutual_friend_preview_list_serialized_for_two_voters(
         second_friend_voter_we_vote_id=''):
     status = ""
     success = True
-    maximum_number_to_return = 5
+    maximum_number_of_mutual_friends_to_return = 8
 
     # Note that in the MutualFriend table, we store both "directions" of the mutual friendship:
     #  person A looking at person B, AND
@@ -2377,7 +2377,7 @@ def generate_mutual_friend_preview_list_serialized_for_two_voters(
         .annotate(combined_friend_count=F('viewer_to_mutual_friend_friend_count') +
                   F('viewee_to_mutual_friend_friend_count'))\
         .order_by('-combined_friend_count')
-    mutual_friend_list = queryset[:maximum_number_to_return]
+    mutual_friend_list = queryset[:maximum_number_of_mutual_friends_to_return]
 
     mutual_friend_preview_list_found = False
     mutual_friend_preview_list = []
