@@ -168,6 +168,13 @@ class FriendInvitationVoterLink(models.Model):
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True, db_index=True)
     merge_by_secret_key_allowed = models.BooleanField(default=True)  # To allow merges after delete
     invitation_table = models.CharField(max_length=8, default=FRIEND_INVITATION_VOTER_LINK)
+
+    mutual_friend_count = models.PositiveSmallIntegerField(null=True, unique=False)
+    mutual_friend_count_last_updated = models.DateTimeField(null=True)
+
+    mutual_friend_preview_list_serialized = models.TextField(default=None, null=True)
+    mutual_friend_preview_list_update_needed = models.BooleanField(default=True)
+
     deleted = models.BooleanField(default=False)  # If invitation is completed or rescinded, mark as deleted
 
 
