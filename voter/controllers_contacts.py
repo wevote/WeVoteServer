@@ -56,9 +56,20 @@ def move_voter_contact_email_to_another_voter(from_voter_we_vote_id, to_voter_we
     # ######################
     # Migrations
     try:
+        query = VoterContactEmail.objects.all()
+        query = query.filter(imported_by_voter_we_vote_id__iexact=to_voter_we_vote_id)
+        query = query.exclude(google_contact_id__isnull=True)
+        query = query.values_list('google_contact_id', flat=True).distinct()
+        google_contact_id_list_to_not_overwrite = list(query)
+
         voter_contact_email_entries_moved += VoterContactEmail.objects\
             .filter(imported_by_voter_we_vote_id__iexact=from_voter_we_vote_id)\
+            .exclude(google_contact_id__in=google_contact_id_list_to_not_overwrite)\
             .update(imported_by_voter_we_vote_id=to_voter_we_vote_id)
+
+        entries_deleted = \
+            VoterContactEmail.objects.filter(imported_by_voter_we_vote_id__iexact=from_voter_we_vote_id).delete()
+        status += "ENTRIES_DELETED: " + str(entries_deleted) + " "
     except Exception as e:
         status += "FAILED-VOTER_CONTACT_EMAIL_UPDATE_IMPORTED_BY: " + str(e) + " "
 
@@ -217,6 +228,7 @@ def voter_contact_list_retrieve_for_api(voter_we_vote_id=''):  # voterContactLis
             if hasattr(voter_contact_email, 'google_contact_id') else '',
             'google_date_last_updated': google_date_last_updated_string,
             'has_data_from_google_people_api': voter_contact_email.has_data_from_google_people_api,
+            'id': voter_contact_email.id if hasattr(voter_contact_email, 'id') else 0,
             'ignore_contact': voter_contact_email.ignore_contact,
             'imported_by_voter_we_vote_id': voter_contact_email.imported_by_voter_we_vote_id
             if hasattr(voter_contact_email, 'imported_by_voter_we_vote_id') else '',

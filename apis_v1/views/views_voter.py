@@ -2061,7 +2061,7 @@ def voter_update_view(request):  # voterUpdate
     try:
         voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     except RequestDataTooBig:
-        status += "RequestDataTooBig"
+        status += "RequestDataTooBig "
         json_data = {
             'status': status,
             'success': False,
@@ -3056,6 +3056,7 @@ def voter_contact_list_save_view(request):  # voterContactListSave
 
     status, voter, voter_found, voter_device_link = views_voter_utils.get_voter_from_request(request, status)
     contacts_string = request.POST.get('contacts', None)
+    augment_voter_contact_emails_with_location = request.POST.get('augment_voter_contact_emails_with_location', False)
     delete_all_voter_contact_emails = request.POST.get('delete_all_voter_contact_emails', False)
     google_api_key_type = request.POST.get('google_api_key_type', 'ballot')
 
@@ -3082,9 +3083,10 @@ def voter_contact_list_save_view(request):  # voterContactListSave
     # augment_results = augment_emails_for_voter_with_snovio(voter_we_vote_id=voter.we_vote_id)
     # status += augment_results['status']
 
-    from import_export_open_people.controllers import augment_emails_for_voter_with_open_people
-    augment_results = augment_emails_for_voter_with_open_people(voter_we_vote_id=voter.we_vote_id)
-    status += augment_results['status']
+    if positive_value_exists(augment_voter_contact_emails_with_location):
+        from import_export_open_people.controllers import augment_emails_for_voter_with_open_people
+        augment_results = augment_emails_for_voter_with_open_people(voter_we_vote_id=voter.we_vote_id)
+        status += augment_results['status']
 
     retrieve_results = voter_contact_list_retrieve_for_api(voter_we_vote_id=voter.we_vote_id)
     voter_contact_email_list = retrieve_results['voter_contact_email_list']
@@ -3093,11 +3095,13 @@ def voter_contact_list_save_view(request):  # voterContactListSave
     json_data = {
         'status':                           status,
         'success':                          success,
-        'we_vote_id_for_google_contacts':   voter.we_vote_id,
+        'augment_voter_contact_emails_with_location':   augment_voter_contact_emails_with_location,
         'contacts_stored':                  contacts_stored,
+        'delete_all_voter_contact_emails':  delete_all_voter_contact_emails,
         'voter_contact_email_google_count': voter_contact_email_google_count,
         'voter_contact_email_list':         voter_contact_email_list,
         'voter_contact_email_list_count':   len(voter_contact_email_list),
+        'we_vote_id_for_google_contacts':   voter.we_vote_id,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

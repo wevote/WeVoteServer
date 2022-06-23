@@ -223,8 +223,8 @@ def friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_
 
     if not voter_results['voter_found']:
         error_results = {
-            'status':                               "ACCEPTING_VOTER_NOT_FOUND ",
-            'success':                              False,
+            'status':       "ACCEPTING_VOTER_NOT_FOUND ",
+            'success':      False,
         }
         return error_results
 
@@ -233,8 +233,8 @@ def friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_
     original_sender_voter_results = voter_manager.retrieve_voter_by_we_vote_id(original_sender_we_vote_id)
     if not original_sender_voter_results['voter_found']:
         error_results = {
-            'status':                               "ORIGINAL_SENDER_VOTER_NOT_FOUND ",
-            'success':                              False,
+            'status':       "ORIGINAL_SENDER_VOTER_NOT_FOUND ",
+            'success':      False,
         }
         return error_results
 
@@ -333,8 +333,8 @@ def friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_
                 status += send_results['status']
 
     results = {
-        'success':                              True,
-        'status':                               status,
+        'success':      True,
+        'status':       status,
     }
     return results
 
@@ -496,6 +496,8 @@ def friend_invitation_by_email_send_for_api(voter_device_id,  # friendInvitation
     if not isinstance(last_name_array, (list, tuple)):
         last_name_array = []
 
+    # if not positive_value_exists(invitation_message):
+    #     invitation_message = ""
     if email_address_array:
         # Reconstruct dictionary array from lists
         for n in range(len(email_address_array)):
@@ -2023,6 +2025,25 @@ def generate_mutual_friends_for_all_voters():
         if positive_value_exists(mutual_friends_update_suppressed_count):
             total_mutual_friends_update_suppressed_count += mutual_friends_update_suppressed_count
 
+    queryset = FriendInvitationVoterLink.objects.all()
+    queryset = queryset.filter(deleted=False)
+    queryset = queryset.order_by('-date_last_changed')
+    friend_invitation_voter_link_list = list(queryset)
+    # Loop through them SuggestedFriend list
+    for one_friend_invitation_voter_link in friend_invitation_voter_link_list:
+        generate_results = generate_mutual_friends_for_friend_invitation_voter_link(
+            friend_invitation_voter_link=one_friend_invitation_voter_link)
+        status += generate_results['status']
+        mutual_friends_created_count = generate_results['mutual_friends_created_count']
+        mutual_friends_updated_count = generate_results['mutual_friends_updated_count']
+        mutual_friends_update_suppressed_count = generate_results['mutual_friends_update_suppressed_count']
+        if positive_value_exists(mutual_friends_created_count):
+            total_mutual_friends_created_count += mutual_friends_created_count
+        if positive_value_exists(mutual_friends_updated_count):
+            total_mutual_friends_updated_count += mutual_friends_updated_count
+        if positive_value_exists(mutual_friends_update_suppressed_count):
+            total_mutual_friends_update_suppressed_count += mutual_friends_update_suppressed_count
+
     if positive_value_exists(total_mutual_friends_created_count):
         status += "created: " + str(total_mutual_friends_created_count) + " "
     if positive_value_exists(total_mutual_friends_updated_count):
@@ -2041,7 +2062,8 @@ def generate_mutual_friends_for_one_voter(voter_we_vote_id='', update_existing_d
     status = ""
     success = True
     friend_manager = FriendManager()
-    voter_manager = VoterManager()
+
+    # ######################
     # Retrieve list of all CurrentFriend entries connected to voter_we_vote_id
     current_friend_list_results = friend_manager.retrieve_current_friend_list(
         voter_we_vote_id=voter_we_vote_id,
@@ -2050,21 +2072,55 @@ def generate_mutual_friends_for_one_voter(voter_we_vote_id='', update_existing_d
         status += current_friend_list_results['status']
         success = False
         results = {
-            'success':                          success,
-            'status':                           status,
+            'success':  success,
+            'status':   status,
         }
         return results
-
     current_friend_list = current_friend_list_results['current_friend_list']
-
-    # Loop through them CurrentFriend list
     for one_current_friend in current_friend_list:
         generate_results = generate_mutual_friends_for_current_friend(current_friend=one_current_friend)
         status += generate_results['status']
 
+    # ######################
+    # Retrieve list of all SuggestedFriend entries connected to voter_we_vote_id
+    suggested_friend_list_results = friend_manager.retrieve_suggested_friend_list(
+        voter_we_vote_id=voter_we_vote_id,
+        read_only=False)
+    if not suggested_friend_list_results['success']:
+        status += suggested_friend_list_results['status']
+        success = False
+        results = {
+            'success':  success,
+            'status':   status,
+        }
+        return results
+    suggested_friend_list = suggested_friend_list_results['suggested_friend_list']
+    for one_suggested_friend in suggested_friend_list:
+        generate_results = generate_mutual_friends_for_suggested_friend(suggested_friend=one_suggested_friend)
+        status += generate_results['status']
+
+    # ######################
+    # Retrieve list of all FriendInvitationVoterLink entries connected to voter_we_vote_id
+    sent_to_me_results = friend_manager.retrieve_friend_invitations_sent_to_me(
+        recipient_voter_we_vote_id=voter_we_vote_id,
+        read_only=False)
+    if not sent_to_me_results['success']:
+        status += sent_to_me_results['status']
+        success = False
+        results = {
+            'success':  success,
+            'status':   status,
+        }
+        return results
+    friend_invitation_voter_link_list = sent_to_me_results['friend_list']
+    for one_friend_invitation_voter_link in friend_invitation_voter_link_list:
+        generate_results = generate_mutual_friends_for_friend_invitation_voter_link(
+            friend_invitation_voter_link=one_friend_invitation_voter_link)
+        status += generate_results['status']
+
     results = {
-        'success':                          success,
-        'status':                           status,
+        'success':  success,
+        'status':   status,
     }
     return results
 
@@ -2141,6 +2197,87 @@ def generate_mutual_friends_for_current_friend(current_friend=None, update_exist
         'mutual_friends_update_suppressed_count': mutual_friends_update_suppressed_count,
         'success': success,
         'status': status,
+    }
+    return results
+
+
+def generate_mutual_friends_for_friend_invitation_voter_link(
+        friend_invitation_voter_link=None,
+        update_existing_data=False):
+    status = ""
+    success = True
+    friend_manager = FriendManager()
+
+    voter_we_vote_id = friend_invitation_voter_link.sender_voter_we_vote_id
+    friend_voter_we_vote_id = friend_invitation_voter_link.recipient_voter_we_vote_id
+
+    # Retrieve the voter_we_vote_id's of all mutual friends, based on query of CurrentFriend table
+    mutual_voter_we_vote_id_list_from_current_friends = \
+        friend_manager.fetch_mutual_friends_voter_we_vote_id_list_from_current_friends(
+            voter_we_vote_id=voter_we_vote_id,
+            friend_voter_we_vote_id=friend_voter_we_vote_id)
+
+    # Update SuggestedFriend with mutual_friend_count
+    mutual_friend_count = len(mutual_voter_we_vote_id_list_from_current_friends)
+    # if positive_value_exists(mutual_friend_count):
+    #     status += "MUTUAL_FRIEND_COUNT: " + str(mutual_friend_count) + " "
+
+    generate_results = generate_mutual_friends_for_two_voters(
+        first_friend_voter_we_vote_id=voter_we_vote_id,
+        mutual_friends_voter_we_vote_id_list_from_current_friends=mutual_voter_we_vote_id_list_from_current_friends,
+        second_friend_voter_we_vote_id=friend_voter_we_vote_id,
+        update_existing_data=update_existing_data)
+    status += generate_results['status']
+    mutual_friends_created_count = generate_results['mutual_friends_created_count']
+    mutual_friends_updated_count = generate_results['mutual_friends_updated_count']
+    mutual_friends_update_suppressed_count = generate_results['mutual_friends_update_suppressed_count']
+
+    change_to_save = False
+    mutual_friend_count_change = False
+    if not positive_value_exists(mutual_friend_count) and friend_invitation_voter_link.mutual_friend_count is None:
+        pass
+    elif friend_invitation_voter_link.mutual_friend_count != mutual_friend_count:
+        friend_invitation_voter_link.mutual_friend_count = mutual_friend_count
+        friend_invitation_voter_link.mutual_friend_count_last_updated = localtime(now()).date()  # Pacific Time
+
+        change_to_save = True
+        mutual_friend_count_change = True
+
+    always_update_serialized = True
+    if always_update_serialized or mutual_friend_count_change or update_existing_data:
+        # Note that in the SuggestedFriend table, we store both "directions" of the suggested friendship:
+        #  person A looking at person B, AND
+        #  person B looking at person A
+        # We *could* generate a mutual friend preview list unique for each friendship direction (depending on
+        #  whether it is person A viewing, or person B viewing). For now we are creating the same preview list
+        #  for both person A and person B
+        preview_results = generate_mutual_friend_preview_list_serialized_for_two_voters(
+            first_friend_voter_we_vote_id=voter_we_vote_id,
+            second_friend_voter_we_vote_id=friend_voter_we_vote_id)
+        status += preview_results['status']
+        if preview_results['success']:
+            mutual_friend_preview_list_serialized = preview_results['mutual_friend_preview_list_serialized']
+            if not positive_value_exists(mutual_friend_preview_list_serialized) and \
+                    friend_invitation_voter_link.mutual_friend_preview_list_serialized is None:
+                pass
+            elif friend_invitation_voter_link.mutual_friend_preview_list_serialized != \
+                    mutual_friend_preview_list_serialized:
+                friend_invitation_voter_link.mutual_friend_preview_list_serialized = \
+                    mutual_friend_preview_list_serialized
+                friend_invitation_voter_link.mutual_friend_preview_list_update_needed = False
+                change_to_save = True
+        else:
+            status += "FAILED_TO_GENERATE_PREVIEW_LIST_FRIEND_INVITATION_VOTER_LINK "
+
+    if change_to_save:
+        friend_invitation_voter_link.save()
+
+    results = {
+        'mutual_friends_created_count':             mutual_friends_created_count,
+        'mutual_friends_updated_count':             mutual_friends_updated_count,
+        'mutual_friends_update_suppressed_count':   mutual_friends_update_suppressed_count,
+        'success':                                  success,
+        'status':                                   status,
     }
     return results
 
@@ -2533,6 +2670,7 @@ def get_friend_invitations_sent_to_me(status, voter, read_only=True):
     status += retrieve_invitations_sent_to_me_results['status']
     if retrieve_invitations_sent_to_me_results['friend_list_found']:
         raw_friend_list = retrieve_invitations_sent_to_me_results['friend_list']
+        friend_invitation_dict = {}
         heal_results = heal_friend_invitations_sent_to_me(voter.we_vote_id, raw_friend_list)
         invitation_table_dict = {}
         verified_friend_list = heal_results['friend_list']
@@ -2540,6 +2678,10 @@ def get_friend_invitations_sent_to_me(status, voter, read_only=True):
         sent_to_me_voter_we_vote_id_list = []
         recipient_voter_email_dict = {}
         for one_friend_invitation in verified_friend_list:
+            friend_invitation_dict[one_friend_invitation.sender_voter_we_vote_id] = \
+                one_friend_invitation \
+                if hasattr(one_friend_invitation, "mutual_friend_count") \
+                else ""
             sent_to_me_voter_we_vote_id_list.append(one_friend_invitation.sender_voter_we_vote_id)
             invitation_table_dict[one_friend_invitation.sender_voter_we_vote_id] = \
                 one_friend_invitation.invitation_table \
@@ -2558,6 +2700,26 @@ def get_friend_invitations_sent_to_me(status, voter, read_only=True):
             for friend_voter in sent_to_me_friend_list:  # This is the voter who sent the invitation to me
                 mutual_friends = friend_manager.fetch_mutual_friends_count_from_current_friends(
                     voter.we_vote_id, friend_voter.we_vote_id)
+                if friend_voter.we_vote_id in friend_invitation_dict:
+                    mutual_friend_count = friend_invitation_dict[friend_voter.we_vote_id].mutual_friend_count \
+                            if hasattr(friend_invitation_dict[friend_voter.we_vote_id], "mutual_friend_count") and \
+                            positive_value_exists(friend_invitation_dict[friend_voter.we_vote_id].mutual_friend_count) \
+                            else 0
+                    mutual_friend_preview_list_serialized = \
+                        friend_invitation_dict[friend_voter.we_vote_id].mutual_friend_preview_list_serialized \
+                        if hasattr(friend_invitation_dict[friend_voter.we_vote_id],
+                                   "mutual_friend_preview_list_serialized") \
+                        and positive_value_exists(friend_invitation_dict[friend_voter.we_vote_id]
+                                                  .mutual_friend_preview_list_serialized) \
+                        else None
+                    if mutual_friend_preview_list_serialized:
+                        mutual_friend_preview_list = \
+                            json.loads(mutual_friend_preview_list_serialized)
+                    else:
+                        mutual_friend_preview_list = []
+                else:
+                    mutual_friend_count = 0
+                    mutual_friend_preview_list = []
                 # Removed for now for speed
                 # positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(friend_voter)
                 one_friend = {
@@ -2578,6 +2740,8 @@ def get_friend_invitations_sent_to_me(status, voter, read_only=True):
                     "invitation_status":                "",  # Not used for invitations sent to me
                     "invitation_sent_to":               recipient_voter_email_dict[friend_voter.we_vote_id],
                     "invitation_table":                 invitation_table_dict[friend_voter.we_vote_id],
+                    "mutual_friend_count":              mutual_friend_count,
+                    "mutual_friend_preview_list":       mutual_friend_preview_list,
                     "mutual_friends":                   mutual_friends,
                     # "positions_taken":                  positions_taken,
                 }
@@ -2630,10 +2794,12 @@ def get_friend_invitations_sent_by_me(status, voter, read_only=True):
     status += retrieve_invitations_sent_by_me_results['status']
     if retrieve_invitations_sent_by_me_results['friend_list_found']:
         raw_friend_list = retrieve_invitations_sent_by_me_results['friend_list']
+        friend_invitation_dict = {}
         invitation_status_dict = {}
         invitation_table_dict = {}
         recipient_voter_email_dict = {}
         recipient_voter_email_invitations = []
+        recipient_voter_we_vote_id = ''
         recipient_voter_we_vote_id_list = []
         for one_friend_invitation in raw_friend_list:
             # Two kinds of invitations come in the raw_friend_list, 1) an invitation connected to voter
@@ -2643,6 +2809,10 @@ def get_friend_invitations_sent_by_me(status, voter, read_only=True):
             else:
                 recipient_voter_we_vote_id = ""
             if positive_value_exists(recipient_voter_we_vote_id):
+                friend_invitation_dict[recipient_voter_we_vote_id] = \
+                    one_friend_invitation \
+                    if hasattr(one_friend_invitation, "mutual_friend_count") \
+                    else ""
                 recipient_voter_we_vote_id_list.append(recipient_voter_we_vote_id)
                 invitation_status_dict[recipient_voter_we_vote_id] = \
                     one_friend_invitation.invitation_status \
@@ -2668,7 +2838,28 @@ def get_friend_invitations_sent_by_me(status, voter, read_only=True):
                 # Removed for now for speed
                 # positions_taken = position_metrics_manager.fetch_positions_count_for_this_voter(friend_voter)
                 mutual_friends = friend_manager.fetch_mutual_friends_count_from_current_friends(
-                    voter.we_vote_id, friend_voter.we_vote_id)
+                    voter.we_vote_id, recipient_voter_we_vote_id)
+                if recipient_voter_we_vote_id in friend_invitation_dict:
+                    mutual_friend_count = friend_invitation_dict[recipient_voter_we_vote_id].mutual_friend_count \
+                        if hasattr(friend_invitation_dict[recipient_voter_we_vote_id], "mutual_friend_count") and \
+                        positive_value_exists(friend_invitation_dict[recipient_voter_we_vote_id]
+                                              .mutual_friend_count) \
+                        else 0
+                    mutual_friend_preview_list_serialized = \
+                        friend_invitation_dict[recipient_voter_we_vote_id].mutual_friend_preview_list_serialized \
+                        if hasattr(friend_invitation_dict[recipient_voter_we_vote_id],
+                                   "mutual_friend_preview_list_serialized") \
+                        and positive_value_exists(friend_invitation_dict[recipient_voter_we_vote_id]
+                                                  .mutual_friend_preview_list_serialized) \
+                        else None
+                    if mutual_friend_preview_list_serialized:
+                        mutual_friend_preview_list = \
+                            json.loads(mutual_friend_preview_list_serialized)
+                    else:
+                        mutual_friend_preview_list = []
+                else:
+                    mutual_friend_count = 0
+                    mutual_friend_preview_list = []
                 one_friend = {
                     "voter_we_vote_id":                 friend_voter.we_vote_id,
                     "voter_date_last_changed":          friend_voter.date_last_changed.strftime('%Y-%m-%d %H:%M:%S'),
@@ -2687,6 +2878,8 @@ def get_friend_invitations_sent_by_me(status, voter, read_only=True):
                     "invitation_status":                invitation_status_dict[friend_voter.we_vote_id],
                     "invitation_table":                 invitation_table_dict[friend_voter.we_vote_id],
                     "invitation_sent_to":               recipient_voter_email_dict[friend_voter.we_vote_id],
+                    "mutual_friend_count":              mutual_friend_count,
+                    "mutual_friend_preview_list":       mutual_friend_preview_list,
                     "mutual_friends":                   mutual_friends,
                     # "positions_taken":                  positions_taken,
                 }
