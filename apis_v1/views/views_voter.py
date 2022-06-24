@@ -3056,11 +3056,18 @@ def voter_contact_list_save_view(request):  # voterContactListSave
 
     status, voter, voter_found, voter_device_link = views_voter_utils.get_voter_from_request(request, status)
     contacts_string = request.POST.get('contacts', None)
-    augment_voter_contact_emails_with_location = request.POST.get('augment_voter_contact_emails_with_location', False)
+
+    augment_with_location = request.POST.get('augment_voter_contact_emails_with_location', False)
+    augment_with_location = positive_value_exists(augment_with_location)
+
+    augment_with_we_vote_data = request.POST.get('augment_voter_contact_emails_with_we_vote_data', False)
+    augment_with_we_vote_data = positive_value_exists(augment_with_we_vote_data)
+
     delete_all_voter_contact_emails = request.POST.get('delete_all_voter_contact_emails', False)
+    delete_all_voter_contact_emails = positive_value_exists(delete_all_voter_contact_emails)
     google_api_key_type = request.POST.get('google_api_key_type', 'ballot')
 
-    if positive_value_exists(delete_all_voter_contact_emails):
+    if delete_all_voter_contact_emails:
         results = delete_all_voter_contact_emails_for_voter(voter_we_vote_id=voter.we_vote_id)
     elif hasattr(voter, 'we_vote_id') and contacts_string:
         contacts = json.loads(contacts_string)
@@ -3068,9 +3075,10 @@ def voter_contact_list_save_view(request):  # voterContactListSave
         results = save_google_contacts(voter_we_vote_id=voter.we_vote_id, contacts=contacts)
         status += results['status']
 
-    from email_outbound.controllers import augment_emails_for_voter_with_we_vote_data
-    augment_results = augment_emails_for_voter_with_we_vote_data(voter_we_vote_id=voter.we_vote_id)
-    status += augment_results['status']
+    if augment_with_we_vote_data:
+        from email_outbound.controllers import augment_emails_for_voter_with_we_vote_data
+        augment_results = augment_emails_for_voter_with_we_vote_data(voter_we_vote_id=voter.we_vote_id)
+        status += augment_results['status']
 
     # 2021-09-30 Requires Pro account which costs $90/month
     # 2022-06-06 We are currently paying for this SendGrid account, so we can implement this
@@ -3083,7 +3091,7 @@ def voter_contact_list_save_view(request):  # voterContactListSave
     # augment_results = augment_emails_for_voter_with_snovio(voter_we_vote_id=voter.we_vote_id)
     # status += augment_results['status']
 
-    if positive_value_exists(augment_voter_contact_emails_with_location):
+    if augment_with_location:
         from import_export_open_people.controllers import augment_emails_for_voter_with_open_people
         augment_results = augment_emails_for_voter_with_open_people(voter_we_vote_id=voter.we_vote_id)
         status += augment_results['status']
@@ -3092,12 +3100,17 @@ def voter_contact_list_save_view(request):  # voterContactListSave
     voter_contact_email_list = retrieve_results['voter_contact_email_list']
     voter_contact_email_google_count = retrieve_results['voter_contact_email_google_count']
 
+    augment_sequence_complete = delete_all_voter_contact_emails or augment_with_location
+    augment_sequence_has_next_step = augment_with_we_vote_data or (contacts_stored > 0)
     json_data = {
         'status':                           status,
         'success':                          success,
-        'augment_voter_contact_emails_with_location':   augment_voter_contact_emails_with_location,
+        'augment_voter_contact_emails_with_location':       augment_with_location,
+        'augment_voter_contact_emails_with_we_vote_data':   augment_with_we_vote_data,
         'contacts_stored':                  contacts_stored,
         'delete_all_voter_contact_emails':  delete_all_voter_contact_emails,
+        'voter_contact_email_augment_sequence_complete':        augment_sequence_complete,
+        'voter_contact_email_augment_sequence_has_next_step':   augment_sequence_has_next_step,
         'voter_contact_email_google_count': voter_contact_email_google_count,
         'voter_contact_email_list':         voter_contact_email_list,
         'voter_contact_email_list_count':   len(voter_contact_email_list),
