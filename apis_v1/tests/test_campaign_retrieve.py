@@ -18,6 +18,7 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
     databases = ["default", "readonly"]
 
 
+
     def setUp(self):
  
         self.voter_create_url = reverse("apis_v1:voterCreateView")
@@ -119,8 +120,10 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
         # print("Device ID: ")
         # print(device_entry)
 
+
+
         #### Generate a voter we vote id ####
-        ## Requires a voter device id ##
+            # Requires a voter device id #
         response2 = self.client2.get(self.voter_create_url, {'voter_device_id': voter_device_id})
         json_data2 = json.loads(response2.content.decode())
 
@@ -321,7 +324,7 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
         print("\nVoter WVID: " + voter_we_vote_id)
 
         #### Generate an organization we vote id ####
-        ## Requires a voter device id & voter we vote id ##
+            # Requires a voter device id & voter we vote id #
         response3 = self.client2.get(self.voter_retrieve_url,{'voter_device_id': voter_device_id})
         json_data3 = json.loads(response3.content.decode())
 
@@ -342,8 +345,10 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
         # print("\nvoter_retrieve_url:" + "\n")
         # print(response3.content) 
 
+
+
         #### Generate a campaignx we vote id ####
-        ## Requires a voter device id, voter we vote id & organization we vote id ##
+            # Requires a voter device id, voter we vote id & organization we vote id #
         response4 = self.client2.get(self.campaign_save_url, {'voter_device_id': voter_device_id, 'voter_we_vote_id': voter_we_vote_id, 'organization_we_vote_id': organization_we_vote_id, 'in_draft_mode': False, 'in_draft_mode_changed': True})
         json_data4 = json.loads(response4.content.decode())
 
@@ -365,6 +370,8 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
         # # print(json_data4)
         # print(response4.content)
 
+
+
         #### Retrieve campaign ####
         response5 = self.client2.get(self.campaign_retrieve_url, {'voter_device_id': voter_device_id, 'campaignx_we_vote_id': campaignx_we_vote_id})
         json_data5 = json.loads(response5.content.decode())
@@ -382,16 +389,15 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
                          "Expected position_list to have length 1, "
                          "actual length = {length}".format(length=len(json_data5["campaignx_owner_list"])))
 
-
-
         # print("\ncampaign_retrieve_url:" + "\n")
         # # print(json_data5)
         # print(response5.content)
 
+
+
         #### Retrieve campaign with voter-we-vote-id as an owner ####
         response6 = self.client2.get(self.campaign_retrieve_as_owner_url, {'voter_device_id': voter_device_id, 'campaignx_we_vote_id': campaignx_we_vote_id})
         json_data6 = json.loads(response6.content.decode())
-
 
         ## TODO ## Check as owner status instead.
         self.assertEqual(json_data6['status'],
@@ -406,10 +412,10 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
                          True,
                          "voter_can_send_updates_to_campaignx = {voter_can_send_updates_to_campaignx} Expected true".format(voter_can_send_updates_to_campaignx=json_data6['voter_can_send_updates_to_campaignx']))
        
-
         # print("\ncampaign_retrieve_as_owner:" + "\n")
         # # print(json_data6)
         # print(response6.content)
+
 
 
         #### Generate another set of voter entry variables: ####
@@ -428,6 +434,8 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
         print('voter_we_vote_ids: ')
         print(voter_we_vote_id)
         print(voter_we_vote_id_2) 
+
+
 
         #### Retrieve campaign with non-owner voter id ####
         response9 = self.client2.get(self.campaign_retrieve_as_owner_url, {'voter_device_id': voter_device_id_2, 'campaignx_we_vote_id': campaignx_we_vote_id})
@@ -450,7 +458,8 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
                          "voter_can_send_updates_to_campaignx = {voter_can_send_updates_to_campaignx} Expected false".format(voter_can_send_updates_to_campaignx=json_data9['voter_can_send_updates_to_campaignx']))        
 
 
-       #### Retrieve campaign with invalid campaign id ####
+
+        #### Retrieve campaign with invalid campaign id ####
         campaignx_we_vote_id_2 = "invalidID"
 
         response10 = self.client2.get(self.campaign_retrieve_url, {'voter_device_id': voter_device_id, 'campaignx_we_vote_id': campaignx_we_vote_id_2})
@@ -475,11 +484,5 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
 
 
 
-        '''
-        TODO
-        Generate another voter device and we vote id
-        Retrieve campaign as a non-owner
-        Retrieve campaign with non-valid campaign id
-        '''
 
 
