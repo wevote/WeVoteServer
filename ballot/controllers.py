@@ -1011,28 +1011,28 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
     if not positive_value_exists(voter_id):
         status += " " + "VALID_VOTER_ID_MISSING"
         error_json_data = {
-            'status':                       status,
-            'success':                      False,
-            'ballot_caveat':                '',
-            'ballot_found':                 False,
-            'ballot_item_list':             [],
+            'status':                               status,
+            'success':                              False,
+            'ballot_caveat':                        '',
+            'ballot_found':                         False,
+            'ballot_item_list':                     [],
             'ballot_location_display_name':         '',
             'ballot_location_shortcut':             ballot_location_shortcut,
             'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
-            'google_civic_election_id':     google_civic_election_id,
-            'is_from_substituted_address':  False,
-            'is_from_test_ballot':          False,
+            'google_civic_election_id':             google_civic_election_id,
+            'is_from_substituted_address':          False,
+            'is_from_test_ballot':                  False,
             'next_national_election_day_text':      '',
-            'original_text_city':           '',
-            'original_text_state':          '',
-            'original_text_zip':            '',
+            'original_text_city':                   '',
+            'original_text_state':                  '',
+            'original_text_zip':                    '',
             'polling_location_we_vote_id_source':   '',
-            'substituted_address_nearby':   '',
-            'substituted_address_city':     '',
-            'substituted_address_state':    '',
-            'substituted_address_zip':      '',
-            'text_for_map_search':          '',
-            'voter_device_id': voter_device_id,
+            'substituted_address_nearby':           '',
+            'substituted_address_city':             '',
+            'substituted_address_state':            '',
+            'substituted_address_zip':              '',
+            'text_for_map_search':                  '',
+            'voter_device_id':                      voter_device_id,
         }
         return error_json_data
 
@@ -1043,6 +1043,9 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
     status += " " + voter_address_results['status']
     # Note that this might be an empty VoterAddress object
     voter_address = voter_address_results['voter_address']
+    text_for_map_search = ''
+    if voter_address and hasattr(voter_address, 'text_for_map_search'):
+        text_for_map_search = voter_address.text_for_map_search
     if positive_value_exists(voter_address_results['voter_address_has_value']):
         ballot_retrieval_based_on_voter_address = True
     else:
@@ -1062,35 +1065,35 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
         elif positive_value_exists(ballot_location_shortcut):
             ballot_caveat = "We could not find the ballot '{ballot_location_shortcut}'.".format(
                 ballot_location_shortcut=ballot_location_shortcut)
-        elif positive_value_exists(voter_address.text_for_map_search):
+        elif positive_value_exists(text_for_map_search):
             ballot_caveat = "We could not find a ballot near '{text_for_map_search}'.".format(
-                text_for_map_search=voter_address.text_for_map_search)
+                text_for_map_search=text_for_map_search)
         else:
             ballot_caveat = "Please save your address so we can find your ballot."
 
         error_json_data = {
-            'status':                       status,
-            'success':                      True,
-            'ballot_caveat':                ballot_caveat,
-            'ballot_found':                 False,
-            'ballot_item_list':             [],
+            'status':                               status,
+            'success':                              True,
+            'ballot_caveat':                        ballot_caveat,
+            'ballot_found':                         False,
+            'ballot_item_list':                     [],
             'ballot_location_display_name':         '',
             'ballot_location_shortcut':             ballot_location_shortcut,
             'ballot_returned_we_vote_id':           ballot_returned_we_vote_id,
-            'google_civic_election_id':     google_civic_election_id,
-            'is_from_substituted_address':  False,
-            'is_from_test_ballot':          False,
+            'google_civic_election_id':             google_civic_election_id,
+            'is_from_substituted_address':          False,
+            'is_from_test_ballot':                  False,
             'next_national_election_day_text':      next_national_election_day_text,
-            'original_text_city':           '',
-            'original_text_state':          '',
-            'original_text_zip':            '',
-            'polling_location_we_vote_id_source': '',
-            'substituted_address_nearby':   '',
-            'substituted_address_city':     '',
-            'substituted_address_state':    '',
-            'substituted_address_zip':      '',
-            'text_for_map_search':          voter_address.text_for_map_search,
-            'voter_device_id': voter_device_id,
+            'original_text_city':                   '',
+            'original_text_state':                  '',
+            'original_text_zip':                    '',
+            'polling_location_we_vote_id_source':   '',
+            'substituted_address_nearby':           '',
+            'substituted_address_city':             '',
+            'substituted_address_state':            '',
+            'substituted_address_zip':              '',
+            'text_for_map_search':                  text_for_map_search,
+            'voter_device_id':                      voter_device_id,
         }
         return error_json_data
 
@@ -1166,34 +1169,34 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
 
         status += " " + results['status']
         json_data = {
-            'status':                       status,
-            'success':                      True,
-            'ballot_caveat':                voter_ballot_saved.ballot_caveat(),
-            'ballot_found':                 True,
-            'ballot_item_list':             results['ballot_item_list'],
-            'ballot_location_display_name': voter_ballot_saved.ballot_location_display_name,
-            'ballot_location_shortcut':     voter_ballot_saved.ballot_location_shortcut,
-            'ballot_returned_we_vote_id':   voter_ballot_saved.ballot_returned_we_vote_id,
-            'election_name':                voter_ballot_saved.election_description_text,
-            'election_day_text':            voter_ballot_saved.election_day_text(),
-            'google_civic_election_id':     google_civic_election_id,
-            'is_from_substituted_address':  voter_ballot_saved.is_from_substituted_address,
-            'is_from_test_ballot':          voter_ballot_saved.is_from_test_ballot,
+            'status':                               status,
+            'success':                              True,
+            'ballot_caveat':                        voter_ballot_saved.ballot_caveat(),
+            'ballot_found':                         True,
+            'ballot_item_list':                     results['ballot_item_list'],
+            'ballot_location_display_name':         voter_ballot_saved.ballot_location_display_name,
+            'ballot_location_shortcut':             voter_ballot_saved.ballot_location_shortcut,
+            'ballot_returned_we_vote_id':           voter_ballot_saved.ballot_returned_we_vote_id,
+            'election_name':                        voter_ballot_saved.election_description_text,
+            'election_day_text':                    voter_ballot_saved.election_day_text(),
+            'google_civic_election_id':             google_civic_election_id,
+            'is_from_substituted_address':          voter_ballot_saved.is_from_substituted_address,
+            'is_from_test_ballot':                  voter_ballot_saved.is_from_test_ballot,
             'next_national_election_day_text':      next_national_election_day_text,
-            'original_text_city':           voter_ballot_saved.original_text_city,
-            'original_text_state':          voter_ballot_saved.original_text_state,
-            'original_text_zip':            voter_ballot_saved.original_text_zip,
-            'polling_location_we_vote_id_source': voter_ballot_saved.polling_location_we_vote_id_source,
-            'substituted_address_nearby':   voter_ballot_saved.substituted_address_nearby,
-            'substituted_address_city':     voter_ballot_saved.substituted_address_city,
-            'substituted_address_state':    voter_ballot_saved.substituted_address_state,
-            'substituted_address_zip':      voter_ballot_saved.substituted_address_zip,
-            'text_for_map_search':          voter_ballot_saved.original_text_for_map_search,
-            'voter_device_id': voter_device_id,
+            'original_text_city':                   voter_ballot_saved.original_text_city,
+            'original_text_state':                  voter_ballot_saved.original_text_state,
+            'original_text_zip':                    voter_ballot_saved.original_text_zip,
+            'polling_location_we_vote_id_source':   voter_ballot_saved.polling_location_we_vote_id_source,
+            'substituted_address_nearby':           voter_ballot_saved.substituted_address_nearby,
+            'substituted_address_city':             voter_ballot_saved.substituted_address_city,
+            'substituted_address_state':            voter_ballot_saved.substituted_address_state,
+            'substituted_address_zip':              voter_ballot_saved.substituted_address_zip,
+            'text_for_map_search':                  voter_ballot_saved.original_text_for_map_search,
+            'voter_device_id':                      voter_device_id,
         }
         return json_data
 
-    status += " " + "NO_VOTER_BALLOT_SAVED_FOUND"
+    status += " " + "NO_VOTER_BALLOT_SAVED_FOUND "
     json_data = {
         'status':                               status,
         'success':                              True,

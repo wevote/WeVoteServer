@@ -1522,6 +1522,8 @@ def positive_value_exists(value):
                 return False
     except ValueError:
         return False
+    except Exception as e:
+        return False
     return bool(value)
 
 

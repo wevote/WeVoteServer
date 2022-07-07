@@ -1248,7 +1248,6 @@ class FollowOrganizationList(models.Model):
                                                  read_only=False):
         # Retrieve a list of follow_organization entries for this voter
         follow_organization_list_found = False
-        following_status = FOLLOWING
         follow_organization_list = {}
         try:
             # Should not default to 'readonly' since we sometimes save the results of this call
@@ -1257,7 +1256,7 @@ class FollowOrganizationList(models.Model):
             else:
                 follow_organization_list = FollowOrganization.objects.all()
             follow_organization_list = follow_organization_list.filter(voter_id=voter_id)
-            follow_organization_list = follow_organization_list.filter(following_status=following_status)
+            follow_organization_list = follow_organization_list.filter(following_status=FOLLOWING)
             if auto_followed_from_twitter_suggestion:
                 follow_organization_list = follow_organization_list.filter(
                     auto_followed_from_twitter_suggestion=auto_followed_from_twitter_suggestion)
@@ -1271,6 +1270,58 @@ class FollowOrganizationList(models.Model):
         else:
             follow_organization_list = {}
             return follow_organization_list
+
+    def delete_follow_organization_list_for_voter_id(
+            self,
+            voter_id=0,
+    ):
+        number_deleted = 0
+        success = True
+        status = ''
+        try:
+            queryset = FollowOrganization.objects.all()
+            queryset = queryset.filter(voter_id=voter_id)
+            number_deleted = queryset.delete()
+            status += "DELETED_FOLLOW_ORGANIZATION: " + str(number_deleted) + " "
+        except Exception as e:
+            success = False
+            status += "FAILED_TO_DELETE_FOLLOW_ORGANIZATION: " + str(e) + " "
+
+        results = {
+            'success':          success,
+            'status':           status,
+            'number_deleted':   number_deleted,
+        }
+        return results
+
+    def move_follow_organization_from_voter_id_to_new_voter_id(
+            self,
+            from_voter_id=0,
+            to_voter_id=0,
+            exclude_organization_we_vote_id_list=[],
+    ):
+        success = True
+        status = ''
+        try:
+            queryset = FollowOrganization.objects.all()
+            queryset = queryset.filter(voter_id=from_voter_id)
+            if len(exclude_organization_we_vote_id_list):
+                queryset = queryset.exclude(organization_we_vote_id__in=exclude_organization_we_vote_id_list)
+            number_moved = queryset.update(
+                voter_id=to_voter_id,
+            )
+            status += "UPDATED_FOLLOW_ORGANIZATION: " + str(number_moved) + " "
+        except Exception as e:
+            number_moved = 0
+            success = False
+            status += "FAILED_TO_UPDATE_FOLLOW_ORGANIZATION: " + str(e) + " "
+
+        results = {
+            'success':      success,
+            'status':       status,
+            'number_moved': number_moved,
+        }
+        return results
 
     def retrieve_follow_organization_by_own_organization_we_vote_id(self, organization_we_vote_id,
                                                                     auto_followed_from_twitter_suggestion=False):
@@ -1320,36 +1371,27 @@ class FollowOrganizationList(models.Model):
             follow_organization_list = {}
             return follow_organization_list
 
-    def retrieve_follow_organization_by_voter_id_simple_id_array(self, voter_id, return_we_vote_id=False,
-                                                                 auto_followed_from_twitter_suggestion=False,
-                                                                 read_only=False):
-        follow_organization_list_manager = FollowOrganizationList()
-        follow_organization_list = \
-            follow_organization_list_manager.retrieve_follow_organization_by_voter_id(
-                voter_id, auto_followed_from_twitter_suggestion, read_only=read_only)
-        follow_organization_list_simple_array = []
-        if len(follow_organization_list):
-            voter_manager = VoterManager()
-            voter_linked_organization_we_vote_id = \
-                voter_manager.fetch_linked_organization_we_vote_id_from_local_id(voter_id)
-            for follow_organization in follow_organization_list:
-                if not read_only:
-                    # Heal the data by making sure the voter's linked_organization_we_vote_id exists and is accurate
-                    if positive_value_exists(voter_linked_organization_we_vote_id) \
-                        and voter_linked_organization_we_vote_id != \
-                            follow_organization.voter_linked_organization_we_vote_id:
-                        try:
-                            follow_organization.voter_linked_organization_we_vote_id = \
-                                voter_linked_organization_we_vote_id
-                            follow_organization.save()
-                        except Exception as e:
-                            status = 'FAILED_TO_UPDATE_FOLLOW_ISSUE-voter_id ' + str(voter_id)
-                            handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
+    def retrieve_follow_organization_by_voter_id_simple_id_array(
+            self,
+            voter_id=0,
+            return_we_vote_id=False,
+            auto_followed_from_twitter_suggestion=False):
 
-                if return_we_vote_id:
-                    follow_organization_list_simple_array.append(follow_organization.organization_we_vote_id)
-                else:
-                    follow_organization_list_simple_array.append(follow_organization.organization_id)
+        try:
+            queryset = FollowOrganization.objects.using('readonly').all()
+            queryset = queryset.filter(voter_id=voter_id)
+            queryset = queryset.filter(following_status=FOLLOWING)
+            if auto_followed_from_twitter_suggestion:
+                queryset = queryset.filter(
+                    auto_followed_from_twitter_suggestion=auto_followed_from_twitter_suggestion)
+            if positive_value_exists(return_we_vote_id):
+                queryset = queryset.values_list('organization_we_vote_id', flat=True).distinct()
+            else:
+                queryset = queryset.values_list('organization_id', flat=True).distinct()
+            follow_organization_list_simple_array = list(queryset)
+        except Exception as e:
+            follow_organization_list_simple_array = []
+
         return follow_organization_list_simple_array
 
     def retrieve_followed_organization_by_organization_we_vote_id_simple_id_array(
@@ -1419,18 +1461,20 @@ class FollowOrganizationList(models.Model):
         return followers_organization_list_simple_array
 
     def retrieve_ignore_organization_by_voter_id_simple_id_array(
-            self, voter_id, return_we_vote_id=False, read_only=False):
-        follow_organization_list_manager = FollowOrganizationList()
-        ignore_organization_list = \
-            follow_organization_list_manager.retrieve_ignore_organization_by_voter_id(voter_id, read_only=read_only)
-        ignore_organization_list_simple_array = []
-        if len(ignore_organization_list):
-            for ignore_organization in ignore_organization_list:
-                if return_we_vote_id:
-                    ignore_organization_list_simple_array.append(ignore_organization.organization_we_vote_id)
-                else:
-                    ignore_organization_list_simple_array.append(ignore_organization.organization_id)
-        return ignore_organization_list_simple_array
+            self, voter_id, return_we_vote_id=False):
+        try:
+            queryset = FollowOrganization.objects.using('readonly').all()
+            queryset = queryset.filter(voter_id=voter_id)
+            queryset = queryset.filter(following_status=FOLLOW_IGNORE)
+            if positive_value_exists(return_we_vote_id):
+                queryset = queryset.values_list('organization_we_vote_id', flat=True).distinct()
+            else:
+                queryset = queryset.values_list('organization_id', flat=True).distinct()
+            follow_organization_list_simple_array = list(queryset)
+        except Exception as e:
+            follow_organization_list_simple_array = []
+
+        return follow_organization_list_simple_array
 
     def retrieve_follow_organization_by_organization_id(self, organization_id):
         # Retrieve a list of follow_organization entries for this organization
