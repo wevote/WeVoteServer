@@ -1103,8 +1103,6 @@ def friend_acceptance_email_should_be_sent(  # friendInvitationByEmailVerify
         return error_results
 
     # Now that we know we are dealing with a valid friend invitation, extract the info we need
-    invitation_found = False
-    voter_we_vote_id_accepting_invitation = ""
     if friend_invitation_results['friend_invitation_voter_link_found']:
         invitation_found = True
         status += "FRIEND_ACCEPTANCE_FRIEND_INVITATION_VOTER_LINK_FOUND "
@@ -1149,7 +1147,7 @@ def friend_acceptance_email_should_be_sent(  # friendInvitationByEmailVerify
         status += "FRIEND_ACCEPTANCE_FRIEND_INVITATION_EMAIL_LINK_FOUND "
         friend_invitation_email_link = friend_invitation_results['friend_invitation_email_link']
         sender_voter_we_vote_id = friend_invitation_email_link.sender_voter_we_vote_id
-        voter_we_vote_id_accepting_invitation = friend_invitation_email_link.recipient_voter_we_vote_id
+        voter_we_vote_id_accepting_invitation = voter_we_vote_id
 
         if sender_voter_we_vote_id == voter_we_vote_id:
             status += "SENDER_AND_RECIPIENT_ARE_IDENTICAL_FAILED "
@@ -1166,23 +1164,26 @@ def friend_acceptance_email_should_be_sent(  # friendInvitationByEmailVerify
             return error_results
 
         friend_manager.update_suggested_friends_starting_with_one_voter(sender_voter_we_vote_id)
-        friend_manager.update_suggested_friends_starting_with_one_voter(voter_we_vote_id_accepting_invitation)
+        if positive_value_exists(voter_we_vote_id_accepting_invitation):
+            friend_manager.update_suggested_friends_starting_with_one_voter(voter_we_vote_id_accepting_invitation)
 
-        if not positive_value_exists(friend_invitation_email_link.invited_friend_accepted_notification_sent):
-            accepting_voter_we_vote_id = voter_we_vote_id_accepting_invitation
-            original_sender_we_vote_id = sender_voter_we_vote_id
-            results = friend_accepted_invitation_send(
-                accepting_voter_we_vote_id,
-                original_sender_we_vote_id,
-                web_app_root_url=web_app_root_url)
-            status = results['status']
-            try:
-                friend_invitation_email_link.invited_friend_accepted_notification_sent = True
-                friend_invitation_email_link.save()
-            except Exception as e:
-                status += "COULD_NOT_SAVE_FRIEND_INVITATION_EMAIL_LINK: " + str(e) + " "
+            if not positive_value_exists(friend_invitation_email_link.invited_friend_accepted_notification_sent):
+                accepting_voter_we_vote_id = voter_we_vote_id_accepting_invitation
+                original_sender_we_vote_id = sender_voter_we_vote_id
+                results = friend_accepted_invitation_send(
+                    accepting_voter_we_vote_id,
+                    original_sender_we_vote_id,
+                    web_app_root_url=web_app_root_url)
+                status = results['status']
+                try:
+                    friend_invitation_email_link.invited_friend_accepted_notification_sent = True
+                    friend_invitation_email_link.save()
+                except Exception as e:
+                    status += "COULD_NOT_SAVE_FRIEND_INVITATION_EMAIL_LINK: " + str(e) + " "
+            else:
+                status += "ALREADY_TRUE: friend_invitation_email_link.invited_friend_accepted_notification_sent "
         else:
-            status += "ALREADY_TRUE: friend_invitation_email_link.invited_friend_accepted_notification_sent "
+            status += "FRIEND_INVITATION_EMAIL_LINK_MISSING-voter_we_vote_id_accepting_invitation "
     else:
         invitation_found = False
         status += "FRIEND_INVITATION_NOT_FOUND "
