@@ -227,7 +227,7 @@ def duplicate_follow_issue_entries_to_another_voter(from_voter_we_vote_id, to_vo
     return results
 
 
-def move_follow_entries_to_another_voter(from_voter_id, to_voter_id, to_voter_we_vote_id):
+def move_follow_entries_to_another_voter(from_voter_id=0, to_voter_id=0, to_voter_we_vote_id=''):
     status = ''
     success = False
     follow_entries_moved = 0
@@ -260,23 +260,23 @@ def move_follow_entries_to_another_voter(from_voter_id, to_voter_id, to_voter_we
         return results
 
     follow_organization_list = FollowOrganizationList()
-    follow_organization_manager = FollowOrganizationManager()
-    from_follow_list = follow_organization_list.retrieve_follow_organization_by_voter_id(from_voter_id)
+    organization_we_vote_ids_followed = \
+        follow_organization_list.retrieve_follow_organization_by_voter_id_simple_id_array(
+            voter_id=to_voter_id,
+            return_we_vote_id=True,
+        )
 
-    for from_follow_entry in from_follow_list:
-        # See if the "to_voter" already has an entry for this organization
-        existing_entry_results = follow_organization_manager.retrieve_follow_organization(
-            0, to_voter_id, from_follow_entry.organization_id, from_follow_entry.organization_we_vote_id)
-        if not existing_entry_results['follow_organization_found']:
-            # Change the voter_id and voter_we_vote_id
-            try:
-                from_follow_entry.voter_id = to_voter_id
-                # We don't currently store follow entries by we_vote_id
-                # from_follow_entry.voter_we_vote_id = to_voter_we_vote_id
-                from_follow_entry.save()
-                follow_entries_moved += 1
-            except Exception as e:
-                follow_entries_not_moved += 1
+    move_results = follow_organization_list.move_follow_organization_from_voter_id_to_new_voter_id(
+        from_voter_id=from_voter_id,
+        to_voter_id=to_voter_id,
+        exclude_organization_we_vote_id_list=organization_we_vote_ids_followed,
+    )
+    follow_entries_moved = move_results['number_moved']
+
+    if move_results['success']:
+        # Finally, delete remaining FollowOrganization entries for from_voter_id
+        delete_results = follow_organization_list.delete_follow_organization_list_for_voter_id(voter_id=from_voter_id)
+        follow_entries_not_moved = delete_results['number_deleted']
 
     results = {
         'status':                   status,

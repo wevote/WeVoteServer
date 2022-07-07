@@ -3109,8 +3109,7 @@ def retrieve_voter_guides_to_follow_by_ballot_item(voter_id, kind_of_ballot_item
 
     follow_organization_list_manager = FollowOrganizationList()
     organizations_followed_by_voter = \
-        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id,
-                                                                                                  read_only=True)
+        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
 
     positions_list = position_list_manager.calculate_positions_not_followed_by_voter(
         all_positions_list, organizations_followed_by_voter)
@@ -3236,10 +3235,10 @@ def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_e
     return_we_vote_id = True
     organization_we_vote_ids_followed_by_voter = \
         follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(
-            voter_id, return_we_vote_id, read_only=True)
+            voter_id, return_we_vote_id)
     organization_we_vote_ids_ignored_by_voter = \
         follow_organization_list_manager.retrieve_ignore_organization_by_voter_id_simple_id_array(
-            voter_id, return_we_vote_id, read_only=True)
+            voter_id, return_we_vote_id)
 
     # position_list_manager = PositionListManager()
     if not positive_value_exists(google_civic_election_id):
@@ -3602,10 +3601,10 @@ def retrieve_voter_guides_to_follow_generic_for_api(voter_id, search_string, fil
         read_only = True
         organization_we_vote_ids_followed_by_voter = \
             follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(
-                voter_id, return_we_vote_id, read_only=read_only)
+                voter_id, return_we_vote_id)
         organization_we_vote_ids_ignored_by_voter = \
             follow_organization_list_manager.retrieve_ignore_organization_by_voter_id_simple_id_array(
-                voter_id, return_we_vote_id, read_only=read_only)
+                voter_id, return_we_vote_id)
 
     # This is a list of orgs that the voter is already following or ignoring
     organization_we_vote_ids_followed_or_ignored_by_voter = list(chain(organization_we_vote_ids_followed_by_voter,
@@ -5077,8 +5076,8 @@ def retrieve_voter_guides_ignored(voter_id):  # voterGuidesIgnoredRetrieve
     follow_organization_list_manager = FollowOrganizationList()
     return_we_vote_id = True
     organization_we_vote_ids_ignored_by_voter = \
-        follow_organization_list_manager.retrieve_ignore_organization_by_voter_id_simple_id_array(voter_id,
-                                                                                                  return_we_vote_id)
+        follow_organization_list_manager.retrieve_ignore_organization_by_voter_id_simple_id_array(
+            voter_id, return_we_vote_id)
 
     voter_guide_list_object = VoterGuideListManager()
     results = voter_guide_list_object.retrieve_voter_guides_by_organization_list(

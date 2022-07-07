@@ -3,7 +3,8 @@
 # -*- coding: UTF-8 -*-
 from config.base import get_environment_variable
 from django.http import HttpResponse
-from friend.controllers import friend_invitation_by_email_send_for_api, friend_invitation_by_email_verify_for_api, \
+from friend.controllers import friend_acceptance_email_should_be_sent, \
+    friend_invitation_by_email_send_for_api, friend_invitation_by_email_verify_for_api, \
     friend_invitation_by_we_vote_id_send_for_api, friend_invite_response_for_api, friend_list_for_api, \
     friend_lists_all_for_api, friend_invitation_by_facebook_send_for_api, \
     friend_invitation_by_facebook_verify_for_api, friend_invitation_information_for_api, message_to_friend_send_for_api
@@ -57,19 +58,38 @@ def friend_invitation_by_email_verify_view(request):  # friendInvitationByEmailV
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    acceptance_email_should_be_sent = positive_value_exists(request.GET.get('acceptance_email_should_be_sent', False))
     invitation_secret_key = request.GET.get('invitation_secret_key', "")
     hostname = request.GET.get('hostname', "")
-    results = friend_invitation_by_email_verify_for_api(voter_device_id, invitation_secret_key,
-                                                        web_app_root_url=hostname)
-    json_data = {
-        'status':                       results['status'],
-        'success':                      results['success'],
-        'voter_device_id':              voter_device_id,
-        'voter_has_data_to_preserve':   results['voter_has_data_to_preserve'],
-        'invitation_found':             results['invitation_found'],
-        'attempted_to_approve_own_invitation':          results['attempted_to_approve_own_invitation'],
-        'invitation_secret_key':                        invitation_secret_key,
-    }
+    if acceptance_email_should_be_sent:
+        results = friend_acceptance_email_should_be_sent(
+            voter_device_id,
+            invitation_secret_key,
+            web_app_root_url=hostname)
+        json_data = {
+            'status':                               results['status'],
+            'success':                              results['success'],
+            'acceptance_email_should_be_sent':      results['acceptance_email_should_be_sent'],
+            'attempted_to_approve_own_invitation':  results['attempted_to_approve_own_invitation'],
+            'invitation_found':                     results['invitation_found'],
+            'invitation_secret_key':                invitation_secret_key,
+            'voter_device_id':                      voter_device_id,
+            'voter_has_data_to_preserve':           results['voter_has_data_to_preserve'],
+        }
+    else:
+        results = friend_invitation_by_email_verify_for_api(
+            voter_device_id,
+            invitation_secret_key)
+        json_data = {
+            'status':                               results['status'],
+            'success':                              results['success'],
+            'acceptance_email_should_be_sent':      results['acceptance_email_should_be_sent'],
+            'attempted_to_approve_own_invitation':  results['attempted_to_approve_own_invitation'],
+            'invitation_found':                     results['invitation_found'],
+            'invitation_secret_key':                invitation_secret_key,
+            'voter_device_id':                      voter_device_id,
+            'voter_has_data_to_preserve':           results['voter_has_data_to_preserve'],
+        }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 

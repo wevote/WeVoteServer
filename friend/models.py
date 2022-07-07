@@ -106,6 +106,7 @@ class FriendInvitationEmailLink(models.Model):
     recipient_last_name = models.CharField(verbose_name='last name', max_length=255, null=True, blank=True)
     secret_key = models.CharField(
         verbose_name="secret key to accept invite", max_length=255, null=True, blank=True, unique=True)
+    invited_friend_accepted_notification_sent = models.BooleanField(default=False)
     invitation_message = models.TextField(null=True, blank=True)
     invitation_status = models.CharField(max_length=50, choices=INVITATION_STATUS_CHOICES, default=NO_RESPONSE)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
@@ -163,6 +164,7 @@ class FriendInvitationVoterLink(models.Model):
         max_length=255, null=True, blank=True, unique=False, db_index=True)
     secret_key = models.CharField(
         verbose_name="secret key to accept invite", max_length=255, null=True, blank=True, unique=True)
+    invited_friend_accepted_notification_sent = models.BooleanField(default=False)
     invitation_message = models.TextField(null=True, blank=True)
     invitation_status = models.CharField(max_length=50, choices=INVITATION_STATUS_CHOICES, default=NO_RESPONSE)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True, db_index=True)
@@ -1897,12 +1899,18 @@ class FriendManager(models.Manager):
         return results
 
     def retrieve_friend_invitation_from_secret_key(
-            self, invitation_secret_key, for_accepting_friendship=False, for_merge_accounts=False,
-            for_retrieving_information=False, read_only=True):
+            self,
+            invitation_secret_key,
+            for_accepting_friendship=False,
+            for_additional_processes=False,
+            for_merge_accounts=False,
+            for_retrieving_information=False,
+            read_only=True):
         """
 
         :param invitation_secret_key:
         :param for_accepting_friendship:
+        :param for_additional_processes:
         :param for_merge_accounts:
         :param for_retrieving_information:
         :param read_only:
@@ -1927,6 +1935,9 @@ class FriendManager(models.Manager):
                 if positive_value_exists(for_accepting_friendship):
                     voter_link_query = voter_link_query.exclude(invitation_status__iexact=ACCEPTED)
                     status += "FOR_ACCEPTING_FRIENDSHIP "
+                elif positive_value_exists(for_additional_processes):
+                    voter_link_query = voter_link_query.filter(invitation_status__iexact=ACCEPTED)
+                    status += "FOR_ADDITIONAL_PROCESSES "
                 elif positive_value_exists(for_merge_accounts):
                     voter_link_query = voter_link_query.filter(merge_by_secret_key_allowed=True)
                     status += "FOR_MERGE_ACCOUNTS "
@@ -1974,6 +1985,9 @@ class FriendManager(models.Manager):
                 if positive_value_exists(for_accepting_friendship):
                     email_link_query = email_link_query.exclude(invitation_status__iexact=ACCEPTED)
                     status += "FOR_ACCEPTING_FRIENDSHIP "
+                elif positive_value_exists(for_additional_processes):
+                    email_link_query = email_link_query.filter(invitation_status__iexact=ACCEPTED)
+                    status += "FOR_ADDITIONAL_PROCESSES "
                 elif positive_value_exists(for_merge_accounts):
                     email_link_query = email_link_query.filter(merge_by_secret_key_allowed=True)
                     status += "FOR_MERGE_ACCOUNTS "

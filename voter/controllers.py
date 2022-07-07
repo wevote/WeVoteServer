@@ -162,7 +162,7 @@ def delete_all_voter_information_permanently(voter_to_delete=None):  # voterDele
             from_linked_organization = from_linked_organization_results['organization']
             voter_to_delete_linked_organization_id = from_linked_organization.id
         else:
-            # Remove the link to the organization so we don't have a future conflict
+            # Remove the link to the organization, so we don't have a future conflict
             try:
                 voter_to_delete_linked_organization_we_vote_id = None
                 voter_to_delete.linked_organization_we_vote_id = None
@@ -176,7 +176,7 @@ def delete_all_voter_information_permanently(voter_to_delete=None):  # voterDele
     delete_apple_user_results = delete_apple_user_entries_for_voter(voter_to_delete_we_vote_id)
     status += delete_apple_user_results['status']
 
-    # Data healing scripts before we try to move the positions
+    # Data healing scripts before we try to delete the positions
     position_list_manager = PositionListManager()
     if positive_value_exists(voter_to_delete_id):
         repair_results = position_list_manager.repair_all_positions_for_voter(voter_to_delete_id)
@@ -204,7 +204,7 @@ def delete_all_voter_information_permanently(voter_to_delete=None):  # voterDele
     status += " " + delete_friend_invitations_results['status']
 
     if positive_value_exists(voter_to_delete.linked_organization_we_vote_id):
-        # Remove the link to the organization so we don't have a future conflict
+        # Remove the link to the organization, so we don't have a future conflict
         try:
             voter_to_delete.linked_organization_we_vote_id = None
             voter_to_delete.save()
@@ -981,7 +981,7 @@ def move_facebook_info_to_another_voter(from_voter, to_voter):
             temp_facebook_id = from_voter.facebook_id
             temp_facebook_profile_image_url_https = from_voter.facebook_profile_image_url_https
             temp_fb_username = from_voter.fb_username
-            # Now delete it and save so we can save the unique facebook_id in the to_voter
+            # Now delete it and save, so we can save the unique facebook_id in the to_voter
             from_voter.facebook_email = ""
             from_voter.facebook_id = 0
             from_voter.facebook_profile_image_url_https = ""
@@ -1094,7 +1094,7 @@ def move_twitter_info_to_another_voter(from_voter, to_voter):
             temp_twitter_name = from_voter.twitter_name
             temp_twitter_profile_image_url_https = from_voter.twitter_profile_image_url_https
             temp_twitter_screen_name = from_voter.twitter_screen_name
-            # Now delete it and save so we can save the unique facebook_id in the to_voter
+            # Now delete it and save, so we can save the unique facebook_id in the to_voter
             from_voter.twitter_id = None
             from_voter.twitter_name = ""
             from_voter.twitter_profile_image_url_https = ""
@@ -2311,7 +2311,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
             from_linked_organization = from_linked_organization_results['organization']
             from_voter_linked_organization_id = from_linked_organization.id
         else:
-            # Remove the link to the organization so we don't have a future conflict
+            # Remove the link to the organization, so we don't have a future conflict
             try:
                 from_voter_linked_organization_we_vote_id = None
                 from_voter.linked_organization_we_vote_id = None
@@ -2329,7 +2329,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
             to_linked_organization = to_linked_organization_results['organization']
             to_voter_linked_organization_id = to_linked_organization.id
         else:
-            # Remove the link to the organization so we don't have a future conflict
+            # Remove the link to the organization, so we don't have a future conflict
             try:
                 to_voter_linked_organization_we_vote_id = None
                 new_owner_voter.linked_organization_we_vote_id = None
@@ -2401,7 +2401,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
     status += " " + move_friend_invitations_results['status']
 
     if positive_value_exists(from_voter.linked_organization_we_vote_id):
-        # Remove the link to the organization so we don't have a future conflict
+        # Remove the link to the organization, so we don't have a future conflict
         try:
             from_voter.linked_organization_we_vote_id = None
             from_voter.save()
@@ -3363,7 +3363,7 @@ def refresh_voter_primary_email_cached_information_by_email(normalized_email_add
                         status += "UNABLE_TO_UPDATE_VOTER_FOUND_BY_EMAIL "
                         # We tried to update the voter found by the voter_we_vote_id stored in the EmailAddress table,
                         #  but got an error, so assume it was because of a collision with the primary_email_we_vote_id
-                        # Here, we retrieve the voter already "claiming" this email entry so we can wipe the
+                        # Here, we retrieve the voter already "claiming" this email entry, so we can wipe the
                         #  email values.
                         voter_by_primary_email_results = voter_manager.retrieve_voter_by_primary_email_we_vote_id(
                             verified_email_address_object.we_vote_id)
@@ -3444,7 +3444,7 @@ def refresh_voter_primary_email_cached_information_by_email(normalized_email_add
         #  email address removed.
         if positive_value_exists(email_results['success']):
             # Make sure no voter's think they are using this email address
-            # Remove the email information so we don't have a future conflict
+            # Remove the email information, so we don't have a future conflict
             try:
                 if voter_found_by_email_boolean:
                     voter_found_by_email.email = None
