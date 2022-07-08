@@ -1308,8 +1308,7 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
 
         # Now we want to make sure we have a current_friend entry
         recipient_organization_we_vote_id = ''
-        voter_results = voter_manager.retrieve_voter_by_we_vote_id(
-            friend_invitation_voter_link.recipient_voter_we_vote_id)
+        voter_results = voter_manager.retrieve_voter_by_we_vote_id(voter_we_vote_id_accepting_invitation)
         if voter_results['voter_found']:
             recipient_organization_we_vote_id = voter_results['voter'].linked_organization_we_vote_id
         friend_results = friend_manager.update_or_create_current_friend(
@@ -1371,6 +1370,9 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
 
             # We might need to heal the data in the voter record
             if voter_we_vote_id_accepting_invitation != voter_we_vote_id:
+                status += "VOTER_ACCEPTING_INVITATION_NOT_CURRENT_SIGNED_IN_VOTER "
+                email_address_object.email_ownership_is_verified = True
+                email_address_object.save()
                 email_owner_results = voter_manager.retrieve_voter_by_we_vote_id(email_address_object.voter_we_vote_id)
                 if email_owner_results['voter_found']:
                     email_owner_voter = email_owner_results['voter']
@@ -1378,6 +1380,9 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
             else:
                 # If we are here, then the email_address_object doesn't belong to another voter and can be
                 #  claimed by this current voter.
+                status += "VOTER_ACCEPTING_INVITATION_IS_CURRENT_SIGNED_IN_VOTER "
+                email_address_object.email_ownership_is_verified = True
+                email_address_object.save()
                 voter_manager.update_voter_email_ownership_verified(voter, email_address_object)
                 if we_have_first_or_last_name_from_friend_invitation_email_link and \
                         not this_voter_has_first_or_last_name_saved:
@@ -1385,6 +1390,7 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
                     update_voter_name = True
 
         else:
+            status += "VERIFIED_EMAIL_ADDRESS_OBJECT_NOT_FOUND "
             voter_we_vote_id_accepting_invitation = voter_we_vote_id
             # If we are here, we know the email is unclaimed. We can assign it to the current voter.
             # Is there an email address entry for this voter/email?
@@ -1393,6 +1399,7 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
                 friend_invitation_email_link.recipient_voter_email, email_we_vote_id,
                 voter_we_vote_id)
             if email_results['email_address_object_found']:
+                status += "UNVERIFIED_EMAIL_ADDRESS_OBJECT_FOUND "
                 email_address_object = email_results['email_address_object']
                 try:
                     email_address_object.email_ownership_is_verified = True
@@ -1407,6 +1414,7 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
                     success = False
                     status += 'FAILED_TO_UPDATE_UNVERIFIED_EMAIL: ' + str(e) + ' '
             else:
+                status += "UNVERIFIED_EMAIL_ADDRESS_OBJECT_NOT_FOUND "
                 email_ownership_is_verified = True
                 email_create_results = email_manager.create_email_address_for_voter(
                     friend_invitation_email_link.recipient_voter_email, voter, email_ownership_is_verified)
