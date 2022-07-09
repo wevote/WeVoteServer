@@ -1048,6 +1048,7 @@ def election_list_view(request):
 
             # Upcoming refresh date scheduled?
             refresh_date_added_to_queue = None
+            retrieve_date_added_to_queue = None
             try:
                 batch_process_queryset = BatchProcess.objects.all()
                 batch_process_queryset = \
@@ -1067,6 +1068,9 @@ def election_list_view(request):
                         if one_batch_process.kind_of_process == 'REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS':
                             if not refresh_date_added_to_queue and one_batch_process.date_added_to_queue:
                                 refresh_date_added_to_queue = one_batch_process.date_added_to_queue
+                        elif one_batch_process.kind_of_process == 'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS':
+                            if not retrieve_date_added_to_queue and one_batch_process.date_added_to_queue:
+                                retrieve_date_added_to_queue = one_batch_process.date_added_to_queue
             except BatchProcess.DoesNotExist:
                 # No offices found. Not a problem.
                 batch_process_list = []
@@ -1079,6 +1083,7 @@ def election_list_view(request):
             election.refresh_date_added_to_queue = refresh_date_added_to_queue
             election.retrieve_date_completed = retrieve_date_completed
             election.retrieve_date_started = retrieve_date_started
+            election.retrieve_date_added_to_queue = retrieve_date_added_to_queue
 
             if refresh_date_completed:
                 most_recent_time = refresh_date_completed
