@@ -296,7 +296,7 @@ def delete_all_voter_information_permanently(voter_to_delete=None):  # voterDele
 
     # And finally, delete all voter_device_links for this voter
     update_link_results = voter_device_link_manager.delete_all_voter_device_links_by_voter_id(voter_to_delete_id)
-    if update_link_results['voter_device_link_updated']:
+    if update_link_results['success']:
         success = True
         status += "VOTER_DEVICE_LINK_DELETED "
     else:

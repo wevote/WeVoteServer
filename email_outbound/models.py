@@ -3,9 +3,11 @@
 # -*- coding: UTF-8 -*-
 
 from datetime import date, timedelta
-from django.core.mail import EmailMultiAlternatives
 from django.apps import apps
 from django.db import models
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import *
+from config.base import get_environment_variable
 from wevote_functions.functions import convert_to_int, extract_email_addresses_from_string, generate_random_string, \
     positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_email_integer, fetch_site_unique_id_prefix
@@ -56,6 +58,8 @@ SEND_STATUS_CHOICES = (
     (BEING_SENT, 'Message being sent'),
     (SENT, 'Message sent'),
 )
+
+SENDGRID_API_KEY = get_environment_variable("SENDGRID_API_KEY", no_exception=True)
 
 
 class EmailAddress(models.Model):
@@ -923,6 +927,7 @@ class EmailManager(models.Manager):
         """
         status = ""
         success = True
+        email_scheduled_sent = False
         sendgrid_turned_off_for_testing = False
         if sendgrid_turned_off_for_testing:
             status += "ERROR_SENDGRID_TURNED_OFF_FOR_TESTING "
@@ -934,32 +939,38 @@ class EmailManager(models.Manager):
             }
             return results
 
-        if positive_value_exists(email_scheduled.sender_voter_name):
-            # TODO DALE Make system variable
-            system_sender_email_address = "{sender_voter_name} via We Vote <info@WeVote.US>" \
-                                          "".format(sender_voter_name=email_scheduled.sender_voter_name)
-        else:
-            system_sender_email_address = "We Vote <info@WeVote.US>"  # TODO DALE Make system variable
-
-        mail = EmailMultiAlternatives(
-            subject=email_scheduled.subject,
-            body=email_scheduled.message_text,
-            from_email=system_sender_email_address,
-            to=[email_scheduled.recipient_voter_email],
-            # headers={"Reply-To": email_scheduled.sender_voter_email}
-        )
-        # 2020-01-19 Dale commented out Reply-To header because with it, Gmail gives phishing warning
-        if positive_value_exists(email_scheduled.message_html):
-            mail.attach_alternative(email_scheduled.message_html, "text/html")
-
         try:
-            mail.send()
-            status += "SENDING_VIA_SENDGRID "
-            email_scheduled_sent = True
+            message = Mail()
+            if positive_value_exists(email_scheduled.sender_voter_name):
+                message.from_email = From(
+                    'info@wevote.us',
+                    "{sender_voter_name} via We Vote".format(sender_voter_name=email_scheduled.sender_voter_name))
+            else:
+                message.from_email = From('info@wevote.us', 'We Vote')
+            message.reply_to = ReplyTo('info@wevote.us', 'We Vote')
+            message.to = To(email_scheduled.recipient_voter_email, email_scheduled.recipient_voter_email, p=0)
+            message.subject = Subject(email_scheduled.subject)
+            message.content = Content(
+                MimeType.text,
+                email_scheduled.message_text)
+            message.content = Content(
+                MimeType.html,
+                email_scheduled.message_html)
+            try:
+                sendgrid_client = SendGridAPIClient(SENDGRID_API_KEY)
+                response = sendgrid_client.send(message)
+                # print(response.status_code)
+                # print(response.body)
+                print(response.headers)
+                status += "SENDING_VIA_SENDGRID "
+                email_scheduled_sent = True
+            except Exception as e:
+                status += "ERROR_COULD_NOT_SEND_VIA_SENDGRID: " + str(e) + ' '
+                print(status)
+                email_scheduled_sent = False
         except Exception as e:
-            status += "ERROR_COULD_NOT_SEND_VIA_SENDGRID: " + str(e) + ' '
+            status += "ERROR_COULD_NOT_BE_PREPARED_FOR_SENDGRID: " + str(e) + ' '
             print(status)
-            email_scheduled_sent = False
 
         results = {
             'success':                  success,

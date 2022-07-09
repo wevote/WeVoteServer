@@ -211,6 +211,12 @@
                         <span style="{% if not election.data_getting_stale %}color: lightgray{% endif %}">
                             start: {{ election.refresh_date_started }}
                         </span>
+                    {% elif election.retrieve_date_completed %}
+                        {{ election.retrieve_date_completed }}
+                    {% elif election.retrieve_date_started %}
+                        <span style="{% if not election.data_getting_stale %}color: lightgray{% endif %}">
+                            start: {{ election.retrieve_date_started }}
+                        </span>
                     {% endif %}
                     <span class="glyphicon glyphicon-new-window"></span>
                 </span>

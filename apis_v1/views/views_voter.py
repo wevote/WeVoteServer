@@ -33,7 +33,8 @@ from sms.controllers import voter_sms_phone_number_retrieve_for_api, voter_sms_p
 from sms.models import SMSManager
 from support_oppose_deciding.controllers import voter_opposing_save, voter_stop_opposing_save, \
     voter_stop_supporting_save, voter_supporting_save_for_api
-from voter.controllers import voter_address_retrieve_for_api, voter_create_for_api, voter_merge_two_accounts_for_api, \
+from voter.controllers import delete_all_voter_information_permanently, \
+    voter_address_retrieve_for_api, voter_create_for_api, voter_merge_two_accounts_for_api, \
     voter_merge_two_accounts_action, voter_photo_save_for_api, voter_retrieve_for_api, \
     voter_save_photo_from_file_reader, voter_sign_out_for_api, voter_split_into_two_accounts_for_api
 from voter.controllers_contacts import delete_all_voter_contact_emails_for_voter, save_google_contacts, \
@@ -2095,6 +2096,7 @@ def voter_update_view(request):  # voterUpdate
     is_post = True if request.method == 'POST' else False
 
     if is_post:
+        delete_voter_account = positive_value_exists(request.POST.get('delete_voter_account', False))
         facebook_email_changed = positive_value_exists(request.POST.get('facebook_email_changed', False))
         facebook_email = request.POST.get('facebook_email', '') if facebook_email_changed else False
         facebook_profile_image_url_https_changed = \
@@ -2133,6 +2135,7 @@ def voter_update_view(request):  # voterUpdate
         profile_image_type_currently_active_changed = \
             positive_value_exists(request.POST.get('profile_image_type_currently_active_changed', False))
     else:
+        delete_voter_account = positive_value_exists(request.GET.get('delete_voter_account', False))
         facebook_email, facebook_email_changed = \
             return_string_value_and_changed_boolean_from_get(request, 'facebook_email')
         facebook_profile_image_url_https, facebook_profile_image_url_https_changed = \
@@ -2260,6 +2263,27 @@ def voter_update_view(request):  # voterUpdate
     # At this point, we have a valid voter
     voter = voter_results['voter']
     voter_we_vote_id = voter.we_vote_id
+
+    if delete_voter_account:
+        # We want to fully delete this record
+        results = delete_all_voter_information_permanently(voter_to_delete=voter)
+        if results['success']:
+            status += "VOTER_DELETED_COMPLETELY "
+            json_data = {
+                'status':           status,
+                'success':          True,
+                'voter_deleted':    True,
+            }
+        else:
+            status += "VOTER_NOT_DELETED: " + results['status'] + " "
+            json_data = {
+                'status':               status,
+                'success':              True,
+                'voter_not_deleted':    True,
+            }
+        response = HttpResponse(json.dumps(json_data), content_type='application/json')
+        return response
+
     voter_full_name_at_start = voter.get_full_name(real_name_only=True)
 
     if at_least_one_variable_has_changed or external_voter_id_to_be_saved:
