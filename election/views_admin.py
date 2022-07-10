@@ -864,7 +864,7 @@ def election_list_view(request):
     office_manager = ContestOfficeManager()
 
     election_list_query = Election.objects.all()
-    election_list_query = election_list_query.order_by('election_day_text')
+    election_list_query = election_list_query.order_by('election_name', 'election_day_text')
     election_list_query = election_list_query.exclude(google_civic_election_id=2000)
     if positive_value_exists(show_ignored_elections):
         # Do not filter out ignored elections
@@ -1056,7 +1056,8 @@ def election_list_view(request):
                 batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
                 batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)
                 ballot_item_processes = [
-                    'REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS']
+                    'REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS',
+                    'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS']
                 batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=ballot_item_processes)
                 batch_process_queryset = batch_process_queryset.order_by("-id")
 
