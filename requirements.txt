@@ -31,7 +31,7 @@ oauthlib==3.1.1
 nameparser==1.0.6
 phonenumbers==8.12.39
 Pillow==9.0.1
-psycopg2-binary==2.8.6
+psycopg2-binary==2.9.3
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 py3dns==3.2.1
