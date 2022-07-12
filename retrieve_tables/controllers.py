@@ -82,36 +82,40 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
 
         csv_files = {}
         if table_name in allowable_tables:
-            cur = conn.cursor()
-            csv_name = os.path.join(LOCAL_TMP_PATH, table_name + '.csvTemp')
-            print("exporting to: " + csv_name)
-            with open(csv_name, 'w') as file:
-                if positive_value_exists(end):
-                    sql = "COPY (SELECT * FROM public." + table_name + " WHERE id BETWEEN " + start + " AND " + end +\
-                          " ORDER BY id) TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
-                else:
-                    sql = "COPY " + table_name + " TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
-                cur.copy_expert(sql, file, size=8192)
-                logger.error("retrieve_tables sql: " + sql)
+            try:
+                cur = conn.cursor()
+                csv_name = os.path.join(LOCAL_TMP_PATH, table_name + '.csvTemp')
+                print("exporting to: " + csv_name)
+                with open(csv_name, 'w') as file:
+                    if positive_value_exists(end):
+                        sql = "COPY (SELECT * FROM public." + table_name + " WHERE id BETWEEN " + start + " AND " + end +\
+                              " ORDER BY id) TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
+                    else:
+                        sql = "COPY " + table_name + " TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
+                    cur.copy_expert(sql, file, size=8192)
+                    logger.error("experiment 7 retrieve_tables sql: " + sql)
                 logger.error("experiment 7: " + sql)
-            file.close()
-            logger.error("experiment 7 after file close ")
-            with open(csv_name, 'r') as file2:
-                csv_files[table_name] = file2.read()
-            file2.close()
-            logger.error("experiment 7 after second file close ")
-            os.remove(csv_name)
-            logger.error("experiment 7 after remove ")
-            if "exported" not in status:
-                status += "exported "
-            status += table_name + "(" + start + "," + end + "), "
-            logger.error("experiment 7 before conn.commit")
-            conn.commit()
-            logger.error("experiment 7 after conn.commit ")
-            conn.close()
-            dt = time.time() - t0
-            logger.error('Extracting the "' + table_name + '" table took ' + "{:.3f}".format(dt) +
-                         ' seconds.  start = ' + start + ', end = ' + end)
+                file.close()
+                logger.error("experiment 7 after file close ")
+                with open(csv_name, 'r') as file2:
+                    csv_files[table_name] = file2.read()
+                file2.close()
+                logger.error("experiment 7 after second file close ")
+                os.remove(csv_name)
+                logger.error("experiment 7 after remove ")
+                if "exported" not in status:
+                    status += "exported "
+                status += table_name + "(" + start + "," + end + "), "
+                logger.error("experiment 7 before conn.commit")
+                conn.commit()
+                logger.error("experiment 7 after conn.commit ")
+                conn.close()
+                logger.error("experiment 7 after conn.commit ")
+                dt = time.time() - t0
+                logger.error('Extracting the "' + table_name + '" table took ' + "{:.3f}".format(dt) +
+                             ' seconds.  start = ' + start + ', end = ' + end)
+            except Exception as e:
+                logger.error("Real exception in retrieve_sql_tables_as_csv(): " + str(e) + " ")
         else:
             status = "the table_name '" + table_name + "' is not in the table list, therefore no table was returned"
             logger.error(status)
@@ -189,7 +193,7 @@ def save_off_database():
     time.sleep(20)
 
 
-def retrieve_sql_files_from_master_server():
+def retrieve_sql_files_from_master_server(request):
     """
     Get the json data, and create new entries in the developers local database
     :return:
