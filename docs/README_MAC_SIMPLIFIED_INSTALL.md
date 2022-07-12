@@ -18,7 +18,7 @@ installed on your Mac), follow these instructions.  They should take an hour or 
 2. Open the Mac "App Store" app, and download the current version of Apple's Xcode, which includes "c" language compilers 
     and native git integration. This download also includes Apple's Xcode IDE for macOS and iOS native development.
 
-    **Note: Xcode requires about 30 GB of disk space, if you don't have much that room on your Mac, it is sufficient 
+    **Note: Xcode requires about 13 GB of disk space, if you don't have much that room on your Mac, it is sufficient 
     to download only the "Xcode Command Line Tools".  Unfortunately you need to sign up as an Apple developer to do that.
     Download (the latest version of) "Command Line Tools for Xcode 13" at 
     [https://developer.apple.com/download/more/](https://developer.apple.com/download/more/).  These tools only require 185 MB 
@@ -32,7 +32,8 @@ installed on your Mac), follow these instructions.  They should take an hour or 
 
     <img width="500" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/FindXcode.png"> 
 
-4. When prompted, download the "Additional Components" (the Command Line Tools).  This takes many minutes to complete.
+
+4. July 2022, this step happens without a prompt:  When prompted, download the "Additional Components" (the Command Line Tools).  This takes many minutes to complete.
 
 5. When you get to "Welcome to Xcode", quit out of the app. (For the WeVoteServer, we only need the command line tools that 
 come with Xcode.)
@@ -46,7 +47,8 @@ come with Xcode.)
     
    <img width="800" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/Fork3.png"> 
 
-8. Download and install the Community version of PyCharm, it's free!
+
+8. Download and install the Community version of PyCharm, it's free!  (If you are a student, you can get PyCharem Professional for free.  Professional is nice, but not necessary.)
     [https://www.jetbrains.com/pycharm/download/#section=mac](https://www.jetbrains.com/pycharm/download/#section=mac)
 
 9. StartPyCharm, and press the 'Get from VCS' button.
@@ -70,12 +72,15 @@ a copy of your copy to your Mac.  At this instant, the 'develop' branch of wevot
     <img src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/transparent8x8.png"> 
     <img width="800" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/PyCharm2021OutOfDracula.png"> 
 
-13. In PyCharm/Preferences/Plugins enable the Markdown and IdeaVim tools (this takes a while).  
+
+13. In PyCharm/Preferences/Plugins enable the IdeaVim tool (this takes a while).  
 Feel free to add any other PyCharm tools that you would like!  When done press 'Ok', and the IDE will reboot.
 
     <img width="700" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/CustomizePyCharm2021.png"> 
 
-14. If the Apple top menu, shows "Git" skip this step.  If it says "VCS", the follow this step to configure Git
+14.  If you are using one of the newer Macs with Apple Silicon processor, he installer offers the "Apple Silicon Version" which is better and more stable -- take it if it is offered!
+
+15. If the Apple top menu, shows "Git" skip this step.  If it says "VCS", the follow this step to configure Git
 
     <img width="500" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/VCSorGIT2.png"> 
    
@@ -83,7 +88,7 @@ Feel free to add any other PyCharm tools that you would like!  When done press '
    
     <img width="700" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/AddGit.png"> 
 
-15. In PyCharm set your git remotes. Navigate to the Git/'Manage Remotes...' dialog
+16. In PyCharm set your git remotes. Navigate to the Git/'Manage Remotes...' dialog  (July 2022:  these two images might be reversed! (Verify!) But the results in the next step are corect.)
 
     ![ScreenShot](images/RemotesUpstream.png)
 
@@ -93,19 +98,18 @@ Feel free to add any other PyCharm tools that you would like!  When done press '
    
     ![ScreenShot](images/RemotesOrigin.png)
 
-16. Then add a remote for your private branch by pressing the '+' button on the Git Remotes dialog.  Add the url for your
+17. Then add a remote for your private branch by pressing the '+' button on the Git Remotes dialog.  Add the url for your
      fork of the WeVoteServer project origin (copy the url from the GitHub website). In this example, the developer 
      is "SailingSteve".
     
     ![ScreenShot](images/AddUpstream2021.png)
-      
-17. When the cloning is complete, it will look something like this.
+18. When the cloning is complete, it will look something like this.
     
      ![ScreenShot](images/CorrectOrigin2021.png)
     
      Press Ok to close the dialog
 
-18. In PyCharm copy `environment_variables-template.json` to `environment_variables.json`
+19. In PyCharm copy `environment_variables-template.json` to `environment_variables.json`
 
      ![ScreenShot](images/PyCharmTemplateCopy2021.png)
 
@@ -119,13 +123,13 @@ Feel free to add any other PyCharm tools that you would like!  When done press '
      **There are a number of secret values in `environment_variables.json` that are not in source control,
      you will need to check in with Dale, as you find that you need them.**
 
-19. In PyCharm, open the Terminal window and accept use of the z shell (if you want to use some other shell, feel free to skip this step).
+20. In PyCharm, open the Terminal window and accept use of the z shell (if you want to use some other shell, feel free to skip this step).
    
      ![ScreenShot](images/AcceptZShell.png)
 
      The terminal opens up with the project root directory set as the pwd (which is handy).
 
-20. In the PyCharm terminal window download [Homebrew]( https://brew.sh/) ("the missing package manager for macOS") by entering
+21. In the PyCharm terminal window download [Homebrew]( https://brew.sh/) ("the missing package manager for macOS") by entering
 the following command:
     
      ``` 
@@ -138,7 +142,7 @@ the following command:
 
      This script can take a few minutes to complete.
 
-21. Install the latest version of Python
+22. Install the latest version of Python
 
      ```
      $ brew install python
@@ -154,7 +158,7 @@ the following command:
      ```
      $ export PATH="/usr/local/opt/python/libexec/bin:$PATH"
      ```
-22. Test that the newly installed Python is in the path. macOS comes with Python 2 preinstalled, so
+23. Test that the newly installed Python is in the path. macOS comes with Python 2 preinstalled, so
 if the reported version is 2, then add the newly loaded python to the path with the export command. 
 Then confirm that the default python is now version 3.9 or later.  (Version 3.6 has problems with macOS Big Sur or later)
 
@@ -175,14 +179,14 @@ Then confirm that the default python is now version 3.9 or later.  (Version 3.6 
      Python 3.9.9
      stevepodell@Steves-MBP-M1-Dec2021 WeVoteServer % 
      ```
-   
-23. If python --version fails,
+     Note July 2022:  n the homebrew directory (not in the venv), had to make a symlink between python3 and python so that psycopg2-binary could find python.  (To be verified)      
+
+24. If python --version fails,
     try 
     ```
     ln -s /opt/homebrew/bin/python3 /opt/homebrew/bin/python
     ```
 bneeded to install postgres before the requirements because psyco3-3 binary requires pg_config which is not installed yet.
-
 
 25. Set up a Virtual Environment with the new Python Interpreter.  
 Navigate to: PyCharm/Preferences/Project: WeVoteServer/Python Interpreter.
@@ -228,6 +232,8 @@ PyCharm and opening a new one.
      linux/macOS binary libraries based on c language packages and compiled with gcc. 
      Wheels allow python library developers to speed up execution by coding critical or complex sections the c language.
      Interpreted Python code runs slower than compiled c. 
+
+     **Note July 2022 if this fails due to `psycopg2-binary` requiring `pg_config` (which is installed with postgres), install Postgres first then come back and do the pip3 install -r requirements.txt` command.**
     
      If this installation succeeds with no missing libraries, or other compiler errors, we are
      almost done.  If this installation fails, please ask for help.
