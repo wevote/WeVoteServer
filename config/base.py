@@ -104,47 +104,16 @@ def get_node_version():
     print('Node version: ' + version)    # Something like 'v14.15.1'
     return version
 
+def get_git_commit_hash(full):
+    try:
+        file1 = open('git_commit_hash', 'r')
+        hash = file1.readline().strip()
+    except:
+        hash = 'git_commit_hash-file-not-found'
 
-def get_git_merge_date():
-    # Assume the latest source file has a timestamp that is the git merge date
-    pattern = '""gm'
-    list_of_files = [fn for fn in glob.glob('./*/**')
-                     if not os.path.basename(fn).endswith(('/', '_')) and
-                     re.search(r"/+.*?\..*?$", fn)]  # exclude directories entries
-    latest_file_string = max(list_of_files, key=os.path.getctime)
-    posix_filepath = pathlib.Path(latest_file_string)
-    stat_of_file = posix_filepath.stat()
-    git_merge_date = str(datetime.datetime.fromtimestamp(stat_of_file.st_atime)).split('.', 1)[0] + '  '
-    git_merge_date += str(datetime.datetime.fromtimestamp(stat_of_file.st_mtime)).split('.', 1)[0] + '  '
-    git_merge_date += str(datetime.datetime.fromtimestamp(stat_of_file.st_ctime)).split('.', 1)[0]    # was mtime here before experiment
-    merge_date = []
-    for fi in list_of_files:    # TODO: Test code, remove asap, 6/14/22
-        posix_filepath = pathlib.Path(fi)
-        stat_of_file = posix_filepath.stat()
-        ts = int(stat_of_file.st_ctime)
-        tm = datetime.datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-        line = {
-            'date': tm,
-            'file': fi,
-        }
-        merge_date.append(line)
-
-    # out_string = git_merge_date + '  (' + latest_file_string + ')'
-    # print(out_string)
-    line = {
-        'date': git_merge_date,
-        'file': latest_file_string,
-    }
-    merge_date2 = sorted(merge_date, key=lambda x: x['date'], reverse=True)
-
-    merge_date2.insert(0, line)
-    return merge_date2
-
-
-def get_git_commit_hash():
-    file1 = open('git_commit_hash', 'r')
-    lines = file1.readlines()
-    return lines
+    if full:
+        return "https://github.com/wevote/WeVoteServer/pull/1862/commits/" + hash
+    return hash
 
 def get_postgres_version():
     formatted = 'fail'

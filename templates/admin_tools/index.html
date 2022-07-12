@@ -5,6 +5,11 @@
 
 {%  block content %}
 {% load humanize %}
+<style>
+    td {
+        padding-left: 20px;
+    }
+</style>
 <h1>We Vote Admin Menu</h1>
     {% if user and not user.is_anonymous %}
     <p>
@@ -172,16 +177,10 @@
             <td>{{ postgres_version }}</td>
         </tr>
         <tr>
-            <td>Git date: (experiment 8)&nbsp;</td>
-{#            <td>{{git_merge_date}}</td>#}
-            {% for line in git_merge_date %}
-                <p>{{ line.date }} --- {{  line.file }}</p>
-            {% endfor %}
-
-        </tr>
-        <tr>
-            <td>Git commit hash: (experiment 8)&nbsp;</td>
-            <td>{{git_commit_hash}}</td>
+            <td>Git commit hash:</td>
+            <td>
+                <a id="gitLink" href={{git_commit_hash_url}} target="_blank">{{git_commit_hash}}</a>
+            </td>
         </tr>
      </table>
 </p>
