@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from config.base import get_environment_variable, get_git_merge_date, get_node_version, get_postgres_version, \
-    get_python_version, LOGIN_URL
+    get_python_version, LOGIN_URL, get_git_commit_hash
 from ballot.models import BallotReturned, VoterBallotSaved
 from candidate.models import CandidateCampaign, CandidateManager
 from candidate.controllers import candidates_import_from_sample_file
@@ -114,6 +114,7 @@ def admin_home_view(request):
         'python_version':                     get_python_version(),
         'node_version':                       get_node_version(),
         'git_merge_date':                     get_git_merge_date(),
+        'git_commit_hash':                    get_git_commit_hash(),
         'postgres_version':                   get_postgres_version(),
         'shared_link_clicked_unique_sharer_count': shared_link_clicked_unique_sharer_count,
         'shared_link_clicked_unique_viewer_count': shared_link_clicked_unique_viewer_count,

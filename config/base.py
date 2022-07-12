@@ -141,6 +141,11 @@ def get_git_merge_date():
     return merge_date2
 
 
+def get_git_commit_hash():
+    file1 = open('git_commit_hash', 'r')
+    lines = file1.readlines()
+    return lines
+
 def get_postgres_version():
     formatted = 'fail'
     try:

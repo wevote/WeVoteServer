@@ -55,7 +55,7 @@ allowable_tables = [
 ]
 
 dummy_unique_id = 10000000
-LOCAL_TMP_PATH = get_environment_variable('PATH_FOR_TEMP_FILES') or '.'
+LOCAL_TMP_PATH = get_environment_variable('PATH_FOR_TEMP_FILES') or '/tmp/'
 
 
 def retrieve_sql_tables_as_csv(table_name, start, end):
@@ -93,24 +93,24 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
                     else:
                         sql = "COPY " + table_name + " TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
                     cur.copy_expert(sql, file, size=8192)
-                    logger.error("experiment 7 retrieve_tables sql: " + sql)
-                logger.error("experiment 7: " + sql)
+                    logger.error("experiment 8 retrieve_tables sql: " + sql)
+                logger.error("experiment 8: " + sql)
                 file.close()
-                logger.error("experiment 7 after file close ")
+                logger.error("experiment 8 after file close ")
                 with open(csv_name, 'r') as file2:
                     csv_files[table_name] = file2.read()
                 file2.close()
-                logger.error("experiment 7 after second file close ")
+                logger.error("experiment 8 after second file close ")
                 os.remove(csv_name)
-                logger.error("experiment 7 after remove ")
+                logger.error("experiment 8 after remove ")
                 if "exported" not in status:
                     status += "exported "
                 status += table_name + "(" + start + "," + end + "), "
-                logger.error("experiment 7 before conn.commit")
+                logger.error("experiment 8 before conn.commit")
                 conn.commit()
-                logger.error("experiment 7 after conn.commit ")
+                logger.error("experiment 8 after conn.commit ")
                 conn.close()
-                logger.error("experiment 7 after conn.commit ")
+                logger.error("experiment 8 after conn.commit ")
                 dt = time.time() - t0
                 logger.error('Extracting the "' + table_name + '" table took ' + "{:.3f}".format(dt) +
                              ' seconds.  start = ' + start + ', end = ' + end)
@@ -120,14 +120,14 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
             status = "the table_name '" + table_name + "' is not in the table list, therefore no table was returned"
             logger.error(status)
 
-        logger.error("experiment 7 before results")
+        logger.error("experiment 8 before results")
         results = {
             'success': True,
             'status': status,
             'files': csv_files,
         }
 
-        logger.error("experiment 7 results: ", results)
+        logger.error("experiment 8 results: ", results)
         return results
 
     except Exception as e:
