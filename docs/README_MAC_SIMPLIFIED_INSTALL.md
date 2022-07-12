@@ -32,6 +32,7 @@ installed on your Mac), follow these instructions.  They should take an hour or 
 
     <img width="500" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/FindXcode.png"> 
 
+
 4. July 2022, this step happens without a prompt:  When prompted, download the "Additional Components" (the Command Line Tools).  This takes many minutes to complete.
 
 5. When you get to "Welcome to Xcode", quit out of the app. (For the WeVoteServer, we only need the command line tools that 
@@ -45,6 +46,7 @@ come with Xcode.)
     Create a fork of wevote/WeVoteServer.git by selecting the "Fork" button (in the upper right of screen).
     
    <img width="800" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/Fork3.png"> 
+
 
 8. Download and install the Community version of PyCharm, it's free!  (If you are a student, you can get PyCharem Professional for free.  Professional is nice, but not necessary.)
     [https://www.jetbrains.com/pycharm/download/#section=mac](https://www.jetbrains.com/pycharm/download/#section=mac)
@@ -69,6 +71,7 @@ a copy of your copy to your Mac.  At this instant, the 'develop' branch of wevot
    
     <img src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/transparent8x8.png"> 
     <img width="800" src="https://raw.githubusercontent.com/wevote/WeVoteServer/develop/docs/images/PyCharm2021OutOfDracula.png"> 
+
 
 13. In PyCharm/Preferences/Plugins enable the IdeaVim tool (this takes a while).  
 Feel free to add any other PyCharm tools that you would like!  When done press 'Ok', and the IDE will reboot.
@@ -100,7 +103,6 @@ Feel free to add any other PyCharm tools that you would like!  When done press '
      is "SailingSteve".
     
     ![ScreenShot](images/AddUpstream2021.png)
-      
 18. When the cloning is complete, it will look something like this.
     
      ![ScreenShot](images/CorrectOrigin2021.png)
@@ -185,7 +187,6 @@ Then confirm that the default python is now version 3.9 or later.  (Version 3.6 
     ln -s /opt/homebrew/bin/python3 /opt/homebrew/bin/python
     ```
 bneeded to install postgres before the requirements because psyco3-3 binary requires pg_config which is not installed yet.
-
 
 25. Set up a Virtual Environment with the new Python Interpreter.  
 Navigate to: PyCharm/Preferences/Project: WeVoteServer/Python Interpreter.
