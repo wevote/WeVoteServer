@@ -55,7 +55,7 @@ allowable_tables = [
 ]
 
 dummy_unique_id = 10000000
-LOCAL_TMP_PATH = get_environment_variable('PATH_FOR_TEMP_FILES') or '/tmp/'
+LOCAL_TMP_PATH = '/tmp/'
 
 
 def retrieve_sql_tables_as_csv(table_name, start, end):
