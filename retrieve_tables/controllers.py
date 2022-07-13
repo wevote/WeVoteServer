@@ -2,6 +2,7 @@ import csv
 import json
 import os
 import re
+import tempfile
 
 import psycopg2
 import requests
@@ -84,8 +85,10 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
         if table_name in allowable_tables:
             try:
                 cur = conn.cursor()
-                csv_name = os.path.join(LOCAL_TMP_PATH, table_name + '.csvTemp')
-                logger.error("experiment 10: exporting to: " + csv_name)
+                # csv_name = os.path.join(LOCAL_TMP_PATH, table_name + '.csvTemp')
+                fd, csv_name = tempfile.mkstemp(prefix=table_name, suffix=".csvTemp")
+
+                logger.error("experiment 11: exporting to: " + csv_name)
                 with open(csv_name, 'w') as file:
                     if positive_value_exists(end):
                         sql = "COPY (SELECT * FROM public." + table_name + " WHERE id BETWEEN " + start + " AND " + \
@@ -93,33 +96,33 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
                     else:
                         sql = "COPY " + table_name + " TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
                     cur.copy_expert(sql, file, size=8192)
-                    logger.error("experiment 10: retrieve_tables sql: " + sql)
-                logger.error("experiment 10: before file close: " + sql)
+                    logger.error("experiment 11: retrieve_tables sql: " + sql)
+                logger.error("experiment 11: before file close: " + sql)
                 file.close()
-                logger.error("experiment 10: after file close ")
+                logger.error("experiment 11: after file close ")
                 with open(csv_name, 'r') as file2:
-                    logger.error("experiment 10: open file2 " + csv_name)
+                    logger.error("experiment 11: open file2 " + csv_name)
                     csv_files[table_name] = file2.read()
                 file2.close()
 
                 #
                 files = os.listdir('/tmp')
                 files_str = '|'.join(files)
-                logger.error("experiment 10: /tmp dir" + files_str)
+                logger.error("experiment 11: /tmp dir" + files_str)
                 #
 
-                logger.error("experiment 10: after second file close ")
+                logger.error("experiment 11: after second file close ")
                 os.remove(csv_name)
-                logger.error("experiment 10: after remove, status " + status)
+                logger.error("experiment 11: after remove, status " + status)
                 if "exported" not in status:
                     status += "exported "
                 status += table_name + "(" + start + "," + end + "), "
-                logger.error("experiment 10: after status +=, " + status)
-                logger.error("experiment 10: before conn.commit")
+                logger.error("experiment 11: after status +=, " + status)
+                logger.error("experiment 11: before conn.commit")
                 conn.commit()
-                logger.error("experiment 10: after conn.commit ")
+                logger.error("experiment 11: after conn.commit ")
                 conn.close()
-                logger.error("experiment 10: after conn.commit ")
+                logger.error("experiment 11: after conn.close ")
                 dt = time.time() - t0
                 logger.error('Extracting the "' + table_name + '" table took ' + "{:.3f}".format(dt) +
                              ' seconds.  start = ' + start + ', end = ' + end)
@@ -129,14 +132,14 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
             status = "the table_name '" + table_name + "' is not in the table list, therefore no table was returned"
             logger.error(status)
 
-        logger.error("experiment 10: before results")
+        logger.error("experiment 11: before results")
         results = {
             'success': True,
             'status': status,
             'files': csv_files,
         }
 
-        logger.error("experiment 10: results: ", results)
+        logger.error("experiment 11: results: ", results)
         return results
 
     except Exception as e:
