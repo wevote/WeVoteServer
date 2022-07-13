@@ -112,7 +112,7 @@ def get_git_commit_hash(full):
         hash = 'git_commit_hash-file-not-found'
 
     if full:
-        return "https://github.com/wevote/WeVoteServer/pull/1862/commits/" + hash
+        return "https://github.com/wevote/WeVoteServer/commit/" + hash
     return hash
 
 def get_postgres_version():

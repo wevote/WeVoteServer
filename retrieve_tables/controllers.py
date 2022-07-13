@@ -88,7 +88,7 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
                 # csv_name = os.path.join(LOCAL_TMP_PATH, table_name + '.csvTemp')
                 fd, csv_name = tempfile.mkstemp(prefix=table_name, suffix=".csvTemp")
 
-                logger.error("experiment 11: exporting to: " + csv_name)
+                logger.error("experiment 12: exporting to: " + csv_name)
                 with open(csv_name, 'w') as file:
                     if positive_value_exists(end):
                         sql = "COPY (SELECT * FROM public." + table_name + " WHERE id BETWEEN " + start + " AND " + \
@@ -96,33 +96,35 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
                     else:
                         sql = "COPY " + table_name + " TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
                     cur.copy_expert(sql, file, size=8192)
-                    logger.error("experiment 11: retrieve_tables sql: " + sql)
-                logger.error("experiment 11: before file close: " + sql)
-                file.close()
-                logger.error("experiment 11: after file close ")
+                    logger.error("experiment 12: retrieve_tables sql: " + sql)
+                logger.error("experiment 12: before file close: " + sql)
+                # # file.seek(0)         # rewind file
+                # csv_files[table_name] = file.read()
+                # file.close()
+                logger.error("experiment 12: after file close (no longer explicit, looks like copy_expert closes file")
                 with open(csv_name, 'r') as file2:
-                    logger.error("experiment 11: open file2 " + csv_name)
+                    logger.error("experiment 12: open file2 " + csv_name)
                     csv_files[table_name] = file2.read()
                 file2.close()
 
                 #
-                files = os.listdir('/tmp')
-                files_str = '|'.join(files)
-                logger.error("experiment 11: /tmp dir" + files_str)
+                # files = os.listdir('/tmp')
+                # files_str = '|'.join(files)
+                # logger.error("experiment 12: /tmp dir" + files_str)
                 #
 
-                logger.error("experiment 11: after second file close ")
+                logger.error("experiment 12: after second file close ")
                 os.remove(csv_name)
-                logger.error("experiment 11: after remove, status " + status)
+                logger.error("experiment 12: after remove, status " + status)
                 if "exported" not in status:
                     status += "exported "
                 status += table_name + "(" + start + "," + end + "), "
-                logger.error("experiment 11: after status +=, " + status)
-                logger.error("experiment 11: before conn.commit")
+                logger.error("experiment 12: after status +=, " + status)
+                logger.error("experiment 12: before conn.commit")
                 conn.commit()
-                logger.error("experiment 11: after conn.commit ")
+                logger.error("experiment 12: after conn.commit ")
                 conn.close()
-                logger.error("experiment 11: after conn.close ")
+                logger.error("experiment 12: after conn.close ")
                 dt = time.time() - t0
                 logger.error('Extracting the "' + table_name + '" table took ' + "{:.3f}".format(dt) +
                              ' seconds.  start = ' + start + ', end = ' + end)
@@ -132,14 +134,14 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
             status = "the table_name '" + table_name + "' is not in the table list, therefore no table was returned"
             logger.error(status)
 
-        logger.error("experiment 11: before results")
+        logger.error("experiment 12: before results")
         results = {
             'success': True,
             'status': status,
             'files': csv_files,
         }
 
-        logger.error("experiment 11: results: ", results)
+        logger.error("experiment 12: results: ", results)
         return results
 
     except Exception as e:
