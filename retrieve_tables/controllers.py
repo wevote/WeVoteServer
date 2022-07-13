@@ -2,15 +2,15 @@ import csv
 import json
 import os
 import re
-import tempfile
+import time
 from io import StringIO
 
 import psycopg2
 import requests
-import time
-from config.base import get_environment_variable
 from django.http import HttpResponse
+
 import wevote_functions.admin
+from config.base import get_environment_variable
 from wevote_functions.functions import positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -71,6 +71,11 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
 
     status = ''
 
+    f = open("requirements.txt", "r")
+    for line in f:
+        if "psycopg2" in line:
+            logger.error("experiment 14: psycopg2: " + line.strip())
+
     try:
         conn = psycopg2.connect(
             database=get_environment_variable('DATABASE_NAME'),
@@ -82,35 +87,47 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
 
         # logger.debug("retrieve_sql_tables_as_csv psycopg2 Connected to DB")
 
+        try:
+            # Simple copy experiment
+            sql = 'COPY "election_election" TO STDOUT;'
+            file = StringIO()  # Empty file
+            cur = conn.cursor()
+            cur.copy_expert(sql, file, size=8192)
+            file.seek(0)
+            logger.error("experiment 14: select some stuff: " + file.readline().strip())
+        except Exception as e:
+            logger.error("Real exception in select some stuff retrieve_sql_tables_as_csv(): " + str(e) + " ")
+
         csv_files = {}
         if table_name in allowable_tables:
             try:
                 cur = conn.cursor()
                 file = StringIO()  # Empty file
 
-                logger.error("experiment 13: file.closed: " + str(file))
+                logger.error("experiment 14: file: " + str(file))
                 if positive_value_exists(end):
                     sql = "COPY (SELECT * FROM public." + table_name + " WHERE id BETWEEN " + start + " AND " + \
                           end + " ORDER BY id) TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
                 else:
                     sql = "COPY " + table_name + " TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
+                logger.error("experiment 14: retrieve_tables sql: " + sql)
                 cur.copy_expert(sql, file, size=8192)
-                logger.error("experiment 13: retrieve_tables sql: " + sql)
-                # file.seek(0)
-                # logger.error("experiment 13: retrieve_tables file contents: " + file.read())
+                logger.error("experiment 14: after cur.copy_expert ")
+                file.seek(0)
+                logger.error("experiment 14: retrieve_tables file contents: " + file.readline().strip())
                 file.seek(0)
                 csv_files[table_name] = file.read()
                 file.close()
-                logger.error("experiment 13: after file close, status "+ status)
+                logger.error("experiment 14: after file close, status " + status)
                 if "exported" not in status:
                     status += "exported "
                 status += table_name + "(" + start + "," + end + "), "
-                logger.error("experiment 13: after status +=, " + status)
-                logger.error("experiment 13: before conn.commit")
+                logger.error("experiment 14: after status +=, " + status)
+                logger.error("experiment 14: before conn.commit")
                 conn.commit()
-                logger.error("experiment 13: after conn.commit ")
+                logger.error("experiment 14: after conn.commit ")
                 conn.close()
-                logger.error("experiment 13: after conn.close ")
+                logger.error("experiment 14: after conn.close ")
                 dt = time.time() - t0
                 logger.error('Extracting the "' + table_name + '" table took ' + "{:.3f}".format(dt) +
                              ' seconds.  start = ' + start + ', end = ' + end)
@@ -120,14 +137,14 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
             status = "the table_name '" + table_name + "' is not in the table list, therefore no table was returned"
             logger.error(status)
 
-        logger.error("experiment 13: before results")
+        logger.error("experiment 14: before results")
         results = {
             'success': True,
             'status': status,
             'files': csv_files,
         }
 
-        logger.error("experiment 13: results: " + str(results))
+        logger.error("experiment 14: results: " + str(results))
         return results
 
     except Exception as e:
