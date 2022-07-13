@@ -110,7 +110,7 @@ class Election(models.Model):
     ignore_this_election = models.BooleanField(default=False)
     # Have we finished all the election preparation related to Offices, Candidates, Measures and Ballot Locations?
     election_preparation_finished = models.BooleanField(default=False)
-    # Have we finished all of the election preparation related to Candidate photos?
+    # Have we finished all the election preparation related to Candidate photos?
     candidate_photos_finished = models.BooleanField(default=False)
 
     # This is a multi-state election
@@ -433,7 +433,7 @@ class ElectionManager(models.Manager):
             election_list_query = Election.objects.using('readonly').all()
             if not positive_value_exists(include_test_election):
                 election_list_query = election_list_query.exclude(google_civic_election_id=2000)
-            election_list_query = election_list_query.order_by('election_day_text')
+            election_list_query = election_list_query.order_by('election_name', 'election_day_text')
             if newest_to_oldest:
                 # Typically we want the newest election displayed first, with the older elections later in the list
                 election_list_query = election_list_query.reverse()
@@ -528,7 +528,7 @@ class ElectionManager(models.Manager):
 
     def retrieve_listed_elections(self):
         """
-        These are all of the elections marked as "listed" with "include_in_list_for_voters"
+        These are all the elections marked as "listed" with "include_in_list_for_voters"
         :return:
         """
         election_list = []
@@ -575,7 +575,7 @@ class ElectionManager(models.Manager):
                 election_list_query = election_list_query.filter(state_code__iexact=state_code)
             if not positive_value_exists(include_test_election):
                 election_list_query = election_list_query.exclude(google_civic_election_id=2000)
-            election_list_query = election_list_query.order_by('election_day_text')
+            election_list_query = election_list_query.order_by('election_name', 'election_day_text')
 
             upcoming_election_list = list(election_list_query)
 
@@ -655,7 +655,7 @@ class ElectionManager(models.Manager):
             elif positive_value_exists(state_code):
                 election_list_query = election_list_query.filter(state_code__iexact=state_code)
             election_list_query = election_list_query.exclude(google_civic_election_id=2000)
-            election_list_query = election_list_query.order_by('election_day_text')
+            election_list_query = election_list_query.order_by('election_name', 'election_day_text')
 
             prior_election_list = list(election_list_query)
 
@@ -1105,7 +1105,7 @@ class ElectionManager(models.Manager):
                 election_list_query = election_list_query.exclude(google_civic_election_id=2000)
             if election_day_text:
                 election_list_query = election_list_query.filter(election_day_text=election_day_text)
-            election_list_query = election_list_query.order_by('election_day_text')
+            election_list_query = election_list_query.order_by('election_name', 'election_day_text')
             election_list = election_list_query
             status = 'ELECTIONS_FOUND'
             success = True
@@ -1185,7 +1185,7 @@ class ElectionManager(models.Manager):
             if state_code and election_day_text:
                 election_list_query = election_list_query.filter(state_code__iexact=state_code,
                                                                  election_day_text=election_day_text)
-            election_list_query = election_list_query.order_by('election_day_text')
+            election_list_query = election_list_query.order_by('election_name', 'election_day_text')
             election_list = election_list_query
             status = 'ELECTIONS_FOUND'
             success = True

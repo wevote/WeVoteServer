@@ -3039,6 +3039,7 @@ def voter_verify_secret_code_view(request):  # voterVerifySecretCode
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
+
 @csrf_exempt
 def voter_contact_list_retrieve_view(request):  # voterContactListRetrieve
     """
