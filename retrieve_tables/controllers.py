@@ -88,8 +88,8 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
                 logger.error("experiment 10: exporting to: " + csv_name)
                 with open(csv_name, 'w') as file:
                     if positive_value_exists(end):
-                        sql = "COPY (SELECT * FROM public." + table_name + " WHERE id BETWEEN " + start + " AND " + end +\
-                              " ORDER BY id) TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
+                        sql = "COPY (SELECT * FROM public." + table_name + " WHERE id BETWEEN " + start + " AND " + \
+                              end + " ORDER BY id) TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
                     else:
                         sql = "COPY " + table_name + " TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
                     cur.copy_expert(sql, file, size=8192)
@@ -98,16 +98,23 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
                 file.close()
                 logger.error("experiment 10: after file close ")
                 with open(csv_name, 'r') as file2:
-                    logger.error("experiment 10: open file2 ", csv_name)
+                    logger.error("experiment 10: open file2 " + csv_name)
                     csv_files[table_name] = file2.read()
                 file2.close()
+
+                #
+                files = os.listdir('/tmp')
+                files_str = '|'.join(files)
+                logger.error("experiment 10: /tmp dir" + files_str)
+                #
+
                 logger.error("experiment 10: after second file close ")
                 os.remove(csv_name)
-                logger.error("experiment 10: after remove, status ", status)
+                logger.error("experiment 10: after remove, status " + status)
                 if "exported" not in status:
                     status += "exported "
                 status += table_name + "(" + start + "," + end + "), "
-                logger.error("experiment 10: after status +=, ", status)
+                logger.error("experiment 10: after status +=, " + status)
                 logger.error("experiment 10: before conn.commit")
                 conn.commit()
                 logger.error("experiment 10: after conn.commit ")
@@ -216,6 +223,7 @@ def retrieve_sql_files_from_master_server(request):
         final_lines_count = 0
         while end < 20000000:
             t2 = time.time()
+            # To test locally call https://wevotedeveloper.com:8000/apis/v1/retrieveSQLTables/?table=election_election
             response = requests.get("https://api.wevoteusa.org/apis/v1/retrieveSQLTables/",
                                     params={'table': table_name, 'start': start, 'end': end})
             structured_json = json.loads(response.text)
