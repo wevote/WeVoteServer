@@ -2217,19 +2217,33 @@ def move_voter_guide_possibility_positions_to_lastest_voter_guide_possibility(vo
     voter_guide_possibility_id = voter_guide_possibility.id
     organization_we_vote_id = voter_guide_possibility.organization_we_vote_id
     voter_guide_possibility_url = voter_guide_possibility.voter_guide_possibility_url
-    url_root = voter_guide_possibility_url.split('/')[2]
+    parts = urlparse(voter_guide_possibility_url)
+    net_location = parts.netloc
+    print(net_location)
 
-    enddate = date.today()
-    startdate = enddate - timedelta(months=6)
+    enddate = datetime.now(pytz.UTC)
+    startdate = enddate - timedelta(days=186)    # 6 months
 
     voter_guide_possibility_query = VoterGuidePossibility.objects.filter(
-        Q(voter_guide_possibility_url__contains=url_root) &
+        Q(voter_guide_possibility_url__contains=net_location) &
         Q(organization_we_vote_id__iexact=organization_we_vote_id) &
-        Q(date_last_changed__range=[startdate, enddate])).exclude(id=voter_guide_possibility_id)
+        Q(date_last_changed__range=[startdate, enddate])).order_by('-date_last_changed')
+    # leave destination in set     .exclude(id=voter_guide_possibility_id)
     voter_guide_possibility_list = list(voter_guide_possibility_query)
+    ids_list = []
     for voter_guide_possibility in voter_guide_possibility_list:
+        ids_list.append(voter_guide_possibility.id)
+
+    possibility_position_query = VoterGuidePossibilityPosition.objects.filter(
+        Q(voter_guide_possibility_parent_id__in=ids_list))
+    possibility_position_query_list = list(possibility_position_query)
+    newlist = sorted(possibility_position_query_list, key=lambda x: x.voter_guide_possibility_parent_id, reverse=True)
+    for blip in newlist:
+        print(str(blip))
+
+            #         voter_guide_possibility_parent_id=voter_guide_possibility.id).order_by('possibility_position_number')
         # move all the latest voter_guide_possibility ies to this voter_guide_possibility_id as parent
-        print(voter_guide_possibility)
+        print(str(voter_guide_possibility))
 
     # now itterate through this list, and move all the lastest_voter_guide_possibility ies to this voter_guide_possibility_id as parent
 
