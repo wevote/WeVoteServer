@@ -2226,6 +2226,10 @@ def move_voter_guide_possibility_positions_to_lastest_voter_guide_possibility(vo
         Q(voter_guide_possibility_url__contains=url_root) &
         Q(organization_we_vote_id__iexact=organization_we_vote_id) &
         Q(date_last_changed__range=[startdate, enddate])).exclude(id=voter_guide_possibility_id)
+    voter_guide_possibility_list = list(voter_guide_possibility_query)
+    for voter_guide_possibility in voter_guide_possibility_list:
+        # move all the latest voter_guide_possibility ies to this voter_guide_possibility_id as parent
+        print(voter_guide_possibility)
 
     # now itterate through this list, and move all the lastest_voter_guide_possibility ies to this voter_guide_possibility_id as parent
 
