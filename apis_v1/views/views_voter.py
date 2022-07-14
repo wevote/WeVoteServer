@@ -877,19 +877,51 @@ def voter_create_new_account_view(request):  # voterCreateNewAccount
         is_verified_volunteer = request.GET.get('is_verified_volunteer', False) == 'true'
 
         # Check to make sure email isn't attached to existing account in EmailAddress table
-        email_address_queryset = EmailAddress.objects.all()
-        email_address_queryset = email_address_queryset.filter(
-            normalized_email_address__iexact=email,
-            deleted=False
+        existing_voter_found = False
+        email_manager = EmailManager()
+        voter = None
+        voter_manager = VoterManager()
+        existing_email_results = email_manager.retrieve_primary_email_with_ownership_verified(
+            normalized_email_address=email,
         )
-        email_address_list = list(email_address_queryset)
-        email_already_in_use = True if len(email_address_list) > 0 else False
-        if email_already_in_use:
-            status += "EMAIL_ADDRESS_ALREADY_IN_USE "
+        if existing_email_results['email_address_object_found']:
+            email_address_object = existing_email_results['email_address_object']
+            voter_we_vote_id = email_address_object.voter_we_vote_id
+            voter_results = voter_manager.retrieve_voter_by_we_vote_id(voter_we_vote_id)
+            if voter_results['voter_found']:
+                voter = voter_results['voter']
+                existing_voter_found = True
+        else:
+            voter_results = voter_manager.retrieve_voter_by_email(email)
+            if voter_results['voter_found']:
+                voter = voter_results['voter']
+                existing_voter_found = True
+
+        if existing_voter_found:
+            voter.set_password(password)
+            if is_admin:
+                voter.is_admin = True
+            if is_analytics_admin:
+                voter.is_analytics_admin = True
+            if is_partner_organization:
+                voter.is_partner_organization = True
+            if is_political_data_manager:
+                voter.is_political_data_manager = True
+            if is_political_data_viewer:
+                voter.is_political_data_viewer = True
+            if is_verified_volunteer:
+                voter.is_verified_volunteer = True
+            if not positive_value_exists(voter.first_name) and positive_value_exists(first_name):
+                voter.first_name = first_name
+            if not positive_value_exists(voter.last_name) and positive_value_exists(last_name):
+                voter.last_name = last_name
+            voter.save()
+
+            status += "EMAIL_ADDRESS_ALREADY_IN_USE-UPDATED_VOTER "
             json_data = {
                 'status':           status,
-                'success':          False,
-                'duplicate_email':  True,
+                'success':          True,
+                'duplicate_email':  False,
                 'has_permission':   True,
             }
         else:

@@ -710,8 +710,11 @@ class VoterManager(BaseUserManager):
         """
         voter = Voter()
         success = False
-        status = "Failed to create voter"
+        status = ""
         duplicate_email = False
+        email_address_object_created = False
+        email_address_we_vote_id = ''
+        voter_created = False
         try:
             voter.set_password(password)
             voter.first_name = first_name
@@ -725,20 +728,50 @@ class VoterManager(BaseUserManager):
             voter.is_verified_volunteer = is_verified_volunteer
             voter.is_active = True
             voter.save()
+            voter_created = True
             success = True
-            status = "Created voter " + voter.we_vote_id
+            status = "Created voter " + str(voter.we_vote_id) + " "
             logger.debug("create_new_voter_account successfully created (voter) : " + first_name)
-
         except IntegrityError as e:
-            status += ", " + str(e)
+            status += "FAILED_TO_CREATE_VOTER_INTEGRITY: " + str(e) + " "
             handle_record_not_saved_exception(e, logger=logger)
             print("create_new_voter_account IntegrityError exception:" + str(e))
             if "voter_voter_email_key" in str(e):
                 duplicate_email = True
         except Exception as e:
-            status += ", " + str(e)
+            status += "FAILED_TO_CREATE_VOTER: " + str(e) + " "
             handle_record_not_saved_exception(e, logger=logger)
             logger.debug("create_new_voter_account general exception: " + str(e))
+
+        if voter_created:
+            try:
+                from email_outbound.models import EmailManager
+                email_manager = EmailManager()
+                email_results = email_manager.create_email_address(
+                    normalized_email_address=email,
+                    voter_we_vote_id=voter.we_vote_id,
+                    email_ownership_is_verified=True,
+                )
+                email_address_object_created = True
+                status += email_results['status']
+                if email_results['email_address_object_saved']:
+                    email_address_object = email_results['email_address_object']
+                    email_address_we_vote_id = email_address_object.we_vote_id
+            except Exception as e:
+                status += "FAILED_TO_CREATE_VOTER_EMAIL_ADDRESS: " + str(e) + " "
+                handle_record_not_saved_exception(e, logger=logger)
+                logger.debug("ERROR_SAVING_NEW_EMAIL create_new_voter_account general exception: " + str(e))
+
+        if email_address_object_created:
+            try:
+                voter.email_ownership_is_verified = True
+                voter.primary_email_we_vote_id = email_address_we_vote_id
+                voter.save()
+                status += "VOTER_CREATED_EMAIL_OWNERSHIP_VERIFIED "
+            except Exception as e:
+                status += "FAILED_TO_UPDATE_VOTER_WITH_EMAIL_ADDRESS: " + str(e) + " "
+                handle_record_not_saved_exception(e, logger=logger)
+                logger.debug("ERROR_SAVING_NEW_EMAIL create_new_voter_account general exception: " + str(e))
 
         results = {
             'success': success,
