@@ -2247,6 +2247,14 @@ def move_voter_guide_possibility_positions_to_requested_voter_guide_possibility(
         if position.ballot_item_name not in seen_candidates:
             new_list.append(position)
             seen_candidates.add(position.ballot_item_name)
+            # TODO: If we have to change all the exising VoterGuidePossibilityPosition entries to match the current
+            #  query, our design could use improvement
+            if position.voter_guide_possibility_parent_id != voter_guide_possibility_id:
+                # position.voter_guide_possibility_parent_id = voter_guide_possibility_id
+                logger.log("Updating '" + position.ballot_item_name + "' from parent id " +
+                           position.voter_guide_possibility_parent_id + " to " +
+                           voter_guide_possibility_id)
+                # position.save()
 
     print('-------')
     for blip in new_list:
