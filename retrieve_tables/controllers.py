@@ -106,7 +106,7 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
 
                 if positive_value_exists(end):
                     sql = "COPY (SELECT * FROM public." + table_name + " WHERE id BETWEEN " + start + " AND " + \
-                          end + " ORDER BY id) TO STDOUT'"
+                          end + " ORDER BY id) TO STDOUT"
                 else:
                     sql = "COPY " + table_name + " TO STDOUT"
                 logger.error("experiment 16: SIMPLIFIED retrieve_tables sql: " + sql)
