@@ -864,7 +864,7 @@ def election_list_view(request):
     office_manager = ContestOfficeManager()
 
     election_list_query = Election.objects.all()
-    election_list_query = election_list_query.order_by('election_name', 'election_day_text')
+    election_list_query = election_list_query.order_by('election_day_text', 'election_name')
     election_list_query = election_list_query.exclude(google_civic_election_id=2000)
     if positive_value_exists(show_ignored_elections):
         # Do not filter out ignored elections
