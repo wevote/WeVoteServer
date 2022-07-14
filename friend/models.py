@@ -1799,6 +1799,7 @@ class FriendManager(models.Manager):
                 port=get_environment_variable('DATABASE_PORT')
             )
             cur = conn.cursor()
+            # July 14, 2022:  If this works locally but not in AWS, then consider dropping the "public". part
             sql_viewer = \
                 'SELECT id, COUNT(*) AS we_count FROM ( ' \
                 'SELECT viewee_voter_we_vote_id id FROM "public"."friend_currentfriend" ' \
