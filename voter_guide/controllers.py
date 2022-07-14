@@ -2116,7 +2116,7 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
         voter_guide_possibility_id=voter_guide_possibility_id)
 
     # TODO: Steve, move all the voterGuidPossiblityPositions with the same organization_we_vote_id that was changed in the last 6 months
-    move_voter_guide_possibility_positions_to_lastest_voter_guide_possibility(results['voter_guide_possibility'])
+    move_voter_guide_possibility_positions_to_requested_voter_guide_possibility(results['voter_guide_possibility'])
 
 
     possible_endorsement_list = []
@@ -2213,7 +2213,7 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
     return json_data
 
 
-def move_voter_guide_possibility_positions_to_lastest_voter_guide_possibility(voter_guide_possibility):
+def move_voter_guide_possibility_positions_to_requested_voter_guide_possibility(voter_guide_possibility):
     voter_guide_possibility_id = voter_guide_possibility.id
     organization_we_vote_id = voter_guide_possibility.organization_we_vote_id
     voter_guide_possibility_url = voter_guide_possibility.voter_guide_possibility_url
@@ -2235,123 +2235,26 @@ def move_voter_guide_possibility_positions_to_lastest_voter_guide_possibility(vo
         ids_list.append(voter_guide_possibility.id)
 
     possibility_position_query = VoterGuidePossibilityPosition.objects.filter(
-        Q(voter_guide_possibility_parent_id__in=ids_list))
+        Q(voter_guide_possibility_parent_id__in=ids_list)).order_by('ballot_item_name', '-voter_guide_possibility_parent_id')
     possibility_position_query_list = list(possibility_position_query)
-    newlist = sorted(possibility_position_query_list, key=lambda x: x.voter_guide_possibility_parent_id, reverse=True)
-    for blip in newlist:
-        print(str(blip))
+    for blip in possibility_position_query_list:
+        print(str(blip.ballot_item_name) + "    " + str(blip.voter_guide_possibility_parent_id))
 
-            #         voter_guide_possibility_parent_id=voter_guide_possibility.id).order_by('possibility_position_number')
-        # move all the latest voter_guide_possibility ies to this voter_guide_possibility_id as parent
-        print(str(voter_guide_possibility))
+    # Remove duplicates, for now if the voter_guide_possibility_parent_id numer is higher, that is the one we keep
+    seen_candidates = set()
+    new_list = []
+    for position in possibility_position_query_list:
+        if position.ballot_item_name not in seen_candidates:
+            new_list.append(position)
+            seen_candidates.add(position.ballot_item_name)
 
-    # now itterate through this list, and move all the lastest_voter_guide_possibility ies to this voter_guide_possibility_id as parent
+    print('-------')
+    for blip in new_list:
+        print(str(blip.ballot_item_name) + "    " + str(blip.voter_guide_possibility_parent_id))
+    print('-------')
 
-    #     voter_guide_possibility_query = voter_guide_possibility_query.filter(date_last_changed__year=now.year)
-    #    # DALE 2020-06-08 After working with this, it is better to include entries hidden from active review
-    #     # voter_guide_possibility_query = voter_guide_possibility_query.exclude(hide_from_active_review=True)
-    #
-    #     # Only retrieve by URL if it was created this year
-    #     own = datetime.now()
-    #     status += "LIMITING_TO_THIS_YEAR: " + str(now.year) + " "
-    #
-    #     voter_guide_possibility_on_stage = voter_guide_possibility_query.last()
-    #     if voter_guide_possibility_on_stage is not None:
-    #         voter_guide_possibility_on_stage_id = voter_guide_possibility_on_stage.id
-    #         status += "VOTER_GUIDE_POSSIBILITY_FOUND_WITH_URL "
-    #         success = True
-    #     else:
-    #         status += "VOTER_GUIDE_POSSIBILITY_NOT_FOUND_WITH_URL "
-    #         success = True
-    #
-    #     possibility_position_query = VoterGuidePossibilityPosition.objects.filter(
-    #         voter_guide_possibility_parent_id=voter_guide_possibility.id).order_by('possibility_position_number')
-    #     possibility_position_list = list(possibility_position_query)
-    #     for possibility_position in possibility_position_list:
-    #         if positive_value_exists(possibility_position.more_info_url):
-    #             more_info_url = possibility_position.more_info_url
-    #         else:
-    #             more_info_url = voter_guide_possibility.voter_guide_possibility_url
-    #         if voter_guide_possibility.voter_guide_possibility_type == ORGANIZATION_ENDORSING_CANDIDATES \
-    #                 or voter_guide_possibility.voter_guide_possibility_type == UNKNOWN_TYPE:
-    #             # The organization variables have been set above
-    #             # Note that UNKNOWN_TYPE might be set if we are looking at organization
-    #             # ######################
-    #             # If we are starting from a single organization endorsing many candidates,
-    #             # we store that candidate information once
-    #             if positive_value_exists(possibility_position.candidate_we_vote_id):
-    #                 candidate_name = possibility_position.ballot_item_name
-    #                 position_json = {
-    #                     'candidate_name': candidate_name,
-    #                     'candidate_we_vote_id': possibility_position.candidate_we_vote_id,
-    #                     'candidate_twitter_handle': possibility_position.candidate_twitter_handle,
-    #                     'google_civic_election_id': possibility_position.google_civic_election_id,
-    #                     'more_info_url': more_info_url,
-    #                     'organization_name': organization_name,
-    #                     'organization_we_vote_id': organization_we_vote_id,
-    #                     'organization_twitter_handle': organization_twitter_handle,
-    #                     'stance': possibility_position.position_stance,
-    #                     'statement_text': possibility_position.statement_text,
-    #                     'state_code': state_code,
-    #                 }
-    #                 position_json_list.append(position_json)
-    #             elif positive_value_exists(possibility_position.measure_we_vote_id):
-    #                 measure_title = possibility_position.ballot_item_name
-    #                 position_json = {
-    #                     'google_civic_election_id': possibility_position.google_civic_election_id,
-    #                     'measure_title': measure_title,
-    #                     'measure_we_vote_id': possibility_position.measure_we_vote_id,
-    #                     'more_info_url': more_info_url,
-    #                     'organization_name': organization_name,
-    #                     'organization_we_vote_id': organization_we_vote_id,
-    #                     'organization_twitter_handle': organization_twitter_handle,
-    #                     'stance': possibility_position.position_stance,
-    #                     'statement_text': possibility_position.statement_text,
-    #                     'state_code': state_code,
-    #                 }
-    #                 position_json_list.append(position_json)
-    #             else:
-    #                 status += "MISSING_BOTH_CANDIDATE_AND_MEASURE_WE_VOTE_ID "
-    #         elif voter_guide_possibility.voter_guide_possibility_type == ENDORSEMENTS_FOR_CANDIDATE:
-    #             # ######################
-    #             # If we are starting from a single candidate endorsed by many "organizations" (which may be people),
-    #             # we store the unique organization information in the VoterGuidePossibilityPosition table
-    #             organization_name = possibility_position.organization_name \
-    #                 if positive_value_exists(possibility_position.organization_name) else ""
-    #             organization_we_vote_id = possibility_position.organization_we_vote_id \
-    #                 if positive_value_exists(possibility_position.organization_we_vote_id) else ""
-    #             organization_twitter_handle = possibility_position.organization_twitter_handle \
-    #                 if positive_value_exists(possibility_position.organization_twitter_handle) else ""
-    #             position_json = {
-    #                 'candidate_name': candidate_name,
-    #                 'candidate_we_vote_id': candidate_we_vote_id,
-    #                 'candidate_twitter_handle': candidate_twitter_handle,
-    #                 'contest_office_name': contest_office_name,
-    #                 'google_civic_election_id': possibility_position.google_civic_election_id,
-    #                 'measure_we_vote_id': possibility_position.measure_we_vote_id,
-    #                 'more_info_url': more_info_url,
-    #                 'organization_name': organization_name,
-    #                 'organization_we_vote_id': organization_we_vote_id,
-    #                 'organization_twitter_handle': organization_twitter_handle,
-    #                 'stance': possibility_position.position_stance,
-    #                 'statement_text': possibility_position.statement_text,
-    #                 'state_code': state_code,
-    #             }
-    #             position_json_list.append(position_json)
-    #         else:
-    #             # This is an error condition which should not be reached
-    #             status += "UNRECOGNIZED_VOTER_POSSIBILITY_TYPE "
-    #
-    #     if len(position_json_list):
-    #         position_json_list_found = True
-    #
-    #     results = {
-    #         'status': status,
-    #         'success': success,
-    #         'position_json_list': position_json_list,
-    #         'position_json_list_found': position_json_list_found,
-    #     }
-    #     return results
+    results = {}
+    return results
 
 
 
