@@ -457,8 +457,11 @@ class EmailManager(models.Manager):
         }
         return results
 
-    def retrieve_email_address_object(self, normalized_email_address='', email_address_object_we_vote_id='',
-                                      voter_we_vote_id=''):
+    def retrieve_email_address_object(
+            self,
+            normalized_email_address='',
+            email_address_object_we_vote_id='',
+            voter_we_vote_id=''):
         """
         There are cases where we store multiple entries for the same normalized_email_address (prior to an email
         address being verified)
@@ -728,7 +731,7 @@ class EmailManager(models.Manager):
         }
         return results
 
-    def retrieve_primary_email_with_ownership_verified(self, voter_we_vote_id, normalized_email_address=''):
+    def retrieve_primary_email_with_ownership_verified(self, voter_we_vote_id='', normalized_email_address=''):
         status = ""
         email_address_list = []
         email_address_list_found = False
