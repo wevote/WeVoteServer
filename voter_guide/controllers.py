@@ -1,6 +1,7 @@
 # voter_guide/controllers.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
+from urllib.parse import urlparse
 
 from ballot.models import OFFICE, CANDIDATE, MEASURE
 from candidate.controllers import retrieve_candidate_list_for_all_prior_elections_this_year, \
@@ -8,7 +9,7 @@ from candidate.controllers import retrieve_candidate_list_for_all_prior_election
 from candidate.models import CandidateManager, CandidateListManager
 from config.base import get_environment_variable
 import copy
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from django.http import HttpResponse
 from election.controllers import retrieve_this_years_election_id_list, retrieve_upcoming_election_id_list
 from election.models import ElectionManager
@@ -2113,7 +2114,7 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
         voter_guide_possibility_id=voter_guide_possibility_id)
 
     # TODO: Steve, move all the voterGuidPossiblityPositions with the same organization_we_vote_id that was changed in the last 6 months
-    # move_voter_guide_possibility_positions_to_lastest_voter_guide_possibility(voter_guide_possibility_id)
+    move_voter_guide_possibility_positions_to_lastest_voter_guide_possibility(results['voter_guide_possibility'])
 
 
     possible_endorsement_list = []
@@ -2210,17 +2211,29 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
     return json_data
 
 
-    # def move_voter_guide_possibility_positions_to_lastest_voter_guide_possibility(voter_guide_possibility_id):
-    #     voter_guide_possibility_query = VoterGuidePossibility.objects.filter(
-    #         Q(voter_guide_possibility_url__iexact=voter_guide_possibility_url) |
-    #         Q(voter_guide_possibility_url__iexact=voter_guide_possibility_url_alternate))
-    #     # DALE 2020-06-08 After working with this, it is better to include entries hidden from active review
+def move_voter_guide_possibility_positions_to_lastest_voter_guide_possibility(voter_guide_possibility):
+    voter_guide_possibility_id = voter_guide_possibility.id
+    organization_we_vote_id = voter_guide_possibility.organization_we_vote_id
+    voter_guide_possibility_url = voter_guide_possibility.voter_guide_possibility_url
+    url_root = voter_guide_possibility_url.split('/')[2]
+
+    enddate = date.today()
+    startdate = enddate - timedelta(months=6)
+
+    voter_guide_possibility_query = VoterGuidePossibility.objects.filter(
+        Q(voter_guide_possibility_url__contains=url_root) &
+        Q(organization_we_vote_id__iexact=organization_we_vote_id) &
+        Q(date_last_changed__range=[startdate, enddate])).exclude(id=voter_guide_possibility_id)
+
+    # now itterate through this list, and move all the lastest_voter_guide_possibility ies to this voter_guide_possibility_id as parent
+
+    #     voter_guide_possibility_query = voter_guide_possibility_query.filter(date_last_changed__year=now.year)
+    #    # DALE 2020-06-08 After working with this, it is better to include entries hidden from active review
     #     # voter_guide_possibility_query = voter_guide_possibility_query.exclude(hide_from_active_review=True)
     #
     #     # Only retrieve by URL if it was created this year
-    #     now = datetime.now()
+    #     own = datetime.now()
     #     status += "LIMITING_TO_THIS_YEAR: " + str(now.year) + " "
-    #     voter_guide_possibility_query = voter_guide_possibility_query.filter(date_last_changed__year=now.year)
     #
     #     voter_guide_possibility_on_stage = voter_guide_possibility_query.last()
     #     if voter_guide_possibility_on_stage is not None:
