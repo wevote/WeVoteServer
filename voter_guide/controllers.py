@@ -3,6 +3,8 @@
 # -*- coding: UTF-8 -*-
 from urllib.parse import urlparse
 
+from django.db.models import Q
+
 from ballot.models import OFFICE, CANDIDATE, MEASURE
 from candidate.controllers import retrieve_candidate_list_for_all_prior_elections_this_year, \
     retrieve_candidate_list_for_all_upcoming_elections

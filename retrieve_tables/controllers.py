@@ -74,7 +74,7 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
     f = open("requirements.txt", "r")
     for line in f:
         if "psycopg2" in line:
-            logger.error("experiment 16: psycopg2: " + line.strip())
+            logger.error("experiment 17: psycopg2: " + line.strip())
 
     try:
         conn = psycopg2.connect(
@@ -94,7 +94,7 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
             cur = conn.cursor()
             cur.copy_expert(sql, file, size=8192)
             file.seek(0)
-            logger.error("experiment 16: select some stuff: " + file.readline().strip())
+            logger.error("experiment 17: select some stuff: " + file.readline().strip())
         except Exception as e:
             logger.error("Real exception in select some stuff retrieve_sql_tables_as_csv(): " + str(e) + " ")
 
@@ -103,46 +103,83 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
             try:
                 cur = conn.cursor()
                 file = StringIO()  # Empty file
-
                 if positive_value_exists(end):
-                    sql = "COPY (SELECT * FROM public." + table_name + " WHERE id BETWEEN " + start + " AND " + \
-                          end + " ORDER BY id) TO STDOUT"
+                    sql = "COPY public.candidate_candidatecampaign TO STDOUT"
                 else:
                     sql = "COPY " + table_name + " TO STDOUT"
-                logger.error("experiment 16: SIMPLIFIED retrieve_tables sql: " + sql)
+                logger.error("experiment 17: SIMPLIFIED4 retrieve_tables sql: " + sql)
                 cur.copy_expert(sql, file, size=8192)
-                logger.error("experiment 16: SIMPLIFIED after cur.copy_expert ")
+                logger.error("experiment 17: SIMPLIFIED4 after cur.copy_expert ")
                 file.seek(0)
-                logger.error("experiment 16: SIMPLIFIED retrieve_tables file contents: " + file.readline().strip())
+                logger.error("experiment 17: SIMPLIFIED4 retrieve_tables file contents: " + file.readline().strip())
+
+                cur = conn.cursor()
+                file = StringIO()  # Empty file
+                if positive_value_exists(end):
+                    sql = "COPY \"public\".\"candidate_candidatecampaign\" TO STDOUT"
+                else:
+                    sql = "COPY " + table_name + " TO STDOUT"
+                logger.error("experiment 17: SIMPLIFIED3 retrieve_tables sql: " + sql)
+                cur.copy_expert(sql, file, size=8192)
+                logger.error("experiment 17: SIMPLIFIED3 after cur.copy_expert ")
+                file.seek(0)
+                logger.error("experiment 17: SIMPLIFIED3 retrieve_tables file contents: " + file.readline().strip())
+
+                cur = conn.cursor()
+                file = StringIO()  # Empty file
+                if positive_value_exists(end):
+                    sql = "COPY (SELECT * FROM public.candidate_candidatecampaign) TO STDOUT"
+                else:
+                    sql = "COPY " + table_name + " TO STDOUT"
+                logger.error("experiment 17: SIMPLIFIED2 retrieve_tables sql: " + sql)
+                cur.copy_expert(sql, file, size=8192)
+                logger.error("experiment 17: SIMPLIFIED2 after cur.copy_expert ")
+                file.seek(0)
+                logger.error("experiment 17: SIMPLIFIED2 retrieve_tables file contents: " + file.readline().strip())
+
+                cur = conn.cursor()
+                file = StringIO()  # Empty file
+                if positive_value_exists(end):
+                    sql = "COPY (SELECT * FROM \"public\".\"" + table_name + "\" WHERE id BETWEEN " + start + " AND " + \
+                          end + " ORDER BY id) TO STDOUT"
+                    # sql = "COPY (SELECT * FROM public." + table_name + " WHERE id BETWEEN " + start + " AND " + \
+                    #       end + " ORDER BY id) TO STDOUT"
+                else:
+                    sql = "COPY " + table_name + " TO STDOUT"
+                logger.error("experiment 17: SIMPLIFIED retrieve_tables sql: " + sql)
+                cur.copy_expert(sql, file, size=8192)
+                logger.error("experiment 17: SIMPLIFIED after cur.copy_expert ")
+                file.seek(0)
+                logger.error("experiment 17: SIMPLIFIED retrieve_tables file contents: " + file.readline().strip())
 
 
                 cur = conn.cursor()
                 file = StringIO()  # Empty file
 
-                logger.error("experiment 16: file: " + str(file))
+                logger.error("experiment 17: file: " + str(file))
                 if positive_value_exists(end):
                     sql = "COPY (SELECT * FROM public." + table_name + " WHERE id BETWEEN " + start + " AND " + \
                           end + " ORDER BY id) TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
                 else:
                     sql = "COPY " + table_name + " TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
-                logger.error("experiment 16: retrieve_tables sql: " + sql)
+                logger.error("experiment 17: retrieve_tables sql: " + sql)
                 cur.copy_expert(sql, file, size=8192)
-                logger.error("experiment 16: after cur.copy_expert ")
+                logger.error("experiment 17: after cur.copy_expert ")
                 file.seek(0)
-                logger.error("experiment 16: retrieve_tables file contents: " + file.readline().strip())
+                logger.error("experiment 17: retrieve_tables file contents: " + file.readline().strip())
                 file.seek(0)
                 csv_files[table_name] = file.read()
                 file.close()
-                logger.error("experiment 16: after file close, status " + status)
+                logger.error("experiment 17: after file close, status " + status)
                 if "exported" not in status:
                     status += "exported "
                 status += table_name + "(" + start + "," + end + "), "
-                logger.error("experiment 16: after status +=, " + status)
-                logger.error("experiment 16: before conn.commit")
+                logger.error("experiment 17: after status +=, " + status)
+                logger.error("experiment 17: before conn.commit")
                 conn.commit()
-                logger.error("experiment 16: after conn.commit ")
+                logger.error("experiment 17: after conn.commit ")
                 conn.close()
-                logger.error("experiment 16: after conn.close ")
+                logger.error("experiment 17: after conn.close ")
                 dt = time.time() - t0
                 logger.error('Extracting the "' + table_name + '" table took ' + "{:.3f}".format(dt) +
                              ' seconds.  start = ' + start + ', end = ' + end)
@@ -152,14 +189,14 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
             status = "the table_name '" + table_name + "' is not in the table list, therefore no table was returned"
             logger.error(status)
 
-        logger.error("experiment 16: before results")
+        logger.error("experiment 17: before results")
         results = {
             'success': True,
             'status': status,
             'files': csv_files,
         }
 
-        logger.error("experiment 16: results: " + str(results))
+        logger.error("experiment 17: results: " + str(results))
         return results
 
     except Exception as e:
