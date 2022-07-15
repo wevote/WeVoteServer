@@ -41,7 +41,7 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ voter.id }}</td>
-            <td>{% if voter.we_vote_hosted_profile_image_url_medium %}<img src="{{ voter.we_vote_hosted_profile_image_url_medium }}" width="48px" />{% endif %}</td>
+            <td>{% if voter.we_vote_hosted_profile_image_url_medium %}<img src="{{ voter.we_vote_hosted_profile_image_url_medium }}" alt="" width="48px" />{% endif %}</td>
             <td>
                 {{ voter.get_full_name|default_if_none:"" }}
                 <a href="{% url 'voter:voter_edit' voter.id %}" target="_blank">
