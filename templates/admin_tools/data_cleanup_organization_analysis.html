@@ -174,7 +174,7 @@
             <td>{{ forloop.counter }}</td>
             <td>{% if organization.organization_photo_url %}
                 <a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ organization.we_vote_id }}" target="_blank">
-                    <img src="{{ organization.organization_photo_url }}" width="73px" /></a>{% endif %}</td>
+                    <img src="{{ organization.organization_photo_url }}" alt="" width="73px" /></a>{% endif %}</td>
             <td><a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ organization.we_vote_id }}" target="_blank">
                 {{ organization.organization_name }}</a></td>
             <td>{% if organization.organization_twitter_handle %}{{ organization.organization_twitter_handle }} <br />
