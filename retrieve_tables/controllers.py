@@ -73,6 +73,7 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
 
     status = ''
 
+    csv_files = {}
     try:
         conn = psycopg2.connect(
             database=get_environment_variable('DATABASE_NAME'),
@@ -84,53 +85,52 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
 
         # logger.debug("retrieve_sql_tables_as_csv psycopg2 Connected to DB")
 
-        csv_files = {}
         if table_name in allowable_tables:
             try:
                 cur = conn.cursor()
                 file = StringIO()  # Empty file
 
-                logger.error("experiment 26: REAL FILE ALLOWED FOR file: " + table_name)
+                logger.error("experiment 27: REAL FILE ALLOWED FOR file: " + table_name)
                 if positive_value_exists(end):
                     sql = "COPY (SELECT * FROM public." + table_name + " WHERE id BETWEEN " + start + " AND " + \
                           end + " ORDER BY id) TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
                 else:
                     sql = "COPY " + table_name + " TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
-                logger.error("experiment 26: retrieve_tables sql: " + sql)
+                logger.error("experiment 27: retrieve_tables sql: " + sql)
                 cur.copy_expert(sql, file, size=8192)
-                logger.error("experiment 26: after cur.copy_expert ")
+                logger.error("experiment 27: after cur.copy_expert ")
                 file.seek(0)
-                # logger.error("experiment 26: retrieve_tables file contents: " + file.readline().strip())
+                # logger.error("experiment 27: retrieve_tables file contents: " + file.readline().strip())
                 file.seek(0)
                 csv_files[table_name] = file.read()
                 file.close()
-                # logger.error("experiment 26: after file close, status " + status)
+                # logger.error("experiment 27: after file close, status " + status)
                 if "exported" not in status:
                     status += "exported "
                 status += table_name + "(" + start + "," + end + "), "
-                logger.error("experiment 26: after status +=, " + status)
-                logger.error("experiment 26: before conn.commit")
+                logger.error("experiment 27: after status +=, " + status)
+                logger.error("experiment 27: before conn.commit")
                 conn.commit()
-                logger.error("experiment 26: after conn.commit ")
+                logger.error("experiment 27: after conn.commit ")
                 conn.close()
-                logger.error("experiment 26: after conn.close ")
+                logger.error("experiment 27: after conn.close ")
                 dt = time.time() - t0
                 logger.error('Extracting the "' + table_name + '" table took ' + "{:.3f}".format(dt) +
                              ' seconds.  start = ' + start + ', end = ' + end)
             except Exception as e:
-                logger.error("experiment 26: Real exception in retrieve_sql_tables_as_csv(): " + str(e) + " ")
+                logger.error("experiment 27: Real exception in retrieve_sql_tables_as_csv(): " + str(e) + " ")
         else:
             status = "the table_name '" + table_name + "' is not in the table list, therefore no table was returned"
             logger.error(status)
 
-        # logger.error("experiment 26: before results")
+        # logger.error("experiment 27: before results")
         results = {
             'success': True,
             'status': status,
             'files': csv_files,
         }
 
-        logger.error("experiment 26: results.csv_files: " + str(results.csv_files))
+        logger.error("experiment 27: results returned")
         return results
 
     # run `pg_dump -f /dev/null wevotedev` on the server to evaluate for a corrupted file
