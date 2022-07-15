@@ -43,7 +43,6 @@ allowable_tables = [
     'party_party',
     'politician_politician',
     'politician_politiciansarenotduplicates',        # last one to fully run at experiment 23
-    'position_positionentered',
     'twitter_twitterlinktoorganization',
     'voter_guide_voterguidepossibility',
     'voter_guide_voterguidepossibilityposition',
@@ -51,9 +50,10 @@ allowable_tables = [
     'wevote_settings_wevotesetting',
     'ballot_ballotitem',
     'ballot_ballotreturned',
-    'polling_location_pollinglocation',     # 7/14/22 ... table possibly corrupted in AWS, so running it last
-    'organization_organization',            # 7/14/22 ... table possibly corrupted in AWS, so running it last
-    'candidate_candidatecampaign',          # 7/14/22 ... table possibly corrupted in AWS, so running it last
+    'position_positionentered',             # 7/15/22 ... table possibly corrupted in AWS, so running at the end
+    'polling_location_pollinglocation',     # 7/14/22 ... table possibly corrupted in AWS, so running at the end
+    'organization_organization',            # 7/14/22 ... table possibly corrupted in AWS, so running at the end
+    'candidate_candidatecampaign',          # 7/14/22 ... table possibly corrupted in AWS, so running at the end
 ]
 
 dummy_unique_id = 10000000
@@ -74,7 +74,7 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
     f = open("requirements.txt", "r")
     for line in f:
         if "psycopg2" in line:
-            logger.error("experiment 24: psycopg2: " + line.strip())
+            logger.error("experiment 25: psycopg2: " + line.strip())
 
     try:
         conn = psycopg2.connect(
@@ -93,47 +93,47 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
                 cur = conn.cursor()
                 file = StringIO()  # Empty file
 
-                logger.error("experiment 24: REAL FILE ALLOWED FOR file: " + table_name)
+                logger.error("experiment 25: REAL FILE ALLOWED FOR file: " + table_name)
                 if positive_value_exists(end):
                     sql = "COPY (SELECT * FROM public." + table_name + " WHERE id BETWEEN " + start + " AND " + \
                           end + " ORDER BY id) TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
                 else:
                     sql = "COPY " + table_name + " TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
-                logger.error("experiment 24: retrieve_tables sql: " + sql)
+                logger.error("experiment 25: retrieve_tables sql: " + sql)
                 cur.copy_expert(sql, file, size=8192)
-                logger.error("experiment 24: after cur.copy_expert ")
+                logger.error("experiment 25: after cur.copy_expert ")
                 file.seek(0)
-                logger.error("experiment 24: retrieve_tables file contents: " + file.readline().strip())
+                # logger.error("experiment 25: retrieve_tables file contents: " + file.readline().strip())
                 file.seek(0)
                 csv_files[table_name] = file.read()
                 file.close()
-                logger.error("experiment 24: after file close, status " + status)
+                # logger.error("experiment 25: after file close, status " + status)
                 if "exported" not in status:
                     status += "exported "
                 status += table_name + "(" + start + "," + end + "), "
-                logger.error("experiment 24: after status +=, " + status)
-                logger.error("experiment 24: before conn.commit")
+                logger.error("experiment 25: after status +=, " + status)
+                logger.error("experiment 25: before conn.commit")
                 conn.commit()
-                logger.error("experiment 24: after conn.commit ")
+                logger.error("experiment 25: after conn.commit ")
                 conn.close()
-                logger.error("experiment 24: after conn.close ")
+                logger.error("experiment 25: after conn.close ")
                 dt = time.time() - t0
                 logger.error('Extracting the "' + table_name + '" table took ' + "{:.3f}".format(dt) +
                              ' seconds.  start = ' + start + ', end = ' + end)
             except Exception as e:
-                logger.error("experiment 24: Real exception in retrieve_sql_tables_as_csv(): " + str(e) + " ")
+                logger.error("experiment 25: Real exception in retrieve_sql_tables_as_csv(): " + str(e) + " ")
         else:
             status = "the table_name '" + table_name + "' is not in the table list, therefore no table was returned"
             logger.error(status)
 
-        logger.error("experiment 24: before results")
+        # logger.error("experiment 25: before results")
         results = {
             'success': True,
             'status': status,
             'files': csv_files,
         }
 
-        logger.error("experiment 24: results: " + str(results))
+        logger.error("experiment 25: results: " + str(results))
         return results
 
     # July 2022:  Unfortunately psycopg2-binary crashes and brings down the python thread hard, with nothing in the
