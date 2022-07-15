@@ -42,7 +42,7 @@ allowable_tables = [
     'organization_organizationreserveddomain',
     'party_party',
     'politician_politician',
-    'politician_politiciansarenotduplicates',
+    'politician_politiciansarenotduplicates',        # last one to fully run at experiment 23
     'position_positionentered',
     'twitter_twitterlinktoorganization',
     'voter_guide_voterguidepossibility',
