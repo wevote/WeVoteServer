@@ -379,7 +379,7 @@ CORS_ALLOW_CREDENTIALS = True
 # specify whether to replace the HTTP_REFERER header if CORS checks pass so that CSRF django middleware checks
 # will work with https
 CORS_REPLACE_HTTPS_REFERER = True
-CSRF_TRUSTED_ORIGINS = ['api.wevoteusa.org']
+CSRF_TRUSTED_ORIGINS = ['api.wevoteusa.org','wevotedeveloper.com']
 DATA_UPLOAD_MAX_MEMORY_SIZE = 6000000
 
 # CORS_ORIGIN_WHITELIST = (

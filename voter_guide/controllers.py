@@ -1,27 +1,29 @@
 # voter_guide/controllers.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
+import copy
+import json
+from datetime import datetime, timedelta
+from itertools import chain
 from urllib.parse import urlparse
 
+import pytz
 from django.db.models import Q
+from django.http import HttpResponse
 
+import wevote_functions.admin
 from ballot.models import OFFICE, CANDIDATE, MEASURE
 from candidate.controllers import retrieve_candidate_list_for_all_prior_elections_this_year, \
     retrieve_candidate_list_for_all_upcoming_elections
 from candidate.models import CandidateManager, CandidateListManager
 from config.base import get_environment_variable
-import copy
-from datetime import datetime, timedelta, date
-from django.http import HttpResponse
 from election.controllers import retrieve_this_years_election_id_list, retrieve_upcoming_election_id_list
 from election.models import ElectionManager
 from exception.models import handle_record_not_found_exception
 from follow.models import FollowOrganizationList, FollowIssueList, FOLLOWING
 from friend.controllers import heal_current_friend
 from friend.models import FriendManager
-from itertools import chain
 from issue.models import OrganizationLinkToIssueList
-import json
 from measure.controllers import add_measure_name_alternatives_to_measure_list_light, \
     retrieve_measure_list_for_all_upcoming_elections
 from measure.models import ContestMeasureListManager, ContestMeasureManager
@@ -35,7 +37,6 @@ from position.controllers import retrieve_ballot_item_we_vote_ids_for_organizati
     retrieve_ballot_item_we_vote_ids_for_organization_static
 from position.models import ANY_STANCE, FRIENDS_AND_PUBLIC, FRIENDS_ONLY, INFORMATION_ONLY, OPPOSE, \
     PositionEntered, PositionManager, PositionListManager, PUBLIC_ONLY, SUPPORT
-import pytz
 from share.models import ShareManager
 from twitter.models import TwitterUserManager
 from voter.models import fetch_voter_id_from_voter_device_link, fetch_voter_we_vote_id_from_voter_device_link, \
@@ -44,7 +45,6 @@ from voter_guide.controllers_possibility import candidates_found_on_url, organiz
 from voter_guide.models import ENDORSEMENTS_FOR_CANDIDATE, ORGANIZATION_ENDORSING_CANDIDATES, UNKNOWN_TYPE, \
     VoterGuide, VoterGuideListManager, VoterGuideManager, \
     VoterGuidePossibility, VoterGuidePossibilityManager, VoterGuidePossibilityPosition
-import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, is_voter_device_id_valid, positive_value_exists, \
     process_request_from_master, is_link_to_video
 
@@ -2235,7 +2235,8 @@ def move_voter_guide_possibility_positions_to_requested_voter_guide_possibility(
         ids_list.append(voter_guide_possibility.id)
 
     possibility_position_query = VoterGuidePossibilityPosition.objects.filter(
-        Q(voter_guide_possibility_parent_id__in=ids_list)).order_by('ballot_item_name', '-voter_guide_possibility_parent_id')
+        Q(voter_guide_possibility_parent_id__in=ids_list)).order_by(
+            'ballot_item_name', '-voter_guide_possibility_parent_id')
     possibility_position_query_list = list(possibility_position_query)
     for blip in possibility_position_query_list:
         print(str(blip.ballot_item_name) + "    " + str(blip.voter_guide_possibility_parent_id))
@@ -2247,22 +2248,23 @@ def move_voter_guide_possibility_positions_to_requested_voter_guide_possibility(
         if position.ballot_item_name not in seen_candidates:
             new_list.append(position)
             seen_candidates.add(position.ballot_item_name)
-            # TODO: If we have to change all the exising Position entries to match the voter_guide_possibility_id
-            #  passed into the query, our design could use improvement
+            # TODO: If we have to change all the exising  position.voter_guide_possibility_parent_id entries to match
+            #  the voter_guide_possibility_id passed in the query from the extension, our design could use improvement.
+            #  It seems that VoterGuidePossibilityPosition items should not be tied to a specific VoterGuidePossibility,
+            #  this would mean that we would lose the connection between a political data volunter an their changes, but
+            #  we could solve this by versioning the VoterGuidePossibilityPosition and have a admin console that allowed
+            #  us to review the changes
             if position.voter_guide_possibility_parent_id != voter_guide_possibility_id:
-                # position.voter_guide_possibility_parent_id = voter_guide_possibility_id
+                position.voter_guide_possibility_parent_id = voter_guide_possibility_id
                 logger.debug("Updating '" + position.ballot_item_name + "' from parent id " +
                              str(position.voter_guide_possibility_parent_id) + " to " + str(voter_guide_possibility_id))
-                # position.save()
+                position.save()
 
-    print('-------')
-    for blip in new_list:
-        print(str(blip.ballot_item_name) + "    " + str(blip.voter_guide_possibility_parent_id))
-    print('-------')
-
-    results = {}
-    return results
-
+    # print('-------')
+    # for possible_postion in new_list:
+    #     print(str(possible_postion.ballot_item_name) + "    " + str(possible_postion.voter_guide_possibility_parent_id))
+    # print('-------')
+    return
 
 
 def voter_guide_possibility_save_for_api(  # voterGuidePossibilitySave
