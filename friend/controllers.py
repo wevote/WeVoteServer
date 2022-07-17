@@ -351,10 +351,15 @@ def friend_accepted_invitation_send(
     return results
 
 
-def friend_invitation_by_email_send_for_api(voter_device_id,  # friendInvitationByEmailSend
-                                            email_address_array, first_name_array, last_name_array,
-                                            email_addresses_raw, invitation_message,
-                                            sender_email_address, web_app_root_url=''):
+def friend_invitation_by_email_send_for_api(  # friendInvitationByEmailSend
+        voter_device_id='',
+        email_address_array=[],
+        first_name_array=[],
+        last_name_array=[],
+        email_addresses_raw='',
+        invitation_message='',
+        sender_email_address='',
+        web_app_root_url=''):
     """
 
     :param voter_device_id:
@@ -369,17 +374,21 @@ def friend_invitation_by_email_send_for_api(voter_device_id,  # friendInvitation
     """
     success = True
     status = ""
+    number_of_messages_sent = 0
     error_message_to_show_voter = ""
     sender_voter_email_address_missing = True
+    success_message_to_show_voter = ""
 
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         error_results = {
             'status':                               results['status'],
             'success':                              False,
-            'voter_device_id':                      voter_device_id,
+            'error_message_to_show_voter':          error_message_to_show_voter,
+            'number_of_messages_sent':              number_of_messages_sent,
             'sender_voter_email_address_missing':   sender_voter_email_address_missing,
-            'error_message_to_show_voter':          error_message_to_show_voter
+            'success_message_to_show_voter':        success_message_to_show_voter,
+            'voter_device_id':                      voter_device_id,
         }
         return error_results
 
@@ -391,9 +400,11 @@ def friend_invitation_by_email_send_for_api(voter_device_id,  # friendInvitation
         error_results = {
             'status':                               status,
             'success':                              False,
-            'voter_device_id':                      voter_device_id,
+            'error_message_to_show_voter':          error_message_to_show_voter,
+            'number_of_messages_sent':              number_of_messages_sent,
             'sender_voter_email_address_missing':   sender_voter_email_address_missing,
-            'error_message_to_show_voter':          error_message_to_show_voter
+            'success_message_to_show_voter':        success_message_to_show_voter,
+            'voter_device_id':                      voter_device_id,
         }
         return error_results
 
@@ -460,9 +471,11 @@ def friend_invitation_by_email_send_for_api(voter_device_id,  # friendInvitation
             error_results = {
                 'success':                              False,
                 'status':                               status,
-                'voter_device_id':                      voter_device_id,
+                'error_message_to_show_voter':          error_message_to_show_voter,
+                'number_of_messages_sent':              number_of_messages_sent,
                 'sender_voter_email_address_missing':   sender_voter_email_address_missing,
-                'error_message_to_show_voter':          error_message_to_show_voter
+                'success_message_to_show_voter':        success_message_to_show_voter,
+                'voter_device_id':                      voter_device_id,
             }
             return error_results
 
@@ -513,8 +526,12 @@ def friend_invitation_by_email_send_for_api(voter_device_id,  # friendInvitation
     if email_address_array:
         # Reconstruct dictionary array from lists
         for n in range(len(email_address_array)):
-            first_name = first_name_array[n]
-            last_name = last_name_array[n]
+            try:
+                first_name = first_name_array[n]
+                last_name = last_name_array[n]
+            except Exception as e:
+                first_name = ''
+                last_name = ''
             one_normalized_raw_email = email_address_array[n]
 
             # Make sure the current voter isn't already friends with owner of this email address
@@ -524,18 +541,29 @@ def friend_invitation_by_email_send_for_api(voter_device_id,  # friendInvitation
                 # Do not send an invitation
                 status += is_friend_results['status']
                 status += "ALREADY_FRIENDS_WITH_SENDER_VOTER_EMAIL_ADDRESS_ARRAY "
-                error_message_to_show_voter += "You are already friends with the owner of " \
-                                               "'{one_normalized_raw_email}'. " \
-                                               "".format(one_normalized_raw_email=one_normalized_raw_email)
+                success_message_to_show_voter += \
+                    "You are already friends with the owner of " \
+                    "'{one_normalized_raw_email}'. " \
+                    "".format(one_normalized_raw_email=one_normalized_raw_email)
                 continue
 
-            send_results = send_to_one_friend(voter_device_id, sender_voter, send_now,
-                                              sender_email_with_ownership_verified,
-                                              one_normalized_raw_email, first_name, last_name, invitation_message,
-                                              web_app_root_url)
+            send_results = send_to_one_friend(
+                voter_device_id=voter_device_id,
+                sender_voter=sender_voter,
+                send_now=send_now,
+                sender_email_with_ownership_verified=sender_email_with_ownership_verified,
+                one_normalized_raw_email=one_normalized_raw_email,
+                first_name=first_name,
+                last_name=last_name,
+                invitation_message=invitation_message,
+                web_app_root_url=web_app_root_url)
+            error_message_to_show_voter += send_results['error_message_to_show_voter']
+            if send_results['success']:
+                number_of_messages_sent += 1
             status += send_results['status']
 
     else:
+        # TODO: Deprecate this in 2024
         # Break apart all the emails in email_addresses_raw input from the voter
         results = email_manager.parse_raw_emails_into_list(email_addresses_raw)
         if results['at_least_one_email_found']:
@@ -555,10 +583,16 @@ def friend_invitation_by_email_send_for_api(voter_device_id,  # friendInvitation
                                                    "".format(one_normalized_raw_email=one_normalized_raw_email)
                     continue
 
-                send_results = send_to_one_friend(voter_device_id, sender_voter, send_now,
-                                                  sender_email_with_ownership_verified,
-                                                  one_normalized_raw_email, first_name, last_name, invitation_message,
-                                                  web_app_root_url)
+                send_results = send_to_one_friend(
+                    voter_device_id=voter_device_id,
+                    sender_voter=sender_voter,
+                    send_now=send_now,
+                    sender_email_with_ownership_verified=sender_email_with_ownership_verified,
+                    one_normalized_raw_email=one_normalized_raw_email,
+                    first_name=first_name,
+                    last_name=last_name,
+                    invitation_message=invitation_message,
+                    web_app_root_url=web_app_root_url)
                 status += send_results['status']
         else:
             error_message_to_show_voter = "Please enter the email address of at least one friend."
@@ -566,9 +600,11 @@ def friend_invitation_by_email_send_for_api(voter_device_id,  # friendInvitation
             error_results = {
                 'status':                               status,
                 'success':                              False,
-                'voter_device_id':                      voter_device_id,
+                'error_message_to_show_voter':          error_message_to_show_voter,
+                'number_of_messages_sent':              number_of_messages_sent,
                 'sender_voter_email_address_missing':   sender_voter_email_address_missing,
-                'error_message_to_show_voter':          error_message_to_show_voter
+                'success_message_to_show_voter':        success_message_to_show_voter,
+                'voter_device_id':                      voter_device_id,
             }
             return error_results
 
@@ -612,16 +648,25 @@ def friend_invitation_by_email_send_for_api(voter_device_id,  # friendInvitation
     results = {
         'success':                              success,
         'status':                               status,
-        'voter_device_id':                      voter_device_id,
+        'error_message_to_show_voter':          error_message_to_show_voter,
+        'number_of_messages_sent':              number_of_messages_sent,
         'sender_voter_email_address_missing':   sender_voter_email_address_missing,
-        'error_message_to_show_voter':          error_message_to_show_voter
+        'success_message_to_show_voter':        success_message_to_show_voter,
+        'voter_device_id':                      voter_device_id,
     }
     return results
 
 
-def send_to_one_friend(voter_device_id, sender_voter, send_now, sender_email_with_ownership_verified,
-                       one_normalized_raw_email, first_name, last_name, invitation_message,
-                       web_app_root_url=''):
+def send_to_one_friend(
+        voter_device_id='',
+        sender_voter=None,
+        send_now=False,
+        sender_email_with_ownership_verified='',
+        one_normalized_raw_email='',
+        first_name='',
+        last_name='',
+        invitation_message='',
+        web_app_root_url=''):
     # Starting with a raw email address, find (or create) the EmailAddress entry
     # and the owner (Voter) if exists
     status = ""
