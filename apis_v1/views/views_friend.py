@@ -37,15 +37,22 @@ def friend_invitation_by_email_send_view(request):  # friendInvitationByEmailSen
     invitation_message = request.GET.get('invitation_message', "")
     sender_email_address = request.GET.get('sender_email_address', "")
     hostname = request.GET.get('hostname', "")
-    results = friend_invitation_by_email_send_for_api(voter_device_id, email_address_array, first_name_array,
-                                                      last_name_array, email_addresses_raw,
-                                                      invitation_message, sender_email_address,
-                                                      web_app_root_url=hostname)
+    results = friend_invitation_by_email_send_for_api(
+        voter_device_id=voter_device_id,
+        email_address_array=email_address_array,
+        first_name_array=first_name_array,
+        last_name_array=last_name_array,
+        email_addresses_raw=email_addresses_raw,
+        invitation_message=invitation_message,
+        sender_email_address=sender_email_address,
+        web_app_root_url=hostname)
     json_data = {
         'status':                               results['status'],
         'success':                              results['success'],
         'voter_device_id':                      voter_device_id,
         'error_message_to_show_voter':          results['error_message_to_show_voter'],
+        'success_message_to_show_voter':        results['success_message_to_show_voter'],
+        'number_of_messages_sent':              results['number_of_messages_sent'],
         'sender_voter_email_address_missing':   results['sender_voter_email_address_missing'],
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')

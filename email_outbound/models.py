@@ -448,11 +448,12 @@ class EmailManager(models.Manager):
         success = True
         status = "EMAIL_MANAGER_PARSE_RAW_EMAILS"
         email_list = extract_email_addresses_from_string(email_addresses_raw)
+        at_least_one_email_found = email_list and email_list.length > 0
 
         results = {
             'success':                  success,
             'status':                   status,
-            'at_least_one_email_found': True,
+            'at_least_one_email_found': at_least_one_email_found,
             'email_list':               email_list,
         }
         return results
