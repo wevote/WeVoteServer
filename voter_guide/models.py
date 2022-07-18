@@ -2,20 +2,22 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+import operator
 from datetime import datetime, timedelta
+
+import pytz
 from django.db import models
 from django.db.models import Q
+
+import wevote_functions.admin
 from election.models import ElectionManager, TIME_SPAN_LIST
 from exception.models import handle_exception, handle_record_not_found_exception, \
     handle_record_found_more_than_one_exception
-import operator
 from organization.models import Organization, OrganizationManager, \
     CORPORATION, GROUP, INDIVIDUAL, NEWS_ORGANIZATION, NONPROFIT, NONPROFIT_501C3, NONPROFIT_501C4, \
     POLITICAL_ACTION_COMMITTEE, PUBLIC_FIGURE, TRADE_ASSOCIATION, UNKNOWN, ORGANIZATION_TYPE_CHOICES
 from pledge_to_vote.models import PledgeToVoteManager
-import pytz
 from voter.models import VoterManager
-import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, convert_to_str, positive_value_exists
 from wevote_settings.models import fetch_site_unique_id_prefix, fetch_next_we_vote_id_voter_guide_integer
 
@@ -2884,6 +2886,7 @@ class VoterGuidePossibilityPosition(models.Model):
     # We are relying on built-in Python id field
 
     # What is the parent VoterGuidePossibility?
+    objects = None
     voter_guide_possibility_parent_id = models.PositiveIntegerField(null=True, db_index=True)
 
     # 001 - 999
