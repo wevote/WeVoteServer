@@ -186,7 +186,7 @@ Then confirm that the default python is now version 3.9 or later.  (Version 3.6 
     ```
     ln -s /opt/homebrew/bin/python3 /opt/homebrew/bin/python
     ```
-bneeded to install postgres before the requirements because psyco3-3 binary requires pg_config which is not installed yet.
+needed to install postgres before the requirements because psyco3-3 binary requires pg_config which is not installed yet.
 
 25. Set up a Virtual Environment with the new Python Interpreter.  
 Navigate to: PyCharm/Preferences/Project: WeVoteServer/Python Interpreter.
