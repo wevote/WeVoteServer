@@ -24,7 +24,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 # 'campaign_campaignxseofriendlypath',
 allowable_tables = [
     'ballot_ballotitem',
-    'position_positionentered',             # 7/15/22 ... table possibly corrupted in AWS, so running at the end
+    'position_positionentered',
     'candidate_candidatesarenotduplicates',
     'candidate_candidatetoofficelink',
     'elected_office_electedoffice',
