@@ -127,6 +127,8 @@ class EmailOutboundDescription(models.Model):
     # We include this here for data monitoring and debugging
     recipient_voter_email = models.EmailField(
         verbose_name='email address for recipient', max_length=255, null=True, blank=True, unique=False)
+    list_unsubscribe_mailto = models.TextField(null=True, blank=True)
+    list_unsubscribe_url = models.TextField(null=True, blank=True)
     template_variables_in_json = models.TextField(null=True, blank=True)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
@@ -151,6 +153,8 @@ class EmailScheduled(models.Model):
         verbose_name="we vote id for the email", max_length=255, null=True, blank=True, unique=False)
     recipient_voter_email = models.EmailField(
         verbose_name='recipient email address', max_length=255, null=True, blank=True, unique=False)
+    list_unsubscribe_mailto = models.TextField(null=True, blank=True)
+    list_unsubscribe_url = models.TextField(null=True, blank=True)
     send_status = models.CharField(max_length=50, choices=SEND_STATUS_CHOICES, default=TO_BE_PROCESSED)
     email_outbound_description_id = models.PositiveIntegerField(
         verbose_name="the internal id of EmailOutboundDescription", default=0, null=False)
@@ -209,8 +213,12 @@ class EmailManager(models.Manager):
     def create_email_address_for_voter(self, normalized_email_address, voter, email_ownership_is_verified=False):
         return self.create_email_address(normalized_email_address, voter.we_vote_id, email_ownership_is_verified)
 
-    def create_email_address(self, normalized_email_address, voter_we_vote_id='', email_ownership_is_verified=False,
-                             make_primary_email=True):
+    def create_email_address(
+            self,
+            normalized_email_address='',
+            voter_we_vote_id='',
+            email_ownership_is_verified=False,
+            make_primary_email=True):
         secret_key = generate_random_string(12)
         status = ""
         normalized_email_address = str(normalized_email_address)
@@ -253,10 +261,18 @@ class EmailManager(models.Manager):
         return results
 
     def create_email_outbound_description(
-            self, sender_voter_we_vote_id, sender_voter_email, sender_voter_name='',
+            self,
+            sender_voter_we_vote_id='',
+            sender_voter_email='',
+            sender_voter_name='',
             recipient_voter_we_vote_id='',
-            recipient_email_we_vote_id='', recipient_voter_email='', template_variables_in_json='',
-            kind_of_email_template=''):
+            recipient_email_we_vote_id='',
+            recipient_voter_email='',
+            template_variables_in_json='',
+            kind_of_email_template='',
+            list_unsubscribe_mailto=None,
+            list_unsubscribe_url=None,
+    ):
         status = ""
         if not positive_value_exists(kind_of_email_template):
             kind_of_email_template = GENERIC_EMAIL_TEMPLATE
@@ -271,6 +287,8 @@ class EmailManager(models.Manager):
                 recipient_voter_email=recipient_voter_email,
                 kind_of_email_template=kind_of_email_template,
                 template_variables_in_json=template_variables_in_json,
+                list_unsubscribe_mailto=list_unsubscribe_mailto,
+                list_unsubscribe_url=list_unsubscribe_url,
             )
             email_outbound_description_saved = True
             success = True
@@ -373,7 +391,7 @@ class EmailManager(models.Manager):
 
     def merge_two_duplicate_emails(self, email_address_object1, email_address_object2):
         """
-        We assume that the checking to see if these are duplicates has been done outside of this function.
+        We assume that the checking to see if these are duplicates has been done outside this function.
         We will keep email_address_object1 and eliminate email_address_object2.
         :param email_address_object1:
         :param email_address_object2:
@@ -614,7 +632,7 @@ class EmailManager(models.Manager):
         }
         return results
 
-    def verify_email_address_object_from_secret_key(self, email_secret_key):
+    def verify_email_address_object_from_secret_key(self, email_secret_key=''):
         """
 
         :param email_secret_key:
@@ -844,8 +862,13 @@ class EmailManager(models.Manager):
             print(status)
             return email_scheduled_object
 
-    def schedule_email(self, email_outbound_description, subject, message_text, message_html,
-                       send_status=TO_BE_PROCESSED):
+    def schedule_email(
+            self,
+            email_outbound_description=None,
+            subject="",
+            message_text="",
+            message_html="",
+            send_status=TO_BE_PROCESSED):
         status = ''
         try:
             email_scheduled = EmailScheduled.objects.create(
@@ -860,6 +883,8 @@ class EmailManager(models.Manager):
                 email_outbound_description_id=email_outbound_description.id,
                 send_status=send_status,
                 subject=subject,
+                list_unsubscribe_mailto=email_outbound_description.list_unsubscribe_mailto,
+                list_unsubscribe_url=email_outbound_description.list_unsubscribe_url,
             )
             email_scheduled_saved = True
             email_scheduled_id = email_scheduled.id
@@ -870,7 +895,7 @@ class EmailManager(models.Manager):
             email_scheduled = EmailScheduled()
             email_scheduled_id = 0
             success = False
-            status += "ERROR_SCHEDULE_EMAIL_NOT_CREATED " + str(e) + ' '
+            status += "ERROR_SCHEDULE_EMAIL_NOT_CREATED: " + str(e) + ' '
             print(status)
 
         results = {
@@ -953,6 +978,25 @@ class EmailManager(models.Manager):
                 message.from_email = From('info@wevote.us', 'We Vote')
             message.reply_to = ReplyTo('info@wevote.us', 'We Vote')
             message.to = To(email_scheduled.recipient_voter_email, email_scheduled.recipient_voter_email, p=0)
+            try:
+                if email_scheduled.list_unsubscribe_mailto or email_scheduled.list_unsubscribe_url:
+                    list_unsubscribe_text = ''
+                    if email_scheduled.list_unsubscribe_mailto:
+                        list_unsubscribe_text += \
+                            "<mailto:{list_unsubscribe_mailto}>" \
+                            "".format(list_unsubscribe_mailto=email_scheduled.list_unsubscribe_mailto)
+                        if email_scheduled.list_unsubscribe_url:
+                            list_unsubscribe_text += ", "
+                    if email_scheduled.list_unsubscribe_url:
+                        list_unsubscribe_text += \
+                            "<{list_unsubscribe_url}>" \
+                            "".format(list_unsubscribe_url=email_scheduled.list_unsubscribe_url)
+                    message.add_header(
+                        Header(key="List-Unsubscribe", value=list_unsubscribe_text)
+                    )
+            except Exception as e:
+                status += "SEND_SCHEDULED_ADD_HEADER_ERROR: " + str(e) + " "
+                print(status)
             message.subject = Subject(email_scheduled.subject)
             message.content = Content(
                 MimeType.text,
@@ -1076,18 +1120,28 @@ class EmailManager(models.Manager):
         else:
             return ""
 
-    def update_email_address_with_new_subscription_secret_key(self, email_we_vote_id):
+    def update_email_address_with_new_subscription_secret_key(self, email_we_vote_id='', force_change=False):
+        """
+        The subscription_secret_key is used to let the voter unsubscribe without being signed in,
+        so it shouldn't change.
+        :param email_we_vote_id:
+        :param force_change:
+        :return:
+        """
         results = self.retrieve_email_address_object('', email_we_vote_id)
         if results['email_address_object_found']:
             email_address_object = results['email_address_object']
-            try:
-                email_address_object.subscription_secret_key = generate_random_string(48)
-                email_address_object.save()
+            if not positive_value_exists(email_address_object.subscription_secret_key) or force_change:
+                try:
+                    email_address_object.subscription_secret_key = generate_random_string(48)
+                    email_address_object.save()
+                    return email_address_object.subscription_secret_key
+                except Exception as e:
+                    status = "ERROR_UPDATE_EMAIL_ADDRESS_WITH_NEW_SUBSCRIPTION_SECRET_KEY: " + str(e) + " "
+                    print(status)
+                    return ""
+            else:
                 return email_address_object.subscription_secret_key
-            except Exception as e:
-                status = "ERROR_UPDATE_EMAIL_ADDRESS_WITH_NEW_SUBSCRIPTION_SECRET_KEY: " + str(e) + " "
-                print(status)
-                return ""
         else:
             return ""
 

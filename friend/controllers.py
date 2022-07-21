@@ -294,6 +294,22 @@ def friend_accepted_invitation_send(
         else:
             subject = "Friend accepted your invitation on We Vote"
 
+        # Unsubscribe link in email
+        # "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
+        # original_sender_email_subscription_secret_key,
+        recipient_unsubscribe_url = \
+            "{root_url}/unsubscribe/{email_secret_key}/friendaccept" \
+            "".format(
+                email_secret_key=original_sender_email_subscription_secret_key,
+                root_url=web_app_root_url_verified,
+            )
+        # Instant unsubscribe link in email header
+        list_unsubscribe_url = str(str(recipient_unsubscribe_url) + '/instant')
+        # Instant unsubscribe email address in email header
+        # from voter.models import NOTIFICATION_FRIEND_REQUEST_RESPONSES_EMAIL
+        list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
+                                  "".format(setting='NOTIFICATION_FRIEND_REQUEST_RESPONSES_EMAIL')
+
         template_variables_for_json = {
             "subject":                      subject,
             "invitation_message":           invitation_message,
@@ -303,11 +319,9 @@ def friend_accepted_invitation_send(
             "sender_description":           accepting_voter_description,
             "sender_network_details":       accepting_voter_network_details,
             "recipient_name":               original_sender_name,
+            "recipient_unsubscribe_url":    recipient_unsubscribe_url,
             "recipient_voter_email":        original_sender_email,
             "see_your_friend_list_url":     web_app_root_url_verified + "/friends",
-            "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
-            original_sender_email_subscription_secret_key,
-            "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
         }
         template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
 
@@ -322,7 +336,10 @@ def friend_accepted_invitation_send(
             recipient_email_we_vote_id=original_sender_email_we_vote_id,
             recipient_voter_email=original_sender_email,
             template_variables_in_json=template_variables_in_json,
-            kind_of_email_template=kind_of_email_template)
+            kind_of_email_template=kind_of_email_template,
+            list_unsubscribe_mailto=list_unsubscribe_mailto,
+            list_unsubscribe_url=list_unsubscribe_url,
+        )
         status += outbound_results['status'] + " "
         if outbound_results['email_outbound_description_saved']:
             email_outbound_description = outbound_results['email_outbound_description']
@@ -562,7 +579,7 @@ def friend_invitation_by_email_send_for_api(  # friendInvitationByEmailSend
                 number_of_messages_sent += 1
             status += send_results['status']
 
-    else:
+    elif positive_value_exists(email_addresses_raw):
         # TODO: Deprecate this in 2024
         # Break apart all the emails in email_addresses_raw input from the voter
         results = email_manager.parse_raw_emails_into_list(email_addresses_raw)
@@ -595,7 +612,7 @@ def friend_invitation_by_email_send_for_api(  # friendInvitationByEmailSend
                     web_app_root_url=web_app_root_url)
                 status += send_results['status']
         else:
-            error_message_to_show_voter = "Please enter the email address of at least one friend."
+            error_message_to_show_voter = "Please enter at least one email address."
             status += "LIST_OF_EMAILS_NOT_RECEIVED " + results['status']
             error_results = {
                 'status':                               status,
@@ -780,6 +797,22 @@ def send_to_one_friend(
             email_manager.update_email_address_with_new_subscription_secret_key(
                 email_we_vote_id=recipient_email_we_vote_id)
 
+    # Unsubscribe link in email
+    # "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
+    # recipient_email_subscription_secret_key,
+    recipient_unsubscribe_url = \
+        "{root_url}/unsubscribe/{email_secret_key}/friendinvite" \
+        "".format(
+            email_secret_key=recipient_email_subscription_secret_key,
+            root_url=web_app_root_url_verified,
+        )
+    # Instant unsubscribe link in email header
+    list_unsubscribe_url = str(str(recipient_unsubscribe_url) + '/instant')
+    # Instant unsubscribe email address in email header
+    # from voter.models import NOTIFICATION_FRIEND_REQUESTS_EMAIL
+    list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
+                              "".format(setting='NOTIFICATION_FRIEND_REQUESTS_EMAIL')
+
     template_variables_for_json = {
         "subject":                      subject,
         "invitation_message":           invitation_message,
@@ -789,12 +822,10 @@ def send_to_one_friend(
         "sender_description":           sender_description,
         "sender_network_details":       sender_network_details,
         "recipient_name":               recipient_name,
+        "recipient_unsubscribe_url":    recipient_unsubscribe_url,
         "recipient_voter_email":        recipient_voter_email,
         "see_all_friend_requests_url":  web_app_root_url_verified + "/friends",
         "confirm_friend_request_url":   web_app_root_url_verified + "/more/network/key/" + invitation_secret_key,
-        "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
-        recipient_email_subscription_secret_key,
-        "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
     }
     template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
 
@@ -810,7 +841,10 @@ def send_to_one_friend(
             recipient_email_we_vote_id=recipient_email_we_vote_id,
             recipient_voter_email=recipient_voter_email,
             template_variables_in_json=template_variables_in_json,
-            kind_of_email_template=kind_of_email_template)
+            kind_of_email_template=kind_of_email_template,
+            list_unsubscribe_mailto=list_unsubscribe_mailto,
+            list_unsubscribe_url=list_unsubscribe_url,
+        )
         status += outbound_results['status'] + " "
         email_outbound_description = outbound_results['email_outbound_description']
         if outbound_results['email_outbound_description_saved'] and send_now:
@@ -1975,6 +2009,22 @@ def friend_invitation_by_we_vote_id_send_for_api(voter_device_id, other_voter_we
                     email_manager.update_email_address_with_new_subscription_secret_key(
                         email_we_vote_id=recipient_email_we_vote_id)
 
+            # Unsubscribe link in email
+            # "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
+            # recipient_email_subscription_secret_key,
+            recipient_unsubscribe_url = \
+                "{root_url}/unsubscribe/{email_secret_key}/friendinvite" \
+                "".format(
+                    email_secret_key=recipient_email_subscription_secret_key,
+                    root_url=web_app_root_url_verified,
+                )
+            # Instant unsubscribe link in email header
+            list_unsubscribe_url = str(str(recipient_unsubscribe_url) + '/instant')
+            # Instant unsubscribe email address in email header
+            # from voter.models import NOTIFICATION_FRIEND_REQUESTS_EMAIL
+            list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
+                                      "".format(setting='NOTIFICATION_FRIEND_REQUESTS_EMAIL')
+
             template_variables_for_json = {
                 "subject":                      subject,
                 "invitation_message":           invitation_message,
@@ -1984,13 +2034,11 @@ def friend_invitation_by_we_vote_id_send_for_api(voter_device_id, other_voter_we
                 "sender_description":           sender_description,
                 "sender_network_details":       sender_network_details,
                 "recipient_name":               recipient_name,
+                "recipient_unsubscribe_url":    recipient_unsubscribe_url,
                 "recipient_voter_email":        recipient_voter_email,
                 "see_all_friend_requests_url":  web_app_root_url_verified + "/friends",
                 "confirm_friend_request_url":
                     web_app_root_url_verified + "/more/network/key/" + invitation_secret_key,
-                "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
-                recipient_email_subscription_secret_key,
-                "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
             }
             template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
 
@@ -2006,7 +2054,10 @@ def friend_invitation_by_we_vote_id_send_for_api(voter_device_id, other_voter_we
                     recipient_email_we_vote_id=recipient_email_we_vote_id,
                     recipient_voter_email=recipient_voter_email,
                     template_variables_in_json=template_variables_in_json,
-                    kind_of_email_template=kind_of_email_template)
+                    kind_of_email_template=kind_of_email_template,
+                    list_unsubscribe_mailto=list_unsubscribe_mailto,
+                    list_unsubscribe_url=list_unsubscribe_url,
+                )
                 status += outbound_results['status'] + " "
                 if outbound_results['email_outbound_description_saved']:
                     email_outbound_description = outbound_results['email_outbound_description']
@@ -3484,6 +3535,22 @@ def message_to_friend_send_for_api(
                     email_manager.update_email_address_with_new_subscription_secret_key(
                         email_we_vote_id=recipient_email_we_vote_id)
 
+            # Unsubscribe link in email
+            # "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
+            # recipient_email_subscription_secret_key,
+            recipient_unsubscribe_url = \
+                "{root_url}/unsubscribe/{email_secret_key}/friendmessage" \
+                "".format(
+                    email_secret_key=recipient_email_subscription_secret_key,
+                    root_url=web_app_root_url_verified,
+                )
+            # Instant unsubscribe link in email header
+            list_unsubscribe_url = str(str(recipient_unsubscribe_url) + '/instant')
+            # Instant unsubscribe email address in email header
+            # from voter.models import NOTIFICATION_FRIEND_MESSAGES_EMAIL
+            list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
+                                      "".format(setting='NOTIFICATION_FRIEND_MESSAGES_EMAIL')
+
             template_variables_for_json = {
                 "subject":                      subject,
                 "message_to_friend":            message_to_friend,
@@ -3493,11 +3560,9 @@ def message_to_friend_send_for_api(
                 "sender_description":           sender_description,
                 "sender_network_details":       sender_network_details,
                 "recipient_name":               recipient_name,
+                "recipient_unsubscribe_url":    recipient_unsubscribe_url,
                 "recipient_voter_email":        recipient_voter_email,
                 "see_ballot_url":               web_app_root_url_verified + "/ballot",
-                "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
-                recipient_email_subscription_secret_key,
-                "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
             }
             template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
 
@@ -3511,7 +3576,10 @@ def message_to_friend_send_for_api(
                 recipient_email_we_vote_id=recipient_email_we_vote_id,
                 recipient_voter_email=recipient_voter_email,
                 template_variables_in_json=template_variables_in_json,
-                kind_of_email_template=kind_of_email_template)
+                kind_of_email_template=kind_of_email_template,
+                list_unsubscribe_mailto=list_unsubscribe_mailto,
+                list_unsubscribe_url=list_unsubscribe_url,
+            )
             status += outbound_results['status'] + " "
             if outbound_results['email_outbound_description_saved']:
                 email_outbound_description = outbound_results['email_outbound_description']

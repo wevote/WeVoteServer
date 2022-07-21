@@ -621,6 +621,23 @@ def notice_friend_endorsements_send(
             # subject += " is getting ready to vote"
             activity_description += "is reviewing the ballot"
 
+        # "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
+        # recipient_email_subscription_secret_key,
+
+        # Unsubscribe link in email
+        recipient_unsubscribe_url = \
+            "{root_url}/unsubscribe/{email_secret_key}/friendopinionsall" \
+            "".format(
+                email_secret_key=recipient_email_subscription_secret_key,
+                root_url=web_app_root_url_verified,
+            )
+        # Instant unsubscribe link in email header
+        list_unsubscribe_url = str(str(recipient_unsubscribe_url) + '/instant')
+        # Instant unsubscribe email address in email header
+        # from voter.models import NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL
+        list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
+                                  "".format(setting='NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL')
+
         # Variables used by templates/email_outbound/email_templates/notice_friend_endorsements.txt and .html
         template_variables_for_json = {
             "activity_description":         activity_description,
@@ -632,10 +649,8 @@ def notice_friend_endorsements_send(
             "sender_description":           speaker_voter_description,
             "sender_network_details":       speaker_voter_network_details,
             "recipient_name":               recipient_name,
+            "recipient_unsubscribe_url":    recipient_unsubscribe_url,
             "recipient_voter_email":        recipient_email,
-            "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
-            recipient_email_subscription_secret_key,
-            "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
             "view_new_endorsements_url":    web_app_root_url_verified + "/news/a/" + activity_tidbit_we_vote_id,
             "view_your_ballot_url":         web_app_root_url_verified + "/ballot",
         }
@@ -651,7 +666,10 @@ def notice_friend_endorsements_send(
             recipient_email_we_vote_id=recipient_email_we_vote_id,
             recipient_voter_email=recipient_email,
             template_variables_in_json=template_variables_in_json,
-            kind_of_email_template=kind_of_email_template)
+            kind_of_email_template=kind_of_email_template,
+            list_unsubscribe_mailto=list_unsubscribe_mailto,
+            list_unsubscribe_url=list_unsubscribe_url,
+        )
         status += outbound_results['status'] + " "
         success = outbound_results['success']
         if outbound_results['email_outbound_description_saved']:
@@ -894,22 +912,36 @@ def notice_voter_daily_summary_send(  # NOTICE_VOTER_DAILY_SUMMARY
         if not positive_value_exists(subject):
             subject = "Your friends have commented"
 
+        # Unsubscribe link in email
+        # "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
+        # recipient_email_subscription_secret_key,
+        recipient_unsubscribe_url = \
+            "{root_url}/unsubscribe/{email_secret_key}/dailyfriendactivity" \
+            "".format(
+                email_secret_key=recipient_email_subscription_secret_key,
+                root_url=web_app_root_url_verified,
+            )
+        # Instant unsubscribe link in email header
+        list_unsubscribe_url = str(str(recipient_unsubscribe_url) + '/instant')
+        # Instant unsubscribe email address in email header
+        # from voter.models import NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL
+        list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
+                                  "".format(setting='NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL')
+
         template_variables_for_json = {
-            "introduction_line":            introduction_line,
-            "subject":                      subject,
-            "friend_activity_dict_list":    friend_activity_dict_list_modified,
+            "introduction_line":                introduction_line,
+            "subject":                          subject,
+            "friend_activity_dict_list":        friend_activity_dict_list_modified,
             # "sender_name":                  speaker_voter_name,
             # "sender_photo":                 speaker_voter_photo,
             # "sender_email_address":         speaker_voter_email,  # Does not affect the "From" email header
             # "sender_description":           speaker_voter_description,
             # "sender_network_details":       speaker_voter_network_details,
-            "recipient_name":               recipient_name,
-            "recipient_voter_email":        recipient_email,
-            "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
-            recipient_email_subscription_secret_key,
-            "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
+            "recipient_name":                   recipient_name,
+            "recipient_unsubscribe_url":        recipient_unsubscribe_url,
+            "recipient_voter_email":            recipient_email,
             "view_main_discussion_page_url":    web_app_root_url_verified + "/news",
-            "view_your_ballot_url":         web_app_root_url_verified + "/ballot",
+            "view_your_ballot_url":             web_app_root_url_verified + "/ballot",
         }
         template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
         from_email_for_daily_summary = "We Vote <info@WeVote.US>"  # TODO DALE Make system variable
@@ -924,7 +956,10 @@ def notice_voter_daily_summary_send(  # NOTICE_VOTER_DAILY_SUMMARY
             recipient_email_we_vote_id=recipient_email_we_vote_id,
             recipient_voter_email=recipient_email,
             template_variables_in_json=template_variables_in_json,
-            kind_of_email_template=kind_of_email_template)
+            kind_of_email_template=kind_of_email_template,
+            list_unsubscribe_mailto=list_unsubscribe_mailto,
+            list_unsubscribe_url=list_unsubscribe_url,
+        )
         status += outbound_results['status'] + " "
         success = outbound_results['success']
         if outbound_results['email_outbound_description_saved']:
