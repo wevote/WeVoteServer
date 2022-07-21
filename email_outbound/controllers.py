@@ -768,11 +768,16 @@ def schedule_verification_email(
             root_url=web_app_root_url_verified,
         )
     # Instant unsubscribe link in email header
-    list_unsubscribe_url = str(str(recipient_unsubscribe_url) + '/instant')
+    list_unsubscribe_url = \
+        "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/login" \
+        "".format(
+            email_secret_key=recipient_email_subscription_secret_key,
+            root_url=WE_VOTE_SERVER_ROOT_URL,
+        )
     # Instant unsubscribe email address in email header
     # from voter.models import NOTIFICATION_LOGIN_EMAIL
     list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
-                              "".format(setting='NOTIFICATION_LOGIN_EMAIL')
+                              "".format(setting='login')
 
     template_variables_for_json = {
         "recipient_unsubscribe_url":    recipient_unsubscribe_url,
@@ -882,11 +887,16 @@ def schedule_link_to_sign_in_email(
             root_url=web_app_root_url_verified,
         )
     # Instant unsubscribe link in email header
-    list_unsubscribe_url = str(str(recipient_unsubscribe_url) + '/instant')
+    list_unsubscribe_url = \
+        "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/login" \
+        "".format(
+            email_secret_key=recipient_email_subscription_secret_key,
+            root_url=WE_VOTE_SERVER_ROOT_URL,
+        )
     # Instant unsubscribe email address in email header
     # from voter.models import NOTIFICATION_LOGIN_EMAIL
     list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
-                              "".format(setting='NOTIFICATION_LOGIN_EMAIL')
+                              "".format(setting='login')
 
     template_variables_for_json = {
         "link_to_sign_in":              link_to_sign_in,
@@ -984,11 +994,16 @@ def schedule_sign_in_code_email(
             root_url=web_app_root_url_verified,
         )
     # Instant unsubscribe link in email header
-    list_unsubscribe_url = str(recipient_unsubscribe_url) + str('/instant')
+    list_unsubscribe_url = \
+        "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/login" \
+        "".format(
+            email_secret_key=recipient_email_subscription_secret_key,
+            root_url=WE_VOTE_SERVER_ROOT_URL,
+        )
     # Instant unsubscribe email address in email header
     # from voter.models import NOTIFICATION_LOGIN_EMAIL
     list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
-                              "".format(setting='NOTIFICATION_LOGIN_EMAIL')
+                              "".format(setting='login')
 
     template_variables_for_json = {
         "recipient_unsubscribe_url":    recipient_unsubscribe_url,

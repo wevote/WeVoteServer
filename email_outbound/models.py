@@ -994,6 +994,10 @@ class EmailManager(models.Manager):
                     message.add_header(
                         Header(key="List-Unsubscribe", value=list_unsubscribe_text)
                     )
+                    if email_scheduled.list_unsubscribe_url:
+                        message.add_header(
+                            Header(key="List-Unsubscribe-Post", value="List-Unsubscribe=One-Click")
+                        )
             except Exception as e:
                 status += "SEND_SCHEDULED_ADD_HEADER_ERROR: " + str(e) + " "
                 print(status)
@@ -1009,7 +1013,7 @@ class EmailManager(models.Manager):
                 response = sendgrid_client.send(message)
                 # print(response.status_code)
                 # print(response.body)
-                print(response.headers)
+                # print(response.headers)
                 status += "SENDING_VIA_SENDGRID "
                 email_scheduled_sent = True
             except Exception as e:

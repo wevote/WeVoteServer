@@ -128,11 +128,16 @@ def campaignx_friend_has_supported_send(  # CAMPAIGNX_FRIEND_HAS_SUPPORTED_TEMPL
     #         root_url=campaigns_root_url_verified,
     #     )
     # Instant unsubscribe link in email header
-    # list_unsubscribe_url = str(str(recipient_unsubscribe_url) + '/instant')
+    # list_unsubscribe_url = \
+    #     "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendcampaignsupport" \
+    #     "".format(
+    #         email_secret_key=recipient_email_subscription_secret_key,
+    #         root_url=WE_VOTE_SERVER_ROOT_URL,
+    #     )
     # # Instant unsubscribe email address in email header
     # # from voter.models import NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL  # To be updated
     # list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
-    #                           "".format(setting='NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL')
+    #                           "".format(setting='friendcampaignsupport')
 
     template_variables_for_json = {
         "subject":                          subject,
@@ -289,11 +294,16 @@ def campaignx_news_item_send(  # CAMPAIGNX_NEWS_ITEM_TEMPLATE
     #         root_url=campaigns_root_url_verified,
     #     )
     # # Instant unsubscribe link in email header
-    # list_unsubscribe_url = str(str(recipient_unsubscribe_url) + '/instant')
+    # list_unsubscribe_url = \
+    #     "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendopinionsall" \
+    #     "".format(
+    #         email_secret_key=recipient_email_subscription_secret_key,
+    #         root_url=WE_VOTE_SERVER_ROOT_URL,
+    #     )
     # # Instant unsubscribe email address in email header
     # # from voter.models import NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL  # To be updated
     # list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
-    #                           "".format(setting='NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL')
+    #                           "".format(setting='friendopinionsall')
 
     template_variables_for_json = {
         "subject":                          statement_subject,
@@ -398,11 +408,16 @@ def campaignx_super_share_item_send(  # CAMPAIGNX_SUPER_SHARE_ITEM_TEMPLATE
             root_url=campaigns_root_url_verified,
         )
     # Instant unsubscribe link in email header
-    list_unsubscribe_url = str(str(recipient_unsubscribe_url) + '/instant')
+    list_unsubscribe_url = \
+        "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/campaignshare" \
+        "".format(
+            email_secret_key=recipient_email_subscription_secret_key,
+            root_url=WE_VOTE_SERVER_ROOT_URL,
+        )
     # Instant unsubscribe email address in email header
     # from voter.models import NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL  # To be updated
     list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
-                              "".format(setting='NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL')
+                              "".format(setting='campaignshare')
 
     template_variables_for_json = {
         "campaignx_title":                  campaignx_title,
@@ -564,17 +579,22 @@ def campaignx_supporter_initial_response_send(  # CAMPAIGNX_SUPPORTER_INITIAL_RE
     recipient_unsubscribe_url = \
         campaigns_root_url_verified + "/settings/notifications/esk/" + recipient_email_subscription_secret_key
     # recipient_unsubscribe_url = \
-    #     "{root_url}/unsubscribe/{email_secret_key}/friendopinionsall" \
+    #     "{root_url}/unsubscribe/{email_secret_key}/supporterinitial" \
     #     "".format(
     #         email_secret_key=recipient_email_subscription_secret_key,
     #         root_url=campaigns_root_url_verified,
     #     )
     # # Instant unsubscribe link in email header
-    # list_unsubscribe_url = str(str(recipient_unsubscribe_url) + '/instant')
+    # list_unsubscribe_url = \
+    #     "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/supporterinitial" \
+    #     "".format(
+    #         email_secret_key=recipient_email_subscription_secret_key,
+    #         root_url=WE_VOTE_SERVER_ROOT_URL,
+    #     )
     # # Instant unsubscribe email address in email header
     # # from voter.models import NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL  # To be updated
     # list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
-    #                           "".format(setting='NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL')
+    #                           "".format(setting='supporterinitial')
 
     template_variables_for_json = {
         "subject":                          subject,

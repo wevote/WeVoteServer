@@ -55,6 +55,78 @@ logger = wevote_functions.admin.get_logger(__name__)
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 
+@csrf_exempt
+def unsubscribe_instant_view(request, subscription_secret_key='', unsubscribe_modifier=''):
+    status = ''
+    if not positive_value_exists(subscription_secret_key) or not positive_value_exists(unsubscribe_modifier):
+        status += "MISSING_REQUIRED_UNSUBSCRIBE_VARIABLES "
+        return HttpResponse('failure ' + status, content_type='text/html')
+
+    email_manager = EmailManager()
+    voter_manager = VoterManager()
+    email_results = email_manager.retrieve_email_address_object_from_secret_key(
+        subscription_secret_key=subscription_secret_key)
+    if email_results['email_address_object_found']:
+        status += "UNSUBSCRIBE_INSTANT-EMAIL_ADDRESS_FOUND "
+        email_address_object = email_results['email_address_object']
+        voter_results = voter_manager.retrieve_voter_by_we_vote_id(email_address_object.voter_we_vote_id)
+        voter_id = voter_results['voter_id']
+    else:
+        status += "EMAIL_ADDRESS_NOT_FOUND "
+        return HttpResponse('failure ' + status, content_type='text/html')
+
+    if not positive_value_exists(voter_id):
+        status += "VOTER_ID_NOT_FOUND "
+        return HttpResponse('failure ' + status, content_type='text/html')
+
+    notification_flag_integer_to_unset = 0
+    from voter.models import NOTIFICATION_FRIEND_MESSAGES_EMAIL, NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL, \
+        NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_EMAIL, NOTIFICATION_FRIEND_REQUEST_RESPONSES_EMAIL, \
+        NOTIFICATION_FRIEND_REQUESTS_EMAIL, NOTIFICATION_LOGIN_EMAIL, NOTIFICATION_NEWSLETTER_OPT_IN, \
+        NOTIFICATION_SUGGESTED_FRIENDS_EMAIL, NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL
+    # NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL = 1024  # When a friend posts something - dailyfriendactivity
+    # NOTIFICATION_FRIEND_REQUEST_RESPONSES_EMAIL = 4096  # "Show me responses to my friend requests" - friendaccept
+    # NOTIFICATION_FRIEND_REQUESTS_EMAIL = 2  # "New friend requests" - friendinvite
+    # NOTIFICATION_FRIEND_MESSAGES_EMAIL = 65536  # "Show me messages from friends" - friendmessage
+    # NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_EMAIL = 32  # "Friends' opinions (on your ballot)" - friendopinions
+    # NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL = 256  # "Friends' opinions (other regions)" - friendopinionsall
+    # NOTIFICATION_LOGIN_EMAIL = 16384  # "Show me email login requests" - login
+    # NOTIFICATION_NEWSLETTER_OPT_IN = 1  # "I would like to receive the We Vote newsletter" - newsletter
+    # NOTIFICATION_SUGGESTED_FRIENDS_EMAIL = 8  # "Suggestions of people you may know" - suggestedfriend
+    if unsubscribe_modifier == 'dailyfriendactivity':
+        notification_flag_integer_to_unset = NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL
+    elif unsubscribe_modifier == 'friendaccept':
+        notification_flag_integer_to_unset = NOTIFICATION_FRIEND_REQUEST_RESPONSES_EMAIL
+    elif unsubscribe_modifier == 'friendinvite':
+        notification_flag_integer_to_unset = NOTIFICATION_FRIEND_REQUESTS_EMAIL
+    elif unsubscribe_modifier == 'friendmessage':
+        notification_flag_integer_to_unset = NOTIFICATION_FRIEND_MESSAGES_EMAIL
+    elif unsubscribe_modifier == 'friendopinions':
+        notification_flag_integer_to_unset = NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_EMAIL
+    elif unsubscribe_modifier == 'friendopinionsall':
+        notification_flag_integer_to_unset = NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL
+    elif unsubscribe_modifier == 'login':
+        notification_flag_integer_to_unset = NOTIFICATION_LOGIN_EMAIL
+    elif unsubscribe_modifier == 'newsletter':
+        notification_flag_integer_to_unset = NOTIFICATION_NEWSLETTER_OPT_IN
+    elif unsubscribe_modifier == 'suggestedfriend':
+        notification_flag_integer_to_unset = NOTIFICATION_SUGGESTED_FRIENDS_EMAIL
+
+    if not positive_value_exists(notification_flag_integer_to_unset):
+        status += "UNSUBSCRIBE_MODIFIER_NOT_VALID "
+        return HttpResponse('failure ' + status, content_type='text/html')
+
+    results = voter_manager.update_voter_by_id(
+        voter_id,
+        notification_flag_integer_to_unset=notification_flag_integer_to_unset)
+    status += results['status']
+    success = results['success']
+    if not success:
+        return HttpResponse('failure ' + status, content_type='text/html')
+
+    return HttpResponse('success', content_type='text/html')
+
+
 def voter_address_retrieve_view(request):  # voterAddressRetrieve
     """
     Retrieve an address for this voter so we can figure out which ballot to display
