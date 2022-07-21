@@ -2256,8 +2256,14 @@ def move_voter_guide_possibility_positions_to_requested_voter_guide_possibility(
             #  us to review the changes
             if position.voter_guide_possibility_parent_id != voter_guide_possibility_id:
                 position.voter_guide_possibility_parent_id = voter_guide_possibility_id
-                logger.debug("Updating '" + position.ballot_item_name + "' from parent id " +
-                             str(position.voter_guide_possibility_parent_id) + " to " + str(voter_guide_possibility_id))
+                try:
+                    logger.debug("Updating '" + position.ballot_item_name + "' from parent id " +
+                                 str(position.voter_guide_possibility_parent_id) + " to " +
+                                 str(voter_guide_possibility_id))
+                except Exception as e:
+                    logger.error(
+                        "move_voter_guide_possibility_positions_to_requested_voter_guide_possibility logger error: ", e)
+
                 position.save()
 
     # print('-------')

@@ -76,6 +76,8 @@ you need to add that domain to your 127.0.0.1 line in /etc/hosts.  After the cha
 
 You will need to elevate your privileges with sudo to make this edit to this linux system file ... ` % sudo vi /etc/hosts` or with some other editor.
 
+Note July 2022:  The auto generated certificate that is made by runsslserver generates warnings in browsers (not really a problem),
+but may stop the JavaScript builtin fetch() function from completing.  The browser extension has to use fetch.
 
 
 ## Facebook

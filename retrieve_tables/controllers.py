@@ -24,7 +24,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 # 'campaign_campaignxseofriendlypath',
 allowable_tables = [
     'ballot_ballotitem',
-    'position_positionentered',             # 7/15/22 ... table possibly corrupted in AWS, so running at the end
+    'position_positionentered',
     'candidate_candidatesarenotduplicates',
     'candidate_candidatetoofficelink',
     'elected_office_electedoffice',
@@ -51,9 +51,9 @@ allowable_tables = [
     'voter_guide_voterguide',
     'wevote_settings_wevotesetting',
     'ballot_ballotreturned',
-    'polling_location_pollinglocation',     # 7/14/22 ... table possibly corrupted in AWS, so running at the end
-    'organization_organization',            # 7/14/22 ... table possibly corrupted in AWS, so running at the end
-    'candidate_candidatecampaign',          # 7/14/22 ... table possibly corrupted in AWS, so running at the end
+    'polling_location_pollinglocation',
+    'organization_organization',
+    'candidate_candidatecampaign',
 ]
 
 dummy_unique_id = 10000000
@@ -209,8 +209,6 @@ def retrieve_sql_files_from_master_server(request):
 
     for table_name in allowable_tables:
         print('Starting on the ' + table_name + ' table, requesting up to 500,000 rows')
-        # if table_name != 'ballot_ballotitem':
-        #     continue
         t1 = time.time()
         dt = 0
         start = 0
@@ -243,12 +241,12 @@ def retrieve_sql_files_from_master_server(request):
             lines = data.splitlines()
             if len(lines) == 1:
                 dt = time.time() - t1
-                print('... Retrieved ' + str(final_lines_count) + ' lines from the ' + table_name +
+                print('... Retrieved ' + "{:,}".format(final_lines_count) + ' lines from the ' + table_name +
                       ' table (as JSON) in ' + str(int(dt)) + ' seconds)')
                 break
             final_lines_count += len(lines)
-            print('... Intermediate line count from this request of 500k, returned ' + str(len(lines)) +
-                  " rows, cumulative is " + str(final_lines_count))
+            print('... Intermediate line count from this request of 500k, returned ' + "{:,}".format(len(lines)) +
+                  " rows, cumulative is " + "{:,}".format(final_lines_count))
 
             if len(lines) > 0:
                 try:
@@ -262,7 +260,7 @@ def retrieve_sql_files_from_master_server(request):
 
                     cur = conn.cursor()
 
-                    print("... Processing rows " + str(start) + " through " + str(end) + " of table " + table_name +
+                    print("... Processing rows " + "{:,}".format(start) + " through " + "{:,}".format(end) + " of table " + table_name +
                           " data received from master server.")
                     if start == 0:
                         cur.execute("DELETE FROM " + table_name)  # Delete all existing data in this table
@@ -287,7 +285,7 @@ def retrieve_sql_files_from_master_server(request):
                     dt = time.time() - t1
                     dt2 = time.time() - t2
                     dtc = time.time() - t0
-                    print('... Processing and inserting the chunk of 1M from ' + table_name + ' table took ' +
+                    print('... Processing and inserting the chunk of 500k from ' + table_name + ' table took ' +
                           str(int(dt2)) + ' seconds, cumulative ' + str(int(dtc)) + ' seconds')
 
                 except Exception as e:
