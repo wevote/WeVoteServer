@@ -632,11 +632,16 @@ def notice_friend_endorsements_send(
                 root_url=web_app_root_url_verified,
             )
         # Instant unsubscribe link in email header
-        list_unsubscribe_url = str(str(recipient_unsubscribe_url) + '/instant')
+        list_unsubscribe_url = \
+            "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendopinionsall" \
+            "".format(
+                email_secret_key=recipient_email_subscription_secret_key,
+                root_url=WE_VOTE_SERVER_ROOT_URL,
+            )
         # Instant unsubscribe email address in email header
         # from voter.models import NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL
         list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
-                                  "".format(setting='NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL')
+                                  "".format(setting='friendopinionsall')
 
         # Variables used by templates/email_outbound/email_templates/notice_friend_endorsements.txt and .html
         template_variables_for_json = {
@@ -922,11 +927,16 @@ def notice_voter_daily_summary_send(  # NOTICE_VOTER_DAILY_SUMMARY
                 root_url=web_app_root_url_verified,
             )
         # Instant unsubscribe link in email header
-        list_unsubscribe_url = str(str(recipient_unsubscribe_url) + '/instant')
+        list_unsubscribe_url = \
+            "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/dailyfriendactivity" \
+            "".format(
+                email_secret_key=recipient_email_subscription_secret_key,
+                root_url=WE_VOTE_SERVER_ROOT_URL,
+            )
         # Instant unsubscribe email address in email header
         # from voter.models import NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL
         list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
-                                  "".format(setting='NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL')
+                                  "".format(setting='dailyfriendactivity')
 
         template_variables_for_json = {
             "introduction_line":                introduction_line,

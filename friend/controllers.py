@@ -304,11 +304,16 @@ def friend_accepted_invitation_send(
                 root_url=web_app_root_url_verified,
             )
         # Instant unsubscribe link in email header
-        list_unsubscribe_url = str(str(recipient_unsubscribe_url) + '/instant')
+        list_unsubscribe_url = \
+            "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendaccept" \
+            "".format(
+                email_secret_key=original_sender_email_subscription_secret_key,
+                root_url=WE_VOTE_SERVER_ROOT_URL,
+            )
         # Instant unsubscribe email address in email header
         # from voter.models import NOTIFICATION_FRIEND_REQUEST_RESPONSES_EMAIL
         list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
-                                  "".format(setting='NOTIFICATION_FRIEND_REQUEST_RESPONSES_EMAIL')
+                                  "".format(setting='friendaccept')
 
         template_variables_for_json = {
             "subject":                      subject,
@@ -807,11 +812,16 @@ def send_to_one_friend(
             root_url=web_app_root_url_verified,
         )
     # Instant unsubscribe link in email header
-    list_unsubscribe_url = str(str(recipient_unsubscribe_url) + '/instant')
+    list_unsubscribe_url = \
+        "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendinvite" \
+        "".format(
+            email_secret_key=recipient_email_subscription_secret_key,
+            root_url=WE_VOTE_SERVER_ROOT_URL,
+        )
     # Instant unsubscribe email address in email header
     # from voter.models import NOTIFICATION_FRIEND_REQUESTS_EMAIL
     list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
-                              "".format(setting='NOTIFICATION_FRIEND_REQUESTS_EMAIL')
+                              "".format(setting='friendinvite')
 
     template_variables_for_json = {
         "subject":                      subject,
@@ -2019,11 +2029,16 @@ def friend_invitation_by_we_vote_id_send_for_api(voter_device_id, other_voter_we
                     root_url=web_app_root_url_verified,
                 )
             # Instant unsubscribe link in email header
-            list_unsubscribe_url = str(str(recipient_unsubscribe_url) + '/instant')
+            list_unsubscribe_url = \
+                "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendinvite" \
+                "".format(
+                    email_secret_key=recipient_email_subscription_secret_key,
+                    root_url=WE_VOTE_SERVER_ROOT_URL,
+                )
             # Instant unsubscribe email address in email header
             # from voter.models import NOTIFICATION_FRIEND_REQUESTS_EMAIL
             list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
-                                      "".format(setting='NOTIFICATION_FRIEND_REQUESTS_EMAIL')
+                                      "".format(setting='friendinvite')
 
             template_variables_for_json = {
                 "subject":                      subject,
@@ -3545,11 +3560,16 @@ def message_to_friend_send_for_api(
                     root_url=web_app_root_url_verified,
                 )
             # Instant unsubscribe link in email header
-            list_unsubscribe_url = str(str(recipient_unsubscribe_url) + '/instant')
+            list_unsubscribe_url = \
+                "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendmessage" \
+                "".format(
+                    email_secret_key=recipient_email_subscription_secret_key,
+                    root_url=WE_VOTE_SERVER_ROOT_URL,
+                )
             # Instant unsubscribe email address in email header
             # from voter.models import NOTIFICATION_FRIEND_MESSAGES_EMAIL
             list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
-                                      "".format(setting='NOTIFICATION_FRIEND_MESSAGES_EMAIL')
+                                      "".format(setting='friendmessage')
 
             template_variables_for_json = {
                 "subject":                      subject,

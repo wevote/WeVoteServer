@@ -1411,11 +1411,16 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
                         root_url=web_app_root_url_verified,
                     )
                 # Instant unsubscribe link in email header
-                list_unsubscribe_url = str(str(recipient_unsubscribe_url) + '/instant')
+                list_unsubscribe_url = \
+                    "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendmessage" \
+                    "".format(
+                        email_secret_key=recipient_email_subscription_secret_key,
+                        root_url=WE_VOTE_SERVER_ROOT_URL,
+                    )
                 # Instant unsubscribe email address in email header
                 # from voter.models import NOTIFICATION_FRIEND_MESSAGES_EMAIL
                 list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
-                                          "".format(setting='NOTIFICATION_FRIEND_MESSAGES_EMAIL')
+                                          "".format(setting='friendmessage')
                 template_variables_for_json = {
                     "subject":                      subject,
                     "invitation_message":           friend_invitation_message,
@@ -1498,7 +1503,12 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
             root_url=web_app_root_url_verified,
         )
     # Instant unsubscribe link in email header
-    list_unsubscribe_url = str(str(recipient_unsubscribe_url) + '/instant')
+    list_unsubscribe_url = \
+        "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendmessage" \
+        "".format(
+            email_secret_key=recipient_email_subscription_secret_key,
+            root_url=WE_VOTE_SERVER_ROOT_URL,
+        )
     # Instant unsubscribe email address in email header
     # from voter.models import NOTIFICATION_FRIEND_MESSAGES_EMAIL
     list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
