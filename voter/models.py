@@ -57,6 +57,13 @@ NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_SMS = 512  # SMS: "Friends' opinions 
 # NOTIFICATION_VOTER_DAILY_SUMMARY = n/a  # In App: When a friend posts something, or reacts to another post
 NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL = 1024  # Email: When a friend posts something, or reacts to another post
 NOTIFICATION_VOTER_DAILY_SUMMARY_SMS = 2048  # SMS: When a friend posts something, or reacts to another post
+# TODO 2022-07-19 UPDATES NEEDED TO SUPPORT THESE NEW VALUES
+NOTIFICATION_FRIEND_REQUEST_RESPONSES_EMAIL = 4096  # Email: "Show me responses to my friend requests" - friendaccept
+NOTIFICATION_FRIEND_REQUEST_RESPONSES_SMS = 8192,  # SMS: "Show me responses to my friend requests"
+NOTIFICATION_LOGIN_EMAIL = 16384  # Email: "Show me responses to my friend requests"
+NOTIFICATION_LOGIN_SMS = 32768  # SMS: "Show me responses to my friend requests"
+NOTIFICATION_FRIEND_MESSAGES_EMAIL = 65536  # Email: "Show me responses to my friend requests" - friendaccept
+NOTIFICATION_FRIEND_MESSAGES_SMS = 131072  # SMS: "Show me responses to my friend requests"
 
 # Default to set for new voters
 NOTIFICATION_SETTINGS_FLAGS_DEFAULT = \

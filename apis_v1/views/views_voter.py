@@ -13,8 +13,9 @@ from config.base import get_environment_variable
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from django_user_agents.utils import get_user_agent
-from email_outbound.controllers import voter_email_address_save_for_api, voter_email_address_retrieve_for_api, \
-    voter_email_address_sign_in_for_api, voter_email_address_verify_for_api
+from email_outbound.controllers import voter_email_address_retrieve_for_api, voter_email_address_save_for_api, \
+    voter_email_address_send_sign_in_code_email_for_api, voter_email_address_sign_in_for_api, \
+    voter_email_address_verify_for_api
 from email_outbound.models import EmailAddress, EmailManager
 from wevote_functions.functions import extract_first_name_from_full_name, extract_last_name_from_full_name
 from follow.controllers import voter_issue_follow_for_api
@@ -981,19 +982,26 @@ def voter_email_address_save_view(request):  # voterEmailAddressSave
     is_cordova = positive_value_exists(request.GET.get('is_cordova', False))
     hostname = request.GET.get('hostname', '')
 
-    results = voter_email_address_save_for_api(
-        voter_device_id=voter_device_id,
-        text_for_email_address=text_for_email_address,
-        incoming_email_we_vote_id=incoming_email_we_vote_id,
-        send_link_to_sign_in=send_link_to_sign_in,
-        send_sign_in_code_email=send_sign_in_code_email,
-        resend_verification_email=resend_verification_email,
-        resend_verification_code_email=resend_verification_code_email,
-        make_primary_email=make_primary_email,
-        delete_email=delete_email,
-        is_cordova=is_cordova,
-        web_app_root_url=hostname,
-        )
+    if positive_value_exists(send_sign_in_code_email):
+        results = voter_email_address_send_sign_in_code_email_for_api(
+            voter_device_id=voter_device_id,
+            text_for_email_address=text_for_email_address,
+            web_app_root_url=hostname,
+            )
+    else:
+        results = voter_email_address_save_for_api(
+            voter_device_id=voter_device_id,
+            text_for_email_address=text_for_email_address,
+            incoming_email_we_vote_id=incoming_email_we_vote_id,
+            send_link_to_sign_in=send_link_to_sign_in,
+            send_sign_in_code_email=send_sign_in_code_email,
+            resend_verification_email=resend_verification_email,
+            resend_verification_code_email=resend_verification_code_email,
+            make_primary_email=make_primary_email,
+            delete_email=delete_email,
+            is_cordova=is_cordova,
+            web_app_root_url=hostname,
+            )
 
     json_data = {
         'status':                           results['status'],
@@ -1003,7 +1011,6 @@ def voter_email_address_save_view(request):  # voterEmailAddressSave
         'make_primary_email':               make_primary_email,
         'delete_email':                     delete_email,
         'email_address_we_vote_id':         results['email_address_we_vote_id'],
-        'email_address_saved_we_vote_id':   results['email_address_saved_we_vote_id'],
         'email_address_already_owned_by_other_voter':   results['email_address_already_owned_by_other_voter'],
         'email_address_already_owned_by_this_voter':    results['email_address_already_owned_by_this_voter'],
         'email_address_created':            results['email_address_created'],
@@ -2695,16 +2702,24 @@ def voter_notification_settings_update_view(request):  # voterNotificationSettin
         interface_status_flags = False
 
     try:
-        flag_integer_to_set = request.GET['flag_integer_to_set']
-        flag_integer_to_set = flag_integer_to_set.strip()
-        flag_integer_to_set = convert_to_int(flag_integer_to_set)
+        flag_integer_to_set_changed = positive_value_exists(request.GET['flag_integer_to_set_changed'])
+        if flag_integer_to_set_changed:
+            flag_integer_to_set = request.GET['flag_integer_to_set']
+            flag_integer_to_set = flag_integer_to_set.strip()
+            flag_integer_to_set = convert_to_int(flag_integer_to_set)
+        else:
+            flag_integer_to_set = False
     except KeyError:
         flag_integer_to_set = False
 
     try:
-        flag_integer_to_unset = request.GET['flag_integer_to_unset']
-        flag_integer_to_unset = flag_integer_to_unset.strip()
-        flag_integer_to_unset = convert_to_int(flag_integer_to_unset)
+        flag_integer_to_unset_changed = positive_value_exists(request.GET['flag_integer_to_unset_changed'])
+        if flag_integer_to_unset_changed:
+            flag_integer_to_unset = request.GET['flag_integer_to_unset']
+            flag_integer_to_unset = flag_integer_to_unset.strip()
+            flag_integer_to_unset = convert_to_int(flag_integer_to_unset)
+        else:
+            flag_integer_to_unset = False
     except KeyError:
         flag_integer_to_unset = False
 
@@ -2817,7 +2832,7 @@ def voter_notification_settings_update_view(request):  # voterNotificationSettin
     if at_least_one_variable_has_changed:
         pass
     else:
-        # If here, there is nothing to change and we just want to return the latest data from the voter object
+        # If here, there is nothing to change. We just want to return the latest data from the voter object
         status += "MISSING_NOTIFICATION_VARIABLE_NO_VARIABLES_PASSED_IN_TO_CHANGE "
         json_data = {
                 'status':                           status,
@@ -2994,12 +3009,12 @@ def voter_verify_secret_code_view(request):  # voterVerifySecretCode
                 # We get the new email being verified, so we can find the normalized_email_address and check to see
                 # if that is in use by someone else.
                 secret_key_results = email_manager.retrieve_email_address_object_from_secret_key(
-                    voter_device_link.email_secret_key)
+                    email_secret_key=voter_device_link.email_secret_key)
                 if secret_key_results['email_address_object_found']:
                     email_object_from_secret_key = secret_key_results['email_address_object']
 
                     matching_results = email_manager.retrieve_email_address_object(
-                        email_object_from_secret_key.normalized_email_address)
+                        normalized_email_address=email_object_from_secret_key.normalized_email_address)
                     if matching_results['email_address_object_found']:
                         email_address_from_normalized = matching_results['email_address_object']
                         if positive_value_exists(email_address_from_normalized.email_ownership_is_verified):
@@ -3038,7 +3053,7 @@ def voter_verify_secret_code_view(request):  # voterVerifySecretCode
                 else:
                     # Find and verify the unverified email we are verifying
                     email_results = email_manager.verify_email_address_object_from_secret_key(
-                        voter_device_link.email_secret_key)
+                        email_secret_key=voter_device_link.email_secret_key)
                     if email_results['email_address_object_found']:
                         email_address_object = email_results['email_address_object']
                         status += "EMAIL_ADDRESS_FOUND_FROM_VERIFY "
