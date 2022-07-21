@@ -1512,7 +1512,7 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
     # Instant unsubscribe email address in email header
     # from voter.models import NOTIFICATION_FRIEND_MESSAGES_EMAIL
     list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
-                              "".format(setting='NOTIFICATION_FRIEND_MESSAGES_EMAIL')
+                              "".format(setting='friendmessage')
 
     template_variables_for_json = {
         "subject":                      subject,
