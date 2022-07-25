@@ -1412,7 +1412,7 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
                     )
                 # Instant unsubscribe link in email header
                 list_unsubscribe_url = \
-                    "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendmessage" \
+                    "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendmessage/" \
                     "".format(
                         email_secret_key=recipient_email_subscription_secret_key,
                         root_url=WE_VOTE_SERVER_ROOT_URL,
@@ -1504,7 +1504,7 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
         )
     # Instant unsubscribe link in email header
     list_unsubscribe_url = \
-        "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendmessage" \
+        "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendmessage/" \
         "".format(
             email_secret_key=recipient_email_subscription_secret_key,
             root_url=WE_VOTE_SERVER_ROOT_URL,

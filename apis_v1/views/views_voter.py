@@ -75,10 +75,6 @@ def unsubscribe_instant_view(request, subscription_secret_key='', unsubscribe_mo
         status += "EMAIL_ADDRESS_NOT_FOUND "
         return HttpResponse('failure ' + status, content_type='text/html')
 
-    if not positive_value_exists(voter_id):
-        status += "VOTER_ID_NOT_FOUND "
-        return HttpResponse('failure ' + status, content_type='text/html')
-
     notification_flag_integer_to_unset = 0
     from voter.models import NOTIFICATION_FRIEND_MESSAGES_EMAIL, NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL, \
         NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_EMAIL, NOTIFICATION_FRIEND_REQUEST_RESPONSES_EMAIL, \
@@ -114,6 +110,13 @@ def unsubscribe_instant_view(request, subscription_secret_key='', unsubscribe_mo
 
     if not positive_value_exists(notification_flag_integer_to_unset):
         status += "UNSUBSCRIBE_MODIFIER_NOT_VALID "
+        return HttpResponse('failure ' + status, content_type='text/html')
+
+    if not positive_value_exists(voter_id):
+        # TODO This doesn't take into consideration 'friendinvite' which is sent to a person
+        #  before a voter object exists. We need a way to let voter's block messages
+        #  if they aren't users of We Vote
+        status += "VOTER_ID_NOT_FOUND "
         return HttpResponse('failure ' + status, content_type='text/html')
 
     results = voter_manager.update_voter_by_id(

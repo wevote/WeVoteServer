@@ -144,6 +144,7 @@ node_modules/
 /**/migrations/*.py
 !/**/migrations/__init__.py
 config/environment_variables.json
+config/environment_variables*.bak.json
 web_app/build/*
 
 # Heroku Related #
