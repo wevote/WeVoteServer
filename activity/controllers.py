@@ -633,7 +633,7 @@ def notice_friend_endorsements_send(
             )
         # Instant unsubscribe link in email header
         list_unsubscribe_url = \
-            "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendopinionsall" \
+            "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendopinionsall/" \
             "".format(
                 email_secret_key=recipient_email_subscription_secret_key,
                 root_url=WE_VOTE_SERVER_ROOT_URL,
@@ -928,7 +928,7 @@ def notice_voter_daily_summary_send(  # NOTICE_VOTER_DAILY_SUMMARY
             )
         # Instant unsubscribe link in email header
         list_unsubscribe_url = \
-            "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/dailyfriendactivity" \
+            "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/dailyfriendactivity/" \
             "".format(
                 email_secret_key=recipient_email_subscription_secret_key,
                 root_url=WE_VOTE_SERVER_ROOT_URL,

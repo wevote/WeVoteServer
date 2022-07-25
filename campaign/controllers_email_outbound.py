@@ -129,7 +129,7 @@ def campaignx_friend_has_supported_send(  # CAMPAIGNX_FRIEND_HAS_SUPPORTED_TEMPL
     #     )
     # Instant unsubscribe link in email header
     # list_unsubscribe_url = \
-    #     "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendcampaignsupport" \
+    #     "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendcampaignsupport/" \
     #     "".format(
     #         email_secret_key=recipient_email_subscription_secret_key,
     #         root_url=WE_VOTE_SERVER_ROOT_URL,
@@ -295,7 +295,7 @@ def campaignx_news_item_send(  # CAMPAIGNX_NEWS_ITEM_TEMPLATE
     #     )
     # # Instant unsubscribe link in email header
     # list_unsubscribe_url = \
-    #     "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendopinionsall" \
+    #     "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendopinionsall/" \
     #     "".format(
     #         email_secret_key=recipient_email_subscription_secret_key,
     #         root_url=WE_VOTE_SERVER_ROOT_URL,
@@ -409,7 +409,7 @@ def campaignx_super_share_item_send(  # CAMPAIGNX_SUPER_SHARE_ITEM_TEMPLATE
         )
     # Instant unsubscribe link in email header
     list_unsubscribe_url = \
-        "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/campaignshare" \
+        "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/campaignshare/" \
         "".format(
             email_secret_key=recipient_email_subscription_secret_key,
             root_url=WE_VOTE_SERVER_ROOT_URL,
@@ -586,7 +586,7 @@ def campaignx_supporter_initial_response_send(  # CAMPAIGNX_SUPPORTER_INITIAL_RE
     #     )
     # # Instant unsubscribe link in email header
     # list_unsubscribe_url = \
-    #     "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/supporterinitial" \
+    #     "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/supporterinitial/" \
     #     "".format(
     #         email_secret_key=recipient_email_subscription_secret_key,
     #         root_url=WE_VOTE_SERVER_ROOT_URL,

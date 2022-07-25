@@ -305,7 +305,7 @@ def friend_accepted_invitation_send(
             )
         # Instant unsubscribe link in email header
         list_unsubscribe_url = \
-            "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendaccept" \
+            "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendaccept/" \
             "".format(
                 email_secret_key=original_sender_email_subscription_secret_key,
                 root_url=WE_VOTE_SERVER_ROOT_URL,
@@ -535,7 +535,7 @@ def friend_invitation_by_email_send_for_api(  # friendInvitationByEmailSend
         # We can continue. Note that we are not checking for "voter.has_email_with_verified_ownership()"
         pass
     else:
-        status += "VOTER_DOES_NOT_HAVE_VALID_EMAIL-CACHING_FOR_LATER "
+        status += "SENDER_VOTER_DOES_NOT_HAVE_VALID_EMAIL-CACHING_FOR_LATER "
 
     if not isinstance(first_name_array, (list, tuple)):
         first_name_array = []
@@ -585,7 +585,7 @@ def friend_invitation_by_email_send_for_api(  # friendInvitationByEmailSend
             status += send_results['status']
 
     elif positive_value_exists(email_addresses_raw):
-        # TODO: Deprecate this in 2024
+        # This branch is used for inviting single friends (e.g. Add friends from your contacts)
         # Break apart all the emails in email_addresses_raw input from the voter
         results = email_manager.parse_raw_emails_into_list(email_addresses_raw)
         if results['at_least_one_email_found']:
@@ -813,7 +813,7 @@ def send_to_one_friend(
         )
     # Instant unsubscribe link in email header
     list_unsubscribe_url = \
-        "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendinvite" \
+        "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendinvite/" \
         "".format(
             email_secret_key=recipient_email_subscription_secret_key,
             root_url=WE_VOTE_SERVER_ROOT_URL,
@@ -1889,8 +1889,11 @@ def friend_invitation_by_facebook_verify_for_api(voter_device_id, facebook_reque
     return json_data
 
 
-def friend_invitation_by_we_vote_id_send_for_api(voter_device_id, other_voter_we_vote_id, invitation_message,
-                                                 web_app_root_url=''):  # friendInvitationByWeVoteIdSend
+def friend_invitation_by_we_vote_id_send_for_api(  # friendInvitationByWeVoteIdSend
+        voter_device_id='',
+        other_voter_we_vote_id='',
+        invitation_message='',
+        web_app_root_url=''):
     """
 
     :param voter_device_id:
@@ -2030,7 +2033,7 @@ def friend_invitation_by_we_vote_id_send_for_api(voter_device_id, other_voter_we
                 )
             # Instant unsubscribe link in email header
             list_unsubscribe_url = \
-                "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendinvite" \
+                "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendinvite/" \
                 "".format(
                     email_secret_key=recipient_email_subscription_secret_key,
                     root_url=WE_VOTE_SERVER_ROOT_URL,
@@ -3561,7 +3564,7 @@ def message_to_friend_send_for_api(
                 )
             # Instant unsubscribe link in email header
             list_unsubscribe_url = \
-                "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendmessage" \
+                "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendmessage/" \
                 "".format(
                     email_secret_key=recipient_email_subscription_secret_key,
                     root_url=WE_VOTE_SERVER_ROOT_URL,

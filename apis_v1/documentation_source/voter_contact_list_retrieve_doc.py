@@ -53,16 +53,17 @@ def voter_contact_list_retrieve_doc_template_values(url_root):
                    '     "has_data_from_google_people_api": boolean,\n' \
                    '     "ignore_contact": boolean,\n' \
                    '     "imported_by_voter_we_vote_id": string,\n' \
+                   '     "is_friend": boolean,\n' \
                    '     "state_code": string,\n' \
                    '   },],\n' \
                    '}'
 
     template_values = {
-        'api_name': 'voterPlanListRetrieve',
-        'api_slug': 'voterPlanListRetrieve',
+        'api_name': 'voterContactListRetrieve',
+        'api_slug': 'voterContactListRetrieve',
         'api_introduction':
             "Retrieve a voter_contact_list that we can display publicly.",
-        'try_now_link': 'apis_v1:voterPlanListRetrieveView',
+        'try_now_link': 'apis_v1:voterContactListRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',

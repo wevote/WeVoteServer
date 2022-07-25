@@ -155,8 +155,11 @@ def friend_invitation_by_we_vote_id_send_view(request):  # friendInvitationByWeV
     invitation_message = request.GET.get('invitation_message', "")
     other_voter_we_vote_id = request.GET.get('other_voter_we_vote_id', "")
     hostname = request.GET.get('hostname', "")
-    results = friend_invitation_by_we_vote_id_send_for_api(voter_device_id, other_voter_we_vote_id, invitation_message,
-                                                           web_app_root_url=hostname)
+    results = friend_invitation_by_we_vote_id_send_for_api(
+        voter_device_id=voter_device_id,
+        other_voter_we_vote_id=other_voter_we_vote_id,
+        invitation_message=invitation_message,
+        web_app_root_url=hostname)
     json_data = {
         'status':                               results['status'],
         'success':                              results['success'],

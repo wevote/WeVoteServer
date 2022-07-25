@@ -216,6 +216,8 @@ def augment_emails_for_voter_with_we_vote_data(voter_we_vote_id=''):
     status = ''
     success = True
 
+    from friend.models import FriendManager
+    friend_manager = FriendManager()
     from voter.models import VoterManager
     voter_manager = VoterManager()
     # Augment all voter contacts with updated data from We Vote
@@ -281,6 +283,36 @@ def augment_emails_for_voter_with_we_vote_data(voter_we_vote_id=''):
                         status += "NUMBER_OF_VOTER_CONTACT_EMAIL_UPDATED: " + str(number_updated) + " "
                     except Exception as e:
                         status += "FAILED_TO_UPDATE_VOTER_CONTACT_EMAIL: " + str(e) + ' '
+
+    # Retrieve again now that voter_we_vote_id has been updated, so we can see if they are a friend
+    voter_contact_results = voter_manager.retrieve_voter_contact_email_list(
+        imported_by_voter_we_vote_id=voter_we_vote_id,
+        read_only=False)
+    if voter_contact_results['voter_contact_email_list_found']:
+        voter_contact_email_list = voter_contact_results['voter_contact_email_list']
+        # Retrieve main voter's friends, and then update voter contacts with is_friend
+        friend_results = friend_manager.retrieve_friends_we_vote_id_list(voter_we_vote_id)
+        friends_we_vote_id_list = []
+        if friend_results['friends_we_vote_id_list_found']:
+            friends_we_vote_id_list = friend_results['friends_we_vote_id_list']
+        for voter_contact in voter_contact_email_list:
+            if positive_value_exists(voter_contact.voter_we_vote_id):
+                should_save_voter_contact = False
+                voter_contact_should_be_friend = voter_contact.voter_we_vote_id in friends_we_vote_id_list
+                if positive_value_exists(voter_contact.is_friend):
+                    if voter_contact_should_be_friend:
+                        pass  # all is well!
+                    else:
+                        voter_contact.is_friend = False
+                        should_save_voter_contact = True
+                elif voter_contact_should_be_friend:
+                    voter_contact.is_friend = True
+                    should_save_voter_contact = True
+                if should_save_voter_contact:
+                    try:
+                        voter_contact.save()
+                    except Exception as e:
+                        status += "COULD_NOT_SAVE_VOTER_CONTACT: " + str(e) + " "
 
     results = {
         'success': success,
@@ -769,7 +801,7 @@ def schedule_verification_email(
         )
     # Instant unsubscribe link in email header
     list_unsubscribe_url = \
-        "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/login" \
+        "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/login/" \
         "".format(
             email_secret_key=recipient_email_subscription_secret_key,
             root_url=WE_VOTE_SERVER_ROOT_URL,
@@ -888,7 +920,7 @@ def schedule_link_to_sign_in_email(
         )
     # Instant unsubscribe link in email header
     list_unsubscribe_url = \
-        "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/login" \
+        "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/login/" \
         "".format(
             email_secret_key=recipient_email_subscription_secret_key,
             root_url=WE_VOTE_SERVER_ROOT_URL,
@@ -995,7 +1027,7 @@ def schedule_sign_in_code_email(
         )
     # Instant unsubscribe link in email header
     list_unsubscribe_url = \
-        "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/login" \
+        "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/login/" \
         "".format(
             email_secret_key=recipient_email_subscription_secret_key,
             root_url=WE_VOTE_SERVER_ROOT_URL,

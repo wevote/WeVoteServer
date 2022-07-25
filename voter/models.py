@@ -326,6 +326,7 @@ class VoterManager(BaseUserManager):
             google_last_name=None,
             ignore_contact=None,
             imported_by_voter_we_vote_id='',
+            is_friend=None,
             last_name=None,
             middle_name=None,
             state_code=None,
@@ -346,6 +347,7 @@ class VoterManager(BaseUserManager):
         :param google_last_name:
         :param ignore_contact:
         :param imported_by_voter_we_vote_id:
+        :param is_friend:
         :param last_name:
         :param middle_name:
         :param state_code:
@@ -419,6 +421,10 @@ class VoterManager(BaseUserManager):
                     if voter_contact_email.ignore_contact != ignore_contact:
                         voter_contact_email.ignore_contact = ignore_contact
                         change_to_save = True
+                if is_friend is not None:
+                    if voter_contact_email.is_friend != is_friend:
+                        voter_contact_email.is_friend = is_friend
+                        change_to_save = True
                 if last_name is not None:
                     if voter_contact_email.last_name != last_name:
                         voter_contact_email.last_name = last_name
@@ -474,6 +480,9 @@ class VoterManager(BaseUserManager):
                     return results
                 if ignore_contact is not None:
                     voter_contact_email.ignore_contact = ignore_contact
+                    change_to_save = True
+                if is_friend is not None:
+                    voter_contact_email.is_friend = is_friend
                     change_to_save = True
                 if change_to_save:
                     voter_contact_email.save()
@@ -1061,7 +1070,9 @@ class VoterManager(BaseUserManager):
         email_addresses_returned_list = []
         if voter_contact_email_list_found:
             for voter_contact_email in voter_contact_email_list:
-                email_addresses_returned_list.append(voter_contact_email.email_address_text)
+                email_address_text_lower_case = voter_contact_email.email_address_text.lower()
+                if email_address_text_lower_case not in email_addresses_returned_list:
+                    email_addresses_returned_list.append(email_address_text_lower_case)
 
         results = {
             'success':                          success,
@@ -3413,6 +3424,7 @@ class VoterContactEmail(models.Model):
     has_data_from_google_people_api = models.BooleanField(default=False)
     ignore_contact = models.BooleanField(default=False)
     imported_by_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
+    is_friend = models.BooleanField(default=False)
     last_name = models.CharField(max_length=255, default=None, null=True)
     middle_name = models.CharField(max_length=255, default=None, null=True)
     state_code = models.CharField(max_length=2, default=None, null=True, db_index=True)
