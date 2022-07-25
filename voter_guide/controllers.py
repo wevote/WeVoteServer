@@ -1734,6 +1734,9 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
             }
             return HttpResponse(json.dumps(json_data), content_type='application/json')
 
+        if not url_to_scan.startswith('http://') and not url_to_scan.startswith('https://'):
+            url_to_scan = 'https://' + url_to_scan
+
         results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_from_url(
             voter_guide_possibility_url=url_to_scan,
             pdf_url=pdf_url,
@@ -2115,9 +2118,8 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
     results = voter_guide_possibility_manager.retrieve_voter_guide_possibility(
         voter_guide_possibility_id=voter_guide_possibility_id)
 
-    # TODO: Steve, move all the voterGuidPossiblityPositions with the same organization_we_vote_id that was changed in the last 6 months
+    # move all the voterGuidPossiblityPositions with same organization_we_vote_id that was changed in the last 6 months
     move_voter_guide_possibility_positions_to_requested_voter_guide_possibility(results['voter_guide_possibility'])
-
 
     possible_endorsement_list = []
     if results['voter_guide_possibility_found']:
