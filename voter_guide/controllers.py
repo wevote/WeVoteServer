@@ -2118,7 +2118,6 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
     results = voter_guide_possibility_manager.retrieve_voter_guide_possibility(
         voter_guide_possibility_id=voter_guide_possibility_id)
 
-    # move all the voterGuidPossiblityPositions with same organization_we_vote_id that was changed in the last 6 months
     move_voter_guide_possibility_positions_to_requested_voter_guide_possibility(results['voter_guide_possibility'])
 
     possible_endorsement_list = []
