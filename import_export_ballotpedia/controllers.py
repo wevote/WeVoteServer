@@ -2746,7 +2746,9 @@ def process_ballotpedia_voter_districts(google_civic_election_id, state_code, mo
 
             # Look for any measures in this election with this ballotpedia_district_id
             results = measure_list_manager.retrieve_measures(
-                google_civic_election_id, one_district['ballotpedia_district_id'], state_code=state_code)
+                google_civic_election_id=google_civic_election_id,
+                ballotpedia_district_id=one_district['ballotpedia_district_id'],
+                state_code=state_code)
             if results['measure_list_found']:
                 measure_list_objects = results['measure_list_objects']
                 for one_measure in measure_list_objects:

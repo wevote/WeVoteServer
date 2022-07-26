@@ -2678,6 +2678,25 @@ def voter_ballot_items_retrieve_for_one_election_for_api(
         success = False
 
     if success:
+        # Loop through measures to make sure we have full measure data needed
+        contest_measure_we_vote_id_list = []
+        for ballot_item in ballot_item_list:
+            if ballot_item.contest_measure_we_vote_id and \
+                    ballot_item.contest_measure_we_vote_id not in contest_measure_we_vote_id_list:
+                contest_measure_we_vote_id_list.append(ballot_item.contest_measure_we_vote_id)
+
+        measure_results_dict = {}
+        if len(contest_measure_we_vote_id_list) > 0:
+            # Retrieve all of these measures with a single call
+            measure_list_manager = ContestMeasureListManager()
+            results = measure_list_manager.retrieve_measures(
+                measure_we_vote_id_list=contest_measure_we_vote_id_list, read_only=True)
+            if results['measure_list_found']:
+                measure_list_objects = results['measure_list_objects']
+                for one_measure in measure_list_objects:
+                    measure_results_dict[one_measure.we_vote_id] = one_measure
+
+        # Now prepare the full list for json result
         status += "BALLOT_ITEM_LIST_FOUND "
         for ballot_item in ballot_item_list:
             if ballot_item.contest_office_we_vote_id:
@@ -2778,6 +2797,25 @@ def voter_ballot_items_retrieve_for_one_election_for_api(
                 measure_id = ballot_item.contest_measure_id
                 measure_we_vote_id = ballot_item.contest_measure_we_vote_id
                 measure_display_name_number = 100
+                try:
+                    if measure_we_vote_id in measure_results_dict:
+                        measure_subtitle = measure_results_dict[measure_we_vote_id].measure_subtitle
+                        measure_text = measure_results_dict[measure_we_vote_id].measure_text
+                        measure_url = measure_results_dict[measure_we_vote_id].measure_url
+                        no_vote_description = measure_results_dict[measure_we_vote_id].ballotpedia_no_vote_description
+                        yes_vote_description = measure_results_dict[measure_we_vote_id].ballotpedia_yes_vote_description
+                    else:
+                        measure_subtitle = ballot_item.measure_subtitle
+                        measure_text = ballot_item.measure_text
+                        measure_url = ballot_item.measure_url
+                        no_vote_description = ballot_item.no_vote_description
+                        yes_vote_description = ballot_item.yes_vote_description
+                except Exception as e:
+                    measure_subtitle = ballot_item.measure_subtitle
+                    measure_text = ballot_item.measure_text
+                    measure_url = ballot_item.measure_url
+                    no_vote_description = ballot_item.no_vote_description
+                    yes_vote_description = ballot_item.yes_vote_description
                 one_ballot_item = {
                     'ballot_item_display_name':     ballot_item.ballot_item_display_name,
                     'google_civic_election_id':     google_civic_election_id,
@@ -2785,16 +2823,16 @@ def voter_ballot_items_retrieve_for_one_election_for_api(
                     'id':                           measure_id,
                     'kind_of_ballot_item':          kind_of_ballot_item,
                     'local_ballot_order':           ballot_item.local_ballot_order + 100,  # Shift to bottom
-                    'measure_subtitle':             ballot_item.measure_subtitle,
-                    'measure_text':                 ballot_item.measure_text,
-                    'measure_url':                  ballot_item.measure_url,
-                    'no_vote_description':          strip_html_tags(ballot_item.no_vote_description),
+                    'measure_subtitle':             measure_subtitle,
+                    'measure_text':                 measure_text,
+                    'measure_url':                  measure_url,
+                    'no_vote_description':          strip_html_tags(no_vote_description),
                     'district_name':                "",  # TODO Add this
                     'election_display_name':        "",  # TODO Add this
                     'regional_display_name':        "",  # TODO Add this
                     'state_display_name':           "",  # TODO Add this
                     'we_vote_id':                   measure_we_vote_id,
-                    'yes_vote_description':         strip_html_tags(ballot_item.yes_vote_description),
+                    'yes_vote_description':         strip_html_tags(yes_vote_description),
                 }
                 ballot_items_to_display.append(one_ballot_item.copy())
 
