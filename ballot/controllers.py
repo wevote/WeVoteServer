@@ -2799,25 +2799,28 @@ def voter_ballot_items_retrieve_for_one_election_for_api(
                 measure_display_name_number = 100
                 try:
                     if measure_we_vote_id in measure_results_dict:
+                        ballot_item_display_name = measure_results_dict[measure_we_vote_id].measure_title
                         measure_subtitle = measure_results_dict[measure_we_vote_id].measure_subtitle
                         measure_text = measure_results_dict[measure_we_vote_id].measure_text
                         measure_url = measure_results_dict[measure_we_vote_id].measure_url
                         no_vote_description = measure_results_dict[measure_we_vote_id].ballotpedia_no_vote_description
                         yes_vote_description = measure_results_dict[measure_we_vote_id].ballotpedia_yes_vote_description
                     else:
+                        ballot_item_display_name = ballot_item.ballot_item_display_name
                         measure_subtitle = ballot_item.measure_subtitle
                         measure_text = ballot_item.measure_text
                         measure_url = ballot_item.measure_url
                         no_vote_description = ballot_item.no_vote_description
                         yes_vote_description = ballot_item.yes_vote_description
                 except Exception as e:
+                    ballot_item_display_name = ballot_item.ballot_item_display_name
                     measure_subtitle = ballot_item.measure_subtitle
                     measure_text = ballot_item.measure_text
                     measure_url = ballot_item.measure_url
                     no_vote_description = ballot_item.no_vote_description
                     yes_vote_description = ballot_item.yes_vote_description
                 one_ballot_item = {
-                    'ballot_item_display_name':     ballot_item.ballot_item_display_name,
+                    'ballot_item_display_name':     ballot_item_display_name,
                     'google_civic_election_id':     google_civic_election_id,
                     'google_ballot_placement':      ballot_item.google_ballot_placement,
                     'id':                           measure_id,
