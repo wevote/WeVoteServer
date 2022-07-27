@@ -190,7 +190,7 @@ def update_position_list_with_contest_office_info(position_list):
             politician_id = candidate.politician_id
         else:
             results = candidate_manager.retrieve_candidate_from_we_vote_id(
-                one_position.candidate_campaign_we_vote_id)
+                one_position.candidate_campaign_we_vote_id, read_only=False)  # May be able to be read_only
             if results['candidate_found']:
                 candidate = results['candidate']
                 candidate_dict[one_position.candidate_campaign_we_vote_id] = candidate

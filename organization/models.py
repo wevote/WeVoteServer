@@ -550,7 +550,7 @@ class OrganizationManager(models.Manager):
     def retrieve_organization_from_facebook_id(self, facebook_id):
         status = ""
         facebook_manager = FacebookManager()
-        results = facebook_manager.retrieve_facebook_link_to_voter_from_facebook_id(facebook_id)
+        results = facebook_manager.retrieve_facebook_link_to_voter_from_facebook_id(facebook_id, read_only=True)
         if results['facebook_link_to_voter_found']:
             facebook_link_to_voter = results['facebook_link_to_voter']
             if positive_value_exists(facebook_link_to_voter.voter_we_vote_id):
@@ -789,7 +789,7 @@ class OrganizationManager(models.Manager):
 
     def fetch_external_voter_id(self, organization_we_vote_id, voter_we_vote_id):
         if positive_value_exists(organization_we_vote_id) and positive_value_exists(voter_we_vote_id):
-            link_query = OrganizationMembershipLinkToVoter.objects.all()
+            link_query = OrganizationMembershipLinkToVoter.objects.using('readonly').all()
             link_query = link_query.filter(organization_we_vote_id=organization_we_vote_id)
             link_query = link_query.filter(voter_we_vote_id=voter_we_vote_id)
             external_voter = link_query.first()
@@ -801,7 +801,7 @@ class OrganizationManager(models.Manager):
         organization_id = 0
         if positive_value_exists(we_vote_id):
             organization_manager = OrganizationManager()
-            results = organization_manager.retrieve_organization(organization_id, we_vote_id)
+            results = organization_manager.retrieve_organization(organization_id, we_vote_id, read_only=True)
             if results['success']:
                 return results['organization_id']
         return 0
@@ -1366,7 +1366,7 @@ class OrganizationManager(models.Manager):
                 # 3a) FacebookLinkToVoter exists? If not, go to step 3b
                 if not organization_on_stage_found and positive_value_exists(facebook_id):
                     facebook_manager = FacebookManager()
-                    facebook_results = facebook_manager.retrieve_facebook_link_to_voter(facebook_id)
+                    facebook_results = facebook_manager.retrieve_facebook_link_to_voter(facebook_id, read_only=True)
                     if facebook_results['facebook_link_to_voter_found']:
                         facebook_link_to_voter = facebook_results['facebook_link_to_voter']
                         voter_manager = VoterManager()

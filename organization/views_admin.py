@@ -1933,7 +1933,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
     candidate_manager = CandidateManager()
     if positive_value_exists(candidate_we_vote_id):
         candidate_id = 0
-        results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+        results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=True)
         if results['candidate_found']:
             candidate = results['candidate']
             candidate_id = candidate.id
@@ -2206,7 +2206,7 @@ def organization_position_new_view(request, organization_id):
     candidate_manager = CandidateManager()
     if positive_value_exists(candidate_we_vote_id):
         candidate_id = 0
-        results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+        results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=True)
         if results['candidate_found']:
             candidate = results['candidate']
             candidate_id = candidate.id
@@ -2255,7 +2255,8 @@ def organization_position_new_view(request, organization_id):
         google_civic_election_id_list=google_civic_election_id_list,
         state_code=state_code,
         search_string=candidate_search,
-        return_list_of_objects=True)
+        return_list_of_objects=True,
+        read_only=True)
     if results['candidate_list_found']:
         candidates_for_this_election_list = results['candidate_list_objects']
 

@@ -263,9 +263,14 @@
    target="_blank" >Export Candidates <span class="glyphicon glyphicon-new-window"></span></a>,&nbsp;&nbsp;&nbsp;
 <a href="{% url 'candidate:repair_imported_names' %}?is_candidate=true" >Repair Imported Candidate Names</a>,&nbsp;&nbsp;&nbsp;
 {% if find_candidates_linked_to_multiple_offices %}
-    <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}" ><strong>Show All Candidates</strong></a>
+    <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}" ><strong>Show All Candidates</strong></a>&nbsp;&nbsp;&nbsp;
 {% else %}
-    <a href="{% url 'candidate:candidate_list' %}?find_candidates_linked_to_multiple_offices=1&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}" >Show Candidates Linked to Two Offices</a>
+    <a href="{% url 'candidate:candidate_list' %}?find_candidates_linked_to_multiple_offices=1&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}" >Show Candidates Linked to Two Offices</a>&nbsp;&nbsp;&nbsp;
+{% endif %}
+{% if vote_usa_candidates_for_this_state %}
+    <a href="{{ vote_usa_candidates_for_this_state }}" target="_blank">Vote USA Candidates API <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
+{% else %}
+    (Vote USA Candidates API requires election and state)
 {% endif %}
 <br />
 
@@ -445,7 +450,7 @@
                                     <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}" />
                                     <input type="hidden" name="hide_candidate_tools" value="{{ hide_candidate_tools }}" />
                                     <input type="hidden" name="page" value="{{ current_page_number }}" />
-                                    <input type="hidden" name="state_code" value="{{ state_code }}" />
+                                    <input type="hidden" name="state_code" value="{{ candidate.state_code }}" />
                                     <input type="hidden" name="refresh_from_twitter" value="1" />
                                     <input type="hidden" name="twitter_url" value="{{ candidate.candidate_merge_possibility.twitter_url }}" />
                                     <input id="choose_{{ forloop.counter }}" type="submit" value="Choose and Update" /> <span class="glyphicon glyphicon-new-window"></span>

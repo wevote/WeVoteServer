@@ -1346,7 +1346,8 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
                 matching_results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
                     google_civic_election_id_list=google_civic_election_id_list,
                     state_code=state_code,
-                    candidate_name=candidate_name)
+                    candidate_name=candidate_name,
+                    read_only=True)
 
                 if matching_results['candidate_found']:
                     candidate = matching_results['candidate']
@@ -2196,7 +2197,8 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
             google_civic_election_id_list=google_civic_election_id_list,
             state_code=state_code,
             candidate_twitter_handle=candidate_twitter_handle,
-            candidate_name=candidate_name)
+            candidate_name=candidate_name,
+            read_only=True)
 
         if matching_results['candidate_found']:
             candidate = matching_results['candidate']
@@ -2287,7 +2289,8 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
             contest_office_name=contest_office_name,
             google_civic_election_id=google_civic_election_id,
             incoming_state_code=state_code,
-            district_id=office_district_id)
+            district_id=office_district_id,
+            read_only=True)
         if matching_results['contest_office_found']:
             contest_office = matching_results['contest_office']
             contest_office_name = contest_office.office_name
@@ -2572,8 +2575,7 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
     contest_office_manager = ContestOfficeManager()
     if positive_value_exists(candidate_we_vote_id):
         candidate_manager = CandidateManager()
-        candidate_results = candidate_manager.retrieve_candidate_from_we_vote_id(
-            candidate_we_vote_id)
+        candidate_results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=True)
 
         if candidate_results['candidate_found']:
             candidate = candidate_results['candidate']
@@ -2612,7 +2614,8 @@ def create_batch_row_action_position(batch_description, batch_header_map, one_ba
             google_civic_election_id_list=google_civic_election_id_list,
             state_code=state_code,
             candidate_twitter_handle=candidate_twitter_handle,
-            candidate_name=candidate_name)
+            candidate_name=candidate_name,
+            read_only=True)
 
         if matching_results['candidate_found']:
             candidate = matching_results['candidate']
@@ -2949,13 +2952,13 @@ def create_batch_row_action_ballot_item(batch_description,
             positive_value_exists(candidate_twitter_handle) or positive_value_exists(candidate_name):
         candidate_list_manager = CandidateListManager()
         google_civic_election_id_list = [google_civic_election_id]
-        # Needs to be read_only=False so we don't get "terminating connection due to conflict with recovery" error
+        # Needs to be read_only=False, so we don't get "terminating connection due to conflict with recovery" error
         matching_results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
             google_civic_election_id_list=google_civic_election_id_list,
             state_code=state_code,
             candidate_twitter_handle=candidate_twitter_handle,
             candidate_name=candidate_name,
-            read_only=False)
+            read_only=True)
         if matching_results['candidate_found']:
             candidate = matching_results['candidate']
             keep_looking_for_duplicates = False
@@ -5243,7 +5246,7 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
         return results
 
     try:
-        batch_description = BatchDescription.objects.get(batch_header_id=batch_header_id)
+        batch_description = BatchDescription.objects.using('readonly').get(batch_header_id=batch_header_id)
         batch_description_found = True
     except BatchDescription.DoesNotExist:
         batch_description = BatchDescription()
@@ -5266,7 +5269,7 @@ def import_ballot_item_data_from_batch_row_actions(batch_header_id, batch_row_id
         # kind_of_batch = batch_description.kind_of_batch
 
     try:
-        batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
+        batch_header_map = BatchHeaderMap.objects.using('readonly').get(batch_header_id=batch_header_id)
         batch_header_map_found = True
     except BatchHeaderMap.DoesNotExist:
         batch_header_map_found = False
@@ -5511,7 +5514,7 @@ def delete_ballot_item_data_from_batch_row_actions(batch_header_id, ballot_item_
         return results
 
     try:
-        batch_description = BatchDescription.objects.get(batch_header_id=batch_header_id)
+        batch_description = BatchDescription.objects.using('readonly').get(batch_header_id=batch_header_id)
         batch_description_found = True
     except BatchDescription.DoesNotExist:
         # This is fine
@@ -5529,7 +5532,7 @@ def delete_ballot_item_data_from_batch_row_actions(batch_header_id, ballot_item_
         return results
 
     try:
-        batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
+        batch_header_map = BatchHeaderMap.objects.using('readonly').get(batch_header_id=batch_header_id)
         batch_header_map_found = True
     except BatchHeaderMap.DoesNotExist:
         # This is fine

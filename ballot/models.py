@@ -1033,7 +1033,7 @@ class BallotItemListManager(models.Manager):
         success = False
         status = ''
         try:
-            ballot_item_queryset = BallotItem.objects.all()
+            ballot_item_queryset = BallotItem.objects.using('readonly').all()
             ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
             if positive_value_exists(state_code):
                 ballot_item_queryset = ballot_item_queryset.filter(state_code__iexact=state_code)
@@ -1063,7 +1063,7 @@ class BallotItemListManager(models.Manager):
         success = False
         status = ''
         try:
-            ballot_item_queryset = BallotItem.objects.all()
+            ballot_item_queryset = BallotItem.objects.using('readonly').all()
             ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
             ballot_item_queryset = ballot_item_queryset.filter(Q(state_code=None) | Q(state_code=""))
             ballot_item_list_count = ballot_item_queryset.count()
@@ -1395,7 +1395,7 @@ class BallotItemListManager(models.Manager):
         if results['success']:
             election_list = results['election_list']
             for one_election in election_list:
-                ballot_item_queryset = BallotItem.objects.all()
+                ballot_item_queryset = BallotItem.objects.using('readonly').all()
                 ballot_item_queryset = ballot_item_queryset.filter(
                     google_civic_election_id=one_election.google_civic_election_id)
                 number_found = ballot_item_queryset.count()
@@ -1410,7 +1410,7 @@ class BallotItemListManager(models.Manager):
         voter_id = convert_to_int(voter_id)
         google_civic_election_id = convert_to_int(google_civic_election_id)
         try:
-            ballot_item_queryset = BallotItem.objects.all()
+            ballot_item_queryset = BallotItem.objects.using('readonly').all()
             if positive_value_exists(voter_id):
                 ballot_item_queryset = ballot_item_queryset.filter(
                     voter_id=voter_id)
@@ -3057,7 +3057,7 @@ class BallotReturnedListManager(models.Manager):
     def fetch_ballot_location_display_option_on_count_for_election(self, google_civic_election_id, state_code=''):
         google_civic_election_id = convert_to_int(google_civic_election_id)
         try:
-            ballot_returned_queryset = BallotReturned.objects.all()
+            ballot_returned_queryset = BallotReturned.objects.using('readonly').all()
             ballot_returned_queryset = ballot_returned_queryset.filter(
                 google_civic_election_id=google_civic_election_id)
             ballot_returned_queryset = ballot_returned_queryset.filter(ballot_location_display_option_on=True)

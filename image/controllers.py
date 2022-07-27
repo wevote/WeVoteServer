@@ -529,7 +529,7 @@ def cache_voter_master_images(voter_id):
     # else:
     facebook_manager = FacebookManager()
     facebook_link_to_voter_results = facebook_manager.retrieve_facebook_link_to_voter_from_voter_we_vote_id(
-        voter.we_vote_id)
+        voter.we_vote_id, read_only=True)
     if facebook_link_to_voter_results['facebook_link_to_voter_found']:
         facebook_id = facebook_link_to_voter_results['facebook_link_to_voter'].facebook_user_id
 

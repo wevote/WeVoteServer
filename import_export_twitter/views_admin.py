@@ -38,7 +38,7 @@ def delete_possible_twitter_handles_view(request, candidate_we_vote_id):
         return redirect_to_sign_in_page(request, authority_required)
 
     candidate_manager = CandidateManager()
-    results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+    results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=True)
 
     if not results['candidate_found']:
         messages.add_message(request, messages.INFO, results['status'])
@@ -61,7 +61,7 @@ def retrieve_possible_twitter_handles_view(request, candidate_we_vote_id):
         return redirect_to_sign_in_page(request, authority_required)
 
     candidate_manager = CandidateManager()
-    results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+    results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=True)
 
     if not results['candidate_found']:
         messages.add_message(request, messages.INFO, results['status'])

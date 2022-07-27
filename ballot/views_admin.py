@@ -48,7 +48,7 @@ def ballot_items_sync_out_view(request):  # ballotItemsSyncOut
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     try:
-        ballot_item_list = BallotItem.objects.all()
+        ballot_item_list = BallotItem.objects.using('readonly').all()
         # We only want BallotItem values associated with map points
         ballot_item_list = ballot_item_list.exclude(
             Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id=""))

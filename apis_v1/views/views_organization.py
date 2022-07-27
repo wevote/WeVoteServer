@@ -315,7 +315,7 @@ def organization_photos_save_view(request):  # organizationPhotosSave
         voter_has_staff_authority_required = True
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     organization_linked_to_this_voter = False
     voter_owns_twitter_handle = False
     if voter_results['voter_found']:
@@ -438,7 +438,7 @@ def organization_save_view(request):  # organizationSave
         voter_has_staff_authority_required = True
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if voter_results['voter_found']:
         voter = voter_results['voter']
         voter_is_signed_in = voter.is_signed_in()

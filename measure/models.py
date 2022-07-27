@@ -1062,7 +1062,7 @@ class ContestMeasureListManager(models.Manager):
         if keep_looking_for_duplicates and positive_value_exists(measure_title):
             # Search by ContestMeasure name exact match
             try:
-                contest_measure_query = ContestMeasure.objects.all()
+                contest_measure_query = ContestMeasure.objects.using('readonly').all()
                 contest_measure_query = contest_measure_query.filter(measure_title__iexact=measure_title,
                                                                      google_civic_election_id=google_civic_election_id)
                 if positive_value_exists(state_code):

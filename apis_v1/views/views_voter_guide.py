@@ -308,7 +308,7 @@ def voter_guides_from_friends_upcoming_retrieve_view(request):  # voterGuidesFro
 
     voter_device_id = get_voter_device_id(request)
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if positive_value_exists(voter_results['voter_found']):
         voter_we_vote_id = voter_results['voter'].we_vote_id
     else:

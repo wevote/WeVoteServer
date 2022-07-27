@@ -23,7 +23,7 @@ def retrieve_google_civic_election_id_for_voter(voter_id):
 
     if positive_value_exists(voter_id):
         try:
-            ballot_item_query = BallotItem.objects.filter(
+            ballot_item_query = BallotItem.objects.using('readonly').filter(
                 voter_id__exact=voter_id,
             )
             ballot_item_list = list(ballot_item_query[:1])
