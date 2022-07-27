@@ -450,7 +450,7 @@
                                     <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}" />
                                     <input type="hidden" name="hide_candidate_tools" value="{{ hide_candidate_tools }}" />
                                     <input type="hidden" name="page" value="{{ current_page_number }}" />
-                                    <input type="hidden" name="state_code" value="{{ candidate.state_code }}" />
+                                    <input type="hidden" name="state_code" value="{{ candidate.get_candidate_state }}" />
                                     <input type="hidden" name="refresh_from_twitter" value="1" />
                                     <input type="hidden" name="twitter_url" value="{{ candidate.candidate_merge_possibility.twitter_url }}" />
                                     <input id="choose_{{ forloop.counter }}" type="submit" value="Choose and Update" /> <span class="glyphicon glyphicon-new-window"></span>
