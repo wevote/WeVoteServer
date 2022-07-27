@@ -713,7 +713,7 @@ def groom_and_store_google_civic_candidates_json_2021(
                 candidate_twitter_handle=None,
                 candidate_name=candidate_name,
                 instagram_handle=None,
-                read_only=True)
+                read_only=False)
             if not results['success']:
                 continue_searching_for_candidate = False
                 status += "FAILED_RETRIEVING_CANDIDATE_FROM_UNIQUE_IDS: " + results['status'] + " "

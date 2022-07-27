@@ -415,7 +415,7 @@ def friend_invitation_by_email_send_for_api(  # friendInvitationByEmailSend
         return error_results
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     sender_voter_id = voter_results['voter_id']
     if not positive_value_exists(sender_voter_id):
         status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
@@ -946,7 +946,7 @@ def friend_invitation_information_for_api(voter_device_id, invitation_secret_key
         return error_results
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
         status += "friendInvitationInformation_VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
@@ -1069,7 +1069,7 @@ def friend_invitation_information_for_api(voter_device_id, invitation_secret_key
             return error_results
 
     if positive_value_exists(sender_voter_we_vote_id):
-        voter_friend_results = voter_manager.retrieve_voter_by_we_vote_id(sender_voter_we_vote_id)
+        voter_friend_results = voter_manager.retrieve_voter_by_we_vote_id(sender_voter_we_vote_id, read_only=True)
         if voter_friend_results['voter_found']:
             friend_we_vote_id = sender_voter_we_vote_id
             voter_friend = voter_friend_results['voter']
@@ -1153,7 +1153,7 @@ def friend_acceptance_email_should_be_sent(  # friendInvitationByEmailVerify
         return error_results
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
         status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
@@ -1333,7 +1333,7 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
         return error_results
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=False)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
         status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
@@ -1398,7 +1398,8 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
         # We want to make all changes against voter_we_vote_id_accepting_invitation, and those changes will be
         # merged into the current voter_we_vote_id on a different API call
         recipient_organization_we_vote_id = ''
-        voter_results = voter_manager.retrieve_voter_by_we_vote_id(voter_we_vote_id_accepting_invitation)
+        voter_results = voter_manager.retrieve_voter_by_we_vote_id(
+            voter_we_vote_id_accepting_invitation, read_only=False)
         if not voter_results['voter_found']:
             status += "VOTER_THIS_INVITATION_WAS_SENT_TO_COULD_NOT_BE_FOUND: " + voter_results['status'] + " "
             error_results = {
@@ -1686,7 +1687,7 @@ def friend_invitation_by_facebook_send_for_api(voter_device_id, recipients_faceb
         return error_results
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     sender_voter_id = voter_results['voter_id']
     if not positive_value_exists(sender_voter_id):
         error_results = {
@@ -1703,7 +1704,7 @@ def friend_invitation_by_facebook_send_for_api(voter_device_id, recipients_faceb
     friend_manager = FriendManager()
 
     facebook_link_to_voter_results = facebook_manager.retrieve_facebook_link_to_voter_from_voter_we_vote_id(
-        sender_voter_we_vote_id)
+        sender_voter_we_vote_id, read_only=True)
     if not facebook_link_to_voter_results['facebook_link_to_voter_found']:
         status += "FRIEND_INVITATION_BY_FACEBOOK-FACEBOOK_LINK_TO_VOTER_NOT_FOUND "
         error_results = {
@@ -1780,7 +1781,7 @@ def friend_invitation_by_facebook_verify_for_api(voter_device_id, facebook_reque
         return error_results
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
         error_results = {
@@ -1801,7 +1802,8 @@ def friend_invitation_by_facebook_verify_for_api(voter_device_id, facebook_reque
     facebook_manager = FacebookManager()
 
     # Retrieve sender voter we vote id
-    facebook_link_to_voter_results = facebook_manager.retrieve_facebook_link_to_voter(sender_facebook_id)
+    facebook_link_to_voter_results = facebook_manager.retrieve_facebook_link_to_voter(
+        sender_facebook_id, read_only=True)
     if not facebook_link_to_voter_results['facebook_link_to_voter_found']:
         error_results = {
             'status':                                       "FACEBOOK_LINK_TO_SENDER_NOT_FOUND",
@@ -1918,7 +1920,7 @@ def friend_invitation_by_we_vote_id_send_for_api(  # friendInvitationByWeVoteIdS
         return error_results
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
 
     if not voter_results['voter_found']:
         error_results = {
@@ -1934,7 +1936,7 @@ def friend_invitation_by_we_vote_id_send_for_api(  # friendInvitationByWeVoteIdS
     recipient_voter = Voter()
     if positive_value_exists(other_voter_we_vote_id):
         other_voter_we_vote_id_found = True
-        recipient_voter_results = voter_manager.retrieve_voter_by_we_vote_id(other_voter_we_vote_id)
+        recipient_voter_results = voter_manager.retrieve_voter_by_we_vote_id(other_voter_we_vote_id, read_only=True)
         if recipient_voter_results['voter_found']:
             recipient_voter = recipient_voter_results['voter']
             other_voter_found = True

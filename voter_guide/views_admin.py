@@ -507,7 +507,7 @@ def voter_guide_create_view(request):
         # #########################
         # voter_guide_create_view: Find the candidate who is the subject of this page
         if positive_value_exists(candidate_we_vote_id):
-            results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+            results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=True)
             if results['candidate_found']:
                 candidate = results['candidate']
                 candidate_found = True
@@ -519,7 +519,8 @@ def voter_guide_create_view(request):
                 google_civic_election_id_list=google_civic_election_id_list_this_year,
                 state_code=state_code,
                 candidate_twitter_handle=candidate_twitter_handle,
-                candidate_name=candidate_name)
+                candidate_name=candidate_name,
+                read_only=True)
             if results['candidate_list_found']:
                 owner_of_website_candidate_list = results['candidate_list']
                 owner_of_website_candidate_list_count = len(owner_of_website_candidate_list)
@@ -1058,7 +1059,7 @@ def voter_guide_create_process_view(request):
         # If here is_list_of_endorsements_for_candidate is true
         # First, identify the candidate that is the subject of the page we are analyzing
         if positive_value_exists(candidate_we_vote_id):
-            results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+            results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=True)
             if results['candidate_found']:
                 candidate = results['candidate']
                 candidate_found = True
@@ -1070,7 +1071,8 @@ def voter_guide_create_process_view(request):
                     google_civic_election_id_list=google_civic_election_id_list_this_year,
                     state_code=state_code,
                     candidate_twitter_handle=candidate_twitter_handle,
-                    candidate_name=candidate_name)
+                    candidate_name=candidate_name,
+                    read_only=True)
                 if results['candidate_found']:
                     candidate = results['candidate']
                     candidate_found = True

@@ -191,7 +191,8 @@ def render_politician_merge_form(
     politician1_linked_candidate_photos = []
     politician1_candidate_results = candidate_list_manager.retrieve_candidates_from_politician(
         politician_id=politician_option1_for_template.id,
-        politician_we_vote_id=politician_option1_for_template.we_vote_id)
+        politician_we_vote_id=politician_option1_for_template.we_vote_id,
+        read_only=True)
     if politician1_candidate_results['candidate_list_found']:
         is_first = True
         is_first_office = True

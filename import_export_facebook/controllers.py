@@ -54,7 +54,8 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
     voter = results['voter']
 
     facebook_manager = FacebookManager()
-    facebook_results = facebook_manager.retrieve_facebook_link_to_voter(voter_we_vote_id=voter.we_vote_id)
+    facebook_results = facebook_manager.retrieve_facebook_link_to_voter(
+        voter_we_vote_id=voter.we_vote_id, read_only=True)
     if facebook_results['facebook_link_to_voter_found']:
         error_results = {
             'status':                   "FACEBOOK_OWNER_VOTER_FOUND_WHEN_NOT_EXPECTED",
@@ -275,14 +276,14 @@ def facebook_friends_action_for_api(voter_device_id):   # facebookFriendsAction
     # Find facebook_link_to_voter for all users and then updating SuggestedFriend table
     facebook_auth_response = auth_response_results['facebook_auth_response']
     my_facebook_link_to_voter_results = facebook_manager.retrieve_facebook_link_to_voter(
-        facebook_auth_response.facebook_user_id)
+        facebook_auth_response.facebook_user_id, read_only=True)
     status += ' ' + my_facebook_link_to_voter_results['status']
     if my_facebook_link_to_voter_results['facebook_link_to_voter_found']:
         friend_manager = FriendManager()
         viewer_voter_we_vote_id = my_facebook_link_to_voter_results['facebook_link_to_voter'].voter_we_vote_id
         for facebook_user_entry in facebook_friends_using_we_vote_list:
             facebook_user_link_to_voter_results = facebook_manager.retrieve_facebook_link_to_voter(
-                facebook_user_entry['facebook_user_id'])
+                facebook_user_entry['facebook_user_id'], read_only=True)
             status += ' ' + facebook_user_link_to_voter_results['status']
             if facebook_user_link_to_voter_results['facebook_link_to_voter_found']:
                 viewee_voter_we_vote_id = facebook_user_link_to_voter_results['facebook_link_to_voter'].voter_we_vote_id
@@ -474,7 +475,8 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
     voter_manager = VoterManager()
     organization_manager = OrganizationManager()
 
-    facebook_link_results = facebook_manager.retrieve_facebook_link_to_voter(facebook_auth_response.facebook_user_id)
+    facebook_link_results = facebook_manager.retrieve_facebook_link_to_voter(
+        facebook_auth_response.facebook_user_id, read_only=True)
     if facebook_link_results['facebook_link_to_voter_found']:
         status += "FACEBOOK_SIGN_IN_RETRIEVE-FACEBOOK_LINK_TO_VOTER_FOUND "
         facebook_link_to_voter = facebook_link_results['facebook_link_to_voter']
@@ -502,7 +504,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
                     facebook_auth_response.facebook_user_id, voter_we_vote_id_attached_to_facebook)
                 status += " " + save_results['status']
                 facebook_link_results = facebook_manager.retrieve_facebook_link_to_voter(
-                    facebook_auth_response.facebook_user_id)
+                    facebook_auth_response.facebook_user_id, read_only=True)
                 if facebook_link_results['facebook_link_to_voter_found']:
                     facebook_link_to_voter = facebook_link_results['facebook_link_to_voter']
                     repair_facebook_related_voter_caching_now = True

@@ -342,7 +342,7 @@ def campaignx_news_item_save_for_api(  # campaignNewsItemSave
     success = True
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if voter_results['voter_found']:
         voter = voter_results['voter']
         voter_we_vote_id = voter.we_vote_id

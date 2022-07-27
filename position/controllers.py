@@ -355,7 +355,7 @@ def generate_position_sorting_dates_for_election(google_civic_election_id=0):
         loop_number += 1
         try:
             # Get a list of candidate_we_vote_ids for this election which haven't been updated yet
-            query = CandidateToOfficeLink.objects.all()
+            query = CandidateToOfficeLink.objects.using('readonly').all()
             query = query.filter(google_civic_election_id=google_civic_election_id)
             query = query.filter(position_dates_set=False)
             query = query.values_list('candidate_we_vote_id', flat=True).distinct()
@@ -2063,9 +2063,9 @@ def position_list_for_ballot_item_for_api(office_id, office_we_vote_id,  # posit
         # the WebApp team)
         candidate_manager = CandidateManager()
         if positive_value_exists(candidate_id):
-            results = candidate_manager.retrieve_candidate_from_id(candidate_id)
+            results = candidate_manager.retrieve_candidate_from_id(candidate_id, read_only=True)
         else:
-            results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+            results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=True)
 
         if results['candidate_found']:
             candidate = results['candidate']
@@ -2315,7 +2315,7 @@ def position_list_for_ballot_item_from_friends_for_api(  # positionListForBallot
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if voter_results['voter_found']:
         voter = voter_results['voter']
         voter_id = voter.id
@@ -2545,9 +2545,9 @@ def retrieve_position_list_for_ballot_item_from_friends(
         # the WebApp team)
         candidate_manager = CandidateManager()
         if positive_value_exists(candidate_id):
-            results = candidate_manager.retrieve_candidate_from_id(candidate_id)
+            results = candidate_manager.retrieve_candidate_from_id(candidate_id, read_only=True)
         else:
-            results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+            results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=True)
 
         if results['candidate_found']:
             candidate = results['candidate']
@@ -2833,9 +2833,9 @@ def retrieve_position_list_for_ballot_item_from_shared_items(
         # the WebApp team)
         candidate_manager = CandidateManager()
         if positive_value_exists(candidate_id):
-            results = candidate_manager.retrieve_candidate_from_id(candidate_id)
+            results = candidate_manager.retrieve_candidate_from_id(candidate_id, read_only=True)
         else:
-            results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+            results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=True)
 
         if results['candidate_found']:
             candidate = results['candidate']
@@ -4470,7 +4470,8 @@ def refresh_positions_with_candidate_details_for_election(google_civic_election_
     candidates_results = candidate_list_manager.retrieve_all_candidates_for_upcoming_election(
         google_civic_election_id_list=google_civic_election_id_list,
         state_code=state_code,
-        return_list_of_objects=return_list_of_objects)
+        return_list_of_objects=return_list_of_objects,
+        read_only=True)
     if candidates_results['candidate_list_found']:
         candidate_list = candidates_results['candidate_list_objects']
 

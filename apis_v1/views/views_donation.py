@@ -230,7 +230,7 @@ def donation_history_list_view(request):   # donationHistory
 
     if positive_value_exists(voter_device_id):
         voter_manager = VoterManager()
-        results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+        results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
         if not results['voter_found']:
             logger.error("donation_history_list received invalid voter_device_id: " + voter_device_id)
             status += "DONATION_HISTORY_LIST-INVALID_VOTER_DEVICE_ID_PASSED "

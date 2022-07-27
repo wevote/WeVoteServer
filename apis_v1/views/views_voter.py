@@ -2342,7 +2342,7 @@ def voter_update_view(request):  # voterUpdate
         else False
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=False)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
         status += "VOTER_NOT_FOUND_FROM_DEVICE_ID-VOTER_UPDATE "

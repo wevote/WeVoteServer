@@ -1143,7 +1143,12 @@ def extract_facebook_username_from_text_string(facebook_text_string):
     facebook_text_string = facebook_text_string.replace("/facebook.com", "")
     facebook_text_string = facebook_text_string.replace("facebook.com", "")
     facebook_text_string = facebook_text_string.replace("@", "")
-    facebook_text_string = facebook_text_string.replace("/", "")
+    while facebook_text_string.find('/') == 0 or \
+            facebook_text_string.find('#') == 0 or \
+            facebook_text_string.find('!') == 0:
+        facebook_text_string = facebook_text_string[1:]
+    if facebook_text_string.find('/') > 0:
+        facebook_text_string = facebook_text_string.split("/", 1)[0]  # Remove all after first "/" (including "/")
     facebook_text_string = facebook_text_string.split("?", 1)[0]  # Remove everything after first "?" (including "?")
     return facebook_text_string
 
@@ -1201,7 +1206,12 @@ def extract_instagram_handle_from_text_string(instagram_text_string):
     instagram_text_string = instagram_text_string.replace("/instagram.com", "")
     instagram_text_string = instagram_text_string.replace("instagram.com", "")
     instagram_text_string = instagram_text_string.replace("@", "")
-    instagram_text_string = instagram_text_string.replace("/", "")
+    while instagram_text_string.find('/') == 0 or \
+            instagram_text_string.find('#') == 0 or \
+            instagram_text_string.find('!') == 0:
+        instagram_text_string = instagram_text_string[1:]
+    if instagram_text_string.find('/') > 0:
+        instagram_text_string = instagram_text_string.split("/", 1)[0]  # Remove all after first "/" (including "/")
     instagram_text_string = instagram_text_string.split("?", 1)[0]  # Remove everything after first "?" (including "?")
     return instagram_text_string
 
@@ -1229,7 +1239,12 @@ def extract_twitter_handle_from_text_string(twitter_text_string):
     twitter_text_string = twitter_text_string.replace("www.twitter.com", "")
     twitter_text_string = twitter_text_string.replace("twitter.com", "")
     twitter_text_string = twitter_text_string.replace("@", "")
-    twitter_text_string = twitter_text_string.replace("/", "")
+    while twitter_text_string.find('/') == 0 or \
+            twitter_text_string.find('#') == 0 or \
+            twitter_text_string.find('!') == 0:
+        twitter_text_string = twitter_text_string[1:]
+    if twitter_text_string.find('/') > 0:
+        twitter_text_string = twitter_text_string.split("/", 1)[0]  # Remove everything after first "/" (including "/")
     twitter_text_string = twitter_text_string.split("?", 1)[0]  # Remove everything after first "?" (including "?")
     return twitter_text_string
 

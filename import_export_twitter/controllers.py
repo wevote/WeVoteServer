@@ -416,7 +416,8 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):  # tw
             google_civic_election_id_list=google_civic_election_id_list,
             state_code=state_code,
             candidate_twitter_handle=twitter_handle,
-            candidate_name=candidate_name)
+            candidate_name=candidate_name,
+            read_only=True)
         if candidate_results['candidate_list_found']:
             candidate_list = candidate_results['candidate_list']
 
@@ -1666,7 +1667,8 @@ def scrape_and_save_social_media_for_candidates_in_one_election(google_civic_ele
     results = candidate_list_manager.retrieve_all_candidates_for_upcoming_election(
         google_civic_election_id_list=google_civic_election_id_list,
         state_code=state_code,
-        return_list_of_objects=return_list_of_objects)
+        return_list_of_objects=return_list_of_objects,
+        read_only=False)
     status += results['status']
     if results['success']:
         candidate_list = results['candidate_list_objects']
@@ -1717,7 +1719,8 @@ def refresh_twitter_candidate_details_for_election(google_civic_election_id, sta
     candidates_results = candidate_list_manager.retrieve_all_candidates_for_upcoming_election(
         google_civic_election_id_list=google_civic_election_id_list,
         state_code=state_code,
-        return_list_of_objects=return_list_of_objects)
+        return_list_of_objects=return_list_of_objects,
+        read_only=False)
     if candidates_results['candidate_list_found']:
         candidate_list = candidates_results['candidate_list_objects']
 
@@ -1767,7 +1770,8 @@ def transfer_candidate_twitter_handles_from_google_civic(google_civic_election_i
     results = candidate_list_object.retrieve_all_candidates_for_upcoming_election(
         google_civic_election_id_list=google_civic_election_id_list,
         state_code=state_code,
-        return_list_of_objects=return_list_of_objects)
+        return_list_of_objects=return_list_of_objects,
+        read_only=False)
     status += results['status']
     if results['success']:
         candidate_list = results['candidate_list_objects']
@@ -2087,7 +2091,7 @@ def twitter_sign_in_request_access_token_for_api(voter_device_id,
         return results
 
     voter_manager = VoterManager()
-    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if not positive_value_exists(results['voter_found']):
         results = {
             'status':                           "VALID_VOTER_MISSING",

@@ -339,7 +339,7 @@ def voter_delete_account_for_api(  # voterDeleteAccount
     voter_device_link = voter_device_link_results['voter_device_link']
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=False)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
         error_results = {
@@ -391,7 +391,7 @@ def delete_facebook_info_for_voter(voter_to_delete):
 
     facebook_manager = FacebookManager()
     voter_to_delete_facebook_results = facebook_manager.retrieve_facebook_link_to_voter_from_voter_we_vote_id(
-        voter_to_delete.we_vote_id)
+        voter_to_delete.we_vote_id, read_only=False)
 
     if voter_to_delete_facebook_results['facebook_link_to_voter_found']:
         voter_to_delete_facebook_link = voter_to_delete_facebook_results['facebook_link_to_voter']
@@ -565,7 +565,7 @@ def email_ballot_data_for_api(voter_device_id, email_address_array, first_name_a
         return error_results
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     sender_voter_id = voter_results['voter_id']
     if not positive_value_exists(sender_voter_id):
         error_results = {
@@ -940,11 +940,11 @@ def move_facebook_info_to_another_voter(from_voter, to_voter):
 
     facebook_manager = FacebookManager()
     to_voter_facebook_results = facebook_manager.retrieve_facebook_link_to_voter_from_voter_we_vote_id(
-        to_voter.we_vote_id)
+        to_voter.we_vote_id, read_only=False)
     # if to_voter_facebook_results['facebook_link_to_voter_found']:
     #     to_voter_facebook_link = to_voter_facebook_results['facebook_link_to_voter']
     from_voter_facebook_results = facebook_manager.retrieve_facebook_link_to_voter_from_voter_we_vote_id(
-        from_voter.we_vote_id)
+        from_voter.we_vote_id, read_only=False)
 
     # Move facebook_link_to_voter
     if to_voter_facebook_results['facebook_link_to_voter_found']:
@@ -1670,7 +1670,7 @@ def voter_create_for_api(voter_device_id):  # voterCreate
     voter_we_vote_id = ''
     # Make sure a voter record hasn't already been created for this
     voter_manager = VoterManager()
-    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if results['voter_found']:
         voter = results['voter']
         voter_id = voter.id
@@ -1845,7 +1845,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         status += "FACEBOOK_SECRET_KEY "
         facebook_manager = FacebookManager()
         facebook_results = facebook_manager.retrieve_facebook_link_to_voter_from_facebook_secret_key(
-            facebook_secret_key)
+            facebook_secret_key, read_only=True)
         if facebook_results['facebook_link_to_voter_found']:
             facebook_link_to_voter = facebook_results['facebook_link_to_voter']
 
@@ -2974,7 +2974,7 @@ def voter_retrieve_for_api(
         #  organization update with latest Facebook data
         facebook_manager = FacebookManager()
         facebook_link_results = facebook_manager.retrieve_facebook_link_to_voter_from_voter_we_vote_id(
-            voter.we_vote_id)
+            voter.we_vote_id, read_only=True)
         if facebook_link_results['facebook_link_to_voter_found']:
             status += "FACEBOOK_LINK_TO_VOTER_FOUND "
             facebook_link_to_voter = facebook_link_results['facebook_link_to_voter']
@@ -3604,7 +3604,7 @@ def voter_sign_out_for_api(voter_device_id, sign_out_all_devices=False):  # vote
     voter_device_link_manager = VoterDeviceLinkManager()
 
     voter_manager = VoterManager()
-    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if results['voter_found']:
         voter_signing_out = results['voter']
         if positive_value_exists(voter_signing_out.email):
@@ -3657,7 +3657,7 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
         return error_results
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=False)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
         error_results = {

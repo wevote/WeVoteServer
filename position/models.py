@@ -4289,7 +4289,7 @@ class PositionManager(models.Manager):
 
             if candidate_we_vote_id:
                 candidate_manager = CandidateManager()
-                results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+                results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=True)
                 if results['candidate_found']:
                     candidate = results['candidate']
                     ballot_item_display_name = candidate.candidate_name
@@ -5377,7 +5377,7 @@ class PositionManager(models.Manager):
                 if positive_value_exists(existing_position.candidate_campaign_we_vote_id):
                     candidate_manager = CandidateManager()
                     results = candidate_manager.retrieve_candidate_from_we_vote_id(
-                        existing_position.candidate_campaign_we_vote_id)
+                        existing_position.candidate_campaign_we_vote_id, read_only=True)
                     if results['candidate_found']:
                         candidate = results['candidate']
                         existing_position.google_civic_election_id = \
@@ -6328,7 +6328,7 @@ class PositionManager(models.Manager):
 
                 if positive_value_exists(voter_position_on_stage.candidate_campaign_we_vote_id):
                     results = candidate_manager.retrieve_candidate_from_we_vote_id(
-                        voter_position_on_stage.candidate_campaign_we_vote_id)
+                        voter_position_on_stage.candidate_campaign_we_vote_id, read_only=True)
                     if results['candidate_found']:
                         candidate = results['candidate']
                         if not positive_value_exists(voter_position_on_stage.candidate_campaign_id):
@@ -6409,7 +6409,7 @@ class PositionManager(models.Manager):
                 speaker_image_url_https_medium = '',
                 speaker_image_url_https_tiny = '',
                 if candidate_we_vote_id:
-                    results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+                    results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=True)
                     if results['candidate_found']:
                         candidate = results['candidate']
                         candidate_id = candidate.id
@@ -7013,7 +7013,7 @@ class PositionManager(models.Manager):
                     position_on_stage.candidate_campaign_we_vote_id = candidate_we_vote_id
                     # Lookup candidate_campaign_id based on candidate_campaign_we_vote_id and update
                     candidate_results = \
-                        candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+                        candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=True)
                     if candidate_results['candidate_found']:
                         candidate = candidate_results['candidate']
                         position_on_stage.candidate_campaign_id = candidate.id
@@ -7529,7 +7529,7 @@ class PositionManager(models.Manager):
 
                 candidate_id = None
                 if candidate_we_vote_id:
-                    results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+                    results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=True)
                     if results['candidate_found']:
                         candidate = results['candidate']
                         candidate_id = candidate.id
@@ -8128,7 +8128,7 @@ class PositionManager(models.Manager):
                             candidate_found = True
                         else:
                             candidate_results = candidate_manager.retrieve_candidate_from_we_vote_id(
-                                position_object.candidate_campaign_we_vote_id)
+                                position_object.candidate_campaign_we_vote_id)  # Unknown read_only setting needed
                             if candidate_results['candidate_found']:
                                 candidate = candidate_results['candidate']
                                 candidate_found = True

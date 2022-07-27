@@ -1712,7 +1712,7 @@ def login_we_vote(request):
 
     voter_manager = VoterManager()
     voter_device_link_manager = VoterDeviceLinkManager()
-    results = voter_manager.retrieve_voter_from_voter_device_id(voter_api_device_id)
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_api_device_id, read_only=True)
     if results['voter_found']:
         voter_on_stage = results['voter']
         voter_on_stage_id = voter_on_stage.id

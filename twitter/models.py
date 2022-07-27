@@ -30,8 +30,9 @@ class TwitterLinkToOrganization(models.Model):
     def fetch_twitter_id_locally_or_remotely(self):
         twitter_id = 0
         twitter_user_manager = TwitterUserManager()
-        twitter_results = twitter_user_manager.retrieve_twitter_user_locally_or_remotely(self.twitter_id,
-                                                                                         read_only=True)
+        twitter_results = twitter_user_manager.retrieve_twitter_user_locally_or_remotely(
+            self.twitter_id,
+            read_only=True)
 
         if twitter_results['twitter_user_found']:
             twitter_user = twitter_results['twitter_user']
@@ -42,8 +43,9 @@ class TwitterLinkToOrganization(models.Model):
     def fetch_twitter_handle_locally_or_remotely(self):
         twitter_handle = ""
         twitter_user_manager = TwitterUserManager()
-        twitter_results = twitter_user_manager.retrieve_twitter_user_locally_or_remotely(self.twitter_id,
-                                                                                         read_only=True)
+        twitter_results = twitter_user_manager.retrieve_twitter_user_locally_or_remotely(
+            self.twitter_id,
+            read_only=True)
 
         if twitter_results['twitter_user_found']:
             twitter_user = twitter_results['twitter_user']

@@ -1211,7 +1211,7 @@ class VoterManager(BaseUserManager):
 
         facebook_manager = FacebookManager()
         facebook_link_results = facebook_manager.retrieve_facebook_link_to_voter_from_facebook_id(
-            facebook_id)
+            facebook_id, read_only=True)
         if not facebook_link_results['facebook_link_to_voter_found']:
             # We don't have an official FacebookLinkToVoter, so we don't want to clean up any caching
             status += "FACEBOOK_LINK_TO_VOTER_NOT_FOUND-CACHING_REPAIR_NOT_EXECUTED "
@@ -1280,7 +1280,7 @@ class VoterManager(BaseUserManager):
             # Now make sure that the voter table has values for the voter linked with the
             # official FacebookLinkToVoter
             voter_results = self.retrieve_voter_by_we_vote_id(
-                facebook_link_to_voter.voter_we_vote_id)
+                facebook_link_to_voter.voter_we_vote_id, read_only=False)
             if not voter_results['voter_found']:
                 status += "REPAIR_FACEBOOK_CACHING-COULD_NOT_UPDATE_LINKED_VOTER "
             else:
@@ -1501,7 +1501,7 @@ class VoterManager(BaseUserManager):
         voter_we_vote_id = ''
 
         facebook_manager = FacebookManager()
-        facebook_retrieve_results = facebook_manager.retrieve_facebook_link_to_voter(facebook_id)
+        facebook_retrieve_results = facebook_manager.retrieve_facebook_link_to_voter(facebook_id, read_only=True)
         if facebook_retrieve_results['facebook_link_to_voter_found']:
             facebook_link_to_voter = facebook_retrieve_results['facebook_link_to_voter']
             voter_we_vote_id = facebook_link_to_voter.voter_we_vote_id
@@ -3258,7 +3258,7 @@ class Voter(AbstractBaseUser):
 
     def signed_in_facebook(self):
         facebook_manager = FacebookManager()
-        facebook_link_results = facebook_manager.retrieve_facebook_link_to_voter(0, self.we_vote_id)
+        facebook_link_results = facebook_manager.retrieve_facebook_link_to_voter(0, self.we_vote_id, read_only=True)
         if facebook_link_results['facebook_link_to_voter_found']:
             facebook_link_to_voter = facebook_link_results['facebook_link_to_voter']
             if positive_value_exists(facebook_link_to_voter.facebook_user_id):
@@ -3279,7 +3279,7 @@ class Voter(AbstractBaseUser):
 
     def signed_in_with_apple(self):
         try:
-            apple_object = AppleUser.objects.get(voter_we_vote_id__iexact=self.we_vote_id)
+            apple_object = AppleUser.objects.using('readonly').get(voter_we_vote_id__iexact=self.we_vote_id)
             return True
         except AppleUser.DoesNotExist:
             return False

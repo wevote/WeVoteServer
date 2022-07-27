@@ -80,7 +80,7 @@ class BallotpediaElection(models.Model):
 class Election(models.Model):
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.CharField(verbose_name="google civic election id",
-                                                max_length=20, null=True, unique=True)
+                                                max_length=20, null=True, unique=True, db_index=True)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", null=True, unique=False)  # Make unique=True after data is migrated
     ballotpedia_election_id = models.PositiveIntegerField(
@@ -101,13 +101,13 @@ class Election(models.Model):
                                   max_length=2, null=True, blank=True, db_index=True)
     # We generate a string with all the state codes. Ex/ CA,CO,UT
     state_code_list_raw = models.CharField(max_length=255, null=True, blank=True)
-    include_in_list_for_voters = models.BooleanField(default=False)
+    include_in_list_for_voters = models.BooleanField(default=False, db_index=True)
 
     # For internal notes regarding gathering data for this election
     internal_notes = models.TextField(null=True, blank=True, default=None)
 
     # Not an election we will be supporting
-    ignore_this_election = models.BooleanField(default=False)
+    ignore_this_election = models.BooleanField(default=False, db_index=True)
     # Have we finished all the election preparation related to Offices, Candidates, Measures and Ballot Locations?
     election_preparation_finished = models.BooleanField(default=False)
     # Have we finished all the election preparation related to Candidate photos?
@@ -557,14 +557,18 @@ class ElectionManager(models.Manager):
             state_code="",
             without_state_code=False,
             require_include_in_list_for_voters=False,
-            include_test_election=False):
+            include_test_election=False,
+            read_only=True):
         status = ''
         election_list_found = False
         upcoming_election_list = []
         today = datetime.now().date()
         we_vote_date_string = convert_date_to_we_vote_date_string(today)
         try:
-            election_list_query = Election.objects.using('readonly').all()
+            if positive_value_exists(read_only):
+                election_list_query = Election.objects.using('readonly').all()
+            else:
+                election_list_query = Election.objects.all()
             election_list_query = election_list_query.filter(election_day_text__gte=we_vote_date_string)
             election_list_query = election_list_query.exclude(ignore_this_election=True)
             if positive_value_exists(require_include_in_list_for_voters):
@@ -604,7 +608,8 @@ class ElectionManager(models.Manager):
         upcoming_google_civic_election_id_list = []
         results = self.retrieve_upcoming_elections(
             state_code=limit_to_this_state_code,
-            require_include_in_list_for_voters=require_include_in_list_for_voters)
+            require_include_in_list_for_voters=require_include_in_list_for_voters,
+            read_only=True)
         if results['election_list_found']:
             election_list = results['election_list']
             for one_election in election_list:
