@@ -339,7 +339,9 @@
     {% if not is_national_election or is_national_election and state_code %}
       <li>
         <a href="{% url 'import_export_batches:retrieve_ballots_for_polling_locations_api_v4' %}?use_ballotpedia=1&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&use_batch_process=1" target="_blank">
-            Ballotpedia: <strong>Retrieve</strong> Ballots from Bulk Map Points, up to 125 at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
+            Ballotpedia: <strong>Retrieve</strong> Ballots from Bulk Map Points, up to
+            {{ map_points_retrieved_each_batch_chunk }}
+            at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
             <span class="glyphicon glyphicon-new-window"></span>
         </a>
         <br />
@@ -352,7 +354,9 @@
       </li>
       <li>
         <a href="{% url 'import_export_batches:retrieve_ballots_for_polling_locations_api_v4' %}?use_ballotpedia=1&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&refresh_ballot_returned=1&use_batch_process=1">
-            Ballotpedia: <strong>Refresh</strong> BallotItems from Bulk Map Points, up to 125 at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
+            Ballotpedia: <strong>Refresh</strong> BallotItems from Bulk Map Points, up to
+            {{ map_points_retrieved_each_batch_chunk }}
+            at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
             <span class="glyphicon glyphicon-new-window"></span>
         </a>
       </li>
@@ -363,7 +367,9 @@
     {% endif %}
     <li>
         <a href="{% url 'import_export_batches:retrieve_ballots_for_entire_election_api_v4' %}?use_ballotpedia=1&google_civic_election_id={{ election.google_civic_election_id }}" target="_blank">
-            Ballotpedia - ALL STATES: Schedule Batch Processes to Retrieve Ballots for this Election (All States), up to 125 at a time
+            Ballotpedia - ALL STATES: Schedule Batch Processes to Retrieve Ballots for this Election (All States), up to
+            {{ map_points_retrieved_each_batch_chunk }}
+            at a time
             <span class="glyphicon glyphicon-new-window"></span></a>
     </li>
 {% endif %}{# if election.use_ballotpedia_as_data_source #}
@@ -374,7 +380,9 @@
         <li>
             <a href="{% url 'import_export_batches:retrieve_ballots_for_polling_locations_api_v4' %}?use_ctcl=1&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&use_batch_process=1"
                target="_blank">
-                CTCL: <strong>Retrieve</strong> Ballots from Bulk Map Points, up to 125 at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
+                CTCL: <strong>Retrieve</strong> Ballots from Bulk Map Points, up to
+                {{ map_points_retrieved_each_batch_chunk }}
+                at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
                 <span class="glyphicon glyphicon-new-window"></span>
             </a>
             <br />
@@ -387,7 +395,9 @@
         <li>
             <a href="{% url 'import_export_batches:retrieve_ballots_for_polling_locations_api_v4' %}?use_ctcl=1&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&refresh_ballot_returned=1&use_batch_process=1"
                target="_blank">
-                CTCL: <strong>Refresh</strong> Ballots from <strong>Bulk Map Points</strong>, up to 125 at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
+                CTCL: <strong>Refresh</strong> Ballots from <strong>Bulk Map Points</strong>, up to
+                {{ map_points_retrieved_each_batch_chunk }}
+                at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
                 <span class="glyphicon glyphicon-new-window"></span>
             </a>
             (Oldest: {{ ballot_returned_oldest_date }})
@@ -395,7 +405,9 @@
         <li>
             <a href="{% url 'import_export_batches:refresh_ballots_for_voters_api_v4' %}?use_ctcl=1&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&use_batch_process=1"
                target="_blank">
-                CTCL-IN_DEVELOPMENT: <strong>Refresh</strong> BallotItems from <strong>Voter</strong>-entered Street Addresses, up to 125 at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
+                CTCL-IN_DEVELOPMENT: <strong>Refresh</strong> BallotItems from <strong>Voter</strong>-entered Street Addresses, up to
+                {{ map_points_retrieved_each_batch_chunk }}
+                at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
                 <span class="glyphicon glyphicon-new-window"></span>
             </a>
             (Oldest: {{ ballot_returned_voter_oldest_date }})
@@ -413,7 +425,9 @@
         <li>
             <a href="{% url 'import_export_batches:retrieve_ballots_for_polling_locations_api_v4' %}?use_vote_usa=1&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&use_batch_process=1"
                target="_blank">
-                Vote USA: <strong>Retrieve</strong> Ballots from Bulk Map Points, up to 125 at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
+                Vote USA: <strong>Retrieve</strong> Ballots from Bulk Map Points, up to
+                {{ map_points_retrieved_each_batch_chunk }}
+                at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
                 <span class="glyphicon glyphicon-new-window"></span>
             </a>
             <br />
@@ -426,7 +440,9 @@
         <li>
             <a href="{% url 'import_export_batches:retrieve_ballots_for_polling_locations_api_v4' %}?use_vote_usa=1&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&refresh_ballot_returned=1&use_batch_process=1"
                target="_blank">
-                Vote USA: <strong>Refresh</strong> Ballots from <strong>Bulk Map Points</strong>, up to 125 at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
+                Vote USA: <strong>Refresh</strong> Ballots from <strong>Bulk Map Points</strong>, up to
+                {{ map_points_retrieved_each_batch_chunk }}
+                at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
                 <span class="glyphicon glyphicon-new-window"></span>
             </a>
             (Oldest: {{ ballot_returned_oldest_date }})
@@ -434,7 +450,9 @@
         <li>
             <a href="{% url 'import_export_batches:refresh_ballots_for_voters_api_v4' %}?use_vote_usa=1&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&use_batch_process=1"
                target="_blank">
-                Vote USA: <strong>Refresh</strong> BallotItems from <strong>Voter</strong>-entered Street Addresses, up to 125 at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
+                Vote USA: <strong>Refresh</strong> BallotItems from <strong>Voter</strong>-entered Street Addresses, up to
+                {{ map_points_retrieved_each_batch_chunk }}
+                at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
                 <span class="glyphicon glyphicon-new-window"></span>
             </a>
             (Oldest: {{ ballot_returned_voter_oldest_date }})
@@ -494,12 +512,16 @@
 {% if election.use_ballotpedia_as_data_source %}
       <li>
         <a href="{% url 'import_export_batches:retrieve_ballots_for_polling_locations_api_v4' %}?use_ballotpedia=1&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&refresh_ballot_returned=1&use_batch_process=1" target="_blank">
-          Ballotpedia: Refresh <strong>Map Point</strong> BallotItems from Ballotpedia from existing BallotReturned entries (up to 125 at a time) <span class="glyphicon glyphicon-new-window"></span></a> (Oldest: {{ ballot_returned_oldest_date }})
+          Ballotpedia: Refresh <strong>Map Point</strong> BallotItems from Ballotpedia from existing BallotReturned entries (up to
+            {{ map_points_retrieved_each_batch_chunk }}
+            at a time) <span class="glyphicon glyphicon-new-window"></span></a> (Oldest: {{ ballot_returned_oldest_date }})
       </li>
 
       <li>
         <a href="{% url 'import_export_batches:refresh_ballots_for_voters_api_v4' %}?use_ballotpedia=1&google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&use_batch_process=1" target="_blank">
-          Ballotpedia: Refresh <strong>Voter</strong> BallotItems from Ballotpedia from existing BallotReturned entries (up to 125 at a time) <span class="glyphicon glyphicon-new-window"></span></a> (Oldest: {{ ballot_returned_voter_oldest_date }})
+          Ballotpedia: Refresh <strong>Voter</strong> BallotItems from Ballotpedia from existing BallotReturned entries (up to
+            {{ map_points_retrieved_each_batch_chunk }}
+            at a time) <span class="glyphicon glyphicon-new-window"></span></a> (Oldest: {{ ballot_returned_voter_oldest_date }})
       </li>
 {% endif %}{# if election.use_ballotpedia_as_data_source #}
 </ul>

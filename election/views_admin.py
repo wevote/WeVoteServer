@@ -43,7 +43,7 @@ from import_export_vote_smart.models import VoteSmartApiCounter, VoteSmartApiCou
 from measure.models import ContestMeasure, ContestMeasureListManager
 from office.models import ContestOffice, ContestOfficeListManager, ContestOfficeManager
 from pledge_to_vote.models import PledgeToVoteManager
-from polling_location.models import PollingLocation
+from polling_location.models import PollingLocation, PollingLocationManager
 from position.models import ANY_STANCE, PositionEntered, PositionForFriends, PositionListManager
 import pytz
 from quick_info.models import QuickInfoManager
@@ -1600,6 +1600,10 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
     ballot_returned_list_manager = BallotReturnedListManager()
     candidate_list_manager = CandidateListManager()
     office_manager = ContestOfficeManager()
+    # See if the number of map points for this state exceed the "large" threshold
+    polling_location_manager = PollingLocationManager()
+    map_points_retrieved_each_batch_chunk = \
+        polling_location_manager.calculate_number_of_map_points_to_retrieve_with_each_batch_chunk(state_code)
 
     if election_found:
         batch_manager = BatchManager()
@@ -1831,6 +1835,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
             'election':                                 election,
             'google_civic_election_id':                 google_civic_election_id,
             'is_national_election':                     election.is_national_election,
+            'map_points_retrieved_each_batch_chunk':    map_points_retrieved_each_batch_chunk,
             'messages_on_stage':                        messages_on_stage,
             'more_than_three_ballotpedia_elections':    more_than_three_ballotpedia_elections,
             'all_ballotpedia_elections_shown':          all_ballotpedia_elections_shown,
@@ -1851,6 +1856,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
             'entries_missing_latitude_longitude':       entries_missing_latitude_longitude,
             'google_civic_election_id':                 google_civic_election_id,
             'is_national_election':                     is_national_election,
+            'map_points_retrieved_each_batch_chunk':    map_points_retrieved_each_batch_chunk,
             'messages_on_stage':                        messages_on_stage,
             'state_code':                               state_code,
             'state_list':                               sorted_state_list,
