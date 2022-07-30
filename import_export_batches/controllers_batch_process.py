@@ -222,8 +222,9 @@ def process_next_ballot_items():
         REFRESH_BALLOT_ITEMS_FROM_VOTERS,
         RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS]
 
-    # Retrieve list of all ballot item BatchProcesses which have been started but not completed so we can decide
+    # Retrieve list of all ballot item BatchProcesses which have been started but not completed, so we can decide
     #  our next steps
+    # TODO: This logic needs to be looked at. How do we know this batch isn't already running on another process?
     results = batch_process_manager.retrieve_batch_process_list(
         kind_of_process_list=ballot_item_kind_of_processes,
         process_active=True,

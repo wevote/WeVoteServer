@@ -20,8 +20,10 @@ KIND_OF_LOG_ENTRY_BALLOT_RECEIVED = 'BALLOT_RECEIVED'
 KIND_OF_LOG_ENTRY_NO_CONTESTS = 'NO_CONTESTS'
 KIND_OF_LOG_ENTRY_NO_BALLOT_JSON = 'NO_BALLOT_JSON'
 MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK = 125  # 125. Formerly 250 and 111
-MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK_FOR_LARGE_STATE = 33
+MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK_FOR_LARGE_STATE = 95
+MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK_FOR_EXTRA_LARGE_STATE = 51
 NUMBER_OF_MAP_POINTS_THRESHOLD_FOR_LARGE_STATE = 9000
+NUMBER_OF_MAP_POINTS_THRESHOLD_FOR_EXTRA_LARGE_STATE = 14000
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -210,7 +212,7 @@ class PollingLocationManager(models.Manager):
 
     def calculate_number_of_map_points_to_retrieve_with_each_batch_chunk(self, state_code):
         # For both REFRESH and RETRIEVE, see if the number of map points for this state exceed the "large" threshold
-        map_points_retrieved_each_batch_chunk = MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK  # 125. Formerly 250 and 111
+        retrieved_each_batch_chunk = MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK  # 125. Formerly 250 and 111
         if positive_value_exists(state_code):
             try:
                 polling_location_query = PollingLocation.objects.using('readonly').all()
@@ -219,10 +221,12 @@ class PollingLocationManager(models.Manager):
             except Exception as e:
                 number_of_polling_locations = 0
 
-            if number_of_polling_locations > NUMBER_OF_MAP_POINTS_THRESHOLD_FOR_LARGE_STATE:
-                map_points_retrieved_each_batch_chunk = MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK_FOR_LARGE_STATE  # 33
+            if number_of_polling_locations > NUMBER_OF_MAP_POINTS_THRESHOLD_FOR_EXTRA_LARGE_STATE:  # 14000
+                retrieved_each_batch_chunk = MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK_FOR_EXTRA_LARGE_STATE  # 51
+            elif number_of_polling_locations > NUMBER_OF_MAP_POINTS_THRESHOLD_FOR_LARGE_STATE:  # 9000
+                retrieved_each_batch_chunk = MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK_FOR_LARGE_STATE  # 95
 
-        return map_points_retrieved_each_batch_chunk
+        return retrieved_each_batch_chunk
 
     def fetch_polling_location_count(
             self,
