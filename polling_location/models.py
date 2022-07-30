@@ -217,6 +217,7 @@ class PollingLocationManager(models.Manager):
             try:
                 polling_location_query = PollingLocation.objects.using('readonly').all()
                 polling_location_query = polling_location_query.filter(state__iexact=state_code)
+                polling_location_query = polling_location_query.filter(polling_location_deleted=False)
                 number_of_polling_locations = polling_location_query.count()
             except Exception as e:
                 number_of_polling_locations = 0
