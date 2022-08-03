@@ -48,7 +48,10 @@ def voter_email_address_sign_in_doc_template_values(url_root):
                    '  "voter_device_id": string (88 characters long),\n' \
                    '  "email_ownership_is_verified": boolean,\n' \
                    '  "email_secret_key_belongs_to_this_voter": boolean,\n' \
+                   '  "email_sign_in_attempted": boolean,\n' \
                    '  "email_address_found": boolean,\n' \
+                   '  "yes_please_merge_accounts": boolean,\n' \
+                   '  "voter_we_vote_id_from_secret_key": string,\n' \
                    '}'
 
     template_values = {

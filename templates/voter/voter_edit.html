@@ -334,6 +334,10 @@
 
 <p><a href="{% url 'voter:voter_remove_facebook_auth_process' %}?voter_id={{ voter_id }}&voter_we_vote_id={{ voter.we_vote_id }}">
     Remove Facebook Authentication (all devices and browsers)</a></p>
+
+    <p>
+    <a href="{% url 'friend:generate_mutual_friends_for_one_voter' %}?voter_id={{ voter_id }}&voter_we_vote_id={{ voter.we_vote_id }}">Generate mutual friends for this voter</a>
+    </p>
 <br/>
 
 {% endif %}

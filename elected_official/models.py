@@ -1989,7 +1989,7 @@ class ElectedOfficialManager(models.Manager):
         success = False
         if positive_value_exists(google_civic_election_id):
             try:
-                elected_official_item_queryset = ElectedOfficial.objects.all()
+                elected_official_item_queryset = ElectedOfficial.objects.using('readonly').all()
                 elected_official_item_queryset = elected_official_item_queryset.filter(
                     google_civic_election_id=google_civic_election_id)
                 elected_officials_count = elected_official_item_queryset.count()

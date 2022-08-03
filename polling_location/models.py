@@ -19,6 +19,11 @@ KIND_OF_LOG_ENTRY_API_END_POINT_CRASH = 'API_END_POINT_CRASH'
 KIND_OF_LOG_ENTRY_BALLOT_RECEIVED = 'BALLOT_RECEIVED'
 KIND_OF_LOG_ENTRY_NO_CONTESTS = 'NO_CONTESTS'
 KIND_OF_LOG_ENTRY_NO_BALLOT_JSON = 'NO_BALLOT_JSON'
+MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK = 125  # 125. Formerly 250 and 111
+MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK_FOR_LARGE_STATE = 95
+MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK_FOR_EXTRA_LARGE_STATE = 51
+NUMBER_OF_MAP_POINTS_THRESHOLD_FOR_LARGE_STATE = 9000
+NUMBER_OF_MAP_POINTS_THRESHOLD_FOR_EXTRA_LARGE_STATE = 14000
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -116,19 +121,19 @@ class PollingLocation(models.Model):
 
 
 class PollingLocationLogEntry(models.Model):
-    batch_process_id = models.PositiveIntegerField(db_index=True, null=True, unique=False)
+    batch_process_id = models.PositiveIntegerField(null=True, unique=False, db_index=True)
     date_time = models.DateTimeField(null=False, auto_now_add=True)
-    google_civic_election_id = models.PositiveIntegerField(db_index=True, null=True, unique=False)
-    is_from_ballotpedia = models.BooleanField(db_index=True, default=False, null=True)  # Error from Ballotpedia
-    is_from_ctcl = models.BooleanField(db_index=True, default=False, null=True)  # Error from retrieving data from CTCL
-    is_from_vote_usa = models.BooleanField(db_index=True, default=False, null=True)  # Error retrieving from Vote USA
-    kind_of_log_entry = models.CharField(db_index=True, max_length=50, default=None, null=True)
-    log_entry_deleted = models.BooleanField(db_index=True, default=False)
+    google_civic_election_id = models.PositiveIntegerField(null=True, unique=False, db_index=True)
+    is_from_ballotpedia = models.BooleanField(default=False, null=True, db_index=True)  # Error from Ballotpedia
+    is_from_ctcl = models.BooleanField(default=False, null=True, db_index=True)  # Error from retrieving data from CTCL
+    is_from_vote_usa = models.BooleanField(default=False, null=True, db_index=True)  # Error retrieving from Vote USA
+    kind_of_log_entry = models.CharField(max_length=50, default=None, null=True, db_index=True)
+    log_entry_deleted = models.BooleanField(default=False, db_index=True)
     log_entry_message = models.TextField(null=True)
-    polling_location_we_vote_id = models.CharField(db_index=True, max_length=255, null=True, unique=False)
-    state_code = models.CharField(db_index=True, max_length=2, null=True)
+    polling_location_we_vote_id = models.CharField(max_length=255, null=True, unique=False, db_index=True)
+    state_code = models.CharField(max_length=2, null=True, db_index=True)
     text_for_map_search = models.CharField(max_length=255, null=True, unique=False)
-    voter_we_vote_id = models.CharField(db_index=True, max_length=255, null=True, unique=False)
+    voter_we_vote_id = models.CharField(max_length=255, null=True, unique=False, db_index=True)
 
 
 class PollingLocationManager(models.Manager):
@@ -204,6 +209,25 @@ class PollingLocationManager(models.Manager):
             'polling_location_log_entry':       polling_location_log_entry,
         }
         return results
+
+    def calculate_number_of_map_points_to_retrieve_with_each_batch_chunk(self, state_code):
+        # For both REFRESH and RETRIEVE, see if the number of map points for this state exceed the "large" threshold
+        retrieved_each_batch_chunk = MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK  # 125. Formerly 250 and 111
+        if positive_value_exists(state_code):
+            try:
+                polling_location_query = PollingLocation.objects.using('readonly').all()
+                polling_location_query = polling_location_query.filter(state__iexact=state_code)
+                polling_location_query = polling_location_query.filter(polling_location_deleted=False)
+                number_of_polling_locations = polling_location_query.count()
+            except Exception as e:
+                number_of_polling_locations = 0
+
+            if number_of_polling_locations > NUMBER_OF_MAP_POINTS_THRESHOLD_FOR_EXTRA_LARGE_STATE:  # 14000
+                retrieved_each_batch_chunk = MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK_FOR_EXTRA_LARGE_STATE  # 51
+            elif number_of_polling_locations > NUMBER_OF_MAP_POINTS_THRESHOLD_FOR_LARGE_STATE:  # 9000
+                retrieved_each_batch_chunk = MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK_FOR_LARGE_STATE  # 95
+
+        return retrieved_each_batch_chunk
 
     def fetch_polling_location_count(
             self,
@@ -481,7 +505,7 @@ class PollingLocationManager(models.Manager):
         success = True
         number_deleted = 0
         try:
-            query = PollingLocationLogEntry.objects.all()
+            query = PollingLocationLogEntry.objects.using('analytics').all()
             query = query.exclude(log_entry_deleted=True)
             if positive_value_exists(len(kind_of_log_entry_list) > 0):
                 query = query.filter(kind_of_log_entry__in=kind_of_log_entry_list)
@@ -932,10 +956,11 @@ class PollingLocationManager(models.Manager):
         polling_location_log_entry_list_found = False
         polling_location_log_entry_list = []
         try:
-            if positive_value_exists(read_only):
-                query = PollingLocationLogEntry.objects.using('readonly').all()
-            else:
-                query = PollingLocationLogEntry.objects.all()
+            # if positive_value_exists(read_only):
+            #     query = PollingLocationLogEntry.objects.using('readonly').all()
+            # else:
+            #     query = PollingLocationLogEntry.objects.using('analytics').all()
+            query = PollingLocationLogEntry.objects.using('analytics').all()
             if positive_value_exists(batch_process_id):
                 query = query.filter(batch_process_id=batch_process_id)
             if positive_value_exists(google_civic_election_id):

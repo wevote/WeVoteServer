@@ -18,6 +18,7 @@ import wevote_functions.admin
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
+DEBUG_LOGGING = False
 
 
 def sign_in_with_apple_view(request):  # appleSignInSave appleSignInSaveView
@@ -50,8 +51,9 @@ def sign_in_with_apple_view(request):  # appleSignInSave appleSignInSaveView
         if results:
             user_code = results['subject_registered_claim']
             email = results['email']
-            # for a splunk trail...
-            # logger.error("splunkapple Not an error: Sign in with Apple iOS, decrypted jwt: " + user_code + "  " + email)
+            if DEBUG_LOGGING:
+                logger.error("awsApple Not an error: Sign in with Apple iOS, (no email decrypted jwt: " + user_code +
+                             "  " + email)
 
     voter_manager = VoterManager()
     voter_device_link_manager = VoterDeviceLinkManager()
@@ -82,7 +84,8 @@ def sign_in_with_apple_view(request):  # appleSignInSave appleSignInSaveView
             'previously_signed_in_voter_found':         previously_signed_in_voter_found,
             'previously_signed_in_voter_we_vote_id':    previously_signed_in_voter_we_vote_id,
         }
-        # logger.error('splunkapple ' + status)
+        if DEBUG_LOGGING:
+            logger.error('awsApple (no voter_starting_process_we_vote_id): ' + status)
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     results = sign_in_with_apple_for_api(
@@ -106,7 +109,8 @@ def sign_in_with_apple_view(request):  # appleSignInSave appleSignInSaveView
     )
     status += merge_results['status']
 
-    # logger.error('splunkapple ' + status)
+    if DEBUG_LOGGING:
+        logger.error('awsApple (after apple_sign_in_save_merge_if_needed): ' + status)
 
     json_data = {
         'status':                                   status,
@@ -220,6 +224,8 @@ def sign_in_with_apple_for_api(
     except Exception as e:
         success_siwa = False
         status += "ERROR_APPLE_USER_NOT_CREATED_OR_UPDATED: " + str(e) + ' '
+        if DEBUG_LOGGING:
+            logger.error("awsApple: ", status)
         handle_exception(e, logger=logger, exception_message=status)
 
     results = {
@@ -249,7 +255,7 @@ def sign_in_with_apple_oauth_redirect_view(request):  # appleSignInOauthRedirect
 
     print("Method is", request.method)
     if not request.method == 'POST':
-        logger.error('splunkapple appleSignInOauthRedirectDestination WRONG Method: ' + request.method)
+        logger.error('awsApple appleSignInOauthRedirectDestination WRONG Method: ' + request.method)
 
     try:
         access_token = request.POST['id_token']
@@ -258,6 +264,9 @@ def sign_in_with_apple_oauth_redirect_view(request):  # appleSignInOauthRedirect
         critical_variable_missing = True
     try:
         state_dict = json.loads(request.POST['state'])
+        if DEBUG_LOGGING:
+            logger.error('awsApple post params on redirect:' + json.dumps(state_dict))
+
         voter_device_id = state_dict['voter_device_id']
         return_url = state_dict['return_url']
     except Exception as e:
@@ -266,7 +275,7 @@ def sign_in_with_apple_oauth_redirect_view(request):  # appleSignInOauthRedirect
     # print('id_token renamed as access_token: ', access_token)
 
     if critical_variable_missing:
-        logger.error('splunkapple ' + status)
+        logger.error('awsApple ' + status)
         return HttpResponseRedirect('https://WeVote.US/applesigninprocess')
 
     if 'user' in request.POST:
@@ -314,8 +323,8 @@ def sign_in_with_apple_oauth_redirect_view(request):  # appleSignInOauthRedirect
     if results:
         user_code = results['subject_registered_claim']
         email = results['email']
-        # for a splunk trail...
-        # logger.error("splunkapple Not an error: Sign in with Apple WebApp, decrypted jwt", results)
+        if DEBUG_LOGGING:
+            logger.error("awsApple Not an error: Sign in with Apple WebApp, decrypted jwt", results)
 
     # voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
     voter_manager = VoterManager()
@@ -339,7 +348,7 @@ def sign_in_with_apple_oauth_redirect_view(request):  # appleSignInOauthRedirect
 
     if not positive_value_exists(voter_starting_process_we_vote_id):
         logger.error(
-            'splunkapple did not receive a voter_we_vote_id from voter_device_id in sign_in_with_apple_oauth_redirect_view ')
+            'awsApple didnt receive a voter_we_vote_id from voter_device_id in sign_in_with_apple_oauth_redirect_view')
 
     results = sign_in_with_apple_for_api(
         user_code=user_code,
@@ -361,7 +370,8 @@ def sign_in_with_apple_oauth_redirect_view(request):  # appleSignInOauthRedirect
         voter_starting_process=voter_starting_process,
     )
     status += merge_results['status']
-    # logger.error('splunkapple ' + status)
+    if DEBUG_LOGGING:
+        logger.error('awsApple ' + status)
 
     return HttpResponseRedirect(return_url)
 

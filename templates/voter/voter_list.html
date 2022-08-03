@@ -50,6 +50,9 @@
       <input type="checkbox" name="checkbox-contributed" id="checkbox-contributed">
       <label for="checkbox-contributed">Has Contributed</label><br />
 
+      <input type="checkbox" name="checkbox-friends" id="checkbox-friends">
+      <label for="checkbox-friends">Has Friends</label><br />
+
       <!-- Allow form submission with keyboard without duplicating the dialog button -->
       <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
     </fieldset>
@@ -59,7 +62,10 @@
 <button id="create-user" style="Margin: 12px 0; font-size: 12pt">Create New Voter Account</button>
 <br />
 <a href="{% url 'image:cache_images_locally_for_all_voters' %}">Cache images locally for all voters</a>,
-<a href="{% url 'voter:process_maintenance_status_flags' %}">Process Maintenance Status Flags</a>
+<a href="{% url 'voter:process_maintenance_status_flags' %}">Process Maintenance Status Flags</a>,
+<a href="{% url 'friend:refresh_voter_friend_count' %}">Update friend count,</a>
+<a href="{% url 'friend:current_friends_data_healing' %}">CurrentFriends data healing,</a>
+<a href="{% url 'friend:generate_mutual_friends_for_all_voters' %}">Generate mutual friends</a>
 
 <form name="voter_search_form" method="get" action="{% url 'voter:voter_list' %}">
     {% csrf_token %}
@@ -121,6 +127,13 @@
                      {% if has_contributed %}checked{% endif %} /> Has Contributed
             </label>
         </span>
+
+        <span style="padding: 6px">
+            <label for="has_friends_id">
+              <input type="checkbox" name="has_friends" id="has_friends_id" value="1"
+                     {% if has_friends %}checked{% endif %} /> Has Friends
+            </label>
+        </span>
     </div>
 </form>
 
@@ -134,16 +147,13 @@
             <th>&nbsp;</th>
             <th>We Vote ID</th>
             <th>You</th>
+            <th>Friends</th>
             <th>Facebook</th>
             <th>Tw</th>
             <th>Email / Phone</th>
             <th>Opt In</th>
-            <th>Org we_vote_id</th>
             <th style='text-align: right'>Contributions</th>
-            <th>Admin</th>
-            <th>Partner Org</th>
-            <th>Political Data</th>
-            <th>Verified Volunteer</th>
+            <th>Roles</th>
             <th>Voter Images</th>
         </tr>
       </thead>
@@ -157,10 +167,23 @@
                 <a href="{% url 'voter:voter_edit' voter.id %}">
                     {{ voter.we_vote_id }}
                 </a>
+                <br />
+                {% if voter.linked_organization_we_vote_id %}
+                <a href="{% url 'organization:organization_edit_we_vote_id' voter.linked_organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                   class="">
+                {{ voter.linked_organization_we_vote_id|default_if_none:"" }}
+                </a>
+                {% else %}
+                    <span style="color: #888888;">Linked org missing</span>
+                {% endif %}
             </td>
             <!-- Is this you? //-->
             <td>
             {% if voter.id == voter_id_signed_in %}*ME*{% else %}{% endif %}
+            </td>
+            <!-- Friend count //-->
+            <td>
+            {% if voter.friend_count %}{{ voter.friend_count }}{% else %}{% endif %}
             </td>
             <!-- Facebook? //-->
             <td>
@@ -189,35 +212,21 @@
             <td>
             {% if voter.is_opt_in_newsletter %}Yes{% else %}{% endif %}
             </td>
-            <!-- Voter Linked Org //-->
-            <td>
-                {% if voter.linked_organization_we_vote_id %}
-                <a href="{% url 'organization:organization_edit_we_vote_id' voter.linked_organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-                   class="">
-                {{ voter.linked_organization_we_vote_id|default_if_none:"" }}
-                </a>
-                {% endif %}
-            </td>
             <!-- Amount voter has paid in Membership fees + Donations + "Chip in"s to campaigns //-->
             <td style='text-align: right'>
                 {{ voter.amount_spent }}
             </td>
+            <td>
             <!-- Is site administrator? //-->
-            <td>
-            {% if voter.is_admin %}Yes{% else %}{% endif %}
-            {% if voter.is_analytics_admin %}Analytics Yes{% else %}{% endif %}
-            </td>
+            {% if voter.is_admin %}Admin, {% else %}{% endif %}
+            {% if voter.is_analytics_admin %}Analytics_Admin, {% else %}{% endif %}
             <!-- Is partner organization? //-->
-            <td>
-            {% if voter.is_partner_organization %}Yes{% else %}{% endif %}
-            </td>
+            {% if voter.is_partner_organization %}Partner, {% else %}{% endif %}
             <!-- Political data authority? //-->
-            <td>
-            {% if voter.is_political_data_manager %}Manager{% elif voter.is_political_data_viewer %}Viewer{% endif %}
-            </td>
+            {% if voter.is_political_data_manager %}Data_Manager,
+            {% elif voter.is_political_data_viewer %}Data_Viewer, {% endif %}
             <!-- Is verified volunteer? //-->
-            <td>
-            {% if voter.is_verified_volunteer %}Yes{% else %}{% endif %}
+            {% if voter.is_verified_volunteer %}Verified_Volunteer, {% else %}{% endif %}
             </td>
             <!-- See images //-->
             <td>
@@ -272,6 +281,11 @@
     });
     $(function() {
         $('#has_contributed_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#has_friends_id').change(function() {
             this.form.submit();
         });
     });

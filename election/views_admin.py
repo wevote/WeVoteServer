@@ -43,7 +43,7 @@ from import_export_vote_smart.models import VoteSmartApiCounter, VoteSmartApiCou
 from measure.models import ContestMeasure, ContestMeasureListManager
 from office.models import ContestOffice, ContestOfficeListManager, ContestOfficeManager
 from pledge_to_vote.models import PledgeToVoteManager
-from polling_location.models import PollingLocation
+from polling_location.models import PollingLocation, PollingLocationManager
 from position.models import ANY_STANCE, PositionEntered, PositionForFriends, PositionListManager
 import pytz
 from quick_info.models import QuickInfoManager
@@ -864,7 +864,7 @@ def election_list_view(request):
     office_manager = ContestOfficeManager()
 
     election_list_query = Election.objects.all()
-    election_list_query = election_list_query.order_by('election_day_text')
+    election_list_query = election_list_query.order_by('election_day_text', 'election_name')
     election_list_query = election_list_query.exclude(google_civic_election_id=2000)
     if positive_value_exists(show_ignored_elections):
         # Do not filter out ignored elections
@@ -1048,6 +1048,7 @@ def election_list_view(request):
 
             # Upcoming refresh date scheduled?
             refresh_date_added_to_queue = None
+            retrieve_date_added_to_queue = None
             try:
                 batch_process_queryset = BatchProcess.objects.all()
                 batch_process_queryset = \
@@ -1055,7 +1056,8 @@ def election_list_view(request):
                 batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
                 batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)
                 ballot_item_processes = [
-                    'REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS']
+                    'REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS',
+                    'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS']
                 batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=ballot_item_processes)
                 batch_process_queryset = batch_process_queryset.order_by("-id")
 
@@ -1067,6 +1069,9 @@ def election_list_view(request):
                         if one_batch_process.kind_of_process == 'REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS':
                             if not refresh_date_added_to_queue and one_batch_process.date_added_to_queue:
                                 refresh_date_added_to_queue = one_batch_process.date_added_to_queue
+                        elif one_batch_process.kind_of_process == 'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS':
+                            if not retrieve_date_added_to_queue and one_batch_process.date_added_to_queue:
+                                retrieve_date_added_to_queue = one_batch_process.date_added_to_queue
             except BatchProcess.DoesNotExist:
                 # No offices found. Not a problem.
                 batch_process_list = []
@@ -1079,6 +1084,7 @@ def election_list_view(request):
             election.refresh_date_added_to_queue = refresh_date_added_to_queue
             election.retrieve_date_completed = retrieve_date_completed
             election.retrieve_date_started = retrieve_date_started
+            election.retrieve_date_added_to_queue = retrieve_date_added_to_queue
 
             if refresh_date_completed:
                 most_recent_time = refresh_date_completed
@@ -1594,6 +1600,10 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
     ballot_returned_list_manager = BallotReturnedListManager()
     candidate_list_manager = CandidateListManager()
     office_manager = ContestOfficeManager()
+    # See if the number of map points for this state exceed the "large" threshold
+    polling_location_manager = PollingLocationManager()
+    map_points_retrieved_each_batch_chunk = \
+        polling_location_manager.calculate_number_of_map_points_to_retrieve_with_each_batch_chunk(state_code)
 
     if election_found:
         batch_manager = BatchManager()
@@ -1825,6 +1835,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
             'election':                                 election,
             'google_civic_election_id':                 google_civic_election_id,
             'is_national_election':                     election.is_national_election,
+            'map_points_retrieved_each_batch_chunk':    map_points_retrieved_each_batch_chunk,
             'messages_on_stage':                        messages_on_stage,
             'more_than_three_ballotpedia_elections':    more_than_three_ballotpedia_elections,
             'all_ballotpedia_elections_shown':          all_ballotpedia_elections_shown,
@@ -1845,6 +1856,7 @@ def election_summary_view(request, election_local_id=0, google_civic_election_id
             'entries_missing_latitude_longitude':       entries_missing_latitude_longitude,
             'google_civic_election_id':                 google_civic_election_id,
             'is_national_election':                     is_national_election,
+            'map_points_retrieved_each_batch_chunk':    map_points_retrieved_each_batch_chunk,
             'messages_on_stage':                        messages_on_stage,
             'state_code':                               state_code,
             'state_list':                               sorted_state_list,
@@ -2100,11 +2112,12 @@ def election_migration_view(request):
     from_election_ballot_item_count = 0
     try:
         if positive_value_exists(from_state_code):
-            from_election_ballot_item_count = BallotItem.objects.filter(google_civic_election_id=from_election_id)\
+            from_election_ballot_item_count = BallotItem.objects.using('readonly')\
+                .filter(google_civic_election_id=from_election_id)\
                 .filter(state_code__iexact=from_state_code).count()
         else:
             from_election_ballot_item_count = \
-                BallotItem.objects.filter(google_civic_election_id=from_election_id).count()
+                BallotItem.objects.using('readonly').filter(google_civic_election_id=from_election_id).count()
         if positive_value_exists(change_now):
             if positive_value_exists(from_state_code):
                 BallotItem.objects.filter(google_civic_election_id=from_election_id)\
@@ -2673,7 +2686,8 @@ def election_migration_view(request):
     # ########################################
     # BatchRowActionBallotItem
     if not positive_value_exists(from_state_code):  # Only move if we are NOT moving just one state
-        batch_query = BatchRowActionBallotItem.objects.filter(google_civic_election_id=from_election_id)
+        batch_query = BatchRowActionBallotItem.objects.using('readonly')\
+            .filter(google_civic_election_id=from_election_id)
         we_vote_batch_count = batch_query.count()
         if positive_value_exists(change_now) and positive_value_exists(we_vote_batch_count):
             try:
@@ -2686,7 +2700,8 @@ def election_migration_view(request):
     # ########################################
     # BatchRowActionCandidate
     if not positive_value_exists(from_state_code):  # Only move if we are NOT moving just one state
-        batch_query = BatchRowActionCandidate.objects.filter(google_civic_election_id=from_election_id)
+        batch_query = BatchRowActionCandidate.objects.using('readonly')\
+            .filter(google_civic_election_id=from_election_id)
         we_vote_batch_count = batch_query.count()
         if positive_value_exists(change_now) and positive_value_exists(we_vote_batch_count):
             try:
@@ -2699,7 +2714,8 @@ def election_migration_view(request):
     # ########################################
     # BatchRowActionContestOffice
     if not positive_value_exists(from_state_code):  # Only move if we are NOT moving just one state
-        batch_query = BatchRowActionContestOffice.objects.filter(google_civic_election_id=from_election_id)
+        batch_query = BatchRowActionContestOffice.objects.using('readonly')\
+            .filter(google_civic_election_id=from_election_id)
         we_vote_batch_count = batch_query.count()
         if positive_value_exists(change_now) and positive_value_exists(we_vote_batch_count):
             try:
@@ -2712,7 +2728,7 @@ def election_migration_view(request):
     # ########################################
     # BatchRowActionMeasure
     if not positive_value_exists(from_state_code):  # Only move if we are NOT moving just one state
-        batch_query = BatchRowActionMeasure.objects.filter(google_civic_election_id=from_election_id)
+        batch_query = BatchRowActionMeasure.objects.using('readonly').filter(google_civic_election_id=from_election_id)
         we_vote_batch_count = batch_query.count()
         if positive_value_exists(change_now) and positive_value_exists(we_vote_batch_count):
             try:
@@ -2725,7 +2741,7 @@ def election_migration_view(request):
     # ########################################
     # BatchRowActionPosition
     if not positive_value_exists(from_state_code):  # Only move if we are NOT moving just one state
-        batch_query = BatchRowActionPosition.objects.filter(google_civic_election_id=from_election_id)
+        batch_query = BatchRowActionPosition.objects.using('readonly').filter(google_civic_election_id=from_election_id)
         we_vote_batch_count = batch_query.count()
         if positive_value_exists(change_now) and positive_value_exists(we_vote_batch_count):
             try:
@@ -2738,7 +2754,7 @@ def election_migration_view(request):
     # ########################################
     # BatchRowTranslationMap
     if not positive_value_exists(from_state_code):  # Only move if we are NOT moving just one state
-        batch_query = BatchRowTranslationMap.objects.filter(google_civic_election_id=from_election_id)
+        batch_query = BatchRowTranslationMap.objects.using('readonly').filter(google_civic_election_id=from_election_id)
         we_vote_batch_count = batch_query.count()
         if positive_value_exists(change_now) and positive_value_exists(we_vote_batch_count):
             try:
@@ -2752,10 +2768,12 @@ def election_migration_view(request):
     # BatchSet
     try:
         if positive_value_exists(from_state_code):
-            we_vote_batch_count = BatchSet.objects.filter(google_civic_election_id=from_election_id)\
+            we_vote_batch_count = BatchSet.objects.using('readonly')\
+                .filter(google_civic_election_id=from_election_id)\
                 .filter(state_code__iexact=from_state_code).count()
         else:
-            we_vote_batch_count = BatchSet.objects.filter(google_civic_election_id=from_election_id).count()
+            we_vote_batch_count = BatchSet.objects.using('readonly')\
+                .filter(google_civic_election_id=from_election_id).count()
         if positive_value_exists(change_now) and positive_value_exists(we_vote_batch_count):
             if positive_value_exists(from_state_code):
                 BatchSet.objects.filter(google_civic_election_id=from_election_id)\

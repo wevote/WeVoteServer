@@ -909,7 +909,8 @@ class ContestOfficeManager(models.Manager):
         contest_office_id = 0
         try:
             if positive_value_exists(contest_office_we_vote_id):
-                contest_office_on_stage = ContestOffice.objects.get(we_vote_id=contest_office_we_vote_id)
+                contest_office_on_stage = ContestOffice.objects.using('readonly').get(
+                    we_vote_id=contest_office_we_vote_id)
                 contest_office_id = contest_office_on_stage.id
 
         except ContestOffice.MultipleObjectsReturned as e:
@@ -929,7 +930,8 @@ class ContestOfficeManager(models.Manager):
         google_civic_election_id = '0'
         try:
             if positive_value_exists(contest_office_we_vote_id):
-                contest_office_on_stage = ContestOffice.objects.get(we_vote_id=contest_office_we_vote_id)
+                contest_office_on_stage = ContestOffice.objects.using('readonly').get(
+                    we_vote_id=contest_office_we_vote_id)
                 google_civic_election_id = contest_office_on_stage.google_civic_election_id
 
         except ContestOffice.MultipleObjectsReturned as e:
@@ -949,7 +951,8 @@ class ContestOfficeManager(models.Manager):
         state_code = ""
         try:
             if positive_value_exists(contest_office_we_vote_id):
-                contest_office_on_stage = ContestOffice.objects.get(we_vote_id=contest_office_we_vote_id)
+                contest_office_on_stage = ContestOffice.objects.using('readonly').get(
+                    we_vote_id=contest_office_we_vote_id)
                 state_code = contest_office_on_stage.state_code
 
         except ContestOffice.MultipleObjectsReturned as e:
@@ -1172,7 +1175,7 @@ class ContestOfficeManager(models.Manager):
         success = False
         if positive_value_exists(google_civic_election_id):
             try:
-                contest_office_item_queryset = ContestOffice.objects.all()
+                contest_office_item_queryset = ContestOffice.objects.using('readonly').all()
                 contest_office_item_queryset = contest_office_item_queryset.filter(
                     google_civic_election_id=google_civic_election_id)
                 contest_offices_count = contest_office_item_queryset.count()
@@ -1249,7 +1252,7 @@ class ContestOfficeListManager(models.Manager):
         if keep_looking_for_duplicates and positive_value_exists(office_name):
             # Search by Contest Office name exact match
             try:
-                contest_office_query = ContestOffice.objects.all()
+                contest_office_query = ContestOffice.objects.using('readonly').all()
                 contest_office_query = contest_office_query.filter(office_name__iexact=office_name,
                                                                    google_civic_election_id=google_civic_election_id)
                 if positive_value_exists(state_code):

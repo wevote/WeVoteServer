@@ -43,7 +43,8 @@ from import_export_ctcl.controllers import CTCL_VOTER_INFO_URL
 from import_export_vote_usa.controllers import VOTE_USA_VOTER_INFO_URL
 import json
 import math
-from polling_location.models import KIND_OF_LOG_ENTRY_BALLOT_RECEIVED, PollingLocation, PollingLocationManager
+from polling_location.models import KIND_OF_LOG_ENTRY_BALLOT_RECEIVED, MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK,\
+    PollingLocation, PollingLocationManager
 from position.models import POSITION
 import random
 import requests
@@ -51,8 +52,6 @@ from voter.models import voter_has_authority
 from voter_guide.models import ORGANIZATION_WORD
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
-
-MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK = 125  # 125. Formerly 250 and 111
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -390,6 +389,7 @@ def batch_action_list_view(request):
 
     batch_set_list = []
     polling_location_we_vote_id = ""
+    status = ""
 
     batch_header_id = convert_to_int(request.GET.get('batch_header_id', 0))
     kind_of_batch = request.GET.get('kind_of_batch', '')
@@ -563,6 +563,7 @@ def batch_action_list_view(request):
                 modified_batch_row_list.append(one_batch_row)
             elif kind_of_batch == POSITION:
                 existing_results = batch_manager.retrieve_batch_row_action_position(batch_header_id, one_batch_row.id)
+                status += existing_results['status']
                 if existing_results['batch_row_action_found']:
                     one_batch_row.batch_row_action = existing_results['batch_row_action_position']
                     one_batch_row.kind_of_batch = POSITION
@@ -599,8 +600,8 @@ def batch_action_list_view(request):
         if one_state[0].lower() in active_state_codes:
             filtered_state_list.append(one_state)
 
-    messages.add_message(request, messages.INFO, 'Batch Row Count: {batch_row_count}'
-                                                 ''.format(batch_row_count=batch_row_count))
+    messages.add_message(request, messages.INFO, 'Batch Row Count: {batch_row_count}, status: {status}'
+                                                 ''.format(batch_row_count=batch_row_count, status=status))
 
     messages_on_stage = get_messages(request)
 
@@ -900,7 +901,7 @@ def batch_action_list_export_voters_view(request):
 @login_required
 def batch_action_list_analyze_process_view(request):
     """
-    Create BatchRowActions for either all of the BatchRows for batch_header_id, or only one with batch_row_id
+    Create BatchRowActions for either all the BatchRows for batch_header_id, or only one with batch_row_id
     :param request:
     :return:
     """
@@ -1747,6 +1748,9 @@ def batch_process_list_view(request):
 
     state_codes_map_point_counts_dict = {}
     polling_location_manager = PollingLocationManager()
+    # For both REFRESH and RETRIEVE, see if the number of map points for this state exceed the "large" threshold
+    map_points_retrieved_each_batch_chunk = \
+        polling_location_manager.calculate_number_of_map_points_to_retrieve_with_each_batch_chunk(state_code)
     for batch_process in batch_process_list:
         if batch_process.kind_of_process in [
             RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,
@@ -1757,13 +1761,13 @@ def batch_process_list_view(request):
             if state_code_lower_case in state_codes_map_point_counts_dict:
                 batch_process.polling_location_count = state_codes_map_point_counts_dict[state_code_lower_case]
                 batch_process.ballot_item_chunks_expected = \
-                    int(math.ceil(batch_process.polling_location_count / 125)) + 1
+                    int(math.ceil(batch_process.polling_location_count / map_points_retrieved_each_batch_chunk)) + 1
             else:
                 state_codes_map_point_counts_dict[state_code_lower_case] = \
                     polling_location_manager.fetch_polling_location_count(state_code=state_code_lower_case)
                 batch_process.polling_location_count = state_codes_map_point_counts_dict[state_code_lower_case]
                 batch_process.ballot_item_chunks_expected = \
-                    int(math.ceil(batch_process.polling_location_count / 125)) + 1
+                    int(math.ceil(batch_process.polling_location_count / map_points_retrieved_each_batch_chunk)) + 1
         # Add the processing "chunks" under each Batch Process
         batch_process_ballot_item_chunk_list = []
         batch_process_ballot_item_chunk_list_found = False
@@ -1896,7 +1900,6 @@ def batch_process_list_view(request):
         toggle_system_url_variables += "&show_paused_processes_only=1"
     if positive_value_exists(state_code):
         toggle_system_url_variables += "&state_code=" + str(state_code)
-
     template_values = {
         'messages_on_stage':                    messages_on_stage,
         'ballot_returned_oldest_date':          ballot_returned_oldest_date,
@@ -1915,6 +1918,7 @@ def batch_process_list_view(request):
         'google_civic_election_id':             google_civic_election_id,
         'include_frequent_processes':           include_frequent_processes,
         'kind_of_processes_to_show':            kind_of_processes_to_show,
+        'map_points_retrieved_each_batch_chunk':    map_points_retrieved_each_batch_chunk,
         'show_all_elections':                   show_all_elections,
         'show_active_processes_only':           show_active_processes_only,
         'show_paused_processes_only':           show_paused_processes_only,
@@ -3132,7 +3136,7 @@ def retrieve_ballots_for_polling_locations_api_v4_view(request):
     from lat/long, and then the ballot items. Ballotpedia API v4
     Reach out to Ballotpedia and retrieve (for one election):
     1) Polling locations (so we can use those addresses to retrieve a representative set of ballots)
-    2) Cycle through a portion of those map points, enough that we are caching all of the possible ballot items
+    2) Cycle through a portion of those map points, enough that we are caching all the possible ballot items
     :param request:
     :return:
     """
@@ -3342,6 +3346,7 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
             }
             return results
 
+    polling_location_manager = PollingLocationManager()
     try:
         if positive_value_exists(refresh_ballot_returned):
             kind_of_process = REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS
@@ -3401,7 +3406,6 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
         # Find polling_location_we_vote_ids already used in this batch_process, which returned a ballot
         polling_location_we_vote_id_list_already_retrieved = []
         if positive_value_exists(batch_process_id):
-            polling_location_manager = PollingLocationManager()
             polling_location_log_entry_list = polling_location_manager.retrieve_polling_location_log_entry_list(
                 batch_process_id=batch_process_id,
                 is_from_ctcl=use_ctcl,
@@ -3412,7 +3416,7 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
                 if one_log_entry.polling_location_we_vote_id not in polling_location_we_vote_id_list_already_retrieved:
                     polling_location_we_vote_id_list_already_retrieved.append(one_log_entry.polling_location_we_vote_id)
 
-        # For both REFRESH and RETRIEVE, find polling locations/map points which have came up empty
+        # For both REFRESH and RETRIEVE, find polling locations/map points which have come up empty
         #  (from this data source) in previous chunks since when this process started
         polling_location_we_vote_id_list_returned_empty = []
         results = ballot_returned_list_manager.\
@@ -3427,7 +3431,11 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
             polling_location_we_vote_id_list_returned_empty = results['polling_location_we_vote_id_list']
 
         status += "REFRESH_BALLOT_RETURNED: " + str(refresh_ballot_returned) + " "
-        refresh_or_retrieve_limit = MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK  # 125. Formerly 250 and 111
+
+        # For both REFRESH and RETRIEVE, see if the number of map points for this state exceed the "large" threshold
+        refresh_or_retrieve_limit = \
+            polling_location_manager.calculate_number_of_map_points_to_retrieve_with_each_batch_chunk(state_code)
+
         if positive_value_exists(refresh_ballot_returned):
             # REFRESH branch
             polling_location_query = PollingLocation.objects.using('readonly').all()

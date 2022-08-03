@@ -2,8 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from config.base import get_environment_variable, get_git_merge_date, get_node_version, get_postgres_version, \
-    get_python_version, LOGIN_URL
+from config.base import get_environment_variable, get_node_version, get_postgres_version, \
+    get_python_version, LOGIN_URL, get_git_commit_hash
 from ballot.models import BallotReturned, VoterBallotSaved
 from candidate.models import CandidateCampaign, CandidateManager
 from candidate.controllers import candidates_import_from_sample_file
@@ -113,7 +113,8 @@ def admin_home_view(request):
         'google_civic_election_id':           google_civic_election_id,
         'python_version':                     get_python_version(),
         'node_version':                       get_node_version(),
-        'git_merge_date':                     get_git_merge_date(),
+        'git_commit_hash':                    get_git_commit_hash(False),
+        'git_commit_hash_url':                get_git_commit_hash(True),
         'postgres_version':                   get_postgres_version(),
         'shared_link_clicked_unique_sharer_count': shared_link_clicked_unique_sharer_count,
         'shared_link_clicked_unique_viewer_count': shared_link_clicked_unique_viewer_count,
@@ -1711,7 +1712,7 @@ def login_we_vote(request):
 
     voter_manager = VoterManager()
     voter_device_link_manager = VoterDeviceLinkManager()
-    results = voter_manager.retrieve_voter_from_voter_device_id(voter_api_device_id)
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_api_device_id, read_only=True)
     if results['voter_found']:
         voter_on_stage = results['voter']
         voter_on_stage_id = voter_on_stage.id

@@ -43,6 +43,7 @@ urlpatterns = [
     re_path(r'^elected_official/', include(('elected_official.urls', 'elected_official'), namespace="elected_official")),
     re_path(r'^electoral_district/', include(('electoral_district.urls', 'electoral_district'), namespace="electoral_district")),
     re_path(r'^follow/', include(('follow.urls', 'follow'), namespace="follow")),
+    re_path(r'^friend/', include(('friend.urls', 'friend'), namespace="friend")),
     re_path(r'^google_custom_search/', include(('google_custom_search.urls', 'google_custom_search'), namespace="google_custom_search")),
     re_path(r'^health/', views.health_view),  # A simple health check to make sure the site is running
     re_path(r'^image/', include(('image.urls', 'image'), namespace="image")),

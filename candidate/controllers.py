@@ -205,7 +205,7 @@ def fetch_duplicate_candidate_count(we_vote_candidate, ignore_candidate_id_list)
         ignore_candidate_id_list=ignore_candidate_id_list)
 
 
-def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list):
+def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list, read_only=True):
     if not hasattr(we_vote_candidate, 'candidate_name'):
         error_results = {
             'success':                              False,
@@ -229,6 +229,7 @@ def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list):
             ignore_candidate_id_list=ignore_candidate_id_list,
             state_code=we_vote_candidate.state_code,
             vote_usa_politician_id=we_vote_candidate.vote_usa_politician_id,
+            read_only=read_only,
         )
 
         if results['candidate_found']:
@@ -466,7 +467,7 @@ def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, adm
 
     # Candidate 1 is the one we keep, and Candidate 2 is the one we will merge into Candidate 1
     candidate1_results = \
-        candidate_manager.retrieve_candidate_from_we_vote_id(candidate1_we_vote_id)
+        candidate_manager.retrieve_candidate_from_we_vote_id(candidate1_we_vote_id, read_only=False)
     if candidate1_results['candidate_found']:
         candidate1_on_stage = candidate1_results['candidate']
         candidate1_id = candidate1_on_stage.id
@@ -480,7 +481,7 @@ def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, adm
         return results
 
     candidate2_results = \
-        candidate_manager.retrieve_candidate_from_we_vote_id(candidate2_we_vote_id)
+        candidate_manager.retrieve_candidate_from_we_vote_id(candidate2_we_vote_id, read_only=False)
     if candidate2_results['candidate_found']:
         candidate2_on_stage = candidate2_results['candidate']
         candidate2_id = candidate2_on_stage.id
@@ -808,7 +809,7 @@ def filter_candidates_structured_json_for_local_duplicates(structured_json):
             candidate_name, google_civic_candidate_name, google_civic_candidate_name2, google_civic_candidate_name3,
             google_civic_election_id, contest_office_we_vote_id,
             politician_we_vote_id, candidate_twitter_handle, ballotpedia_candidate_id, vote_smart_id, maplight_id,
-            we_vote_id_from_master)
+            we_vote_id_from_master, read_only=True)
 
         if results['candidate_list_found']:
             # print("Skipping candidate " + str(candidate_name) + ",  " + str(google_civic_candidate_name) + ",  " +
@@ -1175,11 +1176,11 @@ def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):  # candidate
 
     candidate_manager = CandidateManager()
     if positive_value_exists(candidate_id):
-        results = candidate_manager.retrieve_candidate_from_id(candidate_id)
+        results = candidate_manager.retrieve_candidate_from_id(candidate_id, read_only=True)
         success = results['success']
         status = results['status']
     elif positive_value_exists(candidate_we_vote_id):
-        results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+        results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=True)
         success = results['success']
         status = results['status']
     else:
@@ -1468,7 +1469,7 @@ def refresh_candidate_data_from_master_tables(candidate_we_vote_id):
     candidate = CandidateCampaign()
     twitter_user_manager = TwitterUserManager()
 
-    results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+    results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=False)
     if not results['candidate_found']:
         status = "REFRESH_CANDIDATE_FROM_MASTER_TABLES-CANDIDATE_NOT_FOUND "
         results = {
@@ -1552,7 +1553,7 @@ def refresh_candidate_data_from_master_tables(candidate_we_vote_id):
 
 def push_candidate_data_to_other_table_caches(candidate_we_vote_id):
     candidate_manager = CandidateManager()
-    results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+    results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=False)
     candidate = results['candidate']
 
     save_position_from_candidate_results = update_all_position_details_from_candidate(candidate)
@@ -1802,7 +1803,8 @@ def retrieve_candidate_list_for_entire_year(
             candidate_year=candidate_year,
             limit_to_this_state_code=limit_to_this_state_code,
             search_string=False,
-            return_list_of_objects=False)
+            return_list_of_objects=False,
+            read_only=True)
     if results['candidate_list_found']:
         candidate_list_found = True
         candidate_list_light = results['candidate_list_light']

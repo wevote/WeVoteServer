@@ -1,24 +1,29 @@
 # voter_guide/controllers.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
+import copy
+import json
+from datetime import datetime, timedelta
+from itertools import chain
+from urllib.parse import urlparse
 
+import pytz
+from django.db.models import Q
+from django.http import HttpResponse
+
+import wevote_functions.admin
 from ballot.models import OFFICE, CANDIDATE, MEASURE
 from candidate.controllers import retrieve_candidate_list_for_all_prior_elections_this_year, \
     retrieve_candidate_list_for_all_upcoming_elections
 from candidate.models import CandidateManager, CandidateListManager
 from config.base import get_environment_variable
-import copy
-from datetime import datetime, timedelta
-from django.http import HttpResponse
 from election.controllers import retrieve_this_years_election_id_list, retrieve_upcoming_election_id_list
 from election.models import ElectionManager
 from exception.models import handle_record_not_found_exception
 from follow.models import FollowOrganizationList, FollowIssueList, FOLLOWING
 from friend.controllers import heal_current_friend
 from friend.models import FriendManager
-from itertools import chain
 from issue.models import OrganizationLinkToIssueList
-import json
 from measure.controllers import add_measure_name_alternatives_to_measure_list_light, \
     retrieve_measure_list_for_all_upcoming_elections
 from measure.models import ContestMeasureListManager, ContestMeasureManager
@@ -32,7 +37,6 @@ from position.controllers import retrieve_ballot_item_we_vote_ids_for_organizati
     retrieve_ballot_item_we_vote_ids_for_organization_static
 from position.models import ANY_STANCE, FRIENDS_AND_PUBLIC, FRIENDS_ONLY, INFORMATION_ONLY, OPPOSE, \
     PositionEntered, PositionManager, PositionListManager, PUBLIC_ONLY, SUPPORT
-import pytz
 from share.models import ShareManager
 from twitter.models import TwitterUserManager
 from voter.models import fetch_voter_id_from_voter_device_link, fetch_voter_we_vote_id_from_voter_device_link, \
@@ -41,7 +45,6 @@ from voter_guide.controllers_possibility import candidates_found_on_url, organiz
 from voter_guide.models import ENDORSEMENTS_FOR_CANDIDATE, ORGANIZATION_ENDORSING_CANDIDATES, UNKNOWN_TYPE, \
     VoterGuide, VoterGuideListManager, VoterGuideManager, \
     VoterGuidePossibility, VoterGuidePossibilityManager, VoterGuidePossibilityPosition
-import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, is_voter_device_id_valid, positive_value_exists, \
     process_request_from_master, is_link_to_video
 
@@ -343,7 +346,7 @@ def extract_import_position_list_from_voter_guide_possibility(voter_guide_possib
 
         contest_office_name = ""
         candidate_manager = CandidateManager()
-        results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+        results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=True)
         if results['candidate_found']:
             candidate = results['candidate']
             contest_office_name = candidate.contest_office_name
@@ -485,7 +488,7 @@ def extract_voter_guide_possibility_position_list_from_database(
         candidate_we_vote_id = voter_guide_possibility.candidate_we_vote_id \
             if positive_value_exists(voter_guide_possibility.candidate_we_vote_id) else ""
         # candidate_manager = CandidateManager()
-        # results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+        # results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=True)
         # if results['candidate_found']:
         #     candidate = results['candidate']
         #     contest_office_name = candidate.contest_office_name
@@ -521,7 +524,8 @@ def extract_voter_guide_possibility_position_list_from_database(
                 if positive_value_exists(possibility_position.candidate_twitter_handle) else ""
             # If this is a list of candidates being endorsed by one organization, add on the alternate_names
             if positive_value_exists(candidate_we_vote_id):
-                candidate_results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+                candidate_results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id,
+                                                                                         read_only=True)
                 if candidate_results['candidate_found']:
                     candidate_alternate_names = candidate_results['candidate'].display_alternate_names_list()
         elif voter_guide_possibility.voter_guide_possibility_type == ENDORSEMENTS_FOR_CANDIDATE:
@@ -599,7 +603,7 @@ def augment_candidate_possible_position_data(
             and positive_value_exists(possible_endorsement['candidate_we_vote_id']):
         possible_endorsement_matched = True
         results = candidate_manager.retrieve_candidate_from_we_vote_id(
-            possible_endorsement['candidate_we_vote_id'])
+            possible_endorsement['candidate_we_vote_id'], read_only=True)
         if results['candidate_found']:
             candidate = results['candidate']
             if positive_value_exists(attach_objects):
@@ -630,7 +634,8 @@ def augment_candidate_possible_position_data(
         matching_results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
             google_civic_election_id_list=google_civic_election_id_list,
             state_code=limit_to_this_state_code,
-            candidate_name=possible_endorsement['ballot_item_name'])
+            candidate_name=possible_endorsement['ballot_item_name'],
+            read_only=True)
 
         if matching_results['candidate_found']:
             candidate = matching_results['candidate']
@@ -712,7 +717,7 @@ def augment_candidate_possible_position_data(
                     else:
                         possible_endorsement['google_civic_election_id'] = 0
                     matching_results = candidate_manager.retrieve_candidate_from_we_vote_id(
-                        possible_endorsement['candidate_we_vote_id'])
+                        possible_endorsement['candidate_we_vote_id'], read_only=True)
 
                     if matching_results['candidate_found']:
                         candidate = matching_results['candidate']
@@ -771,7 +776,7 @@ def augment_candidate_possible_position_data(
                         else:
                             possible_endorsement_copy['google_civic_election_id'] = 0
                         matching_results = candidate_manager.retrieve_candidate_from_we_vote_id(
-                            possible_endorsement_copy['candidate_we_vote_id'])
+                            possible_endorsement_copy['candidate_we_vote_id'], read_only=True)
 
                         if matching_results['candidate_found']:
                             candidate = matching_results['candidate']
@@ -1731,6 +1736,9 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
             }
             return HttpResponse(json.dumps(json_data), content_type='application/json')
 
+        if not url_to_scan.startswith('http://') and not url_to_scan.startswith('https://'):
+            url_to_scan = 'https://' + url_to_scan
+
         results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_from_url(
             voter_guide_possibility_url=url_to_scan,
             pdf_url=pdf_url,
@@ -1863,7 +1871,7 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
     possible_owner_of_website_candidates_list = []
     if positive_value_exists(candidate_we_vote_id):
         candidate_manager = CandidateManager()
-        candidate_results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+        candidate_results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=True)
         status += candidate_results['status']
         if candidate_results['candidate_found']:
             candidate = candidate_results['candidate']
@@ -1886,7 +1894,8 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
                 google_civic_election_id_list=google_civic_election_id_list,
                 state_code=limit_to_this_state_code,
                 candidate_twitter_handle=possible_candidate_twitter_handle,
-                candidate_name=possible_candidate_name)
+                candidate_name=possible_candidate_name,
+                read_only=True)
             possible_candidate_list = []
             if results['candidate_list_found']:
                 possible_candidate_list = results['candidate_list']
@@ -1986,7 +1995,7 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
                     highlight_list.append(one_highlight)
                 if positive_value_exists(one_possible_position['candidate_we_vote_id']):
                     candidate_results = candidate_manager.retrieve_candidate_from_we_vote_id(
-                        one_possible_position['candidate_we_vote_id'])
+                        one_possible_position['candidate_we_vote_id'], read_only=True)
                     if candidate_results['candidate_found']:
                         one_candidate = candidate_results['candidate']
                         if positive_value_exists(one_candidate.display_candidate_name()) \
@@ -2112,6 +2121,8 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
     results = voter_guide_possibility_manager.retrieve_voter_guide_possibility(
         voter_guide_possibility_id=voter_guide_possibility_id)
 
+    move_voter_guide_possibility_positions_to_requested_voter_guide_possibility(results['voter_guide_possibility'])
+
     possible_endorsement_list = []
     if results['voter_guide_possibility_found']:
         voter_guide_possibility = results['voter_guide_possibility']
@@ -2204,6 +2215,66 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
         'possible_position_list':       possible_endorsement_list,
     }
     return json_data
+
+
+def move_voter_guide_possibility_positions_to_requested_voter_guide_possibility(voter_guide_possibility):
+    voter_guide_possibility_id = voter_guide_possibility.id
+    organization_we_vote_id = voter_guide_possibility.organization_we_vote_id
+    voter_guide_possibility_url = voter_guide_possibility.voter_guide_possibility_url
+    parts = urlparse(voter_guide_possibility_url)
+    net_location = parts.netloc
+    print(net_location)
+
+    enddate = datetime.now(pytz.UTC)
+    startdate = enddate - timedelta(days=186)    # 6 months
+
+    voter_guide_possibility_query = VoterGuidePossibility.objects.filter(
+        Q(voter_guide_possibility_url__contains=net_location) &
+        Q(organization_we_vote_id__iexact=organization_we_vote_id) &
+        Q(date_last_changed__range=[startdate, enddate])).order_by('-date_last_changed')
+    # leave destination in set     .exclude(id=voter_guide_possibility_id)
+    voter_guide_possibility_list = list(voter_guide_possibility_query)
+    ids_list = []
+    for voter_guide_possibility in voter_guide_possibility_list:
+        ids_list.append(voter_guide_possibility.id)
+
+    possibility_position_query = VoterGuidePossibilityPosition.objects.filter(
+        Q(voter_guide_possibility_parent_id__in=ids_list)).order_by(
+            'ballot_item_name', '-voter_guide_possibility_parent_id')
+    possibility_position_query_list = list(possibility_position_query)
+    for blip in possibility_position_query_list:
+        print(str(blip.ballot_item_name) + "    " + str(blip.voter_guide_possibility_parent_id))
+
+    # Remove duplicates, for now if the voter_guide_possibility_parent_id numer is higher, that is the one we keep
+    seen_candidates = set()
+    new_list = []
+    for position in possibility_position_query_list:
+        if position.ballot_item_name not in seen_candidates:
+            new_list.append(position)
+            seen_candidates.add(position.ballot_item_name)
+            # TODO: If we have to change all the exising  position.voter_guide_possibility_parent_id entries to match
+            #  the voter_guide_possibility_id passed in the query from the extension, our design could use improvement.
+            #  It seems that VoterGuidePossibilityPosition items should not be tied to a specific VoterGuidePossibility,
+            #  this would mean that we would lose the connection between a political data volunter an their changes, but
+            #  we could solve this by versioning the VoterGuidePossibilityPosition and have a admin console that allowed
+            #  us to review the changes
+            if position.voter_guide_possibility_parent_id != voter_guide_possibility_id:
+                position.voter_guide_possibility_parent_id = voter_guide_possibility_id
+                try:
+                    logger.debug("Updating '" + position.ballot_item_name + "' from parent id " +
+                                 str(position.voter_guide_possibility_parent_id) + " to " +
+                                 str(voter_guide_possibility_id))
+                except Exception as e:
+                    logger.error(
+                        "move_voter_guide_possibility_positions_to_requested_voter_guide_possibility logger error: ", e)
+
+                position.save()
+
+    # print('-------')
+    # for possible_postion in new_list:
+    #     print(str(possible_postion.ballot_item_name) + "    " + str(possible_postion.voter_guide_possibility_parent_id))
+    # print('-------')
+    return
 
 
 def voter_guide_possibility_save_for_api(  # voterGuidePossibilitySave
@@ -3109,8 +3180,7 @@ def retrieve_voter_guides_to_follow_by_ballot_item(voter_id, kind_of_ballot_item
 
     follow_organization_list_manager = FollowOrganizationList()
     organizations_followed_by_voter = \
-        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id,
-                                                                                                  read_only=True)
+        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
 
     positions_list = position_list_manager.calculate_positions_not_followed_by_voter(
         all_positions_list, organizations_followed_by_voter)
@@ -3236,10 +3306,10 @@ def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_e
     return_we_vote_id = True
     organization_we_vote_ids_followed_by_voter = \
         follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(
-            voter_id, return_we_vote_id, read_only=True)
+            voter_id, return_we_vote_id)
     organization_we_vote_ids_ignored_by_voter = \
         follow_organization_list_manager.retrieve_ignore_organization_by_voter_id_simple_id_array(
-            voter_id, return_we_vote_id, read_only=True)
+            voter_id, return_we_vote_id)
 
     # position_list_manager = PositionListManager()
     if not positive_value_exists(google_civic_election_id):
@@ -3602,10 +3672,10 @@ def retrieve_voter_guides_to_follow_generic_for_api(voter_id, search_string, fil
         read_only = True
         organization_we_vote_ids_followed_by_voter = \
             follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(
-                voter_id, return_we_vote_id, read_only=read_only)
+                voter_id, return_we_vote_id)
         organization_we_vote_ids_ignored_by_voter = \
             follow_organization_list_manager.retrieve_ignore_organization_by_voter_id_simple_id_array(
-                voter_id, return_we_vote_id, read_only=read_only)
+                voter_id, return_we_vote_id)
 
     # This is a list of orgs that the voter is already following or ignoring
     organization_we_vote_ids_followed_or_ignored_by_voter = list(chain(organization_we_vote_ids_followed_by_voter,
@@ -4677,13 +4747,14 @@ def retrieve_voter_guides_from_friends(
     voter_guide_list = []
     voter_guide_list_found = False
     if not positive_value_exists(maximum_number_to_retrieve):
-        maximum_number_to_retrieve = 30
+        maximum_number_to_retrieve = 50
 
     friend_manager = FriendManager()
-    friend_results = friend_manager.retrieve_current_friends(voter_we_vote_id)
+    friend_results = friend_manager.retrieve_current_friend_list(voter_we_vote_id)
     organization_we_vote_ids_from_friends = []
     if friend_results['current_friend_list_found']:
         current_friend_list = friend_results['current_friend_list']
+        status += "CURRENT_FRIEND_LIST: "
         for one_friend in current_friend_list:
             if one_friend.viewer_voter_we_vote_id == voter_we_vote_id:
                 # If viewer is the voter, the friend is the viewee
@@ -4691,16 +4762,20 @@ def retrieve_voter_guides_from_friends(
                     one_friend = heal_current_friend(one_friend)
                 try:
                     organization_we_vote_ids_from_friends.append(one_friend.viewee_organization_we_vote_id)
+                    status += "(viewee: " + one_friend.viewee_voter_we_vote_id + \
+                              "/" + one_friend.viewee_organization_we_vote_id + ")"
                 except Exception as e:
-                    pass
+                    status += "APPEND_PROBLEM1: " + str(e) + ' '
             else:
                 # If viewer is NOT the voter, the friend is the viewer
                 if not positive_value_exists(one_friend.viewer_organization_we_vote_id):
                     one_friend = heal_current_friend(one_friend)
                 try:
                     organization_we_vote_ids_from_friends.append(one_friend.viewer_organization_we_vote_id)
+                    status += "(viewer: " + one_friend.viewer_voter_we_vote_id + \
+                              "/" + one_friend.viewer_organization_we_vote_id + ")"
                 except Exception as e:
-                    pass
+                    status += "APPEND_PROBLEM2: " + str(e) + ' '
 
     if len(organization_we_vote_ids_from_friends) == 0:
         success = True
@@ -5072,8 +5147,8 @@ def retrieve_voter_guides_ignored(voter_id):  # voterGuidesIgnoredRetrieve
     follow_organization_list_manager = FollowOrganizationList()
     return_we_vote_id = True
     organization_we_vote_ids_ignored_by_voter = \
-        follow_organization_list_manager.retrieve_ignore_organization_by_voter_id_simple_id_array(voter_id,
-                                                                                                  return_we_vote_id)
+        follow_organization_list_manager.retrieve_ignore_organization_by_voter_id_simple_id_array(
+            voter_id, return_we_vote_id)
 
     voter_guide_list_object = VoterGuideListManager()
     results = voter_guide_list_object.retrieve_voter_guides_by_organization_list(

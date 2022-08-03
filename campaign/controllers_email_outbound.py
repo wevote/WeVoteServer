@@ -118,6 +118,27 @@ def campaignx_friend_has_supported_send(  # CAMPAIGNX_FRIEND_HAS_SUPPORTED_TEMPL
         subject = your_friends_name + " supports " + campaignx_title
         politician_full_sentence_string = ''
 
+    # Unsubscribe link in email
+    recipient_unsubscribe_url = \
+        campaigns_root_url_verified + "/settings/notifications/esk/" + recipient_email_subscription_secret_key
+    # recipient_unsubscribe_url = \
+    #     "{root_url}/unsubscribe/{email_secret_key}/friendcampaignsupport" \
+    #     "".format(
+    #         email_secret_key=recipient_email_subscription_secret_key,
+    #         root_url=campaigns_root_url_verified,
+    #     )
+    # Instant unsubscribe link in email header
+    # list_unsubscribe_url = \
+    #     "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendcampaignsupport/" \
+    #     "".format(
+    #         email_secret_key=recipient_email_subscription_secret_key,
+    #         root_url=WE_VOTE_SERVER_ROOT_URL,
+    #     )
+    # # Instant unsubscribe email address in email header
+    # # from voter.models import NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL  # To be updated
+    # list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
+    #                           "".format(setting='friendcampaignsupport')
+
     template_variables_for_json = {
         "subject":                          subject,
         "campaignx_title":                  campaignx_title,
@@ -125,11 +146,9 @@ def campaignx_friend_has_supported_send(  # CAMPAIGNX_FRIEND_HAS_SUPPORTED_TEMPL
         "politician_count":                 politician_count,
         "politician_full_sentence_string":  politician_full_sentence_string,
         "recipient_name":                   recipient_name,
+        "recipient_unsubscribe_url":        recipient_unsubscribe_url,
         "recipient_voter_email":            recipient_email,
-        "recipient_unsubscribe_url":        campaigns_root_url_verified + "/settings/notifications/esk/" +
-        recipient_email_subscription_secret_key,
         "speaker_voter_name":               speaker_voter_name,
-        "email_open_url":                   WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
         "view_main_discussion_page_url":    campaigns_root_url_verified + "/news",
         "view_your_ballot_url":             campaigns_root_url_verified + "/ballot",
         "we_vote_hosted_campaign_photo_large_url":  we_vote_hosted_campaign_photo_large_url,
@@ -147,7 +166,10 @@ def campaignx_friend_has_supported_send(  # CAMPAIGNX_FRIEND_HAS_SUPPORTED_TEMPL
         recipient_email_we_vote_id=recipient_email_we_vote_id,
         recipient_voter_email=recipient_email,
         template_variables_in_json=template_variables_in_json,
-        kind_of_email_template=kind_of_email_template)
+        kind_of_email_template=kind_of_email_template,
+        # list_unsubscribe_mailto=list_unsubscribe_mailto,
+        # list_unsubscribe_url=list_unsubscribe_url,
+    )
     status += outbound_results['status'] + " "
     success = outbound_results['success']
     if outbound_results['email_outbound_description_saved']:
@@ -262,6 +284,27 @@ def campaignx_news_item_send(  # CAMPAIGNX_NEWS_ITEM_TEMPLATE
 
     campaignx_news_item_url = campaignx_url + '/u/' + campaignx_news_item_we_vote_id
 
+    # Unsubscribe link in email
+    recipient_unsubscribe_url = \
+        campaigns_root_url_verified + "/settings/notifications/esk/" + recipient_email_subscription_secret_key
+    # recipient_unsubscribe_url = \
+    #     "{root_url}/unsubscribe/{email_secret_key}/friendopinionsall" \
+    #     "".format(
+    #         email_secret_key=recipient_email_subscription_secret_key,
+    #         root_url=campaigns_root_url_verified,
+    #     )
+    # # Instant unsubscribe link in email header
+    # list_unsubscribe_url = \
+    #     "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendopinionsall/" \
+    #     "".format(
+    #         email_secret_key=recipient_email_subscription_secret_key,
+    #         root_url=WE_VOTE_SERVER_ROOT_URL,
+    #     )
+    # # Instant unsubscribe email address in email header
+    # # from voter.models import NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL  # To be updated
+    # list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
+    #                           "".format(setting='friendopinionsall')
+
     template_variables_for_json = {
         "subject":                          statement_subject,
         "campaignx_title":                  campaignx_title,
@@ -272,11 +315,9 @@ def campaignx_news_item_send(  # CAMPAIGNX_NEWS_ITEM_TEMPLATE
         "politician_count":                 politician_count,
         "politician_full_sentence_string":  politician_full_sentence_string,
         "recipient_name":                   recipient_name,
+        "recipient_unsubscribe_url":        recipient_unsubscribe_url,
         "recipient_voter_email":            recipient_email,
-        "recipient_unsubscribe_url":        campaigns_root_url_verified + "/settings/notifications/esk/" +
-        recipient_email_subscription_secret_key,
         "speaker_voter_name":               speaker_voter_name,
-        "email_open_url":                   WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
         "view_main_discussion_page_url":    campaigns_root_url_verified + "/news",
         "view_your_ballot_url":             campaigns_root_url_verified + "/ballot",
         "we_vote_hosted_campaign_photo_large_url":  we_vote_hosted_campaign_photo_large_url,
@@ -294,7 +335,10 @@ def campaignx_news_item_send(  # CAMPAIGNX_NEWS_ITEM_TEMPLATE
         recipient_email_we_vote_id=recipient_email_we_vote_id,
         recipient_voter_email=recipient_email,
         template_variables_in_json=template_variables_in_json,
-        kind_of_email_template=kind_of_email_template)
+        kind_of_email_template=kind_of_email_template,
+        # list_unsubscribe_mailto=list_unsubscribe_mailto,
+        # list_unsubscribe_url=list_unsubscribe_url,
+    )
     status += outbound_results['status'] + " "
     success = outbound_results['success']
     if outbound_results['email_outbound_description_saved']:
@@ -355,16 +399,36 @@ def campaignx_super_share_item_send(  # CAMPAIGNX_SUPER_SHARE_ITEM_TEMPLATE
     else:
         campaignx_news_item_url = ''
 
+    recipient_email_subscription_secret_key = ''  # To be added
+    # Unsubscribe link in email
+    recipient_unsubscribe_url = \
+        "{root_url}/unsubscribe/{email_secret_key}/campaignshare" \
+        "".format(
+            email_secret_key=recipient_email_subscription_secret_key,
+            root_url=campaigns_root_url_verified,
+        )
+    # Instant unsubscribe link in email header
+    list_unsubscribe_url = \
+        "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/campaignshare/" \
+        "".format(
+            email_secret_key=recipient_email_subscription_secret_key,
+            root_url=WE_VOTE_SERVER_ROOT_URL,
+        )
+    # Instant unsubscribe email address in email header
+    # from voter.models import NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL  # To be updated
+    list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
+                              "".format(setting='campaignshare')
+
     template_variables_for_json = {
         "campaignx_title":                  campaignx_title,
         "campaignx_news_item_url":          campaignx_news_item_url,
         "campaignx_news_text":              statement_text_preview,
         "campaignx_url":                    view_shared_campaignx_url,
-        "email_open_url":                   WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
         "invitation_message":               invitation_message,
         "invitation_message_plain_text":    invitation_message_plain_text,
         "recipient_email_address":          recipient_email_address,
         "recipient_first_name":             recipient_first_name,
+        "recipient_unsubscribe_url":        recipient_unsubscribe_url,
         "sender_email_address":             speaker_email_address,
         "sender_photo":                     speaker_photo,
         "sender_name":                      speaker_voter_name,
@@ -385,7 +449,10 @@ def campaignx_super_share_item_send(  # CAMPAIGNX_SUPER_SHARE_ITEM_TEMPLATE
         recipient_email_we_vote_id='',
         recipient_voter_email=recipient_email_address,
         template_variables_in_json=template_variables_in_json,
-        kind_of_email_template=kind_of_email_template)
+        kind_of_email_template=kind_of_email_template,
+        list_unsubscribe_mailto=list_unsubscribe_mailto,
+        list_unsubscribe_url=list_unsubscribe_url,
+    )
     status += outbound_results['status'] + " "
     success = outbound_results['success']
     if outbound_results['email_outbound_description_saved']:
@@ -507,6 +574,28 @@ def campaignx_supporter_initial_response_send(  # CAMPAIGNX_SUPPORTER_INITIAL_RE
         subject = "You support " + campaignx_title
         politician_full_sentence_string = ''
 
+    recipient_email_subscription_secret_key = ''  # To be added
+    # Unsubscribe link in email
+    recipient_unsubscribe_url = \
+        campaigns_root_url_verified + "/settings/notifications/esk/" + recipient_email_subscription_secret_key
+    # recipient_unsubscribe_url = \
+    #     "{root_url}/unsubscribe/{email_secret_key}/supporterinitial" \
+    #     "".format(
+    #         email_secret_key=recipient_email_subscription_secret_key,
+    #         root_url=campaigns_root_url_verified,
+    #     )
+    # # Instant unsubscribe link in email header
+    # list_unsubscribe_url = \
+    #     "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/supporterinitial/" \
+    #     "".format(
+    #         email_secret_key=recipient_email_subscription_secret_key,
+    #         root_url=WE_VOTE_SERVER_ROOT_URL,
+    #     )
+    # # Instant unsubscribe email address in email header
+    # # from voter.models import NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL  # To be updated
+    # list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
+    #                           "".format(setting='supporterinitial')
+
     template_variables_for_json = {
         "subject":                          subject,
         "campaignx_share_campaign_url":     campaignx_share_campaign_url,
@@ -518,10 +607,8 @@ def campaignx_supporter_initial_response_send(  # CAMPAIGNX_SUPPORTER_INITIAL_RE
         # "sender_description":           speaker_voter_description,
         # "sender_network_details":       speaker_voter_network_details,
         "recipient_name":                   recipient_name,
+        "recipient_unsubscribe_url":        recipient_unsubscribe_url,
         "recipient_voter_email":            recipient_email,
-        "recipient_unsubscribe_url":        campaigns_root_url_verified + "/settings/notifications/esk/" +
-        recipient_email_subscription_secret_key,
-        "email_open_url":                   WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
         "view_main_discussion_page_url":    campaigns_root_url_verified + "/news",
         "view_your_ballot_url":             campaigns_root_url_verified + "/ballot",
         "we_vote_hosted_campaign_photo_large_url":  we_vote_hosted_campaign_photo_large_url,
@@ -539,7 +626,10 @@ def campaignx_supporter_initial_response_send(  # CAMPAIGNX_SUPPORTER_INITIAL_RE
         recipient_email_we_vote_id=recipient_email_we_vote_id,
         recipient_voter_email=recipient_email,
         template_variables_in_json=template_variables_in_json,
-        kind_of_email_template=kind_of_email_template)
+        kind_of_email_template=kind_of_email_template,
+        # list_unsubscribe_mailto=list_unsubscribe_mailto,
+        # list_unsubscribe_url=list_unsubscribe_url,
+    )
     status += outbound_results['status'] + " "
     success = outbound_results['success']
     if outbound_results['email_outbound_description_saved']:

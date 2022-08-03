@@ -41,22 +41,29 @@ INTERFACE_STATUS_THRESHOLD_ORGANIZATIONS_FOLLOWED = 5
 # notification_flag_integer_to_set, notification_flag_integer_to_unset
 # Used for notification_settings bits. Which notification options has the voter chosen?
 NOTIFICATION_ZERO = 0
-NOTIFICATION_NEWSLETTER_OPT_IN = 1  # "I would like to receive the We Vote newsletter"
-# NOTIFICATION_FRIEND_REQUESTS = n/a,  # In App: "New friend requests, and responses to your requests"
-NOTIFICATION_FRIEND_REQUESTS_EMAIL = 2  # Email: "New friend requests, and responses to your requests"
-NOTIFICATION_FRIEND_REQUESTS_SMS = 4  # SMS: "New friend requests, and responses to your requests"
+NOTIFICATION_NEWSLETTER_OPT_IN = 1  # "I would like to receive the We Vote newsletter" - newsletter
+# NOTIFICATION_FRIEND_REQUESTS = n/a,  # In App: "New friend requests"
+NOTIFICATION_FRIEND_REQUESTS_EMAIL = 2  # Email: "New friend requests" - friendinvite
+NOTIFICATION_FRIEND_REQUESTS_SMS = 4  # SMS: "New friend requests"
 # NOTIFICATION_SUGGESTED_FRIENDS = n/a  # In App: "Suggestions of people you may know"
-NOTIFICATION_SUGGESTED_FRIENDS_EMAIL = 8  # Email: "Suggestions of people you may know"
+NOTIFICATION_SUGGESTED_FRIENDS_EMAIL = 8  # Email: "Suggestions of people you may know" - suggestedfriend
 NOTIFICATION_SUGGESTED_FRIENDS_SMS = 16  # SMS: "Suggestions of people you may know"
 # NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT = n/a  # In App: "Friends' opinions (on your ballot)"
-NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_EMAIL = 32  # Email: "Friends' opinions (on your ballot)"
+NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_EMAIL = 32  # Email: "Friends' opinions (on your ballot)" - friendopinions
 NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_SMS = 64  # SMS: "Friends' opinions (on your ballot)"
 NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS = 128  # In App: "Friends' opinions (other regions)"
-NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL = 256  # Email: "Friends' opinions (other regions)"
+NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL = 256  # Email: "Friends' opinions (other regions)" - friendopinionsall
 NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_SMS = 512  # SMS: "Friends' opinions (other regions)"
 # NOTIFICATION_VOTER_DAILY_SUMMARY = n/a  # In App: When a friend posts something, or reacts to another post
-NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL = 1024  # Email: When a friend posts something, or reacts to another post
-NOTIFICATION_VOTER_DAILY_SUMMARY_SMS = 2048  # SMS: When a friend posts something, or reacts to another post
+NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL = 1024  # Email: When a friend posts something - dailyfriendactivity
+NOTIFICATION_VOTER_DAILY_SUMMARY_SMS = 2048  # SMS: When a friend posts something
+# TODO 2022-07-19 UPDATES NEEDED TO SUPPORT THESE NEW VALUES
+NOTIFICATION_FRIEND_REQUEST_RESPONSES_EMAIL = 4096  # Email: "Show me responses to my friend requests" - friendaccept
+NOTIFICATION_FRIEND_REQUEST_RESPONSES_SMS = 8192,  # SMS: "Show me responses to my friend requests"
+NOTIFICATION_LOGIN_EMAIL = 16384  # Email: "Show me email login requests" - login
+NOTIFICATION_LOGIN_SMS = 32768  # SMS: "Show me SMS login requests"
+NOTIFICATION_FRIEND_MESSAGES_EMAIL = 65536  # Email: "Show me messages from friends" - friendmessage
+NOTIFICATION_FRIEND_MESSAGES_SMS = 131072  # SMS: "Show me messages from friends"
 
 # Default to set for new voters
 NOTIFICATION_SETTINGS_FLAGS_DEFAULT = \
@@ -319,6 +326,7 @@ class VoterManager(BaseUserManager):
             google_last_name=None,
             ignore_contact=None,
             imported_by_voter_we_vote_id='',
+            is_friend=None,
             last_name=None,
             middle_name=None,
             state_code=None,
@@ -339,6 +347,7 @@ class VoterManager(BaseUserManager):
         :param google_last_name:
         :param ignore_contact:
         :param imported_by_voter_we_vote_id:
+        :param is_friend:
         :param last_name:
         :param middle_name:
         :param state_code:
@@ -412,6 +421,10 @@ class VoterManager(BaseUserManager):
                     if voter_contact_email.ignore_contact != ignore_contact:
                         voter_contact_email.ignore_contact = ignore_contact
                         change_to_save = True
+                if is_friend is not None:
+                    if voter_contact_email.is_friend != is_friend:
+                        voter_contact_email.is_friend = is_friend
+                        change_to_save = True
                 if last_name is not None:
                     if voter_contact_email.last_name != last_name:
                         voter_contact_email.last_name = last_name
@@ -467,6 +480,9 @@ class VoterManager(BaseUserManager):
                     return results
                 if ignore_contact is not None:
                     voter_contact_email.ignore_contact = ignore_contact
+                    change_to_save = True
+                if is_friend is not None:
+                    voter_contact_email.is_friend = is_friend
                     change_to_save = True
                 if change_to_save:
                     voter_contact_email.save()
@@ -710,8 +726,11 @@ class VoterManager(BaseUserManager):
         """
         voter = Voter()
         success = False
-        status = "Failed to create voter"
+        status = ""
         duplicate_email = False
+        email_address_object_created = False
+        email_address_we_vote_id = ''
+        voter_created = False
         try:
             voter.set_password(password)
             voter.first_name = first_name
@@ -725,20 +744,50 @@ class VoterManager(BaseUserManager):
             voter.is_verified_volunteer = is_verified_volunteer
             voter.is_active = True
             voter.save()
+            voter_created = True
             success = True
-            status = "Created voter " + voter.we_vote_id
+            status = "Created voter " + str(voter.we_vote_id) + " "
             logger.debug("create_new_voter_account successfully created (voter) : " + first_name)
-
         except IntegrityError as e:
-            status += ", " + str(e)
+            status += "FAILED_TO_CREATE_VOTER_INTEGRITY: " + str(e) + " "
             handle_record_not_saved_exception(e, logger=logger)
             print("create_new_voter_account IntegrityError exception:" + str(e))
             if "voter_voter_email_key" in str(e):
                 duplicate_email = True
         except Exception as e:
-            status += ", " + str(e)
+            status += "FAILED_TO_CREATE_VOTER: " + str(e) + " "
             handle_record_not_saved_exception(e, logger=logger)
             logger.debug("create_new_voter_account general exception: " + str(e))
+
+        if voter_created:
+            try:
+                from email_outbound.models import EmailManager
+                email_manager = EmailManager()
+                email_results = email_manager.create_email_address(
+                    normalized_email_address=email,
+                    voter_we_vote_id=voter.we_vote_id,
+                    email_ownership_is_verified=True,
+                )
+                email_address_object_created = True
+                status += email_results['status']
+                if email_results['email_address_object_saved']:
+                    email_address_object = email_results['email_address_object']
+                    email_address_we_vote_id = email_address_object.we_vote_id
+            except Exception as e:
+                status += "FAILED_TO_CREATE_VOTER_EMAIL_ADDRESS: " + str(e) + " "
+                handle_record_not_saved_exception(e, logger=logger)
+                logger.debug("ERROR_SAVING_NEW_EMAIL create_new_voter_account general exception: " + str(e))
+
+        if email_address_object_created:
+            try:
+                voter.email_ownership_is_verified = True
+                voter.primary_email_we_vote_id = email_address_we_vote_id
+                voter.save()
+                status += "VOTER_CREATED_EMAIL_OWNERSHIP_VERIFIED "
+            except Exception as e:
+                status += "FAILED_TO_UPDATE_VOTER_WITH_EMAIL_ADDRESS: " + str(e) + " "
+                handle_record_not_saved_exception(e, logger=logger)
+                logger.debug("ERROR_SAVING_NEW_EMAIL create_new_voter_account general exception: " + str(e))
 
         results = {
             'success': success,
@@ -925,6 +974,66 @@ class VoterManager(BaseUserManager):
         }
         return results
 
+    def retrieve_voter_contact_email(
+            self,
+            email_address_text='',
+            imported_by_voter_we_vote_id='',
+            read_only=False):
+        success = True
+        status = ""
+        voter_contact_email = None
+        voter_contact_email_found = False
+
+        if not positive_value_exists(email_address_text) or \
+                not positive_value_exists(imported_by_voter_we_vote_id):
+            status += "MISSING_IMPORTED_BY_VOTER_WE_VOTE_ID "
+            results = {
+                'success':                      False,
+                'status':                       status,
+                'voter_contact_email':          voter_contact_email,
+                'voter_contact_email_found':    voter_contact_email_found,
+            }
+            return results
+
+        try:
+            if positive_value_exists(read_only):
+                query = VoterContactEmail.objects.using('readonly').all()
+            else:
+                query = VoterContactEmail.objects.all()
+            query = query.filter(imported_by_voter_we_vote_id=imported_by_voter_we_vote_id)
+            query = query.filter(email_address_text__iexact=email_address_text)
+            list_of_voter_contact_emails = list(query)
+            if len(list_of_voter_contact_emails) > 1:
+                first_saved = False
+                for one_voter_contact_email in list_of_voter_contact_emails:
+                    if first_saved:
+                        if positive_value_exists(read_only):
+                            try:
+                                voter_contact_email.delete()
+                            except Exception as e:
+                                status += "VOTER_CONTACT_EMAIL_DELETE-EXCEPTION: " + str(e) + ' '
+                    else:
+                        voter_contact_email = one_voter_contact_email
+                        voter_contact_email_found = True
+            elif len(list_of_voter_contact_emails) == 1:
+                voter_contact_email = list_of_voter_contact_emails[0]
+                voter_contact_email_found = True
+            else:
+                voter_contact_email_found = False
+                status += "VOTER_CONTACT_EMAIL_NOT_FOUND "
+        except Exception as e:
+            voter_contact_email_found = False
+            status += "VOTER_CONTACT_EMAIL_NOT_FOUND-EXCEPTION: " + str(e) + ' '
+            success = False
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'voter_contact_email':              voter_contact_email,
+            'voter_contact_email_found':        voter_contact_email_found,
+        }
+        return results
+
     def retrieve_voter_contact_email_list(self, imported_by_voter_we_vote_id='', read_only=True):
         success = True
         status = ""
@@ -961,7 +1070,9 @@ class VoterManager(BaseUserManager):
         email_addresses_returned_list = []
         if voter_contact_email_list_found:
             for voter_contact_email in voter_contact_email_list:
-                email_addresses_returned_list.append(voter_contact_email.email_address_text)
+                email_address_text_lower_case = voter_contact_email.email_address_text.lower()
+                if email_address_text_lower_case not in email_addresses_returned_list:
+                    email_addresses_returned_list.append(email_address_text_lower_case)
 
         results = {
             'success':                          success,
@@ -1100,7 +1211,7 @@ class VoterManager(BaseUserManager):
 
         facebook_manager = FacebookManager()
         facebook_link_results = facebook_manager.retrieve_facebook_link_to_voter_from_facebook_id(
-            facebook_id)
+            facebook_id, read_only=True)
         if not facebook_link_results['facebook_link_to_voter_found']:
             # We don't have an official FacebookLinkToVoter, so we don't want to clean up any caching
             status += "FACEBOOK_LINK_TO_VOTER_NOT_FOUND-CACHING_REPAIR_NOT_EXECUTED "
@@ -1169,7 +1280,7 @@ class VoterManager(BaseUserManager):
             # Now make sure that the voter table has values for the voter linked with the
             # official FacebookLinkToVoter
             voter_results = self.retrieve_voter_by_we_vote_id(
-                facebook_link_to_voter.voter_we_vote_id)
+                facebook_link_to_voter.voter_we_vote_id, read_only=False)
             if not voter_results['voter_found']:
                 status += "REPAIR_FACEBOOK_CACHING-COULD_NOT_UPDATE_LINKED_VOTER "
             else:
@@ -1390,7 +1501,7 @@ class VoterManager(BaseUserManager):
         voter_we_vote_id = ''
 
         facebook_manager = FacebookManager()
-        facebook_retrieve_results = facebook_manager.retrieve_facebook_link_to_voter(facebook_id)
+        facebook_retrieve_results = facebook_manager.retrieve_facebook_link_to_voter(facebook_id, read_only=True)
         if facebook_retrieve_results['facebook_link_to_voter_found']:
             facebook_link_to_voter = facebook_retrieve_results['facebook_link_to_voter']
             voter_we_vote_id = facebook_link_to_voter.voter_we_vote_id
@@ -2923,6 +3034,8 @@ class Voter(AbstractBaseUser):
     last_name = models.CharField(verbose_name='last name', max_length=255, null=True, blank=True)
     date_joined = models.DateTimeField(verbose_name='date joined', auto_now_add=True)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+    # friend_count helps us quickly identify voters who have friends
+    friend_count = models.PositiveIntegerField(default=None, null=True)
     state_code_for_display = models.CharField(max_length=2, null=True, blank=True)
     state_code_for_display_hidden = models.BooleanField(default=False)
     state_code_for_display_updated = models.BooleanField(default=False)  # Meant to be a transitory field during update
@@ -3145,7 +3258,7 @@ class Voter(AbstractBaseUser):
 
     def signed_in_facebook(self):
         facebook_manager = FacebookManager()
-        facebook_link_results = facebook_manager.retrieve_facebook_link_to_voter(0, self.we_vote_id)
+        facebook_link_results = facebook_manager.retrieve_facebook_link_to_voter(0, self.we_vote_id, read_only=True)
         if facebook_link_results['facebook_link_to_voter_found']:
             facebook_link_to_voter = facebook_link_results['facebook_link_to_voter']
             if positive_value_exists(facebook_link_to_voter.facebook_user_id):
@@ -3166,7 +3279,7 @@ class Voter(AbstractBaseUser):
 
     def signed_in_with_apple(self):
         try:
-            apple_object = AppleUser.objects.get(voter_we_vote_id__iexact=self.we_vote_id)
+            apple_object = AppleUser.objects.using('readonly').get(voter_we_vote_id__iexact=self.we_vote_id)
             return True
         except AppleUser.DoesNotExist:
             return False
@@ -3311,6 +3424,7 @@ class VoterContactEmail(models.Model):
     has_data_from_google_people_api = models.BooleanField(default=False)
     ignore_contact = models.BooleanField(default=False)
     imported_by_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
+    is_friend = models.BooleanField(default=False)
     last_name = models.CharField(max_length=255, default=None, null=True)
     middle_name = models.CharField(max_length=255, default=None, null=True)
     state_code = models.CharField(max_length=2, default=None, null=True, db_index=True)

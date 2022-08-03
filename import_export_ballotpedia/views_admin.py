@@ -11,11 +11,9 @@ from config.base import get_environment_variable
 from datetime import date
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.messages import get_messages
 from django.urls import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
 from election.models import Election, ElectionManager
 from import_export_batches.models import BatchSet, BATCH_SET_SOURCE_IMPORT_BALLOTPEDIA_BALLOT_ITEMS
 
@@ -35,8 +33,6 @@ IMPORT_BALLOT_ITEM = 'IMPORT_BALLOT_ITEM'
 IMPORT_VOTER = 'IMPORT_VOTER'
 MEASURE = 'MEASURE'
 POLITICIAN = 'POLITICIAN'
-
-MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK = 125  # 125. Formerly 250 and 111
 
 
 @login_required

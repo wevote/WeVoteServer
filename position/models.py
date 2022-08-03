@@ -1462,242 +1462,218 @@ class PositionListManager(models.Manager):
         failure_counter = 0
 
         ############################
-        # Retrieve public positions
+        # Repair positions owned by voter_id
+        public_number_changed = 0
+        friend_number_changed = 0
         try:
-            # Retrieve by voter_id
-            public_positions_list_query = PositionEntered.objects.all()
-            public_positions_list_query = public_positions_list_query.filter(voter_id=voter_id)
-            public_positions_list = list(public_positions_list_query)  # Force the query to run
-            for public_position in public_positions_list:
-                public_position_to_be_saved = False
-                try:
-                    if public_position.voter_id != voter_id:
-                        public_position.voter_id = voter_id
-                        public_position_to_be_saved = True
-                    if public_position.voter_we_vote_id != voter_we_vote_id:
-                        public_position.voter_we_vote_id = voter_we_vote_id
-                        public_position_to_be_saved = True
-                    if public_position.organization_id != organization_id:
-                        public_position.organization_id = organization_id
-                        public_position_to_be_saved = True
-                    if public_position.organization_we_vote_id != organization_we_vote_id:
-                        public_position.organization_we_vote_id = organization_we_vote_id
-                        public_position_to_be_saved = True
+            # ...without the right voter_we_vote_id should be updated
+            public_number_changed += PositionEntered.objects.all().filter(
+                voter_id=voter_id,
+            ).exclude(
+                voter_we_vote_id__iexact=voter_we_vote_id,
+            ).update(
+                voter_we_vote_id=voter_we_vote_id,
+            )
+            friend_number_changed += PositionForFriends.objects.all().filter(
+                voter_id=voter_id,
+            ).exclude(
+                voter_we_vote_id__iexact=voter_we_vote_id,
+            ).update(
+                voter_we_vote_id=voter_we_vote_id,
+            )
 
-                    if public_position_to_be_saved:
-                        public_position.save()
+            # ...without the right organization_id should be updated
+            public_number_changed += PositionEntered.objects.all().filter(
+                voter_id=voter_id,
+            ).exclude(
+                organization_id=organization_id,
+            ).update(
+                organization_id=organization_id,
+            )
+            friend_number_changed += PositionForFriends.objects.all().filter(
+                voter_id=voter_id,
+            ).exclude(
+                organization_id=organization_id,
+            ).update(
+                organization_id=organization_id,
+            )
 
-                except Exception as e:
-                    failure_counter += 1
-
-            # Retrieve by voter_we_vote_id
-            public_positions_list_query = PositionEntered.objects.all()
-            public_positions_list_query = public_positions_list_query.filter(
-                voter_we_vote_id__iexact=voter_we_vote_id)
-            public_positions_list = list(public_positions_list_query)  # Force the query to run
-            for public_position in public_positions_list:
-                public_position_to_be_saved = False
-                try:
-                    if public_position.voter_id != voter_id:
-                        public_position.voter_id = voter_id
-                        public_position_to_be_saved = True
-                    if public_position.voter_we_vote_id != voter_we_vote_id:
-                        public_position.voter_we_vote_id = voter_we_vote_id
-                        public_position_to_be_saved = True
-                    if public_position.organization_id != organization_id:
-                        public_position.organization_id = organization_id
-                        public_position_to_be_saved = True
-                    if public_position.organization_we_vote_id != organization_we_vote_id:
-                        public_position.organization_we_vote_id = organization_we_vote_id
-                        public_position_to_be_saved = True
-
-                    if public_position_to_be_saved:
-                        public_position.save()
-
-                except Exception as e:
-                    failure_counter += 1
-
-            # Retrieve by organization_id
-            public_positions_list_query = PositionEntered.objects.all()
-            public_positions_list_query = public_positions_list_query.filter(organization_id=organization_id)
-            # As of Aug 2018 we are no longer using PERCENT_RATING
-            public_positions_list_query = public_positions_list_query.exclude(stance__iexact=PERCENT_RATING)
-            public_positions_list = list(public_positions_list_query)  # Force the query to run
-            for public_position in public_positions_list:
-                public_position_to_be_saved = False
-                try:
-                    if public_position.voter_id != voter_id:
-                        public_position.voter_id = voter_id
-                        public_position_to_be_saved = True
-                    if public_position.voter_we_vote_id != voter_we_vote_id:
-                        public_position.voter_we_vote_id = voter_we_vote_id
-                        public_position_to_be_saved = True
-                    if public_position.organization_id != organization_id:
-                        public_position.organization_id = organization_id
-                        public_position_to_be_saved = True
-                    if public_position.organization_we_vote_id != organization_we_vote_id:
-                        public_position.organization_we_vote_id = organization_we_vote_id
-                        public_position_to_be_saved = True
-
-                    if public_position_to_be_saved:
-                        public_position.save()
-
-                except Exception as e:
-                    failure_counter += 1
-
-            # Retrieve by organization_we_vote_id
-            public_positions_list_query = PositionEntered.objects.all()
-            public_positions_list_query = public_positions_list_query.filter(
-                organization_we_vote_id__iexact=organization_we_vote_id)
-            # As of Aug 2018 we are no longer using PERCENT_RATING
-            public_positions_list_query = public_positions_list_query.exclude(stance__iexact=PERCENT_RATING)
-            public_positions_list = list(public_positions_list_query)  # Force the query to run
-            for public_position in public_positions_list:
-                public_position_to_be_saved = False
-                try:
-                    if public_position.voter_id != voter_id:
-                        public_position.voter_id = voter_id
-                        public_position_to_be_saved = True
-                    if public_position.voter_we_vote_id != voter_we_vote_id:
-                        public_position.voter_we_vote_id = voter_we_vote_id
-                        public_position_to_be_saved = True
-                    if public_position.organization_id != organization_id:
-                        public_position.organization_id = organization_id
-                        public_position_to_be_saved = True
-                    if public_position.organization_we_vote_id != organization_we_vote_id:
-                        public_position.organization_we_vote_id = organization_we_vote_id
-                        public_position_to_be_saved = True
-
-                    if public_position_to_be_saved:
-                        public_position.save()
-
-                except Exception as e:
-                    failure_counter += 1
-
+            # ...without the right organization_we_vote_id should be updated
+            public_number_changed += PositionEntered.objects.all().filter(
+                voter_id=voter_id,
+            ).exclude(
+                organization_we_vote_id__iexact=organization_we_vote_id,
+            ).update(
+                organization_we_vote_id=organization_we_vote_id,
+            )
+            friend_number_changed += PositionForFriends.objects.all().filter(
+                voter_id=voter_id,
+            ).exclude(
+                organization_we_vote_id__iexact=organization_we_vote_id,
+            ).update(
+                organization_we_vote_id=organization_we_vote_id,
+            )
         except Exception as e:
-            results = {
-                'status':           'REPAIR-VOTER_POSITION_FOR_PUBLIC_SEARCH_FAILED ',
-                'success':          False,
-                'repair_complete':  False,
-            }
-            return results
+            failure_counter += 1
 
         ############################
-        # Retrieve positions meant for friends only
+        # Repair public positions owned by voter_we_vote_id
         try:
-            # Retrieve by voter_id
-            friends_positions_list_query = PositionForFriends.objects.all()
-            friends_positions_list_query = friends_positions_list_query.filter(voter_id=voter_id)
-            friends_positions_list = list(friends_positions_list_query)  # Force the query to run
-            for friends_position in friends_positions_list:
-                friends_position_to_be_saved = False
-                try:
-                    if friends_position.voter_id != voter_id:
-                        friends_position.voter_id = voter_id
-                        friends_position_to_be_saved = True
-                    if friends_position.voter_we_vote_id != voter_we_vote_id:
-                        friends_position.voter_we_vote_id = voter_we_vote_id
-                        friends_position_to_be_saved = True
-                    if friends_position.organization_id != organization_id:
-                        friends_position.organization_id = organization_id
-                        friends_position_to_be_saved = True
-                    if friends_position.organization_we_vote_id != organization_we_vote_id:
-                        friends_position.organization_we_vote_id = organization_we_vote_id
-                        friends_position_to_be_saved = True
+            # ...without the right voter_id should be updated
+            public_number_changed += PositionEntered.objects.all().filter(
+                voter_we_vote_id__iexact=voter_we_vote_id,
+            ).exclude(
+                voter_id=voter_id,
+            ).update(
+                voter_id=voter_id,
+            )
+            friend_number_changed += PositionForFriends.objects.all().filter(
+                voter_we_vote_id__iexact=voter_we_vote_id,
+            ).exclude(
+                voter_id=voter_id,
+            ).update(
+                voter_id=voter_id,
+            )
 
-                    if friends_position_to_be_saved:
-                        friends_position.save()
+            # ...without the right organization_id should be updated
+            public_number_changed += PositionEntered.objects.all().filter(
+                voter_we_vote_id__iexact=voter_we_vote_id,
+            ).exclude(
+                organization_id=organization_id,
+            ).update(
+                organization_id=organization_id,
+            )
+            friend_number_changed += PositionForFriends.objects.all().filter(
+                voter_we_vote_id__iexact=voter_we_vote_id,
+            ).exclude(
+                organization_id=organization_id,
+            ).update(
+                organization_id=organization_id,
+            )
 
-                except Exception as e:
-                    failure_counter += 1
-
-            # Retrieve by voter_we_vote_id
-            friends_positions_list_query = PositionForFriends.objects.all()
-            friends_positions_list_query = friends_positions_list_query.filter(
-                voter_we_vote_id__iexact=voter_we_vote_id)
-            friends_positions_list = list(friends_positions_list_query)  # Force the query to run
-            for friends_position in friends_positions_list:
-                friends_position_to_be_saved = False
-                try:
-                    if friends_position.voter_id != voter_id:
-                        friends_position.voter_id = voter_id
-                        friends_position_to_be_saved = True
-                    if friends_position.voter_we_vote_id != voter_we_vote_id:
-                        friends_position.voter_we_vote_id = voter_we_vote_id
-                        friends_position_to_be_saved = True
-                    if friends_position.organization_id != organization_id:
-                        friends_position.organization_id = organization_id
-                        friends_position_to_be_saved = True
-                    if friends_position.organization_we_vote_id != organization_we_vote_id:
-                        friends_position.organization_we_vote_id = organization_we_vote_id
-                        friends_position_to_be_saved = True
-
-                    if friends_position_to_be_saved:
-                        friends_position.save()
-
-                except Exception as e:
-                    failure_counter += 1
-
-            # Retrieve by organization_id
-            friends_positions_list_query = PositionForFriends.objects.all()
-            friends_positions_list_query = friends_positions_list_query.filter(organization_id=organization_id)
-            friends_positions_list = list(friends_positions_list_query)  # Force the query to run
-            for friends_position in friends_positions_list:
-                friends_position_to_be_saved = False
-                try:
-                    if friends_position.voter_id != voter_id:
-                        friends_position.voter_id = voter_id
-                        friends_position_to_be_saved = True
-                    if friends_position.voter_we_vote_id != voter_we_vote_id:
-                        friends_position.voter_we_vote_id = voter_we_vote_id
-                        friends_position_to_be_saved = True
-                    if friends_position.organization_id != organization_id:
-                        friends_position.organization_id = organization_id
-                        friends_position_to_be_saved = True
-                    if friends_position.organization_we_vote_id != organization_we_vote_id:
-                        friends_position.organization_we_vote_id = organization_we_vote_id
-                        friends_position_to_be_saved = True
-
-                    if friends_position_to_be_saved:
-                        friends_position.save()
-
-                except Exception as e:
-                    failure_counter += 1
-
-            # Retrieve by organization_we_vote_id
-            friends_positions_list_query = PositionForFriends.objects.all()
-            friends_positions_list_query = friends_positions_list_query.filter(
-                organization_we_vote_id__iexact=organization_we_vote_id)
-            friends_positions_list = list(friends_positions_list_query)  # Force the query to run
-            for friends_position in friends_positions_list:
-                friends_position_to_be_saved = False
-                try:
-                    if friends_position.voter_id != voter_id:
-                        friends_position.voter_id = voter_id
-                        friends_position_to_be_saved = True
-                    if friends_position.voter_we_vote_id != voter_we_vote_id:
-                        friends_position.voter_we_vote_id = voter_we_vote_id
-                        friends_position_to_be_saved = True
-                    if friends_position.organization_id != organization_id:
-                        friends_position.organization_id = organization_id
-                        friends_position_to_be_saved = True
-                    if friends_position.organization_we_vote_id != organization_we_vote_id:
-                        friends_position.organization_we_vote_id = organization_we_vote_id
-                        friends_position_to_be_saved = True
-
-                    if friends_position_to_be_saved:
-                        friends_position.save()
-
-                except Exception as e:
-                    failure_counter += 1
-
+            # ...without the right organization_we_vote_id should be updated
+            public_number_changed += PositionEntered.objects.all().filter(
+                voter_we_vote_id__iexact=voter_we_vote_id,
+            ).exclude(
+                organization_we_vote_id__iexact=organization_we_vote_id,
+            ).update(
+                organization_we_vote_id=organization_we_vote_id,
+            )
+            friend_number_changed += PositionForFriends.objects.all().filter(
+                voter_we_vote_id__iexact=voter_we_vote_id,
+            ).exclude(
+                organization_we_vote_id__iexact=organization_we_vote_id,
+            ).update(
+                organization_we_vote_id=organization_we_vote_id,
+            )
         except Exception as e:
-            results = {
-                'status':           'REPAIR-VOTER_POSITION_FOR_FRIENDS_SEARCH_FAILED ',
-                'success':          False,
-                'repair_complete':  False,
-            }
-            return results
+            failure_counter += 1
+
+        ############################
+        # Repair public positions owned by organization_id
+        try:
+            # ...without the right voter_id should be updated
+            public_number_changed += PositionEntered.objects.all().filter(
+                organization_id=organization_id,
+            ).exclude(
+                voter_id=voter_id,
+            ).update(
+                voter_id=voter_id,
+            )
+            friend_number_changed += PositionForFriends.objects.all().filter(
+                organization_id=organization_id,
+            ).exclude(
+                voter_id=voter_id,
+            ).update(
+                voter_id=voter_id,
+            )
+
+            # ...without the right voter_we_vot_id should be updated
+            public_number_changed += PositionEntered.objects.all().filter(
+                organization_id=organization_id,
+            ).exclude(
+                voter_we_vote_id__iexact=voter_we_vote_id,
+            ).update(
+                voter_we_vote_id=voter_we_vote_id,
+            )
+            friend_number_changed += PositionForFriends.objects.all().filter(
+                organization_id=organization_id,
+            ).exclude(
+                voter_we_vote_id__iexact=voter_we_vote_id,
+            ).update(
+                voter_we_vote_id=voter_we_vote_id,
+            )
+
+            # ...without the right organization_we_vote_id should be updated
+            public_number_changed += PositionEntered.objects.all().filter(
+                organization_id=organization_id,
+            ).exclude(
+                organization_we_vote_id__iexact=organization_we_vote_id,
+            ).update(
+                organization_we_vote_id=organization_we_vote_id,
+            )
+            friend_number_changed += PositionForFriends.objects.all().filter(
+                organization_id=organization_id,
+            ).exclude(
+                organization_we_vote_id__iexact=organization_we_vote_id,
+            ).update(
+                organization_we_vote_id=organization_we_vote_id,
+            )
+        except Exception as e:
+            failure_counter += 1
+
+        ############################
+        # Repair public positions owned by organization_we_vote_id
+        try:
+            # ...without the right voter_id should be updated
+            public_number_changed += PositionEntered.objects.all().filter(
+                organization_we_vote_id__iexact=organization_we_vote_id,
+            ).exclude(
+                voter_id=voter_id,
+            ).update(
+                voter_id=voter_id,
+            )
+            friend_number_changed += PositionForFriends.objects.all().filter(
+                organization_we_vote_id__iexact=organization_we_vote_id,
+            ).exclude(
+                voter_id=voter_id,
+            ).update(
+                voter_id=voter_id,
+            )
+
+            # ...without the right voter_we_vote_id should be updated
+            public_number_changed += PositionEntered.objects.all().filter(
+                organization_we_vote_id__iexact=organization_we_vote_id,
+            ).exclude(
+                voter_we_vote_id__iexact=voter_we_vote_id,
+            ).update(
+                voter_we_vote_id=voter_we_vote_id,
+            )
+            friend_number_changed += PositionForFriends.objects.all().filter(
+                organization_we_vote_id__iexact=organization_we_vote_id,
+            ).exclude(
+                voter_we_vote_id__iexact=voter_we_vote_id,
+            ).update(
+                voter_we_vote_id=voter_we_vote_id,
+            )
+
+            # ...without the right organization_id should be updated
+            public_number_changed += PositionEntered.objects.all().filter(
+                organization_we_vote_id__iexact=organization_we_vote_id,
+            ).exclude(
+                organization_id=organization_id,
+            ).update(
+                organization_id=organization_id,
+            )
+            friend_number_changed += PositionForFriends.objects.all().filter(
+                organization_we_vote_id__iexact=organization_we_vote_id,
+            ).exclude(
+                organization_id=organization_id,
+            ).update(
+                organization_id=organization_id,
+            )
+        except Exception as e:
+            failure_counter += 1
 
         if positive_value_exists(failure_counter):
             results = {
@@ -2250,6 +2226,7 @@ class PositionListManager(models.Manager):
         candidate_we_vote_id_list = results['candidate_we_vote_id_list']
 
         # Retrieve the support positions for this contest_office_id
+        position_list = []
         position_list_found = False
         try:
             if retrieve_public_positions:
@@ -2281,11 +2258,11 @@ class PositionListManager(models.Manager):
                 # for contest_office (like we do for candidate) because we don't have to deal with
                 # PERCENT_RATING data with measures
             if friends_we_vote_id_list is not False:
-                # Find positions from friends. Look for we_vote_id case insensitive.
+                # Find positions from friends. Look for we_vote_id case-insensitive.
                 we_vote_id_filter = Q()
                 for we_vote_id in friends_we_vote_id_list:
                     we_vote_id_filter |= Q(voter_we_vote_id__iexact=we_vote_id)
-                    position_list_query = position_list_query.filter(we_vote_id_filter)
+                position_list_query = position_list_query.filter(we_vote_id_filter)
             # Limit to positions in the last x years - currently we are not limiting
             # position_list = position_list.filter(election_id=election_id)
 
@@ -4312,7 +4289,7 @@ class PositionManager(models.Manager):
 
             if candidate_we_vote_id:
                 candidate_manager = CandidateManager()
-                results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+                results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=True)
                 if results['candidate_found']:
                     candidate = results['candidate']
                     ballot_item_display_name = candidate.candidate_name
@@ -5400,7 +5377,7 @@ class PositionManager(models.Manager):
                 if positive_value_exists(existing_position.candidate_campaign_we_vote_id):
                     candidate_manager = CandidateManager()
                     results = candidate_manager.retrieve_candidate_from_we_vote_id(
-                        existing_position.candidate_campaign_we_vote_id)
+                        existing_position.candidate_campaign_we_vote_id, read_only=True)
                     if results['candidate_found']:
                         candidate = results['candidate']
                         existing_position.google_civic_election_id = \
@@ -6351,7 +6328,7 @@ class PositionManager(models.Manager):
 
                 if positive_value_exists(voter_position_on_stage.candidate_campaign_we_vote_id):
                     results = candidate_manager.retrieve_candidate_from_we_vote_id(
-                        voter_position_on_stage.candidate_campaign_we_vote_id)
+                        voter_position_on_stage.candidate_campaign_we_vote_id, read_only=True)
                     if results['candidate_found']:
                         candidate = results['candidate']
                         if not positive_value_exists(voter_position_on_stage.candidate_campaign_id):
@@ -6432,7 +6409,7 @@ class PositionManager(models.Manager):
                 speaker_image_url_https_medium = '',
                 speaker_image_url_https_tiny = '',
                 if candidate_we_vote_id:
-                    results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+                    results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=True)
                     if results['candidate_found']:
                         candidate = results['candidate']
                         candidate_id = candidate.id
@@ -7036,7 +7013,7 @@ class PositionManager(models.Manager):
                     position_on_stage.candidate_campaign_we_vote_id = candidate_we_vote_id
                     # Lookup candidate_campaign_id based on candidate_campaign_we_vote_id and update
                     candidate_results = \
-                        candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+                        candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=True)
                     if candidate_results['candidate_found']:
                         candidate = candidate_results['candidate']
                         position_on_stage.candidate_campaign_id = candidate.id
@@ -7552,7 +7529,7 @@ class PositionManager(models.Manager):
 
                 candidate_id = None
                 if candidate_we_vote_id:
-                    results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+                    results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=True)
                     if results['candidate_found']:
                         candidate = results['candidate']
                         candidate_id = candidate.id
@@ -8151,7 +8128,7 @@ class PositionManager(models.Manager):
                             candidate_found = True
                         else:
                             candidate_results = candidate_manager.retrieve_candidate_from_we_vote_id(
-                                position_object.candidate_campaign_we_vote_id)
+                                position_object.candidate_campaign_we_vote_id)  # Unknown read_only setting needed
                             if candidate_results['candidate_found']:
                                 candidate = candidate_results['candidate']
                                 candidate_found = True

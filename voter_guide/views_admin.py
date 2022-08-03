@@ -507,7 +507,7 @@ def voter_guide_create_view(request):
         # #########################
         # voter_guide_create_view: Find the candidate who is the subject of this page
         if positive_value_exists(candidate_we_vote_id):
-            results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+            results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=True)
             if results['candidate_found']:
                 candidate = results['candidate']
                 candidate_found = True
@@ -519,7 +519,8 @@ def voter_guide_create_view(request):
                 google_civic_election_id_list=google_civic_election_id_list_this_year,
                 state_code=state_code,
                 candidate_twitter_handle=candidate_twitter_handle,
-                candidate_name=candidate_name)
+                candidate_name=candidate_name,
+                read_only=True)
             if results['candidate_list_found']:
                 owner_of_website_candidate_list = results['candidate_list']
                 owner_of_website_candidate_list_count = len(owner_of_website_candidate_list)
@@ -724,6 +725,7 @@ def voter_guide_create_process_view(request):
     organization_twitter_handle = extract_twitter_handle_from_text_string(organization_twitter_handle)
 
     voter_manager = VoterManager()
+    voter_who_submitted_is_political_data_manager = False
     organization_twitter_followers_count = 0
     voter_who_submitted_name = ""
     voter_found = False
@@ -732,6 +734,7 @@ def voter_guide_create_process_view(request):
         voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
         if voter_results['voter_found']:
             voter = voter_results['voter']
+            voter_who_submitted_is_political_data_manager = voter.is_political_data_manager
             voter_found = True
             voter_who_submitted_name = voter.get_full_name()
             voter_who_submitted_we_vote_id = voter.we_vote_id
@@ -745,6 +748,7 @@ def voter_guide_create_process_view(request):
         voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
         if voter_results['voter_found']:
             voter = voter_results['voter']
+            voter_who_submitted_is_political_data_manager = voter.is_political_data_manager
             voter_found = True
             voter_who_submitted_name = voter.get_full_name()
             voter_who_submitted_we_vote_id = voter.we_vote_id
@@ -758,6 +762,7 @@ def voter_guide_create_process_view(request):
         voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
         if voter_results['voter_found']:
             voter = voter_results['voter']
+            voter_who_submitted_is_political_data_manager = voter.is_political_data_manager
             voter_who_submitted_name = voter.get_full_name()
             voter_who_submitted_we_vote_id = voter.we_vote_id
 
@@ -1054,7 +1059,7 @@ def voter_guide_create_process_view(request):
         # If here is_list_of_endorsements_for_candidate is true
         # First, identify the candidate that is the subject of the page we are analyzing
         if positive_value_exists(candidate_we_vote_id):
-            results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+            results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=True)
             if results['candidate_found']:
                 candidate = results['candidate']
                 candidate_found = True
@@ -1066,7 +1071,8 @@ def voter_guide_create_process_view(request):
                     google_civic_election_id_list=google_civic_election_id_list_this_year,
                     state_code=state_code,
                     candidate_twitter_handle=candidate_twitter_handle,
-                    candidate_name=candidate_name)
+                    candidate_name=candidate_name,
+                    read_only=True)
                 if results['candidate_found']:
                     candidate = results['candidate']
                     candidate_found = True
@@ -1258,6 +1264,10 @@ def voter_guide_create_process_view(request):
             'voter_who_submitted_name':         voter_who_submitted_name,
             'voter_who_submitted_we_vote_id':   voter_who_submitted_we_vote_id,
         }
+        if positive_value_exists(voter_who_submitted_we_vote_id) and voter_who_submitted_is_political_data_manager:
+            updated_values['assigned_to_name'] = voter_who_submitted_name
+            updated_values['assigned_to_voter_we_vote_id'] = voter_who_submitted_we_vote_id
+
         if has_suggested_voter_guide_rights:
             updated_values['ignore_stored_positions'] = ignore_stored_positions
             updated_values['ignore_this_source'] = ignore_this_source
@@ -1974,7 +1984,10 @@ def voter_guide_list_view(request):
     else:
         voter_guide_query = voter_guide_query.filter(google_civic_election_id__in=google_civic_election_id_list)
 
-    if not positive_value_exists(show_individuals):
+    if positive_value_exists(voter_guide_search):
+        # Allow individuals to be found during voter guide search
+        pass
+    elif not positive_value_exists(show_individuals):
         voter_guide_query = voter_guide_query.exclude(voter_guide_owner_type__iexact=INDIVIDUAL)
 
     if positive_value_exists(voter_guide_search):
@@ -2087,6 +2100,9 @@ def voter_guide_possibility_list_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     assigned_to_voter_we_vote_id = request.GET.get('assigned_to_voter_we_vote_id', False)
+    assigned_to_no_one = positive_value_exists(request.GET.get('assigned_to_no_one', False))
+    if positive_value_exists(assigned_to_no_one):
+        assigned_to_voter_we_vote_id = "ASSIGNED_TO_NO_ONE"
     from_prior_election = positive_value_exists(request.GET.get('from_prior_election', False))
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
@@ -2132,6 +2148,7 @@ def voter_guide_possibility_list_view(request):
         search_string=voter_guide_possibility_search,
         google_civic_election_id=google_civic_election_id,
         show_prior_years=show_all_elections,
+        assigned_to_no_one=assigned_to_no_one,
         assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
         return_count_only=True)
     to_review_count = results['voter_guide_possibility_list_count']
@@ -2142,6 +2159,7 @@ def voter_guide_possibility_list_view(request):
         search_string=voter_guide_possibility_search,
         google_civic_election_id=google_civic_election_id,
         show_prior_years=show_all_elections,
+        assigned_to_no_one=assigned_to_no_one,
         assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
         return_count_only=True)
     from_prior_election_count = results['voter_guide_possibility_list_count']
@@ -2152,6 +2170,7 @@ def voter_guide_possibility_list_view(request):
         search_string=voter_guide_possibility_search,
         google_civic_election_id=google_civic_election_id,
         show_prior_years=show_all_elections,
+        assigned_to_no_one=assigned_to_no_one,
         assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
         return_count_only=True)
     cannot_find_endorsements_count = results['voter_guide_possibility_list_count']
@@ -2162,6 +2181,7 @@ def voter_guide_possibility_list_view(request):
         search_string=voter_guide_possibility_search,
         google_civic_election_id=google_civic_election_id,
         show_prior_years=show_all_elections,
+        assigned_to_no_one=assigned_to_no_one,
         assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
         return_count_only=True)
     candidates_missing_count = results['voter_guide_possibility_list_count']
@@ -2172,6 +2192,7 @@ def voter_guide_possibility_list_view(request):
         search_string=voter_guide_possibility_search,
         google_civic_election_id=google_civic_election_id,
         show_prior_years=show_all_elections,
+        assigned_to_no_one=assigned_to_no_one,
         assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
         return_count_only=True)
     capture_detailed_comments_count = results['voter_guide_possibility_list_count']
@@ -2192,6 +2213,7 @@ def voter_guide_possibility_list_view(request):
             search_string=voter_guide_possibility_search,
             google_civic_election_id=google_civic_election_id,
             show_prior_years=show_all_elections,
+            assigned_to_no_one=assigned_to_no_one,
             assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
             from_prior_election=from_prior_election)
         if results['success']:
@@ -2207,6 +2229,7 @@ def voter_guide_possibility_list_view(request):
             search_string=voter_guide_possibility_search,
             google_civic_election_id=google_civic_election_id,
             show_prior_years=show_all_elections,
+            assigned_to_no_one=assigned_to_no_one,
             assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
             cannot_find_endorsements=cannot_find_endorsements)
         if results['success']:
@@ -2222,6 +2245,7 @@ def voter_guide_possibility_list_view(request):
             search_string=voter_guide_possibility_search,
             google_civic_election_id=google_civic_election_id,
             show_prior_years=show_all_elections,
+            assigned_to_no_one=assigned_to_no_one,
             assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
             candidates_missing_from_we_vote=candidates_missing_from_we_vote)
         if results['success']:
@@ -2237,6 +2261,7 @@ def voter_guide_possibility_list_view(request):
             search_string=voter_guide_possibility_search,
             google_civic_election_id=google_civic_election_id,
             show_prior_years=show_all_elections,
+            assigned_to_no_one=assigned_to_no_one,
             assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
             capture_detailed_comments=capture_detailed_comments)
         if results['success']:
@@ -2253,6 +2278,7 @@ def voter_guide_possibility_list_view(request):
             search_string=voter_guide_possibility_search,
             google_civic_election_id=google_civic_election_id,
             show_prior_years=show_all_elections,
+            assigned_to_no_one=assigned_to_no_one,
             assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
             hide_from_active_review=hide_from_active_review)
         if results['success']:
@@ -2268,6 +2294,7 @@ def voter_guide_possibility_list_view(request):
             search_string=voter_guide_possibility_search,
             google_civic_election_id=google_civic_election_id,
             show_prior_years=show_all_elections,
+            assigned_to_no_one=assigned_to_no_one,
             assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
             ignore_this_source=ignore_this_source)
         print(f"show_ignore_this_source results {results}")
@@ -2283,6 +2310,7 @@ def voter_guide_possibility_list_view(request):
             end_number=end_number,
             search_string=voter_guide_possibility_search,
             google_civic_election_id=google_civic_election_id,
+            assigned_to_no_one=assigned_to_no_one,
             assigned_to_voter_we_vote_id=assigned_to_voter_we_vote_id,
             show_prior_years=show_all_elections,
         )
@@ -2427,9 +2455,13 @@ def voter_guide_possibility_list_process_view(request):
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
 
     if positive_value_exists(assigned_to_voter_we_vote_id):
-        # Show voter guide possibilities assigned to on person
-        url_variables += "&assigned_to_voter_we_vote_id=" + str(assigned_to_voter_we_vote_id)
-    elif positive_value_exists(reassign_to_voter_we_vote_id):
+        if assigned_to_voter_we_vote_id == 'ASSIGNED_TO_NO_ONE':
+            url_variables += "&assigned_to_no_one=" + str(True)
+        else:
+            # Show voter guide possibilities assigned to on person
+            url_variables += "&assigned_to_voter_we_vote_id=" + str(assigned_to_voter_we_vote_id)
+
+    if positive_value_exists(reassign_to_voter_we_vote_id):
         voter_manager = VoterManager()
         results = voter_manager.retrieve_voter_by_we_vote_id(reassign_to_voter_we_vote_id)
         if results['voter_found']:

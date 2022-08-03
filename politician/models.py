@@ -1244,7 +1244,7 @@ class PoliticianManager(models.Manager):
         }
         return results
 
-    def retrieve_politicians_with_misformatted_names(self, start=0, count=15):
+    def retrieve_politicians_with_misformatted_names(self, start=0, count=15, read_only=False):
         """
         Get the first 15 records that have 3 capitalized letters in a row, as long as those letters
         are not 'III' i.e. King Henry III.  Also exclude the names where the word "WITHDRAWN" has been appended when
@@ -1253,9 +1253,14 @@ class PoliticianManager(models.Manager):
            politician_name !~ '.*?III.*?'
 
         :param start:
+        :param count:
+        :param read_only:
         :return:
         """
-        politician_query = Politician.objects.all()
+        if positive_value_exists(read_only):
+            politician_query = Politician.objects.using('readonly').all()
+        else:
+            politician_query = Politician.objects.all()
         # Get all politicians that have three capital letters in a row in their name, but exclude III (King Henry III)
         politician_query = politician_query.filter(politician_name__regex=r'.*?[A-Z][A-Z][A-Z].*?(?<!III)').\
             order_by('politician_name')

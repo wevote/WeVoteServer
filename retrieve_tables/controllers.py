@@ -2,13 +2,15 @@ import csv
 import json
 import os
 import re
+import time
+from io import StringIO
 
 import psycopg2
 import requests
-import time
-from config.base import get_environment_variable
 from django.http import HttpResponse
+
 import wevote_functions.admin
+from config.base import get_environment_variable
 from wevote_functions.functions import positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -21,12 +23,13 @@ logger = wevote_functions.admin.get_logger(__name__)
 # 'campaign_campaignx_politician',
 # 'campaign_campaignxseofriendlypath',
 allowable_tables = [
-    'candidate_candidatecampaign',
+    'ballot_ballotitem',
+    'position_positionentered',
     'candidate_candidatesarenotduplicates',
     'candidate_candidatetoofficelink',
     'elected_office_electedoffice',
     'elected_official_electedofficial',
-    'elected_official_electedofficialsarenotduplicates',
+    'elected_official_electedofficialsarenotduplicates',  # July 2022: This table is empty, why are we loading it?
     'election_ballotpediaelection',
     'election_election',
     'electoral_district_electoraldistrict',
@@ -38,37 +41,39 @@ allowable_tables = [
     'office_contestoffice',
     'office_contestofficesarenotduplicates',
     'office_contestofficevisitingotherelection',
-    'organization_organization',
     'organization_organizationreserveddomain',
     'party_party',
     'politician_politician',
     'politician_politiciansarenotduplicates',
-    'polling_location_pollinglocation',
-    'position_positionentered',
     'twitter_twitterlinktoorganization',
     'voter_guide_voterguidepossibility',
     'voter_guide_voterguidepossibilityposition',
     'voter_guide_voterguide',
     'wevote_settings_wevotesetting',
-    'ballot_ballotitem',
     'ballot_ballotreturned',
+    'polling_location_pollinglocation',
+    'organization_organization',
+    'candidate_candidatecampaign',
 ]
 
 dummy_unique_id = 10000000
-LOCAL_TMP_PATH = get_environment_variable('PATH_FOR_TEMP_FILES') or '.'
+LOCAL_TMP_PATH = '/tmp/'
 
 
 def retrieve_sql_tables_as_csv(table_name, start, end):
     """
-    Extract one of the 15 allowable database tables to CSV (pipe delimited) and send it to the
+    Extract one of the (originally) 15 allowable database tables to CSV (pipe delimited) and send it to the
     developer's local WeVoteServer instance
     limit is used to specify a number of rows to return (this is the SQL LIMIT clause), non-zero or ignored
     offset is used to specify the first row to return (this is the SQL OFFSET clause), non-zero or ignored
+    Note July 2022, re Joe:  This call to `https://api.wevoteusa.org/apis/v1/retrieveSQLTables/` has been moved from a
+    "normal" API server (which was timing out) to a "process" API server with an 1800 second timeout.
     """
     t0 = time.time()
 
     status = ''
 
+    csv_files = {}
     try:
         conn = psycopg2.connect(
             database=get_environment_variable('DATABASE_NAME'),
@@ -80,44 +85,55 @@ def retrieve_sql_tables_as_csv(table_name, start, end):
 
         # logger.debug("retrieve_sql_tables_as_csv psycopg2 Connected to DB")
 
-        csv_files = {}
         if table_name in allowable_tables:
-            cur = conn.cursor()
-            csv_name = os.path.join(LOCAL_TMP_PATH, table_name + '.csvTemp')
-            print("exporting to: " + csv_name)
-            with open(csv_name, 'w') as file:
+            try:
+                cur = conn.cursor()
+                file = StringIO()  # Empty file
+
+                # logger.error("experiment: REAL FILE ALLOWED FOR file: " + table_name)
                 if positive_value_exists(end):
-                    sql = "COPY (SELECT * FROM public." + table_name + " WHERE id BETWEEN " + start + " AND " + end +\
-                          " ORDER BY id) TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
+                    sql = "COPY (SELECT * FROM public." + table_name + " WHERE id BETWEEN " + start + " AND " + \
+                          end + " ORDER BY id) TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
                 else:
                     sql = "COPY " + table_name + " TO STDOUT WITH DELIMITER '|' CSV HEADER NULL '\\N'"
+                # logger.error("experiment: retrieve_tables sql: " + sql)
                 cur.copy_expert(sql, file, size=8192)
-                logger.error("retrieve_tables sql: " + sql)
-            file.close()
-            with open(csv_name, 'r') as file2:
-                csv_files[table_name] = file2.read()
-            file2.close()
-            os.remove(csv_name)
-            if "exported" not in status:
-                status += "exported "
-            status += table_name + "(" + start + "," + end + "), "
-            conn.commit()
-            conn.close()
-            dt = time.time() - t0
-            logger.error('Extracting the "' + table_name + '" table took ' + "{:.3f}".format(dt) +
-                         ' seconds.  start = ' + start + ', end = ' + end)
+                # logger.error("experiment: after cur.copy_expert ")
+                file.seek(0)
+                # logger.error("experiment: retrieve_tables file contents: " + file.readline().strip())
+                file.seek(0)
+                csv_files[table_name] = file.read()
+                file.close()
+                # logger.error("experiment: after file close, status " + status)
+                if "exported" not in status:
+                    status += "exported "
+                status += table_name + "(" + start + "," + end + "), "
+                # logger.error("experiment: after status +=, " + status)
+                # logger.error("experiment: before conn.commit")
+                conn.commit()
+                # logger.error("experiment: after conn.commit ")
+                conn.close()
+                # logger.error("experiment: after conn.close ")
+                dt = time.time() - t0
+                logger.error('Extracting the "' + table_name + '" table took ' + "{:.3f}".format(dt) +
+                             ' seconds.  start = ' + start + ', end = ' + end)
+            except Exception as e:
+                logger.error("Real exception in retrieve_sql_tables_as_csv(): " + str(e) + " ")
         else:
             status = "the table_name '" + table_name + "' is not in the table list, therefore no table was returned"
             logger.error(status)
 
+        # logger.error("experiment: before results")
         results = {
             'success': True,
             'status': status,
             'files': csv_files,
         }
 
+        # logger.error("experiment: results returned")
         return results
 
+    # run `pg_dump -f /dev/null wevotedev` on the server to evaluate for a corrupted file
     except Exception as e:
         status += "retrieve_tables export_sync_files_to_csv caught " + str(e)
         logger.error(status)
@@ -192,18 +208,30 @@ def retrieve_sql_files_from_master_server(request):
     save_off_database()
 
     for table_name in allowable_tables:
-        print('Starting on the ' + table_name + ' table, requesting up to 1,000,000 rows')
-        # if table_name != 'ballot_ballotitem':
-        #     continue
+        print('Starting on the ' + table_name + ' table, requesting up to 500,000 rows')
         t1 = time.time()
         dt = 0
         start = 0
-        end = 999999
+        end = 499999
         final_lines_count = 0
         while end < 20000000:
             t2 = time.time()
-            response = requests.get("https://api.wevoteusa.org/apis/v1/retrieveSQLTables/",
-                                    params={'table': table_name, 'start': start, 'end': end})
+            request_count = 0
+            wait_for_a_http_200 = True
+            response = {}
+
+            while wait_for_a_http_200:
+                # To test locally:  https://wevotedeveloper.com:8000/apis/v1/retrieveSQLTables/?table=election_election
+                response = requests.get("https://api.wevoteusa.org/apis/v1/retrieveSQLTables/",
+                                        params={'table': table_name, 'start': start, 'end': end})
+                request_count += 1
+                # print("... https://api.wevoteusa.org/apis/v1/retrieveSQLTables/?table=" + table_name +
+                #        '&start=' + str(start) + '&end=' + str(end))
+                # print('... HTTP response #' + str(request_count) + ' for table \'' + table_name +
+                #       '\' start ' + str(start) + ', was an HTTP: ' + str(response.status_code))
+                if response.status_code == 200:
+                    wait_for_a_http_200 = False
+
             structured_json = json.loads(response.text)
             if structured_json['success'] is False:
                 print("FAILED:  Did not receive '" + table_name + " from server")
@@ -213,12 +241,12 @@ def retrieve_sql_files_from_master_server(request):
             lines = data.splitlines()
             if len(lines) == 1:
                 dt = time.time() - t1
-                print('... Retrieved ' + str(final_lines_count) + ' lines from the ' + table_name +
+                print('... Retrieved ' + "{:,}".format(final_lines_count) + ' lines from the ' + table_name +
                       ' table (as JSON) in ' + str(int(dt)) + ' seconds)')
                 break
             final_lines_count += len(lines)
-            print('... Intermediate line count from this request of 1M, returned ' + str(len(lines)) +
-                  " rows, cumulative is " + str(final_lines_count))
+            print('... Intermediate line count from this request of 500k, returned ' + "{:,}".format(len(lines)) +
+                  " rows, cumulative is " + "{:,}".format(final_lines_count))
 
             if len(lines) > 0:
                 try:
@@ -232,7 +260,7 @@ def retrieve_sql_files_from_master_server(request):
 
                     cur = conn.cursor()
 
-                    print("... Processing rows " + str(start) + " through " + str(end) + " of table " + table_name +
+                    print("... Processing rows " + "{:,}".format(start) + " through " + "{:,}".format(end) + " of table " + table_name +
                           " data received from master server.")
                     if start == 0:
                         cur.execute("DELETE FROM " + table_name)  # Delete all existing data in this table
@@ -257,7 +285,7 @@ def retrieve_sql_files_from_master_server(request):
                     dt = time.time() - t1
                     dt2 = time.time() - t2
                     dtc = time.time() - t0
-                    print('... Processing and inserting the chunk of 1M from ' + table_name + ' table took ' +
+                    print('... Processing and inserting the chunk of 500k from ' + table_name + ' table took ' +
                           str(int(dt2)) + ' seconds, cumulative ' + str(int(dtc)) + ' seconds')
 
                 except Exception as e:
@@ -265,8 +293,8 @@ def retrieve_sql_files_from_master_server(request):
                     logger.error(status)
 
                 finally:
-                    start += 1000000
-                    end += 1000000
+                    start += 500000
+                    end += 500000
 
         # Update the last_value for this table so creating new entries doesn't
         #  throw "django Key (id)= already exists" error

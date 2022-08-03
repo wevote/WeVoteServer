@@ -2,6 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 from dateutil import parser
+from email_outbound.models import EmailManager
 from wevote_functions.functions import positive_value_exists
 from .models import VoterContactEmail, VoterManager
 
@@ -56,9 +57,20 @@ def move_voter_contact_email_to_another_voter(from_voter_we_vote_id, to_voter_we
     # ######################
     # Migrations
     try:
+        query = VoterContactEmail.objects.all()
+        query = query.filter(imported_by_voter_we_vote_id__iexact=to_voter_we_vote_id)
+        query = query.exclude(google_contact_id__isnull=True)
+        query = query.values_list('google_contact_id', flat=True).distinct()
+        google_contact_id_list_to_not_overwrite = list(query)
+
         voter_contact_email_entries_moved += VoterContactEmail.objects\
             .filter(imported_by_voter_we_vote_id__iexact=from_voter_we_vote_id)\
+            .exclude(google_contact_id__in=google_contact_id_list_to_not_overwrite)\
             .update(imported_by_voter_we_vote_id=to_voter_we_vote_id)
+
+        entries_deleted = \
+            VoterContactEmail.objects.filter(imported_by_voter_we_vote_id__iexact=from_voter_we_vote_id).delete()
+        status += "ENTRIES_DELETED: " + str(entries_deleted) + " "
     except Exception as e:
         status += "FAILED-VOTER_CONTACT_EMAIL_UPDATE_IMPORTED_BY: " + str(e) + " "
 
@@ -102,26 +114,31 @@ def delete_all_voter_contact_emails_for_voter(voter_we_vote_id=''):  # voterCont
     return results
 
 
-def filter_google_contacts(contacts):
+def filter_google_contacts(contacts=[], voter_email_address_list=[]):
     filtered_contacts = []
     strings_to_filter_out = [
         'aws-nonprofit-credits@amazon.com',
-        'tickets@countable.uservoice.com',
         'billing@nationbuilder.com',
+        'donotreply',
         '@noreply.github.com',
-        '@reply.github.com',
-        '@support.facebook.com',
-        'ra@godaddy.com',
         'noreply',
         'no-reply',
+        'ra@godaddy.com',
+        '@reply.github.com',
+        'reply+',
+        'support@',
         'support+',
+        '@support.facebook.com',
+        'tickets@countable.uservoice.com',
         '.zendesk.com',
         'info@',
-        'support@',
     ]
     for contact in contacts:
         email_address_text = contact['email'] if 'email' in contact else ''
         if positive_value_exists(email_address_text):
+            if email_address_text in voter_email_address_list:
+                # Do not show the voter an email they are using for their account
+                continue
             # If the email address contains any of the strings in strings_to_filter_out, don't import it
             if not any(substring in email_address_text for substring in strings_to_filter_out):
                 filtered_contacts.append(contact)
@@ -133,8 +150,16 @@ def save_google_contacts(voter_we_vote_id='', contacts=[]):  # voterContactListS
     success = True
     voter_manager = VoterManager()
 
-    if contacts is not None:
-        contacts = filter_google_contacts(contacts)
+    if not positive_value_exists(voter_we_vote_id):
+        status += "CANNOT_SAVE_GOOGLE_CONTACTS_VOTER_ID_MISSING "
+        success = False
+
+    if success and contacts is not None:
+        email_manager = EmailManager()
+        simple_email_address_list = email_manager.fetch_simple_voter_email_address_list(
+            voter_we_vote_id=voter_we_vote_id)
+
+        contacts = filter_google_contacts(contacts, voter_email_address_list=simple_email_address_list)
 
         existing_voter_contact_email_dict = {}
         results = voter_manager.retrieve_voter_contact_email_list(
@@ -217,9 +242,11 @@ def voter_contact_list_retrieve_for_api(voter_we_vote_id=''):  # voterContactLis
             if hasattr(voter_contact_email, 'google_contact_id') else '',
             'google_date_last_updated': google_date_last_updated_string,
             'has_data_from_google_people_api': voter_contact_email.has_data_from_google_people_api,
+            'id': voter_contact_email.id if hasattr(voter_contact_email, 'id') else 0,
             'ignore_contact': voter_contact_email.ignore_contact,
             'imported_by_voter_we_vote_id': voter_contact_email.imported_by_voter_we_vote_id
             if hasattr(voter_contact_email, 'imported_by_voter_we_vote_id') else '',
+            'is_friend': voter_contact_email.is_friend,
             'last_name': get_voter_contact_email_value(voter_contact_email, 'last_name', 'google_last_name'),
             'state_code': voter_contact_email.state_code if hasattr(voter_contact_email, 'state_code') else '',
             'voter_we_vote_id': voter_contact_email.voter_we_vote_id

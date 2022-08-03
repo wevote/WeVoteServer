@@ -33,7 +33,7 @@
             <td>{{ forloop.counter }}</td>
             <td>{% if organization.we_vote_hosted_profile_image_url_medium %}
                 <a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ organization.we_vote_id }}" target="_blank">
-                    <img src="{{ organization.we_vote_hosted_profile_image_url_medium }}" width="48px" /></a>{% endif %}</td>
+                    <img src="{{ organization.we_vote_hosted_profile_image_url_medium }}" alt="" width="48px" /></a>{% endif %}</td>
             <td><a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ organization.we_vote_id }}" target="_blank">
                 {{ organization.organization_name }}</a><br />
                 &nbsp;&nbsp;&nbsp;(<a href="{% url 'image:images_for_one_organization' organization.we_vote_id %}" target="_blank">See images</a> in new window)
@@ -101,7 +101,7 @@
             <td>{{ forloop.counter }}</td>
             <td>{% if organization.organization_photo_url %}
                 <a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ organization.we_vote_id }}" target="_blank">
-                    <img src="{{ organization.organization_photo_url }}" width="73px" /></a>{% endif %}</td>
+                    <img src="{{ organization.organization_photo_url }}" alt="" width="73px" /></a>{% endif %}</td>
             <td><a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ organization.we_vote_id }}" target="_blank">
                 {{ organization.organization_name }}</a></td>
             <td>{% if organization.organization_twitter_handle %}{{ organization.organization_twitter_handle }} <br />
@@ -145,7 +145,7 @@
             <td>{{ forloop.counter }}</td>
             <td>{% if organization.organization_photo_url %}
                 <a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ organization.we_vote_id }}" target="_blank">
-                    <img src="{{ organization.organization_photo_url }}" width="73px" /></a>{% endif %}</td>
+                    <img src="{{ organization.organization_photo_url }}" alt="" width="73px" /></a>{% endif %}</td>
             <td><a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ organization.we_vote_id }}" target="_blank">
                 {{ organization.organization_name }}</a></td>
             <td>{% if organization.organization_twitter_handle %}{{ organization.organization_twitter_handle }} <br />

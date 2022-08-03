@@ -11,6 +11,6 @@ The We Vote Team
 
 
 ========================================
-This message was sent to {{ recipient_email }}. If you don't want to receive emails from We Vote, please follow the link below to unsubscribe:
-{{ recipient_unsubscribe }}
+This message was sent to {{ recipient_voter_email }}. If you don't want to receive emails from We Vote, please follow the link below to unsubscribe:
+{{ recipient_unsubscribe_url }}
 We Vote, Attention: Community Team, 1423 Broadway PMB 158, Oakland, CA 94612

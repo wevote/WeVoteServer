@@ -198,7 +198,7 @@ class CandidateListManager(models.Manager):
             candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
             candidate_query = candidate_query.exclude(do_not_display_on_ballot=True)
             candidate_query = candidate_query.order_by('-twitter_followers_count')
-            candidate_list = candidate_query
+            candidate_list = list(candidate_query)
 
             if len(candidate_list):
                 candidate_list_found = True
@@ -214,8 +214,8 @@ class CandidateListManager(models.Manager):
             status += 'FAILED retrieve_all_candidates_for_office ' + str(e) + ' '
             success = False
 
-        for one_candidate in candidate_list:
-            candidate_we_vote_id_list.append(one_candidate.we_vote_id)
+        # for one_candidate in candidate_list:
+        #     candidate_we_vote_id_list.append(one_candidate.we_vote_id)
 
         results = {
             'success':              success,
@@ -233,7 +233,8 @@ class CandidateListManager(models.Manager):
             google_civic_election_id_list=[],
             state_code='',
             search_string=False,
-            return_list_of_objects=False):
+            return_list_of_objects=False,
+            read_only=False):
         candidate_list_objects = []
         candidate_list_light = []
         candidate_list_found = False
@@ -256,7 +257,10 @@ class CandidateListManager(models.Manager):
         office_we_vote_id_list_by_candidate_we_vote_id = results['office_we_vote_id_list_by_candidate_we_vote_id']
 
         try:
-            candidate_query = CandidateCampaign.objects.all()
+            if positive_value_exists(read_only):
+                candidate_query = CandidateCampaign.objects.using('readonly').all()
+            else:
+                candidate_query = CandidateCampaign.objects.all()
             if positive_value_exists(google_civic_election_id_list) and len(google_civic_election_id_list):
                 candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
             if positive_value_exists(state_code):
@@ -341,13 +345,15 @@ class CandidateListManager(models.Manager):
             candidate_year=0,
             limit_to_this_state_code='',
             search_string=False,
-            return_list_of_objects=False):
+            return_list_of_objects=False,
+            read_only=False):
         """
         This might generate different results than retrieve_candidate_we_vote_id_list_from_year_list.
         :param candidate_year:
         :param limit_to_this_state_code:
         :param search_string:
         :param return_list_of_objects:
+        :param read_only:
         :return:
         """
         candidate_list_objects = []
@@ -390,7 +396,10 @@ class CandidateListManager(models.Manager):
         office_we_vote_id_list_by_candidate_we_vote_id = results['office_we_vote_id_list_by_candidate_we_vote_id']
 
         try:
-            candidate_query = CandidateCampaign.objects.all()
+            if positive_value_exists(read_only):
+                candidate_query = CandidateCampaign.objects.using('readonly').all()
+            else:
+                candidate_query = CandidateCampaign.objects.all()
             if positive_value_exists(candidate_year_integer):
                 candidate_query = candidate_query.filter(candidate_year=candidate_year_integer)
             if positive_value_exists(limit_to_this_state_code):
@@ -656,7 +665,7 @@ class CandidateListManager(models.Manager):
 
         candidate_list_manager = CandidateListManager()
         results = candidate_list_manager.retrieve_all_candidates_for_office(
-            office_id=office_id, office_we_vote_id=office_we_vote_id)
+            office_id=office_id, office_we_vote_id=office_we_vote_id, read_only=True)
         if not positive_value_exists(results['success']):
             status += 'RETRIEVE_CANDIDATE_COUNT_FOR_OFFICE_FAILED '
             status += results['status']
@@ -789,7 +798,7 @@ class CandidateListManager(models.Manager):
         """
         This is used by the admin tools to show CandidateCampaigns in a drop-down for example
         """
-        candidates_list_temp = CandidateCampaign.objects.all()
+        candidates_list_temp = CandidateCampaign.objects.using('readonly').all()
         # Order by candidate_name.
         # To order by last name we will need to make some guesses in some case about what the last name is.
         candidates_list_temp = candidates_list_temp.order_by('candidate_name')[:300]
@@ -814,7 +823,8 @@ class CandidateListManager(models.Manager):
                                                politician_we_vote_id,
                                                candidate_twitter_handle,
                                                ballotpedia_candidate_id, vote_smart_id, maplight_id,
-                                               we_vote_id_from_master=''):
+                                               we_vote_id_from_master='',
+                                               read_only=True):
         """
         retrieve_possible_duplicate_candidates is used primarily to avoid duplicate candidate imports.
         :param candidate_name:
@@ -829,6 +839,7 @@ class CandidateListManager(models.Manager):
         :param vote_smart_id:
         :param maplight_id:
         :param we_vote_id_from_master:
+        :param read_only:
         :return:
         """
         candidate_list_objects = []
@@ -839,7 +850,10 @@ class CandidateListManager(models.Manager):
         office_manager = ContestOfficeManager()
 
         try:
-            candidate_query = CandidateCampaign.objects.all()
+            if positive_value_exists(read_only):
+                candidate_query = CandidateCampaign.objects.using('readonly').all()
+            else:
+                candidate_query = CandidateCampaign.objects.all()
             google_civic_election_id_list = [convert_to_int(google_civic_election_id)]
 
             results = self.retrieve_candidate_we_vote_id_list_from_election_list(
@@ -1467,7 +1481,7 @@ class CandidateListManager(models.Manager):
 
         if keep_looking_for_duplicates and positive_value_exists(candidate_twitter_handle):
             try:
-                candidate_query = CandidateCampaign.objects.all()
+                candidate_query = CandidateCampaign.objects.using('readonly').all()
                 candidate_query = candidate_query.filter(candidate_twitter_handle__iexact=candidate_twitter_handle)
 
                 # Only look for matches in candidates in the specified elections, or in the year(s) the elections are in
@@ -1492,7 +1506,7 @@ class CandidateListManager(models.Manager):
         if keep_looking_for_duplicates and positive_value_exists(candidate_name):
             # Search by Candidate name exact match
             try:
-                candidate_query = CandidateCampaign.objects.all()
+                candidate_query = CandidateCampaign.objects.using('readonly').all()
                 candidate_query = candidate_query.filter(candidate_name__iexact=candidate_name)
 
                 # Only look for matches in candidates in the specified elections, or in the year(s) the elections are in
@@ -1516,7 +1530,7 @@ class CandidateListManager(models.Manager):
         if keep_looking_for_duplicates and positive_value_exists(candidate_name):
             # Search for Candidate(s) that contains the same first and last names
             try:
-                candidate_query = CandidateCampaign.objects.all()
+                candidate_query = CandidateCampaign.objects.using('readonly').all()
 
                 # Only look for matches in candidates in the specified elections, or in the year(s) the elections are in
                 candidate_query = candidate_query.filter(
@@ -1627,7 +1641,8 @@ class CandidateListManager(models.Manager):
         if len(google_civic_election_id_list) > 0:
             results = self.retrieve_candidate_to_office_link_list(
                 google_civic_election_id_list=google_civic_election_id_list,
-                state_code=limit_to_this_state_code)
+                state_code=limit_to_this_state_code,
+                read_only=True)
             if not positive_value_exists(results['success']):
                 status += results['status']
                 success = False
@@ -1689,7 +1704,7 @@ class CandidateListManager(models.Manager):
         success = True
         candidate_we_vote_id_list = []
 
-        candidate_query = CandidateCampaign.objects.all()
+        candidate_query = CandidateCampaign.objects.using('readonly').all()
         candidate_query = candidate_query.filter(candidate_year__in=year_list)
         if positive_value_exists(limit_to_this_state_code):
             candidate_query = candidate_query.filter(state_code__iexact=limit_to_this_state_code)
@@ -1708,7 +1723,7 @@ class CandidateListManager(models.Manager):
         return results
 
     def fetch_candidate_we_vote_id_list_from_office_we_vote_id(self, office_we_vote_id):
-        results = self.retrieve_all_candidates_for_office(office_we_vote_id=office_we_vote_id)
+        results = self.retrieve_all_candidates_for_office(office_we_vote_id=office_we_vote_id, read_only=True)
         if not positive_value_exists(results['candidate_list_found']):
             return []
         candidate_list = results['candidate_list']
@@ -1728,7 +1743,7 @@ class CandidateListManager(models.Manager):
         return candidate_we_vote_id_list
 
     def fetch_office_we_vote_id_list_from_candidate_we_vote_id(self, candidate_we_vote_id):
-        results = self.retrieve_all_offices_for_candidate(candidate_we_vote_id=candidate_we_vote_id)
+        results = self.retrieve_all_offices_for_candidate(candidate_we_vote_id=candidate_we_vote_id, read_only=True)
         if not positive_value_exists(results['office_list_found']):
             return []
         office_list = results['office_list']
@@ -1765,11 +1780,21 @@ class CandidateListManager(models.Manager):
         }
         return results
 
-    def search_candidates_in_specific_elections(self, google_civic_election_id_list, search_string='', state_code='',
-                                                candidate_name='', candidate_twitter_handle='',
-                                                candidate_website='', candidate_email='',
-                                                candidate_facebook='', candidate_instagram='', twitter_handle_list='',
-                                                facebook_page_list='', exact_match=False):
+    def search_candidates_in_specific_elections(
+            self,
+            google_civic_election_id_list,
+            search_string='',
+            state_code='',
+            candidate_name='',
+            candidate_twitter_handle='',
+            candidate_website='',
+            candidate_email='',
+            candidate_facebook='',
+            candidate_instagram='',
+            twitter_handle_list='',
+            facebook_page_list='',
+            exact_match=False,
+            read_only=False):
         """
         This function, search_candidates_in_specific_elections, is meant to cast a wider net for any
         possible candidates that might match.
@@ -1814,7 +1839,10 @@ class CandidateListManager(models.Manager):
                 success = False
             candidate_we_vote_id_list = results['candidate_we_vote_id_list']
 
-            candidate_query = CandidateCampaign.objects.all()
+            if positive_value_exists(read_only):
+                candidate_query = CandidateCampaign.objects.using('readonly').all()
+            else:
+                candidate_query = CandidateCampaign.objects.all()
             candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
             if positive_value_exists(state_code):
                 candidate_query = candidate_query.filter(state_code__iexact=state_code)
@@ -1963,7 +1991,7 @@ class CandidateListManager(models.Manager):
         }
         return results
 
-    def retrieve_candidates_with_misformatted_names(self, start=0, count=15):
+    def retrieve_candidates_with_misformatted_names(self, start=0, count=15, read_only=True):
         """
         Get the first 15 records that have 3 capitalized letters in a row, as long as those letters
         are not 'III' i.e. King Henry III.  Also exclude the names where the word "WITHDRAWN" has been appended when
@@ -1974,9 +2002,13 @@ class CandidateListManager(models.Manager):
 
         :param start:
         :param count:
+        :param read_only:
         :return:
         """
-        candidate_query = CandidateCampaign.objects.all()
+        if positive_value_exists(read_only):
+            candidate_query = CandidateCampaign.objects.using('readonly').all()
+        else:
+            candidate_query = CandidateCampaign.objects.all()
         # Get all candidates that have three capital letters in a row in their name, but exclude III (King Henry III)
         candidate_query = candidate_query.filter(candidate_name__regex=r'.*?[A-Z][A-Z][A-Z].*?(?<!III)').\
             order_by('candidate_name')
@@ -1998,7 +2030,7 @@ class CandidateListManager(models.Manager):
 
         return results_list, number_of_rows
 
-    def retrieve_candidates_from_politician(self, politician_id=0, politician_we_vote_id=''):
+    def retrieve_candidates_from_politician(self, politician_id=0, politician_we_vote_id='', read_only=False):
         success = True
         status = ""
         candidate_list = []
@@ -2016,7 +2048,10 @@ class CandidateListManager(models.Manager):
             return results
 
         try:
-            candidate_query = CandidateCampaign.objects.all()
+            if positive_value_exists(read_only):
+                candidate_query = CandidateCampaign.objects.using('readonly').all()
+            else:
+                candidate_query = CandidateCampaign.objects.all()
             if positive_value_exists(politician_id) and positive_value_exists(politician_we_vote_id):
                 candidate_query = candidate_query.filter(
                     Q(politician_id=politician_id) |
@@ -2047,7 +2082,7 @@ class CandidateListManager(models.Manager):
         politician_we_vote_id_list = []
         politician_we_vote_id_list_found = False
         try:
-            candidate_query = CandidateCampaign.objects.all()
+            candidate_query = CandidateCampaign.objects.using('readonly').all()
             candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
             candidate_query = candidate_query.exclude(
                 Q(politician_we_vote_id__isnull=True) | Q(politician_we_vote_id="")
@@ -2561,15 +2596,15 @@ class CandidateManager(models.Manager):
         candidate_manager = CandidateManager()
         return candidate_manager.retrieve_candidate(candidate_id, read_only=read_only)
 
-    def retrieve_candidate_from_we_vote_id(self, we_vote_id):
+    def retrieve_candidate_from_we_vote_id(self, we_vote_id, read_only=False):
         candidate_id = 0
         candidate_manager = CandidateManager()
-        return candidate_manager.retrieve_candidate(candidate_id, we_vote_id)
+        return candidate_manager.retrieve_candidate(candidate_id, we_vote_id, read_only=read_only)
 
     def fetch_candidate_id_from_we_vote_id(self, we_vote_id):
         candidate_id = 0
         candidate_manager = CandidateManager()
-        results = candidate_manager.retrieve_candidate(candidate_id, we_vote_id)
+        results = candidate_manager.retrieve_candidate(candidate_id, we_vote_id, read_only=True)
         if results['success']:
             return results['candidate_id']
         return 0
@@ -2577,7 +2612,7 @@ class CandidateManager(models.Manager):
     def fetch_candidate_we_vote_id_from_id(self, candidate_id):
         we_vote_id = ''
         candidate_manager = CandidateManager()
-        results = candidate_manager.retrieve_candidate(candidate_id, we_vote_id)
+        results = candidate_manager.retrieve_candidate(candidate_id, we_vote_id, read_only=True)
         if results['success']:
             return results['candidate_we_vote_id']
         return ''
@@ -2585,7 +2620,7 @@ class CandidateManager(models.Manager):
     def fetch_google_civic_candidate_name_from_we_vote_id(self, we_vote_id):
         candidate_id = 0
         candidate_manager = CandidateManager()
-        results = candidate_manager.retrieve_candidate(candidate_id, we_vote_id)
+        results = candidate_manager.retrieve_candidate(candidate_id, we_vote_id, read_only=True)
         if results['success']:
             candidate = results['candidate']
             return candidate.google_civic_candidate_name
@@ -2614,8 +2649,7 @@ class CandidateManager(models.Manager):
         try:
             if positive_value_exists(candidate_id):
                 if positive_value_exists(read_only):
-                    candidate_on_stage = CandidateCampaign.objects.using('readonly').get(
-                        id=candidate_id)
+                    candidate_on_stage = CandidateCampaign.objects.using('readonly').get(id=candidate_id)
                 else:
                     candidate_on_stage = CandidateCampaign.objects.get(id=candidate_id)
                 candidate_id = candidate_on_stage.id
@@ -2849,7 +2883,8 @@ class CandidateManager(models.Manager):
                     if positive_value_exists(candidate_to_office_link.candidate_we_vote_id):
                         candidate_manager = CandidateManager()
                         return candidate_manager.retrieve_candidate_from_we_vote_id(
-                            candidate_to_office_link.candidate_we_vote_id)
+                            candidate_to_office_link.candidate_we_vote_id,
+                            read_only=read_only)
                 else:
                     candidate_found = False
                     candidate_to_office_link_missing = True
@@ -3071,7 +3106,7 @@ class CandidateManager(models.Manager):
         return results
 
     def fetch_next_upcoming_election_id_for_candidate(self, candidate_we_vote_id):
-        results = self.retrieve_candidate_to_office_link(candidate_we_vote_id=candidate_we_vote_id)
+        results = self.retrieve_candidate_to_office_link(candidate_we_vote_id=candidate_we_vote_id, read_only=True)
         if not positive_value_exists(results['success']):
             return 0
         if results['only_one_found']:
@@ -3088,7 +3123,7 @@ class CandidateManager(models.Manager):
         return 0
 
     def fetch_candidates_are_not_duplicates_list_we_vote_ids(self, candidate_we_vote_id):
-        results = self.retrieve_candidates_are_not_duplicates_list(candidate_we_vote_id)
+        results = self.retrieve_candidates_are_not_duplicates_list(candidate_we_vote_id, read_only=True)
         return results['candidates_are_not_duplicates_list_we_vote_ids']
 
     def update_or_create_candidate(
@@ -3533,7 +3568,7 @@ class CandidateManager(models.Manager):
             if candidate_year_changed or candidate_ultimate_election_date_changed:
                 # Retrieve an editable copy of the candidate so we can update the date caches
                 results = \
-                    candidate_manager.retrieve_candidate_from_we_vote_id(candidate.we_vote_id)
+                    candidate_manager.retrieve_candidate_from_we_vote_id(candidate.we_vote_id, read_only=False)
                 if results['candidate_found']:
                     editable_candidate = results['candidate']
                     try:
@@ -4471,7 +4506,7 @@ class CandidateManager(models.Manager):
         status = ""
         if positive_value_exists(google_civic_election_id):
             try:
-                candidate_item_queryset = CandidateCampaign.objects.all()
+                candidate_item_queryset = CandidateCampaign.objects.using('readonly').all()
                 candidate_item_queryset = candidate_item_queryset.filter(
                     google_civic_election_id=google_civic_election_id)
                 candidates_count = candidate_item_queryset.count()

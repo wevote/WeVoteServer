@@ -162,7 +162,7 @@ def delete_all_voter_information_permanently(voter_to_delete=None):  # voterDele
             from_linked_organization = from_linked_organization_results['organization']
             voter_to_delete_linked_organization_id = from_linked_organization.id
         else:
-            # Remove the link to the organization so we don't have a future conflict
+            # Remove the link to the organization, so we don't have a future conflict
             try:
                 voter_to_delete_linked_organization_we_vote_id = None
                 voter_to_delete.linked_organization_we_vote_id = None
@@ -176,7 +176,7 @@ def delete_all_voter_information_permanently(voter_to_delete=None):  # voterDele
     delete_apple_user_results = delete_apple_user_entries_for_voter(voter_to_delete_we_vote_id)
     status += delete_apple_user_results['status']
 
-    # Data healing scripts before we try to move the positions
+    # Data healing scripts before we try to delete the positions
     position_list_manager = PositionListManager()
     if positive_value_exists(voter_to_delete_id):
         repair_results = position_list_manager.repair_all_positions_for_voter(voter_to_delete_id)
@@ -204,7 +204,7 @@ def delete_all_voter_information_permanently(voter_to_delete=None):  # voterDele
     status += " " + delete_friend_invitations_results['status']
 
     if positive_value_exists(voter_to_delete.linked_organization_we_vote_id):
-        # Remove the link to the organization so we don't have a future conflict
+        # Remove the link to the organization, so we don't have a future conflict
         try:
             voter_to_delete.linked_organization_we_vote_id = None
             voter_to_delete.save()
@@ -296,7 +296,7 @@ def delete_all_voter_information_permanently(voter_to_delete=None):  # voterDele
 
     # And finally, delete all voter_device_links for this voter
     update_link_results = voter_device_link_manager.delete_all_voter_device_links_by_voter_id(voter_to_delete_id)
-    if update_link_results['voter_device_link_updated']:
+    if update_link_results['success']:
         success = True
         status += "VOTER_DEVICE_LINK_DELETED "
     else:
@@ -339,7 +339,7 @@ def voter_delete_account_for_api(  # voterDeleteAccount
     voter_device_link = voter_device_link_results['voter_device_link']
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=False)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
         error_results = {
@@ -391,7 +391,7 @@ def delete_facebook_info_for_voter(voter_to_delete):
 
     facebook_manager = FacebookManager()
     voter_to_delete_facebook_results = facebook_manager.retrieve_facebook_link_to_voter_from_voter_we_vote_id(
-        voter_to_delete.we_vote_id)
+        voter_to_delete.we_vote_id, read_only=False)
 
     if voter_to_delete_facebook_results['facebook_link_to_voter_found']:
         voter_to_delete_facebook_link = voter_to_delete_facebook_results['facebook_link_to_voter']
@@ -565,7 +565,7 @@ def email_ballot_data_for_api(voter_device_id, email_address_array, first_name_a
         return error_results
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     sender_voter_id = voter_results['voter_id']
     if not positive_value_exists(sender_voter_id):
         error_results = {
@@ -940,11 +940,11 @@ def move_facebook_info_to_another_voter(from_voter, to_voter):
 
     facebook_manager = FacebookManager()
     to_voter_facebook_results = facebook_manager.retrieve_facebook_link_to_voter_from_voter_we_vote_id(
-        to_voter.we_vote_id)
+        to_voter.we_vote_id, read_only=False)
     # if to_voter_facebook_results['facebook_link_to_voter_found']:
     #     to_voter_facebook_link = to_voter_facebook_results['facebook_link_to_voter']
     from_voter_facebook_results = facebook_manager.retrieve_facebook_link_to_voter_from_voter_we_vote_id(
-        from_voter.we_vote_id)
+        from_voter.we_vote_id, read_only=False)
 
     # Move facebook_link_to_voter
     if to_voter_facebook_results['facebook_link_to_voter_found']:
@@ -981,7 +981,7 @@ def move_facebook_info_to_another_voter(from_voter, to_voter):
             temp_facebook_id = from_voter.facebook_id
             temp_facebook_profile_image_url_https = from_voter.facebook_profile_image_url_https
             temp_fb_username = from_voter.fb_username
-            # Now delete it and save so we can save the unique facebook_id in the to_voter
+            # Now delete it and save, so we can save the unique facebook_id in the to_voter
             from_voter.facebook_email = ""
             from_voter.facebook_id = 0
             from_voter.facebook_profile_image_url_https = ""
@@ -1094,7 +1094,7 @@ def move_twitter_info_to_another_voter(from_voter, to_voter):
             temp_twitter_name = from_voter.twitter_name
             temp_twitter_profile_image_url_https = from_voter.twitter_profile_image_url_https
             temp_twitter_screen_name = from_voter.twitter_screen_name
-            # Now delete it and save so we can save the unique facebook_id in the to_voter
+            # Now delete it and save, so we can save the unique facebook_id in the to_voter
             from_voter.twitter_id = None
             from_voter.twitter_name = ""
             from_voter.twitter_profile_image_url_https = ""
@@ -1400,6 +1400,27 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
                 else:
                     subject = "Invitation to be friends on We Vote"
                 friend_invitation_message = "Please join me in preparing for the upcoming election."
+
+                # Unsubscribe link in email
+                # "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
+                # recipient_email_subscription_secret_key,
+                recipient_unsubscribe_url = \
+                    "{root_url}/unsubscribe/{email_secret_key}/friendmessage" \
+                    "".format(
+                        email_secret_key=recipient_email_subscription_secret_key,
+                        root_url=web_app_root_url_verified,
+                    )
+                # Instant unsubscribe link in email header
+                list_unsubscribe_url = \
+                    "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendmessage/" \
+                    "".format(
+                        email_secret_key=recipient_email_subscription_secret_key,
+                        root_url=WE_VOTE_SERVER_ROOT_URL,
+                    )
+                # Instant unsubscribe email address in email header
+                # from voter.models import NOTIFICATION_FRIEND_MESSAGES_EMAIL
+                list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
+                                          "".format(setting='friendmessage')
                 template_variables_for_json = {
                     "subject":                      subject,
                     "invitation_message":           friend_invitation_message,
@@ -1409,13 +1430,11 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
                     "sender_description":           sender_description,
                     "sender_network_details":       sender_network_details,
                     "recipient_name":               recipient_name,
+                    "recipient_unsubscribe_url":    recipient_unsubscribe_url,
                     "recipient_voter_email":        recipient_voter_email,
                     "see_all_friend_requests_url":  web_app_root_url_verified + "/friends",
                     "confirm_friend_request_url":   web_app_root_url_verified + "/more/network/key/" +
                     invitation_secret_key,
-                    "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
-                    recipient_email_subscription_secret_key,
-                    "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
                 }
                 template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
 
@@ -1430,7 +1449,10 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
                     recipient_email_we_vote_id=recipient_email_we_vote_id,
                     recipient_voter_email=recipient_voter_email,
                     template_variables_in_json=template_variables_in_json,
-                    kind_of_email_template=kind_of_email_template)
+                    kind_of_email_template=kind_of_email_template,
+                    list_unsubscribe_mailto=list_unsubscribe_mailto,
+                    list_unsubscribe_url=list_unsubscribe_url,
+                )
                 status += outbound_results['status'] + " "
                 email_outbound_description = outbound_results['email_outbound_description']
                 # If send_now is true then send email immediately else schedule email for later with
@@ -1471,6 +1493,27 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
         recipient_name = ""
         success = True
 
+    # Unsubscribe link in email
+    # "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
+    # recipient_email_subscription_secret_key,
+    recipient_unsubscribe_url = \
+        "{root_url}/unsubscribe/{email_secret_key}/friendmessage" \
+        "".format(
+            email_secret_key=recipient_email_subscription_secret_key,
+            root_url=web_app_root_url_verified,
+        )
+    # Instant unsubscribe link in email header
+    list_unsubscribe_url = \
+        "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/friendmessage/" \
+        "".format(
+            email_secret_key=recipient_email_subscription_secret_key,
+            root_url=WE_VOTE_SERVER_ROOT_URL,
+        )
+    # Instant unsubscribe email address in email header
+    # from voter.models import NOTIFICATION_FRIEND_MESSAGES_EMAIL
+    list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
+                              "".format(setting='friendmessage')
+
     template_variables_for_json = {
         "subject":                      subject,
         "invitation_message":           invitation_message,
@@ -1481,12 +1524,10 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
         "sender_description":           sender_description,
         "sender_network_details":       sender_network_details,
         "recipient_name":               recipient_name,
+        "recipient_unsubscribe_url":    recipient_unsubscribe_url,
         "recipient_voter_email":        recipient_voter_email,
         "see_all_friend_requests_url":  web_app_root_url_verified + "/friends",
         "confirm_friend_request_url":   web_app_root_url_verified + "/more/network/key/" + invitation_secret_key,
-        "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
-        recipient_email_subscription_secret_key,
-        "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
     }
     template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
 
@@ -1500,7 +1541,10 @@ def send_ballot_email(voter_device_id, sender_voter, send_now, sender_email_addr
         recipient_email_we_vote_id=recipient_email_we_vote_id,
         recipient_voter_email=recipient_voter_email,
         template_variables_in_json=template_variables_in_json,
-        kind_of_email_template=kind_of_email_template)
+        kind_of_email_template=kind_of_email_template,
+        list_unsubscribe_mailto=list_unsubscribe_mailto,
+        list_unsubscribe_url=list_unsubscribe_url,
+    )
     status += outbound_results['status'] + " "
     email_outbound_description = outbound_results['email_outbound_description']
     if outbound_results['email_outbound_description_saved']:
@@ -1626,7 +1670,7 @@ def voter_create_for_api(voter_device_id):  # voterCreate
     voter_we_vote_id = ''
     # Make sure a voter record hasn't already been created for this
     voter_manager = VoterManager()
-    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if results['voter_found']:
         voter = results['voter']
         voter_id = voter.id
@@ -1754,7 +1798,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     # ############# EMAIL SIGN IN #####################################
     if positive_value_exists(email_secret_key):
         status += "EMAIL_SECRET_KEY "
-        email_results = email_manager.retrieve_email_address_object_from_secret_key(email_secret_key)
+        email_results = email_manager.retrieve_email_address_object_from_secret_key(email_secret_key=email_secret_key)
         if email_results['email_address_object_found']:
             email_address_object = email_results['email_address_object']
 
@@ -1801,7 +1845,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         status += "FACEBOOK_SECRET_KEY "
         facebook_manager = FacebookManager()
         facebook_results = facebook_manager.retrieve_facebook_link_to_voter_from_facebook_secret_key(
-            facebook_secret_key)
+            facebook_secret_key, read_only=True)
         if facebook_results['facebook_link_to_voter_found']:
             facebook_link_to_voter = facebook_results['facebook_link_to_voter']
 
@@ -2311,7 +2355,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
             from_linked_organization = from_linked_organization_results['organization']
             from_voter_linked_organization_id = from_linked_organization.id
         else:
-            # Remove the link to the organization so we don't have a future conflict
+            # Remove the link to the organization, so we don't have a future conflict
             try:
                 from_voter_linked_organization_we_vote_id = None
                 from_voter.linked_organization_we_vote_id = None
@@ -2329,7 +2373,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
             to_linked_organization = to_linked_organization_results['organization']
             to_voter_linked_organization_id = to_linked_organization.id
         else:
-            # Remove the link to the organization so we don't have a future conflict
+            # Remove the link to the organization, so we don't have a future conflict
             try:
                 to_voter_linked_organization_we_vote_id = None
                 new_owner_voter.linked_organization_we_vote_id = None
@@ -2401,7 +2445,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
     status += " " + move_friend_invitations_results['status']
 
     if positive_value_exists(from_voter.linked_organization_we_vote_id):
-        # Remove the link to the organization so we don't have a future conflict
+        # Remove the link to the organization, so we don't have a future conflict
         try:
             from_voter.linked_organization_we_vote_id = None
             from_voter.save()
@@ -2930,7 +2974,7 @@ def voter_retrieve_for_api(
         #  organization update with latest Facebook data
         facebook_manager = FacebookManager()
         facebook_link_results = facebook_manager.retrieve_facebook_link_to_voter_from_voter_we_vote_id(
-            voter.we_vote_id)
+            voter.we_vote_id, read_only=True)
         if facebook_link_results['facebook_link_to_voter_found']:
             status += "FACEBOOK_LINK_TO_VOTER_FOUND "
             facebook_link_to_voter = facebook_link_results['facebook_link_to_voter']
@@ -3363,7 +3407,7 @@ def refresh_voter_primary_email_cached_information_by_email(normalized_email_add
                         status += "UNABLE_TO_UPDATE_VOTER_FOUND_BY_EMAIL "
                         # We tried to update the voter found by the voter_we_vote_id stored in the EmailAddress table,
                         #  but got an error, so assume it was because of a collision with the primary_email_we_vote_id
-                        # Here, we retrieve the voter already "claiming" this email entry so we can wipe the
+                        # Here, we retrieve the voter already "claiming" this email entry, so we can wipe the
                         #  email values.
                         voter_by_primary_email_results = voter_manager.retrieve_voter_by_primary_email_we_vote_id(
                             verified_email_address_object.we_vote_id)
@@ -3444,7 +3488,7 @@ def refresh_voter_primary_email_cached_information_by_email(normalized_email_add
         #  email address removed.
         if positive_value_exists(email_results['success']):
             # Make sure no voter's think they are using this email address
-            # Remove the email information so we don't have a future conflict
+            # Remove the email information, so we don't have a future conflict
             try:
                 if voter_found_by_email_boolean:
                     voter_found_by_email.email = None
@@ -3560,7 +3604,7 @@ def voter_sign_out_for_api(voter_device_id, sign_out_all_devices=False):  # vote
     voter_device_link_manager = VoterDeviceLinkManager()
 
     voter_manager = VoterManager()
-    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if results['voter_found']:
         voter_signing_out = results['voter']
         if positive_value_exists(voter_signing_out.email):
@@ -3613,7 +3657,7 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
         return error_results
 
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=False)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
         error_results = {
