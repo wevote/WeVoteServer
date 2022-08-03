@@ -25,7 +25,7 @@ from voter.models import fetch_voter_id_from_voter_device_link, VoterAddressMana
 from wevote_functions.functions import convert_district_scope_to_ballotpedia_race_office_level, \
     convert_state_text_to_state_code, convert_to_int, \
     extract_district_id_label_when_district_id_exists_from_ocd_id, extract_district_id_from_ocd_division_id, \
-    extract_facebook_username_from_text_string, \
+    extract_facebook_username_from_text_string, extract_instagram_handle_from_text_string, \
     extract_state_code_from_address_string, extract_state_from_ocd_division_id, \
     extract_twitter_handle_from_text_string, extract_vote_usa_measure_id, extract_vote_usa_office_id, \
     is_voter_device_id_valid, logger, positive_value_exists, STATE_CODE_MAP
@@ -562,6 +562,8 @@ def groom_and_store_google_civic_candidates_json_2021(
                                 go_fund_me_url = 'https://' + go_fund_me_url
                     if one_channel['type'] == 'Instagram':
                         instagram_handle = one_channel['id'] if 'id' in one_channel else ''
+                        if positive_value_exists(instagram_handle):
+                            instagram_handle = extract_instagram_handle_from_text_string(instagram_handle)
                     if one_channel['type'] == 'LinkedIn':
                         linkedin_url = one_channel['id'] if 'id' in one_channel else ''
                         if positive_value_exists(linkedin_url):
