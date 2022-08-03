@@ -36,7 +36,8 @@ from position.models import PositionEntered, PositionListManager
 from twitter.models import TwitterLinkPossibility, TwitterUserManager
 from voter.models import voter_has_authority
 from voter_guide.models import VoterGuide
-from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, list_intersection, \
+from wevote_functions.functions import convert_to_int, extract_instagram_handle_from_text_string, \
+    extract_twitter_handle_from_text_string, list_intersection, \
     positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from wevote_settings.models import RemoteRequestHistory, \
@@ -803,7 +804,7 @@ def candidate_list_view(request):
             if not election_id_found_from_link:
                 candidate.google_civic_election_id = contest_office.google_civic_election_id
             if positive_value_exists(candidate.instagram_handle):
-                url = candidate.instagram_handle
+                url = extract_instagram_handle_from_text_string(candidate.instagram_handle)
                 if not url.startswith('https://'):
                     url = ('https://www.instagram.com/' + candidate.instagram_handle).strip().replace('@', '')
                 candidate.instagram_url = url
@@ -1338,6 +1339,8 @@ def candidate_edit_process_view(request):
     candidate_contact_form_url = request.POST.get('candidate_contact_form_url', False)
     facebook_url = request.POST.get('facebook_url', False)
     instagram_handle = request.POST.get('instagram_handle', False)
+    if positive_value_exists(instagram_handle):
+        instagram_handle = extract_instagram_handle_from_text_string(instagram_handle)
     candidate_email = request.POST.get('candidate_email', False)
     candidate_phone = request.POST.get('candidate_phone', False)
     contest_office_id = request.POST.get('contest_office_id', False)
