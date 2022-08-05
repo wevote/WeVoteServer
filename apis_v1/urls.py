@@ -15,7 +15,7 @@ from apis_v1.views import views_activity, views_apple, views_docs, views_analyti
     views_election, views_extension, views_facebook, views_friend, \
     views_issues, views_measure, views_misc, views_organization, \
     views_pledge_to_vote, views_position, views_reaction, views_retrieve_tables, \
-    views_task, views_share, views_twitter, views_voter, views_voter_guide
+    views_task, views_share, views_twitter, views_instagram, views_voter, views_voter_guide
 from analytics.views_admin import analytics_action_sync_out_view, organization_daily_metrics_sync_out_view, \
     organization_election_metrics_sync_out_view, sitewide_daily_metrics_sync_out_view, \
     sitewide_election_metrics_sync_out_view, sitewide_voter_metrics_sync_out_view
@@ -265,6 +265,8 @@ urlpatterns = [
       #     views_twitter.twitter_sign_in_request_access_token_view, name='twitterSignInRequestAccessTokenView'),
       # re_path(r'^twitterSignInRequestVoterInfo/',
       #     views_twitter.twitter_sign_in_request_voter_info_view, name='twitterSignInRequestVoterInfoView'),
+      re_path(r'^instagramSignInStart/',views_instagram.instagram_sign_in_start_view,
+              name='instagramSignInStartView'),
       re_path(r'^twitterSignInStart/', views_twitter.twitter_sign_in_start_view,
               name='twitterSignInStartView'),
       re_path(r'^twitterProcessDeferredImages/', views_twitter.twitter_process_deferred_images_view,
@@ -643,6 +645,14 @@ urlpatterns = [
               views_docs.twitter_sign_in_retrieve_doc_view, name='twitterSignInRetrieveDocs'),
       re_path(r'^docs/twitterSignInStart/$', views_docs.twitter_sign_in_start_doc_view,
               name='twitterSignInStartDocs'),
+
+
+
+      re_path(r'^docs/instagramSignInStart/$', views_docs.instagram_sign_in_start_doc_view,
+              name='instagramSignInStartDocs'),
+
+
+
       re_path(r'^docs/twitterRetrieveIdsIFollow/$',
               views_docs.twitter_retrieve_ids_i_follow_doc_view, name='twitterRetrieveIdsIFollowDocs'),
       re_path(r'^docs/voterAddressRetrieve/$', views_docs.voter_address_retrieve_doc_view,
