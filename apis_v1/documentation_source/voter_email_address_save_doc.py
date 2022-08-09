@@ -80,12 +80,16 @@ def voter_email_address_save_doc_template_values(url_root):
                    '  "text_for_email_address": string,\n' \
                    '  "make_primary_email": boolean,\n' \
                    '  "delete_email": boolean,\n' \
-                   '  "email_address_saved_we_vote_id": string,\n' \
+                   '  "email_address_we_vote_id": string,\n' \
+                   '  "email_address_saved_we_vote_id": boolean,\n' \
+                   '  "email_address_already_owned_by_this_voter": boolean,\n' \
                    '  "email_address_created": boolean,\n' \
                    '  "email_address_deleted": boolean,\n' \
                    '  "email_address_not_valid": boolean,\n' \
+                   '  "email_address_deleted": boolean,\n' \
                    '  "verification_email_sent": boolean,\n' \
-                   '  "email_address_already_owned_by_other_voter": boolean,\n' \
+                   '  "link_to_sign_in_email_sent": boolean,\n' \
+                   '  "sign_in_code_email_sent": boolean,\n' \
                    '  "email_address_found": boolean,\n' \
                    '  "email_address_list_found": boolean,\n' \
                    '  "email_address_list": list\n' \
@@ -96,6 +100,7 @@ def voter_email_address_save_doc_template_values(url_root):
                    '     "email_ownership_is_verified": boolean,\n' \
                    '     "voter_we_vote_id": string,\n' \
                    '     "email_we_vote_id": string,\n' \
+                   '  "secret_code_system_locked_for_this_voter_device_id": boolean\n' \
                    '   ],\n' \
                    '}'
 
