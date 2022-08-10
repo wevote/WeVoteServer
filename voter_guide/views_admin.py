@@ -372,7 +372,7 @@ def voter_guide_create_view(request):
                     is_list_of_endorsements_for_candidate = False
 
                 # Fill the possible_endorsement_list with the latest data
-                # Note that this extraction is limited to 200 possibilities to avoid very slow page loads
+                # POSSIBILITY_LIST_LIMIT set to 400 possibilities to avoid very slow page loads, formerly 200
                 results = extract_voter_guide_possibility_position_list_from_database(voter_guide_possibility)
 
                 if results['possible_endorsement_list_found']:
