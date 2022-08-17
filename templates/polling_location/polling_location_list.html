@@ -72,6 +72,13 @@
 {% endif %}{# End of if state_list #}
 
 
+
+
+
+
+
+
+
 {% if polling_location_search or issues_selected %}
     <a href="{% url 'polling_location:polling_location_list' %}?state_code={{ state_code }}">
          clear search</a>&nbsp;
@@ -103,7 +110,27 @@
       <input type="checkbox" name="show_bulk_retrieve" id="show_bulk_retrieve_id" value="1" onChange="this.form.submit()"
              {% if show_bulk_retrieve %}checked{% endif %} /> bulk retrieve locations
     </label>
+     
+    
+
+
+    {% if source_code_list %}
+        {% for source_code in source_code_list %}
+            {% if source_code %}
+                <label for="show_{{source_code}}_id">
+                    <input type="checkbox" name="show_{{source_code}}" id="show_{{source_code}}_id" value="1" onChange="this.form.submit()"
+                        {% if source_code in selected_types %}checked{% endif %} /> {{ source_code }}
+                </label>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+
+
+
 </form>
+
+
 
 {% if polling_location_list %}
     <table class="table table-condensed">

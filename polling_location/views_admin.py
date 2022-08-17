@@ -521,6 +521,21 @@ def polling_location_list_view(request):
     polling_location_count_query = PollingLocation.objects.all()
     polling_location_without_latitude_count = 0
     polling_location_query = PollingLocation.objects.all()
+#########################################################################################################
+    selected_types = []
+    filtered_polling_locations = []
+
+    polling_location_source_codes = set([polling_location.source_code for polling_location in polling_location_query])
+
+    for polling_location_source_code in polling_location_source_codes:
+        if request.GET.get(f'show_{polling_location_source_code}', 0):
+            selected_types.append(polling_location_source_code)
+
+    if selected_types:
+        polling_location_count_query = polling_location_count_query.filter(source_code__in = selected_types)
+        polling_location_query = polling_location_query.filter(source_code__in = selected_types)
+#########################################################################################################
+
     if not positive_value_exists(polling_location_search):
         polling_location_count_query = polling_location_count_query.exclude(polling_location_deleted=True)
         polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
@@ -688,6 +703,8 @@ def polling_location_list_view(request):
         'show_successful_retrieves': show_successful_retrieves,
         'show_vote_usa_errors':     show_vote_usa_errors,
         'state_code':               state_code,
+        'selected_types':           selected_types,
+        'source_code_list':         polling_location_source_codes,
         'state_name':               convert_state_code_to_state_text(state_code),
         'state_list':               sorted_state_list,
     }
