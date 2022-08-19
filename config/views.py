@@ -37,6 +37,16 @@ def robots_view(request):
     }
     return render(request, 'admin/robots.txt', template_values)
 
+def app_ads_view(request):
+    """
+    Response for app-ads.txt requests
+    :param request:
+    :return:
+    """
+    template_values = {
+    }
+    return render(request, 'admin/app-ads.txt', template_values)
+
 
 def start_view(request):
     return HttpResponseRedirect(reverse('apis_v1:apisIndex', args=()))
