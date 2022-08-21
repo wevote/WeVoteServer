@@ -521,7 +521,6 @@ def polling_location_list_view(request):
     polling_location_count_query = PollingLocation.objects.all()
     polling_location_without_latitude_count = 0
     polling_location_query = PollingLocation.objects.all()
-#########################################################################################################
     selected_types = []
     filtered_polling_locations = []
 
@@ -534,7 +533,6 @@ def polling_location_list_view(request):
     if selected_types:
         polling_location_count_query = polling_location_count_query.filter(source_code__in = selected_types)
         polling_location_query = polling_location_query.filter(source_code__in = selected_types)
-#########################################################################################################
 
     if not positive_value_exists(polling_location_search):
         polling_location_count_query = polling_location_count_query.exclude(polling_location_deleted=True)

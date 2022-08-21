@@ -74,9 +74,9 @@ def twitter_sign_in_start_view(request):  # twitterSignInStart (Step 1)
     :param request:
     :return:
     """
-    voter_device_id = "test"  # We standardize how we take in the voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     return_url = request.GET.get('return_url', '')
-    cordova = request.GET.get('cordova', False) 
+    cordova = request.GET.get('cordova', False)
 
     results = twitter_sign_in_start_for_api(voter_device_id, return_url, cordova)
 
@@ -92,7 +92,7 @@ def twitter_sign_in_start_view(request):  # twitterSignInStart (Step 1)
         'status':               results['status'],
         'success':              results['success'],
         'voter_device_id':      voter_device_id,
-        'twitter_redirect_url': "https://wevote.me/settings/account",
+        'twitter_redirect_url': results['twitter_redirect_url'],
         'voter_info_retrieved': results['voter_info_retrieved'],
         'switch_accounts':      results['switch_accounts'],  # If true, new voter_device_id returned
         'cordova':              cordova,

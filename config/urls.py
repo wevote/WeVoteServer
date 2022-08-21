@@ -50,8 +50,7 @@ urlpatterns = [
     re_path(r'^import_export_batches/', include(('import_export_batches.urls', 'import_export_batches'), namespace="import_export_batches")),
     re_path(r'^import_export_ctcl/', include(('import_export_ctcl.urls', 'import_export_ctcl'), namespace="import_export_ctcl")),
     re_path(r'^import_export_facebook/', include(('import_export_facebook.urls', 'import_export_facebook'), namespace="import_export_facebook")),
-    re_path(r'^import_export_google_civic/', include((
-'import_export_google_civic.urls','import_export_google_civic'), namespace="import_export_google_civic")),
+    re_path(r'^import_export_google_civic/', include(('import_export_google_civic.urls','import_export_google_civic'), namespace="import_export_google_civic")),
     re_path(r'^import_export_maplight/', include(('import_export_maplight.urls', 'import_export_maplight'), namespace="import_export_maplight")),
     re_path(r'^import_export_twitter/', include(('import_export_twitter.urls', 'import_export_twitter'), namespace="import_export_twitter")),
     re_path(r'^import_export_vote_smart/', include(('import_export_vote_smart.urls', 'import_export_vote_smart'), namespace="import_export_vote_smart")),

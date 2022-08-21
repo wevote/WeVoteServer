@@ -75,7 +75,7 @@ from apis_v1.documentation_source import \
     voter_split_into_two_accounts_doc, \
     voter_stop_opposing_save_doc, \
     voter_stop_supporting_save_doc, voter_supporting_save_doc, voter_twitter_save_to_current_account_doc, \
-    voter_update_doc, voter_verify_secret_code_doc, email_ballot_data_doc, instagram_sign_in_start_doc
+    voter_update_doc, voter_verify_secret_code_doc, email_ballot_data_doc
 from config.base import get_environment_variable
 from django.contrib.messages import get_messages
 import importlib
@@ -1133,14 +1133,6 @@ def twitter_sign_in_start_doc_view(request):
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
-def instagram_sign_in_start_doc_view(request):
-    """
-    Show documentation about twitterSignInStart
-    """
-    url_root = WE_VOTE_SERVER_ROOT_URL
-    template_values = instagram_sign_in_start_doc.instagram_sign_in_start_doc_template_values(url_root)
-    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
-    return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 def twitter_sign_in_request_access_token_doc_view(request):
     """
