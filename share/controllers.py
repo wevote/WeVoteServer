@@ -13,6 +13,7 @@ from analytics.models import ACTION_VIEW_SHARED_BALLOT, ACTION_VIEW_SHARED_BALLO
 from follow.models import FOLLOWING, FollowOrganizationManager
 import json
 from organization.models import OrganizationManager
+from position.models import PositionListManager
 import robot_detection
 from share.models import SharedItem, SharedLinkClicked, SharedPermissionsGranted
 from voter.models import VoterDeviceLinkManager, VoterManager
@@ -366,6 +367,15 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         # Shared item not clicked
         pass
 
+    position_list = []
+    if positive_value_exists(shared_item.shared_by_voter_we_vote_id) \
+            and shared_item.shared_item_code_all_opinions == shared_item_code:
+        position_list_manager = PositionListManager()
+        results = position_list_manager.retrieve_all_positions_for_voter_simple(
+            voter_we_vote_id=shared_item.shared_by_voter_we_vote_id)
+        if results['position_list_found']:
+            position_list = results['position_list']
+
     shared_by_display_name = shared_item.shared_by_display_name \
         if positive_value_exists(shared_item.shared_by_display_name) else ''
     shared_by_we_vote_hosted_profile_image_url_large = shared_item.shared_by_we_vote_hosted_profile_image_url_large \
@@ -387,6 +397,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         'is_ready_share':                       shared_item.is_ready_share,
         'include_friends_only_positions':       include_friends_only_positions,
         'google_civic_election_id':             shared_item.google_civic_election_id,
+        'position_list':                        position_list,
         'shared_by_display_name':               shared_by_display_name,
         'shared_by_organization_type':          shared_item.shared_by_organization_type,
         'shared_by_organization_we_vote_id':    shared_item.shared_by_organization_we_vote_id,
