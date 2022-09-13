@@ -1524,6 +1524,8 @@ def batch_process_system_toggle_view(request):
         setting_name = 'batch_process_system_ballot_items_on'
     elif kind_of_process == 'CALCULATE_ANALYTICS':
         setting_name = 'batch_process_system_calculate_analytics_on'
+    elif kind_of_process == 'GENERATE_VOTER_GUIDES':
+        setting_name = 'batch_process_system_generate_voter_guides_on'
     elif kind_of_process == 'SEARCH_TWITTER':
         setting_name = 'batch_process_system_search_twitter_on'
     elif kind_of_process == 'UPDATE_TWITTER_DATA':
@@ -1685,6 +1687,9 @@ def batch_process_list_view(request):
                     'REFRESH_BALLOT_ITEMS_FROM_VOTERS',
                     'RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS']
                 batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=ballot_item_processes)
+            elif kind_of_processes_to_show == "GENERATE_VOTER_GUIDES":
+                processes = ['GENERATE_VOTER_GUIDES']
+                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=processes)
             elif kind_of_processes_to_show == "SEARCH_TWITTER":
                 search_twitter_processes = ['SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE']
                 batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=search_twitter_processes)
@@ -1864,13 +1869,15 @@ def batch_process_list_view(request):
 
     from wevote_settings.models import fetch_batch_process_system_on, fetch_batch_process_system_activity_notices_on, \
         fetch_batch_process_system_api_refresh_on, fetch_batch_process_system_ballot_items_on, \
-        fetch_batch_process_system_calculate_analytics_on, fetch_batch_process_system_search_twitter_on, \
+        fetch_batch_process_system_calculate_analytics_on, fetch_batch_process_system_generate_voter_guides_on, \
+        fetch_batch_process_system_search_twitter_on, \
         fetch_batch_process_system_update_twitter_on
     batch_process_system_on = fetch_batch_process_system_on()
     batch_process_system_activity_notices_on = fetch_batch_process_system_activity_notices_on()
     batch_process_system_api_refresh_on = fetch_batch_process_system_api_refresh_on()
     batch_process_system_ballot_items_on = fetch_batch_process_system_ballot_items_on()
     batch_process_system_calculate_analytics_on = fetch_batch_process_system_calculate_analytics_on()
+    batch_process_system_generate_voter_guides_on = fetch_batch_process_system_generate_voter_guides_on()
     batch_process_system_search_twitter_on = fetch_batch_process_system_search_twitter_on()
     batch_process_system_update_twitter_on = fetch_batch_process_system_update_twitter_on()
 
@@ -1914,6 +1921,7 @@ def batch_process_list_view(request):
         'batch_process_system_api_refresh_on':          batch_process_system_api_refresh_on,
         'batch_process_system_ballot_items_on':         batch_process_system_ballot_items_on,
         'batch_process_system_calculate_analytics_on':  batch_process_system_calculate_analytics_on,
+        'batch_process_system_generate_voter_guides_on':    batch_process_system_generate_voter_guides_on,
         'batch_process_system_search_twitter_on':       batch_process_system_search_twitter_on,
         'batch_process_system_update_twitter_on':       batch_process_system_update_twitter_on,
         'batch_process_search':                 batch_process_search,
