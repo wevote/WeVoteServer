@@ -1710,7 +1710,8 @@ class CandidateListManager(models.Manager):
             candidate_query = candidate_query.filter(state_code__iexact=limit_to_this_state_code)
 
         try:
-            candidate_we_vote_id_list = candidate_query.values_list('we_vote_id', flat=True).distinct()
+            candidate_query = candidate_query.values_list('we_vote_id', flat=True).distinct()
+            candidate_we_vote_id_list = list(candidate_query)
         except Exception as e:
             status += 'ERROR_WITH_DATABASE_QUERY: ' + str(e) + ' '
             success = False
