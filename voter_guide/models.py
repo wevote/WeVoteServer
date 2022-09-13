@@ -425,7 +425,7 @@ class VoterGuideManager(models.Manager):
                 status += 'VOTER_GUIDES_GENERATED_CREATED '
             else:
                 status += 'VOTER_GUIDES_GENERATED_UPDATED '
-        except VoterGuide.MultipleObjectsReturned as e:
+        except VoterGuidesGenerated.MultipleObjectsReturned as e:
             success = False
             status += 'MULTIPLE_MATCHING_VOTER_GUIDES_GENERATED '
         except Exception as e:
