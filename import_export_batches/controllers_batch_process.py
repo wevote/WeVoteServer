@@ -2245,6 +2245,7 @@ def process_one_generate_voter_guides_batch_process(batch_process):
 
     elections_dict = {}
     voter_guides_generated_count = 0
+    status += str(organization_we_vote_ids_with_positions)
     for organization_we_vote_id in organization_we_vote_ids_with_positions:
         results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
             organization_we_vote_id=organization_we_vote_id,
