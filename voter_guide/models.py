@@ -404,6 +404,41 @@ class VoterGuideManager(models.Manager):
         }
         return results
 
+    def update_or_create_voter_guides_generated(
+            self,
+            google_civic_election_id=0,
+            number_of_voter_guides=0):
+        google_civic_election_id = convert_to_int(google_civic_election_id)
+        status = ""
+
+        try:
+            updated_values = {
+                # Values we search against below
+                'google_civic_election_id': google_civic_election_id,
+                'number_of_voter_guides':   number_of_voter_guides,
+            }
+            voter_guide, new_voter_guide_created = VoterGuidesGenerated.objects.update_or_create(
+                google_civic_election_id=google_civic_election_id,
+                defaults=updated_values)
+            success = True
+            if new_voter_guide_created:
+                status += 'VOTER_GUIDES_GENERATED_CREATED '
+            else:
+                status += 'VOTER_GUIDES_GENERATED_UPDATED '
+        except VoterGuidesGenerated.MultipleObjectsReturned as e:
+            success = False
+            status += 'MULTIPLE_MATCHING_VOTER_GUIDES_GENERATED '
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            success = False
+            status += 'UPDATE_OR_CREATE_VOTER_GUIDES_GENERATED: ' + str(e) + ' '
+
+        results = {
+            'success':  success,
+            'status':   status,
+        }
+        return results
+
     def update_or_create_voter_voter_guide(self, google_civic_election_id, voter):
         """
 
@@ -2911,3 +2946,9 @@ class VoterGuidePossibilityPosition(models.Model):
     # Delete existing PositionEntered from database
     position_should_be_removed = models.BooleanField(default=False,
                                                      verbose_name='Delete saved position from PositionEntered.')
+
+
+class VoterGuidesGenerated(models.Model):
+    google_civic_election_id = models.PositiveIntegerField(null=True, db_index=True)
+    date_last_changed = models.DateTimeField(null=True, auto_now=True)
+    number_of_voter_guides = models.PositiveIntegerField(null=True)

@@ -11,7 +11,7 @@ from .models import ACTIVITY_NOTICE_PROCESS, API_REFRESH_REQUEST, \
     CALCULATE_SITEWIDE_DAILY_METRICS, \
     CALCULATE_SITEWIDE_ELECTION_METRICS, \
     CALCULATE_SITEWIDE_VOTER_METRICS, \
-    IMPORT_CREATE, IMPORT_DELETE, \
+    GENERATE_VOTER_GUIDES, IMPORT_CREATE, IMPORT_DELETE, \
     RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, \
     REFRESH_BALLOT_ITEMS_FROM_VOTERS, SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE, UPDATE_TWITTER_DATA_FROM_TWITTER
 from activity.controllers import process_activity_notice_seeds_triggered_by_batch_process
@@ -22,8 +22,10 @@ from analytics.controllers import calculate_sitewide_daily_metrics, \
 from analytics.models import AnalyticsManager
 from api_internal_cache.models import ApiInternalCacheManager
 from ballot.models import BallotReturnedListManager
-from datetime import timedelta
-from django.utils.timezone import now
+from candidate.models import CandidateListManager
+from datetime import datetime, timedelta
+from django.db.models import Q
+from django.utils.timezone import localtime, now
 from election.models import ElectionManager
 from exception.models import handle_exception
 from import_export_twitter.controllers import fetch_number_of_candidates_needing_twitter_search, \
@@ -32,13 +34,15 @@ from import_export_twitter.controllers import fetch_number_of_candidates_needing
     retrieve_possible_twitter_handles_in_bulk
 from issue.controllers import update_issue_statistics
 import json
+from position.models import PositionEntered
 from voter_guide.controllers import voter_guides_upcoming_retrieve_for_api
+from voter_guide.models import VoterGuideManager, VoterGuidesGenerated
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists
 from wevote_settings.models import fetch_batch_process_system_on, fetch_batch_process_system_activity_notices_on, \
     fetch_batch_process_system_api_refresh_on, fetch_batch_process_system_ballot_items_on, \
     fetch_batch_process_system_calculate_analytics_on, fetch_batch_process_system_search_twitter_on, \
-    fetch_batch_process_system_update_twitter_on
+    fetch_batch_process_system_generate_voter_guides_on, fetch_batch_process_system_update_twitter_on
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -418,6 +422,9 @@ def process_next_general_maintenance():
             CALCULATE_ORGANIZATION_DAILY_METRICS,
             CALCULATE_ORGANIZATION_ELECTION_METRICS]
         kind_of_processes_to_run = kind_of_processes_to_run + analytics_process_list
+    if fetch_batch_process_system_generate_voter_guides_on():
+        generate_voter_guides_process_list = [GENERATE_VOTER_GUIDES]
+        kind_of_processes_to_run = kind_of_processes_to_run + generate_voter_guides_process_list
     if fetch_batch_process_system_search_twitter_on():
         search_twitter_process_list = [SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE]
         kind_of_processes_to_run = kind_of_processes_to_run + search_twitter_process_list
@@ -530,6 +537,77 @@ def process_next_general_maintenance():
                     batch_process_manager.create_batch_process_log_entry(
                         batch_process_id=0,
                         kind_of_process=API_REFRESH_REQUEST,
+                        status=status,
+                    )
+
+    # ############################
+    # Generate voter guides - make sure we have a voter guide for every Organization + Election pair
+    #  if an endorsement has been added since the last voter guides were generated
+    if not fetch_batch_process_system_generate_voter_guides_on():
+        status += "BATCH_PROCESS_SYSTEM_GENERATE_VOTER_GUIDES_TURNED_OFF "
+    else:
+        # We only want one GENERATE_VOTER_GUIDES process to be running at a time
+        generate_voter_guides_process_is_already_in_queue = False
+        for batch_process in batch_process_list_already_scheduled:
+            if batch_process.kind_of_process in [GENERATE_VOTER_GUIDES]:
+                status += "GENERATE_VOTER_GUIDES_ALREADY_SCHEDULED(" + str(batch_process.id) + ") "
+                generate_voter_guides_process_is_already_in_queue = True
+        for batch_process in batch_process_list_already_running:
+            if batch_process.kind_of_process in [GENERATE_VOTER_GUIDES]:
+                status += "GENERATE_VOTER_GUIDES_ALREADY_RUNNING(" + str(batch_process.id) + ") "
+                generate_voter_guides_process_is_already_in_queue = True
+        if generate_voter_guides_process_is_already_in_queue:
+            pass
+        else:
+            # Get list of upcoming elections we should generate voter guides for (minus those already generated)
+            election_ids_that_need_voter_guides_generated = []
+            election_manager = ElectionManager()
+            results = election_manager.retrieve_upcoming_google_civic_election_id_list()
+            if results['upcoming_google_civic_election_id_list_found']:
+                upcoming_google_civic_election_id_list = results['upcoming_google_civic_election_id_list']
+                # Make sure they are all integer
+                upcoming_google_civic_election_id_list_converted = []
+                for one_google_civic_election_id in upcoming_google_civic_election_id_list:
+                    upcoming_google_civic_election_id_list_converted\
+                        .append(convert_to_int(one_google_civic_election_id))
+                upcoming_google_civic_election_id_list = upcoming_google_civic_election_id_list_converted
+                if positive_value_exists(len(upcoming_google_civic_election_id_list)):
+                    # Get list of elections we have generated voter guides for in the last 24 hours (so we can remove)
+                    time_threshold = localtime(now() - timedelta(hours=24)).date()  # Pacific Time for TIME_ZONE
+                    query = VoterGuidesGenerated.objects.using('readonly').all()
+                    query = query.filter(date_last_changed__gte=time_threshold)
+                    election_ids_already_generated_list = query.values_list('google_civic_election_id',
+                                                                            flat=True).distinct()
+
+                    if positive_value_exists(len(election_ids_already_generated_list)):
+                        election_ids_that_need_voter_guides_generated = \
+                            list(set(upcoming_google_civic_election_id_list) - set(election_ids_already_generated_list))
+                    else:
+                        election_ids_that_need_voter_guides_generated = upcoming_google_civic_election_id_list
+
+            if positive_value_exists(len(election_ids_that_need_voter_guides_generated)):
+                first_election_id = election_ids_that_need_voter_guides_generated[0]
+                status += "CREATING_GENERATE_VOTER_GUIDES_BATCH_PROCESS_FOR_ELECTION-" + str(first_election_id) + " "
+                results = batch_process_manager.create_batch_process(
+                    google_civic_election_id=first_election_id,
+                    kind_of_process=GENERATE_VOTER_GUIDES)
+                status += results['status']
+                success = results['success']
+                if results['batch_process_saved']:
+                    batch_process = results['batch_process']
+                    status += "SCHEDULED_NEW_GENERATE_VOTER_GUIDES "
+                    batch_process_manager.create_batch_process_log_entry(
+                        batch_process_id=batch_process.id,
+                        kind_of_process=batch_process.kind_of_process,
+                        google_civic_election_id=batch_process.google_civic_election_id,
+                        status=status,
+                    )
+                else:
+                    status += "FAILED_TO_SCHEDULE-" + str(GENERATE_VOTER_GUIDES) + " "
+                    batch_process_manager.create_batch_process_log_entry(
+                        batch_process_id=0,
+                        kind_of_process=GENERATE_VOTER_GUIDES,
+                        google_civic_election_id=first_election_id,
                         status=status,
                     )
 
@@ -762,6 +840,9 @@ def process_next_general_maintenance():
             status += results['status']
         elif batch_process.kind_of_process in [CALCULATE_SITEWIDE_DAILY_METRICS]:
             results = process_one_sitewide_daily_analytics_batch_process(batch_process)
+            status += results['status']
+        elif batch_process.kind_of_process in [GENERATE_VOTER_GUIDES]:
+            results = process_one_generate_voter_guides_batch_process(batch_process)
             status += results['status']
         elif batch_process.kind_of_process in [SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE]:
             results = process_one_search_twitter_batch_process(batch_process, status=status)
@@ -2104,6 +2185,121 @@ def process_activity_notice_batch_process(batch_process):
                 kind_of_process=kind_of_process,
                 status=status,
             )
+
+    results = {
+        'success':              success,
+        'status':               status,
+    }
+    return results
+
+
+def process_one_generate_voter_guides_batch_process(batch_process):
+    status = ""
+    success = True
+    voter_guide_manager = VoterGuideManager()
+    batch_process_manager = BatchProcessManager()
+
+    kind_of_process = batch_process.kind_of_process
+
+    # When a batch_process is running, we mark when it was "taken off the shelf" to be worked on.
+    #  When the process is complete, we should reset this to "NULL"
+    try:
+        batch_process.date_started = now()
+        batch_process.date_checked_out = now()
+        batch_process.save()
+    except Exception as e:
+        status += "ERROR-GENERATE_VOTER_GUIDES-CHECKED_OUT_TIME_NOT_SAVED: " + str(e) + " "
+        handle_exception(e, logger=logger, exception_message=status)
+        success = False
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=kind_of_process,
+            google_civic_election_id=batch_process.google_civic_election_id,
+            status=status,
+        )
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    # Generate voter guides for one election
+    google_civic_election_id = batch_process.google_civic_election_id
+
+    # Query PositionEntered table in this election for unique organization_we_vote_ids
+    candidate_list_manager = CandidateListManager()
+    results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+        google_civic_election_id_list=[google_civic_election_id])
+    if not positive_value_exists(results['success']):
+        success = False
+    candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+
+    positions_exist_query = PositionEntered.objects.using('readonly').all()
+    positions_exist_query = positions_exist_query.filter(
+        Q(google_civic_election_id=google_civic_election_id) |
+        Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
+    positions_exist_query = positions_exist_query.filter(
+        Q(vote_smart_rating__isnull=True) | Q(vote_smart_rating=""))
+    organization_we_vote_ids_with_positions = \
+        positions_exist_query.values_list('organization_we_vote_id', flat=True).distinct()
+
+    elections_dict = {}
+    voter_guides_generated_count = 0
+    for organization_we_vote_id in organization_we_vote_ids_with_positions:
+        results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
+            organization_we_vote_id=organization_we_vote_id,
+            google_civic_election_id=google_civic_election_id,
+            elections_dict=elections_dict,
+        )
+        if results['success']:
+            voter_guides_generated_count += 1
+        else:
+            status += results['status']
+        elections_dict = results['elections_dict']
+
+    if success:
+        status += "VOTER_GUIDES_GENERATED_COUNT: " + str(voter_guides_generated_count) + " "
+        results = voter_guide_manager.update_or_create_voter_guides_generated(
+            google_civic_election_id=google_civic_election_id,
+            number_of_voter_guides=voter_guides_generated_count,
+        )
+        status += results['status']
+
+        try:
+            batch_process.completion_summary = status
+            batch_process.date_checked_out = None
+            batch_process.date_completed = now()
+            batch_process.save()
+
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=kind_of_process,
+                google_civic_election_id=google_civic_election_id,
+                status=status,
+            )
+        except Exception as e:
+            status += "ERROR-VOTER_GUIDES_GENERATED_DATE_COMPLETED_TIME_NOT_SAVED: " + str(e) + " "
+            handle_exception(e, logger=logger, exception_message=status)
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=kind_of_process,
+                google_civic_election_id=google_civic_election_id,
+                status=status,
+            )
+            results = {
+                'success': success,
+                'status': status,
+            }
+            return results
+    else:
+        status += "VOTER_GUIDES_GENERATED_FAILED "
+        success = False
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=kind_of_process,
+            google_civic_election_id=google_civic_election_id,
+            status=status,
+        )
 
     results = {
         'success':              success,

@@ -10,20 +10,26 @@
 <h1>
   Batch Processes{% if batch_process_list %} ({{ batch_process_list|length }}){% endif %}
   {% if not batch_process_system_on %} - BATCH SYSTEM OFF{% endif %}
+</h1>
+{% if not batch_process_system_activity_notices_on or not batch_process_system_api_refresh_on or not batch_process_system_ballot_items_on or not batch_process_system_calculate_analytics_on or not batch_process_system_generate_voter_guides_on or not batch_process_system_search_twitter_on or not batch_process_system_update_twitter_on %}
+<h2>
     {% if not batch_process_system_activity_notices_on %} <span style="color: darkred;">[Activity Processing OFF]</span>{% endif %}
     {% if not batch_process_system_api_refresh_on %} <span style="color: darkred;">[API Refresh OFF]</span>{% endif %}
     {% if not batch_process_system_ballot_items_on %} <span style="color: darkred;">[Ballot Item Processing OFF]</span>{% endif %}
     {% if not batch_process_system_calculate_analytics_on %} <span style="color: darkred;">[Analytics Processing OFF]</span>{% endif %}
+    {% if not batch_process_system_generate_voter_guides_on %} <span style="color: darkred;">[Generate Voter Guides OFF]</span>{% endif %}
     {% if not batch_process_system_search_twitter_on %} <span style="color: darkred;">[Twitter Searching OFF]</span>{% endif %}
     {% if not batch_process_system_update_twitter_on %} <span style="color: darkred;">[Twitter Updates OFF]</span>{% endif %}
-</h1>
+</h2>
+{% endif %}
 
 <ul>
     <li>
         <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?{{ toggle_system_url_variables }}" >
         {% if batch_process_system_on %}Turn OFF Entire Batch System{% else %}<strong>Turn ON Entire Batch System</strong>{% endif %}
         </a>
-        &nbsp;&nbsp;&nbsp;
+    </li>
+    <li>
         <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=ACTIVITY_NOTICE_PROCESS&{{ toggle_system_url_variables }}" >
         {% if batch_process_system_activity_notices_on %}Turn OFF Activity Processing{% else %}<strong>Turn ON Activity Processing</strong>{% endif %}
         </a>
@@ -38,6 +44,10 @@
         &nbsp;&nbsp;&nbsp;
         <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=CALCULATE_ANALYTICS&{{ toggle_system_url_variables }}" >
         {% if batch_process_system_calculate_analytics_on %}Turn OFF Analytics Processing{% else %}<strong>Turn ON Analytics Processing</strong>{% endif %}
+        </a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=GENERATE_VOTER_GUIDES&{{ toggle_system_url_variables }}" >
+        {% if batch_process_system_generate_voter_guides_on %}Turn OFF Generate Voter Guides{% else %}<strong>Turn ON Generate Voter Guides</strong>{% endif %}
         </a>
         &nbsp;&nbsp;&nbsp;
         <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=SEARCH_TWITTER&{{ toggle_system_url_variables }}" >
@@ -141,6 +151,9 @@
         <option value="SEARCH_TWITTER"
         {% if kind_of_processes_to_show == "SEARCH_TWITTER" %} selected="selected"{% endif %}>
             Search Twitter</option>
+        <option value="GENERATE_VOTER_GUIDES"
+        {% if kind_of_processes_to_show == "GENERATE_VOTER_GUIDES" %} selected="selected"{% endif %}>
+            Generate Voter Guides</option>
         <option value="UPDATE_TWITTER_DATA"
         {% if kind_of_processes_to_show == "UPDATE_TWITTER_DATA" %} selected="selected"{% endif %}>
             Update Twitter Data</option>
