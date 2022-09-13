@@ -1111,14 +1111,16 @@ def voter_list_view(request):
     messages_on_stage = get_messages(request)
     if positive_value_exists(voter_search):
         # Search for an email address - do not require to be verified
-        voter_we_vote_ids_with_email = EmailAddress.objects.filter(
+        voter_we_vote_ids_with_email_query = EmailAddress.objects.filter(
             normalized_email_address__icontains=voter_search,
         ).values_list('voter_we_vote_id', flat=True)
+        voter_we_vote_ids_with_email = list(voter_we_vote_ids_with_email_query)
 
         # Search for a phone number
-        voter_we_vote_ids_with_sms_phone_number = SMSPhoneNumber.objects.filter(
+        voter_we_vote_ids_with_sms_phone_number_query = SMSPhoneNumber.objects.filter(
             normalized_sms_phone_number__icontains=voter_search,
         ).values_list('voter_we_vote_id', flat=True)
+        voter_we_vote_ids_with_sms_phone_number = list(voter_we_vote_ids_with_sms_phone_number_query)
 
         # Now search voter object
         voter_query = Voter.objects.all()

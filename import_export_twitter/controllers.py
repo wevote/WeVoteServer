@@ -247,8 +247,9 @@ def fetch_number_of_candidates_needing_twitter_search():
         Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle=""))
     # Exclude candidates we have already have TwitterLinkPossibility data for
     try:
-        twitter_possibility_list = TwitterLinkPossibility.objects.using('readonly'). \
+        twitter_possibility_query = TwitterLinkPossibility.objects.using('readonly'). \
             values_list('candidate_campaign_we_vote_id', flat=True).distinct()
+        twitter_possibility_list = list(twitter_possibility_query)
         if len(twitter_possibility_list):
             candidate_queryset = candidate_queryset.exclude(we_vote_id__in=twitter_possibility_list)
     except Exception as e:
@@ -261,7 +262,8 @@ def fetch_number_of_candidates_needing_twitter_search():
         one_month_ago = now() - timedelta(seconds=one_month_of_seconds)
         remote_request_query = remote_request_query.filter(datetime_of_action__gt=one_month_ago)
         remote_request_query = remote_request_query.filter(kind_of_action__iexact=RETRIEVE_POSSIBLE_TWITTER_HANDLES)
-        remote_request_list = remote_request_query.values_list('candidate_campaign_we_vote_id', flat=True).distinct()
+        remote_request_query = remote_request_query.values_list('candidate_campaign_we_vote_id', flat=True).distinct()
+        remote_request_list = list(remote_request_query)
         if len(remote_request_list):
             candidate_queryset = candidate_queryset.exclude(we_vote_id__in=remote_request_list)
     except Exception as e:
@@ -1311,10 +1313,11 @@ def retrieve_possible_twitter_handles_in_bulk(
     if positive_value_exists(state_code):
         candidate_queryset = candidate_queryset.filter(state_code__iexact=state_code)
 
-    # Exclude candidates we have already have TwitterLinkPossibility data for
+    # Exclude candidates we already have TwitterLinkPossibility data for
     try:
-        twitter_possibility_list = TwitterLinkPossibility.objects. \
+        twitter_possibility_query = TwitterLinkPossibility.objects. \
             values_list('candidate_campaign_we_vote_id', flat=True).distinct()
+        twitter_possibility_list = list(twitter_possibility_query)
         if len(twitter_possibility_list):
             candidate_queryset = candidate_queryset.exclude(we_vote_id__in=twitter_possibility_list)
     except Exception as e:
@@ -1327,7 +1330,8 @@ def retrieve_possible_twitter_handles_in_bulk(
         one_month_ago = now() - timedelta(seconds=one_month_of_seconds)
         remote_request_query = remote_request_query.filter(datetime_of_action__gt=one_month_ago)
         remote_request_query = remote_request_query.filter(kind_of_action__iexact=RETRIEVE_POSSIBLE_TWITTER_HANDLES)
-        remote_request_list = remote_request_query.values_list('candidate_campaign_we_vote_id', flat=True).distinct()
+        remote_request_query = remote_request_query.values_list('candidate_campaign_we_vote_id', flat=True).distinct()
+        remote_request_list = list(remote_request_query)
         if len(remote_request_list):
             candidate_queryset = candidate_queryset.exclude(we_vote_id__in=remote_request_list)
     except Exception as e:

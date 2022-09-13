@@ -2240,13 +2240,18 @@ def process_one_generate_voter_guides_batch_process(batch_process):
         Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
     positions_exist_query = positions_exist_query.filter(
         Q(vote_smart_rating__isnull=True) | Q(vote_smart_rating=""))
-    organization_we_vote_ids_with_positions = \
-        positions_exist_query.values_list('organization_we_vote_id', flat=True).distinct()
+    positions_exist_query = positions_exist_query.values_list('organization_we_vote_id', flat=True).distinct()
+    organization_we_vote_ids_with_positions = list(positions_exist_query)
+    status += str(organization_we_vote_ids_with_positions)
+    # Add extra filter for safety while figuring out why distinct didn't work
+    organization_we_vote_ids_with_positions_filtered = []
+    for organization_we_vote_id in organization_we_vote_ids_with_positions:
+        if organization_we_vote_id not in organization_we_vote_ids_with_positions_filtered:
+            organization_we_vote_ids_with_positions_filtered.append(organization_we_vote_id)
 
     elections_dict = {}
     voter_guides_generated_count = 0
-    status += str(organization_we_vote_ids_with_positions)
-    for organization_we_vote_id in organization_we_vote_ids_with_positions:
+    for organization_we_vote_id in organization_we_vote_ids_with_positions_filtered:
         results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
             organization_we_vote_id=organization_we_vote_id,
             google_civic_election_id=google_civic_election_id,

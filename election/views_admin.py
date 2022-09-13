@@ -2266,11 +2266,13 @@ def election_migration_view(request):
             contest_measure_query = ContestMeasure.objects.filter(google_civic_election_id=from_election_id)\
                 .filter(state_code__iexact=from_state_code)
             from_election_measure_count = contest_measure_query.count()
-            contest_measure_we_vote_ids_migrated = contest_measure_query.values_list('we_vote_id', flat=True).distinct()
+            contest_measure_query = contest_measure_query.values_list('we_vote_id', flat=True).distinct()
+            contest_measure_we_vote_ids_migrated = list(contest_measure_query)
         else:
             contest_measure_query = ContestMeasure.objects.filter(google_civic_election_id=from_election_id)
             from_election_measure_count = contest_measure_query.count()
-            contest_measure_we_vote_ids_migrated = contest_measure_query.values_list('we_vote_id', flat=True).distinct()
+            contest_measure_query = contest_measure_query.values_list('we_vote_id', flat=True).distinct()
+            contest_measure_we_vote_ids_migrated = list(contest_measure_query)
         if positive_value_exists(change_now):
             if positive_value_exists(from_state_code):
                 ContestMeasure.objects.filter(google_civic_election_id=from_election_id)\
@@ -2293,12 +2295,14 @@ def election_migration_view(request):
             contest_office_query = ContestOffice.objects.filter(google_civic_election_id=from_election_id)\
                 .filter(state_code__iexact=from_state_code)
             from_election_office_count = contest_office_query.count()
-            contest_office_we_vote_ids_migrated = contest_office_query.values_list('we_vote_id', flat=True).distinct()
+            contest_office_query = contest_office_query.values_list('we_vote_id', flat=True).distinct()
+            contest_office_we_vote_ids_migrated = list(contest_office_query)
         else:
             contest_office_query = \
                 ContestOffice.objects.filter(google_civic_election_id=from_election_id)
             from_election_office_count = contest_office_query.count()
-            contest_office_we_vote_ids_migrated = contest_office_query.values_list('we_vote_id', flat=True).distinct()
+            contest_office_query = contest_office_query.values_list('we_vote_id', flat=True).distinct()
+            contest_office_we_vote_ids_migrated = list(contest_office_query)
         if positive_value_exists(change_now):
             if positive_value_exists(from_state_code):
                 ContestOffice.objects.filter(google_civic_election_id=from_election_id)\
@@ -2343,12 +2347,14 @@ def election_migration_view(request):
             elected_office_query = ElectedOffice.objects.filter(google_civic_election_id=from_election_id)\
                 .filter(state_code__iexact=from_state_code)
             from_elected_office_count = elected_office_query.count()
-            elected_office_we_vote_ids_migrated = elected_office_query.values_list('we_vote_id', flat=True).distinct()
+            elected_office_query = elected_office_query.values_list('we_vote_id', flat=True).distinct()
+            elected_office_we_vote_ids_migrated = list(elected_office_query)
         else:
             elected_office_query = \
                 ElectedOffice.objects.filter(google_civic_election_id=from_election_id)
             from_elected_office_count = elected_office_query.count()
-            elected_office_we_vote_ids_migrated = elected_office_query.values_list('we_vote_id', flat=True).distinct()
+            elected_office_query = elected_office_query.values_list('we_vote_id', flat=True).distinct()
+            elected_office_we_vote_ids_migrated = list(elected_office_query)
         if positive_value_exists(change_now):
             if positive_value_exists(from_state_code):
                 ElectedOffice.objects.filter(google_civic_election_id=from_election_id)\

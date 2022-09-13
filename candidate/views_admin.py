@@ -602,7 +602,8 @@ def candidate_list_view(request):
                 Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle=""))
             try:
                 twitter_query = TwitterLinkPossibility.objects.filter(likelihood_score__gte=60, not_a_match=False)
-                twitter_list = twitter_query.values_list('candidate_campaign_we_vote_id', flat=True).distinct()
+                twitter_query = twitter_query.values_list('candidate_campaign_we_vote_id', flat=True).distinct()
+                twitter_list = list(twitter_query)
                 if len(twitter_list):
                     candidate_query = candidate_query.filter(we_vote_id__in=twitter_list)
             except Exception as e:
@@ -614,8 +615,8 @@ def candidate_list_view(request):
                     Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle=""))
 
                 twitter_query = TwitterLinkPossibility.objects.filter(not_a_match=False)
-                twitter_possibility_list = twitter_query.values_list('candidate_campaign_we_vote_id', flat=True) \
-                    .distinct()
+                twitter_query = twitter_query.values_list('candidate_campaign_we_vote_id', flat=True).distinct()
+                twitter_possibility_list = list(twitter_query)
                 if len(twitter_possibility_list):
                     candidate_query = candidate_query.filter(we_vote_id__in=twitter_possibility_list)
             except Exception as e:
