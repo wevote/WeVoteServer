@@ -331,6 +331,8 @@ class VoterManager(BaseUserManager):
             middle_name=None,
             state_code=None,
             zip_code=None,
+            phone_number=None,
+            api_type=None,
     ):
         """
 
@@ -352,6 +354,8 @@ class VoterManager(BaseUserManager):
         :param middle_name:
         :param state_code:
         :param zip_code:
+        :param phone_number,
+        :param api_type,
         :return:
         """
         status = ""
@@ -403,6 +407,14 @@ class VoterManager(BaseUserManager):
                     if google_last_name is not None:
                         if voter_contact_email.google_last_name != google_last_name:
                             voter_contact_email.google_last_name = google_last_name
+                            change_to_save = True
+                    if phone_number is not None:
+                        if voter_contact_email.phone_number != phone_number:
+                            voter_contact_email.phone_number = phone_number
+                            change_to_save = True
+                    if api_type is not None:
+                        if voter_contact_email.api_type != api_type:
+                            voter_contact_email.api_type = api_type   # Might as well save the latest one
                             change_to_save = True
                 if city is not None:
                     if voter_contact_email.city != city:
@@ -466,7 +478,9 @@ class VoterManager(BaseUserManager):
                         google_last_name=google_last_name,
                         has_data_from_google_people_api=True,
                         imported_by_voter_we_vote_id=imported_by_voter_we_vote_id,
-                        # state_code=state_code,
+                        state_code=state_code,
+                        phone_number=phone_number,
+                        api_type=api_type,
                     )
                 else:
                     status += "NOT_A_RECOGNIZED_CONTACT_TYPE "
@@ -3431,7 +3445,8 @@ class VoterContactEmail(models.Model):
     voter_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
     we_vote_hosted_profile_image_url_medium = models.TextField(blank=True, null=True)
     zip_code = models.CharField(max_length=10, default=None, null=True)
-
+    phone_number = models.CharField(verbose_name="contact phone number", max_length=64, null=True, blank=True)
+    api_type = models.CharField(verbose_name="apple google android etc", max_length=16, default="google")
 
 # class VoterContactSMS(models.Model):
 #     """

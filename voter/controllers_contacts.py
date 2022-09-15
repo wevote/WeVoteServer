@@ -181,6 +181,9 @@ def save_google_contacts(voter_we_vote_id='', contacts=[]):  # voterContactListS
                 google_display_name = contact['display_name'] if 'display_name' in contact else ''
                 google_first_name = contact['given_name'] if 'given_name' in contact else ''
                 google_last_name = contact['family_name'] if 'family_name' in contact else ''
+                phone_number = contact['phone_number'] if 'phone_number' in contact else ''
+                state_code = contact['state_code'] if 'state_code' in contact else ''
+                api_type = contact['api_type'] if 'api_type' in contact else ''
                 update_results = voter_manager.update_or_create_voter_contact_email(
                     email_address_text=email_address_text,
                     existing_voter_contact_email_dict=existing_voter_contact_email_dict,
@@ -191,6 +194,9 @@ def save_google_contacts(voter_we_vote_id='', contacts=[]):  # voterContactListS
                     google_first_name=google_first_name,
                     google_last_name=google_last_name,
                     imported_by_voter_we_vote_id=voter_we_vote_id,
+                    phone_number=phone_number,
+                    state_code=state_code,
+                    api_type=api_type,
                 )
                 status += update_results['status']
 
