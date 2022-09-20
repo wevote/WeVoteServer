@@ -375,6 +375,7 @@ def measures_import_from_structured_json(structured_json):  # Consumes measuresS
                 'measure_text': one_measure['measure_text'] if 'measure_text' in one_measure else '',
                 'measure_title': measure_title,
                 'measure_url': one_measure['measure_url'] if 'measure_url' in one_measure else '',
+                'measure_year': one_measure['measure_year'] if 'measure_year' in one_measure else '',
                 'ocd_division_id': one_measure['ocd_division_id'] if 'ocd_division_id' in one_measure else '',
                 'primary_party': one_measure['primary_party'] if 'primary_party' in one_measure else '',
                 'state_code': state_code,

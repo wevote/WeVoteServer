@@ -3462,6 +3462,10 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
                 polling_location_we_vote_id_list_to_retrieve[:refresh_or_retrieve_limit]
             polling_location_query = \
                 polling_location_query.filter(we_vote_id__in=polling_location_we_vote_id_list_to_retrieve_limited)
+            if positive_value_exists(use_ctcl):
+                # CTCL only supports full addresses, so don't bother trying to pass addresses without line1
+                polling_location_query = \
+                    polling_location_query.exclude(Q(line1__isnull=True) | Q(line1__exact=''))
             # We don't exclude the deleted map points because we need to know to delete the ballot returned entry
             # polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
             polling_location_list = list(polling_location_query)
@@ -3483,8 +3487,12 @@ def retrieve_ballots_for_polling_locations_api_v4_internal_view(
             polling_location_query = \
                 polling_location_query.exclude(we_vote_id__in=polling_location_we_vote_id_list_to_exclude)
             polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
+            if positive_value_exists(use_ctcl):
+                # CTCL only supports full addresses, so don't bother trying to pass addresses without line1
+                polling_location_query = \
+                    polling_location_query.exclude(Q(line1__isnull=True) | Q(line1__exact=''))
 
-            # Randomly change the sort order so we over time load different map points (before timeout)
+            # Randomly change the sort order, so we over time load different map points (before timeout)
             random_sorting = random.randint(1, 5)
             if random_sorting == 1:
                 # Ordering by "line1" creates a bit of (locational) random order
