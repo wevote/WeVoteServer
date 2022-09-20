@@ -3172,20 +3172,26 @@ def voter_contact_list_retrieve_view(request):  # voterContactListRetrieve
     success = True
     status = ''
     status, voter, voter_found, voter_device_link = views_voter_utils.get_voter_from_request(request, status)
-    voter_contact_email_google_count = 0
+    voter_contact_from_apple_api_count = 0
+    voter_contact_from_google_api_count = 0
+    voter_contact_email_google_count = 0      # Old variable, on way to deprecation
+
     voter_contact_email_list = []
 
     if hasattr(voter, 'we_vote_id'):
         retrieve_results = voter_contact_list_retrieve_for_api(voter_we_vote_id=voter.we_vote_id)
         voter_contact_email_list = retrieve_results['voter_contact_email_list']
-        voter_contact_email_google_count = retrieve_results['voter_contact_email_google_count']
-
+        voter_contact_email_google_count = retrieve_results['voter_contact_email_google_count']   # Old variable
+        voter_contact_from_apple_api_count = retrieve_results['voter_contact_from_apple_api']
+        voter_contact_from_google_api_count = retrieve_results['voter_contact_from_google_api']
     json_data = {
-        'status':                           status,
-        'success':                          success,
-        'voter_contact_email_google_count': voter_contact_email_google_count,
-        'voter_contact_email_list':         voter_contact_email_list,
-        'voter_contact_email_list_count':   len(voter_contact_email_list),
+        'status':                               status,
+        'success':                              success,
+        'voter_contact_from_apple_api_count':   voter_contact_from_apple_api_count,
+        'voter_contact_from_google_api_count':  voter_contact_from_google_api_count,
+        'voter_contact_email_google_count':     voter_contact_email_google_count,      # Old variable
+        'voter_contact_email_list':             voter_contact_email_list,
+        'voter_contact_email_list_count':       len(voter_contact_email_list),
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

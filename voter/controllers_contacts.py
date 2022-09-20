@@ -221,6 +221,8 @@ def voter_contact_list_retrieve_for_api(voter_we_vote_id=''):  # voterContactLis
         imported_by_voter_we_vote_id=voter_we_vote_id)
 
     voter_contact_email_google_count = 0
+    voter_contact_from_google_api = 0
+    voter_contact_from_apple_api = 0
     voter_contact_email_list = voter_contact_results['voter_contact_email_list']
     voter_contact_email_list_found = voter_contact_results['voter_contact_email_list_found']
     status += voter_contact_results['status']
@@ -231,7 +233,11 @@ def voter_contact_list_retrieve_for_api(voter_we_vote_id=''):  # voterContactLis
         date_last_changed_string = ''
         google_date_last_updated_string = ''
         if voter_contact_email.has_data_from_google_people_api:
-            voter_contact_email_google_count += 1
+            voter_contact_email_google_count += 1                   # Old variable, on the way to deprecation
+            if voter_contact_email.api_type == 'apple':
+                voter_contact_from_apple_api += 1
+            else:
+                voter_contact_from_google_api += 1
         try:
             date_last_changed_string = voter_contact_email.date_last_changed.strftime('%Y-%m-%d %H:%M:%S')
             google_date_last_updated_string = voter_contact_email.google_date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
@@ -260,12 +266,16 @@ def voter_contact_list_retrieve_for_api(voter_we_vote_id=''):  # voterContactLis
             'we_vote_hosted_profile_image_url_medium': voter_contact_email.we_vote_hosted_profile_image_url_medium
             if hasattr(voter_contact_email, 'we_vote_hosted_profile_image_url_medium') else '',
             'zip_code': voter_contact_email.zip_code if hasattr(voter_contact_email, 'zip_code') else '',
+            'phone_number': voter_contact_email.phone_number if hasattr(voter_contact_email, 'phone_number') else '',
+            'api_type': voter_contact_email.api_type if hasattr(voter_contact_email, 'api_type') else '',
         }
         voter_contact_email_list_for_json.append(voter_contact_email_dict)
     results = {
         'status':                           status,
         'success':                          success,
         'voter_contact_email_google_count': voter_contact_email_google_count,
+        'voter_contact_from_google_api':    voter_contact_from_google_api,
+        'voter_contact_from_apple_api':     voter_contact_from_apple_api,
         'voter_contact_email_list':         voter_contact_email_list_for_json,
         'voter_contact_email_list_found':   voter_contact_email_list_found,
     }

@@ -385,6 +385,8 @@ class VoterManager(BaseUserManager):
             try:
                 change_to_save = False
                 if positive_value_exists(from_google_people_api):
+                    # Sept 2022:  has_data_from_google_people_api assumed a different data structure for google and
+                    # apple, this variable will always be true
                     if not positive_value_exists(voter_contact_email.has_data_from_google_people_api):
                         voter_contact_email.has_data_from_google_people_api = True
                         change_to_save = True
