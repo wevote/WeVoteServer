@@ -81,6 +81,7 @@
             <th>&nbsp;</th>
             <th>Measure Title</th>
             <th>State</th>
+            <th>Year / Election</th>
             <th>We Vote ID</th>
             <th>Ballotpedia ID</th>
             <th>Ballotpedia Status</th>
@@ -96,6 +97,7 @@
             <td>{{ forloop.counter }}</td>
             <td><a href="{% url 'measure:measure_summary' measure.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">{{ measure.measure_title }}</a></td>
             <td>{{ measure.state_code }}</td>
+            <td>{{ measure.measure_year }} / {{ measure.google_civic_election_id }}</td>
             <td>{{ measure.we_vote_id }}</td>
             <td>{{ measure.ballotpedia_measure_id }}</td>
             <td>{{ measure.ballotpedia_measure_status|default_if_none:"" }}</td>
