@@ -531,6 +531,12 @@ def organization_list_view(request):
             new_filter = Q(chosen_domain_string__icontains=one_word)
             filters.append(new_filter)
 
+            new_filter = Q(chosen_domain_string2__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(chosen_domain_string3__icontains=one_word)
+            filters.append(new_filter)
+
             new_filter = Q(chosen_subdomain_string__icontains=one_word)
             filters.append(new_filter)
 
@@ -1591,6 +1597,8 @@ def organization_edit_account_process_view(request):
     organization_id = convert_to_int(request.POST.get('organization_id', 0))
     chosen_about_organization_external_url = request.POST.get('chosen_about_organization_external_url', None)
     chosen_domain_string = request.POST.get('chosen_domain_string', None)
+    chosen_domain_string2 = request.POST.get('chosen_domain_string2', None)
+    chosen_domain_string3 = request.POST.get('chosen_domain_string3', None)
     chosen_domain_type_is_campaign = request.POST.get('chosen_domain_type_is_campaign', None)
     chosen_favicon_url_https = request.POST.get('chosen_favicon_url_https', None)
     chosen_google_analytics_tracking_id = request.POST.get('chosen_google_analytics_tracking_id', None)
@@ -1644,6 +1652,32 @@ def organization_edit_account_process_view(request):
                         status += domain_results['status']
                 else:
                     organization_on_stage.chosen_domain_string = None
+            if chosen_domain_string2 is not None:
+                if positive_value_exists(chosen_domain_string2):
+                    domain_results = full_domain_string_available(chosen_domain_string2,
+                                                                  requesting_organization_id=organization_id)
+                    if domain_results['full_domain_string_available']:
+                        organization_on_stage.chosen_domain_string2 = chosen_domain_string2.strip()
+                    else:
+                        message = 'Cannot save chosen_domain_string2: \'' + chosen_domain_string2 + '\', status: ' + \
+                                  domain_results['status']
+                        messages.add_message(request, messages.ERROR, message)
+                        status += domain_results['status']
+                else:
+                    organization_on_stage.chosen_domain_string2 = None
+            if chosen_domain_string3 is not None:
+                if positive_value_exists(chosen_domain_string3):
+                    domain_results = full_domain_string_available(chosen_domain_string3,
+                                                                  requesting_organization_id=organization_id)
+                    if domain_results['full_domain_string_available']:
+                        organization_on_stage.chosen_domain_string3 = chosen_domain_string3.strip()
+                    else:
+                        message = 'Cannot save chosen_domain_string3: \'' + chosen_domain_string3 + '\', status: ' + \
+                                  domain_results['status']
+                        messages.add_message(request, messages.ERROR, message)
+                        status += domain_results['status']
+                else:
+                    organization_on_stage.chosen_domain_string3 = None
             if chosen_domain_type_is_campaign is not None:
                 organization_on_stage.chosen_domain_type_is_campaign = chosen_domain_type_is_campaign
             if chosen_favicon_url_https is not None:
@@ -1732,7 +1766,7 @@ def organization_edit_account_process_view(request):
                 else:
                     status += "CHOSEN_SUBDOMAIN_ALREADY_EXISTS "
 
-                # add domain to aws route53 DNS
+                # add subdomain to aws route53 DNS
                 route53_results = add_subdomain_route53_record(chosen_subdomain_string)
                 if route53_results['success']:
                     status += "SUBDOMAIN_ROUTE53_ADDED "
@@ -2954,8 +2988,11 @@ def reserved_domain_edit_process_view(request):
         try:
             organization_list_query = Organization.objects.using('readonly').all()
             if positive_value_exists(full_domain_string):
-                organization_list_query = organization_list_query.\
-                    filter(chosen_domain_string__iexact=full_domain_string)
+                organization_list_query = organization_list_query.filter(
+                    Q(chosen_domain_string__iexact=full_domain_string) |
+                    Q(chosen_domain_string2__iexact=full_domain_string) |
+                    Q(chosen_domain_string3__iexact=full_domain_string))
+
             else:
                 organization_list_query = organization_list_query.\
                     filter(chosen_subdomain_string__iexact=subdomain_string)
@@ -3120,7 +3157,10 @@ def reserved_domain_list_view(request):
     #     exclude(chosen_subdomain_string__isnull=True). \
     #     exclude(chosen_subdomain_string__exact='')
     if positive_value_exists(show_full_domains) and not positive_value_exists(show_subdomains):
-        organization_domain_list_query = organization_domain_list_query.filter(chosen_domain_string__isnull=False)
+        organization_domain_list_query = organization_domain_list_query.filter(
+            Q(chosen_domain_string__isnull=False) |
+            Q(chosen_domain_string2__isnull=False) |
+            Q(chosen_domain_string3__isnull=False))
         organization_domain_list_query = organization_domain_list_query.order_by('chosen_domain_string')
     elif positive_value_exists(show_subdomains) and not positive_value_exists(show_full_domains):
         organization_domain_list_query = organization_domain_list_query.filter(chosen_subdomain_string__isnull=False)
@@ -3128,6 +3168,8 @@ def reserved_domain_list_view(request):
     else:
         organization_domain_list_query = organization_domain_list_query.filter(
             Q(chosen_domain_string__isnull=False) |
+            Q(chosen_domain_string2__isnull=False) |
+            Q(chosen_domain_string3__isnull=False) |
             Q(chosen_subdomain_string__isnull=False)
         )
         organization_domain_list_query = organization_domain_list_query.order_by('chosen_subdomain_string').\
@@ -3138,6 +3180,14 @@ def reserved_domain_list_view(request):
         for one_word in search_words:
             filters = []
             new_filter = Q(chosen_domain_string__icontains=one_word)
+            filters.append(new_filter)
+
+            filters = []
+            new_filter = Q(chosen_domain_string2__icontains=one_word)
+            filters.append(new_filter)
+
+            filters = []
+            new_filter = Q(chosen_domain_string3__icontains=one_word)
             filters.append(new_filter)
 
             new_filter = Q(chosen_subdomain_string__icontains=one_word)

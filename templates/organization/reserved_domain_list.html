@@ -29,8 +29,8 @@
 {% if organization_domain_list %}
     <h3>Reserved by Endorsers</h3>
     {% for organization in organization_domain_list %}
-        {% if organization.chosen_domain_string %}
-            <strong>{{ organization.chosen_domain_string }}</strong>
+        {% if organization.chosen_domain_string or organization.chosen_domain_string2 or organization.chosen_domain_string3 %}
+            <strong>{{ organization.chosen_domain_string }}</strong>{% if organization.chosen_domain_string2 %}, {{organization.chosen_domain_string2|default_if_none:""}}{% endif %}{% if organization.chosen_domain_string3 %}, {{organization.chosen_domain_string3|default_if_none:""}}{% endif %}
             <a href="https://{{ organization.chosen_domain_string }}"
                target="_blank"
                class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
