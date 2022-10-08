@@ -87,8 +87,8 @@
 {% endif %}
 
 {% for organization in organization_domain_list %}
-    {% if organization.chosen_domain_string %}
-        {{ organization.chosen_domain_string }}
+    {% if organization.chosen_domain_string or organization.chosen_domain_string2 or organization.chosen_domain_string3 %}
+        {{ organization.chosen_domain_string }}{% if organization.chosen_domain_string2 %}, {{organization.chosen_domain_string2|default_if_none:""}}{% endif %}{% if organization.chosen_domain_string3 %}, {{organization.chosen_domain_string3|default_if_none:""}}{% endif %}
         <a href="https://{{ organization.chosen_domain_string }}.wevote.us"
            target="_blank"
            class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>

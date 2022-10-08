@@ -186,7 +186,7 @@ def organization_index_view(request, organization_incoming_domain='', campaign_m
                     chosen_favicon_url_https = None
                     hide_favicon = True
                 else:
-                    # Show the We Vote favicon if a new favicon has not been uploaded and We Vote logo not hidden
+                    # Show We Vote favicon if a new favicon has not been uploaded, and We Vote logo not hidden
                     chosen_favicon_url_https = None
                     hide_favicon = False
 
@@ -201,7 +201,7 @@ def organization_index_view(request, organization_incoming_domain='', campaign_m
                     chosen_social_share_master_image_url_https = None
                     hide_social_share_image = True
                 else:
-                    # Show the We Vote social share image if a new image has not been uploaded and We Vote logo not hidden
+                    # Show We Vote social share image if a new image has not been uploaded, and We Vote logo not hidden
                     chosen_social_share_master_image_url_https = None
                     hide_social_share_image = False
 
@@ -417,9 +417,15 @@ def organization_save_view(request):  # organizationSave
 
     organization_manager = OrganizationManager()
     chosen_domain_string = request.GET.get('chosen_domain_string', False)
+    chosen_domain_string2 = request.GET.get('chosen_domain_string2', False)
+    chosen_domain_string3 = request.GET.get('chosen_domain_string3', False)
     # We strip out http or https, and remove paths
     if positive_value_exists(chosen_domain_string):
         chosen_domain_string = extract_website_from_url(chosen_domain_string)
+    if positive_value_exists(chosen_domain_string2):
+        chosen_domain_string2 = extract_website_from_url(chosen_domain_string2)
+    if positive_value_exists(chosen_domain_string3):
+        chosen_domain_string3 = extract_website_from_url(chosen_domain_string3)
     chosen_subdomain_string = request.GET.get('chosen_subdomain_string', False)
 
     chosen_google_analytics_tracking_id = request.GET.get('chosen_google_analytics_tracking_id', False)
@@ -473,6 +479,8 @@ def organization_save_view(request):  # organizationSave
             'status': status,
             'success': False,
             'chosen_domain_string': '',
+            'chosen_domain_string2': '',
+            'chosen_domain_string3': '',
             'full_domain_string_already_taken': None,
             'chosen_favicon_url_https': '',
             'chosen_google_analytics_tracking_id': '',
@@ -522,6 +530,7 @@ def organization_save_view(request):  # organizationSave
                     organization_id = results['organization_id']
         full_domain_string_already_taken = False
         full_domain_string_not_valid = False
+        # Is full domain string valid URL?
         if positive_value_exists(chosen_domain_string):
             domain_string_to_test = "https://{chosen_domain_string}" \
                                     "".format(chosen_domain_string=chosen_domain_string)
@@ -529,6 +538,19 @@ def organization_save_view(request):  # organizationSave
                 full_domain_string_not_valid = True
                 # Do not save it
                 chosen_domain_string = False
+        if positive_value_exists(chosen_domain_string2):
+            domain_string_to_test = "https://{chosen_domain_string2}" \
+                                    "".format(chosen_domain_string2=chosen_domain_string2)
+            if not is_url_valid(domain_string_to_test):
+                # Do not save it
+                chosen_domain_string2 = False
+        if positive_value_exists(chosen_domain_string3):
+            domain_string_to_test = "https://{chosen_domain_string3}" \
+                                    "".format(chosen_domain_string3=chosen_domain_string3)
+            if not is_url_valid(domain_string_to_test):
+                # Do not save it
+                chosen_domain_string3 = False
+        # Is full domain string taken by some other group?
         if positive_value_exists(chosen_domain_string):
             domain_results = full_domain_string_available(
                 chosen_domain_string, requesting_organization_id=organization_id)
@@ -536,6 +558,19 @@ def organization_save_view(request):  # organizationSave
                 full_domain_string_already_taken = True
                 # Do not save it
                 chosen_domain_string = False
+        if positive_value_exists(chosen_domain_string2):
+            domain_results = full_domain_string_available(
+                chosen_domain_string2, requesting_organization_id=organization_id)
+            if not domain_results['full_domain_string_available']:
+                # Do not save it
+                chosen_domain_string2 = False
+        if positive_value_exists(chosen_domain_string3):
+            domain_results = full_domain_string_available(
+                chosen_domain_string3, requesting_organization_id=organization_id)
+            if not domain_results['full_domain_string_available']:
+                # Do not save it
+                chosen_domain_string3 = False
+
         subdomain_string_already_taken = False
         subdomain_string_not_valid = False
         if positive_value_exists(chosen_subdomain_string):
@@ -554,6 +589,8 @@ def organization_save_view(request):  # organizationSave
                 chosen_subdomain_string = False
     else:
         chosen_domain_string = False
+        chosen_domain_string2 = False
+        chosen_domain_string3 = False
         chosen_subdomain_string = False
 
     results = organization_save_for_api(
@@ -574,6 +611,8 @@ def organization_save_view(request):  # organizationSave
         facebook_email=facebook_email,
         facebook_profile_image_url_https=facebook_profile_image_url_https,
         chosen_domain_string=chosen_domain_string,
+        chosen_domain_string2=chosen_domain_string2,
+        chosen_domain_string3=chosen_domain_string3,
         chosen_google_analytics_tracking_id=chosen_google_analytics_tracking_id,
         chosen_html_verification_string=chosen_html_verification_string,
         chosen_hide_we_vote_logo=chosen_hide_we_vote_logo,
