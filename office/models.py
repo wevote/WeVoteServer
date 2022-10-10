@@ -234,6 +234,20 @@ class ContestOffice(models.Model):
     elected_office_name = models.CharField(verbose_name="name of the elected office", max_length=255, null=True,
                                            blank=True, default=None)
 
+    def get_election_day_text(self):
+        if positive_value_exists(self.google_civic_election_id):
+            try:
+                from election.models import Election
+                one_election = Election.objects.using('readonly')\
+                    .get(google_civic_election_id=self.google_civic_election_id)
+                return one_election.election_day_text
+            except Exception as e:
+                handle_record_found_more_than_one_exception(e, logger=logger)
+                logger.error("office.get_election_day_text:" + str(e))
+                return ""
+        else:
+            return ""
+
     def get_office_state(self):
         if positive_value_exists(self.state_code):
             return self.state_code
