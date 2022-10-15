@@ -1850,6 +1850,7 @@ def voter_ballot_list_retrieve_for_api(voter_id):  # voterBallotListRetrieve
                     "original_text_for_map_search": one_ballot_entry.original_text_for_map_search,
                     "ballot_returned_we_vote_id":   ballot_returned_we_vote_id,
                     "ballot_location_shortcut":     one_ballot_entry.ballot_location_shortcut,
+                    "state_code":                   one_ballot_entry.state_code,
                     "state_code_list":              state_code_list,
                 }
                 voter_ballot_list_for_json.append(one_voter_ballot_list)
@@ -1878,6 +1879,7 @@ def voter_ballot_list_retrieve_for_api(voter_id):  # voterBallotListRetrieve
                 "original_text_for_map_search":     "",
                 "ballot_returned_we_vote_id":       "",
                 "ballot_location_shortcut":         "",
+                "state_code":                       election.state_code,
                 "state_code_list":                  state_code_list,
             }
             final_ballot_list.append(one_election)
