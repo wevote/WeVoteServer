@@ -149,6 +149,9 @@
             <td>
                 <span class="u-no-break">{{ election.election_day_text }}</span>
                 {% if election.days_until_election > 0 %} <span class="u-no-break {% if election.days_until_election < 46 %}font-weight-bold text-danger{% endif %}">(in {{ election.days_until_election }} days)</span>{% endif %}
+                <a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ election.state_code }}"
+                   target="_blank">
+                    <span class="glyphicon glyphicon-new-window"></span></a>
             </td>
         {% endif %}
             <td align="middle">
@@ -210,6 +213,12 @@
                     {% elif election.refresh_date_started %}
                         <span style="{% if not election.data_getting_stale %}color: lightgray{% endif %}">
                             start: {{ election.refresh_date_started }}
+                        </span>
+                    {% elif election.retrieve_date_completed %}
+                        {{ election.retrieve_date_completed }}
+                    {% elif election.retrieve_date_started %}
+                        <span style="{% if not election.data_getting_stale %}color: lightgray{% endif %}">
+                            start: {{ election.retrieve_date_started }}
                         </span>
                     {% endif %}
                     <span class="glyphicon glyphicon-new-window"></span>

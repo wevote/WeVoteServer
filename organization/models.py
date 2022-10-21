@@ -70,6 +70,8 @@ ORGANIZATION_UNIQUE_IDENTIFIERS = [
     'ballotpedia_page_title',
     'ballotpedia_photo_url',
     'chosen_domain_string',
+    'chosen_domain_string2',
+    'chosen_domain_string3',
     'chosen_favicon_url_https',
     'chosen_feature_package',
     'chosen_google_analytics_tracking_id',
@@ -550,7 +552,7 @@ class OrganizationManager(models.Manager):
     def retrieve_organization_from_facebook_id(self, facebook_id):
         status = ""
         facebook_manager = FacebookManager()
-        results = facebook_manager.retrieve_facebook_link_to_voter_from_facebook_id(facebook_id)
+        results = facebook_manager.retrieve_facebook_link_to_voter_from_facebook_id(facebook_id, read_only=True)
         if results['facebook_link_to_voter_found']:
             facebook_link_to_voter = results['facebook_link_to_voter']
             if positive_value_exists(facebook_link_to_voter.voter_we_vote_id):
@@ -583,8 +585,15 @@ class OrganizationManager(models.Manager):
         }
         return results
 
-    def retrieve_organization(self, organization_id=None, we_vote_id=None, vote_smart_id=None, twitter_user_id=None,
-                              incoming_hostname=None, organization_api_pass_code=False, read_only=False):
+    def retrieve_organization(
+            self,
+            organization_id=None,
+            we_vote_id=None,
+            vote_smart_id=None,
+            twitter_user_id=None,
+            incoming_hostname=None,
+            organization_api_pass_code=False,
+            read_only=False):
         """
         Get an organization, based the passed in parameters
         :param organization_id:
@@ -658,10 +667,14 @@ class OrganizationManager(models.Manager):
                 if read_only:
                     organization_on_stage = Organization.objects.using('readonly')\
                         .get(Q(chosen_domain_string__iexact=incoming_hostname) |
+                             Q(chosen_domain_string2__iexact=incoming_hostname) |
+                             Q(chosen_domain_string3__iexact=incoming_hostname) |
                              Q(chosen_subdomain_string__iexact=incoming_subdomain))
                 else:
                     organization_on_stage = Organization.objects\
                         .get(Q(chosen_domain_string__iexact=incoming_hostname) |
+                             Q(chosen_domain_string2__iexact=incoming_hostname) |
+                             Q(chosen_domain_string3__iexact=incoming_hostname) |
                              Q(chosen_subdomain_string__iexact=incoming_subdomain))
                 organization_on_stage_id = organization_on_stage.id
                 status = "ORGANIZATION_FOUND_WITH_INCOMING_HOSTNAME "
@@ -789,7 +802,7 @@ class OrganizationManager(models.Manager):
 
     def fetch_external_voter_id(self, organization_we_vote_id, voter_we_vote_id):
         if positive_value_exists(organization_we_vote_id) and positive_value_exists(voter_we_vote_id):
-            link_query = OrganizationMembershipLinkToVoter.objects.all()
+            link_query = OrganizationMembershipLinkToVoter.objects.using('readonly').all()
             link_query = link_query.filter(organization_we_vote_id=organization_we_vote_id)
             link_query = link_query.filter(voter_we_vote_id=voter_we_vote_id)
             external_voter = link_query.first()
@@ -801,7 +814,7 @@ class OrganizationManager(models.Manager):
         organization_id = 0
         if positive_value_exists(we_vote_id):
             organization_manager = OrganizationManager()
-            results = organization_manager.retrieve_organization(organization_id, we_vote_id)
+            results = organization_manager.retrieve_organization(organization_id, we_vote_id, read_only=True)
             if results['success']:
                 return results['organization_id']
         return 0
@@ -1092,19 +1105,25 @@ class OrganizationManager(models.Manager):
     def update_or_create_organization(
             self,
             organization_id, we_vote_id,
-            organization_website_search, organization_twitter_search,
-            organization_name=False, organization_description=False,
+            organization_website_search,
+            organization_twitter_search,
+            organization_name=False,
+            organization_description=False,
             organization_website=False,
             organization_twitter_handle=False,
             organization_email=False,
             organization_facebook=False,
             organization_instagram_handle=False,
             organization_image=False,
-            organization_type=False, refresh_from_twitter=False,
-            facebook_id=False, facebook_email=False,
+            organization_type=False,
+            refresh_from_twitter=False,
+            facebook_id=False,
+            facebook_email=False,
             facebook_profile_image_url_https=False,
             facebook_background_image_url_https=False,
             chosen_domain_string=False,
+            chosen_domain_string2=False,
+            chosen_domain_string3=False,
             chosen_google_analytics_tracking_id=False,
             chosen_html_verification_string=False,
             chosen_hide_we_vote_logo=None,
@@ -1136,6 +1155,8 @@ class OrganizationManager(models.Manager):
         :param facebook_profile_image_url_https:
         :param facebook_background_image_url_https:
         :param chosen_domain_string:
+        :param chosen_domain_string2:
+        :param chosen_domain_string3:
         :param chosen_google_analytics_tracking_id:
         :param chosen_html_verification_string:
         :param chosen_hide_we_vote_logo:
@@ -1174,6 +1195,8 @@ class OrganizationManager(models.Manager):
         organization_image = organization_image.strip() if organization_image is not False else False
         organization_type = organization_type.strip() if organization_type is not False else False
         chosen_domain_string = chosen_domain_string.strip() if chosen_domain_string is not False else False
+        chosen_domain_string2 = chosen_domain_string2.strip() if chosen_domain_string2 is not False else False
+        chosen_domain_string3 = chosen_domain_string3.strip() if chosen_domain_string3 is not False else False
         chosen_google_analytics_tracking_id = chosen_google_analytics_tracking_id.strip() \
             if chosen_google_analytics_tracking_id is not False else False
         chosen_html_verification_string = chosen_html_verification_string.strip() \
@@ -1278,6 +1301,12 @@ class OrganizationManager(models.Manager):
                 if chosen_domain_string is not False:
                     value_changed = True
                     organization_on_stage.chosen_domain_string = chosen_domain_string
+                if chosen_domain_string2 is not False:
+                    value_changed = True
+                    organization_on_stage.chosen_domain_string2 = chosen_domain_string2
+                if chosen_domain_string3 is not False:
+                    value_changed = True
+                    organization_on_stage.chosen_domain_string3 = chosen_domain_string3
                 if chosen_google_analytics_tracking_id is not False:
                     value_changed = True
                     organization_on_stage.chosen_google_analytics_tracking_id = \
@@ -1366,7 +1395,7 @@ class OrganizationManager(models.Manager):
                 # 3a) FacebookLinkToVoter exists? If not, go to step 3b
                 if not organization_on_stage_found and positive_value_exists(facebook_id):
                     facebook_manager = FacebookManager()
-                    facebook_results = facebook_manager.retrieve_facebook_link_to_voter(facebook_id)
+                    facebook_results = facebook_manager.retrieve_facebook_link_to_voter(facebook_id, read_only=True)
                     if facebook_results['facebook_link_to_voter_found']:
                         facebook_link_to_voter = facebook_results['facebook_link_to_voter']
                         voter_manager = VoterManager()
@@ -1502,6 +1531,12 @@ class OrganizationManager(models.Manager):
                     if chosen_domain_string is not False:
                         value_changed = True
                         organization_on_stage.chosen_domain_string = chosen_domain_string
+                    if chosen_domain_string2 is not False:
+                        value_changed = True
+                        organization_on_stage.chosen_domain_string2 = chosen_domain_string2
+                    if chosen_domain_string3 is not False:
+                        value_changed = True
+                        organization_on_stage.chosen_domain_string3 = chosen_domain_string3
                     if chosen_google_analytics_tracking_id is not False:
                         value_changed = True
                         organization_on_stage.chosen_google_analytics_tracking_id = \
@@ -1666,6 +1701,12 @@ class OrganizationManager(models.Manager):
                     if chosen_domain_string is not False:
                         value_changed = True
                         organization_on_stage.chosen_domain_string = chosen_domain_string
+                    if chosen_domain_string2 is not False:
+                        value_changed = True
+                        organization_on_stage.chosen_domain_string2 = chosen_domain_string2
+                    if chosen_domain_string3 is not False:
+                        value_changed = True
+                        organization_on_stage.chosen_domain_string3 = chosen_domain_string3
                     if chosen_google_analytics_tracking_id is not False:
                         value_changed = True
                         organization_on_stage.chosen_google_analytics_tracking_id = \
@@ -2941,6 +2982,8 @@ class Organization(models.Model):
     # This is the domain name the client has configured for their We Vote configured site
     chosen_domain_string = models.CharField(
         verbose_name="client domain name for we vote site", max_length=255, null=True, blank=True)
+    chosen_domain_string2 = models.CharField(max_length=255, null=True, blank=True)  # Alternate ex/ www
+    chosen_domain_string3 = models.CharField(max_length=255, null=True, blank=True)  # Another alternate
     chosen_favicon_url_https = models.TextField(
         verbose_name='url of client favicon', blank=True, null=True)
     chosen_google_analytics_tracking_id = models.CharField(max_length=255, null=True, blank=True)

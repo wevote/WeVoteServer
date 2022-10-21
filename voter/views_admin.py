@@ -1097,6 +1097,7 @@ def voter_list_view(request):
     is_political_data_viewer = request.GET.get('is_political_data_viewer', '')
     is_verified_volunteer = request.GET.get('is_verified_volunteer', '')
     has_contributed = request.GET.get('has_contributed', '')
+    has_friends = request.GET.get('has_friends', '')
 
     voter_api_device_id = get_voter_api_device_id(request)  # We look in the cookies for voter_api_device_id
     voter_manager = VoterManager()
@@ -1110,14 +1111,16 @@ def voter_list_view(request):
     messages_on_stage = get_messages(request)
     if positive_value_exists(voter_search):
         # Search for an email address - do not require to be verified
-        voter_we_vote_ids_with_email = EmailAddress.objects.filter(
+        voter_we_vote_ids_with_email_query = EmailAddress.objects.filter(
             normalized_email_address__icontains=voter_search,
         ).values_list('voter_we_vote_id', flat=True)
+        voter_we_vote_ids_with_email = list(voter_we_vote_ids_with_email_query)
 
         # Search for a phone number
-        voter_we_vote_ids_with_sms_phone_number = SMSPhoneNumber.objects.filter(
+        voter_we_vote_ids_with_sms_phone_number_query = SMSPhoneNumber.objects.filter(
             normalized_sms_phone_number__icontains=voter_search,
         ).values_list('voter_we_vote_id', flat=True)
+        voter_we_vote_ids_with_sms_phone_number = list(voter_we_vote_ids_with_sms_phone_number_query)
 
         # Now search voter object
         voter_query = Voter.objects.all()
@@ -1190,6 +1193,9 @@ def voter_list_view(request):
     if positive_value_exists(has_contributed):
         payments = StripePayments.objects.all()
         voter_query = voter_query.filter(we_vote_id__in=Subquery(payments.values('voter_we_vote_id')))
+    if positive_value_exists(has_friends):
+        voter_query = voter_query.filter(friend_count__gt=0)
+        voter_query = voter_query.order_by('-friend_count')
 
     voter_list_found_count = voter_query.count()
 
@@ -1222,6 +1228,7 @@ def voter_list_view(request):
         'is_political_data_viewer':     is_political_data_viewer,
         'is_verified_volunteer':        is_verified_volunteer,
         'has_contributed':              has_contributed,
+        'has_friends':                  has_friends,
         'messages_on_stage':            messages_on_stage,
         'password_proposed':            password_proposed,
         'voter_list':                   modified_voter_list,

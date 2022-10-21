@@ -25,11 +25,15 @@ class SharedItem(models.Model):
     # Code for include_friends_only_positions
     shared_item_code_all_opinions = models.CharField(max_length=50, null=True, blank=True, unique=True, db_index=True)
     # The voter and organization id of the person initiating the share
+    shared_by_display_name = models.TextField(blank=True, null=True)
     shared_by_voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True)
     shared_by_organization_type = models.CharField(
         verbose_name="type of org", max_length=2, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
     shared_by_organization_we_vote_id = models.CharField(max_length=255, null=True, blank=True, db_index=True)
     shared_by_state_code = models.CharField(max_length=2, null=True, db_index=True)
+    shared_by_we_vote_hosted_profile_image_url_large = models.TextField(blank=True, null=True)
+    shared_by_we_vote_hosted_profile_image_url_medium = models.TextField(blank=True, null=True)
+    shared_by_we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
     # The owner of the custom site this share was from
     site_owner_organization_we_vote_id = models.CharField(max_length=255, null=True, blank=False, db_index=True)
     google_civic_election_id = models.PositiveIntegerField(default=0, null=True, blank=True)
@@ -312,32 +316,59 @@ class ShareManager(models.Manager):
             # TODO: Confirm its not in use
             shared_item_code_all_opinions = random_string
 
+        shared_by_display_name = defaults['shared_by_display_name'] if 'shared_by_display_name' in defaults else None
+        shared_by_we_vote_hosted_profile_image_url_large = \
+            defaults['shared_by_we_vote_hosted_profile_image_url_large'] \
+            if 'shared_by_we_vote_hosted_profile_image_url_large' in defaults else None
+        shared_by_we_vote_hosted_profile_image_url_medium = \
+            defaults['shared_by_we_vote_hosted_profile_image_url_medium'] \
+            if 'shared_by_we_vote_hosted_profile_image_url_medium' in defaults else None
+        shared_by_we_vote_hosted_profile_image_url_tiny = \
+            defaults['shared_by_we_vote_hosted_profile_image_url_tiny'] \
+            if 'shared_by_we_vote_hosted_profile_image_url_tiny' in defaults else None
+
         if shared_item_found:
-            if positive_value_exists(shared_item_code_no_opinions) \
-                    or positive_value_exists(shared_item_code_all_opinions) \
-                    or not positive_value_exists(shared_item.year_as_integer):
-                # There is a reason to update
-                try:
-                    change_to_save = False
-                    if positive_value_exists(shared_item_code_no_opinions):
-                        shared_item.shared_item_code_no_opinions = shared_item_code_no_opinions
-                        change_to_save = True
-                    if positive_value_exists(shared_item_code_all_opinions):
-                        shared_item.shared_item_code_all_opinions = shared_item_code_all_opinions
-                        change_to_save = True
-                    if not positive_value_exists(shared_item.year_as_integer):
-                        shared_item.generate_year_as_integer()
-                        change_to_save = True
-                    if change_to_save:
-                        shared_item.save()
-                        shared_item_created = True
-                        success = True
-                        status += "SHARED_ITEM_UPDATED "
-                except Exception as e:
-                    shared_item_created = False
-                    shared_item = None
-                    success = False
-                    status += "SHARED_ITEM_NOT_UPDATED: " + str(e) + " "
+            try:
+                change_to_save = False
+                if shared_item.shared_by_display_name != shared_by_display_name:
+                    shared_item.shared_by_display_name = shared_by_display_name
+                    change_to_save = True
+                if shared_item.shared_by_we_vote_hosted_profile_image_url_large \
+                        != shared_by_we_vote_hosted_profile_image_url_large:
+                    shared_item.shared_by_we_vote_hosted_profile_image_url_large = \
+                        shared_by_we_vote_hosted_profile_image_url_large
+                    change_to_save = True
+                if shared_item.shared_by_we_vote_hosted_profile_image_url_medium \
+                        != shared_by_we_vote_hosted_profile_image_url_medium:
+                    shared_item.shared_by_we_vote_hosted_profile_image_url_medium = \
+                        shared_by_we_vote_hosted_profile_image_url_medium
+                    change_to_save = True
+                if shared_item.shared_by_we_vote_hosted_profile_image_url_tiny \
+                        != shared_by_we_vote_hosted_profile_image_url_tiny:
+                    shared_item.shared_by_we_vote_hosted_profile_image_url_tiny = \
+                        shared_by_we_vote_hosted_profile_image_url_tiny
+                    change_to_save = True
+                if positive_value_exists(shared_item_code_no_opinions) and \
+                        shared_item.shared_item_code_no_opinions != shared_item_code_no_opinions:
+                    shared_item.shared_item_code_no_opinions = shared_item_code_no_opinions
+                    change_to_save = True
+                if positive_value_exists(shared_item_code_all_opinions) and \
+                        shared_item.shared_item_code_all_opinions != shared_item_code_all_opinions:
+                    shared_item.shared_item_code_all_opinions = shared_item_code_all_opinions
+                    change_to_save = True
+                if not positive_value_exists(shared_item.year_as_integer):
+                    shared_item.generate_year_as_integer()
+                    change_to_save = True
+                if change_to_save:
+                    shared_item.save()
+                    shared_item_created = True
+                    success = True
+                    status += "SHARED_ITEM_UPDATED "
+            except Exception as e:
+                shared_item_created = False
+                shared_item = None
+                success = False
+                status += "SHARED_ITEM_NOT_UPDATED: " + str(e) + " "
         else:
             try:
                 shared_item = SharedItem.objects.create(
@@ -352,9 +383,13 @@ class ShareManager(models.Manager):
                     is_ready_share=defaults['is_ready_share'],
                     measure_we_vote_id=defaults['measure_we_vote_id'],
                     office_we_vote_id=defaults['office_we_vote_id'],
+                    shared_by_display_name=shared_by_display_name,
                     shared_by_organization_type=defaults['shared_by_organization_type'],
                     shared_by_organization_we_vote_id=defaults['shared_by_organization_we_vote_id'],
                     shared_by_voter_we_vote_id=shared_by_voter_we_vote_id,
+                    shared_by_we_vote_hosted_profile_image_url_large=shared_by_we_vote_hosted_profile_image_url_large,
+                    shared_by_we_vote_hosted_profile_image_url_medium=shared_by_we_vote_hosted_profile_image_url_medium,
+                    shared_by_we_vote_hosted_profile_image_url_tiny=shared_by_we_vote_hosted_profile_image_url_tiny,
                     shared_item_code_no_opinions=shared_item_code_no_opinions,
                     shared_item_code_all_opinions=shared_item_code_all_opinions,
                     site_owner_organization_we_vote_id=defaults['site_owner_organization_we_vote_id'],

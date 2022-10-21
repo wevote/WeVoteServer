@@ -60,6 +60,13 @@ class CurrentFriend(models.Model):
         verbose_name="voter we vote id person 2", max_length=255, null=True, blank=True, unique=False, db_index=True)
     viewee_organization_we_vote_id = models.CharField(
         max_length=255, null=True, blank=True, unique=False, db_index=True)
+
+    mutual_friend_count = models.PositiveSmallIntegerField(null=True, unique=False)
+    mutual_friend_count_last_updated = models.DateTimeField(null=True)
+
+    mutual_friend_preview_list_serialized = models.TextField(default=None, null=True)
+    mutual_friend_preview_list_update_needed = models.BooleanField(default=True)
+
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
     def fetch_other_organization_we_vote_id(self, one_we_vote_id):
@@ -99,6 +106,7 @@ class FriendInvitationEmailLink(models.Model):
     recipient_last_name = models.CharField(verbose_name='last name', max_length=255, null=True, blank=True)
     secret_key = models.CharField(
         verbose_name="secret key to accept invite", max_length=255, null=True, blank=True, unique=True)
+    invited_friend_accepted_notification_sent = models.BooleanField(default=False)
     invitation_message = models.TextField(null=True, blank=True)
     invitation_status = models.CharField(max_length=50, choices=INVITATION_STATUS_CHOICES, default=NO_RESPONSE)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
@@ -156,11 +164,19 @@ class FriendInvitationVoterLink(models.Model):
         max_length=255, null=True, blank=True, unique=False, db_index=True)
     secret_key = models.CharField(
         verbose_name="secret key to accept invite", max_length=255, null=True, blank=True, unique=True)
+    invited_friend_accepted_notification_sent = models.BooleanField(default=False)
     invitation_message = models.TextField(null=True, blank=True)
     invitation_status = models.CharField(max_length=50, choices=INVITATION_STATUS_CHOICES, default=NO_RESPONSE)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True, db_index=True)
     merge_by_secret_key_allowed = models.BooleanField(default=True)  # To allow merges after delete
     invitation_table = models.CharField(max_length=8, default=FRIEND_INVITATION_VOTER_LINK)
+
+    mutual_friend_count = models.PositiveSmallIntegerField(null=True, unique=False)
+    mutual_friend_count_last_updated = models.DateTimeField(null=True)
+
+    mutual_friend_preview_list_serialized = models.TextField(default=None, null=True)
+    mutual_friend_preview_list_update_needed = models.BooleanField(default=True)
+
     deleted = models.BooleanField(default=False)  # If invitation is completed or rescinded, mark as deleted
 
 
@@ -767,17 +783,20 @@ class FriendManager(models.Manager):
             current_friends_count = 0
         return current_friends_count
 
-    def fetch_mutual_friends_count(self, voter_we_vote_id, friend_we_vote_id):
+    def fetch_mutual_friends_voter_we_vote_id_list_from_current_friends(
+            self,
+            voter_we_vote_id='',
+            friend_voter_we_vote_id=''):
         """
         TODO: This could be converted to database only calculation for better speed
         :param voter_we_vote_id:
-        :param friend_we_vote_id:
+        :param friend_voter_we_vote_id:
         :return:
         """
-        mutual_friends_count = 0
+        mutual_friends_voter_we_vote_id_list = []
 
-        if not positive_value_exists(voter_we_vote_id) or not positive_value_exists(friend_we_vote_id):
-            return mutual_friends_count
+        if not positive_value_exists(voter_we_vote_id) or not positive_value_exists(friend_voter_we_vote_id):
+            return mutual_friends_voter_we_vote_id_list
 
         voter_friends_we_vote_id_list = []
         friend_friends_we_vote_id_list = []
@@ -797,20 +816,29 @@ class FriendManager(models.Manager):
         try:
             friend_friends_queryset = CurrentFriend.objects.using('readonly').all()
             friend_friends_queryset = friend_friends_queryset.filter(
-                Q(viewer_voter_we_vote_id__iexact=friend_we_vote_id) |
-                Q(viewee_voter_we_vote_id__iexact=friend_we_vote_id))
+                Q(viewer_voter_we_vote_id__iexact=friend_voter_we_vote_id) |
+                Q(viewee_voter_we_vote_id__iexact=friend_voter_we_vote_id))
             friend_friends_list = list(friend_friends_queryset)
             for one_friend in friend_friends_list:
-                friend_friends_we_vote_id_list.append(one_friend.fetch_other_voter_we_vote_id(friend_we_vote_id))
+                friend_friends_we_vote_id_list.append(one_friend.fetch_other_voter_we_vote_id(friend_voter_we_vote_id))
         except Exception as e:
-            mutual_friends_count = 0
-            return mutual_friends_count
+            mutual_friends_voter_we_vote_id_list = []
+            return mutual_friends_voter_we_vote_id_list
 
         voter_set = set(voter_friends_we_vote_id_list)
         friend_set = set(friend_friends_we_vote_id_list)
         mutual_set = voter_set & friend_set
-        if mutual_set:
-            mutual_friends_count = len(mutual_set)
+        mutual_friends_voter_we_vote_id_list = list(mutual_set)
+        return mutual_friends_voter_we_vote_id_list
+
+    def fetch_mutual_friends_count_from_current_friends(self, voter_we_vote_id='', friend_voter_we_vote_id=''):
+        mutual_friends_count = 0
+        mutual_friends_voter_we_vote_id_list = \
+            self.fetch_mutual_friends_voter_we_vote_id_list_from_current_friends(
+                voter_we_vote_id, friend_voter_we_vote_id)
+
+        if mutual_friends_voter_we_vote_id_list:
+            mutual_friends_count = len(mutual_friends_voter_we_vote_id_list)
 
         return mutual_friends_count
 
@@ -830,14 +858,14 @@ class FriendManager(models.Manager):
             suggested_friends_count = 0
         return suggested_friends_count
 
-    def retrieve_current_friends(self, voter_we_vote_id, read_only=True):
+    def retrieve_current_friend_list(self, voter_we_vote_id, read_only=True):
         status = ""
         current_friend_list = []  # The entries from CurrentFriend table
         current_friend_list_found = False
 
         if not positive_value_exists(voter_we_vote_id):
             success = False
-            status += 'VALID_VOTER_WE_VOTE_ID_MISSING'
+            status += 'VALID_VOTER_WE_VOTE_ID_MISSING '
             results = {
                 'success':                      success,
                 'status':                       status,
@@ -856,7 +884,7 @@ class FriendManager(models.Manager):
                 Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
                 Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))
             current_friend_queryset = current_friend_queryset.order_by('-date_last_changed')
-            current_friend_list = current_friend_queryset
+            current_friend_list = list(current_friend_queryset)
 
             if len(current_friend_list):
                 success = True
@@ -875,7 +903,7 @@ class FriendManager(models.Manager):
         except Exception as e:
             success = False
             current_friend_list_found = False
-            status += 'FAILED retrieve_current_friends ' + str(e) + " "
+            status += 'FAILED retrieve_current_friend_list: ' + str(e) + " "
             current_friend_list = []
 
         results = {
@@ -942,17 +970,32 @@ class FriendManager(models.Manager):
             status += 'AS_VOTERS_FAILED retrieve_current_friends_as_voters ' + str(e) + " "
 
         if current_friend_list_found:
-            current_friend_we_vote_id_list = []
+            current_friend_dict = {}
+            current_friend_voter_we_vote_id_list = []
             for current_friend_entry in current_friend_list:
                 we_vote_id_of_friend = current_friend_entry.fetch_other_voter_we_vote_id(voter_we_vote_id)
-                current_friend_we_vote_id_list.append(we_vote_id_of_friend)
+                current_friend_voter_we_vote_id_list.append(we_vote_id_of_friend)
+                current_friend_dict[we_vote_id_of_friend] = current_friend_entry
             voter_manager = VoterManager()
             results = voter_manager.retrieve_voter_list_by_we_vote_id_list(
-                voter_we_vote_id_list=current_friend_we_vote_id_list,
+                voter_we_vote_id_list=current_friend_voter_we_vote_id_list,
                 read_only=read_only)
             if results['voter_list_found']:
-                friend_list = results['voter_list']
+                friend_list = []
+                raw_friend_list = results['voter_list']
                 friend_list_found = True
+                # Augment friend_list with mutual_friend data
+                for one_voter in raw_friend_list:
+                    if one_voter.we_vote_id in current_friend_dict:
+                        current_friend = current_friend_dict[one_voter.we_vote_id]
+                        one_voter.mutual_friend_count = current_friend.mutual_friend_count
+                        if current_friend.mutual_friend_preview_list_serialized:
+                            mutual_friend_preview_list = \
+                                json.loads(current_friend.mutual_friend_preview_list_serialized)
+                        else:
+                            mutual_friend_preview_list = []
+                        one_voter.mutual_friend_preview_list = mutual_friend_preview_list
+                    friend_list.append(one_voter)
 
         results = {
             'success':              success,
@@ -965,7 +1008,7 @@ class FriendManager(models.Manager):
 
     def retrieve_friends_we_vote_id_list(self, voter_we_vote_id):
         """
-        This is similar to retrieve_current_friends, but only returns the we_vote_id
+        This is similar to retrieve_current_friend_list, but only returns the we_vote_id
         :param voter_we_vote_id:
         :return:
         """
@@ -1856,12 +1899,18 @@ class FriendManager(models.Manager):
         return results
 
     def retrieve_friend_invitation_from_secret_key(
-            self, invitation_secret_key, for_accepting_friendship=False, for_merge_accounts=False,
-            for_retrieving_information=False, read_only=True):
+            self,
+            invitation_secret_key,
+            for_accepting_friendship=False,
+            for_additional_processes=False,
+            for_merge_accounts=False,
+            for_retrieving_information=False,
+            read_only=True):
         """
 
         :param invitation_secret_key:
         :param for_accepting_friendship:
+        :param for_additional_processes:
         :param for_merge_accounts:
         :param for_retrieving_information:
         :param read_only:
@@ -1886,6 +1935,9 @@ class FriendManager(models.Manager):
                 if positive_value_exists(for_accepting_friendship):
                     voter_link_query = voter_link_query.exclude(invitation_status__iexact=ACCEPTED)
                     status += "FOR_ACCEPTING_FRIENDSHIP "
+                elif positive_value_exists(for_additional_processes):
+                    voter_link_query = voter_link_query.filter(invitation_status__iexact=ACCEPTED)
+                    status += "FOR_ADDITIONAL_PROCESSES "
                 elif positive_value_exists(for_merge_accounts):
                     voter_link_query = voter_link_query.filter(merge_by_secret_key_allowed=True)
                     status += "FOR_MERGE_ACCOUNTS "
@@ -1933,6 +1985,9 @@ class FriendManager(models.Manager):
                 if positive_value_exists(for_accepting_friendship):
                     email_link_query = email_link_query.exclude(invitation_status__iexact=ACCEPTED)
                     status += "FOR_ACCEPTING_FRIENDSHIP "
+                elif positive_value_exists(for_additional_processes):
+                    email_link_query = email_link_query.filter(invitation_status__iexact=ACCEPTED)
+                    status += "FOR_ADDITIONAL_PROCESSES "
                 elif positive_value_exists(for_merge_accounts):
                     email_link_query = email_link_query.filter(merge_by_secret_key_allowed=True)
                     status += "FOR_MERGE_ACCOUNTS "
@@ -2003,6 +2058,73 @@ class FriendManager(models.Manager):
             'status':                                   status,
             'friend_invitation_facebook_link_found':    friend_invitation_facebook_link_found,
             'friend_invitation_facebook_link':          friend_invitation_facebook_link
+        }
+        return results
+
+    def retrieve_mutual_friend_list(
+            self,
+            first_friend_voter_we_vote_id='',
+            second_friend_voter_we_vote_id='',
+            mutual_friend_voter_we_vote_id='',
+            read_only=True):
+        status = ""
+        success = True
+        mutual_friend_list = []  # The entries from MutualFriend table
+        mutual_friend_list_found = False
+
+        if positive_value_exists(first_friend_voter_we_vote_id) and \
+                positive_value_exists(second_friend_voter_we_vote_id):
+            pass
+        elif positive_value_exists(mutual_friend_voter_we_vote_id):
+            pass
+        else:
+            success = False
+            status += 'RETRIEVE_MUTUAL_FRIEND_LIST_MISSING_KEY_VARIABLE '
+            results = {
+                'success':                  success,
+                'status':                   status,
+                'mutual_friend_list_found': mutual_friend_list_found,
+                'mutual_friend_list':       mutual_friend_list,
+            }
+            return results
+
+        try:
+            if positive_value_exists(read_only):
+                queryset = MutualFriend.objects.using('readonly').all()
+            else:
+                queryset = MutualFriend.objects.all()
+            if positive_value_exists(first_friend_voter_we_vote_id):
+                queryset = queryset.filter(
+                    Q(viewer_voter_we_vote_id__iexact=first_friend_voter_we_vote_id) |
+                    Q(viewee_voter_we_vote_id__iexact=first_friend_voter_we_vote_id))
+            if positive_value_exists(second_friend_voter_we_vote_id):
+                queryset = queryset.filter(
+                    Q(viewer_voter_we_vote_id__iexact=second_friend_voter_we_vote_id) |
+                    Q(viewee_voter_we_vote_id__iexact=second_friend_voter_we_vote_id))
+            if positive_value_exists(mutual_friend_voter_we_vote_id):
+                queryset = queryset.filter(
+                    mutual_friend_voter_we_vote_id=mutual_friend_voter_we_vote_id,
+                )
+            queryset = queryset.order_by('-date_last_changed')
+            mutual_friend_list = list(queryset)
+
+            if len(mutual_friend_list):
+                mutual_friend_list_found = True
+                status += 'MUTUAL_FRIEND_LIST_RETRIEVED '
+            else:
+                mutual_friend_list_found = False
+                status += 'NO_MUTUAL_FRIEND_LIST_RETRIEVED '
+        except Exception as e:
+            success = False
+            mutual_friend_list_found = False
+            status += 'FAILED retrieve_mutual_friend_list: ' + str(e) + " "
+            mutual_friend_list = []
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'mutual_friend_list_found': mutual_friend_list_found,
+            'mutual_friend_list':       mutual_friend_list,
         }
         return results
 
@@ -2189,9 +2311,11 @@ class FriendManager(models.Manager):
 
         filtered_suggested_friend_list_we_vote_ids = {}
         if suggested_friend_list_found:
+            suggested_friend_dict = {}
             voter_manager = VoterManager()
             for suggested_friend_entry in suggested_friend_list:
                 we_vote_id_of_friend = suggested_friend_entry.fetch_other_voter_we_vote_id(voter_we_vote_id)
+                suggested_friend_dict[we_vote_id_of_friend] = suggested_friend_entry
 
                 if we_vote_id_of_friend in friends_we_vote_id_list:
                     # If this person is already a friend, don't suggest as a friend
@@ -2217,8 +2341,21 @@ class FriendManager(models.Manager):
                 voter_we_vote_id_list=ordered_suggested_friend_list_we_vote_ids,
                 read_only=read_only)
             if results['voter_list_found']:
-                friend_list = results['voter_list']
+                friend_list = []
+                raw_friend_list = results['voter_list']
                 friend_list_found = True
+                # Augment friend_list with mutual_friend data
+                for one_voter in raw_friend_list:
+                    if one_voter.we_vote_id in suggested_friend_dict:
+                        suggested_friend = suggested_friend_dict[one_voter.we_vote_id]
+                        one_voter.mutual_friend_count = suggested_friend.mutual_friend_count
+                        if suggested_friend.mutual_friend_preview_list_serialized:
+                            mutual_friend_preview_list = \
+                                json.loads(suggested_friend.mutual_friend_preview_list_serialized)
+                        else:
+                            mutual_friend_preview_list = []
+                        one_voter.mutual_friend_preview_list = mutual_friend_preview_list
+                    friend_list.append(one_voter)
 
         results = {
             'success':              success,
@@ -2232,7 +2369,7 @@ class FriendManager(models.Manager):
     def update_suggested_friends_starting_with_one_voter(self, starting_voter_we_vote_id, read_only=False):
         """
         Note that we default to "read_only=False" (that is, the live db) since usually we are doing this update
-        right after adding a friend, and we want the new friend to be returned in "retrieve_current_friends".
+        right after adding a friend, and we want the new friend to be returned in "retrieve_current_friend_list".
         We use the live database ("read_only=False") because we don't want to create a race condition with
         the replicated read_only not being caught up with the master fast enough (since a friend
         was just created above.)
@@ -2241,7 +2378,7 @@ class FriendManager(models.Manager):
         :param read_only:
         :return:
         """
-        all_friends_one_person_results = self.retrieve_current_friends(starting_voter_we_vote_id, read_only=read_only)
+        all_friends_one_person_results = self.retrieve_current_friend_list(starting_voter_we_vote_id, read_only=read_only)
         suggested_friend_created_count = 0
         if all_friends_one_person_results['current_friend_list_found']:
             current_friend_list = all_friends_one_person_results['current_friend_list']
@@ -2336,6 +2473,42 @@ class FriendManager(models.Manager):
         return results
 
 
+class MutualFriend(models.Model):
+    """
+    This is considered a "cache" table, with all data being generated and aggregated to speed up other processes.
+    This table helps us generate and update the array stored in CurrentFriend.mutual_friend_preview_list_serialized.
+    The "direction" doesn't matter, although it usually indicates who initiated the first friend invitation.
+    """
+    viewer_voter_we_vote_id = models.CharField(
+        verbose_name="voter we vote id person 1", max_length=255, null=True, blank=True, unique=False, db_index=True)
+    viewee_voter_we_vote_id = models.CharField(
+        verbose_name="voter we vote id person 2", max_length=255, null=True, blank=True, unique=False, db_index=True)
+    mutual_friend_voter_we_vote_id = models.CharField(
+        max_length=255, null=True, blank=True, unique=False, db_index=True)
+
+    mutual_friend_display_name = models.CharField(max_length=255, null=True, blank=True)
+    mutual_friend_display_name_exists = models.BooleanField(default=False, db_index=True)
+
+    mutual_friend_we_vote_hosted_profile_image_url_medium = models.TextField(blank=True, null=True)
+    mutual_friend_profile_image_exists = models.BooleanField(default=False, db_index=True)
+
+    # The more friends the viewer and the mutual_friend share, the more important this mutual friend is
+    viewer_to_mutual_friend_friend_count = models.PositiveSmallIntegerField(null=True, unique=False)
+    # The more friends the viewee and the mutual_friend share, the more important this mutual friend is
+    viewee_to_mutual_friend_friend_count = models.PositiveSmallIntegerField(null=True, unique=False)
+
+    date_last_changed = models.DateTimeField(null=True, auto_now=True)
+
+    def fetch_other_voter_we_vote_id(self, one_we_vote_id):
+        if one_we_vote_id == self.viewer_voter_we_vote_id:
+            return self.viewee_voter_we_vote_id
+        elif one_we_vote_id == self.viewee_voter_we_vote_id:
+            return self.viewer_voter_we_vote_id
+        else:
+            # If the we_vote_id passed in wasn't found, don't return another we_vote_id
+            return ""
+
+
 class SuggestedFriend(models.Model):
     """
     This table stores possible friend connections.
@@ -2352,6 +2525,13 @@ class SuggestedFriend(models.Model):
         verbose_name="second voter to remove suggested friend", max_length=255, null=True, blank=True, unique=False)
     friend_invite_sent = models.BooleanField(default=False)
     current_friends = models.BooleanField(default=False)
+
+    mutual_friend_count = models.PositiveSmallIntegerField(null=True, unique=False)
+    mutual_friend_count_last_updated = models.DateTimeField(null=True)
+
+    mutual_friend_preview_list_serialized = models.TextField(default=None, null=True)
+    mutual_friend_preview_list_update_needed = models.BooleanField(default=True)
+
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
     def fetch_other_voter_we_vote_id(self, one_we_vote_id):

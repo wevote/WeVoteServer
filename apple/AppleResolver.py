@@ -5,6 +5,7 @@ from jwt.algorithms import RSAAlgorithm     # pragma: no cover
 import wevote_functions.admin
 
 logger = wevote_functions.admin.get_logger(__name__)
+DEBUG_LOGGING = False
 
 
 class AppleResolver(object):
@@ -47,8 +48,9 @@ class AppleResolver(object):
 
             verified_payload = jwt.decode(access_token, apple_public_key_as_string,
                                           audience=client_id,
-                                          algorithm=public_key_info['alg'])
-            print('AppleResolver verified_payload: ', verified_payload)
+                                          algorithms=["RS256"])
+            if DEBUG_LOGGING:
+                logger.error('awsApple AppleResolver verified_payload: ', verified_payload)
 
             # sub:
             #   The subject registered claim identifies the principal that is the subject of the identity token. Since

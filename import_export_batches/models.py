@@ -604,6 +604,7 @@ CALCULATE_ORGANIZATION_ELECTION_METRICS = "CALCULATE_ORGANIZATION_ELECTION_METRI
 CALCULATE_SITEWIDE_DAILY_METRICS = "CALCULATE_SITEWIDE_DAILY_METRICS"
 CALCULATE_SITEWIDE_ELECTION_METRICS = "CALCULATE_SITEWIDE_ELECTION_METRICS"
 CALCULATE_SITEWIDE_VOTER_METRICS = "CALCULATE_SITEWIDE_VOTER_METRICS"
+GENERATE_VOTER_GUIDES = "GENERATE_VOTER_GUIDES"
 RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS = "RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS"
 REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS = "REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS"
 REFRESH_BALLOT_ITEMS_FROM_VOTERS = "REFRESH_BALLOT_ITEMS_FROM_VOTERS"
@@ -620,6 +621,7 @@ KIND_OF_PROCESS_CHOICES = (
     (CALCULATE_SITEWIDE_ELECTION_METRICS,  'Sitewide election metrics'),
     (CALCULATE_ORGANIZATION_DAILY_METRICS,  'Organization specific daily metrics'),
     (CALCULATE_ORGANIZATION_ELECTION_METRICS,  'Organization specific election metrics'),
+    (GENERATE_VOTER_GUIDES,  'Generate voter guides'),
     (RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,  'Retrieve Ballot Items from Map Points'),
     (REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, 'Refresh Ballot Items from BallotReturned Map Points'),
     (REFRESH_BALLOT_ITEMS_FROM_VOTERS, 'Refresh Ballot Items from Voter Custom Addresses'),
@@ -1414,7 +1416,7 @@ class BatchManager(models.Manager):
         """
 
         try:
-            batch_row_query = BatchRow.objects.filter(batch_header_id=batch_header_id)
+            batch_row_query = BatchRow.objects.using('readonly').filter(batch_header_id=batch_header_id)
             batch_row_count = batch_row_query.count()
         except BatchRow.DoesNotExist:
             batch_row_count = 0
@@ -1434,47 +1436,56 @@ class BatchManager(models.Manager):
         batch_row_action_count = 0
         try:
             if kind_of_batch == CANDIDATE:
-                batch_row_action_query = BatchRowActionCandidate.objects.filter(batch_header_id=batch_header_id)
+                batch_row_action_query = BatchRowActionCandidate.objects.using('readonly')\
+                    .filter(batch_header_id=batch_header_id)
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
             elif kind_of_batch == CONTEST_OFFICE:
-                batch_row_action_query = BatchRowActionContestOffice.objects.filter(batch_header_id=batch_header_id)
+                batch_row_action_query = BatchRowActionContestOffice.objects.using('readonly')\
+                    .filter(batch_header_id=batch_header_id)
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
             elif kind_of_batch == ELECTED_OFFICE:
-                batch_row_action_query = BatchRowActionElectedOffice.objects.filter(batch_header_id=batch_header_id)
+                batch_row_action_query = BatchRowActionElectedOffice.objects.using('readonly')\
+                    .filter(batch_header_id=batch_header_id)
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
             elif kind_of_batch == IMPORT_BALLOT_ITEM:
-                batch_row_action_query = BatchRowActionBallotItem.objects.filter(batch_header_id=batch_header_id)
+                batch_row_action_query = BatchRowActionBallotItem.objects.using('readonly')\
+                    .filter(batch_header_id=batch_header_id)
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
             elif kind_of_batch == IMPORT_POLLING_LOCATION:
-                batch_row_action_query = BatchRowActionPollingLocation.objects.filter(batch_header_id=batch_header_id)
+                batch_row_action_query = BatchRowActionPollingLocation.objects.using('readonly')\
+                    .filter(batch_header_id=batch_header_id)
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
             elif kind_of_batch == MEASURE:
-                batch_row_action_query = BatchRowActionMeasure.objects.filter(batch_header_id=batch_header_id)
+                batch_row_action_query = BatchRowActionMeasure.objects.using('readonly')\
+                    .filter(batch_header_id=batch_header_id)
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
             elif kind_of_batch == ORGANIZATION_WORD:
-                batch_row_action_query = BatchRowActionOrganization.objects.filter(batch_header_id=batch_header_id)
+                batch_row_action_query = BatchRowActionOrganization.objects.using('readonly')\
+                    .filter(batch_header_id=batch_header_id)
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
             elif kind_of_batch == POLITICIAN:
-                batch_row_action_query = BatchRowActionPolitician.objects.filter(batch_header_id=batch_header_id)
+                batch_row_action_query = BatchRowActionPolitician.objects.using('readonly')\
+                    .filter(batch_header_id=batch_header_id)
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
             elif kind_of_batch == POSITION:
-                batch_row_action_query = BatchRowActionPosition.objects.filter(batch_header_id=batch_header_id)
+                batch_row_action_query = BatchRowActionPosition.objects.using('readonly')\
+                    .filter(batch_header_id=batch_header_id)
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
@@ -1494,47 +1505,56 @@ class BatchManager(models.Manager):
         batch_row_action_count = 0
         try:
             if kind_of_batch == CANDIDATE:
-                batch_row_action_query = BatchRowActionCandidate.objects.filter(batch_set_id=batch_set_id)
+                batch_row_action_query = BatchRowActionCandidate.objects.using('readonly')\
+                    .filter(batch_set_id=batch_set_id)
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
             elif kind_of_batch == CONTEST_OFFICE:
-                batch_row_action_query = BatchRowActionContestOffice.objects.filter(batch_set_id=batch_set_id)
+                batch_row_action_query = BatchRowActionContestOffice.objects.using('readonly')\
+                    .filter(batch_set_id=batch_set_id)
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
             elif kind_of_batch == ELECTED_OFFICE:
-                batch_row_action_query = BatchRowActionElectedOffice.objects.filter(batch_set_id=batch_set_id)
+                batch_row_action_query = BatchRowActionElectedOffice.objects.using('readonly')\
+                    .filter(batch_set_id=batch_set_id)
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
             elif kind_of_batch == IMPORT_BALLOT_ITEM:
-                batch_row_action_query = BatchRowActionBallotItem.objects.filter(batch_set_id=batch_set_id)
+                batch_row_action_query = BatchRowActionBallotItem.objects.using('readonly')\
+                    .filter(batch_set_id=batch_set_id)
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
             elif kind_of_batch == IMPORT_POLLING_LOCATION:
-                batch_row_action_query = BatchRowActionPollingLocation.objects.filter(batch_set_id=batch_set_id)
+                batch_row_action_query = BatchRowActionPollingLocation.objects.using('readonly')\
+                    .filter(batch_set_id=batch_set_id)
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
             elif kind_of_batch == MEASURE:
-                batch_row_action_query = BatchRowActionMeasure.objects.filter(batch_set_id=batch_set_id)
+                batch_row_action_query = BatchRowActionMeasure.objects.using('readonly')\
+                    .filter(batch_set_id=batch_set_id)
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
             elif kind_of_batch == ORGANIZATION_WORD:
-                batch_row_action_query = BatchRowActionOrganization.objects.filter(batch_set_id=batch_set_id)
+                batch_row_action_query = BatchRowActionOrganization.objects.using('readonly')\
+                    .filter(batch_set_id=batch_set_id)
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
             elif kind_of_batch == POLITICIAN:
-                batch_row_action_query = BatchRowActionPolitician.objects.filter(batch_set_id=batch_set_id)
+                batch_row_action_query = BatchRowActionPolitician.objects.using('readonly')\
+                    .filter(batch_set_id=batch_set_id)
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
             elif kind_of_batch == POSITION:
-                batch_row_action_query = BatchRowActionPosition.objects.filter(batch_set_id=batch_set_id)
+                batch_row_action_query = BatchRowActionPosition.objects.using('readonly')\
+                    .filter(batch_set_id=batch_set_id)
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
@@ -1582,12 +1602,17 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def retrieve_batch_header_translation_suggestion(self, kind_of_batch, incoming_alternate_header_value):
+    def retrieve_batch_header_translation_suggestion(
+            self,
+            kind_of_batch,
+            incoming_alternate_header_value,
+            read_only=True):
         """
         We are looking at one header value from a file imported by an admin or volunteer. We want to see if
         there are any suggestions for headers already recognized by We Vote. Ex/ "Organization" -> "organization_name"
         :param kind_of_batch:
         :param incoming_alternate_header_value:
+        :param read_only:
         :return:
         """
         success = False
@@ -1606,9 +1631,14 @@ class BatchManager(models.Manager):
 
         try:
             # Note that we don't care about case sensitivity when we search for the alternate value
-            batch_header_translation_suggestion = BatchHeaderTranslationSuggestion.objects.get(
-                kind_of_batch=kind_of_batch,
-                incoming_alternate_header_value__iexact=incoming_alternate_header_value)
+            if positive_value_exists(read_only):
+                batch_header_translation_suggestion = BatchHeaderTranslationSuggestion.objects.using('readonly').get(
+                    kind_of_batch=kind_of_batch,
+                    incoming_alternate_header_value__iexact=incoming_alternate_header_value)
+            else:
+                batch_header_translation_suggestion = BatchHeaderTranslationSuggestion.objects.get(
+                    kind_of_batch=kind_of_batch,
+                    incoming_alternate_header_value__iexact=incoming_alternate_header_value)
             batch_header_translation_suggestion_found = True
             success = True
             status += "BATCH_HEADER_TRANSLATION_SUGGESTION_SAVED "
@@ -1659,7 +1689,7 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def retrieve_batch_row_translation_map(self, kind_of_batch, incoming_alternate_header_value):
+    def retrieve_batch_row_translation_map(self, kind_of_batch, incoming_alternate_header_value, read_only=True):
         # TODO This hasn't been built yet
         success = False
         status = ""
@@ -1677,9 +1707,14 @@ class BatchManager(models.Manager):
 
         try:
             # Note that we don't care about case sensitivity when we search for the alternate value
-            batch_header_translation_suggestion = BatchHeaderTranslationSuggestion.objects.get(
-                kind_of_batch=kind_of_batch,
-                incoming_alternate_header_value__iexact=incoming_alternate_header_value)
+            if positive_value_exists(read_only):
+                batch_header_translation_suggestion = BatchHeaderTranslationSuggestion.objects.using('read_only').get(
+                    kind_of_batch=kind_of_batch,
+                    incoming_alternate_header_value__iexact=incoming_alternate_header_value)
+            else:
+                batch_header_translation_suggestion = BatchHeaderTranslationSuggestion.objects.get(
+                    kind_of_batch=kind_of_batch,
+                    incoming_alternate_header_value__iexact=incoming_alternate_header_value)
             batch_header_translation_suggestion_found = True
             success = True
             status += "BATCH_HEADER_TRANSLATION_SUGGESTION_SAVED "
@@ -3669,27 +3704,31 @@ class BatchManager(models.Manager):
         number_of_batch_action_rows = 0
         if positive_value_exists(header_id):
             if kind_of_batch == MEASURE:
-                number_of_batch_action_rows = BatchRowActionMeasure.objects.filter(batch_header_id=header_id).count()
+                number_of_batch_action_rows = BatchRowActionMeasure.objects.using('readonly')\
+                    .filter(batch_header_id=header_id).count()
             elif kind_of_batch == ELECTED_OFFICE:
-                number_of_batch_action_rows = BatchRowActionElectedOffice.objects.filter(batch_header_id=header_id).\
-                    count()
+                number_of_batch_action_rows = BatchRowActionElectedOffice.objects.using('readonly')\
+                    .filter(batch_header_id=header_id).count()
             elif kind_of_batch == CONTEST_OFFICE:
-                number_of_batch_action_rows = BatchRowActionContestOffice.objects.filter(batch_header_id=header_id).\
-                    count()
+                number_of_batch_action_rows = BatchRowActionContestOffice.objects.using('readonly')\
+                    .filter(batch_header_id=header_id).count()
             elif kind_of_batch == CANDIDATE:
-                number_of_batch_action_rows = BatchRowActionCandidate.objects.filter(batch_header_id=header_id).count()
+                number_of_batch_action_rows = BatchRowActionCandidate.objects.using('readonly')\
+                    .filter(batch_header_id=header_id).count()
             elif kind_of_batch == POLITICIAN:
-                number_of_batch_action_rows = BatchRowActionPolitician.objects.filter(batch_header_id=header_id).count()
+                number_of_batch_action_rows = BatchRowActionPolitician.objects.using('readonly')\
+                    .filter(batch_header_id=header_id).count()
             else:
                 number_of_batch_action_rows = 0
         return number_of_batch_action_rows
 
     def count_number_of_batches_in_batch_set(self, batch_set_id=0, batch_row_analyzed=None, batch_row_created=None):
         number_of_batches = 0
-        batch_description_query = BatchDescription.objects.filter(batch_set_id=batch_set_id)
+        batch_description_query = BatchDescription.objects.using('readonly').filter(batch_set_id=batch_set_id)
         batch_description_list = list(batch_description_query)
         for batch_description in batch_description_list:
-            batch_row_query = BatchRow.objects.filter(batch_header_id=batch_description.batch_header_id)
+            batch_row_query = BatchRow.objects.using('readonly')\
+                .filter(batch_header_id=batch_description.batch_header_id)
             if batch_row_analyzed is not None:
                 batch_row_query = batch_row_query.filter(batch_row_analyzed=batch_row_analyzed)
             if batch_row_created is not None:
@@ -3707,7 +3746,10 @@ class BatchManager(models.Manager):
         :param alternate_header_value:
         :return:
         """
-        results = self.retrieve_batch_header_translation_suggestion(kind_of_batch, alternate_header_value)
+        results = self.retrieve_batch_header_translation_suggestion(
+            kind_of_batch,
+            alternate_header_value,
+            read_only=True)
         if results['batch_header_translation_suggestion_found']:
             batch_header_translation_suggestion = results['batch_header_translation_suggestion']
             return batch_header_translation_suggestion.header_value_recognized_by_we_vote
@@ -3715,7 +3757,7 @@ class BatchManager(models.Manager):
 
     # TODO This hasn't been built
     def fetch_batch_row_translation_map(self, kind_of_batch, batch_row_name, incoming_alternate_row_value):
-        results = self.retrieve_batch_row_translation_map(kind_of_batch, incoming_alternate_row_value)
+        results = self.retrieve_batch_row_translation_map(kind_of_batch, incoming_alternate_row_value, read_only=True)
         if results['batch_header_translation_suggestion_found']:
             batch_header_translation_suggestion = results['batch_header_translation_suggestion']
             return batch_header_translation_suggestion.header_value_recognized_by_we_vote
@@ -3734,8 +3776,9 @@ class BatchManager(models.Manager):
         # batch_header_id = get_batch_header_id_from_batch_description(batch_set_id, ELECTED_OFFICE)
         try:
             if positive_value_exists(batch_set_id):
-                batch_description_on_stage = BatchDescription.objects.get(batch_set_id=batch_set_id,
-                                                                          kind_of_batch=ELECTED_OFFICE)
+                batch_description_on_stage = BatchDescription.objects.using('readonly').get(
+                    batch_set_id=batch_set_id,
+                    kind_of_batch=ELECTED_OFFICE)
                 if batch_description_on_stage:
                     batch_header_id = batch_description_on_stage.batch_header_id
         except BatchDescription.DoesNotExist:
@@ -3747,7 +3790,7 @@ class BatchManager(models.Manager):
         try:
             batch_manager = BatchManager()
             if positive_value_exists(batch_header_id) and elected_office_ctcl_id:
-                batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
+                batch_header_map = BatchHeaderMap.objects.using('readonly').get(batch_header_id=batch_header_id)
 
                 # Get the column name in BatchRow that stores elected_office_batch_id - id taken from batch_header_map
                 # eg: batch_row_000 -> elected_office_batch_id
@@ -3756,8 +3799,9 @@ class BatchManager(models.Manager):
 
                 # we found batch row column name corresponding to elected_office_batch_id, now look up batch_row table
                 # with given batch_header_id and elected_office_batch_id (batch_row_00)
-                batch_row_on_stage = BatchRow.objects.get(batch_header_id=batch_header_id,
-                                                          **{ elected_office_id_column_name: elected_office_ctcl_id})
+                batch_row_on_stage = BatchRow.objects.using('readonly').get(
+                    batch_header_id=batch_header_id,
+                    **{elected_office_id_column_name: elected_office_ctcl_id})
                 # we know the batch row, next retrieve value for elected_office_name eg: off1 -> NC State Senator
                 elected_office_name = batch_manager.retrieve_value_from_batch_row('elected_office_name',
                                                                                   batch_header_map, batch_row_on_stage)
@@ -3780,8 +3824,9 @@ class BatchManager(models.Manager):
         # batch_header_id = get_batch_header_id_from_batch_description(batch_set_id, CANDIDATE)
         try:
             if positive_value_exists(batch_set_id):
-                batch_description_on_stage = BatchDescription.objects.get(batch_set_id=batch_set_id,
-                                                                          kind_of_batch=CANDIDATE)
+                batch_description_on_stage = BatchDescription.objects.using('readonly').get(
+                    batch_set_id=batch_set_id,
+                    kind_of_batch=CANDIDATE)
                 if batch_description_on_stage:
                     batch_header_id = batch_description_on_stage.batch_header_id
         except BatchDescription.DoesNotExist:
@@ -3789,8 +3834,9 @@ class BatchManager(models.Manager):
 
         try:
             if positive_value_exists(batch_header_id) and person_id is not None:
-                batchrowaction_candidate = BatchRowActionCandidate.objects.get(batch_header_id=batch_header_id,
-                                                                               candidate_ctcl_person_id=person_id)
+                batchrowaction_candidate = BatchRowActionCandidate.objects.using('readonly').get(
+                    batch_header_id=batch_header_id,
+                    candidate_ctcl_person_id=person_id)
 
                 if batchrowaction_candidate is not None:
                     state_code = batchrowaction_candidate.state_code
@@ -4916,6 +4962,7 @@ class BatchProcessManager(models.Manager):
                     CALCULATE_SITEWIDE_ELECTION_METRICS,
                     CALCULATE_ORGANIZATION_DAILY_METRICS,
                     CALCULATE_ORGANIZATION_ELECTION_METRICS,
+                    GENERATE_VOTER_GUIDES,
                     REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,
                     REFRESH_BALLOT_ITEMS_FROM_VOTERS,
                     RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,
@@ -5088,14 +5135,14 @@ class BatchProcessManager(models.Manager):
         batch_process_count = 0
 
         election_manager = ElectionManager()
-        results = election_manager.retrieve_upcoming_elections()
+        results = election_manager.retrieve_upcoming_elections(read_only=True)
         election_list = results['election_list']
         google_civic_election_id_list = []
         for one_election in election_list:
             google_civic_election_id_list.append(one_election.google_civic_election_id)
 
         try:
-            batch_process_queryset = BatchProcess.objects.all()
+            batch_process_queryset = BatchProcess.objects.using('readonly').all()
             batch_process_queryset = batch_process_queryset.filter(date_started__isnull=False)
             batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
             batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)
@@ -5112,14 +5159,14 @@ class BatchProcessManager(models.Manager):
         batch_process_count = 0
 
         election_manager = ElectionManager()
-        results = election_manager.retrieve_upcoming_elections()
+        results = election_manager.retrieve_upcoming_elections(read_only=True)
         election_list = results['election_list']
         google_civic_election_id_list = []
         for one_election in election_list:
             google_civic_election_id_list.append(one_election.google_civic_election_id)
 
         try:
-            batch_process_queryset = BatchProcess.objects.all()
+            batch_process_queryset = BatchProcess.objects.using('readonly').all()
             batch_process_queryset = batch_process_queryset.filter(date_started__isnull=False)
             batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
             batch_process_queryset = batch_process_queryset.filter(date_checked_out__isnull=False)
@@ -5140,6 +5187,7 @@ class BatchProcessManager(models.Manager):
     # CALCULATE_SITEWIDE_ELECTION_METRICS
     # CALCULATE_ORGANIZATION_DAILY_METRICS
     # CALCULATE_ORGANIZATION_ELECTION_METRICS
+    # GENERATE_VOTER_GUIDES
     # REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS
     # REFRESH_BALLOT_ITEMS_FROM_VOTERS
     # RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS
@@ -5161,14 +5209,14 @@ class BatchProcessManager(models.Manager):
             RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS in kind_of_process_list
         if related_to_upcoming_election:
             election_manager = ElectionManager()
-            results = election_manager.retrieve_upcoming_elections()
+            results = election_manager.retrieve_upcoming_elections(read_only=True)
             election_list = results['election_list']
             google_civic_election_id_list = []
             for one_election in election_list:
                 google_civic_election_id_list.append(one_election.google_civic_election_id)
 
         try:
-            batch_process_queryset = BatchProcess.objects.all()
+            batch_process_queryset = BatchProcess.objects.using('readonly').all()
             batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=kind_of_process_list)
             batch_process_queryset = batch_process_queryset.exclude(batch_process_paused=True)
             if positive_value_exists(is_active):
@@ -5197,7 +5245,7 @@ class BatchProcessManager(models.Manager):
             self, google_civic_election_id=0, state_code="", kind_of_process=""):
         status = ""
         try:
-            batch_process_queryset = BatchProcess.objects.all()
+            batch_process_queryset = BatchProcess.objects.using('readonly').all()
             batch_process_queryset = batch_process_queryset.filter(google_civic_election_id=google_civic_election_id)
             batch_process_queryset = batch_process_queryset.filter(state_code=state_code)
             batch_process_queryset = batch_process_queryset.filter(kind_of_process=kind_of_process)
@@ -5214,7 +5262,7 @@ class BatchProcessManager(models.Manager):
         status = ""
         analytics_kind_of_process_list = [ACTIVITY_NOTICE_PROCESS]
         try:
-            batch_process_queryset = BatchProcess.objects.all()
+            batch_process_queryset = BatchProcess.objects.using('readonly').all()
             batch_process_queryset = batch_process_queryset.filter(date_started__isnull=False)
             batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
             batch_process_queryset = batch_process_queryset.filter(date_checked_out__isnull=False)
@@ -5238,7 +5286,7 @@ class BatchProcessManager(models.Manager):
                 CALCULATE_SITEWIDE_ELECTION_METRICS, CALCULATE_ORGANIZATION_DAILY_METRICS,
                 CALCULATE_ORGANIZATION_ELECTION_METRICS]
         try:
-            batch_process_queryset = BatchProcess.objects.all()
+            batch_process_queryset = BatchProcess.objects.using('readonly').all()
             batch_process_queryset = batch_process_queryset.filter(date_started__isnull=False)
             batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
             batch_process_queryset = batch_process_queryset.filter(date_checked_out__isnull=False)
@@ -5316,6 +5364,8 @@ class BatchProcessManager(models.Manager):
                         checked_out_expiration_time = 270  # 4.5 minutes * 60 seconds
                     elif batch_process.kind_of_process == API_REFRESH_REQUEST:
                         checked_out_expiration_time = 360  # 6 minutes * 60 seconds
+                    elif batch_process.kind_of_process == GENERATE_VOTER_GUIDES:
+                        checked_out_expiration_time = 600  # 10 minutes * 60 seconds
                     elif batch_process.kind_of_process in [
                             REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, REFRESH_BALLOT_ITEMS_FROM_VOTERS,
                             RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS]:
@@ -5468,7 +5518,7 @@ class BatchProcess(models.Model):
     """
     """
     kind_of_process = models.CharField(max_length=50, choices=KIND_OF_PROCESS_CHOICES,
-                                       default=RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS)
+                                       default=RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, db_index=True)
 
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(
@@ -5490,13 +5540,13 @@ class BatchProcess(models.Model):
     election_id_list_serialized = models.CharField(max_length=255, null=True)
 
     date_added_to_queue = models.DateTimeField(verbose_name='start', null=True)
-    date_started = models.DateTimeField(verbose_name='start', null=True)
+    date_started = models.DateTimeField(verbose_name='start', null=True, db_index=True)
     # When have all of the steps completed?
-    date_completed = models.DateTimeField(verbose_name='finished', null=True)
+    date_completed = models.DateTimeField(verbose_name='finished', null=True, db_index=True)
     # When a batch_process is running, we mark when it was "taken off the shelf" to be worked on.
     #  When the process is complete, we should reset this to "NULL"
     date_checked_out = models.DateTimeField(null=True)
-    batch_process_paused = models.BooleanField(default=False)
+    batch_process_paused = models.BooleanField(default=False, db_index=True)
     completion_summary = models.TextField(null=True, blank=True)
     use_ballotpedia = models.BooleanField(default=False)
     use_ctcl = models.BooleanField(default=False)

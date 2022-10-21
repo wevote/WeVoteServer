@@ -2,20 +2,22 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+import operator
 from datetime import datetime, timedelta
+
+import pytz
 from django.db import models
 from django.db.models import Q
+
+import wevote_functions.admin
 from election.models import ElectionManager, TIME_SPAN_LIST
 from exception.models import handle_exception, handle_record_not_found_exception, \
     handle_record_found_more_than_one_exception
-import operator
 from organization.models import Organization, OrganizationManager, \
     CORPORATION, GROUP, INDIVIDUAL, NEWS_ORGANIZATION, NONPROFIT, NONPROFIT_501C3, NONPROFIT_501C4, \
     POLITICAL_ACTION_COMMITTEE, PUBLIC_FIGURE, TRADE_ASSOCIATION, UNKNOWN, ORGANIZATION_TYPE_CHOICES
 from pledge_to_vote.models import PledgeToVoteManager
-import pytz
 from voter.models import VoterManager
-import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, convert_to_str, positive_value_exists
 from wevote_settings.models import fetch_site_unique_id_prefix, fetch_next_we_vote_id_voter_guide_integer
 
@@ -399,6 +401,41 @@ class VoterGuideManager(models.Manager):
             'MultipleObjectsReturned':  exception_multiple_object_returned,
             'voter_guide_saved':        success,
             'new_voter_guide_created':  new_voter_guide_created,
+        }
+        return results
+
+    def update_or_create_voter_guides_generated(
+            self,
+            google_civic_election_id=0,
+            number_of_voter_guides=0):
+        google_civic_election_id = convert_to_int(google_civic_election_id)
+        status = ""
+
+        try:
+            updated_values = {
+                # Values we search against below
+                'google_civic_election_id': google_civic_election_id,
+                'number_of_voter_guides':   number_of_voter_guides,
+            }
+            voter_guide, new_voter_guide_created = VoterGuidesGenerated.objects.update_or_create(
+                google_civic_election_id=google_civic_election_id,
+                defaults=updated_values)
+            success = True
+            if new_voter_guide_created:
+                status += 'VOTER_GUIDES_GENERATED_CREATED '
+            else:
+                status += 'VOTER_GUIDES_GENERATED_UPDATED '
+        except VoterGuidesGenerated.MultipleObjectsReturned as e:
+            success = False
+            status += 'MULTIPLE_MATCHING_VOTER_GUIDES_GENERATED '
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            success = False
+            status += 'UPDATE_OR_CREATE_VOTER_GUIDES_GENERATED: ' + str(e) + ' '
+
+        results = {
+            'success':  success,
+            'status':   status,
         }
         return results
 
@@ -2236,21 +2273,23 @@ class VoterGuidePossibilityManager(models.Manager):
         }
         return results
 
-    def retrieve_voter_guide_possibility_list(self,
-                                              order_by='',
-                                              start_number=0,
-                                              end_number=25,
-                                              search_string='',
-                                              google_civic_election_id=0,
-                                              hide_from_active_review=False,
-                                              cannot_find_endorsements=False,
-                                              candidates_missing_from_we_vote=False,
-                                              capture_detailed_comments=False,
-                                              from_prior_election=False,
-                                              ignore_this_source=False,
-                                              show_prior_years=False,
-                                              assigned_to_voter_we_vote_id=False,
-                                              return_count_only=False):
+    def retrieve_voter_guide_possibility_list(
+            self,
+            order_by='',
+            start_number=0,
+            end_number=25,
+            search_string='',
+            google_civic_election_id=0,
+            hide_from_active_review=False,
+            cannot_find_endorsements=False,
+            candidates_missing_from_we_vote=False,
+            capture_detailed_comments=False,
+            from_prior_election=False,
+            ignore_this_source=False,
+            show_prior_years=False,
+            assigned_to_no_one=False,
+            assigned_to_voter_we_vote_id=False,
+            return_count_only=False):
         start_number = convert_to_int(start_number)
         end_number = convert_to_int(end_number)
         hide_from_active_review = positive_value_exists(hide_from_active_review)
@@ -2273,7 +2312,11 @@ class VoterGuidePossibilityManager(models.Manager):
                 # Default to only showing this year
                 now = datetime.now()
                 voter_guide_query = voter_guide_query.filter(date_last_changed__year=now.year)
-            if positive_value_exists(assigned_to_voter_we_vote_id):
+            if positive_value_exists(assigned_to_no_one):
+                voter_guide_query = voter_guide_query.filter(
+                    Q(assigned_to_voter_we_vote_id__isnull=True) |
+                    Q(assigned_to_voter_we_vote_id=""))
+            elif positive_value_exists(assigned_to_voter_we_vote_id):
                 voter_guide_query = voter_guide_query.filter(
                     assigned_to_voter_we_vote_id__iexact=assigned_to_voter_we_vote_id)
 
@@ -2878,6 +2921,7 @@ class VoterGuidePossibilityPosition(models.Model):
     # We are relying on built-in Python id field
 
     # What is the parent VoterGuidePossibility?
+    objects = None
     voter_guide_possibility_parent_id = models.PositiveIntegerField(null=True, db_index=True)
 
     # 001 - 999
@@ -2902,3 +2946,9 @@ class VoterGuidePossibilityPosition(models.Model):
     # Delete existing PositionEntered from database
     position_should_be_removed = models.BooleanField(default=False,
                                                      verbose_name='Delete saved position from PositionEntered.')
+
+
+class VoterGuidesGenerated(models.Model):
+    google_civic_election_id = models.PositiveIntegerField(null=True, db_index=True)
+    date_last_changed = models.DateTimeField(null=True, auto_now=True)
+    number_of_voter_guides = models.PositiveIntegerField(null=True)

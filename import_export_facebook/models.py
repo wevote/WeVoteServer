@@ -689,31 +689,40 @@ class FacebookManager(models.Manager):
 
     def fetch_facebook_id_from_voter_we_vote_id(self, voter_we_vote_id):
         facebook_user_id = 0
-        facebook_results = self.retrieve_facebook_link_to_voter(facebook_user_id, voter_we_vote_id)
+        facebook_results = self.retrieve_facebook_link_to_voter(facebook_user_id, voter_we_vote_id, read_only=True)
         if facebook_results['facebook_link_to_voter_found']:
             facebook_link_to_voter = facebook_results['facebook_link_to_voter']
             facebook_user_id = facebook_link_to_voter.facebook_user_id
         return facebook_user_id
 
-    def retrieve_facebook_link_to_voter_from_facebook_id(self, facebook_user_id):
-        return self.retrieve_facebook_link_to_voter(facebook_user_id)
+    def retrieve_facebook_link_to_voter_from_facebook_id(self, facebook_user_id, read_only=False):
+        return self.retrieve_facebook_link_to_voter(facebook_user_id, read_only=read_only)
 
-    def retrieve_facebook_link_to_voter_from_voter_we_vote_id(self, voter_we_vote_id):
+    def retrieve_facebook_link_to_voter_from_voter_we_vote_id(self, voter_we_vote_id, read_only=False):
         facebook_user_id = 0
         facebook_secret_key = ""
-        return self.retrieve_facebook_link_to_voter(facebook_user_id, voter_we_vote_id, facebook_secret_key)
+        return self.retrieve_facebook_link_to_voter(
+            facebook_user_id, voter_we_vote_id, facebook_secret_key, read_only=read_only)
 
-    def retrieve_facebook_link_to_voter_from_facebook_secret_key(self, facebook_secret_key):
+    def retrieve_facebook_link_to_voter_from_facebook_secret_key(self, facebook_secret_key, read_only=False):
         facebook_user_id = 0
         voter_we_vote_id = ""
-        return self.retrieve_facebook_link_to_voter(facebook_user_id, voter_we_vote_id, facebook_secret_key)
+        return self.retrieve_facebook_link_to_voter(
+            facebook_user_id, voter_we_vote_id, facebook_secret_key, read_only=read_only)
 
-    def retrieve_facebook_link_to_voter(self, facebook_user_id=0, voter_we_vote_id='', facebook_secret_key=''):
+    def retrieve_facebook_link_to_voter(
+            self,
+            facebook_user_id=0,
+            voter_we_vote_id='',
+            facebook_secret_key='',
+            read_only=False,
+        ):
         """
 
         :param facebook_user_id:
         :param voter_we_vote_id:
         :param facebook_secret_key:
+        :param read_only:
         :return:
         """
         facebook_link_to_voter = FacebookLinkToVoter()
@@ -721,25 +730,40 @@ class FacebookManager(models.Manager):
 
         try:
             if positive_value_exists(facebook_user_id):
-                facebook_link_to_voter = FacebookLinkToVoter.objects.get(
-                    facebook_user_id=facebook_user_id,
-                )
+                if positive_value_exists(read_only):
+                    facebook_link_to_voter = FacebookLinkToVoter.objects.using('readonly').get(
+                        facebook_user_id=facebook_user_id,
+                    )
+                else:
+                    facebook_link_to_voter = FacebookLinkToVoter.objects.get(
+                        facebook_user_id=facebook_user_id,
+                    )
                 facebook_link_to_voter_id = facebook_link_to_voter.id
                 facebook_link_to_voter_found = True
                 success = True
                 status = "RETRIEVE_FACEBOOK_LINK_TO_VOTER_FOUND_BY_FACEBOOK_USER_ID "
             elif positive_value_exists(voter_we_vote_id):
-                facebook_link_to_voter = FacebookLinkToVoter.objects.get(
-                    voter_we_vote_id__iexact=voter_we_vote_id,
-                )
+                if positive_value_exists(read_only):
+                    facebook_link_to_voter = FacebookLinkToVoter.objects.using('readonly').get(
+                        voter_we_vote_id__iexact=voter_we_vote_id,
+                    )
+                else:
+                    facebook_link_to_voter = FacebookLinkToVoter.objects.get(
+                        voter_we_vote_id__iexact=voter_we_vote_id,
+                    )
                 facebook_link_to_voter_id = facebook_link_to_voter.id
                 facebook_link_to_voter_found = True
                 success = True
                 status = "RETRIEVE_FACEBOOK_LINK_TO_VOTER_FOUND_BY_VOTER_WE_VOTE_ID "
             elif positive_value_exists(facebook_secret_key):
-                facebook_link_to_voter = FacebookLinkToVoter.objects.get(
-                    secret_key=facebook_secret_key,
-                )
+                if positive_value_exists(read_only):
+                    facebook_link_to_voter = FacebookLinkToVoter.objects.using('readonly').get(
+                        secret_key=facebook_secret_key,
+                    )
+                else:
+                    facebook_link_to_voter = FacebookLinkToVoter.objects.get(
+                        secret_key=facebook_secret_key,
+                    )
                 facebook_link_to_voter_id = facebook_link_to_voter.id
                 facebook_link_to_voter_found = True
                 success = True

@@ -5,15 +5,12 @@
 import datetime
 import glob
 import json
-# import logging
 import os
 import pathlib
 import re
+
 from django.core.exceptions import ImproperlyConfigured
 from django.db import connection
-
-import sys
-sys.path.append("/home/codespace/WeVoteServer3.5/WeVoteServer/lib/python3.8/site-packages/")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # Override in local.py for development
@@ -107,21 +104,16 @@ def get_node_version():
     print('Node version: ' + version)    # Something like 'v14.15.1'
     return version
 
+def get_git_commit_hash(full):
+    try:
+        file1 = open('git_commit_hash', 'r')
+        hash = file1.readline().strip()
+    except:
+        hash = 'git_commit_hash-file-not-found'
 
-def get_git_merge_date():
-    # Assume the latest source file has a timestamp that is the git merge date
-    pattern = '""gm'
-    list_of_files = [fn for fn in glob.glob('./*/**')
-                     if not os.path.basename(fn).endswith(('/', '_')) and
-                     re.search(r"/+.*?\..*?$", fn)]  # exclude new directories
-    latest_file_string = max(list_of_files, key=os.path.getctime)
-    posix_filepath = pathlib.Path(latest_file_string)
-    stat_of_file = posix_filepath.stat()
-    git_merge_date = str(datetime.datetime.fromtimestamp(stat_of_file.st_mtime)).split('.', 1)[0]
-    out_string = git_merge_date + '  (' + latest_file_string + ')'
-    # print(out_string)
-    return out_string
-
+    if full:
+        return "https://github.com/wevote/WeVoteServer/commit/" + hash
+    return hash
 
 def get_postgres_version():
     formatted = 'fail'
@@ -387,8 +379,9 @@ CORS_ALLOW_CREDENTIALS = True
 # specify whether to replace the HTTP_REFERER header if CORS checks pass so that CSRF django middleware checks
 # will work with https
 CORS_REPLACE_HTTPS_REFERER = True
-CSRF_TRUSTED_ORIGINS = ['api.wevoteusa.org']
+CSRF_TRUSTED_ORIGINS = ['api.wevoteusa.org', 'wevotedeveloper.com']
 DATA_UPLOAD_MAX_MEMORY_SIZE = 6000000
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 4096
 
 # CORS_ORIGIN_WHITELIST = (
 #     'google.com',

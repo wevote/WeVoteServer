@@ -36,7 +36,8 @@ from position.models import PositionEntered, PositionListManager
 from twitter.models import TwitterLinkPossibility, TwitterUserManager
 from voter.models import voter_has_authority
 from voter_guide.models import VoterGuide
-from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, list_intersection, \
+from wevote_functions.functions import convert_to_int, extract_instagram_handle_from_text_string, \
+    extract_twitter_handle_from_text_string, list_intersection, \
     positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from wevote_settings.models import RemoteRequestHistory, \
@@ -601,7 +602,8 @@ def candidate_list_view(request):
                 Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle=""))
             try:
                 twitter_query = TwitterLinkPossibility.objects.filter(likelihood_score__gte=60, not_a_match=False)
-                twitter_list = twitter_query.values_list('candidate_campaign_we_vote_id', flat=True).distinct()
+                twitter_query = twitter_query.values_list('candidate_campaign_we_vote_id', flat=True).distinct()
+                twitter_list = list(twitter_query)
                 if len(twitter_list):
                     candidate_query = candidate_query.filter(we_vote_id__in=twitter_list)
             except Exception as e:
@@ -613,8 +615,8 @@ def candidate_list_view(request):
                     Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle=""))
 
                 twitter_query = TwitterLinkPossibility.objects.filter(not_a_match=False)
-                twitter_possibility_list = twitter_query.values_list('candidate_campaign_we_vote_id', flat=True) \
-                    .distinct()
+                twitter_query = twitter_query.values_list('candidate_campaign_we_vote_id', flat=True).distinct()
+                twitter_possibility_list = list(twitter_query)
                 if len(twitter_possibility_list):
                     candidate_query = candidate_query.filter(we_vote_id__in=twitter_possibility_list)
             except Exception as e:
@@ -803,7 +805,7 @@ def candidate_list_view(request):
             if not election_id_found_from_link:
                 candidate.google_civic_election_id = contest_office.google_civic_election_id
             if positive_value_exists(candidate.instagram_handle):
-                url = candidate.instagram_handle
+                url = extract_instagram_handle_from_text_string(candidate.instagram_handle)
                 if not url.startswith('https://'):
                     url = ('https://www.instagram.com/' + candidate.instagram_handle).strip().replace('@', '')
                 candidate.instagram_url = url
@@ -876,6 +878,17 @@ def candidate_list_view(request):
             except Exception as e:
                 candidate.google_search_merge_possibility = None
 
+    if positive_value_exists(google_civic_election_id) and positive_value_exists(state_code):
+        from import_export_vote_usa.controllers import VOTE_USA_API_KEY, VOTE_USA_CANDIDATE_QUERY_URL
+        vote_usa_candidates_for_this_state = \
+            VOTE_USA_CANDIDATE_QUERY_URL + \
+            "?accessKey={access_key}&electionDay={election_day}&state={state_code}".format(
+                access_key=VOTE_USA_API_KEY,
+                election_day='2022-11-08',
+                state_code=state_code,
+            )
+    else:
+        vote_usa_candidates_for_this_state = ''
     template_values = {
         'candidate_count_start':                    candidate_count_start,
         'candidate_list':                           candidate_list,
@@ -905,6 +918,7 @@ def candidate_list_view(request):
         'state_code':                               state_code,
         'state_list':                               sorted_state_list,
         'total_twitter_handles':                    total_twitter_handles,
+        'vote_usa_candidates_for_this_state':       vote_usa_candidates_for_this_state,
     }
     return render(request, 'candidate/candidate_list.html', template_values)
 
@@ -1221,11 +1235,11 @@ def repair_imported_names_view(request):
     if is_candidate:
         candidate_list_manager = CandidateListManager()
         list_of_people_from_db, number_of_rows = candidate_list_manager.retrieve_candidates_with_misformatted_names(
-            start, count)
+            start, count, read_only=True)
     else:
         politician_manager = PoliticianManager()
         list_of_people_from_db, number_of_rows = politician_manager.retrieve_politicians_with_misformatted_names(
-            start, count)
+            start, count, read_only=True)
 
     people_list = []
     for person in list_of_people_from_db:
@@ -1326,6 +1340,8 @@ def candidate_edit_process_view(request):
     candidate_contact_form_url = request.POST.get('candidate_contact_form_url', False)
     facebook_url = request.POST.get('facebook_url', False)
     instagram_handle = request.POST.get('instagram_handle', False)
+    if positive_value_exists(instagram_handle):
+        instagram_handle = extract_instagram_handle_from_text_string(instagram_handle)
     candidate_email = request.POST.get('candidate_email', False)
     candidate_phone = request.POST.get('candidate_phone', False)
     contest_office_id = request.POST.get('contest_office_id', False)
@@ -2188,7 +2204,7 @@ def candidate_merge_process_view(request):
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 
-    candidate1_results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate1_we_vote_id)
+    candidate1_results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate1_we_vote_id, read_only=True)
     if candidate1_results['candidate_found']:
         candidate1_on_stage = candidate1_results['candidate']
     else:
@@ -2197,7 +2213,7 @@ def candidate_merge_process_view(request):
                                     '?google_civic_election_id=' + str(google_civic_election_id) +
                                     '&state_code=' + str(state_code))
 
-    candidate2_results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate2_we_vote_id)
+    candidate2_results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate2_we_vote_id, read_only=True)
     if candidate2_results['candidate_found']:
         candidate2_on_stage = candidate2_results['candidate']
     else:
@@ -2302,7 +2318,7 @@ def find_and_merge_duplicate_candidates_view(request):
 
         ignore_candidate_id_list += not_a_duplicate_list
 
-        results = find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list)
+        results = find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list, read_only=True)
         ignore_candidate_id_list = []
 
         # If we find candidates to merge, stop and ask for confirmation (if we need to)
@@ -2448,7 +2464,7 @@ def find_duplicate_candidate_view(request, candidate_id):
     ignore_candidate_id_list = []
     ignore_candidate_id_list.append(candidate.we_vote_id)
 
-    results = find_duplicate_candidate(candidate, ignore_candidate_id_list)
+    results = find_duplicate_candidate(candidate, ignore_candidate_id_list, read_only=True)
 
     # If we find candidates to merge, stop and ask for confirmation
     if results['candidate_merge_possibility_found']:
@@ -2728,7 +2744,7 @@ def candidate_summary_view(request, candidate_id):
     elif candidate_on_stage_found:
         ignore_candidate_we_vote_id_list = []
         ignore_candidate_we_vote_id_list.append(candidate_on_stage.we_vote_id)
-        results = find_duplicate_candidate(candidate_on_stage, ignore_candidate_we_vote_id_list)
+        results = find_duplicate_candidate(candidate_on_stage, ignore_candidate_we_vote_id_list, read_only=True)
         if results['candidate_merge_possibility_found']:
             candidate_search_results_list = results['candidate_list']
 
@@ -2831,7 +2847,7 @@ def compare_two_candidates_for_merge_view(request):
     google_civic_election_id = convert_to_int(google_civic_election_id)
 
     candidate_manager = CandidateManager()
-    candidate_results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate1_we_vote_id)
+    candidate_results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate1_we_vote_id, read_only=True)
     if not candidate_results['candidate_found']:
         messages.add_message(request, messages.ERROR, "Candidate1 not found.")
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
@@ -2839,7 +2855,7 @@ def compare_two_candidates_for_merge_view(request):
 
     candidate_option1_for_template = candidate_results['candidate']
 
-    candidate_results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate2_we_vote_id)
+    candidate_results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate2_we_vote_id, read_only=True)
     if not candidate_results['candidate_found']:
         messages.add_message(request, messages.ERROR, "Candidate2 not found.")
         return HttpResponseRedirect(reverse('candidate:candidate_summary', args=(candidate_option1_for_template.id,)) +

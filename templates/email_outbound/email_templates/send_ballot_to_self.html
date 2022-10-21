@@ -1,15 +1,15 @@
 {# email_outbound/email_templates/send_ballot_to_self.html #}<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional //EN">
-<html>
+<html lang="en">
   <head>
     <title>We Vote</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <style>@media all and (max-width: 480px){*[class].ib_t{min-width:100% !important}*[class].ib_row{display:block !important}*[class].ib_ext{display:block !important;padding:10px 0 5px 0;vertical-align:top !important;width:100% !important}*[class].ib_img,*[class].ib_mid{vertical-align:top !important}*[class].mb_blk{display:block !important;padding-bottom:10px;width:100% !important}*[class].mb_hide{display:none !important}*[class].mb_inl{display:inline !important}}.mb_text h1,.mb_text h2,.mb_text h3,.mb_text h4,.mb_text h5,.mb_text h6{line-height:normal}</style>
   </head>
   <body style="margin:0;padding:0;" dir="ltr" bgcolor="#ffffff">
-    <table cellspacing="0" cellpadding="0" width="100%;" id="email_table" border="0" style="border-collapse:collapse;">
+    <table cellspacing="0" cellpadding="0" width="100%;" id="email_table" border="0" style="border-collapse:collapse;" role="presentation">
       <tr>
         <td id="email_content" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;background:#ffffff;">
-          <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;">
+          <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;" role="presentation">
             <tr style="">
               <td height="20" style="line-height:20px;" colspan="3">&nbsp;</td>
             </tr>
@@ -21,12 +21,12 @@
             <tr>
               <td width="15" style="display:block;width:15px;">&nbsp;&nbsp;&nbsp;</td>
               <td style="">
-                <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;">
+                <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;" role="presentation">
                   <tr style="">
                     <td height="16" style="line-height:16px;" colspan="3">&nbsp;</td>
                   </tr>
                   <tr>
-                    <td width="32" align="left" valign="middle" style="height:32;line-height:0px;"><a href="{{ ballot_link }}" style="color:#3b5998;text-decoration:none;"><img src="https://WeVote.US/img/global/logos/we-vote-button-32x32.png" width="32" height="32" style="border:0;" /></a></td>
+                    <td width="32" align="left" valign="middle" style="height:32;line-height:0px;"><a href="{{ ballot_link }}" style="color:#3b5998;text-decoration:none;"><img src="https://WeVote.US/img/global/logos/we-vote-button-32x32.png" alt="" width="32" height="32" style="border:0;" /></a></td>
                     <td width="15" style="display:block;width:15px;">&nbsp;&nbsp;&nbsp;</td>
                     <td width="100%" style=""><a href="{{ ballot_link }}" style="color:#3b5998;text-decoration:none;font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:19px;line-height:32px;">We Vote</a></td>
                   </tr>
@@ -40,7 +40,7 @@
             <tr>
               <td width="15" style="display:block;width:15px;">&nbsp;&nbsp;&nbsp;</td>
               <td style="">
-                <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;">
+                <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;" role="presentation">
                   <tr style="">
                     <td height="28" style="line-height:28px;">&nbsp;</td>
                   </tr>
@@ -66,12 +66,12 @@
             <tr>
               <td width="15" style="display:block;width:15px;">&nbsp;&nbsp;&nbsp;</td>
               <td style="">
-                <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;">
+                <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;" role="presentation">
                   <tr style="border-top:solid 1px #e5e5e5;">
                     <td height="16" style="line-height:16px;">&nbsp;</td>
                   </tr>
                   <tr>
-                    <td style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:11px;color:#aaaaaa;line-height:16px;">This message was sent to <a href="mailto:{{ recipient_voter_email }}" style="color:#3b5998;text-decoration:none;">{{ recipient_voter_email }}</a>. If you don&#039;t want to receive emails from We Vote, please <a href="{{ recipient_unsubscribe_url }}" style="color:#3b5998;text-decoration:none;">unsubscribe</a>.<br />We Vote, Attention: Community Team, 1423 Broadway PMB 158, Oakland, CA 94612</td>
+                    <td style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:11px;color:#424242;line-height:16px;">This message was sent to <a href="mailto:{{ recipient_voter_email }}" style="color:#3b5998;text-decoration:none;">{{ recipient_voter_email }}</a>. If you don&#039;t want to receive emails from We Vote, please <a href="{{ recipient_unsubscribe_url }}" style="color:#3b5998;text-decoration:none;">unsubscribe</a>.<br />We Vote, Attention: Community Team, 1423 Broadway PMB 158, Oakland, CA 94612</td>
                   </tr>
                 </table>
               </td>
@@ -81,7 +81,6 @@
               <td height="20" style="line-height:20px;" colspan="3">&nbsp;</td>
             </tr>
           </table>
-          <!-- <span style=""><img src="{{ email_open_url }}" style="border:0;width:1px;height:1px;" /></span> //-->
         </td>
       </tr>
     </table>

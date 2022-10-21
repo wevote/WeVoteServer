@@ -729,7 +729,8 @@ class AnalyticsManager(models.Manager):
             success = False
 
         try:
-            retrieved_voter_we_vote_id_list = voter_list_query.values_list('voter_we_vote_id', flat=True).distinct()
+            voter_list_query = voter_list_query.values_list('voter_we_vote_id', flat=True).distinct()
+            retrieved_voter_we_vote_id_list = list(voter_list_query)
             retrieved_voter_we_vote_id_list_found = True
         except Exception as e:
             retrieved_voter_we_vote_id_list_found = False

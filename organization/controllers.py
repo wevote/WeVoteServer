@@ -10,6 +10,7 @@ from io import BytesIO
 import robot_detection
 import tweepy
 from PIL import Image, ImageOps
+from django.db.models import Q
 from django.http import HttpResponse
 
 import wevote_functions.admin
@@ -233,7 +234,10 @@ def full_domain_string_available(full_domain_string, requesting_organization_id)
     try:
         organization_list_query = Organization.objects.using('readonly').all()
         organization_list_query = organization_list_query.exclude(id=requesting_organization_id)
-        organization_list_query = organization_list_query.filter(chosen_domain_string__iexact=full_domain_string)
+        organization_list_query = organization_list_query.filter(
+            Q(chosen_domain_string__iexact=full_domain_string) |
+            Q(chosen_domain_string2__iexact=full_domain_string) |
+            Q(chosen_domain_string3__iexact=full_domain_string))
         organization_domain_match_count = organization_list_query.count()
         if positive_value_exists(organization_domain_match_count):
             status += "FULL_DOMAIN_STRING_FOUND-OWNED_BY_ORGANIZATION "
@@ -2176,6 +2180,8 @@ def organization_retrieve_for_api(  # organizationRetrieve
             'status':                           status,
             'success':                          False,
             'chosen_domain_string':             '',
+            'chosen_domain_string2':             '',
+            'chosen_domain_string3':             '',
             'chosen_favicon_url_https':         '',
             'chosen_feature_package':           '',
             'chosen_google_analytics_tracking_id': '',
@@ -2253,6 +2259,8 @@ def organization_retrieve_for_api(  # organizationRetrieve
             'success': True,
             'status': status,
             'chosen_domain_string':             organization.chosen_domain_string,
+            'chosen_domain_string2':             organization.chosen_domain_string2,
+            'chosen_domain_string3':             organization.chosen_domain_string3,
             'chosen_favicon_url_https':         organization.chosen_favicon_url_https,
             'chosen_feature_package':           organization.chosen_feature_package,
             'chosen_google_analytics_tracking_id': organization.chosen_google_analytics_tracking_id,
@@ -2311,6 +2319,8 @@ def organization_retrieve_for_api(  # organizationRetrieve
             'status':                           status,
             'success':                          False,
             'chosen_domain_string':             '',
+            'chosen_domain_string2':            '',
+            'chosen_domain_string3':            '',
             'chosen_favicon_url_https':         '',
             'chosen_google_analytics_tracking_id': '',
             'chosen_html_verification_string':  '',
@@ -2368,6 +2378,8 @@ def organization_save_for_api(  # organizationSave
         facebook_email=False,
         facebook_profile_image_url_https=False,
         chosen_domain_string=False,
+        chosen_domain_string2=False,
+        chosen_domain_string3=False,
         chosen_google_analytics_tracking_id=False,
         chosen_html_verification_string=False,
         chosen_hide_we_vote_logo=None,
@@ -2397,6 +2409,8 @@ def organization_save_for_api(  # organizationSave
     :param facebook_email:
     :param facebook_profile_image_url_https:
     :param chosen_domain_string:
+    :param chosen_domain_string2:
+    :param chosen_domain_string3:
     :param chosen_google_analytics_tracking_id:
     :param chosen_html_verification_string:
     :param chosen_hide_we_vote_logo:
@@ -2430,6 +2444,8 @@ def organization_save_for_api(  # organizationSave
             'status':                       "ORGANIZATION_REQUIRED_UNIQUE_IDENTIFIER_VARIABLES_MISSING",
             'success':                      False,
             'chosen_domain_string':         chosen_domain_string,
+            'chosen_domain_string2':        chosen_domain_string2,
+            'chosen_domain_string3':        chosen_domain_string3,
             'chosen_favicon_url_https':     '',
             'chosen_google_analytics_tracking_id': chosen_google_analytics_tracking_id,
             'chosen_html_verification_string':  chosen_html_verification_string,
@@ -2468,6 +2484,8 @@ def organization_save_for_api(  # organizationSave
             'status':                       "NEW_ORGANIZATION_REQUIRED_VARIABLES_MISSING",
             'success':                      False,
             'chosen_domain_string':         chosen_domain_string,
+            'chosen_domain_string2':        chosen_domain_string2,
+            'chosen_domain_string3':        chosen_domain_string3,
             'chosen_favicon_url_https':     '',
             'chosen_google_analytics_tracking_id': chosen_google_analytics_tracking_id,
             'chosen_html_verification_string':  chosen_html_verification_string,
@@ -2570,6 +2588,8 @@ def organization_save_for_api(  # organizationSave
         facebook_profile_image_url_https=facebook_profile_image_url_https,
         facebook_background_image_url_https=facebook_background_image_url_https,
         chosen_domain_string=chosen_domain_string,
+        chosen_domain_string2=chosen_domain_string2,
+        chosen_domain_string3=chosen_domain_string3,
         chosen_google_analytics_tracking_id=chosen_google_analytics_tracking_id,
         chosen_html_verification_string=chosen_html_verification_string,
         chosen_hide_we_vote_logo=chosen_hide_we_vote_logo,
@@ -2694,10 +2714,12 @@ def organization_save_for_api(  # organizationSave
             organization_banner_url = organization_banner_url[0]
 
         results = {
-            'success':                      success,
-            'status':                       status,
-            'voter_device_id':              voter_device_id,
+            'success':                          success,
+            'status':                           status,
+            'voter_device_id':                  voter_device_id,
             'chosen_domain_string':             organization.chosen_domain_string,
+            'chosen_domain_string2':            organization.chosen_domain_string2,
+            'chosen_domain_string3':            organization.chosen_domain_string3,
             'chosen_favicon_url_https':         organization.chosen_favicon_url_https,
             'chosen_google_analytics_tracking_id': organization.chosen_google_analytics_tracking_id,
             'chosen_html_verification_string':  organization.chosen_html_verification_string,
@@ -2712,11 +2734,11 @@ def organization_save_for_api(  # organizationSave
             'chosen_subscription_plan':         organization.chosen_subscription_plan,
             'subscription_plan_end_day_text':   organization.subscription_plan_end_day_text,
             'subscription_plan_features_active': organization.subscription_plan_features_active,
-            'chosen_feature_package':       organization.chosen_feature_package,
-            'features_provided_bitmap':     organization.features_provided_bitmap,
-            'organization_id':              organization.id,
-            'organization_we_vote_id':      organization.we_vote_id,
-            'new_organization_created':     save_results['new_organization_created'],
+            'chosen_feature_package':           organization.chosen_feature_package,
+            'features_provided_bitmap':         organization.features_provided_bitmap,
+            'organization_id':                  organization.id,
+            'organization_we_vote_id':          organization.we_vote_id,
+            'new_organization_created':         save_results['new_organization_created'],
             'organization_name':
                 organization.organization_name if positive_value_exists(organization.organization_name) else '',
             'organization_description':
@@ -2731,60 +2753,63 @@ def organization_save_for_api(  # organizationSave
             'organization_instagram_handle':
                 organization.organization_instagram_handle
                 if positive_value_exists(organization.organization_instagram_handle) else '',
-            'organization_banner_url':      organization_banner_url,
-            'organization_photo_url':       organization.organization_photo_url()
+            'organization_banner_url':          organization_banner_url,
+            'organization_photo_url':           organization.organization_photo_url()
                 if positive_value_exists(organization.organization_photo_url()) else '',
-            'organization_photo_url_large': we_vote_hosted_profile_image_url_large,
-            'organization_photo_url_medium': organization.we_vote_hosted_profile_image_url_medium,
-            'organization_photo_url_tiny': organization.we_vote_hosted_profile_image_url_tiny,
-            'organization_twitter_handle':  organization.organization_twitter_handle if positive_value_exists(
+            'organization_photo_url_large':     we_vote_hosted_profile_image_url_large,
+            'organization_photo_url_medium':    organization.we_vote_hosted_profile_image_url_medium,
+            'organization_photo_url_tiny':      organization.we_vote_hosted_profile_image_url_tiny,
+            'organization_twitter_handle':      organization.organization_twitter_handle if positive_value_exists(
                 organization.organization_twitter_handle) else '',
-            'organization_type':            organization.organization_type if positive_value_exists(
+            'organization_type':                organization.organization_type if positive_value_exists(
                 organization.organization_type) else '',
-            'twitter_followers_count':      organization.twitter_followers_count if positive_value_exists(
+            'twitter_followers_count':          organization.twitter_followers_count if positive_value_exists(
                 organization.twitter_followers_count) else 0,
-            'twitter_description':          organization.twitter_description if positive_value_exists(
+            'twitter_description':              organization.twitter_description if positive_value_exists(
                 organization.twitter_description) else '',
-            'refresh_from_twitter':         refresh_from_twitter,
-            'facebook_id': organization.facebook_id if positive_value_exists(organization.facebook_id) else 0,
+            'refresh_from_twitter':             refresh_from_twitter,
+            'facebook_id':                      organization.facebook_id if positive_value_exists(
+                organization.facebook_id) else 0,
         }
         return results
     else:
         results = {
-            'success':                  False,
-            'status':                   save_results['status'],
-            'voter_device_id':          voter_device_id,
-            'chosen_domain_string':             chosen_domain_string,
-            'chosen_favicon_url_https':         '',
-            'chosen_google_analytics_tracking_id': chosen_google_analytics_tracking_id,
-            'chosen_html_verification_string':  chosen_html_verification_string,
-            'chosen_hide_we_vote_logo':            chosen_hide_we_vote_logo,
-            'chosen_logo_url_https':            '',
-            'chosen_prevent_sharing_opinions':  chosen_prevent_sharing_opinions,
-            'chosen_ready_introduction_text': chosen_ready_introduction_text,
-            'chosen_ready_introduction_title': chosen_ready_introduction_title,
-            'chosen_social_share_description':  chosen_social_share_description,
+            'success':                              False,
+            'status':                               save_results['status'],
+            'voter_device_id':                      voter_device_id,
+            'chosen_domain_string':                 chosen_domain_string,
+            'chosen_domain_string2':                chosen_domain_string2,
+            'chosen_domain_string3':                chosen_domain_string3,
+            'chosen_favicon_url_https':             '',
+            'chosen_google_analytics_tracking_id':  chosen_google_analytics_tracking_id,
+            'chosen_html_verification_string':      chosen_html_verification_string,
+            'chosen_hide_we_vote_logo':             chosen_hide_we_vote_logo,
+            'chosen_logo_url_https':                '',
+            'chosen_prevent_sharing_opinions':      chosen_prevent_sharing_opinions,
+            'chosen_ready_introduction_text':       chosen_ready_introduction_text,
+            'chosen_ready_introduction_title':      chosen_ready_introduction_title,
+            'chosen_social_share_description':      chosen_social_share_description,
             'chosen_social_share_image_256x256_url_https': '',
-            'chosen_subdomain_string':          chosen_subdomain_string,
-            'chosen_subscription_plan':         chosen_subscription_plan,
-            'subscription_plan_end_day_text':   '',
-            'subscription_plan_features_active': '',
-            'chosen_feature_package':   '',
-            'features_provided_bitmap': '',
-            'organization_id':          organization_id,
-            'organization_we_vote_id':  organization_we_vote_id,
-            'new_organization_created': save_results['new_organization_created'],
-            'organization_name':        organization_name,
-            'organization_email':       organization_email,
-            'organization_website':     organization_website,
-            'organization_facebook':    organization_facebook,
-            'organization_photo_url':   organization_image,
-            'organization_twitter_handle': organization_twitter_handle,
-            'organization_type':        organization_type,
-            'twitter_followers_count':  0,
-            'twitter_description':      "",
-            'refresh_from_twitter':     refresh_from_twitter,
-            'facebook_id':              facebook_id,
+            'chosen_subdomain_string':              chosen_subdomain_string,
+            'chosen_subscription_plan':             chosen_subscription_plan,
+            'subscription_plan_end_day_text':       '',
+            'subscription_plan_features_active':    '',
+            'chosen_feature_package':               '',
+            'features_provided_bitmap':             '',
+            'organization_id':                      organization_id,
+            'organization_we_vote_id':              organization_we_vote_id,
+            'new_organization_created':             save_results['new_organization_created'],
+            'organization_name':                    organization_name,
+            'organization_email':                   organization_email,
+            'organization_website':                 organization_website,
+            'organization_facebook':                organization_facebook,
+            'organization_photo_url':               organization_image,
+            'organization_twitter_handle':          organization_twitter_handle,
+            'organization_type':                    organization_type,
+            'twitter_followers_count':              0,
+            'twitter_description':                  "",
+            'refresh_from_twitter':                 refresh_from_twitter,
+            'facebook_id':                          facebook_id,
         }
         return results
 
@@ -3091,20 +3116,20 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
     if not positive_value_exists(hostname):
         status += "HOSTNAME_MISSING "
         results = {
-            'success':                          success,
-            'status':                           status,
-            'chosen_about_organization_external_url': chosen_about_organization_external_url,
-            'chosen_google_analytics_tracking_id':    chosen_google_analytics_tracking_id,
-            'chosen_hide_we_vote_logo':         chosen_hide_we_vote_logo,
-            'chosen_logo_url_https':            chosen_logo_url_https,
-            'chosen_prevent_sharing_opinions':  chosen_prevent_sharing_opinions,
-            'chosen_ready_introduction_text':   chosen_ready_introduction_text,
-            'chosen_ready_introduction_title':  chosen_ready_introduction_title,
-            'chosen_website_name':              chosen_website_name,
-            'features_provided_bitmap':         features_provided_bitmap,
-            'hostname':                         hostname,
-            'organization_we_vote_id':          organization_we_vote_id,
-            'reserved_by_we_vote':              reserved_by_we_vote,
+            'success':                                  success,
+            'status':                                   status,
+            'chosen_about_organization_external_url':   chosen_about_organization_external_url,
+            'chosen_google_analytics_tracking_id':      chosen_google_analytics_tracking_id,
+            'chosen_hide_we_vote_logo':                 chosen_hide_we_vote_logo,
+            'chosen_logo_url_https':                    chosen_logo_url_https,
+            'chosen_prevent_sharing_opinions':          chosen_prevent_sharing_opinions,
+            'chosen_ready_introduction_text':           chosen_ready_introduction_text,
+            'chosen_ready_introduction_title':          chosen_ready_introduction_title,
+            'chosen_website_name':                      chosen_website_name,
+            'features_provided_bitmap':                 features_provided_bitmap,
+            'hostname':                                 hostname,
+            'organization_we_vote_id':                  organization_we_vote_id,
+            'reserved_by_we_vote':                      reserved_by_we_vote,
         }
         return results
 
@@ -3118,20 +3143,20 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
         success = False
         hostname = ""
         results = {
-            'success':                          success,
-            'status':                           status,
-            'chosen_about_organization_external_url': chosen_about_organization_external_url,
-            'chosen_google_analytics_tracking_id': chosen_google_analytics_tracking_id,
-            'chosen_hide_we_vote_logo':         chosen_hide_we_vote_logo,
-            'chosen_logo_url_https':            chosen_logo_url_https,
-            'chosen_prevent_sharing_opinions':  chosen_prevent_sharing_opinions,
-            'chosen_ready_introduction_text':   chosen_ready_introduction_text,
-            'chosen_ready_introduction_title':  chosen_ready_introduction_title,
-            'chosen_website_name':              chosen_website_name,
-            'features_provided_bitmap':         features_provided_bitmap,
-            'hostname':                         hostname,
-            'organization_we_vote_id':          organization_we_vote_id,
-            'reserved_by_we_vote':              reserved_by_we_vote,
+            'success':                                  success,
+            'status':                                   status,
+            'chosen_about_organization_external_url':   chosen_about_organization_external_url,
+            'chosen_google_analytics_tracking_id':      chosen_google_analytics_tracking_id,
+            'chosen_hide_we_vote_logo':                 chosen_hide_we_vote_logo,
+            'chosen_logo_url_https':                    chosen_logo_url_https,
+            'chosen_prevent_sharing_opinions':          chosen_prevent_sharing_opinions,
+            'chosen_ready_introduction_text':           chosen_ready_introduction_text,
+            'chosen_ready_introduction_title':          chosen_ready_introduction_title,
+            'chosen_website_name':                      chosen_website_name,
+            'features_provided_bitmap':                 features_provided_bitmap,
+            'hostname':                                 hostname,
+            'organization_we_vote_id':                  organization_we_vote_id,
+            'reserved_by_we_vote':                      reserved_by_we_vote,
         }
         return results
     results = organization_manager.retrieve_organization_from_incoming_hostname(hostname, read_only=True)
@@ -3163,20 +3188,20 @@ def site_configuration_retrieve_for_api(hostname):  # siteConfigurationRetrieve
         status += "HOSTNAME_NOT_OWNED_BY_ORG_OR_RESERVED_BY_WE_VOTE "
 
     results = {
-        'success':                          success,
-        'status':                           status,
-        'chosen_about_organization_external_url': chosen_about_organization_external_url,
-        'chosen_google_analytics_tracking_id': chosen_google_analytics_tracking_id,
-        'chosen_hide_we_vote_logo':         chosen_hide_we_vote_logo,
-        'chosen_logo_url_https':            chosen_logo_url_https,
-        'chosen_prevent_sharing_opinions':  chosen_prevent_sharing_opinions,
-        'chosen_ready_introduction_text':   chosen_ready_introduction_text,
-        'chosen_ready_introduction_title':  chosen_ready_introduction_title,
-        'chosen_website_name':              chosen_website_name,
-        'features_provided_bitmap':         features_provided_bitmap,
-        'hostname':                         hostname,
-        'organization_we_vote_id':          organization_we_vote_id,
-        'reserved_by_we_vote':              reserved_by_we_vote,
+        'success':                                  success,
+        'status':                                   status,
+        'chosen_about_organization_external_url':   chosen_about_organization_external_url,
+        'chosen_google_analytics_tracking_id':      chosen_google_analytics_tracking_id,
+        'chosen_hide_we_vote_logo':                 chosen_hide_we_vote_logo,
+        'chosen_logo_url_https':                    chosen_logo_url_https,
+        'chosen_prevent_sharing_opinions':          chosen_prevent_sharing_opinions,
+        'chosen_ready_introduction_text':           chosen_ready_introduction_text,
+        'chosen_ready_introduction_title':          chosen_ready_introduction_title,
+        'chosen_website_name':                      chosen_website_name,
+        'features_provided_bitmap':                 features_provided_bitmap,
+        'hostname':                                 hostname,
+        'organization_we_vote_id':                  organization_we_vote_id,
+        'reserved_by_we_vote':                      reserved_by_we_vote,
     }
     return results
 

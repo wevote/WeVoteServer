@@ -1062,7 +1062,7 @@ class ContestMeasureListManager(models.Manager):
         if keep_looking_for_duplicates and positive_value_exists(measure_title):
             # Search by ContestMeasure name exact match
             try:
-                contest_measure_query = ContestMeasure.objects.all()
+                contest_measure_query = ContestMeasure.objects.using('readonly').all()
                 contest_measure_query = contest_measure_query.filter(measure_title__iexact=measure_title,
                                                                      google_civic_election_id=google_civic_election_id)
                 if positive_value_exists(state_code):
@@ -1081,8 +1081,14 @@ class ContestMeasureListManager(models.Manager):
 
         return 0
 
-    def retrieve_measures(self, google_civic_election_id=0, ballotpedia_district_id=0, state_code="", limit=0,
-                          read_only=False):
+    def retrieve_measures(
+            self,
+            google_civic_election_id=0,
+            ballotpedia_district_id=0,
+            state_code="",
+            limit=0,
+            measure_we_vote_id_list=[],
+            read_only=False):
         measure_list_objects = []
         measure_list_light = []
         measure_list_found = False
@@ -1096,6 +1102,8 @@ class ContestMeasureListManager(models.Manager):
                 measure_queryset = measure_queryset.filter(google_civic_election_id=google_civic_election_id)
             if positive_value_exists(ballotpedia_district_id):
                 measure_queryset = measure_queryset.filter(ballotpedia_district_id=ballotpedia_district_id)
+            if positive_value_exists(len(measure_we_vote_id_list)):
+                measure_queryset = measure_queryset.filter(we_vote_id__in=measure_we_vote_id_list)
             if positive_value_exists(state_code):
                 measure_queryset = measure_queryset.filter(state_code__iexact=state_code)
             if positive_value_exists(limit):

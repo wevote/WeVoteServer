@@ -248,10 +248,12 @@
                     <td>{% if organization.chosen_domain_type_is_campaign %}Campaigns Site{% else %}Ballot Site{% endif %}</td>
                 </tr>
             {% endif %}
-            {% if organization.chosen_domain_string %}
+            {% if organization.chosen_domain_string or organization.chosen_domain_string2 or organization.chosen_domain_string3 %}
                 <tr>
-                    <th>Domain string:</th>
-                    <td>{{organization.chosen_domain_string|default_if_none:""}}</td>
+                    <th>Domain string(s):</th>
+                    <td>
+                        {{organization.chosen_domain_string|default_if_none:""}}{% if organization.chosen_domain_string2 %}, {{organization.chosen_domain_string2|default_if_none:""}}{% endif %}{% if organization.chosen_domain_string3 %}, {{organization.chosen_domain_string3|default_if_none:""}}{% endif %}
+                    </td>
                 </tr>
             {% endif %}
             {% if organization.chosen_organization_api_pass_code %}

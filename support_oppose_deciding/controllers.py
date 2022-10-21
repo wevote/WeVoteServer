@@ -85,13 +85,13 @@ def positions_count_for_candidate(voter_id, candidate_id, candidate_we_vote_id, 
     # so we make sure we have both of these values to return
     if positive_value_exists(candidate_id):
         candidate_manager = CandidateManager()
-        results = candidate_manager.retrieve_candidate_from_id(candidate_id)
+        results = candidate_manager.retrieve_candidate_from_id(candidate_id, read_only=True)
         if results['candidate_found']:
             candidate = results['candidate']
             candidate_we_vote_id = candidate.we_vote_id
     elif positive_value_exists(candidate_we_vote_id):
         candidate_manager = CandidateManager()
-        results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id)
+        results = candidate_manager.retrieve_candidate_from_we_vote_id(candidate_we_vote_id, read_only=True)
         if results['candidate_found']:
             candidate = results['candidate']
             candidate_id = candidate.id

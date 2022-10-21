@@ -308,7 +308,7 @@ def voter_guides_from_friends_upcoming_retrieve_view(request):  # voterGuidesFro
 
     voter_device_id = get_voter_device_id(request)
     voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     if positive_value_exists(voter_results['voter_found']):
         voter_we_vote_id = voter_results['voter'].we_vote_id
     else:
@@ -322,7 +322,8 @@ def voter_guides_from_friends_upcoming_retrieve_view(request):  # voterGuidesFro
         return HttpResponse(json.dumps(results), content_type='application/json')
 
     results = voter_guides_upcoming_retrieve_for_api(
-        google_civic_election_id_list=google_civic_election_id_list, friends_vs_public=FRIENDS_AND_PUBLIC,
+        google_civic_election_id_list=google_civic_election_id_list,
+        friends_vs_public=FRIENDS_AND_PUBLIC,
         voter_we_vote_id=voter_we_vote_id)
     status += results['status']
 

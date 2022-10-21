@@ -180,7 +180,10 @@
                 {% if office.district_name %}<br /><span style="color: darkgray">{{ office.district_name|default_if_none:"" }}</span>{% endif %}
             </td>
           {% if google_civic_election_id == 0 %}
-            <td>{{ office.google_civic_election_id|default_if_none:"" }}</td>
+            <td>
+                {{ office.google_civic_election_id|default_if_none:"" }}<br />
+                <span class="u-no-break" style="color: gray">{{ office.get_election_day_text|default_if_none:"" }}</span>
+            </td>
           {% endif %}
             <td>{{ office.state_code }}</td>
             <td>

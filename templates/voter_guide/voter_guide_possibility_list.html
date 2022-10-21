@@ -144,6 +144,7 @@
         {% for voter in political_data_managers_list %}
           <option value="{{ voter.we_vote_id }}" {% if assigned_to_voter_we_vote_id|slugify == voter.we_vote_id|slugify %}selected="selected"{% endif %}>{{ voter.get_full_name }}</option>
         {% endfor %}
+          <option value="ASSIGNED_TO_NO_ONE" {% if assigned_to_voter_we_vote_id|slugify == "ASSIGNED_TO_NO_ONE"|slugify %}selected="selected"{% endif %}>* Not Assigned *</option>
       </select>
     &nbsp;&nbsp;&nbsp;
   </div>
@@ -197,6 +198,7 @@
     <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
     <input type="hidden" name="show_all_elections" value="{{ show_all_elections }}">
     <input type="hidden" name="from_prior_election" value="{{ from_prior_election }}">
+    <input type="hidden" name="page" value="{{ page }}">
     <input type="hidden" name="show_candidates_missing_from_we_vote" value="{{ show_candidates_missing_from_we_vote }}">
     <input type="hidden" name="show_cannot_find_endorsements" value="{{ show_cannot_find_endorsements }}">
     <input type="hidden" name="show_capture_detailed_comments" value="{{ show_capture_detailed_comments }}">

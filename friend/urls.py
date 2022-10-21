@@ -8,9 +8,12 @@ from . import views_admin
 
 
 urlpatterns = [
-    url(r'^$', views_admin.batches_home_view, name='batches_home',),
-    # url(r'^batch_action_list/$', views_admin.batch_action_list_view, name='batch_action_list'),
-    # url(r'^batch_action_list_process/$', views_admin.batch_action_list_process_view, name='batch_action_list_process'),
-    # url(r'^batch_list/$', views_admin.batch_list_view, name='batch_list'),
-    # url(r'^batch_list_process/$', views_admin.batch_list_process_view, name='batch_list_process'),
+    url(r'^current_friends_data_healing/$',
+        views_admin.current_friends_data_healing_view, name='current_friends_data_healing'),
+    url(r'^generate_mutual_friends_for_all_voters/$',
+        views_admin.generate_mutual_friends_for_all_voters_view, name='generate_mutual_friends_for_all_voters'),
+    url(r'^generate_mutual_friends_for_one_voter/$',
+        views_admin.generate_mutual_friends_for_one_voter_view, name='generate_mutual_friends_for_one_voter'),
+    url(r'^refresh_voter_friend_count/$',
+        views_admin.refresh_voter_friend_count_view, name='refresh_voter_friend_count'),
 ]

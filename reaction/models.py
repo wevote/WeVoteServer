@@ -41,7 +41,7 @@ class ReactionManager(models.Manager):
     def count_all_reaction_likes(self, liked_item_we_vote_id):
         # How many people, across the entire network, like this position?
         try:
-            reaction_like_query = ReactionLike.objects.all()
+            reaction_like_query = ReactionLike.objects.using('readonly').all()
             reaction_like_query = reaction_like_query.filter(liked_item_we_vote_id__iexact=liked_item_we_vote_id)
             number_of_likes = reaction_like_query.count()
             status = "REACTION_LIKE_ALL_COUNT_RETRIEVED"
@@ -136,7 +136,7 @@ class ReactionManager(models.Manager):
     def count_voter_network_reaction_likes(self, liked_item_we_vote_id, voter_id):
         # How many people, limited to the voter's network, like this position?  # TODO limit to just the voter's network
         try:
-            reaction_like_query = ReactionLike.objects.all()
+            reaction_like_query = ReactionLike.objects.using('readonly').all()
             reaction_like_query = reaction_like_query.filter(liked_item_we_vote_id=liked_item_we_vote_id)
             number_of_likes = reaction_like_query.count()
             status = "REACTION_LIKE_VOTER_NETWORK_COUNT_RETRIEVED"

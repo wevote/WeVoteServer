@@ -13,6 +13,7 @@ from analytics.models import ACTION_VIEW_SHARED_BALLOT, ACTION_VIEW_SHARED_BALLO
 from follow.models import FOLLOWING, FollowOrganizationManager
 import json
 from organization.models import OrganizationManager
+from position.models import PositionListManager
 import robot_detection
 from share.models import SharedItem, SharedLinkClicked, SharedPermissionsGranted
 from voter.models import VoterDeviceLinkManager, VoterManager
@@ -166,9 +167,13 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
     measure_we_vote_id = ''
     office_we_vote_id = ''
     api_call_coming_from_voter_who_shared = False
+    shared_by_display_name = ''
     shared_by_voter_we_vote_id = ''
     shared_by_organization_type = ''
     shared_by_organization_we_vote_id = ''
+    shared_by_we_vote_hosted_profile_image_url_large = ''
+    shared_by_we_vote_hosted_profile_image_url_medium = ''
+    shared_by_we_vote_hosted_profile_image_url_tiny = ''
     shared_item_code_no_opinions = ''
     shared_item_code_all_opinions = ''
     site_owner_organization_we_vote_id = ''
@@ -197,29 +202,33 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
     if not results['shared_item_found']:
         status += "SHARED_ITEM_NOT_FOUND "
         results = {
-            'status':                       status,
-            'success':                      False,
-            'destination_full_url':         destination_full_url,
-            'shared_item_code_no_opinions':             shared_item_code_no_opinions,
-            'shared_item_code_all_opinions':           shared_item_code_all_opinions,
-            'url_with_shared_item_code_no_opinions':    url_with_shared_item_code_no_opinions,
-            'url_with_shared_item_code_all_opinions':  url_with_shared_item_code_all_opinions,
-            'is_ballot_share':              is_ballot_share,
-            'is_candidate_share':           is_candidate_share,
-            'is_measure_share':             is_measure_share,
-            'is_office_share':              is_office_share,
-            'is_organization_share':        is_organization_share,
-            'is_ready_share':               is_ready_share,
+            'status':                           status,
+            'success':                          False,
+            'candidate_we_vote_id':             candidate_we_vote_id,
+            'date_first_shared':                date_first_shared,
+            'destination_full_url':             destination_full_url,
+            'google_civic_election_id':         google_civic_election_id,
             'include_friends_only_positions':   include_friends_only_positions,
-            'google_civic_election_id':     google_civic_election_id,
-            'site_owner_organization_we_vote_id':   site_owner_organization_we_vote_id,
-            'shared_by_voter_we_vote_id':   shared_by_voter_we_vote_id,
-            'shared_by_organization_type':  shared_by_organization_type,
-            'shared_by_organization_we_vote_id':    shared_by_organization_we_vote_id,
-            'candidate_we_vote_id':         candidate_we_vote_id,
-            'measure_we_vote_id':           measure_we_vote_id,
-            'office_we_vote_id':            office_we_vote_id,
-            'date_first_shared':            date_first_shared,
+            'is_ballot_share':                  is_ballot_share,
+            'is_candidate_share':               is_candidate_share,
+            'is_measure_share':                 is_measure_share,
+            'is_office_share':                  is_office_share,
+            'is_organization_share':            is_organization_share,
+            'is_ready_share':                   is_ready_share,
+            'measure_we_vote_id':               measure_we_vote_id,
+            'office_we_vote_id':                        office_we_vote_id,
+            'shared_by_display_name':                   shared_by_display_name,
+            'shared_by_voter_we_vote_id':               shared_by_voter_we_vote_id,
+            'shared_by_organization_type':              shared_by_organization_type,
+            'shared_by_organization_we_vote_id':        shared_by_organization_we_vote_id,
+            'shared_by_we_vote_hosted_profile_image_url_large': shared_by_we_vote_hosted_profile_image_url_large,
+            'shared_by_we_vote_hosted_profile_image_url_medium': shared_by_we_vote_hosted_profile_image_url_medium,
+            'shared_by_we_vote_hosted_profile_image_url_tiny': shared_by_we_vote_hosted_profile_image_url_tiny,
+            'shared_item_code_no_opinions':             shared_item_code_no_opinions,
+            'shared_item_code_all_opinions':            shared_item_code_all_opinions,
+            'site_owner_organization_we_vote_id':       site_owner_organization_we_vote_id,
+            'url_with_shared_item_code_no_opinions':    url_with_shared_item_code_no_opinions,
+            'url_with_shared_item_code_all_opinions':   url_with_shared_item_code_all_opinions,
         }
         return results
 
@@ -358,26 +367,49 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         # Shared item not clicked
         pass
 
+    position_list = []
+    if positive_value_exists(shared_item.shared_by_voter_we_vote_id) \
+            and shared_item.shared_item_code_all_opinions == shared_item_code:
+        position_list_manager = PositionListManager()
+        results = position_list_manager.retrieve_all_positions_for_voter_simple(
+            voter_we_vote_id=shared_item.shared_by_voter_we_vote_id)
+        if results['position_list_found']:
+            position_list = results['position_list']
+
+    shared_by_display_name = shared_item.shared_by_display_name \
+        if positive_value_exists(shared_item.shared_by_display_name) else ''
+    shared_by_we_vote_hosted_profile_image_url_large = shared_item.shared_by_we_vote_hosted_profile_image_url_large \
+        if positive_value_exists(shared_item.shared_by_we_vote_hosted_profile_image_url_large) else ''
+    shared_by_we_vote_hosted_profile_image_url_medium = shared_item.shared_by_we_vote_hosted_profile_image_url_medium \
+        if positive_value_exists(shared_item.shared_by_we_vote_hosted_profile_image_url_medium) else ''
+    shared_by_we_vote_hosted_profile_image_url_tiny = shared_item.shared_by_we_vote_hosted_profile_image_url_tiny \
+        if positive_value_exists(shared_item.shared_by_we_vote_hosted_profile_image_url_tiny) else ''
+
     results = {
-        'status':                       status,
-        'success':                      success,
-        'destination_full_url':         shared_item.destination_full_url,
-        'is_ballot_share':              shared_item.is_ballot_share,
-        'is_candidate_share':           shared_item.is_candidate_share,
-        'is_measure_share':             shared_item.is_measure_share,
-        'is_office_share':              shared_item.is_office_share,
-        'is_organization_share':        shared_item.is_organization_share,
-        'is_ready_share':               shared_item.is_ready_share,
-        'include_friends_only_positions': include_friends_only_positions,
-        'google_civic_election_id':     shared_item.google_civic_election_id,
-        'shared_by_organization_type':  shared_item.shared_by_organization_type,
+        'status':                               status,
+        'success':                              success,
+        'destination_full_url':                 shared_item.destination_full_url,
+        'is_ballot_share':                      shared_item.is_ballot_share,
+        'is_candidate_share':                   shared_item.is_candidate_share,
+        'is_measure_share':                     shared_item.is_measure_share,
+        'is_office_share':                      shared_item.is_office_share,
+        'is_organization_share':                shared_item.is_organization_share,
+        'is_ready_share':                       shared_item.is_ready_share,
+        'include_friends_only_positions':       include_friends_only_positions,
+        'google_civic_election_id':             shared_item.google_civic_election_id,
+        'position_list':                        position_list,
+        'shared_by_display_name':               shared_by_display_name,
+        'shared_by_organization_type':          shared_item.shared_by_organization_type,
         'shared_by_organization_we_vote_id':    shared_item.shared_by_organization_we_vote_id,
         'shared_by_voter_we_vote_id':           shared_item.shared_by_voter_we_vote_id,
+        'shared_by_we_vote_hosted_profile_image_url_large': shared_by_we_vote_hosted_profile_image_url_large,
+        'shared_by_we_vote_hosted_profile_image_url_medium': shared_by_we_vote_hosted_profile_image_url_medium,
+        'shared_by_we_vote_hosted_profile_image_url_tiny': shared_by_we_vote_hosted_profile_image_url_tiny,
         'site_owner_organization_we_vote_id':   shared_item.site_owner_organization_we_vote_id,
-        'candidate_we_vote_id':         shared_item.candidate_we_vote_id,
-        'measure_we_vote_id':           shared_item.measure_we_vote_id,
-        'office_we_vote_id':            shared_item.office_we_vote_id,
-        'date_first_shared':            str(shared_item.date_first_shared),
+        'candidate_we_vote_id':                 shared_item.candidate_we_vote_id,
+        'measure_we_vote_id':                   shared_item.measure_we_vote_id,
+        'office_we_vote_id':                    shared_item.office_we_vote_id,
+        'date_first_shared':                    str(shared_item.date_first_shared),
     }
     if api_call_coming_from_voter_who_shared:
         results['shared_item_code_no_opinions'] = shared_item.shared_item_code_no_opinions
@@ -420,9 +452,13 @@ def shared_item_save_for_api(  # sharedItemSave
     hostname = ''
     measure_we_vote_id = ''
     office_we_vote_id = ''
-    shared_by_voter_we_vote_id = ''
+    shared_by_display_name = None
     shared_by_organization_type = ''
     shared_by_organization_we_vote_id = ''
+    shared_by_voter_we_vote_id = ''
+    shared_by_we_vote_hosted_profile_image_url_large = None
+    shared_by_we_vote_hosted_profile_image_url_medium = None
+    shared_by_we_vote_hosted_profile_image_url_tiny = None
     shared_item_code_no_opinions = ''
     shared_item_code_all_opinions = ''
     site_owner_organization_we_vote_id = ''
@@ -469,32 +505,48 @@ def shared_item_save_for_api(  # sharedItemSave
     if not required_variables_for_new_entry or not success:
         status += "NEW_ORGANIZATION_REQUIRED_VARIABLES_MISSING "
         results = {
-            'status':                       status,
-            'success':                      False,
-            'destination_full_url':         destination_full_url,
+            'status':                                   status,
+            'success':                                  False,
+            'candidate_we_vote_id':                     candidate_we_vote_id,
+            'date_first_shared':                        date_first_shared,
+            'destination_full_url':                     destination_full_url,
+            'google_civic_election_id':                 google_civic_election_id,
+            'is_ballot_share':                          is_ballot_share,
+            'is_candidate_share':                       is_candidate_share,
+            'is_measure_share':                         is_measure_share,
+            'is_office_share':                          is_office_share,
+            'is_organization_share':                    is_organization_share,
+            'is_ready_share':                           is_ready_share,
+            'measure_we_vote_id':                       measure_we_vote_id,
+            'office_we_vote_id':                        office_we_vote_id,
+            'shared_by_display_name':                   shared_by_display_name,
+            'shared_by_organization_type':              shared_by_organization_type,
+            'shared_by_organization_we_vote_id':        shared_by_organization_we_vote_id,
+            'shared_by_voter_we_vote_id':               shared_by_voter_we_vote_id,
+            'shared_by_we_vote_hosted_profile_image_url_large': shared_by_we_vote_hosted_profile_image_url_large,
+            'shared_by_we_vote_hosted_profile_image_url_medium': shared_by_we_vote_hosted_profile_image_url_medium,
+            'shared_by_we_vote_hosted_profile_image_url_tiny': shared_by_we_vote_hosted_profile_image_url_tiny,
             'shared_item_code_no_opinions':             shared_item_code_no_opinions,
-            'shared_item_code_all_opinions':           shared_item_code_all_opinions,
+            'shared_item_code_all_opinions':            shared_item_code_all_opinions,
+            'site_owner_organization_we_vote_id':       site_owner_organization_we_vote_id,
             'url_with_shared_item_code_no_opinions':    url_with_shared_item_code_no_opinions,
-            'url_with_shared_item_code_all_opinions':  url_with_shared_item_code_all_opinions,
-            'is_ballot_share':              is_ballot_share,
-            'is_candidate_share':           is_candidate_share,
-            'is_measure_share':             is_measure_share,
-            'is_office_share':              is_office_share,
-            'is_organization_share':        is_organization_share,
-            'is_ready_share':               is_ready_share,
-            'google_civic_election_id':     google_civic_election_id,
-            'shared_by_organization_type':  shared_by_organization_type,
-            'shared_by_organization_we_vote_id':    shared_by_organization_we_vote_id,
-            'shared_by_voter_we_vote_id':           shared_by_voter_we_vote_id,
-            'site_owner_organization_we_vote_id':   site_owner_organization_we_vote_id,
-            'candidate_we_vote_id':         candidate_we_vote_id,
-            'measure_we_vote_id':           measure_we_vote_id,
-            'office_we_vote_id':            office_we_vote_id,
-            'date_first_shared':            date_first_shared,
+            'url_with_shared_item_code_all_opinions':   url_with_shared_item_code_all_opinions,
         }
         return results
 
     share_manager = ShareManager()
+    if positive_value_exists(shared_by_organization_we_vote_id):
+        results = organization_manager.retrieve_organization_from_we_vote_id(
+            organization_we_vote_id=shared_by_organization_we_vote_id,
+            read_only=True)
+        if results['success'] and results['organization_found']:
+            shared_by_display_name = results['organization'].organization_name
+            shared_by_we_vote_hosted_profile_image_url_large = \
+                results['organization'].we_vote_hosted_profile_image_url_large
+            shared_by_we_vote_hosted_profile_image_url_medium = \
+                results['organization'].we_vote_hosted_profile_image_url_medium
+            shared_by_we_vote_hosted_profile_image_url_tiny = \
+                results['organization'].we_vote_hosted_profile_image_url_tiny
     defaults = {
         'candidate_we_vote_id':                 candidate_we_vote_id,
         'google_civic_election_id':             google_civic_election_id,
@@ -506,9 +558,13 @@ def shared_item_save_for_api(  # sharedItemSave
         'is_ready_share':                       is_ready_share,
         'measure_we_vote_id':                   measure_we_vote_id,
         'office_we_vote_id':                    office_we_vote_id,
+        'shared_by_display_name':               shared_by_display_name,
         'shared_by_organization_type':          shared_by_organization_type,
         'shared_by_organization_we_vote_id':    shared_by_organization_we_vote_id,
         'shared_by_voter_we_vote_id':           shared_by_voter_we_vote_id,
+        'shared_by_we_vote_hosted_profile_image_url_large':     shared_by_we_vote_hosted_profile_image_url_large,
+        'shared_by_we_vote_hosted_profile_image_url_medium':    shared_by_we_vote_hosted_profile_image_url_medium,
+        'shared_by_we_vote_hosted_profile_image_url_tiny':      shared_by_we_vote_hosted_profile_image_url_tiny,
         'site_owner_organization_we_vote_id':   site_owner_organization_we_vote_id,
     }
     create_results = share_manager.update_or_create_shared_item(
@@ -526,28 +582,32 @@ def shared_item_save_for_api(  # sharedItemSave
         url_with_shared_item_code_all_opinions = "https://" + hostname + "/-" + shared_item_code_all_opinions
 
     results = {
-        'status':                       status,
-        'success':                      success,
-        'destination_full_url':         destination_full_url,
-        'shared_item_code_no_opinions':             shared_item_code_no_opinions,
-        'shared_item_code_all_opinions':           shared_item_code_all_opinions,
-        'url_with_shared_item_code_no_opinions':    url_with_shared_item_code_no_opinions,
-        'url_with_shared_item_code_all_opinions':  url_with_shared_item_code_all_opinions,
-        'is_ballot_share':              is_ballot_share,
-        'is_candidate_share':           is_candidate_share,
-        'is_measure_share':             is_measure_share,
-        'is_office_share':              is_office_share,
-        'is_organization_share':        is_organization_share,
-        'is_ready_share':               is_ready_share,
-        'google_civic_election_id':     google_civic_election_id,
-        'shared_by_organization_type':  shared_by_organization_type,
+        'status':                               status,
+        'success':                              success,
+        'candidate_we_vote_id':                 candidate_we_vote_id,
+        'date_first_shared':                    date_first_shared,
+        'destination_full_url':                 destination_full_url,
+        'google_civic_election_id':             google_civic_election_id,
+        'is_ballot_share':                      is_ballot_share,
+        'is_candidate_share':                   is_candidate_share,
+        'is_measure_share':                     is_measure_share,
+        'is_office_share':                      is_office_share,
+        'is_organization_share':                is_organization_share,
+        'is_ready_share':                       is_ready_share,
+        'measure_we_vote_id':                   measure_we_vote_id,
+        'office_we_vote_id':                    office_we_vote_id,
+        'shared_by_display_name':               shared_by_display_name,
+        'shared_by_organization_type':          shared_by_organization_type,
         'shared_by_organization_we_vote_id':    shared_by_organization_we_vote_id,
         'shared_by_voter_we_vote_id':           shared_by_voter_we_vote_id,
-        'site_owner_organization_we_vote_id':   site_owner_organization_we_vote_id,
-        'candidate_we_vote_id':         candidate_we_vote_id,
-        'measure_we_vote_id':           measure_we_vote_id,
-        'office_we_vote_id':            office_we_vote_id,
-        'date_first_shared':            date_first_shared,
+        'shared_by_we_vote_hosted_profile_image_url_large':     shared_by_we_vote_hosted_profile_image_url_large,
+        'shared_by_we_vote_hosted_profile_image_url_medium':    shared_by_we_vote_hosted_profile_image_url_medium,
+        'shared_by_we_vote_hosted_profile_image_url_tiny':      shared_by_we_vote_hosted_profile_image_url_tiny,
+        'shared_item_code_no_opinions':                         shared_item_code_no_opinions,
+        'shared_item_code_all_opinions':                        shared_item_code_all_opinions,
+        'site_owner_organization_we_vote_id':                   site_owner_organization_we_vote_id,
+        'url_with_shared_item_code_no_opinions':                url_with_shared_item_code_no_opinions,
+        'url_with_shared_item_code_all_opinions':               url_with_shared_item_code_all_opinions,
     }
     return results
 
