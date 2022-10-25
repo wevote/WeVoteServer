@@ -1,0 +1,30 @@
+========================================{# Later we replace "Your   friend" with the sender name. #}
+{% if url_with_shared_item_code %}
+View your ballot: {{ url_with_shared_item_code }}
+
+{% endif %}
+{% if we_vote_url %}
+What is We Vote? {{ we_vote_url }}
+
+{% endif %}
+========================================
+
+{% if recipient_name %}
+Hello {{ recipient_name }},
+{% else %}
+Hello,
+{% endif %}
+
+{% if sender_name %}{{ sender_name }}{% else %}Your   friend{% endif %}{% if sender_email_address %} ({{ sender_email_address }}){% elif sms_phone_number %} ({{ sms_phone_number }}){% endif %} sent you this reminder to vote.
+{% if invitation_message %}
+"{{ invitation_message }}"{% endif %}
+
+Thank you,
+The We Vote Team
+
+
+
+========================================
+This message was sent to {{ recipient_voter_email }}. If you don't want to receive emails from We Vote, please unsubscribe:
+{{ recipient_unsubscribe_url }}
+We Vote, Attention: Community Team, 1423 Broadway PMB 158, Oakland, CA 94612

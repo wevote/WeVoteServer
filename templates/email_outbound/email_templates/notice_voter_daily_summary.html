@@ -56,7 +56,7 @@
                     <td style="">
                       <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;" role="presentation">
                         <tr>
-                          <td style="font-size:11px;font-family:LucidaGrande,tahoma,verdana,arial,sans-serif;border:solid 1px #e5e5e5;border-radius:2px;padding:10px;display:block;">
+                          <td style="font-size:11px;font-family:LucidaGrande,tahoma,verdana,arial,sans-serif;border:solid 1px #e5e5e5;border-radius:4px;padding:10px;display:block;">
                             <table cellspacing="0" cellpadding="0" width="100%" align="left" class="ib_t" style="border-collapse:collapse;width:100%;min-width:420px;" role="presentation">
                               <tr class="ib_row">
                                 {% if friend_activity.speaker_profile_image_url_medium %}
@@ -83,8 +83,8 @@
                                           <td class="mb_blk" style="">
                                             <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;" role="presentation">
                                               <tr>
-                                                <td style="border-collapse:collapse;border-radius:2px;text-align:center;display:block;border:solid 1px #344c80;box-shadow:inset 0 1px 1px rgba(255, 255, 255, 0.1),0 1px 0 rgba(0, 0, 0, 0.1);background:#2E3C5D;padding:7px 16px 11px 16px;">
-                                          <a href="{{ friend_activity.view_activity_tidbit_url }}" style="color:#2E3C5D;text-decoration:none;display:block;"><center><span style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;white-space:nowrap;vertical-align:middle;color:#ffffff;text-shadow:0 -1px 0 #415686;font-size:20px;line-height:20px;">View Discussion</span></center></a>
+                                                <td style="border-collapse:collapse;border-radius:4px;text-align:center;display:block;border:solid 1px #344c80;box-shadow:inset 0 1px 1px rgba(255, 255, 255, 0.1),0 1px 0 rgba(0, 0, 0, 0.1);background:#0834CD;padding:11px 16px 11px 16px;">
+                                          <a href="{{ friend_activity.view_activity_tidbit_url }}" style="color:#0834CD;text-decoration:none;display:block;"><center><span style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;white-space:nowrap;vertical-align:middle;color:#ffffff;text-shadow:0 -1px 0 #415686;font-size:20px;line-height:20px;">View Discussion</span></center></a>
                                                 </td>
                                               </tr>
                                             </table>
@@ -124,8 +124,8 @@
                     <td class="mb_blk" style="">
                         <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;" role="presentation">
                           <tr>
-                            <td style="border-collapse:collapse;border-radius:2px;text-align:center;display:block;border:solid 1px #344c80;box-shadow:inset 0 1px 1px rgba(255, 255, 255, 0.1),0 1px 0 rgba(0, 0, 0, 0.1);background:#2E3C5D;padding:7px 16px 11px 16px;">
-                      <a href="{{ view_main_discussion_page_url }}" style="color:#2E3C5D;text-decoration:none;display:block;"><center><span style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;white-space:nowrap;vertical-align:middle;color:#525252;text-shadow:0 -1px 0 #ffffff;font-size:20px;line-height:20px;">See All Discussions</span></center></a>
+                            <td style="border-collapse:collapse;border-radius:4px;text-align:center;display:block;border:solid 1px #344c80;box-shadow:inset 0 1px 1px rgba(255, 255, 255, 0.1),0 1px 0 rgba(0, 0, 0, 0.1);background:#0834CD;padding:11px 16px 11px 16px;">
+                      <a href="{{ view_main_discussion_page_url }}" style="color:#0834CD;text-decoration:none;display:block;"><center><span style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;white-space:nowrap;vertical-align:middle;color:#525252;text-shadow:0 -1px 0 #ffffff;font-size:20px;line-height:20px;">See All Discussions</span></center></a>
                             </td>
                           </tr>
                         </table>
@@ -134,8 +134,8 @@
                     <td class="mb_blk" style="">
                         <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;" role="presentation">
                           <tr>
-                            <td style="border-collapse:collapse;border-radius:2px;text-align:center;display:block;border:solid 1px #c9ccd1;box-shadow:0 1px 0 rgba(0, 0, 0, 0.04);background:#f6f7f8;padding:7px 16px 11px 16px;">
-                      <a href="{{ view_your_ballot_url }}" style="color:#2E3C5D;text-decoration:none;display:block;"><center><span style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;white-space:nowrap;vertical-align:middle;color:#525252;text-shadow:0 1px 0 #ffffff;font-size:20px;line-height:20px;">See&nbsp;Your Ballot</span></center></a>
+                            <td style="border-collapse:collapse;border-radius:4px;text-align:center;display:block;border:solid 1px #c9ccd1;box-shadow:0 1px 0 rgba(0, 0, 0, 0.04);background:#f6f7f8;padding:11px 16px 11px 16px;">
+                      <a href="{{ view_your_ballot_url }}" style="color:#0834CD;text-decoration:none;display:block;"><center><span style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;white-space:nowrap;vertical-align:middle;color:#525252;text-shadow:0 1px 0 #ffffff;font-size:20px;line-height:20px;">See&nbsp;Your Ballot</span></center></a>
                             </td>
                           </tr>
                         </table>
@@ -164,6 +164,12 @@
                   </tr>
                   <tr>
                     <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:18px;line-height:24px;color:#141823;">If the See Your Ballot button does not work, please use this link: {{ view_your_ballot_url }}</span></td>
+                  </tr>
+                  <tr style="">
+                    <td height="14" style="line-height:14px;">&nbsp;</td>
+                  </tr>
+                  <tr style="">
+                    <td height="14" style="line-height:14px;">&nbsp;</td>
                   </tr>
                 </table>
               </td>

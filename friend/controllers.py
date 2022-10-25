@@ -5,13 +5,16 @@
 from django.db.models import F, Q
 from django.utils.timezone import localtime, now
 from .models import ACCEPTED, CurrentFriend, FriendInvitationVoterLink, FriendManager, CURRENT_FRIENDS, \
-    DELETE_INVITATION_EMAIL_SENT_BY_ME, DELETE_INVITATION_VOTER_SENT_BY_ME, FRIEND_INVITATIONS_PROCESSED, \
+    DELETE_INVITATION_EMAIL_SENT_BY_ME, DELETE_INVITATION_VOTER_SENT_BY_ME, FRIEND_INVITATION_SECRET_KEY_LENGTH, \
+    FRIEND_INVITATIONS_PROCESSED, \
     FRIEND_INVITATIONS_SENT_BY_ME, FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_WAITING_FOR_VERIFICATION, \
     IGNORE_SUGGESTION, MutualFriend, SuggestedFriend, SUGGESTED_FRIEND_LIST, UNFRIEND_CURRENT_FRIEND
 from config.base import get_environment_variable
 from email_outbound.controllers import schedule_email_with_email_outbound_description, schedule_verification_email
-from email_outbound.models import EmailAddress, EmailManager, FRIEND_ACCEPTED_INVITATION_TEMPLATE, \
-    FRIEND_INVITATION_TEMPLATE, MESSAGE_TO_FRIEND_TEMPLATE, SENT, TO_BE_PROCESSED, WAITING_FOR_VERIFICATION
+from email_outbound.models import EmailAddress, EmailManager, EMAIL_SECRET_KEY_LENGTH, \
+    FRIEND_ACCEPTED_INVITATION_TEMPLATE, \
+    FRIEND_INVITATION_TEMPLATE, MESSAGE_TO_FRIEND_TEMPLATE, REMIND_CONTACT, SENT, TO_BE_PROCESSED, \
+    WAITING_FOR_VERIFICATION
 from follow.models import FollowIssueList
 from import_export_facebook.models import FacebookManager
 import json
@@ -369,6 +372,287 @@ def friend_accepted_invitation_send(
     results = {
         'success':      True,
         'status':       status,
+    }
+    return results
+
+
+def remind_contact_by_email_send_for_api(  # sharedItemSave in remindMode
+        voter_device_id='',
+        email_address_array=[],
+        first_name_array=[],
+        last_name_array=[],
+        other_voter_display_name='',
+        other_voter_we_vote_id_array=[],
+        email_addresses_raw='',
+        invitation_message='',
+        sender_display_name='',
+        sender_email_address='',
+        url_with_shared_item_code='',
+        web_app_root_url=''):
+    success = True
+    status = ""
+    number_of_messages_sent = 0
+    error_message_to_show_voter = ""
+    sender_voter_email_address_missing = True
+    success_message_to_show_voter = ""
+
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        error_results = {
+            'status':                               results['status'],
+            'success':                              False,
+            'error_message_to_show_voter':          error_message_to_show_voter,
+            'number_of_messages_sent':              number_of_messages_sent,
+            'sender_voter_email_address_missing':   sender_voter_email_address_missing,
+            'success_message_to_show_voter':        success_message_to_show_voter,
+            'voter_device_id':                      voter_device_id,
+        }
+        return error_results
+
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
+    sender_voter_id = voter_results['voter_id']
+    if not positive_value_exists(sender_voter_id):
+        status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
+        error_results = {
+            'status':                               status,
+            'success':                              False,
+            'error_message_to_show_voter':          error_message_to_show_voter,
+            'number_of_messages_sent':              number_of_messages_sent,
+            'sender_voter_email_address_missing':   sender_voter_email_address_missing,
+            'success_message_to_show_voter':        success_message_to_show_voter,
+            'voter_device_id':                      voter_device_id,
+        }
+        return error_results
+
+    sender_voter = voter_results['voter']
+    email_manager = EmailManager()
+
+    valid_new_sender_email_address = False
+    sender_email_with_ownership_verified = ""
+    # TODO We should be able to send email without verified email (if you are signed in with Twitter or SMS for example)
+    #  I still don't think we should allow sending email if not signed in (in some way)
+    if sender_voter.has_email_with_verified_ownership():
+        sender_email_with_ownership_verified = \
+            email_manager.fetch_primary_email_with_ownership_verified(sender_voter.we_vote_id)
+        sender_voter_email_address_missing = False
+        status += "SENDER_HAS_EMAIL_WITH_OWNERSHIP_VERIFIED "
+    elif positive_value_exists(sender_email_address) and validate_email(sender_email_address):
+        # If here, check to see if a sender_email_address was passed in
+        status += "VALID_EMAIL_PASSED_INTO_THIS_FUNCTION "
+        valid_new_sender_email_address = True
+    else:
+        sender_voter_email_address_missing = True
+        status += "SENDER_EMAIL_NOT_PASSED_IN "
+
+    if not isinstance(first_name_array, (list, tuple)):
+        first_name_array = []
+
+    if not isinstance(last_name_array, (list, tuple)):
+        last_name_array = []
+
+    if not positive_value_exists(invitation_message):
+        invitation_message = ""
+    if email_address_array:
+        # This branch hasn't been updated yet, but should be supported for future front-end scenarios
+        # For example, we might want a "Send to all" option
+        pass
+    elif positive_value_exists(email_addresses_raw):
+        # This branch is used for reminding single friends (e.g. Remind friends from your contacts)
+        # Break apart all the emails in email_addresses_raw input from the voter
+        results = email_manager.parse_raw_emails_into_list(email_addresses_raw)
+        if results['at_least_one_email_found']:
+            raw_email_list_to_invite = results['email_list']
+            for one_normalized_raw_email in raw_email_list_to_invite:
+                # TODO: Put some restriction on number of times a reminder can be sent to each person?
+                send_results = send_reminder_to_one_contact(
+                    voter_device_id=voter_device_id,
+                    sender_voter=sender_voter,
+                    sender_email_with_ownership_verified=sender_email_with_ownership_verified,
+                    recipient_name=other_voter_display_name,
+                    recipient_voter_email=one_normalized_raw_email,
+                    invitation_message=invitation_message,
+                    url_with_shared_item_code=url_with_shared_item_code,
+                    web_app_root_url=web_app_root_url)
+                status += send_results['status']
+        else:
+            error_message_to_show_voter = "Please enter at least one email address."
+            status += "LIST_OF_EMAILS_NOT_RECEIVED " + results['status']
+            error_results = {
+                'status':                               status,
+                'success':                              False,
+                'error_message_to_show_voter':          error_message_to_show_voter,
+                'number_of_messages_sent':              number_of_messages_sent,
+                'sender_voter_email_address_missing':   sender_voter_email_address_missing,
+                'success_message_to_show_voter':        success_message_to_show_voter,
+                'voter_device_id':                      voter_device_id,
+            }
+            return error_results
+
+    results = {
+        'success':                              success,
+        'status':                               status,
+        'error_message_to_show_voter':          error_message_to_show_voter,
+        'number_of_messages_sent':              number_of_messages_sent,
+        'sender_voter_email_address_missing':   sender_voter_email_address_missing,
+        'success_message_to_show_voter':        success_message_to_show_voter,
+        'voter_device_id':                      voter_device_id,
+    }
+    return results
+
+
+def send_reminder_to_one_contact(
+        voter_device_id='',
+        sender_voter=None,
+        sender_email_with_ownership_verified='',
+        recipient_name='',
+        recipient_voter_email='',
+        invitation_message='',
+        url_with_shared_item_code='',
+        web_app_root_url=''):
+    status = ""
+    success = True
+    real_name_only = True
+    sender_name = sender_voter.get_full_name(real_name_only)
+    sender_photo = sender_voter.voter_photo_url()
+    sender_description = ""
+    sender_network_details = ""
+    sender_voter_we_vote_id = sender_voter.we_vote_id
+    email_manager = EmailManager()
+    error_message_to_show_voter = ''
+    web_app_root_url_verified = transform_web_app_url(web_app_root_url)  # Change to client URL if needed
+
+    retrieve_results = retrieve_voter_and_email_address(recipient_voter_email)
+    if not retrieve_results['success']:
+        error_message_to_show_voter = \
+            "We could not send to your friend's email address {recipient_voter_email}. Please try again later." \
+            "".format(recipient_voter_email=recipient_voter_email)
+        results = {
+            'success':                              False,
+            'status':                               retrieve_results['status'],
+            'voter_device_id':                      voter_device_id,
+            'sender_voter_email_address_missing':   False,
+            'error_message_to_show_voter':          error_message_to_show_voter
+        }
+        return results
+    status += retrieve_results['status'] + " "
+
+    if not retrieve_results['email_address_object_found']:
+        # We need to generate an email_object, so we can get an unsubscribe key
+        pass
+
+    if not retrieve_results['email_address_object_found']:
+        error_message_to_show_voter = \
+            "We could not send to your friend's email address {recipient_voter_email}, error 2. " \
+            "Please try again later." \
+            "".format(recipient_voter_email=recipient_voter_email)
+        results = {
+            'success':                              False,
+            'status':                               retrieve_results['status'],
+            'voter_device_id':                      voter_device_id,
+            'sender_voter_email_address_missing':   False,
+            'error_message_to_show_voter':          error_message_to_show_voter
+        }
+        return results
+
+    recipient_voter_we_vote_id = ''
+    if retrieve_results['voter_found']:
+        recipient_voter = retrieve_results['voter']
+        recipient_voter_we_vote_id = recipient_voter.we_vote_id
+
+    recipient_email_address_object = retrieve_results['email_address_object']
+    recipient_email_we_vote_id = recipient_email_address_object.we_vote_id
+    recipient_voter_email = recipient_email_address_object.normalized_email_address
+    if positive_value_exists(recipient_email_address_object.subscription_secret_key):
+        recipient_email_subscription_secret_key = recipient_email_address_object.subscription_secret_key
+    else:
+        recipient_email_subscription_secret_key = \
+            email_manager.update_email_address_with_new_subscription_secret_key(
+                email_we_vote_id=recipient_email_we_vote_id)
+
+    # Variables used by templates/email_outbound/email_templates/friend_invitation.txt and .html
+    subject = "Reminder to vote by Nov 8, 2022"
+    if positive_value_exists(sender_name):
+        subject += " from " + sender_name
+
+    if positive_value_exists(sender_email_with_ownership_verified):
+        sender_email_address = sender_email_with_ownership_verified
+    else:
+        sender_email_address = ""
+
+    # Unsubscribe link in email
+    # "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
+    # recipient_email_subscription_secret_key,
+    recipient_unsubscribe_url = \
+        "{root_url}/unsubscribe/{email_secret_key}/remindcontact" \
+        "".format(
+            email_secret_key=recipient_email_subscription_secret_key,
+            root_url=web_app_root_url_verified,
+        )
+    # Instant unsubscribe link in email header
+    list_unsubscribe_url = \
+        "{root_url}/apis/v1/unsubscribeInstant/{email_secret_key}/remindcontact/" \
+        "".format(
+            email_secret_key=recipient_email_subscription_secret_key,
+            root_url=WE_VOTE_SERVER_ROOT_URL,
+        )
+    # Instant unsubscribe email address in email header
+    # from voter.models import NOTIFICATION_FRIEND_REQUESTS_EMAIL
+    list_unsubscribe_mailto = "unsubscribe@wevote.us?subject=unsubscribe%20{setting}" \
+                              "".format(setting='remindcontact')
+
+    template_variables_for_json = {
+        "subject":                      subject,
+        "invitation_message":           invitation_message,
+        "sender_name":                  sender_name,
+        "sender_photo":                 sender_photo,
+        "sender_email_address":         sender_email_address,  # Does not affect the "From" email header
+        "sender_description":           sender_description,
+        "sender_network_details":       sender_network_details,
+        "recipient_name":               recipient_name,
+        "recipient_unsubscribe_url":    recipient_unsubscribe_url,
+        "recipient_voter_email":        recipient_voter_email,
+        "url_with_shared_item_code":    url_with_shared_item_code,
+        "we_vote_url":                  web_app_root_url_verified,
+    }
+    template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
+
+    # TODO DALE - What kind of policy do we want re: sending a second email to a person?
+    # Create the outbound email description, then schedule it
+    kind_of_email_template = REMIND_CONTACT
+    outbound_results = email_manager.create_email_outbound_description(
+        sender_voter_we_vote_id=sender_voter_we_vote_id,
+        sender_voter_email=sender_email_with_ownership_verified,
+        sender_voter_name=sender_name,
+        recipient_voter_we_vote_id=recipient_voter_we_vote_id,
+        recipient_email_we_vote_id=recipient_email_we_vote_id,
+        recipient_voter_email=recipient_voter_email,
+        template_variables_in_json=template_variables_in_json,
+        kind_of_email_template=kind_of_email_template,
+        list_unsubscribe_mailto=list_unsubscribe_mailto,
+        list_unsubscribe_url=list_unsubscribe_url,
+    )
+    status += outbound_results['status'] + " "
+    email_outbound_description = outbound_results['email_outbound_description']
+    if outbound_results['email_outbound_description_saved']:
+        send_status = TO_BE_PROCESSED
+        schedule_results = schedule_email_with_email_outbound_description(email_outbound_description, send_status)
+        status += schedule_results['status'] + " "
+        if schedule_results['email_scheduled_saved']:
+            # messages_to_send.append(schedule_results['email_scheduled_id'])
+            email_scheduled = schedule_results['email_scheduled']
+            send_results = email_manager.send_scheduled_email(email_scheduled)
+            email_scheduled_sent = send_results['email_scheduled_sent']
+            status += send_results['status']
+    else:
+        status += 'EMAIL_OUTBOUND_DESCRIPTION_NOT_SAVED '
+
+    results = {
+        'success':                              success,
+        'status':                               status,
+        'voter_device_id':                      voter_device_id,
+        'sender_voter_email_address_missing':   False,
+        'error_message_to_show_voter':          error_message_to_show_voter
     }
     return results
 
@@ -1553,7 +1837,7 @@ def friend_invitation_by_email_verify_for_api(  # friendInvitationByEmailVerify
                 email_address_object = email_results['email_address_object']
                 try:
                     email_address_object.email_ownership_is_verified = True
-                    email_address_object.secret_key = generate_random_string(12)  # Reset the secret_key
+                    email_address_object.secret_key = generate_random_string(EMAIL_SECRET_KEY_LENGTH)  # Reset
                     email_address_object.save()
                     voter_manager.update_voter_email_ownership_verified(voter, email_address_object)
                     if we_have_first_or_last_name_from_friend_invitation_email_link and \
@@ -4030,11 +4314,12 @@ def retrieve_voter_and_email_address(one_normalized_raw_email):
         success = False
         status += "RETRIEVE_VOTER_AND_EMAIL-EMAIL_ADDRESS_OBJECT_MISSING "
         results = {
-            'success':              success,
-            'status':               status,
-            'voter_found':          voter_friend_found,
-            'voter':                voter_friend,
-            'email_address_object': email_address_object,
+            'success':                      success,
+            'status':                       status,
+            'voter_found':                  voter_friend_found,
+            'voter':                        voter_friend,
+            'email_address_object':         email_address_object,
+            'email_address_object_found':   email_address_object_found,
         }
         return results
     else:
@@ -4059,11 +4344,12 @@ def retrieve_voter_and_email_address(one_normalized_raw_email):
     # If so, we need to ...
 
     results = {
-        'success':              success,
-        'status':               status,
-        'voter_found':          voter_friend_found,
-        'voter':                voter_friend,
-        'email_address_object': email_address_object,
+        'success':                      success,
+        'status':                       status,
+        'voter_found':                  voter_friend_found,
+        'voter':                        voter_friend,
+        'email_address_object':         email_address_object,
+        'email_address_object_found':   email_address_object_found,
     }
     return results
 
@@ -4121,7 +4407,7 @@ def store_internal_friend_invitation_with_two_voters(voter, invitation_message,
 
     friend_manager = FriendManager()
     sender_email_ownership_is_verified = voter.has_email_with_verified_ownership()
-    invitation_secret_key = generate_random_string(12)
+    invitation_secret_key = generate_random_string(FRIEND_INVITATION_SECRET_KEY_LENGTH)
 
     create_results = friend_manager.update_or_create_friend_invitation_voter_link(
         sender_voter_we_vote_id, recipient_voter_we_vote_id, invitation_message, sender_email_ownership_is_verified,
@@ -4148,7 +4434,7 @@ def store_internal_friend_invitation_with_unknown_email(
 
     friend_manager = FriendManager()
     sender_email_ownership_is_verified = voter.has_email_with_verified_ownership()
-    invitation_secret_key = generate_random_string(12)
+    invitation_secret_key = generate_random_string(FRIEND_INVITATION_SECRET_KEY_LENGTH)
 
     create_results = friend_manager.update_or_create_friend_invitation_email_link(
         sender_voter_we_vote_id=sender_voter_we_vote_id,

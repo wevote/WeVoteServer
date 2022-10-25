@@ -163,10 +163,18 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
     is_office_share = False
     is_organization_share = False
     is_ready_share = False
+    is_remind_contact_share = False
     google_civic_election_id = ''
     measure_we_vote_id = ''
     office_we_vote_id = ''
+    other_voter_display_name = ''
+    other_voter_email_address_text = ''
+    other_voter_first_name = ''
+    other_voter_last_name = ''
+    other_voter_we_vote_id = ''
     api_call_coming_from_voter_who_shared = False
+    email_secret_key = ''
+    sms_secret_key = ''
     shared_by_display_name = ''
     shared_by_voter_we_vote_id = ''
     shared_by_organization_type = ''
@@ -176,6 +184,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
     shared_by_we_vote_hosted_profile_image_url_tiny = ''
     shared_item_code_no_opinions = ''
     shared_item_code_all_opinions = ''
+    shared_message = ''
     site_owner_organization_we_vote_id = ''
     url_with_shared_item_code_no_opinions = ''
     url_with_shared_item_code_all_opinions = ''
@@ -197,7 +206,8 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
     results = share_manager.retrieve_shared_item(
         destination_full_url=destination_full_url,
         shared_by_voter_we_vote_id=viewed_by_voter_we_vote_id,
-        shared_item_code=shared_item_code)
+        shared_item_code=shared_item_code,
+        read_only=True)
     status += results['status']
     if not results['shared_item_found']:
         status += "SHARED_ITEM_NOT_FOUND "
@@ -207,6 +217,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
             'candidate_we_vote_id':             candidate_we_vote_id,
             'date_first_shared':                date_first_shared,
             'destination_full_url':             destination_full_url,
+            'email_secret_key':                 email_secret_key,
             'google_civic_election_id':         google_civic_election_id,
             'include_friends_only_positions':   include_friends_only_positions,
             'is_ballot_share':                  is_ballot_share,
@@ -215,8 +226,14 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
             'is_office_share':                  is_office_share,
             'is_organization_share':            is_organization_share,
             'is_ready_share':                   is_ready_share,
+            'is_remind_contact_share':          is_remind_contact_share,
             'measure_we_vote_id':               measure_we_vote_id,
             'office_we_vote_id':                        office_we_vote_id,
+            'other_voter_email_address_text':           other_voter_email_address_text,
+            'other_voter_display_name':                 other_voter_display_name,
+            'other_voter_first_name':                   other_voter_first_name,
+            'other_voter_last_name':                    other_voter_last_name,
+            'other_voter_we_vote_id':                   other_voter_we_vote_id,
             'shared_by_display_name':                   shared_by_display_name,
             'shared_by_voter_we_vote_id':               shared_by_voter_we_vote_id,
             'shared_by_organization_type':              shared_by_organization_type,
@@ -226,7 +243,9 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
             'shared_by_we_vote_hosted_profile_image_url_tiny': shared_by_we_vote_hosted_profile_image_url_tiny,
             'shared_item_code_no_opinions':             shared_item_code_no_opinions,
             'shared_item_code_all_opinions':            shared_item_code_all_opinions,
+            'shared_message':                           shared_message,
             'site_owner_organization_we_vote_id':       site_owner_organization_we_vote_id,
+            'sms_secret_key':                           sms_secret_key,
             'url_with_shared_item_code_no_opinions':    url_with_shared_item_code_no_opinions,
             'url_with_shared_item_code_all_opinions':   url_with_shared_item_code_all_opinions,
         }
@@ -272,6 +291,31 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
             include_friends_only_positions=include_friends_only_positions,
         )
         status += clicked_results['status']
+
+        delete_secret_keys = False
+        # If an email or sms secret_key was stored in the SharedItem, we can use it to sign in the person clicking the
+        #  link on the first click. After the first click, we delete both secret keys so subsequent clicks don't sign
+        #  the person in.
+        if positive_value_exists(shared_item.email_secret_key):
+            email_secret_key = shared_item.email_secret_key
+            delete_secret_keys = True
+        if positive_value_exists(shared_item.sms_secret_key):
+            sms_secret_key = shared_item.sms_secret_key
+            delete_secret_keys = True
+        if delete_secret_keys:
+            # Retrieve again from main db so we can delete
+            retrieve_results_for_delete = share_manager.retrieve_shared_item(
+                shared_item_code=shared_item_code,
+                read_only=False)
+            status += results['status']
+            if retrieve_results_for_delete['shared_item_found']:
+                shared_item = retrieve_results_for_delete['shared_item']
+                try:
+                    shared_item.email_secret_key = None
+                    shared_item.sms_secret_key = None
+                    shared_item.save()
+                except Exception as e:
+                    status += "COULD_NOT_CLEAR_SECRET_KEYS: " + str(e) + " "
 
         # Store the new permissions granted if the public or friends-only positions were shared
         if positive_value_exists(include_public_positions) or positive_value_exists(include_friends_only_positions):
@@ -376,6 +420,16 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         if results['position_list_found']:
             position_list = results['position_list']
 
+    other_voter_email_address_text = shared_item.other_voter_email_address_text \
+        if positive_value_exists(shared_item.other_voter_email_address_text) else ''
+    other_voter_display_name = shared_item.other_voter_display_name \
+        if positive_value_exists(shared_item.other_voter_display_name) else ''
+    other_voter_first_name = shared_item.other_voter_first_name \
+        if positive_value_exists(shared_item.other_voter_first_name) else ''
+    other_voter_last_name = shared_item.other_voter_last_name \
+        if positive_value_exists(shared_item.other_voter_last_name) else ''
+    other_voter_we_vote_id = shared_item.other_voter_we_vote_id \
+        if positive_value_exists(shared_item.other_voter_we_vote_id) else ''
     shared_by_display_name = shared_item.shared_by_display_name \
         if positive_value_exists(shared_item.shared_by_display_name) else ''
     shared_by_we_vote_hosted_profile_image_url_large = shared_item.shared_by_we_vote_hosted_profile_image_url_large \
@@ -385,18 +439,28 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
     shared_by_we_vote_hosted_profile_image_url_tiny = shared_item.shared_by_we_vote_hosted_profile_image_url_tiny \
         if positive_value_exists(shared_item.shared_by_we_vote_hosted_profile_image_url_tiny) else ''
 
+    if positive_value_exists(shared_item.date_first_shared):
+        date_first_shared = shared_item.date_first_shared.strftime('%Y-%m-%d %H:%M:%S')
+
     results = {
         'status':                               status,
         'success':                              success,
         'destination_full_url':                 shared_item.destination_full_url,
+        'email_secret_key':                     email_secret_key,  # Only returned on first click
         'is_ballot_share':                      shared_item.is_ballot_share,
         'is_candidate_share':                   shared_item.is_candidate_share,
         'is_measure_share':                     shared_item.is_measure_share,
         'is_office_share':                      shared_item.is_office_share,
         'is_organization_share':                shared_item.is_organization_share,
         'is_ready_share':                       shared_item.is_ready_share,
+        'is_remind_contact_share':              shared_item.is_remind_contact_share,
         'include_friends_only_positions':       include_friends_only_positions,
         'google_civic_election_id':             shared_item.google_civic_election_id,
+        'other_voter_email_address_text':       other_voter_email_address_text,
+        'other_voter_display_name':             other_voter_display_name,
+        'other_voter_first_name':               other_voter_first_name,
+        'other_voter_last_name':                other_voter_last_name,
+        'other_voter_we_vote_id':               other_voter_we_vote_id,
         'position_list':                        position_list,
         'shared_by_display_name':               shared_by_display_name,
         'shared_by_organization_type':          shared_item.shared_by_organization_type,
@@ -405,11 +469,13 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         'shared_by_we_vote_hosted_profile_image_url_large': shared_by_we_vote_hosted_profile_image_url_large,
         'shared_by_we_vote_hosted_profile_image_url_medium': shared_by_we_vote_hosted_profile_image_url_medium,
         'shared_by_we_vote_hosted_profile_image_url_tiny': shared_by_we_vote_hosted_profile_image_url_tiny,
+        'shared_message':                       shared_item.shared_message,
         'site_owner_organization_we_vote_id':   shared_item.site_owner_organization_we_vote_id,
+        'sms_secret_key':                       sms_secret_key,  # Only returned on first click
         'candidate_we_vote_id':                 shared_item.candidate_we_vote_id,
         'measure_we_vote_id':                   shared_item.measure_we_vote_id,
         'office_we_vote_id':                    shared_item.office_we_vote_id,
-        'date_first_shared':                    str(shared_item.date_first_shared),
+        'date_first_shared':                    str(date_first_shared),
     }
     if api_call_coming_from_voter_who_shared:
         results['shared_item_code_no_opinions'] = shared_item.shared_item_code_no_opinions
@@ -444,7 +510,14 @@ def shared_item_save_for_api(  # sharedItemSave
         is_office_share=False,
         is_organization_share=False,
         is_ready_share=False,
-        organization_we_vote_id=''):
+        is_remind_contact_share=False,
+        organization_we_vote_id='',
+        other_voter_display_name='',
+        other_voter_first_name='',
+        other_voter_last_name='',
+        other_voter_we_vote_id='',
+        other_voter_email_address_text=None,
+        shared_message=None):
     status = ''
     success = True
     candidate_we_vote_id = ''
@@ -500,10 +573,18 @@ def shared_item_save_for_api(  # sharedItemSave
         elif "off" in ballot_item_we_vote_id:
             office_we_vote_id = ballot_item_we_vote_id
 
-    required_variables_for_new_entry = positive_value_exists(destination_full_url) \
-        and positive_value_exists(shared_by_voter_we_vote_id)
+    if positive_value_exists(is_remind_contact_share):
+        required_variables_for_new_entry = positive_value_exists(destination_full_url) \
+            and positive_value_exists(shared_by_voter_we_vote_id) \
+            and positive_value_exists(other_voter_email_address_text)
+    else:
+        required_variables_for_new_entry = positive_value_exists(destination_full_url) \
+            and positive_value_exists(shared_by_voter_we_vote_id)
     if not required_variables_for_new_entry or not success:
-        status += "NEW_ORGANIZATION_REQUIRED_VARIABLES_MISSING "
+        if positive_value_exists(is_remind_contact_share):
+            status += "REMIND_CONTACT_SHARED_ITEM_REQUIRED_VARIABLES_MISSING "
+        else:
+            status += "SHARED_ITEM_SAVE_REQUIRED_VARIABLES_MISSING "
         results = {
             'status':                                   status,
             'success':                                  False,
@@ -517,8 +598,14 @@ def shared_item_save_for_api(  # sharedItemSave
             'is_office_share':                          is_office_share,
             'is_organization_share':                    is_organization_share,
             'is_ready_share':                           is_ready_share,
+            'is_remind_contact_share':                  is_remind_contact_share,
             'measure_we_vote_id':                       measure_we_vote_id,
             'office_we_vote_id':                        office_we_vote_id,
+            'other_voter_email_address_text':           other_voter_email_address_text,
+            'other_voter_display_name':                 other_voter_display_name,
+            'other_voter_first_name':                   other_voter_first_name,
+            'other_voter_last_name':                    other_voter_last_name,
+            'other_voter_we_vote_id':                   other_voter_we_vote_id,
             'shared_by_display_name':                   shared_by_display_name,
             'shared_by_organization_type':              shared_by_organization_type,
             'shared_by_organization_we_vote_id':        shared_by_organization_we_vote_id,
@@ -528,6 +615,7 @@ def shared_item_save_for_api(  # sharedItemSave
             'shared_by_we_vote_hosted_profile_image_url_tiny': shared_by_we_vote_hosted_profile_image_url_tiny,
             'shared_item_code_no_opinions':             shared_item_code_no_opinions,
             'shared_item_code_all_opinions':            shared_item_code_all_opinions,
+            'shared_message':                           shared_message,
             'site_owner_organization_we_vote_id':       site_owner_organization_we_vote_id,
             'url_with_shared_item_code_no_opinions':    url_with_shared_item_code_no_opinions,
             'url_with_shared_item_code_all_opinions':   url_with_shared_item_code_all_opinions,
@@ -540,7 +628,10 @@ def shared_item_save_for_api(  # sharedItemSave
             organization_we_vote_id=shared_by_organization_we_vote_id,
             read_only=True)
         if results['success'] and results['organization_found']:
-            shared_by_display_name = results['organization'].organization_name
+            shared_by_display_name = None
+            if positive_value_exists(results['organization'].organization_name) \
+                    and 'Voter-' not in results['organization'].organization_name:
+                shared_by_display_name = results['organization'].organization_name
             shared_by_we_vote_hosted_profile_image_url_large = \
                 results['organization'].we_vote_hosted_profile_image_url_large
             shared_by_we_vote_hosted_profile_image_url_medium = \
@@ -556,6 +647,7 @@ def shared_item_save_for_api(  # sharedItemSave
         'is_office_share':                      is_office_share,
         'is_organization_share':                is_organization_share,
         'is_ready_share':                       is_ready_share,
+        'is_remind_contact_share':              is_remind_contact_share,
         'measure_we_vote_id':                   measure_we_vote_id,
         'office_we_vote_id':                    office_we_vote_id,
         'shared_by_display_name':               shared_by_display_name,
@@ -567,8 +659,59 @@ def shared_item_save_for_api(  # sharedItemSave
         'shared_by_we_vote_hosted_profile_image_url_tiny':      shared_by_we_vote_hosted_profile_image_url_tiny,
         'site_owner_organization_we_vote_id':   site_owner_organization_we_vote_id,
     }
+    recipient_email_secret_key = None
+    if positive_value_exists(other_voter_email_address_text):
+        defaults['other_voter_email_address_text'] = other_voter_email_address_text
+        # We want to get the email_secret_key (i.e. support auto-sign) in if:
+        #  1) Only one Email object exists, and it has not been verified by a voter yet
+        #  2) We don't recognize this email (generate it)
+        from email_outbound.models import EmailManager
+        email_manager = EmailManager()
+        retrieve_results = email_manager.retrieve_email_address_object(
+            normalized_email_address=other_voter_email_address_text)
+        if retrieve_results['email_address_object_found']:
+            # Only one found. Check to make sure it hasn't been verified yet.
+            recipient_email_address_object = retrieve_results['email_address_object']
+            if not recipient_email_address_object.email_ownership_is_verified:
+                if positive_value_exists(recipient_email_address_object.secret_key):
+                    recipient_email_secret_key = recipient_email_address_object.secret_key
+                elif positive_value_exists(recipient_email_address_object.we_vote_id):
+                    recipient_email_secret_key = \
+                        email_manager.update_email_address_with_new_secret_key(
+                            email_we_vote_id=recipient_email_address_object.we_vote_id)
+            status += "SECRET_KEY_INCLUDED_ONE_FOUND "
+        elif retrieve_results['success'] and not retrieve_results['email_address_list_found']:
+            # Generate new EmailAddress because none found
+            create_results = email_manager.create_email_address(
+                normalized_email_address=other_voter_email_address_text)
+            if create_results['email_address_object_saved']:
+                recipient_email_address_object = create_results['email_address_object']
+                if positive_value_exists(recipient_email_address_object.secret_key):
+                    recipient_email_secret_key = recipient_email_address_object.secret_key
+                else:
+                    # If a secret key wasn't generated upon email creation, don't try again
+                    status += "CREATE_EMAIL_DID_NOT_GENERATE_SECRET_KEY "
+        else:
+            status += "CANNOT_INCLUDE_SECRET_KEY "
+    if positive_value_exists(recipient_email_secret_key):
+        defaults['email_secret_key'] = recipient_email_secret_key
+    if positive_value_exists(other_voter_we_vote_id):
+        defaults['other_voter_we_vote_id'] = other_voter_we_vote_id
+    if positive_value_exists(other_voter_display_name):
+        defaults['other_voter_display_name'] = other_voter_display_name
+    if positive_value_exists(other_voter_first_name):
+        defaults['other_voter_first_name'] = other_voter_first_name
+    if positive_value_exists(other_voter_last_name):
+        defaults['other_voter_last_name'] = other_voter_last_name
+    if positive_value_exists(shared_message):
+        defaults['shared_message'] = shared_message
+    # TODO Limit number of reminders to X per week?
+    # Since reminder email is only sent upon creation, and we don't need to edit these, always
+    #  create a new SharedItem when is_remind_contact_share
+    force_create_new = is_remind_contact_share
     create_results = share_manager.update_or_create_shared_item(
         destination_full_url=destination_full_url,
+        force_create_new=force_create_new,
         shared_by_voter_we_vote_id=shared_by_voter_we_vote_id,
         google_civic_election_id=google_civic_election_id,
         defaults=defaults,
@@ -576,10 +719,28 @@ def shared_item_save_for_api(  # sharedItemSave
     status += create_results['status']
     if create_results['shared_item_found']:
         shared_item = create_results['shared_item']
+        if positive_value_exists(shared_item.date_first_shared):
+            date_first_shared = shared_item.date_first_shared.strftime('%Y-%m-%d %H:%M:%S')
         shared_item_code_no_opinions = shared_item.shared_item_code_no_opinions
         shared_item_code_all_opinions = shared_item.shared_item_code_all_opinions
         url_with_shared_item_code_no_opinions = "https://" + hostname + "/-" + shared_item_code_no_opinions
         url_with_shared_item_code_all_opinions = "https://" + hostname + "/-" + shared_item_code_all_opinions
+
+    if create_results['shared_item_created'] and positive_value_exists(is_remind_contact_share):
+        # We could put switch here depending on whether we want to include opinions during remind process
+        url_with_shared_item_code = url_with_shared_item_code_no_opinions
+
+        # Trigger send of the reminder
+        from friend.controllers import remind_contact_by_email_send_for_api
+        results = remind_contact_by_email_send_for_api(
+            voter_device_id=voter_device_id,
+            email_addresses_raw=other_voter_email_address_text,
+            invitation_message=shared_message,
+            other_voter_display_name=other_voter_display_name,
+            sender_display_name=shared_by_display_name,
+            url_with_shared_item_code=url_with_shared_item_code,
+            web_app_root_url=hostname)
+        status += results['status']
 
     results = {
         'status':                               status,
@@ -594,8 +755,14 @@ def shared_item_save_for_api(  # sharedItemSave
         'is_office_share':                      is_office_share,
         'is_organization_share':                is_organization_share,
         'is_ready_share':                       is_ready_share,
+        'is_remind_contact_share':              is_remind_contact_share,
         'measure_we_vote_id':                   measure_we_vote_id,
         'office_we_vote_id':                    office_we_vote_id,
+        'other_voter_email_address_text':       other_voter_email_address_text,
+        'other_voter_display_name':             other_voter_display_name,
+        'other_voter_first_name':               other_voter_first_name,
+        'other_voter_last_name':                other_voter_last_name,
+        'other_voter_we_vote_id':               other_voter_we_vote_id,
         'shared_by_display_name':               shared_by_display_name,
         'shared_by_organization_type':          shared_by_organization_type,
         'shared_by_organization_we_vote_id':    shared_by_organization_we_vote_id,

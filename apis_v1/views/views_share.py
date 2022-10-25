@@ -46,7 +46,14 @@ def shared_item_save_view(request):  # sharedItemSave
     is_office_share = positive_value_exists(request.GET.get('is_office_share', False))
     is_organization_share = positive_value_exists(request.GET.get('is_organization_share', False))
     is_ready_share = positive_value_exists(request.GET.get('is_ready_share', False))
+    is_remind_contact_share = positive_value_exists(request.GET.get('is_remind_contact_share', False))
     organization_we_vote_id = request.GET.get('organization_we_vote_id', None)
+    other_voter_email_address_text = request.GET.get('other_voter_email_address_text', None)
+    other_voter_display_name = request.GET.get('other_voter_display_name', None)
+    other_voter_first_name = request.GET.get('other_voter_first_name', None)
+    other_voter_last_name = request.GET.get('other_voter_last_name', None)
+    other_voter_we_vote_id = request.GET.get('other_voter_we_vote_id', None)
+    shared_message = request.GET.get('shared_message', None)
     json_data = shared_item_save_for_api(
         voter_device_id=voter_device_id,
         destination_full_url=destination_full_url,
@@ -58,7 +65,14 @@ def shared_item_save_view(request):  # sharedItemSave
         is_office_share=is_office_share,
         is_organization_share=is_organization_share,
         is_ready_share=is_ready_share,
+        is_remind_contact_share=is_remind_contact_share,
         organization_we_vote_id=organization_we_vote_id,
+        other_voter_display_name=other_voter_display_name,
+        other_voter_first_name=other_voter_first_name,
+        other_voter_last_name=other_voter_last_name,
+        other_voter_we_vote_id=other_voter_we_vote_id,
+        other_voter_email_address_text=other_voter_email_address_text,
+        shared_message=shared_message,
     )
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

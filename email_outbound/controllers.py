@@ -15,7 +15,8 @@ import requests
 from validate_email import validate_email
 from voter.models import VoterContactEmail, VoterDeviceLinkManager, VoterManager
 import wevote_functions.admin
-from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
+from wevote_functions.functions import extract_first_name_from_full_name, extract_last_name_from_full_name, \
+    is_voter_device_id_valid, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -755,6 +756,7 @@ def schedule_verification_email(
     """
     When a voter adds a new email address for self, create and send an outbound email with a link
     that the voter can click to verify the email.
+    TODO: Deprecate this (in favor of sending 6 digit code)
     :param sender_voter_we_vote_id:
     :param recipient_voter_we_vote_id:
     :param recipient_email_we_vote_id:
@@ -870,6 +872,7 @@ def schedule_link_to_sign_in_email(
     """
     When a voter wants to sign in with a pre-existing email, create and send an outbound email with a link
     that the voter can click to sign in.
+    TODO: Deprecate this function (in favor of sending 6 digit code)
     :param sender_voter_we_vote_id:
     :param recipient_voter_we_vote_id:
     :param recipient_email_we_vote_id:
@@ -1245,11 +1248,21 @@ def voter_email_address_sign_in_for_api(voter_device_id, email_secret_key):  # v
     return json_data
 
 
-def voter_email_address_verify_for_api(voter_device_id, email_secret_key):  # voterEmailAddressVerify
+def voter_email_address_verify_for_api(  # voterEmailAddressVerify
+        voter_device_id,
+        email_secret_key,
+        first_name=False,
+        last_name=False,
+        full_name=False,
+        name_save_only_if_no_existing_names=True):
     """
-
+    See also voter_verify_secret_code_view  # voterVerifySecretCode
     :param voter_device_id:
     :param email_secret_key:
+    :param first_name:
+    :param last_name:
+    :param full_name:
+    :param name_save_only_if_no_existing_names:
     :return:
     """
     email_secret_key_belongs_to_this_voter = False
@@ -1301,53 +1314,174 @@ def voter_email_address_verify_for_api(voter_device_id, email_secret_key):  # vo
     voter_we_vote_id = voter.we_vote_id
 
     email_manager = EmailManager()
-    # Look to see if there is an EmailAddress entry for the incoming text_for_email_address or email_we_vote_id
-    email_results = email_manager.verify_email_address_object_from_secret_key(email_secret_key=email_secret_key)
-    if email_results['email_address_object_found']:
-        email_address_object = email_results['email_address_object']
-        email_address_found = True
-        status += "EMAIL_ADDRESS_FOUND_FROM_VERIFY "
+    secret_key_results = email_manager.retrieve_email_address_object_from_secret_key(email_secret_key=email_secret_key)
+    if not secret_key_results['email_address_object_found']:
+        status += "EMAIL_NOT_FOUND_FROM_SECRET_KEY "
+        error_results = {
+            'status':                                   status,
+            'success':                                  False,
+            'voter_device_id':                          voter_device_id,
+            'email_ownership_is_verified':              False,
+            'email_secret_key_belongs_to_this_voter':   False,
+            'email_address_found':                      False,
+        }
+        return error_results
 
-        email_ownership_is_verified = email_address_object.email_ownership_is_verified
-        if voter_we_vote_id == email_address_object.voter_we_vote_id:
-            email_secret_key_belongs_to_this_voter = True
-            voter_ownership_results = voter_manager.update_voter_email_ownership_verified(voter, email_address_object)
-            voter_ownership_saved = voter_ownership_results['voter_updated']
-            if voter_ownership_saved:
-                voter = voter_ownership_results['voter']
-        else:
-            email_owner_results = voter_manager.retrieve_voter_by_we_vote_id(email_address_object.voter_we_vote_id)
-            if email_owner_results['voter_found']:
-                email_owner_voter = email_owner_results['voter']
-                voter_manager.update_voter_email_ownership_verified(email_owner_voter, email_address_object)
-                # If we verify it but don't use it to sign in, don't set voter_ownership_saved
-                # (which invalidates email_secret_key below)
+    status += "EMAIL_ADDRESS_FOUND_FROM_SECRET_KEY "
+    email_object_from_secret_key = secret_key_results['email_address_object']
+    email_address_found = True
+    link_to_this_voter_if_no_conflicts = False
+    normalized_email_ownership_verified_count = 0
+    normalized_not_verified_count = 0
+    normalized_voter_we_vote_id = ''
+    update_this_voter_if_missing_primary = False
+    verify_email_address_if_no_conflicts = False
+
+    # Check existing data before verifying. Note: this is not a "merge accounts" process.
+
+    # How many EmailAddress entries are there with this normalized_email, and are any already verified?
+    matching_results = email_manager.retrieve_email_address_object(
+        normalized_email_address=email_object_from_secret_key.normalized_email_address)
+    if matching_results['email_address_object_found']:
+        # Only one entry with normalized_email_address.
+        email_object_from_normalized = matching_results['email_address_object']
+        if email_object_from_secret_key.we_vote_id != email_object_from_normalized.we_vote_id:
+            # This should not be possible, but we still have to check
+            status += "EMAIL_OBJECT_FROM_SECRET_KEY_DOES_NOT_MATCH_NORMALIZED "
+        elif not email_object_from_normalized.email_ownership_is_verified:
+            # Only proceed if not verified
+            normalized_voter_we_vote_id = email_object_from_normalized.voter_we_vote_id
+            verify_email_address_if_no_conflicts = True
+            if positive_value_exists(normalized_voter_we_vote_id):
+                if voter_we_vote_id == normalized_voter_we_vote_id:
+                    link_to_this_voter_if_no_conflicts = True
+                    update_this_voter_if_missing_primary = True
+                else:
+                    # Verification was requested from another account we aren't currently signed in with.
+                    #  Here we will verify_email_address_if_no_conflicts, but we won't link to the current account
+                    pass
+            else:
+                link_to_this_voter_if_no_conflicts = True
+                update_this_voter_if_missing_primary = True
+    elif matching_results['email_address_list_found']:
+        # Multiple entries with the same normalized_email_address found
+        email_address_list = matching_results['email_address_list']
+        email_object_from_normalized = None
+        for email_object_from_normalized in email_address_list:
+            if email_object_from_normalized.email_ownership_is_verified:
+                normalized_email_ownership_verified_count += 1
+            else:
+                # Entry with is not verified
+                normalized_not_verified_count += 1
+                # normalized_email_we_vote_id = email_object_from_normalized.we_vote_id
+                normalized_voter_we_vote_id = email_object_from_normalized.voter_we_vote_id
+        if normalized_email_ownership_verified_count > 0:
+            # EmailAddress with this normalized_email_address is already verified, so do not proceed
+            pass
+        elif normalized_not_verified_count == 1:
+            if email_object_from_secret_key.we_vote_id != email_object_from_normalized.we_vote_id:
+                # This should not be possible, but we still have to check
+                status += "EMAIL_OBJECT_FROM_SECRET_KEY_DOES_NOT_MATCH_NORMALIZED_LIST "
+            else:
+                verify_email_address_if_no_conflicts = True
+                if positive_value_exists(normalized_voter_we_vote_id):
+                    if voter_we_vote_id == normalized_voter_we_vote_id:
+                        link_to_this_voter_if_no_conflicts = True
+                        update_this_voter_if_missing_primary = True
+                    else:
+                        # Verification was requested from another account we aren't currently signed in with.
+                        #  Here we will verify_email_address_if_no_conflicts, but we won't link to the current account
+                        pass
+        elif normalized_not_verified_count > 1:
+            # Cycle through list until we find the EmailAddress match for this voter, so we can verify
+            pass
+
+    # ##########################
+    # Error conditions to check
+
+    # Do any other voter records have this normalized_email_we_vote_id already in voter.primary_email_we_vote_id?
+    # Do any other voter records have this normalized_email_address already in voter.email?
+
+    # Note that voter.email and voter.primary_email_we_vote_id must be unique, so calling
+    #  voter_manager.update_voter_email_ownership_verified below will fail if they are already stored
+    #  in another voter record
+
+    # See if email already in voter.primary_email_we_vote_id
+    voter_is_missing_primary = False
+    if not positive_value_exists(voter.primary_email_we_vote_id) or not positive_value_exists(voter.email):
+        voter_is_missing_primary = True
+
+    # See if this email_address_object has a different voter_we_vote_id
+
+    # ##########
+    # Update voter name - this may seem out of place here, but this update is related to a successful click
+    #  from a contact after being reminded to vote with sharedItemSaveRemindContact
+    if positive_value_exists(voter.first_name) or positive_value_exists(voter.last_name):
+        saved_first_or_last_name_exists = True
     else:
-        email_results = email_manager.retrieve_email_address_object_from_secret_key(email_secret_key=email_secret_key)
-        if email_results['email_address_object_found']:
-            status += "EMAIL_ADDRESS_FOUND_FROM_RETRIEVE "
-            email_address_object = email_results['email_address_object']
-            email_address_found = True
+        saved_first_or_last_name_exists = False
 
-            email_ownership_is_verified = email_address_object.email_ownership_is_verified
-            if voter_we_vote_id == email_address_object.voter_we_vote_id:
-                email_secret_key_belongs_to_this_voter = True
-                voter_ownership_results = voter_manager.update_voter_email_ownership_verified(voter,
-                                                                                              email_address_object)
-                voter_ownership_saved = voter_ownership_results['voter_updated']
-                if voter_ownership_saved:
-                    voter = voter_ownership_results['voter']
-        else:
-            status += "EMAIL_NOT_FOUND_FROM_SECRET_KEY "
-            error_results = {
-                'status':                                   status,
-                'success':                                  False,
-                'voter_device_id':                          voter_device_id,
-                'email_ownership_is_verified':              False,
-                'email_secret_key_belongs_to_this_voter':   False,
-                'email_address_found':                      False,
-            }
-            return error_results
+    incoming_first_or_last_name = positive_value_exists(first_name) or positive_value_exists(last_name)
+    # If a first_name or last_name is coming in, we want to ignore the full_name
+    if positive_value_exists(full_name) and not positive_value_exists(incoming_first_or_last_name):
+        incoming_full_name_can_be_processed = True
+    else:
+        incoming_full_name_can_be_processed = False
+
+    if incoming_full_name_can_be_processed:
+        # If here we want to parse full_name into first and last
+        first_name = extract_first_name_from_full_name(full_name)
+        last_name = extract_last_name_from_full_name(full_name)
+
+    if name_save_only_if_no_existing_names:
+        if saved_first_or_last_name_exists:
+            first_name = False
+            last_name = False
+
+    if positive_value_exists(first_name) or positive_value_exists(last_name):
+        try:
+            if positive_value_exists(first_name):
+                voter.first_name = first_name
+            if positive_value_exists(last_name):
+                voter.last_name = last_name
+            voter.save()
+        except Exception as e:
+            status += "COULD_NOT_SAVE_FIRST_NAME_OR_LAST_NAME " + str(e) + " "
+
+    save_email_object_from_secret_key = False
+    if verify_email_address_if_no_conflicts:
+        try:
+            email_object_from_secret_key.email_ownership_is_verified = True
+            save_email_object_from_secret_key = True
+            status += "EMAIL_OWNERSHIP_VERIFIED "
+        except Exception as e:
+            status += "COULD_NOT_ASSIGN_EMAIL_OWNERSHIP_IS_VERIFIED: " + str(e) + " "
+
+    if link_to_this_voter_if_no_conflicts:
+        try:
+            email_object_from_secret_key.voter_we_vote_id = voter_we_vote_id
+            save_email_object_from_secret_key = True
+            status += "UPDATE_VOTER_WE_VOTE_ID "
+        except Exception as e:
+            status += "COULD_NOT_UPDATE_VOTER_WE_VOTE_ID: " + str(e) + " "
+
+    if save_email_object_from_secret_key:
+        try:
+            email_object_from_secret_key.save()
+            status += "EMAIL_OBJECT_FROM_SECRET_KEY_SAVED "
+        except Exception as e:
+            status += "COULD_NOT_UPDATE_EMAIL_OBJECT_FROM_SECRET_KEY: " + str(e) + " "
+
+    if voter_we_vote_id == email_object_from_secret_key.voter_we_vote_id:
+        email_secret_key_belongs_to_this_voter = True
+
+    email_ownership_is_verified = email_object_from_secret_key.email_ownership_is_verified
+    if email_secret_key_belongs_to_this_voter and update_this_voter_if_missing_primary and voter_is_missing_primary:
+        voter_ownership_results = voter_manager.update_voter_email_ownership_verified(
+            voter, email_object_from_secret_key)
+        voter_ownership_saved = voter_ownership_results['voter_updated']
+        if voter_ownership_saved:
+            voter = voter_ownership_results['voter']
 
     organization_manager = OrganizationManager()
     if voter_ownership_saved:
@@ -1371,9 +1505,9 @@ def voter_email_address_verify_for_api(voter_device_id, email_secret_key):  # vo
                     voter.linked_organization_we_vote_id = organization.we_vote_id
                     voter.save()
                 except Exception as e:
-                    status += "UNABLE_TO_LINK_NEW_ORGANIZATION_TO_VOTER "
+                    status += "UNABLE_TO_LINK_NEW_ORGANIZATION_TO_VOTER: " + str(e) + " "
 
-        # TODO DALE We want to invalidate the email_secret key used
+        # TODO DALE We want to reset the email_secret key used
 
     is_organization = False
     organization_full_name = ""
@@ -1388,7 +1522,7 @@ def voter_email_address_verify_for_api(voter_device_id, email_secret_key):  # vo
 
     # send previous scheduled emails
     real_name_only = True
-    from_voter_we_vote_id = email_address_object.voter_we_vote_id
+    from_voter_we_vote_id = email_object_from_secret_key.voter_we_vote_id
     if is_organization:
         if positive_value_exists(organization_full_name) and 'Voter-' not in organization_full_name:
             # Only send if the organization name exists

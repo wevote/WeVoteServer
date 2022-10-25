@@ -6,7 +6,8 @@ from .models import CAMPAIGNX_FRIEND_HAS_SUPPORTED_TEMPLATE, CAMPAIGNX_NEWS_ITEM
     CAMPAIGNX_SUPER_SHARE_ITEM_TEMPLATE, CAMPAIGNX_SUPPORTER_INITIAL_RESPONSE_TEMPLATE, \
     FRIEND_ACCEPTED_INVITATION_TEMPLATE, FRIEND_INVITATION_TEMPLATE, LINK_TO_SIGN_IN_TEMPLATE, \
     MESSAGE_TO_FRIEND_TEMPLATE, NOTICE_FRIEND_ENDORSEMENTS_TEMPLATE, NOTICE_VOTER_DAILY_SUMMARY_TEMPLATE, \
-    SEND_BALLOT_TO_SELF, SEND_BALLOT_TO_FRIENDS, SIGN_IN_CODE_EMAIL_TEMPLATE, VERIFY_EMAIL_ADDRESS_TEMPLATE
+    REMIND_CONTACT, SEND_BALLOT_TO_SELF, SEND_BALLOT_TO_FRIENDS, SIGN_IN_CODE_EMAIL_TEMPLATE, \
+    VERIFY_EMAIL_ADDRESS_TEMPLATE
 from django.template.loader import get_template
 from django.template import Context
 import json
@@ -68,6 +69,11 @@ def get_template_filename(kind_of_email_template, text_or_html):
             return "notice_voter_daily_summary.html"
         else:
             return "notice_voter_daily_summary.txt"
+    elif kind_of_email_template == REMIND_CONTACT:
+        if text_or_html == "HTML":
+            return "remind_contact.html"
+        else:
+            return "remind_contact.txt"
     elif kind_of_email_template == SEND_BALLOT_TO_SELF:
         if text_or_html == "HTML":
             return "send_ballot_to_self.html"

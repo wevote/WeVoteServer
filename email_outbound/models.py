@@ -22,6 +22,7 @@ LINK_TO_SIGN_IN_TEMPLATE = 'LINK_TO_SIGN_IN_TEMPLATE'
 MESSAGE_TO_FRIEND_TEMPLATE = 'MESSAGE_TO_FRIEND_TEMPLATE'
 NOTICE_FRIEND_ENDORSEMENTS_TEMPLATE = 'NOTICE_FRIEND_ENDORSEMENTS_TEMPLATE'
 NOTICE_VOTER_DAILY_SUMMARY_TEMPLATE = 'NOTICE_VOTER_DAILY_SUMMARY_TEMPLATE'
+REMIND_CONTACT = 'REMIND_CONTACT'
 VERIFY_EMAIL_ADDRESS_TEMPLATE = 'VERIFY_EMAIL_ADDRESS_TEMPLATE'
 SEND_BALLOT_TO_SELF = 'SEND_BALLOT_TO_SELF'
 SEND_BALLOT_TO_FRIENDS = 'SEND_BALLOT_TO_FRIENDS'
@@ -34,6 +35,7 @@ KIND_OF_EMAIL_TEMPLATE_CHOICES = (
     (MESSAGE_TO_FRIEND_TEMPLATE, 'Message to friend'),
     (NOTICE_FRIEND_ENDORSEMENTS_TEMPLATE, 'New opinion from Friend.'),
     (NOTICE_VOTER_DAILY_SUMMARY_TEMPLATE, 'Daily summary of activity for the voter.'),
+    (REMIND_CONTACT, 'Remind contact to vote'),
     (VERIFY_EMAIL_ADDRESS_TEMPLATE, 'Verify Senders Email Address'),
     (SEND_BALLOT_TO_SELF, 'Send ballot to self'),
     (SEND_BALLOT_TO_FRIENDS, 'Send ballot to friends'),
@@ -57,6 +59,9 @@ SEND_STATUS_CHOICES = (
     (BEING_SENT, 'Message being sent'),
     (SENT, 'Message sent'),
 )
+
+EMAIL_SECRET_KEY_LENGTH = 12
+SUBSCRIPTION_SECRET_KEY_LENGTH = 48
 
 SENDGRID_API_KEY = get_environment_variable("SENDGRID_API_KEY", no_exception=True)
 
@@ -224,7 +229,8 @@ class EmailManager(models.Manager):
             voter_we_vote_id='',
             email_ownership_is_verified=False,
             make_primary_email=True):
-        secret_key = generate_random_string(12)
+        secret_key = generate_random_string(EMAIL_SECRET_KEY_LENGTH)
+        subscription_secret_key = generate_random_string(SUBSCRIPTION_SECRET_KEY_LENGTH)
         status = ""
         normalized_email_address = str(normalized_email_address)
         normalized_email_address = normalized_email_address.strip()
@@ -246,6 +252,7 @@ class EmailManager(models.Manager):
                 voter_we_vote_id=voter_we_vote_id,
                 email_ownership_is_verified=email_ownership_is_verified,
                 secret_key=secret_key,
+                subscription_secret_key=subscription_secret_key,
             )
             email_address_object_saved = True
             success = True
@@ -673,9 +680,10 @@ class EmailManager(models.Manager):
             print(status)
 
         email_ownership_is_verified = False
-        if email_address_object_found:
+        owner_voter_we_vote_id = email_address_object.voter_we_vote_id
+        if email_address_object_found and positive_value_exists(email_address_object.voter_we_vote_id):
             try:
-                # Note that we leave the secret key in place so we can find the owner we_vote_id in a subsequent call
+                # Note that we leave the secret key in place, so we can find the owner we_vote_id in a subsequent call
                 email_address_object.email_ownership_is_verified = True
                 email_address_object.save()
                 email_ownership_is_verified = True
@@ -694,6 +702,7 @@ class EmailManager(models.Manager):
             'email_address_object_we_vote_id':  email_address_object_we_vote_id,
             'email_address_object':             email_address_object,
             'email_ownership_is_verified':      email_ownership_is_verified,
+            'owner_voter_we_vote_id':           owner_voter_we_vote_id,
         }
         return results
 
@@ -1226,7 +1235,7 @@ class EmailManager(models.Manager):
         if results['email_address_object_found']:
             email_address_object = results['email_address_object']
             try:
-                email_address_object.secret_key = generate_random_string(12)
+                email_address_object.secret_key = generate_random_string(EMAIL_SECRET_KEY_LENGTH)
                 email_address_object.save()
                 return email_address_object.secret_key
             except Exception as e:
@@ -1249,7 +1258,8 @@ class EmailManager(models.Manager):
             email_address_object = results['email_address_object']
             if not positive_value_exists(email_address_object.subscription_secret_key) or force_change:
                 try:
-                    email_address_object.subscription_secret_key = generate_random_string(48)
+                    email_address_object.subscription_secret_key = \
+                        generate_random_string(SUBSCRIPTION_SECRET_KEY_LENGTH)
                     email_address_object.save()
                     return email_address_object.subscription_secret_key
                 except Exception as e:
