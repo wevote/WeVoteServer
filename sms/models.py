@@ -32,6 +32,8 @@ SEND_STATUS_CHOICES = (
     (SENT, 'Message sent'),
 )
 
+SMS_SECRET_KEY_LENGTH = 12
+
 
 class SMSPhoneNumber(models.Model):
     """
@@ -240,7 +242,7 @@ class SMSManager(models.Manager):
 
     def create_sms_phone_number(
             self, normalized_sms_phone_number, voter_we_vote_id='', sms_ownership_is_verified=False):
-        secret_key = generate_random_string(12)
+        secret_key = generate_random_string(SMS_SECRET_KEY_LENGTH)
         normalized_sms_phone_number = str(normalized_sms_phone_number)
         normalized_sms_phone_number = normalized_sms_phone_number.strip()
         normalized_sms_phone_number = normalized_sms_phone_number.lower()
@@ -935,7 +937,7 @@ class SMSManager(models.Manager):
         if results['sms_phone_number_found']:
             sms_phone_number = results['sms_phone_number']
             try:
-                sms_phone_number.secret_key = generate_random_string(12)
+                sms_phone_number.secret_key = generate_random_string(SMS_SECRET_KEY_LENGTH)
                 sms_phone_number.save()
                 return sms_phone_number.secret_key
             except Exception as e:

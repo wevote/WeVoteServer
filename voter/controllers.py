@@ -1730,7 +1730,8 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         facebook_secret_key='',
         twitter_secret_key='',
         invitation_secret_key='',
-        web_app_root_url=''):
+        web_app_root_url='',
+        do_not_merge_if_currently_signed_in=False):
     current_voter_found = False
     email_owner_voter_found = False
     facebook_owner_voter_found = False
@@ -1762,7 +1763,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
         error_results = {
-            'status':                       "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
+            'status':                       "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID ",
             'success':                      False,
             'voter_device_id':              voter_device_id,
             'current_voter_found':          current_voter_found,
@@ -1780,13 +1781,27 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
             and not positive_value_exists(facebook_secret_key) \
             and not positive_value_exists(twitter_secret_key) \
             and not positive_value_exists(invitation_secret_key):
+        status += "VOTER_SPLIT_INTO_TWO_ACCOUNTS_SECRET_KEY_NOT_PASSED_IN "
         error_results = {
-            'status':                       "VOTER_SPLIT_INTO_TWO_ACCOUNTS_SECRET_KEY_NOT_PASSED_IN",
+            'status':                       status,
             'success':                      False,
             'voter_device_id':              voter_device_id,
             'current_voter_found':          current_voter_found,
             'email_owner_voter_found':      email_owner_voter_found,
             'facebook_owner_voter_found':   facebook_owner_voter_found,
+            'invitation_owner_voter_found': False,
+        }
+        return error_results
+
+    if do_not_merge_if_currently_signed_in and voter.is_signed_in():
+        status += "VOTER_MERGE_STOPPED-ALREADY_SIGNED_IN "
+        error_results = {
+            'status': status,
+            'success': True,
+            'voter_device_id': voter_device_id,
+            'current_voter_found': current_voter_found,
+            'email_owner_voter_found': email_owner_voter_found,
+            'facebook_owner_voter_found': facebook_owner_voter_found,
             'invitation_owner_voter_found': False,
         }
         return error_results
@@ -1799,20 +1814,21 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     if positive_value_exists(email_secret_key):
         status += "EMAIL_SECRET_KEY "
         email_results = email_manager.retrieve_email_address_object_from_secret_key(email_secret_key=email_secret_key)
+        success = email_results['success']
         if email_results['email_address_object_found']:
             email_address_object = email_results['email_address_object']
+            if positive_value_exists(email_address_object.voter_we_vote_id):
+                email_owner_voter_results = voter_manager.retrieve_voter_by_we_vote_id(
+                    email_address_object.voter_we_vote_id)
+                if email_owner_voter_results['voter_found']:
+                    email_owner_voter_found = True
+                    email_owner_voter = email_owner_voter_results['voter']
+                    # TODO Pull the first/last name out of FriendInvitationEmailLink
 
-            email_owner_voter_results = voter_manager.retrieve_voter_by_we_vote_id(
-                email_address_object.voter_we_vote_id)
-            if email_owner_voter_results['voter_found']:
-                email_owner_voter_found = True
-                email_owner_voter = email_owner_voter_results['voter']
-                # TODO Pull the first/last name out of FriendInvitationEmailLink
-
-        if not email_owner_voter_found:
+        if not email_owner_voter_found or not success:
             error_results = {
-                'status':                       "EMAIL_OWNER_VOTER_NOT_FOUND",
-                'success':                      False,
+                'status':                       "VOTER_MERGE_EMAIL_OWNER_VOTER_NOT_FOUND",
+                'success':                      success,
                 'voter_device_id':              voter_device_id,
                 'current_voter_found':          current_voter_found,
                 'email_owner_voter_found':      email_owner_voter_found,
@@ -1948,10 +1964,9 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
             if not facebook_owner_voter.email_ownership_is_verified and facebook_email_address_verified:
                 try:
                     # Attach the email_address_object to facebook_owner_voter
-                    voter_manager.update_voter_email_ownership_verified(facebook_owner_voter,
-                                                                        email_address_object)
+                    voter_manager.update_voter_email_ownership_verified(facebook_owner_voter, email_address_object)
                 except Exception as e:
-                    status += "UNABLE_TO_MAKE_FACEBOOK_EMAIL_THE_PRIMARY " + str(e) + " "
+                    status += "UNABLE_TO_MAKE_FACEBOOK_EMAIL_THE_PRIMARY: " + str(e) + " "
 
         # Now we have voter (from voter_device_id) and email_owner_voter (from facebook_secret_key)
         # We are going to make the email_owner_voter the new master

@@ -1137,9 +1137,19 @@ def voter_email_address_verify_view(request):  # voterEmailAddressVerify
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     email_secret_key = request.GET.get('email_secret_key', '')
+    # We are currently not using incoming variables "first_name_changed", "last_name_changed" or "full_name_changed"
+    first_name, first_name_changed = return_string_value_and_changed_boolean_from_get(request, 'first_name')
+    last_name, last_name_changed = return_string_value_and_changed_boolean_from_get(request, 'last_name')
+    full_name, full_name_changed = return_string_value_and_changed_boolean_from_get(request, 'full_name')
 
-    results = voter_email_address_verify_for_api(voter_device_id=voter_device_id,
-                                                 email_secret_key=email_secret_key)
+    results = voter_email_address_verify_for_api(
+        voter_device_id=voter_device_id,
+        email_secret_key=email_secret_key,
+        first_name=first_name,
+        last_name=last_name,
+        full_name=full_name,
+        name_save_only_if_no_existing_names=True,
+    )
 
     json_data = {
         'status':                           results['status'],
@@ -1302,22 +1312,26 @@ def voter_merge_two_accounts_view(request):  # voterMergeTwoAccounts
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    do_not_merge_if_currently_signed_in = request.GET.get('do_not_merge_if_currently_signed_in', '')
     email_secret_key = request.GET.get('email_secret_key', '')
     facebook_secret_key = request.GET.get('facebook_secret_key', '')
     twitter_secret_key = request.GET.get('twitter_secret_key', '')
     invitation_secret_key = request.GET.get('invitation_secret_key', '')
     hostname = request.GET.get('hostname', '')
 
-    results = voter_merge_two_accounts_for_api(voter_device_id=voter_device_id,
-                                               email_secret_key=email_secret_key,
-                                               facebook_secret_key=facebook_secret_key,
-                                               twitter_secret_key=twitter_secret_key,
-                                               invitation_secret_key=invitation_secret_key,
-                                               web_app_root_url=hostname)
+    results = voter_merge_two_accounts_for_api(
+        voter_device_id=voter_device_id,
+        email_secret_key=email_secret_key,
+        facebook_secret_key=facebook_secret_key,
+        twitter_secret_key=twitter_secret_key,
+        invitation_secret_key=invitation_secret_key,
+        do_not_merge_if_currently_signed_in=do_not_merge_if_currently_signed_in,
+        web_app_root_url=hostname)
 
     json_data = {
         'status':                           results['status'],
         'success':                          results['success'],
+        'email_owner_voter_found':          results['email_owner_voter_found'],
         'voter_device_id':                  voter_device_id,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -2970,6 +2984,7 @@ def voter_verify_secret_code_view(request):  # voterVerifySecretCode
     """
     Compare a time-limited 6 digit secret code against this specific voter_device_id. If correct, sign in the
     voter_device_id.
+    See also voter_email_address_verify_for_api  # voterEmailAddressVerify
     :param request:
     :return:
     """
@@ -3091,11 +3106,11 @@ def voter_verify_secret_code_view(request):  # voterVerifySecretCode
                     matching_results = email_manager.retrieve_email_address_object(
                         normalized_email_address=email_object_from_secret_key.normalized_email_address)
                     if matching_results['email_address_object_found']:
-                        email_address_from_normalized = matching_results['email_address_object']
-                        if positive_value_exists(email_address_from_normalized.email_ownership_is_verified):
-                            if positive_value_exists(email_address_from_normalized.voter_we_vote_id):
+                        email_object_from_normalized = matching_results['email_address_object']
+                        if positive_value_exists(email_object_from_normalized.email_ownership_is_verified):
+                            if positive_value_exists(email_object_from_normalized.voter_we_vote_id):
                                 voter_results = voter_manager.retrieve_voter_by_we_vote_id(
-                                    email_address_from_normalized.voter_we_vote_id)
+                                    email_object_from_normalized.voter_we_vote_id)
                                 if voter_results['voter_found']:
                                     voter_from_normalized = voter_results['voter']
                                     # If here we know the voter account still exists
@@ -3104,11 +3119,11 @@ def voter_verify_secret_code_view(request):  # voterVerifySecretCode
                                         new_owner_voter = voter_from_normalized
                     elif matching_results['email_address_list_found']:
                         email_address_list = matching_results['email_address_list']
-                        for email_address_from_normalized in email_address_list:
-                            if positive_value_exists(email_address_from_normalized.email_ownership_is_verified):
-                                if positive_value_exists(email_address_from_normalized.voter_we_vote_id):
+                        for email_object_from_normalized in email_address_list:
+                            if positive_value_exists(email_object_from_normalized.email_ownership_is_verified):
+                                if positive_value_exists(email_object_from_normalized.voter_we_vote_id):
                                     voter_results = voter_manager.retrieve_voter_by_we_vote_id(
-                                        email_address_from_normalized.voter_we_vote_id)
+                                        email_object_from_normalized.voter_we_vote_id)
                                     if voter_results['voter_found']:
                                         voter_from_normalized = voter_results['voter']
                                         # If here we know the voter account still exists
