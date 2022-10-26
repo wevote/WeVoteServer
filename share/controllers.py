@@ -736,7 +736,8 @@ def shared_item_save_for_api(  # sharedItemSave
             voter_device_id=voter_device_id,
             email_addresses_raw=other_voter_email_address_text,
             invitation_message=shared_message,
-            other_voter_display_name=other_voter_display_name,
+            # other_voter_display_name=other_voter_display_name,
+            other_voter_first_name=other_voter_first_name,
             sender_display_name=shared_by_display_name,
             url_with_shared_item_code=url_with_shared_item_code,
             web_app_root_url=hostname)

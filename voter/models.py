@@ -3913,7 +3913,8 @@ class VoterDeviceLinkManager(models.Manager):
             generate_new_secret_code=False,
             delete_secret_code=False,
             email_secret_key=False,
-            sms_secret_key=False):
+            sms_secret_key=False,
+            called_recursively=False):
         """
         Update existing voter_device_link with a new voter_id or google_civic_election_id
         """
@@ -3924,6 +3925,8 @@ class VoterDeviceLinkManager(models.Manager):
         missing_required_variables = False
         voter_device_link_id = 0
 
+        if positive_value_exists(called_recursively):
+            status += "UPDATING_VOTER_DEVICE_LINK_RECURSIVELY "
         try:
             if positive_value_exists(voter_device_link.voter_device_id):
                 if voter_object and positive_value_exists(voter_object.id):
@@ -3957,6 +3960,35 @@ class VoterDeviceLinkManager(models.Manager):
                 missing_required_variables = True
                 voter_device_link_id = 0
                 status += "UPDATE-MISSING_VOTER_DEVICE_ID "
+        except IntegrityError as e:
+            handle_record_not_saved_exception(e, logger=logger)
+            error_result = True
+            exception_record_not_saved = True
+            status += "UPDATE_VOTER_DEVICE_INTEGRITY_ERROR: " + str(e) + " "
+            success = False
+            # There are three fields which require that they are unique
+            # If voter tries to sign in with an email, the email_secret_key gets attached to that voter_device_link
+            # If voter clears out cookies, and then tries to sign in again with the same email, we need to be able
+            #  to clear out email_secret_key so voter can sign in in other browser
+            # If this is a secondary recursive call of this function, don't proceed
+            if positive_value_exists(email_secret_key) and not positive_value_exists(called_recursively):
+                # status += "CLEARING_EMAIL_SECRET_KEY "
+                status += "NEED_TO_CLEAR_EMAIL_SECRET_KEY-BUT_NOT_FOR_NOW "
+                voter_device_link_manager = VoterDeviceLinkManager()
+                clear_results = voter_device_link_manager.clear_secret_key(email_secret_key=email_secret_key)
+                if clear_results['success']:
+                    save_results = voter_device_link_manager.update_voter_device_link(
+                        voter_device_link=voter_device_link,
+                        voter_object=voter_object,
+                        google_civic_election_id=google_civic_election_id,
+                        state_code=state_code,
+                        generate_new_secret_code=generate_new_secret_code,
+                        delete_secret_code=delete_secret_code,
+                        email_secret_key=email_secret_key,
+                        sms_secret_key=sms_secret_key,
+                        called_recursively=True,
+                    )
+                    return save_results
         except Exception as e:
             handle_record_not_saved_exception(e, logger=logger)
             error_result = True
