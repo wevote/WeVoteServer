@@ -381,7 +381,7 @@ def remind_contact_by_email_send_for_api(  # sharedItemSave in remindMode
         email_address_array=[],
         first_name_array=[],
         last_name_array=[],
-        other_voter_display_name='',
+        other_voter_first_name='',
         other_voter_we_vote_id_array=[],
         email_addresses_raw='',
         invitation_message='',
@@ -469,7 +469,7 @@ def remind_contact_by_email_send_for_api(  # sharedItemSave in remindMode
                     voter_device_id=voter_device_id,
                     sender_voter=sender_voter,
                     sender_email_with_ownership_verified=sender_email_with_ownership_verified,
-                    recipient_name=other_voter_display_name,
+                    recipient_name=other_voter_first_name,
                     recipient_voter_email=one_normalized_raw_email,
                     invitation_message=invitation_message,
                     url_with_shared_item_code=url_with_shared_item_code,
@@ -580,6 +580,10 @@ def send_reminder_to_one_contact(
     else:
         sender_email_address = ""
 
+    remind_contact_url = "{root_url}/friends/remind" \
+        "".format(
+            root_url=web_app_root_url_verified,
+        )
     # Unsubscribe link in email
     # "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
     # recipient_email_subscription_secret_key,
@@ -612,6 +616,7 @@ def send_reminder_to_one_contact(
         "recipient_name":               recipient_name,
         "recipient_unsubscribe_url":    recipient_unsubscribe_url,
         "recipient_voter_email":        recipient_voter_email,
+        "remind_contact_url":           remind_contact_url,
         "url_with_shared_item_code":    url_with_shared_item_code,
         "we_vote_url":                  web_app_root_url_verified,
     }

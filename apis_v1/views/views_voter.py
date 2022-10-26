@@ -3223,6 +3223,7 @@ def voter_contact_list_save_view(request):  # voterContactListSave
     contacts_stored = 0
 
     status, voter, voter_found, voter_device_link = views_voter_utils.get_voter_from_request(request, status)
+    voter_we_vote_id = voter.we_vote_id if hasattr(voter, 'we_vote_id') else ''
     contacts_string = request.POST.get('contacts', None)
 
     augment_with_location = request.POST.get('augment_voter_contact_emails_with_location', False)
@@ -3235,36 +3236,36 @@ def voter_contact_list_save_view(request):  # voterContactListSave
     delete_all_voter_contact_emails = positive_value_exists(delete_all_voter_contact_emails)
     google_api_key_type = request.POST.get('google_api_key_type', 'ballot')
 
-    if delete_all_voter_contact_emails:
-        results = delete_all_voter_contact_emails_for_voter(voter_we_vote_id=voter.we_vote_id)
-    elif hasattr(voter, 'we_vote_id') and contacts_string:
+    if delete_all_voter_contact_emails and voter_we_vote_id:
+        results = delete_all_voter_contact_emails_for_voter(voter_we_vote_id=voter_we_vote_id)
+    elif positive_value_exists(voter_we_vote_id) and contacts_string:
         contacts = json.loads(contacts_string)
         contacts_stored = len(contacts)
-        results = save_google_contacts(voter_we_vote_id=voter.we_vote_id, contacts=contacts)
+        results = save_google_contacts(voter_we_vote_id=voter_we_vote_id, contacts=contacts)
         status += results['status']
 
-    if augment_with_we_vote_data:
+    if augment_with_we_vote_data and positive_value_exists(voter_we_vote_id):
         from email_outbound.controllers import augment_emails_for_voter_with_we_vote_data
-        augment_results = augment_emails_for_voter_with_we_vote_data(voter_we_vote_id=voter.we_vote_id)
+        augment_results = augment_emails_for_voter_with_we_vote_data(voter_we_vote_id=voter_we_vote_id)
         status += augment_results['status']
 
     # 2021-09-30 Requires Pro account which costs $90/month
     # 2022-06-06 We are currently paying for this SendGrid account, so we can implement this
     # from email_outbound.controllers import augment_emails_for_voter_with_sendgrid
-    # augment_results = augment_emails_for_voter_with_sendgrid(voter_we_vote_id=voter.we_vote_id)
+    # augment_results = augment_emails_for_voter_with_sendgrid(voter_we_vote_id=voter_we_vote_id)
     # status += augment_results['status']
 
     # Did not find any matches out of 750 sent and costs $39/month
     # from import_export_snovio.controllers import augment_emails_for_voter_with_snovio
-    # augment_results = augment_emails_for_voter_with_snovio(voter_we_vote_id=voter.we_vote_id)
+    # augment_results = augment_emails_for_voter_with_snovio(voter_we_vote_id=voter_we_vote_id)
     # status += augment_results['status']
 
-    if augment_with_location:
+    if augment_with_location and voter_we_vote_id:
         from import_export_open_people.controllers import augment_emails_for_voter_with_open_people
-        augment_results = augment_emails_for_voter_with_open_people(voter_we_vote_id=voter.we_vote_id)
+        augment_results = augment_emails_for_voter_with_open_people(voter_we_vote_id=voter_we_vote_id)
         status += augment_results['status']
 
-    retrieve_results = voter_contact_list_retrieve_for_api(voter_we_vote_id=voter.we_vote_id)
+    retrieve_results = voter_contact_list_retrieve_for_api(voter_we_vote_id=voter_we_vote_id)
     voter_contact_email_list = retrieve_results['voter_contact_email_list']
     voter_contact_email_google_count = retrieve_results['voter_contact_email_google_count']
 
@@ -3282,7 +3283,7 @@ def voter_contact_list_save_view(request):  # voterContactListSave
         'voter_contact_email_google_count': voter_contact_email_google_count,
         'voter_contact_email_list':         voter_contact_email_list,
         'voter_contact_email_list_count':   len(voter_contact_email_list),
-        'we_vote_id_for_google_contacts':   voter.we_vote_id,
+        'we_vote_id_for_google_contacts':   voter_we_vote_id,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -3296,6 +3297,7 @@ def voter_contact_save_view(request):  # voterContactSave
     status, voter, voter_found, voter_device_link = views_voter_utils.get_voter_from_request(request, status)
     email_address_text = request.GET.get('email_address_text', None)
     ignore_voter_contact = positive_value_exists(request.GET.get('ignore_voter_contact', False))
+    stop_ignoring_voter_contact = positive_value_exists(request.GET.get('stop_ignoring_voter_contact', False))
 
     try:
         voter_we_vote_id = voter.we_vote_id
@@ -3303,17 +3305,21 @@ def voter_contact_save_view(request):  # voterContactSave
         status += "VOTER_CONTACT_SAVE_NO_VOTER_WE_VOTE_ID: " + str(e) + " "
         voter_we_vote_id = ''
 
-    action_variable_found = positive_value_exists(ignore_voter_contact)
+    action_variable_found = positive_value_exists(ignore_voter_contact) or \
+        positive_value_exists(stop_ignoring_voter_contact)
     if not positive_value_exists(action_variable_found) or not positive_value_exists(email_address_text) or \
             not positive_value_exists(voter_we_vote_id):
         email_ignored = False
         status += "VOTER_CONTACT_SAVE_MISSING_KEY_VARIABLE "
         success = False
         json_data = {
-            'status':                   status,
-            'success':                  success,
-            'email_address_text':       email_address_text,
-            'email_ignored':            email_ignored,
+            'status': status,
+            'success': success,
+            'action_variable_found': action_variable_found,
+            'email_address_text': email_address_text,
+            'email_ignored': email_ignored,
+            'ignore_voter_contact': ignore_voter_contact,
+            'stop_ignoring_voter_contact': stop_ignoring_voter_contact,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -3333,16 +3339,25 @@ def voter_contact_save_view(request):  # voterContactSave
             except Exception as e:
                 success = False
                 status += "VOTER_CONTACT_EMAIL_FAILED_TO_SAVE_IGNORE: " + str(e) + ' '
+        elif stop_ignoring_voter_contact:
+            try:
+                voter_contact_email.ignore_contact = False
+                voter_contact_email.save()
+                email_ignored = False
+            except Exception as e:
+                success = False
+                status += "VOTER_CONTACT_EMAIL_FAILED_TO_SAVE_STOP_IGNORING: " + str(e) + ' '
         else:
             status += "VOTER_CONTACT_EMAIL_ACTION_MISSING "
     else:
         status += "VOTER_CONTACT_EMAIL_NOT_FOUND "
     json_data = {
-        'status':                   status,
-        'success':                  success,
-        'action_variable_found':    action_variable_found,
-        'email_address_text':       email_address_text,
-        'email_ignored':            email_ignored,
-        'ignore_voter_contact':     ignore_voter_contact,
+        'status':                       status,
+        'success':                      success,
+        'action_variable_found':        action_variable_found,
+        'email_address_text':           email_address_text,
+        'email_ignored':                email_ignored,
+        'ignore_voter_contact':         ignore_voter_contact,
+        'stop_ignoring_voter_contact':  stop_ignoring_voter_contact,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')

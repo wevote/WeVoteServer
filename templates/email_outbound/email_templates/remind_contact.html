@@ -21,7 +21,7 @@
                     <td height="16" style="line-height:16px;" colspan="1">&nbsp;</td>
                   </tr>
                   <tr>
-                    <td width="249" align="left" valign="middle" style="height:49px;line-height:0px;"><a href="{{ we_vote_url }}" style="color:#3b5998;text-decoration:none;"><img src="https://WeVote.US/img/global/logos/we-vote-logo-horizontal-no-padding-249x49.png" alt="" width="249" height="49" style="border:0;" /></a></td>
+                    <td width="141" align="left" valign="middle" style="height:28px;line-height:0px;"><a href="{{ we_vote_url }}" style="color:#3b5998;text-decoration:none;"><img src="https://WeVote.US/img/global/logos/we-vote-logo-horizontal-no-padding-141x28.png" alt="" width="141" height="28" style="border:0;" /></a></td>
                   </tr>
                   <tr style="border-bottom:solid 1px #e5e5e5;">
                     <td height="16" style="line-height:16px;" colspan="1">&nbsp;</td>
@@ -46,7 +46,7 @@
                   </tr>
                 {% endif %}
                   <tr>
-                    <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:20px;line-height:24px;color:#141823;">{% if sender_name %}{{ sender_name }}{% else %}Your   friend{% endif %}{% if sender_email_address %} ({{ sender_email_address }}){% elif sms_phone_number %} ({{ sms_phone_number }}){% endif %} sent you this reminder to vote.</span></td>
+                    <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:20px;line-height:24px;color:#141823;">{% if sender_name %}{{ sender_name }}{% else %}Your   friend{% endif %}{% if sender_email_address %} ({{ sender_email_address }}){% elif sms_phone_number %} ({{ sms_phone_number }}){% endif %} wants to make sure that you remember to vote.</span></td>
                   </tr>
                   <tr style="">
                     <td height="14" style="line-height:14px;">&nbsp;</td>
@@ -60,13 +60,13 @@
                             <table cellspacing="0" cellpadding="0" width="100%" align="left" class="ib_t" style="border-collapse:collapse;width:100%;min-width:420px;" role="presentation">
                               <tr class="ib_row">
                                 {% if sender_photo %}
-                                <td valign="top" style="padding-right:15px;font-size:0px;" class="ib_img"><a href="{{ url_with_shared_item_code }}" style="color:#3b5998;text-decoration:none;"><img src="{{ sender_photo }}" alt="" width="75" height="75" style="border:0;background:#ffffff;" /></a></td>
+                                <td valign="top" style="padding-right:15px;font-size:0px;" class="ib_img"><a href="{{ url_with_shared_item_code }}" style="color:#3b5998;text-decoration:none;"><img src="{{ sender_photo }}" alt="" width="75" height="75" style="border:0;border-radius:75px;background:#ffffff;" /></a></td>
                                 {% endif %}
                                 <td width="100%" valign="middle" style="padding-right:10px;" class="ib_mid">
                                   <table cellspacing="0" cellpadding="0" style="border-collapse:collapse;" role="presentation">
                                     {% if invitation_message %}
                                     <tr>
-                                      <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:20px;line-height:24px;color:#898f9c;"><span style="color: #141823;">{{ invitation_message }}</span></span></td>
+                                      <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:20px;line-height:24px;color:#898f9c;"><span style="color: #141823;">&quot;{{ invitation_message }}&quot;</span></span></td>
                                     </tr>
                                     {% endif %}
                                     {% if sender_description or sender_network_details %}
@@ -106,42 +106,42 @@
               </td>
               <td width="15" style="display:block;width:15px;">&nbsp;&nbsp;&nbsp;</td>
             </tr>
-            <tr>
-              <td width="15" style="display:block;width:15px;">&nbsp;&nbsp;&nbsp;</td>
-              <td style="">
-                <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;" role="presentation">
-                  <tr style="">
-                    <td height="2" style="line-height:2px;" colspan="3">&nbsp;</td>
-                  </tr>
-                  <tr>
-                    <td class="mb_blk" style="">
-                        <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;" role="presentation">
-                          <tr>
-                            <td style="border-collapse:collapse;border-radius:4px;text-align:center;display:block;border:solid 1px #344c80;box-shadow:inset 0 1px 1px rgba(255, 255, 255, 0.1),0 1px 0 rgba(0, 0, 0, 0.1);background:#0834CD;padding:11px 16px 11px 16px;">
-                      <a href="{{ url_with_shared_item_code }}" style="color:#0834CD;text-decoration:none;display:block;"><center><span style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;white-space:nowrap;vertical-align:middle;color:#ffffff;text-shadow:0 -1px 0 #415686;font-size:20px;line-height:20px;">View your ballot</span></center></a>
-                            </td>
-                          </tr>
-                        </table>
-                    </td>
-                    <td width="10" style="display:block;width:10px;" class="mb_hide">&nbsp;&nbsp;&nbsp;</td>
-                    <td class="mb_blk" style="">
-                        <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;" role="presentation">
-                          <tr>
-                            <td style="border-collapse:collapse;border-radius:4px;text-align:center;display:block;border:solid 1px #c9ccd1;box-shadow:0 1px 0 rgba(0, 0, 0, 0.04);background:#f6f7f8;padding:11px 16px 11px 16px;">
-                      <a href="{{ we_vote_url }}" style="color:#0834CD;text-decoration:none;display:block;"><center><span style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;white-space:nowrap;vertical-align:middle;text-shadow:0 1px 0 #ffffff;font-size:20px;line-height:20px;">What is We Vote?</span></center></a>
-                            </td>
-                          </tr>
-                        </table>
-                    </td>
-                    <td width="100%" class="mb_hide" style=""></td>
-                  </tr>
-                  <tr style="">
-                    <td height="32" style="line-height:32px;" colspan="3">&nbsp;</td>
-                  </tr>
-                </table>
-              </td>
-              <td width="15" style="display:block;width:15px;">&nbsp;&nbsp;&nbsp;</td>
-            </tr>
+{#            <tr>#}
+{#              <td width="15" style="display:block;width:15px;">&nbsp;&nbsp;&nbsp;</td>#}
+{#              <td style="">#}
+{#                <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;" role="presentation">#}
+{#                  <tr style="">#}
+{#                    <td height="2" style="line-height:2px;" colspan="3">&nbsp;</td>#}
+{#                  </tr>#}
+{#                  <tr>#}
+{#                    <td class="mb_blk" style="">#}
+{#                        <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;" role="presentation">#}
+{#                          <tr>#}
+{#                            <td style="border-collapse:collapse;border-radius:4px;text-align:center;display:block;border:solid 1px #344c80;box-shadow:inset 0 1px 1px rgba(255, 255, 255, 0.1),0 1px 0 rgba(0, 0, 0, 0.1);background:#0834CD;padding:11px 16px 11px 16px;">#}
+{#                      <a href="{{ url_with_shared_item_code }}" style="color:#0834CD;text-decoration:none;display:block;"><center><span style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;white-space:nowrap;vertical-align:middle;color:#ffffff;text-shadow:0 -1px 0 #415686;font-size:20px;line-height:20px;">View your ballot</span></center></a>#}
+{#                            </td>#}
+{#                          </tr>#}
+{#                        </table>#}
+{#                    </td>#}
+{#                    <td width="10" style="display:block;width:10px;" class="mb_hide">&nbsp;&nbsp;&nbsp;</td>#}
+{#                    <td class="mb_blk" style="">#}
+{#                        <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;" role="presentation">#}
+{#                          <tr>#}
+{#                            <td style="border-collapse:collapse;border-radius:4px;text-align:center;display:block;border:solid 1px #c9ccd1;box-shadow:0 1px 0 rgba(0, 0, 0, 0.04);background:#f6f7f8;padding:11px 16px 11px 16px;">#}
+{#                      <a href="{{ we_vote_url }}" style="color:#0834CD;text-decoration:none;display:block;"><center><span style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;white-space:nowrap;vertical-align:middle;text-shadow:0 1px 0 #ffffff;font-size:20px;line-height:20px;">What is We Vote?</span></center></a>#}
+{#                            </td>#}
+{#                          </tr>#}
+{#                        </table>#}
+{#                    </td>#}
+{#                    <td width="100%" class="mb_hide" style=""></td>#}
+{#                  </tr>#}
+{#                  <tr style="">#}
+{#                    <td height="32" style="line-height:32px;" colspan="3">&nbsp;</td>#}
+{#                  </tr>#}
+{#                </table>#}
+{#              </td>#}
+{#              <td width="15" style="display:block;width:15px;">&nbsp;&nbsp;&nbsp;</td>#}
+{#            </tr>#}
             <tr>
               <td width="15" style="display:block;width:15px;">&nbsp;&nbsp;&nbsp;</td>
               <td style="">
@@ -150,13 +150,19 @@
                     <td height="14" style="line-height:14px;">&nbsp;</td>
                   </tr>
                   <tr>
-                    <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:20px;line-height:24px;color:#141823;">View your ballot link: {{ url_with_shared_item_code }}</span></td>
+                      <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:20px;line-height:24px;color:#141823;"><a href="{{ remind_contact_url }}" style="color:#0834CD;display:block;">Remind your friends to vote.</a></span></td>
                   </tr>
                   <tr style="">
-                    <td height="7" style="line-height:7px;">&nbsp;</td>
+                    <td height="14" style="line-height:14px;">&nbsp;</td>
                   </tr>
                   <tr>
-                    <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:20px;line-height:24px;color:#141823;">What is We Vote link: {{ we_vote_url }}</span></td>
+                      <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:20px;line-height:24px;color:#141823;">Not sure who to vote for?<br /><a href="{{ url_with_shared_item_code }}" style="color:#0834CD;display:block;">View your ballot on We Vote.</a></span></td>
+                  </tr>
+                  <tr style="">
+                    <td height="14" style="line-height:14px;">&nbsp;</td>
+                  </tr>
+                  <tr>
+                      <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:20px;line-height:24px;color:#141823;"><a href="{{ we_vote_url }}" style="color:#0834CD;display:block;">What is We Vote?</a></span></td>
                   </tr>
                   <tr style="">
                     <td height="14" style="line-height:14px;">&nbsp;</td>
