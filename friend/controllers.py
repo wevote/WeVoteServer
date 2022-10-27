@@ -385,9 +385,10 @@ def remind_contact_by_email_send_for_api(  # sharedItemSave in remindMode
         other_voter_we_vote_id_array=[],
         email_addresses_raw='',
         invitation_message='',
+        ready_page_url_using_shared_item_code='',
+        remind_contacts_url_using_shared_item_code='',
         sender_display_name='',
         sender_email_address='',
-        url_with_shared_item_code='',
         web_app_root_url=''):
     success = True
     status = ""
@@ -453,6 +454,8 @@ def remind_contact_by_email_send_for_api(  # sharedItemSave in remindMode
 
     if not positive_value_exists(invitation_message):
         invitation_message = ""
+    # DALE 2022-10-26 Instead of looping through multiple emails here, I think we will want to give each email we
+    #  send its own SharedItem
     if email_address_array:
         # This branch hasn't been updated yet, but should be supported for future front-end scenarios
         # For example, we might want a "Send to all" option
@@ -472,7 +475,8 @@ def remind_contact_by_email_send_for_api(  # sharedItemSave in remindMode
                     recipient_name=other_voter_first_name,
                     recipient_voter_email=one_normalized_raw_email,
                     invitation_message=invitation_message,
-                    url_with_shared_item_code=url_with_shared_item_code,
+                    ready_page_url_using_shared_item_code=ready_page_url_using_shared_item_code,
+                    remind_contacts_url_using_shared_item_code=remind_contacts_url_using_shared_item_code,
                     web_app_root_url=web_app_root_url)
                 status += send_results['status']
         else:
@@ -508,7 +512,8 @@ def send_reminder_to_one_contact(
         recipient_name='',
         recipient_voter_email='',
         invitation_message='',
-        url_with_shared_item_code='',
+        ready_page_url_using_shared_item_code='',
+        remind_contacts_url_using_shared_item_code='',
         web_app_root_url=''):
     status = ""
     success = True
@@ -580,10 +585,6 @@ def send_reminder_to_one_contact(
     else:
         sender_email_address = ""
 
-    remind_contact_url = "{root_url}/friends/remind" \
-        "".format(
-            root_url=web_app_root_url_verified,
-        )
     # Unsubscribe link in email
     # "recipient_unsubscribe_url":    web_app_root_url_verified + "/settings/notifications/esk/" +
     # recipient_email_subscription_secret_key,
@@ -606,19 +607,19 @@ def send_reminder_to_one_contact(
                               "".format(setting='remindcontact')
 
     template_variables_for_json = {
-        "subject":                      subject,
-        "invitation_message":           invitation_message,
-        "sender_name":                  sender_name,
-        "sender_photo":                 sender_photo,
-        "sender_email_address":         sender_email_address,  # Does not affect the "From" email header
-        "sender_description":           sender_description,
-        "sender_network_details":       sender_network_details,
-        "recipient_name":               recipient_name,
-        "recipient_unsubscribe_url":    recipient_unsubscribe_url,
-        "recipient_voter_email":        recipient_voter_email,
-        "remind_contact_url":           remind_contact_url,
-        "url_with_shared_item_code":    url_with_shared_item_code,
-        "we_vote_url":                  web_app_root_url_verified,
+        "subject":                                  subject,
+        "invitation_message":                       invitation_message,
+        "sender_name":                              sender_name,
+        "sender_photo":                             sender_photo,
+        "sender_email_address":                     sender_email_address,  # Does not affect the "From" email header
+        "sender_description":                       sender_description,
+        "sender_network_details":                   sender_network_details,
+        "ready_page_url_using_shared_item_code":    ready_page_url_using_shared_item_code,
+        "recipient_name":                           recipient_name,
+        "recipient_unsubscribe_url":                recipient_unsubscribe_url,
+        "recipient_voter_email":                    recipient_voter_email,
+        "remind_contacts_url_using_shared_item_code": remind_contacts_url_using_shared_item_code,
+        "we_vote_url":                              web_app_root_url_verified,
     }
     template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
 
