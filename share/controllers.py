@@ -156,6 +156,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
     success = True
     candidate_we_vote_id = ''
     date_first_shared = None
+    hostname = ''
     include_friends_only_positions = False
     is_ballot_share = False
     is_candidate_share = False
@@ -217,6 +218,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
             'candidate_we_vote_id':             candidate_we_vote_id,
             'date_first_shared':                date_first_shared,
             'destination_full_url':             destination_full_url,
+            'destination_full_url_override':    '',
             'email_secret_key':                 email_secret_key,
             'google_civic_election_id':         google_civic_election_id,
             'include_friends_only_positions':   include_friends_only_positions,
@@ -268,11 +270,22 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         except Exception as e:
             status += "COULD_NOT_MODIFY_HOSTNAME: " + str(e) + " "
 
+    destination_full_url_override = ''
+    if positive_value_exists(shared_item_code) and positive_value_exists(hostname):
+        if positive_value_exists(shared_item.shared_item_code_ready):
+            if shared_item_code == shared_item.shared_item_code_ready:
+                destination_full_url_override = "https://" + hostname + "/ready"
+        if positive_value_exists(shared_item.shared_item_code_remind_contacts):
+            if shared_item_code == shared_item.shared_item_code_remind_contacts:
+                destination_full_url_override = "https://" + hostname + "/friends/remind"
+
     if viewed_by_voter_we_vote_id == shared_item.shared_by_voter_we_vote_id:
         api_call_coming_from_voter_who_shared = True
 
     # Store that the link was clicked
-    if positive_value_exists(shared_item_clicked):
+    # TODO We need to adjust this since each shared item can contain the primary destination_full_url
+    #  and secondary links
+    if positive_value_exists(shared_item_clicked) and not positive_value_exists(api_call_coming_from_voter_who_shared):
         # At some point we may allow a distinction between sharing only your public opinions
         #  (as opposed to public AND friends only opinion). shared_item_code_public_opinions is not implemented yet.
         include_public_positions = shared_item.shared_item_code_all_opinions == shared_item_code
@@ -446,6 +459,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         'status':                               status,
         'success':                              success,
         'destination_full_url':                 shared_item.destination_full_url,
+        'destination_full_url_override':        destination_full_url_override,
         'email_secret_key':                     email_secret_key,  # Only returned on first click
         'is_ballot_share':                      shared_item.is_ballot_share,
         'is_candidate_share':                   shared_item.is_candidate_share,
@@ -480,10 +494,12 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
     if api_call_coming_from_voter_who_shared:
         results['shared_item_code_no_opinions'] = shared_item.shared_item_code_no_opinions
         results['shared_item_code_all_opinions'] = shared_item.shared_item_code_all_opinions
+        results['shared_item_code_ready'] = shared_item.shared_item_code_ready
+        results['shared_item_code_remind_contacts'] = shared_item.shared_item_code_remind_contacts
         results['url_with_shared_item_code_no_opinions'] = url_with_shared_item_code_no_opinions
         results['url_with_shared_item_code_all_opinions'] = url_with_shared_item_code_all_opinions
     else:
-        # If here we don't want to reveal the other shared_item code
+        # If here we don't want to reveal the other shared_item codes
         if shared_item.shared_item_code_no_opinions == shared_item_code:
             results['shared_item_code_no_opinions'] = shared_item.shared_item_code_no_opinions
             results['url_with_shared_item_code_no_opinions'] = url_with_shared_item_code_no_opinions
@@ -496,6 +512,14 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         else:
             results['shared_item_code_all_opinions'] = ''
             results['url_with_shared_item_code_all_opinions'] = ''
+        if shared_item.shared_item_code_ready == shared_item_code:
+            results['shared_item_code_ready'] = shared_item.shared_item_code_ready
+        else:
+            results['shared_item_code_ready'] = ''
+        if shared_item.shared_item_code_remind_contacts == shared_item_code:
+            results['shared_item_code_remind_contacts'] = shared_item.shared_item_code_remind_contacts
+        else:
+            results['shared_item_code_remind_contacts'] = ''
     return results
 
 
@@ -525,6 +549,8 @@ def shared_item_save_for_api(  # sharedItemSave
     hostname = ''
     measure_we_vote_id = ''
     office_we_vote_id = ''
+    ready_page_url_using_shared_item_code = ''
+    remind_contacts_url_using_shared_item_code = ''
     shared_by_display_name = None
     shared_by_organization_type = ''
     shared_by_organization_we_vote_id = ''
@@ -574,8 +600,9 @@ def shared_item_save_for_api(  # sharedItemSave
             office_we_vote_id = ballot_item_we_vote_id
 
     if positive_value_exists(is_remind_contact_share):
-        required_variables_for_new_entry = positive_value_exists(destination_full_url) \
-            and positive_value_exists(shared_by_voter_we_vote_id) \
+        # destination_full_url is optional because by default we only use the
+        #  built-in /ready and /friends/remind links
+        required_variables_for_new_entry = positive_value_exists(shared_by_voter_we_vote_id) \
             and positive_value_exists(other_voter_email_address_text)
     else:
         required_variables_for_new_entry = positive_value_exists(destination_full_url) \
@@ -679,7 +706,8 @@ def shared_item_save_for_api(  # sharedItemSave
                     recipient_email_secret_key = \
                         email_manager.update_email_address_with_new_secret_key(
                             email_we_vote_id=recipient_email_address_object.we_vote_id)
-            status += "SECRET_KEY_INCLUDED_ONE_FOUND "
+                if positive_value_exists(recipient_email_secret_key):
+                    status += "SECRET_KEY_INCLUDED_ONE_FOUND_ONE_EMAIL_OBJECT "
         elif retrieve_results['success'] and not retrieve_results['email_address_list_found']:
             # Generate new EmailAddress because none found
             create_results = email_manager.create_email_address(
@@ -688,6 +716,8 @@ def shared_item_save_for_api(  # sharedItemSave
                 recipient_email_address_object = create_results['email_address_object']
                 if positive_value_exists(recipient_email_address_object.secret_key):
                     recipient_email_secret_key = recipient_email_address_object.secret_key
+                    if positive_value_exists(recipient_email_secret_key):
+                        status += "SECRET_KEY_INCLUDED_ONE_FOUND_LIST "
                 else:
                     # If a secret key wasn't generated upon email creation, don't try again
                     status += "CREATE_EMAIL_DID_NOT_GENERATE_SECRET_KEY "
@@ -721,25 +751,37 @@ def shared_item_save_for_api(  # sharedItemSave
         shared_item = create_results['shared_item']
         if positive_value_exists(shared_item.date_first_shared):
             date_first_shared = shared_item.date_first_shared.strftime('%Y-%m-%d %H:%M:%S')
+
         shared_item_code_no_opinions = shared_item.shared_item_code_no_opinions
-        shared_item_code_all_opinions = shared_item.shared_item_code_all_opinions
         url_with_shared_item_code_no_opinions = "https://" + hostname + "/-" + shared_item_code_no_opinions
+
+        shared_item_code_all_opinions = shared_item.shared_item_code_all_opinions
         url_with_shared_item_code_all_opinions = "https://" + hostname + "/-" + shared_item_code_all_opinions
 
-    if create_results['shared_item_created'] and positive_value_exists(is_remind_contact_share):
-        # We could put switch here depending on whether we want to include opinions during remind process
-        url_with_shared_item_code = url_with_shared_item_code_no_opinions
+        # It is better to have a trackable code, but we can still link to the right page if we don't have code
+        if positive_value_exists(shared_item.shared_item_code_ready):
+            ready_page_url_using_shared_item_code = "https://" + hostname + "/-" + shared_item.shared_item_code_ready
+        else:
+            ready_page_url_using_shared_item_code = "https://" + hostname + "/"
 
+        # It is better to have a trackable code, but we can still link to the right page if we don't have code
+        if positive_value_exists(shared_item.shared_item_code_remind_contacts):
+            remind_contacts_url_using_shared_item_code = \
+                "https://" + hostname + "/-" + shared_item.shared_item_code_remind_contacts
+        else:
+            remind_contacts_url_using_shared_item_code = "https://" + hostname + "/friends/remind"
+
+    if create_results['shared_item_created'] and positive_value_exists(is_remind_contact_share):
         # Trigger send of the reminder
         from friend.controllers import remind_contact_by_email_send_for_api
         results = remind_contact_by_email_send_for_api(
             voter_device_id=voter_device_id,
             email_addresses_raw=other_voter_email_address_text,
             invitation_message=shared_message,
-            # other_voter_display_name=other_voter_display_name,
             other_voter_first_name=other_voter_first_name,
             sender_display_name=shared_by_display_name,
-            url_with_shared_item_code=url_with_shared_item_code,
+            ready_page_url_using_shared_item_code=ready_page_url_using_shared_item_code,
+            remind_contacts_url_using_shared_item_code=remind_contacts_url_using_shared_item_code,
             web_app_root_url=hostname)
         status += results['status']
 

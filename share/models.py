@@ -24,6 +24,10 @@ class SharedItem(models.Model):
     #     models.CharField(max_length=50, null=True, blank=True, unique=True, db_index=True)
     # Code for include_friends_only_positions
     shared_item_code_all_opinions = models.CharField(max_length=50, null=True, blank=True, unique=True, db_index=True)
+    # Returns link to /friends/remind URL
+    shared_item_code_remind_contacts = models.CharField(max_length=50, null=True, unique=True, db_index=True)
+    # Returns link to /ready URL
+    shared_item_code_ready = models.CharField(max_length=50, null=True, unique=True, db_index=True)
     # secret key to verify ownership of email on first click
     email_secret_key = models.CharField(max_length=255, null=True, db_index=True)
     # secret key to verify ownership of phone number on first click
@@ -280,8 +284,12 @@ class ShareManager(models.Manager):
             defaults={}):
         create_shared_item_code_no_opinions = True
         create_shared_item_code_all_opinions = True
-        shared_item_code_no_opinions = ''
-        shared_item_code_all_opinions = ''
+        create_shared_item_code_ready = True
+        create_shared_item_code_remind_contacts = True
+        shared_item_code_no_opinions = None
+        shared_item_code_all_opinions = None
+        shared_item_code_ready = None
+        shared_item_code_remind_contacts = None
         shared_item_created = False
         shared_item_found = False
         status = ""
@@ -290,8 +298,20 @@ class ShareManager(models.Manager):
             google_civic_election_id = convert_to_int(google_civic_election_id)
         else:
             google_civic_election_id = 0
-        if not positive_value_exists(destination_full_url) or not positive_value_exists(shared_by_voter_we_vote_id):
-            status += "CREATE_OR_UPDATE_SHARED_ITEM-MISSING_REQUIRED_VARIABLE "
+        is_remind_contact_share = defaults['is_remind_contact_share'] \
+            if 'is_remind_contact_share' in defaults else False
+        if positive_value_exists(is_remind_contact_share):
+            # destination_full_url is optional because by for remind_contact_share we only require the
+            #  built-in /ready and /friends/remind links
+            required_variables = positive_value_exists(shared_by_voter_we_vote_id)
+        else:
+            required_variables = positive_value_exists(shared_by_voter_we_vote_id) and \
+                positive_value_exists(destination_full_url)
+        if not positive_value_exists(required_variables):
+            if positive_value_exists(is_remind_contact_share):
+                status += "CREATE_OR_UPDATE_SHARED_ITEM-MISSING_REMIND_CONTACT_REQUIRED_VARIABLE "
+            else:
+                status += "CREATE_OR_UPDATE_SHARED_ITEM-MISSING_REQUIRED_VARIABLES "
             results = {
                 'success':              False,
                 'status':               status,
@@ -301,7 +321,7 @@ class ShareManager(models.Manager):
             }
             return results
 
-        if force_create_new:
+        if force_create_new or positive_value_exists(is_remind_contact_share):
             shared_item = None
             shared_item_found = False
         else:
@@ -320,6 +340,10 @@ class ShareManager(models.Manager):
                 create_shared_item_code_no_opinions = False
             if positive_value_exists(shared_item.shared_item_code_all_opinions):
                 create_shared_item_code_all_opinions = False
+            if positive_value_exists(shared_item.shared_item_code_ready):
+                create_shared_item_code_ready = False
+            if positive_value_exists(shared_item.shared_item_code_remind_contacts):
+                create_shared_item_code_remind_contacts = False
             if not positive_value_exists(defaults['shared_by_organization_we_vote_id']):
                 pass
 
@@ -332,6 +356,16 @@ class ShareManager(models.Manager):
             random_string = generate_random_string(10)
             # TODO: Confirm its not in use
             shared_item_code_all_opinions = random_string
+
+        if create_shared_item_code_ready:
+            random_string = generate_random_string(8)
+            # TODO: Confirm its not in use
+            shared_item_code_ready = random_string
+
+        if create_shared_item_code_remind_contacts:
+            random_string = generate_random_string(8)
+            # TODO: Confirm its not in use
+            shared_item_code_remind_contacts = random_string
 
         email_secret_key = defaults['email_secret_key'] if 'email_secret_key' in defaults else None
         other_voter_email_address_text = defaults['other_voter_email_address_text'] \
@@ -410,6 +444,14 @@ class ShareManager(models.Manager):
                         shared_item.shared_item_code_all_opinions != shared_item_code_all_opinions:
                     shared_item.shared_item_code_all_opinions = shared_item_code_all_opinions
                     change_to_save = True
+                if positive_value_exists(shared_item_code_ready) and \
+                        shared_item.shared_item_code_ready != shared_item_code_ready:
+                    shared_item.shared_item_code_ready = shared_item_code_ready
+                    change_to_save = True
+                if positive_value_exists(shared_item_code_remind_contacts) and \
+                        shared_item.shared_item_code_remind_contacts != shared_item_code_remind_contacts:
+                    shared_item.shared_item_code_remind_contacts = shared_item_code_remind_contacts
+                    change_to_save = True
                 if shared_item.shared_message != shared_message:
                     if not positive_value_exists(shared_message):
                         shared_message = None
@@ -458,6 +500,8 @@ class ShareManager(models.Manager):
                     shared_by_we_vote_hosted_profile_image_url_tiny=shared_by_we_vote_hosted_profile_image_url_tiny,
                     shared_item_code_no_opinions=shared_item_code_no_opinions,
                     shared_item_code_all_opinions=shared_item_code_all_opinions,
+                    shared_item_code_ready=shared_item_code_ready,
+                    shared_item_code_remind_contacts=shared_item_code_remind_contacts,
                     shared_message=shared_message,
                     site_owner_organization_we_vote_id=defaults['site_owner_organization_we_vote_id'],
                     sms_secret_key=sms_secret_key,
@@ -926,13 +970,17 @@ class ShareManager(models.Manager):
                 if positive_value_exists(read_only):
                     shared_item = SharedItem.objects.using('readonly').get(
                         Q(shared_item_code_no_opinions=shared_item_code) |
-                        Q(shared_item_code_all_opinions=shared_item_code),
+                        Q(shared_item_code_all_opinions=shared_item_code) |
+                        Q(shared_item_code_ready=shared_item_code) |
+                        Q(shared_item_code_remind_contacts=shared_item_code),
                         deleted=False
                     )
                 else:
                     shared_item = SharedItem.objects.get(
                         Q(shared_item_code_no_opinions=shared_item_code) |
-                        Q(shared_item_code_all_opinions=shared_item_code),
+                        Q(shared_item_code_all_opinions=shared_item_code) |
+                        Q(shared_item_code_ready=shared_item_code) |
+                        Q(shared_item_code_remind_contacts=shared_item_code),
                         deleted=False
                     )
                 shared_item_id = shared_item.id
