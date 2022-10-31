@@ -437,14 +437,14 @@ def remind_contact_by_email_send_for_api(  # sharedItemSave in remindMode
         sender_email_with_ownership_verified = \
             email_manager.fetch_primary_email_with_ownership_verified(sender_voter.we_vote_id)
         sender_voter_email_address_missing = False
-        status += "SENDER_HAS_EMAIL_WITH_OWNERSHIP_VERIFIED "
+        status += "SENDER_HAS_EMAIL_WITH_OWNERSHIP_VERIFIED-REMIND_CONTACT "
     elif positive_value_exists(sender_email_address) and validate_email(sender_email_address):
         # If here, check to see if a sender_email_address was passed in
-        status += "VALID_EMAIL_PASSED_INTO_THIS_FUNCTION "
+        status += "VALID_EMAIL_PASSED_INTO_THIS_FUNCTION-REMIND_CONTACT "
         valid_new_sender_email_address = True
     else:
         sender_voter_email_address_missing = True
-        status += "SENDER_EMAIL_NOT_PASSED_IN "
+        status += "SENDER_EMAIL_NOT_PASSED_IN-REMIND_CONTACT "
 
     if not isinstance(first_name_array, (list, tuple)):
         first_name_array = []

@@ -47,17 +47,19 @@ def delete_activity_comments_for_voter(voter_to_delete_we_vote_id, from_organiza
         return results
 
     try:
-        activity_comment_entries_deleted += ActivityComment.objects\
+        delete_tuple = ActivityComment.objects\
             .filter(commenter_voter_we_vote_id__iexact=voter_to_delete_we_vote_id)\
             .delete()
+        activity_comment_entries_deleted += delete_tuple[0]
     except Exception as e:
         status += "FAILED-ACTIVITY_COMMENT_UPDATE-INCLUDING_ORG_UPDATE " + str(e) + " "
     # #############################################
     # Delete based on organization_we_vote_id
     try:
-        activity_comment_entries_deleted += ActivityComment.objects \
+        delete_tuple = ActivityComment.objects \
             .filter(commenter_organization_we_vote_id__iexact=from_organization_we_vote_id) \
             .delete()
+        activity_comment_entries_deleted += delete_tuple[0]
     except Exception as e:
         status += "FAILED-ACTIVITY_COMMENT_DELETE-FROM_ORG_WE_VOTE_ID " + str(e) + " "
 
@@ -89,37 +91,42 @@ def delete_activity_notices_for_voter(voter_to_delete_we_vote_id, from_organizat
         return results
 
     try:
-        activity_notice_seed_entries_deleted += ActivityNoticeSeed.objects\
+        delete_tuple = ActivityNoticeSeed.objects\
             .filter(speaker_voter_we_vote_id__iexact=voter_to_delete_we_vote_id)\
             .delete()
+        activity_notice_seed_entries_deleted += delete_tuple[0]
     except Exception as e:
-        status += "FAILED-ACTIVITY_NOTICE_SEED_UPDATE-INCLUDING_ORG_UPDATE " + str(e) + " "
+        status += "FAILED-ACTIVITY_NOTICE_SEED_UPDATE_INCLUDING_ORG_UPDATE1 " + str(e) + " "
     try:
-        activity_notice_entries_deleted += ActivityNotice.objects\
+        delete_tuple = ActivityNotice.objects\
             .filter(speaker_voter_we_vote_id__iexact=voter_to_delete_we_vote_id) \
             .delete()
+        activity_notice_entries_deleted += delete_tuple[0]
     except Exception as e:
         status += "FAILED-ACTIVITY_NOTICE_UPDATE-INCLUDING_ORG_UPDATE " + str(e) + " "
     # #############################################
     # Delete based on speaker_organization_we_vote_id
     try:
-        activity_notice_seed_entries_deleted += ActivityNoticeSeed.objects \
+        delete_tuple = ActivityNoticeSeed.objects \
             .filter(speaker_organization_we_vote_id__iexact=from_organization_we_vote_id) \
             .delete()
+        activity_notice_seed_entries_deleted += delete_tuple[0]
     except Exception as e:
         status += "FAILED-ACTIVITY_NOTICE_SEED_UPDATE-FROM_ORG_WE_VOTE_ID " + str(e) + " "
     try:
-        activity_notice_entries_deleted += ActivityNotice.objects \
+        delete_tuple = ActivityNotice.objects \
             .filter(speaker_organization_we_vote_id__iexact=from_organization_we_vote_id) \
             .delete()
+        activity_notice_entries_deleted += delete_tuple[0]
     except Exception as e:
         status += "FAILED-ACTIVITY_NOTICE_UPDATE-FROM_ORG_WE_VOTE_ID " + str(e) + " "
 
     # Now move ActivityNotice recipient_voter_we_vote_id
     try:
-        activity_notice_entries_deleted += ActivityNotice.objects \
+        delete_tuple = ActivityNotice.objects \
             .filter(recipient_voter_we_vote_id__iexact=voter_to_delete_we_vote_id) \
             .delete()
+        activity_notice_entries_deleted += delete_tuple[0]
     except Exception as e:
         status += "FAILED-ACTIVITY_NOTICE_UPDATE-RECIPIENT " + str(e) + " "
 
@@ -150,17 +157,19 @@ def delete_activity_posts_for_voter(voter_to_delete_we_vote_id, from_organizatio
         return results
 
     try:
-        activity_post_entries_deleted += ActivityPost.objects\
+        delete_tuple = ActivityPost.objects\
             .filter(speaker_voter_we_vote_id__iexact=voter_to_delete_we_vote_id)\
             .delete()
+        activity_post_entries_deleted += delete_tuple[0]
     except Exception as e:
         status += "FAILED-ACTIVITY_POST_UPDATE-INCLUDING_ORG_UPDATE " + str(e) + " "
     # #############################################
     # Delete based on speaker_organization_we_vote_id
     try:
-        activity_post_entries_deleted += ActivityPost.objects \
+        delete_tuple = ActivityPost.objects \
             .filter(speaker_organization_we_vote_id__iexact=from_organization_we_vote_id) \
             .delete()
+        activity_post_entries_deleted += delete_tuple[0]
     except Exception as e:
         status += "FAILED-ACTIVITY_POST_DELETE-FROM_ORG_WE_VOTE_ID " + str(e) + " "
 
@@ -318,7 +327,7 @@ def move_activity_notices_to_another_voter(
                         speaker_profile_image_url_medium=speaker_profile_image_url_medium,
                         speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
         except Exception as e:
-            status += "FAILED-ACTIVITY_NOTICE_SEED_UPDATE-INCLUDING_ORG_UPDATE: " + str(e) + " "
+            status += "FAILED-ACTIVITY_NOTICE_SEED_UPDATE_INCLUDING_ORG_UPDATE2: " + str(e) + " "
         try:
             activity_notice_entries_moved += ActivityNotice.objects\
                 .filter(speaker_voter_we_vote_id__iexact=from_voter_we_vote_id) \
