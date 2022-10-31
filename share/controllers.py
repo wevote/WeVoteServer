@@ -770,6 +770,8 @@ def shared_item_save_for_api(  # sharedItemSave
                 "https://" + hostname + "/-" + shared_item.shared_item_code_remind_contacts
         else:
             remind_contacts_url_using_shared_item_code = "https://" + hostname + "/friends/remind"
+    else:
+        remind_contacts_url_using_shared_item_code = "https://" + hostname + "/friends/remind"
 
     if create_results['shared_item_created'] and positive_value_exists(is_remind_contact_share):
         # Trigger send of the reminder

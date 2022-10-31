@@ -1281,7 +1281,8 @@ class FollowOrganizationList(models.Model):
         try:
             queryset = FollowOrganization.objects.all()
             queryset = queryset.filter(voter_id=voter_id)
-            number_deleted = queryset.delete()
+            delete_tuple = queryset.delete()
+            number_deleted = delete_tuple[0]
             status += "DELETED_FOLLOW_ORGANIZATION: " + str(number_deleted) + " "
         except Exception as e:
             success = False

@@ -1065,7 +1065,7 @@ def donation_subscription_cancellation_for_api(voter_we_vote_id, plan_type_enum=
             livemode = subscription['livemode']
 
             if not positive_value_exists(canceled_at):
-                results = subscription.delete()
+                results = subscription.delete()  # results different from a python .delete()
                 status += "STRIPE_SUBSCRIPTION_DELETED "
                 status += results['status']
                 canceled_at = results['canceled_at']
