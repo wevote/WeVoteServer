@@ -1123,7 +1123,11 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
             ballot_returned_we_vote_id=ballot_returned_we_vote_id)
 
         election_day_text = voter_ballot_saved.election_day_text()
-        if len(results['ballot_item_list']) == 0:
+        if not results['success']:
+            status += "FAILED_VOTER_BALLOT_ITEMS_RETRIEVE: "
+            status += results['status']
+        elif len(results['ballot_item_list']) == 0:
+            status += results['status']
             try:
                 # Heal the data
                 voter_ballot_saved.delete()
@@ -2774,7 +2778,7 @@ def voter_ballot_items_retrieve_for_one_election_for_api(
                             }
                             candidates_to_display.append(one_candidate.copy())
                 except Exception as e:
-                    status = 'FAILED retrieve_all_candidates_for_office. ' + str(e) + " "
+                    status += 'FAILED retrieve_all_candidates_for_office. ' + str(e) + " "
                     candidates_to_display = []
                     if hasattr(results, 'status'):
                         status += results['status'] + " "
@@ -2815,6 +2819,7 @@ def voter_ballot_items_retrieve_for_one_election_for_api(
                         no_vote_description = ballot_item.no_vote_description
                         yes_vote_description = ballot_item.yes_vote_description
                 except Exception as e:
+                    status += "PROBLEM_WITH_MEASURE: " + str(e) + " "
                     ballot_item_display_name = ballot_item.ballot_item_display_name
                     measure_subtitle = ballot_item.measure_subtitle
                     measure_text = ballot_item.measure_text
