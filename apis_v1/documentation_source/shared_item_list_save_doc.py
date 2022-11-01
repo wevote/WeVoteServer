@@ -1,11 +1,11 @@
-# apis_v1/documentation_source/shared_item_save_doc.py
+# apis_v1/documentation_source/shared_item_list_save_doc.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
 
-def shared_item_save_doc_template_values(url_root):
+def shared_item_list_save_doc_template_values(url_root):
     """
-    Show documentation about sharedItemSave
+    Show documentation about sharedItemListSave
     """
     required_query_parameter_list = [
         {
@@ -170,11 +170,11 @@ def shared_item_save_doc_template_values(url_root):
                    '}'
 
     template_values = {
-        'api_name': 'sharedItemSave',
-        'api_slug': 'sharedItemSave',
+        'api_name': 'sharedItemListSave',
+        'api_slug': 'sharedItemListSave',
         'api_introduction':
             "",
-        'try_now_link': 'apis_v1:sharedItemSaveView',
+        'try_now_link': 'apis_v1:sharedItemListSaveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',
