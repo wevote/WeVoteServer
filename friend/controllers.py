@@ -377,6 +377,7 @@ def friend_accepted_invitation_send(
 
 
 def remind_contact_by_email_send_for_api(  # sharedItemSave in remindMode
+        voter=None,
         voter_device_id='',
         email_address_array=[],
         first_name_array=[],
@@ -397,36 +398,42 @@ def remind_contact_by_email_send_for_api(  # sharedItemSave in remindMode
     sender_voter_email_address_missing = True
     success_message_to_show_voter = ""
 
-    results = is_voter_device_id_valid(voter_device_id)
-    if not results['success']:
-        error_results = {
-            'status':                               results['status'],
-            'success':                              False,
-            'error_message_to_show_voter':          error_message_to_show_voter,
-            'number_of_messages_sent':              number_of_messages_sent,
-            'sender_voter_email_address_missing':   sender_voter_email_address_missing,
-            'success_message_to_show_voter':        success_message_to_show_voter,
-            'voter_device_id':                      voter_device_id,
-        }
-        return error_results
+    if voter and hasattr(voter, 'linked_organization_we_vote_id'):
+        sender_voter = voter
+    else:
+        results = is_voter_device_id_valid(voter_device_id)
+        if not results['success']:
+            status += "VALID_VOTER_DEVICE_ID_NOT_FOUND "
+            status += results['status']
+            error_message_to_show_voter = "Could not email {email_address}. ".format(email_address=email_addresses_raw)
+            error_results = {
+                'status': status,
+                'success': False,
+                'error_message_to_show_voter': error_message_to_show_voter,
+                'number_of_messages_sent': number_of_messages_sent,
+                'sender_voter_email_address_missing': sender_voter_email_address_missing,
+                'success_message_to_show_voter': success_message_to_show_voter,
+                'voter_device_id': voter_device_id,
+            }
+            return error_results
+        voter_manager = VoterManager()
+        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
+        sender_voter_id = voter_results['voter_id']
+        if not positive_value_exists(sender_voter_id):
+            status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
+            error_message_to_show_voter = "Could not email {email_address}. ".format(email_address=email_addresses_raw)
+            error_results = {
+                'status':                               status,
+                'success':                              False,
+                'error_message_to_show_voter':          error_message_to_show_voter,
+                'number_of_messages_sent':              number_of_messages_sent,
+                'sender_voter_email_address_missing':   sender_voter_email_address_missing,
+                'success_message_to_show_voter':        success_message_to_show_voter,
+                'voter_device_id':                      voter_device_id,
+            }
+            return error_results
+        sender_voter = voter_results['voter']
 
-    voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
-    sender_voter_id = voter_results['voter_id']
-    if not positive_value_exists(sender_voter_id):
-        status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
-        error_results = {
-            'status':                               status,
-            'success':                              False,
-            'error_message_to_show_voter':          error_message_to_show_voter,
-            'number_of_messages_sent':              number_of_messages_sent,
-            'sender_voter_email_address_missing':   sender_voter_email_address_missing,
-            'success_message_to_show_voter':        success_message_to_show_voter,
-            'voter_device_id':                      voter_device_id,
-        }
-        return error_results
-
-    sender_voter = voter_results['voter']
     email_manager = EmailManager()
 
     valid_new_sender_email_address = False
@@ -479,6 +486,8 @@ def remind_contact_by_email_send_for_api(  # sharedItemSave in remindMode
                     remind_contacts_url_using_shared_item_code=remind_contacts_url_using_shared_item_code,
                     web_app_root_url=web_app_root_url)
                 status += send_results['status']
+                if send_results['number_of_messages_sent']:
+                    number_of_messages_sent = 1
         else:
             error_message_to_show_voter = "Please enter at least one email address."
             status += "LIST_OF_EMAILS_NOT_RECEIVED " + results['status']
@@ -525,6 +534,7 @@ def send_reminder_to_one_contact(
     sender_voter_we_vote_id = sender_voter.we_vote_id
     email_manager = EmailManager()
     error_message_to_show_voter = ''
+    number_of_messages_sent = 0
     web_app_root_url_verified = transform_web_app_url(web_app_root_url)  # Change to client URL if needed
 
     retrieve_results = retrieve_voter_and_email_address(recipient_voter_email)
@@ -535,6 +545,7 @@ def send_reminder_to_one_contact(
         results = {
             'success':                              False,
             'status':                               retrieve_results['status'],
+            'number_of_messages_sent':              0,
             'voter_device_id':                      voter_device_id,
             'sender_voter_email_address_missing':   False,
             'error_message_to_show_voter':          error_message_to_show_voter
@@ -554,6 +565,7 @@ def send_reminder_to_one_contact(
         results = {
             'success':                              False,
             'status':                               retrieve_results['status'],
+            'number_of_messages_sent':              0,
             'voter_device_id':                      voter_device_id,
             'sender_voter_email_address_missing':   False,
             'error_message_to_show_voter':          error_message_to_show_voter
@@ -649,6 +661,8 @@ def send_reminder_to_one_contact(
             email_scheduled = schedule_results['email_scheduled']
             send_results = email_manager.send_scheduled_email(email_scheduled)
             email_scheduled_sent = send_results['email_scheduled_sent']
+            if positive_value_exists(email_scheduled_sent):
+                number_of_messages_sent = 1
             status += send_results['status']
     else:
         status += 'EMAIL_OUTBOUND_DESCRIPTION_NOT_SAVED '
@@ -656,6 +670,7 @@ def send_reminder_to_one_contact(
     results = {
         'success':                              success,
         'status':                               status,
+        'number_of_messages_sent':              number_of_messages_sent,
         'voter_device_id':                      voter_device_id,
         'sender_voter_email_address_missing':   False,
         'error_message_to_show_voter':          error_message_to_show_voter

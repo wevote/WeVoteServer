@@ -145,6 +145,202 @@ def move_shared_items_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_i
     return results
 
 
+def shared_item_list_save_for_api(  # sharedItemListSave
+        voter_device_id='',
+        destination_full_url='',
+        ballot_item_we_vote_id='',
+        google_civic_election_id=0,
+        is_ballot_share=False,
+        is_candidate_share=False,
+        is_measure_share=False,
+        is_office_share=False,
+        is_organization_share=False,
+        is_ready_share=False,
+        is_remind_contact_share=False,
+        other_voter_email_address_array=None,
+        shared_message=None):
+    status = ''
+    success = True
+    candidate_we_vote_id = ''
+    date_first_shared = None
+    hostname = ''
+    measure_we_vote_id = ''
+    office_we_vote_id = ''
+    shared_by_display_name = None
+    shared_by_organization_type = ''
+    shared_by_organization_we_vote_id = ''
+    shared_by_voter_we_vote_id = ''
+    shared_by_we_vote_hosted_profile_image_url_large = None
+    shared_by_we_vote_hosted_profile_image_url_medium = None
+    shared_by_we_vote_hosted_profile_image_url_tiny = None
+    shared_item_code_no_opinions = ''
+    shared_item_code_all_opinions = ''
+    site_owner_organization_we_vote_id = ''
+    url_with_shared_item_code_no_opinions = destination_full_url  # Default to this
+    url_with_shared_item_code_all_opinions = destination_full_url  # Default to this
+    voter = None
+
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if voter_results['voter_found']:
+        voter = voter_results['voter']
+        shared_by_voter_we_vote_id = voter.we_vote_id
+        shared_by_organization_we_vote_id = voter.linked_organization_we_vote_id
+        shared_by_organization_type = INDIVIDUAL
+
+    organization_manager = OrganizationManager()
+    try:
+        hostname = destination_full_url.strip().lower()
+        hostname = hostname.replace('http://', '')
+        hostname = hostname.replace('https://', '')
+        if '/' in hostname:
+            hostname_array = hostname.split('/')
+            hostname = hostname_array[0]
+
+        results = organization_manager.retrieve_organization_from_incoming_hostname(hostname, read_only=True)
+        status += results['status']
+        organization_found = results['organization_found']
+        if organization_found:
+            organization = results['organization']
+            site_owner_organization_we_vote_id = organization.we_vote_id
+    except Exception as e:
+        status += "COULD_NOT_MODIFY_HOSTNAME: " + str(e) + " "
+        success = False
+
+    if positive_value_exists(ballot_item_we_vote_id):
+        if "cand" in ballot_item_we_vote_id:
+            candidate_we_vote_id = ballot_item_we_vote_id
+        elif "meas" in ballot_item_we_vote_id:
+            measure_we_vote_id = ballot_item_we_vote_id
+        elif "off" in ballot_item_we_vote_id:
+            office_we_vote_id = ballot_item_we_vote_id
+
+    required_variables_for_new_entry = positive_value_exists(destination_full_url) \
+        and positive_value_exists(shared_by_voter_we_vote_id) \
+        and other_voter_email_address_array and len(other_voter_email_address_array) > 0
+    if not required_variables_for_new_entry or not success:
+        if positive_value_exists(is_remind_contact_share):
+            status += "REMIND_CONTACT_SHARED_ITEM_LIST_REQUIRED_VARIABLES_MISSING "
+        else:
+            status += "SHARED_ITEM_LIST_SAVE_REQUIRED_VARIABLES_MISSING "
+        results = {
+            'status':                                   status,
+            'success':                                  False,
+            'candidate_we_vote_id':                     candidate_we_vote_id,
+            'date_first_shared':                        date_first_shared,
+            'destination_full_url':                     destination_full_url,
+            'google_civic_election_id':                 google_civic_election_id,
+            'is_ballot_share':                          is_ballot_share,
+            'is_candidate_share':                       is_candidate_share,
+            'is_measure_share':                         is_measure_share,
+            'is_office_share':                          is_office_share,
+            'is_organization_share':                    is_organization_share,
+            'is_ready_share':                           is_ready_share,
+            'is_remind_contact_share':                  is_remind_contact_share,
+            'measure_we_vote_id':                       measure_we_vote_id,
+            'office_we_vote_id':                        office_we_vote_id,
+            'other_voter_email_address_array':           other_voter_email_address_array,
+            'shared_by_display_name':                   shared_by_display_name,
+            'shared_by_organization_type':              shared_by_organization_type,
+            'shared_by_organization_we_vote_id':        shared_by_organization_we_vote_id,
+            'shared_by_voter_we_vote_id':               shared_by_voter_we_vote_id,
+            'shared_by_we_vote_hosted_profile_image_url_large': shared_by_we_vote_hosted_profile_image_url_large,
+            'shared_by_we_vote_hosted_profile_image_url_medium': shared_by_we_vote_hosted_profile_image_url_medium,
+            'shared_by_we_vote_hosted_profile_image_url_tiny': shared_by_we_vote_hosted_profile_image_url_tiny,
+            'shared_item_code_no_opinions':             shared_item_code_no_opinions,
+            'shared_item_code_all_opinions':            shared_item_code_all_opinions,
+            'shared_message':                           shared_message,
+            'site_owner_organization_we_vote_id':       site_owner_organization_we_vote_id,
+            'url_with_shared_item_code_no_opinions':    url_with_shared_item_code_no_opinions,
+            'url_with_shared_item_code_all_opinions':   url_with_shared_item_code_all_opinions,
+        }
+        return results
+
+    share_manager = ShareManager()
+    if positive_value_exists(shared_by_organization_we_vote_id):
+        results = organization_manager.retrieve_organization_from_we_vote_id(
+            organization_we_vote_id=shared_by_organization_we_vote_id,
+            read_only=True)
+        if results['success'] and results['organization_found']:
+            shared_by_display_name = None
+            if positive_value_exists(results['organization'].organization_name) \
+                    and 'Voter-' not in results['organization'].organization_name:
+                shared_by_display_name = results['organization'].organization_name
+            shared_by_we_vote_hosted_profile_image_url_large = \
+                results['organization'].we_vote_hosted_profile_image_url_large
+            shared_by_we_vote_hosted_profile_image_url_medium = \
+                results['organization'].we_vote_hosted_profile_image_url_medium
+            shared_by_we_vote_hosted_profile_image_url_tiny = \
+                results['organization'].we_vote_hosted_profile_image_url_tiny
+
+    error_message_to_show_voter = ''
+    number_of_messages_sent = 0
+    success_message_to_show_voter = ''
+    for other_voter_email_address_text in other_voter_email_address_array:
+        one_result = shared_item_save_for_api(
+            voter,
+            destination_full_url=destination_full_url,
+            ballot_item_we_vote_id=ballot_item_we_vote_id,
+            google_civic_election_id=google_civic_election_id,
+            is_ballot_share=is_ballot_share,
+            is_candidate_share=is_candidate_share,
+            is_measure_share=is_measure_share,
+            is_office_share=is_office_share,
+            is_organization_share=is_organization_share,
+            is_ready_share=is_ready_share,
+            is_remind_contact_share=is_remind_contact_share,
+            # organization_we_vote_id=organization_we_vote_id,
+            # other_voter_display_name=other_voter_display_name,
+            # other_voter_first_name=other_voter_first_name,
+            # other_voter_last_name=other_voter_last_name,
+            # other_voter_we_vote_id=other_voter_we_vote_id,
+            other_voter_email_address_text=other_voter_email_address_text,
+            shared_message=shared_message,
+        )
+        number_of_messages_sent += one_result['number_of_messages_sent']
+        if hasattr(one_result, 'success_message_to_show_voter') \
+                and positive_value_exists(one_result['success_message_to_show_voter']):
+            success_message_to_show_voter += one_result['success_message_to_show_voter']
+        if hasattr(one_result, 'error_message_to_show_voter') \
+                and positive_value_exists(one_result['error_message_to_show_voter']):
+            error_message_to_show_voter += one_result['error_message_to_show_voter']
+
+    results = {
+        'status':                               status,
+        'success':                              success,
+        'candidate_we_vote_id':                 candidate_we_vote_id,
+        'date_first_shared':                    date_first_shared,
+        'destination_full_url':                 destination_full_url,
+        'error_message_to_show_voter':          error_message_to_show_voter,
+        'google_civic_election_id':             google_civic_election_id,
+        'is_ballot_share':                      is_ballot_share,
+        'is_candidate_share':                   is_candidate_share,
+        'is_measure_share':                     is_measure_share,
+        'is_office_share':                      is_office_share,
+        'is_organization_share':                is_organization_share,
+        'is_ready_share':                       is_ready_share,
+        'is_remind_contact_share':              is_remind_contact_share,
+        'measure_we_vote_id':                   measure_we_vote_id,
+        'number_of_messages_sent':              number_of_messages_sent,
+        'office_we_vote_id':                    office_we_vote_id,
+        'other_voter_email_address_array':      other_voter_email_address_array,
+        'shared_by_display_name':               shared_by_display_name,
+        'shared_by_organization_type':          shared_by_organization_type,
+        'shared_by_organization_we_vote_id':    shared_by_organization_we_vote_id,
+        'shared_by_voter_we_vote_id':           shared_by_voter_we_vote_id,
+        'shared_by_we_vote_hosted_profile_image_url_large':     shared_by_we_vote_hosted_profile_image_url_large,
+        'shared_by_we_vote_hosted_profile_image_url_medium':    shared_by_we_vote_hosted_profile_image_url_medium,
+        'shared_by_we_vote_hosted_profile_image_url_tiny':      shared_by_we_vote_hosted_profile_image_url_tiny,
+        'shared_item_code_no_opinions':                         shared_item_code_no_opinions,
+        'shared_item_code_all_opinions':                        shared_item_code_all_opinions,
+        'site_owner_organization_we_vote_id':                   site_owner_organization_we_vote_id,
+        'success_message_to_show_voter':                        success_message_to_show_voter,
+        'url_with_shared_item_code_no_opinions':                url_with_shared_item_code_no_opinions,
+        'url_with_shared_item_code_all_opinions':               url_with_shared_item_code_all_opinions,
+    }
+    return results
+
+
 def shared_item_retrieve_for_api(  # sharedItemRetrieve
         voter_device_id='',
         destination_full_url='',
@@ -524,6 +720,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
 
 
 def shared_item_save_for_api(  # sharedItemSave
+        voter=None,
         voter_device_id='',
         destination_full_url='',
         ballot_item_we_vote_id='',
@@ -548,6 +745,7 @@ def shared_item_save_for_api(  # sharedItemSave
     date_first_shared = None
     hostname = ''
     measure_we_vote_id = ''
+    number_of_messages_sent = 0
     office_we_vote_id = ''
     ready_page_url_using_shared_item_code = ''
     remind_contacts_url_using_shared_item_code = ''
@@ -564,13 +762,18 @@ def shared_item_save_for_api(  # sharedItemSave
     url_with_shared_item_code_no_opinions = destination_full_url  # Default to this
     url_with_shared_item_code_all_opinions = destination_full_url  # Default to this
 
-    voter_manager = VoterManager()
-    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
-    if voter_results['voter_found']:
-        voter = voter_results['voter']
+    if voter and hasattr(voter, 'linked_organization_we_vote_id'):
         shared_by_voter_we_vote_id = voter.we_vote_id
         shared_by_organization_we_vote_id = voter.linked_organization_we_vote_id
         shared_by_organization_type = INDIVIDUAL
+    else:
+        voter_manager = VoterManager()
+        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+        if voter_results['voter_found']:
+            voter = voter_results['voter']
+            shared_by_voter_we_vote_id = voter.we_vote_id
+            shared_by_organization_we_vote_id = voter.linked_organization_we_vote_id
+            shared_by_organization_type = INDIVIDUAL
 
     organization_manager = OrganizationManager()
     try:
@@ -602,7 +805,8 @@ def shared_item_save_for_api(  # sharedItemSave
     if positive_value_exists(is_remind_contact_share):
         # destination_full_url is optional because by default we only use the
         #  built-in /ready and /friends/remind links
-        required_variables_for_new_entry = positive_value_exists(shared_by_voter_we_vote_id) \
+        required_variables_for_new_entry = positive_value_exists(destination_full_url) \
+            and positive_value_exists(shared_by_voter_we_vote_id) \
             and positive_value_exists(other_voter_email_address_text)
     else:
         required_variables_for_new_entry = positive_value_exists(destination_full_url) \
@@ -627,6 +831,7 @@ def shared_item_save_for_api(  # sharedItemSave
             'is_ready_share':                           is_ready_share,
             'is_remind_contact_share':                  is_remind_contact_share,
             'measure_we_vote_id':                       measure_we_vote_id,
+            'number_of_messages_sent':                  number_of_messages_sent,
             'office_we_vote_id':                        office_we_vote_id,
             'other_voter_email_address_text':           other_voter_email_address_text,
             'other_voter_display_name':                 other_voter_display_name,
@@ -777,6 +982,7 @@ def shared_item_save_for_api(  # sharedItemSave
         # Trigger send of the reminder
         from friend.controllers import remind_contact_by_email_send_for_api
         results = remind_contact_by_email_send_for_api(
+            voter=voter,
             voter_device_id=voter_device_id,
             email_addresses_raw=other_voter_email_address_text,
             invitation_message=shared_message,
@@ -786,6 +992,7 @@ def shared_item_save_for_api(  # sharedItemSave
             remind_contacts_url_using_shared_item_code=remind_contacts_url_using_shared_item_code,
             web_app_root_url=hostname)
         status += results['status']
+        number_of_messages_sent += results['number_of_messages_sent']
 
     results = {
         'status':                               status,
@@ -802,9 +1009,10 @@ def shared_item_save_for_api(  # sharedItemSave
         'is_ready_share':                       is_ready_share,
         'is_remind_contact_share':              is_remind_contact_share,
         'measure_we_vote_id':                   measure_we_vote_id,
+        'number_of_messages_sent':              number_of_messages_sent,
         'office_we_vote_id':                    office_we_vote_id,
-        'other_voter_email_address_text':       other_voter_email_address_text,
         'other_voter_display_name':             other_voter_display_name,
+        'other_voter_email_address_text':       other_voter_email_address_text,
         'other_voter_first_name':               other_voter_first_name,
         'other_voter_last_name':                other_voter_last_name,
         'other_voter_we_vote_id':               other_voter_we_vote_id,
