@@ -149,7 +149,7 @@
             <th>You</th>
             <th>Friends</th>
             <th>Facebook</th>
-            <th>Tw</th>
+            <th>Tw / Apple</th>
             <th>Email / Phone</th>
             <th>Opt In</th>
             <th style='text-align: right'>Contributions</th>
@@ -200,6 +200,10 @@
             {% if voter.twitter_handle %}
               @{{ voter.twitter_handle }}
             {% else %}{% endif %}
+            {% if voter.twitter_handle and voter.signed_in_with_apple %}
+              &nbsp;/&nbsp;
+            {% endif %}
+            {% if voter.signed_in_with_apple %}Apple{% endif %}
             </td>
             <td>
             <!-- Email //-->

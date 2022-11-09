@@ -588,7 +588,7 @@ def send_reminder_to_one_contact(
                 email_we_vote_id=recipient_email_we_vote_id)
 
     # Variables used by templates/email_outbound/email_templates/friend_invitation.txt and .html
-    subject = "Reminder to vote by Nov 8, 2022"
+    subject = "Reminder to vote"  #  by Nov 5, 2024
     if positive_value_exists(sender_name):
         subject += " from " + sender_name
 

@@ -159,7 +159,7 @@ $(function () {
     }
 
     if (couponExpiresDate.val().length) {
-      valid = valid && checkRegexp(couponExpiresDate, /^([0-9]{2}\/[0-9]{2}\/[0-9]{4})+$/, 'Expiration date must use this format: 12/25/2022');
+      valid = valid && checkRegexp(couponExpiresDate, /^([0-9]{2}\/[0-9]{2}\/[0-9]{4})+$/, 'Expiration date must use this format: 12/25/2024');
       if (valid) {
         moment().tz('America/Los_Angeles').format();
         expires = moment(couponExpiresDate.val(), 'MM/DD/YYYY HH:mm').format();
