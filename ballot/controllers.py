@@ -969,7 +969,7 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
         incoming_status=''):
     status = incoming_status
 
-    next_national_election_day_text = '2022/11/08'
+    next_national_election_day_text = '2024/11/05'
 
     specific_ballot_requested = positive_value_exists(ballot_returned_we_vote_id) or \
         positive_value_exists(ballot_location_shortcut)
