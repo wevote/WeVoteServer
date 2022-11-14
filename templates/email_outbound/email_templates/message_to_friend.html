@@ -13,6 +13,11 @@
             <tr style="">
               <td height="20" style="line-height:20px;" colspan="3">&nbsp;</td>
             </tr>
+            {% if message_to_friend %}
+            <tr>
+              <td height="1" colspan="3" style="line-height:1px;"><span style="color:#FFFFFF;display:none !important;font-size:1px;">{{ message_to_friend }} </span></td>
+            </tr>
+            {% endif %}
             {% if sender_network_details %}
             <tr>
               <td height="1" colspan="3" style="line-height:1px;"><span style="color:#FFFFFF;display:none !important;font-size:1px;">100 mutual friends - Fomenting the Revolution at Artist - California College of the Arts - 993 friends - 96 notes - 105 groups</span></td>

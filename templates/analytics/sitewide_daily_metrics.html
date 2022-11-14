@@ -7,6 +7,7 @@
 
 {%  block content %}
 {% load template_filters %}
+{% load humanize %}
 <p><a href="{% url 'analytics:analytics_index' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Analytics Home</a></p>
 
 <h2>Sitewide Daily Metrics</h2>

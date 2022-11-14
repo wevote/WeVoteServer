@@ -2697,14 +2697,14 @@ def voter_photo_save_for_api(voter_device_id, facebook_profile_image_url_https, 
     return results
 
 
-def voter_retrieve_for_api(
+def voter_retrieve_for_api(  # voterRetrieve
         request=None,
         state_code_from_ip_address='',
         user_agent_string='',
         user_agent_object=None,
         voter_device_id='',
         voter_location_results={},
-    ):  # voterRetrieve
+):
     """
     Used by the api
     :param request:
@@ -3140,6 +3140,9 @@ def voter_retrieve_for_api(
 
         # print('voterRetrieve status', status, ', voter.email ', voter.email, ', full name ', voter.get_full_name(), ',
         #   voter_photo_url_medium', we_vote_hosted_profile_image_url_medium )
+        if hasattr(address_results, 'voter_device_id'):
+            if not positive_value_exists(address_results['voter_device_id']) and positive_value_exists(voter_device_id):
+                address_results['voter_device_id'] = voter_device_id
         json_data = {
             'status':                           status,
             'success':                          True,

@@ -862,7 +862,7 @@ class AnalyticsManager(models.Manager):
         new_analytics_date_as_integer = 0
         new_analytics_date_as_integer_found = False
 
-        # If here, these are all finished and we need to analyze the next day
+        # If here, these are all finished, and we need to analyze the next day
         date_now = now()
         date_now_as_integer = convert_date_to_date_as_integer(date_now)
 

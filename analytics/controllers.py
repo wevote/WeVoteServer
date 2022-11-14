@@ -1077,7 +1077,7 @@ def calculate_sitewide_daily_metrics(limit_to_one_date_as_integer):
     issues_followed_total = follow_metrics_manager.fetch_issues_followed(
         voter_we_vote_id_empty, date_as_integer_zero, count_through_this_date_as_integer)
     issues_followed_today = follow_metrics_manager.fetch_issues_followed(
-        voter_we_vote_id_empty, limit_to_one_date_as_integer)
+        voter_we_vote_id_empty, limit_to_one_date_as_integer, count_through_this_date_as_integer)
 
     organizations_followed_total = None
     organizations_followed_today = None
