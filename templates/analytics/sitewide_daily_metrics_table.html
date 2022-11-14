@@ -1,5 +1,8 @@
 {# templates/analytics/sitewide_daily_metrics_table.html #}
 
+{% block content %}
+{% load humanize %}
+
 <table border="1" cellpadding="5" cellspacing="5" class="table">
 {% for one_row in sitewide_daily_metrics_list %}
 {% if forloop.counter == 1 or forloop.counter|divisibleby:16 %}
@@ -72,3 +75,4 @@
     </tr>
 {% endif %}
 </table>
+{% endblock %}
