@@ -24,6 +24,7 @@ from django.utils.timezone import now
 from election.models import Election, ElectionManager
 from exception.models import print_to_log
 import json
+import math
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_date_as_integer_to_date, convert_date_to_date_as_integer, \
@@ -1139,7 +1140,7 @@ def sitewide_daily_metrics_view(request):
         through_date_as_integer_modified = through_date_as_integer + 1
         through_date = convert_date_as_integer_to_date(through_date_as_integer_modified)
 
-    sitewide_daily_metrics_list = []
+    sitewide_daily_metrics_list_modified = []
 
     messages_on_stage = get_messages(request)
     try:
@@ -1150,13 +1151,20 @@ def sitewide_daily_metrics_view(request):
             sitewide_daily_metrics_query = sitewide_daily_metrics_query.filter(
                 date_as_integer__lte=through_date_as_integer)
         sitewide_daily_metrics_list = sitewide_daily_metrics_query[:180]  # Limit to no more than 6 months
+        for one_day in sitewide_daily_metrics_list:
+            if positive_value_exists(one_day.authenticated_visitors_today) and \
+                    positive_value_exists(one_day.new_visitors_today):
+                visitors_ratio = one_day.authenticated_visitors_today / one_day.new_visitors_today
+                percent_raw = visitors_ratio * 100
+                one_day.authenticated_visitors_percent_of_all_today = math.floor(percent_raw)
+            sitewide_daily_metrics_list_modified.append(one_day)
     except SitewideDailyMetrics.DoesNotExist:
         # This is fine
         pass
 
     template_values = {
         'messages_on_stage':            messages_on_stage,
-        'sitewide_daily_metrics_list':  sitewide_daily_metrics_list,
+        'sitewide_daily_metrics_list':  sitewide_daily_metrics_list_modified,
         'google_civic_election_id':     google_civic_election_id,
         'state_code':                   state_code,
         'date_as_integer':              date_as_integer,

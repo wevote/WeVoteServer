@@ -26,23 +26,28 @@
         <td>{{ forloop.counter }}</td>
         <td>{{ one_row.date_as_integer }}</td>
         <td>
-            {% if one_row.visitors_total %}<span class="u-no-break">total, all time: {{ one_row.visitors_total }}</span>{% endif %}
-            {% if one_row.visitors_today %}<br /><span class="u-no-break">today: {{ one_row.visitors_today }}</span>{% endif %}
-            {% if one_row.new_visitors_today %}<br />new: {{ one_row.new_visitors_today }}{% endif %}
+            {% if one_row.visitors_total %}<span class="u-no-break">total, all time: {{ one_row.visitors_total|intcomma }}</span>{% endif %}
+            {% if one_row.visitors_today %}<br /><span class="u-no-break">today: {{ one_row.visitors_today|intcomma }}</span>{% endif %}
+            {% if one_row.new_visitors_today %}<br />new: {{ one_row.new_visitors_today|intcomma }}{% endif %}
         </td>
         <td>
-            {% if one_row.authenticated_visitors_total %}<span class="u-no-break">total, all time: {{ one_row.authenticated_visitors_total }}</span>{% endif %}
-            {% if one_row.authenticated_visitors_today %}<br /><span class="u-no-break">today: {{ one_row.authenticated_visitors_today }}</span>{% endif %}
-            {% if one_row.authenticated_new_visitors_today %}<br />new: {{ one_row.authenticated_new_visitors_today }}{% endif %}
+            {% if one_row.authenticated_visitors_total %}<span class="u-no-break">total, all time: {{ one_row.authenticated_visitors_total|intcomma }}</span>{% endif %}
+            {% if one_row.authenticated_visitors_today %}
+                <br /><span class="u-no-break">today: {{ one_row.authenticated_visitors_today|intcomma }}</span>
+                {% if one_row.authenticated_visitors_percent_of_all_today %}
+                ({{ one_row.authenticated_visitors_percent_of_all_today }}% of visitors today)
+                {% endif %}
+            {% endif %}
+            {% if one_row.authenticated_new_visitors_today %}<br />new: {{ one_row.authenticated_new_visitors_today|intcomma }}{% endif %}
         </td>
-        <td>{% if one_row.ballot_views_today %}{{ one_row.ballot_views_today }}{% endif %}</td>
+        <td>{% if one_row.ballot_views_today %}{{ one_row.ballot_views_today|intcomma }}{% endif %}</td>
         <td>
-            {% if one_row.voter_guides_viewed_total %}<span class="u-no-break">total, all time: {{ one_row.voter_guides_viewed_total }}</span>{% endif %}
-            {% if one_row.voter_guides_viewed_today %}<br /><span class="u-no-break">today: {{ one_row.voter_guides_viewed_today }}</span>{% endif %}
+            {% if one_row.voter_guides_viewed_total %}<span class="u-no-break">total, all time: {{ one_row.voter_guides_viewed_total|intcomma }}</span>{% endif %}
+            {% if one_row.voter_guides_viewed_today %}<br /><span class="u-no-break">today: {{ one_row.voter_guides_viewed_today|intcomma }}</span>{% endif %}
         </td>
         <td>
-            {% if one_row.issues_followed_total %}<span class="u-no-break">total, all time: {{ one_row.issues_followed_total }}</span>{% endif %}
-            {% if one_row.issues_followed_today %}<br /><span class="u-no-break">today: {{ one_row.issues_followed_today }}</span>{% endif %}
+            {% if one_row.issues_followed_total %}<span class="u-no-break">total, all time: {{ one_row.issues_followed_total|intcomma }}</span>{% endif %}
+            {% if one_row.issues_followed_today %}<br /><span class="u-no-break">today: {{ one_row.issues_followed_today|intcomma }}</span>{% endif %}
         </td>
 {#        <td><span class="u-no-break">total, all time: {{ one_row.issue_follows_total }}</span>#}
 {#            <br /><span class="u-no-break">today: {{ one_row.issue_follows_today }}</span></td>#}

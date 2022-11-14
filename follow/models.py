@@ -646,8 +646,11 @@ class FollowMetricsManager(models.Manager):
             pass
         return count_result
 
-    def fetch_issues_followed(self, voter_we_vote_id='',
-                              limit_to_one_date_as_integer=0, count_through_this_date_as_integer=0):
+    def fetch_issues_followed(
+            self,
+            voter_we_vote_id='',
+            limit_to_one_date_as_integer=0,
+            count_through_this_date_as_integer=0):
         timezone = pytz.timezone("America/Los_Angeles")
         if positive_value_exists(limit_to_one_date_as_integer):
             one_date_string = str(limit_to_one_date_as_integer)
