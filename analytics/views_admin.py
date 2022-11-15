@@ -1153,8 +1153,8 @@ def sitewide_daily_metrics_view(request):
         sitewide_daily_metrics_list = sitewide_daily_metrics_query[:180]  # Limit to no more than 6 months
         for one_day in sitewide_daily_metrics_list:
             if positive_value_exists(one_day.authenticated_visitors_today) and \
-                    positive_value_exists(one_day.new_visitors_today):
-                visitors_ratio = one_day.authenticated_visitors_today / one_day.new_visitors_today
+                    positive_value_exists(one_day.visitors_today):
+                visitors_ratio = one_day.authenticated_visitors_today / one_day.visitors_today
                 percent_raw = visitors_ratio * 100
                 one_day.authenticated_visitors_percent_of_all_today = math.floor(percent_raw)
             sitewide_daily_metrics_list_modified.append(one_day)
