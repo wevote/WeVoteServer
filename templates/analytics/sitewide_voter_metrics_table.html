@@ -27,7 +27,12 @@
 {% endif %}
     <tr>
         <td>{{ forloop.counter }}</td>
-        <td>{{ one_row.voter_we_vote_id }}</td>
+        <td>
+            <a href="{% url 'analytics:analytics_action_list' one_row.voter_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+               target="_blank"><span class="u-no-break">
+                {{ one_row.voter_we_vote_id }}
+            </span></a>
+        </td>
         <td><span class="u-no-break">{{ one_row.last_action_date|default_if_none:"n/a" }}</span></td>
         <td><a href="{% url 'analytics:analytics_action_list' one_row.voter_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
                target="_blank"><span class="u-no-break">{{ one_row.actions_count }}</span></a></td>

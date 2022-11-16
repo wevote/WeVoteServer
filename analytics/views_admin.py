@@ -24,7 +24,6 @@ from django.utils.timezone import now
 from election.models import Election, ElectionManager
 from exception.models import print_to_log
 import json
-import math
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_date_as_integer_to_date, convert_date_to_date_as_integer, \
@@ -631,11 +630,18 @@ def analytics_index_view(request):
         # This is fine
         pass
 
-    sitewide_daily_metrics_list = []
+    sitewide_daily_metrics_list_modified = []
     try:
         sitewide_daily_metrics_query = SitewideDailyMetrics.objects.using('analytics').order_by('-date_as_integer')
         sitewide_daily_metrics_query = sitewide_daily_metrics_query[:3]
         sitewide_daily_metrics_list = list(sitewide_daily_metrics_query)
+        for one_day in sitewide_daily_metrics_list:
+            if positive_value_exists(one_day.authenticated_visitors_today) and \
+                    positive_value_exists(one_day.visitors_today):
+                visitors_ratio = one_day.authenticated_visitors_today / one_day.visitors_today
+                percent_raw = visitors_ratio * 100
+                one_day.authenticated_visitors_percent_of_all_today = "{:.2f}".format(percent_raw)
+            sitewide_daily_metrics_list_modified.append(one_day)
     except SitewideDailyMetrics.DoesNotExist:
         # This is fine
         pass
@@ -655,6 +661,7 @@ def analytics_index_view(request):
         sitewide_voter_metrics_query = SitewideVoterMetrics.objects.using('analytics').order_by('-last_action_date')
         # Don't return the welcome page bounces
         sitewide_voter_metrics_query = sitewide_voter_metrics_query.exclude(welcome_visited=1, actions_count=1)
+        sitewide_voter_metrics_query = sitewide_voter_metrics_query.exclude(actions_count__lte=1)
         sitewide_voter_metrics_query = sitewide_voter_metrics_query[:3]
         sitewide_voter_metrics_list = list(sitewide_voter_metrics_query)
     except SitewideVoterMetrics.DoesNotExist:
@@ -680,7 +687,7 @@ def analytics_index_view(request):
         'messages_on_stage':                            messages_on_stage,
         'WEB_APP_ROOT_URL':                             WEB_APP_ROOT_URL,
         'sitewide_election_metrics_list':               sitewide_election_metrics_list,
-        'sitewide_daily_metrics_list':                  sitewide_daily_metrics_list,
+        'sitewide_daily_metrics_list':                  sitewide_daily_metrics_list_modified,
         'sitewide_voter_metrics_list':                  sitewide_voter_metrics_list,
         'organization_election_metrics_list':           organization_election_metrics_list,
         'voter_allowed_to_see_organization_analytics':  voter_allowed_to_see_organization_analytics,
@@ -1156,7 +1163,7 @@ def sitewide_daily_metrics_view(request):
                     positive_value_exists(one_day.visitors_today):
                 visitors_ratio = one_day.authenticated_visitors_today / one_day.visitors_today
                 percent_raw = visitors_ratio * 100
-                one_day.authenticated_visitors_percent_of_all_today = math.floor(percent_raw)
+                one_day.authenticated_visitors_percent_of_all_today = "{:.2f}".format(percent_raw)
             sitewide_daily_metrics_list_modified.append(one_day)
     except SitewideDailyMetrics.DoesNotExist:
         # This is fine
@@ -1337,8 +1344,7 @@ def sitewide_voter_metrics_view(request):
 
     try:
         sitewide_voter_metrics_query = SitewideVoterMetrics.objects.using('analytics').order_by('-last_action_date')
-        # Don't return the welcome page bounces
-        sitewide_voter_metrics_query = sitewide_voter_metrics_query.exclude(welcome_visited=1, actions_count=1)
+        sitewide_voter_metrics_query = sitewide_voter_metrics_query.exclude(actions_count__lte=1)
         if positive_value_exists(date_as_integer):
             sitewide_voter_metrics_query = sitewide_voter_metrics_query.filter(last_action_date__gte=start_date)
         if positive_value_exists(through_date_as_integer):
@@ -1346,9 +1352,9 @@ def sitewide_voter_metrics_view(request):
                 last_action_date__lte=through_date)
         sitewide_voter_metrics_list = list(sitewide_voter_metrics_query)
 
-        # Count how many welcome page bounces are being removed
+        # Count how many bounces are being removed
         bounce_query = SitewideVoterMetrics.objects.using('analytics').all()
-        bounce_query = bounce_query.filter(welcome_visited=1, actions_count=1)
+        bounce_query = bounce_query.filter(actions_count__lte=1)
         if positive_value_exists(date_as_integer):
             bounce_query = bounce_query.filter(last_action_date__gte=start_date)
         if positive_value_exists(through_date_as_integer):
@@ -1365,13 +1371,15 @@ def sitewide_voter_metrics_view(request):
         total_voters = total_number_of_voters_without_bounce + bounce_count
         if positive_value_exists(bounce_count) and positive_value_exists(total_voters):
             voter_bounce_rate = bounce_count / total_voters
+            percent_raw = voter_bounce_rate * 100
+            voter_bounce_rate = "{:.2f}".format(percent_raw)
         else:
             voter_bounce_rate = 0
 
         messages.add_message(request, messages.INFO,
-                             str(total_number_of_voters_without_bounce) + ' voters with statistics. ' +
-                             str(bounce_count) + ' welcome page bounces not shown. ' +
-                             str(voter_bounce_rate) + '% visitors bounced (left with only one view).')
+                             format(total_number_of_voters_without_bounce, ",") + ' voters with activity. ' +
+                             str(voter_bounce_rate) +
+                             '% visitors who left with only one view (bounced without activity).')
 
     except SitewideVoterMetrics.DoesNotExist:
         # This is fine
