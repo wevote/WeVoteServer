@@ -1371,7 +1371,8 @@ def sitewide_voter_metrics_view(request):
         total_voters = total_number_of_voters_without_bounce + bounce_count
         if positive_value_exists(bounce_count) and positive_value_exists(total_voters):
             voter_bounce_rate = bounce_count / total_voters
-            voter_bounce_rate = "{:.2f}".format(voter_bounce_rate)
+            percent_raw = voter_bounce_rate * 100
+            voter_bounce_rate = "{:.2f}".format(percent_raw)
         else:
             voter_bounce_rate = 0
 
