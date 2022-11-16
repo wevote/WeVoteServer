@@ -38,7 +38,7 @@
             {% if one_row.authenticated_visitors_today %}
                 <br /><span class="u-no-break">today: {{ one_row.authenticated_visitors_today|intcomma }}</span>
                 {% if one_row.authenticated_visitors_percent_of_all_today %}
-                ({{ one_row.authenticated_visitors_percent_of_all_today }}% of visitors today)
+                ({{ one_row.authenticated_visitors_percent_of_all_today }}% of today's visitors)
                 {% endif %}
             {% endif %}
             {% if one_row.authenticated_new_visitors_today %}<br />new: {{ one_row.authenticated_new_visitors_today|intcomma }}{% endif %}
