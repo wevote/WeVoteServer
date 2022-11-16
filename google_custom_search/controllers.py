@@ -11,7 +11,7 @@ from image.controllers import IMAGE_SOURCE_BALLOTPEDIA, LINKEDIN, FACEBOOK, TWIT
 from import_export_facebook.models import FacebookManager
 from import_export_wikipedia.controllers import reach_out_to_wikipedia_with_guess, \
     retrieve_candidate_images_from_wikipedia_page
-from re import sub
+from re import sub, compile
 from wevote_functions.functions import positive_value_exists, convert_state_code_to_state_text, \
     POSITIVE_SEARCH_KEYWORDS, NEGATIVE_SEARCH_KEYWORDS, extract_facebook_username_from_text_string
 from wevote_settings.models import RemoteRequestHistoryManager, RETRIEVE_POSSIBLE_GOOGLE_LINKS
@@ -230,6 +230,21 @@ def retrieve_possible_google_search_users(candidate, voter_device_id):
 
     return results
 
+url_patterns_to_ignore = [
+    r"^https?://uk.linkedin.com",
+    r"^https?://nz.linkedin.com",
+    r"^https?://www.linkedin.com/pub/dir",
+    r"^https?://www.facebook.com/events",
+    r"^https?://twitter.com/\w+/status/"
+]
+url_patterns_to_ignore = [compile(pattern) for pattern in url_patterns_to_ignore]
+
+def should_ignore_google_json(google_json):
+    '''
+    Tests if the google_json object should have a likelihood score of 0 and therefore be ignored
+    based on the list of url patterns
+    '''
+    return any((pattern.match(google_json['item_link']) for pattern in url_patterns_to_ignore))
 
 def analyze_google_search_results(search_results, search_term, candidate_name,
                                   candidate, voter_device_id):
@@ -253,6 +268,9 @@ def analyze_google_search_results(search_results, search_term, candidate_name,
             from_twitter = False
             from_wikipedia = False
             google_json = parse_google_search_results(search_term, one_result)
+
+            if should_ignore_google_json(google_json):
+                continue
 
             if FACEBOOK in google_json['item_link']:
                 current_candidate_facebook_search_info = analyze_facebook_search_results(
