@@ -2,6 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from django.utils.timezone import now
 from .models import ShareManager
 from analytics.models import ACTION_VIEW_SHARED_BALLOT, ACTION_VIEW_SHARED_BALLOT_ALL_OPINIONS, \
     ACTION_VIEW_SHARED_CANDIDATE, ACTION_VIEW_SHARED_CANDIDATE_ALL_OPINIONS, \
@@ -19,6 +20,7 @@ from share.models import SharedItem, SharedLinkClicked, SharedPermissionsGranted
 from voter.models import VoterDeviceLinkManager, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
+from wevote_settings.models import WeVoteSetting, WeVoteSettingsManager
 
 INDIVIDUAL = 'I'  # One person
 
@@ -1251,5 +1253,107 @@ def super_share_item_send_for_api(  # superShareItemSave (for sending)
         'in_draft_mode':            in_draft_mode,
         'send_super_share_item':    True,
         'super_share_item_id':      super_share_item_id,
+    }
+    return results
+
+
+def update_shared_item_statistics(
+        first_update_only=True):
+    shared_items_changed = 0
+    shared_items_not_changed = 0
+    status = ''
+    success = True
+
+    # Get last ShareLinkClicked id: "share_link_clicked_count_statistics_updated_through_id"
+    we_vote_settings_manager = WeVoteSettingsManager()
+    results = we_vote_settings_manager.fetch_setting_results('share_link_clicked_count_statistics_updated_through_id')
+    share_link_clicked_count_statistics_updated_through_id = 0
+    if not results['success']:
+        status += results['status']
+        success = False
+        count_updates_remaining = 0
+        results = {
+            'status':                   status,
+            'success':                  success,
+            'count_updates_remaining':  count_updates_remaining,
+            'shared_items_changed':     shared_items_changed,
+            'shared_items_not_changed': shared_items_not_changed,
+        }
+        return results
+    elif results['we_vote_setting_found']:
+        share_link_clicked_count_statistics_updated_through_id = results['setting_value']
+
+    highest_shared_link_clicked_id = 0
+    if positive_value_exists(share_link_clicked_count_statistics_updated_through_id):
+        status += "share_link_clicked_count_statistics_updated_through_id-FOUND: {share_link_clicked_id} ".format(
+            share_link_clicked_id=share_link_clicked_count_statistics_updated_through_id
+        )
+        highest_shared_link_clicked_id = share_link_clicked_count_statistics_updated_through_id
+    else:
+        status += "Starting update at share_link_clicked.id = 0 "
+
+    # Get a list of shared_item_id's which have had activity in X period of time or since...
+    clicked_queryset = SharedLinkClicked.objects.using('readonly').all()
+    clicked_queryset = clicked_queryset.order_by('id')
+    clicked_queryset = clicked_queryset.filter(id__gt=share_link_clicked_count_statistics_updated_through_id)
+    # clicked_queryset = clicked_queryset.values_list('shared_item_id', flat=True).distinct()
+    clicked_queryset = clicked_queryset[:1000]
+    shared_link_clicked_list = list(clicked_queryset)
+    shared_item_id_list = []
+    for one_shared_link_clicked in shared_link_clicked_list:
+        if one_shared_link_clicked.id > highest_shared_link_clicked_id:
+            highest_shared_link_clicked_id = one_shared_link_clicked.id
+        if one_shared_link_clicked.shared_item_id not in shared_item_id_list:
+            shared_item_id_list.append(one_shared_link_clicked.shared_item_id)
+
+    # Now get all the SharedItems to update
+    queryset = SharedItem.objects.all()
+    queryset = queryset.filter(id__in=shared_item_id_list)
+    shared_item_list = list(queryset)
+
+    for shared_item in shared_item_list:
+        prior_shared_link_clicked_count = shared_item.shared_link_clicked_count
+        prior_shared_link_clicked_unique_viewer_count = shared_item.shared_link_clicked_unique_viewer_count
+        clicked_queryset = SharedLinkClicked.objects.using('readonly').all()
+        clicked_queryset = clicked_queryset.filter(shared_item_id=shared_item.id)
+        shared_item.shared_link_clicked_count = clicked_queryset.count()
+        unique_queryset = clicked_queryset.order_by('shared_item_id', 'viewed_by_voter_we_vote_id')\
+            .distinct('shared_item_id', 'viewed_by_voter_we_vote_id')
+        shared_item.shared_link_clicked_unique_viewer_count = unique_queryset.count()
+        if prior_shared_link_clicked_count != shared_item.shared_link_clicked_count or \
+                prior_shared_link_clicked_unique_viewer_count != shared_item.shared_link_clicked_unique_viewer_count:
+            shared_items_changed += 1
+            try:
+                shared_item.shared_link_clicked_count_last_updated = now()
+                shared_item.save()
+                shared_items_changed += 1
+            except Exception as e:
+                status += "FAILED_SAVE: " + str(e) + " "
+                success = False
+                break
+        else:
+            shared_items_not_changed += 1
+
+    if success and positive_value_exists(highest_shared_link_clicked_id):
+        # Update the "share_link_clicked_count_statistics_updated_through_id"
+        results = we_vote_settings_manager.save_setting(
+            setting_name="share_link_clicked_count_statistics_updated_through_id",
+            setting_value=highest_shared_link_clicked_id,
+            value_type=WeVoteSetting.INTEGER)
+        if not results['success']:
+            status += results['status']
+            success = False
+
+    # How many remain to be updated in the future?
+    queryset = SharedLinkClicked.objects.using('readonly').all()
+    queryset = queryset.filter(id__gt=highest_shared_link_clicked_id)
+    count_updates_remaining = queryset.count()
+
+    results = {
+        'status':                   status,
+        'success':                  success,
+        'count_updates_remaining':  count_updates_remaining,
+        'shared_items_changed':     shared_items_changed,
+        'shared_items_not_changed': shared_items_not_changed,
     }
     return results
