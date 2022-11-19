@@ -32,8 +32,8 @@ def shared_item_list_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     exclude_remind_contact = positive_value_exists(request.GET.get('exclude_remind_contact', False))
-
     limit_to_last_90_days = positive_value_exists(request.GET.get('limit_to_last_90_days', False))
+    number_to_update = request.GET.get('number_to_update', 10000)
     only_show_shares_with_clicks = positive_value_exists(request.GET.get('only_show_shares_with_clicks', False))
     shared_item_search = request.GET.get('shared_item_search', '')
     show_more = positive_value_exists(request.GET.get('show_more', False))
@@ -50,7 +50,7 @@ def shared_item_list_view(request):
 
     update_statistics = True
     if update_statistics:
-        statistics_results = update_shared_item_statistics()
+        statistics_results = update_shared_item_statistics(number_to_update=number_to_update)
         if not statistics_results['success']:
             message_to_print = "FAILED update_shared_item_statistics: {status}".format(
                 status=statistics_results['status']

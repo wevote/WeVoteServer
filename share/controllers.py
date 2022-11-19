@@ -1257,8 +1257,7 @@ def super_share_item_send_for_api(  # superShareItemSave (for sending)
     return results
 
 
-def update_shared_item_statistics(
-        first_update_only=True):
+def update_shared_item_statistics(number_to_update=10000):
     shared_items_changed = 0
     shared_items_not_changed = 0
     status = ''
@@ -1296,8 +1295,10 @@ def update_shared_item_statistics(
     clicked_queryset = SharedLinkClicked.objects.using('readonly').all()
     clicked_queryset = clicked_queryset.order_by('id')
     clicked_queryset = clicked_queryset.filter(id__gt=share_link_clicked_count_statistics_updated_through_id)
-    # clicked_queryset = clicked_queryset.values_list('shared_item_id', flat=True).distinct()
-    clicked_queryset = clicked_queryset[:10000]
+
+    if not positive_value_exists(number_to_update):
+        number_to_update = 10000
+    clicked_queryset = clicked_queryset[:number_to_update]
     shared_link_clicked_list = list(clicked_queryset)
     shared_item_id_list = []
     for one_shared_link_clicked in shared_link_clicked_list:
