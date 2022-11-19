@@ -1297,7 +1297,7 @@ def update_shared_item_statistics(
     clicked_queryset = clicked_queryset.order_by('id')
     clicked_queryset = clicked_queryset.filter(id__gt=share_link_clicked_count_statistics_updated_through_id)
     # clicked_queryset = clicked_queryset.values_list('shared_item_id', flat=True).distinct()
-    clicked_queryset = clicked_queryset[:1000]
+    clicked_queryset = clicked_queryset[:10000]
     shared_link_clicked_list = list(clicked_queryset)
     shared_item_id_list = []
     for one_shared_link_clicked in shared_link_clicked_list:

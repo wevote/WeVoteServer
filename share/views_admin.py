@@ -60,9 +60,9 @@ def shared_item_list_view(request):
                 positive_value_exists(statistics_results['shared_items_changed']) or \
                 positive_value_exists(statistics_results['shared_items_not_changed']):
             message_to_print = \
-                "shared_items_changed: {shared_items_changed}, " \
-                "shared_items_not_changed: {shared_items_not_changed}, "\
-                "count_updates_remaining: {count_updates_remaining}" \
+                "shared_items_changed: {shared_items_changed:,}, " \
+                "shared_items_not_changed: {shared_items_not_changed:,}, "\
+                "count_updates_remaining: {count_updates_remaining:,}" \
                 "".format(
                     count_updates_remaining=statistics_results['count_updates_remaining'],
                     shared_items_changed=statistics_results['shared_items_changed'],
@@ -172,7 +172,7 @@ def shared_item_list_view(request):
     else:
         shared_item_list = shared_item_query[:200]
 
-    message_to_print = "{count} shared items found.".format(count=shared_item_list_found_count)
+    message_to_print = "{count:,} shared items found.".format(count=shared_item_list_found_count)
     messages.add_message(request, messages.INFO, message_to_print)
     messages_on_stage = get_messages(request)
 
