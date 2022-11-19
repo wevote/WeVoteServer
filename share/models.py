@@ -28,6 +28,20 @@ class SharedItem(models.Model):
     shared_item_code_remind_contacts = models.CharField(max_length=50, null=True, unique=True, db_index=True)
     # Returns link to /ready URL
     shared_item_code_ready = models.CharField(max_length=50, null=True, unique=True, db_index=True)
+    # Analytics for easy sorting (this is not master data, but calculated from SharedLinkClicked data)
+    shared_link_clicked_count = models.PositiveIntegerField(default=0, null=True, blank=True)
+    shared_link_clicked_count_last_updated = models.DateTimeField(null=True)
+    shared_link_clicked_unique_viewer_count = models.PositiveIntegerField(default=0, null=True, blank=True)
+    # Analytics for each kind of click offered by a SharedItem
+    shared_link_clicked_count_all_opinions = models.PositiveIntegerField(default=0, null=True, blank=True)
+    shared_link_clicked_unique_viewer_count_all_opinions = models.PositiveIntegerField(default=0, null=True, blank=True)
+    shared_link_clicked_count_no_opinions = models.PositiveIntegerField(default=0, null=True, blank=True)
+    shared_link_clicked_unique_viewer_count_no_opinions = models.PositiveIntegerField(default=0, null=True, blank=True)
+    shared_link_clicked_count_ready = models.PositiveIntegerField(default=0, null=True, blank=True)
+    shared_link_clicked_unique_viewer_count_ready = models.PositiveIntegerField(default=0, null=True, blank=True)
+    shared_link_clicked_count_remind_contacts = models.PositiveIntegerField(default=0, null=True, blank=True)
+    shared_link_clicked_unique_viewer_count_remind_contacts = \
+        models.PositiveIntegerField(default=0, null=True, blank=True)
     # secret key to verify ownership of email on first click
     email_secret_key = models.CharField(max_length=255, null=True, db_index=True)
     # secret key to verify ownership of phone number on first click
