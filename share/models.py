@@ -855,9 +855,14 @@ class ShareManager(models.Manager):
             field_for_distinct_filter='shared_by_voter_we_vote_id')
 
     def fetch_shared_link_clicked_unique_viewer_count(
-            self, shared_by_state_code_list=[], viewed_by_state_code_list=[], year_as_integer_list=[]):
+            self,
+            shared_by_state_code_list=[],
+            shared_by_voter_we_vote_id_list=[],
+            viewed_by_state_code_list=[],
+            year_as_integer_list=[]):
         return self.fetch_shared_link_clicked_count(
             shared_by_state_code_list=shared_by_state_code_list,
+            shared_by_voter_we_vote_id_list=shared_by_voter_we_vote_id_list,
             viewed_by_state_code_list=viewed_by_state_code_list,
             year_as_integer_list=year_as_integer_list,
             field_for_distinct_filter='viewed_by_voter_we_vote_id')
@@ -871,15 +876,21 @@ class ShareManager(models.Manager):
             field_for_distinct_filter='shared_item_id')
 
     def fetch_shared_link_clicked_shared_links_click_count(
-            self, shared_by_state_code_list=[], viewed_by_state_code_list=[], year_as_integer_list=[]):
+            self,
+            shared_by_state_code_list=[],
+            shared_by_voter_we_vote_id_list=[],
+            viewed_by_state_code_list=[],
+            year_as_integer_list=[]):
         return self.fetch_shared_link_clicked_count(
             shared_by_state_code_list=shared_by_state_code_list,
+            shared_by_voter_we_vote_id_list=shared_by_voter_we_vote_id_list,
             viewed_by_state_code_list=viewed_by_state_code_list,
             year_as_integer_list=year_as_integer_list,
             field_for_distinct_filter='id')
 
     def fetch_shared_link_clicked_count(
             self, shared_by_state_code_list=[],
+            shared_by_voter_we_vote_id_list=[],
             viewed_by_state_code_list=[],
             year_as_integer_list=[],
             field_for_distinct_filter=''):
@@ -891,6 +902,8 @@ class ShareManager(models.Manager):
 
         if positive_value_exists(len(shared_by_state_code_list)):
             queryset = queryset.filter(shared_by_state_code__in=shared_by_state_code_list)
+        if positive_value_exists(len(shared_by_voter_we_vote_id_list)):
+            queryset = queryset.filter(shared_by_voter_we_vote_id__in=shared_by_voter_we_vote_id_list)
         if positive_value_exists(len(viewed_by_state_code_list)):
             queryset = queryset.filter(viewed_by_state_code__in=viewed_by_state_code_list)
         if positive_value_exists(len(year_as_integer_list)):
@@ -1387,6 +1400,39 @@ class ShareManager(models.Manager):
             'super_share_item_list':        super_share_item_list,
         }
         return results
+
+
+class VoterWhoSharesSummaryAllTime(models.Model):
+    """
+    We calculate this summary information, so we can see quickly who are the top sharers in We Vote network
+    """
+    voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True, unique=True)
+    shared_by_display_name = models.TextField(blank=True, null=True)
+    # Image we are using as the profile photo (could be sourced from Twitter, Facebook or uploaded directly by voter)
+    we_vote_hosted_profile_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
+    # Analytics for easy sorting (this is not master data, but calculated from SharedLinkClicked data)
+    shared_link_clicked_count = models.PositiveIntegerField(default=0, null=True, blank=True)
+    shared_link_clicked_count_last_updated = models.DateTimeField(null=True)
+    shared_link_clicked_unique_viewer_count = models.PositiveIntegerField(default=0, null=True, blank=True)
+
+
+class VoterWhoSharesSummaryOneYear(models.Model):
+    """
+    We calculate this summary information for one year, so we can see the top sharers in We Vote network
+    """
+    voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True, unique=True)
+    shared_by_display_name = models.TextField(blank=True, null=True)
+    year_as_integer = models.PositiveIntegerField(null=True, unique=False, db_index=True)
+    # Image we are using as the profile photo (could be sourced from Twitter, Facebook or uploaded directly by voter)
+    we_vote_hosted_profile_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
+    # Analytics for easy sorting (this is not master data, but calculated from SharedLinkClicked data)
+    shared_link_clicked_count = models.PositiveIntegerField(default=0, null=True, blank=True)
+    shared_link_clicked_count_last_updated = models.DateTimeField(null=True)
+    shared_link_clicked_unique_viewer_count = models.PositiveIntegerField(default=0, null=True, blank=True)
 
 
 class SuperShareItem(models.Model):
