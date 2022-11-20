@@ -16,7 +16,8 @@ import json
 from organization.models import OrganizationManager
 from position.models import PositionListManager
 import robot_detection
-from share.models import SharedItem, SharedLinkClicked, SharedPermissionsGranted
+from share.models import SharedItem, SharedLinkClicked, SharedPermissionsGranted, \
+    VoterWhoSharesSummaryAllTime, VoterWhoSharesSummaryOneYear
 from voter.models import VoterDeviceLinkManager, VoterManager, Voter
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
@@ -1477,5 +1478,138 @@ def update_shared_item_statistics(number_to_update=10000):
         'count_updates_remaining':  count_updates_remaining,
         'shared_items_changed':     shared_items_changed,
         'shared_items_not_changed': shared_items_not_changed,
+    }
+    return results
+
+
+def update_voter_who_shares_summary_for_all_time(number_to_update=1000):
+    sharing_summary_items_changed = 0
+    sharing_summary_items_not_changed = 0
+    sharing_summary_updates_remaining = 0
+    status = ''
+    success = True
+
+    # Get last SharedLinkClicked id: "sharing_summary_for_voter_updated_through_shared_link_clicked_id"
+    we_vote_settings_manager = WeVoteSettingsManager()
+    results = we_vote_settings_manager.fetch_setting_results(
+        'sharing_summary_for_voter_updated_through_shared_link_clicked_id')
+    sharing_summary_for_voter_updated_through_shared_link_clicked_id = 0
+    if not results['success']:
+        status += results['status']
+        success = False
+        sharing_summary_updates_remaining = 0
+        results = {
+            'status':                               status,
+            'success':                              success,
+            'sharing_summary_updates_remaining':    sharing_summary_updates_remaining,
+            'sharing_summary_items_changed':        sharing_summary_items_changed,
+            'sharing_summary_items_not_changed':    sharing_summary_items_not_changed,
+        }
+        return results
+    elif results['we_vote_setting_found']:
+        sharing_summary_for_voter_updated_through_shared_link_clicked_id = results['setting_value']
+
+    highest_shared_link_clicked_id = 0
+    if positive_value_exists(sharing_summary_for_voter_updated_through_shared_link_clicked_id):
+        status += "sharing_summary_for_voter_updated_through_shared_link_clicked_id-FOUND: {share_link_clicked_id} " \
+            "".format(share_link_clicked_id=sharing_summary_for_voter_updated_through_shared_link_clicked_id)
+        highest_shared_link_clicked_id = sharing_summary_for_voter_updated_through_shared_link_clicked_id
+    else:
+        status += "Starting update at share_link_clicked.id = 0 "
+
+    # Get a list of shared_item id's which have had activity through shared_item_id
+    clicked_queryset = SharedLinkClicked.objects.using('readonly').all()
+    clicked_queryset = clicked_queryset.order_by('id')
+    clicked_queryset = clicked_queryset.filter(id__gt=sharing_summary_for_voter_updated_through_shared_link_clicked_id)
+
+    if not positive_value_exists(number_to_update):
+        number_to_update = 10000
+    number_to_update = convert_to_int(number_to_update)
+    clicked_queryset = clicked_queryset[:number_to_update]
+    shared_link_clicked_list = list(clicked_queryset)
+
+    # Since we might be looking for 10,000 voters, retrieve them all at once and put them in a dict
+    voter_we_vote_id_list = []
+    for one_shared_link_clicked in shared_link_clicked_list:
+        if one_shared_link_clicked.shared_by_voter_we_vote_id not in voter_we_vote_id_list:
+            voter_we_vote_id_list.append(one_shared_link_clicked.shared_by_voter_we_vote_id)
+    voter_dict_by_voter_we_vote_id = {}
+    try:
+        voter_query = Voter.objects.using('readonly').all()
+        voter_query = voter_query.filter(we_vote_id__in=voter_we_vote_id_list)
+        voter_list = list(voter_query)
+        for one_voter in voter_list:
+            voter_dict_by_voter_we_vote_id[one_voter.we_vote_id] = one_voter
+    except Exception as e:
+        status += "VOTER_RETRIEVE_FAIL: " + str(e) + " "
+        success = False
+        results = {
+            'status':                               status,
+            'success':                              success,
+            'sharing_summary_updates_remaining':    sharing_summary_updates_remaining,
+            'sharing_summary_items_changed':        sharing_summary_items_changed,
+            'sharing_summary_items_not_changed':    sharing_summary_items_not_changed,
+        }
+        return results
+
+    real_name_only = True
+    share_manager = ShareManager()
+    voter_we_vote_id_already_processed_list = []
+    for one_shared_link_clicked in shared_link_clicked_list:
+        if one_shared_link_clicked.shared_by_voter_we_vote_id in voter_we_vote_id_already_processed_list:
+            # Voter already processed: go to the next shared_link_clicked to find other voters to process
+            continue
+        try:
+            voter_we_vote_id = one_shared_link_clicked.shared_by_voter_we_vote_id
+            voter = voter_dict_by_voter_we_vote_id[voter_we_vote_id]
+            shared_link_clicked_count = share_manager.fetch_shared_link_clicked_shared_links_click_count(
+                shared_by_voter_we_vote_id_list=[voter_we_vote_id]
+            )
+            shared_link_clicked_count_last_updated = now()
+            shared_link_clicked_unique_viewer_count = share_manager.fetch_shared_link_clicked_unique_viewer_count(
+                shared_by_voter_we_vote_id_list=[voter_we_vote_id]
+            )
+            sharing_summary_for_voter, created = VoterWhoSharesSummaryAllTime.objects.update_or_create(
+                voter_we_vote_id=voter_we_vote_id,
+                defaults={
+                    'shared_link_clicked_count': shared_link_clicked_count,
+                    'shared_link_clicked_count_last_updated': shared_link_clicked_count_last_updated,
+                    'shared_link_clicked_unique_viewer_count': shared_link_clicked_unique_viewer_count,
+                    'shared_by_display_name': voter.get_full_name(real_name_only),
+                    'voter_we_vote_id': voter_we_vote_id,
+                    'we_vote_hosted_profile_image_url_large': voter.we_vote_hosted_profile_image_url_large,
+                    'we_vote_hosted_profile_image_url_medium': voter.we_vote_hosted_profile_image_url_medium,
+                    'we_vote_hosted_profile_image_url_tiny': voter.we_vote_hosted_profile_image_url_tiny,
+                }
+            )
+            voter_we_vote_id_already_processed_list.append(voter_we_vote_id)
+            sharing_summary_items_changed += 1
+            if one_shared_link_clicked.id > highest_shared_link_clicked_id:
+                highest_shared_link_clicked_id = one_shared_link_clicked.id
+        except Exception as e:
+            status += "FAILED_UPDATE: " + str(e) + " "
+            sharing_summary_items_not_changed += 1
+
+    if positive_value_exists(highest_shared_link_clicked_id):
+        # Update the "sharing_summary_for_voter_updated_through_shared_link_clicked_id"
+        results = we_vote_settings_manager.save_setting(
+            setting_name="sharing_summary_for_voter_updated_through_shared_link_clicked_id",
+            setting_value=highest_shared_link_clicked_id,
+            value_type=WeVoteSetting.INTEGER)
+        if not results['success']:
+            status += results['status']
+            success = False
+
+    # How many remain to be updated in the future?
+    queryset = SharedLinkClicked.objects.using('readonly').all()
+    queryset = queryset.filter(id__gt=highest_shared_link_clicked_id)
+    sharing_summary_updates_remaining = queryset.count()
+
+    results = {
+        'status':                               status,
+        'success':                              success,
+        'sharing_summary_updates_remaining':    sharing_summary_updates_remaining,
+        'sharing_summary_items_changed':        sharing_summary_items_changed,
+        'sharing_summary_items_not_changed':    sharing_summary_items_not_changed,
     }
     return results
