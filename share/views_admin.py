@@ -170,9 +170,11 @@ def shared_item_list_view(request):
                     final_filters |= item
 
                 shared_item_query = shared_item_query.filter(final_filters)
-        shared_item_query = shared_item_query.order_by('-shared_link_clicked_unique_viewer_count')
+        shared_item_query = shared_item_query\
+            .order_by('-shared_link_clicked_unique_viewer_count', '-shared_link_clicked_count')
     else:
-        shared_item_query = SharedItem.objects.order_by('-shared_link_clicked_unique_viewer_count')
+        shared_item_query = SharedItem.objects\
+            .order_by('-shared_link_clicked_unique_viewer_count', '-shared_link_clicked_count')
 
     if positive_value_exists(exclude_remind_contact):
         shared_item_query = shared_item_query.exclude(is_remind_contact_share=True)
