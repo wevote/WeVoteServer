@@ -18,7 +18,7 @@ from voter.models import voter_has_authority, VoterManager
 from wevote_functions.functions import convert_to_int, get_voter_api_device_id, \
     positive_value_exists
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
-from .controllers import update_shared_item_statistics
+from .controllers import update_shared_item_shared_by_info, update_shared_item_statistics
 from .models import SharedItem
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -33,7 +33,7 @@ def shared_item_list_view(request):
 
     exclude_remind_contact = positive_value_exists(request.GET.get('exclude_remind_contact', False))
     limit_to_last_90_days = positive_value_exists(request.GET.get('limit_to_last_90_days', False))
-    number_to_update = request.GET.get('number_to_update', 10000)
+    number_to_update = convert_to_int(request.GET.get('number_to_update', 10000))
     only_show_shares_with_clicks = positive_value_exists(request.GET.get('only_show_shares_with_clicks', False))
     shared_item_search = request.GET.get('shared_item_search', '')
     show_more = positive_value_exists(request.GET.get('show_more', False))
@@ -60,13 +60,33 @@ def shared_item_list_view(request):
                 positive_value_exists(statistics_results['shared_items_changed']) or \
                 positive_value_exists(statistics_results['shared_items_not_changed']):
             message_to_print = \
-                "shared_items_changed: {shared_items_changed:,}, " \
+                "STATISTICS: shared_items_changed: {shared_items_changed:,}, " \
                 "shared_items_not_changed: {shared_items_not_changed:,}, "\
                 "count_updates_remaining: {count_updates_remaining:,}" \
                 "".format(
                     count_updates_remaining=statistics_results['count_updates_remaining'],
                     shared_items_changed=statistics_results['shared_items_changed'],
                     shared_items_not_changed=statistics_results['shared_items_not_changed'],
+                )
+            messages.add_message(request, messages.INFO, message_to_print)
+
+        shared_by_results = update_shared_item_shared_by_info(number_to_update=number_to_update)
+        if not shared_by_results['success']:
+            message_to_print = "FAILED update_shared_item_shared_by_info: {status}".format(
+                status=shared_by_results['status']
+            )
+            messages.add_message(request, messages.ERROR, message_to_print)
+        elif positive_value_exists(shared_by_results['shared_by_updates_remaining']) or \
+                positive_value_exists(shared_by_results['shared_items_changed']) or \
+                positive_value_exists(shared_by_results['shared_items_not_changed']):
+            message_to_print = \
+                "SHARED_BY_INFO: shared_items_changed: {shared_items_changed:,}, " \
+                "shared_items_not_changed: {shared_items_not_changed:,}, "\
+                "shared_by_updates_remaining: {shared_by_updates_remaining:,}" \
+                "".format(
+                    shared_by_updates_remaining=shared_by_results['shared_by_updates_remaining'],
+                    shared_items_changed=shared_by_results['shared_items_changed'],
+                    shared_items_not_changed=shared_by_results['shared_items_not_changed'],
                 )
             messages.add_message(request, messages.INFO, message_to_print)
 
