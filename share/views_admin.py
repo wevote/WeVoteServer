@@ -19,8 +19,9 @@ from wevote_functions.functions import convert_to_int, get_voter_api_device_id, 
     positive_value_exists
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from .controllers import update_shared_item_shared_by_info, update_shared_item_statistics, \
-    update_voter_who_shares_summary_for_all_time
-from .models import SharedItem, VoterWhoSharesSummaryAllTime
+    update_voter_who_shares_summary_for_all_time, update_voter_by_year_who_shares_summary, \
+    update_who_shares_summary_by_year_from_shared_item
+from .models import SharedItem, VoterWhoSharesSummaryAllTime, VoterWhoSharesSummaryOneYear
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -227,7 +228,7 @@ def voter_who_shares_summary_list_view(request):
     only_show_shares_with_clicks = positive_value_exists(request.GET.get('only_show_shares_with_clicks', False))
     voter_summary_search = request.GET.get('voter_summary_search', '')
     show_more = positive_value_exists(request.GET.get('show_more', False))
-    show_this_year = request.GET.get('show_this_year', False)
+    show_this_year = convert_to_int(request.GET.get('show_this_year', 0))
 
     voter_api_device_id = get_voter_api_device_id(request)  # We look in the cookies for voter_api_device_id
     voter_manager = VoterManager()
@@ -252,7 +253,7 @@ def voter_who_shares_summary_list_view(request):
             message_to_print = \
                 "SHARING_SUMMARY: sharing_summary_items_changed: {sharing_summary_items_changed:,}, " \
                 "sharing_summary_items_not_changed: {sharing_summary_items_not_changed:,}, " \
-                "sharing_summary_updates_remaining: {sharing_summary_updates_remaining:,}" \
+                "sharing_summary_updates_remaining: {sharing_summary_updates_remaining:,} " \
                 "shared_by_results['status']: {status}" \
                 "".format(
                     status=shared_by_results['status'],
@@ -261,6 +262,59 @@ def voter_who_shares_summary_list_view(request):
                     sharing_summary_updates_remaining=shared_by_results['sharing_summary_updates_remaining'],
                 )
             messages.add_message(request, messages.INFO, message_to_print)
+        # Update based on SharedItem activity
+        shared_by_results = update_who_shares_summary_by_year_from_shared_item(number_to_update=number_to_update)
+        if not shared_by_results['success']:
+            message_to_print = "FAILED update_who_shares_summary_by_year_from_shared_item: {status}".format(
+                status=shared_by_results['status']
+            )
+            messages.add_message(request, messages.ERROR, message_to_print)
+        elif positive_value_exists(shared_by_results['sharing_summary_items_changed']) or \
+                positive_value_exists(shared_by_results['sharing_summary_items_not_changed']) or \
+                positive_value_exists(shared_by_results['sharing_summary_updates_remaining']):
+            message_to_print = \
+                "SHARING_BY_YEAR_SHARED_ITEM_SUMMARY: " \
+                "sharing_summary_items_changed: {sharing_summary_items_changed:,}, " \
+                "sharing_summary_items_not_changed: {sharing_summary_items_not_changed:,}, " \
+                "sharing_summary_updates_remaining: {sharing_summary_updates_remaining:,} " \
+                "shared_by_results['status']: {status}" \
+                "".format(
+                    status=shared_by_results['status'],
+                    sharing_summary_items_changed=shared_by_results['sharing_summary_items_changed'],
+                    sharing_summary_items_not_changed=shared_by_results['sharing_summary_items_not_changed'],
+                    sharing_summary_updates_remaining=shared_by_results['sharing_summary_updates_remaining'],
+                )
+            messages.add_message(request, messages.INFO, message_to_print)
+        # Update based on ShareLinkClicked activity
+        shared_by_results = update_voter_by_year_who_shares_summary(number_to_update=number_to_update)
+        if not shared_by_results['success']:
+            message_to_print = "FAILED update_voter_by_year_who_shares_summary: {status}".format(
+                status=shared_by_results['status']
+            )
+            messages.add_message(request, messages.ERROR, message_to_print)
+        elif positive_value_exists(shared_by_results['sharing_summary_items_changed']) or \
+                positive_value_exists(shared_by_results['sharing_summary_items_not_changed']) or \
+                positive_value_exists(shared_by_results['sharing_summary_updates_remaining']):
+            message_to_print = \
+                "SHARING_BY_YEAR_SUMMARY: sharing_summary_items_changed: {sharing_summary_items_changed:,}, " \
+                "sharing_summary_items_not_changed: {sharing_summary_items_not_changed:,}, " \
+                "sharing_summary_updates_remaining: {sharing_summary_updates_remaining:,} " \
+                "shared_by_results['status']: {status}" \
+                "".format(
+                    status=shared_by_results['status'],
+                    sharing_summary_items_changed=shared_by_results['sharing_summary_items_changed'],
+                    sharing_summary_items_not_changed=shared_by_results['sharing_summary_items_not_changed'],
+                    sharing_summary_updates_remaining=shared_by_results['sharing_summary_updates_remaining'],
+                )
+            messages.add_message(request, messages.INFO, message_to_print)
+
+    if positive_value_exists(show_this_year):
+        # If filtering by year, use VoterWhoSharesSummaryOneYear object
+        voter_who_shares_query = VoterWhoSharesSummaryOneYear.objects.using('readonly').all()
+        voter_who_shares_query = voter_who_shares_query.filter(year_as_integer=show_this_year)
+    else:
+        # Otherwise, use VoterWhoSharesSummaryAllTime object
+        voter_who_shares_query = VoterWhoSharesSummaryAllTime.objects.using('readonly').all()
 
     if positive_value_exists(voter_summary_search):
         # Search for an email address - do not require to be verified
@@ -275,8 +329,6 @@ def voter_who_shares_summary_list_view(request):
         ).values_list('voter_we_vote_id', flat=True)
         voter_we_vote_ids_with_sms_phone_number = list(voter_we_vote_ids_with_sms_phone_number_query)
 
-        # Now search VoterWhoSharesSummaryAllTime object
-        voter_who_shares_query = VoterWhoSharesSummaryAllTime.objects.all()
         search_words = voter_summary_search.split()
         for one_word in search_words:
             filters = []  # Reset for each search word
@@ -305,20 +357,15 @@ def voter_who_shares_summary_list_view(request):
                     final_filters |= item
 
                 voter_who_shares_query = voter_who_shares_query.filter(final_filters)
-        voter_who_shares_query = voter_who_shares_query\
-            .order_by('-shared_link_clicked_unique_viewer_count', '-shared_link_clicked_count')
-    else:
-        voter_who_shares_query = VoterWhoSharesSummaryAllTime.objects\
-            .order_by('-shared_link_clicked_unique_viewer_count', '-shared_link_clicked_count')
 
     if positive_value_exists(limit_to_last_90_days):
         when_process_must_stop = now() - timedelta(days=90)
         voter_who_shares_query = voter_who_shares_query.filter(shared_link_clicked_count_last_updated__gt=when_process_must_stop)
         show_this_year = 0
-    elif positive_value_exists(show_this_year):
-        voter_who_shares_query = voter_who_shares_query.filter(shared_link_clicked_count_last_updated__year=show_this_year)
     if positive_value_exists(only_show_shares_with_clicks):
         voter_who_shares_query = voter_who_shares_query.filter(shared_link_clicked_count__gt=0)
+    voter_who_shares_query = \
+        voter_who_shares_query.order_by('-shared_link_clicked_unique_viewer_count', '-shared_link_clicked_count')
 
     voter_who_shares_summary_list_found_count = voter_who_shares_query.count()
 
@@ -327,9 +374,29 @@ def voter_who_shares_summary_list_view(request):
     else:
         voter_who_shares_summary_list = voter_who_shares_query[:200]
 
+    voter_who_shares_summary_list_modified = []
     for voter_who_shares_summary in voter_who_shares_summary_list:
         # Now retrieve all shared items to show under this voter summary
-        pass
+        shared_item_query = SharedItem.objects.using('readonly').all()
+        shared_item_query = \
+            shared_item_query.filter(shared_by_voter_we_vote_id=voter_who_shares_summary.voter_we_vote_id)
+        shared_item_query = shared_item_query.order_by('-date_first_shared')
+
+        if positive_value_exists(exclude_remind_contact):
+            shared_item_query = shared_item_query.exclude(is_remind_contact_share=True)
+        if positive_value_exists(only_show_shares_with_clicks):
+            shared_item_query = shared_item_query.filter(shared_link_clicked_count__gt=0)
+        if positive_value_exists(limit_to_last_90_days):
+            when_process_must_stop = now() - timedelta(days=90)
+            shared_item_query = shared_item_query.filter(date_first_shared__gt=when_process_must_stop)
+        if positive_value_exists(show_this_year):
+            shared_item_query = shared_item_query.filter(date_first_shared__year=show_this_year)
+
+        voter_who_shares_summary.shared_item_list_count = shared_item_query.count()
+
+        shared_item_list = shared_item_query[:100]
+        voter_who_shares_summary.shared_item_list = shared_item_list
+        voter_who_shares_summary_list_modified.append(voter_who_shares_summary)
 
     message_to_print = "{count:,} voters found who shared.".format(count=voter_who_shares_summary_list_found_count)
     messages.add_message(request, messages.INFO, message_to_print)
@@ -341,11 +408,11 @@ def voter_who_shares_summary_list_view(request):
         'limit_to_last_90_days':        limit_to_last_90_days,
         'messages_on_stage':            messages_on_stage,
         'only_show_shares_with_clicks': only_show_shares_with_clicks,
-        'voter_who_shares_summary_list':             voter_who_shares_summary_list,
+        'voter_who_shares_summary_list':             voter_who_shares_summary_list_modified,
         'voter_who_shares_summary_list_found_count': voter_who_shares_summary_list_found_count,
         'voter_summary_search':         voter_summary_search,
         'show_more':                    show_more,
         'show_this_year':               show_this_year,
-        'voter_id_signed_in': voter_id,
+        'voter_id_signed_in':           voter_id,
     }
     return render(request, 'share/voter_who_shares_summary_list.html', template_values)
