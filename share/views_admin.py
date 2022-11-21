@@ -362,9 +362,6 @@ def voter_who_shares_summary_list_view(request):
         when_process_must_stop = now() - timedelta(days=90)
         voter_who_shares_query = voter_who_shares_query.filter(shared_link_clicked_count_last_updated__gt=when_process_must_stop)
         show_this_year = 0
-    elif positive_value_exists(show_this_year):
-        # Only used with VoterWhoSharesSummaryOneYear
-        voter_who_shares_query = voter_who_shares_query.filter(year_as_integer=show_this_year)
     if positive_value_exists(only_show_shares_with_clicks):
         voter_who_shares_query = voter_who_shares_query.filter(shared_link_clicked_count__gt=0)
     voter_who_shares_query = \
