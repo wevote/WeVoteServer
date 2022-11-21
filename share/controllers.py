@@ -1495,6 +1495,7 @@ def update_voter_who_shares_summary_for_all_time(number_to_update=1000):
         'sharing_summary_for_voter_updated_through_shared_link_clicked_id')
     sharing_summary_for_voter_updated_through_shared_link_clicked_id = 0
     if not results['success']:
+        status += "FAILED_GETTING_SETTING: "
         status += results['status']
         success = False
         sharing_summary_updates_remaining = 0
@@ -1525,6 +1526,7 @@ def update_voter_who_shares_summary_for_all_time(number_to_update=1000):
     if not positive_value_exists(number_to_update):
         number_to_update = 10000
     number_to_update = convert_to_int(number_to_update)
+    status += "number_to_update: {number_to_update}".format(number_to_update=number_to_update)
     clicked_queryset = clicked_queryset[:number_to_update]
     shared_link_clicked_list = list(clicked_queryset)
 
@@ -1534,12 +1536,15 @@ def update_voter_who_shares_summary_for_all_time(number_to_update=1000):
         if one_shared_link_clicked.shared_by_voter_we_vote_id not in voter_we_vote_id_list:
             voter_we_vote_id_list.append(one_shared_link_clicked.shared_by_voter_we_vote_id)
     voter_dict_by_voter_we_vote_id = {}
+    voter_count = 0
     try:
         voter_query = Voter.objects.using('readonly').all()
         voter_query = voter_query.filter(we_vote_id__in=voter_we_vote_id_list)
         voter_list = list(voter_query)
         for one_voter in voter_list:
             voter_dict_by_voter_we_vote_id[one_voter.we_vote_id] = one_voter
+            voter_count += 1
+        status += "voter_count: {voter_count}".format(voter_count=voter_count)
     except Exception as e:
         status += "VOTER_RETRIEVE_FAIL: " + str(e) + " "
         success = False
@@ -1558,6 +1563,9 @@ def update_voter_who_shares_summary_for_all_time(number_to_update=1000):
     for one_shared_link_clicked in shared_link_clicked_list:
         if one_shared_link_clicked.shared_by_voter_we_vote_id in voter_we_vote_id_already_processed_list:
             # Voter already processed: go to the next shared_link_clicked to find other voters to process
+            status += "[voter_we_vote_id already processed]"
+            if one_shared_link_clicked.id > highest_shared_link_clicked_id:
+                highest_shared_link_clicked_id = one_shared_link_clicked.id
             continue
         try:
             voter_we_vote_id = one_shared_link_clicked.shared_by_voter_we_vote_id
