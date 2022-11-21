@@ -253,7 +253,7 @@ def voter_who_shares_summary_list_view(request):
                 "SHARING_SUMMARY: sharing_summary_items_changed: {sharing_summary_items_changed:,}, " \
                 "sharing_summary_items_not_changed: {sharing_summary_items_not_changed:,}, " \
                 "sharing_summary_updates_remaining: {sharing_summary_updates_remaining:,}" \
-                "shared_by_results['status']: {status:,}" \
+                "shared_by_results['status']: {status}" \
                 "".format(
                     status=shared_by_results['status'],
                     sharing_summary_items_changed=shared_by_results['sharing_summary_items_changed'],
