@@ -1422,7 +1422,7 @@ class VoterWhoSharesSummaryOneYear(models.Model):
     """
     We calculate this summary information for one year, so we can see the top sharers in We Vote network
     """
-    voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True, unique=True)
+    voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True)
     shared_by_display_name = models.TextField(blank=True, null=True)
     year_as_integer = models.PositiveIntegerField(null=True, unique=False, db_index=True)
     # Image we are using as the profile photo (could be sourced from Twitter, Facebook or uploaded directly by voter)
