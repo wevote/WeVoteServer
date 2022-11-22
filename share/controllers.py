@@ -1153,7 +1153,8 @@ def super_share_item_save_for_api(  # superShareItemSave
                 date_sent_to_email_string = ''
                 try:
                     if super_share_email_recipient.date_sent_to_email:
-                        date_sent_to_email_string = super_share_email_recipient.date_sent_to_email.strftime('%Y-%m-%d %H:%M:%S')
+                        date_sent_to_email_string = super_share_email_recipient.date_sent_to_email\
+                            .strftime('%Y-%m-%d %H:%M:%S')
                 except Exception as e:
                     pass
                 email_recipient_dict = {
@@ -1258,16 +1259,16 @@ def super_share_item_send_for_api(  # superShareItemSave (for sending)
     return results
 
 
-def update_shared_item_shared_by_info(number_to_update=1000):
+def update_shared_item_shared_by_info_from_shared_item(number_to_update=1000):
     shared_items_changed = 0
     shared_items_not_changed = 0
     status = ''
     success = True
 
-    # Get last SharedItem id: "shared_item_shared_by_info_updated_through_id"
+    # Get last SharedItem id: "shared_item_shared_by_info_last_id"
     we_vote_settings_manager = WeVoteSettingsManager()
-    results = we_vote_settings_manager.fetch_setting_results('shared_item_shared_by_info_updated_through_id')
-    shared_item_shared_by_info_updated_through_id = 0
+    results = we_vote_settings_manager.fetch_setting_results('shared_item_shared_by_info_last_id')
+    shared_item_shared_by_info_last_id = 0
     if not results['success']:
         status += results['status']
         success = False
@@ -1281,21 +1282,21 @@ def update_shared_item_shared_by_info(number_to_update=1000):
         }
         return results
     elif results['we_vote_setting_found']:
-        shared_item_shared_by_info_updated_through_id = results['setting_value']
+        shared_item_shared_by_info_last_id = results['setting_value']
 
     highest_shared_item_id = 0
-    if positive_value_exists(shared_item_shared_by_info_updated_through_id):
-        status += "shared_item_shared_by_info_updated_through_id-FOUND: {share_link_clicked_id} ".format(
-            share_link_clicked_id=shared_item_shared_by_info_updated_through_id
+    if positive_value_exists(shared_item_shared_by_info_last_id):
+        status += "shared_item_shared_by_info_last_id-FOUND: {shared_item_id} ".format(
+            shared_item_id=shared_item_shared_by_info_last_id
         )
-        highest_shared_item_id = shared_item_shared_by_info_updated_through_id
+        highest_shared_item_id = shared_item_shared_by_info_last_id
     else:
-        status += "Starting update at share_link_clicked.id = 0 "
+        status += "Starting update at shared_link_clicked.id = 0 "
 
     # Now get all the SharedItems to update
     queryset = SharedItem.objects.all()
     queryset = queryset.order_by('id')
-    queryset = queryset.filter(id__gt=shared_item_shared_by_info_updated_through_id)
+    queryset = queryset.filter(id__gt=shared_item_shared_by_info_last_id)
     if not positive_value_exists(number_to_update):
         number_to_update = 10000
     number_to_update = convert_to_int(number_to_update)
@@ -1329,7 +1330,14 @@ def update_shared_item_shared_by_info(number_to_update=1000):
     real_name_only = True
     for shared_item in shared_item_update_needed_list:
         try:
-            voter = voter_dict_by_voter_we_vote_id[shared_item.shared_by_voter_we_vote_id]
+            try:
+                voter = voter_dict_by_voter_we_vote_id[shared_item.shared_by_voter_we_vote_id]
+            except Exception as e:
+                status += "VOTER_MISSING: " + str(e) + " "
+                shared_items_not_changed += 1
+                if shared_item.id > highest_shared_item_id:
+                    highest_shared_item_id = shared_item.id
+                continue
             if not positive_value_exists(shared_item.shared_by_display_name) and \
                     voter.get_full_name(real_name_only):
                 shared_item.shared_by_display_name = voter.get_full_name(real_name_only)
@@ -1347,16 +1355,16 @@ def update_shared_item_shared_by_info(number_to_update=1000):
                     voter.we_vote_hosted_profile_image_url_tiny
             shared_item.save()
             shared_items_changed += 1
-            if shared_item.id > highest_shared_item_id:
-                highest_shared_item_id = shared_item.id
         except Exception as e:
             status += "FAILED_SAVE: " + str(e) + " "
             shared_items_not_changed += 1
+        if shared_item.id > highest_shared_item_id:
+            highest_shared_item_id = shared_item.id
 
     if positive_value_exists(highest_shared_item_id):
-        # Update the "shared_item_shared_by_info_updated_through_id"
+        # Update the "shared_item_shared_by_info_last_id"
         results = we_vote_settings_manager.save_setting(
-            setting_name="shared_item_shared_by_info_updated_through_id",
+            setting_name="shared_item_shared_by_info_last_id",
             setting_value=highest_shared_item_id,
             value_type=WeVoteSetting.INTEGER)
         if not results['success']:
@@ -1378,16 +1386,16 @@ def update_shared_item_shared_by_info(number_to_update=1000):
     return results
 
 
-def update_shared_item_statistics(number_to_update=10000):
+def update_shared_item_statistics_from_shared_link_clicked(number_to_update=10000):
     shared_items_changed = 0
     shared_items_not_changed = 0
     status = ''
     success = True
 
-    # Get last ShareLinkClicked id: "share_link_clicked_count_statistics_updated_through_id"
+    # Get last ShareLinkClicked id: "shared_item_statistics_from_shared_link_clicked_last_id"
     we_vote_settings_manager = WeVoteSettingsManager()
-    results = we_vote_settings_manager.fetch_setting_results('share_link_clicked_count_statistics_updated_through_id')
-    share_link_clicked_count_statistics_updated_through_id = 0
+    results = we_vote_settings_manager.fetch_setting_results('shared_item_statistics_from_shared_link_clicked_last_id')
+    shared_item_statistics_from_shared_link_clicked_last_id = 0
     if not results['success']:
         status += results['status']
         success = False
@@ -1401,21 +1409,21 @@ def update_shared_item_statistics(number_to_update=10000):
         }
         return results
     elif results['we_vote_setting_found']:
-        share_link_clicked_count_statistics_updated_through_id = results['setting_value']
+        shared_item_statistics_from_shared_link_clicked_last_id = results['setting_value']
 
     highest_shared_link_clicked_id = 0
-    if positive_value_exists(share_link_clicked_count_statistics_updated_through_id):
-        status += "share_link_clicked_count_statistics_updated_through_id-FOUND: {share_link_clicked_id} ".format(
-            share_link_clicked_id=share_link_clicked_count_statistics_updated_through_id
+    if positive_value_exists(shared_item_statistics_from_shared_link_clicked_last_id):
+        status += "shared_item_statistics_from_shared_link_clicked_last_id-FOUND: {shared_link_clicked_id} ".format(
+            shared_link_clicked_id=shared_item_statistics_from_shared_link_clicked_last_id
         )
-        highest_shared_link_clicked_id = share_link_clicked_count_statistics_updated_through_id
+        highest_shared_link_clicked_id = shared_item_statistics_from_shared_link_clicked_last_id
     else:
-        status += "Starting update at share_link_clicked.id = 0 "
+        status += "Starting update at shared_link_clicked.id = 0 "
 
     # Get a list of shared_item_id's which have had activity in X period of time or since...
     clicked_queryset = SharedLinkClicked.objects.using('readonly').all()
     clicked_queryset = clicked_queryset.order_by('id')
-    clicked_queryset = clicked_queryset.filter(id__gt=share_link_clicked_count_statistics_updated_through_id)
+    clicked_queryset = clicked_queryset.filter(id__gt=shared_item_statistics_from_shared_link_clicked_last_id)
 
     if not positive_value_exists(number_to_update):
         number_to_update = 10000
@@ -1458,9 +1466,9 @@ def update_shared_item_statistics(number_to_update=10000):
             shared_items_not_changed += 1
 
     if success and positive_value_exists(highest_shared_link_clicked_id):
-        # Update the "share_link_clicked_count_statistics_updated_through_id"
+        # Update the "shared_item_statistics_from_shared_link_clicked_last_id"
         results = we_vote_settings_manager.save_setting(
-            setting_name="share_link_clicked_count_statistics_updated_through_id",
+            setting_name="shared_item_statistics_from_shared_link_clicked_last_id",
             setting_value=highest_shared_link_clicked_id,
             value_type=WeVoteSetting.INTEGER)
         if not results['success']:
@@ -1482,18 +1490,18 @@ def update_shared_item_statistics(number_to_update=10000):
     return results
 
 
-def update_who_shares_all_time_from_click_link(number_to_update=1000):
+def update_who_shares_all_time_from_shared_item(number_to_update=1000):
     sharing_summary_items_changed = 0
     sharing_summary_items_not_changed = 0
     sharing_summary_updates_remaining = 0
     status = ''
     success = True
 
-    # Get last SharedLinkClicked id: "sharing_summary_for_voter_updated_through_shared_link_clicked_id"
+    # Get last SharedItem id: "who_shares_all_time_from_shared_item_last_id"
     we_vote_settings_manager = WeVoteSettingsManager()
     results = we_vote_settings_manager.fetch_setting_results(
-        'sharing_summary_for_voter_updated_through_shared_link_clicked_id')
-    sharing_summary_for_voter_updated_through_shared_link_clicked_id = 0
+        'who_shares_all_time_from_shared_item_last_id')
+    who_shares_all_time_from_shared_item_last_id = 0
     if not results['success']:
         status += "FAILED_GETTING_SETTING: "
         status += results['status']
@@ -1508,20 +1516,167 @@ def update_who_shares_all_time_from_click_link(number_to_update=1000):
         }
         return results
     elif results['we_vote_setting_found']:
-        sharing_summary_for_voter_updated_through_shared_link_clicked_id = results['setting_value']
+        who_shares_all_time_from_shared_item_last_id = results['setting_value']
+
+    highest_shared_item_id = 0
+    if positive_value_exists(who_shares_all_time_from_shared_item_last_id):
+        status += "who_shares_all_time_from_shared_item_last_id-FOUND: {shared_item_id} " \
+            "".format(shared_item_id=who_shares_all_time_from_shared_item_last_id)
+        highest_shared_item_id = who_shares_all_time_from_shared_item_last_id
+    else:
+        status += "Starting update at shared_link_clicked.id = 0 "
+
+    # Get a list of shared_item id's which have had activity through shared_item_id
+    queryset = SharedItem.objects.using('readonly').all()
+    queryset = queryset.order_by('id')
+    queryset = queryset.filter(id__gt=who_shares_all_time_from_shared_item_last_id)
+
+    if not positive_value_exists(number_to_update):
+        number_to_update = 10000
+    number_to_update = convert_to_int(number_to_update)
+    status += "NUMBER_TO_UPDATE: {number_to_update} ".format(number_to_update=number_to_update)
+    queryset = queryset[:number_to_update]
+    shared_item_list = list(queryset)
+
+    # Since we might be looking for 10,000 voters, retrieve them all at once and put them in a dict
+    voter_we_vote_id_list = []
+    for one_shared_item in shared_item_list:
+        if one_shared_item.shared_by_voter_we_vote_id not in voter_we_vote_id_list:
+            voter_we_vote_id_list.append(one_shared_item.shared_by_voter_we_vote_id)
+    voter_dict_by_voter_we_vote_id = {}
+    voter_count = 0
+    try:
+        voter_query = Voter.objects.using('readonly').all()
+        voter_query = voter_query.filter(we_vote_id__in=voter_we_vote_id_list)
+        voter_list = list(voter_query)
+        for one_voter in voter_list:
+            voter_dict_by_voter_we_vote_id[one_voter.we_vote_id] = one_voter
+            voter_count += 1
+        status += "VOTER_COUNT: {voter_count} ".format(voter_count=voter_count)
+    except Exception as e:
+        status += "VOTER_RETRIEVE_FAIL: " + str(e) + " "
+        success = False
+        results = {
+            'status':                               status,
+            'success':                              success,
+            'sharing_summary_updates_remaining':    sharing_summary_updates_remaining,
+            'sharing_summary_items_changed':        sharing_summary_items_changed,
+            'sharing_summary_items_not_changed':    sharing_summary_items_not_changed,
+        }
+        return results
+
+    real_name_only = True
+    share_manager = ShareManager()
+    voter_we_vote_id_already_processed_list = []
+    for one_shared_item in shared_item_list:
+        if one_shared_item.shared_by_voter_we_vote_id in voter_we_vote_id_already_processed_list:
+            # Voter already processed: go to the next shared_link_clicked to find other voters to process
+            if one_shared_item.id > highest_shared_item_id:
+                highest_shared_item_id = one_shared_item.id
+            continue
+        try:
+            voter_we_vote_id = one_shared_item.shared_by_voter_we_vote_id
+            try:
+                voter = voter_dict_by_voter_we_vote_id[voter_we_vote_id]
+            except Exception as e:
+                status += "VOTER_MISSING: " + str(e) + " "
+                sharing_summary_items_not_changed += 1
+                if one_shared_item.id > highest_shared_item_id:
+                    highest_shared_item_id = one_shared_item.id
+                continue
+            shared_link_clicked_count = share_manager.fetch_shared_link_clicked_shared_links_click_count(
+                shared_by_voter_we_vote_id_list=[voter_we_vote_id]
+            )
+            shared_link_clicked_count_last_updated = now()
+            shared_link_clicked_unique_viewer_count = share_manager.fetch_shared_link_clicked_unique_viewer_count(
+                shared_by_voter_we_vote_id_list=[voter_we_vote_id]
+            )
+            sharing_summary_for_voter, created = VoterWhoSharesSummaryAllTime.objects.update_or_create(
+                voter_we_vote_id=voter_we_vote_id,
+                defaults={
+                    'shared_link_clicked_count': shared_link_clicked_count,
+                    'shared_link_clicked_count_last_updated': shared_link_clicked_count_last_updated,
+                    'shared_link_clicked_unique_viewer_count': shared_link_clicked_unique_viewer_count,
+                    'shared_by_display_name': voter.get_full_name(real_name_only),
+                    'voter_we_vote_id': voter_we_vote_id,
+                    'we_vote_hosted_profile_image_url_large': voter.we_vote_hosted_profile_image_url_large,
+                    'we_vote_hosted_profile_image_url_medium': voter.we_vote_hosted_profile_image_url_medium,
+                    'we_vote_hosted_profile_image_url_tiny': voter.we_vote_hosted_profile_image_url_tiny,
+                }
+            )
+            voter_we_vote_id_already_processed_list.append(voter_we_vote_id)
+            sharing_summary_items_changed += 1
+        except Exception as e:
+            status += "FAILED_UPDATE: " + str(e) + " "
+            sharing_summary_items_not_changed += 1
+        if one_shared_item.id > highest_shared_item_id:
+            highest_shared_item_id = one_shared_item.id
+
+    if positive_value_exists(highest_shared_item_id):
+        # Update the "who_shares_all_time_from_shared_item_last_id"
+        results = we_vote_settings_manager.save_setting(
+            setting_name="who_shares_all_time_from_shared_item_last_id",
+            setting_value=highest_shared_item_id,
+            value_type=WeVoteSetting.INTEGER)
+        if not results['success']:
+            status += results['status']
+            success = False
+
+    # How many remain to be updated in the future?
+    queryset = SharedItem.objects.using('readonly').all()
+    queryset = queryset.filter(id__gt=highest_shared_item_id)
+    sharing_summary_updates_remaining = queryset.count()
+
+    results = {
+        'status':                               status,
+        'success':                              success,
+        'sharing_summary_updates_remaining':    sharing_summary_updates_remaining,
+        'sharing_summary_items_changed':        sharing_summary_items_changed,
+        'sharing_summary_items_not_changed':    sharing_summary_items_not_changed,
+    }
+    return results
+
+
+def update_who_shares_all_time_from_shared_link_clicked(number_to_update=1000):
+    sharing_summary_items_changed = 0
+    sharing_summary_items_not_changed = 0
+    sharing_summary_updates_remaining = 0
+    status = ''
+    success = True
+
+    # Get last SharedLinkClicked id: "who_shares_all_time_from_shared_link_clicked_last_id"
+    we_vote_settings_manager = WeVoteSettingsManager()
+    results = we_vote_settings_manager.fetch_setting_results(
+        'who_shares_all_time_from_shared_link_clicked_last_id')
+    who_shares_all_time_from_shared_link_clicked_last_id = 0
+    if not results['success']:
+        status += "FAILED_GETTING_SETTING: "
+        status += results['status']
+        success = False
+        sharing_summary_updates_remaining = 0
+        results = {
+            'status':                               status,
+            'success':                              success,
+            'sharing_summary_updates_remaining':    sharing_summary_updates_remaining,
+            'sharing_summary_items_changed':        sharing_summary_items_changed,
+            'sharing_summary_items_not_changed':    sharing_summary_items_not_changed,
+        }
+        return results
+    elif results['we_vote_setting_found']:
+        who_shares_all_time_from_shared_link_clicked_last_id = results['setting_value']
 
     highest_shared_link_clicked_id = 0
-    if positive_value_exists(sharing_summary_for_voter_updated_through_shared_link_clicked_id):
-        status += "sharing_summary_for_voter_updated_through_shared_link_clicked_id-FOUND: {share_link_clicked_id} " \
-            "".format(share_link_clicked_id=sharing_summary_for_voter_updated_through_shared_link_clicked_id)
-        highest_shared_link_clicked_id = sharing_summary_for_voter_updated_through_shared_link_clicked_id
+    if positive_value_exists(who_shares_all_time_from_shared_link_clicked_last_id):
+        status += "who_shares_all_time_from_shared_link_clicked_last_id-FOUND: {shared_link_clicked_id} " \
+            "".format(shared_link_clicked_id=who_shares_all_time_from_shared_link_clicked_last_id)
+        highest_shared_link_clicked_id = who_shares_all_time_from_shared_link_clicked_last_id
     else:
-        status += "Starting update at share_link_clicked.id = 0 "
+        status += "Starting update at shared_link_clicked.id = 0 "
 
     # Get a list of shared_item id's which have had activity through shared_item_id
     clicked_queryset = SharedLinkClicked.objects.using('readonly').all()
     clicked_queryset = clicked_queryset.order_by('id')
-    clicked_queryset = clicked_queryset.filter(id__gt=sharing_summary_for_voter_updated_through_shared_link_clicked_id)
+    clicked_queryset = clicked_queryset.filter(id__gt=who_shares_all_time_from_shared_link_clicked_last_id)
 
     if not positive_value_exists(number_to_update):
         number_to_update = 10000
@@ -1568,7 +1723,14 @@ def update_who_shares_all_time_from_click_link(number_to_update=1000):
             continue
         try:
             voter_we_vote_id = one_shared_link_clicked.shared_by_voter_we_vote_id
-            voter = voter_dict_by_voter_we_vote_id[voter_we_vote_id]
+            try:
+                voter = voter_dict_by_voter_we_vote_id[voter_we_vote_id]
+            except Exception as e:
+                status += "VOTER_MISSING: " + str(e) + " "
+                sharing_summary_items_not_changed += 1
+                if one_shared_link_clicked.id > highest_shared_link_clicked_id:
+                    highest_shared_link_clicked_id = one_shared_link_clicked.id
+                continue
             shared_link_clicked_count = share_manager.fetch_shared_link_clicked_shared_links_click_count(
                 shared_by_voter_we_vote_id_list=[voter_we_vote_id]
             )
@@ -1591,16 +1753,16 @@ def update_who_shares_all_time_from_click_link(number_to_update=1000):
             )
             voter_we_vote_id_already_processed_list.append(voter_we_vote_id)
             sharing_summary_items_changed += 1
-            if one_shared_link_clicked.id > highest_shared_link_clicked_id:
-                highest_shared_link_clicked_id = one_shared_link_clicked.id
         except Exception as e:
             status += "FAILED_UPDATE: " + str(e) + " "
             sharing_summary_items_not_changed += 1
+        if one_shared_link_clicked.id > highest_shared_link_clicked_id:
+            highest_shared_link_clicked_id = one_shared_link_clicked.id
 
     if positive_value_exists(highest_shared_link_clicked_id):
-        # Update the "sharing_summary_for_voter_updated_through_shared_link_clicked_id"
+        # Update the "who_shares_all_time_from_shared_link_clicked_last_id"
         results = we_vote_settings_manager.save_setting(
-            setting_name="sharing_summary_for_voter_updated_through_shared_link_clicked_id",
+            setting_name="who_shares_all_time_from_shared_link_clicked_last_id",
             setting_value=highest_shared_link_clicked_id,
             value_type=WeVoteSetting.INTEGER)
         if not results['success']:
@@ -1629,11 +1791,11 @@ def update_who_shares_by_year_from_shared_item(number_to_update=1000):
     status = ''
     success = True
 
-    # Get last SharedLinkClicked id: "sharing_summary_for_voter_by_year_last_shared_item_id"
+    # Get last SharedItem id: "who_shares_by_year_from_shared_item_last_id"
     we_vote_settings_manager = WeVoteSettingsManager()
     results = we_vote_settings_manager.fetch_setting_results(
-        'sharing_summary_for_voter_by_year_last_shared_item_id')
-    sharing_summary_for_voter_by_year_last_shared_item_id = 0
+        'who_shares_by_year_from_shared_item_last_id')
+    who_shares_by_year_from_shared_item_last_id = 0
     if not results['success']:
         status += "FAILED_GETTING_SETTING: "
         status += results['status']
@@ -1648,20 +1810,20 @@ def update_who_shares_by_year_from_shared_item(number_to_update=1000):
         }
         return results
     elif results['we_vote_setting_found']:
-        sharing_summary_for_voter_by_year_last_shared_item_id = results['setting_value']
+        who_shares_by_year_from_shared_item_last_id = results['setting_value']
 
     highest_shared_item_id = 0
-    if positive_value_exists(sharing_summary_for_voter_by_year_last_shared_item_id):
-        status += "sharing_summary_for_voter_by_year_last_shared_item_id-FOUND: {share_link_clicked_id} " \
-            "".format(share_link_clicked_id=sharing_summary_for_voter_by_year_last_shared_item_id)
-        highest_shared_item_id = sharing_summary_for_voter_by_year_last_shared_item_id
+    if positive_value_exists(who_shares_by_year_from_shared_item_last_id):
+        status += "who_shares_by_year_from_shared_item_last_id-FOUND: {shared_item_id} " \
+            "".format(shared_item_id=who_shares_by_year_from_shared_item_last_id)
+        highest_shared_item_id = who_shares_by_year_from_shared_item_last_id
     else:
-        status += "Starting update at share_link_clicked.id = 0 "
+        status += "Starting update at shared_link_clicked.id = 0 "
 
     # Get a list of shared_items so we can
     queryset = SharedItem.objects.using('readonly').all()
     queryset = queryset.order_by('id')
-    queryset = queryset.filter(id__gt=sharing_summary_for_voter_by_year_last_shared_item_id)
+    queryset = queryset.filter(id__gt=who_shares_by_year_from_shared_item_last_id)
 
     if not positive_value_exists(number_to_update):
         number_to_update = 10000
@@ -1716,13 +1878,21 @@ def update_who_shares_by_year_from_shared_item(number_to_update=1000):
             voter_we_vote_id_already_processed_by_year_dict[year_of_this_click] = []
         if one_shared_item.shared_by_voter_we_vote_id in \
                 voter_we_vote_id_already_processed_by_year_dict[year_of_this_click]:
-            # Voter already processed: go to the next shared_link_clicked to find other voters to process
+            # Voter already processed for this year: go to the next shared_link_clicked to find other voters to process
             if one_shared_item.id > highest_shared_item_id:
                 highest_shared_item_id = one_shared_item.id
             continue
         try:
             voter_we_vote_id = one_shared_item.shared_by_voter_we_vote_id
-            voter = voter_dict_by_voter_we_vote_id[voter_we_vote_id]
+            try:
+                voter = voter_dict_by_voter_we_vote_id[voter_we_vote_id]
+            except Exception as e:
+                status += "VOTER_MISSING: " + str(e) + " "
+                sharing_summary_items_not_changed += 1
+                # Go to the next shared_item to find other voters to process
+                if one_shared_item.id > highest_shared_item_id:
+                    highest_shared_item_id = one_shared_item.id
+                continue
             year_as_integer_list = [year_of_this_click]
             shared_link_clicked_count = share_manager.fetch_shared_link_clicked_shared_links_click_count(
                 shared_by_voter_we_vote_id_list=[voter_we_vote_id],
@@ -1750,16 +1920,17 @@ def update_who_shares_by_year_from_shared_item(number_to_update=1000):
             )
             voter_we_vote_id_already_processed_by_year_dict[year_of_this_click].append(voter_we_vote_id)
             sharing_summary_items_changed += 1
-            if one_shared_item.id > highest_shared_item_id:
-                highest_shared_item_id = one_shared_item.id
         except Exception as e:
             status += "FAILED_UPDATE: " + str(e) + " "
             sharing_summary_items_not_changed += 1
+        # Go to the next shared_item to find other voters to process
+        if one_shared_item.id > highest_shared_item_id:
+            highest_shared_item_id = one_shared_item.id
 
     if positive_value_exists(highest_shared_item_id):
-        # Update the "sharing_summary_for_voter_by_year_last_shared_item_id"
+        # Update the "who_shares_by_year_from_shared_item_last_id"
         results = we_vote_settings_manager.save_setting(
-            setting_name="sharing_summary_for_voter_by_year_last_shared_item_id",
+            setting_name="who_shares_by_year_from_shared_item_last_id",
             setting_value=highest_shared_item_id,
             value_type=WeVoteSetting.INTEGER)
         if not results['success']:
@@ -1781,18 +1952,18 @@ def update_who_shares_by_year_from_shared_item(number_to_update=1000):
     return results
 
 
-def update_who_shares_by_year_from_click_link(number_to_update=1000):
+def update_who_shares_by_year_from_shared_link_clicked(number_to_update=1000):
     sharing_summary_items_changed = 0
     sharing_summary_items_not_changed = 0
     sharing_summary_updates_remaining = 0
     status = ''
     success = True
 
-    # Get last SharedLinkClicked id: "sharing_summary_for_voter_by_year_last_shared_link_clicked_id"
+    # Get last SharedLinkClicked id: "who_shares_by_year_from_shared_link_clicked_last_id"
     we_vote_settings_manager = WeVoteSettingsManager()
     results = we_vote_settings_manager.fetch_setting_results(
-        'sharing_summary_for_voter_by_year_last_shared_link_clicked_id')
-    sharing_summary_for_voter_by_year_last_shared_link_clicked_id = 0
+        'who_shares_by_year_from_shared_link_clicked_last_id')
+    who_shares_by_year_from_shared_link_clicked_last_id = 0
     if not results['success']:
         status += "FAILED_GETTING_SETTING: "
         status += results['status']
@@ -1807,20 +1978,20 @@ def update_who_shares_by_year_from_click_link(number_to_update=1000):
         }
         return results
     elif results['we_vote_setting_found']:
-        sharing_summary_for_voter_by_year_last_shared_link_clicked_id = results['setting_value']
+        who_shares_by_year_from_shared_link_clicked_last_id = results['setting_value']
 
     highest_shared_link_clicked_id = 0
-    if positive_value_exists(sharing_summary_for_voter_by_year_last_shared_link_clicked_id):
-        status += "sharing_summary_for_voter_by_year_last_shared_link_clicked_id-FOUND: {share_link_clicked_id} " \
-            "".format(share_link_clicked_id=sharing_summary_for_voter_by_year_last_shared_link_clicked_id)
-        highest_shared_link_clicked_id = sharing_summary_for_voter_by_year_last_shared_link_clicked_id
+    if positive_value_exists(who_shares_by_year_from_shared_link_clicked_last_id):
+        status += "who_shares_by_year_from_shared_link_clicked_last_id-FOUND: {shared_link_clicked_id} " \
+            "".format(shared_link_clicked_id=who_shares_by_year_from_shared_link_clicked_last_id)
+        highest_shared_link_clicked_id = who_shares_by_year_from_shared_link_clicked_last_id
     else:
-        status += "Starting update at share_link_clicked.id = 0 "
+        status += "Starting update at shared_link_clicked.id = 0 "
 
     # Get a list of shared_item id's which have had activity through shared_item_id
     clicked_queryset = SharedLinkClicked.objects.using('readonly').all()
     clicked_queryset = clicked_queryset.order_by('id')
-    clicked_queryset = clicked_queryset.filter(id__gt=sharing_summary_for_voter_by_year_last_shared_link_clicked_id)
+    clicked_queryset = clicked_queryset.filter(id__gt=who_shares_by_year_from_shared_link_clicked_last_id)
 
     if not positive_value_exists(number_to_update):
         number_to_update = 10000
@@ -1860,7 +2031,14 @@ def update_who_shares_by_year_from_click_link(number_to_update=1000):
     share_manager = ShareManager()
     voter_we_vote_id_already_processed_by_year_dict = {}
     for one_shared_link_clicked in shared_link_clicked_list:
-        year_of_this_click = one_shared_link_clicked.year_as_integer
+        # Not all rows have year_as_integer
+        # year_of_this_click = one_shared_link_clicked.year_as_integer
+        try:
+            year_of_this_click = one_shared_link_clicked.date_clicked.strftime('%Y')
+            year_of_this_click = convert_to_int(year_of_this_click)
+        except Exception as e:
+            status += "YEAR_PROBLEM: " + str(e) + " "
+            year_of_this_click = 0
         if not positive_value_exists(year_of_this_click):
             # Can't process this click go to the next shared_link_clicked to find other voters to process
             if one_shared_link_clicked.id > highest_shared_link_clicked_id:
@@ -1876,7 +2054,15 @@ def update_who_shares_by_year_from_click_link(number_to_update=1000):
             continue
         try:
             voter_we_vote_id = one_shared_link_clicked.shared_by_voter_we_vote_id
-            voter = voter_dict_by_voter_we_vote_id[voter_we_vote_id]
+            try:
+                voter = voter_dict_by_voter_we_vote_id[voter_we_vote_id]
+            except Exception as e:
+                status += "VOTER_MISSING: " + str(e) + " "
+                sharing_summary_items_not_changed += 1
+                # Go to the next shared_link_clicked to find other voters to process
+                if one_shared_link_clicked.id > highest_shared_link_clicked_id:
+                    highest_shared_link_clicked_id = one_shared_link_clicked.id
+                continue
             year_as_integer_list = [year_of_this_click]
             shared_link_clicked_count = share_manager.fetch_shared_link_clicked_shared_links_click_count(
                 shared_by_voter_we_vote_id_list=[voter_we_vote_id],
@@ -1904,16 +2090,17 @@ def update_who_shares_by_year_from_click_link(number_to_update=1000):
             )
             voter_we_vote_id_already_processed_by_year_dict[year_of_this_click].append(voter_we_vote_id)
             sharing_summary_items_changed += 1
-            if one_shared_link_clicked.id > highest_shared_link_clicked_id:
-                highest_shared_link_clicked_id = one_shared_link_clicked.id
         except Exception as e:
             status += "FAILED_UPDATE: " + str(e) + " "
             sharing_summary_items_not_changed += 1
+        # Go to the next shared_link_clicked to find other voters to process
+        if one_shared_link_clicked.id > highest_shared_link_clicked_id:
+            highest_shared_link_clicked_id = one_shared_link_clicked.id
 
     if positive_value_exists(highest_shared_link_clicked_id):
-        # Update the "sharing_summary_for_voter_by_year_last_shared_link_clicked_id"
+        # Update the "who_shares_by_year_from_shared_link_clicked_last_id"
         results = we_vote_settings_manager.save_setting(
-            setting_name="sharing_summary_for_voter_by_year_last_shared_link_clicked_id",
+            setting_name="who_shares_by_year_from_shared_link_clicked_last_id",
             setting_value=highest_shared_link_clicked_id,
             value_type=WeVoteSetting.INTEGER)
         if not results['success']:
