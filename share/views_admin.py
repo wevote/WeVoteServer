@@ -18,9 +18,11 @@ from voter.models import voter_has_authority, VoterManager
 from wevote_functions.functions import convert_to_int, get_voter_api_device_id, \
     positive_value_exists
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
-from .controllers import update_shared_item_shared_by_info, update_shared_item_statistics, \
-    update_who_shares_all_time_from_click_link, update_who_shares_by_year_from_click_link, \
-    update_who_shares_by_year_from_shared_item
+from .controllers import update_shared_item_shared_by_info_from_shared_item, \
+    update_shared_item_statistics_from_shared_link_clicked, update_who_shares_all_time_from_shared_item, \
+    update_who_shares_all_time_from_shared_link_clicked, update_who_shares_by_year_from_shared_item, \
+    update_who_shares_by_year_from_shared_link_clicked
+
 from .models import SharedItem, VoterWhoSharesSummaryAllTime, VoterWhoSharesSummaryOneYear
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -52,9 +54,9 @@ def shared_item_list_view(request):
 
     update_statistics = True
     if update_statistics:
-        statistics_results = update_shared_item_statistics(number_to_update=number_to_update)
+        statistics_results = update_shared_item_statistics_from_shared_link_clicked(number_to_update=number_to_update)
         if not statistics_results['success']:
-            message_to_print = "FAILED update_shared_item_statistics: {status}".format(
+            message_to_print = "FAILED update_shared_item_statistics_from_shared_link_clicked: {status}".format(
                 status=statistics_results['status']
             )
             messages.add_message(request, messages.ERROR, message_to_print)
@@ -62,7 +64,8 @@ def shared_item_list_view(request):
                 positive_value_exists(statistics_results['shared_items_changed']) or \
                 positive_value_exists(statistics_results['shared_items_not_changed']):
             message_to_print = \
-                "STATISTICS: shared_items_changed: {shared_items_changed:,}, " \
+                "UPDATE_SHARED_ITEM_STATISTICS_FROM_SHARED_LINK_CLICKED: \n" \
+                "shared_items_changed: {shared_items_changed:,}, " \
                 "shared_items_not_changed: {shared_items_not_changed:,}, "\
                 "count_updates_remaining: {count_updates_remaining:,}" \
                 "".format(
@@ -72,9 +75,9 @@ def shared_item_list_view(request):
                 )
             messages.add_message(request, messages.INFO, message_to_print)
 
-        shared_by_results = update_shared_item_shared_by_info(number_to_update=number_to_update)
+        shared_by_results = update_shared_item_shared_by_info_from_shared_item(number_to_update=number_to_update)
         if not shared_by_results['success']:
-            message_to_print = "FAILED update_shared_item_shared_by_info: {status}".format(
+            message_to_print = "FAILED update_shared_item_shared_by_info_from_shared_item: {status}".format(
                 status=shared_by_results['status']
             )
             messages.add_message(request, messages.ERROR, message_to_print)
@@ -82,7 +85,8 @@ def shared_item_list_view(request):
                 positive_value_exists(shared_by_results['shared_items_changed']) or \
                 positive_value_exists(shared_by_results['shared_items_not_changed']):
             message_to_print = \
-                "SHARED_BY_INFO: shared_items_changed: {shared_items_changed:,}, " \
+                "UPDATE_SHARED_ITEM_SHARED_BY_INFO_FROM_SHARED_ITEM: \n" \
+                "shared_items_changed: {shared_items_changed:,}, " \
                 "shared_items_not_changed: {shared_items_not_changed:,}, "\
                 "shared_by_updates_remaining: {shared_by_updates_remaining:,}" \
                 "".format(
@@ -241,9 +245,9 @@ def voter_who_shares_summary_list_view(request):
 
     update_statistics = True
     if update_statistics:
-        shared_by_results = update_who_shares_all_time_from_click_link(number_to_update=number_to_update)
+        shared_by_results = update_who_shares_all_time_from_shared_item(number_to_update=number_to_update)
         if not shared_by_results['success']:
-            message_to_print = "FAILED update_who_shares_all_time_from_click_link: {status}".format(
+            message_to_print = "FAILED update_who_shares_all_time_from_shared_item: {status}".format(
                 status=shared_by_results['status']
             )
             messages.add_message(request, messages.ERROR, message_to_print)
@@ -251,9 +255,10 @@ def voter_who_shares_summary_list_view(request):
                 positive_value_exists(shared_by_results['sharing_summary_items_not_changed']) or \
                 positive_value_exists(shared_by_results['sharing_summary_updates_remaining']):
             message_to_print = \
-                "SHARING_SUMMARY: sharing_summary_items_changed: {sharing_summary_items_changed:,}, " \
+                "WHO_SHARES_ALL_TIME_FROM_SHARED_ITEM: \n" \
+                "sharing_summary_items_changed: {sharing_summary_items_changed:,}, " \
                 "sharing_summary_items_not_changed: {sharing_summary_items_not_changed:,}, " \
-                "sharing_summary_updates_remaining: {sharing_summary_updates_remaining:,} " \
+                "sharing_summary_updates_remaining: {sharing_summary_updates_remaining:,} \n" \
                 "shared_by_results['status']: {status}" \
                 "".format(
                     status=shared_by_results['status'],
@@ -262,6 +267,30 @@ def voter_who_shares_summary_list_view(request):
                     sharing_summary_updates_remaining=shared_by_results['sharing_summary_updates_remaining'],
                 )
             messages.add_message(request, messages.INFO, message_to_print)
+
+        shared_by_results = update_who_shares_all_time_from_shared_link_clicked(number_to_update=number_to_update)
+        if not shared_by_results['success']:
+            message_to_print = "FAILED update_who_shares_all_time_from_shared_link_clicked: {status}".format(
+                status=shared_by_results['status']
+            )
+            messages.add_message(request, messages.ERROR, message_to_print)
+        elif positive_value_exists(shared_by_results['sharing_summary_items_changed']) or \
+                positive_value_exists(shared_by_results['sharing_summary_items_not_changed']) or \
+                positive_value_exists(shared_by_results['sharing_summary_updates_remaining']):
+            message_to_print = \
+                "WHO_SHARES_ALL_TIME_FROM_SHARED_LINK_CLICKED: \n" \
+                "sharing_summary_items_changed: {sharing_summary_items_changed:,}, " \
+                "sharing_summary_items_not_changed: {sharing_summary_items_not_changed:,}, " \
+                "sharing_summary_updates_remaining: {sharing_summary_updates_remaining:,} \n" \
+                "shared_by_results['status']: {status}" \
+                "".format(
+                    status=shared_by_results['status'],
+                    sharing_summary_items_changed=shared_by_results['sharing_summary_items_changed'],
+                    sharing_summary_items_not_changed=shared_by_results['sharing_summary_items_not_changed'],
+                    sharing_summary_updates_remaining=shared_by_results['sharing_summary_updates_remaining'],
+                )
+            messages.add_message(request, messages.INFO, message_to_print)
+
         # Update based on SharedItem activity
         shared_by_results = update_who_shares_by_year_from_shared_item(number_to_update=number_to_update)
         if not shared_by_results['success']:
@@ -273,10 +302,10 @@ def voter_who_shares_summary_list_view(request):
                 positive_value_exists(shared_by_results['sharing_summary_items_not_changed']) or \
                 positive_value_exists(shared_by_results['sharing_summary_updates_remaining']):
             message_to_print = \
-                "SHARING_BY_YEAR_SHARED_ITEM_SUMMARY: " \
+                "WHO_SHARES_BY_YEAR_FROM_SHARED_ITEM: \n" \
                 "sharing_summary_items_changed: {sharing_summary_items_changed:,}, " \
                 "sharing_summary_items_not_changed: {sharing_summary_items_not_changed:,}, " \
-                "sharing_summary_updates_remaining: {sharing_summary_updates_remaining:,} " \
+                "sharing_summary_updates_remaining: {sharing_summary_updates_remaining:,} \n" \
                 "shared_by_results['status']: {status}" \
                 "".format(
                     status=shared_by_results['status'],
@@ -285,10 +314,11 @@ def voter_who_shares_summary_list_view(request):
                     sharing_summary_updates_remaining=shared_by_results['sharing_summary_updates_remaining'],
                 )
             messages.add_message(request, messages.INFO, message_to_print)
+
         # Update based on ShareLinkClicked activity
-        shared_by_results = update_who_shares_by_year_from_click_link(number_to_update=number_to_update)
+        shared_by_results = update_who_shares_by_year_from_shared_link_clicked(number_to_update=number_to_update)
         if not shared_by_results['success']:
-            message_to_print = "FAILED update_who_shares_by_year_from_click_link: {status}".format(
+            message_to_print = "FAILED update_who_shares_by_year_from_shared_link_clicked: {status}".format(
                 status=shared_by_results['status']
             )
             messages.add_message(request, messages.ERROR, message_to_print)
@@ -296,9 +326,10 @@ def voter_who_shares_summary_list_view(request):
                 positive_value_exists(shared_by_results['sharing_summary_items_not_changed']) or \
                 positive_value_exists(shared_by_results['sharing_summary_updates_remaining']):
             message_to_print = \
-                "SHARING_BY_YEAR_SUMMARY: sharing_summary_items_changed: {sharing_summary_items_changed:,}, " \
+                "WHO_SHARES_BY_YEAR_FROM_SHARED_LINK_CLICKED: \n" \
+                "sharing_summary_items_changed: {sharing_summary_items_changed:,}, " \
                 "sharing_summary_items_not_changed: {sharing_summary_items_not_changed:,}, " \
-                "sharing_summary_updates_remaining: {sharing_summary_updates_remaining:,} " \
+                "sharing_summary_updates_remaining: {sharing_summary_updates_remaining:,} \n" \
                 "shared_by_results['status']: {status}" \
                 "".format(
                     status=shared_by_results['status'],
