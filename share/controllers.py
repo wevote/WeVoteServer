@@ -1482,7 +1482,7 @@ def update_shared_item_statistics(number_to_update=10000):
     return results
 
 
-def update_voter_who_shares_summary_for_all_time(number_to_update=1000):
+def update_who_shares_all_time_from_click_link(number_to_update=1000):
     sharing_summary_items_changed = 0
     sharing_summary_items_not_changed = 0
     sharing_summary_updates_remaining = 0
@@ -1526,7 +1526,7 @@ def update_voter_who_shares_summary_for_all_time(number_to_update=1000):
     if not positive_value_exists(number_to_update):
         number_to_update = 10000
     number_to_update = convert_to_int(number_to_update)
-    status += "NUMBER_TO_UPDATE: {number_to_update}".format(number_to_update=number_to_update)
+    status += "NUMBER_TO_UPDATE: {number_to_update} ".format(number_to_update=number_to_update)
     clicked_queryset = clicked_queryset[:number_to_update]
     shared_link_clicked_list = list(clicked_queryset)
 
@@ -1544,7 +1544,7 @@ def update_voter_who_shares_summary_for_all_time(number_to_update=1000):
         for one_voter in voter_list:
             voter_dict_by_voter_we_vote_id[one_voter.we_vote_id] = one_voter
             voter_count += 1
-        status += "VOTER_COUNT: {voter_count}".format(voter_count=voter_count)
+        status += "VOTER_COUNT: {voter_count} ".format(voter_count=voter_count)
     except Exception as e:
         status += "VOTER_RETRIEVE_FAIL: " + str(e) + " "
         success = False
@@ -1622,7 +1622,7 @@ def update_voter_who_shares_summary_for_all_time(number_to_update=1000):
     return results
 
 
-def update_who_shares_summary_by_year_from_shared_item(number_to_update=1000):
+def update_who_shares_by_year_from_shared_item(number_to_update=1000):
     sharing_summary_items_changed = 0
     sharing_summary_items_not_changed = 0
     sharing_summary_updates_remaining = 0
@@ -1650,11 +1650,11 @@ def update_who_shares_summary_by_year_from_shared_item(number_to_update=1000):
     elif results['we_vote_setting_found']:
         sharing_summary_for_voter_by_year_last_shared_item_id = results['setting_value']
 
-    highest_shared_link_clicked_id = 0
+    highest_shared_item_id = 0
     if positive_value_exists(sharing_summary_for_voter_by_year_last_shared_item_id):
         status += "sharing_summary_for_voter_by_year_last_shared_item_id-FOUND: {share_link_clicked_id} " \
             "".format(share_link_clicked_id=sharing_summary_for_voter_by_year_last_shared_item_id)
-        highest_shared_link_clicked_id = sharing_summary_for_voter_by_year_last_shared_item_id
+        highest_shared_item_id = sharing_summary_for_voter_by_year_last_shared_item_id
     else:
         status += "Starting update at share_link_clicked.id = 0 "
 
@@ -1684,7 +1684,7 @@ def update_who_shares_summary_by_year_from_shared_item(number_to_update=1000):
         for one_voter in voter_list:
             voter_dict_by_voter_we_vote_id[one_voter.we_vote_id] = one_voter
             voter_count += 1
-        status += "VOTER_COUNT: {voter_count}".format(voter_count=voter_count)
+        status += "VOTER_COUNT: {voter_count} ".format(voter_count=voter_count)
     except Exception as e:
         status += "VOTER_RETRIEVE_FAIL: " + str(e) + " "
         success = False
@@ -1709,16 +1709,16 @@ def update_who_shares_summary_by_year_from_shared_item(number_to_update=1000):
             year_of_this_click = 0
         if not positive_value_exists(year_of_this_click):
             # Can't process this click go to the next shared_link_clicked to find other voters to process
-            if one_shared_item.id > highest_shared_link_clicked_id:
-                highest_shared_link_clicked_id = one_shared_item.id
+            if one_shared_item.id > highest_shared_item_id:
+                highest_shared_item_id = one_shared_item.id
             continue
         if year_of_this_click not in voter_we_vote_id_already_processed_by_year_dict:
             voter_we_vote_id_already_processed_by_year_dict[year_of_this_click] = []
         if one_shared_item.shared_by_voter_we_vote_id in \
                 voter_we_vote_id_already_processed_by_year_dict[year_of_this_click]:
             # Voter already processed: go to the next shared_link_clicked to find other voters to process
-            if one_shared_item.id > highest_shared_link_clicked_id:
-                highest_shared_link_clicked_id = one_shared_item.id
+            if one_shared_item.id > highest_shared_item_id:
+                highest_shared_item_id = one_shared_item.id
             continue
         try:
             voter_we_vote_id = one_shared_item.shared_by_voter_we_vote_id
@@ -1750,25 +1750,25 @@ def update_who_shares_summary_by_year_from_shared_item(number_to_update=1000):
             )
             voter_we_vote_id_already_processed_by_year_dict[year_of_this_click].append(voter_we_vote_id)
             sharing_summary_items_changed += 1
-            if one_shared_item.id > highest_shared_link_clicked_id:
-                highest_shared_link_clicked_id = one_shared_item.id
+            if one_shared_item.id > highest_shared_item_id:
+                highest_shared_item_id = one_shared_item.id
         except Exception as e:
             status += "FAILED_UPDATE: " + str(e) + " "
             sharing_summary_items_not_changed += 1
 
-    if positive_value_exists(highest_shared_link_clicked_id):
+    if positive_value_exists(highest_shared_item_id):
         # Update the "sharing_summary_for_voter_by_year_last_shared_item_id"
         results = we_vote_settings_manager.save_setting(
             setting_name="sharing_summary_for_voter_by_year_last_shared_item_id",
-            setting_value=highest_shared_link_clicked_id,
+            setting_value=highest_shared_item_id,
             value_type=WeVoteSetting.INTEGER)
         if not results['success']:
             status += results['status']
             success = False
 
     # How many remain to be updated in the future?
-    queryset = SharedLinkClicked.objects.using('readonly').all()
-    queryset = queryset.filter(id__gt=highest_shared_link_clicked_id)
+    queryset = SharedItem.objects.using('readonly').all()
+    queryset = queryset.filter(id__gt=highest_shared_item_id)
     sharing_summary_updates_remaining = queryset.count()
 
     results = {
@@ -1781,7 +1781,7 @@ def update_who_shares_summary_by_year_from_shared_item(number_to_update=1000):
     return results
 
 
-def update_voter_by_year_who_shares_summary(number_to_update=1000):
+def update_who_shares_by_year_from_click_link(number_to_update=1000):
     sharing_summary_items_changed = 0
     sharing_summary_items_not_changed = 0
     sharing_summary_updates_remaining = 0
