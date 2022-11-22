@@ -78,7 +78,6 @@
     </label>
 
     {% if election_years_available %}
-        &nbsp;&nbsp;&nbsp;
     <select {% if limit_to_last_90_days %}disabled {% endif %}id="show_this_year_id" name="show_this_year">
         <option value="0" {% if 0 == show_this_year|convert_to_int %} selected="selected"{% endif %}>
         {% if show_this_year|convert_to_int > 0 %}
@@ -129,135 +128,8 @@
 </form>
 
 {% if voter_who_shares_summary_list %}
-<table class="table">
-{% for voter_who_shares_summary in voter_who_shares_summary_list %}
-    {% if forloop.counter == 1 or forloop.counter|divisibleby:16 %}
-    {# Show the header every ~15 lines #}
-     <thead>
-        <tr>
-            <th></th>
-            <th></th>
-            <th>Shared By</th>
-            <th>Shared Items</th>
-            <th>Unique<br />Viewers</th>
-            <th>Clicks</th>
-            <th>Message</th>
-        </tr>
-      </thead>
-    {% endif %}
-        <tr>
-            <td style="width: 24px;">{{ forloop.counter }}</td>
-            <td style="width: 36px;">
-            {% if voter_who_shares_summary.we_vote_hosted_profile_image_url_medium %}
-                <a href="{% url 'voter:voter_summary_we_vote_id' voter_who_shares_summary.voter_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
-                   target="_blank">
-                <img src="{{ voter_who_shares_summary.we_vote_hosted_profile_image_url_medium }}" width="36px" />
-                </a>
-            {% endif %}
-            </td>
-            <td>
-            {% if voter_who_shares_summary.shared_by_display_name %}
-                <a href="{% url 'voter:voter_summary_we_vote_id' voter_who_shares_summary.voter_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
-                   target="_blank">
-                    {{ voter_who_shares_summary.shared_by_display_name|default_if_none:"" }}
-                   <span class="glyphicon glyphicon-new-window"></span>
-                </a>
-            {% elif voter_who_shares_summary.voter_we_vote_id %}
-                <a href="{% url 'voter:voter_summary_we_vote_id' voter_who_shares_summary.voter_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
-                   target="_blank">
-                <span style="color: #808080;">{{ voter_who_shares_summary.voter_we_vote_id }}</span>
-                    <span class="glyphicon glyphicon-new-window"></span>
-                </a>
-            {% endif %}
-            {% if voter_who_shares_summary.shared_by_state_code %}
-                - {{ voter_who_shares_summary.shared_by_state_code|default_if_none:"" }}
-            {% endif %}
-                <br />
-                <span style="color: #808080; font-size: 10px; white-space: nowrap;">
-                {{ voter_who_shares_summary.date_first_shared|default_if_none:"" }}
-                </span>
-            </td>
-        {# Shared Items #}
-            <td>
-                {{ voter_who_shares_summary.shared_item_list_count }}
-            {% if voter_who_shares_summary.shared_item_list_count == 1 %}
-                Item
-            {% else %}
-                Items
-            {% endif %}
-                Shared<br />
-        {% for shared_item in voter_who_shares_summary.shared_item_list %}
-            <span style="color: #808080; font-size: 10px; white-space: nowrap;">
-                {{ shared_item.date_first_shared }}:
-            {% if shared_item.is_ballot_share %}
-                Ballot
-            {% elif shared_item.is_campaignx_share %}
-                CampaignX
-            {% elif shared_item.is_candidate_share %}
-                Candidate
-            {% elif shared_item.is_measure_share %}
-                Measure
-            {% elif shared_item.is_office_share %}
-                Office
-            {% elif shared_item.is_organization_share %}
-                Organization
-            {% elif shared_item.is_ready_share %}
-                Ready
-            {% elif shared_item.is_remind_contact_share %}
-                Remind
-            {% endif %}
-            </span>
-            <a href="{{ shared_item.destination_full_url }}" target="_blank">
-            <span style="color: #808080; font-size: 10px; white-space: nowrap;">
-                {{ shared_item.destination_full_url|truncatechars:34 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span>
-            </span>
-            </a><br />
-        {% endfor %}
-            </td>
-        {# Unique Viewers #}
-            <td>
-                {{ voter_who_shares_summary.shared_link_clicked_unique_viewer_count|default_if_none:"" }} total
-            {% for shared_item in voter_who_shares_summary.shared_item_list %}
-                <br />
-                <span style="color: #808080; font-size: 10px; white-space: nowrap;">
-                    {{ shared_item.shared_link_clicked_unique_viewer_count|default_if_none:"" }}
-                </span>
-            {% endfor %}
-            </td>
-        {# Clicks #}
-            <td>
-                {{ voter_who_shares_summary.shared_link_clicked_count|default_if_none:"" }} total
-            {% for shared_item in voter_who_shares_summary.shared_item_list %}
-                <br />
-                <span style="color: #808080; font-size: 10px; white-space: nowrap;">
-                    {{ shared_item.shared_link_clicked_count|default_if_none:"" }}
-                </span>
-            {% endfor %}
-            </td>
-        {# Messages #}
-            <td>
-            {% for shared_item in voter_who_shares_summary.shared_item_list %}
-                <br />
-                <span style="color: #808080; font-size: 10px; white-space: nowrap;">
-                    {{ shared_item.shared_message|default_if_none:""|truncatechars:34 }}
-                {% if shared_item.other_voter_email_address_text or shared_item.other_voter_display_name %}
-                    Sent to:
-                {% endif %}
-                {% if shared_item.other_voter_display_name %}
-                    {{ shared_item.other_voter_display_name }}
-                {% endif %}
-                {% if shared_item.other_voter_email_address_text and shared_item.other_voter_display_name %}
-                    -
-                {% endif %}
-                {% if shared_item.other_voter_email_address_text %}
-                    {{ shared_item.other_voter_email_address_text }}
-                {% endif %}
-                </span>
-            {% endfor %}
-            </td>
-        </tr>
-{% endfor %}
-</table>
+    {% include "share/voter_who_shares_summary_table.html" with voter_who_shares_summary_list=voter_who_shares_summary_list %}
+
     {% if not show_all and not show_more %}
     <a href="{% url 'share:voter_who_shares_summary_list' %}?state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&only_show_shares_with_clicks={{ only_show_shares_with_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&voter_summary_search={{ voter_summary_search }}&show_this_year={{ show_this_year }}&show_more=1">
         show more</a>

@@ -909,7 +909,7 @@ class ShareManager(models.Manager):
         if positive_value_exists(len(year_as_integer_list)):
             queryset = queryset.filter(year_as_integer__in=year_as_integer_list)
         if positive_value_exists(field_for_distinct_filter):
-            queryset = queryset.values(field_for_distinct_filter).distinct()
+            queryset = queryset.order_by().values(field_for_distinct_filter).distinct()
 
         shared_link_clicked_count = 0
         try:
@@ -1413,6 +1413,7 @@ class VoterWhoSharesSummaryAllTime(models.Model):
     we_vote_hosted_profile_image_url_medium = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
     # Analytics for easy sorting (this is not master data, but calculated from SharedLinkClicked data)
+    shared_item_count = models.PositiveIntegerField(default=0, null=True, blank=True)
     shared_link_clicked_count = models.PositiveIntegerField(default=0, null=True, blank=True)
     shared_link_clicked_count_last_updated = models.DateTimeField(null=True)
     shared_link_clicked_unique_viewer_count = models.PositiveIntegerField(default=0, null=True, blank=True)
@@ -1430,6 +1431,7 @@ class VoterWhoSharesSummaryOneYear(models.Model):
     we_vote_hosted_profile_image_url_medium = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
     # Analytics for easy sorting (this is not master data, but calculated from SharedLinkClicked data)
+    shared_item_count = models.PositiveIntegerField(default=0, null=True, blank=True)
     shared_link_clicked_count = models.PositiveIntegerField(default=0, null=True, blank=True)
     shared_link_clicked_count_last_updated = models.DateTimeField(null=True)
     shared_link_clicked_unique_viewer_count = models.PositiveIntegerField(default=0, null=True, blank=True)

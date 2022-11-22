@@ -160,7 +160,11 @@
     {% for voter in voter_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{{ voter.id }}</td>
+            <td>
+                <a href="{% url 'voter:voter_summary' voter.id %}">
+                {{ voter.id }}
+                </a>
+            </td>
             <td>{% if voter.we_vote_hosted_profile_image_url_tiny %}<img src="{{ voter.we_vote_hosted_profile_image_url_tiny }}" />{% endif %}</td>
             <td>
                 {{ voter.get_full_name|default_if_none:"" }}
