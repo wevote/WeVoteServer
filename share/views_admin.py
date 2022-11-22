@@ -19,8 +19,8 @@ from wevote_functions.functions import convert_to_int, get_voter_api_device_id, 
     positive_value_exists
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from .controllers import update_shared_item_shared_by_info, update_shared_item_statistics, \
-    update_voter_who_shares_summary_for_all_time, update_voter_by_year_who_shares_summary, \
-    update_who_shares_summary_by_year_from_shared_item
+    update_who_shares_all_time_from_click_link, update_who_shares_by_year_from_click_link, \
+    update_who_shares_by_year_from_shared_item
 from .models import SharedItem, VoterWhoSharesSummaryAllTime, VoterWhoSharesSummaryOneYear
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -241,9 +241,9 @@ def voter_who_shares_summary_list_view(request):
 
     update_statistics = True
     if update_statistics:
-        shared_by_results = update_voter_who_shares_summary_for_all_time(number_to_update=number_to_update)
+        shared_by_results = update_who_shares_all_time_from_click_link(number_to_update=number_to_update)
         if not shared_by_results['success']:
-            message_to_print = "FAILED update_voter_who_shares_summary_for_all_time: {status}".format(
+            message_to_print = "FAILED update_who_shares_all_time_from_click_link: {status}".format(
                 status=shared_by_results['status']
             )
             messages.add_message(request, messages.ERROR, message_to_print)
@@ -263,9 +263,9 @@ def voter_who_shares_summary_list_view(request):
                 )
             messages.add_message(request, messages.INFO, message_to_print)
         # Update based on SharedItem activity
-        shared_by_results = update_who_shares_summary_by_year_from_shared_item(number_to_update=number_to_update)
+        shared_by_results = update_who_shares_by_year_from_shared_item(number_to_update=number_to_update)
         if not shared_by_results['success']:
-            message_to_print = "FAILED update_who_shares_summary_by_year_from_shared_item: {status}".format(
+            message_to_print = "FAILED update_who_shares_by_year_from_shared_item: {status}".format(
                 status=shared_by_results['status']
             )
             messages.add_message(request, messages.ERROR, message_to_print)
@@ -286,9 +286,9 @@ def voter_who_shares_summary_list_view(request):
                 )
             messages.add_message(request, messages.INFO, message_to_print)
         # Update based on ShareLinkClicked activity
-        shared_by_results = update_voter_by_year_who_shares_summary(number_to_update=number_to_update)
+        shared_by_results = update_who_shares_by_year_from_click_link(number_to_update=number_to_update)
         if not shared_by_results['success']:
-            message_to_print = "FAILED update_voter_by_year_who_shares_summary: {status}".format(
+            message_to_print = "FAILED update_who_shares_by_year_from_click_link: {status}".format(
                 status=shared_by_results['status']
             )
             messages.add_message(request, messages.ERROR, message_to_print)
