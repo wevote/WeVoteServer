@@ -19,9 +19,8 @@ from wevote_functions.functions import convert_to_int, get_voter_api_device_id, 
     positive_value_exists
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from .controllers import update_shared_item_shared_by_info_from_shared_item, \
-    update_shared_item_statistics_from_shared_link_clicked, update_who_shares_all_time_from_shared_item, \
-    update_who_shares_all_time_from_shared_link_clicked, update_who_shares_by_year_from_shared_item, \
-    update_who_shares_by_year_from_shared_link_clicked
+    update_shared_item_statistics_from_shared_link_clicked, update_who_shares_from_shared_item, \
+    update_who_shares_from_shared_link_clicked
 
 from .models import SharedItem, VoterWhoSharesSummaryAllTime, VoterWhoSharesSummaryOneYear
 
@@ -228,7 +227,7 @@ def voter_who_shares_summary_list_view(request):
 
     exclude_remind_contact = positive_value_exists(request.GET.get('exclude_remind_contact', False))
     limit_to_last_90_days = positive_value_exists(request.GET.get('limit_to_last_90_days', False))
-    number_to_update = convert_to_int(request.GET.get('number_to_update', 10000))
+    number_to_update = convert_to_int(request.GET.get('number_to_update', False))
     only_show_shares_with_clicks = positive_value_exists(request.GET.get('only_show_shares_with_clicks', False))
     voter_summary_search = request.GET.get('voter_summary_search', '')
     show_more = positive_value_exists(request.GET.get('show_more', False))
@@ -245,7 +244,11 @@ def voter_who_shares_summary_list_view(request):
 
     update_statistics = True
     if update_statistics:
-        shared_by_results = update_who_shares_all_time_from_shared_item(number_to_update=number_to_update)
+        # Update VoterWhoSharesSummaryAllTime based on SharedItem activity
+        shared_by_results = update_who_shares_from_shared_item(
+            number_to_update=number_to_update,
+            table_name='VoterWhoSharesSummaryAllTime',
+        )
         if not shared_by_results['success']:
             message_to_print = "FAILED update_who_shares_all_time_from_shared_item: {status}".format(
                 status=shared_by_results['status']
@@ -268,7 +271,11 @@ def voter_who_shares_summary_list_view(request):
                 )
             messages.add_message(request, messages.INFO, message_to_print)
 
-        shared_by_results = update_who_shares_all_time_from_shared_link_clicked(number_to_update=number_to_update)
+        # Update 'VoterWhoSharesSummaryAllTime' based on ShareLinkClicked activity
+        shared_by_results = update_who_shares_from_shared_link_clicked(
+            number_to_update=number_to_update,
+            table_name='VoterWhoSharesSummaryAllTime',
+        )
         if not shared_by_results['success']:
             message_to_print = "FAILED update_who_shares_all_time_from_shared_link_clicked: {status}".format(
                 status=shared_by_results['status']
@@ -291,8 +298,11 @@ def voter_who_shares_summary_list_view(request):
                 )
             messages.add_message(request, messages.INFO, message_to_print)
 
-        # Update based on SharedItem activity
-        shared_by_results = update_who_shares_by_year_from_shared_item(number_to_update=number_to_update)
+        # Update VoterWhoSharesSummaryOneYear based on SharedItem activity
+        shared_by_results = update_who_shares_from_shared_item(
+            number_to_update=number_to_update,
+            table_name='VoterWhoSharesSummaryOneYear',
+        )
         if not shared_by_results['success']:
             message_to_print = "FAILED update_who_shares_by_year_from_shared_item: {status}".format(
                 status=shared_by_results['status']
@@ -315,8 +325,10 @@ def voter_who_shares_summary_list_view(request):
                 )
             messages.add_message(request, messages.INFO, message_to_print)
 
-        # Update based on ShareLinkClicked activity
-        shared_by_results = update_who_shares_by_year_from_shared_link_clicked(number_to_update=number_to_update)
+        # Update 'VoterWhoSharesSummaryOneYear' based on ShareLinkClicked activity
+        shared_by_results = update_who_shares_from_shared_link_clicked(
+            number_to_update=number_to_update,
+            table_name='VoterWhoSharesSummaryOneYear')
         if not shared_by_results['success']:
             message_to_print = "FAILED update_who_shares_by_year_from_shared_link_clicked: {status}".format(
                 status=shared_by_results['status']
@@ -377,8 +389,6 @@ def voter_who_shares_summary_list_view(request):
             new_filter = Q(voter_we_vote_id__iexact=one_word)
             filters.append(new_filter)
 
-            filters.append(new_filter)
-
             # Add the first query
             if len(filters):
                 final_filters = filters.pop()
@@ -388,6 +398,14 @@ def voter_who_shares_summary_list_view(request):
                     final_filters |= item
 
                 voter_who_shares_query = voter_who_shares_query.filter(final_filters)
+    else:
+        # If not searching, don't return entries with only one shared_item and 0 clicks.
+        #  This is because some shared item entries are created automatically and don't mean the person intended
+        #  to share.
+        voter_who_shares_query = voter_who_shares_query.exclude(
+            shared_item_count__lte=1,
+            shared_link_clicked_count=0,
+        )
 
     if positive_value_exists(limit_to_last_90_days):
         when_process_must_stop = now() - timedelta(days=90)
@@ -396,7 +414,8 @@ def voter_who_shares_summary_list_view(request):
     if positive_value_exists(only_show_shares_with_clicks):
         voter_who_shares_query = voter_who_shares_query.filter(shared_link_clicked_count__gt=0)
     voter_who_shares_query = \
-        voter_who_shares_query.order_by('-shared_link_clicked_unique_viewer_count', '-shared_link_clicked_count')
+        voter_who_shares_query.order_by(
+            '-shared_link_clicked_unique_viewer_count', '-shared_item_count', '-shared_link_clicked_count')
 
     voter_who_shares_summary_list_found_count = voter_who_shares_query.count()
 

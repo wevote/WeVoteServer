@@ -21,11 +21,14 @@ from import_export_facebook.models import FacebookLinkToVoter, FacebookManager
 from organization.models import Organization, OrganizationManager, INDIVIDUAL
 from position.controllers import merge_duplicate_positions_for_voter
 from position.models import PositionEntered, PositionForFriends
+from share.controllers import update_voter_who_shares_tables_from_shared_item_list
+from share.models import SharedItem, VoterWhoSharesSummaryAllTime, VoterWhoSharesSummaryOneYear
 from sms.models import SMSManager, SMSPhoneNumber
 from stripe_donations.models import StripeManager, StripePayments
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
 from wevote_functions.functions import convert_to_int, generate_random_string, get_voter_api_device_id, \
     set_voter_api_device_id, positive_value_exists
+from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from .controllers import delete_all_voter_information_permanently, process_maintenance_status_flags
 from .models import fetch_voter_id_from_voter_device_link, \
     PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
@@ -1245,14 +1248,15 @@ def voter_summary_view(request, voter_id=0, voter_we_vote_id=''):
     authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
+    show_this_year = convert_to_int(request.GET.get('show_this_year', 0))
 
-    messages_on_stage = get_messages(request)
     voter_id = convert_to_int(voter_id)
     voter_on_stage_found = False
     voter_on_stage = Voter()
     if positive_value_exists(voter_id):
         try:
             voter_on_stage = Voter.objects.get(id=voter_id)
+            voter_we_vote_id = voter_on_stage.we_vote_id
             voter_on_stage_found = True
         except Voter.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
@@ -1274,11 +1278,72 @@ def voter_summary_view(request, voter_id=0, voter_we_vote_id=''):
     address_results = voter_address_manager.retrieve_voter_address_list(voter_id=voter_id)
     voter_address_list = address_results['voter_address_list']
 
+    update_statistics = True
+    if update_statistics and positive_value_exists(voter_we_vote_id):
+        by_year_mode = positive_value_exists(show_this_year)
+        voter_dict_by_voter_we_vote_id = {}
+        voter_dict_by_voter_we_vote_id[voter_we_vote_id] = voter_on_stage
+
+        queryset = SharedItem.objects.using('readonly').all()
+        queryset = queryset.order_by('id')
+        queryset = queryset.filter(shared_by_voter_we_vote_id=voter_we_vote_id)
+        shared_item_list = list(queryset)
+
+        update_results = update_voter_who_shares_tables_from_shared_item_list(
+            by_year_mode=by_year_mode,
+            shared_item_list=shared_item_list,
+            voter_dict_by_voter_we_vote_id=voter_dict_by_voter_we_vote_id,
+        )
+        message_to_print = \
+            "UPDATE_VOTER_WHO_SHARES_FOR_THIS_VOTER: \n" \
+            "sharing_summary_items_changed: {sharing_summary_items_changed:,}, " \
+            "sharing_summary_items_not_changed: {sharing_summary_items_not_changed:,} \n" \
+            "status: {status} \n" \
+            "".format(
+                sharing_summary_items_changed=update_results['sharing_summary_items_changed'],
+                sharing_summary_items_not_changed=update_results['sharing_summary_items_not_changed'],
+                status=update_results['status'],
+            )
+        messages.add_message(request, messages.INFO, message_to_print)
+
+    if positive_value_exists(show_this_year):
+        # If filtering by year, use VoterWhoSharesSummaryOneYear object
+        voter_who_shares_query = VoterWhoSharesSummaryOneYear.objects.using('readonly').all()
+        voter_who_shares_query = voter_who_shares_query.filter(year_as_integer=show_this_year)
+    else:
+        # Otherwise, use VoterWhoSharesSummaryAllTime object
+        voter_who_shares_query = VoterWhoSharesSummaryAllTime.objects.using('readonly').all()
+    voter_who_shares_query = voter_who_shares_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+    voter_who_shares_summary_list = list(voter_who_shares_query)
+
+    voter_who_shares_summary_list_modified = []
+    for voter_who_shares_summary in voter_who_shares_summary_list:
+        # Now retrieve all shared items to show under this voter summary
+        shared_item_query = SharedItem.objects.using('readonly').all()
+        shared_item_query = \
+            shared_item_query.filter(shared_by_voter_we_vote_id=voter_who_shares_summary.voter_we_vote_id)
+        shared_item_query = shared_item_query.order_by('-date_first_shared')
+
+        if positive_value_exists(show_this_year):
+            shared_item_query = shared_item_query.filter(date_first_shared__year=show_this_year)
+
+        voter_who_shares_summary.shared_item_list_count = shared_item_query.count()
+
+        shared_item_list = shared_item_query[:2000]
+        voter_who_shares_summary.shared_item_list = shared_item_list
+        voter_who_shares_summary_list_modified.append(voter_who_shares_summary)
+
+    messages_on_stage = get_messages(request)
+
     if voter_on_stage_found:
         template_values = {
-            'messages_on_stage':    messages_on_stage,
-            'voter':                voter_on_stage,
-            'voter_address_list':   voter_address_list,
+            'election_years_available':         ELECTION_YEARS_AVAILABLE,
+            'messages_on_stage':                messages_on_stage,
+            'show_this_year':                   show_this_year,
+            'voter':                            voter_on_stage,
+            'voter_address_list':               voter_address_list,
+            'voter_we_vote_id':                 voter_we_vote_id,
+            'voter_who_shares_summary_list':    voter_who_shares_summary_list_modified,
         }
     else:
         template_values = {
