@@ -909,7 +909,7 @@ class ShareManager(models.Manager):
         if positive_value_exists(len(year_as_integer_list)):
             queryset = queryset.filter(year_as_integer__in=year_as_integer_list)
         if positive_value_exists(field_for_distinct_filter):
-            queryset = queryset.order_by().values(field_for_distinct_filter).distinct()
+            queryset = queryset.order_by(field_for_distinct_filter).values(field_for_distinct_filter).distinct()
 
         shared_link_clicked_count = 0
         try:

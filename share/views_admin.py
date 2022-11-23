@@ -19,8 +19,8 @@ from wevote_functions.functions import convert_to_int, get_voter_api_device_id, 
     positive_value_exists
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from .controllers import update_shared_item_shared_by_info_from_shared_item, \
-    update_shared_item_statistics_from_shared_link_clicked, update_who_shares_from_shared_item, \
-    update_who_shares_from_shared_link_clicked
+    update_shared_item_statistics_from_shared_link_clicked, update_shared_link_clicked_year_as_integer, \
+    update_who_shares_from_shared_item, update_who_shares_from_shared_link_clicked
 
 from .models import SharedItem, VoterWhoSharesSummaryAllTime, VoterWhoSharesSummaryOneYear
 
@@ -51,7 +51,32 @@ def shared_item_list_view(request):
         voter_id = voter.id
         voter_id = convert_to_int(voter_id)
 
-    update_statistics = True
+    fix_year_as_integer = True
+    if fix_year_as_integer:
+        year_results = update_shared_link_clicked_year_as_integer(number_to_update=number_to_update)
+        if not year_results['success']:
+            message_to_print = "FAILED update_shared_item_statistics_from_shared_link_clicked: {status}".format(
+                status=year_results['status']
+            )
+            messages.add_message(request, messages.ERROR, message_to_print)
+        elif positive_value_exists(year_results['shared_link_clicked_updates_remaining']) or \
+                positive_value_exists(year_results['shared_link_clicked_changed']) or \
+                positive_value_exists(year_results['shared_link_clicked_not_changed']):
+            message_to_print = \
+                "UPDATE_SHARED_ITEM_YEAR_AS_INTEGER: \n" \
+                "shared_link_clicked_changed: {shared_link_clicked_changed:,}, " \
+                "shared_link_clicked_not_changed: {shared_link_clicked_not_changed:,}, "\
+                "shared_link_clicked_updates_remaining: {shared_link_clicked_updates_remaining:,}\n" \
+                "status: {status}\n" \
+                "".format(
+                    shared_link_clicked_updates_remaining=year_results['shared_link_clicked_updates_remaining'],
+                    shared_link_clicked_changed=year_results['shared_link_clicked_changed'],
+                    shared_link_clicked_not_changed=year_results['shared_link_clicked_not_changed'],
+                    status=year_results['status'],
+                )
+            messages.add_message(request, messages.INFO, message_to_print)
+
+    update_statistics = False
     if update_statistics:
         statistics_results = update_shared_item_statistics_from_shared_link_clicked(number_to_update=number_to_update)
         if not statistics_results['success']:
