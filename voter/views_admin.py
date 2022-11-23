@@ -11,9 +11,11 @@ from django.db.models import Q, Subquery
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils.timezone import now
 
 import wevote_functions.admin
 from admin_tools.views import redirect_to_sign_in_page
+from datetime import timedelta
 from email_outbound.models import EmailAddress, EmailManager
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
     handle_record_not_saved_exception, handle_exception
@@ -1248,6 +1250,13 @@ def voter_summary_view(request, voter_id=0, voter_we_vote_id=''):
     authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
+
+    exclude_remind_contact = positive_value_exists(request.GET.get('exclude_remind_contact', False))
+    limit_to_last_90_days = positive_value_exists(request.GET.get('limit_to_last_90_days', False))
+    number_to_update = convert_to_int(request.GET.get('number_to_update', False))
+    only_show_shares_with_clicks = positive_value_exists(request.GET.get('only_show_shares_with_clicks', False))
+    voter_summary_search = request.GET.get('voter_summary_search', '')
+    show_more = positive_value_exists(request.GET.get('show_more', False))
     show_this_year = convert_to_int(request.GET.get('show_this_year', 0))
 
     voter_id = convert_to_int(voter_id)
@@ -1324,6 +1333,56 @@ def voter_summary_view(request, voter_id=0, voter_we_vote_id=''):
             shared_item_query.filter(shared_by_voter_we_vote_id=voter_who_shares_summary.voter_we_vote_id)
         shared_item_query = shared_item_query.order_by('-date_first_shared')
 
+        if positive_value_exists(voter_summary_search):
+            # Search for an email address - do not require to be verified
+            voter_we_vote_ids_with_email_query = EmailAddress.objects.filter(
+                normalized_email_address__icontains=voter_summary_search,
+            ).values_list('voter_we_vote_id', flat=True)
+            voter_we_vote_ids_with_email = list(voter_we_vote_ids_with_email_query)
+
+            # Search for a phone number
+            voter_we_vote_ids_with_sms_phone_number_query = SMSPhoneNumber.objects.filter(
+                normalized_sms_phone_number__icontains=voter_summary_search,
+            ).values_list('voter_we_vote_id', flat=True)
+            voter_we_vote_ids_with_sms_phone_number = list(voter_we_vote_ids_with_sms_phone_number_query)
+
+            search_words = voter_summary_search.split()
+            for one_word in search_words:
+                filters = []  # Reset for each search word
+                if len(voter_we_vote_ids_with_email) > 0:
+                    new_filter = Q(shared_by_voter_we_vote_id__in=voter_we_vote_ids_with_email)
+                    filters.append(new_filter)
+
+                if len(voter_we_vote_ids_with_sms_phone_number) > 0:
+                    new_filter = Q(shared_by_voter_we_vote_id__in=voter_we_vote_ids_with_sms_phone_number)
+                    filters.append(new_filter)
+
+                new_filter = Q(destination_full_url__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(shared_by_display_name__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(shared_by_voter_we_vote_id__iexact=one_word)
+                filters.append(new_filter)
+
+                # Add the first query
+                if len(filters):
+                    final_filters = filters.pop()
+
+                    # ...and "OR" the remaining items in the list
+                    for item in filters:
+                        final_filters |= item
+
+                    shared_item_query = shared_item_query.filter(final_filters)
+
+        if positive_value_exists(exclude_remind_contact):
+            shared_item_query = shared_item_query.exclude(is_remind_contact_share=True)
+        if positive_value_exists(only_show_shares_with_clicks):
+            shared_item_query = shared_item_query.filter(shared_link_clicked_count__gt=0)
+        if positive_value_exists(limit_to_last_90_days):
+            when_process_must_stop = now() - timedelta(days=90)
+            shared_item_query = shared_item_query.filter(date_first_shared__gt=when_process_must_stop)
         if positive_value_exists(show_this_year):
             shared_item_query = shared_item_query.filter(date_first_shared__year=show_this_year)
 
@@ -1338,10 +1397,14 @@ def voter_summary_view(request, voter_id=0, voter_we_vote_id=''):
     if voter_on_stage_found:
         template_values = {
             'election_years_available':         ELECTION_YEARS_AVAILABLE,
+            'exclude_remind_contact':           exclude_remind_contact,
+            'limit_to_last_90_days':            limit_to_last_90_days,
             'messages_on_stage':                messages_on_stage,
+            'only_show_shares_with_clicks':     only_show_shares_with_clicks,
             'show_this_year':                   show_this_year,
             'voter':                            voter_on_stage,
             'voter_address_list':               voter_address_list,
+            'voter_summary_search':             voter_summary_search,
             'voter_we_vote_id':                 voter_we_vote_id,
             'voter_who_shares_summary_list':    voter_who_shares_summary_list_modified,
         }

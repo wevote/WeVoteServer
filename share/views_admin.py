@@ -76,7 +76,7 @@ def shared_item_list_view(request):
                 )
             messages.add_message(request, messages.INFO, message_to_print)
 
-    update_statistics = False
+    update_statistics = True
     if update_statistics:
         statistics_results = update_shared_item_statistics_from_shared_link_clicked(number_to_update=number_to_update)
         if not statistics_results['success']:
@@ -457,6 +457,25 @@ def voter_who_shares_summary_list_view(request):
             shared_item_query.filter(shared_by_voter_we_vote_id=voter_who_shares_summary.voter_we_vote_id)
         shared_item_query = shared_item_query.order_by('-date_first_shared')
 
+        # ######################
+        # To support searching for a specific URL, we would need a SharedItem-specific search box
+        # search_words = voter_summary_search.split()
+        # for one_word in search_words:
+        #     filters = []  # Reset for each search word
+        #
+        #     new_filter = Q(destination_full_url__icontains=one_word)
+        #     filters.append(new_filter)
+        #
+        #     # Add the first query
+        #     if len(filters):
+        #         final_filters = filters.pop()
+        #
+        #         # ...and "OR" the remaining items in the list
+        #         for item in filters:
+        #             final_filters |= item
+        #
+        #         shared_item_query = shared_item_query.filter(final_filters)
+
         if positive_value_exists(exclude_remind_contact):
             shared_item_query = shared_item_query.exclude(is_remind_contact_share=True)
         if positive_value_exists(only_show_shares_with_clicks):
@@ -469,7 +488,7 @@ def voter_who_shares_summary_list_view(request):
 
         voter_who_shares_summary.shared_item_list_count = shared_item_query.count()
 
-        shared_item_list = shared_item_query[:100]
+        shared_item_list = shared_item_query[:25]
         voter_who_shares_summary.shared_item_list = shared_item_list
         voter_who_shares_summary_list_modified.append(voter_who_shares_summary)
 
