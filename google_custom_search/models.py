@@ -8,6 +8,7 @@ from django.db import models
 
 from config.base import get_environment_variable
 from wevote_functions.functions import positive_value_exists
+from re import compile
 
 logger = wevote_functions.admin.get_logger(__name__)
 GOOGLE_SEARCH_ENGINE_ID = get_environment_variable("GOOGLE_SEARCH_ENGINE_ID")
@@ -17,6 +18,16 @@ GOOGLE_SEARCH_API_VERSION = get_environment_variable("GOOGLE_SEARCH_API_VERSION"
 BALLOTPEDIA_LOGO_URL = "ballotpedia-logo-square"
 MAXIMUM_GOOGLE_SEARCH_USERS = 10
 MAXIMUM_CHARACTERS_LENGTH = 1024
+
+URL_PATTERNS_TO_IGNORE = [
+    r"^https?://uk.linkedin.com",
+    r"^https?://nz.linkedin.com",
+    r"^https?://www.linkedin.com/pub/dir",
+    r"^https?://www.facebook.com/events",
+    r"^https?://twitter.com/\w+/status"
+]
+
+URL_PATTERNS_TO_IGNORE = [compile(pattern) for pattern in URL_PATTERNS_TO_IGNORE]
 
 
 class GoogleSearchUser(models.Model):
