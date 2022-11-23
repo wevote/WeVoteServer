@@ -1386,6 +1386,101 @@ def update_shared_item_shared_by_info_from_shared_item(number_to_update=100000):
     return results
 
 
+def update_shared_link_clicked_year_as_integer(number_to_update=10000):
+    shared_link_clicked_changed = 0
+    shared_link_clicked_not_changed = 0
+    shared_link_clicked_updates_remaining = 0
+    status = ''
+    success = True
+
+    # Get last SharedLinkClicked id
+    we_vote_settings_manager = WeVoteSettingsManager()
+    results = we_vote_settings_manager.fetch_setting_results('shared_link_clicked_year_as_integer_last_id')
+    shared_link_clicked_year_as_integer_last_id = 0
+    if not results['success']:
+        status += results['status']
+        success = False
+        results = {
+            'status':                                   status,
+            'success':                                  success,
+            'shared_link_clicked_updates_remaining':    shared_link_clicked_updates_remaining,
+            'shared_link_clicked_changed':              shared_link_clicked_changed,
+            'shared_link_clicked_not_changed':          shared_link_clicked_not_changed,
+        }
+        return results
+    elif results['we_vote_setting_found']:
+        shared_link_clicked_year_as_integer_last_id = results['setting_value']
+
+    highest_shared_link_clicked_id = 0
+    if positive_value_exists(shared_link_clicked_year_as_integer_last_id):
+        status += "shared_link_clicked_year_as_integer_last_id-FOUND: {shared_item_id} ".format(
+            shared_item_id=shared_link_clicked_year_as_integer_last_id
+        )
+        highest_shared_link_clicked_id = shared_link_clicked_year_as_integer_last_id
+    else:
+        status += "Starting update at shared_link_clicked.id = 0 "
+
+    # Now get the entries to update
+    queryset = SharedLinkClicked.objects.all()
+    queryset = queryset.order_by('id')
+    queryset = queryset.filter(id__gt=shared_link_clicked_year_as_integer_last_id)
+    queryset = queryset.filter(year_as_integer__isnull=True)
+    queryset = queryset.exclude(date_clicked__isnull=True)
+    entries_to_update_count = queryset.count()
+
+    if positive_value_exists(entries_to_update_count):
+        if not positive_value_exists(number_to_update):
+            number_to_update = 10000
+        number_to_update = convert_to_int(number_to_update)
+        queryset = queryset[:number_to_update]
+        shared_link_clicked_list = list(queryset)
+    else:
+        shared_link_clicked_list = []
+        try:
+            queryset = SharedLinkClicked.objects.all()
+            queryset = queryset.order_by('id')
+            last_entry = queryset.last()
+            highest_shared_link_clicked_id = last_entry.id
+        except Exception as e:
+            status += "COULD_NOT_GET_LAST_ID: " + str(e) + " "
+            success = False
+
+    for shared_link_clicked in shared_link_clicked_list:
+        try:
+            shared_link_clicked.year_as_integer = shared_link_clicked.date_clicked.strftime('%Y')
+            shared_link_clicked.save()
+            shared_link_clicked_changed += 1
+        except Exception as e:
+            status += "FAILED_SAVE: " + str(e) + " "
+            shared_link_clicked_not_changed += 1
+        if shared_link_clicked.id > highest_shared_link_clicked_id:
+            highest_shared_link_clicked_id = shared_link_clicked.id
+
+    if positive_value_exists(highest_shared_link_clicked_id):
+        # Update the "shared_link_clicked_year_as_integer_last_id"
+        results = we_vote_settings_manager.save_setting(
+            setting_name="shared_link_clicked_year_as_integer_last_id",
+            setting_value=highest_shared_link_clicked_id,
+            value_type=WeVoteSetting.INTEGER)
+        if not results['success']:
+            status += results['status']
+            success = False
+
+    # How many remain to be updated in the future?
+    queryset = SharedLinkClicked.objects.using('readonly').all()
+    queryset = queryset.filter(id__gt=highest_shared_link_clicked_id)
+    shared_link_clicked_updates_remaining = queryset.count()
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'shared_link_clicked_updates_remaining':   shared_link_clicked_updates_remaining,
+        'shared_link_clicked_changed':             shared_link_clicked_changed,
+        'shared_link_clicked_not_changed':         shared_link_clicked_not_changed,
+    }
+    return results
+
+
 def update_shared_item_statistics_from_shared_link_clicked(number_to_update=10000):
     shared_items_changed = 0
     shared_items_not_changed = 0
