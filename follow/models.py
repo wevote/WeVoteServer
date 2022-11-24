@@ -665,8 +665,14 @@ class FollowMetricsManager(models.Manager):
                 count_query = count_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
             count_query = count_query.filter(following_status=FOLLOWING)
             if positive_value_exists(limit_to_one_date_as_integer):
-                # TODO DALE THIS NEEDS WORK TO FIND ALL ENTRIES ON ONE DAY
-                count_query = count_query.filter(date_last_changed=limit_to_one_date)
+                date_as_string = "{date}".format(date=limit_to_one_date_as_integer)
+                date_start = datetime.strptime(date_as_string, "%Y%m%d").date()
+                datetime_start = datetime.combine(date_start, datetime.min.time())
+
+                pst_timezone = pytz.timezone("America/Los_Angeles")
+                date_start_pst = pst_timezone.localize(datetime_start)
+                date_end_pst = date_start_pst + timedelta(days=1) - timedelta(microseconds=1)
+                count_query = count_query.filter(date_last_changed__range=(date_start_pst, date_end_pst))
             elif positive_value_exists(count_through_this_date_as_integer):
                 count_query = count_query.filter(date_last_changed__lte=count_through_this_date)
             count_result = count_query.count()

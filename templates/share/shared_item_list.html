@@ -63,9 +63,9 @@
     </label>
 
     {#  #}
-    <label for="only_show_shares_with_clicks_id">
-      <input type="checkbox" name="only_show_shares_with_clicks" id="only_show_shares_with_clicks_id" value="1"
-             {% if only_show_shares_with_clicks %}checked{% endif %} /> Exclude Zero Clicks&nbsp;&nbsp;&nbsp;
+    <label for="show_shares_with_zero_clicks_id">
+      <input type="checkbox" name="show_shares_with_zero_clicks" id="show_shares_with_zero_clicks_id" value="1"
+             {% if show_shares_with_zero_clicks %}checked{% endif %} /> Show Zero Clicks&nbsp;&nbsp;&nbsp;
     </label>
 
     {#  #}
@@ -117,7 +117,7 @@
     <br />
 
 {% if shared_item_search %}
-    <a href="{% url 'share:shared_item_list' %}?state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&only_show_shares_with_clicks={{ only_show_shares_with_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&shared_item_search=&show_this_year={{ show_this_year }}">
+    <a href="{% url 'share:shared_item_list' %}?state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&show_shares_with_zero_clicks={{ show_shares_with_zero_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&shared_item_search=&show_this_year={{ show_this_year }}">
          clear search</a>&nbsp;
 {% endif %}
     <input type="text" name="shared_item_search" id="shared_item_search_id" value="{{ shared_item_search }}" />
@@ -166,7 +166,7 @@
                     <span class="glyphicon glyphicon-new-window"></span>
                 </a>
             {% endif %}
-            <a href="{% url 'share:shared_item_list' %}?shared_item_search={{ shared_item.shared_by_voter_we_vote_id }}&state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&only_show_shares_with_clicks={{ only_show_shares_with_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&show_this_year={{ show_this_year }}">
+            <a href="{% url 'share:shared_item_list' %}?shared_item_search={{ shared_item.shared_by_voter_we_vote_id }}&state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&show_shares_with_zero_clicks={{ show_shares_with_zero_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&show_this_year={{ show_this_year }}">
                 <span class="glyphicon glyphicon-filter"></span>
             </a>
             {% if shared_item.shared_by_state_code %}
@@ -230,16 +230,16 @@
     {% endfor %}
     </table>
     {% if not show_all and not show_more %}
-    <a href="{% url 'share:shared_item_list' %}?state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&only_show_shares_with_clicks={{ only_show_shares_with_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&shared_item_search={{ shared_item_search }}&show_this_year={{ show_this_year }}&show_more=1">
+    <a href="{% url 'share:shared_item_list' %}?state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&show_shares_with_zero_clicks={{ show_shares_with_zero_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&shared_item_search={{ shared_item_search }}&show_this_year={{ show_this_year }}&show_more=1">
         show more</a>
     {% endif %}
 {#    {% if show_more %}#}
-{#    <a href="{% url 'share:shared_item_list' %}?state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&only_show_shares_with_clicks={{ only_show_shares_with_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&shared_item_search={{ shared_item_search }}&show_this_year={{ show_this_year }}&show_all=1">#}
+{#    <a href="{% url 'share:shared_item_list' %}?state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&show_shares_with_zero_clicks={{ show_shares_with_zero_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&shared_item_search={{ shared_item_search }}&show_this_year={{ show_this_year }}&show_all=1">#}
 {#        show all</a>#}
 {#    {% endif %}#}
     {% if show_more %}
     &nbsp;&nbsp;&nbsp;
-      <a href="{% url 'share:shared_item_list' %}?state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&only_show_shares_with_clicks={{ only_show_shares_with_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&shared_item_search={{ shared_item_search }}&show_this_year={{ show_this_year }}&show_more=0">
+      <a href="{% url 'share:shared_item_list' %}?state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&show_shares_with_zero_clicks={{ show_shares_with_zero_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&shared_item_search={{ shared_item_search }}&show_this_year={{ show_this_year }}&show_more=0">
         show fewer</a>
     {% endif %}
 
@@ -264,7 +264,7 @@
             $('#limit_to_last_90_days_id').change(function() {
                 this.form.submit();
             });
-            $('#only_show_shares_with_clicks_id').change(function() {
+            $('#show_shares_with_zero_clicks_id').change(function() {
                 this.form.submit();
             });
             $('#show_this_year_id').change(function() {

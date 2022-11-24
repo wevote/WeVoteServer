@@ -22,6 +22,7 @@ from import_export_batches.models import AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_
 from measure.models import ContestMeasureManager
 from office.models import ContestOfficeManager
 from position.models import PositionMetricsManager
+from share.models import ShareManager
 from voter.models import VoterManager, VoterMetricsManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_date_to_date_as_integer, convert_to_int, positive_value_exists
@@ -1043,6 +1044,7 @@ def calculate_sitewide_daily_metrics(limit_to_one_date_as_integer):
 
     analytics_count_manager = AnalyticsCountManager()
     follow_metrics_manager = FollowMetricsManager()
+    share_manager = ShareManager()
 
     google_civic_election_id_zero = 0
     organization_we_vote_id_empty = ""
@@ -1078,6 +1080,13 @@ def calculate_sitewide_daily_metrics(limit_to_one_date_as_integer):
         voter_we_vote_id_empty, date_as_integer_zero, count_through_this_date_as_integer)
     issues_followed_today = follow_metrics_manager.fetch_issues_followed(
         voter_we_vote_id_empty, limit_to_one_date_as_integer, count_through_this_date_as_integer)
+
+    shared_items_clicked_today = share_manager.fetch_shared_items_clicked_count_for_one_day(
+        date_as_integer=limit_to_one_date_as_integer)
+    shared_link_clicked_count_today = share_manager.fetch_shared_link_clicked_count_for_one_day(
+        date_as_integer=limit_to_one_date_as_integer)
+    shared_link_clicked_unique_viewers_today = share_manager.fetch_shared_link_clicked_unique_viewers_one_day(
+        date_as_integer=limit_to_one_date_as_integer)
 
     organizations_followed_total = None
     organizations_followed_today = None
@@ -1115,8 +1124,8 @@ def calculate_sitewide_daily_metrics(limit_to_one_date_as_integer):
         'issues_followed_today':                    issues_followed_today,
         'organizations_followed_total':             organizations_followed_total,
         'organizations_followed_today':             organizations_followed_today,
-        'organizations_auto_followed_total':         organizations_auto_followed_total,
-        'organizations_auto_followed_today':         organizations_auto_followed_today,
+        'organizations_auto_followed_total':        organizations_auto_followed_total,
+        'organizations_auto_followed_today':        organizations_auto_followed_today,
         'organizations_with_linked_issues':         organizations_with_linked_issues,
         'issues_linked_total':                      issues_linked_total,
         'issues_linked_today':                      issues_linked_today,
@@ -1129,6 +1138,9 @@ def calculate_sitewide_daily_metrics(limit_to_one_date_as_integer):
         'individuals_with_friends_only_positions':  individuals_with_friends_only_positions,
         'friends_only_positions':                   friends_only_positions,
         'entered_full_address':                     entered_full_address,
+        'shared_items_clicked_today':               shared_items_clicked_today,
+        'shared_link_clicked_count_today':          shared_link_clicked_count_today,
+        'shared_link_clicked_unique_viewers_today': shared_link_clicked_unique_viewers_today,
     }
     results = {
         'status':                           status,
