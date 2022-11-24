@@ -19,7 +19,7 @@
     {% csrf_token %}
 {#    <input type="hidden" name="exclude_remind_contact" value="{{ exclude_remind_contact }}">#}
 {#    <input type="hidden" name="limit_to_last_90_days" value="{{ limit_to_last_90_days }}">#}
-{#    <input type="hidden" name="only_show_shares_with_clicks" value="{{ limit_to_last_90_days }}">#}
+{#    <input type="hidden" name="show_shares_with_zero_clicks" value="{{ limit_to_last_90_days }}">#}
     <input type="hidden" name="sort_by" value="{{ sort_by }}">
     <input type="hidden" name="show_all" value="{{ show_all }}">
     <input type="hidden" name="show_more" value="{{ show_more }}">
@@ -66,9 +66,9 @@
     </label>
 
     {#  #}
-    <label for="only_show_shares_with_clicks_id">
-      <input type="checkbox" name="only_show_shares_with_clicks" id="only_show_shares_with_clicks_id" value="1"
-             {% if only_show_shares_with_clicks %}checked{% endif %} /> Exclude Zero Clicks&nbsp;&nbsp;&nbsp;
+    <label for="show_shares_with_zero_clicks_id">
+      <input type="checkbox" name="show_shares_with_zero_clicks" id="show_shares_with_zero_clicks_id" value="1"
+             {% if show_shares_with_zero_clicks %}checked{% endif %} /> Show Zero Clicks&nbsp;&nbsp;&nbsp;
     </label>
 
     {#  #}
@@ -119,7 +119,7 @@
     <br />
 
 {% if voter_summary_search %}
-    <a href="{% url 'share:voter_who_shares_summary_list' %}?state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&only_show_shares_with_clicks={{ only_show_shares_with_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&voter_summary_search=&show_this_year={{ show_this_year }}">
+    <a href="{% url 'share:voter_who_shares_summary_list' %}?state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&show_shares_with_zero_clicks={{ show_shares_with_zero_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&voter_summary_search=&show_this_year={{ show_this_year }}">
          clear search</a>&nbsp;
 {% endif %}
     <input type="text" name="voter_summary_search" id="voter_summary_search_id" value="{{ voter_summary_search }}" />
@@ -131,16 +131,16 @@
     {% include "share/voter_who_shares_summary_table.html" with voter_who_shares_summary_list=voter_who_shares_summary_list %}
 
     {% if not show_all and not show_more %}
-    <a href="{% url 'share:voter_who_shares_summary_list' %}?state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&only_show_shares_with_clicks={{ only_show_shares_with_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&voter_summary_search={{ voter_summary_search }}&show_this_year={{ show_this_year }}&show_more=1">
+    <a href="{% url 'share:voter_who_shares_summary_list' %}?state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&show_shares_with_zero_clicks={{ show_shares_with_zero_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&voter_summary_search={{ voter_summary_search }}&show_this_year={{ show_this_year }}&show_more=1">
         show more</a>
     {% endif %}
 {#    {% if show_more %}#}
-{#    <a href="{% url 'share:voter_who_shares_summary_list' %}?state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&only_show_shares_with_clicks={{ only_show_shares_with_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&voter_summary_search={{ voter_summary_search }}&show_this_year={{ show_this_year }}&show_all=1">#}
+{#    <a href="{% url 'share:voter_who_shares_summary_list' %}?state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&show_shares_with_zero_clicks={{ show_shares_with_zero_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&voter_summary_search={{ voter_summary_search }}&show_this_year={{ show_this_year }}&show_all=1">#}
 {#        show all</a>#}
 {#    {% endif %}#}
     {% if show_more %}
     &nbsp;&nbsp;&nbsp;
-      <a href="{% url 'share:voter_who_shares_summary_list' %}?state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&only_show_shares_with_clicks={{ only_show_shares_with_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&voter_summary_search={{ voter_summary_search }}&show_this_year={{ show_this_year }}&show_more=0">
+      <a href="{% url 'share:voter_who_shares_summary_list' %}?state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&show_shares_with_zero_clicks={{ show_shares_with_zero_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&voter_summary_search={{ voter_summary_search }}&show_this_year={{ show_this_year }}&show_more=0">
         show fewer</a>
     {% endif %}
 
@@ -165,7 +165,7 @@
             $('#limit_to_last_90_days_id').change(function() {
                 this.form.submit();
             });
-            $('#only_show_shares_with_clicks_id').change(function() {
+            $('#show_shares_with_zero_clicks_id').change(function() {
                 this.form.submit();
             });
             $('#show_this_year_id').change(function() {

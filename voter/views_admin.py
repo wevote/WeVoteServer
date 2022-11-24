@@ -1254,7 +1254,7 @@ def voter_summary_view(request, voter_id=0, voter_we_vote_id=''):
     exclude_remind_contact = positive_value_exists(request.GET.get('exclude_remind_contact', False))
     limit_to_last_90_days = positive_value_exists(request.GET.get('limit_to_last_90_days', False))
     number_to_update = convert_to_int(request.GET.get('number_to_update', False))
-    only_show_shares_with_clicks = positive_value_exists(request.GET.get('only_show_shares_with_clicks', False))
+    show_shares_with_zero_clicks = positive_value_exists(request.GET.get('show_shares_with_zero_clicks', False))
     voter_summary_search = request.GET.get('voter_summary_search', '')
     show_more = positive_value_exists(request.GET.get('show_more', False))
     show_this_year = convert_to_int(request.GET.get('show_this_year', 0))
@@ -1378,7 +1378,7 @@ def voter_summary_view(request, voter_id=0, voter_we_vote_id=''):
 
         if positive_value_exists(exclude_remind_contact):
             shared_item_query = shared_item_query.exclude(is_remind_contact_share=True)
-        if positive_value_exists(only_show_shares_with_clicks):
+        if not positive_value_exists(show_shares_with_zero_clicks):
             shared_item_query = shared_item_query.filter(shared_link_clicked_count__gt=0)
         if positive_value_exists(limit_to_last_90_days):
             when_process_must_stop = now() - timedelta(days=90)
@@ -1400,7 +1400,7 @@ def voter_summary_view(request, voter_id=0, voter_we_vote_id=''):
             'exclude_remind_contact':           exclude_remind_contact,
             'limit_to_last_90_days':            limit_to_last_90_days,
             'messages_on_stage':                messages_on_stage,
-            'only_show_shares_with_clicks':     only_show_shares_with_clicks,
+            'show_shares_with_zero_clicks':     show_shares_with_zero_clicks,
             'show_this_year':                   show_this_year,
             'voter':                            voter_on_stage,
             'voter_address_list':               voter_address_list,

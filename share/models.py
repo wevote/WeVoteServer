@@ -4,8 +4,11 @@
 
 from django.db import models
 from django.db.models import Q
+from django.utils import timezone
 from django.utils.timezone import localtime, now
+from datetime import datetime, time, timedelta
 from organization.models import ORGANIZATION_TYPE_CHOICES, UNKNOWN
+import pytz
 import sys
 from wevote_functions.functions import convert_to_int, generate_random_string, positive_value_exists
 
@@ -888,8 +891,58 @@ class ShareManager(models.Manager):
             year_as_integer_list=year_as_integer_list,
             field_for_distinct_filter='id')
 
+    def fetch_shared_items_clicked_count_for_one_day(
+            self,
+            date_as_integer=0):
+        """
+        Used for SitewideDailyMetrics
+        :param date_as_integer:
+        :return:
+        """
+        return self.fetch_shared_link_clicked_count(
+            date_as_integer=date_as_integer,
+            field_for_distinct_filter='shared_item_id')
+
+    def fetch_shared_link_clicked_count_for_one_day(
+            self,
+            date_as_integer=0):
+        """
+        Used for SitewideDailyMetrics
+        :param date_as_integer:
+        :return:
+        """
+        return self.fetch_shared_link_clicked_count(
+            date_as_integer=date_as_integer,
+            field_for_distinct_filter='id')
+
+    def fetch_shared_link_clicked_unique_viewers_one_day(
+            self,
+            date_as_integer=0):
+        """
+        Used for SitewideDailyMetrics
+        :param date_as_integer:
+        :return:
+        """
+        return self.fetch_shared_link_clicked_count(
+            date_as_integer=date_as_integer,
+            field_for_distinct_filter='viewed_by_voter_we_vote_id')
+
+    def fetch_shared_link_clicked_unique_viewers_one_day(
+            self,
+            date_as_integer=0):
+        """
+        Used for SitewideDailyMetrics
+        :param date_as_integer:
+        :return:
+        """
+        return self.fetch_shared_link_clicked_count(
+            date_as_integer=date_as_integer,
+            field_for_distinct_filter='viewed_by_voter_we_vote_id')
+
     def fetch_shared_link_clicked_count(
-            self, shared_by_state_code_list=[],
+            self,
+            date_as_integer=0,
+            shared_by_state_code_list=[],
             shared_by_voter_we_vote_id_list=[],
             viewed_by_state_code_list=[],
             year_as_integer_list=[],
@@ -900,6 +953,15 @@ class ShareManager(models.Manager):
         else:
             queryset = SharedLinkClicked.objects.using('readonly').all()
 
+        if positive_value_exists(date_as_integer):
+            date_as_string = "{date}".format(date=date_as_integer)
+            date_start = datetime.strptime(date_as_string, "%Y%m%d").date()
+            datetime_start = datetime.combine(date_start, datetime.min.time())
+
+            pst_timezone = pytz.timezone("America/Los_Angeles")
+            date_start_pst = pst_timezone.localize(datetime_start)
+            date_end_pst = date_start_pst + timedelta(days=1) - timedelta(microseconds=1)
+            queryset = queryset.filter(date_clicked__range=(date_start_pst, date_end_pst))
         if positive_value_exists(len(shared_by_state_code_list)):
             queryset = queryset.filter(shared_by_state_code__in=shared_by_state_code_list)
         if positive_value_exists(len(shared_by_voter_we_vote_id_list)):

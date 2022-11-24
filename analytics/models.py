@@ -1771,6 +1771,10 @@ class SitewideDailyMetrics(models.Model):
     entered_full_address = models.PositiveIntegerField(verbose_name="all",
                                                        null=True, unique=False)
 
+    shared_items_clicked_today = models.PositiveIntegerField(verbose_name="", null=True, unique=False)
+    shared_link_clicked_count_today = models.PositiveIntegerField(verbose_name="", null=True, unique=False)
+    shared_link_clicked_unique_viewers_today = models.PositiveIntegerField(verbose_name="", null=True, unique=False)
+
     def generate_date_as_integer(self):
         # We want to store the day as an integer for extremely quick database indexing and lookup
         datetime_now = localtime(now()).date()  # We Vote uses Pacific Time for TIME_ZONE

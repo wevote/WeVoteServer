@@ -111,9 +111,9 @@
     </label>
 
     {#  #}
-    <label for="only_show_shares_with_clicks_id">
-      <input type="checkbox" name="only_show_shares_with_clicks" id="only_show_shares_with_clicks_id" value="1"
-             {% if only_show_shares_with_clicks %}checked{% endif %} /> Exclude Zero Clicks&nbsp;&nbsp;&nbsp;
+    <label for="show_shares_with_zero_clicks_id">
+      <input type="checkbox" name="show_shares_with_zero_clicks" id="show_shares_with_zero_clicks_id" value="1"
+             {% if show_shares_with_zero_clicks %}checked{% endif %} /> Show Zero Clicks&nbsp;&nbsp;&nbsp;
     </label>
 
     {#  #}
@@ -142,7 +142,7 @@
 
 &nbsp;&nbsp;&nbsp;
 {% if voter_summary_search %}
-    <a href="{% url 'voter:voter_summary_we_vote_id' voter_we_vote_id %}?state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&only_show_shares_with_clicks={{ only_show_shares_with_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&voter_summary_search=&show_this_year={{ show_this_year }}">
+    <a href="{% url 'voter:voter_summary_we_vote_id' voter_we_vote_id %}?state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&show_shares_with_zero_clicks={{ show_shares_with_zero_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&voter_summary_search=&show_this_year={{ show_this_year }}">
          clear search</a>&nbsp;
 {% endif %}
     <input type="text" name="voter_summary_search" id="voter_summary_search_id" value="{{ voter_summary_search }}" />
@@ -174,7 +174,7 @@
             $('#limit_to_last_90_days_id').change(function() {
                 this.form.submit();
             });
-            $('#only_show_shares_with_clicks_id').change(function() {
+            $('#show_shares_with_zero_clicks_id').change(function() {
                 this.form.submit();
             });
             $('#show_this_year_id').change(function() {
