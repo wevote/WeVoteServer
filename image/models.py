@@ -1797,14 +1797,14 @@ class WeVoteImageManager(models.Manager):
             original_image = Image.open(image_local_path)
             image = ImageOps.exif_transpose(original_image)
             if image_type == TWITTER_BACKGROUND_IMAGE_NAME or image_type == TWITTER_BANNER_IMAGE_NAME:
-                image = image.resize((image_width, image_height), Image.ANTIALIAS)
+                image = image.resize((image_width, image_height), Image.Resampling.LANCZOS)
             elif image_type == FACEBOOK_BACKGROUND_IMAGE_NAME:
                 centering_x = 0.5
                 centering_y = ((image.height - image_offset_y) * 0.5) / image.height
-                image = ImageOps.fit(image, (image_width, image_height), Image.ANTIALIAS,
+                image = ImageOps.fit(image, (image_width, image_height), Image.Resampling.LANCZOS,
                                      centering=(centering_x, centering_y))
             else:
-                image = ImageOps.fit(image, (image_width, image_height), Image.ANTIALIAS, centering=(0.5, 0.5))
+                image = ImageOps.fit(image, (image_width, image_height), Image.Resampling.LANCZOS, centering=(0.5, 0.5))
             if convert_image_to_jpg:
                 image = image.convert('RGB')
                 image.save(image_local_path, quality=95, subsampling=0)
