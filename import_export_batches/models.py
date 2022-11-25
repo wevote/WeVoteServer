@@ -5290,8 +5290,7 @@ class BatchProcessManager(models.Manager):
             batch_process_queryset = batch_process_queryset.filter(date_started__isnull=False)
             batch_process_queryset = batch_process_queryset.filter(date_completed__isnull=True)
             batch_process_queryset = batch_process_queryset.filter(date_checked_out__isnull=False)
-            batch_process_queryset = batch_process_queryset.filter(
-                kind_of_process__in=analytics_kind_of_process_list)
+            batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=analytics_kind_of_process_list)
 
             batch_process_count = batch_process_queryset.count()
             return positive_value_exists(batch_process_count)

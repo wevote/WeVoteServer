@@ -1429,6 +1429,7 @@ def retrieve_analytics_processing_next_step():
     augment_analytics_action_with_election_id = False
 
     analytics_manager = AnalyticsManager()
+    # If we are current on analyzing statistics, this will return False for results['analytics_processing_status_found']
     results = analytics_manager.retrieve_or_create_next_analytics_processing_status()
     success = results['success']
     if not success:
