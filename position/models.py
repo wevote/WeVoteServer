@@ -2969,10 +2969,17 @@ class PositionListManager(models.Manager):
         position_list = []
         return position_list
 
-    def retrieve_all_positions_for_voter(self, voter_id=0, voter_we_vote_id='',
-                                         stance_we_are_looking_for=ANY_STANCE, friends_vs_public=FRIENDS_AND_PUBLIC,
-                                         google_civic_election_id=0, this_election_vs_others='', state_code='',
-                                         since_date=None):
+    def retrieve_all_positions_for_voter(
+            self,
+            voter_id=0,
+            voter_we_vote_id='',
+            stance_we_are_looking_for=ANY_STANCE,
+            friends_vs_public=FRIENDS_AND_PUBLIC,
+            google_civic_election_id=0,
+            this_election_vs_others='',
+            state_code='',
+            since_date=None,
+            read_only=False):
         """
         We want the voter's position information for display prior to sign in
         :param voter_id:
@@ -2984,6 +2991,7 @@ class PositionListManager(models.Manager):
         :param this_election_vs_others:
         :param state_code:
         :param since_date:
+        :param read_only:
         :return:
         """
         status = ''
@@ -3037,7 +3045,10 @@ class PositionListManager(models.Manager):
             ############################
             # Retrieve public positions
             try:
-                public_positions_list_query = PositionEntered.objects.all()
+                if read_only:
+                    public_positions_list_query = PositionEntered.objects.using('readonly').all()
+                else:
+                    public_positions_list_query = PositionEntered.objects.all()
 
                 # As of Aug 2018 we are no longer using PERCENT_RATING
                 public_positions_list_query = public_positions_list_query.exclude(stance__iexact=PERCENT_RATING)
@@ -3094,7 +3105,10 @@ class PositionListManager(models.Manager):
             ############################
             # Retrieve positions meant for friends only
             try:
-                friends_positions_list_query = PositionForFriends.objects.all()
+                if read_only:
+                    friends_positions_list_query = PositionForFriends.objects.using('readonly').all()
+                else:
+                    friends_positions_list_query = PositionForFriends.objects.all()
 
                 # As of Aug 2018 we are no longer using PERCENT_RATING
                 friends_positions_list_query = friends_positions_list_query.exclude(stance__iexact=PERCENT_RATING)
@@ -3221,23 +3235,37 @@ class PositionListManager(models.Manager):
             }
             return results
 
-    def retrieve_all_positions_for_voter_simple(self, voter_id=0, voter_we_vote_id='', google_civic_election_id=0):
+    def retrieve_all_positions_for_voter_simple(
+            self,
+            voter_id=0,
+            voter_we_vote_id='',
+            google_civic_election_id=0,
+            count_only=False,
+            read_only=True):
         """
         We just want the barest of information.
         :param voter_id:
         :param voter_we_vote_id:
         :param google_civic_election_id:
+        :param count_only:
+        :param read_only:
         :return:
         """
         status = ''
+        count_only = positive_value_exists(count_only)
+        friend_position_count = 0
+        position_count = 0
+        position_list_found = False
+        public_position_count = 0
         if not positive_value_exists(voter_id) and not positive_value_exists(voter_we_vote_id):
             position_list = []
             status += 'MISSING_VOTER_ID '
             results = {
                 'status':               status,
                 'success':              False,
-                'position_list_found':  False,
+                'position_count':       position_count,
                 'position_list':        position_list,
+                'position_list_found':  False,
             }
             return results
 
@@ -3254,7 +3282,10 @@ class PositionListManager(models.Manager):
         ############################
         # Retrieve public positions
         try:
-            public_positions_list_query = PositionEntered.objects.all()
+            if positive_value_exists(read_only):
+                public_positions_list_query = PositionEntered.objects.using('readonly').all()
+            else:
+                public_positions_list_query = PositionEntered.objects.all()
 
             # As of Aug 2018 we are no longer using PERCENT_RATING
             public_positions_list_query = public_positions_list_query.exclude(stance__iexact=PERCENT_RATING)
@@ -3268,9 +3299,12 @@ class PositionListManager(models.Manager):
                 public_positions_list_query = public_positions_list_query.filter(
                     Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list) |
                     Q(google_civic_election_id=google_civic_election_id))
-            # Force the position for the most recent election to show up last
-            public_positions_list_query = public_positions_list_query.order_by('google_civic_election_id')
-            public_positions_list = list(public_positions_list_query)  # Force the query to run
+            if count_only:
+                public_position_count = public_positions_list_query.count()
+            else:
+                # Force the position for the most recent election to show up last
+                public_positions_list_query = public_positions_list_query.order_by('google_civic_election_id')
+                public_positions_list = list(public_positions_list_query)  # Force the query to run
         except Exception as e:
             position_list = []
             status += 'VOTER_POSITION_FOR_PUBLIC_SEARCH_FAILED: ' + str(e) + ' '
@@ -3278,6 +3312,7 @@ class PositionListManager(models.Manager):
                 'status':               status,
                 'success':              False,
                 'position_list_found':  False,
+                'position_count':       position_count,
                 'position_list':        position_list,
             }
             return results
@@ -3285,7 +3320,10 @@ class PositionListManager(models.Manager):
         ############################
         # Retrieve positions meant for friends only
         try:
-            friends_positions_list_query = PositionForFriends.objects.all()
+            if positive_value_exists(read_only):
+                friends_positions_list_query = PositionForFriends.objects.using('readonly').all()
+            else:
+                friends_positions_list_query = PositionForFriends.objects.all()
 
             # As of Aug 2018 we are no longer using PERCENT_RATING
             friends_positions_list_query = friends_positions_list_query.exclude(stance__iexact=PERCENT_RATING)
@@ -3299,9 +3337,12 @@ class PositionListManager(models.Manager):
                 friends_positions_list_query = friends_positions_list_query.filter(
                     Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list) |
                     Q(google_civic_election_id=google_civic_election_id))
-            # Force the position for the most recent election to show up last
-            friends_positions_list_query = friends_positions_list_query.order_by('google_civic_election_id')
-            friends_positions_list = list(friends_positions_list_query)  # Force the query to run
+            if count_only:
+                friend_position_count = friends_positions_list_query.count()
+            else:
+                # Force the position for the most recent election to show up last
+                friends_positions_list_query = friends_positions_list_query.order_by('google_civic_election_id')
+                friends_positions_list = list(friends_positions_list_query)  # Force the query to run
         except Exception as e:
             position_list = []
             status += 'VOTER_POSITION_FOR_FRIENDS_SEARCH_FAILED: ' + str(e) + ' '
@@ -3309,6 +3350,7 @@ class PositionListManager(models.Manager):
                 'status':               status,
                 'success':              False,
                 'position_list_found':  False,
+                'position_count':       position_count,
                 'position_list':        position_list,
             }
             return results
@@ -3326,11 +3368,25 @@ class PositionListManager(models.Manager):
         #     one_friends_position.is_public_position = False
         #     friends_positions_list2.append(one_friends_position)
 
-        # Merge public positions and "For friends" positions
-        position_list = public_positions_list + friends_positions_list
-        position_list_found = len(position_list)
+        if count_only:
+            position_count = public_position_count + friend_position_count
+        else:
+            # Merge public positions and "For friends" positions
+            position_list = public_positions_list + friends_positions_list
+            position_list_found = len(position_list)
 
-        if position_list_found:
+        if count_only:
+            position_list = []
+            status += 'POSITION_COUNT_RESULTS '
+            results = {
+                'status':               status,
+                'success':              True,
+                'position_list_found':  False,
+                'position_count':       position_count,
+                'position_list':        position_list,
+            }
+            return results
+        elif position_list_found:
             simple_position_list = []
             for position in position_list:
                 # Make sure we have a ballot_item_we_vote_id
@@ -3341,12 +3397,33 @@ class PositionListManager(models.Manager):
                 else:
                     continue
 
+                ballot_item_display_name = position.ballot_item_display_name \
+                    if positive_value_exists(position.ballot_item_display_name) else ''
+                ballot_item_image_url_https_large = position.ballot_item_image_url_https_large \
+                    if positive_value_exists(position.ballot_item_image_url_https_large) else ''
+                ballot_item_image_url_https_medium = position.ballot_item_image_url_https_medium \
+                    if positive_value_exists(position.ballot_item_image_url_https_medium) else ''
+                ballot_item_image_url_https_tiny = position.ballot_item_image_url_https_tiny \
+                    if positive_value_exists(position.ballot_item_image_url_https_tiny) else ''
+                candidate_campaign_we_vote_id = position.candidate_campaign_we_vote_id \
+                    if positive_value_exists(position.candidate_campaign_we_vote_id) else ''
+                contest_office_name = position.contest_office_name \
+                    if positive_value_exists(position.contest_office_name) else ''
+                political_party = position.political_party \
+                    if positive_value_exists(position.political_party) else ''
                 one_position = {
-                    'ballot_item_we_vote_id':   ballot_item_we_vote_id,
-                    'is_support':               position.is_support(),
-                    'is_oppose':                position.is_oppose(),
-                    'statement_text':           position.statement_text,
-                    'is_public_position':       position.is_public_position(),
+                    'ballot_item_display_name':             ballot_item_display_name,
+                    'ballot_item_image_url_https_large':    ballot_item_image_url_https_large,
+                    'ballot_item_image_url_https_medium':   ballot_item_image_url_https_medium,
+                    'ballot_item_image_url_https_tiny':     ballot_item_image_url_https_tiny,
+                    'ballot_item_we_vote_id':               ballot_item_we_vote_id,
+                    "candidate_campaign_we_vote_id":        candidate_campaign_we_vote_id,
+                    'contest_office_name':                  contest_office_name,
+                    'is_support':                           position.is_support(),
+                    'is_oppose':                            position.is_oppose(),
+                    'statement_text':                       position.statement_text,
+                    'is_public_position':                   position.is_public_position(),
+                    'political_party':                      political_party,
                 }
                 simple_position_list.append(one_position)
 
@@ -3355,6 +3432,7 @@ class PositionListManager(models.Manager):
                 'status':               status,
                 'success':              True,
                 'position_list_found':  True,
+                'position_count':       position_count,
                 'position_list':        simple_position_list,
             }
             return results
@@ -3365,6 +3443,7 @@ class PositionListManager(models.Manager):
                 'status':               status,
                 'success':              True,
                 'position_list_found':  False,
+                'position_count':       position_count,
                 'position_list':        position_list,
             }
             return results
@@ -6609,7 +6688,7 @@ class PositionManager(models.Manager):
                 status += "SAVED_POSITION_IMAGE_URLS_FROM_ORGANIZATION "
             except Exception as e:
                 success = False
-                status += 'NOT_SAVED_POSITION_IMAGE_URLS_FROM_ORGANIZATION '
+                status += 'NOT_SAVED_POSITION_IMAGE_URLS_FROM_ORGANIZATION: ' + str(e) + ' '
         else:
             success = True
             status += "NO_CHANGES_SAVED_TO_POSITION_IMAGE_URLS "

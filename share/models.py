@@ -51,6 +51,8 @@ class SharedItem(models.Model):
     sms_secret_key = models.CharField(max_length=255, null=True, db_index=True)
     # The voter and organization id of the person initiating the share
     shared_by_display_name = models.TextField(blank=True, null=True)
+    shared_by_first_name = models.CharField(max_length=255, null=True, blank=True)
+    shared_by_last_name = models.CharField(max_length=255, null=True, blank=True)
     shared_by_voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True)
     shared_by_organization_type = models.CharField(
         verbose_name="type of org", max_length=2, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
@@ -395,6 +397,8 @@ class ShareManager(models.Manager):
             if 'other_voter_last_name' in defaults else None
         other_voter_we_vote_id = defaults['other_voter_we_vote_id'] if 'other_voter_we_vote_id' in defaults else None
         shared_by_display_name = defaults['shared_by_display_name'] if 'shared_by_display_name' in defaults else None
+        shared_by_first_name = defaults['shared_by_first_name'] if 'shared_by_first_name' in defaults else None
+        shared_by_last_name = defaults['shared_by_last_name'] if 'shared_by_last_name' in defaults else None
         shared_by_we_vote_hosted_profile_image_url_large = \
             defaults['shared_by_we_vote_hosted_profile_image_url_large'] \
             if 'shared_by_we_vote_hosted_profile_image_url_large' in defaults else None
@@ -437,6 +441,12 @@ class ShareManager(models.Manager):
                     change_to_save = True
                 if shared_item.shared_by_display_name != shared_by_display_name:
                     shared_item.shared_by_display_name = shared_by_display_name
+                    change_to_save = True
+                if shared_item.shared_by_first_name != shared_by_first_name:
+                    shared_item.shared_by_first_name = shared_by_first_name
+                    change_to_save = True
+                if shared_item.shared_by_last_name != shared_by_last_name:
+                    shared_item.shared_by_last_name = shared_by_last_name
                     change_to_save = True
                 if shared_item.shared_by_we_vote_hosted_profile_image_url_large \
                         != shared_by_we_vote_hosted_profile_image_url_large:
@@ -509,6 +519,8 @@ class ShareManager(models.Manager):
                     other_voter_email_address_text=other_voter_email_address_text,
                     other_voter_we_vote_id=other_voter_we_vote_id,
                     shared_by_display_name=shared_by_display_name,
+                    shared_by_first_name=shared_by_first_name,
+                    shared_by_last_name=shared_by_last_name,
                     shared_by_organization_type=defaults['shared_by_organization_type'],
                     shared_by_organization_we_vote_id=defaults['shared_by_organization_we_vote_id'],
                     shared_by_voter_we_vote_id=shared_by_voter_we_vote_id,

@@ -185,6 +185,12 @@ def shared_item_list_view(request):
             new_filter = Q(shared_by_display_name__icontains=one_word)
             filters.append(new_filter)
 
+            new_filter = Q(shared_by_first_name__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(shared_by_last_name__icontains=one_word)
+            filters.append(new_filter)
+
             new_filter = Q(shared_by_voter_we_vote_id__iexact=one_word)
             filters.append(new_filter)
 
