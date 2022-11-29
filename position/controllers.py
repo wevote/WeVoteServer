@@ -98,8 +98,11 @@ def delete_positions_for_voter(from_voter_id, from_voter_we_vote_id):
     stance_we_are_looking_for = ANY_STANCE
     friends_vs_public = FRIENDS_ONLY
     from_position_private_list_results = position_list_manager.retrieve_all_positions_for_voter(
-        from_voter_id, from_voter_we_vote_id,
-        stance_we_are_looking_for, friends_vs_public)
+        from_voter_id,
+        from_voter_we_vote_id,
+        stance_we_are_looking_for,
+        friends_vs_public,
+        read_only=False)
     from_position_private_list = from_position_private_list_results['position_list']
 
     for from_position_entry in from_position_private_list:
@@ -114,8 +117,11 @@ def delete_positions_for_voter(from_voter_id, from_voter_we_vote_id):
     stance_we_are_looking_for = ANY_STANCE
     friends_vs_public = PUBLIC_ONLY
     from_position_public_results = position_list_manager.retrieve_all_positions_for_voter(
-        from_voter_id, from_voter_we_vote_id,
-        stance_we_are_looking_for, friends_vs_public)
+        from_voter_id,
+        from_voter_we_vote_id,
+        stance_we_are_looking_for,
+        friends_vs_public,
+        read_only=False)
     from_position_public_list = from_position_public_results['position_list']
 
     for from_position_entry in from_position_public_list:
@@ -1406,8 +1412,11 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
     stance_we_are_looking_for = ANY_STANCE
     friends_vs_public = FRIENDS_ONLY
     from_position_private_list_results = position_list_manager.retrieve_all_positions_for_voter(
-        from_voter_id, from_voter_we_vote_id,
-        stance_we_are_looking_for, friends_vs_public)
+        from_voter_id,
+        from_voter_we_vote_id,
+        stance_we_are_looking_for,
+        friends_vs_public,
+        read_only=False)
     from_position_private_list = from_position_private_list_results['position_list']
 
     position_we_vote_id = ""
@@ -1474,8 +1483,11 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
                 position_entries_not_moved += 1
 
     from_position_private_list_remaining_results = position_list_manager.retrieve_all_positions_for_voter(
-        from_voter_id, from_voter_we_vote_id,
-        stance_we_are_looking_for, friends_vs_public)
+        from_voter_id,
+        from_voter_we_vote_id,
+        stance_we_are_looking_for,
+        friends_vs_public,
+        read_only=False)
     from_position_private_list_remaining = from_position_private_list_remaining_results['position_list']
     for from_position_entry in from_position_private_list_remaining:
         # Delete the remaining position values
@@ -1488,8 +1500,11 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
     stance_we_are_looking_for = ANY_STANCE
     friends_vs_public = PUBLIC_ONLY
     from_position_public_results = position_list_manager.retrieve_all_positions_for_voter(
-        from_voter_id, from_voter_we_vote_id,
-        stance_we_are_looking_for, friends_vs_public)
+        from_voter_id,
+        from_voter_we_vote_id,
+        stance_we_are_looking_for,
+        friends_vs_public,
+        read_only=False)
     from_position_public_list = from_position_public_results['position_list']
 
     position_we_vote_id = ""
@@ -1549,8 +1564,11 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
                 status += "MOVE_TO_ANOTHER_VOTER-UNABLE_TO_SAVE_PUBLIC_ORGANIZATION_UPDATE2 "
 
     from_position_public_results = position_list_manager.retrieve_all_positions_for_voter(
-        from_voter_id, from_voter_we_vote_id,
-        stance_we_are_looking_for, friends_vs_public)
+        from_voter_id,
+        from_voter_we_vote_id,
+        stance_we_are_looking_for,
+        friends_vs_public,
+        read_only=False)
     from_position_public_list_remaining = from_position_public_results['position_list']
     for from_position_entry in from_position_public_list_remaining:
         # Delete the remaining position values
@@ -1587,13 +1605,19 @@ def duplicate_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
     stance_we_are_looking_for = ANY_STANCE
     friends_vs_public = FRIENDS_ONLY
     from_position_private_list_results = position_list_manager.retrieve_all_positions_for_voter(
-        from_voter_id, from_voter_we_vote_id,
-        stance_we_are_looking_for, friends_vs_public)
+        from_voter_id,
+        from_voter_we_vote_id,
+        stance_we_are_looking_for,
+        friends_vs_public,
+        read_only=False)
     from_position_private_list = from_position_private_list_results['position_list']
 
     to_position_private_list_results = position_list_manager.retrieve_all_positions_for_voter(
-        to_voter_id, to_voter_we_vote_id,
-        stance_we_are_looking_for, friends_vs_public)
+        to_voter_id,
+        to_voter_we_vote_id,
+        stance_we_are_looking_for,
+        friends_vs_public,
+        read_only=False)
     to_position_private_list = to_position_private_list_results['position_list']
     if len(to_position_private_list):
         # If the to_voter already has private positions, we don't want to copy because we might create collisions
@@ -1630,13 +1654,19 @@ def duplicate_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
     stance_we_are_looking_for = ANY_STANCE
     friends_vs_public = PUBLIC_ONLY
     from_position_public_results = position_list_manager.retrieve_all_positions_for_voter(
-        from_voter_id, from_voter_we_vote_id,
-        stance_we_are_looking_for, friends_vs_public)
+        from_voter_id,
+        from_voter_we_vote_id,
+        stance_we_are_looking_for,
+        friends_vs_public,
+        read_only=False)
     from_position_public_list = from_position_public_results['position_list']
 
     to_position_public_list_results = position_list_manager.retrieve_all_positions_for_voter(
-        to_voter_id, to_voter_we_vote_id,
-        stance_we_are_looking_for, friends_vs_public)
+        to_voter_id,
+        to_voter_we_vote_id,
+        stance_we_are_looking_for,
+        friends_vs_public,
+        read_only=False)
     to_position_public_list = to_position_public_list_results['position_list']
     if len(to_position_public_list):
         # If the to_voter already has public positions, we don't want to copy because we might create collisions
@@ -3422,8 +3452,13 @@ def position_list_for_voter_for_api(voter_device_id,
         this_election_vs_others = ALL_ELECTIONS
 
     position_list_results = position_list_manager.retrieve_all_positions_for_voter(
-        voter.id, voter.we_vote_id, stance_we_are_looking_for, friends_vs_public, google_civic_election_id,
-        this_election_vs_others)
+        voter.id,
+        voter.we_vote_id,
+        stance_we_are_looking_for,
+        friends_vs_public,
+        google_civic_election_id,
+        this_election_vs_others,
+        read_only=False)
     if position_list_results['position_list_found']:
         position_list_retrieved = position_list_results['position_list']
     else:
@@ -5117,11 +5152,14 @@ def reset_position_for_friends_image_details_from_voter(voter, twitter_profile_i
         speaker_image_url_https = facebook_profile_image_url_https
 
     positions_for_voter_results = position_list_manager.retrieve_all_positions_for_voter(
-        voter.id, voter.we_vote_id, stance_we_are_looking_for, friends_vs_public)
+        voter.id,
+        voter.we_vote_id,
+        stance_we_are_looking_for,
+        friends_vs_public,
+        read_only=False)
     if positions_for_voter_results['position_list_found']:
         friends_position_list = positions_for_voter_results['position_list']
         for position_object in friends_position_list:
-
             reset_position_image_urls_results = position_manager.reset_position_image_details(
                 position_object, speaker_image_url_https=speaker_image_url_https)
             reset_all_position_image_urls_results.append(reset_position_image_urls_results)
@@ -5146,7 +5184,11 @@ def update_position_for_friends_details_from_voter(voter):
     positions_not_updated_count = 0
 
     positions_for_voter_results = position_list_manager.retrieve_all_positions_for_voter(
-        voter.id, voter.we_vote_id, stance_we_are_looking_for, friends_vs_public)
+        voter.id,
+        voter.we_vote_id,
+        stance_we_are_looking_for,
+        friends_vs_public,
+        read_only=False)
 
     if positions_for_voter_results['position_list_found']:
         friends_position_list = positions_for_voter_results['position_list']

@@ -24,6 +24,8 @@ from wevote_functions.functions import convert_to_int, positive_value_exists
 from wevote_settings.models import WeVoteSetting, WeVoteSettingsManager
 
 INDIVIDUAL = 'I'  # One person
+# TODO: If longer than 10 or so ballot items, return office/measure data in a second API call
+BALLOT_SHARED_ITEM_CUTOFF = 1000
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -170,6 +172,8 @@ def shared_item_list_save_for_api(  # sharedItemListSave
     measure_we_vote_id = ''
     office_we_vote_id = ''
     shared_by_display_name = None
+    shared_by_first_name = None
+    shared_by_last_name = None
     shared_by_organization_type = ''
     shared_by_organization_we_vote_id = ''
     shared_by_voter_we_vote_id = ''
@@ -187,6 +191,10 @@ def shared_item_list_save_for_api(  # sharedItemListSave
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
     if voter_results['voter_found']:
         voter = voter_results['voter']
+        if positive_value_exists(voter.first_name):
+            shared_by_first_name = voter.first_name
+        if positive_value_exists(voter.last_name):
+            shared_by_last_name = voter.last_name
         shared_by_voter_we_vote_id = voter.we_vote_id
         shared_by_organization_we_vote_id = voter.linked_organization_we_vote_id
         shared_by_organization_type = INDIVIDUAL
@@ -244,6 +252,8 @@ def shared_item_list_save_for_api(  # sharedItemListSave
             'office_we_vote_id':                        office_we_vote_id,
             'other_voter_email_address_array':           other_voter_email_address_array,
             'shared_by_display_name':                   shared_by_display_name,
+            'shared_by_first_name':                     shared_by_first_name,
+            'shared_by_last_name':                      shared_by_last_name,
             'shared_by_organization_type':              shared_by_organization_type,
             'shared_by_organization_we_vote_id':        shared_by_organization_we_vote_id,
             'shared_by_voter_we_vote_id':               shared_by_voter_we_vote_id,
@@ -328,6 +338,8 @@ def shared_item_list_save_for_api(  # sharedItemListSave
         'office_we_vote_id':                    office_we_vote_id,
         'other_voter_email_address_array':      other_voter_email_address_array,
         'shared_by_display_name':               shared_by_display_name,
+        'shared_by_first_name':                 shared_by_first_name,
+        'shared_by_last_name':                  shared_by_last_name,
         'shared_by_organization_type':          shared_by_organization_type,
         'shared_by_organization_we_vote_id':    shared_by_organization_we_vote_id,
         'shared_by_voter_we_vote_id':           shared_by_voter_we_vote_id,
@@ -376,6 +388,8 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
     email_secret_key = ''
     sms_secret_key = ''
     shared_by_display_name = ''
+    shared_by_first_name = ''
+    shared_by_last_name = ''
     shared_by_voter_we_vote_id = ''
     shared_by_organization_type = ''
     shared_by_organization_we_vote_id = ''
@@ -436,6 +450,8 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
             'other_voter_last_name':                    other_voter_last_name,
             'other_voter_we_vote_id':                   other_voter_we_vote_id,
             'shared_by_display_name':                   shared_by_display_name,
+            'shared_by_first_name':                     shared_by_first_name,
+            'shared_by_last_name':                      shared_by_last_name,
             'shared_by_voter_we_vote_id':               shared_by_voter_we_vote_id,
             'shared_by_organization_type':              shared_by_organization_type,
             'shared_by_organization_we_vote_id':        shared_by_organization_we_vote_id,
@@ -623,14 +639,24 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         # Shared item not clicked
         pass
 
-    position_list = []
+    ballot_item_list = []
+    candidate_position_list = []
     if positive_value_exists(shared_item.shared_by_voter_we_vote_id) \
             and shared_item.shared_item_code_all_opinions == shared_item_code:
         position_list_manager = PositionListManager()
         results = position_list_manager.retrieve_all_positions_for_voter_simple(
-            voter_we_vote_id=shared_item.shared_by_voter_we_vote_id)
-        if results['position_list_found']:
-            position_list = results['position_list']
+            voter_we_vote_id=shared_item.shared_by_voter_we_vote_id,
+            count_only=True)
+        status += results['status']
+        if results['position_count'] < BALLOT_SHARED_ITEM_CUTOFF:
+            from ballot.ballot_shared_controllers import shared_item_ballot_retrieve_for_api
+            ballot_results = shared_item_ballot_retrieve_for_api(  # sharedItemBallotRetrieve
+                shared_by_voter_we_vote_id=shared_item.shared_by_voter_we_vote_id)
+            ballot_item_list = ballot_results['ballot_item_list']
+            candidate_position_list = ballot_results['candidate_position_list']
+        else:
+            # We are going to retrieve in a follow-up API call
+            pass
 
     other_voter_email_address_text = shared_item.other_voter_email_address_text \
         if positive_value_exists(shared_item.other_voter_email_address_text) else ''
@@ -644,6 +670,10 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         if positive_value_exists(shared_item.other_voter_we_vote_id) else ''
     shared_by_display_name = shared_item.shared_by_display_name \
         if positive_value_exists(shared_item.shared_by_display_name) else ''
+    shared_by_first_name = shared_item.shared_by_first_name \
+        if positive_value_exists(shared_item.shared_by_first_name) else ''
+    shared_by_last_name = shared_item.shared_by_last_name \
+        if positive_value_exists(shared_item.shared_by_last_name) else ''
     shared_by_we_vote_hosted_profile_image_url_large = shared_item.shared_by_we_vote_hosted_profile_image_url_large \
         if positive_value_exists(shared_item.shared_by_we_vote_hosted_profile_image_url_large) else ''
     shared_by_we_vote_hosted_profile_image_url_medium = shared_item.shared_by_we_vote_hosted_profile_image_url_medium \
@@ -657,6 +687,8 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
     results = {
         'status':                               status,
         'success':                              success,
+        'ballot_item_list':                     ballot_item_list,
+        'candidate_position_list':              candidate_position_list,
         'destination_full_url':                 shared_item.destination_full_url,
         'destination_full_url_override':        destination_full_url_override,
         'email_secret_key':                     email_secret_key,  # Only returned on first click
@@ -674,8 +706,9 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         'other_voter_first_name':               other_voter_first_name,
         'other_voter_last_name':                other_voter_last_name,
         'other_voter_we_vote_id':               other_voter_we_vote_id,
-        'position_list':                        position_list,
         'shared_by_display_name':               shared_by_display_name,
+        'shared_by_first_name':                 shared_by_first_name,
+        'shared_by_last_name':                  shared_by_last_name,
         'shared_by_organization_type':          shared_item.shared_by_organization_type,
         'shared_by_organization_we_vote_id':    shared_item.shared_by_organization_we_vote_id,
         'shared_by_voter_we_vote_id':           shared_item.shared_by_voter_we_vote_id,
@@ -753,6 +786,8 @@ def shared_item_save_for_api(  # sharedItemSave
     ready_page_url_using_shared_item_code = ''
     remind_contacts_url_using_shared_item_code = ''
     shared_by_display_name = None
+    shared_by_first_name = None
+    shared_by_last_name = None
     shared_by_organization_type = ''
     shared_by_organization_we_vote_id = ''
     shared_by_voter_we_vote_id = ''
@@ -777,6 +812,12 @@ def shared_item_save_for_api(  # sharedItemSave
             shared_by_voter_we_vote_id = voter.we_vote_id
             shared_by_organization_we_vote_id = voter.linked_organization_we_vote_id
             shared_by_organization_type = INDIVIDUAL
+
+    if voter and hasattr(voter, 'first_name'):
+        if positive_value_exists(voter.first_name):
+            shared_by_first_name = voter.first_name
+        if positive_value_exists(voter.last_name):
+            shared_by_last_name = voter.last_name
 
     organization_manager = OrganizationManager()
     try:
@@ -842,6 +883,8 @@ def shared_item_save_for_api(  # sharedItemSave
             'other_voter_last_name':                    other_voter_last_name,
             'other_voter_we_vote_id':                   other_voter_we_vote_id,
             'shared_by_display_name':                   shared_by_display_name,
+            'shared_by_first_name':                     shared_by_first_name,
+            'shared_by_last_name':                      shared_by_last_name,
             'shared_by_organization_type':              shared_by_organization_type,
             'shared_by_organization_we_vote_id':        shared_by_organization_we_vote_id,
             'shared_by_voter_we_vote_id':               shared_by_voter_we_vote_id,
@@ -886,6 +929,8 @@ def shared_item_save_for_api(  # sharedItemSave
         'measure_we_vote_id':                   measure_we_vote_id,
         'office_we_vote_id':                    office_we_vote_id,
         'shared_by_display_name':               shared_by_display_name,
+        'shared_by_first_name':                 shared_by_first_name,
+        'shared_by_last_name':                  shared_by_last_name,
         'shared_by_organization_type':          shared_by_organization_type,
         'shared_by_organization_we_vote_id':    shared_by_organization_we_vote_id,
         'shared_by_voter_we_vote_id':           shared_by_voter_we_vote_id,
@@ -1020,6 +1065,8 @@ def shared_item_save_for_api(  # sharedItemSave
         'other_voter_last_name':                other_voter_last_name,
         'other_voter_we_vote_id':               other_voter_we_vote_id,
         'shared_by_display_name':               shared_by_display_name,
+        'shared_by_first_name':                 shared_by_first_name,
+        'shared_by_last_name':                  shared_by_last_name,
         'shared_by_organization_type':          shared_by_organization_type,
         'shared_by_organization_we_vote_id':    shared_by_organization_we_vote_id,
         'shared_by_voter_we_vote_id':           shared_by_voter_we_vote_id,
@@ -1307,6 +1354,8 @@ def update_shared_item_shared_by_info_from_shared_item(number_to_update=100000):
     voter_we_vote_id_list = []
     for shared_item in shared_item_list:
         if not shared_item.shared_by_display_name or \
+                not shared_item.shared_by_first_name or \
+                not shared_item.shared_by_last_name or \
                 not shared_item.shared_by_we_vote_hosted_profile_image_url_large or \
                 not shared_item.shared_by_we_vote_hosted_profile_image_url_medium or \
                 not shared_item.shared_by_we_vote_hosted_profile_image_url_tiny:
@@ -1341,6 +1390,12 @@ def update_shared_item_shared_by_info_from_shared_item(number_to_update=100000):
             if not positive_value_exists(shared_item.shared_by_display_name) and \
                     voter.get_full_name(real_name_only):
                 shared_item.shared_by_display_name = voter.get_full_name(real_name_only)
+            if not positive_value_exists(shared_item.shared_by_first_name) and \
+                    positive_value_exists(voter.first_name):
+                shared_item.shared_by_first_name = voter.first_name
+            if not positive_value_exists(shared_item.shared_by_last_name) and \
+                    positive_value_exists(voter.last_name):
+                shared_item.shared_by_last_name = voter.last_name
             if not positive_value_exists(shared_item.shared_by_we_vote_hosted_profile_image_url_large) and \
                     positive_value_exists(voter.we_vote_hosted_profile_image_url_large):
                 shared_item.shared_by_we_vote_hosted_profile_image_url_large = \

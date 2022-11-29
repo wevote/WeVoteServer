@@ -2949,7 +2949,8 @@ def update_or_create_activity_notice_seed_for_voter_position(
             since_date = activity_notice_seed.date_of_notice - timedelta(seconds=60)
             position_results = position_list_manager.retrieve_all_positions_for_voter(
                 voter_we_vote_id=speaker_voter_we_vote_id,
-                since_date=since_date)
+                since_date=since_date,
+                read_only=True)
             if position_results['success']:
                 friends_positions_list = position_results['friends_positions_list']
                 position_name_list_for_friends = []
@@ -3095,7 +3096,8 @@ def update_activity_notice_seed_with_positions(activity_notice_seed):
     since_date = activity_notice_seed.date_of_notice - timedelta(seconds=60)
     position_results = position_list_manager.retrieve_all_positions_for_voter(
         voter_we_vote_id=activity_notice_seed.speaker_voter_we_vote_id,
-        since_date=since_date)
+        since_date=since_date,
+        read_only=True)
     if position_results['success']:
         friends_positions_list = position_results['friends_positions_list']
         position_name_list_for_friends_latest = []
