@@ -155,6 +155,8 @@ def shared_item_list_save_doc_template_values(url_root):
                    '  "other_voter_last_name": string,\n' \
                    '  "other_voter_we_vote_id": string,\n' \
                    '  "shared_by_display_name": string,\n' \
+                   '  "shared_by_first_name": string,\n' \
+                   '  "shared_by_last_name": string,\n' \
                    '  "shared_by_email_address_text": string,\n' \
                    '  "shared_by_organization_type": string,\n' \
                    '  "shared_by_organization_we_vote_id": string,\n' \

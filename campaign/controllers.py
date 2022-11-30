@@ -1368,7 +1368,7 @@ def campaignx_save_photo_from_file_reader(
             format_to_cache = original_image.format
             python_image_library_image = ImageOps.exif_transpose(original_image)
             python_image_library_image.thumbnail(
-                (CAMPAIGN_PHOTO_ORIGINAL_MAX_WIDTH, CAMPAIGN_PHOTO_ORIGINAL_MAX_HEIGHT), Image.ANTIALIAS)
+                (CAMPAIGN_PHOTO_ORIGINAL_MAX_WIDTH, CAMPAIGN_PHOTO_ORIGINAL_MAX_HEIGHT), Image.Resampling.LANCZOS)
             python_image_library_image.format = format_to_cache
             image_data_found = True
         except Exception as e:

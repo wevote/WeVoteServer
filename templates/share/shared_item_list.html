@@ -1,0 +1,279 @@
+{# templates/share/shared_item_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Shared Items{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+{% load humanize %}
+
+<h1>Shared Items</h1>
+
+<a href="{% url 'share:voter_who_shares_summary_list' %}">
+    Voters who share
+</a>
+<br />
+<br />
+
+<form name="state_code_form" method="get" action="{% url 'share:shared_item_list' %}">
+    {% csrf_token %}
+    <input type="hidden" name="sort_by" value="{{ sort_by }}">
+    <input type="hidden" name="show_all" value="{{ show_all }}">
+    <input type="hidden" name="show_more" value="{{ show_more }}">
+
+{% if state_list %}
+    <select id="state_code_id" name="state_code">
+        <option value="" {% if '' == state_code %} selected="selected"{% endif %}>
+        {% if '' == state_code %}
+            -- Filter by State Served --
+        {% else %}
+            -- Show All States Served --
+        {% endif %}
+        </option>
+    {% for key, state in state_list %}
+        <option value="{{ key }}"
+                {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
+            {{ state }}</option>
+    {% endfor %}
+    </select>
+{% endif %}{# End of if state_list #}
+
+
+{% if share_types %}
+    <select id="share_type_filter_id" name="share_type_filter">
+        <option value="" {% if '' ==  share_type_filter %} selected="selected" {% endif %}>
+        {% if '' ==  share_type_filter %}
+            -- Filter by Shared Item Type --
+        {% else %}
+            -- Show All Shared Item Types --
+        {% endif %}
+        </option>
+    {% for key, share_type in share_types %}
+        <option value="{{ key }}"
+                {% if key|lower == share_type_filter|lower %} selected="selected"{% endif %}>
+        {{ share_type }}</option>
+    {% endfor %}
+    </select>
+{% endif %} {# End of if share_types #}
+
+    {#  #}
+    <label for="exclude_remind_contact_id">
+      <input type="checkbox" name="exclude_remind_contact" id="exclude_remind_contact_id" value="1"
+             {% if exclude_remind_contact %}checked{% endif %} /> Exclude Remind Contact&nbsp;&nbsp;&nbsp;
+    </label>
+
+    {#  #}
+    <label for="show_shares_with_zero_clicks_id">
+      <input type="checkbox" name="show_shares_with_zero_clicks" id="show_shares_with_zero_clicks_id" value="1"
+             {% if show_shares_with_zero_clicks %}checked{% endif %} /> Show Zero Clicks&nbsp;&nbsp;&nbsp;
+    </label>
+
+    {#  #}
+    <label for="limit_to_last_90_days_id">
+      <input type="checkbox" name="limit_to_last_90_days" id="limit_to_last_90_days_id" value="1"
+             {% if limit_to_last_90_days %}checked{% endif %} /> Last 90 days only&nbsp;&nbsp;&nbsp;
+    </label>
+
+    {% if election_years_available %}
+        &nbsp;&nbsp;&nbsp;
+    <select {% if limit_to_last_90_days %}disabled {% endif %}id="show_this_year_id" name="show_this_year">
+        <option value="0" {% if 0 == show_this_year|convert_to_int %} selected="selected"{% endif %}>
+        {% if show_this_year|convert_to_int > 0 %}
+            -- Stop Limiting to {{ show_this_year }} --
+        {% elif limit_to_last_90_days %}
+            -- Uncheck "Last 90 days only" to show specific year --
+        {% else %}
+            -- Show Specific Year --
+        {% endif %}
+        </option>
+        {% for year in election_years_available %}
+        <option value="{{ year }}"
+                {% if show_this_year|slugify == year|slugify %} selected="selected"{% endif %}>
+            {% if show_this_year|slugify == year|slugify %}Limited To {% endif %}
+            {{ year }}</option>
+        {% endfor %}
+    </select>
+    {% endif %}{# End of if election_years_available #}
+
+    {% if state_list %}
+    <select id="limit_to_opinions_in_state_code_id" name="limit_to_opinions_in_state_code">
+        <option value="" {% if '' == limit_to_opinions_in_state_code %} selected="selected"{% endif %}>
+        {% if '' == limit_to_opinions_in_state_code %}
+            -- Opinions in This State --
+        {% else %}
+            -- Do Not Limit by State --
+        {% endif %}
+        </option>
+    {% for key, state in state_list %}
+        <option value="{{ key }}"
+                {% if key|lower == limit_to_opinions_in_state_code|lower %} selected="selected"{% endif %}>
+            {% if key|lower == limit_to_opinions_in_state_code|lower %}Limited to Opinions About Candidates in {% endif %}
+            {{ state }}</option>
+    {% endfor %}
+    </select>
+    {% endif %}{# End of if state_list #}
+
+    <br />
+    <br />
+
+{% if shared_item_search %}
+    <a href="{% url 'share:shared_item_list' %}?state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&show_shares_with_zero_clicks={{ show_shares_with_zero_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&shared_item_search=&show_this_year={{ show_this_year }}">
+         clear search</a>&nbsp;
+{% endif %}
+    <input type="text" name="shared_item_search" id="shared_item_search_id" value="{{ shared_item_search }}" />
+    <input type="submit" value="Search" />
+
+</form>
+
+{% if shared_item_list %}
+    <table class="table">
+    {% for shared_item in shared_item_list %}
+    {% if forloop.counter == 1 or forloop.counter|divisibleby:16 %}
+    {# Show the header every ~15 lines #}
+     <thead>
+        <tr>
+            <th></th>
+            <th></th>
+            <th>Shared By</th>
+            <th>Shared Item</th>
+            <th>Unique<br />Viewers</th>
+            <th>Clicks</th>
+            <th>Message</th>
+        </tr>
+      </thead>
+    {% endif %}
+        <tr>
+            <td style="width: 24px;">{{ forloop.counter }}</td>
+            <td style="width: 36px;">
+            {% if shared_item.shared_by_we_vote_hosted_profile_image_url_medium %}
+                <a href="{% url 'voter:voter_summary_we_vote_id' shared_item.shared_by_voter_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">
+                <img src="{{ shared_item.shared_by_we_vote_hosted_profile_image_url_medium }}" width="36px" />
+                </a>
+            {% endif %}
+            </td>
+            <td>
+            {% if shared_item.shared_by_display_name %}
+                <a href="{% url 'voter:voter_summary_we_vote_id' shared_item.shared_by_voter_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">
+                    {{ shared_item.shared_by_display_name|default_if_none:"" }}
+                   <span class="glyphicon glyphicon-new-window"></span>
+                </a>
+            {% elif shared_item.shared_by_voter_we_vote_id %}
+                <a href="{% url 'voter:voter_summary_we_vote_id' shared_item.shared_by_voter_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">
+                <span style="color: #808080;">{{ shared_item.shared_by_voter_we_vote_id }}</span>
+                    <span class="glyphicon glyphicon-new-window"></span>
+                </a>
+            {% endif %}
+            <a href="{% url 'share:shared_item_list' %}?shared_item_search={{ shared_item.shared_by_voter_we_vote_id }}&state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&show_shares_with_zero_clicks={{ show_shares_with_zero_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&show_this_year={{ show_this_year }}">
+                <span class="glyphicon glyphicon-filter"></span>
+            </a>
+            {% if shared_item.shared_by_state_code %}
+                - {{ shared_item.shared_by_state_code|default_if_none:"" }}
+            {% endif %}
+                <br />
+                <span style="color: #808080; font-size: 10px; white-space: nowrap;">
+                First shared: {{ shared_item.date_first_shared|default_if_none:"" }}
+                </span>
+            </td>
+            <td>
+            {% if shared_item.is_ballot_share %}
+                Ballot
+            {% elif shared_item.is_campaignx_share %}
+                CampaignX
+            {% elif shared_item.is_candidate_share %}
+                Candidate
+            {% elif shared_item.is_measure_share %}
+                Measure
+            {% elif shared_item.is_office_share %}
+                Office
+            {% elif shared_item.is_organization_share %}
+                Organization
+            {% elif shared_item.is_ready_share %}
+                Ready
+            {% elif shared_item.is_remind_contact_share %}
+                Remind
+            {% endif %}
+            {% if shared_item.destination_full_url %}
+                <br />
+                <a href="{{ shared_item.destination_full_url }}" target="_blank">
+                <span style="color: #808080; font-size: 10px; white-space: nowrap;">
+                    {{ shared_item.destination_full_url|truncatechars:34 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span>
+                </span>
+                </a>
+            {% endif %}
+            </td>
+            <td>{{ shared_item.shared_link_clicked_unique_viewer_count|default_if_none:"" }}</td>
+            <td>{{ shared_item.shared_link_clicked_count|default_if_none:"" }}</td>
+            <td>
+            {% if shared_item.shared_message %}
+                <span style="color: #808080;">{{ shared_item.shared_message|default_if_none:"" }}</span>
+                <br />
+            {% endif %}
+            <span style="color: #808080;">
+            {% if shared_item.other_voter_email_address_text or shared_item.other_voter_display_name %}
+                Sent to:
+            {% endif %}
+            {% if shared_item.other_voter_display_name %}
+                {{ shared_item.other_voter_display_name }}
+            {% endif %}
+            {% if shared_item.other_voter_email_address_text and shared_item.other_voter_display_name %}
+                -
+            {% endif %}
+            {% if shared_item.other_voter_email_address_text %}
+                {{ shared_item.other_voter_email_address_text }}
+            {% endif %}
+                </span>
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+    {% if not show_all and not show_more %}
+    <a href="{% url 'share:shared_item_list' %}?state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&show_shares_with_zero_clicks={{ show_shares_with_zero_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&shared_item_search={{ shared_item_search }}&show_this_year={{ show_this_year }}&show_more=1">
+        show more</a>
+    {% endif %}
+{#    {% if show_more %}#}
+{#    <a href="{% url 'share:shared_item_list' %}?state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&show_shares_with_zero_clicks={{ show_shares_with_zero_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&shared_item_search={{ shared_item_search }}&show_this_year={{ show_this_year }}&show_all=1">#}
+{#        show all</a>#}
+{#    {% endif %}#}
+    {% if show_more %}
+    &nbsp;&nbsp;&nbsp;
+      <a href="{% url 'share:shared_item_list' %}?state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&show_shares_with_zero_clicks={{ show_shares_with_zero_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&shared_item_search={{ shared_item_search }}&show_this_year={{ show_this_year }}&show_more=0">
+        show fewer</a>
+    {% endif %}
+
+    <p></p>
+{% else %}
+    <p>(no shared items found)</p>
+{% endif %}
+
+    <p></p>
+
+    <script>
+        $(function() {
+            $('#limit_to_opinions_in_state_code_id').change(function() {
+                this.form.submit();
+            });
+            $('#share_type_filter_id').change(function() {
+                this.form.submit();
+            });
+            $('#exclude_remind_contact_id').change(function() {
+                this.form.submit();
+            });
+            $('#limit_to_last_90_days_id').change(function() {
+                this.form.submit();
+            });
+            $('#show_shares_with_zero_clicks_id').change(function() {
+                this.form.submit();
+            });
+            $('#show_this_year_id').change(function() {
+                this.form.submit();
+            });
+            $('#state_code_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+
+{% endblock %}

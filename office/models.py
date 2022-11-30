@@ -1285,9 +1285,15 @@ class ContestOfficeListManager(models.Manager):
 
         return 0
 
-    def retrieve_offices(self, google_civic_election_id=0, state_code="", retrieve_from_this_office_we_vote_id_list=[],
-                         return_list_of_objects=False, ballotpedia_district_id=0, include_national_offices=False,
-                         read_only=False):
+    def retrieve_offices(
+            self,
+            google_civic_election_id=0,
+            state_code="",
+            retrieve_from_this_office_we_vote_id_list=[],
+            return_list_of_objects=False,
+            ballotpedia_district_id=0,
+            include_national_offices=False,
+            read_only=False):
         office_list_objects = []
         office_list_light = []
         office_list_found = False

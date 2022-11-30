@@ -5,11 +5,12 @@
 from django.db import models
 from django.db.models import Q
 from django.utils.timezone import localtime, now
-from datetime import timedelta
+from datetime import datetime, timedelta
 from election.models import Election
 from exception.models import print_to_log
 from follow.models import FollowOrganizationList
 from organization.models import Organization
+import pytz
 import wevote_functions.admin
 from wevote_functions.functions import convert_date_as_integer_to_date, convert_date_to_date_as_integer, \
     convert_to_int, positive_value_exists
@@ -691,9 +692,16 @@ class AnalyticsManager(models.Manager):
         return results
 
     def retrieve_analytics_processed_list(
-            self, analytics_date_as_integer=0, voter_we_vote_id='', voter_we_vote_id_list=[],
-            google_civic_election_id=0, organization_we_vote_id='', kind_of_process='',
-            batch_process_id=0, batch_process_analytics_chunk_id=0, analytics_date_as_integer_more_recent_than=0):
+            self,
+            analytics_date_as_integer=0,
+            voter_we_vote_id='',
+            voter_we_vote_id_list=[],
+            google_civic_election_id=0,
+            organization_we_vote_id='',
+            kind_of_process='',
+            batch_process_id=0,
+            batch_process_analytics_chunk_id=0,
+            analytics_date_as_integer_more_recent_than=0):
         success = True
         status = ""
         analytics_processed_list = []
@@ -1010,6 +1018,7 @@ class AnalyticsManager(models.Manager):
         analytics_processing_status = None
         analytics_processing_status_found = False
         create_new_status_entry = False
+        new_analytics_date_as_integer = 0
         we_vote_settings_manager = WeVoteSettingsManager()
         results = we_vote_settings_manager.fetch_setting_results('analytics_date_as_integer_last_processed')
         analytics_date_as_integer_last_processed = 0
@@ -1031,6 +1040,7 @@ class AnalyticsManager(models.Manager):
             # Is there an analytics_processing_status for the date we care about?
             results = self.does_analytics_processing_status_exist_for_one_date(analytics_date_as_integer_last_processed)
             if not results['analytics_processing_status_found']:
+                # If here, kick off the processing of another day by creating "empty" AnalyticsProcessingStatus
                 defaults = {}
                 analytics_processing_status, created = AnalyticsProcessingStatus.objects.using('analytics').\
                     update_or_create(
@@ -1047,6 +1057,8 @@ class AnalyticsManager(models.Manager):
                     analytics_processing_status_found = True
                 else:
                     if positive_value_exists(analytics_date_as_integer_last_processed):
+                        # Check to see if there is any analytics activity on the day after
+                        #  analytics_date_as_integer_last_processed
                         results = self.find_next_date_with_analytics_to_process(
                             last_analytics_date_as_integer=analytics_date_as_integer_last_processed)
                         if results['new_analytics_date_as_integer_found']:
@@ -1068,27 +1080,37 @@ class AnalyticsManager(models.Manager):
             status += "ANALYTICS_PROCESSING_STATUS_ERROR: " + str(e) + " "
             success = False
 
-        # If here, we need to create a new entry
         if create_new_status_entry and positive_value_exists(new_analytics_date_as_integer) and success:
-            try:
-                defaults = {}
-                analytics_processing_status, created = AnalyticsProcessingStatus.objects.using('analytics').\
-                    update_or_create(
-                        analytics_date_as_integer=new_analytics_date_as_integer,
-                        defaults=defaults
-                    )
-                analytics_processing_status_found = True
-                status += "ANALYTICS_PROCESSING_STATUS_CREATED "
-                if positive_value_exists(new_analytics_date_as_integer):
-                    # Update this value in the settings table: analytics_date_as_integer_last_processed
-                    # ...to new_analytics_date_as_integer
-                    results = we_vote_settings_manager.save_setting(
-                        setting_name="analytics_date_as_integer_last_processed",
-                        setting_value=new_analytics_date_as_integer,
-                        value_type=WeVoteSetting.INTEGER)
-            except Exception as e:
-                success = False
-                status += 'CREATE_ANALYTICS_PROCESSING_STATUS_ERROR: ' + str(e) + ' '
+            # We don't want to proceed with the new date until we pass midnight US Pacific Time
+            timezone = pytz.timezone("America/Los_Angeles")
+            pacific_time_datetime_now = timezone.localize(datetime.now())
+            pacific_time_date_as_integer = convert_date_to_date_as_integer(pacific_time_datetime_now)
+            if new_analytics_date_as_integer > pacific_time_date_as_integer:
+                # Wait until we pass midnight to process the analytics
+                status += "WAIT_UNTIL_AFTER_MIDNIGHT_PACIFIC_TIME "
+                pass
+            else:
+                # If here, we need to create a new entry
+                try:
+                    defaults = {}
+                    analytics_processing_status, created = AnalyticsProcessingStatus.objects.using('analytics').\
+                        update_or_create(
+                            analytics_date_as_integer=new_analytics_date_as_integer,
+                            defaults=defaults
+                        )
+                    analytics_processing_status_found = True
+                    status += "ANALYTICS_PROCESSING_STATUS_CREATED "
+
+                    if positive_value_exists(new_analytics_date_as_integer):
+                        # Update this value in the settings table: analytics_date_as_integer_last_processed
+                        # ...to new_analytics_date_as_integer
+                        results = we_vote_settings_manager.save_setting(
+                            setting_name="analytics_date_as_integer_last_processed",
+                            setting_value=new_analytics_date_as_integer,
+                            value_type=WeVoteSetting.INTEGER)
+                except Exception as e:
+                    success = False
+                    status += 'CREATE_ANALYTICS_PROCESSING_STATUS_ERROR: ' + str(e) + ' '
 
         results = {
             'success':                              success,
@@ -1770,6 +1792,10 @@ class SitewideDailyMetrics(models.Model):
                                                          null=True, unique=False)
     entered_full_address = models.PositiveIntegerField(verbose_name="all",
                                                        null=True, unique=False)
+
+    shared_items_clicked_today = models.PositiveIntegerField(verbose_name="", null=True, unique=False)
+    shared_link_clicked_count_today = models.PositiveIntegerField(verbose_name="", null=True, unique=False)
+    shared_link_clicked_unique_viewers_today = models.PositiveIntegerField(verbose_name="", null=True, unique=False)
 
     def generate_date_as_integer(self):
         # We want to store the day as an integer for extremely quick database indexing and lookup

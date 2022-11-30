@@ -4,8 +4,11 @@
 
 from django.db import models
 from django.db.models import Q
+from django.utils import timezone
 from django.utils.timezone import localtime, now
+from datetime import datetime, time, timedelta
 from organization.models import ORGANIZATION_TYPE_CHOICES, UNKNOWN
+import pytz
 import sys
 from wevote_functions.functions import convert_to_int, generate_random_string, positive_value_exists
 
@@ -28,12 +31,28 @@ class SharedItem(models.Model):
     shared_item_code_remind_contacts = models.CharField(max_length=50, null=True, unique=True, db_index=True)
     # Returns link to /ready URL
     shared_item_code_ready = models.CharField(max_length=50, null=True, unique=True, db_index=True)
+    # Analytics for easy sorting (this is not master data, but calculated from SharedLinkClicked data)
+    shared_link_clicked_count = models.PositiveIntegerField(default=0, null=True, blank=True)
+    shared_link_clicked_count_last_updated = models.DateTimeField(null=True)
+    shared_link_clicked_unique_viewer_count = models.PositiveIntegerField(default=0, null=True, blank=True)
+    # Analytics for each kind of click offered by a SharedItem
+    shared_link_clicked_count_all_opinions = models.PositiveIntegerField(default=0, null=True, blank=True)
+    shared_link_clicked_unique_viewer_count_all_opinions = models.PositiveIntegerField(default=0, null=True, blank=True)
+    shared_link_clicked_count_no_opinions = models.PositiveIntegerField(default=0, null=True, blank=True)
+    shared_link_clicked_unique_viewer_count_no_opinions = models.PositiveIntegerField(default=0, null=True, blank=True)
+    shared_link_clicked_count_ready = models.PositiveIntegerField(default=0, null=True, blank=True)
+    shared_link_clicked_unique_viewer_count_ready = models.PositiveIntegerField(default=0, null=True, blank=True)
+    shared_link_clicked_count_remind_contacts = models.PositiveIntegerField(default=0, null=True, blank=True)
+    shared_link_clicked_unique_viewer_count_remind_contacts = \
+        models.PositiveIntegerField(default=0, null=True, blank=True)
     # secret key to verify ownership of email on first click
     email_secret_key = models.CharField(max_length=255, null=True, db_index=True)
     # secret key to verify ownership of phone number on first click
     sms_secret_key = models.CharField(max_length=255, null=True, db_index=True)
     # The voter and organization id of the person initiating the share
     shared_by_display_name = models.TextField(blank=True, null=True)
+    shared_by_first_name = models.CharField(max_length=255, null=True, blank=True)
+    shared_by_last_name = models.CharField(max_length=255, null=True, blank=True)
     shared_by_voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True)
     shared_by_organization_type = models.CharField(
         verbose_name="type of org", max_length=2, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
@@ -378,6 +397,8 @@ class ShareManager(models.Manager):
             if 'other_voter_last_name' in defaults else None
         other_voter_we_vote_id = defaults['other_voter_we_vote_id'] if 'other_voter_we_vote_id' in defaults else None
         shared_by_display_name = defaults['shared_by_display_name'] if 'shared_by_display_name' in defaults else None
+        shared_by_first_name = defaults['shared_by_first_name'] if 'shared_by_first_name' in defaults else None
+        shared_by_last_name = defaults['shared_by_last_name'] if 'shared_by_last_name' in defaults else None
         shared_by_we_vote_hosted_profile_image_url_large = \
             defaults['shared_by_we_vote_hosted_profile_image_url_large'] \
             if 'shared_by_we_vote_hosted_profile_image_url_large' in defaults else None
@@ -420,6 +441,12 @@ class ShareManager(models.Manager):
                     change_to_save = True
                 if shared_item.shared_by_display_name != shared_by_display_name:
                     shared_item.shared_by_display_name = shared_by_display_name
+                    change_to_save = True
+                if shared_item.shared_by_first_name != shared_by_first_name:
+                    shared_item.shared_by_first_name = shared_by_first_name
+                    change_to_save = True
+                if shared_item.shared_by_last_name != shared_by_last_name:
+                    shared_item.shared_by_last_name = shared_by_last_name
                     change_to_save = True
                 if shared_item.shared_by_we_vote_hosted_profile_image_url_large \
                         != shared_by_we_vote_hosted_profile_image_url_large:
@@ -492,6 +519,8 @@ class ShareManager(models.Manager):
                     other_voter_email_address_text=other_voter_email_address_text,
                     other_voter_we_vote_id=other_voter_we_vote_id,
                     shared_by_display_name=shared_by_display_name,
+                    shared_by_first_name=shared_by_first_name,
+                    shared_by_last_name=shared_by_last_name,
                     shared_by_organization_type=defaults['shared_by_organization_type'],
                     shared_by_organization_we_vote_id=defaults['shared_by_organization_we_vote_id'],
                     shared_by_voter_we_vote_id=shared_by_voter_we_vote_id,
@@ -841,9 +870,14 @@ class ShareManager(models.Manager):
             field_for_distinct_filter='shared_by_voter_we_vote_id')
 
     def fetch_shared_link_clicked_unique_viewer_count(
-            self, shared_by_state_code_list=[], viewed_by_state_code_list=[], year_as_integer_list=[]):
+            self,
+            shared_by_state_code_list=[],
+            shared_by_voter_we_vote_id_list=[],
+            viewed_by_state_code_list=[],
+            year_as_integer_list=[]):
         return self.fetch_shared_link_clicked_count(
             shared_by_state_code_list=shared_by_state_code_list,
+            shared_by_voter_we_vote_id_list=shared_by_voter_we_vote_id_list,
             viewed_by_state_code_list=viewed_by_state_code_list,
             year_as_integer_list=year_as_integer_list,
             field_for_distinct_filter='viewed_by_voter_we_vote_id')
@@ -857,15 +891,71 @@ class ShareManager(models.Manager):
             field_for_distinct_filter='shared_item_id')
 
     def fetch_shared_link_clicked_shared_links_click_count(
-            self, shared_by_state_code_list=[], viewed_by_state_code_list=[], year_as_integer_list=[]):
+            self,
+            shared_by_state_code_list=[],
+            shared_by_voter_we_vote_id_list=[],
+            viewed_by_state_code_list=[],
+            year_as_integer_list=[]):
         return self.fetch_shared_link_clicked_count(
             shared_by_state_code_list=shared_by_state_code_list,
+            shared_by_voter_we_vote_id_list=shared_by_voter_we_vote_id_list,
             viewed_by_state_code_list=viewed_by_state_code_list,
             year_as_integer_list=year_as_integer_list,
             field_for_distinct_filter='id')
 
+    def fetch_shared_items_clicked_count_for_one_day(
+            self,
+            date_as_integer=0):
+        """
+        Used for SitewideDailyMetrics
+        :param date_as_integer:
+        :return:
+        """
+        return self.fetch_shared_link_clicked_count(
+            date_as_integer=date_as_integer,
+            field_for_distinct_filter='shared_item_id')
+
+    def fetch_shared_link_clicked_count_for_one_day(
+            self,
+            date_as_integer=0):
+        """
+        Used for SitewideDailyMetrics
+        :param date_as_integer:
+        :return:
+        """
+        return self.fetch_shared_link_clicked_count(
+            date_as_integer=date_as_integer,
+            field_for_distinct_filter='id')
+
+    def fetch_shared_link_clicked_unique_viewers_one_day(
+            self,
+            date_as_integer=0):
+        """
+        Used for SitewideDailyMetrics
+        :param date_as_integer:
+        :return:
+        """
+        return self.fetch_shared_link_clicked_count(
+            date_as_integer=date_as_integer,
+            field_for_distinct_filter='viewed_by_voter_we_vote_id')
+
+    def fetch_shared_link_clicked_unique_viewers_one_day(
+            self,
+            date_as_integer=0):
+        """
+        Used for SitewideDailyMetrics
+        :param date_as_integer:
+        :return:
+        """
+        return self.fetch_shared_link_clicked_count(
+            date_as_integer=date_as_integer,
+            field_for_distinct_filter='viewed_by_voter_we_vote_id')
+
     def fetch_shared_link_clicked_count(
-            self, shared_by_state_code_list=[],
+            self,
+            date_as_integer=0,
+            shared_by_state_code_list=[],
+            shared_by_voter_we_vote_id_list=[],
             viewed_by_state_code_list=[],
             year_as_integer_list=[],
             field_for_distinct_filter=''):
@@ -875,14 +965,25 @@ class ShareManager(models.Manager):
         else:
             queryset = SharedLinkClicked.objects.using('readonly').all()
 
+        if positive_value_exists(date_as_integer):
+            date_as_string = "{date}".format(date=date_as_integer)
+            date_start = datetime.strptime(date_as_string, "%Y%m%d").date()
+            datetime_start = datetime.combine(date_start, datetime.min.time())
+
+            pst_timezone = pytz.timezone("America/Los_Angeles")
+            date_start_pst = pst_timezone.localize(datetime_start)
+            date_end_pst = date_start_pst + timedelta(days=1) - timedelta(microseconds=1)
+            queryset = queryset.filter(date_clicked__range=(date_start_pst, date_end_pst))
         if positive_value_exists(len(shared_by_state_code_list)):
             queryset = queryset.filter(shared_by_state_code__in=shared_by_state_code_list)
+        if positive_value_exists(len(shared_by_voter_we_vote_id_list)):
+            queryset = queryset.filter(shared_by_voter_we_vote_id__in=shared_by_voter_we_vote_id_list)
         if positive_value_exists(len(viewed_by_state_code_list)):
             queryset = queryset.filter(viewed_by_state_code__in=viewed_by_state_code_list)
         if positive_value_exists(len(year_as_integer_list)):
             queryset = queryset.filter(year_as_integer__in=year_as_integer_list)
         if positive_value_exists(field_for_distinct_filter):
-            queryset = queryset.values(field_for_distinct_filter).distinct()
+            queryset = queryset.order_by(field_for_distinct_filter).values(field_for_distinct_filter).distinct()
 
         shared_link_clicked_count = 0
         try:
@@ -1373,6 +1474,41 @@ class ShareManager(models.Manager):
             'super_share_item_list':        super_share_item_list,
         }
         return results
+
+
+class VoterWhoSharesSummaryAllTime(models.Model):
+    """
+    We calculate this summary information, so we can see quickly who are the top sharers in We Vote network
+    """
+    voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True, unique=True)
+    shared_by_display_name = models.TextField(blank=True, null=True)
+    # Image we are using as the profile photo (could be sourced from Twitter, Facebook or uploaded directly by voter)
+    we_vote_hosted_profile_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
+    # Analytics for easy sorting (this is not master data, but calculated from SharedLinkClicked data)
+    shared_item_count = models.PositiveIntegerField(default=0, null=True, blank=True)
+    shared_link_clicked_count = models.PositiveIntegerField(default=0, null=True, blank=True)
+    shared_link_clicked_count_last_updated = models.DateTimeField(null=True)
+    shared_link_clicked_unique_viewer_count = models.PositiveIntegerField(default=0, null=True, blank=True)
+
+
+class VoterWhoSharesSummaryOneYear(models.Model):
+    """
+    We calculate this summary information for one year, so we can see the top sharers in We Vote network
+    """
+    voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True)
+    shared_by_display_name = models.TextField(blank=True, null=True)
+    year_as_integer = models.PositiveIntegerField(null=True, unique=False, db_index=True)
+    # Image we are using as the profile photo (could be sourced from Twitter, Facebook or uploaded directly by voter)
+    we_vote_hosted_profile_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
+    # Analytics for easy sorting (this is not master data, but calculated from SharedLinkClicked data)
+    shared_item_count = models.PositiveIntegerField(default=0, null=True, blank=True)
+    shared_link_clicked_count = models.PositiveIntegerField(default=0, null=True, blank=True)
+    shared_link_clicked_count_last_updated = models.DateTimeField(null=True)
+    shared_link_clicked_unique_viewer_count = models.PositiveIntegerField(default=0, null=True, blank=True)
 
 
 class SuperShareItem(models.Model):

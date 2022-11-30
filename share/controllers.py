@@ -2,6 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from django.utils.timezone import now
 from .models import ShareManager
 from analytics.models import ACTION_VIEW_SHARED_BALLOT, ACTION_VIEW_SHARED_BALLOT_ALL_OPINIONS, \
     ACTION_VIEW_SHARED_CANDIDATE, ACTION_VIEW_SHARED_CANDIDATE_ALL_OPINIONS, \
@@ -15,12 +16,16 @@ import json
 from organization.models import OrganizationManager
 from position.models import PositionListManager
 import robot_detection
-from share.models import SharedItem, SharedLinkClicked, SharedPermissionsGranted
-from voter.models import VoterDeviceLinkManager, VoterManager
+from share.models import SharedItem, SharedLinkClicked, SharedPermissionsGranted, \
+    VoterWhoSharesSummaryAllTime, VoterWhoSharesSummaryOneYear
+from voter.models import VoterDeviceLinkManager, VoterManager, Voter
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_settings.models import WeVoteSetting, WeVoteSettingsManager
 
 INDIVIDUAL = 'I'  # One person
+# TODO: If longer than 10 or so ballot items, return office/measure data in a second API call
+BALLOT_SHARED_ITEM_CUTOFF = 1000
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -167,6 +172,8 @@ def shared_item_list_save_for_api(  # sharedItemListSave
     measure_we_vote_id = ''
     office_we_vote_id = ''
     shared_by_display_name = None
+    shared_by_first_name = None
+    shared_by_last_name = None
     shared_by_organization_type = ''
     shared_by_organization_we_vote_id = ''
     shared_by_voter_we_vote_id = ''
@@ -184,6 +191,10 @@ def shared_item_list_save_for_api(  # sharedItemListSave
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
     if voter_results['voter_found']:
         voter = voter_results['voter']
+        if positive_value_exists(voter.first_name):
+            shared_by_first_name = voter.first_name
+        if positive_value_exists(voter.last_name):
+            shared_by_last_name = voter.last_name
         shared_by_voter_we_vote_id = voter.we_vote_id
         shared_by_organization_we_vote_id = voter.linked_organization_we_vote_id
         shared_by_organization_type = INDIVIDUAL
@@ -241,6 +252,8 @@ def shared_item_list_save_for_api(  # sharedItemListSave
             'office_we_vote_id':                        office_we_vote_id,
             'other_voter_email_address_array':           other_voter_email_address_array,
             'shared_by_display_name':                   shared_by_display_name,
+            'shared_by_first_name':                     shared_by_first_name,
+            'shared_by_last_name':                      shared_by_last_name,
             'shared_by_organization_type':              shared_by_organization_type,
             'shared_by_organization_we_vote_id':        shared_by_organization_we_vote_id,
             'shared_by_voter_we_vote_id':               shared_by_voter_we_vote_id,
@@ -325,6 +338,8 @@ def shared_item_list_save_for_api(  # sharedItemListSave
         'office_we_vote_id':                    office_we_vote_id,
         'other_voter_email_address_array':      other_voter_email_address_array,
         'shared_by_display_name':               shared_by_display_name,
+        'shared_by_first_name':                 shared_by_first_name,
+        'shared_by_last_name':                  shared_by_last_name,
         'shared_by_organization_type':          shared_by_organization_type,
         'shared_by_organization_we_vote_id':    shared_by_organization_we_vote_id,
         'shared_by_voter_we_vote_id':           shared_by_voter_we_vote_id,
@@ -373,6 +388,8 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
     email_secret_key = ''
     sms_secret_key = ''
     shared_by_display_name = ''
+    shared_by_first_name = ''
+    shared_by_last_name = ''
     shared_by_voter_we_vote_id = ''
     shared_by_organization_type = ''
     shared_by_organization_we_vote_id = ''
@@ -433,6 +450,8 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
             'other_voter_last_name':                    other_voter_last_name,
             'other_voter_we_vote_id':                   other_voter_we_vote_id,
             'shared_by_display_name':                   shared_by_display_name,
+            'shared_by_first_name':                     shared_by_first_name,
+            'shared_by_last_name':                      shared_by_last_name,
             'shared_by_voter_we_vote_id':               shared_by_voter_we_vote_id,
             'shared_by_organization_type':              shared_by_organization_type,
             'shared_by_organization_we_vote_id':        shared_by_organization_we_vote_id,
@@ -620,14 +639,24 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         # Shared item not clicked
         pass
 
-    position_list = []
+    ballot_item_list = []
+    candidate_position_list = []
     if positive_value_exists(shared_item.shared_by_voter_we_vote_id) \
             and shared_item.shared_item_code_all_opinions == shared_item_code:
         position_list_manager = PositionListManager()
         results = position_list_manager.retrieve_all_positions_for_voter_simple(
-            voter_we_vote_id=shared_item.shared_by_voter_we_vote_id)
-        if results['position_list_found']:
-            position_list = results['position_list']
+            voter_we_vote_id=shared_item.shared_by_voter_we_vote_id,
+            count_only=True)
+        status += results['status']
+        if results['position_count'] < BALLOT_SHARED_ITEM_CUTOFF:
+            from ballot.ballot_shared_controllers import shared_item_ballot_retrieve_for_api
+            ballot_results = shared_item_ballot_retrieve_for_api(  # sharedItemBallotRetrieve
+                shared_by_voter_we_vote_id=shared_item.shared_by_voter_we_vote_id)
+            ballot_item_list = ballot_results['ballot_item_list']
+            candidate_position_list = ballot_results['candidate_position_list']
+        else:
+            # We are going to retrieve in a follow-up API call
+            pass
 
     other_voter_email_address_text = shared_item.other_voter_email_address_text \
         if positive_value_exists(shared_item.other_voter_email_address_text) else ''
@@ -641,6 +670,10 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         if positive_value_exists(shared_item.other_voter_we_vote_id) else ''
     shared_by_display_name = shared_item.shared_by_display_name \
         if positive_value_exists(shared_item.shared_by_display_name) else ''
+    shared_by_first_name = shared_item.shared_by_first_name \
+        if positive_value_exists(shared_item.shared_by_first_name) else ''
+    shared_by_last_name = shared_item.shared_by_last_name \
+        if positive_value_exists(shared_item.shared_by_last_name) else ''
     shared_by_we_vote_hosted_profile_image_url_large = shared_item.shared_by_we_vote_hosted_profile_image_url_large \
         if positive_value_exists(shared_item.shared_by_we_vote_hosted_profile_image_url_large) else ''
     shared_by_we_vote_hosted_profile_image_url_medium = shared_item.shared_by_we_vote_hosted_profile_image_url_medium \
@@ -654,6 +687,8 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
     results = {
         'status':                               status,
         'success':                              success,
+        'ballot_item_list':                     ballot_item_list,
+        'candidate_position_list':              candidate_position_list,
         'destination_full_url':                 shared_item.destination_full_url,
         'destination_full_url_override':        destination_full_url_override,
         'email_secret_key':                     email_secret_key,  # Only returned on first click
@@ -671,8 +706,9 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
         'other_voter_first_name':               other_voter_first_name,
         'other_voter_last_name':                other_voter_last_name,
         'other_voter_we_vote_id':               other_voter_we_vote_id,
-        'position_list':                        position_list,
         'shared_by_display_name':               shared_by_display_name,
+        'shared_by_first_name':                 shared_by_first_name,
+        'shared_by_last_name':                  shared_by_last_name,
         'shared_by_organization_type':          shared_item.shared_by_organization_type,
         'shared_by_organization_we_vote_id':    shared_item.shared_by_organization_we_vote_id,
         'shared_by_voter_we_vote_id':           shared_item.shared_by_voter_we_vote_id,
@@ -750,6 +786,8 @@ def shared_item_save_for_api(  # sharedItemSave
     ready_page_url_using_shared_item_code = ''
     remind_contacts_url_using_shared_item_code = ''
     shared_by_display_name = None
+    shared_by_first_name = None
+    shared_by_last_name = None
     shared_by_organization_type = ''
     shared_by_organization_we_vote_id = ''
     shared_by_voter_we_vote_id = ''
@@ -774,6 +812,12 @@ def shared_item_save_for_api(  # sharedItemSave
             shared_by_voter_we_vote_id = voter.we_vote_id
             shared_by_organization_we_vote_id = voter.linked_organization_we_vote_id
             shared_by_organization_type = INDIVIDUAL
+
+    if voter and hasattr(voter, 'first_name'):
+        if positive_value_exists(voter.first_name):
+            shared_by_first_name = voter.first_name
+        if positive_value_exists(voter.last_name):
+            shared_by_last_name = voter.last_name
 
     organization_manager = OrganizationManager()
     try:
@@ -839,6 +883,8 @@ def shared_item_save_for_api(  # sharedItemSave
             'other_voter_last_name':                    other_voter_last_name,
             'other_voter_we_vote_id':                   other_voter_we_vote_id,
             'shared_by_display_name':                   shared_by_display_name,
+            'shared_by_first_name':                     shared_by_first_name,
+            'shared_by_last_name':                      shared_by_last_name,
             'shared_by_organization_type':              shared_by_organization_type,
             'shared_by_organization_we_vote_id':        shared_by_organization_we_vote_id,
             'shared_by_voter_we_vote_id':               shared_by_voter_we_vote_id,
@@ -883,6 +929,8 @@ def shared_item_save_for_api(  # sharedItemSave
         'measure_we_vote_id':                   measure_we_vote_id,
         'office_we_vote_id':                    office_we_vote_id,
         'shared_by_display_name':               shared_by_display_name,
+        'shared_by_first_name':                 shared_by_first_name,
+        'shared_by_last_name':                  shared_by_last_name,
         'shared_by_organization_type':          shared_by_organization_type,
         'shared_by_organization_we_vote_id':    shared_by_organization_we_vote_id,
         'shared_by_voter_we_vote_id':           shared_by_voter_we_vote_id,
@@ -1017,6 +1065,8 @@ def shared_item_save_for_api(  # sharedItemSave
         'other_voter_last_name':                other_voter_last_name,
         'other_voter_we_vote_id':               other_voter_we_vote_id,
         'shared_by_display_name':               shared_by_display_name,
+        'shared_by_first_name':                 shared_by_first_name,
+        'shared_by_last_name':                  shared_by_last_name,
         'shared_by_organization_type':          shared_by_organization_type,
         'shared_by_organization_we_vote_id':    shared_by_organization_we_vote_id,
         'shared_by_voter_we_vote_id':           shared_by_voter_we_vote_id,
@@ -1150,7 +1200,8 @@ def super_share_item_save_for_api(  # superShareItemSave
                 date_sent_to_email_string = ''
                 try:
                     if super_share_email_recipient.date_sent_to_email:
-                        date_sent_to_email_string = super_share_email_recipient.date_sent_to_email.strftime('%Y-%m-%d %H:%M:%S')
+                        date_sent_to_email_string = super_share_email_recipient.date_sent_to_email\
+                            .strftime('%Y-%m-%d %H:%M:%S')
                 except Exception as e:
                     pass
                 email_recipient_dict = {
@@ -1251,5 +1302,837 @@ def super_share_item_send_for_api(  # superShareItemSave (for sending)
         'in_draft_mode':            in_draft_mode,
         'send_super_share_item':    True,
         'super_share_item_id':      super_share_item_id,
+    }
+    return results
+
+
+def update_shared_item_shared_by_info_from_shared_item(number_to_update=100000):
+    shared_items_changed = 0
+    shared_items_not_changed = 0
+    status = ''
+    success = True
+
+    # Get last SharedItem id: "shared_item_shared_by_info_last_id"
+    we_vote_settings_manager = WeVoteSettingsManager()
+    results = we_vote_settings_manager.fetch_setting_results('shared_item_shared_by_info_last_id')
+    shared_item_shared_by_info_last_id = 0
+    if not results['success']:
+        status += results['status']
+        success = False
+        shared_by_updates_remaining = 0
+        results = {
+            'status':                       status,
+            'success':                      success,
+            'shared_by_updates_remaining':  shared_by_updates_remaining,
+            'shared_items_changed':         shared_items_changed,
+            'shared_items_not_changed':     shared_items_not_changed,
+        }
+        return results
+    elif results['we_vote_setting_found']:
+        shared_item_shared_by_info_last_id = results['setting_value']
+
+    highest_shared_item_id = 0
+    if positive_value_exists(shared_item_shared_by_info_last_id):
+        status += "shared_item_shared_by_info_last_id-FOUND: {shared_item_id} ".format(
+            shared_item_id=shared_item_shared_by_info_last_id
+        )
+        highest_shared_item_id = shared_item_shared_by_info_last_id
+    else:
+        status += "Starting update at shared_link_clicked.id = 0 "
+
+    # Now get all the SharedItems to update
+    queryset = SharedItem.objects.all()
+    queryset = queryset.order_by('id')
+    queryset = queryset.filter(id__gt=shared_item_shared_by_info_last_id)
+    if not positive_value_exists(number_to_update):
+        number_to_update = 100000
+    number_to_update = convert_to_int(number_to_update)
+    queryset = queryset[:number_to_update]
+    shared_item_list = list(queryset)
+
+    shared_item_update_needed_list = []
+    voter_we_vote_id_list = []
+    for shared_item in shared_item_list:
+        if not shared_item.shared_by_display_name or \
+                not shared_item.shared_by_first_name or \
+                not shared_item.shared_by_last_name or \
+                not shared_item.shared_by_we_vote_hosted_profile_image_url_large or \
+                not shared_item.shared_by_we_vote_hosted_profile_image_url_medium or \
+                not shared_item.shared_by_we_vote_hosted_profile_image_url_tiny:
+            shared_item_update_needed_list.append(shared_item)
+            if shared_item.shared_by_voter_we_vote_id not in voter_we_vote_id_list:
+                voter_we_vote_id_list.append(shared_item.shared_by_voter_we_vote_id)
+        else:
+            shared_items_not_changed += 1
+
+    # Since we might be looking for 1000 voters, retrieve them all at once
+    voter_dict_by_voter_we_vote_id = {}
+    try:
+        voter_query = Voter.objects.using('readonly').all()
+        voter_query = voter_query.filter(we_vote_id__in=voter_we_vote_id_list)
+        voter_list = list(voter_query)
+        for one_voter in voter_list:
+            voter_dict_by_voter_we_vote_id[one_voter.we_vote_id] = one_voter
+    except Exception as e:
+        status += "VOTER_RETRIEVE_FAIL: " + str(e) + " "
+
+    real_name_only = True
+    for shared_item in shared_item_update_needed_list:
+        try:
+            try:
+                voter = voter_dict_by_voter_we_vote_id[shared_item.shared_by_voter_we_vote_id]
+            except Exception as e:
+                status += "VOTER_MISSING: " + str(e) + " "
+                shared_items_not_changed += 1
+                if shared_item.id > highest_shared_item_id:
+                    highest_shared_item_id = shared_item.id
+                continue
+            if not positive_value_exists(shared_item.shared_by_display_name) and \
+                    voter.get_full_name(real_name_only):
+                shared_item.shared_by_display_name = voter.get_full_name(real_name_only)
+            if not positive_value_exists(shared_item.shared_by_first_name) and \
+                    positive_value_exists(voter.first_name):
+                shared_item.shared_by_first_name = voter.first_name
+            if not positive_value_exists(shared_item.shared_by_last_name) and \
+                    positive_value_exists(voter.last_name):
+                shared_item.shared_by_last_name = voter.last_name
+            if not positive_value_exists(shared_item.shared_by_we_vote_hosted_profile_image_url_large) and \
+                    positive_value_exists(voter.we_vote_hosted_profile_image_url_large):
+                shared_item.shared_by_we_vote_hosted_profile_image_url_large = \
+                    voter.we_vote_hosted_profile_image_url_large
+            if not positive_value_exists(shared_item.shared_by_we_vote_hosted_profile_image_url_medium) and \
+                    positive_value_exists(voter.we_vote_hosted_profile_image_url_medium):
+                shared_item.shared_by_we_vote_hosted_profile_image_url_medium = \
+                    voter.we_vote_hosted_profile_image_url_medium
+            if not positive_value_exists(shared_item.shared_by_we_vote_hosted_profile_image_url_tiny) and \
+                    positive_value_exists(voter.we_vote_hosted_profile_image_url_tiny):
+                shared_item.shared_by_we_vote_hosted_profile_image_url_tiny = \
+                    voter.we_vote_hosted_profile_image_url_tiny
+            shared_item.save()
+            shared_items_changed += 1
+        except Exception as e:
+            status += "FAILED_SAVE: " + str(e) + " "
+            shared_items_not_changed += 1
+        if shared_item.id > highest_shared_item_id:
+            highest_shared_item_id = shared_item.id
+
+    if positive_value_exists(highest_shared_item_id):
+        # Update the "shared_item_shared_by_info_last_id"
+        results = we_vote_settings_manager.save_setting(
+            setting_name="shared_item_shared_by_info_last_id",
+            setting_value=highest_shared_item_id,
+            value_type=WeVoteSetting.INTEGER)
+        if not results['success']:
+            status += results['status']
+            success = False
+
+    # How many remain to be updated in the future?
+    queryset = SharedItem.objects.using('readonly').all()
+    queryset = queryset.filter(id__gt=highest_shared_item_id)
+    shared_by_updates_remaining = queryset.count()
+
+    results = {
+        'status':                       status,
+        'success':                      success,
+        'shared_by_updates_remaining':  shared_by_updates_remaining,
+        'shared_items_changed':         shared_items_changed,
+        'shared_items_not_changed':     shared_items_not_changed,
+    }
+    return results
+
+
+def update_shared_link_clicked_year_as_integer(number_to_update=10000):
+    shared_link_clicked_changed = 0
+    shared_link_clicked_not_changed = 0
+    shared_link_clicked_updates_remaining = 0
+    status = ''
+    success = True
+
+    # Get last SharedLinkClicked id
+    we_vote_settings_manager = WeVoteSettingsManager()
+    results = we_vote_settings_manager.fetch_setting_results('shared_link_clicked_year_as_integer_last_id')
+    shared_link_clicked_year_as_integer_last_id = 0
+    if not results['success']:
+        status += results['status']
+        success = False
+        results = {
+            'status':                                   status,
+            'success':                                  success,
+            'shared_link_clicked_updates_remaining':    shared_link_clicked_updates_remaining,
+            'shared_link_clicked_changed':              shared_link_clicked_changed,
+            'shared_link_clicked_not_changed':          shared_link_clicked_not_changed,
+        }
+        return results
+    elif results['we_vote_setting_found']:
+        shared_link_clicked_year_as_integer_last_id = results['setting_value']
+
+    highest_shared_link_clicked_id = 0
+    if positive_value_exists(shared_link_clicked_year_as_integer_last_id):
+        status += "shared_link_clicked_year_as_integer_last_id-FOUND: {shared_item_id} ".format(
+            shared_item_id=shared_link_clicked_year_as_integer_last_id
+        )
+        highest_shared_link_clicked_id = shared_link_clicked_year_as_integer_last_id
+    else:
+        status += "Starting update at shared_link_clicked.id = 0 "
+
+    # Now get the entries to update
+    queryset = SharedLinkClicked.objects.all()
+    queryset = queryset.order_by('id')
+    queryset = queryset.filter(id__gt=shared_link_clicked_year_as_integer_last_id)
+    queryset = queryset.filter(year_as_integer__isnull=True)
+    queryset = queryset.exclude(date_clicked__isnull=True)
+    entries_to_update_count = queryset.count()
+
+    if positive_value_exists(entries_to_update_count):
+        if not positive_value_exists(number_to_update):
+            number_to_update = 10000
+        number_to_update = convert_to_int(number_to_update)
+        queryset = queryset[:number_to_update]
+        shared_link_clicked_list = list(queryset)
+    else:
+        shared_link_clicked_list = []
+        try:
+            queryset = SharedLinkClicked.objects.all()
+            queryset = queryset.order_by('id')
+            last_entry = queryset.last()
+            highest_shared_link_clicked_id = last_entry.id
+        except Exception as e:
+            status += "COULD_NOT_GET_LAST_ID: " + str(e) + " "
+            success = False
+
+    for shared_link_clicked in shared_link_clicked_list:
+        try:
+            shared_link_clicked.year_as_integer = shared_link_clicked.date_clicked.strftime('%Y')
+            shared_link_clicked.save()
+            shared_link_clicked_changed += 1
+        except Exception as e:
+            status += "FAILED_SAVE: " + str(e) + " "
+            shared_link_clicked_not_changed += 1
+        if shared_link_clicked.id > highest_shared_link_clicked_id:
+            highest_shared_link_clicked_id = shared_link_clicked.id
+
+    if positive_value_exists(highest_shared_link_clicked_id):
+        # Update the "shared_link_clicked_year_as_integer_last_id"
+        results = we_vote_settings_manager.save_setting(
+            setting_name="shared_link_clicked_year_as_integer_last_id",
+            setting_value=highest_shared_link_clicked_id,
+            value_type=WeVoteSetting.INTEGER)
+        if not results['success']:
+            status += results['status']
+            success = False
+
+    # How many remain to be updated in the future?
+    queryset = SharedLinkClicked.objects.using('readonly').all()
+    queryset = queryset.filter(id__gt=highest_shared_link_clicked_id)
+    shared_link_clicked_updates_remaining = queryset.count()
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'shared_link_clicked_updates_remaining':   shared_link_clicked_updates_remaining,
+        'shared_link_clicked_changed':             shared_link_clicked_changed,
+        'shared_link_clicked_not_changed':         shared_link_clicked_not_changed,
+    }
+    return results
+
+
+def update_shared_item_statistics_from_shared_link_clicked(number_to_update=10000):
+    shared_items_changed = 0
+    shared_items_not_changed = 0
+    status = ''
+    success = True
+
+    # Get last ShareLinkClicked id: "shared_item_statistics_from_shared_link_clicked_last_id"
+    we_vote_settings_manager = WeVoteSettingsManager()
+    results = we_vote_settings_manager.fetch_setting_results('shared_item_statistics_from_shared_link_clicked_last_id')
+    shared_item_statistics_from_shared_link_clicked_last_id = 0
+    if not results['success']:
+        status += results['status']
+        success = False
+        count_updates_remaining = 0
+        results = {
+            'status':                   status,
+            'success':                  success,
+            'count_updates_remaining':  count_updates_remaining,
+            'shared_items_changed':     shared_items_changed,
+            'shared_items_not_changed': shared_items_not_changed,
+        }
+        return results
+    elif results['we_vote_setting_found']:
+        shared_item_statistics_from_shared_link_clicked_last_id = results['setting_value']
+
+    highest_shared_link_clicked_id = 0
+    if positive_value_exists(shared_item_statistics_from_shared_link_clicked_last_id):
+        status += "shared_item_statistics_from_shared_link_clicked_last_id-FOUND: {shared_link_clicked_id} ".format(
+            shared_link_clicked_id=shared_item_statistics_from_shared_link_clicked_last_id
+        )
+        highest_shared_link_clicked_id = shared_item_statistics_from_shared_link_clicked_last_id
+    else:
+        status += "Starting update at shared_link_clicked.id = 0 "
+
+    # Get a list of shared_item_id's which have had activity in X period of time or since...
+    clicked_queryset = SharedLinkClicked.objects.using('readonly').all()
+    clicked_queryset = clicked_queryset.order_by('id')
+    clicked_queryset = clicked_queryset.filter(id__gt=shared_item_statistics_from_shared_link_clicked_last_id)
+
+    if not positive_value_exists(number_to_update):
+        number_to_update = 10000
+    number_to_update = convert_to_int(number_to_update)
+    clicked_queryset = clicked_queryset[:number_to_update]
+    shared_link_clicked_list = list(clicked_queryset)
+    shared_item_id_list = []
+    for one_shared_link_clicked in shared_link_clicked_list:
+        if one_shared_link_clicked.id > highest_shared_link_clicked_id:
+            highest_shared_link_clicked_id = one_shared_link_clicked.id
+        if one_shared_link_clicked.shared_item_id not in shared_item_id_list:
+            shared_item_id_list.append(one_shared_link_clicked.shared_item_id)
+
+    # Now get all the SharedItems to update
+    queryset = SharedItem.objects.all()
+    queryset = queryset.filter(id__in=shared_item_id_list)
+    shared_item_list = list(queryset)
+
+    for shared_item in shared_item_list:
+        prior_shared_link_clicked_count = shared_item.shared_link_clicked_count
+        prior_shared_link_clicked_unique_viewer_count = shared_item.shared_link_clicked_unique_viewer_count
+        # Number of times the shared item was clicked
+        clicked_queryset = SharedLinkClicked.objects.using('readonly').all()
+        clicked_queryset = clicked_queryset.filter(shared_item_id=shared_item.id)
+        shared_item.shared_link_clicked_count = clicked_queryset.count()
+        # Number of unique voters who clicked one or more times
+        unique_queryset = clicked_queryset.order_by('shared_item_id', 'viewed_by_voter_we_vote_id')\
+            .distinct('shared_item_id', 'viewed_by_voter_we_vote_id')
+        shared_item.shared_link_clicked_unique_viewer_count = unique_queryset.count()
+        if prior_shared_link_clicked_count != shared_item.shared_link_clicked_count or \
+                prior_shared_link_clicked_unique_viewer_count != shared_item.shared_link_clicked_unique_viewer_count:
+            shared_items_changed += 1
+            try:
+                shared_item.shared_link_clicked_count_last_updated = now()
+                shared_item.save()
+                shared_items_changed += 1
+            except Exception as e:
+                status += "FAILED_SAVE: " + str(e) + " "
+                success = False
+                break
+        else:
+            shared_items_not_changed += 1
+
+    if success and positive_value_exists(highest_shared_link_clicked_id):
+        # Update the "shared_item_statistics_from_shared_link_clicked_last_id"
+        results = we_vote_settings_manager.save_setting(
+            setting_name="shared_item_statistics_from_shared_link_clicked_last_id",
+            setting_value=highest_shared_link_clicked_id,
+            value_type=WeVoteSetting.INTEGER)
+        if not results['success']:
+            status += results['status']
+            success = False
+
+    # How many remain to be updated in the future?
+    queryset = SharedLinkClicked.objects.using('readonly').all()
+    queryset = queryset.filter(id__gt=highest_shared_link_clicked_id)
+    count_updates_remaining = queryset.count()
+
+    results = {
+        'status':                   status,
+        'success':                  success,
+        'count_updates_remaining':  count_updates_remaining,
+        'shared_items_changed':     shared_items_changed,
+        'shared_items_not_changed': shared_items_not_changed,
+    }
+    return results
+
+
+def update_who_shares_from_shared_item(
+        number_to_update=False,
+        table_name=''):
+    sharing_summary_items_changed = 0
+    sharing_summary_items_not_changed = 0
+    sharing_summary_updates_remaining = 0
+    status = ''
+    success = True
+
+    if table_name == 'VoterWhoSharesSummaryOneYear':
+        by_year_mode = True
+        last_id_we_vote_setting_name = 'who_shares_by_year_from_shared_item_last_id'
+    else:
+        # Default to VoterWhoSharesSummaryAllTime
+        by_year_mode = False
+        last_id_we_vote_setting_name = 'who_shares_all_time_from_shared_item_last_id'
+
+    # Get last SharedItem id
+    we_vote_settings_manager = WeVoteSettingsManager()
+    results = we_vote_settings_manager.fetch_setting_results(last_id_we_vote_setting_name)
+    who_shares_last_shared_item_id = 0
+    if not results['success']:
+        status += "FAILED_GETTING_SETTING: "
+        status += results['status']
+        success = False
+        sharing_summary_updates_remaining = 0
+        results = {
+            'status':                               status,
+            'success':                              success,
+            'sharing_summary_updates_remaining':    sharing_summary_updates_remaining,
+            'sharing_summary_items_changed':        sharing_summary_items_changed,
+            'sharing_summary_items_not_changed':    sharing_summary_items_not_changed,
+        }
+        return results
+    elif results['we_vote_setting_found']:
+        who_shares_last_shared_item_id = results['setting_value']
+
+    highest_shared_item_id = 0
+    if positive_value_exists(who_shares_last_shared_item_id):
+        status += "{last_id_we_vote_setting_name}-FOUND: {shared_item_id} " \
+            "".format(
+                last_id_we_vote_setting_name=last_id_we_vote_setting_name,
+                shared_item_id=who_shares_last_shared_item_id)
+        highest_shared_item_id = who_shares_last_shared_item_id
+    else:
+        status += "Starting update at shared_item.id = 0 "
+
+    # Get a list of shared_item id's which have had activity through shared_item_id
+    queryset = SharedItem.objects.using('readonly').all()
+    queryset = queryset.order_by('id')
+    queryset = queryset.filter(id__gt=who_shares_last_shared_item_id)
+
+    if not positive_value_exists(number_to_update):
+        number_to_update = 100000
+    number_to_update = convert_to_int(number_to_update)
+    status += "NUMBER_TO_UPDATE: {number_to_update} ".format(number_to_update=number_to_update)
+    queryset = queryset[:number_to_update]
+    shared_item_list = list(queryset)
+
+    # Since we might be looking for 100,000 voters, retrieve them all at once and put them in a dict
+    voter_we_vote_id_list = []
+    for one_shared_item in shared_item_list:
+        if one_shared_item.shared_by_voter_we_vote_id not in voter_we_vote_id_list:
+            voter_we_vote_id_list.append(one_shared_item.shared_by_voter_we_vote_id)
+    voter_dict_by_voter_we_vote_id = {}
+    voter_count = 0
+    try:
+        voter_query = Voter.objects.using('readonly').all()
+        voter_query = voter_query.filter(we_vote_id__in=voter_we_vote_id_list)
+        voter_list = list(voter_query)
+        for one_voter in voter_list:
+            voter_dict_by_voter_we_vote_id[one_voter.we_vote_id] = one_voter
+            voter_count += 1
+        status += "VOTER_COUNT: {voter_count} ".format(voter_count=voter_count)
+    except Exception as e:
+        status += "VOTER_RETRIEVE_FAIL: " + str(e) + " "
+        success = False
+        results = {
+            'status':                               status,
+            'success':                              success,
+            'sharing_summary_updates_remaining':    sharing_summary_updates_remaining,
+            'sharing_summary_items_changed':        sharing_summary_items_changed,
+            'sharing_summary_items_not_changed':    sharing_summary_items_not_changed,
+        }
+        return results
+
+    update_results = update_voter_who_shares_tables_from_shared_item_list(
+        by_year_mode=by_year_mode,
+        highest_shared_item_id=highest_shared_item_id,
+        shared_item_list=shared_item_list,
+        voter_dict_by_voter_we_vote_id=voter_dict_by_voter_we_vote_id,
+    )
+    highest_shared_item_id = update_results['highest_shared_item_id']
+    sharing_summary_items_changed = update_results['sharing_summary_items_changed']
+    sharing_summary_items_not_changed = update_results['sharing_summary_items_not_changed']
+
+    if positive_value_exists(highest_shared_item_id):
+        # Update the last_id_we_vote_setting_name
+        results = we_vote_settings_manager.save_setting(
+            setting_name=last_id_we_vote_setting_name,
+            setting_value=highest_shared_item_id,
+            value_type=WeVoteSetting.INTEGER)
+        if not results['success']:
+            status += results['status']
+            success = False
+
+    # How many remain to be updated in the future?
+    queryset = SharedItem.objects.using('readonly').all()
+    queryset = queryset.filter(id__gt=highest_shared_item_id)
+    sharing_summary_updates_remaining = queryset.count()
+
+    results = {
+        'status':                               status,
+        'success':                              success,
+        'sharing_summary_updates_remaining':    sharing_summary_updates_remaining,
+        'sharing_summary_items_changed':        sharing_summary_items_changed,
+        'sharing_summary_items_not_changed':    sharing_summary_items_not_changed,
+    }
+    return results
+
+
+def update_voter_who_shares_tables_from_shared_item_list(
+        by_year_mode=False,
+        highest_shared_item_id=0,
+        shared_item_list=[],
+        voter_dict_by_voter_we_vote_id={},
+):
+    sharing_summary_items_changed = 0
+    sharing_summary_items_not_changed = 0
+    real_name_only = True
+    share_manager = ShareManager()
+    status = ''
+    success = True
+    voter_we_vote_id_already_processed_list = []
+    voter_we_vote_id_already_processed_by_year_dict = {}
+    for one_shared_item in shared_item_list:
+        if by_year_mode:
+            try:
+                year_of_this_click = one_shared_item.date_first_shared.strftime('%Y')
+                year_of_this_click = convert_to_int(year_of_this_click)
+            except Exception as e:
+                status += "YEAR_PROBLEM: " + str(e) + " "
+                year_of_this_click = 0
+            if not positive_value_exists(year_of_this_click):
+                # Can't process this click go to the next shared_link_clicked to find other voters to process
+                if one_shared_item.id > highest_shared_item_id:
+                    highest_shared_item_id = one_shared_item.id
+                continue
+            if year_of_this_click not in voter_we_vote_id_already_processed_by_year_dict:
+                voter_we_vote_id_already_processed_by_year_dict[year_of_this_click] = []
+            if one_shared_item.shared_by_voter_we_vote_id in \
+                    voter_we_vote_id_already_processed_by_year_dict[year_of_this_click]:
+                # Voter already processed for this year: go to the next shared_link_clicked to find other voters
+                if one_shared_item.id > highest_shared_item_id:
+                    highest_shared_item_id = one_shared_item.id
+                continue
+        else:
+            # Default to all time mode
+            year_of_this_click = 0
+            if one_shared_item.shared_by_voter_we_vote_id in voter_we_vote_id_already_processed_list:
+                # Voter already processed: go to the next shared_link_clicked to find other voters to process
+                if one_shared_item.id > highest_shared_item_id:
+                    highest_shared_item_id = one_shared_item.id
+                continue
+        try:
+            voter_we_vote_id = one_shared_item.shared_by_voter_we_vote_id
+            try:
+                voter = voter_dict_by_voter_we_vote_id[voter_we_vote_id]
+            except Exception as e:
+                status += "VOTER_MISSING: " + str(e) + " "
+                sharing_summary_items_not_changed += 1
+                # Go to the next shared_item to find other voters to process
+                if one_shared_item.id > highest_shared_item_id:
+                    highest_shared_item_id = one_shared_item.id
+                continue
+
+            shared_item_query = SharedItem.objects.using('readonly').all()
+            shared_item_query = shared_item_query.filter(shared_by_voter_we_vote_id=voter_we_vote_id)
+
+            if by_year_mode:
+                year_as_integer_list = [year_of_this_click]
+                shared_link_clicked_count = share_manager.fetch_shared_link_clicked_shared_links_click_count(
+                    shared_by_voter_we_vote_id_list=[voter_we_vote_id],
+                    year_as_integer_list=year_as_integer_list
+                )
+                shared_link_clicked_count_last_updated = now()
+                shared_link_clicked_unique_viewer_count = share_manager.fetch_shared_link_clicked_unique_viewer_count(
+                    shared_by_voter_we_vote_id_list=[voter_we_vote_id],
+                    year_as_integer_list=year_as_integer_list
+                )
+                # How many shared_items from this voter, from this year?
+                shared_item_query = shared_item_query.filter(date_first_shared__year=year_of_this_click)
+                shared_item_count = shared_item_query.count()
+                sharing_summary_for_voter, created = VoterWhoSharesSummaryOneYear.objects.update_or_create(
+                    voter_we_vote_id=voter_we_vote_id,
+                    year_as_integer=year_of_this_click,
+                    defaults={
+                        'shared_by_display_name': voter.get_full_name(real_name_only),
+                        'shared_item_count': shared_item_count,
+                        'shared_link_clicked_count': shared_link_clicked_count,
+                        'shared_link_clicked_count_last_updated': shared_link_clicked_count_last_updated,
+                        'shared_link_clicked_unique_viewer_count': shared_link_clicked_unique_viewer_count,
+                        'voter_we_vote_id': voter_we_vote_id,
+                        'we_vote_hosted_profile_image_url_large': voter.we_vote_hosted_profile_image_url_large,
+                        'we_vote_hosted_profile_image_url_medium': voter.we_vote_hosted_profile_image_url_medium,
+                        'we_vote_hosted_profile_image_url_tiny': voter.we_vote_hosted_profile_image_url_tiny,
+                        'year_as_integer': year_of_this_click,
+                    }
+                )
+                voter_we_vote_id_already_processed_by_year_dict[year_of_this_click].append(voter_we_vote_id)
+                sharing_summary_items_changed += 1
+            else:
+                shared_link_clicked_count = share_manager.fetch_shared_link_clicked_shared_links_click_count(
+                    shared_by_voter_we_vote_id_list=[voter_we_vote_id]
+                )
+                shared_link_clicked_count_last_updated = now()
+                shared_link_clicked_unique_viewer_count = share_manager.fetch_shared_link_clicked_unique_viewer_count(
+                    shared_by_voter_we_vote_id_list=[voter_we_vote_id]
+                )
+                # How many shared_items from this voter?
+                shared_item_count = shared_item_query.count()
+                sharing_summary_for_voter, created = VoterWhoSharesSummaryAllTime.objects.update_or_create(
+                    voter_we_vote_id=voter_we_vote_id,
+                    defaults={
+                        'shared_by_display_name': voter.get_full_name(real_name_only),
+                        'shared_item_count': shared_item_count,
+                        'shared_link_clicked_count': shared_link_clicked_count,
+                        'shared_link_clicked_count_last_updated': shared_link_clicked_count_last_updated,
+                        'shared_link_clicked_unique_viewer_count': shared_link_clicked_unique_viewer_count,
+                        'voter_we_vote_id': voter_we_vote_id,
+                        'we_vote_hosted_profile_image_url_large': voter.we_vote_hosted_profile_image_url_large,
+                        'we_vote_hosted_profile_image_url_medium': voter.we_vote_hosted_profile_image_url_medium,
+                        'we_vote_hosted_profile_image_url_tiny': voter.we_vote_hosted_profile_image_url_tiny,
+                    }
+                )
+                voter_we_vote_id_already_processed_list.append(voter_we_vote_id)
+                sharing_summary_items_changed += 1
+        except Exception as e:
+            status += "FAILED_UPDATE: " + str(e) + " "
+            sharing_summary_items_not_changed += 1
+        # Go to the next shared_item to find other voters to process
+        if one_shared_item.id > highest_shared_item_id:
+            highest_shared_item_id = one_shared_item.id
+    results = {
+        'status':                               status,
+        'success':                              success,
+        'highest_shared_item_id':               highest_shared_item_id,
+        'sharing_summary_items_changed':        sharing_summary_items_changed,
+        'sharing_summary_items_not_changed':    sharing_summary_items_not_changed,
+    }
+    return results
+
+
+def update_voter_who_shares_tables_from_shared_link_clicked_list(
+        by_year_mode=False,
+        highest_shared_link_clicked_id=0,
+        shared_link_clicked_list=[],
+        voter_dict_by_voter_we_vote_id={},
+):
+    sharing_summary_items_changed = 0
+    sharing_summary_items_not_changed = 0
+    status = ''
+    success = True
+    real_name_only = True
+    share_manager = ShareManager()
+    voter_we_vote_id_already_processed_list = []
+    voter_we_vote_id_already_processed_by_year_dict = {}
+    for one_shared_link_clicked in shared_link_clicked_list:
+        if by_year_mode:
+            # Not all rows have year_as_integer
+            # year_of_this_click = one_shared_link_clicked.year_as_integer
+            try:
+                year_of_this_click = one_shared_link_clicked.date_clicked.strftime('%Y')
+                year_of_this_click = convert_to_int(year_of_this_click)
+            except Exception as e:
+                status += "YEAR_PROBLEM: " + str(e) + " "
+                year_of_this_click = 0
+            if not positive_value_exists(year_of_this_click):
+                # Can't process this click go to the next shared_link_clicked to find other voters to process
+                if one_shared_link_clicked.id > highest_shared_link_clicked_id:
+                    highest_shared_link_clicked_id = one_shared_link_clicked.id
+                continue
+            if year_of_this_click not in voter_we_vote_id_already_processed_by_year_dict:
+                voter_we_vote_id_already_processed_by_year_dict[year_of_this_click] = []
+            if one_shared_link_clicked.shared_by_voter_we_vote_id in \
+                    voter_we_vote_id_already_processed_by_year_dict[year_of_this_click]:
+                # Voter already processed: go to the next shared_link_clicked to find other voters to process
+                if one_shared_link_clicked.id > highest_shared_link_clicked_id:
+                    highest_shared_link_clicked_id = one_shared_link_clicked.id
+                continue
+        else:
+            # Default to all time mode
+            year_of_this_click = 0
+            if one_shared_link_clicked.shared_by_voter_we_vote_id in voter_we_vote_id_already_processed_list:
+                # Voter already processed: go to the next shared_link_clicked to find other voters to process
+                if one_shared_link_clicked.id > highest_shared_link_clicked_id:
+                    highest_shared_link_clicked_id = one_shared_link_clicked.id
+                continue
+        try:
+            voter_we_vote_id = one_shared_link_clicked.shared_by_voter_we_vote_id
+            try:
+                voter = voter_dict_by_voter_we_vote_id[voter_we_vote_id]
+            except Exception as e:
+                status += "VOTER_MISSING: " + str(e) + " "
+                sharing_summary_items_not_changed += 1
+                # Go to the next shared_link_clicked to find other voters to process
+                if one_shared_link_clicked.id > highest_shared_link_clicked_id:
+                    highest_shared_link_clicked_id = one_shared_link_clicked.id
+                continue
+            if by_year_mode:
+                year_as_integer_list = [year_of_this_click]
+                shared_link_clicked_count = share_manager.fetch_shared_link_clicked_shared_links_click_count(
+                    shared_by_voter_we_vote_id_list=[voter_we_vote_id],
+                    year_as_integer_list=year_as_integer_list
+                )
+                shared_link_clicked_count_last_updated = now()
+                shared_link_clicked_unique_viewer_count = share_manager.fetch_shared_link_clicked_unique_viewer_count(
+                    shared_by_voter_we_vote_id_list=[voter_we_vote_id],
+                    year_as_integer_list=year_as_integer_list
+                )
+                sharing_summary_for_voter, created = VoterWhoSharesSummaryOneYear.objects.update_or_create(
+                    voter_we_vote_id=voter_we_vote_id,
+                    year_as_integer=year_of_this_click,
+                    defaults={
+                        'shared_link_clicked_count': shared_link_clicked_count,
+                        'shared_link_clicked_count_last_updated': shared_link_clicked_count_last_updated,
+                        'shared_link_clicked_unique_viewer_count': shared_link_clicked_unique_viewer_count,
+                        'shared_by_display_name': voter.get_full_name(real_name_only),
+                        'voter_we_vote_id': voter_we_vote_id,
+                        'we_vote_hosted_profile_image_url_large': voter.we_vote_hosted_profile_image_url_large,
+                        'we_vote_hosted_profile_image_url_medium': voter.we_vote_hosted_profile_image_url_medium,
+                        'we_vote_hosted_profile_image_url_tiny': voter.we_vote_hosted_profile_image_url_tiny,
+                        'year_as_integer': year_of_this_click,
+                    }
+                )
+                voter_we_vote_id_already_processed_by_year_dict[year_of_this_click].append(voter_we_vote_id)
+                sharing_summary_items_changed += 1
+            else:
+                shared_link_clicked_count = share_manager.fetch_shared_link_clicked_shared_links_click_count(
+                    shared_by_voter_we_vote_id_list=[voter_we_vote_id]
+                )
+                shared_link_clicked_count_last_updated = now()
+                shared_link_clicked_unique_viewer_count = share_manager.fetch_shared_link_clicked_unique_viewer_count(
+                    shared_by_voter_we_vote_id_list=[voter_we_vote_id]
+                )
+                sharing_summary_for_voter, created = VoterWhoSharesSummaryAllTime.objects.update_or_create(
+                    voter_we_vote_id=voter_we_vote_id,
+                    defaults={
+                        'shared_link_clicked_count': shared_link_clicked_count,
+                        'shared_link_clicked_count_last_updated': shared_link_clicked_count_last_updated,
+                        'shared_link_clicked_unique_viewer_count': shared_link_clicked_unique_viewer_count,
+                        'shared_by_display_name': voter.get_full_name(real_name_only),
+                        'voter_we_vote_id': voter_we_vote_id,
+                        'we_vote_hosted_profile_image_url_large': voter.we_vote_hosted_profile_image_url_large,
+                        'we_vote_hosted_profile_image_url_medium': voter.we_vote_hosted_profile_image_url_medium,
+                        'we_vote_hosted_profile_image_url_tiny': voter.we_vote_hosted_profile_image_url_tiny,
+                    }
+                )
+                voter_we_vote_id_already_processed_list.append(voter_we_vote_id)
+                sharing_summary_items_changed += 1
+        except Exception as e:
+            status += "FAILED_UPDATE: " + str(e) + " "
+            sharing_summary_items_not_changed += 1
+        # Go to the next shared_link_clicked to find other voters to process
+        if one_shared_link_clicked.id > highest_shared_link_clicked_id:
+            highest_shared_link_clicked_id = one_shared_link_clicked.id
+
+    results = {
+        'status':                               status,
+        'success':                              success,
+        'highest_shared_link_clicked_id':       highest_shared_link_clicked_id,
+        'sharing_summary_items_changed':        sharing_summary_items_changed,
+        'sharing_summary_items_not_changed':    sharing_summary_items_not_changed,
+    }
+    return results
+
+
+def update_who_shares_from_shared_link_clicked(
+        number_to_update=False,
+        table_name=''):
+    sharing_summary_items_changed = 0
+    sharing_summary_items_not_changed = 0
+    sharing_summary_updates_remaining = 0
+    status = ''
+    success = True
+
+    if table_name == 'VoterWhoSharesSummaryOneYear':
+        by_year_mode = True
+        last_id_we_vote_setting_name = 'who_shares_by_year_from_shared_link_clicked_last_id'
+    else:
+        # Default to VoterWhoSharesSummaryAllTime
+        by_year_mode = False
+        last_id_we_vote_setting_name = 'who_shares_all_time_from_shared_link_clicked_last_id'
+
+    # Get last SharedLinkClicked id
+    we_vote_settings_manager = WeVoteSettingsManager()
+    results = we_vote_settings_manager.fetch_setting_results(last_id_we_vote_setting_name)
+    who_shares_from_shared_link_clicked_last_id = 0
+    if not results['success']:
+        status += "FAILED_GETTING_SETTING: "
+        status += results['status']
+        success = False
+        sharing_summary_updates_remaining = 0
+        results = {
+            'status':                               status,
+            'success':                              success,
+            'sharing_summary_updates_remaining':    sharing_summary_updates_remaining,
+            'sharing_summary_items_changed':        sharing_summary_items_changed,
+            'sharing_summary_items_not_changed':    sharing_summary_items_not_changed,
+        }
+        return results
+    elif results['we_vote_setting_found']:
+        who_shares_from_shared_link_clicked_last_id = results['setting_value']
+
+    highest_shared_link_clicked_id = 0
+    if positive_value_exists(who_shares_from_shared_link_clicked_last_id):
+        status += "who_shares_from_shared_link_clicked_last_id-FOUND: {shared_link_clicked_id} " \
+            "".format(shared_link_clicked_id=who_shares_from_shared_link_clicked_last_id)
+        highest_shared_link_clicked_id = who_shares_from_shared_link_clicked_last_id
+    else:
+        status += "Starting update at shared_link_clicked.id = 0 "
+
+    # Get a list of shared_item id's which have had activity through shared_item_id
+    clicked_queryset = SharedLinkClicked.objects.using('readonly').all()
+    clicked_queryset = clicked_queryset.order_by('id')
+    clicked_queryset = clicked_queryset.filter(id__gt=who_shares_from_shared_link_clicked_last_id)
+
+    if not positive_value_exists(number_to_update):
+        number_to_update = 10000
+    number_to_update = convert_to_int(number_to_update)
+    status += "NUMBER_TO_UPDATE: {number_to_update} ".format(number_to_update=number_to_update)
+    clicked_queryset = clicked_queryset[:number_to_update]
+    shared_link_clicked_list = list(clicked_queryset)
+
+    # Since we might be looking for 10,000 voters, retrieve them all at once and put them in a dict
+    voter_we_vote_id_list = []
+    for one_shared_link_clicked in shared_link_clicked_list:
+        if one_shared_link_clicked.shared_by_voter_we_vote_id not in voter_we_vote_id_list:
+            voter_we_vote_id_list.append(one_shared_link_clicked.shared_by_voter_we_vote_id)
+    voter_dict_by_voter_we_vote_id = {}
+    voter_count = 0
+    try:
+        voter_query = Voter.objects.using('readonly').all()
+        voter_query = voter_query.filter(we_vote_id__in=voter_we_vote_id_list)
+        voter_list = list(voter_query)
+        for one_voter in voter_list:
+            voter_dict_by_voter_we_vote_id[one_voter.we_vote_id] = one_voter
+            voter_count += 1
+        status += "VOTER_COUNT: {voter_count} ".format(voter_count=voter_count)
+    except Exception as e:
+        status += "VOTER_RETRIEVE_FAIL: " + str(e) + " "
+        success = False
+        results = {
+            'status':                               status,
+            'success':                              success,
+            'sharing_summary_updates_remaining':    sharing_summary_updates_remaining,
+            'sharing_summary_items_changed':        sharing_summary_items_changed,
+            'sharing_summary_items_not_changed':    sharing_summary_items_not_changed,
+        }
+        return results
+
+    update_results = update_voter_who_shares_tables_from_shared_link_clicked_list(
+        by_year_mode=by_year_mode,
+        highest_shared_link_clicked_id=highest_shared_link_clicked_id,
+        shared_link_clicked_list=shared_link_clicked_list,
+        voter_dict_by_voter_we_vote_id=voter_dict_by_voter_we_vote_id,
+    )
+    highest_shared_link_clicked_id = update_results['highest_shared_link_clicked_id']
+    sharing_summary_items_changed = update_results['sharing_summary_items_changed']
+    sharing_summary_items_not_changed = update_results['sharing_summary_items_not_changed']
+
+    if positive_value_exists(highest_shared_link_clicked_id):
+        # Update the last_id_we_vote_setting_name
+        results = we_vote_settings_manager.save_setting(
+            setting_name=last_id_we_vote_setting_name,
+            setting_value=highest_shared_link_clicked_id,
+            value_type=WeVoteSetting.INTEGER)
+        if not results['success']:
+            status += results['status']
+            success = False
+
+    # How many remain to be updated in the future?
+    queryset = SharedLinkClicked.objects.using('readonly').all()
+    queryset = queryset.filter(id__gt=highest_shared_link_clicked_id)
+    sharing_summary_updates_remaining = queryset.count()
+
+    results = {
+        'status':                               status,
+        'success':                              success,
+        'sharing_summary_updates_remaining':    sharing_summary_updates_remaining,
+        'sharing_summary_items_changed':        sharing_summary_items_changed,
+        'sharing_summary_items_not_changed':    sharing_summary_items_not_changed,
     }
     return results

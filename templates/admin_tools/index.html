@@ -131,13 +131,15 @@
 
 {# ################## #}
 <h2>Analytics</h2>
-    <p><a href="{% url 'analytics:analytics_index' %}">Analytics</a></p>
 
-<div>
+<p><a href="{% url 'analytics:analytics_index' %}">Analytics</a></p>
+
+<p>
     <a href="{% url 'issue:issue_partisan_analysis' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
         target="_blank">Breakdown of Endorsements, by Partisan Leaning <span class="glyphicon glyphicon-new-window"></span></a>
-</div>
+</p>
 
+<p><a href="{% url 'share:voter_who_shares_summary_list' %}">Statistics About Voters Who Share</a></p>
 {# ################## #}
 <h2>Security</h2>
     <p><a href="{% url 'stripe_donations:suspects_list' %}">Disputed, Fraudulent, and Suspect, Stripe Transactions</a></p>

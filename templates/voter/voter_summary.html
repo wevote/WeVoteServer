@@ -7,6 +7,8 @@
 {% endif %}{% endblock %}
 
 {%  block content %}
+{% load template_filters %}
+{% load humanize %}
 
 <a href="{% url 'voter:voter_list' %}">< Back to Voters</a>
 
@@ -94,6 +96,63 @@
         <br />
     {% endif %}
 
+    <br />
+    <h3>{{ voter.get_full_name }} Has Shared</h3>
+<form name="show_this_year_form" method="get" action="{% url 'voter:voter_summary_we_vote_id' voter_we_vote_id %}">
+    {% csrf_token %}
+    <input type="hidden" name="sort_by" value="{{ sort_by }}">
+    <input type="hidden" name="show_all" value="{{ show_all }}">
+    <input type="hidden" name="show_more" value="{{ show_more }}">
+
+    {#  #}
+    <label for="exclude_remind_contact_id">
+      <input type="checkbox" name="exclude_remind_contact" id="exclude_remind_contact_id" value="1"
+             {% if exclude_remind_contact %}checked{% endif %} /> Exclude Remind Contact&nbsp;&nbsp;&nbsp;
+    </label>
+
+    {#  #}
+    <label for="show_shares_with_zero_clicks_id">
+      <input type="checkbox" name="show_shares_with_zero_clicks" id="show_shares_with_zero_clicks_id" value="1"
+             {% if show_shares_with_zero_clicks %}checked{% endif %} /> Show Zero Clicks&nbsp;&nbsp;&nbsp;
+    </label>
+
+    {#  #}
+    <label for="limit_to_last_90_days_id">
+      <input type="checkbox" name="limit_to_last_90_days" id="limit_to_last_90_days_id" value="1"
+             {% if limit_to_last_90_days %}checked{% endif %} /> Last 90 days only&nbsp;&nbsp;&nbsp;
+    </label>
+
+    {% if election_years_available %}
+    <select {% if limit_to_last_90_days %}disabled {% endif %}id="show_this_year_id" name="show_this_year">
+        <option value="0" {% if 0 == show_this_year|convert_to_int %} selected="selected"{% endif %}>
+        {% if show_this_year|convert_to_int > 0 %}
+            -- Stop Limiting to {{ show_this_year }} --
+        {% else %}
+            -- Show Specific Year --
+        {% endif %}
+        </option>
+        {% for year in election_years_available %}
+        <option value="{{ year }}"
+                {% if show_this_year|slugify == year|slugify %} selected="selected"{% endif %}>
+            {% if show_this_year|slugify == year|slugify %}Limited To {% endif %}
+            {{ year }}</option>
+        {% endfor %}
+    </select>
+    {% endif %}{# End of if election_years_available #}
+
+&nbsp;&nbsp;&nbsp;
+{% if voter_summary_search %}
+    <a href="{% url 'voter:voter_summary_we_vote_id' voter_we_vote_id %}?state_code={{ state_code }}&exclude_remind_contact={{ exclude_remind_contact }}&show_shares_with_zero_clicks={{ show_shares_with_zero_clicks }}&limit_to_last_90_days={{ limit_to_last_90_days }}&voter_summary_search=&show_this_year={{ show_this_year }}">
+         clear search</a>&nbsp;
+{% endif %}
+    <input type="text" name="voter_summary_search" id="voter_summary_search_id" value="{{ voter_summary_search }}" />
+    <input type="submit" value="Search" />
+
+</form>
+
+    {% if voter_who_shares_summary_list %}
+    {% include "share/voter_who_shares_summary_table.html" with voter_who_shares_summary_list=voter_who_shares_summary_list %}
+    {% endif %}
 
 {% else %}
 
@@ -101,5 +160,30 @@
     Please visit the <a href="{% url 'voter:voter_list' %}">Voter List</a> page.
 
 {% endif %}
+    <script>
+        $(function() {
+            $('#limit_to_opinions_in_state_code_id').change(function() {
+                this.form.submit();
+            });
+            $('#share_type_filter_id').change(function() {
+                this.form.submit();
+            });
+            $('#exclude_remind_contact_id').change(function() {
+                this.form.submit();
+            });
+            $('#limit_to_last_90_days_id').change(function() {
+                this.form.submit();
+            });
+            $('#show_shares_with_zero_clicks_id').change(function() {
+                this.form.submit();
+            });
+            $('#show_this_year_id').change(function() {
+                this.form.submit();
+            });
+            $('#state_code_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
 
 {% endblock %}

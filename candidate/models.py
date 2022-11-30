@@ -3097,11 +3097,11 @@ class CandidateManager(models.Manager):
             success = False
 
         results = {
-            'success':                  success,
-            'status':                   status,
-            'candidate_to_office_link': candidate_to_office_link,
-            'list_found':               list_found,
-            'only_one_found':           only_one_found,
+            'success':                          success,
+            'status':                           status,
+            'candidate_to_office_link':         candidate_to_office_link,
+            'list_found':                       list_found,
+            'only_one_found':                   only_one_found,
             'candidate_to_office_link_list':    link_list,
         }
         return results
