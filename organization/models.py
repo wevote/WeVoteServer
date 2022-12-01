@@ -3186,6 +3186,13 @@ class Organization(models.Model):
         else:
             return ''
 
+    def generate_instagram_link(self):
+        if self.organization_instagram_handle:
+            return "https://instagram.com/{instagram_handle}/" \
+                   "".format(instagram_handle=self.organization_instagram_handle)
+        else:
+            return ''
+
     def generate_twitter_link(self):
         if self.organization_twitter_handle:
             return "https://twitter.com/{twitter_handle}".format(twitter_handle=self.organization_twitter_handle)

@@ -114,6 +114,19 @@
                     <th><span {% if twitter_handle_mismatch %}style="color: red;"{% endif %}>Twitter Location:</span></th>
                     <td>{{ organization.twitter_location|default_if_none:"" }}</td>
                 </tr>
+                <tr>
+                    <th><span>Instagram Handle</span></th>
+                    <td>
+                        {{ organization.organization_instagram_handle|default_if_none:"" }}
+                    {% if organization.generate_instagram_link %}
+                        {% if organization.organization_instagram_handle %}
+                            <a href="{{ organization.generate_instagram_link }}"
+                               target="_blank"
+                               class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+                        {% endif %}
+                    {% endif %}
+                    </td>
+                </tr>
             {% if organization.generate_facebook_link %}
                 <tr>
                     <th>Facebook: </th>

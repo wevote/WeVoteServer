@@ -41,6 +41,7 @@
             <td><a href="{% url 'organization:organization_position_list' possible_organization.organization_id %}" target="_blank">{{ possible_organization.organization_name }}</a> (view in new window)</td>
             <td>{% if possible_organization.organization_twitter_handle %}{{ possible_organization.organization_twitter_handle }}{% endif %}</td>
             <td>{% if possible_organization.organization_facebook %}{{ possible_organization.organization_facebook }}{% endif %}</td>
+            <td>{% if possible_organization.organization_instagram_handle %}{{ possible_organization.organization_instagram_handle }}{% endif %}</td>
             <td>{% if possible_organization.organization_website %}{{ possible_organization.organization_website }}{% endif %}</td>
             <td>{% if possible_organization.wikipedia_page_id %}
                 <a href="{{ possible_organization.generate_wikipedia_link }}" target="_blank">W yes</a>{% endif %}</td>
@@ -184,6 +185,30 @@
             >
                 Refresh Facebook Photo</a>
         {% endif %}
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="organization_instagram_handle_id" class="col-sm-3 control-label">
+    <span {% if instagram_handle_mismatch %} style="color: red;" {% endif %}>
+        Instagram Handle
+        {% if instagram_handle_mismatch %} MISMATCH WITH INSTAGRAM LINK ('{{ instagram_link_to_organization_handle }}' expected){% endif %}
+    </span>
+        {% if organization.organization_instagram_handle %}
+        <a href="https://instagram.com/{{ organization.organization_instagram_handle }}"
+                   target="_blank"
+                   class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+        {% endif %}
+    </label>
+    <div class="col-sm-8">
+        <input type="text" name="organization_instagram_handle" id="organization_instagram_handle_id" class="form-control"
+               value="{% if organization %}{{ organization.organization_instagram_handle|default_if_none:'' }}{% else %}{{ organization_instagram_handle|default_if_none:'' }}{% endif %}" />
+        {% if organization.organization_instagram_handle %}
+{#            <input type="checkbox" name="organization_twitter_updates_failing" id="organization_twitter_updates_failing_id" value="1"#}
+{#                    {% if organization.organization_instagram_updates_failing %}checked{% endif %} />#}
+{#            <label for="organization_instagram_updates_failing_id" style="font-weight: normal !important;">Instagram Updates Failing. <span style="color: darkgray">Our automated Instagram data update script had trouble retrieving a handle. Uncheck when fixed.</span></label>#}
+        {% endif %}
+
     </div>
 </div>
 
