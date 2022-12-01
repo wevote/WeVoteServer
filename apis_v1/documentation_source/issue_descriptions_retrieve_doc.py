@@ -21,12 +21,24 @@ def issue_descriptions_retrieve_doc_template_values(url_root):
                    '  "status": string,\n' \
                    '  "issue_list": list\n' \
                    '   [\n' \
+                   '     "considered_left": boolean,\n' \
+                   '     "considered_right": boolean,\n' \
                    '     "issue_we_vote_id": string,\n' \
                    '     "issue_name": string,\n' \
                    '     "issue_description": string,\n' \
+                   '     "issue_followers_count": number,\n' \
                    '     "issue_icon_local_path": string,\n' \
-                   '     "issue_image_url": string,\n' \
-                   '     "issue_photo_url_large": string,\n' \
+                   '     "linked_organization_count": number,\n' \
+                   '     "linked_organization_preview_list": list' \
+                   '      [{\n' \
+                   '        "organization_name": string,\n' \
+                   '        "organization_we_vote_id": string,\n' \
+                   '        "twitter_description": string,\n' \
+                   '        "twitter_followers_count": number,\n' \
+                   '        "organization_twitter_handle": string,\n' \
+                   '        "we_vote_hosted_profile_image_url_medium": string,\n' \
+                   '        "we_vote_hosted_profile_image_url_tiny": string,\n' \
+                   '      }],\n' \
                    '     "issue_photo_url_medium": string,\n' \
                    '     "issue_photo_url_tiny": string,\n' \
                    '   ],\n' \
