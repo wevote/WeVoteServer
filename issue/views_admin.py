@@ -85,6 +85,12 @@ def issue_descriptions_retrieve_view(request):  # issueDescriptionsRetrieve
     return http_response
 
 
+def issue_organizations_retrieve_view(request):  # issueOrganizationsRetrieve
+    issue_we_vote_id = request.GET.get('issue_we_vote_id', '')
+    http_response = issue_organizations_retrieve_for_api(issue_we_vote_id=issue_we_vote_id)
+    return http_response
+
+
 def issues_followed_retrieve_view(request):  # issuesFollowedRetrieve
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     http_response = issues_followed_retrieve_for_api(voter_device_id)

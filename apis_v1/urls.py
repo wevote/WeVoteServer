@@ -22,7 +22,8 @@ from analytics.views_admin import analytics_action_sync_out_view, organization_d
 from ballot.views_admin import ballot_items_sync_out_view, ballot_returned_sync_out_view
 from candidate.views_admin import candidates_sync_out_view, candidate_to_office_link_sync_out_view
 from issue.views_admin import issue_descriptions_retrieve_view, issues_followed_retrieve_view, \
-    issues_sync_out_view, issues_retrieve_view, issues_under_ballot_items_retrieve_view, \
+    issue_organizations_retrieve_view, issues_sync_out_view, issues_retrieve_view, \
+    issues_under_ballot_items_retrieve_view, \
     retrieve_issues_to_follow_view, organization_link_to_issue_sync_out_view, test_real_time_update
 from measure.views_admin import measures_sync_out_view
 from office.views_admin import offices_sync_out_view
@@ -142,6 +143,8 @@ urlpatterns = [
       re_path(r'^issueDescriptionsRetrieve/', issue_descriptions_retrieve_view,
               name='issueDescriptionsRetrieveView'),
       re_path(r'^issueFollow/', views_voter.voter_issue_follow_view, name='issueFollowView'),
+      re_path(r'^issueOrganizationsRetrieve/', issue_organizations_retrieve_view,
+              name='issueOrganizationsRetrieveView'),
       re_path(r'^issuesLinkedToOrganization/',
               views_issues.issues_linked_to_organization_view, name='issuesLinkedToOrganizationView'),
       re_path(r'^issuesToLinkToForOrganization/',
@@ -514,6 +517,8 @@ urlpatterns = [
       re_path(r'^docs/issueDescriptionsRetrieve/$',
               views_docs.issue_descriptions_retrieve_doc_view, name='issueDescriptionsRetrieveDocs'),
       re_path(r'^docs/issueFollow/$', views_docs.issue_follow_doc_view, name='issueFollowDocs'),
+      re_path(r'^docs/issueOrganizationsRetrieve/$',
+              views_docs.issue_organizations_retrieve_doc_view, name='issueOrganizationsRetrieveDocs'),
       re_path(r'^docs/issuesFollowedRetrieve/$',
               views_docs.issues_followed_retrieve_doc_view, name='issuesFollowedRetrieveDocs'),
       re_path(r'^docs/issuesRetrieve/$', views_docs.issues_retrieve_doc_view, name='issuesRetrieveDocs'),

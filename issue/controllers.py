@@ -295,6 +295,97 @@ def issue_descriptions_retrieve_for_api():  # issueDescriptionsRetrieve
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
+def issue_organizations_retrieve_for_api(issue_we_vote_id=''):  # issueOrganizationsRetrieve
+    issue_list = []
+    issues_to_display = []
+
+    try:
+        issue_list_object = IssueListManager()
+        if positive_value_exists(issue_we_vote_id):
+            results = issue_list_object.retrieve_issues(
+                issue_we_vote_id_list_to_filter=[issue_we_vote_id],
+                read_only=True)
+        else:
+            results = issue_list_object.retrieve_issues(
+                read_only=True)
+        success = results['success']
+        status = results['status']
+        issue_list = results['issue_list']
+    except Exception as e:
+        status = 'FAILED issue_organizations_retrieve_for_api. ' \
+                 '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        handle_exception(e, logger=logger, exception_message=status)
+        success = False
+
+    if not success:
+        json_data = {
+            'status':               status,
+            'success':              False,
+            'issue_list':           [],
+            'organization_list':    [],
+        }
+
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    link_manager = OrganizationLinkToIssueList()
+    complete_organization_we_vote_id_list = []
+    for issue in issue_list:
+        linked_organization_we_vote_id_list = []
+        one_issue_list = [issue.we_vote_id]
+        results = link_manager.retrieve_organization_we_vote_id_list_from_issue_we_vote_id_list(one_issue_list)
+        if results['organization_we_vote_id_list_found']:
+            linked_organization_we_vote_id_list = results['organization_we_vote_id_list']
+            temp_combined_list = complete_organization_we_vote_id_list + linked_organization_we_vote_id_list
+            values_as_keys = dict.fromkeys(temp_combined_list)
+            complete_organization_we_vote_id_list = list(values_as_keys)
+        one_issue = {
+            'issue_we_vote_id':                 issue.we_vote_id,
+            'linked_organization_we_vote_id_list': linked_organization_we_vote_id_list,
+        }
+        issues_to_display.append(one_issue)
+
+    organization_list = []
+    organization_list_found = False
+    from organization.models import Organization
+    try:
+        organization_queryset = Organization.objects.all()
+        organization_queryset = organization_queryset.filter(we_vote_id__in=complete_organization_we_vote_id_list)
+        organization_queryset = organization_queryset.order_by('-twitter_followers_count')
+        organization_list = list(organization_queryset)
+
+        if len(organization_list):
+            organization_list_found = True
+            status += 'ORGANIZATIONS_FOUND '
+        else:
+            status += 'NO_ORGANIZATIONS_FOUND '
+    except Exception as e:
+        status += 'issue_organizations_retrieve_for_api: Unable to retrieve organizations from db. ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        success = False
+
+    simple_organization_list = []
+    if organization_list_found:
+        for organization in organization_list:
+            organization_dict = {
+                'organization_name': organization.organization_name,
+                'organization_we_vote_id': organization.we_vote_id,
+                'twitter_description': organization.twitter_description,
+                'twitter_followers_count': organization.twitter_followers_count,
+                'organization_twitter_handle': organization.organization_twitter_handle,
+                'we_vote_hosted_profile_image_url_medium': organization.we_vote_hosted_profile_image_url_medium,
+                'we_vote_hosted_profile_image_url_tiny': organization.we_vote_hosted_profile_image_url_tiny,
+            }
+            simple_organization_list.append(organization_dict)
+
+    json_data = {
+        'status':               status,
+        'success':              success,
+        'issue_list':           issues_to_display,
+        'organization_list':    simple_organization_list,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
 def issues_retrieve_for_api(  # issuesRetrieve  # DEPRECATED
         voter_device_id, sort_formula, google_civic_election_id=0,
         voter_issues_only=None,  # Deprecated
@@ -1096,6 +1187,7 @@ def retrieve_organization_preview_list(issue_we_vote_id):
     success = True
     issue_we_vote_id_list = [issue_we_vote_id]
     linked_organization_preview_list = []
+    organization_list = []
     organization_list_found = False
 
     link_manager = OrganizationLinkToIssueList()
@@ -1124,6 +1216,10 @@ def retrieve_organization_preview_list(issue_we_vote_id):
                 organization_dict = {
                     'organization_name':                        organization.organization_name,
                     'organization_we_vote_id':                  organization.we_vote_id,
+                    'twitter_description':                      organization.twitter_description,
+                    'twitter_followers_count':                  organization.twitter_followers_count,
+                    'organization_twitter_handle':              organization.organization_twitter_handle,
+                    'we_vote_hosted_profile_image_url_medium':  organization.we_vote_hosted_profile_image_url_medium,
                     'we_vote_hosted_profile_image_url_tiny':    organization.we_vote_hosted_profile_image_url_tiny,
                 }
                 linked_organization_preview_list.append(organization_dict)

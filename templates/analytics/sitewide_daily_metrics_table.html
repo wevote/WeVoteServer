@@ -47,8 +47,8 @@
     {# Sharing #}
         <td>
             {% if one_row.shared_items_clicked_today %}<span class="u-no-break">links clicked: {{ one_row.shared_items_clicked_today|intcomma }}</span><br />{% endif %}
-            {% if one_row.shared_link_clicked_unique_viewers_today %}<span class="u-no-break">unique viewers: {{ one_row.shared_link_clicked_unique_viewers_today|intcomma }}</span>{% endif %}
-            {% if one_row.shared_link_clicked_count_today %}<span class="u-no-break">total clicks: {{ one_row.shared_link_clicked_count_today|intcomma }}</span><br />{% endif %}
+            {% if one_row.shared_link_clicked_unique_viewers_today %}<span class="u-no-break">unique viewers: {{ one_row.shared_link_clicked_unique_viewers_today|intcomma }}</span><br />{% endif %}
+            {% if one_row.shared_link_clicked_count_today %}<span class="u-no-break">total clicks: {{ one_row.shared_link_clicked_count_today|intcomma }}</span>{% endif %}
         </td>
         <td>{% if one_row.ballot_views_today %}{{ one_row.ballot_views_today|intcomma }}{% endif %}</td>
         <td>
