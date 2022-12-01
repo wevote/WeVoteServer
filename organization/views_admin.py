@@ -45,7 +45,8 @@ from twitter.models import TwitterLinkToOrganization, TwitterUserManager
 from voter.models import retrieve_voter_authority, voter_has_authority, VoterManager
 from voter_guide.models import VoterGuideManager
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists, \
+from wevote_functions.functions import convert_to_int, extract_instagram_handle_from_text_string, \
+    extract_twitter_handle_from_text_string, positive_value_exists, \
     STATE_CODE_MAP
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 
@@ -1247,6 +1248,7 @@ def organization_edit_process_view(request):
     issue_analysis_done = request.POST.get('issue_analysis_done', False)
     organization_endorsements_api_url = request.POST.get('organization_endorsements_api_url', False)
     organization_id = convert_to_int(request.POST.get('organization_id', 0))
+    organization_instagram_handle = request.POST.get('organization_instagram_handle', False)
     organization_link_issue_we_vote_ids = request.POST.getlist('selected_issues', False)
     organization_name = request.POST.get('organization_name', '')
     organization_contact_form_url = request.POST.get('organization_contact_form_url', False)
@@ -1275,6 +1277,7 @@ def organization_edit_process_view(request):
 
     # Filter incoming data
     organization_twitter_handle = extract_twitter_handle_from_text_string(organization_twitter_handle)
+    organization_instagram_handle = extract_instagram_handle_from_text_string(organization_instagram_handle)
 
     # Check to see if this organization is already being used anywhere
     new_organization_created = False
@@ -1364,23 +1367,25 @@ def organization_edit_process_view(request):
 
     if twitter_handle_can_be_saved_without_conflict and create_twitter_link_to_organization_for_handle \
             and positive_value_exists(twitter_link_to_organization_from_handle_twitter_id):
+        org_results_organization_we_vote_id = ''
         if not positive_value_exists(organization_we_vote_id):
             org_results = Organization.objects.update_or_create_organization(
                 organization_id='',
                 we_vote_id='',
                 organization_website_search='',
                 organization_twitter_search='',
-                organization_name=organization_name ,
+                organization_name=organization_name,
                 organization_website=organization_website,
                 organization_twitter_handle=organization_twitter_handle,
                 organization_email=organization_email,
                 organization_facebook=organization_facebook,
                 organization_type=organization_type,
             )
+            org_results_organization_we_vote_id = org_results['organization'].we_vote_id
         create_results = twitter_user_manager.create_twitter_link_to_organization(
             twitter_id=twitter_link_to_organization_from_handle_twitter_id,
-            organization_we_vote_id=organization_we_vote_id if positive_value_exists(organization_we_vote_id) else
-                org_results['organization'].we_vote_id)
+            organization_we_vote_id=organization_we_vote_id
+            if positive_value_exists(organization_we_vote_id) else org_results_organization_we_vote_id)
         if not create_results['success']:
             messages.add_message(request, messages.ERROR, 'Could not create TwitterLinkToOrganization.')
             twitter_handle_can_be_saved_without_conflict = False
@@ -1392,8 +1397,6 @@ def organization_edit_process_view(request):
                 organization_on_stage.issue_analysis_admin_notes = issue_analysis_admin_notes.strip()
             if issue_analysis_done is not False:
                 organization_on_stage.issue_analysis_done = issue_analysis_done
-            if organization_name is not False:
-                organization_on_stage.organization_name = organization_name.strip()
             if organization_twitter_handle is not False:
                 if twitter_handle_can_be_saved_without_conflict:
                     organization_on_stage.organization_twitter_handle = organization_twitter_handle.strip()
@@ -1402,20 +1405,24 @@ def organization_edit_process_view(request):
                 organization_on_stage.organization_contact_form_url = organization_contact_form_url.strip()
             if organization_email is not False:
                 organization_on_stage.organization_email = organization_email.strip()
+            if organization_endorsements_api_url is not False:
+                organization_on_stage.organization_endorsements_api_url = organization_endorsements_api_url.strip()
             if organization_facebook is not False:
                 organization_on_stage.organization_facebook = organization_facebook.strip()
+            if organization_instagram_handle is not False:
+                organization_on_stage.organization_instagram_handle = organization_instagram_handle.strip()
+            if organization_name is not False:
+                organization_on_stage.organization_name = organization_name.strip()
+            if organization_type is not False:
+                organization_on_stage.organization_type = organization_type.strip()
             if organization_website is not False:
                 organization_on_stage.organization_website = organization_website.strip()
+            if state_served_code is not False:
+                organization_on_stage.state_served_code = state_served_code.strip()
             if wikipedia_page_title is not False:
                 organization_on_stage.wikipedia_page_title = wikipedia_page_title.strip()
             if wikipedia_photo_url is not False:
                 organization_on_stage.wikipedia_photo_url = wikipedia_photo_url.strip()
-            if organization_endorsements_api_url is not False:
-                organization_on_stage.organization_endorsements_api_url = organization_endorsements_api_url.strip()
-            if state_served_code is not False:
-                organization_on_stage.state_served_code = state_served_code.strip()
-            if organization_type is not False:
-                organization_on_stage.organization_type = organization_type.strip()
             organization_on_stage.save()
             organization_id = organization_on_stage.id
             organization_we_vote_id = organization_on_stage.we_vote_id
@@ -1449,6 +1456,7 @@ def organization_edit_process_view(request):
                     'messages_on_stage':            messages_on_stage,
                     'organizations_list':           organizations_list,
                     'organization_name':            organization_name,
+                    'organization_instagram_handle':    organization_instagram_handle,
                     'organization_twitter_handle':  organization_twitter_handle,
                     'organization_facebook':        organization_facebook,
                     'organization_website':         organization_website,
@@ -1475,6 +1483,7 @@ def organization_edit_process_view(request):
                 template_values = {
                     'google_civic_election_id':     google_civic_election_id,
                     'messages_on_stage':            messages_on_stage,
+                    'organization_instagram_handle':    organization_instagram_handle,
                     'organization_name':            organization_name,
                     'organization_twitter_handle':  organization_twitter_handle,
                     'organization_facebook':        organization_facebook,
@@ -1501,6 +1510,8 @@ def organization_edit_process_view(request):
                 organization_on_stage.organization_email = organization_email
             if organization_facebook is not False:
                 organization_on_stage.organization_facebook = organization_facebook
+            if organization_instagram_handle is not False:
+                organization_on_stage.organization_instagram_handle = organization_instagram_handle
             if organization_website is not False:
                 organization_on_stage.organization_website = organization_website
             if wikipedia_page_title is not False:
