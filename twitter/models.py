@@ -432,7 +432,7 @@ class TwitterUserManager(models.Manager):
             twitter_user = results['twitter_user']
             twitter_user_id = twitter_user.twitter_id
         else:
-            status += "TWITTER_USER_ID_MISSING: " + results['status']
+            status += "RETRIEVE_TWITTER_ERROR: " + results['status']
             results = {
                 'success':  False,
                 'status':   status,
@@ -714,6 +714,8 @@ class TwitterUserManager(models.Manager):
 
         # Is this twitter_handle already stored locally? If so, return that
         twitter_results = self.retrieve_twitter_user(twitter_user_id, twitter_handle, read_only=read_only)
+        if twitter_results['success'] is False:
+            status += twitter_results['status']
         if twitter_results['twitter_user_found']:
             twitter_user = twitter_results['twitter_user']
             if positive_value_exists(twitter_user.twitter_profile_image_url_https):
@@ -724,6 +726,8 @@ class TwitterUserManager(models.Manager):
 
         # If here, we want to reach out to Twitter to get info for this twitter_handle
         twitter_results = retrieve_twitter_user_info(twitter_user_id, twitter_handle)
+        if twitter_results['success'] is False:
+            status += twitter_results['status']
         if twitter_results['twitter_handle_found']:
             twitter_save_results = self.update_or_create_twitter_user(
                 twitter_json=twitter_results['twitter_json'], twitter_id=twitter_user_id)
