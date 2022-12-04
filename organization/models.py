@@ -2594,14 +2594,14 @@ class OrganizationListManager(models.Manager):
         }
         return results
 
-    def retrieve_organizations_from_twitter_handle(self, twitter_handle=''):
+    def retrieve_organizations_from_twitter_handle(self, twitter_handle='', read_only=True):
         keep_looking_for_duplicates = True
         organization_list = []
         organization_list_found = False
         organization_found = False
         multiple_entries_found = False
         organization = Organization()
-        success = False
+        success = True
         status = ""
         twitter_handle_filtered = extract_twitter_handle_from_text_string(twitter_handle)
 
@@ -2609,20 +2609,19 @@ class OrganizationListManager(models.Manager):
             # See if we have linked an organization to this Twitter handle
             twitter_user_manager = TwitterUserManager()
             results = twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_handle(
-                twitter_handle_filtered)
+                twitter_handle_filtered, read_only=True)
             if 'twitter_link_to_organization_found' in results and results['twitter_link_to_organization_found']:
                 twitter_link_to_organization = results['twitter_link_to_organization']
                 organization_manager = OrganizationManager()
                 organization_results = organization_manager.retrieve_organization_from_we_vote_id(
-                    twitter_link_to_organization.organization_we_vote_id)
+                    twitter_link_to_organization.organization_we_vote_id, read_only=True)
                 if organization_results['organization_found']:
                     organization = organization_results['organization']
                     organization_found = True
                     keep_looking_for_duplicates = False
                     organization_list_found = True
                     organization_list.append(organization)
-                    success = True
-                    status = "ORGANIZATION_FOUND_FROM_TWITTER_LINK_TO_ORGANIZATION"
+                    status += "ORGANIZATION_FOUND_FROM_TWITTER_LINK_TO_ORGANIZATION "
                 else:
                     keep_looking_for_duplicates = True
                     # Heal the data -- the organization is missing so we should delete the Twitter link
@@ -2637,14 +2636,16 @@ class OrganizationListManager(models.Manager):
                         status += repair_results['status']
 
                     organization_list_found = False
-                    success = True
                     status += "ORGANIZATION_NOT_FOUND_FROM_TWITTER_LINK_TO_ORGANIZATION-DELETED_BAD_LINK "
             else:
                 keep_looking_for_duplicates = True
 
             if keep_looking_for_duplicates:
                 try:
-                    organization_queryset = Organization.objects.all()
+                    if positive_value_exists(read_only):
+                        organization_queryset = Organization.objects.using('readonly').all()
+                    else:
+                        organization_queryset = Organization.objects.all()
                     organization_queryset = organization_queryset.filter(
                         organization_twitter_handle__iexact=twitter_handle_filtered)
                     # If multiple organizations claim the same Twitter handle, select the one with... ??
@@ -2664,26 +2665,22 @@ class OrganizationListManager(models.Manager):
                             organization_list_found = True
                             multiple_entries_found = True
                             status += 'ORGANIZATIONS_RETRIEVED_FROM_TWITTER_HANDLE '
-                            success = True
                     else:
                         status += 'NO_ORGANIZATIONS_RETRIEVED_FROM_TWITTER_HANDLE '
-                        success = True
                 except Organization.DoesNotExist:
                     # No organizations found. Not a problem.
                     status += 'NO_ORGANIZATIONS_FOUND_FROM_TWITTER_HANDLE_DoesNotExist'
                     organization_list = []
                     multiple_entries_found = False
-                    success = True
                 except Exception as e:
                     handle_exception(e, logger=logger,
                                      exception_message="exception thrown in retrieve_organizations_"
                                                        "from_non_unique_identifiers")
-                    status = 'FAILED retrieve_organizations_from_twitter_handle ' \
-                             '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                    status += 'FAILED retrieve_organizations_from_twitter_handle ' \
+                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
                     success = False
                     organization_list = []
                     multiple_entries_found = False
-                    keep_looking_for_duplicates = False
 
         results = {
             'success':                  success,

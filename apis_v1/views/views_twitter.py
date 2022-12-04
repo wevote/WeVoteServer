@@ -42,8 +42,9 @@ def twitter_identity_retrieve_view(request):  # twitterIdentityRetrieve
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    results = twitter_identity_retrieve_for_api(twitter_handle, voter_device_id)
+    # 2022-12-04 We are moving twitterIdentityRetrieve over to the CDN, and removing anything custom to voter
+    # voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    results = twitter_identity_retrieve_for_api(twitter_handle)
     json_data = {
         'status':                                   results['status'],
         'success':                                  results['success'],

@@ -379,10 +379,10 @@ def fetch_number_of_organizations_needing_twitter_update():
 
 
 def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):  # twitterIdentityRetrieve
-    status = "TWITTER_HANDLE_DOES_NOT_EXIST"  # Default to this
+    status = ""
     success = True
     google_civic_election_id = 0
-    google_civic_election_id_voter_is_watching = 0
+    # google_civic_election_id_voter_is_watching = 0
     kind_of_owner = "TWITTER_HANDLE_DOES_NOT_EXIST"
     owner_found = False
     owner_we_vote_id = ''
@@ -403,50 +403,52 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):  # tw
     # NOTE: It would be better to retrieve from the Politician, and then bring "up" information we need from the
     #  CandidateCampaign table. 2016-05-11 We haven't implemented Politician's yet though.
 
+    # Deprecating anything to do with voter-specific data (for speed)
     # Check Candidate table
-    if not positive_value_exists(owner_found):
-        # Find out the election the voter is looking at
-        results = figure_out_google_civic_election_id_voter_is_watching(voter_device_id)
-        if positive_value_exists(results['google_civic_election_id']):
-            google_civic_election_id_voter_is_watching = results['google_civic_election_id']
-        state_code = ""
-        candidate_name = ""
-
-        candidate_list_manager = CandidateListManager()
-        google_civic_election_id_list = [google_civic_election_id_voter_is_watching]
-        candidate_results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
-            google_civic_election_id_list=google_civic_election_id_list,
-            state_code=state_code,
-            candidate_twitter_handle=twitter_handle,
-            candidate_name=candidate_name,
-            read_only=True)
-        if candidate_results['candidate_list_found']:
-            candidate_list = candidate_results['candidate_list']
-
-            # ...and then find the candidate entry for that election
-            most_recent_candidate = candidate_list[0]
-            for one_candidate in candidate_list:
-                if google_civic_election_id_voter_is_watching == convert_to_int(one_candidate.google_civic_election_id):
-                    kind_of_owner = "CANDIDATE"
-                    owner_we_vote_id = one_candidate.we_vote_id
-                    owner_id = one_candidate.id
-                    google_civic_election_id = one_candidate.google_civic_election_id
-                    owner_found = True
-                    status = "OWNER_OF_THIS_TWITTER_HANDLE_FOUND-CANDIDATE"
-                    # Now that we have candidate, break out of for-loop
-                    break
-            if not owner_found:
-                kind_of_owner = "CANDIDATE"
-                owner_we_vote_id = most_recent_candidate.we_vote_id
-                owner_id = most_recent_candidate.id
-                google_civic_election_id = most_recent_candidate.google_civic_election_id
-                owner_found = True
-                status = "OWNER_OF_THIS_TWITTER_HANDLE_FOUND-CANDIDATE"
+    # if not positive_value_exists(owner_found):
+    #     # Find out the election the voter is looking at
+    #     results = figure_out_google_civic_election_id_voter_is_watching(voter_device_id)
+    #     if positive_value_exists(results['google_civic_election_id']):
+    #         google_civic_election_id_voter_is_watching = results['google_civic_election_id']
+    #     state_code = ""
+    #     candidate_name = ""
+    #
+    #     candidate_list_manager = CandidateListManager()
+    #     google_civic_election_id_list = [google_civic_election_id_voter_is_watching]
+    #     candidate_results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
+    #         google_civic_election_id_list=google_civic_election_id_list,
+    #         state_code=state_code,
+    #         candidate_twitter_handle=twitter_handle,
+    #         candidate_name=candidate_name,
+    #         read_only=True)
+    #     if candidate_results['candidate_list_found']:
+    #         candidate_list = candidate_results['candidate_list']
+    #
+    #         # ...and then find the candidate entry for that election
+    #         most_recent_candidate = candidate_list[0]
+    #         for one_candidate in candidate_list:
+    #             if google_civic_election_id_voter_is_watching == \
+    #                   convert_to_int(one_candidate.google_civic_election_id):
+    #                 kind_of_owner = "CANDIDATE"
+    #                 owner_we_vote_id = one_candidate.we_vote_id
+    #                 owner_id = one_candidate.id
+    #                 google_civic_election_id = one_candidate.google_civic_election_id
+    #                 owner_found = True
+    #                 status = "OWNER_OF_THIS_TWITTER_HANDLE_FOUND-CANDIDATE"
+    #                 # Now that we have candidate, break out of for-loop
+    #                 break
+    #         if not owner_found:
+    #             kind_of_owner = "CANDIDATE"
+    #             owner_we_vote_id = most_recent_candidate.we_vote_id
+    #             owner_id = most_recent_candidate.id
+    #             google_civic_election_id = most_recent_candidate.google_civic_election_id
+    #             owner_found = True
+    #             status = "OWNER_OF_THIS_TWITTER_HANDLE_FOUND-CANDIDATE"
 
     if not positive_value_exists(owner_found):
         organization_list_manager = OrganizationListManager()
         organization_results = organization_list_manager.retrieve_organizations_from_twitter_handle(
-            twitter_handle=twitter_handle)
+            twitter_handle=twitter_handle, read_only=True)
         if organization_results['organization_list_found']:
             organization_list = organization_results['organization_list']
             one_organization = organization_list[0]
@@ -455,7 +457,7 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):  # tw
             owner_id = one_organization.id
             google_civic_election_id = 0
             owner_found = True
-            status = "OWNER_OF_THIS_TWITTER_HANDLE_FOUND-ORGANIZATION"
+            status += "OWNER_OF_THIS_TWITTER_HANDLE_FOUND-ORGANIZATION "
             twitter_description = one_organization.twitter_description
             twitter_followers_count = one_organization.twitter_followers_count
             twitter_photo_url = one_organization.twitter_profile_image_url_https
@@ -519,14 +521,14 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):  # tw
                     status += results['status']
                     status += "TwitterLinkToOrganization_NOT_CREATED_AFTER_ORGANIZATION_CREATE "
                     kind_of_owner = "TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE"
-                    status = "TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE"
+                    status += "TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE "
             except Exception as e:
                 status += "UNABLE_TO_CREATE_TWITTER_LINK_TO_ORG: " + str(e) + " "
                 kind_of_owner = "TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE"
-                status = "TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE"
+                status += "TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE "
         else:
             kind_of_owner = "TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE"
-            status = "TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE"
+            status += "TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE "
 
     results = {
         'status':                                   status,
