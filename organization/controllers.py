@@ -1626,8 +1626,8 @@ def organizations_followed_retrieve_for_api(voter_device_id, maximum_number_to_r
                     organization.twitter_followers_count if positive_value_exists(
                         organization.twitter_followers_count) else 0,
                 'twitter_description':
-                    organization.organization_description
-                    if positive_value_exists(organization.organization_description) else '',
+                    organization.twitter_description
+                    if positive_value_exists(organization.twitter_description) else '',
                 'organization_email':
                     organization.organization_email if positive_value_exists(organization.organization_email) else '',
                 'organization_facebook': organization.organization_facebook
