@@ -257,7 +257,7 @@ def friend_list_view(request):  # friendList
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def friend_lists_all_view(request):  # friendList
+def friend_lists_all_view(request):  # friendListsAll
     """
     :param request:
     :return:
