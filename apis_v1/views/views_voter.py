@@ -1222,7 +1222,7 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
     facebook_background_image_offset_x = request.GET.get('facebook_background_image_offset_x', '')
     facebook_background_image_offset_y = request.GET.get('facebook_background_image_offset_y', '')
     merge_two_accounts = request.GET.get('merge_two_accounts', False)
-    print('voter_facebook_sign_in_save_view merge_two_accounts ', merge_two_accounts)
+    # print('voter_facebook_sign_in_save_view merge_two_accounts ', merge_two_accounts)
 
     results = voter_facebook_sign_in_save_for_api(
         voter_device_id=voter_device_id,
