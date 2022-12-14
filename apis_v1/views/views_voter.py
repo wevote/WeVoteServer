@@ -2,22 +2,26 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+import json
+
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django_user_agents.utils import get_user_agent
+
+import wevote_functions.admin
 from apis_v1.controllers import voter_count
-from ballot.controllers import choose_election_and_prepare_ballot_data,voter_ballot_items_retrieve_for_api, \
+from apis_v1.views import views_voter_utils
+from ballot.controllers import choose_election_and_prepare_ballot_data, voter_ballot_items_retrieve_for_api, \
     voter_ballot_list_retrieve_for_api
 from ballot.models import BallotItemListManager, BallotReturnedManager, find_best_previously_stored_ballot_returned, \
     OFFICE, CANDIDATE, MEASURE, VoterBallotSavedManager
 from bookmark.controllers import voter_all_bookmarks_status_retrieve_for_api, voter_bookmark_off_save_for_api, \
     voter_bookmark_on_save_for_api, voter_bookmark_status_retrieve_for_api
 from config.base import get_environment_variable
-from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse
-from django_user_agents.utils import get_user_agent
 from email_outbound.controllers import voter_email_address_retrieve_for_api, voter_email_address_save_for_api, \
     voter_email_address_send_sign_in_code_email_for_api, voter_email_address_sign_in_for_api, \
     voter_email_address_verify_for_api
-from email_outbound.models import EmailAddress, EmailManager
-from wevote_functions.functions import extract_first_name_from_full_name, extract_last_name_from_full_name
+from email_outbound.models import EmailManager
 from follow.controllers import voter_issue_follow_for_api
 from geoip.controllers import voter_location_retrieve_from_ip_for_api
 from image.controllers import TWITTER, FACEBOOK, cache_master_and_resized_image, create_resized_images
@@ -26,7 +30,6 @@ from import_export_facebook.controllers import voter_facebook_sign_in_retrieve_f
     voter_facebook_sign_in_save_for_api
 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
 from import_export_twitter.controllers import voter_twitter_save_to_current_account_for_api
-import json
 from organization.models import OrganizationManager
 from position.controllers import voter_all_positions_retrieve_for_api, \
     voter_position_retrieve_for_api, voter_position_comment_save_for_api, voter_position_visibility_save_for_api
@@ -37,18 +40,18 @@ from support_oppose_deciding.controllers import voter_opposing_save, voter_stop_
 from voter.controllers import delete_all_voter_information_permanently, \
     voter_address_retrieve_for_api, voter_create_for_api, voter_merge_two_accounts_for_api, \
     voter_merge_two_accounts_action, voter_photo_save_for_api, voter_retrieve_for_api, \
-    voter_save_photo_from_file_reader, voter_sign_out_for_api, voter_split_into_two_accounts_for_api
+    voter_save_photo_from_file_reader, voter_sign_out_for_api, voter_split_into_two_accounts_for_api, \
+    voter_merge_two_accounts_for_facebook
 from voter.controllers_contacts import delete_all_voter_contact_emails_for_voter, save_google_contacts, \
     voter_contact_list_retrieve_for_api
 from voter.models import BALLOT_ADDRESS, fetch_voter_we_vote_id_from_voter_device_link, \
     PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, PROFILE_IMAGE_TYPE_UPLOADED, \
-    VoterAddress, VoterAddressManager, VoterDeviceLink, VoterDeviceLinkManager, VoterManager, Voter, \
+    VoterAddressManager, VoterDeviceLink, VoterDeviceLinkManager, VoterManager, Voter, \
     voter_has_authority
 from voter_guide.controllers import voter_follow_all_organizations_followed_by_organization_for_api
-import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_maximum_number_to_retrieve_from_request, \
     get_voter_device_id, is_voter_device_id_valid, positive_value_exists
-from apis_v1.views import views_voter_utils
+from wevote_functions.functions import extract_first_name_from_full_name, extract_last_name_from_full_name
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -257,39 +260,39 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieve
                 voter_id, BALLOT_ADDRESS, text_for_map_search)
             status += voter_address_save_results['status'] + ", "
 
-            if voter_address_save_results['success'] and voter_address_save_results['voter_address_found']:
-                voter_address = voter_address_save_results['voter_address']
-                use_test_election = False
-                # Reach out to Google and populate ballot items in the database with fresh ballot data
-                # NOTE: 2016-05-26 Google civic NEVER returns a ballot for City, State ZIP, so we could change this
-
-                # DALE 2018-09-06 TURNED OFF
-                # google_retrieve_results = voter_ballot_items_retrieve_from_google_civic_for_api(
-                #     voter_device_id, text_for_map_search, use_test_election)
-                # status += google_retrieve_results['status'] + ", "
-                #
-                # if positive_value_exists(google_retrieve_results['google_civic_election_id']):
-                #     # Update voter_address with the google_civic_election_id retrieved from Google Civic
-                #     # and clear out ballot_saved information
-                #     google_civic_election_id = google_retrieve_results['google_civic_election_id']
-                #
-                #     voter_address.google_civic_election_id = google_civic_election_id
-                #     voter_address_update_results = voter_address_manager.update_existing_voter_address_object(
-                #         voter_address)
-                #
-                #     if voter_address_update_results['success']:
-                #         # Replace the former google_civic_election_id from this voter_device_link
-                #         voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(
-                #             voter_device_id)
-                #         if voter_device_link_results['voter_device_link_found']:
-                #             voter_device_link = voter_device_link_results['voter_device_link']
-                #             voter_device_link_manager.update_voter_device_link_with_election_id(
-                #                 voter_device_link, google_retrieve_results['google_civic_election_id'])
-                #
-                # else:
-                #     # This block of code helps us if the google_civic_election_id wasn't found when we reached out
-                #     # to the Google Civic API, following finding the voter's location from IP address.
-                #     google_civic_election_id = 0
+            # if voter_address_save_results['success'] and voter_address_save_results['voter_address_found']:
+            #     voter_address = voter_address_save_results['voter_address']
+            #     use_test_election = False
+            #     Reach out to Google and populate ballot items in the database with fresh ballot data
+            #     NOTE: 2016-05-26 Google civic NEVER returns a ballot for City, State ZIP, so we could change this
+            #
+            #     DALE 2018-09-06 TURNED OFF
+            #     google_retrieve_results = voter_ballot_items_retrieve_from_google_civic_for_api(
+            #         voter_device_id, text_for_map_search, use_test_election)
+            #     status += google_retrieve_results['status'] + ", "
+            #
+            #     if positive_value_exists(google_retrieve_results['google_civic_election_id']):
+            #         # Update voter_address with the google_civic_election_id retrieved from Google Civic
+            #         # and clear out ballot_saved information
+            #         google_civic_election_id = google_retrieve_results['google_civic_election_id']
+            #
+            #         voter_address.google_civic_election_id = google_civic_election_id
+            #         voter_address_update_results = voter_address_manager.update_existing_voter_address_object(
+            #             voter_address)
+            #
+            #         if voter_address_update_results['success']:
+            #             # Replace the former google_civic_election_id from this voter_device_link
+            #             voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(
+            #                 voter_device_id)
+            #             if voter_device_link_results['voter_device_link_found']:
+            #                 voter_device_link = voter_device_link_results['voter_device_link']
+            #                 voter_device_link_manager.update_voter_device_link_with_election_id(
+            #                     voter_device_link, google_retrieve_results['google_civic_election_id'])
+            #
+            #     else:
+            #         # This block of code helps us if the google_civic_election_id wasn't found when we reached out
+            #         # to the Google Civic API, following finding the voter's location from IP address.
+            #         google_civic_election_id = 0
 
             # We retrieve voter_device_link
             voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
@@ -501,9 +504,9 @@ def voter_address_save_view(request):  # voterAddressSave
         original_text_city = ''
         original_text_state = ''
         original_text_zip = ''
-        substituted_address_city = ''
-        substituted_address_state = ''
-        substituted_address_zip = ''
+        # substituted_address_city = ''
+        # substituted_address_state = ''
+        # substituted_address_zip = ''
         voter_address = voter_address_save_results['voter_address']
         text_for_map_search_saved = voter_address.text_for_map_search
         use_test_election = False
@@ -512,7 +515,7 @@ def voter_address_save_view(request):  # voterAddressSave
         # Search for these variables elsewhere when updating code
         turn_off_direct_voter_ballot_retrieve = False
         default_election_data_source_is_ballotpedia = False
-        default_election_data_source_is_ctcl = False
+        # default_election_data_source_is_ctcl = False
         default_election_data_source_is_google_civic = False
         default_election_data_source_is_vote_usa = True
         was_refreshed_from_ballotpedia_just_now = False
@@ -579,9 +582,9 @@ def voter_address_save_view(request):  # voterAddressSave
                     original_text_city = ballotpedia_retrieve_results['original_text_city']
                     original_text_state = ballotpedia_retrieve_results['original_text_state']
                     original_text_zip = ballotpedia_retrieve_results['original_text_zip']
-                    substituted_address_city = ''
-                    substituted_address_state = ''
-                    substituted_address_zip = ''
+                    # substituted_address_city = ''
+                    # substituted_address_state = ''
+                    # substituted_address_zip = ''
 
                     status += save_results['status']
                     google_civic_election_id = ballotpedia_retrieve_results['google_civic_election_id']
@@ -645,9 +648,9 @@ def voter_address_save_view(request):  # voterAddressSave
                     original_text_city = vote_usa_results['original_text_city']
                     original_text_state = vote_usa_results['original_text_state']
                     original_text_zip = vote_usa_results['original_text_zip']
-                    substituted_address_city = ''
-                    substituted_address_state = ''
-                    substituted_address_zip = ''
+                    # substituted_address_city = ''
+                    # substituted_address_state = ''
+                    # substituted_address_zip = ''
                     status += save_results['status']
                     google_civic_election_id = save_results['google_civic_election_id']
             else:
@@ -695,7 +698,7 @@ def voter_address_save_view(request):  # voterAddressSave
                     if positive_value_exists(google_civic_election_id) and positive_value_exists(voter_id):
                         # Delete voter-specific ballot_returned for this election
                         ballot_returned_manager = BallotReturnedManager()
-                        results = ballot_returned_manager.delete_ballot_returned_by_identifier(
+                        ballot_returned_manager.delete_ballot_returned_by_identifier(
                             voter_id=voter_id,
                             google_civic_election_id=google_civic_election_id)
 
@@ -736,9 +739,9 @@ def voter_address_save_view(request):  # voterAddressSave
                     original_text_city = ''
                     original_text_state = ''
                     original_text_zip = ''
-                    substituted_address_city = ballot_returned_results['original_text_city']
-                    substituted_address_state = ballot_returned_results['original_text_state']
-                    substituted_address_zip = ballot_returned_results['original_text_zip']
+                    # substituted_address_city = ballot_returned_results['original_text_city']
+                    # substituted_address_state = ballot_returned_results['original_text_state']
+                    # substituted_address_zip = ballot_returned_results['original_text_zip']
                     status += save_results['status']
 
         # At this point proceed to update google_civic_election_id whether it is a positive integer or zero
@@ -1062,7 +1065,7 @@ def voter_email_address_save_view(request):  # voterEmailAddressSave
             voter_device_id=voter_device_id,
             text_for_email_address=text_for_email_address,
             web_app_root_url=hostname,
-            )
+        )
     else:
         results = voter_email_address_save_for_api(
             voter_device_id=voter_device_id,
@@ -1076,7 +1079,7 @@ def voter_email_address_save_view(request):  # voterEmailAddressSave
             delete_email=delete_email,
             is_cordova=is_cordova,
             web_app_root_url=hostname,
-            )
+        )
 
     json_data = {
         'status':                           results['status'],
@@ -1218,6 +1221,8 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
     facebook_background_image_url_https = request.GET.get('facebook_background_image_url_https', '')
     facebook_background_image_offset_x = request.GET.get('facebook_background_image_offset_x', '')
     facebook_background_image_offset_y = request.GET.get('facebook_background_image_offset_y', '')
+    merge_two_accounts = request.GET.get('merge_two_accounts', False)
+    print('voter_facebook_sign_in_save_view merge_two_accounts ', merge_two_accounts)
 
     results = voter_facebook_sign_in_save_for_api(
         voter_device_id=voter_device_id,
@@ -1236,7 +1241,50 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
         facebook_background_image_url_https=facebook_background_image_url_https,
         facebook_background_image_offset_x=facebook_background_image_offset_x,
         facebook_background_image_offset_y=facebook_background_image_offset_y,
-        )
+    )
+
+    status = results['status']
+    merge_occurred = False
+    new_owner_voter = None
+    if merge_two_accounts:
+        voter_manager = VoterManager()
+        # voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+        from_voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+        if from_voter_results['voter_found']:
+            from_voter = from_voter_results['voter']
+            merge_status, new_owner_voter, error_results = voter_merge_two_accounts_for_facebook(
+                None, facebook_user_id, from_voter, voter_device_id, True, status)
+            status += ' ' + merge_status
+            merge_occurred = new_owner_voter is not None
+            if error_results:
+                status += ' ' + error_results['status']
+
+            # Now do part 2
+            # We retrieve voter_device_link
+            voter_device_link_manager = VoterDeviceLinkManager()
+            voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
+            if not voter_device_link_results['voter_device_link_found']:
+                status += "VALID_VOTER_DEVICE_ID_MISSING: " + voter_device_link_results['status']
+                results = {
+                    'status': status,
+                    'success': False,
+                    'voter_device_id': voter_device_id,
+                    'voter_device_link_found': False,
+                    'voter_address_object_found': False,
+                    'voter_ballot_saved_found': False,
+                    'google_civic_election_id': 0,
+                    'merge_occurred': False,
+                }
+                return results
+
+            voter_device_link = voter_device_link_results['voter_device_link']
+            part2_results = voter_merge_two_accounts_action(from_voter, new_owner_voter, voter_device_link,
+                                                            status=status, email_owner_voter_found=False,
+                                                            facebook_owner_voter_found=True,
+                                                            invitation_owner_voter_found=False)
+            status += part2_results['status']
+        else:
+            status += ' NO_EXISTING_FACEBOOK_LOGIN_VOTER_FOUND_TO_MERGE_WITH_CURRENT_VOTER'
 
     json_data = {
         'status':                   results['status'],
@@ -1248,6 +1296,8 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
         'save_profile_data':        save_profile_data,
         'save_photo_data':          save_photo_data,
         'minimum_data_saved':       results['minimum_data_saved'],
+        'new_owner_voter':          new_owner_voter.we_vote_id if new_owner_voter else 0,
+        'merge_occurred':           merge_occurred,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1858,7 +1908,7 @@ def voter_sms_phone_number_save_view(request):  # voterSMSPhoneNumberSave
         make_primary_sms_phone_number=make_primary_sms_phone_number,
         delete_sms=delete_sms,
         web_app_root_url=hostname,
-        )
+    )
 
     json_data = {
         'status':                           results['status'],
@@ -2567,7 +2617,7 @@ def voter_update_view(request):  # voterUpdate
                     we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_twitter_image_url_large
                     we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_twitter_image_url_medium
                     we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_twitter_image_url_tiny
-                    continue_analyzing_profile_image_type_currently_active = False
+                    # continue_analyzing_profile_image_type_currently_active = False
 
     at_least_one_variable_has_changed = True if \
         at_least_one_variable_has_changed \
@@ -3007,9 +3057,9 @@ def voter_verify_secret_code_view(request):  # voterVerifySecretCode
     if not positive_value_exists(secret_code_verified):
         status += results['status']
 
-    voter_found = False
-    voter = None
-    voter_device_link = None
+    # voter_found = False
+    # voter = None
+    # voter_device_link = None
     if positive_value_exists(secret_code_verified):
         status, voter, voter_found, voter_device_link = views_voter_utils.get_voter_from_request(request, status)
         if not voter_found:
@@ -3017,7 +3067,7 @@ def voter_verify_secret_code_view(request):  # voterVerifySecretCode
             voter_must_request_new_code = True
 
         if voter_found:
-            email_manager = EmailManager()
+            # email_manager = EmailManager()
             sms_manager = SMSManager()
             if positive_value_exists(code_sent_to_sms_phone_number):
                 existing_verified_sms_found = False
@@ -3234,10 +3284,10 @@ def voter_contact_list_save_view(request):  # voterContactListSave
 
     delete_all_voter_contact_emails = request.POST.get('delete_all_voter_contact_emails', False)
     delete_all_voter_contact_emails = positive_value_exists(delete_all_voter_contact_emails)
-    google_api_key_type = request.POST.get('google_api_key_type', 'ballot')
+    # google_api_key_type = request.POST.get('google_api_key_type', 'ballot')
 
     if delete_all_voter_contact_emails and voter_we_vote_id:
-        results = delete_all_voter_contact_emails_for_voter(voter_we_vote_id=voter_we_vote_id)
+        delete_all_voter_contact_emails_for_voter(voter_we_vote_id=voter_we_vote_id)
     elif positive_value_exists(voter_we_vote_id) and contacts_string:
         contacts = json.loads(contacts_string)
         contacts_stored = len(contacts)

@@ -2,27 +2,28 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from django.db import (models, IntegrityError)
-from django.db.models import Q
-from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser)  # PermissionsMixin
-from django.core.validators import RegexValidator
-from django.utils.timezone import now
-from datetime import datetime, timedelta
-from apple.models import AppleUser
-from exception.models import handle_exception, handle_record_found_more_than_one_exception,\
-    handle_record_not_saved_exception
-from import_export_facebook.models import FacebookManager
-import pytz
-from sms.models import SMSManager
 import string
 import sys
-from twitter.models import TwitterUserManager
+from datetime import datetime, timedelta
+
+import pytz
+from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser)  # PermissionsMixin
+from django.core.validators import RegexValidator
+from django.db import (models, IntegrityError)
+from django.db.models import Q
+from django.utils.timezone import now
 from validate_email import validate_email
+
 import wevote_functions.admin
+from apple.models import AppleUser
+from exception.models import handle_exception, handle_record_found_more_than_one_exception, \
+    handle_record_not_saved_exception
+from import_export_facebook.models import FacebookManager
+from sms.models import SMSManager
+from twitter.models import TwitterUserManager
 from wevote_functions.functions import extract_state_code_from_address_string, convert_to_int, generate_random_string, \
     generate_voter_device_id, get_voter_api_device_id, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_voter_integer, fetch_site_unique_id_prefix
-
 
 logger = wevote_functions.admin.get_logger(__name__)
 SUPPORT_OPPOSE_MODAL_SHOWN = 1  # When this bit is set, we know the voter has seen the initial support/oppose modal
@@ -157,7 +158,7 @@ class VoterManager(BaseUserManager):
             checked_against_snovio=None,
             checked_against_targetsmart=None,
             email_address_text='',
-            existing_contact_email_augmented_dict={},
+            existing_contact_email_augmented_dict=None,
             has_known_bounces=None,
             has_mx_or_a_record=None,
             has_suspected_bounces=None,
@@ -176,6 +177,8 @@ class VoterManager(BaseUserManager):
             targetsmart_id=None,
             targetsmart_source_state=None,
     ):
+        if existing_contact_email_augmented_dict is None:
+            existing_contact_email_augmented_dict = {}
         status = ""
         success = True
         contact_email_augmented = None
@@ -1511,6 +1514,11 @@ class VoterManager(BaseUserManager):
         voter_we_vote_id = ''
         voter_manager = VoterManager()
         return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token)
+
+    # def retrieve_voter_by_facebook_id(self, facebook_id, read_only=False):
+    #     voter_id = ''
+    #     voter_manager = VoterManager()
+    #     return voter_manager.retrieve_voter(voter_id, facebook_id=facebook_id, read_only=read_only)
 
     def retrieve_voter_by_facebook_id(self, facebook_id, read_only=False):
         voter_id = ''

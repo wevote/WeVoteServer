@@ -79,6 +79,12 @@ You will need to elevate your privileges with sudo to make this edit to this lin
 Note July 2022:  The auto generated certificate that is made by runsslserver generates warnings in browsers (not really a problem),
 but may stop the JavaScript builtin fetch() function from completing.  The browser extension has to use fetch.
 
+## Fixing "NET::ERR_CERT_COMMON_NAME_INVALID" errors in the DevTools ERROR Console
+
+Find one of those failing links in the Network, and click it, to open in a new tab, then follow the
+same procedure that you would follow for any invalid certificate.   The details of how you do this
+changes over time, but in general on the chrome error screen that you see, follow the links for
+viewing the page anyways.  Once you have done that the problem will go away.
 
 ## Facebook
 In environment_variables.json, these two variable need to be set:  
