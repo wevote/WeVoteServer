@@ -1,14 +1,21 @@
 # voter/controllers.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, \
-    MAINTENANCE_STATUS_FLAGS_TASK_ONE, MAINTENANCE_STATUS_FLAGS_TASK_TWO, MAINTENANCE_STATUS_FLAGS_COMPLETED, \
-    NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL, \
-    NOTIFICATION_FRIEND_REQUESTS_EMAIL, NOTIFICATION_SUGGESTED_FRIENDS_EMAIL, \
-    NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_EMAIL, NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS, \
-    NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL, \
-    Voter, VoterAddress, VoterAddressManager, \
-    VoterDeviceLink, VoterDeviceLinkManager, VoterManager
+import base64
+import json
+import re
+from datetime import timedelta
+from io import BytesIO
+
+import robot_detection
+from PIL import Image, ImageOps
+from django.db.models import F
+from django.http import HttpResponse
+from django.utils.timezone import now
+from validate_email import validate_email
+
+import wevote_functions.admin
+import wevote_functions.admin
 from activity.controllers import delete_activity_comments_for_voter, delete_activity_notices_for_voter, \
     delete_activity_posts_for_voter, \
     move_activity_comments_to_another_voter, move_activity_notices_to_another_voter, \
@@ -17,13 +24,7 @@ from analytics.controllers import delete_analytics_info_for_voter, move_analytic
 from analytics.models import AnalyticsManager, ACTION_FACEBOOK_AUTHENTICATION_EXISTS, \
     ACTION_GOOGLE_AUTHENTICATION_EXISTS, \
     ACTION_TWITTER_AUTHENTICATION_EXISTS, ACTION_EMAIL_AUTHENTICATION_EXISTS
-import base64
 from campaign.controllers import move_campaignx_to_another_voter
-from datetime import timedelta
-from django.http import HttpResponse
-from django.db.models import F
-from django.utils.timezone import now
-from stripe_donations.controllers import donation_journal_history_for_a_voter, move_donation_info_to_another_voter
 from email_outbound.controllers import delete_email_address_entries_for_voter, \
     move_email_address_entries_to_another_voter, schedule_verification_email, \
     WE_VOTE_SERVER_ROOT_URL, schedule_email_with_email_outbound_description
@@ -44,10 +45,9 @@ from friend.controllers import delete_friend_invitations_for_voter, delete_frien
 from friend.models import FriendManager
 from geoip.controllers import voter_location_retrieve_from_ip_for_api
 from image.controllers import cache_master_and_resized_image, cache_voter_master_uploaded_image, FACEBOOK, \
-    PROFILE_IMAGE_ORIGINAL_MAX_WIDTH, PROFILE_IMAGE_ORIGINAL_MAX_HEIGHT, TWITTER
+    PROFILE_IMAGE_ORIGINAL_MAX_WIDTH, PROFILE_IMAGE_ORIGINAL_MAX_HEIGHT
 from import_export_facebook.models import FacebookManager
 from import_export_twitter.models import TwitterAuthManager
-import json
 from organization.controllers import delete_membership_link_entries_for_voter, delete_organization_complete, \
     move_membership_link_entries_to_another_voter, move_organization_team_member_entries_to_another_voter, \
     move_organization_to_another_complete, transfer_voter_images_to_organization, transform_web_app_url
@@ -55,25 +55,27 @@ from organization.models import OrganizationListManager, OrganizationManager, IN
 from position.controllers import delete_positions_for_voter, duplicate_positions_to_another_voter, \
     move_positions_to_another_voter
 from position.models import PositionListManager
-from io import BytesIO, StringIO
-from PIL import Image, ImageOps
-import re
-import robot_detection
 from share.controllers import move_shared_items_to_another_voter
 from sms.controllers import delete_sms_phone_number_entries_for_voter, move_sms_phone_number_entries_to_another_voter
+from stripe_donations.controllers import move_donation_info_to_another_voter
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
-from validate_email import validate_email
 from voter.controllers_contacts import delete_all_voter_contact_emails_for_voter
+from voter.models import Voter, VoterAddress, VoterDeviceLinkManager, VoterManager, MAINTENANCE_STATUS_FLAGS_TASK_ONE, \
+    NOTIFICATION_FRIEND_REQUESTS_EMAIL, NOTIFICATION_SUGGESTED_FRIENDS_EMAIL, \
+    NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_EMAIL, NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS, \
+    NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL, MAINTENANCE_STATUS_FLAGS_TASK_TWO, \
+    NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL, fetch_voter_id_from_voter_device_link, VoterAddressManager, VoterDeviceLink, \
+    BALLOT_ADDRESS
 from voter_guide.controllers import delete_voter_guides_for_voter, duplicate_voter_guides, \
     move_voter_guides_to_another_voter
-import wevote_functions.admin
 from wevote_functions.functions import generate_voter_device_id, is_voter_device_id_valid, positive_value_exists
-
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 
-def add_state_code_for_display_to_voter_list(voter_we_vote_id_list=[]):
+def add_state_code_for_display_to_voter_list(voter_we_vote_id_list=None):
+    if voter_we_vote_id_list is None:
+        voter_we_vote_id_list = []
     status = ''
     success = True
     address_list_found = False
@@ -1724,6 +1726,141 @@ def voter_create_for_api(voter_device_id):  # voterCreate
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
+def voter_merge_two_accounts_for_facebook(facebook_secret_key, facebook_user_id, from_voter, voter_device_id,
+                                          current_voter_found, status):
+    voter_manager = VoterManager()
+    facebook_owner_voter_found = False
+    facebook_owner_voter = {'id': 0}
+    facebook_manager = FacebookManager()
+
+    if positive_value_exists(facebook_secret_key):
+        status += "FACEBOOK_SECRET_KEY "
+        facebook_results = facebook_manager.retrieve_facebook_link_to_voter_from_facebook_secret_key(
+            facebook_secret_key, read_only=True)
+        if facebook_results['facebook_link_to_voter_found']:
+            facebook_link_to_voter = facebook_results['facebook_link_to_voter']
+
+            facebook_owner_voter_results = voter_manager.retrieve_voter_by_we_vote_id(
+                facebook_link_to_voter.voter_we_vote_id)
+            if facebook_owner_voter_results['voter_found']:
+                facebook_owner_voter_found = True
+                facebook_owner_voter = facebook_owner_voter_results['voter']
+    elif positive_value_exists(facebook_user_id):
+        status += "FACEBOOK_USER_ID "
+        facebook_owner_voter_results = voter_manager.retrieve_voter_by_facebook_id(facebook_user_id)   # The "to" voter
+        if facebook_owner_voter_results['voter_found']:
+            facebook_owner_voter_found = True
+            facebook_owner_voter = facebook_owner_voter_results['voter']
+
+    if not facebook_owner_voter_found:
+        error_results = {
+            'status': "FACEBOOK_OWNER_VOTER_NOT_FOUND",
+            'success': False,
+            'voter_device_id': voter_device_id,
+            'current_voter_found': current_voter_found,
+            'email_owner_voter_found': False,
+            'facebook_owner_voter_found': facebook_owner_voter_found,
+            'invitation_owner_voter_found': False,
+        }
+        return None, None, error_results
+
+    facebook_auth_response = None
+    auth_response_results = facebook_manager.retrieve_facebook_auth_response(voter_device_id)
+    if auth_response_results['facebook_auth_response_found']:
+        facebook_auth_response = auth_response_results['facebook_auth_response']
+
+    # Double-check they aren't the same voter account
+    if from_voter.id == facebook_owner_voter.id and facebook_auth_response:
+        # If here, we probably have some bad data and need to update the voter record to reflect that
+        #  it is signed in with Facebook
+        if auth_response_results['facebook_auth_response_found']:
+            # Get the recent facebook_user_id and facebook_email
+            voter_manager.update_voter_with_facebook_link_verified(
+                facebook_owner_voter,
+                facebook_auth_response.facebook_user_id, facebook_auth_response.facebook_email)
+
+        else:
+            error_results = {
+                'status': "CURRENT_VOTER_AND_EMAIL_OWNER_VOTER_ARE_SAME",
+                'success': True,
+                'voter_device_id': voter_device_id,
+                'current_voter_found': current_voter_found,
+                'email_owner_voter_found': False,
+                'facebook_owner_voter_found': facebook_owner_voter_found,
+                'invitation_owner_voter_found': False,
+            }
+            return None, None, error_results
+
+    # Cache original and resized images
+    cache_results = cache_master_and_resized_image(
+        voter_we_vote_id=facebook_owner_voter.we_vote_id,
+        facebook_user_id=facebook_auth_response.facebook_user_id,
+        facebook_profile_image_url_https=facebook_auth_response.facebook_profile_image_url_https,
+        image_source=FACEBOOK)
+    cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
+    we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+    we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+    we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+
+    # Update the facebook photo
+    save_facebook_results = voter_manager.save_facebook_user_values(
+        facebook_owner_voter, facebook_auth_response, cached_facebook_profile_image_url_https,
+        we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
+        we_vote_hosted_profile_image_url_tiny)
+    status += " " + save_facebook_results['status']
+    facebook_owner_voter = save_facebook_results['voter']
+
+    # ##### Store the facebook_email as a verified email for facebook_owner_voter
+    if positive_value_exists(facebook_auth_response.facebook_email):
+        # Check to make sure there isn't an account already using the facebook_email
+        facebook_email_address_verified = False
+        temp_voter_we_vote_id = ""
+        email_manager = EmailManager()
+        email_results = email_manager.retrieve_primary_email_with_ownership_verified(
+            temp_voter_we_vote_id, facebook_auth_response.facebook_email)
+        if email_results['email_address_object_found']:
+            # If here, then it turns out the facebook_email is verified, and we can
+            #   update_voter_email_ownership_verified if a verified email is already stored in the voter record
+            email_address_object = email_results['email_address_object']
+            facebook_email_address_verified = True
+        else:
+            # See if an unverified email exists for this voter
+            email_address_object = None
+            email_address_object_we_vote_id = ""
+            email_retrieve_results = email_manager.retrieve_email_address_object(
+                facebook_auth_response.facebook_email, email_address_object_we_vote_id,
+                facebook_owner_voter.we_vote_id)
+            if email_retrieve_results['email_address_object_found']:
+                email_address_object = email_retrieve_results['email_address_object']
+                email_address_object = email_manager.update_email_address_object_as_verified(
+                    email_address_object)
+                facebook_email_address_verified = True
+            else:
+                email_ownership_is_verified = True
+                email_create_results = email_manager.create_email_address(
+                    facebook_auth_response.facebook_email, facebook_owner_voter.we_vote_id,
+                    email_ownership_is_verified)
+                if email_create_results['email_address_object_saved']:
+                    email_address_object = email_create_results['email_address_object']
+                    facebook_email_address_verified = True
+
+        # Does facebook_owner_voter already have a primary email? If not, update it
+        if not facebook_owner_voter.email_ownership_is_verified and facebook_email_address_verified:
+            try:
+                # Attach the email_address_object to facebook_owner_voter
+                voter_manager.update_voter_email_ownership_verified(facebook_owner_voter,
+                                                                    email_address_object)
+            except Exception as e:
+                status += "UNABLE_TO_MAKE_FACEBOOK_EMAIL_THE_PRIMARY " + str(e) + " "
+
+    # Now we have voter (from voter_device_id) and email_owner_voter (from facebook_secret_key)
+    # We are going to make the email_owner_voter the new master
+    to_voter_we_vote_id = facebook_owner_voter.we_vote_id     # No need to return to_voter_we_vote_id from this func
+    new_owner_voter = facebook_owner_voter
+    status += "TO_VOTER-" + str(to_voter_we_vote_id) + " "
+    return status, new_owner_voter, None
+
+
 def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         voter_device_id='',
         email_secret_key='',
@@ -1813,6 +1950,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     # ############# EMAIL SIGN IN #####################################
     if positive_value_exists(email_secret_key):
         status += "EMAIL_SECRET_KEY "
+        email_owner_voter = None
         email_results = email_manager.retrieve_email_address_object_from_secret_key(email_secret_key=email_secret_key)
         success = email_results['success']
         if email_results['email_address_object_found']:
@@ -1858,127 +1996,135 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
 
     # ############# FACEBOOK SIGN IN #####################################
     elif positive_value_exists(facebook_secret_key):
-        status += "FACEBOOK_SECRET_KEY "
-        facebook_manager = FacebookManager()
-        facebook_results = facebook_manager.retrieve_facebook_link_to_voter_from_facebook_secret_key(
-            facebook_secret_key, read_only=True)
-        if facebook_results['facebook_link_to_voter_found']:
-            facebook_link_to_voter = facebook_results['facebook_link_to_voter']
-
-            facebook_owner_voter_results = voter_manager.retrieve_voter_by_we_vote_id(
-                facebook_link_to_voter.voter_we_vote_id)
-            if facebook_owner_voter_results['voter_found']:
-                facebook_owner_voter_found = True
-                facebook_owner_voter = facebook_owner_voter_results['voter']
-
-        if not facebook_owner_voter_found:
-            error_results = {
-                'status': "FACEBOOK_OWNER_VOTER_NOT_FOUND",
-                'success': False,
-                'voter_device_id': voter_device_id,
-                'current_voter_found': current_voter_found,
-                'email_owner_voter_found': False,
-                'facebook_owner_voter_found': facebook_owner_voter_found,
-                'invitation_owner_voter_found': False,
-            }
+        facebook_user_id = None
+        status, new_owner_voter, error_results = voter_merge_two_accounts_for_facebook(
+            facebook_secret_key, facebook_user_id, voter, voter_device_id, current_voter_found, status)
+        if error_results:
             return error_results
 
-        auth_response_results = facebook_manager.retrieve_facebook_auth_response(voter_device_id)
-        if auth_response_results['facebook_auth_response_found']:
-            facebook_auth_response = auth_response_results['facebook_auth_response']
-
-        # Double-check they aren't the same voter account
-        if voter.id == facebook_owner_voter.id:
-            # If here, we probably have some bad data and need to update the voter record to reflect that
-            #  it is signed in with Facebook
-            if auth_response_results['facebook_auth_response_found']:
-                # Get the recent facebook_user_id and facebook_email
-                voter_manager.update_voter_with_facebook_link_verified(
-                    facebook_owner_voter,
-                    facebook_auth_response.facebook_user_id, facebook_auth_response.facebook_email)
-
-            else:
-                error_results = {
-                    'status': "CURRENT_VOTER_AND_EMAIL_OWNER_VOTER_ARE_SAME",
-                    'success': True,
-                    'voter_device_id': voter_device_id,
-                    'current_voter_found': current_voter_found,
-                    'email_owner_voter_found': False,
-                    'facebook_owner_voter_found': facebook_owner_voter_found,
-                    'invitation_owner_voter_found': False,
-                }
-                return error_results
-
-        # Cache original and resized images
-        cache_results = cache_master_and_resized_image(
-            voter_we_vote_id=facebook_owner_voter.we_vote_id,
-            facebook_user_id=facebook_auth_response.facebook_user_id,
-            facebook_profile_image_url_https=facebook_auth_response.facebook_profile_image_url_https,
-            image_source=FACEBOOK)
-        cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
-        we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
-        we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
-        we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
-
-        # Update the facebook photo
-        save_facebook_results = voter_manager.save_facebook_user_values(
-            facebook_owner_voter, facebook_auth_response, cached_facebook_profile_image_url_https,
-            we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
-            we_vote_hosted_profile_image_url_tiny)
-        status += " " + save_facebook_results['status']
-        facebook_owner_voter = save_facebook_results['voter']
-
-        # ##### Store the facebook_email as a verified email for facebook_owner_voter
-        if positive_value_exists(facebook_auth_response.facebook_email):
-            # Check to make sure there isn't an account already using the facebook_email
-            facebook_email_address_verified = False
-            temp_voter_we_vote_id = ""
-            email_results = email_manager.retrieve_primary_email_with_ownership_verified(
-                temp_voter_we_vote_id, facebook_auth_response.facebook_email)
-            if email_results['email_address_object_found']:
-                # If here, then it turns out the facebook_email is verified, and we can
-                #   update_voter_email_ownership_verified if a verified email is already stored in the voter record
-                email_address_object = email_results['email_address_object']
-                facebook_email_address_verified = True
-            else:
-                # See if an unverified email exists for this voter
-                email_address_object_we_vote_id = ""
-                email_retrieve_results = email_manager.retrieve_email_address_object(
-                    facebook_auth_response.facebook_email, email_address_object_we_vote_id,
-                    facebook_owner_voter.we_vote_id)
-                if email_retrieve_results['email_address_object_found']:
-                    email_address_object = email_retrieve_results['email_address_object']
-                    email_address_object = email_manager.update_email_address_object_as_verified(
-                        email_address_object)
-                    facebook_email_address_verified = True
-                else:
-                    email_ownership_is_verified = True
-                    email_create_results = email_manager.create_email_address(
-                        facebook_auth_response.facebook_email, facebook_owner_voter.we_vote_id,
-                        email_ownership_is_verified)
-                    if email_create_results['email_address_object_saved']:
-                        email_address_object = email_create_results['email_address_object']
-                        facebook_email_address_verified = True
-
-            # Does facebook_owner_voter already have a primary email? If not, update it
-            if not facebook_owner_voter.email_ownership_is_verified and facebook_email_address_verified:
-                try:
-                    # Attach the email_address_object to facebook_owner_voter
-                    voter_manager.update_voter_email_ownership_verified(facebook_owner_voter, email_address_object)
-                except Exception as e:
-                    status += "UNABLE_TO_MAKE_FACEBOOK_EMAIL_THE_PRIMARY: " + str(e) + " "
-
-        # Now we have voter (from voter_device_id) and email_owner_voter (from facebook_secret_key)
-        # We are going to make the email_owner_voter the new master
-        to_voter_we_vote_id = facebook_owner_voter.we_vote_id
-        new_owner_voter = facebook_owner_voter
-        status += "TO_VOTER-" + str(to_voter_we_vote_id) + " "
+        # status += "FACEBOOK_SECRET_KEY "
+        # facebook_manager = FacebookManager()
+        # facebook_results = facebook_manager.retrieve_facebook_link_to_voter_from_facebook_secret_key(
+        #     facebook_secret_key, read_only=True)
+        # if facebook_results['facebook_link_to_voter_found']:
+        #     facebook_link_to_voter = facebook_results['facebook_link_to_voter']
+        #
+        #     facebook_owner_voter_results = voter_manager.retrieve_voter_by_we_vote_id(
+        #         facebook_link_to_voter.voter_we_vote_id)
+        #     if facebook_owner_voter_results['voter_found']:
+        #         facebook_owner_voter_found = True
+        #         facebook_owner_voter = facebook_owner_voter_results['voter']
+        #
+        # if not facebook_owner_voter_found:
+        #     error_results = {
+        #         'status': "FACEBOOK_OWNER_VOTER_NOT_FOUND",
+        #         'success': False,
+        #         'voter_device_id': voter_device_id,
+        #         'current_voter_found': current_voter_found,
+        #         'email_owner_voter_found': False,
+        #         'facebook_owner_voter_found': facebook_owner_voter_found,
+        #         'invitation_owner_voter_found': False,
+        #     }
+        #     return error_results
+        #
+        # auth_response_results = facebook_manager.retrieve_facebook_auth_response(voter_device_id)
+        # if auth_response_results['facebook_auth_response_found']:
+        #     facebook_auth_response = auth_response_results['facebook_auth_response']
+        #
+        # # Double-check they aren't the same voter account
+        # if voter.id == facebook_owner_voter.id:
+        #     # If here, we probably have some bad data and need to update the voter record to reflect that
+        #     #  it is signed in with Facebook
+        #     if auth_response_results['facebook_auth_response_found']:
+        #         # Get the recent facebook_user_id and facebook_email
+        #         voter_manager.update_voter_with_facebook_link_verified(
+        #             facebook_owner_voter,
+        #             facebook_auth_response.facebook_user_id, facebook_auth_response.facebook_email)
+        #
+        #     else:
+        #         error_results = {
+        #             'status': "CURRENT_VOTER_AND_EMAIL_OWNER_VOTER_ARE_SAME",
+        #             'success': True,
+        #             'voter_device_id': voter_device_id,
+        #             'current_voter_found': current_voter_found,
+        #             'email_owner_voter_found': False,
+        #             'facebook_owner_voter_found': facebook_owner_voter_found,
+        #             'invitation_owner_voter_found': False,
+        #         }
+        #         return error_results
+        #
+        # # Cache original and resized images
+        # cache_results = cache_master_and_resized_image(
+        #     voter_we_vote_id=facebook_owner_voter.we_vote_id,
+        #     facebook_user_id=facebook_auth_response.facebook_user_id,
+        #     facebook_profile_image_url_https=facebook_auth_response.facebook_profile_image_url_https,
+        #     image_source=FACEBOOK)
+        # cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
+        # we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+        # we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+        # we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+        #
+        # # Update the facebook photo
+        # save_facebook_results = voter_manager.save_facebook_user_values(
+        #     facebook_owner_voter, facebook_auth_response, cached_facebook_profile_image_url_https,
+        #     we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
+        #     we_vote_hosted_profile_image_url_tiny)
+        # status += " " + save_facebook_results['status']
+        # facebook_owner_voter = save_facebook_results['voter']
+        #
+        # # ##### Store the facebook_email as a verified email for facebook_owner_voter
+        # if positive_value_exists(facebook_auth_response.facebook_email):
+        #     # Check to make sure there isn't an account already using the facebook_email
+        #     facebook_email_address_verified = False
+        #     temp_voter_we_vote_id = ""
+        #     email_results = email_manager.retrieve_primary_email_with_ownership_verified(
+        #         temp_voter_we_vote_id, facebook_auth_response.facebook_email)
+        #     if email_results['email_address_object_found']:
+        #         # If here, then it turns out the facebook_email is verified, and we can
+        #         #   update_voter_email_ownership_verified if a verified email is already stored in the voter record
+        #         email_address_object = email_results['email_address_object']
+        #         facebook_email_address_verified = True
+        #     else:
+        #         # See if an unverified email exists for this voter
+        #         email_address_object_we_vote_id = ""
+        #         email_retrieve_results = email_manager.retrieve_email_address_object(
+        #             facebook_auth_response.facebook_email, email_address_object_we_vote_id,
+        #             facebook_owner_voter.we_vote_id)
+        #         if email_retrieve_results['email_address_object_found']:
+        #             email_address_object = email_retrieve_results['email_address_object']
+        #             email_address_object = email_manager.update_email_address_object_as_verified(
+        #                 email_address_object)
+        #             facebook_email_address_verified = True
+        #         else:
+        #             email_ownership_is_verified = True
+        #             email_create_results = email_manager.create_email_address(
+        #                 facebook_auth_response.facebook_email, facebook_owner_voter.we_vote_id,
+        #                 email_ownership_is_verified)
+        #             if email_create_results['email_address_object_saved']:
+        #                 email_address_object = email_create_results['email_address_object']
+        #                 facebook_email_address_verified = True
+        #
+        #     # Does facebook_owner_voter already have a primary email? If not, update it
+        #     if not facebook_owner_voter.email_ownership_is_verified and facebook_email_address_verified:
+        #         try:
+        #             # Attach the email_address_object to facebook_owner_voter
+        #             voter_manager.update_voter_email_ownership_verified(facebook_owner_voter,
+        #                                                                 email_address_object)
+        #         except Exception as e:
+        #             status += "UNABLE_TO_MAKE_FACEBOOK_EMAIL_THE_PRIMARY " + str(e) + " "
+        #
+        # # Now we have voter (from voter_device_id) and email_owner_voter (from facebook_secret_key)
+        # # We are going to make the email_owner_voter the new master
+        # to_voter_we_vote_id = facebook_owner_voter.we_vote_id
+        # new_owner_voter = facebook_owner_voter
+        # status += "TO_VOTER-" + str(to_voter_we_vote_id) + " "
 
     # ############# TWITTER SIGN IN #####################################
     elif positive_value_exists(twitter_secret_key):
         status += "TWITTER_SECRET_KEY "
         twitter_user_manager = TwitterUserManager()
         twitter_link_to_voter = TwitterLinkToVoter()
+        twitter_owner_voter = None
 
         twitter_link_to_organization = TwitterLinkToOrganization()
         repair_twitter_related_organization_caching_now = False
@@ -2014,11 +2160,12 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
 
         twitter_auth_manager = TwitterAuthManager()
         auth_response_results = twitter_auth_manager.retrieve_twitter_auth_response(voter_device_id)
+        twitter_auth_response = None
         if auth_response_results['twitter_auth_response_found']:
             twitter_auth_response = auth_response_results['twitter_auth_response']
 
         # Double-check they aren't the same voter account
-        if voter.id == twitter_owner_voter.id:
+        if twitter_owner_voter and twitter_auth_response and voter.id == twitter_owner_voter.id:
             # If here, we probably have some bad data and need to update the voter record to reflect that
             #  it is signed in with Twitter
             if auth_response_results['twitter_auth_response_found']:
@@ -2038,31 +2185,6 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                     'twitter_owner_voter_found': twitter_owner_voter_found,
                 }
                 return error_results
-
-        # Dec 2021 Steve: Removed a redundant cache_master_and_resized_image call for the merged voter.
-        # Did we ever need this, or was it a "just in case" (This added 5 seconds to each twitter signin in the WebApp)
-        # If it needs to be revived, please revive it for just the most specific case
-        # Cache original and resized images
-        # cache_results = cache_master_and_resized_image(
-        #     voter_we_vote_id=twitter_owner_voter.we_vote_id,
-        #     twitter_id=twitter_auth_response.twitter_id,
-        #     twitter_screen_name=twitter_auth_response.twitter_screen_name,
-        #     twitter_profile_image_url_https=twitter_auth_response.twitter_profile_image_url_https,
-        #     image_source=TWITTER)
-        # cached_twitter_profile_image_url_https = cache_results['cached_twitter_profile_image_url_https']
-        # we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
-        # we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
-        # we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
-        #
-        # Update the Twitter photo in the voter
-        # save_twitter_results = voter_manager.save_twitter_user_values_from_twitter_auth_response(
-        #     twitter_owner_voter, twitter_auth_response,
-        #     cached_twitter_profile_image_url_https=cached_twitter_profile_image_url_https,
-        #     we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
-        #     we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
-        #     we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
-        # status += " " + save_twitter_results['status']
-        # twitter_owner_voter = save_twitter_results['voter']
 
         # Make sure we have a twitter_link_to_organization entry for the destination voter
         if positive_value_exists(twitter_owner_voter.linked_organization_we_vote_id):
@@ -2703,7 +2825,7 @@ def voter_retrieve_for_api(  # voterRetrieve
         user_agent_string='',
         user_agent_object=None,
         voter_device_id='',
-        voter_location_results={},
+        voter_location_results=None,
 ):
     """
     Used by the api
@@ -2715,6 +2837,10 @@ def voter_retrieve_for_api(  # voterRetrieve
     :param voter_location_results:
     :return:
     """
+    if voter_location_results is None:
+        voter_location_results = {}
+    if voter_location_results is None:
+        voter_location_results = {}
     organization_manager = OrganizationManager()
     voter_manager = VoterManager()
     voter_device_link = VoterDeviceLink()
@@ -2724,7 +2850,7 @@ def voter_retrieve_for_api(  # voterRetrieve
     twitter_link_to_voter = TwitterLinkToVoter()
     repair_twitter_link_to_voter_caching_now = False
     repair_facebook_link_to_voter_caching_now = False
-    facebook_user = None;
+    facebook_user = None
 
     status = "VOTER_RETRIEVE_START "
 
@@ -3140,9 +3266,6 @@ def voter_retrieve_for_api(  # voterRetrieve
 
         # print('voterRetrieve status', status, ', voter.email ', voter.email, ', full name ', voter.get_full_name(), ',
         #   voter_photo_url_medium', we_vote_hosted_profile_image_url_medium )
-        if hasattr(address_results, 'voter_device_id'):
-            if not positive_value_exists(address_results['voter_device_id']) and positive_value_exists(voter_device_id):
-                address_results['voter_device_id'] = voter_device_id
         json_data = {
             'status':                           status,
             'success':                          True,
@@ -3399,6 +3522,7 @@ def refresh_voter_primary_email_cached_information_by_email(normalized_email_add
                 #  record.
                 # Wipe this voter...
                 try:
+                    voter_found_by_voter_we_vote_id2 = None
                     voter_found_by_email.email = None
                     voter_found_by_email.primary_email_we_vote_id = None
                     voter_found_by_email.email_ownership_is_verified = False
@@ -3423,6 +3547,7 @@ def refresh_voter_primary_email_cached_information_by_email(normalized_email_add
                             status += "UNABLE_TO_FIND_VOTER_BY_VOTER_WE_VOTE_ID "
                     except Exception as e:
                         status += "UNABLE_TO_UPDATE_VOTER_FOUND_BY_EMAIL "
+                        # voter_found_by_voter_we_vote_id2 = None
                         # We tried to update the voter found by the voter_we_vote_id stored in the EmailAddress table,
                         #  but got an error, so assume it was because of a collision with the primary_email_we_vote_id
                         # Here, we retrieve the voter already "claiming" this email entry, so we can wipe the

@@ -479,13 +479,99 @@ this step.  To see if postgres is already running, check with lsof in a terminal
 1.  Your local instance of the WeVoteServer is now setup and running (although there is no election 
     data stored in your Postgres instance, for it to serve to clients at this point).
 
-## import some ballot data from the live production API Server
+## Import some ballot data from the live production API Server
 
    
 **This page of instructions has covered steps 1 through 5 of the multi-page instructions, so now you can skip to step 6 to 
 load some ballot data.**
 
 Step 6:  [Set up Initial Data](README_API_INSTALL_SETUP_DATA.md)
+
+## Optional:  Running in SSL/https mode
+
+You only need to do this if you are going to be working on Login with Facebook or Stripe Donations
+
+### If you have not created a secure certificate to run WebApp on your Mac in SSL/HTTPS mode, do this first
+
+The following link takes you to a page in the WebApp docs, you will have to manually navigate back here when you are done.
+
+[Installing Secure Certificate](https://github.com/wevote/WebApp/blob/develop/docs/working/SECURE_CERTIFICATE.md)
+
+### Make a small necessary change to your /etc/hosts
+
+Facebook will no longer redirect to localhost and it also won't redirect to a http link, so these changes are necessary.
+
+Make a second alias for 127.0.0.1 with this made up (but standardized for We Vote developers) domain: `wevotedeveloper.com`
+
+Explanation from the python-social-auth docs: "[If you define a redirect URL in Facebook setup page, be sure to not define http://127.0.0.1:8000 or http://localhost:8000 because it won’t work when testing. Instead I define http://wevotedeveloper.com and setup a mapping on /etc/hosts.](https://python-social-auth.readthedocs.io/en/latest/backends/facebook.html)"
+
+First we have to make a small change to /etc/hosts.  This is the before:
+```
+    (venv2) stevepodell@StevesM1Dec2021 WeVoteServer % cat /etc/hosts
+    ##
+    # Host Database
+    #
+    # localhost is used to configure the loopback interface
+    # when the system is booting.  Do not change this entry.
+    ##
+    127.0.0.1       localhost
+    255.255.255.255 broadcasthost
+    ::1             localhost
+    (venv2) stevepodell@StevesM1Dec2021 WeVoteServer % 
+```
+Add a local domain alias `wevotedeveloper.com` for the [Facebook Valid OAuth Redirect URIs](https://developers.facebook.com/apps/1097389196952441/fb-login/settings/). 
+To do this you need to add `wevotedeveloper.com` to your `127.0.0.1` line in /etc/hosts.  After the change:
+```
+    (venv2) stevepodell@StevesM1Dec2021 WeVoteServer % cat /etc/hosts
+    ##
+    # Host Database
+    #
+    # localhost is used to configure the loopback interface
+    # when the system is booting.  Do not change this entry.
+    ##
+    127.0.0.1       localhost wevotedeveloper.com
+    255.255.255.255 broadcasthost
+    ::1             localhost
+    (venv2) stevepodell@StevesM1Dec2021 WeVoteServer % 
+```
+
+You will need to elevate your privileges with sudo to make this edit to this linux system file ... ` % sudo vi /etc/hosts` You can do with any other editor that you would prefer, as long as it can be run with sudo.
+
+Note July 2022:  The auto generated certificate that is made by runsslserver generates warnings in browsers (not really a problem),
+but may stop the JavaScript builtin fetch() function from completing.  The browser extension has to use fetch.
+
+### Server setup changes
+In your environment_variables.json
+replace all (6) urls that contain `http://localhost:8000/` (or 8001), with `https://wevotedeveloper.com:8000/`
+
+(Explanation at https://github.com/teddziuba/django-sslserver)
+
+Then start an SSL-enabled debug server:
+
+![ScreenShot](images/RunSslServer.png)
+![ScreenShot](images/RunningSslServer.png)
+
+or if you prefer the command line ...
+
+```
+  $ python manage.py runsslserver wevotedeveloper.com:8000
+```
+
+and access the API Server Python Management app on https://wevotedeveloper.com:8000
+
+The first time you start up the [runsslserver](https://github.com/teddziuba/django-sslserver) the app may take a full minute to respond to the first request.
+
+That's it!
+
+You will also need to have your WebApp running in SSL mode, on https://wevotedeveloper.com:3000
+
+## Fixing "NET::ERR_CERT_COMMON_NAME_INVALID" errors in the DevTools ERROR Console
+
+Find one of those failing links in the Network, and click it, to open in a new tab, then follow the
+same procedure that you would follow for any invalid certificate.   The details of how you do this
+changes over time, but in general on the chrome error screen that you see, follow the links for
+viewing the page anyways.  Once you have done that the problem will go away.
+
 
 [Back to root README](../README.md)
 
