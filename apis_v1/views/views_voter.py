@@ -27,7 +27,7 @@ from geoip.controllers import voter_location_retrieve_from_ip_for_api
 from image.controllers import TWITTER, FACEBOOK, cache_master_and_resized_image, create_resized_images
 from import_export_ballotpedia.controllers import voter_ballot_items_retrieve_from_ballotpedia_for_api_v4
 from import_export_facebook.controllers import voter_facebook_sign_in_retrieve_for_api, \
-    voter_facebook_sign_in_save_for_api
+    voter_facebook_sign_in_save_auth_for_api, voter_facebook_save_to_current_account_for_api
 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
 from import_export_twitter.controllers import voter_twitter_save_to_current_account_for_api
 from organization.models import OrganizationManager
@@ -1179,7 +1179,7 @@ def voter_facebook_sign_in_retrieve_view(request):  # voterFacebookSignInRetriev
         'status':                                   results['status'],
         'success':                                  results['success'],
         'voter_device_id':                          voter_device_id,
-        'existing_facebook_account_found':          results['existing_facebook_account_found'],
+        'existing_facebook_account_found':          positive_value_exists(results['facebook_user_id']),
         'voter_we_vote_id_attached_to_facebook':    results['voter_we_vote_id_attached_to_facebook'],
         'voter_we_vote_id_attached_to_facebook_email':  results['voter_we_vote_id_attached_to_facebook_email'],
         'facebook_retrieve_attempted':              True,
@@ -1224,7 +1224,7 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
     merge_two_accounts = request.GET.get('merge_two_accounts', False)
     # print('voter_facebook_sign_in_save_view merge_two_accounts ', merge_two_accounts)
 
-    results = voter_facebook_sign_in_save_for_api(
+    results = voter_facebook_sign_in_save_auth_for_api(
         voter_device_id=voter_device_id,
         save_auth_data=save_auth_data,
         facebook_access_token=facebook_access_token,
@@ -1254,35 +1254,41 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
             from_voter = from_voter_results['voter']
             merge_status, new_owner_voter, error_results = voter_merge_two_accounts_for_facebook(
                 None, facebook_user_id, from_voter, voter_device_id, True, status)
-            status += ' ' + merge_status
+            if merge_status:
+                status += ' ' + merge_status
             merge_occurred = new_owner_voter is not None
-            if error_results:
-                status += ' ' + error_results['status']
+            if not merge_occurred:
+                # If merge called for (new way 12/2022) but nothing to merge to...
+                print('calling voter_facebook_save_to_current_account_for_api since voter is new to WeVote')
+                voter_facebook_save_to_current_account_for_api(voter_device_id)
+            else:
+                if error_results:
+                    status += ' ' + error_results['status']
 
-            # Now do part 2
-            # We retrieve voter_device_link
-            voter_device_link_manager = VoterDeviceLinkManager()
-            voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
-            if not voter_device_link_results['voter_device_link_found']:
-                status += "VALID_VOTER_DEVICE_ID_MISSING: " + voter_device_link_results['status']
-                results = {
-                    'status': status,
-                    'success': False,
-                    'voter_device_id': voter_device_id,
-                    'voter_device_link_found': False,
-                    'voter_address_object_found': False,
-                    'voter_ballot_saved_found': False,
-                    'google_civic_election_id': 0,
-                    'merge_occurred': False,
-                }
-                return results
+                # Now do part 2
+                # We retrieve voter_device_link
+                voter_device_link_manager = VoterDeviceLinkManager()
+                voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
+                if not voter_device_link_results['voter_device_link_found']:
+                    status += "VALID_VOTER_DEVICE_ID_MISSING: " + voter_device_link_results['status']
+                    results = {
+                        'status': status,
+                        'success': False,
+                        'voter_device_id': voter_device_id,
+                        'voter_device_link_found': False,
+                        'voter_address_object_found': False,
+                        'voter_ballot_saved_found': False,
+                        'google_civic_election_id': 0,
+                        'merge_occurred': False,
+                    }
+                    return results
 
-            voter_device_link = voter_device_link_results['voter_device_link']
-            part2_results = voter_merge_two_accounts_action(from_voter, new_owner_voter, voter_device_link,
-                                                            status=status, email_owner_voter_found=False,
-                                                            facebook_owner_voter_found=True,
-                                                            invitation_owner_voter_found=False)
-            status += part2_results['status']
+                voter_device_link = voter_device_link_results['voter_device_link']
+                part2_results = voter_merge_two_accounts_action(from_voter, new_owner_voter, voter_device_link,
+                                                                status=status, email_owner_voter_found=False,
+                                                                facebook_owner_voter_found=True,
+                                                                invitation_owner_voter_found=False)
+                status += part2_results['status']
         else:
             status += ' NO_EXISTING_FACEBOOK_LOGIN_VOTER_FOUND_TO_MERGE_WITH_CURRENT_VOTER'
 
@@ -2444,7 +2450,7 @@ def voter_update_view(request):  # voterUpdate
 
     if delete_voter_account:
         # We want to fully delete this record
-        results = delete_all_voter_information_permanently(voter_to_delete=voter)
+        results = delete_all_voter_information_permanently(voter_to_delete=voter, user=request.user)
         if results['success']:
             status += "VOTER_DELETED_COMPLETELY "
             json_data = {

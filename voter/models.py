@@ -4302,6 +4302,7 @@ class VoterAddress(models.Model):
     # We are relying on built-in Python id field
 
     # The voter_id that owns this address
+    objects = None
     voter_id = models.BigIntegerField(
         verbose_name="voter unique identifier", null=False, blank=False, unique=False, db_index=True)
     address_type = models.CharField(

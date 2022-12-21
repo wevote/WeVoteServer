@@ -3,6 +3,8 @@
 # -*- coding: UTF-8 -*-
 
 import re
+import threading
+from time import time
 
 import wevote_functions.admin
 from config.base import get_environment_variable
@@ -11,6 +13,7 @@ from friend.models import FriendManager
 from image.controllers import FACEBOOK, cache_master_and_resized_image
 from import_export_facebook.models import FacebookManager
 from organization.models import OrganizationManager, INDIVIDUAL
+from voter.controllers import voter_cache_facebook_images_process
 from voter.models import VoterManager
 from wevote_functions.functions import is_voter_device_id_valid, \
     positive_value_exists
@@ -99,31 +102,16 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
         if positive_value_exists(photo_url):
             facebook_auth_response.facebook_profile_image_url_https = photo_url
 
-    # Cache original and resized images
-    cache_results = cache_master_and_resized_image(
-        voter_we_vote_id=voter.we_vote_id,
-        facebook_user_id=facebook_auth_response.facebook_user_id,
-        facebook_profile_image_url_https=facebook_auth_response.facebook_profile_image_url_https,
-        facebook_background_image_url_https=facebook_auth_response.facebook_background_image_url_https,
-        image_source=FACEBOOK)
-    cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
-    # cached_facebook_background_image_url_https is cached, but is not stored in voter_voter
-    we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
-    we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
-    we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+    # Cache original and resized images in a thread
+    t = threading.Thread(
+        target=voter_cache_facebook_images_process,
+        args=(voter, facebook_auth_response),
+        kwargs=None)
+    t.setDaemon(True)
+    t.start()
 
-    # Update voter with Facebook info (not including email -- that is done below)
-    results = voter_manager.save_facebook_user_values(
-        voter=voter,
-        facebook_auth_response=facebook_auth_response,
-        cached_facebook_profile_image_url_https=cached_facebook_profile_image_url_https,
-        we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
-        we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
-        we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
-
-    status += results['status'] + ", "
-    success = results['success']
-    voter = results['voter']
+    status += " FACEBOOK_IMAGES_CACHED_IN_THREAD"
+    success = True
 
     # ##### Make the facebook_email an email for the current voter (and possibly the primary email)
     email_manager = EmailManager()
@@ -358,6 +346,77 @@ def facebook_disconnect_for_api(voter_device_id):  # facebookDisconnect
     return results
 
 
+def caching_facebook_images_for_retrieve_process(*args, **kwargs):
+    repair_facebook_related_voter_caching_now = args[0]
+    facebook_auth_response = args[1]
+    voter_we_vote_id_attached_to_facebook = args[2]
+    voter_we_vote_id_attached_to_facebook_email = args[3]
+    voter_we_vote_id = args[4]
+    t0 = time()
+    status = ''
+
+    if repair_facebook_related_voter_caching_now:
+        voter_manager = VoterManager()
+        repair_results = voter_manager.repair_facebook_related_voter_caching(facebook_auth_response.facebook_user_id)
+        status += repair_results['status']
+
+    if positive_value_exists(voter_we_vote_id_attached_to_facebook):
+        existing_facebook_account_found = True
+        voter_we_vote_id_for_cache = voter_we_vote_id_attached_to_facebook
+    elif positive_value_exists(voter_we_vote_id_attached_to_facebook_email):
+        existing_facebook_account_found = True
+        voter_we_vote_id_for_cache = voter_we_vote_id_attached_to_facebook_email
+    else:
+        existing_facebook_account_found = False
+        voter_we_vote_id_for_cache = voter_we_vote_id
+
+    # Cache original and resized images
+    cache_results = cache_master_and_resized_image(
+        voter_we_vote_id=voter_we_vote_id_for_cache,
+        facebook_user_id=facebook_auth_response.facebook_user_id,
+        facebook_profile_image_url_https=facebook_auth_response.facebook_profile_image_url_https,
+        facebook_background_image_url_https=facebook_auth_response.facebook_background_image_url_https,
+        facebook_background_image_offset_x=facebook_auth_response.facebook_background_image_offset_x,
+        facebook_background_image_offset_y=facebook_auth_response.facebook_background_image_offset_y,
+        image_source=FACEBOOK)
+    cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
+    cached_facebook_background_image_url_https = cache_results['cached_facebook_background_image_url_https']
+    we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+    we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+    we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+
+    if positive_value_exists(cached_facebook_profile_image_url_https):
+        facebook_profile_image_url_https = cached_facebook_profile_image_url_https
+    else:
+        facebook_profile_image_url_https = facebook_auth_response.facebook_profile_image_url_https
+
+    if positive_value_exists(cached_facebook_background_image_url_https):
+        facebook_background_image_url_https = cached_facebook_background_image_url_https
+    else:
+        facebook_background_image_url_https = facebook_auth_response.facebook_background_image_url_https
+
+    facebook_manager = FacebookManager()
+    facebook_user_results = facebook_manager.update_or_create_facebook_user(
+        facebook_auth_response.facebook_user_id, facebook_auth_response.facebook_first_name,
+        facebook_auth_response.facebook_middle_name, facebook_auth_response.facebook_last_name,
+        facebook_profile_image_url_https=facebook_profile_image_url_https,
+        facebook_background_image_url_https=facebook_background_image_url_https,
+        we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
+        we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
+        we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny,
+        facebook_email=facebook_auth_response.facebook_email)
+    status += facebook_user_results['status']
+
+    update_organization_facebook_images(facebook_auth_response.facebook_user_id,
+                                        facebook_profile_image_url_https,
+                                        facebook_background_image_url_https)
+    dtc = time() - t0
+    logger.info('Processing the facebook images for a RETRIEVE in a thread for voter %s %s (%s) took %.3f seconds' %
+                (facebook_auth_response.facebook_first_name, facebook_auth_response.facebook_last_name,
+                 voter_we_vote_id_for_cache, dtc))
+    logger.debug('caching_facebook_images_for_retrieve_process status: ' + status)
+
+
 def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSignInRetrieve
     """
     After signing into facebook, retrieve the voter information for use in the WebApp
@@ -590,59 +649,27 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
             else:
                 status += "FACEBOOK_LINKED_VOTER_NOT_REPAIRED "
 
-    if repair_facebook_related_voter_caching_now:
-        repair_results = voter_manager.repair_facebook_related_voter_caching(facebook_auth_response.facebook_user_id)
-        status += repair_results['status']
+    # Cache original and resized images in a thread for read
+    t = threading.Thread(
+        target=caching_facebook_images_for_retrieve_process,
+        args=(repair_facebook_related_voter_caching_now, facebook_auth_response, voter_we_vote_id_attached_to_facebook,
+              voter_we_vote_id_attached_to_facebook_email, voter_we_vote_id),
+        kwargs=None)
+    t.setDaemon(True)
+    t.start()
+    status += " FACEBOOK_IMAGES_CACHED_IN_THREAD_BY_RETRIEVE"
 
-    if positive_value_exists(voter_we_vote_id_attached_to_facebook):
-        existing_facebook_account_found = True
-        voter_we_vote_id_for_cache = voter_we_vote_id_attached_to_facebook
-    elif positive_value_exists(voter_we_vote_id_attached_to_facebook_email):
-        existing_facebook_account_found = True
-        voter_we_vote_id_for_cache = voter_we_vote_id_attached_to_facebook_email
-    else:
-        existing_facebook_account_found = False
-        voter_we_vote_id_for_cache = voter_we_vote_id
+    fbuser = None
+    facebook_user_results = facebook_manager.retrieve_facebook_user_by_facebook_user_id(
+        facebook_auth_response.facebook_user_id)
+    if facebook_user_results['facebook_user_found']:
+        fbuser = facebook_user_results['facebook_user']
 
-    # Cache original and resized images
-    cache_results = cache_master_and_resized_image(
-        voter_we_vote_id=voter_we_vote_id_for_cache,
-        facebook_user_id=facebook_auth_response.facebook_user_id,
-        facebook_profile_image_url_https=facebook_auth_response.facebook_profile_image_url_https,
-        facebook_background_image_url_https=facebook_auth_response.facebook_background_image_url_https,
-        facebook_background_image_offset_x=facebook_auth_response.facebook_background_image_offset_x,
-        facebook_background_image_offset_y=facebook_auth_response.facebook_background_image_offset_y,
-        image_source=FACEBOOK)
-    cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
-    cached_facebook_background_image_url_https = cache_results['cached_facebook_background_image_url_https']
-    we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
-    we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
-    we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
-
-    if positive_value_exists(cached_facebook_profile_image_url_https):
-        facebook_profile_image_url_https = cached_facebook_profile_image_url_https
-    else:
-        facebook_profile_image_url_https = facebook_auth_response.facebook_profile_image_url_https
-
-    if positive_value_exists(cached_facebook_background_image_url_https):
-        facebook_background_image_url_https = cached_facebook_background_image_url_https
-    else:
-        facebook_background_image_url_https = facebook_auth_response.facebook_background_image_url_https
-
-    facebook_user_results = facebook_manager.update_or_create_facebook_user(
-        facebook_auth_response.facebook_user_id, facebook_auth_response.facebook_first_name,
-        facebook_auth_response.facebook_middle_name, facebook_auth_response.facebook_last_name,
-        facebook_profile_image_url_https=facebook_profile_image_url_https,
-        facebook_background_image_url_https=facebook_background_image_url_https,
-        we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
-        we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
-        we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny,
-        facebook_email=facebook_auth_response.facebook_email)
-    status += facebook_user_results['status']
-
-    update_organization_facebook_images(facebook_auth_response.facebook_user_id,
-                                        facebook_profile_image_url_https,
-                                        facebook_background_image_url_https)
+    facebook_profile_image_url_https = fbuser.facebook_profile_image_url_https if fbuser else ''
+    facebook_background_image_url_https = fbuser.facebook_background_image_url_https if fbuser else ''
+    we_vote_hosted_profile_image_url_large = fbuser.we_vote_hosted_profile_image_url_large if fbuser else ''
+    we_vote_hosted_profile_image_url_medium = fbuser.we_vote_hosted_profile_image_url_medium if fbuser else ''
+    we_vote_hosted_profile_image_url_tiny = fbuser.we_vote_hosted_profile_image_url_tiny if fbuser else ''
 
     json_data = {
         'success':                                  success,
@@ -650,7 +677,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
         'voter_device_id':                          voter_device_id,
         'voter_we_vote_id':                         voter_we_vote_id,
         'voter_has_data_to_preserve':               voter_has_data_to_preserve,
-        'existing_facebook_account_found':          existing_facebook_account_found,
+        'existing_facebook_account_found':          positive_value_exists(facebook_auth_response.facebook_user_id),
         'voter_we_vote_id_attached_to_facebook':    voter_we_vote_id_attached_to_facebook,
         'voter_we_vote_id_attached_to_facebook_email':    voter_we_vote_id_attached_to_facebook_email,
         'facebook_sign_in_found':                   auth_response_results['facebook_auth_response_found'],
@@ -713,7 +740,7 @@ def update_organization_facebook_images(facebook_user_id, facebook_profile_image
     return
 
 
-def voter_facebook_sign_in_save_for_api(voter_device_id,  # voterFacebookSignInSave
+def voter_facebook_sign_in_save_auth_for_api(voter_device_id,  # voterFacebookSignInSave
                                         save_auth_data,
                                         facebook_access_token, facebook_user_id, facebook_expires_in,
                                         facebook_signed_request,

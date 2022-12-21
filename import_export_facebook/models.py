@@ -493,7 +493,13 @@ class FacebookManager(models.Manager):
 
             facebook_user_list = list(facebook_user_query)
             for one_facebook_user in facebook_user_list:
-                logger.debug("DELETING one_facebook_user " + one_facebook_user.facebook_user_name)
+                name = one_facebook_user.facebook_user_name
+                if not name:
+                    name = one_facebook_user.facebook_user_first_name
+                if not name:
+                    name = "Entry does not contain a name"
+
+                logger.debug("DELETING one_facebook_user " + name)
                 one_facebook_user.delete()
                 facebook_users_deleted = facebook_users_deleted + 1
             success = True
