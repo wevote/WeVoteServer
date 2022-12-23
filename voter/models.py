@@ -675,7 +675,7 @@ class VoterManager(BaseUserManager):
             voter_created = True
         except IntegrityError as e:
             handle_record_not_saved_exception(e, logger=logger)
-            logger.debug("create_voter IntegrityError exception (#1): " + str(e))
+            logger.error("create_voter IntegrityError exception (#1): " + str(e))
             try:
                 # Trying to save again will increment the 'we_vote_id_last_voter_integer'
                 # by calling 'fetch_next_we_vote_id_voter_integer'
@@ -686,10 +686,10 @@ class VoterManager(BaseUserManager):
                 voter_created = True
             except IntegrityError as e:
                 handle_record_not_saved_exception(e, logger=logger)
-                logger.debug("create_voter IntegrityError exception (#2): " + str(e))
+                logger.error("create_voter IntegrityError exception (#2): " + str(e))
             except Exception as e:
                 handle_record_not_saved_exception(e, logger=logger)
-                logger.debug("create_voter general exception (#1): " + str(e))
+                logger.error("create_voter general exception (#1): " + str(e))
 
 
         except Exception as e:
