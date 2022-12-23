@@ -2,6 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 import string
+from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth import login
@@ -15,7 +16,6 @@ from django.utils.timezone import now
 
 import wevote_functions.admin
 from admin_tools.views import redirect_to_sign_in_page
-from datetime import timedelta
 from email_outbound.models import EmailAddress, EmailManager
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
     handle_record_not_saved_exception, handle_exception
@@ -238,7 +238,8 @@ def voter_delete_process_view(request):
         if len(voter_query):
             voter_on_stage = voter_query[0]
             voter_on_stage_found = True
-            results = delete_all_voter_information_permanently(voter_to_delete=voter_on_stage)
+            results = delete_all_voter_information_permanently(voter_to_delete=voter_on_stage,
+                                                               user = request.user)
             status += results['status']
     except Exception as e:
         handle_record_not_found_exception(e, logger=logger)
