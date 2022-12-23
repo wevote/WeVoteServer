@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 import json
+from time import time
 
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -1223,6 +1224,7 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
     facebook_background_image_offset_y = request.GET.get('facebook_background_image_offset_y', '')
     merge_two_accounts = request.GET.get('merge_two_accounts', False)
     # print('voter_facebook_sign_in_save_view merge_two_accounts ', merge_two_accounts)
+    t0 = time()
 
     results = voter_facebook_sign_in_save_auth_for_api(
         voter_device_id=voter_device_id,
@@ -1242,6 +1244,10 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
         facebook_background_image_offset_x=facebook_background_image_offset_x,
         facebook_background_image_offset_y=facebook_background_image_offset_y,
     )
+
+    t1 = time()
+    t2 = time()
+
 
     status = results['status']
     merge_occurred = False
@@ -1265,6 +1271,7 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
                 if error_results:
                     status += ' ' + error_results['status']
 
+                t2 = time()
                 # Now do part 2
                 # We retrieve voter_device_link
                 voter_device_link_manager = VoterDeviceLinkManager()
@@ -1291,6 +1298,16 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
                 status += part2_results['status']
         else:
             status += ' NO_EXISTING_FACEBOOK_LOGIN_VOTER_FOUND_TO_MERGE_WITH_CURRENT_VOTER'
+    t3 = time()
+    dt0 = t1 - t0
+    dt1 = t2 - t1
+    dt2 = t3 - t2
+    dt = t3 - t0
+    logger.error('(not an error) voter_facebook_sign_in_save_view step 1 took ' + "{:.6f}".format(dt0) +
+                 ' seconds, step 2 took ' + "{:.6f}".format(dt1) +
+                 ' seconds, step 3 took ' + "{:.6f}".format(dt2) +
+                 ' seconds, total took ' + "{:.6f}".format(dt) + ' seconds')
+
 
     json_data = {
         'status':                   results['status'],

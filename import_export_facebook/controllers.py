@@ -423,6 +423,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
     :param voter_device_id:
     :return:
     """
+    t0 = time()
     voter_manager = VoterManager()
     repair_facebook_related_voter_caching_now = False
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
@@ -495,6 +496,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
 
     success = True
     facebook_auth_response = auth_response_results['facebook_auth_response']
+    t1 = time()
 
     if not facebook_auth_response.facebook_user_id:
         success = False
@@ -568,6 +570,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
                     facebook_link_to_voter = facebook_link_results['facebook_link_to_voter']
                     repair_facebook_related_voter_caching_now = True
 
+    t2 = time()
     voter_we_vote_id_attached_to_facebook_email = ""
     if not positive_value_exists(voter_we_vote_id_attached_to_facebook) \
             and positive_value_exists(facebook_auth_response.facebook_email) \
@@ -648,6 +651,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
                 facebook_linked_voter = repair_results['voter']
             else:
                 status += "FACEBOOK_LINKED_VOTER_NOT_REPAIRED "
+    t3 = time()
 
     # Cache original and resized images in a thread for read
     t = threading.Thread(
@@ -658,6 +662,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
     t.setDaemon(True)
     t.start()
     status += " FACEBOOK_IMAGES_CACHED_IN_THREAD_BY_RETRIEVE"
+    t4 = time()
 
     fbuser = None
     facebook_user_results = facebook_manager.retrieve_facebook_user_by_facebook_user_id(
@@ -671,6 +676,19 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
     we_vote_hosted_profile_image_url_medium = fbuser.we_vote_hosted_profile_image_url_medium if fbuser else ''
     we_vote_hosted_profile_image_url_tiny = fbuser.we_vote_hosted_profile_image_url_tiny if fbuser else ''
 
+    t5 = time()
+    dt0 = t1 - t0
+    dt1 = t2 - t1
+    dt2 = t3 - t2
+    dt3 = t4 - t3
+    dt4 = t5 - t4
+    dt = t5 - t0
+    logger.error('(not an error) RETRIEVE voter_facebook_sign_in_retrieve_for_api step 1 took ' + "{:.6f}".format(dt0) +
+                 ' seconds, step 2 took ' + "{:.6f}".format(dt1) +
+                 ' seconds, step 3 took ' + "{:.6f}".format(dt2) +
+                 ' seconds, step 4 took ' + "{:.6f}".format(dt3) +
+                 ' seconds, step 5 took ' + "{:.6f}".format(dt4) +
+                 ' seconds, total took ' + "{:.6f}".format(dt) + ' seconds')
     json_data = {
         'success':                                  success,
         'status':                                   status,
