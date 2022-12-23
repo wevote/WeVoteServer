@@ -1763,8 +1763,8 @@ def voter_cache_facebook_images_process(*args, **kwargs):
         we_vote_hosted_profile_image_url_tiny)
     dtc = time() - t0
     # 12/20/22: takes 1.2 seconds on my local postgres, leave this logger in for a few months, so we can gather data
-    logger.info('Processing the facebook images in a thread for voter %s %s (%s) took %.3f seconds' %
-          (voter.first_name, voter.last_name, voter.we_vote_id, dtc))
+    logger.error('(Not an error) Processing the facebook images in a thread for voter %s %s (%s) took %.3f seconds' %
+                 (voter.first_name, voter.last_name, voter.we_vote_id, dtc))
     # print("process finished")
 
 
