@@ -411,9 +411,9 @@ def caching_facebook_images_for_retrieve_process(*args, **kwargs):
                                         facebook_profile_image_url_https,
                                         facebook_background_image_url_https)
     dtc = time() - t0
-    logger.info('Processing the facebook images for a RETRIEVE in a thread for voter %s %s (%s) took %.3f seconds' %
-                (facebook_auth_response.facebook_first_name, facebook_auth_response.facebook_last_name,
-                 voter_we_vote_id_for_cache, dtc))
+    logger.error('(Not an error) Processing the facebook images for a RETRIEVE in a thread for voter %s %s (%s) took %.3f seconds' %
+                 (facebook_auth_response.facebook_first_name, facebook_auth_response.facebook_last_name,
+                  voter_we_vote_id_for_cache, dtc))
     logger.debug('caching_facebook_images_for_retrieve_process status: ' + status)
 
 
