@@ -1,7 +1,7 @@
 # apis_v1/views/views_candidate.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-from candidate.controllers import candidate_retrieve_for_api, candidates_retrieve_for_api, \
+from candidate.controllers import candidate_retrieve_for_api, candidates_query_for_api, candidates_retrieve_for_api, \
     retrieve_candidate_list_for_all_upcoming_elections
 from candidate.views_admin import candidate_change_names
 from politician.views_admin import politician_change_names
@@ -10,6 +10,7 @@ from config.base import get_environment_variable
 from django.http import HttpResponse
 import json
 import wevote_functions.admin
+from wevote_functions.functions import positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -20,6 +21,22 @@ def candidate_retrieve_view(request):  # candidateRetrieve
     candidate_id = request.GET.get('candidate_id', 0)
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', None)
     return candidate_retrieve_for_api(candidate_id, candidate_we_vote_id)
+
+
+def candidates_query_view(request):  # candidatesQuery
+    candidates_index_start = request.GET.get('candidatesIndexStart', 0)
+    election_day = request.GET.get('electionDay', '')
+    race_office_level_list = request.GET.getlist('raceOfficeLevel[]', False)
+    search_text = request.GET.get('searchText', '')
+    use_we_vote_format = positive_value_exists(request.GET.get('useWeVoteFormat', False))
+    limit_to_this_state_code = request.GET.get('state', '')
+    return candidates_query_for_api(
+        candidates_index_start=candidates_index_start,
+        election_day=election_day,
+        limit_to_this_state_code=limit_to_this_state_code,
+        race_office_level_list=race_office_level_list,
+        search_text=search_text,
+        use_we_vote_format=use_we_vote_format)
 
 
 def candidates_retrieve_view(request):  # candidatesRetrieve

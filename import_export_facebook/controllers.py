@@ -13,7 +13,6 @@ from friend.models import FriendManager
 from image.controllers import FACEBOOK, cache_master_and_resized_image
 from import_export_facebook.models import FacebookManager
 from organization.models import OrganizationManager, INDIVIDUAL
-from voter.controllers import voter_cache_facebook_images_process
 from voter.models import VoterManager
 from wevote_functions.functions import is_voter_device_id_valid, \
     positive_value_exists
@@ -103,6 +102,7 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
             facebook_auth_response.facebook_profile_image_url_https = photo_url
 
     # Cache original and resized images in a thread
+    from voter.controllers import voter_cache_facebook_images_process
     t = threading.Thread(
         target=voter_cache_facebook_images_process,
         args=(voter, facebook_auth_response),

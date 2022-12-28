@@ -343,6 +343,8 @@ class CandidateListManager(models.Manager):
     def retrieve_all_candidates_for_one_year(
             self,
             candidate_year=0,
+            candidates_index_start=0,
+            candidates_limit=300,
             limit_to_this_state_code='',
             search_string=False,
             return_list_of_objects=False,
@@ -350,6 +352,8 @@ class CandidateListManager(models.Manager):
         """
         This might generate different results than retrieve_candidate_we_vote_id_list_from_year_list.
         :param candidate_year:
+        :param candidates_index_start:
+        :param candidates_limit:
         :param limit_to_this_state_code:
         :param search_string:
         :param return_list_of_objects:
@@ -363,6 +367,8 @@ class CandidateListManager(models.Manager):
             today = datetime.now().date()
             candidate_year = today.year
         candidate_year_integer = convert_to_int(candidate_year)
+        candidates_returned_count = 0
+        candidates_total_count = 0
         status = ""
         if positive_value_exists(search_string):
             try:
@@ -382,10 +388,11 @@ class CandidateListManager(models.Manager):
             starting_date_as_integer=starting_date_as_integer,
             ending_date_as_integer=ending_date_as_integer,
         )
+        election_list_objects = []
         google_civic_election_id_list = []
         if results['election_list_found']:
-            election_list = results['election_list']
-            for one_election in election_list:
+            election_list_objects = results['election_list']
+            for one_election in election_list_objects:
                 google_civic_election_id_list.append(one_election.google_civic_election_id)
 
         results = self.retrieve_candidate_we_vote_id_list_from_election_list(
@@ -433,7 +440,14 @@ class CandidateListManager(models.Manager):
                     # Add as new filter for "AND"
                     candidate_query = candidate_query.filter(final_filters)
             candidate_query = candidate_query.order_by("candidate_name")
-            candidate_list_objects = list(candidate_query)
+            candidates_total_count = candidate_query.count()
+            if candidates_limit > 0:
+                if candidates_index_start > 0:
+                    candidate_list_objects = candidate_query[candidates_index_start:candidates_limit]
+                else:
+                    candidate_list_objects = candidate_query[:candidates_limit]
+            else:
+                candidate_list_objects = list(candidate_query)
 
             if len(candidate_list_objects):
                 candidate_list_found = True
@@ -451,6 +465,8 @@ class CandidateListManager(models.Manager):
             handle_exception(e, logger=logger)
             status += 'FAILED retrieve_all_candidates_for_upcoming_election ' + str(e) + ' '
             success = False
+
+        candidates_returned_count = len(candidate_list_objects)
 
         for candidate in candidate_list_objects:
             try:
@@ -471,10 +487,13 @@ class CandidateListManager(models.Manager):
         results = {
             'success':                          success,
             'status':                           status,
-            'google_civic_election_id_list':    google_civic_election_id_list,
             'candidate_list_found':             candidate_list_found,
             'candidate_list_objects':           candidate_list_objects if return_list_of_objects else [],
             'candidate_list_light':             candidate_list_light,
+            'candidates_returned_count':        candidates_returned_count,
+            'candidates_total_count':           candidates_total_count,
+            'election_list_objects':            election_list_objects,
+            'google_civic_election_id_list':    google_civic_election_id_list,
         }
         return results
 
