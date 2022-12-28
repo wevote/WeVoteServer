@@ -36,7 +36,9 @@ from position.models import PositionEntered, PositionListManager
 from twitter.models import TwitterLinkPossibility, TwitterUserManager
 from voter.models import voter_has_authority
 from voter_guide.models import VoterGuide
-from wevote_functions.functions import convert_to_int, extract_instagram_handle_from_text_string, \
+from wevote_functions.functions import convert_date_to_date_as_integer, convert_to_int, \
+    convert_we_vote_date_string_to_date, \
+    extract_instagram_handle_from_text_string, \
     extract_twitter_handle_from_text_string, list_intersection, \
     positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
@@ -364,35 +366,48 @@ def candidate_list_view(request):
     candidate_manager = CandidateManager()
     candidate_list_manager = CandidateListManager()
 
-    # 2021-10-23 Turning off migration fix since the 'google_civic_election_id' and 'contest_office_we_vote_id'
-    #  data is no longer considered the master linkage between a candidate and office
-    # if positive_value_exists(google_civic_election_id) or positive_value_exists(migrate_to_candidate_link):
-    #     candidate_query = CandidateCampaign.objects.all()
-    #     if positive_value_exists(google_civic_election_id):
-    #         candidate_query = candidate_query.filter(google_civic_election_id=google_civic_election_id)
-    #     candidate_query = candidate_query.filter(migrated_to_link=False)
-    #     candidate_list = list(candidate_query)
-    #     candidates_migrated = 0
-    #     for one_candidate in candidate_list:
-    #         if positive_value_exists(one_candidate.we_vote_id) \
-    #                 and positive_value_exists(one_candidate.contest_office_we_vote_id) \
-    #                 and positive_value_exists(one_candidate.google_civic_election_id):
-    #             results = candidate_manager.get_or_create_candidate_to_office_link(
-    #                 candidate_we_vote_id=one_candidate.we_vote_id,
-    #                 contest_office_we_vote_id=one_candidate.contest_office_we_vote_id,
-    #                 google_civic_election_id=convert_to_int(one_candidate.google_civic_election_id),
-    #                 state_code=one_candidate.state_code)
-    #             if not positive_value_exists(results['success']):
-    #                 # Break out of loop
-    #                 messages.add_message(request, messages.ERROR, "Could not migrate: " + str(results['status']))
-    #             else:
-    #                 if positive_value_exists(results['new_candidate_to_office_link_created']):
-    #                     pass
-    #                 one_candidate.migrated_to_link = True
-    #                 one_candidate.save()
-    #                 candidates_migrated += 1
-    #     if positive_value_exists(candidates_migrated) or positive_value_exists(migrate_to_candidate_link):
-    #         messages.add_message(request, messages.INFO, "candidates_migrated: " + str(candidates_migrated))
+    # Populate candidate_ultimate_election_date
+    candidate_query = CandidateCampaign.objects.all()
+    candidate_query = candidate_query.filter(
+        Q(candidate_ultimate_election_date=0) | Q(candidate_ultimate_election_date__isnull=True))
+    candidate_ultimate_count = candidate_query.count()
+    if positive_value_exists(candidate_ultimate_count):
+        messages.add_message(request, messages.INFO, "candidate_ultimate_election_date count at start: "
+                                                     "" + str(candidate_ultimate_count))
+    candidate_list = candidate_query[:10000]  # Only process 10000 at a time
+    candidates_updated = 0
+    candidates_not_updated = 0
+    elections_to_retrieve = []
+    for one_candidate in candidate_list:
+        if positive_value_exists(one_candidate.google_civic_election_id):
+            elections_to_retrieve.append(one_candidate.google_civic_election_id)
+    election_date_as_integer_dict = {}
+    if len(elections_to_retrieve) > 0:
+        election_manager = ElectionManager()
+        election_results = election_manager.retrieve_elections_by_google_civic_election_id_list(
+            google_civic_election_id_list=elections_to_retrieve,
+            read_only=True)
+        for one_election in election_results['election_list']:
+            if positive_value_exists(one_election.election_day_text):
+                election_date = convert_we_vote_date_string_to_date(one_election.election_day_text)
+                date_as_integer = convert_date_to_date_as_integer(election_date)
+                if positive_value_exists(date_as_integer):
+                    election_date_as_integer_dict[one_election.google_civic_election_id] = date_as_integer
+    for one_candidate in candidate_list:
+        if positive_value_exists(one_candidate.google_civic_election_id) and \
+                positive_value_exists(election_date_as_integer_dict[one_candidate.google_civic_election_id]):
+            one_candidate.candidate_ultimate_election_date = \
+                election_date_as_integer_dict[one_candidate.google_civic_election_id]
+            one_candidate.save()
+            candidates_updated += 1
+        else:
+            candidates_not_updated += 1
+    if positive_value_exists(candidates_updated):
+        messages.add_message(request, messages.INFO, "candidate_ultimate_election_date candidates_updated: "
+                                                     "" + str(candidates_updated))
+    if positive_value_exists(candidates_not_updated):
+        messages.add_message(request, messages.ERROR, "candidate_ultimate_election_date candidates_not_updated: "
+                                                      "" + str(candidates_not_updated))
 
     google_civic_election_id_list_generated = False
     show_this_year_of_candidates_restriction = False
@@ -696,7 +711,7 @@ def candidate_list_view(request):
 
     messages_on_stage = get_messages(request)
 
-    # Provide this election to the template so we can show election statistics
+    # Provide this election to the template, so we can show election statistics
     election = None
     if positive_value_exists(google_civic_election_id):
         results = election_manager.retrieve_election(google_civic_election_id)

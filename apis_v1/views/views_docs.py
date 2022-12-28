@@ -11,8 +11,8 @@ from apis_v1.documentation_source import \
     ballot_items_sync_out_doc, ballot_returned_sync_out_doc, \
     campaign_follow_doc, campaign_news_item_save_doc, campaign_retrieve_doc, campaign_save_doc, \
     campaign_supporter_retrieve_doc, campaign_supporter_save_doc, \
-    campaign_list_retrieve_doc, \
-    candidate_retrieve_doc, candidates_retrieve_doc, candidate_list_for_upcoming_elections_retrieve_doc, \
+    campaign_list_retrieve_doc, candidate_retrieve_doc, \
+    candidates_query_doc, candidates_retrieve_doc, candidate_list_for_upcoming_elections_retrieve_doc, \
     candidates_sync_out_doc, candidate_to_office_link_sync_out_doc, device_id_generate_doc, \
     device_store_firebase_fcm_token_doc, donation_with_stripe_doc, \
     elections_retrieve_doc, elections_sync_out_doc, facebook_disconnect_doc, facebook_friends_action_doc, \
@@ -328,6 +328,15 @@ def candidate_list_for_upcoming_elections_retrieve_doc_view(request):
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = \
         candidate_list_for_upcoming_elections_retrieve_doc.doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def candidates_query_doc_view(request):
+    """
+    Show documentation about candidatesQuery
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = candidates_query_doc.candidates_query_doc_template_values(url_root)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
