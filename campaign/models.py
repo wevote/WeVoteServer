@@ -877,7 +877,9 @@ class CampaignXManager(models.Manager):
             including_politicians_in_any_of_these_states=None,
             including_politicians_with_support_in_any_of_these_issues=None,
             limit=25,
-            read_only=True):
+            limit_to_this_state_code='',
+            read_only=True,
+            search_text=''):
         campaignx_list = []
         campaignx_list_found = False
         campaignx_manager = CampaignXManager()
@@ -895,29 +897,74 @@ class CampaignXManager(models.Manager):
             # #########
             # All "OR" queries
             filters = []
-            if positive_value_exists(including_started_by_voter_we_vote_id):
-                # started_by this voter
-                new_filter = Q(started_by_voter_we_vote_id__iexact=including_started_by_voter_we_vote_id)
-                filters.append(new_filter)
-                # Voter is owner of the campaign, or on team that owns it
-                voter_owned_campaignx_we_vote_ids = campaignx_manager.retrieve_voter_owned_campaignx_we_vote_ids(
-                    voter_we_vote_id=including_started_by_voter_we_vote_id)
-                new_filter = Q(we_vote_id__in=voter_owned_campaignx_we_vote_ids)
-                filters.append(new_filter)
 
-            final_election_date_plus_cool_down = generate_date_as_integer() + FINAL_ELECTION_DATE_COOL_DOWN
-            new_filter = \
-                Q(in_draft_mode=False,
-                  is_blocked_by_we_vote=False,
-                  is_in_team_review_mode=False,
-                  is_not_promoted_by_we_vote=False,
-                  is_still_active=True,
-                  is_ok_to_promote_on_we_vote=True) & \
-                (Q(supporters_count__gte=SUPPORTERS_COUNT_MINIMUM_FOR_LISTING) |
-                 Q(supporters_count_minimum_ignored=True)) & \
-                (Q(final_election_date_as_integer__isnull=True) |
-                 Q(final_election_date_as_integer__gt=final_election_date_plus_cool_down))
-            filters.append(new_filter)
+            campaignx_we_vote_id_list = []
+            if positive_value_exists(search_text) or positive_value_exists(limit_to_this_state_code):
+                politician_list = campaignx_manager.retrieve_campaignx_politician_list(
+                    limit_to_this_state_code=limit_to_this_state_code,
+                    search_text=search_text)
+                for one_politician in politician_list:
+                    if one_politician.campaignx_we_vote_id not in campaignx_we_vote_id_list:
+                        campaignx_we_vote_id_list.append(one_politician.campaignx_we_vote_id)
+                # Find campaigns based on this search text
+                try:
+                    search_words = search_text.split()
+                except Exception as e:
+                    status += "SEARCH_STRING_INVALID: " + str(e) + ' '
+                    search_words = []
+                for search_word in search_words:
+                    search_filters = []
+
+                    # We want to find candidates with *any* of these values
+                    new_search_filter = Q(campaign_description__icontains=search_word)
+                    search_filters.append(new_search_filter)
+                    new_search_filter = Q(campaign_title__icontains=search_word)
+                    search_filters.append(new_search_filter)
+                    new_search_filter = Q(seo_friendly_path__icontains=search_word)
+                    search_filters.append(new_search_filter)
+                    new_search_filter = Q(politician_starter_list_serialized__icontains=search_word)
+                    search_filters.append(new_search_filter)
+                    # Any politicians with one of the search_words or in the state we care about?
+                    if len(campaignx_we_vote_id_list) > 0:
+                        new_search_filter = Q(we_vote_id__in=campaignx_we_vote_id_list)
+                        search_filters.append(new_search_filter)
+
+                    # Add the first query
+                    final_filters = search_filters.pop()
+
+                    # ...and "OR" the remaining items in the list
+                    for item in search_filters:
+                        final_filters |= item
+
+                    campaignx_queryset = campaignx_queryset.filter(final_filters)
+
+                # ...but limit with these queries
+                campaignx_queryset = campaignx_queryset.filter(in_draft_mode=False)
+                campaignx_queryset = campaignx_queryset.filter(is_blocked_by_we_vote=False)
+                campaignx_queryset = campaignx_queryset.filter(is_in_team_review_mode=False)
+            else:
+                if positive_value_exists(including_started_by_voter_we_vote_id):
+                    # started_by this voter
+                    new_filter = Q(started_by_voter_we_vote_id__iexact=including_started_by_voter_we_vote_id)
+                    filters.append(new_filter)
+                    # Voter is owner of the campaign, or on team that owns it
+                    voter_owned_campaignx_we_vote_ids = campaignx_manager.retrieve_voter_owned_campaignx_we_vote_ids(
+                        voter_we_vote_id=including_started_by_voter_we_vote_id)
+                    new_filter = Q(we_vote_id__in=voter_owned_campaignx_we_vote_ids)
+                    filters.append(new_filter)
+                final_election_date_plus_cool_down = generate_date_as_integer() + FINAL_ELECTION_DATE_COOL_DOWN
+                new_filter = \
+                    Q(in_draft_mode=False,
+                      is_blocked_by_we_vote=False,
+                      is_in_team_review_mode=False,
+                      is_not_promoted_by_we_vote=False,
+                      is_still_active=True,
+                      is_ok_to_promote_on_we_vote=True) & \
+                    (Q(supporters_count__gte=SUPPORTERS_COUNT_MINIMUM_FOR_LISTING) |
+                     Q(supporters_count_minimum_ignored=True)) & \
+                    (Q(final_election_date_as_integer__isnull=True) |
+                     Q(final_election_date_as_integer__gt=final_election_date_plus_cool_down))
+                filters.append(new_filter)
 
             # Add the first query
             if len(filters):
@@ -1397,12 +1444,38 @@ class CampaignXManager(models.Manager):
         }
         return results
 
-    def retrieve_campaignx_politician_list(self, campaignx_we_vote_id=''):
+    def retrieve_campaignx_politician_list(self, campaignx_we_vote_id='', limit_to_this_state_code='', search_text=''):
         campaignx_politician_list_found = False
         campaignx_politician_list = []
         try:
             campaignx_politician_query = CampaignXPolitician.objects.all()
-            campaignx_politician_query = campaignx_politician_query.filter(campaignx_we_vote_id=campaignx_we_vote_id)
+            if positive_value_exists(campaignx_we_vote_id):
+                campaignx_politician_query = campaignx_politician_query.filter(
+                    campaignx_we_vote_id=campaignx_we_vote_id)
+            if positive_value_exists(limit_to_this_state_code):
+                campaignx_politician_query = campaignx_politician_query.filter(
+                    state_code__iexact=limit_to_this_state_code)
+            if positive_value_exists(search_text):
+                try:
+                    search_words = search_text.split()
+                except Exception as e:
+                    return []
+                for search_word in search_words:
+                    filters = []
+
+                    # We want to find candidates with *any* of these values
+                    new_filter = Q(politician_name__icontains=search_word)
+                    filters.append(new_filter)
+
+                    # Add the first query
+                    final_filters = filters.pop()
+
+                    # ...and "OR" the remaining items in the list
+                    for item in filters:
+                        final_filters |= item
+
+                    # Add as new filter for "AND"
+                    campaignx_politician_query = campaignx_politician_query.filter(final_filters)
             campaignx_politician_list = list(campaignx_politician_query)
             if len(campaignx_politician_list):
                 campaignx_politician_list_found = True
