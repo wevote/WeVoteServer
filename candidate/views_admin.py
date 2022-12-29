@@ -373,7 +373,7 @@ def candidate_list_view(request):
     # if positive_value_exists(candidate_ultimate_count):
     #     messages.add_message(request, messages.INFO, "candidate_ultimate_election_date count at start: "
     #                                                  "" + str(candidate_ultimate_count))
-    # candidate_list = candidate_query[:10000]  # Only process 10000 at a time
+    # candidate_list = candidate_query[:100000]  # Only process 100000 at a time
     # candidates_updated = 0
     # candidates_not_updated = 0
     # elections_to_retrieve = []
