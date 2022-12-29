@@ -363,51 +363,50 @@ def candidate_list_view(request):
     state_code = request.GET.get('state_code', '')
     state_list = STATE_CODE_MAP
     state_list_modified = {}
-    candidate_manager = CandidateManager()
     candidate_list_manager = CandidateListManager()
 
-    # Populate candidate_ultimate_election_date
-    candidate_query = CandidateCampaign.objects.all()
-    candidate_query = candidate_query.filter(
-        Q(candidate_ultimate_election_date=0) | Q(candidate_ultimate_election_date__isnull=True))
-    candidate_ultimate_count = candidate_query.count()
-    if positive_value_exists(candidate_ultimate_count):
-        messages.add_message(request, messages.INFO, "candidate_ultimate_election_date count at start: "
-                                                     "" + str(candidate_ultimate_count))
-    candidate_list = candidate_query[:10000]  # Only process 10000 at a time
-    candidates_updated = 0
-    candidates_not_updated = 0
-    elections_to_retrieve = []
-    for one_candidate in candidate_list:
-        if positive_value_exists(one_candidate.google_civic_election_id):
-            elections_to_retrieve.append(one_candidate.google_civic_election_id)
-    election_date_as_integer_dict = {}
-    if len(elections_to_retrieve) > 0:
-        election_manager = ElectionManager()
-        election_results = election_manager.retrieve_elections_by_google_civic_election_id_list(
-            google_civic_election_id_list=elections_to_retrieve,
-            read_only=True)
-        for one_election in election_results['election_list']:
-            if positive_value_exists(one_election.election_day_text):
-                election_date = convert_we_vote_date_string_to_date(one_election.election_day_text)
-                date_as_integer = convert_date_to_date_as_integer(election_date)
-                if positive_value_exists(date_as_integer):
-                    election_date_as_integer_dict[one_election.google_civic_election_id] = date_as_integer
-    for one_candidate in candidate_list:
-        if positive_value_exists(one_candidate.google_civic_election_id) and \
-                positive_value_exists(election_date_as_integer_dict[one_candidate.google_civic_election_id]):
-            one_candidate.candidate_ultimate_election_date = \
-                election_date_as_integer_dict[one_candidate.google_civic_election_id]
-            one_candidate.save()
-            candidates_updated += 1
-        else:
-            candidates_not_updated += 1
-    if positive_value_exists(candidates_updated):
-        messages.add_message(request, messages.INFO, "candidate_ultimate_election_date candidates_updated: "
-                                                     "" + str(candidates_updated))
-    if positive_value_exists(candidates_not_updated):
-        messages.add_message(request, messages.ERROR, "candidate_ultimate_election_date candidates_not_updated: "
-                                                      "" + str(candidates_not_updated))
+    # # Populate candidate_ultimate_election_date
+    # candidate_query = CandidateCampaign.objects.all()
+    # candidate_query = candidate_query.filter(
+    #     Q(candidate_ultimate_election_date=0) | Q(candidate_ultimate_election_date__isnull=True))
+    # candidate_ultimate_count = candidate_query.count()
+    # if positive_value_exists(candidate_ultimate_count):
+    #     messages.add_message(request, messages.INFO, "candidate_ultimate_election_date count at start: "
+    #                                                  "" + str(candidate_ultimate_count))
+    # candidate_list = candidate_query[:10000]  # Only process 10000 at a time
+    # candidates_updated = 0
+    # candidates_not_updated = 0
+    # elections_to_retrieve = []
+    # for one_candidate in candidate_list:
+    #     if positive_value_exists(one_candidate.google_civic_election_id):
+    #         elections_to_retrieve.append(one_candidate.google_civic_election_id)
+    # election_date_as_integer_dict = {}
+    # if len(elections_to_retrieve) > 0:
+    #     election_manager = ElectionManager()
+    #     election_results = election_manager.retrieve_elections_by_google_civic_election_id_list(
+    #         google_civic_election_id_list=elections_to_retrieve,
+    #         read_only=True)
+    #     for one_election in election_results['election_list']:
+    #         if positive_value_exists(one_election.election_day_text):
+    #             election_date = convert_we_vote_date_string_to_date(one_election.election_day_text)
+    #             date_as_integer = convert_date_to_date_as_integer(election_date)
+    #             if positive_value_exists(date_as_integer):
+    #                 election_date_as_integer_dict[one_election.google_civic_election_id] = date_as_integer
+    # for one_candidate in candidate_list:
+    #     if positive_value_exists(one_candidate.google_civic_election_id) and \
+    #             positive_value_exists(election_date_as_integer_dict[one_candidate.google_civic_election_id]):
+    #         one_candidate.candidate_ultimate_election_date = \
+    #             election_date_as_integer_dict[one_candidate.google_civic_election_id]
+    #         one_candidate.save()
+    #         candidates_updated += 1
+    #     else:
+    #         candidates_not_updated += 1
+    # if positive_value_exists(candidates_updated):
+    #     messages.add_message(request, messages.INFO, "candidate_ultimate_election_date candidates_updated: "
+    #                                                  "" + str(candidates_updated))
+    # if positive_value_exists(candidates_not_updated):
+    #     messages.add_message(request, messages.ERROR, "candidate_ultimate_election_date candidates_not_updated: "
+    #                                                   "" + str(candidates_not_updated))
 
     google_civic_election_id_list_generated = False
     show_this_year_of_candidates_restriction = False

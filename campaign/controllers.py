@@ -29,16 +29,20 @@ CAMPAIGN_PHOTO_SMALL_MAX_HEIGHT = 73
 
 
 def campaignx_list_retrieve_for_api(  # campaignListRetrieve
-        request=None,
-        voter_device_id='',
         hostname='',
-        recommended_campaigns_for_campaignx_we_vote_id=''):
+        limit_to_this_state_code='',
+        recommended_campaigns_for_campaignx_we_vote_id='',
+        request=None,
+        search_text='',
+        voter_device_id=''):
     """
 
-    :param request:
-    :param voter_device_id:
     :param hostname:
+    :param limit_to_this_state_code:
     :param recommended_campaigns_for_campaignx_we_vote_id:
+    :param request:
+    :param search_text:
+    :param voter_device_id:
     :return:
     """
     campaignx_display_list = []
@@ -49,7 +53,7 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
     voter_started_campaignx_list_returned = True
     voter_supported_campaignx_list_returned = True
 
-    if positive_value_exists(recommended_campaigns_for_campaignx_we_vote_id):
+    if positive_value_exists(recommended_campaigns_for_campaignx_we_vote_id) or positive_value_exists(search_text):
         # Do not retrieve certain data if returning recommended campaigns
         promoted_campaignx_list_returned = False
         voter_can_vote_for_politicians_list_returned = False
@@ -107,7 +111,9 @@ def campaignx_list_retrieve_for_api(  # campaignListRetrieve
             visible_on_this_site_campaignx_we_vote_id_list = results['visible_on_this_site_campaignx_we_vote_id_list']
         else:
             results = campaignx_manager.retrieve_campaignx_list(
-                including_started_by_voter_we_vote_id=voter_we_vote_id)
+                including_started_by_voter_we_vote_id=voter_we_vote_id,
+                limit_to_this_state_code=limit_to_this_state_code,
+                search_text=search_text)
     success = results['success']
     status += results['status']
     campaignx_list = results['campaignx_list']
