@@ -5,7 +5,7 @@
 import json
 
 import stripe
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseNotFound
 from django.views.decorators.csrf import csrf_exempt
 
 import wevote_functions.admin
@@ -24,83 +24,87 @@ WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 
 def donation_with_stripe_view(request):  # donationWithStripe
-    """
-    Make a charge with a stripe token. This could either be:
-    A) one-time or monthly donation
-    B) payment for a subscription plan
-    :type request: object
-    :param request:
-    :return:
-    """
+    return HttpResponseNotFound("error")
 
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    token = request.GET.get('token', '')
-    email = request.GET.get('email', '')
-    donation_amount = request.GET.get('donation_amount', 0)
-    is_chip_in = positive_value_exists(request.GET.get('is_chip_in', False))
-    is_monthly_donation = positive_value_exists(request.GET.get('is_monthly_donation', False))
-    is_premium_plan = positive_value_exists(request.GET.get('is_premium_plan', False))
-    client_ip = request.GET.get('client_ip', '')
-    campaignx_we_vote_id = request.GET.get('campaignx_we_vote_id', '')
-    payment_method_id = request.GET.get('payment_method_id', '')
-    coupon_code = request.GET.get('coupon_code', '')
-    premium_plan_type_enum = request.GET.get('premium_plan_type_enum', '')
-
-    voter_we_vote_id = ''
-
-    if positive_value_exists(voter_device_id):
-        voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
-    else:
-        logger.error('%s', 'donation_with_stripe_view voter_we_vote_id is missing')
-
-    voter_manager = VoterManager()
-    linked_organization_we_vote_id = \
-        voter_manager.fetch_linked_organization_we_vote_id_by_voter_we_vote_id(voter_we_vote_id)
-
-    if positive_value_exists(token):
-        results = donation_with_stripe_for_api(request, token, email, donation_amount,
-                                               is_chip_in, is_monthly_donation, is_premium_plan,
-                                               client_ip, campaignx_we_vote_id, payment_method_id, coupon_code,
-                                               premium_plan_type_enum,
-                                               voter_we_vote_id, linked_organization_we_vote_id )
-
-        org_subs_already_exists = results['org_subs_already_exists'] if \
-            'org_subs_already_exists' in results else False
-
-        active_results = donation_active_paid_plan_retrieve(linked_organization_we_vote_id, voter_we_vote_id)
-        active_paid_plan = active_results['active_paid_plan']
-        # donation_plan_definition_list_json = active_results['donation_plan_definition_list_json']
-        donation_subscription_list, donation_payments_list = donation_lists_for_a_voter(voter_we_vote_id)
-        json_data = {
-            'status': results['status'],
-            'success': results['success'],
-            'active_paid_plan': active_paid_plan,
-            'amount_paid': results['amount_paid'],
-            'charge_id': results['charge_id'],
-            'stripe_customer_id': results['stripe_customer_id'],
-            'donation_subscription_list': donation_subscription_list,
-            'donation_payments_list': donation_payments_list,
-            'error_message_for_voter': results['error_message_for_voter'],
-            'stripe_failure_code': results['stripe_failure_code'],
-            'is_monthly_donation': is_monthly_donation,
-            'organization_saved': results['organization_saved'],
-            'org_subs_already_exists': org_subs_already_exists,
-            'premium_plan_type_enum': results['premium_plan_type_enum'],
-            'saved_donation_in_log': results['donation_entry_saved'],
-            'saved_stripe_donation': results['saved_stripe_donation'],
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
-
-    else:
-        json_data = {
-            'status': "TOKEN_IS_MISSING ",
-            'success': False,
-            'amount_paid': 0,
-            'error_message_for_voter': 'Cannot connect to payment processor.',
-            'organization_saved': False,
-            'premium_plan_type_enum': '',
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+# Disconnected December 30, 2022 -- in response to DOS attack on this api endpoint
+# def donation_with_stripe_view(request):  # donationWithStripe
+#     """
+#     Make a charge with a stripe token. This could either be:
+#     A) one-time or monthly donation
+#     B) payment for a subscription plan
+#     :type request: object
+#     :param request:
+#     :return:
+#     """
+#
+#     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+#     token = request.GET.get('token', '')
+#     email = request.GET.get('email', '')
+#     donation_amount = request.GET.get('donation_amount', 0)
+#     is_chip_in = positive_value_exists(request.GET.get('is_chip_in', False))
+#     is_monthly_donation = positive_value_exists(request.GET.get('is_monthly_donation', False))
+#     is_premium_plan = positive_value_exists(request.GET.get('is_premium_plan', False))
+#     client_ip = request.GET.get('client_ip', '')
+#     campaignx_we_vote_id = request.GET.get('campaignx_we_vote_id', '')
+#     payment_method_id = request.GET.get('payment_method_id', '')
+#     coupon_code = request.GET.get('coupon_code', '')
+#     premium_plan_type_enum = request.GET.get('premium_plan_type_enum', '')
+#
+#     voter_we_vote_id = ''
+#
+#     if positive_value_exists(voter_device_id):
+#         voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
+#     else:
+#         logger.error('%s', 'donation_with_stripe_view voter_we_vote_id is missing')
+#
+#     voter_manager = VoterManager()
+#     linked_organization_we_vote_id = \
+#         voter_manager.fetch_linked_organization_we_vote_id_by_voter_we_vote_id(voter_we_vote_id)
+#
+#     if positive_value_exists(token):
+#         results = donation_with_stripe_for_api(request, token, email, donation_amount,
+#                                                is_chip_in, is_monthly_donation, is_premium_plan,
+#                                                client_ip, campaignx_we_vote_id, payment_method_id, coupon_code,
+#                                                premium_plan_type_enum,
+#                                                voter_we_vote_id, linked_organization_we_vote_id )
+#
+#         org_subs_already_exists = results['org_subs_already_exists'] if \
+#             'org_subs_already_exists' in results else False
+#
+#         active_results = donation_active_paid_plan_retrieve(linked_organization_we_vote_id, voter_we_vote_id)
+#         active_paid_plan = active_results['active_paid_plan']
+#         # donation_plan_definition_list_json = active_results['donation_plan_definition_list_json']
+#         donation_subscription_list, donation_payments_list = donation_lists_for_a_voter(voter_we_vote_id)
+#         json_data = {
+#             'status': results['status'],
+#             'success': results['success'],
+#             'active_paid_plan': active_paid_plan,
+#             'amount_paid': results['amount_paid'],
+#             'charge_id': results['charge_id'],
+#             'stripe_customer_id': results['stripe_customer_id'],
+#             'donation_subscription_list': donation_subscription_list,
+#             'donation_payments_list': donation_payments_list,
+#             'error_message_for_voter': results['error_message_for_voter'],
+#             'stripe_failure_code': results['stripe_failure_code'],
+#             'is_monthly_donation': is_monthly_donation,
+#             'organization_saved': results['organization_saved'],
+#             'org_subs_already_exists': org_subs_already_exists,
+#             'premium_plan_type_enum': results['premium_plan_type_enum'],
+#             'saved_donation_in_log': results['donation_entry_saved'],
+#             'saved_stripe_donation': results['saved_stripe_donation'],
+#         }
+#         return HttpResponse(json.dumps(json_data), content_type='application/json')
+#
+#     else:
+#         json_data = {
+#             'status': "TOKEN_IS_MISSING ",
+#             'success': False,
+#             'amount_paid': 0,
+#             'error_message_for_voter': 'Cannot connect to payment processor.',
+#             'organization_saved': False,
+#             'premium_plan_type_enum': '',
+#         }
+#         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def donation_refund_view(request):  # donationRefund
