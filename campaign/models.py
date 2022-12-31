@@ -1476,6 +1476,11 @@ class CampaignXManager(models.Manager):
 
                     # Add as new filter for "AND"
                     campaignx_politician_query = campaignx_politician_query.filter(final_filters)
+            searching_for_specific_campaigns = \
+                positive_value_exists(campaignx_we_vote_id) or positive_value_exists(search_text)
+            if not searching_for_specific_campaigns:
+                # Do not include campaigns in general lists with the following conditions
+                campaignx_politician_query = campaignx_politician_query.exclude(supporters_count__lte=5)
             campaignx_politician_list = list(campaignx_politician_query)
             if len(campaignx_politician_list):
                 campaignx_politician_list_found = True
@@ -2919,6 +2924,7 @@ class CampaignXPolitician(models.Model):
     campaignx_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
     # We store YYYYMMDD as an integer for very fast lookup (ex/ "20240901" for September, 1, 2024)
     next_election_date_as_integer = models.PositiveIntegerField(null=True, unique=False, db_index=True)
+    candidate_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
     politician_we_vote_id = models.CharField(max_length=255, null=True, blank=True, unique=False)
     politician_name = models.CharField(max_length=255, null=False, blank=False)
     state_code = models.CharField(verbose_name="politician home state", max_length=2, null=True)
