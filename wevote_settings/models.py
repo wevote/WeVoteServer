@@ -2,13 +2,14 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from django.db import models
-from exception.models import handle_record_found_more_than_one_exception,\
-    handle_record_not_saved_exception
 import string
-import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, generate_random_string, positive_value_exists
 
+from django.db import models
+
+import wevote_functions.admin
+from exception.models import handle_record_found_more_than_one_exception, \
+    handle_record_not_saved_exception
+from wevote_functions.functions import convert_to_int, generate_random_string, positive_value_exists
 
 RETRIEVE_UPDATE_DATA_FROM_TWITTER = 'RETRIEVE_UPDATE_DATA_FROM_TWITTER'
 SUGGESTED_VOTER_GUIDE_FROM_PRIOR = 'SUGGESTED_VOTER_GUIDE_FROM_PRIOR'
@@ -52,6 +53,7 @@ class WeVoteSetting(models.Model):
     string_value = models.CharField(verbose_name='string value', max_length=255, null=True, blank=True)
     integer_value = models.BigIntegerField(verbose_name='integer value', null=True, blank=True)
     boolean_value = models.BooleanField(verbose_name='boolean value', blank=True, default=None, null=True)
+    admin_app = models.BooleanField(verbose_name='allow changes via admin app', default=False)
 
 
 class WeVoteSettingsManager(models.Manager):
@@ -142,7 +144,7 @@ class WeVoteSettingsManager(models.Manager):
             'we_vote_setting_found':    False
         }
 
-    def save_setting(self, setting_name, setting_value, value_type=None):
+    def save_setting(self, setting_name, setting_value, value_type=None, admin_app=False):
         accepted_value_types = [WeVoteSetting.BOOLEAN, WeVoteSetting.INTEGER, WeVoteSetting.STRING]
 
         if value_type is None:
@@ -180,7 +182,7 @@ class WeVoteSettingsManager(models.Manager):
             try:
                 we_vote_setting.value_type = value_type
                 we_vote_setting = we_vote_setting_manager.set_setting_value_by_type(
-                    we_vote_setting, setting_value, value_type)
+                    we_vote_setting, setting_value, value_type, admin_app)
                 we_vote_setting.save()
                 we_vote_setting_id = we_vote_setting.id
             except Exception as e:
@@ -193,7 +195,7 @@ class WeVoteSettingsManager(models.Manager):
                     name=setting_name,
                 )
                 we_vote_setting = we_vote_setting_manager.set_setting_value_by_type(
-                    we_vote_setting, setting_value, value_type)
+                    we_vote_setting, setting_value, value_type, admin_app)
                 we_vote_setting.save()
                 we_vote_setting_id = we_vote_setting.id
             except Exception as e:
@@ -205,7 +207,7 @@ class WeVoteSettingsManager(models.Manager):
         }
         return results
 
-    def set_setting_value_by_type(self, we_vote_setting, setting_value, setting_type):
+    def set_setting_value_by_type(self, we_vote_setting, setting_value, setting_type, admin_app):
         if setting_type == WeVoteSetting.BOOLEAN:
             we_vote_setting.boolean_value = setting_value
             we_vote_setting.integer_value = None
@@ -218,6 +220,7 @@ class WeVoteSettingsManager(models.Manager):
             we_vote_setting.boolean_value = False
             we_vote_setting.integer_value = None
             we_vote_setting.string_value = setting_value
+        we_vote_setting.admin_app = admin_app
         return we_vote_setting
 
 # site_unique_id_prefix
@@ -383,6 +386,36 @@ def fetch_site_unique_id_prefix():
         # TODO Each We Vote site needs to keep a local copy of site_unique_id_prefix's that are in use, AND
         # TODO Each We Vote site also needs to publish site_unique_id_prefix's in use by that organization
     return site_unique_id_prefix
+
+
+def fetch_stripe_processing_enabled_state():
+    we_vote_settings_manager = WeVoteSettingsManager()
+    results = we_vote_settings_manager.fetch_setting_results('stripe_processing_enabled', read_only=False)
+    if results['success']:
+        if results['we_vote_setting_found']:
+            return results['setting_value']
+        else:
+            # Create the setting the first time
+            results = we_vote_settings_manager.save_setting(
+                setting_name='stripe_processing_enabled',
+                setting_value=True,
+                value_type=WeVoteSetting.BOOLEAN,
+                admin_app=True,
+            )
+            return results['success']
+    else:
+        return False
+
+
+def set_stripe_processing_enabled_state(new_state):
+    we_vote_settings_manager = WeVoteSettingsManager()
+    results = we_vote_settings_manager.save_setting(
+        setting_name='stripe_processing_enabled',
+        setting_value=new_state,
+        value_type=WeVoteSetting.BOOLEAN,
+        admin_app=True,
+        )
+    return results['success']
 
 
 def fetch_next_we_vote_id_integer(we_vote_id_last_setting_name):

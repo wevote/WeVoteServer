@@ -36,6 +36,19 @@ tr, th, td {
 </div>
 
 <br />
+<div style="border: 1px solid #333; padding: 8px;margin: 20px;{% if not stripe_processing_enabled %}background-color: #ffc0c0;{% endif %}">
+    {% if stripe_processing_enabled %}
+        <span style="color: green;">Processing of Stripe Transactions is ENABLED</span>
+    {% else %}
+        <span style="color: black;">Processing of Stripe Transactions is DISABLED</span>
+    {% endif %}
+    <span style="padding: 16px">
+        <input type="checkbox" name="toggle_confirm_one" id="toggle_confirm_one" value="0" style="margin: 0 6px 0 32px"/>
+        <button id="toggle_stripe_state" style="">Click Both Checkboxes and Press This Button to Toggle Stripe Enabled State</button>
+        <input type="checkbox" name="toggle_confirm_two" id="toggle_confirm_two" value="0" style="margin: 0 0 0 6px"/>
+    </span>
+</div>
+<br />
 
 <div id="tabs">
     <ul>
@@ -171,6 +184,21 @@ tr, th, td {
     const dispute = {{ dispute|lower }};
     setDisplayedTab(dispute);
   })
+  $('#toggle_stripe_state').click(function(evt) {
+    let checked = $('#toggle_confirm_one').is(":checked") && $('#toggle_confirm_two').is(":checked")
+    if (checked) {
+      const enabled = {{ stripe_processing_enabled|yesno:"true,false" }};
+      let { href } = window.location;
+      const x = {{ stripe_processing_enabled|yesno:"true,false" }};
+      const newState = !x;
+      href += '?set_stripe_enabled=' + newState;
+      window.location.href = href;
+    }
+  })
+  // Inline for each page load, remove the old get param
+  if (window.location.href.includes('set_stripe_enabled=')) {
+    window.location.href = window.location.href.replace(/[?&]set_stripe_enabled=(false|true)/gm, '');
+  }
 </script>
 
 {% endblock %}

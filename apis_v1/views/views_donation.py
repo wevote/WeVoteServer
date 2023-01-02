@@ -5,7 +5,7 @@
 import json
 
 import stripe
-from django.http import HttpResponse, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseNotFound
 from django.views.decorators.csrf import csrf_exempt
 
 import wevote_functions.admin
@@ -16,7 +16,8 @@ from stripe_donations.controllers import donation_active_paid_plan_retrieve, don
 from stripe_donations.controllers import donation_lists_for_a_voter
 from stripe_donations.models import StripeManager
 from voter.models import fetch_voter_we_vote_id_from_voter_device_link, VoterManager
-from wevote_functions.functions import get_voter_device_id, positive_value_exists
+from wevote_functions.functions import get_ip_from_headers, positive_value_exists, get_voter_device_id
+from wevote_settings.models import fetch_stripe_processing_enabled_state
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -24,87 +25,119 @@ WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 
 def donation_with_stripe_view(request):  # donationWithStripe
-    return HttpResponseNotFound("error")
+    """
+    Make a charge with a stripe token. This could either be:
+    A) one-time or monthly donation
+    B) payment for a subscription plan
+    :type request: object
+    :param request:
+    :return:
+    """
 
-# Disconnected December 30, 2022 -- in response to DOS attack on this api endpoint
-# def donation_with_stripe_view(request):  # donationWithStripe
-#     """
-#     Make a charge with a stripe token. This could either be:
-#     A) one-time or monthly donation
-#     B) payment for a subscription plan
-#     :type request: object
-#     :param request:
-#     :return:
-#     """
-#
-#     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-#     token = request.GET.get('token', '')
-#     email = request.GET.get('email', '')
-#     donation_amount = request.GET.get('donation_amount', 0)
-#     is_chip_in = positive_value_exists(request.GET.get('is_chip_in', False))
-#     is_monthly_donation = positive_value_exists(request.GET.get('is_monthly_donation', False))
-#     is_premium_plan = positive_value_exists(request.GET.get('is_premium_plan', False))
-#     client_ip = request.GET.get('client_ip', '')
-#     campaignx_we_vote_id = request.GET.get('campaignx_we_vote_id', '')
-#     payment_method_id = request.GET.get('payment_method_id', '')
-#     coupon_code = request.GET.get('coupon_code', '')
-#     premium_plan_type_enum = request.GET.get('premium_plan_type_enum', '')
-#
-#     voter_we_vote_id = ''
-#
-#     if positive_value_exists(voter_device_id):
-#         voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
-#     else:
-#         logger.error('%s', 'donation_with_stripe_view voter_we_vote_id is missing')
-#
-#     voter_manager = VoterManager()
-#     linked_organization_we_vote_id = \
-#         voter_manager.fetch_linked_organization_we_vote_id_by_voter_we_vote_id(voter_we_vote_id)
-#
-#     if positive_value_exists(token):
-#         results = donation_with_stripe_for_api(request, token, email, donation_amount,
-#                                                is_chip_in, is_monthly_donation, is_premium_plan,
-#                                                client_ip, campaignx_we_vote_id, payment_method_id, coupon_code,
-#                                                premium_plan_type_enum,
-#                                                voter_we_vote_id, linked_organization_we_vote_id )
-#
-#         org_subs_already_exists = results['org_subs_already_exists'] if \
-#             'org_subs_already_exists' in results else False
-#
-#         active_results = donation_active_paid_plan_retrieve(linked_organization_we_vote_id, voter_we_vote_id)
-#         active_paid_plan = active_results['active_paid_plan']
-#         # donation_plan_definition_list_json = active_results['donation_plan_definition_list_json']
-#         donation_subscription_list, donation_payments_list = donation_lists_for_a_voter(voter_we_vote_id)
-#         json_data = {
-#             'status': results['status'],
-#             'success': results['success'],
-#             'active_paid_plan': active_paid_plan,
-#             'amount_paid': results['amount_paid'],
-#             'charge_id': results['charge_id'],
-#             'stripe_customer_id': results['stripe_customer_id'],
-#             'donation_subscription_list': donation_subscription_list,
-#             'donation_payments_list': donation_payments_list,
-#             'error_message_for_voter': results['error_message_for_voter'],
-#             'stripe_failure_code': results['stripe_failure_code'],
-#             'is_monthly_donation': is_monthly_donation,
-#             'organization_saved': results['organization_saved'],
-#             'org_subs_already_exists': org_subs_already_exists,
-#             'premium_plan_type_enum': results['premium_plan_type_enum'],
-#             'saved_donation_in_log': results['donation_entry_saved'],
-#             'saved_stripe_donation': results['saved_stripe_donation'],
-#         }
-#         return HttpResponse(json.dumps(json_data), content_type='application/json')
-#
-#     else:
-#         json_data = {
-#             'status': "TOKEN_IS_MISSING ",
-#             'success': False,
-#             'amount_paid': 0,
-#             'error_message_for_voter': 'Cannot connect to payment processor.',
-#             'organization_saved': False,
-#             'premium_plan_type_enum': '',
-#         }
-#         return HttpResponse(json.dumps(json_data), content_type='application/json')
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+
+    # Before anything else, screen for DOS or scammers
+    # https://wevotedeveloper.com:8000/apis/v1/donationWithStripe
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    ip_address = get_ip_from_headers(request)
+    voter_found = positive_value_exists(results['voter_found'])
+    voter = results['voter'] if voter_found else 0
+    we_vote_id = voter.we_vote_id if voter else 'no id'
+    name = voter.first_name if voter else 'no'
+    name += (" " + voter.last_name) if voter else ' name'
+    signed_in = voter.is_signed_in() if voter else False
+    signed_in_twitter = voter.signed_in_twitter() if voter else False
+    signed_in_facebook = voter.signed_in_facebook() if voter else False
+    # Dale would like to allow not-signed in donors, so this is temporary so we can gather (log) some info
+    if not voter_found or not (signed_in_twitter or signed_in_facebook):
+        logger.error('(not an error) DONATION voter not found (%s) %s - %s, signedIn %s, twitter %s, facebook %s, request %s' %
+                     (ip_address, name, we_vote_id, signed_in, signed_in_twitter, signed_in_facebook, dict(request.GET)))
+        return HttpResponseForbidden("error")
+
+    # 1/2/2023:  If disabled on the "Stripe Fraudulent and Suspect Charges" page, no stripe charges can go through
+    if not fetch_stripe_processing_enabled_state():
+        logger.error('DONATION request arrived while API disabled (%s) %s - %s, signedIn %s, twitter %s, facebook %s, request %s' %
+                     (ip_address, name, we_vote_id, signed_in, signed_in_twitter, signed_in_facebook, dict(request.GET)))
+        return HttpResponseNotFound("Stripe transactions disabled by WeVote")
+
+
+    logger.error('(not an error) DONATION voter PASSED SCREEN (%s) %s - %s, signedIn %s, twitter %s, facebook %s' %
+                 (ip_address, name, we_vote_id, signed_in, signed_in_twitter, signed_in_facebook))
+
+    # Handle the hopefully valid API call
+    token = request.GET.get('token', '')
+    email = request.GET.get('email', '')
+    donation_amount = request.GET.get('donation_amount', 0)
+    is_chip_in = positive_value_exists(request.GET.get('is_chip_in', False))
+    is_monthly_donation = positive_value_exists(request.GET.get('is_monthly_donation', False))
+    is_premium_plan = positive_value_exists(request.GET.get('is_premium_plan', False))
+    client_ip = request.GET.get('client_ip', '')
+    campaignx_we_vote_id = request.GET.get('campaignx_we_vote_id', '')
+    payment_method_id = request.GET.get('payment_method_id', '')
+    coupon_code = request.GET.get('coupon_code', '')
+    premium_plan_type_enum = request.GET.get('premium_plan_type_enum', '')
+
+    voter_we_vote_id = ''
+
+    if positive_value_exists(voter_device_id):
+        voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
+    else:
+        logger.error('%s', 'DONATION donation_with_stripe_view voter_we_vote_id is missing')
+
+    voter_manager = VoterManager()
+    linked_organization_we_vote_id = \
+        voter_manager.fetch_linked_organization_we_vote_id_by_voter_we_vote_id(voter_we_vote_id)
+
+    if positive_value_exists(token):
+        logger.error('(not an error) DONATION donation_with_stripe_for_app called '
+                     '(%s) %s - %s, signedIn %s, twitter %s, facebook %s, request %s' %
+                     (ip_address, name, we_vote_id, signed_in, signed_in_twitter, signed_in_facebook,
+                      dict(request.GET)))
+
+        results = donation_with_stripe_for_api(request, token, email, donation_amount,
+                                               is_chip_in, is_monthly_donation, is_premium_plan,
+                                               client_ip, campaignx_we_vote_id, payment_method_id, coupon_code,
+                                               premium_plan_type_enum,
+                                               voter_we_vote_id, linked_organization_we_vote_id )
+
+        org_subs_already_exists = results['org_subs_already_exists'] if \
+            'org_subs_already_exists' in results else False
+
+        active_results = donation_active_paid_plan_retrieve(linked_organization_we_vote_id, voter_we_vote_id)
+        active_paid_plan = active_results['active_paid_plan']
+        # donation_plan_definition_list_json = active_results['donation_plan_definition_list_json']
+        donation_subscription_list, donation_payments_list = donation_lists_for_a_voter(voter_we_vote_id)
+        json_data = {
+            'status': results['status'],
+            'success': results['success'],
+            'active_paid_plan': active_paid_plan,
+            'amount_paid': results['amount_paid'],
+            'charge_id': results['charge_id'],
+            'stripe_customer_id': results['stripe_customer_id'],
+            'donation_subscription_list': donation_subscription_list,
+            'donation_payments_list': donation_payments_list,
+            'error_message_for_voter': results['error_message_for_voter'],
+            'stripe_failure_code': results['stripe_failure_code'],
+            'is_monthly_donation': is_monthly_donation,
+            'organization_saved': results['organization_saved'],
+            'org_subs_already_exists': org_subs_already_exists,
+            'premium_plan_type_enum': results['premium_plan_type_enum'],
+            'saved_donation_in_log': results['donation_entry_saved'],
+            'saved_stripe_donation': results['saved_stripe_donation'],
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    else:
+        json_data = {
+            'status': "TOKEN_IS_MISSING ",
+            'success': False,
+            'amount_paid': 0,
+            'error_message_for_voter': 'Cannot connect to payment processor.',
+            'organization_saved': False,
+            'premium_plan_type_enum': '',
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def donation_refund_view(request):  # donationRefund
@@ -117,11 +150,14 @@ def donation_refund_view(request):  # donationRefund
 
     charge_id = request.GET.get('charge', '')
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    ip_address = get_ip_from_headers(request)
 
     if positive_value_exists(voter_device_id):
         voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
         if len(charge_id) > 1:
             results = donation_refund_for_api(request, charge_id, voter_we_vote_id)
+            logger.error('(not an error) DONATION REFUNDED donation_refund_for_api (%s) charge_id %s, voter_we_vote_id %s' %
+                         (ip_address, charge_id, voter_we_vote_id))
             json_data = {
                 'success': str(results),
                 'charge_id': charge_id,
@@ -129,13 +165,13 @@ def donation_refund_view(request):  # donationRefund
                 'voter_we_vote_id': voter_we_vote_id,
             }
         else:
-            logger.error('%s', 'donation_refund_view voter_we_vote_id is missing')
+            logger.error('%s', 'DONATION donation_refund_view voter_we_vote_id is missing')
             json_data = {
                 'status': "VOTER_WE_VOTE_ID_IS_MISSING",
                 'success': False,
             }
     else:
-        logger.error('%s', 'donation_refund_view stripe_charge_id is missing')
+        logger.error('%s', 'DONATION donation_refund_view stripe_charge_id is missing')
         json_data = {
             'status': "STRIPE_CHARGE_ID_IS_MISSING",
             'success': False,
@@ -162,13 +198,13 @@ def donation_cancel_subscription_view(request):  # donationCancelSubscription
             json_data = donation_subscription_cancellation_for_api(
                 voter_we_vote_id, premium_plan_type_enum=premium_plan_type_enum, stripe_subscription_id=stripe_subscription_id)
         else:
-            logger.error('%s', 'donation_cancel_subscription_view voter_we_vote_id is missing')
+            logger.error('%s', 'DONATION donation_cancel_subscription_view voter_we_vote_id is missing')
             json_data = {
                 'status': "VOTER_WE_VOTE_ID_IS_MISSING ",
                 'success': False,
             }
     else:
-        logger.error('%s', 'donation_cancel_subscription_view stripe_subscription_id is missing')
+        logger.error('%s', 'DONATION donation_cancel_subscription_view stripe_subscription_id is missing')
         json_data = {
             'status': "STRIPE_SUBSCRIPTION_ID_IS_MISSING ",
             'success': False,
@@ -194,17 +230,19 @@ def donation_stripe_webhook_view(request):    # donationStripeWebhook
         event = stripe.Event.construct_from(json.loads(payload), stripe.api_key)
 
     except ValueError as e:
-        logger.error("donation_stripe_webhook_view, Stripe returned ValueError: " + str(e))
+        logger.error("DONATION donation_stripe_webhook_view, Stripe returned ValueError: " + str(e))
         return HttpResponse(status=400)
 
     except stripe.error.SignatureVerificationError as err:
-        logger.error("donation_stripe_webhook_view, Stripe returned SignatureVerificationError: " + str(err))
+        logger.error("DONATION donation_stripe_webhook_view, Stripe returned SignatureVerificationError: " + str(err))
         return HttpResponse(status=400)
 
     except Exception as err:
-        logger.error("donation_stripe_webhook_view: " + str(err))
+        logger.error("DONATION donation_stripe_webhook_view: " + str(err))
         return HttpResponse(status=400)
 
+    ip_address = get_ip_from_headers(request)
+    logger.error("DONATION donation_stripe_webhook_view INVOKED: " + event + " --  " +  ip_address)
     donation_process_stripe_webhook_event(event)
 
     return HttpResponse(status=200)
@@ -236,7 +274,7 @@ def donation_history_list_view(request):   # donationHistory
         voter_manager = VoterManager()
         results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
         if not results['voter_found']:
-            logger.error("donation_history_list received invalid voter_device_id: " + voter_device_id)
+            logger.error("DONATION donation_history_list received invalid voter_device_id: " + voter_device_id)
             status += "DONATION_HISTORY_LIST-INVALID_VOTER_DEVICE_ID_PASSED "
             success = False
         else:
@@ -258,7 +296,7 @@ def donation_history_list_view(request):   # donationHistory
             'success':                          success,
         }
     else:
-        logger.error('%s', 'donation_history_list stripe_subscription_id is missing')
+        logger.error('%s', 'DONATION donation_history_list stripe_subscription_id is missing')
         json_data = {
             'active_paid_plan': active_paid_plan,
             'donation_list': [],
@@ -393,7 +431,7 @@ def does_paid_subscription_exist_for_api(request):  # doesOrgHavePaidPlan
     if positive_value_exists(voter_device_id):
         voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
     else:
-        logger.error('%s', 'donation_with_stripe_view voter_we_vote_id is missing')
+        logger.error('%s', 'DONATION donation_with_stripe_view voter_we_vote_id is missing')
     voter_manager = VoterManager()
     organization_we_vote_id = voter_manager.fetch_linked_organization_we_vote_id_by_voter_we_vote_id(voter_we_vote_id)
     found_live_paid_subscription_for_the_org = StripeManager.does_paid_subscription_exist(organization_we_vote_id)

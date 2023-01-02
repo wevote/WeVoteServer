@@ -1,33 +1,34 @@
 # apis_v1/views/views_organization.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
+import json
+import re
+
+import requests
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+from django_user_agents.utils import get_user_agent
+
+import wevote_functions.admin
+from apis_v1.controllers import organization_count, organization_follow, organization_follow_ignore, \
+    organization_stop_following, organization_stop_ignoring
+from config.base import get_environment_variable
+from donate.models import DonationManager
+from follow.controllers import organization_suggestion_tasks_for_api
 from follow.models import UPDATE_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW, UPDATE_SUGGESTIONS_FROM_WHAT_FRIENDS_FOLLOW, \
     UPDATE_SUGGESTIONS_FROM_WHAT_FRIENDS_FOLLOW_ON_TWITTER, UPDATE_SUGGESTIONS_FROM_WHAT_FRIEND_FOLLOWS, \
     UPDATE_SUGGESTIONS_FROM_WHAT_FRIEND_FOLLOWS_ON_TWITTER, UPDATE_SUGGESTIONS_ALL, \
     FOLLOW_SUGGESTIONS_FROM_FRIENDS_ON_TWITTER, FOLLOW_SUGGESTIONS_FROM_FRIENDS, \
     FOLLOW_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW
-from apis_v1.controllers import organization_count, organization_follow, organization_follow_ignore, \
-    organization_stop_following, organization_stop_ignoring
-from config.base import get_environment_variable
-from django.http import HttpResponse
-from django.shortcuts import render
-from django_user_agents.utils import get_user_agent
-from django.views.decorators.csrf import csrf_exempt
-from donate.models import DonationManager
-from follow.controllers import organization_suggestion_tasks_for_api
-import json
-import re
-import requests
 from organization.controllers import full_domain_string_available, organization_analytics_by_voter_for_api, \
     organization_retrieve_for_api, organization_photos_save_for_api, \
     organization_save_for_api, organization_search_for_api, organizations_followed_retrieve_for_api, \
     site_configuration_retrieve_for_api, subdomain_string_available
-from organization.models import CHOSEN_FAVICON_ALLOWED, CHOSEN_FULL_DOMAIN_ALLOWED, CHOSEN_GOOGLE_ANALYTICS_ALLOWED, \
-    CHOSEN_SOCIAL_SHARE_IMAGE_ALLOWED, CHOSEN_SOCIAL_SHARE_DESCRIPTION_ALLOWED, CHOSEN_PROMOTED_ORGANIZATIONS_ALLOWED, \
-    OrganizationManager
+from organization.models import CHOSEN_FAVICON_ALLOWED, CHOSEN_GOOGLE_ANALYTICS_ALLOWED, \
+    CHOSEN_SOCIAL_SHARE_IMAGE_ALLOWED, CHOSEN_SOCIAL_SHARE_DESCRIPTION_ALLOWED, OrganizationManager
 from voter.models import voter_has_authority, VoterManager
 from voter_guide.controllers_possibility import organizations_found_on_url
-import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_website_from_url, get_voter_device_id, \
     get_maximum_number_to_retrieve_from_request, is_url_valid, positive_value_exists
 

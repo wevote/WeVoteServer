@@ -16,6 +16,7 @@ from donate.models import DonationManager
 from stripe_donations.models import StripeDispute, StripePayments
 from voter.models import voter_has_authority
 from wevote_functions.functions import convert_to_int
+from wevote_settings.models import fetch_stripe_processing_enabled_state, set_stripe_processing_enabled_state
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -81,6 +82,7 @@ def suspect_charges_list_view(request):
     page_limit = 10
     server_root = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
     template_values['dispute'] = request.GET.get('dispute', True)
+    new_stripe_enabled_value = request.GET.get('set_stripe_enabled')
     month_ago = now() - timedelta(days=30)
 
     # Disputes ########################
@@ -111,5 +113,10 @@ def suspect_charges_list_view(request):
         server_root + '/stripe_donations/suspects_list?dispute=false&page_offset_suspects=' + str(page_offset_suspects - page_limit)
     template_values['next_page_url_suspects'] = None if number_of_suspects < page_limit or page_offset_suspects + page_limit >= number_of_suspects else \
         server_root + '/stripe_donations/suspects_list?dispute=false&page_offset_suspects=' + str(page_offset_suspects + page_limit)
+
+    if new_stripe_enabled_value is not None:
+        set_stripe_processing_enabled_state(new_stripe_enabled_value == 'true')
+
+    template_values['stripe_processing_enabled'] = fetch_stripe_processing_enabled_state()
 
     return render(request, 'stripe_donations/suspects_list.html', template_values)
