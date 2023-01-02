@@ -60,7 +60,7 @@
         {% endfor %}
         </select>
         {% if state_code != "" %}
-        <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&candidate_search={{ candidate_search }}{% if show_all_elections %}&show_all_elections=1{% endif %}">
+        <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&candidate_search={{ candidate_search }}{% if race_office_level %}&race_office_level={{ race_office_level }}{% endif %}{% if show_marquee_or_battleground %}&show_marquee_or_battleground=1{% endif %}{% if show_all_elections %}&show_all_elections=1{% endif %}">
             show all</a>
         {% endif %}
     {% endif %}{# End of if state_list #}
@@ -162,7 +162,6 @@
             <th>District</th>
             <th># of Candidates</th>
             <th>Public Positions</th>
-            <th>Battleground</th>
             <th>IDs</th>
             <th>Select</th>
         </tr>
@@ -178,6 +177,7 @@
             <td>
                 <a href="{% url 'office:office_summary' office.id %}">{{ office.office_name }}</a>
                 {% if office.district_name %}<br /><span style="color: darkgray">{{ office.district_name|default_if_none:"" }}</span>{% endif %}
+                {% if office.is_battleground_race %}<br /><strong>Battleground</strong>{% endif %}
             </td>
           {% if google_civic_election_id == 0 %}
             <td>
@@ -192,7 +192,6 @@
             </td>
             <td>{{ office.candidate_count }}</td>
             <td>{{ office.positions_count }}</td>
-            <td>{{ office.is_battleground_race|default_if_none:"" }}</td>
             <td>
                 {% if office.ocd_division_id %}{{ office.ocd_division_id|default_if_none:"" }}<br />{% endif %}
                 {% if office.ballotpedia_race_id %}BP Race Id: {{ office.ballotpedia_race_id|default_if_none:"" }}<br />{% endif %}
