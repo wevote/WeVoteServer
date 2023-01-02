@@ -25,7 +25,8 @@ from position.controllers import move_positions_to_another_candidate, update_all
 from twitter.models import TwitterUserManager
 from wevote_functions.functions import add_period_to_middle_name_initial, add_period_to_name_prefix_and_suffix, \
     convert_date_to_we_vote_date_string, convert_to_int, \
-    convert_to_political_party_constant, positive_value_exists, process_request_from_master, \
+    convert_to_political_party_constant, convert_we_vote_date_string_to_date_as_integer, positive_value_exists, \
+    process_request_from_master, \
     extract_twitter_handle_from_text_string, extract_website_from_url, \
     remove_period_from_middle_name_initial, remove_period_from_name_prefix_and_suffix
 from .models import CandidateListManager, CandidateCampaign, CandidateManager, \
@@ -956,6 +957,8 @@ def candidates_import_from_structured_json(structured_json):  # Consumes candida
                     one_candidate['google_civic_candidate_name3']
             if 'google_plus_url' in one_candidate:
                 updated_candidate_values['google_plus_url'] = one_candidate['google_plus_url']
+            if 'is_battleground_race' in one_candidate:
+                updated_candidate_values['is_battleground_race'] = one_candidate['is_battleground_race']
             if 'linkedin_url' in one_candidate:
                 updated_candidate_values['linkedin_url'] = one_candidate['linkedin_url']
             if 'linkedin_photo_url' in one_candidate:
@@ -1282,6 +1285,8 @@ def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):  # candidate
             len(candidate.twitter_description) > 1 else '',
             'twitter_followers_count':      candidate.twitter_followers_count,
             'we_vote_id':                   candidate.we_vote_id,
+            'is_battleground_race':         candidate.is_battleground_race
+            if positive_value_exists(candidate.is_battleground_race) else False,
             'withdrawn_from_election':      candidate.withdrawn_from_election,
             'withdrawal_date':              wdate,
             'youtube_url': candidate.youtube_url,
@@ -1357,9 +1362,9 @@ def candidates_query_for_api(  # candidatesQuery
     if retrieve_mode == 'YEAR':
         try:
             results = candidate_list_manager.retrieve_all_candidates_for_one_year(
-                candidates_limit=candidates_limit,
                 candidate_year=election_day,
                 candidates_index_start=candidates_index_start,
+                candidates_limit=candidates_limit,
                 limit_to_this_state_code=limit_to_this_state_code,
                 search_string=False,
                 return_list_of_objects=True,
@@ -1489,6 +1494,8 @@ def candidates_query_for_api(  # candidatesQuery
                     len(candidate.twitter_description) > 1 else '',
                     'twitter_followers_count':      candidate.twitter_followers_count,
                     'youtube_url':                  candidate.youtube_url,
+                    'is_battleground_race':         candidate.is_battleground_race
+                    if positive_value_exists(candidate.is_battleground_race) else False,
                     'withdrawn_from_election':      candidate.withdrawn_from_election,
                     'withdrawal_date':              wdate,
                 }
@@ -1537,6 +1544,8 @@ def candidates_query_for_api(  # candidatesQuery
                        len(candidate.twitter_description) > 1 else '',
                     'twitter_followers_count': candidate.twitter_followers_count,
                     'youtube_url': candidate.youtube_url,
+                    'is_battleground_race': candidate.is_battleground_race
+                    if positive_value_exists(candidate.is_battleground_race) else False,
                     'withdrawn_from_election': candidate.withdrawn_from_election,
                     'withdrawal_date': wdate,
                 }
@@ -1695,6 +1704,8 @@ def candidates_retrieve_for_api(office_id=0, office_we_vote_id=''):  # candidate
                 len(candidate.twitter_description) > 1 else '',
                 'twitter_followers_count':      candidate.twitter_followers_count,
                 'youtube_url':                  candidate.youtube_url,
+                'is_battleground_race':         candidate.is_battleground_race
+                if positive_value_exists(candidate.is_battleground_race) else False,
                 'withdrawn_from_election':      candidate.withdrawn_from_election,
                 'withdrawal_date':              wdate,
             }
@@ -2836,5 +2847,77 @@ def reorder_endorsement_list_to_match_candidates_on_one_web_page(site_url, endor
         'at_least_one_endorsement_found':   at_least_one_endorsement_found,
         'page_redirected':                  False,
         'endorsement_list_light':           endorsement_list_light_modified,
+    }
+    return results
+
+
+def update_candidates_with_is_battleground_race(office_we_vote_id=''):
+    """
+    In We Vote, one candidate record is used for all elections they are in, within one election cycle.
+    So if the candidate is in a battleground primary, is_battleground_race will be true.
+    But then when the candidate moves into the general election which is not a battleground race, then
+    is_battleground_race will be reset to false.
+    With this function, the candidates will not be updated based on whether office_we_vote_id is a battleground race,
+    but whether the final office race the candidates from office_we_vote_id are in, is a battleground race.
+    :param office_we_vote_id:
+    :return:
+    """
+    status = ''
+    success = True
+    candidate_list_manager = CandidateListManager()
+    office_manager = ContestOfficeManager()
+    results = candidate_list_manager.retrieve_candidate_to_office_link_list(
+        contest_office_we_vote_id_list=[office_we_vote_id],
+        read_only=True)
+    candidate_to_office_link_list = results['candidate_to_office_link_list']
+    candidate_we_vote_ids_to_update = []
+    candidates_updated = 0
+    latest_election_date = 0
+    latest_office_we_vote_id = ''
+    latest_state_code = ''
+    for candidate_to_office_link in candidate_to_office_link_list:
+        try:
+            candidate_we_vote_ids_to_update.append(candidate_to_office_link.candidate_we_vote_id)
+            this_election = candidate_to_office_link.election()
+            election_day_as_integer = convert_we_vote_date_string_to_date_as_integer(
+                this_election.election_day_text)
+            if election_day_as_integer > latest_election_date:
+                latest_election_date = election_day_as_integer
+                latest_office_we_vote_id = candidate_to_office_link.contest_office_we_vote_id
+                latest_state_code = candidate_to_office_link.state_code
+        except Exception as e:
+            status += "ERROR_GATHERING_LATEST_OFFICE: " + str(e) + " "
+            success = False
+
+    if success:
+        is_battleground_race = False
+        if positive_value_exists(latest_office_we_vote_id):
+            results = office_manager.retrieve_contest_office_from_we_vote_id(
+                latest_office_we_vote_id,
+                read_only=True,
+            )
+            if results['contest_office_found']:
+                is_battleground_race = positive_value_exists(results['contest_office'].is_battleground_race)
+            # Now retrieve all candidates under this final election/office, so we can update
+            candidate_list_manager = CandidateListManager()
+            results = candidate_list_manager.retrieve_candidate_list(
+                candidate_we_vote_id_list=candidate_we_vote_ids_to_update,
+                read_only=False)
+            if results['candidate_list_found']:
+                candidate_list = results['candidate_list']
+                for candidate in candidate_list:
+                    candidate.candidate_ultimate_election_date = latest_election_date
+                    candidate.is_battleground_race = is_battleground_race
+                    if not candidate.state_code or candidate.state_code is '':
+                        # Healing the data
+                        candidate.state_code = latest_state_code
+                    candidate.save()
+                    candidates_updated += 1
+        else:
+            status += "LATEST_OFFICE_NOT_FOUND "
+    results = {
+        'success':              success,
+        'status':               status,
+        'candidates_updated':   candidates_updated,
     }
     return results

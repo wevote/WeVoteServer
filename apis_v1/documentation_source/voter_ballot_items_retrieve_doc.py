@@ -134,6 +134,7 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
                    '        "twitter_description": string,\n' \
                    '        "twitter_followers_count": integer,\n' \
                    '        "youtube_url": string,\n' \
+                   '        "is_battleground_race": boolean,\n' \
                    '        "withdrawn_from_election": boolean,\n' \
                    '        "withdrawal_date": date,\n' \
                    '      ],\n' \

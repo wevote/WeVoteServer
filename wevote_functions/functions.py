@@ -715,6 +715,13 @@ def convert_we_vote_date_string_to_date(we_vote_date_string):
     return date
 
 
+def convert_we_vote_date_string_to_date_as_integer(we_vote_date_string):
+    date_as_string = convert_to_str(we_vote_date_string)
+    date_as_string = date_as_string.replace("-", "")
+    date_as_integer = convert_to_int(date_as_string)
+    return date_as_integer
+
+
 def digit_count(number):
     if number > 1 and round(log10(number)) >= log10(number) and number % 10 != 0:
         return round(log10(number))

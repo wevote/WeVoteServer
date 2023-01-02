@@ -189,6 +189,9 @@ th, td {
                        target="_blank">Compare Offices 2 &amp; 3 <span class="glyphicon glyphicon-new-window"></span></a><br />
                 {% endif %}
             {% endif %}
+        {% if candidate.is_battleground_race %}
+            <br /><strong>Competitive Race</strong>
+        {% endif %}
         </span>
     </label>
     <div class="col-sm-8">

@@ -228,6 +228,95 @@ class CandidateListManager(models.Manager):
         }
         return results
 
+    def retrieve_candidate_list(
+            self,
+            candidate_id_list=None,
+            candidate_we_vote_id_list=None,
+            candidate_maplight_id_list=None,
+            candidate_vote_smart_id_list=None,
+            candidate_ctcl_uuid_list=None,
+            ballotpedia_candidate_id_list=None,
+            read_only=False):
+        status = ""
+        success = True
+        candidate_list = []
+
+        try:
+            if positive_value_exists(candidate_id_list):
+                if positive_value_exists(read_only):
+                    candidate_query = CandidateCampaign.objects.using('readonly').filter(id__in=candidate_id_list)
+                else:
+                    candidate_query = CandidateCampaign.objects.filter(id__in=candidate_id_list)
+                candidate_list = list(candidate_query)
+                candidate_list_found = True
+                status += "RETRIEVE_CANDIDATE_LIST_FOUND_BY_ID_LIST "
+            elif positive_value_exists(candidate_we_vote_id_list):
+                if positive_value_exists(read_only):
+                    candidate_query = CandidateCampaign.objects.using('readonly').filter(
+                        we_vote_id__in=candidate_we_vote_id_list)
+                else:
+                    candidate_query = CandidateCampaign.objects.filter(we_vote_id__in=candidate_we_vote_id_list)
+                candidate_list = list(candidate_query)
+                candidate_list_found = True
+                status += "RETRIEVE_CANDIDATE_LIST_FOUND_BY_WE_VOTE_ID_LIST "
+            elif positive_value_exists(candidate_ctcl_uuid_list):
+                if positive_value_exists(read_only):
+                    candidate_query = CandidateCampaign.objects.using('readonly').filter(
+                        ctcl_uuid__in=candidate_ctcl_uuid_list)
+                else:
+                    candidate_query = CandidateCampaign.objects.filter(ctcl_uuid__in=candidate_ctcl_uuid_list)
+                candidate_list = list(candidate_query)
+                candidate_list_found = True
+                status += "RETRIEVE_CANDIDATE_LIST_FOUND_BY_CTCL_UUID_LIST "
+            elif positive_value_exists(candidate_maplight_id_list):
+                if positive_value_exists(read_only):
+                    candidate_query = CandidateCampaign.objects.using('readonly').filter(
+                        maplight_id__in=candidate_maplight_id_list)
+                else:
+                    candidate_query = CandidateCampaign.objects.filter(maplight_id__in=candidate_maplight_id_list)
+                candidate_list = list(candidate_query)
+                candidate_list_found = True
+                status += "RETRIEVE_CANDIDATE_LIST_FOUND_BY_MAPLIGHT_ID_LIST "
+            elif positive_value_exists(candidate_vote_smart_id_list):
+                if positive_value_exists(read_only):
+                    candidate_query = CandidateCampaign.objects.using('readonly').filter(
+                        vote_smart_id__in=candidate_vote_smart_id_list)
+                else:
+                    candidate_query = CandidateCampaign.objects.filter(vote_smart_id__in=candidate_vote_smart_id_list)
+                candidate_list = list(candidate_query)
+                candidate_list_found = True
+                status += "RETRIEVE_CANDIDATE_LIST_FOUND_BY_VOTE_SMART_ID_LIST "
+            elif positive_value_exists(ballotpedia_candidate_id_list):
+                ballotpedia_candidate_id_integer_list = []
+                for ballotpedia_candidate_id in ballotpedia_candidate_id_list:
+                    ballotpedia_candidate_id_integer = convert_to_int(ballotpedia_candidate_id)
+                    ballotpedia_candidate_id_integer_list.append(ballotpedia_candidate_id_integer)
+                if positive_value_exists(read_only):
+                    candidate_query = CandidateCampaign.objects.using('readonly').filter(
+                        ballotpedia_candidate_id=ballotpedia_candidate_id_integer_list)
+                else:
+                    candidate_query = CandidateCampaign.objects.filter(
+                        ballotpedia_candidate_id=ballotpedia_candidate_id_integer_list)
+                candidate_list = list(candidate_query)
+                candidate_list_found = True
+                status += "RETRIEVE_CANDIDATE_LIST_FOUND_BY_BALLOTPEDIA_CANDIDATE_ID_LIST "
+            else:
+                candidate_list_found = False
+                status += "RETRIEVE_CANDIDATE_SEARCH_LIST_MISSING "
+                success = False
+        except Exception as e:
+            candidate_list_found = False
+            status += "RETRIEVE_CANDIDATE_LIST_NOT_FOUND_EXCEPTION: " + str(e) + " "
+            success = False
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'candidate_list_found':     candidate_list_found,
+            'candidate_list':           candidate_list,
+        }
+        return results
+
     def retrieve_all_candidates_for_upcoming_election(
             self,
             google_civic_election_id_list=[],
@@ -293,7 +382,7 @@ class CandidateListManager(models.Manager):
 
                     # Add as new filter for "AND"
                     candidate_query = candidate_query.filter(final_filters)
-            candidate_query = candidate_query.order_by("candidate_name")
+            candidate_query = candidate_query.order_by('-is_battleground_race', '-twitter_followers_count')
             if positive_value_exists(google_civic_election_id_list) and len(google_civic_election_id_list):
                 candidate_list_objects = list(candidate_query)
             else:
@@ -439,7 +528,7 @@ class CandidateListManager(models.Manager):
 
                     # Add as new filter for "AND"
                     candidate_query = candidate_query.filter(final_filters)
-            candidate_query = candidate_query.order_by("candidate_name")
+            candidate_query = candidate_query.order_by('-is_battleground_race', '-twitter_followers_count')
             candidates_total_count = candidate_query.count()
             if candidates_limit > 0:
                 if candidates_index_start > 0:
@@ -2363,6 +2452,7 @@ class CandidateCampaign(models.Model):
     # Candidacy Declared, (and others for withdrawing, etc.)
     candidate_participation_status = models.CharField(verbose_name="candidate participation status",
                                                       max_length=255, null=True, blank=True)
+    is_battleground_race = models.BooleanField(default=False, null=False)
     withdrawn_from_election = models.BooleanField(verbose_name='Candidate has withdrawn from election', default=False)
     withdrawal_date = models.DateField(verbose_name='Withdrawal date from election', null=True, auto_now=False)
     # Set to true if we don't want to display this candidate for some reason

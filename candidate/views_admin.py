@@ -37,7 +37,7 @@ from twitter.models import TwitterLinkPossibility, TwitterUserManager
 from voter.models import voter_has_authority
 from voter_guide.models import VoterGuide
 from wevote_functions.functions import convert_date_to_date_as_integer, convert_to_int, \
-    convert_we_vote_date_string_to_date, \
+    convert_we_vote_date_string_to_date_as_integer, \
     extract_instagram_handle_from_text_string, \
     extract_twitter_handle_from_text_string, list_intersection, \
     positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization
@@ -159,6 +159,7 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
             'google_plus_url',
             'instagram_followers_count',
             'instagram_handle',
+            'is_battleground_race',
             'linkedin_url',
             'linkedin_photo_url',
             'maplight_id',
@@ -1422,6 +1423,7 @@ def candidate_edit_process_view(request):
     # Check to see if this candidate is already being used anywhere
     candidate_on_stage_found = False
     candidate_on_stage = CandidateCampaign()
+    office_manager = ContestOfficeManager()
     state_code_from_candidate = ''
     candidate_we_vote_id = ''
     if positive_value_exists(candidate_id):
@@ -1483,6 +1485,33 @@ def candidate_edit_process_view(request):
         messages.add_message(request, messages.ERROR, 'To add Candidate-to-Office Link, all three variables required.')
 
     # ##################################
+    # Update "is_battleground_race" based on office data found through the link CandidateToOfficeLink
+    results = candidate_list_manager.retrieve_candidate_to_office_link_list(
+        candidate_we_vote_id_list=[candidate_we_vote_id],
+        read_only=True)
+    candidate_to_office_link_list = results['candidate_to_office_link_list']
+    latest_election_date = 0
+    latest_office_we_vote_id = ''
+    for candidate_to_office_link in candidate_to_office_link_list:
+        try:
+            this_election = candidate_to_office_link.election()
+            election_day_as_integer = convert_we_vote_date_string_to_date_as_integer(this_election.election_day_text)
+            if election_day_as_integer > latest_election_date:
+                latest_election_date = election_day_as_integer
+                latest_office_we_vote_id = candidate_to_office_link.contest_office_we_vote_id
+        except Exception as e:
+            pass
+
+    is_battleground_race = False
+    if positive_value_exists(latest_office_we_vote_id):
+        results = office_manager.retrieve_contest_office_from_we_vote_id(
+            latest_office_we_vote_id,
+            read_only=True,
+        )
+        if results['contest_office_found']:
+            is_battleground_race = positive_value_exists(results['contest_office'].is_battleground_race)
+
+    # ##################################
     # If linked to a Politician, make sure that both politician_id and politician_we_vote_id exist
     if candidate_on_stage_found:
         if positive_value_exists(candidate_on_stage.politician_we_vote_id) \
@@ -1500,7 +1529,6 @@ def candidate_edit_process_view(request):
                 messages.add_message(request, messages.ERROR, 'Could not save candidate.')
 
     contest_office_we_vote_id = ''
-    office_manager = ContestOfficeManager()
     state_code_from_office = ''
     if positive_value_exists(contest_office_id):
         results = office_manager.retrieve_contest_office_from_id(contest_office_id)
@@ -1658,6 +1686,7 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.facebook_url = facebook_url
             if instagram_handle is not False:
                 candidate_on_stage.instagram_handle = instagram_handle
+            candidate_on_stage.is_battleground_race = is_battleground_race
             if candidate_email is not False:
                 candidate_on_stage.candidate_email = candidate_email
             if candidate_phone is not False:
@@ -1816,6 +1845,7 @@ def candidate_edit_process_view(request):
                     candidate_on_stage.facebook_url = facebook_url
                 if instagram_handle is not False:
                     candidate_on_stage.instagram_handle = instagram_handle
+                candidate_on_stage.is_battleground_race = is_battleground_race
                 if candidate_email is not False:
                     candidate_on_stage.candidate_email = candidate_email
                 if candidate_phone is not False:
