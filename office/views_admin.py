@@ -889,6 +889,7 @@ def office_edit_process_view(request):
     :param request:
     :return:
     """
+    status = ''
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
@@ -980,10 +981,6 @@ def office_edit_process_view(request):
             office_on_stage_id = office_on_stage.id
             messages.add_message(request, messages.INFO, 'Office updated.')
             google_civic_election_id = office_on_stage.google_civic_election_id
-
-            return HttpResponseRedirect(reverse('office:office_summary', args=(office_on_stage_id,)) +
-                                        "?google_civic_election_id=" + str(google_civic_election_id) +
-                                        "&state_code=" + str(state_code))
         else:
             # Create new
             office_on_stage = ContestOffice(
@@ -1030,10 +1027,22 @@ def office_edit_process_view(request):
             office_on_stage.save()
             office_on_stage_id = office_on_stage.id
             messages.add_message(request, messages.INFO, 'New office saved.')
+        # ##################################
+        # Update "is_battleground_race" for all candidates under this office through the link CandidateToOfficeLink
+        # We can't automatically update all of these candidates with the office's setting,
+        # because we may be saving a primary election office
+        # which isn't a battleground race, and the candidate may have made it through to the general election which
+        # *is* a battleground.
+        from candidate.controllers import update_candidates_with_is_battleground_race
+        results = update_candidates_with_is_battleground_race(office_we_vote_id=office_on_stage.we_vote_id)
+        status += results['status']
+        status += "CANDIDATES_UPDATED: " + str(results['candidates_updated'])
+        if not positive_value_exists(results['success']):
+            messages.add_message(request, messages.ERROR, status)
 
-            return HttpResponseRedirect(reverse('office:office_summary', args=(office_on_stage_id,)) +
-                                        "?google_civic_election_id=" + str(google_civic_election_id) +
-                                        "&state_code=" + str(state_code))
+        return HttpResponseRedirect(reverse('office:office_summary', args=(office_on_stage_id,)) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
     except Exception as e:
         handle_record_not_saved_exception(e, logger=logger)
         messages.add_message(request, messages.ERROR, 'Could not save office: ' + str(e))

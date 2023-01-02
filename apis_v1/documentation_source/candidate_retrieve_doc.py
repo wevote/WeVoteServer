@@ -89,6 +89,7 @@ def candidate_retrieve_doc_template_values(url_root):
                    '  "twitter_followers_count": integer,\n' \
                    '  "we_vote_id": string,\n' \
                    '  "withdrawn_from_election": boolean,\n' \
+                   '  "is_battleground_race": boolean,\n' \
                    '  "withdrawal_date": date,\n' \
                    '  "youtube_url": string,\n' \
                    '}'

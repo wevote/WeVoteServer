@@ -234,7 +234,7 @@
 
         <li><a href="{% url 'import_export_facebook:bulk_retrieve_facebook_photos' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}"
                target="_blank" >
-            Retrieve Facebook Photos for up to <b>{{facebook_urls_without_picture_urls}}</b> Candidates <span class="glyphicon glyphicon-new-window"></span></a> (If the count does not decrease with each click, you are done for this election)</li>
+            Retrieve Facebook Photos for up to <strong>{{facebook_urls_without_picture_urls}}</strong> Candidates <span class="glyphicon glyphicon-new-window"></span></a> (If the count does not decrease with each click, you are done for this election)</li>
 
         <li><a href="{% url 'google_custom_search:bulk_retrieve_possible_google_search_users' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
                target="_blank" >
@@ -376,11 +376,11 @@
                     </span>
                     {% if candidate.withdrawn_from_election %}
                         <br />
-                        <span><b>Withdrew {% if candidate.withdrawal_date %}({{ candidate.withdrawal_date }}){% endif %}</b></span>
+                        <span><strong>Withdrew {% if candidate.withdrawal_date %}({{ candidate.withdrawal_date }}){% endif %}</strong></span>
                     {% endif %}
                     {% if candidate.do_not_display_on_ballot %}
                         <br />
-                        <span><b>Don't Display on Ballot</b></span>
+                        <span><strong>Don't Display on Ballot</strong></span>
                     {% endif %}
                     <br />
                     {{ candidate.we_vote_id }}
@@ -421,6 +421,10 @@
                     {% endif %}
                   {% else %}
                       (office missing)
+                  {% endif %}
+                  {% if candidate.is_battleground_race %}
+                    <br />
+                    <span><strong>Competitive</strong></span>
                   {% endif %}
                 </span>
                 </td>

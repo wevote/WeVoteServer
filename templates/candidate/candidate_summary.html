@@ -57,7 +57,9 @@ th, td {
                    target="_blank">Compare Offices <span class="glyphicon glyphicon-new-window"></span></a><br />
             {% endif %}
         </span>
-
+        {% if candidate.is_battleground_race %}
+            <strong>Competitive Race</strong>
+        {% endif %}
       </td>
       <td><strong>OLD Google Civic Election ID: {{ candidate.google_civic_election_id }}</strong>
     <table class="lightgray_border">

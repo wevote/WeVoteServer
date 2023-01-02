@@ -2247,6 +2247,8 @@ def all_ballot_items_retrieve_for_one_election_for_api(google_civic_election_id,
                                 len(candidate.twitter_description) > 1 else '',
                                 'twitter_followers_count':      candidate.twitter_followers_count,
                                 # 'youtube_url':                  candidate.youtube_url,
+                                'is_battleground_race':         candidate.is_battleground_race
+                                if positive_value_exists(candidate.is_battleground_race) else False,
                                 'withdrawn_from_election':      candidate.withdrawn_from_election,
                                 'withdrawal_date':              withdrawal_date,
                             }
@@ -2447,6 +2449,8 @@ def ballot_items_search_retrieve_for_api(search_string):  # ballotItemsSearchRet
     #                             'twitter_description':          candidate.twitter_description,
     #                             'twitter_followers_count':      candidate.twitter_followers_count,
     #                             # 'youtube_url':                  candidate.youtube_url,
+    #                             'is_battleground_race': candidate.is_battleground_race
+    #                             if positive_value_exists(candidate.is_battleground_race) else False,
     #                             'withdrawn_from_election':      candidate.withdrawn_from_election,
     #                             'withdrawal_date':              withdrawal_date,
     #                         }
@@ -2780,6 +2784,8 @@ def voter_ballot_items_retrieve_for_one_election_for_api(
                                 len(candidate.twitter_description) > 1 else '',
                                 'twitter_followers_count':      candidate.twitter_followers_count,
                                 'youtube_url':                  candidate.youtube_url,
+                                'is_battleground_race':         candidate.is_battleground_race
+                                if positive_value_exists(candidate.is_battleground_race) else False,
                                 'withdrawn_from_election':      candidate.withdrawn_from_election,
                                 'withdrawal_date':              withdrawal_date,
                             }
