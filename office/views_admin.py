@@ -568,6 +568,7 @@ def office_list_view(request):
         results = election_manager.retrieve_upcoming_elections()
         election_list = results['election_list']
 
+    office_repair_list = []
     try:
         office_queryset = ContestOffice.objects.all()
 
@@ -632,6 +633,8 @@ def office_list_view(request):
                     office_queryset = office_queryset.filter(final_filters)
 
         office_list_count = office_queryset.count()
+        if show_marquee_or_battleground:
+            office_repair_list = list(office_queryset)
 
         office_queryset = office_queryset[:200]
         office_list = list(office_queryset)
@@ -711,6 +714,21 @@ def office_list_view(request):
                     office.ballotpedia_race_office_level = 'State'
                     office.save()
             updated_office_list.append(office)
+
+    office_repair_success = True
+
+    if len(office_repair_list) > 0:
+        from candidate.controllers import update_candidates_with_is_battleground_race
+        for office_on_stage in office_repair_list:
+            if office_repair_success and not office_on_stage.is_battleground_race_cached_in_candidates:
+                results = update_candidates_with_is_battleground_race(office_we_vote_id=office_on_stage.we_vote_id)
+                office_repair_success = results['success']
+                if office_repair_success:
+                    office_on_stage.is_battleground_race_cached_in_candidates = True
+                    office_on_stage.save()
+                else:
+                    status += results['status']
+                    messages.add_message(request, messages.ERROR, status)
 
     messages_on_stage = get_messages(request)
 
