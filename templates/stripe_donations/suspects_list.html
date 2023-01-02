@@ -44,7 +44,7 @@ tr, th, td {
     {% endif %}
     <span style="padding: 16px">
         <input type="checkbox" name="toggle_confirm_one" id="toggle_confirm_one" value="0" style="margin: 0 6px 0 32px"/>
-        <button id="toggle_stripe_state" style="">Click Both Checkboxes and Press This Button to Toggle Stripe Enabled State</button>
+        <button id="toggle_stripe_state" style="">Click Both Checkboxes and Press This Button to     {% if stripe_processing_enabled %}Disable{% else %}Enable{% endif %} Stripe </button>
         <input type="checkbox" name="toggle_confirm_two" id="toggle_confirm_two" value="0" style="margin: 0 0 0 6px"/>
     </span>
 </div>
