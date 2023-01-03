@@ -2908,7 +2908,7 @@ def update_candidates_with_is_battleground_race(office_we_vote_id=''):
                 for candidate in candidate_list:
                     candidate.candidate_ultimate_election_date = latest_election_date
                     candidate.is_battleground_race = is_battleground_race
-                    if not candidate.state_code or candidate.state_code is '':
+                    if not candidate.state_code or candidate.state_code == '':
                         # Healing the data
                         candidate.state_code = latest_state_code
                     candidate.save()
