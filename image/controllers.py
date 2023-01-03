@@ -3338,6 +3338,7 @@ def cache_master_and_resized_image(
     :param wikipedia_profile_image_url:
     :return:
     """
+    # print('---------------- cache_master_and_resized_image ------------------')
     time0 = log_and_time_cache_action(True, 0, 'cache_master_and_resized_image')
     status = ''
     cached_ballotpedia_image_url_https = None

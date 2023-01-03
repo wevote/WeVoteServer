@@ -393,7 +393,7 @@ def donation_with_stripe_for_api(request, token, email, donation_amount,
         results['stripe_failure_code'] = e.code
         results['error_message_for_voter'] = error_from_json['message']
         error_message = translate_stripe_error_to_voter_explanation_text(e.http_status, error_from_json['type'])
-        logger.error("donation_with_stripe_for_api, CardError: " + error_message)
+        logger.error("DONATION donation_with_stripe_for_api, CardError: " + error_message)
     # except KeyError as e:   (July 2021: Only received this once, on a test card with a decline for cvc)
     except stripe.error.StripeError as e:
         body = e.json_body
@@ -411,12 +411,12 @@ def donation_with_stripe_for_api(request, token, email, donation_amount,
             # Don't know how to reproduce this, so just in case the error codes don't exist ....
             pass
         error_message = translate_stripe_error_to_voter_explanation_text(e.http_status, error_from_json['type'])
-        logger.error("donation_with_stripe_for_api, StripeError : " + raw_donation_status)
+        logger.error("DONATION donation_with_stripe_for_api, StripeError : " + raw_donation_status)
     except Exception as err:
         # Something else happened, completely unrelated to Stripe
-        logger.error("donation_with_stripe_for_api caught: ", err)
+        logger.error("DONATION donation_with_stripe_for_api caught: ", err)
         raw_donation_status += "A_NON_STRIPE_ERROR_OCCURRED "
-        logger.error("donation_with_stripe_for_api threw " + str(err))
+        logger.error("DONATION donation_with_stripe_for_api threw " + str(err))
         results['status'] += textwrap.shorten(raw_donation_status + " " + results['status'], width=255,
                                               placeholder="...")
         error_message = 'Your payment was unsuccessful. Please try again later.'
@@ -447,7 +447,7 @@ def is_voter_logged_in(request):
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
-        logger.error("invalid voter_device_id passed to is_voter_logged_in" + voter_device_id)
+        logger.error("DONATION invalid voter_device_id passed to is_voter_logged_in" + voter_device_id)
         return False
     voter = voter_results['voter']
     return voter.is_signed_in()
@@ -598,8 +598,8 @@ def donation_process_stripe_webhook_event(event):  # donationStripeWebhook
     """
     etype = event.type
     api_version = event.api_version
-    logger.info("WEBHOOK received: donation_process_stripe_webhook_event: " + etype)
-    print("WEBHOOK received: donation_process_stripe_webhook_event: " + etype)
+    logger.error("DONATION WEBHOOK received: donation_process_stripe_webhook_event: " + etype)
+    # print("WEBHOOK received: donation_process_stripe_webhook_event: " + etype)
     # write_event_to_local_file(event)      # for debugging
 
     if etype == 'charge.succeeded':
@@ -717,16 +717,16 @@ def donation_process_charge(event):           # 'charge.succeeded' webhook
             StripeManager.stripe_payment_create_or_update(payment)
 
         # StripeManager.create_payment_entry(payment)
-        logger.debug("Stripe subscription payment from webhook: " + str(charge['customer']) + ", amount: " +
+        logger.error("DONATION Stripe subscription payment PROCESSED from webhook: " + str(charge['customer']) + ", amount: " +
                      str(charge['amount']) + ", last4:" + str(source['last4']))
 
     except stripe.error.StripeError as e:
         body = e.json_body
         error_from_json = body['error']
-        logger.error("donation_process_charge, Stripe: " + error_from_json)
+        logger.error("DONATION donation_process_charge, Stripe: " + error_from_json)
 
     except Exception as err:
-        logger.error("donation_process_charge, general: " + str(err))
+        logger.error("DONATION donation_process_charge, general: " + str(err))
 
     return
 
@@ -776,7 +776,7 @@ def donation_update_subscription_with_charge_info(event):
         StripeManager.update_subscription_and_payment_on_charge_success(charge_data)
 
     except Exception as err:
-        logger.error("donation_update_subscription_with_charge_info, error: " + str(err))
+        logger.error("DONATION donation_update_subscription_with_charge_info, error: " + str(err))
 
     return
 
@@ -998,7 +998,7 @@ def donation_process_subscription_payment(event):    # invoice.payment_succeeded
         print('Adding or updating StripePayment record on_charge_success: ', stripe_payment)
         StripeManager.stripe_payment_create_or_update(stripe_payment)
     except Exception as err:
-        logger.error("donation_process_subscription_payment: " + str(err))
+        logger.error("DONATION donation_process_subscription_payment: " + str(err))
 
     return None
 
@@ -1026,12 +1026,12 @@ def donation_refund_for_api(request, charge, voter_we_vote_id):
     except stripe.error.InvalidRequestError as err:
         body = err.json_body
         error_string = body['error']['message']
-        logger.error("donation_refund_for_api: " + error_string)
+        logger.error("DONATION donation_refund_for_api: " + error_string)
         success = StripeManager.update_journal_entry_for_already_refunded(charge, voter_we_vote_id)
         return success
 
     except StripeManager.DoesNotExist as err:
-        logger.error("donation_refund_for_api returned DoesNotExist for : " + charge)
+        logger.error("DONATION donation_refund_for_api returned DoesNotExist for : " + charge)
         return False
 
     except Exception as err:
@@ -1140,7 +1140,7 @@ def donation_subscription_cancellation_for_api(voter_we_vote_id, premium_plan_ty
             else:
                 status += "STRIPE_SUBSCRIPTION_PREVIOUSLY_DELETED "
         except Exception as e:
-            logger.error("donation_subscription_cancellation_for_api err " + str(e))
+            logger.error("DONATION donation_subscription_cancellation_for_api err " + str(e))
             status += "DONATION_SUBSCRIPTION_CANCELLATION err:" + str(e) + " "
             success = False
 
@@ -1154,7 +1154,7 @@ def donation_subscription_cancellation_for_api(voter_we_vote_id, premium_plan_ty
                 donation_plan_definition_id=donation_plan_definition_id, stripe_subscription_id=stripe_subscription_id)
             status += results['status']
         except Exception as e:
-            logger.error("MARK_JOURNAL_OR_DONATION_PLAN_DEFINITION err " + str(e))
+            logger.error("DONATION MARK_JOURNAL_OR_DONATION_PLAN_DEFINITION err " + str(e))
             status += "DONATION_SUBSCRIPTION_CANCELLATION err:" + str(e) + " "
             success = False
 
@@ -1262,9 +1262,9 @@ def donation_process_dispute(event):           # 'charge.dispute.created' and 'c
     except stripe.error.StripeError as e:
         body = e.json_body
         error_from_json = body['error']
-        logger.error("donation_process_dispute, Stripe: " + error_from_json)
+        logger.error("DONATION donation_process_dispute, Stripe: " + error_from_json)
 
     except Exception as err:
-        logger.error("donation_process_dispute, general: " + str(err))
+        logger.error("DONATION donation_process_dispute, general: " + str(err))
 
     return
