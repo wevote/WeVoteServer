@@ -616,7 +616,7 @@ def donation_process_stripe_webhook_event(event):  # donationStripeWebhook
         return donation_process_dispute(event)
 
     print("WEBHOOK ignored: donation_process_stripe_webhook_event: " + event['type'])
-    logger.info("WEBHOOK ignored: donation_process_stripe_webhook_event: " + event['type'])
+    logger.error("DONATION WEBHOOK ignored: donation_process_stripe_webhook_event: " + event['type'])
     return
 
 

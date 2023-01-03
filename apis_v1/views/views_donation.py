@@ -152,6 +152,12 @@ def donation_refund_view(request):  # donationRefund
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     ip_address = get_ip_from_headers(request)
 
+    # 1/3/2023:  If disabled on the "Stripe Fraudulent and Suspect Charges" page, no stripe refunds can go through
+    if not fetch_stripe_processing_enabled_state():
+        logger.error('DONATION refund request arrived while API disabled (%s) -- %s' % (ip_address, charge_id))
+        return HttpResponseNotFound("Stripe refunds disabled by WeVote")
+
+
     if positive_value_exists(voter_device_id):
         voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
         if len(charge_id) > 1:
@@ -242,7 +248,19 @@ def donation_stripe_webhook_view(request):    # donationStripeWebhook
         return HttpResponse(status=400)
 
     ip_address = get_ip_from_headers(request)
-    logger.error("DONATION donation_stripe_webhook_view INVOKED: " + event + " --  " +  ip_address)
+
+    # 1/3/2023:  If disabled on the "Stripe Fraudulent and Suspect Charges" page, stripe WebHooks are alos disabled
+    if not fetch_stripe_processing_enabled_state():
+        ip_address = get_ip_from_headers(request)
+        try:
+            logger.error('DONATION WebHook arrived while API disabled (%s) -- %s Event: %s' %
+                         (ip_address, event.type, json.dumps(event)))
+        except:
+            logger.error('DONATION WebHook arrived while API disabled (%s) -- %s Event: Unable to serialize event' %
+                         (ip_address, event.type))
+        return HttpResponseNotFound("Stripe WebHooks disabled by WeVote")
+
+    logger.error("DONATION donation_stripe_webhook_view INVOKED: " + event.type + " --  " +  ip_address)
     donation_process_stripe_webhook_event(event)
 
     return HttpResponse(status=200)
