@@ -1,50 +1,8 @@
-{# templates/politician/politician_list.html #}
-{% extends "template_base.html" %}
-
-{% block title %}Politicians{% endblock %}
+{# templates/politician/politician_selection_list.html #}
 
 {%  block content %}
 {% load template_filters %}
 {% load humanize %}
-
-<h1>Politicians</h1>
-
-    <ul>
-        <li><a href="{% url 'politician:politician_new' %}?state_code={{ state_code }}">Add New Politician</a></li>
-        <li><a href="{% url 'politician:find_and_merge_duplicate_politicians' %}?state_code={{ state_code }}"
-                        target="_blank" >
-            Find and Merge Duplicate Politicians <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
-        <li><a href="{% url 'candidate:repair_imported_names' %}?is_candidate=false" >Repair Politician Names</a></li>
-    </ul>
-
-<br /><br />
-
-<form name="state_code_form" method="get" action="{% url 'politician:politician_list' %}">
-    {% csrf_token %}
-
-    {% if state_list %}
-        <select id="state_code_id" name="state_code">
-            <option value="">
-                -- Filter by State Served --</option>
-        {% for key, state in state_list %}
-            <option value="{{ key }}"
-                    {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
-                {{ state }}</option>
-        {% endfor %}
-        </select>
-        {% if state_code != "" %}
-        <a href="{% url 'politician:politician_list' %}?politician_search={{ politician_search }}">
-            show all states</a>&nbsp;&nbsp;&nbsp;
-        {% endif %}
-    {% endif %}{# End of if state_list #}
-
-    {% if politician_search %}
-    <a href="{% url 'politician:politician_list' %}?state_code={{ state_code }}">
-         clear search</a>&nbsp;
-    {% endif %}
-    <input type="text" name="politician_search" id="politician_search_id" value="{{ politician_search }}" />
-    <input type="submit" value="Search for Politician" />
-</form>
 
 {% if politician_list %}
     <table class="table">
@@ -69,12 +27,14 @@
             <td>{{ forloop.counter }}</td>
             <td>
                 {% if politician.we_vote_hosted_profile_image_url_tiny %}
-                <a href="{% url 'politician:politician_edit' politician.id %}?google_civic_election_id={{ google_civic_election_id }}">
+                <a href="{% url 'politician:politician_edit' politician.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">
                     <img src='{{ politician.we_vote_hosted_profile_image_url_tiny }}' height="25px" />
                 </a>
                 {% endif %}
             </td>
-            <td><a href="{% url 'politician:politician_edit' politician.id %}?google_civic_election_id={{ google_civic_election_id }}">{{ politician.politician_name }}</a></td>
+            <td><a href="{% url 'politician:politician_edit' politician.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">{{ politician.politician_name }} <span class="glyphicon glyphicon-new-window"></span></a></td>
             <td>{{ politician.state_code }}</td>
             <td>
                 {% if politician.politician_twitter_handle %}<a href="https://twitter.com/{{ politician.politician_twitter_handle }}"
@@ -99,21 +59,6 @@
         </tr>
     {% endfor %}
     </table>
-
-    <p></p>
-{% else %}
-    <p>(no politicians found)</p>
-    <p>
-        <a href="{% url 'politician:politician_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Politician</a><br />
-    </p>
 {% endif %}
-
-    <script>
-        $(function() {
-            $('#state_code_id').change(function() {
-                this.form.submit();
-            });
-        });
-    </script>
 
 {% endblock %}

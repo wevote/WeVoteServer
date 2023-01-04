@@ -38,21 +38,61 @@
 {% include "politician/politician_merge_one_field_decision.html" with field_name="last_name" field_label="Last Name" conflict_status=conflict_values.last_name politician1_field_value=politician_option1.last_name politician2_field_value=politician_option2.last_name politician1=politician_option1 politician2=politician_option2 %}
 
     <tr>
-        <td>Google&nbsp;Civic&nbsp;Politician&nbsp;Name</td>
-        <td>{{ politician_option1.google_civic_candidate_name|default_if_none:"" }}</td>
-        <td>{{ politician_option2.google_civic_candidate_name|default_if_none:"" }}</td>
+        <td>
+            Google&nbsp;Civic&nbsp;Politician&nbsp;Name
+        </td>
+        <td>
+            {{ politician_option1.google_civic_candidate_name|default_if_none:"" }}
+            {% if politician_option1.google_civic_candidate_name2 %}
+                <br />{{ politician_option1.google_civic_candidate_name2|default_if_none:"" }}
+            {% endif %}
+            {% if politician_option1.google_civic_candidate_name3 %}
+                <br />{{ politician_option1.google_civic_candidate_name3|default_if_none:"" }}
+            {% endif %}
+        </td>
+        <td>
+            {{ politician_option2.google_civic_candidate_name|default_if_none:"" }}
+            {% if politician_option2.google_civic_candidate_name2 %}
+                <br />{{ politician_option2.google_civic_candidate_name2|default_if_none:"" }}
+            {% endif %}
+            {% if politician_option2.google_civic_candidate_name3 %}
+                <br />{{ politician_option2.google_civic_candidate_name3|default_if_none:"" }}
+            {% endif %}
+        </td>
     </tr>
 
     <tr>
-        <td>Google&nbsp;Civic&nbsp;Politician&nbsp;Name 2</td>
-        <td>{{ politician_option1.google_civic_candidate_name2|default_if_none:"" }}</td>
-        <td>{{ politician_option2.google_civic_candidate_name2|default_if_none:"" }}</td>
-    </tr>
-
-    <tr>
-        <td>Google&nbsp;Civic&nbsp;Politician&nbsp;Name 3</td>
-        <td>{{ politician_option1.google_civic_candidate_name3|default_if_none:"" }}</td>
-        <td>{{ politician_option2.google_civic_candidate_name3|default_if_none:"" }}</td>
+        <td>Twitter Handles</td>
+        <td>
+            {{ politician_option1.politician_twitter_handle|default_if_none:"" }}
+            {% if politician_option1.politician_twitter_handle2 %}
+                <br />{{ politician_option1.politician_twitter_handle2|default_if_none:"" }}
+            {% endif %}
+            {% if politician_option1.politician_twitter_handle3 %}
+                <br />{{ politician_option1.politician_twitter_handle3|default_if_none:"" }}
+            {% endif %}
+            {% if politician_option1.politician_twitter_handle4 %}
+                <br />{{ politician_option1.politician_twitter_handle4|default_if_none:"" }}
+            {% endif %}
+            {% if politician_option1.politician_twitter_handle5 %}
+                <br />{{ politician_option1.politician_twitter_handle5|default_if_none:"" }}
+            {% endif %}
+        </td>
+        <td>
+            {{ politician_option2.politician_twitter_handle|default_if_none:"" }}
+            {% if politician_option2.politician_twitter_handle2 %}
+                <br />{{ politician_option2.politician_twitter_handle2|default_if_none:"" }}
+            {% endif %}
+            {% if politician_option2.politician_twitter_handle3 %}
+                <br />{{ politician_option2.politician_twitter_handle3|default_if_none:"" }}
+            {% endif %}
+            {% if politician_option2.politician_twitter_handle4 %}
+                <br />{{ politician_option2.politician_twitter_handle4|default_if_none:"" }}
+            {% endif %}
+            {% if politician_option2.politician_twitter_handle5 %}
+                <br />{{ politician_option2.politician_twitter_handle5|default_if_none:"" }}
+            {% endif %}
+        </td>
     </tr>
 
 {% include "politician/politician_merge_one_field_decision.html" with field_name="political_party" field_label="Party" conflict_status=conflict_values.political_party politician1_field_value=politician_option1.political_party politician2_field_value=politician_option2.political_party politician1=politician_option1 politician2=politician_option2 %}
@@ -87,8 +127,6 @@
 {% include "politician/politician_merge_one_field_decision.html" with field_name="politician_email_address" field_label="Politician Email" conflict_status=conflict_values.politician_email_address politician1_field_value=politician_option1.politician_email_address politician2_field_value=politician_option2.politician_email_address politician1=politician_option1 politician2=politician_option2 %}
 
 {% include "politician/politician_merge_one_field_decision.html" with field_name="politician_phone_number" field_label="Phone Number" conflict_status=conflict_values.politician_phone_number politician1_field_value=politician_option1.politician_phone_number politician2_field_value=politician_option2.politician_phone_number politician1=politician_option1 politician2=politician_option2 %}
-
-{% include "politician/politician_merge_one_field_decision.html" with field_name="politician_twitter_handle" field_label="Twitter Handle" conflict_status=conflict_values.politician_twitter_handle politician1_field_value=politician_option1.politician_twitter_handle politician2_field_value=politician_option2.politician_twitter_handle politician1=politician_option1 politician2=politician_option2 %}
 
 {% include "politician/politician_merge_one_field_decision.html" with field_name="politician_url" field_label="Politician URL" conflict_status=conflict_values.politician_url politician1_field_value=politician_option1.politician_url politician2_field_value=politician_option2.politician_url politician1=politician_option1 politician2=politician_option2 %}
 

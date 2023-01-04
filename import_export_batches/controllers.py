@@ -1516,6 +1516,14 @@ def create_batch_row_action_politician(batch_description, batch_header_map, one_
     ctcl_uuid = batch_manager.retrieve_value_from_batch_row("politician_ctcl_uuid", batch_header_map, one_batch_row)
     politician_twitter_url = batch_manager.retrieve_value_from_batch_row("politician_twitter_url", batch_header_map,
                                                                          one_batch_row)
+    politician_twitter_url2 = batch_manager.retrieve_value_from_batch_row("politician_twitter_url2", batch_header_map,
+                                                                          one_batch_row)
+    politician_twitter_url3 = batch_manager.retrieve_value_from_batch_row("politician_twitter_url3", batch_header_map,
+                                                                          one_batch_row)
+    politician_twitter_url4 = batch_manager.retrieve_value_from_batch_row("politician_twitter_url4", batch_header_map,
+                                                                          one_batch_row)
+    politician_twitter_url5 = batch_manager.retrieve_value_from_batch_row("politician_twitter_url5", batch_header_map,
+                                                                          one_batch_row)
     facebook_id = batch_manager.retrieve_value_from_batch_row("politician_facebook_id", batch_header_map, one_batch_row)
     party_name = batch_manager.retrieve_value_from_batch_row("politician_party_name", batch_header_map, one_batch_row)
     first_name = batch_manager.retrieve_value_from_batch_row("politician_first_name", batch_header_map, one_batch_row)
@@ -1532,6 +1540,10 @@ def create_batch_row_action_politician(batch_description, batch_header_map, one_
 
     # extract twitter handle from politician_twitter_url
     politician_twitter_handle = extract_twitter_handle_from_text_string(politician_twitter_url)
+    politician_twitter_handle2 = extract_twitter_handle_from_text_string(politician_twitter_url2)
+    politician_twitter_handle3 = extract_twitter_handle_from_text_string(politician_twitter_url3)
+    politician_twitter_handle4 = extract_twitter_handle_from_text_string(politician_twitter_url4)
+    politician_twitter_handle5 = extract_twitter_handle_from_text_string(politician_twitter_url5)
 
     # BatchRowActionCandidate has personId which is politician id. Match id with personId from Candidate and get the
     # state_code from BatchRowActionCandidate
@@ -1545,10 +1557,16 @@ def create_batch_row_action_politician(batch_description, batch_header_map, one_
     multiple_politicians_found = False
     # First look up Politician table to see if an entry exists based on twitter_handle
     if positive_value_exists(politician_twitter_handle):
+        # TODO We could also support searching for other incoming politician_twitter_handles
         try:
             politician_query = Politician.objects.all()
-            politician_query = politician_query.filter(politician_twitter_handle__iexact=politician_twitter_handle)
-
+            politician_query = politician_query.filter(
+                Q(politician_twitter_handle__iexact=politician_twitter_handle) |
+                Q(politician_twitter_handle2__iexact=politician_twitter_handle) |
+                Q(politician_twitter_handle3__iexact=politician_twitter_handle) |
+                Q(politician_twitter_handle4__iexact=politician_twitter_handle) |
+                Q(politician_twitter_handle5__iexact=politician_twitter_handle)
+            )
             politician_item_list = list(politician_query)
             if len(politician_item_list):
                 # entry exists
@@ -1681,6 +1699,10 @@ def create_batch_row_action_politician(batch_description, batch_header_map, one_
         batch_row_action_politician.politician_email_address = email_address
         batch_row_action_politician.politician_phone_number = phone_number
         batch_row_action_politician.politician_twitter_handle = politician_twitter_handle
+        batch_row_action_politician.politician_twitter_handle2 = politician_twitter_handle2
+        batch_row_action_politician.politician_twitter_handle3 = politician_twitter_handle3
+        batch_row_action_politician.politician_twitter_handle4 = politician_twitter_handle4
+        batch_row_action_politician.politician_twitter_handle5 = politician_twitter_handle5
         batch_row_action_politician.politician_facebook_id = facebook_id
         batch_row_action_politician.politician_googleplus_id = googleplus_id
         batch_row_action_politician.politician_youtube_id = youtube_id
@@ -4480,6 +4502,10 @@ def import_politician_data_from_batch_row_actions(batch_header_id, batch_row_id,
         politician_email_address = one_batch_row_action.politician_email_address
         politician_phone_number = one_batch_row_action.politician_phone_number
         politician_twitter_handle = one_batch_row_action.politician_twitter_handle
+        politician_twitter_handle2 = one_batch_row_action.politician_twitter_handle2
+        politician_twitter_handle3 = one_batch_row_action.politician_twitter_handle3
+        politician_twitter_handle4 = one_batch_row_action.politician_twitter_handle4
+        politician_twitter_handle5 = one_batch_row_action.politician_twitter_handle5
         politician_facebook_id = one_batch_row_action.politician_facebook_id
         politician_googleplus_id = one_batch_row_action.politician_googleplus_id
         politician_youtube_id = one_batch_row_action.politician_youtube_id
@@ -4492,15 +4518,24 @@ def import_politician_data_from_batch_row_actions(batch_header_id, batch_row_id,
         if positive_value_exists(politician_name) or positive_value_exists(politician_twitter_handle):
             politician_manager = PoliticianManager()
             if create_entry_flag:
-                results = politician_manager.create_politician_row_entry(politician_name, politician_first_name,
-                                                                         politician_middle_name, politician_last_name,
-                                                                         ctcl_uuid, political_party,
-                                                                         politician_email_address,
-                                                                         politician_phone_number,
-                                                                         politician_twitter_handle,
-                                                                         politician_facebook_id,
-                                                                         politician_googleplus_id,
-                                                                         politician_youtube_id, politician_website_url)
+                results = politician_manager.create_politician_row_entry(
+                    politician_name,
+                    politician_first_name,
+                    politician_middle_name,
+                    politician_last_name,
+                    ctcl_uuid,
+                    political_party,
+                    politician_email_address,
+                    politician_phone_number,
+                    politician_twitter_handle,
+                    politician_twitter_handle2,
+                    politician_twitter_handle3,
+                    politician_twitter_handle4,
+                    politician_twitter_handle5,
+                    politician_facebook_id,
+                    politician_googleplus_id,
+                    politician_youtube_id,
+                    politician_website_url)
                 if results['new_politician_created']:
                     number_of_politicians_created += 1
                     success = True
@@ -4516,16 +4551,25 @@ def import_politician_data_from_batch_row_actions(batch_header_id, batch_row_id,
                         handle_exception(e, logger=logger, exception_message=status)
             elif update_entry_flag:
                 politician_we_vote_id = one_batch_row_action.politician_we_vote_id
-                results = politician_manager.update_politician_row_entry(politician_name, politician_first_name,
-                                                                         politician_middle_name, politician_last_name,
-                                                                         ctcl_uuid,political_party,
-                                                                         politician_email_address,
-                                                                         politician_twitter_handle,
-                                                                         politician_phone_number,
-                                                                         politician_facebook_id,
-                                                                         politician_googleplus_id,
-                                                                         politician_youtube_id, politician_website_url,
-                                                                         politician_we_vote_id)
+                results = politician_manager.update_politician_row_entry(
+                    politician_name,
+                    politician_first_name,
+                    politician_middle_name,
+                    politician_last_name,
+                    ctcl_uuid,
+                    political_party,
+                    politician_email_address,
+                    politician_twitter_handle,
+                    politician_twitter_handle2,
+                    politician_twitter_handle3,
+                    politician_twitter_handle4,
+                    politician_twitter_handle5,
+                    politician_phone_number,
+                    politician_facebook_id,
+                    politician_googleplus_id,
+                    politician_youtube_id,
+                    politician_website_url,
+                    politician_we_vote_id)
                 if results['politician_updated']:
                     number_of_politicians_updated += 1
                     success = True

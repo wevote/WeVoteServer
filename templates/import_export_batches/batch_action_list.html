@@ -898,7 +898,21 @@
                         </td>
                         <td>{{ one_batch_row.batch_row_action.state_code|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.political_party|default_if_none:"" }}</td>
-                        <td>{{ one_batch_row.batch_row_action.politician_twitter_handle|default_if_none:"" }}</td>
+                        <td>
+                            {{ one_batch_row.batch_row_action.politician_twitter_handle|default_if_none:"" }}
+                        {% if one_batch_row.batch_row_action.politician_twitter_handle2 %}
+                            <br />{{ one_batch_row.batch_row_action.politician_twitter_handle2|default_if_none:"" }}
+                        {% endif %}
+                        {% if one_batch_row.batch_row_action.politician_twitter_handle3 %}
+                            <br />{{ one_batch_row.batch_row_action.politician_twitter_handle3|default_if_none:"" }}
+                        {% endif %}
+                        {% if one_batch_row.batch_row_action.politician_twitter_handle4 %}
+                            <br />{{ one_batch_row.batch_row_action.politician_twitter_handle4|default_if_none:"" }}
+                        {% endif %}
+                        {% if one_batch_row.batch_row_action.politician_twitter_handle5 %}
+                            <br />{{ one_batch_row.batch_row_action.politician_twitter_handle5|default_if_none:"" }}
+                        {% endif %}
+                        </td>
                         <td>{{ one_batch_row.batch_row_action.politician_email_address|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.politician_url|default_if_none:"" }}</td>
                     </tr>

@@ -85,6 +85,10 @@ def search_all_for_api(text_from_search_field='', voter_device_id='', search_sco
                 'google_civic_election_id': 0,
                 'state_code':               one_politician.state_code,
                 'twitter_handle':           one_politician.politician_twitter_handle,
+                'twitter_handle2':          one_politician.politician_twitter_handle2,
+                'twitter_handle3':          one_politician.politician_twitter_handle3,
+                'twitter_handle4':          one_politician.politician_twitter_handle4,
+                'twitter_handle5':          one_politician.politician_twitter_handle5,
                 'we_vote_id':               one_politician.we_vote_id,
                 'local_id':                 one_politician.id,
             }

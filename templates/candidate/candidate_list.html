@@ -258,7 +258,19 @@
     <a href="{{ current_page_minus_candidate_tools_url }}&hide_candidate_tools=0">(Show Candidate Tools)</a><br />
 {% endif %}
 
+{% if show_this_year_of_candidates %}
+    <ul>
+        <li>Prepare: <a href="{% url 'candidate:find_and_merge_duplicate_candidates' %}?candidate_year={{ show_this_year_of_candidates }}&state_code={{ state_code }}"
+                        target="_blank" >
+        Find and Merge Duplicate Candidates for this Year <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
+
+        <li>Prepare: <a href="{% url 'candidate:candidate_politician_match_for_this_election' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+        target="_blank">
+        Match Candidates to Politicians (and Create Politicians) for this Year <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
+    </ul>
+{% endif %}
 <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">To Add New Candidate Start from Office Page</a>,&nbsp;&nbsp;&nbsp;
+<a href="{% url 'candidate:candidate_new_search' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Add Candidate (no Office)</a>,&nbsp;&nbsp;&nbsp;
 <a href="{% url 'apis_v1:candidatesSyncOutView' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}"
    target="_blank" >Export Candidates <span class="glyphicon glyphicon-new-window"></span></a>,&nbsp;&nbsp;&nbsp;
 <a href="{% url 'candidate:repair_imported_names' %}?is_candidate=true" >Repair Imported Candidate Names</a>,&nbsp;&nbsp;&nbsp;

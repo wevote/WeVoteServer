@@ -528,19 +528,6 @@ def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, adm
         candidate1_on_stage.politician_id = politician2_id
     # else do nothing (no parent politician for candidate 2)
 
-    # # TODO: Migrate bookmarks
-    # bookmark_item_list_manager = BookmarkItemList()
-    # bookmark_results = bookmark_item_list_manager.retrieve_bookmark_item_list_for_candidate(candidate2_we_vote_id)
-    # if bookmark_results['bookmark_item_list_found']:
-    #     status += "Bookmarks found for Candidate 2 - automatic merge not working yet. "
-    #     results = {
-    #         'success': True,
-    #         'status': status,
-    #         'candidates_merged': False,
-    #         'candidate': None,
-    #     }
-    #     return results
-
     # Merge attribute values chosen by the admin
     for attribute in CANDIDATE_UNIQUE_IDENTIFIERS:
         # try:
@@ -2003,7 +1990,7 @@ def candidate_politician_match(we_vote_candidate):
 
 
 def retrieve_candidate_politician_match_options(
-        vote_smart_id,
+        vote_smart_id='',
         vote_usa_politician_id='',
         maplight_id='',
         candidate_twitter_handle='',
@@ -2054,9 +2041,11 @@ def retrieve_candidate_politician_match_options(
             'politician':               politician,
         }
         return results
+    else:
+        success = results['success']
+        status += results['status']
 
-    success = False
-    status += "TO_BE_IMPLEMENTED "
+    status += "NO_POLITICIANS_FOUND "
     results = {
         'success':                  success,
         'status':                   status,
