@@ -4,7 +4,8 @@
 
 from candidate.controllers import add_name_to_next_spot, move_candidates_to_another_politician
 from elected_official.controllers import move_elected_officials_to_another_politician
-from politician.models import Politician, PoliticianManager, POLITICIAN_UNIQUE_IDENTIFIERS
+from politician.models import Politician, PoliticianManager, POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, \
+    POLITICIAN_UNIQUE_IDENTIFIERS
 from position.controllers import move_positions_to_another_politician
 from config.base import get_environment_variable
 import wevote_functions.admin
@@ -17,14 +18,78 @@ WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 POLITICIANS_SYNC_URL = get_environment_variable("POLITICIANS_SYNC_URL")  # politiciansSyncOut
 
 
+def add_twitter_handle_to_next_politician_spot(politician, twitter_handle):
+    status = ''
+    success = True
+    values_changed = False
+    if not positive_value_exists(twitter_handle):
+        status += 'TWITTER_HANDLE_MISSING '
+        return {
+            'success':          False,
+            'status':           status,
+            'politician':       politician,
+            'values_changed':   values_changed,
+        }
+
+    if not positive_value_exists(politician.politician_twitter_handle):
+        politician.politician_twitter_handle = twitter_handle
+        values_changed = True
+    elif twitter_handle == politician.politician_twitter_handle:
+        # The value is already stored in politician.politician_twitter_handle so doesn't need
+        # to be added anywhere below
+        pass
+    elif not positive_value_exists(politician.politician_twitter_handle2):
+        politician.politician_twitter_handle2 = twitter_handle
+        values_changed = True
+    elif twitter_handle == politician.politician_twitter_handle2:
+        # The value is already stored in politician.politician_twitter_handle2 so doesn't need
+        # to be added to politician.politician_twitter_handle3
+        pass
+    elif not positive_value_exists(politician.politician_twitter_handle3):
+        politician.politician_twitter_handle3 = twitter_handle
+        values_changed = True
+    elif twitter_handle == politician.politician_twitter_handle3:
+        # The value is already stored in politician.politician_twitter_handle3 so doesn't need
+        # to be added to politician.politician_twitter_handle4
+        pass
+    elif not positive_value_exists(politician.politician_twitter_handle4):
+        politician.politician_twitter_handle4 = twitter_handle
+        values_changed = True
+    elif twitter_handle == politician.politician_twitter_handle4:
+        # The value is already stored in politician.politician_twitter_handle4 so doesn't need
+        # to be added to politician.politician_twitter_handle5
+        pass
+    elif not positive_value_exists(politician.politician_twitter_handle5):
+        politician.politician_twitter_handle5 = twitter_handle
+        values_changed = True
+    # We currently only support 5 alternate names
+    return {
+        'success': success,
+        'status': status,
+        'politician': politician,
+        'values_changed': values_changed,
+    }
+
+
 def fetch_duplicate_politician_count(we_vote_politician, ignore_politician_id_list):
     if not hasattr(we_vote_politician, 'politician_name'):
         return 0
 
     politician_manager = PoliticianManager()
+    politician_twitter_handle_list = []
+    if positive_value_exists(we_vote_politician.politician_twitter_handle):
+        politician_twitter_handle_list.append(we_vote_politician.politician_twitter_handle)
+    if positive_value_exists(we_vote_politician.politician_twitter_handle2):
+        politician_twitter_handle_list.append(we_vote_politician.politician_twitter_handle2)
+    if positive_value_exists(we_vote_politician.politician_twitter_handle3):
+        politician_twitter_handle_list.append(we_vote_politician.politician_twitter_handle3)
+    if positive_value_exists(we_vote_politician.politician_twitter_handle4):
+        politician_twitter_handle_list.append(we_vote_politician.politician_twitter_handle4)
+    if positive_value_exists(we_vote_politician.politician_twitter_handle5):
+        politician_twitter_handle_list.append(we_vote_politician.politician_twitter_handle5)
     return politician_manager.fetch_politicians_from_non_unique_identifiers_count(
         state_code=we_vote_politician.state_code,
-        politician_twitter_handle=we_vote_politician.politician_twitter_handle,
+        politician_twitter_handle_list=politician_twitter_handle_list,
         politician_name=we_vote_politician.politician_name,
         ignore_politician_id_list=ignore_politician_id_list)
 
@@ -42,12 +107,23 @@ def find_duplicate_politician(we_vote_politician, ignore_politician_id_list):
         return error_results
 
     politician_manager = PoliticianManager()
+    politician_twitter_handle_list = []
+    if positive_value_exists(we_vote_politician.politician_twitter_handle):
+        politician_twitter_handle_list.append(we_vote_politician.politician_twitter_handle)
+    if positive_value_exists(we_vote_politician.politician_twitter_handle2):
+        politician_twitter_handle_list.append(we_vote_politician.politician_twitter_handle2)
+    if positive_value_exists(we_vote_politician.politician_twitter_handle3):
+        politician_twitter_handle_list.append(we_vote_politician.politician_twitter_handle3)
+    if positive_value_exists(we_vote_politician.politician_twitter_handle4):
+        politician_twitter_handle_list.append(we_vote_politician.politician_twitter_handle4)
+    if positive_value_exists(we_vote_politician.politician_twitter_handle5):
+        politician_twitter_handle_list.append(we_vote_politician.politician_twitter_handle5)
 
     # Search for other politicians that share the same elections that match name and election
     try:
         results = politician_manager.retrieve_politicians_from_non_unique_identifiers(
             state_code=we_vote_politician.state_code,
-            politician_twitter_handle=we_vote_politician.politician_twitter_handle,
+            politician_twitter_handle_list=politician_twitter_handle_list,
             politician_name=we_vote_politician.politician_name,
             ignore_politician_id_list=ignore_politician_id_list)
 
@@ -155,6 +231,7 @@ def merge_if_duplicate_politicians(politician1_on_stage, politician2_on_stage, c
 
     # Are there any comparisons that require admin intervention?
     merge_choices = {}
+    clear_these_attributes_from_politician2 = []
     for attribute in POLITICIAN_UNIQUE_IDENTIFIERS:
         if attribute == "we_vote_hosted_profile_image_url_large" \
                 or attribute == "we_vote_hosted_profile_image_url_medium" \
@@ -172,10 +249,17 @@ def merge_if_duplicate_politicians(politician1_on_stage, politician2_on_stage, c
                 break
             elif conflict_value == "POLITICIAN2":
                 merge_choices[attribute] = getattr(politician2_on_stage, attribute)
+                if attribute in POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED:
+                    clear_these_attributes_from_politician2.append(attribute)
 
     if not decisions_required:
         status += "NO_DECISIONS_REQUIRED "
-        merge_results = merge_these_two_politicians(politician1_we_vote_id, politician2_we_vote_id, merge_choices)
+        merge_results = merge_these_two_politicians(
+            politician1_we_vote_id,
+            politician2_we_vote_id,
+            merge_choices,
+            clear_these_attributes_from_politician2
+        )
 
         if merge_results['politicians_merged']:
             success = True
@@ -191,12 +275,17 @@ def merge_if_duplicate_politicians(politician1_on_stage, politician2_on_stage, c
     return results
 
 
-def merge_these_two_politicians(politician1_we_vote_id, politician2_we_vote_id, admin_merge_choices={}):
+def merge_these_two_politicians(
+        politician1_we_vote_id,
+        politician2_we_vote_id,
+        admin_merge_choices={},
+        clear_these_attributes_from_politician2=[]):
     """
     Process the merging of two politicians
     :param politician1_we_vote_id:
     :param politician2_we_vote_id:
     :param admin_merge_choices: Dictionary with the attribute name as the key, and the chosen value as the value
+    :param clear_these_attributes_from_politician2:
     :return:
     """
     status = ""
@@ -248,6 +337,33 @@ def merge_these_two_politicians(politician1_we_vote_id, politician2_we_vote_id, 
     if positive_value_exists(politician2_on_stage.google_civic_candidate_name3):
         politician1_on_stage = add_name_to_next_spot(
             politician1_on_stage, politician2_on_stage.google_civic_candidate_name3)
+
+    # Preserve unique politician_twitter_handle -> politician_twitter_handle5
+    if positive_value_exists(politician2_on_stage.politician_twitter_handle):
+        twitter_results = add_twitter_handle_to_next_politician_spot(
+            politician1_on_stage, politician2_on_stage.politician_twitter_handle)
+        if twitter_results['success']:
+            politician1_on_stage = twitter_results['politician']
+    if positive_value_exists(politician2_on_stage.politician_twitter_handle2):
+        twitter_results = add_twitter_handle_to_next_politician_spot(
+            politician1_on_stage, politician2_on_stage.politician_twitter_handle2)
+        if twitter_results['success']:
+            politician1_on_stage = twitter_results['politician']
+    if positive_value_exists(politician2_on_stage.politician_twitter_handle3):
+        twitter_results = add_twitter_handle_to_next_politician_spot(
+            politician1_on_stage, politician2_on_stage.politician_twitter_handle3)
+        if twitter_results['success']:
+            politician1_on_stage = twitter_results['politician']
+    if positive_value_exists(politician2_on_stage.politician_twitter_handle4):
+        twitter_results = add_twitter_handle_to_next_politician_spot(
+            politician1_on_stage, politician2_on_stage.politician_twitter_handle4)
+        if twitter_results['success']:
+            politician1_on_stage = twitter_results['politician']
+    if positive_value_exists(politician2_on_stage.politician_twitter_handle5):
+        twitter_results = add_twitter_handle_to_next_politician_spot(
+            politician1_on_stage, politician2_on_stage.politician_twitter_handle5)
+        if twitter_results['success']:
+            politician1_on_stage = twitter_results['politician']
 
     # Update candidates to new politician ids
     candidate_results = move_candidates_to_another_politician(
@@ -315,6 +431,15 @@ def merge_these_two_politicians(politician1_we_vote_id, politician2_we_vote_id, 
             'politician': None,
         }
         return results
+
+    # Clear 'unique=True' fields in politician2_on_stage, which need to be Null before politician1_on_stage can be saved
+    #  with updated values
+    politician2_updated = False
+    for attribute in clear_these_attributes_from_politician2:
+        setattr(politician2_on_stage, attribute, None)
+        politician2_updated = True
+    if politician2_updated:
+        politician2_on_stage.save()
 
     # Note: wait to wrap in try/except block
     politician1_on_stage.save()
@@ -398,12 +523,19 @@ def politicians_import_from_structured_json(structured_json):
                 updated_politician_values['last_name'] = one_politician['last_name']
             if 'politician_name' in one_politician:
                 updated_politician_values['politician_name'] = one_politician['politician_name']
-            if 'google_civic_candidate_name' in one_politician:
-                updated_politician_values['google_civic_candidate_name'] = one_politician['google_civic_candidate_name']
             if 'full_name_assembled' in one_politician:
                 updated_politician_values['full_name_assembled'] = one_politician['full_name_assembled']
             if 'gender' in one_politician:
                 updated_politician_values['gender'] = one_politician['gender']
+            if 'google_civic_candidate_name' in one_politician:
+                updated_politician_values['google_civic_candidate_name'] = \
+                    one_politician['google_civic_candidate_name']
+            if 'google_civic_candidate_name2' in one_politician:
+                updated_politician_values['google_civic_candidate_name2'] = \
+                    one_politician['google_civic_candidate_name2']
+            if 'google_civic_candidate_name3' in one_politician:
+                updated_politician_values['google_civic_candidate_name3'] = \
+                    one_politician['google_civic_candidate_name3']
             if 'birth_date' in one_politician:
                 updated_politician_values['birth_date'] = one_politician['birth_date']
             if 'bioguide_id' in one_politician:
@@ -442,8 +574,6 @@ def politicians_import_from_structured_json(structured_json):
                 updated_politician_values['state_code'] = one_politician['state_code']
             if 'politician_url' in one_politician:
                 updated_politician_values['politician_url'] = one_politician['politician_url']
-            if 'politician_twitter_handle' in one_politician:
-                updated_politician_values['politician_twitter_handle'] = one_politician['politician_twitter_handle']
             if 'we_vote_hosted_profile_image_url_large' in one_politician:
                 updated_politician_values['we_vote_hosted_profile_image_url_large'] = \
                     one_politician['we_vote_hosted_profile_image_url_large']
@@ -469,6 +599,56 @@ def politicians_import_from_structured_json(structured_json):
             results = politician_manager.update_or_create_politician(
                 updated_politician_values=updated_politician_values,
                 politician_we_vote_id=politician_we_vote_id)
+            if results['success']:
+                values_changed = False
+                politician = results['politician']
+                if 'politician_twitter_handle' in one_politician:
+                    twitter_results = add_twitter_handle_to_next_politician_spot(
+                        politician, one_politician['politician_twitter_handle'])
+                    if twitter_results['success']:
+                        politician = twitter_results['politician']
+                        if twitter_results['values_changed']:
+                            values_changed = True
+                    else:
+                        results['status'] += twitter_results['status']
+                if 'politician_twitter_handle2' in one_politician:
+                    twitter_results = add_twitter_handle_to_next_politician_spot(
+                        politician, one_politician['politician_twitter_handle2'])
+                    if twitter_results['success']:
+                        politician = twitter_results['politician']
+                        if twitter_results['values_changed']:
+                            values_changed = True
+                    else:
+                        results['status'] += twitter_results['status']
+                if 'politician_twitter_handle3' in one_politician:
+                    twitter_results = add_twitter_handle_to_next_politician_spot(
+                        politician, one_politician['politician_twitter_handle3'])
+                    if twitter_results['success']:
+                        politician = twitter_results['politician']
+                        if twitter_results['values_changed']:
+                            values_changed = True
+                    else:
+                        results['status'] += twitter_results['status']
+                if 'politician_twitter_handle4' in one_politician:
+                    twitter_results = add_twitter_handle_to_next_politician_spot(
+                        politician, one_politician['politician_twitter_handle4'])
+                    if twitter_results['success']:
+                        politician = twitter_results['politician']
+                        if twitter_results['values_changed']:
+                            values_changed = True
+                    else:
+                        results['status'] += twitter_results['status']
+                if 'politician_twitter_handle5' in one_politician:
+                    twitter_results = add_twitter_handle_to_next_politician_spot(
+                        politician, one_politician['politician_twitter_handle5'])
+                    if twitter_results['success']:
+                        politician = twitter_results['politician']
+                        if twitter_results['values_changed']:
+                            values_changed = True
+                    else:
+                        results['status'] += twitter_results['status']
+                if values_changed:
+                    politician.save()
         else:
             politicians_not_processed += 1
             results = {

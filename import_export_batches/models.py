@@ -463,6 +463,10 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS = {
     'politician_full_name': 'politician_full_name',
     'politician_ctcl_uuid': 'politician_ctcl_uuid',
     'politician_twitter_url': 'politician_twitter_url',
+    'politician_twitter_url2': 'politician_twitter_url2',
+    'politician_twitter_url3': 'politician_twitter_url3',
+    'politician_twitter_url4': 'politician_twitter_url4',
+    'politician_twitter_url5': 'politician_twitter_url5',
     'politician_facebook_id': 'politician_facebook_id',
     'politician_party_name': 'politician_party_name',
     'politician_first_name': 'politician_first_name',
@@ -5995,8 +5999,11 @@ class BatchRowActionPolitician(models.Model):
     politician_url = models.URLField(
         verbose_name='latest website url of politician', max_length=255, blank=True, null=True)
 
-    politician_twitter_handle = models.CharField(verbose_name='politician twitter screen_name', max_length=255,
-                                                 null=True, unique=False)
+    politician_twitter_handle = models.CharField(max_length=255, null=True, unique=False)
+    politician_twitter_handle2 = models.CharField(max_length=255, null=True, unique=False)
+    politician_twitter_handle3 = models.CharField(max_length=255, null=True, unique=False)
+    politician_twitter_handle4 = models.CharField(max_length=255, null=True, unique=False)
+    politician_twitter_handle5 = models.CharField(max_length=255, null=True, unique=False)
     we_vote_hosted_profile_image_url_large = models.URLField(
         verbose_name='we vote hosted large image url', max_length=255, blank=True, null=True)
     we_vote_hosted_profile_image_url_medium = models.URLField(

@@ -2795,13 +2795,16 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
     return json_data
 
 
-def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFollowRetrieve
-                                            kind_of_ballot_item='', ballot_item_we_vote_id='',
-                                            google_civic_election_id=0, search_string='',
-                                            start_retrieve_at_this_number=0,
-                                            maximum_number_to_retrieve=0,
-                                            filter_voter_guides_by_issue=False,
-                                            add_voter_guides_not_from_election=False):
+def voter_guides_to_follow_retrieve_for_api(  # voterGuidesToFollowRetrieve
+        voter_device_id,
+        kind_of_ballot_item='',
+        ballot_item_we_vote_id='',
+        google_civic_election_id=0,
+        search_string='',
+        start_retrieve_at_this_number=0,
+        maximum_number_to_retrieve=0,
+        filter_voter_guides_by_issue=False,
+        add_voter_guides_not_from_election=False):
     voter_we_vote_id = ""
     start_retrieve_at_this_number = convert_to_int(start_retrieve_at_this_number)
     number_retrieved = 0

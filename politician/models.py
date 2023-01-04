@@ -27,7 +27,7 @@ GENDER_CHOICES = (
 
 logger = wevote_functions.admin.get_logger(__name__)
 
-# When merging candidates, these are the fields we check for figure_out_candidate_conflict_values
+# When merging candidates, these are the fields we check for figure_out_politician_conflict_values
 POLITICIAN_UNIQUE_IDENTIFIERS = [
     'ballotpedia_id',
     'bioguide_id',
@@ -50,7 +50,6 @@ POLITICIAN_UNIQUE_IDENTIFIERS = [
     'politician_googleplus_id',
     'politician_name',
     'politician_phone_number',
-    'politician_twitter_handle',
     'politician_url',
     'politician_youtube_id',
     'state_code',
@@ -62,6 +61,13 @@ POLITICIAN_UNIQUE_IDENTIFIERS = [
     'we_vote_hosted_profile_image_url_medium',
     'we_vote_hosted_profile_image_url_tiny',
     'wikipedia_id',
+]
+POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED = [
+    'bioguide_id',
+    'fec_id',
+    'govtrack_id',
+    'maplight_id',
+    'thomas_id',
 ]
 
 
@@ -133,8 +139,11 @@ class Politician(models.Model):
     politician_url = models.URLField(
         verbose_name='latest website url of politician', max_length=255, blank=True, null=True)
 
-    politician_twitter_handle = models.CharField(
-        verbose_name='politician twitter screen_name', max_length=255, null=True, unique=False)
+    politician_twitter_handle = models.CharField(max_length=255, null=True, unique=False)
+    politician_twitter_handle2 = models.CharField(max_length=255, null=True, unique=False)
+    politician_twitter_handle3 = models.CharField(max_length=255, null=True, unique=False)
+    politician_twitter_handle4 = models.CharField(max_length=255, null=True, unique=False)
+    politician_twitter_handle5 = models.CharField(max_length=255, null=True, unique=False)
     vote_usa_politician_id = models.CharField(
         verbose_name="Vote USA permanent id for this candidate", max_length=64, default=None, null=True, blank=True)
     we_vote_hosted_profile_image_url_large = models.URLField(verbose_name='we vote hosted large image url',
@@ -308,6 +317,35 @@ class PoliticianManager(models.Manager):
     def retrieve_politician_from_we_vote_id(self, politician_we_vote_id):
         return self.retrieve_politician(0, politician_we_vote_id)
 
+    def create_politician_name_filter(
+            self,
+            filters=[],
+            politician_name='',
+            state_code=''):
+        if positive_value_exists(state_code):
+            new_filter = Q(politician_name__iexact=politician_name,
+                           state_code__iexact=state_code)
+        else:
+            new_filter = Q(politician_name__iexact=politician_name)
+        filter_set = True
+        filters.append(new_filter)
+
+        if politician_name:
+            search_words = politician_name.split()
+            for one_word in search_words:
+                if positive_value_exists(state_code):
+                    new_filter = Q(politician_name__icontains=one_word,
+                                   state_code__iexact=state_code)
+                else:
+                    new_filter = Q(politician_name__icontains=one_word)
+                filters.append(new_filter)
+
+        results = {
+            'filters':  filters,
+            'filter_set': filter_set,
+        }
+        return results
+
     def retrieve_all_politicians_that_might_match_candidate(
             self,
             candidate_name='',
@@ -319,6 +357,7 @@ class PoliticianManager(models.Manager):
             state_code='',
             vote_smart_id='',
             vote_usa_politician_id='',
+            read_only=True,
     ):
         politician_list = []
         politician_list_found = False
@@ -328,7 +367,10 @@ class PoliticianManager(models.Manager):
 
         try:
             filter_set = False
-            politician_queryset = Politician.objects.all()
+            if positive_value_exists(read_only):
+                politician_queryset = Politician.objects.using('readonly').all()
+            else:
+                politician_queryset = Politician.objects.all()
 
             filters = []
             if positive_value_exists(vote_smart_id):
@@ -347,33 +389,57 @@ class PoliticianManager(models.Manager):
                 filters.append(new_filter)
 
             if positive_value_exists(candidate_twitter_handle):
+                filter_set = True
                 new_filter = Q(politician_twitter_handle__iexact=candidate_twitter_handle)
-                filter_set = True
+                filters.append(new_filter)
+                new_filter = Q(politician_twitter_handle2__iexact=candidate_twitter_handle)
+                filters.append(new_filter)
+                new_filter = Q(politician_twitter_handle3__iexact=candidate_twitter_handle)
+                filters.append(new_filter)
+                new_filter = Q(politician_twitter_handle4__iexact=candidate_twitter_handle)
+                filters.append(new_filter)
+                new_filter = Q(politician_twitter_handle5__iexact=candidate_twitter_handle)
                 filters.append(new_filter)
 
-            if positive_value_exists(candidate_name) and positive_value_exists(state_code):
-                new_filter = Q(politician_name__iexact=candidate_name,
-                               state_code__iexact=state_code)
-                filter_set = True
-                filters.append(new_filter)
+            if positive_value_exists(candidate_name):
+                filter_results = self.create_politician_name_filter(
+                    filters=filters,
+                    politician_name=candidate_name,
+                    state_code=state_code,
+                )
+                if filter_results['filter_set']:
+                    filter_set = True
+                    filters = filter_results['filters']
 
-            if positive_value_exists(google_civic_candidate_name) and positive_value_exists(state_code):
-                new_filter = Q(politician_name__iexact=google_civic_candidate_name,
-                               state_code__iexact=state_code)
-                filter_set = True
-                filters.append(new_filter)
+            if positive_value_exists(google_civic_candidate_name):
+                filter_results = self.create_politician_name_filter(
+                    filters=filters,
+                    politician_name=google_civic_candidate_name,
+                    state_code=state_code,
+                )
+                if filter_results['filter_set']:
+                    filter_set = True
+                    filters = filter_results['filters']
 
-            if positive_value_exists(google_civic_candidate_name2) and positive_value_exists(state_code):
-                new_filter = Q(politician_name__iexact=google_civic_candidate_name2,
-                               state_code__iexact=state_code)
-                filter_set = True
-                filters.append(new_filter)
+            if positive_value_exists(google_civic_candidate_name2):
+                filter_results = self.create_politician_name_filter(
+                    filters=filters,
+                    politician_name=google_civic_candidate_name2,
+                    state_code=state_code,
+                )
+                if filter_results['filter_set']:
+                    filter_set = True
+                    filters = filter_results['filters']
 
-            if positive_value_exists(google_civic_candidate_name3) and positive_value_exists(state_code):
-                new_filter = Q(politician_name__iexact=google_civic_candidate_name3,
-                               state_code__iexact=state_code)
-                filter_set = True
-                filters.append(new_filter)
+            if positive_value_exists(google_civic_candidate_name3):
+                filter_results = self.create_politician_name_filter(
+                    filters=filters,
+                    politician_name=google_civic_candidate_name3,
+                    state_code=state_code,
+                )
+                if filter_results['filter_set']:
+                    filter_set = True
+                    filters = filter_results['filters']
 
             # Add the first query
             if len(filters):
@@ -395,7 +461,7 @@ class PoliticianManager(models.Manager):
                 politician_list_found = False
                 politician = politician_list[0]
                 status += 'ONE_POLITICIAN_RETRIEVED '
-            elif len(politician_list):
+            elif len(politician_list) > 1:
                 politician_found = False
                 politician_list_found = True
                 status += 'POLITICIAN_LIST_RETRIEVED '
@@ -471,6 +537,14 @@ class PoliticianManager(models.Manager):
 
                 new_filter = Q(politician_twitter_handle__icontains=one_word)
                 filters.append(new_filter)
+                new_filter = Q(politician_twitter_handle2__icontains=one_word)
+                filters.append(new_filter)
+                new_filter = Q(politician_twitter_handle3__icontains=one_word)
+                filters.append(new_filter)
+                new_filter = Q(politician_twitter_handle4__icontains=one_word)
+                filters.append(new_filter)
+                new_filter = Q(politician_twitter_handle5__icontains=one_word)
+                filters.append(new_filter)
 
                 # Add the first query
                 if len(filters):
@@ -500,9 +574,12 @@ class PoliticianManager(models.Manager):
         :param candidate:
         :return:
         """
+        status = ''
+        success = True
         values_changed = False
         politician_details = self.retrieve_politician(0, candidate.politician_we_vote_id)
         politician = politician_details['politician']
+        from politician.controllers import add_twitter_handle_to_next_politician_spot
         if politician_details['success'] and politician:
             # Politician found so update politician details with candidate details
             first_name = extract_first_name_from_full_name(candidate.candidate_name)
@@ -538,10 +615,14 @@ class PoliticianManager(models.Manager):
             if positive_value_exists(candidate.state_code) and candidate.state_code != politician.state_code:
                 politician.state_code = candidate.state_code
                 values_changed = True
-            if positive_value_exists(candidate.candidate_twitter_handle) and \
-                    candidate.candidate_twitter_handle != politician.politician_twitter_handle:
-                politician.politician_twitter_handle = candidate.candidate_twitter_handle
-                values_changed = True
+            if positive_value_exists(candidate.candidate_twitter_handle):
+                add_results = add_twitter_handle_to_next_politician_spot(politician, candidate.candidate_twitter_handle)
+                if add_results['success']:
+                    politician = add_results['politician']
+                    values_changed = add_results['values_changed']
+                else:
+                    status += 'FAILED_TO_ADD_ONE_TWITTER_HANDLE '
+                    success = False
             if positive_value_exists(candidate.we_vote_hosted_profile_image_url_large) and \
                     candidate.we_vote_hosted_profile_image_url_large != \
                     politician.we_vote_hosted_profile_image_url_large:
@@ -559,14 +640,12 @@ class PoliticianManager(models.Manager):
 
             if values_changed:
                 politician.save()
-                success = True
-                status = "SAVED_POLITICIAN_DETAILS"
+                status += "SAVED_POLITICIAN_DETAILS"
             else:
-                success = True
-                status = "NO_CHANGES_SAVED_TO_POLITICIAN_DETAILS"
+                status += "NO_CHANGES_SAVED_TO_POLITICIAN_DETAILS"
         else:
             success = False
-            status = "POLITICIAN_NOT_FOUND"
+            status += "POLITICIAN_NOT_FOUND"
         results = {
             'success':      success,
             'status':       status,
@@ -576,7 +655,7 @@ class PoliticianManager(models.Manager):
 
     def update_or_create_politician_from_candidate(self, candidate):
         """
-        Take a We Vote candidate object, and map it to update_or_create_politician
+        Take We Vote candidate object, and map it to update_or_create_politician
         :param candidate:
         :return:
         """
@@ -593,7 +672,8 @@ class PoliticianManager(models.Manager):
             'politician_name':                          candidate.candidate_name,
             'google_civic_candidate_name':              candidate.google_civic_candidate_name,
             'state_code':                               candidate.state_code,
-            'politician_twitter_handle':                candidate.candidate_twitter_handle,
+            # See below
+            # 'politician_twitter_handle':                candidate.candidate_twitter_handle,
             'we_vote_hosted_profile_image_url_large':   candidate.we_vote_hosted_profile_image_url_large,
             'we_vote_hosted_profile_image_url_medium':  candidate.we_vote_hosted_profile_image_url_medium,
             'we_vote_hosted_profile_image_url_tiny':    candidate.we_vote_hosted_profile_image_url_tiny,
@@ -603,13 +683,25 @@ class PoliticianManager(models.Manager):
             'political_party':                          political_party,
         }
 
-        return self.update_or_create_politician(
+        results = self.update_or_create_politician(
             updated_politician_values=updated_politician_values,
             politician_we_vote_id=candidate.politician_we_vote_id,
             vote_usa_politician_id=candidate.vote_usa_politician_id,
             candidate_twitter_handle=candidate.candidate_twitter_handle,
             candidate_name=candidate.candidate_name,
             state_code=candidate.state_code)
+        from politician.controllers import add_twitter_handle_to_next_politician_spot
+        if results['success']:
+            politician = results['politician']
+            twitter_results = add_twitter_handle_to_next_politician_spot(politician, candidate.candidate_twitter_handle)
+            if twitter_results['success']:
+                if twitter_results['values_changed']:
+                    politician = twitter_results['politician']
+                    politician.save()
+            else:
+                results['status'] += twitter_results['status']
+                results['success'] = False
+        return results
 
     def update_or_create_politician(
             self,
@@ -657,11 +749,23 @@ class PoliticianManager(models.Manager):
                         defaults=updated_politician_values)
                 politician_found = True
             elif positive_value_exists(candidate_twitter_handle):
-                politician, new_politician_created = \
-                    Politician.objects.update_or_create(
-                        politician_twitter_handle__iexact=candidate_twitter_handle,
-                        defaults=updated_politician_values)
-                politician_found = True
+                # For incoming twitter_handle we need to approach this differently
+                query = Politician.objects.all.filter(
+                    Q(politician_twitter_handle__iexact=candidate_twitter_handle) |
+                    Q(politician_twitter_handle2__iexact=candidate_twitter_handle) |
+                    Q(politician_twitter_handle3__iexact=candidate_twitter_handle) |
+                    Q(politician_twitter_handle4__iexact=candidate_twitter_handle) |
+                    Q(politician_twitter_handle5__iexact=candidate_twitter_handle)
+                )
+                results_list = list(query)
+                if len(results_list) > 0:
+                    politician = results_list[0]
+                    politician_found = True
+                else:
+                    # Create politician
+                    politician = Politician.objects.create(defaults=updated_politician_values)
+                    new_politician_created = True
+                    politician_found = True
             elif positive_value_exists(candidate_name) and positive_value_exists(state_code):
                 state_code = state_code.lower()
                 politician, new_politician_created = \
@@ -723,26 +827,45 @@ class PoliticianManager(models.Manager):
         results = self.retrieve_politicians_are_not_duplicates_list(politician_we_vote_id)
         return results['politicians_are_not_duplicates_list_we_vote_ids']
 
-    def create_politician_row_entry(self, politician_name, politician_first_name, politician_middle_name,
-                                    politician_last_name, ctcl_uuid, political_party, politician_email_address,
-                                    politician_phone_number, politician_twitter_handle, politician_facebook_id,
-                                    politician_googleplus_id, politician_youtube_id, politician_website_url):
+    def create_politician_row_entry(
+            self,
+            politician_name,
+            politician_first_name,
+            politician_middle_name,
+            politician_last_name,
+            ctcl_uuid,
+            political_party,
+            politician_email_address,
+            politician_phone_number,
+            politician_twitter_handle,
+            politician_twitter_handle2,
+            politician_twitter_handle3,
+            politician_twitter_handle4,
+            politician_twitter_handle5,
+            politician_facebook_id,
+            politician_googleplus_id,
+            politician_youtube_id,
+            politician_website_url):
         """
-        Create Politician table entry with Politician details
-        :param politician_name: 
-        :param politician_first_name: 
-        :param politician_middle_name: 
-        :param politician_last_name: 
-        :param ctcl_uuid: 
-        :param political_party: 
-        :param politician_email_address: 
-        :param politician_phone_number: 
+
+        :param politician_name:
+        :param politician_first_name:
+        :param politician_middle_name:
+        :param politician_last_name:
+        :param ctcl_uuid:
+        :param political_party:
+        :param politician_email_address:
+        :param politician_phone_number:
         :param politician_twitter_handle:
-        :param politician_facebook_id: 
-        :param politician_googleplus_id: 
-        :param politician_youtube_id: 
-        :param politician_website_url: 
-        :return: 
+        :param politician_twitter_handle2:
+        :param politician_twitter_handle3:
+        :param politician_twitter_handle4:
+        :param politician_twitter_handle5:
+        :param politician_facebook_id:
+        :param politician_googleplus_id:
+        :param politician_youtube_id:
+        :param politician_website_url:
+        :return:
         """
         success = False
         status = ""
@@ -751,17 +874,24 @@ class PoliticianManager(models.Manager):
         new_politician = ''
 
         try:
-            new_politician = Politician.objects.create(politician_name=politician_name,
-                                                       first_name=politician_first_name,
-                                                       middle_name=politician_middle_name,
-                                                       last_name=politician_last_name, political_party=political_party,
-                                                       politician_email_address=politician_email_address,
-                                                       politician_phone_number=politician_phone_number,
-                                                       politician_twitter_handle=politician_twitter_handle,
-                                                       politician_facebook_id=politician_facebook_id,
-                                                       politician_googleplus_id=politician_googleplus_id,
-                                                       politician_youtube_id=politician_youtube_id,
-                                                       politician_url=politician_website_url, ctcl_uuid=ctcl_uuid)
+            new_politician = Politician.objects.create(
+                politician_name=politician_name,
+                first_name=politician_first_name,
+                middle_name=politician_middle_name,
+                last_name=politician_last_name,
+                political_party=political_party,
+                politician_email_address=politician_email_address,
+                politician_phone_number=politician_phone_number,
+                politician_twitter_handle=politician_twitter_handle,
+                politician_twitter_handle2=politician_twitter_handle2,
+                politician_twitter_handle3=politician_twitter_handle3,
+                politician_twitter_handle4=politician_twitter_handle4,
+                politician_twitter_handle5=politician_twitter_handle5,
+                politician_facebook_id=politician_facebook_id,
+                politician_googleplus_id=politician_googleplus_id,
+                politician_youtube_id=politician_youtube_id,
+                politician_url=politician_website_url,
+                ctcl_uuid=ctcl_uuid)
             if new_politician:
                 success = True
                 status += "POLITICIAN_CREATED "
@@ -784,30 +914,48 @@ class PoliticianManager(models.Manager):
             }
         return results
 
-    def update_politician_row_entry(self, politician_name, politician_first_name, politician_middle_name,
-                                    politician_last_name, ctcl_uuid, political_party, politician_email_address,
-                                    politician_twitter_handle, politician_phone_number, politician_facebook_id,
-                                    politician_googleplus_id, politician_youtube_id, politician_website_url,
-                                    politician_we_vote_id):
-        """
-        Update Politician table entry with matching we_vote_id
-        :param politician_name: 
-        :param politician_first_name: 
-        :param politician_middle_name: 
-        :param politician_last_name: 
-        :param ctcl_uuid: 
-        :param political_party: 
-        :param politician_email_address: 
-        :param politician_twitter_handle: 
-        :param politician_phone_number: 
-        :param politician_facebook_id: 
-        :param politician_googleplus_id: 
-        :param politician_youtube_id: 
-        :param politician_website_url: 
-        :param politician_we_vote_id: 
-        :return: 
+    def update_politician_row_entry(
+            self,
+            politician_name,
+            politician_first_name,
+            politician_middle_name,
+            politician_last_name,
+            ctcl_uuid,
+            political_party,
+            politician_email_address,
+            politician_twitter_handle,
+            politician_twitter_handle2,
+            politician_twitter_handle3,
+            politician_twitter_handle4,
+            politician_twitter_handle5,
+            politician_phone_number,
+            politician_facebook_id,
+            politician_googleplus_id,
+            politician_youtube_id,
+            politician_website_url,
+            politician_we_vote_id):
         """
 
+        :param politician_name:
+        :param politician_first_name:
+        :param politician_middle_name:
+        :param politician_last_name:
+        :param ctcl_uuid:
+        :param political_party:
+        :param politician_email_address:
+        :param politician_twitter_handle:
+        :param politician_twitter_handle2:
+        :param politician_twitter_handle3:
+        :param politician_twitter_handle4:
+        :param politician_twitter_handle5:
+        :param politician_phone_number:
+        :param politician_facebook_id:
+        :param politician_googleplus_id:
+        :param politician_youtube_id:
+        :param politician_website_url:
+        :param politician_we_vote_id:
+        :return:
+        """
         success = False
         status = ""
         politician_updated = False
@@ -826,7 +974,11 @@ class PoliticianManager(models.Manager):
                 existing_politician_entry.party_name = political_party
                 existing_politician_entry.ctcl_uuid = ctcl_uuid
                 existing_politician_entry.politician_phone_number = politician_phone_number
-                existing_politician_entry.twitter_handle = politician_twitter_handle
+                existing_politician_entry.politician_twitter_handle = politician_twitter_handle
+                existing_politician_entry.politician_twitter_handle2 = politician_twitter_handle2
+                existing_politician_entry.politician_twitter_handle3 = politician_twitter_handle3
+                existing_politician_entry.politician_twitter_handle4 = politician_twitter_handle4
+                existing_politician_entry.politician_twitter_handle5 = politician_twitter_handle5
                 existing_politician_entry.politician_facebook_id = politician_facebook_id
                 existing_politician_entry.politician_googleplus_id = politician_googleplus_id
                 existing_politician_entry.politician_youtube_id = politician_youtube_id
@@ -913,14 +1065,14 @@ class PoliticianManager(models.Manager):
     def retrieve_politicians_from_non_unique_identifiers(
             self,
             state_code='',
-            politician_twitter_handle='',
+            politician_twitter_handle_list=[],
             politician_name='',
             ignore_politician_id_list=[],
             read_only=False):
         """
 
         :param state_code:
-        :param politician_twitter_handle:
+        :param politician_twitter_handle_list:
         :param politician_name:
         :param ignore_politician_id_list:
         :param read_only:
@@ -931,19 +1083,37 @@ class PoliticianManager(models.Manager):
         politician_found = False
         politician_list = []
         politician_list_found = False
-        politician_twitter_handle = extract_twitter_handle_from_text_string(politician_twitter_handle)
         multiple_entries_found = False
         success = True
         status = ""
 
-        if keep_looking_for_duplicates and positive_value_exists(politician_twitter_handle):
+        if keep_looking_for_duplicates and len(politician_twitter_handle_list) > 0:
             try:
                 if positive_value_exists(read_only):
                     politician_query = Politician.objects.using('readonly').all()
                 else:
                     politician_query = Politician.objects.all()
 
-                politician_query = politician_query.filter(politician_twitter_handle__iexact=politician_twitter_handle)
+                twitter_filters = []
+                for one_twitter_handle in politician_twitter_handle_list:
+                    one_twitter_handle_cleaned = extract_twitter_handle_from_text_string(one_twitter_handle)
+                    new_filter = (
+                        Q(politician_twitter_handle__iexact=one_twitter_handle_cleaned) |
+                        Q(politician_twitter_handle2__iexact=one_twitter_handle_cleaned) |
+                        Q(politician_twitter_handle3__iexact=one_twitter_handle_cleaned) |
+                        Q(politician_twitter_handle4__iexact=one_twitter_handle_cleaned) |
+                        Q(politician_twitter_handle5__iexact=one_twitter_handle_cleaned)
+                    )
+                    twitter_filters.append(new_filter)
+
+                # Add the first query
+                final_filters = twitter_filters.pop()
+                # ...and "OR" the remaining items in the list
+                for item in twitter_filters:
+                    final_filters |= item
+
+                politician_query = politician_query.filter(final_filters)
+
                 if positive_value_exists(state_code):
                     politician_query = politician_query.filter(state_code__iexact=state_code)
 
@@ -1092,17 +1262,34 @@ class PoliticianManager(models.Manager):
     def fetch_politicians_from_non_unique_identifiers_count(
             self,
             state_code='',
-            politician_twitter_handle='',
+            politician_twitter_handle_list=[],
             politician_name='',
             ignore_politician_id_list=[]):
         keep_looking_for_duplicates = True
-        politician_twitter_handle = extract_twitter_handle_from_text_string(politician_twitter_handle)
         status = ""
 
-        if keep_looking_for_duplicates and positive_value_exists(politician_twitter_handle):
+        if keep_looking_for_duplicates and len(politician_twitter_handle_list) > 0:
             try:
-                politician_query = Politician.objects.all()
-                politician_query = politician_query.filter(politician_twitter_handle__iexact=politician_twitter_handle)
+                politician_query = Politician.objects.using('readonly').all()
+                twitter_filters = []
+                for one_twitter_handle in politician_twitter_handle_list:
+                    one_twitter_handle_cleaned = extract_twitter_handle_from_text_string(one_twitter_handle)
+                    new_filter = (
+                        Q(politician_twitter_handle__iexact=one_twitter_handle_cleaned) |
+                        Q(politician_twitter_handle2__iexact=one_twitter_handle_cleaned) |
+                        Q(politician_twitter_handle3__iexact=one_twitter_handle_cleaned) |
+                        Q(politician_twitter_handle4__iexact=one_twitter_handle_cleaned) |
+                        Q(politician_twitter_handle5__iexact=one_twitter_handle_cleaned)
+                    )
+                    twitter_filters.append(new_filter)
+
+                # Add the first query
+                final_filters = twitter_filters.pop()
+                # ...and "OR" the remaining items in the list
+                for item in twitter_filters:
+                    final_filters |= item
+
+                politician_query = politician_query.filter(final_filters)
 
                 if positive_value_exists(state_code):
                     politician_query = politician_query.filter(state_code__iexact=state_code)
@@ -1120,7 +1307,7 @@ class PoliticianManager(models.Manager):
         if keep_looking_for_duplicates and positive_value_exists(politician_name):
             # Search by Candidate name exact match
             try:
-                politician_query = Politician.objects.all()
+                politician_query = Politician.objects.using('readonly').all()
                 politician_query = politician_query.filter(
                     Q(politician_name__iexact=politician_name) |
                     Q(google_civic_candidate_name__iexact=politician_name) |
@@ -1146,7 +1333,7 @@ class PoliticianManager(models.Manager):
             last_name = extract_last_name_from_full_name(politician_name)
             if positive_value_exists(first_name) and positive_value_exists(last_name):
                 try:
-                    politician_query = Politician.objects.all()
+                    politician_query = Politician.objects.using('readonly').all()
 
                     politician_query = politician_query.filter(
                         (Q(politician_name__icontains=first_name) & Q(politician_name__icontains=last_name)) |

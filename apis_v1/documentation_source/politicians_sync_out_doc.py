@@ -55,6 +55,10 @@ def politicians_sync_out_doc_template_values(url_root):
                    '  "state_code": string,\n' \
                    '  "politician_url": string,\n' \
                    '  "politician_twitter_handle": string,\n' \
+                   '  "politician_twitter_handle2": string,\n' \
+                   '  "politician_twitter_handle3": string,\n' \
+                   '  "politician_twitter_handle4": string,\n' \
+                   '  "politician_twitter_handle5": string,\n' \
                    '  "we_vote_hosted_profile_image_url_large": string,\n' \
                    '  "we_vote_hosted_profile_image_url_medium": string,\n' \
                    '  "we_vote_hosted_profile_image_url_tiny": string,\n' \

@@ -6,7 +6,7 @@
 {%  block content %}
 <a href="{% url 'candidate:candidate_list' %}">< Back to Candidates</a>
   <br /></r />
-<a href="{% url 'candidate:find_and_merge_duplicate_candidates' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&find_number_of_duplicates=1"
+<a href="{% url 'candidate:find_and_merge_duplicate_candidates' %}?candidate_year={{ candidate_year }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&find_number_of_duplicates=1"
    target="_blank" >Click to find number of possible duplicates <span class="glyphicon glyphicon-new-window"></span></a> (takes 30-60 seconds)
 
 <h1>{% if candidate_option1 %}Merge {{ candidate_option1.candidate_name }}{% else %}CANNOT MERGE{% endif %}</h1>
@@ -160,6 +160,8 @@
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_phone" field_label="Phone Number" conflict_status=conflict_values.candidate_phone candidate1_field_value=candidate_option1.candidate_phone candidate2_field_value=candidate_option2.candidate_phone candidate1=candidate_option1 candidate2=candidate_option2 %}
 
+{% include "candidate/candidate_merge_one_field_decision.html" with field_name="is_battleground_race" field_label="Battleground Race" conflict_status=conflict_values.is_battleground_race candidate1_field_value=candidate_option1.is_battleground_race candidate2_field_value=candidate_option2.is_battleground_race candidate1=candidate_option1 candidate2=candidate_option2 %}
+
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_is_incumbent" field_label="Is Incumbent" conflict_status=conflict_values.candidate_is_incumbent candidate1_field_value=candidate_option1.candidate_is_incumbent candidate2_field_value=candidate_option2.candidate_is_incumbent candidate1=candidate_option1 candidate2=candidate_option2 %}
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_is_top_ticket" field_label="Is Top of Ticket" conflict_status=conflict_values.candidate_is_top_ticket candidate1_field_value=candidate_option1.candidate_is_top_ticket candidate2_field_value=candidate_option2.candidate_is_top_ticket candidate1=candidate_option1 candidate2=candidate_option2 %}
@@ -288,6 +290,7 @@
         <td><input type="submit" value="Merge Candidates" name="merge" /></td>
     </tr>
 </table>
+<input type="hidden" name="candidate_year" value="{{ candidate_year }}" />
 <input type="hidden" name="remove_duplicate_process" value="{{ remove_duplicate_process }}" />
 <input type="hidden" name="state_code" value="{{ candidate_option2.state_code }}" />
 <input type="hidden" name="google_civic_election_id" value="{{ candidate_option1.google_civic_election_id }}" />

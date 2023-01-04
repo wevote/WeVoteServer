@@ -57,6 +57,7 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'facebook_url',
     'google_civic_election_id',
     'google_plus_url',
+    'is_battleground_race',
     'linkedin_url',
     'linkedin_photo_url',
     'maplight_id',
