@@ -1,10 +1,12 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-import os
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 import boto3
 import json
 from config.base import get_environment_variable
 
+from aws.functions.voter_profile import voter_profiler_job_example
 
 # max time (in sec) that a job may take to complete
 #  this prevents a different worker from picking up a job that
@@ -14,9 +16,10 @@ MAX_JOB_PROCESSING_TIME = 60
 MAX_JOB_RETRY_ATTEMPTS = 5
 
 def process_request(function, body, message):
+
     if function == 'ProfileImageFetchResize':
-        # TODO add code to do work here
-        return True
+        return voter_profiler_job_example(body)
+    # TODO add other async jobs here
 
     # default: no function found
     return False
