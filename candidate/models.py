@@ -14,7 +14,7 @@ from exception.models import handle_exception, handle_record_found_more_than_one
 from image.models import ORGANIZATION_ENDORSEMENTS_IMAGE_NAME
 from office.models import ContestOffice, ContestOfficeManager
 from wevote_functions.functions import add_period_to_middle_name_initial, add_period_to_name_prefix_and_suffix, \
-    convert_to_int, \
+    candidate_party_display, convert_to_int, \
     display_full_name_with_correct_capitalization, extract_instagram_handle_from_text_string, \
     extract_title_from_full_name, extract_first_name_from_full_name, extract_middle_name_from_full_name, \
     extract_last_name_from_full_name, extract_suffix_from_full_name, extract_nickname_from_full_name, \
@@ -34,11 +34,12 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'ballotpedia_election_id',
     'ballotpedia_image_id',
     'ballotpedia_office_id',
-    'ballotpedia_person_id',
     'ballotpedia_page_title',
+    'ballotpedia_person_id',
     'ballotpedia_photo_url',
     'ballotpedia_race_id',
     'birth_day_text',
+    'candidate_contact_form_url',
     'candidate_email',
     'candidate_gender',
     'candidate_is_incumbent',
@@ -46,17 +47,21 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'candidate_participation_status',
     'candidate_name',
     'candidate_phone',
-    'candidate_twitter_handle',
+    'candidate_ultimate_election_date',
     'candidate_url',
-    'candidate_contact_form_url',
+    'candidate_year',
     'contest_office_id',
+    'contest_office_name',
     'contest_office_we_vote_id',
     'crowdpac_candidate_id',
     'ctcl_uuid',
     'facebook_profile_image_url_https',
     'facebook_url',
+    'facebook_url_is_broken',
     'google_civic_election_id',
     'google_plus_url',
+    'instagram_followers_count',
+    'instagram_handle',
     'is_battleground_race',
     'linkedin_url',
     'linkedin_photo_url',
@@ -75,6 +80,8 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'politician_we_vote_id',
     'profile_image_type_currently_active',
     'state_code',
+    'twitter_description',
+    'twitter_followers_count',
     'twitter_location',
     'twitter_name',
     'twitter_profile_background_image_url_https',
@@ -103,6 +110,8 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'we_vote_hosted_profile_vote_usa_image_url_tiny',
     'wikipedia_page_title',
     'wikipedia_photo_url',
+    'withdrawal_date',
+    'withdrawn_from_election',
     'youtube_url',
 ]
 
@@ -369,6 +378,10 @@ class CandidateListManager(models.Manager):
                     filters.append(new_filter)
                     new_filter = Q(candidate_twitter_handle__icontains=search_word)
                     filters.append(new_filter)
+                    new_filter = Q(candidate_twitter_handle2__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(candidate_twitter_handle3__icontains=search_word)
+                    filters.append(new_filter)
                     new_filter = Q(contest_office_name__icontains=search_word)
                     filters.append(new_filter)
                     new_filter = Q(twitter_name__icontains=search_word)
@@ -435,15 +448,18 @@ class CandidateListManager(models.Manager):
             candidate_year=0,
             candidates_index_start=0,
             candidates_limit=300,
+            is_missing_politician_we_vote_id=False,
             limit_to_this_state_code='',
-            search_string=False,
             return_list_of_objects=False,
-            read_only=False):
+            read_only=False,
+            search_string=False,
+    ):
         """
         This might generate different results than retrieve_candidate_we_vote_id_list_from_year_list.
         :param candidate_year:
         :param candidates_index_start:
         :param candidates_limit:
+        :param is_missing_politician_we_vote_id:
         :param limit_to_this_state_code:
         :param search_string:
         :param return_list_of_objects:
@@ -499,6 +515,11 @@ class CandidateListManager(models.Manager):
                 candidate_query = CandidateCampaign.objects.all()
             if positive_value_exists(candidate_year_integer):
                 candidate_query = candidate_query.filter(candidate_year=candidate_year_integer)
+            if positive_value_exists(is_missing_politician_we_vote_id):
+                candidate_query = candidate_query.filter(
+                    Q(politician_we_vote_id__isnull=True) |
+                    Q(politician_we_vote_id='')
+                )
             if positive_value_exists(limit_to_this_state_code):
                 candidate_query = candidate_query.filter(state_code__iexact=limit_to_this_state_code)
             if positive_value_exists(search_string):
@@ -514,6 +535,10 @@ class CandidateListManager(models.Manager):
                     new_filter = Q(candidate_name__icontains=search_word)
                     filters.append(new_filter)
                     new_filter = Q(candidate_twitter_handle__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(candidate_twitter_handle2__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(candidate_twitter_handle3__icontains=search_word)
                     filters.append(new_filter)
                     new_filter = Q(contest_office_name__icontains=search_word)
                     filters.append(new_filter)
@@ -926,14 +951,23 @@ class CandidateListManager(models.Manager):
         }
         return results
 
-    def retrieve_possible_duplicate_candidates(self, candidate_name, google_civic_candidate_name,
-                                               google_civic_candidate_name2, google_civic_candidate_name3,
-                                               google_civic_election_id, office_we_vote_id,
-                                               politician_we_vote_id,
-                                               candidate_twitter_handle,
-                                               ballotpedia_candidate_id, vote_smart_id, maplight_id,
-                                               we_vote_id_from_master='',
-                                               read_only=True):
+    def retrieve_possible_duplicate_candidates(
+            self,
+            candidate_name='',
+            google_civic_candidate_name='',
+            google_civic_candidate_name2='',
+            google_civic_candidate_name3='',
+            google_civic_election_id='',
+            office_we_vote_id='',
+            politician_we_vote_id='',
+            candidate_twitter_handle='',
+            candidate_twitter_handle2='',
+            candidate_twitter_handle3='',
+            ballotpedia_candidate_id='',
+            vote_smart_id='',
+            maplight_id='',
+            we_vote_id_from_master='',
+            read_only=True):
         """
         retrieve_possible_duplicate_candidates is used primarily to avoid duplicate candidate imports.
         :param candidate_name:
@@ -944,6 +978,8 @@ class CandidateListManager(models.Manager):
         :param office_we_vote_id:
         :param politician_we_vote_id:
         :param candidate_twitter_handle:
+        :param candidate_twitter_handle2:
+        :param candidate_twitter_handle3:
         :param ballotpedia_candidate_id:
         :param vote_smart_id:
         :param maplight_id:
@@ -1171,7 +1207,27 @@ class CandidateListManager(models.Manager):
                 filters.append(new_filter)
 
             if positive_value_exists(candidate_twitter_handle):
-                new_filter = Q(candidate_twitter_handle__iexact=candidate_twitter_handle)
+                new_filter = (
+                    Q(candidate_twitter_handle__iexact=candidate_twitter_handle) |
+                    Q(candidate_twitter_handle2__iexact=candidate_twitter_handle) |
+                    Q(candidate_twitter_handle3__iexact=candidate_twitter_handle)
+                )
+                filters.append(new_filter)
+
+            if positive_value_exists(candidate_twitter_handle2):
+                new_filter = (
+                    Q(candidate_twitter_handle__iexact=candidate_twitter_handle2) |
+                    Q(candidate_twitter_handle2__iexact=candidate_twitter_handle2) |
+                    Q(candidate_twitter_handle3__iexact=candidate_twitter_handle2)
+                )
+                filters.append(new_filter)
+
+            if positive_value_exists(candidate_twitter_handle3):
+                new_filter = (
+                    Q(candidate_twitter_handle__iexact=candidate_twitter_handle3) |
+                    Q(candidate_twitter_handle2__iexact=candidate_twitter_handle3) |
+                    Q(candidate_twitter_handle3__iexact=candidate_twitter_handle3)
+                )
                 filters.append(new_filter)
 
             if positive_value_exists(ballotpedia_candidate_id):
@@ -1229,6 +1285,8 @@ class CandidateListManager(models.Manager):
             google_civic_election_id_list=[],
             state_code='',
             candidate_twitter_handle='',
+            candidate_twitter_handle2='',
+            candidate_twitter_handle3='',
             candidate_name='',
             ignore_candidate_id_list=[],
             instagram_handle='',
@@ -1242,6 +1300,8 @@ class CandidateListManager(models.Manager):
         :param google_civic_election_id_list:
         :param state_code:
         :param candidate_twitter_handle:
+        :param candidate_twitter_handle2:
+        :param candidate_twitter_handle3:
         :param candidate_name:
         :param ignore_candidate_id_list:
         :param instagram_handle:
@@ -1255,6 +1315,8 @@ class CandidateListManager(models.Manager):
         candidate_list = []
         candidate_list_found = False
         candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle)
+        candidate_twitter_handle2 = extract_twitter_handle_from_text_string(candidate_twitter_handle2)
+        candidate_twitter_handle3 = extract_twitter_handle_from_text_string(candidate_twitter_handle3)
         instagram_handle = extract_instagram_handle_from_text_string(instagram_handle)
         multiple_entries_found = False
         success = True
@@ -1276,7 +1338,11 @@ class CandidateListManager(models.Manager):
             year_list = results['year_list']
 
         # We want to let candidate_twitter_handle be the dominant search factor if it exists
-        if keep_looking_for_duplicates and positive_value_exists(candidate_twitter_handle):
+        one_twitter_handle_exists = \
+            positive_value_exists(candidate_twitter_handle) or \
+            positive_value_exists(candidate_twitter_handle2) or \
+            positive_value_exists(candidate_twitter_handle3)
+        if keep_looking_for_duplicates and one_twitter_handle_exists:
             try:
                 if positive_value_exists(read_only):
                     candidate_query = CandidateCampaign.objects.using('readonly').all()
@@ -1289,7 +1355,27 @@ class CandidateListManager(models.Manager):
                     Q(candidate_year__in=year_list)
                 )
 
-                candidate_query = candidate_query.filter(candidate_twitter_handle__iexact=candidate_twitter_handle)
+                if positive_value_exists(candidate_twitter_handle):
+                    candidate_query = candidate_query.filter(
+                        Q(candidate_twitter_handle__iexact=candidate_twitter_handle) |
+                        Q(candidate_twitter_handle2__iexact=candidate_twitter_handle) |
+                        Q(candidate_twitter_handle3__iexact=candidate_twitter_handle)
+                    )
+
+                if positive_value_exists(candidate_twitter_handle2):
+                    candidate_query = candidate_query.filter(
+                        Q(candidate_twitter_handle__iexact=candidate_twitter_handle2) |
+                        Q(candidate_twitter_handle2__iexact=candidate_twitter_handle2) |
+                        Q(candidate_twitter_handle3__iexact=candidate_twitter_handle2)
+                    )
+
+                if positive_value_exists(candidate_twitter_handle3):
+                    candidate_query = candidate_query.filter(
+                        Q(candidate_twitter_handle__iexact=candidate_twitter_handle3) |
+                        Q(candidate_twitter_handle2__iexact=candidate_twitter_handle3) |
+                        Q(candidate_twitter_handle3__iexact=candidate_twitter_handle3)
+                    )
+
                 if positive_value_exists(state_code):
                     candidate_query = candidate_query.filter(state_code__iexact=state_code)
 
@@ -1571,10 +1657,14 @@ class CandidateListManager(models.Manager):
             google_civic_election_id_list=[],
             state_code='',
             candidate_twitter_handle='',
+            candidate_twitter_handle2='',
+            candidate_twitter_handle3='',
             candidate_name='',
             ignore_candidate_id_list=[]):
         keep_looking_for_duplicates = True
         candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle)
+        candidate_twitter_handle2 = extract_twitter_handle_from_text_string(candidate_twitter_handle2)
+        candidate_twitter_handle3 = extract_twitter_handle_from_text_string(candidate_twitter_handle3)
         status = ""
 
         results = self.retrieve_candidate_we_vote_id_list_from_election_list(
@@ -1588,10 +1678,31 @@ class CandidateListManager(models.Manager):
         if results['success']:
             year_list = results['year_list']
 
-        if keep_looking_for_duplicates and positive_value_exists(candidate_twitter_handle):
+        one_twitter_handle_exists = \
+            positive_value_exists(candidate_twitter_handle) or \
+            positive_value_exists(candidate_twitter_handle2) or \
+            positive_value_exists(candidate_twitter_handle3)
+        if keep_looking_for_duplicates and one_twitter_handle_exists:
             try:
                 candidate_query = CandidateCampaign.objects.using('readonly').all()
-                candidate_query = candidate_query.filter(candidate_twitter_handle__iexact=candidate_twitter_handle)
+                if positive_value_exists(candidate_twitter_handle):
+                    candidate_query = candidate_query.filter(
+                        Q(candidate_twitter_handle__iexact=candidate_twitter_handle) |
+                        Q(candidate_twitter_handle2__iexact=candidate_twitter_handle) |
+                        Q(candidate_twitter_handle3__iexact=candidate_twitter_handle)
+                    )
+                if positive_value_exists(candidate_twitter_handle2):
+                    candidate_query = candidate_query.filter(
+                        Q(candidate_twitter_handle__iexact=candidate_twitter_handle2) |
+                        Q(candidate_twitter_handle2__iexact=candidate_twitter_handle2) |
+                        Q(candidate_twitter_handle3__iexact=candidate_twitter_handle2)
+                    )
+                if positive_value_exists(candidate_twitter_handle3):
+                    candidate_query = candidate_query.filter(
+                        Q(candidate_twitter_handle__iexact=candidate_twitter_handle3) |
+                        Q(candidate_twitter_handle2__iexact=candidate_twitter_handle3) |
+                        Q(candidate_twitter_handle3__iexact=candidate_twitter_handle3)
+                    )
 
                 # Only look for matches in candidates in the specified elections, or in the year(s) the elections are in
                 candidate_query = candidate_query.filter(
@@ -1909,7 +2020,7 @@ class CandidateListManager(models.Manager):
         This function, search_candidates_in_specific_elections, is meant to cast a wider net for any
         possible candidates that might match.
         It has some parallels with organization.models: organization_search_find_any_possibilities
-        This is different than retrieve_candidates_from_non_unique_identifiers, which is built to find
+        This is different from retrieve_candidates_from_non_unique_identifiers, which is built to find
         possible duplicate candidates with stricter parameters.
         Another related function, retrieve_possible_duplicate_candidates, is used to avoid duplicate candidate imports.
         :param google_civic_election_id_list:
@@ -1970,6 +2081,10 @@ class CandidateListManager(models.Manager):
                 new_filter = Q(candidate_name__icontains=search_word)
                 filters.append(new_filter)
                 new_filter = Q(candidate_twitter_handle__icontains=search_word)
+                filters.append(new_filter)
+                new_filter = Q(candidate_twitter_handle2__icontains=search_word)
+                filters.append(new_filter)
+                new_filter = Q(candidate_twitter_handle3__icontains=search_word)
                 filters.append(new_filter)
                 new_filter = Q(contest_office_name__icontains=search_word)
                 filters.append(new_filter)
@@ -2314,15 +2429,15 @@ class CandidateCampaign(models.Model):
         verbose_name="google civic election id", default=0, null=True, blank=True)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
     instagram_handle = models.TextField(verbose_name="candidate's instagram handle", blank=True, null=True)
-    instagram_followers_count = models.IntegerField(verbose_name="count of candidate's instagram followers",
-                                                    null=True, blank=True)
+    instagram_followers_count = models.IntegerField(
+        verbose_name="count of candidate's instagram followers", null=True, blank=True)
     # The date of the last election this candidate relates to, converted to integer, ex/ 20201103
     candidate_ultimate_election_date = models.PositiveIntegerField(default=None, null=True)
     # The year this candidate is running for office
     candidate_year = models.PositiveIntegerField(default=None, null=True)
     # State code
-    state_code = models.CharField(verbose_name="state this candidate serves",
-                                  max_length=2, null=True, blank=True, db_index=True)
+    state_code = models.CharField(
+        verbose_name="state this candidate serves", max_length=2, null=True, blank=True, db_index=True)
     date_last_updated = models.DateTimeField(null=True, auto_now=True)
     # The URL for the candidate's campaign web site.
     candidate_url = models.URLField(
@@ -2347,17 +2462,17 @@ class CandidateCampaign(models.Model):
         verbose_name="candidate plain text name from twitter", max_length=255, null=True, blank=True)
     twitter_location = models.CharField(
         verbose_name="candidate location from twitter", max_length=255, null=True, blank=True)
-    twitter_followers_count = models.IntegerField(verbose_name="number of twitter followers",
-                                                  null=False, blank=True, default=0)
+    twitter_followers_count = models.IntegerField(
+        verbose_name="number of twitter followers", null=False, blank=True, default=0)
     # This is the master image cached on We Vote servers. Note that we do not keep the original image URL from Twitter.
     twitter_profile_image_url_https = models.TextField(
         verbose_name='locally cached url of candidate profile image from twitter', blank=True, null=True)
-    twitter_profile_background_image_url_https = models.TextField(verbose_name='tile-able background from twitter',
-                                                                  blank=True, null=True)
-    twitter_profile_banner_url_https = models.TextField(verbose_name='profile banner image from twitter',
-                                                        blank=True, null=True)
-    twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
-                                           max_length=255, null=True, blank=True)
+    twitter_profile_background_image_url_https = models.TextField(
+        verbose_name='tile-able background from twitter', blank=True, null=True)
+    twitter_profile_banner_url_https = models.TextField(
+        verbose_name='profile banner image from twitter', blank=True, null=True)
+    twitter_description = models.CharField(
+        verbose_name="Text description of this organization from twitter.", max_length=255, null=True, blank=True)
     vote_usa_office_id = models.CharField(
         verbose_name="Vote USA permanent id for the office", max_length=64, default=None, null=True, blank=True)
     vote_usa_politician_id = models.CharField(
@@ -2416,8 +2531,8 @@ class CandidateCampaign(models.Model):
 
     ballotpedia_candidate_id = models.PositiveIntegerField(verbose_name="ballotpedia integer id", null=True, blank=True)
     # The candidate's name as passed over by Ballotpedia
-    ballotpedia_candidate_name = models.CharField(verbose_name="candidate name exactly as received from ballotpedia",
-                                                  max_length=255, null=True, blank=True)
+    ballotpedia_candidate_name = models.CharField(
+        verbose_name="candidate name exactly as received from ballotpedia", max_length=255, null=True, blank=True)
     ballotpedia_candidate_summary = models.TextField(verbose_name="candidate summary from ballotpedia",
                                                      null=True, blank=True, default=None)
     ballotpedia_candidate_url = models.TextField(
@@ -2632,40 +2747,6 @@ def fetch_candidate_count_for_election_and_state(google_civic_election_id, state
     candidate_list = CandidateListManager()
     results = candidate_list.retrieve_candidate_count_for_office(google_civic_election_id, state_code)
     return results['candidate_count']
-
-
-# See also 'convert_to_political_party_constant' in we_vote_functions/functions.py
-def candidate_party_display(raw_party):
-    if raw_party is None:
-        return ''
-    if raw_party == '':
-        return ''
-    if raw_party == 'Amer. Ind.':
-        return 'American Independent'
-    if raw_party == 'DEM':
-        return 'Democrat'
-    if raw_party == 'Democratic':
-        return 'Democrat'
-    if raw_party == 'Party Preference: Democratic':
-        return 'Democrat'
-    if raw_party == 'GRN':
-        return 'Green'
-    if raw_party == 'LIB':
-        return 'Libertarian'
-    if raw_party == 'NPP':
-        return 'No Party Preference'
-    if raw_party == 'Party Preference: None':
-        return 'No Party Preference'
-    if raw_party == 'PF':
-        return 'Peace and Freedom'
-    if raw_party == 'REP':
-        return 'Republican'
-    if raw_party == 'Party Preference: Republican':
-        return 'Republican'
-    if raw_party.lower() == 'none':
-        return ''
-    else:
-        return raw_party
 
 
 def mimic_google_civic_initials(name):

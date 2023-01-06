@@ -2059,6 +2059,12 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
     candidate_twitter_handle_raw = batch_manager.retrieve_value_from_batch_row(
         "candidate_twitter_handle", batch_header_map, one_batch_row)
     candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle_raw)
+    candidate_twitter_handle_raw2 = batch_manager.retrieve_value_from_batch_row(
+        "candidate_twitter_handle2", batch_header_map, one_batch_row)
+    candidate_twitter_handle2 = extract_twitter_handle_from_text_string(candidate_twitter_handle_raw2)
+    candidate_twitter_handle_raw3 = batch_manager.retrieve_value_from_batch_row(
+        "candidate_twitter_handle3", batch_header_map, one_batch_row)
+    candidate_twitter_handle3 = extract_twitter_handle_from_text_string(candidate_twitter_handle_raw3)
     candidate_url = batch_manager.retrieve_value_from_batch_row("candidate_url", batch_header_map, one_batch_row)
     candidate_contact_form_url = batch_manager.retrieve_value_from_batch_row(
         "candidate_contact_form_url", batch_header_map, one_batch_row)
@@ -2219,6 +2225,8 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
             google_civic_election_id_list=google_civic_election_id_list,
             state_code=state_code,
             candidate_twitter_handle=candidate_twitter_handle,
+            candidate_twitter_handle2=candidate_twitter_handle2,
+            candidate_twitter_handle3=candidate_twitter_handle3,
             candidate_name=candidate_name,
             read_only=True)
 
@@ -2371,6 +2379,8 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
             batch_row_action_candidate.candidate_twitter_handle = vote_usa_candidate_twitter_handle
         else:
             batch_row_action_candidate.candidate_twitter_handle = candidate_twitter_handle
+        batch_row_action_candidate.candidate_twitter_handle2 = candidate_twitter_handle2
+        batch_row_action_candidate.candidate_twitter_handle3 = candidate_twitter_handle3
         if positive_value_exists(vote_usa_candidate_url):
             batch_row_action_candidate.candidate_url = vote_usa_candidate_url
         else:

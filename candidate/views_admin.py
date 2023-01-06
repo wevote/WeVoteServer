@@ -95,6 +95,12 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
             new_filter = Q(candidate_twitter_handle__icontains=candidate_search)
             filters.append(new_filter)
 
+            new_filter = Q(candidate_twitter_handle2__icontains=candidate_search)
+            filters.append(new_filter)
+
+            new_filter = Q(candidate_twitter_handle3__icontains=candidate_search)
+            filters.append(new_filter)
+
             new_filter = Q(candidate_url__icontains=candidate_search)
             filters.append(new_filter)
 
@@ -141,6 +147,8 @@ def candidates_sync_out_view(request):  # candidatesSyncOut
             'candidate_participation_status',
             'candidate_phone',
             'candidate_twitter_handle',
+            'candidate_twitter_handle2',
+            'candidate_twitter_handle3',
             'candidate_ultimate_election_date',
             'candidate_url',
             'candidate_year',
@@ -563,6 +571,12 @@ def candidate_list_view(request):
                 filters.append(new_filter)
 
                 new_filter = Q(candidate_twitter_handle__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(candidate_twitter_handle2__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(candidate_twitter_handle3__icontains=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(candidate_url__icontains=one_word)
@@ -1295,6 +1309,8 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
     google_civic_candidate_name2 = request.GET.get('google_civic_candidate_name2', False)
     google_civic_candidate_name3 = request.GET.get('google_civic_candidate_name3', False)
     candidate_twitter_handle = request.GET.get('candidate_twitter_handle', False)
+    candidate_twitter_handle2 = request.GET.get('candidate_twitter_handle2', False)
+    candidate_twitter_handle3 = request.GET.get('candidate_twitter_handle3', False)
     candidate_url = request.GET.get('candidate_url', False)
     candidate_contact_form_url = request.GET.get('candidate_contact_form_url', False)
     facebook_url = request.GET.get('facebook_url', False)
@@ -1439,6 +1455,8 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
             'google_civic_candidate_name2':     google_civic_candidate_name2,
             'google_civic_candidate_name3':     google_civic_candidate_name3,
             'candidate_twitter_handle':         candidate_twitter_handle,
+            'candidate_twitter_handle2':        candidate_twitter_handle2,
+            'candidate_twitter_handle3':        candidate_twitter_handle3,
             'candidate_url':                    candidate_url,
             'candidate_contact_form_url':       candidate_contact_form_url,
             'facebook_url':                     facebook_url,
@@ -1591,6 +1609,12 @@ def candidate_edit_process_view(request):
     candidate_twitter_handle = request.POST.get('candidate_twitter_handle', False)
     if positive_value_exists(candidate_twitter_handle):
         candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle)
+    candidate_twitter_handle2 = request.POST.get('candidate_twitter_handle2', False)
+    if positive_value_exists(candidate_twitter_handle2):
+        candidate_twitter_handle2 = extract_twitter_handle_from_text_string(candidate_twitter_handle2)
+    candidate_twitter_handle3 = request.POST.get('candidate_twitter_handle3', False)
+    if positive_value_exists(candidate_twitter_handle3):
+        candidate_twitter_handle3 = extract_twitter_handle_from_text_string(candidate_twitter_handle3)
     candidate_url = request.POST.get('candidate_url', False)
     candidate_contact_form_url = request.POST.get('candidate_contact_form_url', False)
     facebook_url = request.POST.get('facebook_url', False)
@@ -1627,31 +1651,34 @@ def candidate_edit_process_view(request):
     select_for_marking_twitter_link_possibility_ids = request.POST.getlist('select_for_marking_checks[]')
     which_marking = request.POST.get('which_marking')
 
+    url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
+                    "&ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
+                    "&candidate_contact_form_url=" + str(candidate_contact_form_url) + \
+                    "&candidate_email=" + str(candidate_email) + \
+                    "&candidate_name=" + str(candidate_name) + \
+                    "&candidate_phone=" + str(candidate_phone) + \
+                    "&candidate_twitter_handle=" + str(candidate_twitter_handle) + \
+                    "&candidate_twitter_handle2=" + str(candidate_twitter_handle2) + \
+                    "&candidate_twitter_handle3=" + str(candidate_twitter_handle3) + \
+                    "&candidate_url=" + str(candidate_url) + \
+                    "&contest_office_id=" + str(contest_office_id) + \
+                    "&google_civic_candidate_name=" + str(google_civic_candidate_name) + \
+                    "&google_civic_candidate_name2=" + str(google_civic_candidate_name2) + \
+                    "&google_civic_candidate_name3=" + str(google_civic_candidate_name3) + \
+                    "&facebook_url=" + str(facebook_url) + \
+                    "&instagram_handle=" + str(instagram_handle) + \
+                    "&maplight_id=" + str(maplight_id) + \
+                    "&party=" + str(party) + \
+                    "&politician_we_vote_id=" + str(politician_we_vote_id) + \
+                    "&state_code=" + str(state_code) + \
+                    "&vote_smart_id=" + str(vote_smart_id)
+
     # Note: A date is not required, but if provided it needs to be in a correct date format
     if positive_value_exists(withdrawn_from_election) and positive_value_exists(withdrawal_date):
         # If withdrawn_from_election is true AND we have an invalid withdrawal_date return with error
         res = re.match(r'([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))', withdrawal_date)
         if res is None:
             print('withdrawal_date is invalid: ' + withdrawal_date)
-            url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
-                            "&candidate_name=" + str(candidate_name) + \
-                            "&state_code=" + str(state_code) + \
-                            "&google_civic_candidate_name=" + str(google_civic_candidate_name) + \
-                            "&google_civic_candidate_name2=" + str(google_civic_candidate_name2) + \
-                            "&google_civic_candidate_name3=" + str(google_civic_candidate_name3) + \
-                            "&contest_office_id=" + str(contest_office_id) + \
-                            "&candidate_twitter_handle=" + str(candidate_twitter_handle) + \
-                            "&candidate_url=" + str(candidate_url) + \
-                            "&candidate_contact_form_url=" + str(candidate_contact_form_url) + \
-                            "&facebook_url=" + str(facebook_url) + \
-                            "&instagram_handle=" + str(instagram_handle) + \
-                            "&candidate_email=" + str(candidate_email) + \
-                            "&candidate_phone=" + str(candidate_phone) + \
-                            "&party=" + str(party) + \
-                            "&ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
-                            "&vote_smart_id=" + str(vote_smart_id) + \
-                            "&politician_we_vote_id=" + str(politician_we_vote_id) + \
-                            "&maplight_id=" + str(maplight_id)
             messages.add_message(request, messages.ERROR, 'Could not save candidate. If the "Candidate Has Withdrawn '
                                                           'From Election" is True, then the date in the field must be '
                                                           'in the YYYY-MM-DD format')
@@ -1804,6 +1831,8 @@ def candidate_edit_process_view(request):
             vote_usa_politician_id=vote_usa_politician_id,
             maplight_id=maplight_id,
             candidate_twitter_handle=candidate_twitter_handle,
+            candidate_twitter_handle2=candidate_twitter_handle2,
+            candidate_twitter_handle3=candidate_twitter_handle3,
             candidate_name=candidate_name,
             state_code=best_state_code)
         if match_results['politician_found']:
@@ -1827,26 +1856,6 @@ def candidate_edit_process_view(request):
                                                          '1) Candidate Name & State Code, '
                                                          '2) Twitter Handle, or '
                                                          '3) Vote Smart Id')
-
-        url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
-                        "&candidate_name=" + str(candidate_name) + \
-                        "&state_code=" + str(state_code) + \
-                        "&google_civic_candidate_name=" + str(google_civic_candidate_name) + \
-                        "&google_civic_candidate_name2=" + str(google_civic_candidate_name2) + \
-                        "&google_civic_candidate_name3=" + str(google_civic_candidate_name3) + \
-                        "&contest_office_id=" + str(contest_office_id) + \
-                        "&candidate_twitter_handle=" + str(candidate_twitter_handle) + \
-                        "&candidate_url=" + str(candidate_url) + \
-                        "&candidate_contact_form_url=" + str(candidate_contact_form_url) + \
-                        "&facebook_url=" + str(facebook_url) + \
-                        "&instagram_handle=" + str(instagram_handle) + \
-                        "&candidate_email=" + str(candidate_email) + \
-                        "&candidate_phone=" + str(candidate_phone) + \
-                        "&party=" + str(party) + \
-                        "&ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
-                        "&vote_smart_id=" + str(vote_smart_id) + \
-                        "&politician_we_vote_id=" + str(politician_we_vote_id) + \
-                        "&maplight_id=" + str(maplight_id)
 
         if positive_value_exists(candidate_id):
             return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) + url_variables)
@@ -1890,28 +1899,6 @@ def candidate_edit_process_view(request):
         if existing_candidate_found:
             # We have found a duplicate for this election
             messages.add_message(request, messages.ERROR, 'This candidate is already saved for this election.')
-            url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
-                            "&candidate_name=" + str(candidate_name) + \
-                            "&state_code=" + str(state_code) + \
-                            "&google_civic_candidate_name=" + str(google_civic_candidate_name) + \
-                            "&google_civic_candidate_name2=" + str(google_civic_candidate_name2) + \
-                            "&google_civic_candidate_name3=" + str(google_civic_candidate_name3) + \
-                            "&contest_office_id=" + str(contest_office_id) + \
-                            "&candidate_twitter_handle=" + str(candidate_twitter_handle) + \
-                            "&candidate_url=" + str(candidate_url) + \
-                            "&candidate_contact_form_url=" + str(candidate_contact_form_url) + \
-                            "&facebook_url=" + str(facebook_url) + \
-                            "&instagram_handle=" + str(instagram_handle) + \
-                            "&candidate_email=" + str(candidate_email) + \
-                            "&candidate_phone=" + str(candidate_phone) + \
-                            "&party=" + str(party) + \
-                            "&ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
-                            "&ballotpedia_candidate_id=" + str(ballotpedia_candidate_id) + \
-                            "&ballotpedia_candidate_name=" + str(ballotpedia_candidate_name) + \
-                            "&ballotpedia_candidate_url=" + str(ballotpedia_candidate_url) + \
-                            "&vote_smart_id=" + str(vote_smart_id) + \
-                            "&politician_we_vote_id=" + str(politician_we_vote_id) + \
-                            "&maplight_id=" + str(maplight_id)
             return HttpResponseRedirect(reverse('candidate:candidate_new', args=()) + url_variables)
         elif candidate_on_stage_found:
             # Update
@@ -1919,6 +1906,10 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.candidate_name = candidate_name
             if candidate_twitter_handle is not False:
                 candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
+            if candidate_twitter_handle2 is not False:
+                candidate_on_stage.candidate_twitter_handle2 = candidate_twitter_handle2
+            if candidate_twitter_handle3 is not False:
+                candidate_on_stage.candidate_twitter_handle3 = candidate_twitter_handle3
             if candidate_url is not False:
                 candidate_on_stage.candidate_url = candidate_url
             if candidate_contact_form_url is not False:
@@ -2071,6 +2062,10 @@ def candidate_edit_process_view(request):
                     candidate_on_stage.google_civic_candidate_name3 = google_civic_candidate_name3
                 if candidate_twitter_handle is not False:
                     candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
+                if candidate_twitter_handle2 is not False:
+                    candidate_on_stage.candidate_twitter_handle2 = candidate_twitter_handle2
+                if candidate_twitter_handle3 is not False:
+                    candidate_on_stage.candidate_twitter_handle3 = candidate_twitter_handle3
                 if twitter_url is not False:
                     candidate_on_stage.twitter_url = twitter_url
                 if withdrawn_from_election:
@@ -2137,31 +2132,6 @@ def candidate_edit_process_view(request):
                     state_code=best_state_code)
             else:
                 # messages.add_message(request, messages.INFO, 'Could not save -- missing required variables.')
-                url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
-                                "&candidate_name=" + str(candidate_name) + \
-                                "&state_code=" + str(best_state_code) + \
-                                "&google_civic_candidate_name=" + str(google_civic_candidate_name) + \
-                                "&google_civic_candidate_name2=" + str(google_civic_candidate_name2) + \
-                                "&google_civic_candidate_name3=" + str(google_civic_candidate_name3) + \
-                                "&contest_office_id=" + str(contest_office_id) + \
-                                "&candidate_twitter_handle=" + str(candidate_twitter_handle) + \
-                                "&candidate_url=" + str(candidate_url) + \
-                                "&candidate_contact_form_url=" + str(candidate_contact_form_url) + \
-                                "&facebook_url=" + str(facebook_url) + \
-                                "&instagram_handle=" + str(instagram_handle) + \
-                                "&candidate_email=" + str(candidate_email) + \
-                                "&candidate_phone=" + str(candidate_phone) + \
-                                "&party=" + str(party) + \
-                                "&ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
-                                "&ballotpedia_candidate_id=" + str(ballotpedia_candidate_id) + \
-                                "&ballotpedia_candidate_name=" + str(ballotpedia_candidate_name) + \
-                                "&ballotpedia_candidate_url=" + str(ballotpedia_candidate_url) + \
-                                "&ballotpedia_office_id=" + str(ballotpedia_office_id) + \
-                                "&ballotpedia_person_id=" + str(ballotpedia_person_id) + \
-                                "&ballotpedia_race_id=" + str(ballotpedia_race_id) + \
-                                "&vote_smart_id=" + str(vote_smart_id) + \
-                                "&politician_we_vote_id=" + str(politician_we_vote_id) + \
-                                "&maplight_id=" + str(maplight_id)
                 if positive_value_exists(candidate_id):
                     return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) +
                                                 url_variables)
@@ -2372,7 +2342,7 @@ def candidate_politician_match_this_election_view(request):
     message = "About to loop through all of the candidates in this election to make sure we have a politician record."
     print_to_log(logger, exception_message_optional=message)
 
-    # Loop through all of the candidates in this election
+    # Loop through all the candidates in this election
     for we_vote_candidate in candidate_list:
         num_candidates_reviewed += 1
         if we_vote_candidate.politician_we_vote_id:
@@ -2410,6 +2380,89 @@ def candidate_politician_match_this_election_view(request):
                                 "&state_code={state_code}"
                                 "".format(
                                 google_civic_election_id=google_civic_election_id,
+                                state_code=state_code))
+
+
+@login_required
+def candidate_politician_match_this_year_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    candidate_year = request.GET.get('candidate_year', 0)
+    state_code = request.GET.get('state_code', '')
+
+    # We only want to process if a year comes in
+    if not positive_value_exists(candidate_year):
+        messages.add_message(request, messages.ERROR, "Year required.")
+        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()))
+
+    candidate_list_manager = CandidateListManager()
+    results = candidate_list_manager.retrieve_all_candidates_for_one_year(
+        candidate_year=candidate_year,
+        is_missing_politician_we_vote_id=True,
+        limit_to_this_state_code=state_code,
+        return_list_of_objects=True,
+    )
+    candidate_list = results['candidate_list_objects']
+
+    if len(candidate_list) == 0:
+        messages.add_message(request, messages.INFO, "No candidates found for year: {candidate_year}.".format(
+            candidate_year=candidate_year))
+        return HttpResponseRedirect(
+            reverse('candidate:candidate_list', args=()) + "?show_this_year_of_candidates={candidate_year}"
+                                                           "".format(
+                                                           candidate_year=candidate_year))
+
+    num_candidates_reviewed = 0
+    num_that_already_have_politician_we_vote_id = 0
+    new_politician_created = 0
+    existing_politician_found = 0
+    multiple_politicians_found = 0
+    other_results = 0
+
+    message = "About to loop through all of the candidates in this election to make sure we have a politician record."
+    print_to_log(logger, exception_message_optional=message)
+
+    # Loop through all the candidates from this year
+    for we_vote_candidate in candidate_list:
+        num_candidates_reviewed += 1
+        if we_vote_candidate.politician_we_vote_id:
+            num_that_already_have_politician_we_vote_id += 1
+        match_results = candidate_politician_match(we_vote_candidate)
+        if match_results['politician_created']:
+            new_politician_created += 1
+        elif match_results['politician_found']:
+            existing_politician_found += 1
+        elif match_results['politician_list_found']:
+            multiple_politicians_found += 1
+        else:
+            other_results += 1
+
+    message = "Year: {candidate_year}, " \
+              "{num_candidates_reviewed} candidates reviewed, " \
+              "{num_that_already_have_politician_we_vote_id} Candidates that already have Politician Ids, " \
+              "{new_politician_created} politicians just created, " \
+              "{existing_politician_found} politicians found that already exist, " \
+              "{multiple_politicians_found} times we found multiple politicians and could not link, " \
+              "{other_results} other results". \
+              format(candidate_year=candidate_year,
+                     num_candidates_reviewed=num_candidates_reviewed,
+                     num_that_already_have_politician_we_vote_id=num_that_already_have_politician_we_vote_id,
+                     new_politician_created=new_politician_created,
+                     existing_politician_found=existing_politician_found,
+                     multiple_politicians_found=multiple_politicians_found,
+                     other_results=other_results)
+
+    print_to_log(logger, exception_message_optional=message)
+    messages.add_message(request, messages.INFO, message)
+
+    return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
+                                "?show_this_year_of_candidates={candidate_year}"
+                                "&state_code={state_code}"
+                                "".format(
+                                candidate_year=candidate_year,
                                 state_code=state_code))
 
 
@@ -2594,6 +2647,7 @@ def find_and_merge_duplicate_candidates_view(request):
     if retrieve_by_candidate_year:
         results = candidate_list_manager.retrieve_all_candidates_for_one_year(
             candidate_year=candidate_year,
+            limit_to_this_state_code=state_code,
             return_list_of_objects=True,
         )
         candidate_list = results['candidate_list_objects']
@@ -2618,7 +2672,7 @@ def find_and_merge_duplicate_candidates_view(request):
                                                          "possible duplicates."
                                                          "".format(duplicate_candidate_count=duplicate_candidate_count))
 
-    # Loop through all the candidates in this election
+    # Loop through all the candidates in this year or election
     ignore_candidate_id_list = []
     for we_vote_candidate in candidate_list:
         # Add current candidate entry to ignore list
@@ -2647,9 +2701,6 @@ def find_and_merge_duplicate_candidates_view(request):
                 candidate = merge_results['candidate']
                 messages.add_message(request, messages.INFO, "Candidate {candidate_name} automatically merged."
                                                              "".format(candidate_name=candidate.candidate_name))
-                # return HttpResponseRedirect(reverse('candidate:find_and_merge_duplicate_candidates', args=()) +
-                #                             "?google_civic_election_id=" + str(google_civic_election_id) +
-                #                             "&state_code=" + str(state_code))
             else:
                 # This view function takes us to displaying a template
                 messages.add_message(request, messages.INFO, merge_results['status'])
@@ -2662,9 +2713,23 @@ def find_and_merge_duplicate_candidates_view(request):
                     candidate_year=candidate_year,
                     remove_duplicate_process=remove_duplicate_process)
 
-    message = "Google Civic Election ID: {election_id}, " \
-              "No duplicate candidates found for this election." \
-              "".format(election_id=google_civic_election_id)
+    if retrieve_by_candidate_year:
+        message = "No more duplicate candidates found for the year {candidate_year}" \
+                  "".format(candidate_year=candidate_year)
+        if positive_value_exists(state_code):
+            message += " in {state_code}".format(state_code=state_code)
+        message += "."
+    elif retrieve_by_election_id_list:
+        message = "No more duplicate candidates found for election {election_id}" \
+                  "".format(election_id=google_civic_election_id)
+        if positive_value_exists(state_code):
+            message += " in {state_code}".format(state_code=state_code)
+        message += "."
+    else:
+        message = "No more duplicate candidates found"
+        if positive_value_exists(state_code):
+            message += " in {state_code}".format(state_code=state_code)
+        message += "."
 
     messages.add_message(request, messages.INFO, message)
 

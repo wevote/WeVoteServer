@@ -6101,8 +6101,9 @@ class BatchRowActionCandidate(models.Model):
 
     twitter_url = models.URLField(verbose_name='twitter url of candidate', blank=True, null=True)
     twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)
-    candidate_twitter_handle = models.CharField(
-        verbose_name='candidate twitter screen_name', max_length=255, null=True, unique=False)
+    candidate_twitter_handle = models.CharField(max_length=255, null=True, unique=False)
+    candidate_twitter_handle2 = models.CharField(max_length=255, null=True, unique=False)
+    candidate_twitter_handle3 = models.CharField(max_length=255, null=True, unique=False)
     twitter_name = models.CharField(
         verbose_name="org name from twitter", max_length=255, null=True, blank=True)
     twitter_location = models.CharField(
