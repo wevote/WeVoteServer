@@ -6,7 +6,7 @@ import boto3
 import json
 from config.base import get_environment_variable
 
-from functions.voter_profile import voter_profiler_job_example
+from aws.functions.voter_profile import voter_profiler_job_example
 
 # max time (in sec) that a job may take to complete
 #  this prevents a different worker from picking up a job that
