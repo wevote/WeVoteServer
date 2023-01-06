@@ -108,8 +108,8 @@
 
 
 {#{% include "candidate/candidate_merge_one_field_decision.html" with field_name="contest_office_we_vote_id" field_label="Office We Vote Id" conflict_status=conflict_values.contest_office_we_vote_id candidate1_field_value=candidate_option1.contest_office_we_vote_id candidate2_field_value=candidate_option2.contest_office_we_vote_id candidate1=candidate_option1 candidate2=candidate_option2 %}#}
-{##}
-{#{% include "candidate/candidate_merge_one_field_decision.html" with field_name="contest_office_name" field_label="Office Name" conflict_status=conflict_values.contest_office_name candidate1_field_value=candidate_option1.contest_office_name candidate2_field_value=candidate_option2.contest_office_name candidate1=candidate_option1 candidate2=candidate_option2 %}#}
+
+{% include "candidate/candidate_merge_one_field_decision.html" with field_name="contest_office_name" field_label="Office Name" conflict_status=conflict_values.contest_office_name candidate1_field_value=candidate_option1.contest_office_name candidate2_field_value=candidate_option2.contest_office_name candidate1=candidate_option1 candidate2=candidate_option2 %}
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="party" field_label="Party" conflict_status=conflict_values.party candidate1_field_value=candidate_option1.party candidate2_field_value=candidate_option2.party candidate1=candidate_option1 candidate2=candidate_option2 %}
 
@@ -140,6 +140,8 @@
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_candidate_summary" field_label="Ballotpedia Candidate Summary" conflict_status=conflict_values.ballotpedia_candidate_summary candidate1_field_value=candidate_option1.ballotpedia_candidate_summary candidate2_field_value=candidate_option2.ballotpedia_candidate_summary candidate1=candidate_option1 candidate2=candidate_option2 %}
 
+{% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballot_guide_official_statement" field_label="Official Candidate Statement" conflict_status=conflict_values.ballot_guide_official_statement candidate1_field_value=candidate_option1.ballot_guide_official_statement candidate2_field_value=candidate_option2.ballot_guide_official_statement candidate1=candidate_option1 candidate2=candidate_option2 %}
+
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_candidate_url" field_label="Ballotpedia URL" conflict_status=conflict_values.ballotpedia_candidate_url candidate1_field_value=candidate_option1.ballotpedia_candidate_url candidate2_field_value=candidate_option2.ballotpedia_candidate_url candidate1=candidate_option1 candidate2=candidate_option2 %}
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_office_id" field_label="Ballotpedia Elected Office ID" conflict_status=conflict_values.ballotpedia_office_id candidate1_field_value=candidate_option1.ballotpedia_office_id candidate2_field_value=candidate_option2.ballotpedia_office_id candidate1=candidate_option1 candidate2=candidate_option2 %}
@@ -166,7 +168,15 @@
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_is_top_ticket" field_label="Is Top of Ticket" conflict_status=conflict_values.candidate_is_top_ticket candidate1_field_value=candidate_option1.candidate_is_top_ticket candidate2_field_value=candidate_option2.candidate_is_top_ticket candidate1=candidate_option1 candidate2=candidate_option2 %}
 
+{% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_ultimate_election_date" field_label="Ultimate Election Date" conflict_status=conflict_values.candidate_ultimate_election_date candidate1_field_value=candidate_option1.candidate_ultimate_election_date candidate2_field_value=candidate_option2.candidate_ultimate_election_date candidate1=candidate_option1 candidate2=candidate_option2 %}
+
+{% include "candidate/candidate_merge_one_field_decision.html" with field_name="do_not_display_on_ballot" field_label="Don't Display On Ballot" conflict_status=conflict_values.do_not_display_on_ballot candidate1_field_value=candidate_option1.do_not_display_on_ballot candidate2_field_value=candidate_option2.do_not_display_on_ballot candidate1=candidate_option1 candidate2=candidate_option2 %}
+
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_participation_status" field_label="Participation Status" conflict_status=conflict_values.candidate_participation_status candidate1_field_value=candidate_option1.candidate_participation_status candidate2_field_value=candidate_option2.candidate_participation_status candidate1=candidate_option1 candidate2=candidate_option2 %}
+
+{% include "candidate/candidate_merge_one_field_decision.html" with field_name="withdrawn_from_election" field_label="Withdrawn" conflict_status=conflict_values.withdrawn_from_election candidate1_field_value=candidate_option1.withdrawn_from_election candidate2_field_value=candidate_option2.withdrawn_from_election candidate1=candidate_option1 candidate2=candidate_option2 %}
+
+{% include "candidate/candidate_merge_one_field_decision.html" with field_name="withdrawal_date" field_label="Withdrawal Date" conflict_status=conflict_values.withdrawal_date candidate1_field_value=candidate_option1.withdrawal_date candidate2_field_value=candidate_option2.withdrawal_date candidate1=candidate_option1 candidate2=candidate_option2 %}
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_url" field_label="Candidate URL" conflict_status=conflict_values.candidate_url candidate1_field_value=candidate_option1.candidate_url candidate2_field_value=candidate_option2.candidate_url candidate1=candidate_option1 candidate2=candidate_option2 %}
 
@@ -190,9 +200,13 @@
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="twitter_location" field_label="Twitter Location" conflict_status=conflict_values.twitter_location candidate1_field_value=candidate_option1.twitter_location candidate2_field_value=candidate_option2.twitter_location candidate1=candidate_option1 candidate2=candidate_option2 %}
 
+{% include "candidate/candidate_merge_one_field_decision.html" with field_name="instagram_handle" field_label="Instagram Handle" conflict_status=conflict_values.instagram_handle candidate1_field_value=candidate_option1.instagram_handle candidate2_field_value=candidate_option2.instagram_handle candidate1=candidate_option1 candidate2=candidate_option2 %}
+
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="order_on_ballot" field_label="Order on Ballot" conflict_status=conflict_values.order_on_ballot candidate1_field_value=candidate_option1.order_on_ballot candidate2_field_value=candidate_option2.order_on_ballot candidate1=candidate_option1 candidate2=candidate_option2 %}
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="facebook_url" field_label="Facebook URL" conflict_status=conflict_values.facebook_url candidate1_field_value=candidate_option1.facebook_url candidate2_field_value=candidate_option2.facebook_url candidate1=candidate_option1 candidate2=candidate_option2 %}
+
+{% include "candidate/candidate_merge_one_field_decision.html" with field_name="facebook_url_is_broken" field_label="Facebook URL Broken" conflict_status=conflict_values.facebook_url_is_broken candidate1_field_value=candidate_option1.facebook_url_is_broken candidate2_field_value=candidate_option2.facebook_url_is_broken candidate1=candidate_option1 candidate2=candidate_option2 %}
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="youtube_url" field_label="YouTube URL" conflict_status=conflict_values.youtube_url candidate1_field_value=candidate_option1.youtube_url candidate2_field_value=candidate_option2.youtube_url candidate1=candidate_option1 candidate2=candidate_option2 %}
 
@@ -207,6 +221,8 @@
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="other_source_photo_url" field_label="Other Source Photo" conflict_status=conflict_values.other_source_photo_url candidate1_field_value=candidate_option1.other_source_photo_url candidate2_field_value=candidate_option2.other_source_photo_url candidate1=candidate_option1 candidate2=candidate_option2 %}
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="photo_url" field_label="Other Photo" conflict_status=conflict_values.photo_url candidate1_field_value=candidate_option1.photo_url candidate2_field_value=candidate_option2.photo_url candidate1=candidate_option1 candidate2=candidate_option2 %}
+
+{% include "candidate/candidate_merge_one_field_decision.html" with field_name="photo_url_from_ctcl" field_label="Photo (from CTCL)" conflict_status=conflict_values.photo_url_from_ctcl candidate1_field_value=candidate_option1.photo_url_from_ctcl candidate2_field_value=candidate_option2.photo_url_from_ctcl candidate1=candidate_option1 candidate2=candidate_option2 %}
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="photo_url_from_maplight" field_label="Photo (from MapLight)" conflict_status=conflict_values.photo_url_from_maplight candidate1_field_value=candidate_option1.photo_url_from_maplight candidate2_field_value=candidate_option2.photo_url_from_maplight candidate1=candidate_option1 candidate2=candidate_option2 %}
 
@@ -230,6 +246,9 @@
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_medium" field_label="We Vote Image (Medium)" conflict_status=conflict_values.we_vote_hosted_profile_image_url_medium candidate1_field_value=candidate_option1.we_vote_hosted_profile_image_url_medium candidate2_field_value=candidate_option2.we_vote_hosted_profile_image_url_medium candidate1=candidate_option1 candidate2=candidate_option2 %}
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_large" field_label="We Vote Image (Large)" conflict_status=conflict_values.we_vote_hosted_profile_image_url_large candidate1_field_value=candidate_option1.we_vote_hosted_profile_image_url_large candidate2_field_value=candidate_option2.we_vote_hosted_profile_image_url_large candidate1=candidate_option1 candidate2=candidate_option2 %}
+
+{# Ballotpedia photo #}
+{% include "candidate/candidate_merge_one_field_decision.html" with field_name="ballotpedia_profile_image_url_https" field_label="Ballotpedia Image" conflict_status=conflict_values.ballotpedia_profile_image_url_https candidate1_field_value=candidate_option1.ballotpedia_profile_image_url_https candidate2_field_value=candidate_option2.ballotpedia_profile_image_url_https candidate1=candidate_option1 candidate2=candidate_option2 %}
 
 {# Facebook photo #}
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_facebook_image_url_tiny" field_label="Facebook Image (Tiny)" conflict_status=conflict_values.we_vote_hosted_profile_facebook_image_url_tiny candidate1_field_value=candidate_option1.we_vote_hosted_profile_facebook_image_url_tiny candidate2_field_value=candidate_option2.we_vote_hosted_profile_facebook_image_url_tiny candidate1=candidate_option1 candidate2=candidate_option2 %}
@@ -292,8 +311,8 @@
 </table>
 <input type="hidden" name="candidate_year" value="{{ candidate_year }}" />
 <input type="hidden" name="remove_duplicate_process" value="{{ remove_duplicate_process }}" />
-<input type="hidden" name="state_code" value="{{ candidate_option2.state_code }}" />
-<input type="hidden" name="google_civic_election_id" value="{{ candidate_option1.google_civic_election_id }}" />
+<input type="hidden" name="state_code" value="{% if state_code %}{{ state_code }}{% else %}{{ candidate_option2.state_code }}{% endif %}" />
+<input type="hidden" name="google_civic_election_id" value="{% if google_civic_election_id %}{{ google_civic_election_id }}{% else %}{{ candidate_option1.google_civic_election_id }}{% endif %}" />
 <input type="hidden" name="candidate1_we_vote_id" value="{{ candidate_option1.we_vote_id }}" />
 <input type="hidden" name="candidate2_we_vote_id" value="{{ candidate_option2.we_vote_id }}" />
 {% else %}

@@ -94,7 +94,11 @@ def elected_official_list_view(request):
         try:
             filters = []
             if positive_value_exists(one_elected_official.elected_official_twitter_handle):
-                new_filter = Q(candidate_twitter_handle__iexact=one_elected_official.elected_official_twitter_handle)
+                new_filter = (
+                    Q(candidate_twitter_handle__iexact=one_elected_official.elected_official_twitter_handle) |
+                    Q(candidate_twitter_handle2__iexact=one_elected_official.elected_official_twitter_handle) |
+                    Q(candidate_twitter_handle3__iexact=one_elected_official.elected_official_twitter_handle)
+                )
                 filters.append(new_filter)
 
             if positive_value_exists(one_elected_official.vote_smart_id):

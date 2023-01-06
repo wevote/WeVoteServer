@@ -126,6 +126,45 @@ def add_name_to_next_spot(candidate_or_politician, google_civic_candidate_name_t
     return candidate_or_politician
 
 
+def add_twitter_handle_to_next_candidate_spot(candidate, twitter_handle):
+    status = ''
+    success = True
+    values_changed = False
+    if not positive_value_exists(twitter_handle):
+        status += 'TWITTER_HANDLE_MISSING '
+        return {
+            'success':          False,
+            'status':           status,
+            'candidate':        candidate,
+            'values_changed':   values_changed,
+        }
+
+    if not positive_value_exists(candidate.candidate_twitter_handle):
+        candidate.candidate_twitter_handle = twitter_handle
+        values_changed = True
+    elif twitter_handle == candidate.candidate_twitter_handle:
+        # The value is already stored in candidate.candidate_twitter_handle so doesn't need
+        # to be added anywhere below
+        pass
+    elif not positive_value_exists(candidate.candidate_twitter_handle2):
+        candidate.candidate_twitter_handle2 = twitter_handle
+        values_changed = True
+    elif twitter_handle == candidate.candidate_twitter_handle2:
+        # The value is already stored in candidate.candidate_twitter_handle2 so doesn't need
+        # to be added to candidate.candidate_twitter_handle3
+        pass
+    elif not positive_value_exists(candidate.candidate_twitter_handle3):
+        candidate.candidate_twitter_handle3 = twitter_handle
+        values_changed = True
+    # We currently only support 3 twitter handles
+    return {
+        'success':          success,
+        'status':           status,
+        'candidate':        candidate,
+        'values_changed':   values_changed,
+    }
+
+
 def candidates_import_from_sample_file():
     """
     Get the json data, and either create new entries or update existing
@@ -202,6 +241,8 @@ def fetch_duplicate_candidate_count(we_vote_candidate, ignore_candidate_id_list)
         google_civic_election_id_list=google_civic_election_id_list,
         state_code=we_vote_candidate.state_code,
         candidate_twitter_handle=we_vote_candidate.candidate_twitter_handle,
+        candidate_twitter_handle2=we_vote_candidate.candidate_twitter_handle2,
+        candidate_twitter_handle3=we_vote_candidate.candidate_twitter_handle3,
         candidate_name=we_vote_candidate.candidate_name,
         ignore_candidate_id_list=ignore_candidate_id_list)
 
@@ -224,8 +265,10 @@ def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list, read_o
     # Search for other candidates that share the same elections that match name and election
     try:
         results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
-            candidate_twitter_handle=we_vote_candidate.candidate_twitter_handle,
             candidate_name=we_vote_candidate.candidate_name,
+            candidate_twitter_handle=we_vote_candidate.candidate_twitter_handle,
+            candidate_twitter_handle2=we_vote_candidate.candidate_twitter_handle2,
+            candidate_twitter_handle3=we_vote_candidate.candidate_twitter_handle3,
             google_civic_election_id_list=google_civic_election_id_list,
             ignore_candidate_id_list=ignore_candidate_id_list,
             state_code=we_vote_candidate.state_code,
@@ -311,11 +354,6 @@ def figure_out_candidate_conflict_values(candidate1, candidate2):
                         candidate_merge_conflict_values[attribute] = 'MATCHING'
                     else:
                         candidate_merge_conflict_values[attribute] = 'CONFLICT'
-                elif attribute == "candidate_twitter_handle":
-                    if candidate1_attribute_value.lower() == candidate2_attribute_value.lower():
-                        candidate_merge_conflict_values[attribute] = 'MATCHING'
-                    else:
-                        candidate_merge_conflict_values[attribute] = 'CONFLICT'
                 elif attribute == "candidate_url":
                     candidate1_attribute_value_trimmed = candidate1_attribute_value.rstrip('/')
                     candidate2_attribute_value_trimmed = candidate2_attribute_value.rstrip('/')
@@ -365,21 +403,21 @@ def merge_if_duplicate_candidates(candidate1_on_stage, candidate2_on_stage, conf
     # Are there any comparisons that require admin intervention?
     merge_choices = {}
     for attribute in CANDIDATE_UNIQUE_IDENTIFIERS:
-        if attribute == "candidate_url":
-            # Don't worry about CONFLICT with any of these fields, but honor CANDIDATE2
-            conflict_value = conflict_values.get(attribute, None)
-            if conflict_value == "CANDIDATE2":
-                merge_choices[attribute] = getattr(candidate2_on_stage, attribute)
-            elif positive_value_exists(getattr(candidate1_on_stage, attribute)):
-                # We can proceed because candidate1 has a valid image, so we can default to choosing that one
-                pass
-            elif positive_value_exists(getattr(candidate2_on_stage, attribute)):
-                # If we are here candidate1 does NOT have image, but candidate2 does
-                merge_choices[attribute] = getattr(candidate2_on_stage, attribute)
-        elif attribute == "facebook_profile_image_url_https" \
+        # Don't let conflict stop us with any of these fields
+        if attribute == "ballotpedia_candidate_id" \
+                or attribute == "ballotpedia_office_id" \
+                or attribute == "ballotpedia_race_id" \
+                or attribute == "candidate_url" \
+                or attribute == "facebook_url" \
+                or attribute == "facebook_profile_image_url_https" \
+                or attribute == "maplight_id" \
+                or attribute == "other_source_photo_url" \
+                or attribute == "profile_image_type_currently_active" \
+                or attribute == "twitter_followers_count" \
                 or attribute == "twitter_profile_background_image_url_https" \
                 or attribute == "twitter_profile_banner_url_https" \
                 or attribute == "twitter_profile_image_url_https" \
+                or attribute == "twitter_url" \
                 or attribute == "twitter_user_id" \
                 or attribute == "vote_usa_profile_image_url_https" \
                 or attribute == "we_vote_hosted_profile_facebook_image_url_large" \
@@ -397,34 +435,20 @@ def merge_if_duplicate_candidates(candidate1_on_stage, candidate2_on_stage, conf
                 or attribute == "we_vote_hosted_profile_vote_usa_image_url_large" \
                 or attribute == "we_vote_hosted_profile_vote_usa_image_url_medium" \
                 or attribute == "we_vote_hosted_profile_vote_usa_image_url_tiny":
-            # Don't let conflict stop us with any of these fields
             conflict_value = conflict_values.get(attribute, None)
             if conflict_value == "CANDIDATE2":
+                # Use value from CANDIDATE2
                 merge_choices[attribute] = getattr(candidate2_on_stage, attribute)
             elif positive_value_exists(getattr(candidate1_on_stage, attribute)):
-                # We can proceed because candidate1 has a valid field, so we can default to choosing that one
+                # We can default to value in candidate1, because it has a valid field
                 pass
             elif positive_value_exists(getattr(candidate2_on_stage, attribute)):
-                # If we are here candidate1 does NOT have image, but candidate2 does
-                merge_choices[attribute] = getattr(candidate2_on_stage, attribute)
-        elif attribute == "facebook_url" \
-                or attribute == "maplight_id" \
-                or attribute == "profile_image_type_currently_active" \
-                or attribute == "twitter_url":
-            # Don't worry about CONFLICT with any of these fields, but honor CANDIDATE2
-            conflict_value = conflict_values.get(attribute, None)
-            if conflict_value == "CANDIDATE2":
-                merge_choices[attribute] = getattr(candidate2_on_stage, attribute)
-            elif positive_value_exists(getattr(candidate1_on_stage, attribute)):
-                # We can proceed because candidate1 has a valid image, so we can default to choosing that one
-                pass
-            elif positive_value_exists(getattr(candidate2_on_stage, attribute)):
-                # If we are here candidate1 does NOT have image, but candidate2 does
+                # If we are here, candidate1 does NOT have valid value, so we can default to the value candidate2 has
                 merge_choices[attribute] = getattr(candidate2_on_stage, attribute)
         elif attribute == "contest_office_id" \
                 or attribute == "contest_office_we_vote_id" \
                 or attribute == "google_civic_election_id":
-            # We are phasing these fields out
+            # We are phasing these fields out, but use them if they exist
             if positive_value_exists(getattr(candidate1_on_stage, attribute)):
                 pass
             elif positive_value_exists(getattr(candidate2_on_stage, attribute)):
@@ -547,6 +571,23 @@ def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, adm
     if positive_value_exists(candidate2_on_stage.google_civic_candidate_name3):
         candidate1_on_stage = add_name_to_next_spot(
             candidate1_on_stage, candidate2_on_stage.google_civic_candidate_name3)
+
+    # Preserve unique candidate_twitter_handle, candidate_twitter_handle2, and candidate_twitter_handle3
+    if positive_value_exists(candidate2_on_stage.candidate_twitter_handle):
+        results = add_twitter_handle_to_next_candidate_spot(
+            candidate1_on_stage, candidate2_on_stage.candidate_twitter_handle)
+        if results['success'] and results['values_changed']:
+            candidate1_on_stage = results['candidate']
+    if positive_value_exists(candidate2_on_stage.candidate_twitter_handle2):
+        results = add_twitter_handle_to_next_candidate_spot(
+            candidate1_on_stage, candidate2_on_stage.candidate_twitter_handle2)
+        if results['success'] and results['values_changed']:
+            candidate1_on_stage = results['candidate']
+    if positive_value_exists(candidate2_on_stage.candidate_twitter_handle3):
+        results = add_twitter_handle_to_next_candidate_spot(
+            candidate1_on_stage, candidate2_on_stage.candidate_twitter_handle3)
+        if results['success'] and results['values_changed']:
+            candidate1_on_stage = results['candidate']
 
     # Merge public positions
     public_positions_results = move_positions_to_another_candidate(candidate2_id, candidate2_we_vote_id,
@@ -768,36 +809,41 @@ def filter_candidates_structured_json_for_local_duplicates(structured_json):
     filtered_structured_json = []
     candidate_list_manager = CandidateListManager()
     for one_candidate in structured_json:
-        candidate_name = one_candidate['candidate_name'] if 'candidate_name' in one_candidate else ''
-        google_civic_candidate_name = one_candidate['google_civic_candidate_name'] \
-            if 'google_civic_candidate_name' in one_candidate else ''
-        google_civic_candidate_name2 = one_candidate['google_civic_candidate_name2'] \
-            if 'google_civic_candidate_name2' in one_candidate else ''
-        google_civic_candidate_name3 = one_candidate['google_civic_candidate_name3'] \
-            if 'google_civic_candidate_name3' in one_candidate else ''
-        we_vote_id = one_candidate['we_vote_id'] if 'we_vote_id' in one_candidate else ''
-        google_civic_election_id = \
-            one_candidate['google_civic_election_id'] if 'google_civic_election_id' in one_candidate else ''
-        contest_office_we_vote_id = \
-            one_candidate['contest_office_we_vote_id'] if 'contest_office_we_vote_id' in one_candidate else ''
-        politician_we_vote_id = one_candidate['politician_we_vote_id'] \
-            if 'politician_we_vote_id' in one_candidate else ''
-        candidate_twitter_handle = one_candidate['candidate_twitter_handle'] \
-            if 'candidate_twitter_handle' in one_candidate else ''
-        ballotpedia_candidate_id = one_candidate['ballotpedia_candidate_id'] \
-            if 'ballotpedia_candidate_id' in one_candidate else ''
+        candidate_name = one_candidate.get('candidate_name', '')
+        google_civic_candidate_name = one_candidate.get('google_civic_candidate_name', '')
+        google_civic_candidate_name2 = one_candidate.get('google_civic_candidate_name2', '')
+        google_civic_candidate_name3 = one_candidate.get('google_civic_candidate_name3', '')
+        we_vote_id = one_candidate.get('we_vote_id', '')
+        google_civic_election_id = one_candidate.get('google_civic_election_id', '')
+        contest_office_we_vote_id = one_candidate.get('contest_office_we_vote_id', '')
+        politician_we_vote_id = one_candidate.get('politician_we_vote_id', '')
+        candidate_twitter_handle = one_candidate.get('candidate_twitter_handle', '')
+        candidate_twitter_handle2 = one_candidate.get('candidate_twitter_handle2', '')
+        candidate_twitter_handle3 = one_candidate.get('candidate_twitter_handle3', '')
+        ballotpedia_candidate_id = one_candidate.get('ballotpedia_candidate_id', '')
         # Not needed here: ballotpedia_person_id
-        vote_smart_id = one_candidate['vote_smart_id'] if 'vote_smart_id' in one_candidate else ''
-        maplight_id = one_candidate['maplight_id'] if 'maplight_id' in one_candidate else ''
+        vote_smart_id = one_candidate.get('vote_smart_id', '')
+        maplight_id = one_candidate.get('maplight_id', '')
 
         # Check to see if there is an entry that matches in all critical ways, minus the we_vote_id
         we_vote_id_from_master = we_vote_id
 
         results = candidate_list_manager.retrieve_possible_duplicate_candidates(
-            candidate_name, google_civic_candidate_name, google_civic_candidate_name2, google_civic_candidate_name3,
-            google_civic_election_id, contest_office_we_vote_id,
-            politician_we_vote_id, candidate_twitter_handle, ballotpedia_candidate_id, vote_smart_id, maplight_id,
-            we_vote_id_from_master, read_only=True)
+            candidate_name=candidate_name,
+            google_civic_candidate_name=google_civic_candidate_name,
+            google_civic_candidate_name2=google_civic_candidate_name2,
+            google_civic_candidate_name3=google_civic_candidate_name3,
+            google_civic_election_id=google_civic_election_id,
+            office_we_vote_id=contest_office_we_vote_id,
+            politician_we_vote_id=politician_we_vote_id,
+            candidate_twitter_handle=candidate_twitter_handle,
+            candidate_twitter_handle2=candidate_twitter_handle2,
+            candidate_twitter_handle3=candidate_twitter_handle3,
+            ballotpedia_candidate_id=ballotpedia_candidate_id,
+            vote_smart_id=vote_smart_id,
+            maplight_id=maplight_id,
+            we_vote_id_from_master=we_vote_id_from_master,
+            read_only=True)
 
         if results['candidate_list_found']:
             # print("Skipping candidate " + str(candidate_name) + ",  " + str(google_civic_candidate_name) + ",  " +
@@ -895,10 +941,6 @@ def candidates_import_from_structured_json(structured_json):  # Consumes candida
                 updated_candidate_values['candidate_email'] = one_candidate['candidate_email']
             if 'candidate_gender' in one_candidate:
                 updated_candidate_values['candidate_gender'] = one_candidate['candidate_gender']
-            if 'instagram_handle' in one_candidate:
-                updated_candidate_values['instagram_handle'] = one_candidate['instagram_handle']
-            if 'instagram_followers_count' in one_candidate:
-                updated_candidate_values['instagram_followers_count'] = one_candidate['instagram_followers_count']
             if 'candidate_is_incumbent' in one_candidate:
                 updated_candidate_values['candidate_is_incumbent'] = one_candidate['candidate_is_incumbent']
             if 'candidate_is_top_ticket' in one_candidate:
@@ -909,8 +951,11 @@ def candidates_import_from_structured_json(structured_json):  # Consumes candida
             if 'candidate_phone' in one_candidate:
                 updated_candidate_values['candidate_phone'] = one_candidate['candidate_phone']
             if 'candidate_twitter_handle' in one_candidate:
-                updated_candidate_values['candidate_twitter_handle'] = \
-                    one_candidate['candidate_twitter_handle']
+                updated_candidate_values['candidate_twitter_handle'] = one_candidate['candidate_twitter_handle']
+            if 'candidate_twitter_handle2' in one_candidate:
+                updated_candidate_values['candidate_twitter_handle2'] = one_candidate['candidate_twitter_handle2']
+            if 'candidate_twitter_handle3' in one_candidate:
+                updated_candidate_values['candidate_twitter_handle3'] = one_candidate['candidate_twitter_handle3']
             if 'candidate_ultimate_election_date' in one_candidate:
                 updated_candidate_values['candidate_ultimate_election_date'] = \
                     one_candidate['candidate_ultimate_election_date']
@@ -918,8 +963,12 @@ def candidates_import_from_structured_json(structured_json):  # Consumes candida
                 updated_candidate_values['candidate_url'] = one_candidate['candidate_url']
             if 'candidate_year' in one_candidate:
                 updated_candidate_values['candidate_year'] = convert_to_int(one_candidate['candidate_year'])
+            if 'contest_office_id' in one_candidate:
+                updated_candidate_values['contest_office_id'] = one_candidate['contest_office_id']
             if 'contest_office_name' in one_candidate:
                 updated_candidate_values['contest_office_name'] = one_candidate['contest_office_name']
+            if 'contest_office_we_vote_id' in one_candidate:
+                updated_candidate_values['contest_office_we_vote_id'] = one_candidate['contest_office_we_vote_id']
             if 'crowdpac_candidate_id' in one_candidate:
                 updated_candidate_values['crowdpac_candidate_id'] = one_candidate['crowdpac_candidate_id']
             if 'ctcl_uuid' in one_candidate:
@@ -934,16 +983,17 @@ def candidates_import_from_structured_json(structured_json):  # Consumes candida
             if 'facebook_url_is_broken' in one_candidate:
                 updated_candidate_values['facebook_url_is_broken'] = one_candidate['facebook_url_is_broken']
             if 'google_civic_candidate_name' in one_candidate:
-                updated_candidate_values['google_civic_candidate_name'] = \
-                    one_candidate['google_civic_candidate_name']
+                updated_candidate_values['google_civic_candidate_name'] = one_candidate['google_civic_candidate_name']
             if 'google_civic_candidate_name2' in one_candidate:
-                updated_candidate_values['google_civic_candidate_name2'] = \
-                    one_candidate['google_civic_candidate_name2']
+                updated_candidate_values['google_civic_candidate_name2'] = one_candidate['google_civic_candidate_name2']
             if 'google_civic_candidate_name3' in one_candidate:
-                updated_candidate_values['google_civic_candidate_name3'] = \
-                    one_candidate['google_civic_candidate_name3']
+                updated_candidate_values['google_civic_candidate_name3'] = one_candidate['google_civic_candidate_name3']
             if 'google_plus_url' in one_candidate:
                 updated_candidate_values['google_plus_url'] = one_candidate['google_plus_url']
+            if 'instagram_followers_count' in one_candidate:
+                updated_candidate_values['instagram_followers_count'] = one_candidate['instagram_followers_count']
+            if 'instagram_handle' in one_candidate:
+                updated_candidate_values['instagram_handle'] = one_candidate['instagram_handle']
             if 'is_battleground_race' in one_candidate:
                 updated_candidate_values['is_battleground_race'] = one_candidate['is_battleground_race']
             if 'linkedin_url' in one_candidate:
@@ -952,22 +1002,26 @@ def candidates_import_from_structured_json(structured_json):  # Consumes candida
                 updated_candidate_values['linkedin_photo_url'] = one_candidate['linkedin_photo_url']
             if 'maplight_id' in one_candidate:
                 updated_candidate_values['maplight_id'] = one_candidate['maplight_id']
+            if 'order_on_ballot' in one_candidate:
+                updated_candidate_values['order_on_ballot'] = one_candidate['order_on_ballot']
             if 'other_source_url' in one_candidate:
                 updated_candidate_values['other_source_url'] = one_candidate['other_source_url']
             if 'other_source_photo_url' in one_candidate:
                 updated_candidate_values['other_source_photo_url'] = one_candidate['other_source_photo_url']
-            if 'order_on_ballot' in one_candidate:
-                updated_candidate_values['order_on_ballot'] = one_candidate['order_on_ballot']
             if 'party' in one_candidate:
                 updated_candidate_values['party'] = one_candidate['party']
             if 'photo_url' in one_candidate:
                 updated_candidate_values['photo_url'] = one_candidate['photo_url']
+            if 'photo_url_from_ctcl' in one_candidate:
+                updated_candidate_values['photo_url_from_ctcl'] = one_candidate['photo_url_from_ctcl']
             if 'photo_url_from_maplight' in one_candidate:
                 updated_candidate_values['photo_url_from_maplight'] = one_candidate['photo_url_from_maplight']
             if 'photo_url_from_vote_smart' in one_candidate:
                 updated_candidate_values['photo_url_from_vote_smart'] = one_candidate['photo_url_from_vote_smart']
             if 'photo_url_from_vote_usa' in one_candidate:
                 updated_candidate_values['photo_url_from_vote_usa'] = one_candidate['photo_url_from_vote_usa']
+            if 'politician_id' in one_candidate:
+                updated_candidate_values['politician_id'] = one_candidate['politician_id']
             if 'politician_we_vote_id' in one_candidate:
                 updated_candidate_values['politician_we_vote_id'] = one_candidate['politician_we_vote_id']
             if 'profile_image_type_currently_active' in one_candidate:
@@ -1914,6 +1968,8 @@ def candidate_politician_match(we_vote_candidate):
     results = politician_manager.retrieve_all_politicians_that_might_match_candidate(
         candidate_name=we_vote_candidate.candidate_name,
         candidate_twitter_handle=we_vote_candidate.candidate_twitter_handle,
+        candidate_twitter_handle2=we_vote_candidate.candidate_twitter_handle2,
+        candidate_twitter_handle3=we_vote_candidate.candidate_twitter_handle3,
         google_civic_candidate_name=we_vote_candidate.google_civic_candidate_name,
         google_civic_candidate_name2=we_vote_candidate.google_civic_candidate_name2,
         google_civic_candidate_name3=we_vote_candidate.google_civic_candidate_name3,
@@ -1968,7 +2024,7 @@ def candidate_politician_match(we_vote_candidate):
         return results
     else:
         # Create new politician for this candidate
-        create_results = politician_manager.update_or_create_politician_from_candidate(we_vote_candidate)
+        create_results = politician_manager.create_politician_from_candidate(we_vote_candidate)
         status += create_results['status']
         if create_results['politician_found']:
             politician = create_results['politician']
@@ -1994,6 +2050,8 @@ def retrieve_candidate_politician_match_options(
         vote_usa_politician_id='',
         maplight_id='',
         candidate_twitter_handle='',
+        candidate_twitter_handle2='',
+        candidate_twitter_handle3='',
         candidate_name='',
         state_code=''):
     politician_manager = PoliticianManager()
@@ -2007,6 +2065,8 @@ def retrieve_candidate_politician_match_options(
     results = politician_manager.retrieve_all_politicians_that_might_match_candidate(
         candidate_name=candidate_name,
         candidate_twitter_handle=candidate_twitter_handle,
+        candidate_twitter_handle2=candidate_twitter_handle2,
+        candidate_twitter_handle3=candidate_twitter_handle3,
         maplight_id=maplight_id,
         state_code=state_code,
         vote_smart_id=vote_smart_id,

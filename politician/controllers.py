@@ -96,6 +96,7 @@ def fetch_duplicate_politician_count(we_vote_politician, ignore_politician_id_li
 
 def find_duplicate_politician(we_vote_politician, ignore_politician_id_list):
     status = ''
+    success = True
     if not hasattr(we_vote_politician, 'politician_name'):
         status += "FIND_DUPLICATE_POLITICIAN_MISSING_POLITICIAN_OBJECT "
         error_results = {
@@ -128,11 +129,14 @@ def find_duplicate_politician(we_vote_politician, ignore_politician_id_list):
             ignore_politician_id_list=ignore_politician_id_list)
 
         if results['politician_found']:
-            politician_merge_conflict_values = \
-                figure_out_politician_conflict_values(we_vote_politician, results['politician'])
+            conflict_results = figure_out_politician_conflict_values(we_vote_politician, results['politician'])
+            politician_merge_conflict_values = conflict_results['politician_merge_conflict_values']
+            if not conflict_results['success']:
+                status += conflict_results['status']
+                success = conflict_results['success']
             status += "FIND_DUPLICATE_POLITICIAN_DUPLICATE_FOUND "
             results = {
-                'success':                              True,
+                'success':                              success,
                 'status':                               status,
                 'politician_merge_possibility_found':   True,
                 'politician_merge_possibility':         results['politician'],
@@ -142,11 +146,14 @@ def find_duplicate_politician(we_vote_politician, ignore_politician_id_list):
             return results
         elif results['politician_list_found']:
             # Only deal with merging the incoming politician and the first on found
-            politician_merge_conflict_values = \
-                figure_out_politician_conflict_values(we_vote_politician, results['politician_list'][0])
+            conflict_results = figure_out_politician_conflict_values(we_vote_politician, results['politician_list'][0])
+            politician_merge_conflict_values = conflict_results['politician_merge_conflict_values']
+            if not conflict_results['success']:
+                status += conflict_results['status']
+                success = conflict_results['success']
             status += "FIND_DUPLICATE_POLITICIAN_DUPLICATES_FOUND_FROM_LIST "
             results = {
-                'success':                              True,
+                'success':                              success,
                 'status':                               status,
                 'politician_merge_possibility_found':   True,
                 'politician_merge_possibility':         results['politician_list'][0],
@@ -157,7 +164,7 @@ def find_duplicate_politician(we_vote_politician, ignore_politician_id_list):
         else:
             status += "FIND_DUPLICATE_POLITICIAN_NO_DUPLICATES_FOUND "
             results = {
-                'success':                              True,
+                'success':                              success,
                 'status':                               status,
                 'politician_merge_possibility_found':   False,
                 'politician_list':                      results['politician_list'],
@@ -166,9 +173,10 @@ def find_duplicate_politician(we_vote_politician, ignore_politician_id_list):
 
     except Exception as e:
         status += "FIND_DUPLICATE_POLITICIAN_ERROR: " + str(e) + ' '
+        success = False
 
     results = {
-        'success':                              True,
+        'success':                              success,
         'status':                               status,
         'politician_merge_possibility_found':   False,
         'politician_list':                      [],
@@ -177,6 +185,8 @@ def find_duplicate_politician(we_vote_politician, ignore_politician_id_list):
 
 
 def figure_out_politician_conflict_values(politician1, politician2):
+    status = ''
+    success = True
     politician_merge_conflict_values = {}
 
     for attribute in POLITICIAN_UNIQUE_IDENTIFIERS:
@@ -216,9 +226,14 @@ def figure_out_politician_conflict_values(politician1, politician2):
                     else:
                         politician_merge_conflict_values[attribute] = 'CONFLICT'
         except AttributeError:
-            pass
+            status += "COULD_NOT_PROCESS_ATTRIBUTE: " + str(attribute) + " "
+            success = False
 
-    return politician_merge_conflict_values
+    return {
+        'status': status,
+        'success': success,
+        'politician_merge_conflict_values': politician_merge_conflict_values,
+    }
 
 
 def merge_if_duplicate_politicians(politician1_on_stage, politician2_on_stage, conflict_values):
@@ -233,14 +248,16 @@ def merge_if_duplicate_politicians(politician1_on_stage, politician2_on_stage, c
     merge_choices = {}
     clear_these_attributes_from_politician2 = []
     for attribute in POLITICIAN_UNIQUE_IDENTIFIERS:
-        if attribute == "we_vote_hosted_profile_image_url_large" \
+        if attribute == "ballotpedia_id" \
+                or attribute == "other_source_photo_url" \
+                or attribute == "we_vote_hosted_profile_image_url_large" \
                 or attribute == "we_vote_hosted_profile_image_url_medium" \
                 or attribute == "we_vote_hosted_profile_image_url_tiny":
             if positive_value_exists(getattr(politician1_on_stage, attribute)):
                 # We can proceed because politician1 has a valid image, so we can default to choosing that one
                 pass
             elif positive_value_exists(getattr(politician2_on_stage, attribute)):
-                # If we are here politician1 does NOT have image, but politician2 does
+                # If we are here, politician1 does NOT have an image, but politician2 does
                 merge_choices[attribute] = getattr(politician2_on_stage, attribute)
         else:
             conflict_value = conflict_values.get(attribute, None)
@@ -515,14 +532,28 @@ def politicians_import_from_structured_json(structured_json):
                 'politician_name': politician_name,
                 # 'we_vote_id': politician_we_vote_id,  # Trying to keep politician
             }
+            if 'ballotpedia_id' in one_politician:
+                updated_politician_values['ballotpedia_id'] = one_politician['ballotpedia_id']
+            if 'ballotpedia_politician_name' in one_politician:
+                updated_politician_values['ballotpedia_politician_name'] = one_politician['ballotpedia_politician_name']
+            if 'ballotpedia_politician_url' in one_politician:
+                updated_politician_values['ballotpedia_politician_url'] = one_politician['ballotpedia_politician_url']
+            if 'bioguide_id' in one_politician:
+                updated_politician_values['bioguide_id'] = one_politician['bioguide_id']
+            if 'birth_date' in one_politician:
+                updated_politician_values['birth_date'] = one_politician['birth_date']
+            if 'cspan_id' in one_politician:
+                updated_politician_values['cspan_id'] = one_politician['cspan_id']
+            if 'ctcl_uuid' in one_politician:
+                updated_politician_values['ctcl_uuid'] = one_politician['ctcl_uuid']
+            if 'facebook_url' in one_politician:
+                updated_politician_values['facebook_url'] = one_politician['facebook_url']
+            if 'facebook_url_is_broken' in one_politician:
+                updated_politician_values['facebook_url_is_broken'] = one_politician['facebook_url_is_broken']
+            if 'fec_id' in one_politician:
+                updated_politician_values['fec_id'] = one_politician['fec_id']
             if 'first_name' in one_politician:
                 updated_politician_values['first_name'] = one_politician['first_name']
-            if 'middle_name' in one_politician:
-                updated_politician_values['middle_name'] = one_politician['middle_name']
-            if 'last_name' in one_politician:
-                updated_politician_values['last_name'] = one_politician['last_name']
-            if 'politician_name' in one_politician:
-                updated_politician_values['politician_name'] = one_politician['politician_name']
             if 'full_name_assembled' in one_politician:
                 updated_politician_values['full_name_assembled'] = one_politician['full_name_assembled']
             if 'gender' in one_politician:
@@ -536,44 +567,64 @@ def politicians_import_from_structured_json(structured_json):
             if 'google_civic_candidate_name3' in one_politician:
                 updated_politician_values['google_civic_candidate_name3'] = \
                     one_politician['google_civic_candidate_name3']
-            if 'birth_date' in one_politician:
-                updated_politician_values['birth_date'] = one_politician['birth_date']
-            if 'bioguide_id' in one_politician:
-                updated_politician_values['bioguide_id'] = one_politician['bioguide_id']
-            if 'thomas_id' in one_politician:
-                updated_politician_values['thomas_id'] = one_politician['thomas_id']
-            if 'lis_id' in one_politician:
-                updated_politician_values['lis_id'] = one_politician['lis_id']
             if 'govtrack_id' in one_politician:
                 updated_politician_values['govtrack_id'] = one_politician['govtrack_id']
+            if 'house_history_id' in one_politician:
+                updated_politician_values['house_history_id'] = one_politician['house_history_id']
+            if 'icpsr_id' in one_politician:
+                updated_politician_values['icpsr_id'] = one_politician['icpsr_id']
+            if 'instagram_followers_count' in one_politician:
+                updated_politician_values['instagram_followers_count'] = one_politician['instagram_followers_count']
+            if 'instagram_handle' in one_politician:
+                updated_politician_values['instagram_handle'] = one_politician['instagram_handle']
+            if 'last_name' in one_politician:
+                updated_politician_values['last_name'] = one_politician['last_name']
+            if 'lis_id' in one_politician:
+                updated_politician_values['lis_id'] = one_politician['lis_id']
+            if 'maplight_id' in one_politician:
+                updated_politician_values['maplight_id'] = one_politician['maplight_id']
+            if 'middle_name' in one_politician:
+                updated_politician_values['middle_name'] = one_politician['middle_name']
             if 'opensecrets_id' in one_politician:
                 updated_politician_values['opensecrets_id'] = one_politician['opensecrets_id']
+            if 'political_party' in one_politician:
+                updated_politician_values['political_party'] = one_politician['political_party']
+            if 'politician_contact_form_url' in one_politician:
+                updated_politician_values['politician_contact_form_url'] = one_politician['politician_contact_form_url']
+            if 'politician_email_address' in one_politician:
+                updated_politician_values['politician_email_address'] = one_politician['politician_email_address']
+            if 'politician_facebook_id' in one_politician:
+                updated_politician_values['politician_facebook_id'] = one_politician['politician_facebook_id']
+            if 'politician_googleplus_id' in one_politician:
+                updated_politician_values['politician_googleplus_id'] = one_politician['politician_googleplus_id']
+            if 'politician_name' in one_politician:
+                updated_politician_values['politician_name'] = one_politician['politician_name']
+            if 'politician_phone_number' in one_politician:
+                updated_politician_values['politician_phone_number'] = one_politician['politician_phone_number']
+            if 'politician_twitter_handle' in one_politician:
+                updated_politician_values['politician_twitter_handle'] = one_politician['politician_twitter_handle']
+            if 'politician_twitter_handle2' in one_politician:
+                updated_politician_values['politician_twitter_handle2'] = one_politician['politician_twitter_handle2']
+            if 'politician_twitter_handle3' in one_politician:
+                updated_politician_values['politician_twitter_handle3'] = one_politician['politician_twitter_handle3']
+            if 'politician_twitter_handle4' in one_politician:
+                updated_politician_values['politician_twitter_handle4'] = one_politician['politician_twitter_handle4']
+            if 'politician_twitter_handle5' in one_politician:
+                updated_politician_values['politician_twitter_handle5'] = one_politician['politician_twitter_handle5']
+            if 'politician_url' in one_politician:
+                updated_politician_values['politician_url'] = one_politician['politician_url']
+            if 'politician_youtube_id' in one_politician:
+                updated_politician_values['politician_youtube_id'] = one_politician['politician_youtube_id']
+            if 'state_code' in one_politician:
+                updated_politician_values['state_code'] = one_politician['state_code']
+            if 'thomas_id' in one_politician:
+                updated_politician_values['thomas_id'] = one_politician['thomas_id']
             if 'vote_smart_id' in one_politician:
                 updated_politician_values['vote_smart_id'] = one_politician['vote_smart_id']
             if 'vote_usa_politician_id' in one_politician:
                 updated_politician_values['vote_usa_politician_id'] = one_politician['vote_usa_politician_id']
-            if 'fec_id' in one_politician:
-                updated_politician_values['fec_id'] = one_politician['fec_id']
-            if 'cspan_id' in one_politician:
-                updated_politician_values['cspan_id'] = one_politician['cspan_id']
-            if 'wikipedia_id' in one_politician:
-                updated_politician_values['wikipedia_id'] = one_politician['wikipedia_id']
-            if 'ballotpedia_id' in one_politician:
-                updated_politician_values['ballotpedia_id'] = one_politician['ballotpedia_id']
-            if 'house_history_id' in one_politician:
-                updated_politician_values['house_history_id'] = one_politician['house_history_id']
-            if 'maplight_id' in one_politician:
-                updated_politician_values['maplight_id'] = one_politician['maplight_id']
             if 'washington_post_id' in one_politician:
                 updated_politician_values['washington_post_id'] = one_politician['washington_post_id']
-            if 'icpsr_id' in one_politician:
-                updated_politician_values['icpsr_id'] = one_politician['icpsr_id']
-            if 'political_party' in one_politician:
-                updated_politician_values['political_party'] = one_politician['political_party']
-            if 'state_code' in one_politician:
-                updated_politician_values['state_code'] = one_politician['state_code']
-            if 'politician_url' in one_politician:
-                updated_politician_values['politician_url'] = one_politician['politician_url']
             if 'we_vote_hosted_profile_image_url_large' in one_politician:
                 updated_politician_values['we_vote_hosted_profile_image_url_large'] = \
                     one_politician['we_vote_hosted_profile_image_url_large']
@@ -583,18 +634,8 @@ def politicians_import_from_structured_json(structured_json):
             if 'we_vote_hosted_profile_image_url_tiny' in one_politician:
                 updated_politician_values['we_vote_hosted_profile_image_url_tiny'] = \
                     one_politician['we_vote_hosted_profile_image_url_tiny']
-            if 'ctcl_uuid' in one_politician:
-                updated_politician_values['ctcl_uuid'] = one_politician['ctcl_uuid']
-            if 'politician_facebook_id' in one_politician:
-                updated_politician_values['politician_facebook_id'] = one_politician['politician_facebook_id']
-            if 'politician_phone_number' in one_politician:
-                updated_politician_values['politician_phone_number'] = one_politician['politician_phone_number']
-            if 'politician_googleplus_id' in one_politician:
-                updated_politician_values['politician_googleplus_id'] = one_politician['politician_googleplus_id']
-            if 'politician_youtube_id' in one_politician:
-                updated_politician_values['politician_youtube_id'] = one_politician['politician_youtube_id']
-            if 'politician_email_address' in one_politician:
-                updated_politician_values['politician_email_address'] = one_politician['politician_email_address']
+            if 'wikipedia_id' in one_politician:
+                updated_politician_values['wikipedia_id'] = one_politician['wikipedia_id']
 
             results = politician_manager.update_or_create_politician(
                 updated_politician_values=updated_politician_values,

@@ -112,6 +112,10 @@
     </tr>
     {% endif %}
 
+{% include "politician/politician_merge_one_field_decision.html" with field_name="ballotpedia_politician_name" field_label="Ballotpedia Politician Name" conflict_status=conflict_values.ballotpedia_politician_name politician1_field_value=politician_option1.ballotpedia_politician_name politician2_field_value=politician_option2.ballotpedia_politician_name politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="ballotpedia_politician_url" field_label="Ballotpedia Politician URL" conflict_status=conflict_values.ballotpedia_politician_url politician1_field_value=politician_option1.ballotpedia_politician_url politician2_field_value=politician_option2.ballotpedia_politician_url politician1=politician_option1 politician2=politician_option2 %}
+
 {% include "politician/politician_merge_one_field_decision.html" with field_name="ballotpedia_id" field_label="Ballotpedia ID" conflict_status=conflict_values.ballotpedia_id politician1_field_value=politician_option1.ballotpedia_id politician2_field_value=politician_option2.ballotpedia_id politician1=politician_option1 politician2=politician_option2 %}
 
 {% include "politician/politician_merge_one_field_decision.html" with field_name="bioguide_id" field_label="Bioguide ID" conflict_status=conflict_values.bioguide_id politician1_field_value=politician_option1.bioguide_id politician2_field_value=politician_option2.bioguide_id politician1=politician_option1 politician2=politician_option2 %}
@@ -129,6 +133,16 @@
 {% include "politician/politician_merge_one_field_decision.html" with field_name="politician_phone_number" field_label="Phone Number" conflict_status=conflict_values.politician_phone_number politician1_field_value=politician_option1.politician_phone_number politician2_field_value=politician_option2.politician_phone_number politician1=politician_option1 politician2=politician_option2 %}
 
 {% include "politician/politician_merge_one_field_decision.html" with field_name="politician_url" field_label="Politician URL" conflict_status=conflict_values.politician_url politician1_field_value=politician_option1.politician_url politician2_field_value=politician_option2.politician_url politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="politician_contact_form_url" field_label="Politician Contact Form" conflict_status=conflict_values.politician_contact_form_url politician1_field_value=politician_option1.politician_contact_form_url politician2_field_value=politician_option2.politician_contact_form_url politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="facebook_url" field_label="Facebook" conflict_status=conflict_values.facebook_url politician1_field_value=politician_option1.facebook_url politician2_field_value=politician_option2.facebook_url politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="facebook_url_is_broken" field_label="Facebook URL Broken" conflict_status=conflict_values.facebook_url_is_broken politician1_field_value=politician_option1.facebook_url_is_broken politician2_field_value=politician_option2.facebook_url_is_broken politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="instagram_handle" field_label="Instagram Handle" conflict_status=conflict_values.instagram_handle politician1_field_value=politician_option1.instagram_handle politician2_field_value=politician_option2.instagram_handle politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="instagram_followers_count" field_label="Instagram Followers" conflict_status=conflict_values.instagram_followers_count politician1_field_value=politician_option1.instagram_followers_count politician2_field_value=politician_option2.instagram_followers_count politician1=politician_option1 politician2=politician_option2 %}
 
 {% include "politician/politician_merge_one_field_decision.html" with field_name="maplight_id" field_label="MapLight ID" conflict_status=conflict_values.maplight_id politician1_field_value=politician_option1.maplight_id politician2_field_value=politician_option2.maplight_id politician1=politician_option1 politician2=politician_option2 %}
 

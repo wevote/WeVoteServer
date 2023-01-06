@@ -42,7 +42,7 @@ STATE_CODE_MAP = {
     'AK': 'Alaska',
     'AL': 'Alabama',
     'AR': 'Arkansas',
-    'AS': 'American Samoa',
+    # 'AS': 'American Samoa',
     'AZ': 'Arizona',
     'CA': 'California',
     'CO': 'Colorado',
@@ -66,7 +66,7 @@ STATE_CODE_MAP = {
     'MI': 'Michigan',
     'MN': 'Minnesota',
     'MO': 'Missouri',
-    'MP': 'Northern Mariana Islands',
+    # 'MP': 'Northern Mariana Islands',
     'MS': 'Mississippi',
     'MT': 'Montana',
     'NA': 'National',
@@ -82,7 +82,7 @@ STATE_CODE_MAP = {
     'OK': 'Oklahoma',
     'OR': 'Oregon',
     'PA': 'Pennsylvania',
-    'PR': 'Puerto Rico',
+    # 'PR': 'Puerto Rico',
     'RI': 'Rhode Island',
     'SC': 'South Carolina',
     'SD': 'South Dakota',
@@ -90,7 +90,7 @@ STATE_CODE_MAP = {
     'TX': 'Texas',
     'UT': 'Utah',
     'VA': 'Virginia',
-    'VI': 'Virgin Islands',
+    # 'VI': 'Virgin Islands',
     'VT': 'Vermont',
     'WA': 'Washington',
     'WI': 'Wisconsin',
@@ -308,7 +308,9 @@ NEGATIVE_SEARCH_KEYWORDS = [
     "writer",
 ]
 
+ALLIANCE = 'ALLIANCE'
 AMERICAN_INDEPENDENT = 'AMERICAN_INDEPENDENT'
+CONSTITUTION = 'CONSTITUTION'
 DEMOCRAT = 'DEMOCRAT'
 D_R = 'D_R'
 ECONOMIC_GROWTH = 'ECONOMIC_GROWTH'
@@ -321,6 +323,7 @@ NON_PARTISAN = 'NON_PARTISAN'
 PEACE_AND_FREEDOM = 'PEACE_AND_FREEDOM'
 REFORM = 'REFORM'
 REPUBLICAN = 'REPUBLICAN'
+WORKING_FAMILIES = 'WORKING_FAMILIES'
 
 LANGUAGE_CODE_ENGLISH = 'en'
 LANGUAGE_CODE_SPANISH = 'es'
@@ -547,6 +550,90 @@ class LocalSwitch(object):
             return False
 
 
+# See also 'convert_to_political_party_constant'
+def candidate_party_display(raw_party_incoming):
+    raw_party = raw_party_incoming.strip()
+    raw_party = raw_party.lower()
+    raw_party = raw_party.replace("party preference: ", "")
+
+    if raw_party is None:
+        return ''
+    if raw_party == '':
+        return ''
+    if raw_party == 'Alliance'.lower():
+        return 'Alliance'
+    if raw_party == ALLIANCE.lower():
+        return 'Alliance'
+    if raw_party == AMERICAN_INDEPENDENT.lower():
+        return 'American Independent'
+    if raw_party == 'Amer. Ind.'.lower():
+        return 'American Independent'
+    if raw_party == 'Constitution'.lower():
+        return 'Constitution'
+    if raw_party == CONSTITUTION.lower():
+        return 'Constitution'
+    if raw_party == 'DEM'.lower():
+        return 'Democrat'
+    if raw_party == DEMOCRAT.lower():
+        return 'Democrat'
+    if raw_party == 'DEM'.lower():
+        return 'Democrat'
+    if raw_party == 'Democratic'.lower():
+        return 'Democrat'
+    if raw_party == D_R.lower():
+        return 'D-R Party'
+    if raw_party == ECONOMIC_GROWTH.lower():
+        return 'Economic Growth'
+    if raw_party == 'Party Preference: Democratic'.lower():
+        return 'Democrat'
+    if raw_party == GREEN.lower():
+        return 'Green'
+    if raw_party == 'GRN'.lower():
+        return 'Green'
+    if raw_party == INDEPENDENT.lower():
+        return 'Independent'
+    if raw_party == 'Independent'.lower():
+        return 'Independent'
+    if raw_party == LIBERTARIAN.lower():
+        return 'Libertarian'
+    if raw_party == 'Libertarian'.lower():
+        return 'Libertarian'
+    if raw_party == 'LIB'.lower():
+        return 'Libertarian'
+    if raw_party == NO_PARTY_PREFERENCE.lower():
+        return 'No Party Preference'
+    if raw_party == 'NPP'.lower():
+        return 'No Party Preference'
+    if raw_party == 'Party Preference: None'.lower():
+        return 'No Party Preference'
+    if raw_party == NON_PARTISAN.lower():
+        return 'Nonpartisan'
+    if raw_party == 'Nonpartisan'.lower():
+        return 'Nonpartisan'
+    if raw_party == PEACE_AND_FREEDOM.lower():
+        return 'Peace and Freedom'
+    if raw_party == 'PF'.lower():
+        return 'Peace and Freedom'
+    if raw_party == REFORM.lower():
+        return 'Reform'
+    if raw_party == REPUBLICAN.lower():
+        return 'Republican'
+    if raw_party == 'Republican'.lower():
+        return 'Republican'
+    if raw_party == 'REP'.lower():
+        return 'Republican'
+    if raw_party == 'Party Preference: Republican'.lower():
+        return 'Republican'
+    if raw_party == 'none':
+        return ''
+    if raw_party == WORKING_FAMILIES.lower():
+        return 'Working Families'
+    if raw_party == 'working families':
+        return 'Working Families'
+    else:
+        return raw_party_incoming
+
+
 def convert_pennies_integer_to_dollars_string(pennies_integer):
     cents_to_dollars_format_string = '{:,.2f}'
     dollars_string = cents_to_dollars_format_string.format(pennies_integer / 100)
@@ -612,7 +699,7 @@ def convert_to_str(value):
     return new_value
 
 
-# See also 'candidate_party_display' in candidate/models.py
+# See also 'candidate_party_display'
 def convert_to_political_party_constant(raw_party_incoming):
     if not positive_value_exists(raw_party_incoming):
         return ""
@@ -621,10 +708,14 @@ def convert_to_political_party_constant(raw_party_incoming):
     raw_party = raw_party.lower()
     raw_party = raw_party.replace("party preference: ", "")
 
+    if raw_party == 'alliance':
+        return ALLIANCE
     if raw_party == 'amer. ind.':
         return AMERICAN_INDEPENDENT
     if raw_party == 'american independent':
         return AMERICAN_INDEPENDENT
+    if raw_party == 'constitution':
+        return CONSTITUTION
     if raw_party == 'dem':
         return DEMOCRAT
     if raw_party == 'democrat':
@@ -646,7 +737,7 @@ def convert_to_political_party_constant(raw_party_incoming):
     if raw_party == 'g-p':
         return GREEN
     if raw_party == 'independent':
-        return NO_PARTY_PREFERENCE
+        return INDEPENDENT
     if raw_party == 'independent green':
         return INDEPENDENT_GREEN
     if raw_party == 'lib':
@@ -681,6 +772,8 @@ def convert_to_political_party_constant(raw_party_incoming):
         return REPUBLICAN
     if raw_party == 'republican party':
         return REPUBLICAN
+    if raw_party == 'working families':
+        return WORKING_FAMILIES
     else:
         return raw_party_incoming
 

@@ -264,7 +264,7 @@
                         target="_blank" >
         Find and Merge Duplicate Candidates for this Year <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
 
-        <li>Prepare: <a href="{% url 'candidate:candidate_politician_match_for_this_election' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+        <li>Prepare: <a href="{% url 'candidate:candidate_politician_match_this_year' %}?candidate_year={{ show_this_year_of_candidates }}&state_code={{ state_code }}"
         target="_blank">
         Match Candidates to Politicians (and Create Politicians) for this Year <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
     </ul>
