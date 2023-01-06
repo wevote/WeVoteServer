@@ -11,6 +11,7 @@ from config.base import get_environment_variable
 #  is currently being handled by another worker
 MAX_JOB_PROCESSING_TIME = 60
 
+MAX_JOB_RETRY_ATTEMPTS = 5
 
 def process_request(function, body, message):
     if function == 'ProfileImageFetchResize':
@@ -47,8 +48,15 @@ def worker_run(queue_url):
             if 'Function' in message['MessageAttributes'].keys():
                 function = message['MessageAttributes']['Function']['StringValue']
                 print(f"Calling function [{function}]")
-                body = json.loads(message['MessageBody'])
-                processed = process_request(function, body, message)
+                body = json.loads(message['Body'])
+                try:
+                    processed = process_request(function, body, message)
+                except Exception as e:
+                    print("Failed to call function {function}:", e)
+                    job_retry_count = int(message['Attributes']['ApproximateReceiveCount'])
+                    if job_retry_count > MAX_JOB_RETRY_ATTEMPTS:
+                        print("Message crossed max retry attempts, deleting.")
+                        processed = True
 
             else:
                 print("No function provided in SQS message, deleting invalid request.")
