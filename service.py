@@ -3,6 +3,8 @@
 import os
 import boto3
 import json
+from config.base import get_environment_variable
+
 
 # max time (in sec) that a job may take to complete
 #  this prevents a different worker from picking up a job that
@@ -22,7 +24,8 @@ def process_request(function, body, message):
 
 
 def worker_run(queue_url):
-    sqs = boto3.client('sqs')
+    AWS_REGION_NAME = get_environment_variable("AWS_REGION_NAME")
+    sqs = boto3.client('sqs', region_name=AWS_REGION_NAME)
 
     while True:
         # Receive message from SQS queue
