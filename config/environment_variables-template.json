@@ -105,6 +105,9 @@
   "_comment":                       "Google Firebase Admin API (for Firebase Cloud Messaging send/receive)",
   "GOOGLE_APPLICATION_CREDENTIALS": "/etc/wevoteapps-f4b59fec8c57.json",
 
+  "_comment":                       "Google reCAPTCHA",
+  "GOOGLE_RECAPTCHA_SECRET_KEY":    "",
+
   "_comment":                       "import_export_google_civic",
   "GOOGLE_CIVIC_API_KEY":           "",
   "GOOGLE_MAPS_API_KEY":            "",

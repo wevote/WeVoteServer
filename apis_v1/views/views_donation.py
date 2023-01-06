@@ -3,6 +3,8 @@
 # -*- coding: UTF-8 -*-
 
 import json
+from urllib.parse import urlencode
+from urllib.request import urlopen
 
 import stripe
 from django.http import HttpResponse, HttpResponseForbidden, HttpResponseNotFound
@@ -156,7 +158,6 @@ def donation_refund_view(request):  # donationRefund
     if not fetch_stripe_processing_enabled_state():
         logger.error('DONATION refund request arrived while API disabled (%s) -- %s' % (ip_address, charge_id))
         return HttpResponseNotFound("Stripe refunds disabled by WeVote")
-
 
     if positive_value_exists(voter_device_id):
         voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
@@ -460,3 +461,77 @@ def does_paid_subscription_exist_for_api(request):  # doesOrgHavePaidPlan
     }
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def log_to_cloudwatch_view(request):            # logToCloudWatch
+    # This was created for Stripe Captchas, but could be used for any situation where we want to log WebApp errors to
+    # CloudWatch WeVoteServer Python logs
+
+    error_level = request.GET.get('error_level', 'ERROR')
+    message = request.GET.get('message', 'No message supplied')
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    ip_address = get_ip_from_headers(request)
+    we_vote_id = 'failed'
+    success = True
+    try:
+        voter_manager = VoterManager()
+        results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+        voter = results['voter']
+        we_vote_id = voter.we_vote_id
+    except Exception as e:
+        success = False
+        logger.error('log_to_cloudwatch_view failed to retrieve a voter for device_id: ', voter_device_id, e)
+
+    line = "WebApp (%s -- %s): %s" % (ip_address, we_vote_id, message)
+
+    if error_level == "ERROR":
+        logger.error(line)
+    elif error_level == "INFO":
+        logger.info(line)
+    elif error_level == "DEBUG":
+        logger.debug(line)
+
+    results = {
+        'success': success,
+    }
+
+    return HttpResponse(json.dumps(results), content_type='application/json')
+
+
+def google_recaptcha_verify_view(request):            # googleRecaptchaVerifyView
+    recaptcha_uri = 'https://www.google.com/recaptcha/api/siteverify'
+    token = request.GET.get('token', None)
+    secret_key = get_environment_variable("GOOGLE_RECAPTCHA_SECRET_KEY")
+    remote_ip = get_ip_from_headers(request)
+    params = urlencode({
+        'secret': secret_key,
+        'response': token,
+        'remote_ip': remote_ip,
+    })
+
+    # print params
+    data = urlopen(recaptcha_uri, params.encode('utf-8')).read()
+    result = json.loads(data)
+    success = result.get('success', None)
+    captcha_score = result.get('score', None)
+
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    we_vote_id = 'failed'
+
+    try:
+        voter_manager = VoterManager()
+        results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+        voter = results['voter']
+        we_vote_id = voter.we_vote_id
+    except Exception as e:
+        success = False
+        logger.error('google_recaptcha_verify_view failed to retrieve a voter for device_id: ', voter_device_id, e)
+
+    logger.error("reCAPTCHA ip: %s, we_vote_id: %s, verified: %s, score: %s" % (remote_ip, we_vote_id, success,
+                                                                                captcha_score))
+    results = {
+        'success': success,
+        'captcha_score': captcha_score,
+    }
+
+    return HttpResponse(json.dumps(results), content_type='application/json')
