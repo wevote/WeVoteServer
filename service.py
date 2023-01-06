@@ -47,8 +47,12 @@ def worker_run(queue_url):
             if 'Function' in message['MessageAttributes'].keys():
                 function = message['MessageAttributes']['Function']['StringValue']
                 print(f"Calling function [{function}]")
-                body = json.loads(message['MessageBody'])
-                processed = process_request(function, body, message)
+                body = json.loads(message['Body'])
+                try:
+                    processed = process_request(function, body, message)
+                except Exception as e:
+                    print("Failed to call function {function}:", e)
+                    next
 
             else:
                 print("No function provided in SQS message, deleting invalid request.")
