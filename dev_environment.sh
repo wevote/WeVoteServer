@@ -1,5 +1,14 @@
 #!/usr/bin/env sh
 
+# dev env settings
+DOCKER_API_NAME="wevote-api"
+DOCKER_DB_NAME="wevote-db"
+DOCKER_API_TAG="${DOCKER_API_NAME}:latest"
+DOCKER_DB_TAG="${DOCKER_DB_NAME}:latest"
+DOCKER_NETWORK="wevote"
+DOCKER_DB_VOLUME="wevote-postgres-data"
+DB_NAME="wevotedb"
+
 set -e
 
 usage() {
@@ -10,10 +19,11 @@ usage() {
 	echo ""
 	echo "Usage: $0 <command>"
 	echo " where <command> can be:"
-	echo "    create     - Creates and runs WeVote API server in the foreground"
-	echo "    delete     - Stops the containers (if running) and removes all resources,"
+	echo "    start      - Creates and starts WeVote API development environment"
+	echo "    stop       - Stops all WeVote API development containers"
+	echo "    delete     - Stops and removes all WeVote API development resources,"
 	echo "                 except for database storage volume."
-	echo "    deletedb   - Removes database data (stored in docker volume.) "
+	echo "    deletedb   - Removes database storage volume (docker volume.) "
 	echo "                 WARNING: this permanetly removes all wevote database data!"
 	exit 1
 }
@@ -34,22 +44,15 @@ if [ -z "$CMD" ]; then
 	usage
 fi
 
-DOCKER_API_NAME="wevote-api"
-DOCKER_DB_NAME="wevote-db"
-DOCKER_API_TAG="${DOCKER_API_NAME}:latest"
-DOCKER_DB_TAG="${DOCKER_DB_NAME}:latest"
-DOCKER_NETWORK="wevote"
-DOCKER_DB_VOLUME="wevote-postgres-data"
-DB_NAME="wevotedb"
 
-if [ "$CMD" = "create" ]; then
+if [ "$CMD" = "start" ]; then
 
 	if [ -z "$(docker network ls | grep $DOCKER_NETWORK)" ]; then
 		echo "Creating docker network.."
 		docker network create $DOCKER_NETWORK
 	fi
 
-	if [ -z "$(docker ps | grep $DOCKER_DB_NAME)" ]; then
+	if [ -z "$(docker container ls -a | grep $DOCKER_DB_NAME)" ]; then
 		echo "Creating wevote database container.."
 		# build db docker container
 		docker build -t $DOCKER_DB_TAG \
@@ -66,9 +69,16 @@ if [ "$CMD" = "create" ]; then
 			$DOCKER_DB_TAG
 
 		# create dev database (sleep to make sure pg is started)
-		echo "Ensuring the development database exists.."
+		echo "Waiting for database container to start..."
 		sleep 3
+		echo "Creating wevote db ($DB_NAME)..."
 		docker exec $DOCKER_DB_NAME psql -U postgres -c "CREATE DATABASE $DB_NAME" || true
+	else
+		echo "Wevote database container already exists, checking if running.."
+		if [ -z "$(docker ps | grep $DOCKER_DB_NAME)" ]; then
+			echo "Starting wevote database container..."
+			docker start $DOCKER_DB_NAME
+		fi
 	fi
 
 	# build API docker container
@@ -93,6 +103,10 @@ if [ "$CMD" = "create" ]; then
 		-it --rm \
 		$DOCKER_API_TAG
 
+elif [ "$CMD" = "stop" ]; then
+	echo "Stopping wevote containers.."
+	docker stop $DOCKER_DB_NAME 2>/dev/null
+	docker stop $DOCKER_API_NAME 2>/dev/null
 elif [ "$CMD" = "delete" ]; then
 	echo "Removing WeVote developer environment.."
 
