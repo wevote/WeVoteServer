@@ -1,4 +1,3 @@
-
 import json
 import os
 
@@ -7,13 +6,16 @@ from django.core.management.base import BaseCommand
 
 from config.base import get_environment_variable
 
-# for testing the job queue system locally, you can run an SQS 
+# For testing the job queue system locally, you can run an SQS 
 # server locally using localstack within docker.
 # Use the following commands to install:
-#   pip install localstack localstack-client
-#   localstack start -d
-#   localstack ssh
-#   % awslocal sqs create-queue --queue-name job-queue.fifo --attributes FifoQueue=true
+#
+#   pip install localstack localstack-client awscli-local
+#   localstack start -d     (wait for sqs service to launch)
+#   awslocal sqs create-queue --queue-name job-queue.fifo --attributes FifoQueue=true
+#
+# Make sure the QueueUrl displayed matches AWS_SQS_WEB_QUEUE_URL in
+#  config file environment-variables.json
 
 # max time (in sec) that a job may take to complete
 #  this prevents a different worker from picking up a job that
