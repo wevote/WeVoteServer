@@ -11,8 +11,11 @@ from config.base import get_environment_variable
 # Use the following commands to install:
 #
 #   pip install localstack localstack-client awscli-local
+#
 #   localstack start -d     (wait for sqs service to launch)
-#   awslocal sqs create-queue --queue-name job-queue.fifo --attributes FifoQueue=true
+#
+#   awslocal sqs create-queue --queue-name job-queue.fifo \
+#     --attributes FifoQueue=true,ContentBasedDeduplication=true
 #
 # Make sure the QueueUrl displayed matches AWS_SQS_WEB_QUEUE_URL in
 #  config file environment-variables.json
