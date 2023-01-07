@@ -57,7 +57,7 @@ def store_ballotpedia_json_response_to_import_batch_system(
             BATCH_HEADER_MAP_MEASURES_TO_BALLOTPEDIA_MEASURES, kind_of_batch,
             google_civic_election_id, organization_we_vote_id, batch_set_id=batch_set_id, state_code=state_code)
         return results
-    elif kind_of_batch is 'IMPORT_BALLOT_ITEM':
+    elif kind_of_batch is IMPORT_BALLOT_ITEM:
         filename = "Ballot Items for Address from Ballotpedia API"
         if state_code != "":
             filename += " for " + state_code.upper()

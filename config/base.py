@@ -169,6 +169,7 @@ INSTALLED_APPS = (
     'api_internal_cache',
     'apis_v1',
     'apple',
+    'aws',
     'ballot',
     'bookmark',
     'campaign',
