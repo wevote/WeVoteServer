@@ -68,7 +68,7 @@ if [ "$CMD" = "create" ]; then
 		# create dev database (sleep to make sure pg is started)
 		echo "Ensuring the development database exists.."
 		sleep 3
-		docker exec $DOCKER_DB_NAME psql -U postgres -c "CREATE DATABASE $DB_NAME"
+		docker exec $DOCKER_DB_NAME psql -U postgres -c "CREATE DATABASE $DB_NAME" || true
 	fi
 
 	# build API docker container
@@ -102,7 +102,7 @@ elif [ "$CMD" = "delete" ]; then
 	fi
 
 	echo "Removing wevote-api container.."
-	docker rm $DOCKER_API_NAME 2>/dev/null
+	docker rm $DOCKER_API_NAME 2>/dev/null || true
 
 	if [ ! -z "$(docker ps | grep $DOCKER_DB_NAME)" ]; then
 		echo "Stopping postgresql container.."
@@ -110,14 +110,14 @@ elif [ "$CMD" = "delete" ]; then
 	fi
 
 	echo "Removing postgresql container.."
-	docker rm $DOCKER_DB_NAME 2>/dev/null
+	docker rm $DOCKER_DB_NAME 2>/dev/null || true
 
 	echo "Removing wevote docker network.."
-	docker network rm $DOCKER_NETWORK 2>/dev/null
+	docker network rm $DOCKER_NETWORK 2>/dev/null || true
 
 elif [ "$CMD" = "deletedb" ]; then
 	echo "Removing postgres data volume.."
-	docker volume rm $DOCKER_DB_VOLUME
+	docker volume rm $DOCKER_DB_VOLUME 2>/dev/null || true
 else
 	echo "ERROR: Invalid command $CMD"
 	usage
