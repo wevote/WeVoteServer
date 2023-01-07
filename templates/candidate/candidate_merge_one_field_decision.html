@@ -3,10 +3,10 @@
 {% if candidate1_field_value != None or candidate2_field_value != None %}
 <tr>
     <td>{{ field_label }}</td>
-    {% if conflict_status == "CONFLICT" %}
+{% if conflict_status == "CONFLICT" %}
     <td><input type="radio" name="{{ field_name }}_choice" value="{{ candidate1.we_vote_id }}" checked /><span class="bold-select"> {{ candidate1_field_value|default_if_none:"" }}</span>&nbsp;&nbsp;</td>
     <td><input type="radio" name="{{ field_name }}_choice" value="{{ candidate2.we_vote_id }}" /><span class="bold-select"> {{ candidate2_field_value|default_if_none:"" }}</span></td>
-    {% else %}
+{% else %}
     <td>
     {% if 'http' in candidate1_field_value %}
         <a href="{{ candidate1_field_value }}" target="_blank">
@@ -28,6 +28,6 @@
         {% if conflict_status == "CANDIDATE2" %}<strong>{{ candidate2_field_value|default_if_none:"" }}</strong>{% else %}{{ candidate2_field_value|default_if_none:"" }}{% endif %}
     {% endif %}
     </td>
-    {% endif %}
+{% endif %}
 </tr>
 {% endif %}

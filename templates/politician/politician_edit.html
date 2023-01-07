@@ -350,7 +350,7 @@
             <td class="padded">{{ candidate.get_candidate_state }}</td>
             <td class="padded">
                 {{ candidate.election.election_name }} - {{ candidate.election.google_civic_election_id }}<br />
-                {% if candidate.candidate_year %}Year: {{ candidate.candidate_year }}{% endif %}
+                {% if candidate.candidate_year %}Year: {{ candidate.candidate_year }}{% else %}{{ candidate.election.election_day_text }}{% endif %}
             </td>
             <td class="padded">
                 {% if candidate.office %}
@@ -424,8 +424,8 @@
             </td>
             <td>{{ candidate.get_candidate_state }}</td>
             <td>
-                {{ candidate.election.election_name }} - {{ candidate.election.google_civic_election_id }}
-                {% if candidate.candidate_year %}Year: {{ candidate.candidate_year }}{% endif %}
+                {{ candidate.election.election_name }} - {{ candidate.election.google_civic_election_id }}<br />
+                {% if candidate.candidate_year %}Year: {{ candidate.candidate_year }}{% else %}{{ candidate.election.election_day_text }}{% endif %}
             </td>
             <td>
                 {% if candidate.office %}
