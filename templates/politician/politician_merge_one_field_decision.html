@@ -3,12 +3,31 @@
 {% if politician1_field_value != None or politician2_field_value != None %}
 <tr>
     <td>{{ field_label }}</td>
-    {% if conflict_status == "CONFLICT" %}
+{% if conflict_status == "CONFLICT" %}
     <td><input type="radio" name="{{ field_name }}_choice" value="{{ politician1.we_vote_id }}" checked /><span class="bold-select"> {{ politician1_field_value|default_if_none:"" }}</span></td>
     <td><input type="radio" name="{{ field_name }}_choice" value="{{ politician2.we_vote_id }}" /><span class="bold-select"> {{ politician2_field_value|default_if_none:"" }}</span></td>
+{% else %}
+    <td>
+    {% if 'http' in politician1_field_value %}
+        <a href="{{ politician1_field_value }}" target="_blank">
+        {% if conflict_status == "POLITICIAN1" %}<strong>{{ politician1_field_value|default_if_none:"" }}</strong>{% else %}{{ politician1_field_value|default_if_none:"" }}{% endif %}
+        <span class="glyphicon glyphicon-new-window"></span>
+        </a>
     {% else %}
-    <td>{% if conflict_status == "POLITICIAN1" %}<strong>{{ politician1_field_value|default_if_none:"" }}</strong>{% else %}{{ politician1_field_value|default_if_none:"" }}{% endif %}</td>
-    <td>{% if conflict_status == "POLITICIAN2" %}<strong>{{ politician2_field_value|default_if_none:"" }}</strong>{% else %}{{ politician2_field_value|default_if_none:"" }}{% endif %}</td>
+        {% if conflict_status == "POLITICIAN1" %}<strong>{{ politician1_field_value|default_if_none:"" }}</strong>{% else %}{{ politician1_field_value|default_if_none:"" }}{% endif %}
     {% endif %}
+        &nbsp;&nbsp;
+    </td>
+    <td>
+    {% if 'http' in politician2_field_value %}
+        <a href="{{ politician2_field_value }}" target="_blank">
+        {% if conflict_status == "POLITICIAN2" %}<strong>{{ politician2_field_value|default_if_none:"" }}</strong>{% else %}{{ politician2_field_value|default_if_none:"" }}{% endif %}
+        <span class="glyphicon glyphicon-new-window"></span>
+        </a>
+    {% else %}
+        {% if conflict_status == "POLITICIAN2" %}<strong>{{ politician2_field_value|default_if_none:"" }}</strong>{% else %}{{ politician2_field_value|default_if_none:"" }}{% endif %}
+    {% endif %}
+    </td>
+{% endif %}
 </tr>
 {% endif %}
