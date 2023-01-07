@@ -1,5 +1,4 @@
 
-import boto3
 import json
 import os
 
@@ -10,14 +9,11 @@ from config.base import get_environment_variable
 
 # for testing the job queue system locally, you can run an SQS 
 # server locally using localstack within docker.
-# Use the following commands:
+# Use the following commands to install:
 #   pip install localstack localstack-client
 #   localstack start -d
 #   localstack ssh
 #   % awslocal sqs create-queue --queue-name job-queue.fifo --attributes FifoQueue=true
-#   % exit
-# uncomment the line below when using local development SQS
-#import localstack_client.session as boto3
 
 # max time (in sec) that a job may take to complete
 #  this prevents a different worker from picking up a job that
@@ -39,6 +35,14 @@ def process_request(function, body, message):
 
 
 def worker_run(queue_url):
+    if queue_url.startswith('http://localhost'):
+        try:
+            import localstack_client.session as boto3
+        except:
+            import boto3
+    else:
+        import boto3
+
     sqs = boto3.client('sqs')
 
     while True:
