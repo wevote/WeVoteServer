@@ -24,7 +24,7 @@ from analytics.controllers import delete_analytics_info_for_voter, move_analytic
 from analytics.models import AnalyticsManager, ACTION_FACEBOOK_AUTHENTICATION_EXISTS, \
     ACTION_GOOGLE_AUTHENTICATION_EXISTS, \
     ACTION_TWITTER_AUTHENTICATION_EXISTS, ACTION_EMAIL_AUTHENTICATION_EXISTS
-from aws.management.commands.runsqsworker import process_request
+from aws.controllers import submit_web_function_job
 from campaign.controllers import move_campaignx_to_another_voter
 from email_outbound.controllers import delete_email_address_entries_for_voter, \
     move_email_address_entries_to_another_voter, schedule_verification_email, \
@@ -1835,11 +1835,10 @@ def voter_merge_two_accounts_for_facebook(facebook_secret_key, facebook_user_id,
             return None, None, error_results
 
     # Cache original and resized images in a Lambda
-    process_request('voter_cache_facebook_images_process', {
+    submit_web_function_job('voter_cache_facebook_images_process', {
                         'voter': facebook_owner_voter,
                         'facebook_auth_response': facebook_auth_response,
-                    },
-                    'hello')
+                    })
     status += " FACEBOOK_IMAGES_CACHED_IN_LAMBDA"
 
     # ##### Store the facebook_email as a verified email for facebook_owner_voter
