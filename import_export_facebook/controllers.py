@@ -105,8 +105,7 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
     submit_web_function_job('voter_cache_facebook_images_process', {
                         'voter': voter,
                         'facebook_auth_response': facebook_auth_response,
-                    },
-                    'hello')
+                    })
 
     status += " FACEBOOK_IMAGES_SCHEDULED_TO_BE_CACHED_IN_LAMBDA"
     success = True
