@@ -41,10 +41,7 @@ MAX_JOB_RETRY_ATTEMPTS = 5
 
 def process_request(function, body, message):
 
-    if function == 'ProfileImageFetchResize':
-        from aws.functions.voter_profile import voter_profiler_job_example
-        return voter_profiler_job_example(body)
-    elif function == 'caching_facebook_images_for_retrieve_process':
+    if function == 'caching_facebook_images_for_retrieve_process':
         from import_export_facebook.controllers import caching_facebook_images_for_retrieve_process
         repair_facebook_related_voter_caching_now = body['repair_facebook_related_voter_caching_now']
         facebook_auth_response = body['facebook_auth_response']
