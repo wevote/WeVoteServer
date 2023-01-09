@@ -4,7 +4,6 @@
 import base64
 import json
 import re
-import threading
 from datetime import timedelta
 from io import BytesIO
 from time import time
@@ -25,6 +24,7 @@ from analytics.controllers import delete_analytics_info_for_voter, move_analytic
 from analytics.models import AnalyticsManager, ACTION_FACEBOOK_AUTHENTICATION_EXISTS, \
     ACTION_GOOGLE_AUTHENTICATION_EXISTS, \
     ACTION_TWITTER_AUTHENTICATION_EXISTS, ACTION_EMAIL_AUTHENTICATION_EXISTS
+from aws.management.commands.runsqsworker import process_request
 from campaign.controllers import move_campaignx_to_another_voter
 from email_outbound.controllers import delete_email_address_entries_for_voter, \
     move_email_address_entries_to_another_voter, schedule_verification_email, \
@@ -65,8 +65,8 @@ from voter.models import Voter, VoterAddress, VoterDeviceLinkManager, VoterManag
     NOTIFICATION_FRIEND_REQUESTS_EMAIL, NOTIFICATION_SUGGESTED_FRIENDS_EMAIL, \
     NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_EMAIL, NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS, \
     NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL, MAINTENANCE_STATUS_FLAGS_TASK_TWO, \
-    NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL, fetch_voter_id_from_voter_device_link, VoterAddressManager, VoterDeviceLink, \
-    BALLOT_ADDRESS
+    NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL, fetch_voter_id_from_voter_device_link, VoterAddressManager, \
+    VoterDeviceLink, BALLOT_ADDRESS
 from voter_guide.controllers import delete_voter_guides_for_voter, duplicate_voter_guides, \
     move_voter_guides_to_another_voter
 from wevote_functions.functions import generate_voter_device_id, is_voter_device_id_valid, positive_value_exists
@@ -1738,12 +1738,13 @@ def voter_create_for_api(voter_device_id):  # voterCreate
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-def voter_cache_facebook_images_process(*args, **kwargs):
+
+def voter_cache_facebook_images_process(voter, facebook_auth_response):
+    # Called by this server running in an AWS Lambda, invoked from a SQS queue
     # Cache original and resized images
+
     t0 = time()
     # print("process started")
-    voter = args[0]
-    facebook_auth_response = args[1]
 
     cache_results = cache_master_and_resized_image(
         voter_we_vote_id=voter.we_vote_id,
@@ -1757,13 +1758,13 @@ def voter_cache_facebook_images_process(*args, **kwargs):
 
     # Update the facebook photo
     voter_manager = VoterManager()
-    save_facebook_results = voter_manager.save_facebook_user_values(
+    voter_manager.save_facebook_user_values(
         voter, facebook_auth_response, cached_facebook_profile_image_url_https,
         we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
         we_vote_hosted_profile_image_url_tiny)
     dtc = time() - t0
     # 12/20/22: takes 1.2 seconds on my local postgres, leave this logger in for a few months, so we can gather data
-    logger.error('(Not an error) Processing the facebook images in a thread for voter %s %s (%s) took %.3f seconds' %
+    logger.error('(Not an error) Processing the facebook images in a Lambda for voter %s %s (%s) took %.3f seconds' %
                  (voter.first_name, voter.last_name, voter.we_vote_id, dtc))
     # print("process finished")
 
@@ -1833,14 +1834,13 @@ def voter_merge_two_accounts_for_facebook(facebook_secret_key, facebook_user_id,
             }
             return None, None, error_results
 
-    # Cache original and resized images in a thread
-    t = threading.Thread(
-        target=voter_cache_facebook_images_process,
-        args=(facebook_owner_voter, facebook_auth_response),
-        kwargs=None)
-    t.setDaemon(True)
-    t.start()
-    status += " FACEBOOK_IMAGES_CACHED_IN_THREAD"
+    # Cache original and resized images in a Lambda
+    process_request('voter_cache_facebook_images_process', {
+                        'voter': facebook_owner_voter,
+                        'facebook_auth_response': facebook_auth_response,
+                    },
+                    'hello')
+    status += " FACEBOOK_IMAGES_CACHED_IN_LAMBDA"
 
     # ##### Store the facebook_email as a verified email for facebook_owner_voter
     if positive_value_exists(facebook_auth_response.facebook_email):
