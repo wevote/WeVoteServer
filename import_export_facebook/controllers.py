@@ -660,8 +660,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
                         'voter_we_vote_id_attached_to_facebook': voter_we_vote_id_attached_to_facebook,
                         'voter_we_vote_id_attached_to_facebook_email': voter_we_vote_id_attached_to_facebook_email,
                         'voter_we_vote_id': voter_we_vote_id,
-                    },
-                    'hello mom')
+                    })
 
     status += " FACEBOOK_IMAGES_SCHEDULED_TO_BE_CACHED_IN_LAMBDA_BY_RETRIEVE"
     t4 = time()

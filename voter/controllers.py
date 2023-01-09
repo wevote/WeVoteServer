@@ -1838,8 +1838,7 @@ def voter_merge_two_accounts_for_facebook(facebook_secret_key, facebook_user_id,
     submit_web_function_job('voter_cache_facebook_images_process', {
                         'voter': facebook_owner_voter,
                         'facebook_auth_response': facebook_auth_response,
-                    },
-                    'hello')
+                    })
     status += " FACEBOOK_IMAGES_CACHED_IN_LAMBDA"
 
     # ##### Store the facebook_email as a verified email for facebook_owner_voter
