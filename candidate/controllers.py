@@ -1964,7 +1964,8 @@ def candidate_politician_match(we_vote_candidate):
             we_vote_candidate.politician_id = None
             we_vote_candidate.save()
 
-    # Search the politician table for a match
+    # Search the politician table for a stricter match (don't match on "dan" if "dan smith" passed in)
+    #  so we set return_close_matches to False
     results = politician_manager.retrieve_all_politicians_that_might_match_candidate(
         candidate_name=we_vote_candidate.candidate_name,
         candidate_twitter_handle=we_vote_candidate.candidate_twitter_handle,
@@ -1974,6 +1975,7 @@ def candidate_politician_match(we_vote_candidate):
         google_civic_candidate_name2=we_vote_candidate.google_civic_candidate_name2,
         google_civic_candidate_name3=we_vote_candidate.google_civic_candidate_name3,
         maplight_id=we_vote_candidate.maplight_id,
+        return_close_matches=False,
         state_code=we_vote_candidate.state_code,
         vote_smart_id=we_vote_candidate.vote_smart_id,
         vote_usa_politician_id=we_vote_candidate.vote_usa_politician_id,
@@ -2043,80 +2045,6 @@ def candidate_politician_match(we_vote_candidate):
             'politician':                   create_results['politician'],
         }
         return results
-
-
-def retrieve_candidate_politician_match_options(
-        vote_smart_id='',
-        vote_usa_politician_id='',
-        maplight_id='',
-        candidate_twitter_handle='',
-        candidate_twitter_handle2='',
-        candidate_twitter_handle3='',
-        candidate_name='',
-        state_code=''):
-    politician_manager = PoliticianManager()
-    politician_created = False
-    politician_found = False
-    politician_list_found = False
-    politician_list = []
-    status = ""
-
-    # Search the politician table for a match
-    results = politician_manager.retrieve_all_politicians_that_might_match_candidate(
-        candidate_name=candidate_name,
-        candidate_twitter_handle=candidate_twitter_handle,
-        candidate_twitter_handle2=candidate_twitter_handle2,
-        candidate_twitter_handle3=candidate_twitter_handle3,
-        maplight_id=maplight_id,
-        state_code=state_code,
-        vote_smart_id=vote_smart_id,
-        vote_usa_politician_id=vote_usa_politician_id,
-    )
-    if results['politician_list_found']:
-        # If here, return
-        politician_list = results['politician_list']
-        status += results['status']
-        results = {
-            'success':                  results['success'],
-            'status':                   status,
-            'politician_list_found':    True,
-            'politician_list':          politician_list,
-            'politician_found':         False,
-            'politician_created':       False,
-            'politician':               None,
-        }
-        return results
-    elif results['politician_found']:
-        # Return this politician entry
-        politician = results['politician']
-        status += results['status']
-
-        results = {
-            'success':                  results['success'],
-            'status':                   status,
-            'politician_list_found':    False,
-            'politician_list':          [],
-            'politician_found':         True,
-            'politician_created':       False,
-            'politician':               politician,
-        }
-        return results
-    else:
-        success = results['success']
-        status += results['status']
-
-    status += "NO_POLITICIANS_FOUND "
-    results = {
-        'success':                  success,
-        'status':                   status,
-        'politician_list_found':    politician_list_found,
-        'politician_list':          politician_list,
-        'politician_found':         politician_found,
-        'politician_created':       politician_created,
-        'politician':               None,
-    }
-
-    return results
 
 
 def retrieve_candidate_list_for_entire_year(
