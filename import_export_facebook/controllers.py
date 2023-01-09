@@ -3,10 +3,10 @@
 # -*- coding: UTF-8 -*-
 
 import re
-import threading
 from time import time
 
 import wevote_functions.admin
+from aws.management.commands.runsqsworker import process_request
 from config.base import get_environment_variable
 from email_outbound.models import EmailManager
 from friend.models import FriendManager
@@ -102,15 +102,13 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
             facebook_auth_response.facebook_profile_image_url_https = photo_url
 
     # Cache original and resized images in a thread
-    from voter.controllers import voter_cache_facebook_images_process
-    t = threading.Thread(
-        target=voter_cache_facebook_images_process,
-        args=(voter, facebook_auth_response),
-        kwargs=None)
-    t.setDaemon(True)
-    t.start()
+    process_request('voter_cache_facebook_images_process', {
+                        'voter': voter,
+                        'facebook_auth_response': facebook_auth_response,
+                    },
+                    'hello')
 
-    status += " FACEBOOK_IMAGES_CACHED_IN_THREAD"
+    status += " FACEBOOK_IMAGES_SCHEDULED_TO_BE_CACHED_IN_LAMBDA"
     success = True
 
     # ##### Make the facebook_email an email for the current voter (and possibly the primary email)
@@ -346,12 +344,14 @@ def facebook_disconnect_for_api(voter_device_id):  # facebookDisconnect
     return results
 
 
-def caching_facebook_images_for_retrieve_process(*args, **kwargs):
-    repair_facebook_related_voter_caching_now = args[0]
-    facebook_auth_response = args[1]
-    voter_we_vote_id_attached_to_facebook = args[2]
-    voter_we_vote_id_attached_to_facebook_email = args[3]
-    voter_we_vote_id = args[4]
+def caching_facebook_images_for_retrieve_process(repair_facebook_related_voter_caching_now,
+                                                 facebook_auth_response,
+                                                 voter_we_vote_id_attached_to_facebook,
+                                                 voter_we_vote_id_attached_to_facebook_email,
+                                                 voter_we_vote_id):
+    # Called by this server running in an AWS Lambda, invoked from a SQS queue
+    # Cache original and resized images
+
     t0 = time()
     status = ''
 
@@ -411,7 +411,7 @@ def caching_facebook_images_for_retrieve_process(*args, **kwargs):
                                         facebook_profile_image_url_https,
                                         facebook_background_image_url_https)
     dtc = time() - t0
-    logger.error('(Not an error) Processing the facebook images for a RETRIEVE in a thread for voter %s %s (%s) took %.3f seconds' %
+    logger.error('(Not an error) Processing the facebook images for a RETRIEVE in a Lambda for voter %s %s (%s) took %.3f seconds' %
                  (facebook_auth_response.facebook_first_name, facebook_auth_response.facebook_last_name,
                   voter_we_vote_id_for_cache, dtc))
     logger.debug('caching_facebook_images_for_retrieve_process status: ' + status)
@@ -653,15 +653,17 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
                 status += "FACEBOOK_LINKED_VOTER_NOT_REPAIRED "
     t3 = time()
 
-    # Cache original and resized images in a thread for read
-    t = threading.Thread(
-        target=caching_facebook_images_for_retrieve_process,
-        args=(repair_facebook_related_voter_caching_now, facebook_auth_response, voter_we_vote_id_attached_to_facebook,
-              voter_we_vote_id_attached_to_facebook_email, voter_we_vote_id),
-        kwargs=None)
-    t.setDaemon(True)
-    t.start()
-    status += " FACEBOOK_IMAGES_CACHED_IN_THREAD_BY_RETRIEVE"
+    # Cache original and resized images in a Lambda for read
+    process_request('caching_facebook_images_for_retrieve_process', {
+                        'repair_facebook_related_voter_caching_now': repair_facebook_related_voter_caching_now,
+                        'facebook_auth_response': facebook_auth_response,
+                        'voter_we_vote_id_attached_to_facebook': voter_we_vote_id_attached_to_facebook,
+                        'voter_we_vote_id_attached_to_facebook_email': voter_we_vote_id_attached_to_facebook_email,
+                        'voter_we_vote_id': voter_we_vote_id,
+                    },
+                    'hello mom')
+
+    status += " FACEBOOK_IMAGES_SCHEDULED_TO_BE_CACHED_IN_LAMBDA_BY_RETRIEVE"
     t4 = time()
 
     fbuser = None

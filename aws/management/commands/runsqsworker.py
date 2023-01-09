@@ -1,7 +1,6 @@
 import json
 import os
 
-from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
 from config.base import get_environment_variable
@@ -12,10 +11,24 @@ from config.base import get_environment_variable
 #
 #   pip install localstack localstack-client awscli-local
 #
-#   localstack start -d     (wait for sqs service to launch)
+#  If 'docker' cli is not available at the command line...
+#    Get the docker CLI at https://docs.docker.com/desktop/install/mac-install/
+#    Find the downloaded file, and substitute its path in the following set of commands
+#      (venv2) WeVoteServer % sudo hdiutil attach '/Users/stevepodell/Downloads/Docker (1).dmg'
+#      (venv2) WeVoteServer % sudo /Volumes/Docker/Docker.app/Contents/MacOS/install
+#      (venv2) WeVoteServer % sudo hdiutil detach /Volumes/Docker
+#    In a MacOS modal dialog that appears, allow docker to make some symbolic links
+#    Once the Docker Desktop starts, and shows as running, typing 'docker' at the command line, will show a response
 #
-#   awslocal sqs create-queue --queue-name job-queue.fifo \
-#     --attributes FifoQueue=true,ContentBasedDeduplication=true
+# if aws (awslocal) is not available at the command line...
+#   Follow instructions at
+#   https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html#getting-started-install-instructions
+#
+# Start the aws local sqs service
+#    localstack start -d     (wait for sqs service to launch)
+#
+# Create a sqs queue, and copy the QueueUrl it reports to environment-variables.json
+#   awslocal sqs create-queue --queue-name job-queue.fifo --attributes FifoQueue=true,ContentBasedDeduplication=true
 #
 # Make sure the QueueUrl displayed matches AWS_SQS_WEB_QUEUE_URL in
 #  config file environment-variables.json
@@ -31,11 +44,35 @@ def process_request(function, body, message):
     if function == 'ProfileImageFetchResize':
         from aws.functions.voter_profile import voter_profiler_job_example
         return voter_profiler_job_example(body)
-    # TODO add other async jobs here
+    elif function == 'caching_facebook_images_for_retrieve_process':
+        from import_export_facebook.controllers import caching_facebook_images_for_retrieve_process
+        repair_facebook_related_voter_caching_now = body['repair_facebook_related_voter_caching_now']
+        facebook_auth_response = body['facebook_auth_response']
+        voter_we_vote_id_attached_to_facebook = body['voter_we_vote_id_attached_to_facebook']
+        voter_we_vote_id_attached_to_facebook_email = body['voter_we_vote_id_attached_to_facebook_email']
+        voter_we_vote_id = body['voter_we_vote_id']
 
-    # default: no function found, act as
-    #  processed so it gets deleted
-    print(f"Job references unknown function [{function}], deleting.")
+        # print("caching_facebook_images_for_retrieve_process from SQS in a Lambda: %s, %s %s, %s, " %
+        #       (voter_we_vote_id, facebook_auth_response.facebook_first_name, facebook_auth_response.facebook_last_name,
+        #        facebook_auth_response.facebook_email))
+        caching_facebook_images_for_retrieve_process(repair_facebook_related_voter_caching_now,
+                                                     facebook_auth_response,
+                                                     voter_we_vote_id_attached_to_facebook,
+                                                     voter_we_vote_id_attached_to_facebook_email,
+                                                     voter_we_vote_id)
+    elif function == 'voter_cache_facebook_images_process':
+        from voter.controllers import voter_cache_facebook_images_process
+        voter = body['voter']
+        facebook_auth_response = body['facebook_auth_response']
+        print("voter_cache_facebook_images_process from SQS in a Lambda: %s, %s %s, %s, " %
+              (voter.we_vote_id, facebook_auth_response.facebook_first_name, facebook_auth_response.facebook_last_name,
+               facebook_auth_response.facebook_email))
+        voter_cache_facebook_images_process(voter, facebook_auth_response)
+    else:
+        # default: no function found, act as
+        #  processed, so it gets deleted
+        print(f"Job references unknown function [{function}], deleting.")
+
     return True
 
 
