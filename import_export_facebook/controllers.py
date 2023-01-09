@@ -6,7 +6,7 @@ import re
 from time import time
 
 import wevote_functions.admin
-from aws.management.commands.runsqsworker import process_request
+from aws.controllers import submit_web_function_job
 from config.base import get_environment_variable
 from email_outbound.models import EmailManager
 from friend.models import FriendManager
@@ -102,7 +102,7 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
             facebook_auth_response.facebook_profile_image_url_https = photo_url
 
     # Cache original and resized images in a thread
-    process_request('voter_cache_facebook_images_process', {
+    submit_web_function_job('voter_cache_facebook_images_process', {
                         'voter': voter,
                         'facebook_auth_response': facebook_auth_response,
                     },
@@ -654,7 +654,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
     t3 = time()
 
     # Cache original and resized images in a Lambda for read
-    process_request('caching_facebook_images_for_retrieve_process', {
+    submit_web_function_job('caching_facebook_images_for_retrieve_process', {
                         'repair_facebook_related_voter_caching_now': repair_facebook_related_voter_caching_now,
                         'facebook_auth_response': facebook_auth_response,
                         'voter_we_vote_id_attached_to_facebook': voter_we_vote_id_attached_to_facebook,
