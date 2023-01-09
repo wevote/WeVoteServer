@@ -48,10 +48,8 @@ from .controllers import candidates_import_from_master_server, candidates_import
     candidate_politician_match, fetch_duplicate_candidate_count, figure_out_candidate_conflict_values, \
     find_duplicate_candidate, \
     merge_if_duplicate_candidates, merge_these_two_candidates, \
-    retrieve_candidate_photos, \
-    retrieve_candidate_politician_match_options, retrieve_next_or_most_recent_office_for_candidate, \
-    save_image_to_candidate_table, \
-    save_google_search_link_to_candidate_table
+    retrieve_candidate_photos, retrieve_next_or_most_recent_office_for_candidate, \
+    save_google_search_link_to_candidate_table, save_image_to_candidate_table
 from .models import CandidateCampaign, CandidateListManager, CandidateManager, CandidateToOfficeLink, \
     CANDIDATE_UNIQUE_IDENTIFIERS, PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
     PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_VOTE_USA
@@ -1075,6 +1073,7 @@ def candidate_new_search_process_view(request):
 
     candidate_manager = CandidateManager()
     candidate_list_manager = CandidateListManager()
+    politician_manager = PoliticianManager()
 
     status = ""
 
@@ -1100,11 +1099,12 @@ def candidate_new_search_process_view(request):
 
     politician_list = []
     # If here, we specifically want to see if a politician exists, given the information submitted
-    match_results = retrieve_candidate_politician_match_options(
-        vote_usa_politician_id=vote_usa_politician_id,
-        candidate_twitter_handle=candidate_twitter_handle,
+    match_results = politician_manager.retrieve_all_politicians_that_might_match_candidate(
         candidate_name=candidate_name,
-        state_code=state_code)
+        candidate_twitter_handle=candidate_twitter_handle,
+        return_close_matches=True,
+        state_code=state_code,
+        vote_usa_politician_id=vote_usa_politician_id)
     # TODO This is still a work in progress
     if match_results['politician_found']:
         messages.add_message(request, messages.INFO, 'Politician found! Information filled into this form.')
@@ -1122,6 +1122,8 @@ def candidate_new_search_process_view(request):
         google_civic_candidate_name = matching_politician.google_civic_candidate_name
         candidate_name = candidate_name if positive_value_exists(candidate_name) \
             else matching_politician.politician_name
+        politician_list = []
+        politician_list.append(matching_politician)
     elif match_results['politician_list_found']:
         politician_list = match_results['politician_list']
     else:
@@ -1825,18 +1827,20 @@ def candidate_edit_process_view(request):
         best_state_code = state_code
 
     if positive_value_exists(look_for_politician):
+        politician_manager = PoliticianManager()
         # If here, we specifically want to see if a politician exists, given the information submitted
-        match_results = retrieve_candidate_politician_match_options(
-            vote_smart_id=vote_smart_id,
-            vote_usa_politician_id=vote_usa_politician_id,
-            maplight_id=maplight_id,
+        match_results = politician_manager.retrieve_all_politicians_that_might_match_candidate(
+            candidate_name=candidate_name,
             candidate_twitter_handle=candidate_twitter_handle,
             candidate_twitter_handle2=candidate_twitter_handle2,
             candidate_twitter_handle3=candidate_twitter_handle3,
-            candidate_name=candidate_name,
-            state_code=best_state_code)
+            maplight_id=maplight_id,
+            return_close_matches=True,
+            state_code=best_state_code,
+            vote_smart_id=vote_smart_id,
+            vote_usa_politician_id=vote_usa_politician_id)
         if match_results['politician_found']:
-            messages.add_message(request, messages.INFO, 'Politician found! Information filled into this form.')
+            messages.add_message(request, messages.INFO, 'Politician found.')
             matching_politician = match_results['politician']
             politician_we_vote_id = matching_politician.we_vote_id
             politician_twitter_handle = matching_politician.politician_twitter_handle \

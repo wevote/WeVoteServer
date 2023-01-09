@@ -711,6 +711,7 @@ def site_configuration_retrieve_view(request):  # siteConfigurationRetrieve
         'success':                          results['success'],
         'status':                           results['status'],
         'chosen_about_organization_external_url': results['chosen_about_organization_external_url'],
+        'chosen_domain_type_is_campaign':   results['chosen_domain_type_is_campaign'],
         'chosen_google_analytics_tracking_id': results['chosen_google_analytics_tracking_id'],
         'chosen_hide_we_vote_logo':         results['chosen_hide_we_vote_logo'],
         'chosen_logo_url_https':            results['chosen_logo_url_https'],

@@ -485,14 +485,22 @@ class PoliticianManager(models.Manager):
             filters=[],
             politician_name='',
             queryset=None,
+            return_close_matches=False,
             state_code=''):
         filter_set = False
         if politician_name:
-            if positive_value_exists(state_code):
-                new_filter = Q(politician_name__iexact=politician_name,
-                               state_code__iexact=state_code)
+            if positive_value_exists(return_close_matches):
+                if positive_value_exists(state_code):
+                    new_filter = Q(politician_name__icontains=politician_name,
+                                   state_code__iexact=state_code)
+                else:
+                    new_filter = Q(politician_name__icontains=politician_name)
             else:
-                new_filter = Q(politician_name__iexact=politician_name)
+                if positive_value_exists(state_code):
+                    new_filter = Q(politician_name__iexact=politician_name,
+                                   state_code__iexact=state_code)
+                else:
+                    new_filter = Q(politician_name__iexact=politician_name)
             filter_set = True
             filters.append(new_filter)
 
@@ -510,9 +518,14 @@ class PoliticianManager(models.Manager):
                 # Add the first query
                 if len(search_filters) > 0:
                     final_search_filters = search_filters.pop()
-                    # ...and "AND" the remaining items in the list
-                    for item in search_filters:
-                        final_search_filters &= item
+                    if positive_value_exists(return_close_matches):
+                        # ..."OR" the remaining items in the list
+                        for item in search_filters:
+                            final_search_filters |= item
+                    else:
+                        # ..."AND" the remaining items in the list
+                        for item in search_filters:
+                            final_search_filters &= item
                     queryset = queryset.filter(final_search_filters)
 
         results = {
@@ -532,6 +545,7 @@ class PoliticianManager(models.Manager):
             google_civic_candidate_name2='',
             google_civic_candidate_name3='',
             maplight_id='',
+            return_close_matches=True,
             state_code='',
             vote_smart_id='',
             vote_usa_politician_id='',
@@ -604,6 +618,7 @@ class PoliticianManager(models.Manager):
                     filters=filters,
                     politician_name=candidate_name,
                     queryset=politician_queryset,
+                    return_close_matches=return_close_matches,
                     state_code=state_code,
                 )
                 if filter_results['filter_set']:
@@ -616,6 +631,7 @@ class PoliticianManager(models.Manager):
                     filters=filters,
                     politician_name=google_civic_candidate_name,
                     queryset=politician_queryset,
+                    return_close_matches=return_close_matches,
                     state_code=state_code,
                 )
                 if filter_results['filter_set']:
@@ -628,6 +644,7 @@ class PoliticianManager(models.Manager):
                     filters=filters,
                     politician_name=google_civic_candidate_name2,
                     queryset=politician_queryset,
+                    return_close_matches=return_close_matches,
                     state_code=state_code,
                 )
                 if filter_results['filter_set']:
@@ -640,6 +657,7 @@ class PoliticianManager(models.Manager):
                     filters=filters,
                     politician_name=google_civic_candidate_name3,
                     queryset=politician_queryset,
+                    return_close_matches=return_close_matches,
                     state_code=state_code,
                 )
                 if filter_results['filter_set']:

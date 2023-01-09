@@ -552,6 +552,8 @@ class LocalSwitch(object):
 
 # See also 'convert_to_political_party_constant'
 def candidate_party_display(raw_party_incoming):
+    if not positive_value_exists(raw_party_incoming):
+        return ""
     raw_party = raw_party_incoming.strip()
     raw_party = raw_party.lower()
     raw_party = raw_party.replace("party preference: ", "")
