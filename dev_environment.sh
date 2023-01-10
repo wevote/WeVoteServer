@@ -11,6 +11,9 @@ DB_NAME="wevotedb"
 
 set -e
 
+# determine base WeVoteServer directory
+BASEDIR=$(dirname $0)/..
+
 usage() {
 	echo ""
 	echo "Summary: Create or remove WeVoteServer development environment"
@@ -56,7 +59,7 @@ if [ "$CMD" = "start" ]; then
 		echo "Creating wevote database container.."
 		# build db docker container
 		docker build -t $DOCKER_DB_TAG \
-			-f docker/Dockerfile.db docker
+			-f $BASEDIR/docker/Dockerfile.db $BASEDIR/docker
 
 		# create volume for postgres data
 		if [ -z "$(docker volume ls | grep $DOCKER_DB_VOLUME)" ]; then
@@ -82,15 +85,14 @@ if [ "$CMD" = "start" ]; then
 	fi
 
 	# build API docker container
-	docker build --pull -t $DOCKER_API_TAG -f docker/Dockerfile.api .
+	docker build --pull -t $DOCKER_API_TAG -f docker/Dockerfile.api $BASEDIR
 
-	if [ ! -e config/environment_variables.json ]; then
-		echo "Creating develop configuration file in config/environment_variables.json..."
-		cp config/environment_variables-template.json config/environment_variables.json
-		# configure database name
-		sed -ibak "s/WeVoteServerDB/$DB_NAME/" config/environment_variables.json
-		# configure database host to use docker container name
-		sed -E -ibak "s/(DATABASE_HOST.*\":.*)\"\"/\1\"${DOCKER_DB_NAME}\"/" config/environment_variables.json
+	if [ ! -e $BASEDIR/config/environment_variables.json ]; then
+		echo "Creating developer configuration file in config/environment_variables.json..."
+		cat $BASEDIR/config/environment_variables-template.json | \
+			sed "s/WeVoteServerDB/$DB_NAME/" | \
+			sed -E "s/(DATABASE_HOST.*\":.*)\"\"/\1\"${DOCKER_DB_NAME}\"/" \
+			> $BASEDIR/config/environment_variables.json
 		
 	fi
 
@@ -99,7 +101,7 @@ if [ "$CMD" = "start" ]; then
 		-p 127.0.0.1:8000:8000 \
 		--name=$DOCKER_API_NAME \
 		-e DATABASE_HOST=$DOCKER_DB_NAME \
-		-v $(pwd):/wevote \
+		-v $BASEDIR:/wevote \
 		-it --rm \
 		$DOCKER_API_TAG
 
