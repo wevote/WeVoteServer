@@ -2056,8 +2056,10 @@ class VoterManager(BaseUserManager):
                 voter.we_vote_hosted_profile_facebook_image_url_medium = we_vote_hosted_profile_image_url_medium
             if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
                 voter.we_vote_hosted_profile_facebook_image_url_tiny = we_vote_hosted_profile_image_url_tiny
-            if voter.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
+            if voter.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN or not \
+                    positive_value_exists(voter.profile_image_type_currently_active):
                 voter.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_FACEBOOK
+            init_active = voter.profile_image_type_currently_active
             if voter.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_FACEBOOK:
                 if positive_value_exists(we_vote_hosted_profile_image_url_large):
                     voter.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
@@ -2065,6 +2067,11 @@ class VoterManager(BaseUserManager):
                     voter.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
                 if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
                     voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+            logger.error(
+                '(Ok) save_facebook_user_values %s %s (%s)(%s) active "%s" -> "%s" cached_fb %s hosted_lg %s' %
+                (voter.first_name, voter.last_name, voter.we_vote_id, facebook_auth_response.facebook_user_id,
+                 init_active, voter.profile_image_type_currently_active, cached_facebook_profile_image_url_https,
+                 we_vote_hosted_profile_image_url_large))
 
             voter.save()
             success = True
