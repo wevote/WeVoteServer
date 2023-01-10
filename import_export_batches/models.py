@@ -47,7 +47,7 @@ NO_STANCE = 'NO_STANCE'
 
 CANDIDATE = 'CANDIDATE'
 CONTEST_OFFICE = 'CONTEST_OFFICE'
-ELECTED_OFFICE = 'ELECTED_OFFICE'
+OFFICE_HELD = 'OFFICE_HELD'
 IMPORT_BALLOT_ITEM = 'IMPORT_BALLOT_ITEM'
 IMPORT_POLLING_LOCATION = 'IMPORT_POLLING_LOCATION'
 IMPORT_VOTER = 'IMPORT_VOTER'
@@ -56,7 +56,7 @@ POLITICIAN = 'POLITICIAN'
 
 KIND_OF_BATCH_CHOICES = (
     (MEASURE,           'Measure'),
-    (ELECTED_OFFICE,    'ElectedOffice'),
+    (OFFICE_HELD,    'OfficeHeld'),
     (CONTEST_OFFICE,    'ContestOffice'),
     (CANDIDATE,         'Candidate'),
     (IMPORT_BALLOT_ITEM,   'Ballot Returned'),
@@ -98,7 +98,7 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES = {
     'ballotpedia_candidate_url': 'ballotpedia_candidate_url',
     'ballotpedia_election_id': 'ballotpedia_election_id',
     'ballotpedia_image_id': 'ballotpedia_image_id',
-    'ballotpedia_office_id': 'ballotpedia_office_id * (elected_office)',  # For matching only
+    'ballotpedia_office_id': 'ballotpedia_office_id * (office_held)',  # For matching only
     'ballotpedia_person_id': 'ballotpedia_person_id',
     'ballotpedia_race_id': 'ballotpedia_race_id * (contest_office)',  # For matching only
     'ballotpedia url': 'vote_usa_ballotpedia_candidate_url',
@@ -247,7 +247,7 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES = {
     'contest_office_number_elected': 'contest_office_number_elected',
     'contest_office_district_name': 'contest_office_district_name',
     'district_id': 'district_id',
-    'elected_office_id': 'elected_office_id',
+    'office_held_id': 'office_held_id',
     'election_day': 'election_day',
     'electoral_district_id': 'electoral_district_id',
     'google_civic_election_id': 'google_civic_election_id',
@@ -323,16 +323,16 @@ BATCH_HEADER_MAP_CONTEST_OFFICES_TO_VOTE_USA_OFFICES = {
     'state_code': 'office_district_state',
 }
 
-BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES = {
-    'elected_office_name': 'elected_office_name',
+BATCH_IMPORT_KEYS_ACCEPTED_FOR_OFFICES_HELD = {
+    'office_held_name': 'office_held_name',
     'electoral_district_id': 'electoral_district_id',
     'state_code': 'state_code',
-    'elected_office_ctcl_uuid': 'elected_office_ctcl_uuid',
-    'elected_office_description': 'elected_office_description',
-    'elected_office_is_partisan': 'elected_office_is_partisan',
-    'elected_office_name_es': 'elected_office_name_es',
-    'elected_office_description_es': 'elected_office_description_es',
-    'elected_office_batch_id': 'elected_office_batch_id',
+    'office_held_ctcl_uuid': 'office_held_ctcl_uuid',
+    'office_held_description': 'office_held_description',
+    'office_held_is_partisan': 'office_held_is_partisan',
+    'office_held_name_es': 'office_held_name_es',
+    'office_held_description_es': 'office_held_description_es',
+    'office_held_batch_id': 'office_held_batch_id',
 }
 
 BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES = {
@@ -1363,8 +1363,8 @@ class BatchManager(models.Manager):
             batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES
         elif kind_of_batch == CONTEST_OFFICE:
             batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES
-        elif kind_of_batch == ELECTED_OFFICE:
-            batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_ELECTED_OFFICES
+        elif kind_of_batch == OFFICE_HELD:
+            batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_OFFICES_HELD
         elif kind_of_batch == MEASURE:
             batch_import_keys_accepted = BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES
         elif kind_of_batch == ORGANIZATION_WORD:
@@ -1451,8 +1451,8 @@ class BatchManager(models.Manager):
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
-            elif kind_of_batch == ELECTED_OFFICE:
-                batch_row_action_query = BatchRowActionElectedOffice.objects.using('readonly')\
+            elif kind_of_batch == OFFICE_HELD:
+                batch_row_action_query = BatchRowActionOfficeHeld.objects.using('readonly')\
                     .filter(batch_header_id=batch_header_id)
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
@@ -1520,8 +1520,8 @@ class BatchManager(models.Manager):
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
                 batch_row_action_count = batch_row_action_query.count()
-            elif kind_of_batch == ELECTED_OFFICE:
-                batch_row_action_query = BatchRowActionElectedOffice.objects.using('readonly')\
+            elif kind_of_batch == OFFICE_HELD:
+                batch_row_action_query = BatchRowActionOfficeHeld.objects.using('readonly')\
                     .filter(batch_set_id=batch_set_id)
                 if positive_value_exists(kind_of_action):
                     batch_row_action_query = batch_row_action_query.filter(kind_of_action__iexact=kind_of_action)
@@ -1790,36 +1790,36 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def retrieve_batch_row_action_elected_office(self, batch_header_id, batch_row_id):
+    def retrieve_batch_row_action_office_held(self, batch_header_id, batch_row_id):
         """
-        Retrieves data from BatchRowActionElectedOffice table
+        Retrieves data from BatchRowActionOfficeHeld table
         :param batch_header_id:
         :param batch_row_id:
         :return:
         """
         status = ""
         try:
-            batch_row_action_elected_office = BatchRowActionElectedOffice.objects.get(batch_header_id=batch_header_id,
+            batch_row_action_office_held = BatchRowActionOfficeHeld.objects.get(batch_header_id=batch_header_id,
                                                                                       batch_row_id=batch_row_id)
             batch_row_action_found = True
             success = True
-            status += "BATCH_ROW_ACTION_ELECTED_OFFICE_RETRIEVED "
-        except BatchRowActionElectedOffice.DoesNotExist:
-            batch_row_action_elected_office = None
+            status += "BATCH_ROW_ACTION_OFFICE_HELD_RETRIEVED "
+        except BatchRowActionOfficeHeld.DoesNotExist:
+            batch_row_action_office_held = None
             batch_row_action_found = False
             success = True
-            status += "BATCH_ROW_ACTION_ELECTED_OFFICE_NOT_FOUND "
+            status += "BATCH_ROW_ACTION_OFFICE_HELD_NOT_FOUND "
         except Exception as e:
-            batch_row_action_elected_office = None
+            batch_row_action_office_held = None
             batch_row_action_found = False
             success = False
-            status += "BATCH_ROW_ACTION_ELECTED_OFFICE_RETRIEVE_ERROR: " + str(e) + " "
+            status += "BATCH_ROW_ACTION_OFFICE_HELD_RETRIEVE_ERROR: " + str(e) + " "
 
         results = {
             'success':                          success,
             'status':                           status,
             'batch_row_action_found':           batch_row_action_found,
-            'batch_row_action_elected_office':  batch_row_action_elected_office,
+            'batch_row_action_office_held':  batch_row_action_office_held,
         }
         return results
 
@@ -2182,8 +2182,8 @@ class BatchManager(models.Manager):
         if xml_root:
             if kind_of_batch == MEASURE:
                 return self.store_measure_xml(batch_uri, google_civic_election_id, organization_we_vote_id, xml_root)
-            elif kind_of_batch == ELECTED_OFFICE:
-                return self.store_elected_office_xml(batch_uri, google_civic_election_id, organization_we_vote_id,
+            elif kind_of_batch == OFFICE_HELD:
+                return self.store_office_held_xml(batch_uri, google_civic_election_id, organization_we_vote_id,
                                                      xml_root)
             elif kind_of_batch == CONTEST_OFFICE:
                 return self.store_contest_office_xml(batch_uri, google_civic_election_id, organization_we_vote_id,
@@ -2347,7 +2347,7 @@ class BatchManager(models.Manager):
         }
         return results
 
-    def store_elected_office_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
+    def store_office_held_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id, xml_root,
                                  batch_set_id=0):
         """
         Retrieves Office data from CTCL xml file
@@ -2368,59 +2368,59 @@ class BatchManager(models.Manager):
 
         # Look for Office and create the batch_header first. Office is the direct child node
         # of VipObject
-        elected_office_xml_node = xml_root.findall('Office')
+        office_held_xml_node = xml_root.findall('Office')
         # if ballot_measure_xml_node is not None:
-        for one_elected_office in elected_office_xml_node:
+        for one_office_held in office_held_xml_node:
             if positive_value_exists(limit_for_testing) and number_of_batch_rows >= limit_for_testing:
                 break
 
             # look for relevant child nodes under Office: id, Name, Description, ElectoralDistrictId,
             # IsPartisan, other::ctcl-uid
-            elected_office_id = one_elected_office.attrib['id']
+            office_held_id = one_office_held.attrib['id']
 
-            elected_office_name_node = one_elected_office.find("./Name/Text/[@language='"+LANGUAGE_CODE_ENGLISH+"']")
-            if elected_office_name_node is not None:
-                elected_office_name = elected_office_name_node.text
+            office_held_name_node = one_office_held.find("./Name/Text/[@language='"+LANGUAGE_CODE_ENGLISH+"']")
+            if office_held_name_node is not None:
+                office_held_name = office_held_name_node.text
             else:
-                elected_office_name = ""
+                office_held_name = ""
 
-            elected_office_name_es_node = one_elected_office.find("./Name/Text/[@language='"+LANGUAGE_CODE_SPANISH+"']")
-            if elected_office_name_es_node is not None:
-                elected_office_name_es = elected_office_name_es_node.text
+            office_held_name_es_node = one_office_held.find("./Name/Text/[@language='"+LANGUAGE_CODE_SPANISH+"']")
+            if office_held_name_es_node is not None:
+                office_held_name_es = office_held_name_es_node.text
             else:
-                elected_office_name_es = ""
+                office_held_name_es = ""
 
-            elected_office_description_node = one_elected_office.find(
+            office_held_description_node = one_office_held.find(
                 "Description/Text/[@language='"+LANGUAGE_CODE_ENGLISH+"']")
-            if elected_office_description_node is not None:
-                elected_office_description = elected_office_description_node.text
+            if office_held_description_node is not None:
+                office_held_description = office_held_description_node.text
             else:
-                elected_office_description = ""
+                office_held_description = ""
 
-            elected_office_description_es_node = one_elected_office.find(
+            office_held_description_es_node = one_office_held.find(
                 "Description/Text/[@language='"+LANGUAGE_CODE_SPANISH+"']")
-            if elected_office_description_es_node is not None:
-                elected_office_description_es = elected_office_description_es_node.text
+            if office_held_description_es_node is not None:
+                office_held_description_es = office_held_description_es_node.text
             else:
-                elected_office_description_es = ""
+                office_held_description_es = ""
 
-            electoral_district_id_node = one_elected_office.find('ElectoralDistrictId')
+            electoral_district_id_node = one_office_held.find('ElectoralDistrictId')
             if electoral_district_id_node is not None:
                 electoral_district_id = electoral_district_id_node.text
             else:
                 electoral_district_id = ""
 
-            elected_office_is_partisan_node = one_elected_office.find('IsPartisan')
-            if elected_office_is_partisan_node is not None:
-                elected_office_is_partisan = elected_office_is_partisan_node.text
+            office_held_is_partisan_node = one_office_held.find('IsPartisan')
+            if office_held_is_partisan_node is not None:
+                office_held_is_partisan = office_held_is_partisan_node.text
             else:
-                elected_office_is_partisan = ""
+                office_held_is_partisan = ""
 
             ctcl_uuid = ""
-            ctcl_uuid_node = one_elected_office.find(
+            ctcl_uuid_node = one_office_held.find(
                 "./ExternalIdentifiers/ExternalIdentifier/[OtherType='ctcl-uuid']")
             if ctcl_uuid_node is not None:
-                ctcl_uuid = one_elected_office.find(
+                ctcl_uuid = one_office_held.find(
                     "./ExternalIdentifiers/ExternalIdentifier/[OtherType='ctcl-uuid']/Value").text
 
             if first_line:
@@ -2442,21 +2442,21 @@ class BatchManager(models.Manager):
                         # Save an initial BatchHeaderMap
                         batch_header_map = BatchHeaderMap.objects.create(
                             batch_header_id=batch_header_id,
-                            batch_header_map_000='elected_office_batch_id',
-                            batch_header_map_001='elected_office_name',
-                            batch_header_map_002='elected_office_name_es',
-                            batch_header_map_003='elected_office_description',
-                            batch_header_map_004='elected_office_description_es',
+                            batch_header_map_000='office_held_batch_id',
+                            batch_header_map_001='office_held_name',
+                            batch_header_map_002='office_held_name_es',
+                            batch_header_map_003='office_held_description',
+                            batch_header_map_004='office_held_description_es',
                             batch_header_map_005='electoral_district_id',
-                            batch_header_map_006='elected_office_is_partisan',
-                            batch_header_map_007='elected_office_ctcl_uuid',
+                            batch_header_map_006='office_held_is_partisan',
+                            batch_header_map_007='office_held_ctcl_uuid',
                         )
                         batch_header_map_id = batch_header_map.id
                         status += " BATCH_HEADER_MAP_SAVED"
 
                     if positive_value_exists(batch_header_id) and positive_value_exists(batch_header_map_id):
                         # Now save the BatchDescription
-                        batch_name = "ELECTED_OFFICE " + " batch_header_id: " + str(batch_header_id)
+                        batch_name = "OFFICE_HELD " + " batch_header_id: " + str(batch_header_id)
                         batch_description_text = ""
                         batch_description = BatchDescription.objects.create(
                             batch_header_id=batch_header_id,
@@ -2464,7 +2464,7 @@ class BatchManager(models.Manager):
                             batch_name=batch_name,
                             batch_description_text=batch_description_text,
                             google_civic_election_id=google_civic_election_id,
-                            kind_of_batch='ELECTED_OFFICE',
+                            kind_of_batch='OFFICE_HELD',
                             organization_we_vote_id=organization_we_vote_id,
                             source_uri=batch_uri,
                             batch_set_id=batch_set_id,
@@ -2481,19 +2481,19 @@ class BatchManager(models.Manager):
                 break
 
             # check for office_batch_id or electoral_district or name AND ctcl_uuid
-            if positive_value_exists(elected_office_id) and positive_value_exists(ctcl_uuid) and \
-                    (positive_value_exists(electoral_district_id) or positive_value_exists(elected_office_name)) or \
-                    positive_value_exists(elected_office_name_es):
+            if positive_value_exists(office_held_id) and positive_value_exists(ctcl_uuid) and \
+                    (positive_value_exists(electoral_district_id) or positive_value_exists(office_held_name)) or \
+                    positive_value_exists(office_held_name_es):
                 try:
                     batch_row = BatchRow.objects.create(
                         batch_header_id=batch_header_id,
-                        batch_row_000=elected_office_id,
-                        batch_row_001=elected_office_name,
-                        batch_row_002=elected_office_name_es,
-                        batch_row_003=elected_office_description,
-                        batch_row_004=elected_office_description_es,
+                        batch_row_000=office_held_id,
+                        batch_row_001=office_held_name,
+                        batch_row_002=office_held_name_es,
+                        batch_row_003=office_held_description,
+                        batch_row_004=office_held_description_es,
                         batch_row_005=electoral_district_id,
-                        batch_row_006=elected_office_is_partisan,
+                        batch_row_006=office_held_is_partisan,
                         batch_row_007=ctcl_uuid
                     )
                     number_of_batch_rows += 1
@@ -2572,11 +2572,11 @@ class BatchManager(models.Manager):
             else:
                 contest_office_votes_allowed = ""
 
-            elected_office_id_node = one_contest_office.find('OfficeIds')
-            if elected_office_id_node is not None:
-                elected_office_id = elected_office_id_node.text
+            office_held_id_node = one_contest_office.find('OfficeIds')
+            if office_held_id_node is not None:
+                office_held_id = office_held_id_node.text
             else:
-                elected_office_id = ""
+                office_held_id = ""
 
             ctcl_uuid = ""
             ctcl_uuid_node = one_contest_office.find(
@@ -2636,7 +2636,7 @@ class BatchManager(models.Manager):
                             batch_header_id=batch_header_id,
                             batch_header_map_000='contest_office_batch_id',
                             batch_header_map_001='contest_office_name',
-                            batch_header_map_002='elected_office_id',
+                            batch_header_map_002='office_held_id',
                             batch_header_map_003='electoral_district_id',
                             batch_header_map_004='contest_office_votes_allowed',
                             batch_header_map_005='contest_office_number_elected',
@@ -2689,7 +2689,7 @@ class BatchManager(models.Manager):
                         batch_header_id=batch_header_id,
                         batch_row_000=contest_office_id,
                         batch_row_001=contest_office_name,
-                        batch_row_002=elected_office_id,
+                        batch_row_002=office_held_id,
                         batch_row_003=electoral_district_id,
                         batch_row_004=contest_office_votes_allowed,
                         batch_row_005=contest_office_number_elected,
@@ -3568,16 +3568,16 @@ class BatchManager(models.Manager):
                         status += results['status']
                         status += " CREATE_BATCH_SET-PARTY_IMPORT_ERRORS-VIP_XML "
 
-            # look for different data sets in the XML - ElectedOffice, ContestOffice, Candidate, Politician, Measure
+            # look for different data sets in the XML - OfficeHeld, ContestOffice, Candidate, Politician, Measure
 
-            # Elected Office
-            skip_elected_office = False  # We can set this to True during development to save time
-            if continue_batch_set_processing and not skip_elected_office:
-                results = self.store_elected_office_xml(batch_uri, google_civic_election_id, organization_we_vote_id,
+            # Office Held
+            skip_office_held = False  # We can set this to True during development to save time
+            if continue_batch_set_processing and not skip_office_held:
+                results = self.store_office_held_xml(batch_uri, google_civic_election_id, organization_we_vote_id,
                                                         xml_root, batch_set_id)
                 if results['success']:
-                    # Elected Office data found
-                    status += 'CREATE_BATCH_SET_ELECTED_OFFICE_DATA_FOUND'
+                    # Office Held data found
+                    status += 'CREATE_BATCH_SET_OFFICE_HELD_DATA_FOUND'
                     number_of_batch_rows += results['number_of_batch_rows']
                 else:
                     continue_batch_set_processing = False
@@ -3589,7 +3589,7 @@ class BatchManager(models.Manager):
             if continue_batch_set_processing and not skip_candidate_mapping:
                 results = create_candidate_selection_rows(xml_root, batch_set_id)
                 if results['success']:
-                    # Elected Office data found
+                    # Office Held data found
                     status += 'CREATE_BATCH_SET_CANDIDATE_SELECTION_DATA_FOUND'
                     number_of_batch_rows += results['number_of_batch_rows']
                 else:
@@ -3710,8 +3710,8 @@ class BatchManager(models.Manager):
             if kind_of_batch == MEASURE:
                 number_of_batch_action_rows = BatchRowActionMeasure.objects.using('readonly')\
                     .filter(batch_header_id=header_id).count()
-            elif kind_of_batch == ELECTED_OFFICE:
-                number_of_batch_action_rows = BatchRowActionElectedOffice.objects.using('readonly')\
+            elif kind_of_batch == OFFICE_HELD:
+                number_of_batch_action_rows = BatchRowActionOfficeHeld.objects.using('readonly')\
                     .filter(batch_header_id=header_id).count()
             elif kind_of_batch == CONTEST_OFFICE:
                 number_of_batch_action_rows = BatchRowActionContestOffice.objects.using('readonly')\
@@ -3767,53 +3767,53 @@ class BatchManager(models.Manager):
             return batch_header_translation_suggestion.header_value_recognized_by_we_vote
         return ""
 
-    def fetch_elected_office_name_from_elected_office_ctcl_id(self, elected_office_ctcl_id, batch_set_id):
+    def fetch_office_held_name_from_office_held_ctcl_id(self, office_held_ctcl_id, batch_set_id):
         """
-        Take in elected_office_ctcl_id and batch_set_id, look up BatchRow and return elected_office_name
-        :param elected_office_ctcl_id: 
+        Take in office_held_ctcl_id and batch_set_id, look up BatchRow and return office_held_name
+        :param office_held_ctcl_id: 
         :param batch_set_id:
         :return:
         """
-        elected_office_name = ''
+        office_held_name = ''
         batch_header_id = 0
         # From batch_description, get the header_id using batch_set_id
-        # batch_header_id = get_batch_header_id_from_batch_description(batch_set_id, ELECTED_OFFICE)
+        # batch_header_id = get_batch_header_id_from_batch_description(batch_set_id, OFFICE_HELD)
         try:
             if positive_value_exists(batch_set_id):
                 batch_description_on_stage = BatchDescription.objects.using('readonly').get(
                     batch_set_id=batch_set_id,
-                    kind_of_batch=ELECTED_OFFICE)
+                    kind_of_batch=OFFICE_HELD)
                 if batch_description_on_stage:
                     batch_header_id = batch_description_on_stage.batch_header_id
         except BatchDescription.DoesNotExist:
-                elected_office_name = ''
-                pass
+            office_held_name = ''
+            pass
 
-        # Lookup BatchRow with given header_id and elected_office_ctcl_id. But before doing that, we need to get batch
-        # row column name that matches 'elected_office_batch_id'
+        # Lookup BatchRow with given header_id and office_held_ctcl_id. But before doing that, we need to get batch
+        # row column name that matches 'office_held_batch_id'
         try:
             batch_manager = BatchManager()
-            if positive_value_exists(batch_header_id) and elected_office_ctcl_id:
+            if positive_value_exists(batch_header_id) and office_held_ctcl_id:
                 batch_header_map = BatchHeaderMap.objects.using('readonly').get(batch_header_id=batch_header_id)
 
-                # Get the column name in BatchRow that stores elected_office_batch_id - id taken from batch_header_map
-                # eg: batch_row_000 -> elected_office_batch_id
-                elected_office_id_column_name = batch_manager.retrieve_column_name_from_batch_row(
-                    "elected_office_batch_id", batch_header_map)
+                # Get the column name in BatchRow that stores office_held_batch_id - id taken from batch_header_map
+                # eg: batch_row_000 -> office_held_batch_id
+                office_held_id_column_name = batch_manager.retrieve_column_name_from_batch_row(
+                    "office_held_batch_id", batch_header_map)
 
-                # we found batch row column name corresponding to elected_office_batch_id, now look up batch_row table
-                # with given batch_header_id and elected_office_batch_id (batch_row_00)
+                # we found batch row column name corresponding to office_held_batch_id, now look up batch_row table
+                # with given batch_header_id and office_held_batch_id (batch_row_00)
                 batch_row_on_stage = BatchRow.objects.using('readonly').get(
                     batch_header_id=batch_header_id,
-                    **{elected_office_id_column_name: elected_office_ctcl_id})
-                # we know the batch row, next retrieve value for elected_office_name eg: off1 -> NC State Senator
-                elected_office_name = batch_manager.retrieve_value_from_batch_row('elected_office_name',
+                    **{office_held_id_column_name: office_held_ctcl_id})
+                # we know the batch row, next retrieve value for office_held_name eg: off1 -> NC State Senator
+                office_held_name = batch_manager.retrieve_value_from_batch_row('office_held_name',
                                                                                   batch_header_map, batch_row_on_stage)
 
         except BatchRow.DoesNotExist:
-            elected_office_name = ''
+            office_held_name = ''
 
-        return elected_office_name
+        return office_held_name
 
     def fetch_state_code_from_person_id_in_candidate(self, person_id, batch_set_id):
         """
@@ -5766,7 +5766,7 @@ class BatchRowActionContestOffice(models.Model):
     is_ballotpedia_general_runoff_election = models.BooleanField(default=False)
     is_ballotpedia_primary_election = models.BooleanField(default=False)
     is_ballotpedia_primary_runoff_election = models.BooleanField(default=False)
-    # Equivalent of elected_office in We Vote
+    # Equivalent of office_held in We Vote
     ballotpedia_office_id = models.PositiveIntegerField(
         verbose_name="ballotpedia integer id", null=True, blank=True)
     # The office's name as passed over by Ballotpedia. This helps us do exact matches when id is missing
@@ -5822,7 +5822,7 @@ class BatchRowActionContestOffice(models.Model):
     # "Yes" or "No" depending on whether this a contest being held outside the normal election cycle.
     special = models.CharField(verbose_name="google civic primary party", max_length=255, null=True, blank=True)
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True)
-    elected_office_name = models.CharField(verbose_name="name of the elected office", max_length=255, null=True,
+    office_held_name = models.CharField(verbose_name="name of the office held", max_length=255, null=True,
                                            blank=True, default=None)
     candidate_selection_id1 = models.CharField(verbose_name="temporary id of candidate selection 1", max_length=255,
                                                null=True, blank=True, default=None)
@@ -5850,7 +5850,7 @@ class BatchRowActionContestOffice(models.Model):
     status = models.TextField(verbose_name="batch row action contest office status", null=True, blank=True, default="")
 
 
-class BatchRowActionElectedOffice(models.Model):
+class BatchRowActionOfficeHeld(models.Model):
     """
     The definition of the action for importing one Office.
     """
@@ -5862,14 +5862,14 @@ class BatchRowActionElectedOffice(models.Model):
     kind_of_action = models.CharField(
         max_length=40, choices=KIND_OF_ACTION_CHOICES, default=IMPORT_TO_BE_DETERMINED, db_index=True)
 
-    # Fields from ElectedOffice
-    elected_office_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id for this elected office", max_length=255, default=None, null=True,
+    # Fields from OfficeHeld
+    office_held_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id for this office held", max_length=255, default=None, null=True,
         blank=True)
     # The name of the office for this contest.
-    elected_office_name = models.CharField(verbose_name="name of the elected office", max_length=255,
+    office_held_name = models.CharField(verbose_name="name of the office held", max_length=255,
                                               null=False, blank=False)
-    elected_office_name_es = models.CharField(verbose_name="name of the elected office in Spanish", max_length=255,
+    office_held_name_es = models.CharField(verbose_name="name of the office held in Spanish", max_length=255,
                                               null=True, blank=True, default=None)
     # The offices' name as passed over by Google Civic. We save this so we can match to this office even
     # if we edit the office's name locally.
@@ -5886,11 +5886,6 @@ class BatchRowActionElectedOffice(models.Model):
     ballotpedia_id = models.CharField(
         verbose_name="ballotpedia unique identifier", max_length=255, null=True, blank=True)
     wikipedia_id = models.CharField(verbose_name="wikipedia unique identifier", max_length=255, null=True, blank=True)
-    # vote_type (ranked choice, majority)
-    # The number of candidates that a voter may vote for in this contest.
-    # TODO for now comment out number_voting_for for elected_office table
-    # number_voting_for = models.CharField(verbose_name="google civic number of candidates to vote for",
-    #                                      max_length=255, null=True, blank=True)
     # The number of candidates that will be elected to office in this contest.
     number_elected = models.CharField(verbose_name="google civic number of candidates who will be elected",
                                       max_length=255, null=True, blank=True)
@@ -5929,15 +5924,15 @@ class BatchRowActionElectedOffice(models.Model):
     # "Yes" or "No" depending on whether this a contest being held outside the normal election cycle.
     special = models.CharField(verbose_name="google civic primary party", max_length=255, null=True, blank=True)
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True)
-    elected_office_description = models.CharField(verbose_name="office description", max_length=255,
+    office_held_description = models.CharField(verbose_name="office description", max_length=255,
                                                      null=True, blank=True)
-    elected_office_description_es = models.CharField(verbose_name="office description spanish", max_length=255,
+    office_held_description_es = models.CharField(verbose_name="office description spanish", max_length=255,
                                                      null=True, blank=True)
-    elected_office_is_partisan = models.BooleanField(verbose_name='office is_partisan', default=False)
-    elected_office_ctcl_id = models.CharField(verbose_name="we vote permanent id for this elected office",
+    office_held_is_partisan = models.BooleanField(verbose_name='office is_partisan', default=False)
+    office_held_ctcl_id = models.CharField(verbose_name="we vote permanent id for this office held",
                                               max_length=255, default=None, null=True, blank=True)
 
-    status = models.TextField(verbose_name="batch row action elected office status", null=True, blank=True, default="")
+    status = models.TextField(verbose_name="batch row action office held status", null=True, blank=True, default="")
 
 
 class BatchRowActionPolitician(models.Model):
@@ -6142,9 +6137,9 @@ class BatchRowActionCandidate(models.Model):
     ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True, blank=True)
     # The id of the image for retrieval from Ballotpedia API
     ballotpedia_image_id = models.PositiveIntegerField(verbose_name="ballotpedia image id", null=True, blank=True)
-    # Equivalent of elected_office in We Vote
+    # Equivalent of office_held in We Vote
     ballotpedia_office_id = models.PositiveIntegerField(
-        verbose_name="ballotpedia elected office integer id", null=True, blank=True)
+        verbose_name="ballotpedia office held integer id", null=True, blank=True)
     # This is just the characters in the Ballotpedia URL
     ballotpedia_page_title = models.CharField(
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)

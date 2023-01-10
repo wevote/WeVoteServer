@@ -2542,9 +2542,9 @@ class CandidateCampaign(models.Model):
     ballotpedia_image_id = models.PositiveIntegerField(verbose_name="ballotpedia image id", null=True, blank=True)
     ballotpedia_profile_image_url_https = models.TextField(
         verbose_name='locally cached candidate profile image from ballotpedia', blank=True, null=True)
-    # Equivalent to Elected Office
+    # Equivalent to Office Held
     ballotpedia_office_id = models.PositiveIntegerField(
-        verbose_name="ballotpedia elected office integer id", null=True, blank=True)
+        verbose_name="ballotpedia office held integer id", null=True, blank=True)
     # This is just the characters in the Ballotpedia URL
     ballotpedia_page_title = models.CharField(
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)

@@ -535,7 +535,7 @@ def offices_import_from_structured_json(structured_json):
                 if 'ballotpedia_id' in one_office else ''
             updated_contest_office_values['ballotpedia_is_marquee'] = one_office['ballotpedia_is_marquee'] \
                 if 'ballotpedia_is_marquee' in one_office else ''
-            # Equivalent to elected_office
+            # Equivalent to office_held
             updated_contest_office_values['ballotpedia_office_id'] = one_office['ballotpedia_office_id'] \
                 if 'ballotpedia_office_id' in one_office else ''
             updated_contest_office_values['ballotpedia_office_name'] = one_office['ballotpedia_office_name'] \

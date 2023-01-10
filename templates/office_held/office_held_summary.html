@@ -1,0 +1,98 @@
+{# templates/office/office_held_summary.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if office_held %}{{ office_held.office_held_name }}
+                {% if office_held.district_id %}
+                    - District {{ office_held.district_id }}
+                {% endif %}
+                {% if office_held.state_code %}
+                    - {{ office_held.state_code }}
+                {% endif %}
+    Summary{% else %}No Office Held Found{% endif %}{% endblock %}
+
+{%  block content %}
+{% load humanize %}
+
+<a href="{% url 'office_held:office_held_list' %}?state_code={{ state_code }}">< Back to Offices Held</a>
+
+{% if office_held %}
+
+    <h1>{{ office_held.office_held_name }}{% if office_held.district_id %} - District {{ office_held.district_id }}{% endif %}{% if office_held.state_code %} - {{ office_held.state_code }}{% endif %}
+</h1>
+
+    <table>
+    <tr>
+      <td>Office Held We Vote ID:</td>
+      <td>
+        <strong>{{ office_held.we_vote_id }}</strong>
+        (<a href="{% url 'office_held:office_held_delete_process' %}?office_held_id={{ office_held.id }}&google_civic_election_id={{ google_civic_election_id }}">delete office</a>)
+      </td>
+    </tr>
+    <tr>
+      <td>Ocd Division ID:</td>
+      <td><strong>{{ office_held.ocd_division_id }}</strong></td>
+    </tr>
+    {% if office_held.office_url %}
+    <tr>
+      <td>Office Held Website:</td>
+      <td><strong>{{ office_held.office_url }}</strong></td>
+    </tr>
+    {% endif %}
+    </table>
+
+    <p>
+      <br />
+      <a href="{% url 'office_held:office_held_edit' office_held.id %}">edit</a><br />
+    </p>
+    <table border="1" cellpadding="5" cellspacing="5">
+        <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>Candidate Name</td>
+            <td>Party</td>
+            <td>State</td>
+            <td>Twitter Handle</td>
+            <td>Website</td>
+            <td>Id</td>
+            <td>We Vote Id</td>
+            <td>Vote Smart Id</td>
+            <td>Supporters</td>
+            <td>Opposers</td>
+            <td>% of Support</td>
+            <td>&nbsp;</td>
+        </tr>
+    {% for representative in representative_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                {% if representative.representative_photo_url %}
+                <a href="{% url 'representative:representative_edit' representative.id %}">
+                    <img src='{{ representative.representative_photo_url }}' height="25px" />
+                </a>
+                {% endif %}
+            </td>
+            <td><a href="{% url 'representative:representative_edit' representative.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">{{ representative.representative_name }}</a></td>
+            <td>{{ representative.party }}</td>
+            <td>{{ representative.get_representative_state }}</td>
+            <td>{% if representative.representative_twitter_handle %}<a href="https://twitter.com/{{ representative.representative_twitter_handle }}"
+                    target="_blank">{{ representative.representative_twitter_handle }}</a><br />
+                ({{ representative.twitter_followers_count|intcomma }} followers){% endif %}</td>
+            <td>{% if representative.representative_url %}<a href="{{ representative.representative_url }}" target="_blank">{{ representative.representative_url }}</a>{% endif %}</td>
+            <td>{% if representative.representative_contact_form_url %}<a href="{{ representative.representative_contact_form_url }}" target="_blank">{{ representative.representative_contact_form_url }}</a>{% endif %}</td>
+            <td>{{ representative.id }}</td>
+            <td>{{ representative.we_vote_id }}</td>
+            <td>{{ representative.vote_smart_id|default_if_none:"" }}</td>
+            <td>{{ representative.support_count }}</td>
+            <td>{{ representative.oppose_count }}</td>
+            <td>{% if representative.percentage_of_support %}{{ representative.percentage_of_support }}%{% endif %}</td>
+            <td><a href="{% url 'representative:representative_edit' representative.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" style="font-size: .65em">(edit)</a></td>
+        </tr>
+    {% endfor %}
+    </table>
+
+    <p></p>
+{% else %}
+    <p>(no Office Held found)</p>
+{% endif %}
+
+{% endblock %}

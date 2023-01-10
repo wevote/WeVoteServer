@@ -6,8 +6,8 @@
         Process Candidate Data
     {% elif kind_of_batch == "CONTEST_OFFICE" %}
         Process Contest Office Data
-    {% elif kind_of_batch == "ELECTED_OFFICE" %}
-        Process Elected Office Data
+    {% elif kind_of_batch == "OFFICE_HELD" %}
+        Process Office Held Data
     {% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
         Import Ballot at One Location
     {% elif kind_of_batch == "IMPORT_POLLING_LOCATION" %}
@@ -41,7 +41,7 @@
 {% elif kind_of_batch == "CONTEST_OFFICE" %}
     <p><a href="{% url 'office:office_list' %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
           target="_blank">Current Offices{% if google_civic_election_id > 0 %} for this Election{% endif %} <span class="glyphicon glyphicon-new-window"></span></a></p>
-{% elif kind_of_batch == "ELECTED_OFFICE" %}
+{% elif kind_of_batch == "OFFICE_HELD" %}
 {% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
     <p><a href="{% url 'election:election_summary' 0 %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
           target="_blank">Current Ballots{% if google_civic_election_id > 0 %} for this Election{% endif %} <span class="glyphicon glyphicon-new-window"></span></a></p>
@@ -71,8 +71,8 @@
         Candidate</a> -
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CONTEST_OFFICE&google_civic_election_id={{ google_civic_election_id }}">
         Contest Office</a> -
-    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ELECTED_OFFICE&google_civic_election_id={{ google_civic_election_id }}">
-        Elected Office</a> -
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=OFFICE_HELD&google_civic_election_id={{ google_civic_election_id }}">
+        Office Held</a> -
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=MEASURE&google_civic_election_id={{ google_civic_election_id }}">
         Measure</a> -
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ORGANIZATION&google_civic_election_id={{ google_civic_election_id }}">
@@ -90,8 +90,8 @@
         Ballot at One Location:
     {% elif kind_of_batch == "CANDIDATE" %}
         Process Candidate Data:
-    {% elif kind_of_batch == "ELECTED_OFFICE" %}
-        Process Elected Office Data:
+    {% elif kind_of_batch == "OFFICE_HELD" %}
+        Process Office Held Data:
     {% elif kind_of_batch == "CONTEST_OFFICE" %}
         Process Contest Office Data:
     {% elif kind_of_batch == "IMPORT_VOTER" %}
@@ -557,9 +557,9 @@
                     </tr>
                     {% endif %}
                 </tbody>
-            {% elif one_batch_row.kind_of_batch == "ELECTED_OFFICE" %}
+            {% elif one_batch_row.kind_of_batch == "OFFICE_HELD" %}
             {# ####################################### #}
-            {# ### ELECTED_OFFICE ### #}
+            {# ### OFFICE_HELD ### #}
             {# ####################################### #}
                 <thead>
                     <tr class="{% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
@@ -591,7 +591,7 @@
                             {% if one_batch_row.batch_row_action.kind_of_action == "IMPORT_CREATE" %}
                             <form action="{% url 'import_export_batches:batch_action_list_update_or_create_process' %}" method="get" class="form-horizontal">
                                 {% csrf_token %}
-                                <input type="hidden" name="kind_of_batch" value="ELECTED_OFFICE">
+                                <input type="hidden" name="kind_of_batch" value="OFFICE_HELD">
                                 <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
                                 <input type="hidden" name="batch_row_id" value="{{ one_batch_row.id }}">
                                 <input type="hidden" name="kind_of_action" value="{{ one_batch_row.batch_row_action.kind_of_action }}">
@@ -601,7 +601,7 @@
                             {% elif one_batch_row.batch_row_action.kind_of_action == "IMPORT_ADD_TO_EXISTING" %}
                             <form action="{% url 'import_export_batches:batch_action_list_update_or_create_process' %}" method="get" class="form-horizontal">
                                 {% csrf_token %}
-                                <input type="hidden" name="kind_of_batch" value="ELECTED_OFFICE">
+                                <input type="hidden" name="kind_of_batch" value="OFFICE_HELD">
                                 <input type="hidden" name="batch_header_id" value="{{ one_batch_row.batch_header_id }}">
                                 <input type="hidden" name="batch_row_id" value="{{ one_batch_row.id }}">
                                 <input type="hidden" name="kind_of_action" value="{{ one_batch_row.batch_row_action.kind_of_action }}">
@@ -612,7 +612,7 @@
                                 {{ one_batch_row.batch_row_action.kind_of_action }}
                             {% endif %}
                         </td>
-                        <td>{{ one_batch_row.batch_row_action.elected_office_name|default_if_none:"" }}</td>
+                        <td>{{ one_batch_row.batch_row_action.office_held_name|default_if_none:"" }}</td>
                         <td>{{ one_batch_row.batch_row_action.state_code|default_if_none:"" }}</td>
                     </tr>
                     {% if one_batch_row.batch_row_action.status %}
