@@ -22,8 +22,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.db.models import Q
 from django.shortcuts import render
-from elected_office.models import ElectedOffice
-from elected_official.models import ElectedOfficial
 from election.models import BallotpediaElection, ElectionManager
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
     handle_record_not_saved_exception
@@ -2339,57 +2337,6 @@ def election_migration_view(request):
         status += 'FAILED_TO_COUNT_HOSTED_OFFICES ' + str(e) + ' '
 
     # ########################################
-    # Elected Offices
-    elected_office_we_vote_ids_migrated = []
-    from_elected_office_count = 0
-    try:
-        if positive_value_exists(from_state_code):
-            elected_office_query = ElectedOffice.objects.filter(google_civic_election_id=from_election_id)\
-                .filter(state_code__iexact=from_state_code)
-            from_elected_office_count = elected_office_query.count()
-            elected_office_query = elected_office_query.values_list('we_vote_id', flat=True).distinct()
-            elected_office_we_vote_ids_migrated = list(elected_office_query)
-        else:
-            elected_office_query = \
-                ElectedOffice.objects.filter(google_civic_election_id=from_election_id)
-            from_elected_office_count = elected_office_query.count()
-            elected_office_query = elected_office_query.values_list('we_vote_id', flat=True).distinct()
-            elected_office_we_vote_ids_migrated = list(elected_office_query)
-        if positive_value_exists(change_now):
-            if positive_value_exists(from_state_code):
-                ElectedOffice.objects.filter(google_civic_election_id=from_election_id)\
-                    .filter(state_code__iexact=from_state_code).update(google_civic_election_id=to_election_id)
-            else:
-                ElectedOffice.objects.filter(google_civic_election_id=from_election_id)\
-                    .update(google_civic_election_id=to_election_id)
-            status += 'ELECTED_OFFICE_UPDATED '
-    except Exception as e:
-        error = True
-        status += 'FAILED_TO_UPDATE_ELECTED_OFFICE ' + str(e) + ' '
-
-    # ########################################
-    # Elected Officials
-    from_elected_official_count = 0
-    try:
-        if positive_value_exists(from_state_code):
-            from_elected_official_count = ElectedOfficial.objects.filter(google_civic_election_id=from_election_id)\
-                .filter(state_code__iexact=from_state_code).count()
-        else:
-            from_elected_official_count = \
-                ElectedOfficial.objects.filter(google_civic_election_id=from_election_id).count()
-        if positive_value_exists(change_now):
-            if positive_value_exists(from_state_code):
-                ElectedOfficial.objects.filter(google_civic_election_id=from_election_id)\
-                    .filter(state_code__iexact=from_state_code).update(google_civic_election_id=to_election_id)
-            else:
-                ElectedOfficial.objects.filter(google_civic_election_id=from_election_id)\
-                    .update(google_civic_election_id=to_election_id)
-            status += 'ELECTED_OFFICIALS_UPDATED '
-    except Exception as e:
-        error = True
-        status += 'FAILED_TO_UPDATE_ELECTED_OFFICIALS ' + str(e) + ' '
-
-    # ########################################
     # Pledge to Vote
     from_election_pledge_to_vote_count = 0
     if not positive_value_exists(from_state_code):  # Only move if we are NOT moving just one state
@@ -2870,8 +2817,6 @@ def election_migration_view(request):
                          'voter_guide_count: {voter_guide_count}, ' \
                          'position_network_scores_count: {position_network_scores_migrated}, ' \
                          '\n' \
-                         'elected_office_count: {elected_office_count}, ' \
-                         'elected_official_count: {elected_official_count}, ' \
                          'contest_office_visiting_host_count: {contest_office_visiting_host_count}, ' \
                          'contest_office_visiting_origin_count: {contest_office_visiting_origin_count}, ' \
                          'status: {status} '.format(
@@ -2897,8 +2842,6 @@ def election_migration_view(request):
                              voter_device_link_count=from_election_voter_device_link_count,
                              voter_guide_count=from_election_voter_guide_count,
                              position_network_scores_migrated=position_network_scores_migrated,
-                             elected_office_count=from_elected_office_count,
-                             elected_official_count=from_elected_official_count,
                              contest_office_visiting_host_count=contest_office_visiting_host_count,
                              contest_office_visiting_origin_count=contest_office_visiting_origin_count,
                              status=status,)

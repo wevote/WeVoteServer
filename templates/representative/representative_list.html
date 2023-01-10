@@ -1,0 +1,98 @@
+{# templates/representative/representative_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Representatives{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+{% load humanize %}
+
+<h1>Elected Representatives</h1>
+
+<br/>
+
+<a href="{% url 'representative:representative_new' %}?state_code={{ state_code }}">Add New Representative</a>
+<br/><br/>
+
+<form name="state_code_form" method="get" action="{% url 'representative:representative_list' %}">
+    {% csrf_token %}
+
+    {% if state_list %}
+        <select id="state_code_id" name="state_code">
+            <option value="">
+                -- Filter by State Served --</option>
+        {% for key, state in state_list %}
+            <option value="{{ key }}"
+                    {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
+                {{ state }}</option>
+        {% endfor %}
+        </select>
+        {% if state_code != "" %}
+        <a href="{% url 'representative:representative_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&representative_search={{ representative_search }}&show_all=1">
+            Show all Representatives in this state</a>
+        <br/><br/>
+        {% endif %}
+    {% endif %}{# End of if state_list #}
+
+    {% if representative_search %}
+    <a href="{% url 'representative:representative_list' %}?state_code={{ state_code }}">
+         clear search</a>&nbsp;
+    {% endif %}
+    <input type="text" name="representative_search" id="representative_search_id" value="{{ representative_search }}" />
+    <input type="submit" value="Search for Representative" />
+</form>
+<br/>
+
+{% if representative_list %}
+    <table class="table">
+        <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>Representative Name</td>
+            <td>Office Held Name</td>
+            <td>State</td>
+            <td>Twitter Handle</td>
+            <td>Website</td>
+            <td>We Vote Id</td>
+            <td>Vote Smart Id</td>
+        </tr>
+    {% for representative in representative_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                {% if representative.representative_photo_url %}
+                <a href="{% url 'representative:representative_edit' representative.id %}?google_civic_election_id={{ google_civic_election_id }}">
+                    <img src='{{ representative.photo_url }}' height="25px" />
+                </a>
+                {% endif %}
+            </td>
+            <td><a href="{% url 'representative:representative_edit' representative.id %}?google_civic_election_id={{ google_civic_election_id }}">{{ representative.representative_name }}</a></td>
+            <td>{{ representative.office_held_name }}</td>
+            <td>{{ representative.state_code }}</td>
+            <td>{% if representative.representative_twitter_handle %}<a href="https://twitter.com/{{ representative.representative_twitter_handle }}"
+                    target="_blank">{{ representative.representative_twitter_handle }}</a><br />
+                ({{ representative.twitter_followers_count|intcomma }} followers){% endif %}</td>
+            <td>{% if representative.representative_url %}<a href="{{ representative.representative_url }}" target="_blank">{{ representative.representative_url }}</a>{% endif %}</td>
+            <td>{{ representative.we_vote_id }}</td>
+            <td>{{ representative.vote_smart_id|default_if_none:"" }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+
+    <p></p>
+{% else %}
+    <p>(no representatives found)</p>
+    <p>
+        <a href="{% url 'representative:representative_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Representative</a><br />
+    </p>
+{% endif %}
+
+    <script>
+        $(function() {
+            $('#state_code_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+
+{% endblock %}

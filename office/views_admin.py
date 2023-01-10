@@ -114,7 +114,7 @@ def offices_sync_out_view(request):  # officesSyncOut
             'district_id',
             'district_name',
             'district_scope',
-            'elected_office_name',
+            'office_held_name',
             'electorate_specifications',
             'google_ballot_placement',
             'google_civic_election_id',
@@ -926,7 +926,7 @@ def office_edit_process_view(request):
     district_id = request.POST.get('district_id', False)
     primary_party = request.POST.get('primary_party', False)
     state_code = request.POST.get('state_code', False)
-    ballotpedia_office_id = request.POST.get('ballotpedia_office_id', False)  # Related to elected_office
+    ballotpedia_office_id = request.POST.get('ballotpedia_office_id', False)  # Related to office_held
     ballotpedia_race_id = request.POST.get('ballotpedia_race_id', False)  # Related to contest_office
     ballotpedia_race_office_level = request.POST.get('ballotpedia_race_office_level', False)
     ballotpedia_office_name = request.POST.get('ballotpedia_office_name', False)

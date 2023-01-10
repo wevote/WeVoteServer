@@ -1,24 +1,17 @@
-{# templates/office/elected_office_list.html #}
+{# templates/office/office_held_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Elected Offices{% endblock %}
+{% block title %}Offices Held By Elected Representatives{% endblock %}
 
 {%  block content %}
 
-<h1>Elected Offices</h1>
-
-<br/>
-<p>
-    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ELECTED_OFFICE&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-      target="_blank">
-        Import New Elected Offices ></a> (open in new window)
-</p>
+<h1>Offices Currently Held By Elected Representatives</h1>
 
 <br/>
 
-<form id="update_office" name="elected_office_update" method="get" action="{% url 'elected_office:elected_office_update' %}">
+<form id="update_office" name="office_held_update" method="get" action="{% url 'office_held:office_held_update' %}">
         {#% csrf_token %#}
-    <input type="submit" value="Update current elected offices and officials from Google Civic for state ...">
+    <input type="submit" value="Update current office helds and officials from Google Civic for state ...">
     {% if state_list %}
         <select id="update_state_code_id" name="update_state_code">
             <option value="">
@@ -40,10 +33,10 @@
 <br/>
 
 <p>
-    <a href="{% url 'elected_office:elected_office_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Elected Office</a>
+    <a href="{% url 'office_held:office_held_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Office Held</a>
 </p>
 
-<form name="organization_position_choose_election" method="get" action="{% url 'elected_office:elected_office_list' %}">
+<form name="organization_position_choose_election" method="get" action="{% url 'office_held:office_held_list' %}">
     {% csrf_token %}
 
     {% if state_list %}
@@ -57,31 +50,31 @@
         {% endfor %}
         </select>
         {% if state_code != "" %}
-        <a href="{% url 'elected_office:elected_office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}&show_all=1">
-            Show all Elected Offices in this state</a>
+        <a href="{% url 'office_held:office_held_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}&show_all=1">
+            Show all Offices Held in this state</a>
         {% endif %}
         {% endif %}
         <br/><br/>
-        {% if elected_office_search %}
-            <a href="{% url 'elected_office:elected_office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+        {% if office_held_search %}
+            <a href="{% url 'office_held:office_held_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
                  clear search</a>&nbsp;
         {% endif %}
-        <input type="text" name="elected_office_search" id="elected_office_search_id" value="{{ elected_office_search }}" style="width: 450px" />
-        <input type="submit" value="Search for Elected Office" />
+        <input type="text" name="office_held_search" id="office_held_search_id" value="{{ office_held_search }}" style="width: 450px" />
+        <input type="submit" value="Search for Office Held" />
         {# End of if state_list #}
 
-        {% if elected_office_list %}
+        {% if office_held_list %}
             {% if google_civic_election_id %}
             <ul>
                 <li>Prepare: <a href="{% url 'office:find_and_merge_duplicate_offices' %}?google_civic_election_id={{ google_civic_election_id }}"
                                 target="_blank" >
-                Find and Merge Duplicate Elected Offices for this Election</a> (in new window - about 1 minute)</li>
+                Find and Merge Duplicate Offices Held for this Election</a> (in new window - about 1 minute)</li>
             </ul>
 
             {% endif %}
         {% endif %}
 
-{% if elected_office_list %}
+{% if office_held_list %}
     <br/>
     <table class="table">
       <thead>
@@ -89,33 +82,33 @@
             <th>&nbsp;</th>
             <th>ID</th>
             <th>We Vote ID</th>
-            <th>Elected Office Name</th>
+            <th>Office Held Name</th>
             <th>State</th>
             <th>Number Elected</th>
             <th>Ocd Division ID</th>
             <th>Ballotpedia office ID</th>
         </tr>
       </thead>
-    {% for elected_office in elected_office_list %}
+    {% for office_held in office_held_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{{ elected_office.id }}</td>
-            <td>{{ elected_office.we_vote_id }}</td>
+            <td>{{ office_held.id }}</td>
+            <td>{{ office_held.we_vote_id }}</td>
             <td>
-                <a href="{% url 'elected_office:elected_office_summary' elected_office.id %}">{{ elected_office.elected_office_name }}</a>
+                <a href="{% url 'office_held:office_held_summary' office_held.id %}">{{ office_held.office_held_name }}</a>
             </td>
-            <td>{{ elected_office.state_code }}</td>
-            <td>{{ elected_office.number_elected }}</td>
-            <td>{{ elected_office.ocd_division_id }}</td>
-            <td>{{ elected_office.ballotpedia_office_id }}</td>
+            <td>{{ office_held.state_code }}</td>
+            <td>{{ office_held.number_elected }}</td>
+            <td>{{ office_held.ocd_division_id }}</td>
+            <td>{{ office_held.ballotpedia_office_id }}</td>
         </tr>
     {% endfor %}
     </table>
 
     <p></p>
-    {# <p><a href="{% url 'office:offices_export' %}?format=json" target="_blank" >Export Elected Offices</a></p> #}
+    {# <p><a href="{% url 'office:offices_export' %}?format=json" target="_blank" >Export Offices Held</a></p> #}
 {% else %}
-    <p>(no elected offices found)</p>
+    <p>(no office helds found)</p>
 {% endif %}
 </form>
 
@@ -142,7 +135,7 @@
 
     setInterval(function () {
       let origin = new URL('{{request.build_absolute_uri}}').origin;
-      let apiURL = origin + '/elected_office/real_time_status/';
+      let apiURL = origin + '/office_held/real_time_status/';
       let started = document.getElementById('started_update').value;
       console.log("started ---- " + started);
       if (started === 'start') {

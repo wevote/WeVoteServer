@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from candidate.controllers import add_name_to_next_spot, move_candidates_to_another_politician
-from elected_official.controllers import move_elected_officials_to_another_politician
+from representative.controllers import move_representatives_to_another_politician
 from politician.models import Politician, PoliticianManager, POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, \
     POLITICIAN_UNIQUE_IDENTIFIERS
 from position.controllers import move_positions_to_another_politician
@@ -432,15 +432,15 @@ def merge_these_two_politicians(
         }
         return results
 
-    # Update Elected Officials to new politician ids
-    elected_official_results = move_elected_officials_to_another_politician(
+    # Update Representatives to new politician ids
+    representative_results = move_representatives_to_another_politician(
         from_politician_id=politician2_id,
         from_politician_we_vote_id=politician2_we_vote_id,
         to_politician_id=politician1_id,
         to_politician_we_vote_id=politician1_we_vote_id)
-    if not elected_official_results['success']:
-        status += elected_official_results['status']
-        status += "COULD_NOT_MOVE_ELECTED_OFFICIALS_TO_POLITICIAN1 "
+    if not representative_results['success']:
+        status += representative_results['status']
+        status += "COULD_NOT_MOVE_REPRESENTATIVES_TO_POLITICIAN1 "
         results = {
             'success': False,
             'status': status,

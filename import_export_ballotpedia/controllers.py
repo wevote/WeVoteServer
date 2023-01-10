@@ -2436,7 +2436,7 @@ def groom_ballotpedia_data_for_processing(structured_json, google_civic_election
                                           contains_api=False, kind_of_election="", kind_of_election_by_race={}):
     success = False
     status = ""
-    # if kind_of_batch not in (MEASURE, ELECTED_OFFICE, CONTEST_OFFICE, CANDIDATE, ORGANIZATION_WORD, POSITION,
+    # if kind_of_batch not in (MEASURE, OFFICE_HELD, CONTEST_OFFICE, CANDIDATE, ORGANIZATION_WORD, POSITION,
     #                          POLITICIAN, IMPORT_BALLOT_ITEM):
 
     if 'data' in structured_json:

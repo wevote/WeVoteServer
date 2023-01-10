@@ -471,12 +471,12 @@ def fetch_next_we_vote_id_contest_office_integer():
     return fetch_next_we_vote_id_integer('we_vote_id_last_contest_office_integer')
 
 
-def fetch_next_we_vote_id_elected_office_integer():
-    return fetch_next_we_vote_id_integer('we_vote_id_last_elected_office_integer')
+def fetch_next_we_vote_id_office_held_integer():
+    return fetch_next_we_vote_id_integer('we_vote_id_last_office_held_integer')
 
 
-def fetch_next_we_vote_id_elected_official_integer():
-    return fetch_next_we_vote_id_integer('we_vote_id_last_elected_official_integer')
+def fetch_next_we_vote_id_representative_integer():
+    return fetch_next_we_vote_id_integer('we_vote_id_last_representative_integer')
 
 
 def fetch_next_we_vote_id_contest_measure_integer():

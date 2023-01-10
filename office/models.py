@@ -33,7 +33,7 @@ CONTEST_OFFICE_UNIQUE_IDENTIFIERS = [
     'district_id',
     'district_name',
     'district_scope',
-    'elected_office_name',
+    'office_held_name',
     'electorate_specifications',
     'google_ballot_placement',
     'google_civic_election_id',
@@ -176,7 +176,7 @@ class ContestOffice(models.Model):
     is_ballotpedia_primary_election = models.BooleanField(default=False)
     is_ballotpedia_primary_runoff_election = models.BooleanField(default=False)
 
-    # Equivalent to elected_office
+    # Equivalent to office_held
     ballotpedia_office_id = models.PositiveIntegerField(db_index=True, null=True, blank=True)
     # The office's name as passed over by Ballotpedia. This helps us do exact matches when id is missing
     ballotpedia_office_name = models.CharField(verbose_name="office name exactly as received from ballotpedia",
@@ -232,7 +232,7 @@ class ContestOffice(models.Model):
     # "Yes" or "No" depending on whether this a contest being held outside the normal election cycle.
     special = models.CharField(verbose_name="google civic primary party", max_length=255, null=True, blank=True)
     ctcl_uuid = models.CharField(db_index=True, max_length=36, null=True, blank=True)
-    elected_office_name = models.CharField(verbose_name="name of the elected office", max_length=255, null=True,
+    office_held_name = models.CharField(verbose_name="name of the office held", max_length=255, null=True,
                                            blank=True, default=None)
 
     def get_election_day_text(self):

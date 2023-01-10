@@ -138,11 +138,11 @@ def import_ctcl_from_xml(request):
 
                 # Office import, look for Office
                 office_results = ''
-                office_results = batch_manager.store_elected_office_xml(CTCL_SAMPLE_XML_FILE, 0, '', xml_root)
+                office_results = batch_manager.store_office_held_xml(CTCL_SAMPLE_XML_FILE, 0, '', xml_root)
                 if not office_results['success']:
                     results = {
                         'success': False,
-                        'import_complete': 'ELECTED_OFFICE_IMPORT_FAILED'
+                        'import_complete': 'OFFICE_HELD_IMPORT_FAILED'
                     }
                     return results
 

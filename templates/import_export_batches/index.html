@@ -18,8 +18,8 @@
     Import Measures</a></p>
 <p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CONTEST_OFFICE&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
     Import Contest Offices</a></p>
-<p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ELECTED_OFFICE&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-    Import Elected Offices</a></p>
+<p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=OFFICE_HELD&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    Import Offices Held</a></p>
 <p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CANDIDATE&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
     Import Candidates</a></p>
 <p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ORGANIZATION&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">

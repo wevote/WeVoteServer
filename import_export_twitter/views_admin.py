@@ -241,8 +241,8 @@ def refresh_twitter_politician_details_view(request, politician_id):  # TODO DAL
 
 
 @login_required
-def refresh_twitter_elected_official_details_view(request, elected_official_id):
-    # TODO DALE Get this working for politicians
+def refresh_twitter_representative_details_view(request, representative_id):
+    # TODO DALE Get this working for representatives
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
@@ -259,7 +259,7 @@ def refresh_twitter_elected_official_details_view(request, elected_official_id):
     #
     # results = refresh_twitter_candidate_details(candidate)
 
-    return HttpResponseRedirect(reverse('elected_official:elected_official_edit', args=(elected_official_id,)))
+    return HttpResponseRedirect(reverse('representative:representative_edit', args=(representative_id,)))
 
 
 @login_required

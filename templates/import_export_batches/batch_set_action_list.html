@@ -11,8 +11,8 @@
     <h1>
     {% if kind_of_batch == "MEASURE" %}
         Process Measure Data
-    {% elif kind_of_batch == "ELECTED_OFFICE" %}
-        Process Elected Office Data
+    {% elif kind_of_batch == "OFFICE_HELD" %}
+        Process Office Held Data
     {% elif kind_of_batch == "CONTEST_OFFICE" %}
         Process Contest Office Data
     {% elif kind_of_batch == "CANDIDATE" %}
@@ -154,11 +154,11 @@
                     <td></td>
                     <td>{{ one_batch_row.batch_row_action.kind_of_action }}</td>
                 </tr>
-                {% elif one_batch_row.kind_of_batch == "ELECTED_OFFICE" %}
+                {% elif one_batch_row.kind_of_batch == "OFFICE_HELD" %}
             {# ### OFFICE### #}
                 <tr>
                     <th></th>
-                    <th>elected_office_name</th>
+                    <th>office_held_name</th>
                     <th>state_code</th>
                     <th>ALERTS</th>
                     <th>ACTIONS</th>
@@ -166,11 +166,11 @@
                 </tr>
                 <tr>
                     <td>analysis:</td>
-                    <td>{{ one_batch_row.batch_row_action.elected_office_name}}</td>
+                    <td>{{ one_batch_row.batch_row_action.office_held_name}}</td>
                     <td>{{ one_batch_row.batch_row_action.state_code }}</td>
                     <td></td>
                     <td>{{ one_batch_row.batch_row_action.kind_of_action }}</td>
-                    <td><a href="{% url 'import_export_batches:batch_action_list_update_or_create_process' %}?kind_of_batch=ELECTED_OFFICE&batch_header_id={{ batch_header_id }}&batch_row_id={{ one_batch_row.id }}">Import into ElectedOffice Table</a></td>
+                    <td><a href="{% url 'import_export_batches:batch_action_list_update_or_create_process' %}?kind_of_batch=OFFICE_HELD&batch_header_id={{ batch_header_id }}&batch_row_id={{ one_batch_row.id }}">Import into OfficeHeld Table</a></td>
                 </tr>
                 {% elif one_batch_row.kind_of_batch == "CONTEST_OFFICE" %}
             {# ### MEASURE### #}

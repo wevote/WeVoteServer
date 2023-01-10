@@ -6,8 +6,8 @@
     Import Candidates
 {% elif kind_of_batch == "CONTEST_OFFICE" %}
     Import Contest Offices
-{% elif kind_of_batch == "ELECTED_OFFICE" %}
-    Import Elected Offices
+{% elif kind_of_batch == "OFFICE_HELD" %}
+    Import Offices Held
 {% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
     Import Ballot at One Location
 {% elif kind_of_batch == "IMPORT_POLLING_LOCATION" %}
@@ -37,7 +37,7 @@
 {% elif kind_of_batch == "CONTEST_OFFICE" %}
     <p><a href="{% url 'office:office_list' %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
           target="_blank">Current Offices{% if google_civic_election_id > 0 %} for this Election{% endif %} <span class="glyphicon glyphicon-new-window"></span></a></p>
-{% elif kind_of_batch == "ELECTED_OFFICE" %}
+{% elif kind_of_batch == "OFFICE_HELD" %}
 {% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
     <p><a href="{% url 'election:election_summary' 0 %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
           target="_blank">Current Ballots{% if google_civic_election_id > 0 %} for this Election{% endif %} <span class="glyphicon glyphicon-new-window"></span></a></p>
@@ -69,8 +69,8 @@
         Contest Office</a> -
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=MEASURE&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
         Measure</a> -
-    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ELECTED_OFFICE&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-        Elected Office</a> -
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=OFFICE_HELD&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+        Office Held</a> -
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ORGANIZATION&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
         Endorser</a> -
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POLITICIAN&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
@@ -86,8 +86,8 @@
         Import Candidate Data in Bulk
     {% elif kind_of_batch == "CONTEST_OFFICE" %}
         Import Contest Office Data in Bulk
-    {% elif kind_of_batch == "ELECTED_OFFICE" %}
-        Import Elected Office Data in Bulk
+    {% elif kind_of_batch == "OFFICE_HELD" %}
+        Import Office Held Data in Bulk
     {% elif kind_of_batch == "IMPORT_BALLOT_ITEM" %}
         Import Ballot Items for One Map Point
     {% elif kind_of_batch == "IMPORT_POLLING_LOCATION" %}
