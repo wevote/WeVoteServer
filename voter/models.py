@@ -3478,6 +3478,7 @@ class ContactEmailAugmented(models.Model):
     """
     What information have we retrieved to augment this one email address?
     """
+    objects = None
     checked_against_open_people = models.BooleanField(db_index=True, default=False)
     checked_against_sendgrid = models.BooleanField(db_index=True, default=False)
     checked_against_snovio = models.BooleanField(db_index=True, default=False)
@@ -3536,6 +3537,9 @@ class VoterDeviceLink(models.Model):
     # The id for this object is not used in any searches
     # A randomly generated identifier that gets stored as a cookie on a single device
     # See wevote_functions.functions, function generate_voter_device_id for a discussion of voter_device_id length
+    MultipleObjectsReturned = None
+    DoesNotExist = None
+    objects = None
     voter_device_id = models.CharField(verbose_name='voter device id',
                                        max_length=255, null=False, blank=False, unique=True)
     # The voter_id associated with voter_device_id

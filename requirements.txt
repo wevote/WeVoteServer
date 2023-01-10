@@ -1,10 +1,14 @@
 # As we approach deployment, we should probably move to different requirements files for local vs. production
 # See Chapt 5.5 in Two Scoops of Django
-boto3==1.13.16
+# Unipath==1.1s
+# python-votesmart=0.3.3  # Using local version instead since 0.3.3 not Py 3 compatible
+# sendgrid-django==4.2.0
+Pillow==9.3.0
+PyJWT==2.4.0
+boto3==1.26.46
 cryptography==3.4.8
 dj-database-url==0.5.0
 dj-static==0.0.6
-django==3.2.16
 django-background-tasks==1.2.5
 django-bootstrap3==15.0.0
 django-cors-headers==3.7.0
@@ -12,6 +16,7 @@ django-crispy-forms==1.12.0
 django-sslserver==0.22
 django-twitter-bootstrap==3.3.0
 django-user_agents==0.4.0
+django==3.2.16
 djangorestframework==3.12.4
 elasticsearch>=1.0.0,<2.0.0
 facebook-sdk==3.1.0
@@ -26,28 +31,25 @@ google-cloud-firestore==2.4.0
 google-cloud-storage==2.3.0
 gunicorn==20.1.0
 httplib2==0.19.1
+nameparser==1.0.6
 oauth2client==4.1.3
 oauthlib==3.2.1
-nameparser==1.0.6
 phonenumbers==8.12.39
-Pillow==9.3.0
 psycopg2-binary==2.9.3
-pyasn1==0.4.8
-pyasn1-modules==0.2.8
 py3dns==3.2.1
+pyasn1-modules==0.2.8
+pyasn1==0.4.8
 pygeoip==0.3.2
 pyjwkest==1.4.2
-PyJWT==2.4.0
 python-magic==0.4.24  # Requires "brew install libmagic" or "brew upgrade libmagic" or "pip install libmagic"
 python3-openid -e git+git://github.com/wevote/python3-openid.git@master#egg=python3-openid
 pytz==2021.1
-requests==2.25.1
 requests-oauthlib==1.3.0
+requests==2.25.1
 robot-detection==0.4
 rsa==4.7.2
 selenium==3.141.0
 sendgrid==6.9.7
-# sendgrid-django==4.2.0
 setuptools
 simplejson==3.17.2
 six==1.14.0
@@ -57,11 +59,9 @@ static3==0.7.0
 stripe==2.58.0
 tweepy==4.4.0
 twilio==7.8.2
-# Unipath==1.1s
 uritemplate==3.0.1
 usaddress==0.5.10
 user-agents==1.1.0
 validate-email==1.3
-# python-votesmart=0.3.3  # Using local version instead since 0.3.3 not Py 3 compatible
 wikipedia==1.4.0
 xmltodict==0.12.0

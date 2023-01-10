@@ -32,6 +32,11 @@ from config.base import get_environment_variable
 #
 # Make sure the QueueUrl displayed matches AWS_SQS_WEB_QUEUE_URL in
 #  config file environment-variables.json
+#
+# Then start the queue processing code (in a seperate python server instance) by opening a terminal window and running
+#    python manage.py runsqsworker
+# you will see looging from the sqs worker in that terminal
+
 
 # max time (in sec) that a job may take to complete
 #  this prevents a different worker from picking up a job that
@@ -40,34 +45,28 @@ MAX_JOB_PROCESSING_TIME = 60
 MAX_JOB_RETRY_ATTEMPTS = 5
 
 def process_request(function, body, message):
+    # print('sqs job execute process_request ' + function + '  ' + str(body))
 
     if function == 'caching_facebook_images_for_retrieve_process':
         from import_export_facebook.controllers import caching_facebook_images_for_retrieve_process
         repair_facebook_related_voter_caching_now = body['repair_facebook_related_voter_caching_now']
-        facebook_auth_response = body['facebook_auth_response']
+        facebook_auth_response_id = body['facebook_auth_response_id']
         voter_we_vote_id_attached_to_facebook = body['voter_we_vote_id_attached_to_facebook']
         voter_we_vote_id_attached_to_facebook_email = body['voter_we_vote_id_attached_to_facebook_email']
         voter_we_vote_id = body['voter_we_vote_id']
 
-        # print("caching_facebook_images_for_retrieve_process from SQS in a Lambda: %s, %s %s, %s, " %
-        #       (voter_we_vote_id, facebook_auth_response.facebook_first_name, facebook_auth_response.facebook_last_name,
-        #        facebook_auth_response.facebook_email))
         caching_facebook_images_for_retrieve_process(repair_facebook_related_voter_caching_now,
-                                                     facebook_auth_response,
+                                                     facebook_auth_response_id,
                                                      voter_we_vote_id_attached_to_facebook,
                                                      voter_we_vote_id_attached_to_facebook_email,
                                                      voter_we_vote_id)
     elif function == 'voter_cache_facebook_images_process':
         from voter.controllers import voter_cache_facebook_images_process
-        voter = body['voter']
-        facebook_auth_response = body['facebook_auth_response']
-        print("voter_cache_facebook_images_process from SQS in a Lambda: %s, %s %s, %s, " %
-              (voter.we_vote_id, facebook_auth_response.facebook_first_name, facebook_auth_response.facebook_last_name,
-               facebook_auth_response.facebook_email))
-        voter_cache_facebook_images_process(voter, facebook_auth_response)
+        voter_id = body['voter_id']
+        facebook_auth_response_id = body['facebook_auth_response_id']
+
+        voter_cache_facebook_images_process(voter_id, facebook_auth_response_id)
     else:
-        # default: no function found, act as
-        #  processed, so it gets deleted
         print(f"Job references unknown function [{function}], deleting.")
 
     return True
@@ -83,6 +82,7 @@ def worker_run(queue_url):
         import boto3
 
     sqs = boto3.client('sqs')
+    # print("sqs.receive_message startup--------------------")
 
     while True:
         # Receive message from SQS queue
