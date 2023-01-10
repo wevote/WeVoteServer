@@ -19,7 +19,7 @@ class Command(BaseCommand):
             print("Usage: $ python manage.py send_sqs_message function_name body")
             print("Example: $ python manage.py send_sqs_message TestFunctionName '{ \"field\": \"test\" }'")
         else:
-            print("Sending test SQS message, function: " + args[0] + ", body: " + args[1])
+            print("Sending test SQS message, function: " + args[0] + ", body: " + str(args[1]))
             submit_web_function_job(args[0], args[1])
 
         print("End of send_sqs_message")

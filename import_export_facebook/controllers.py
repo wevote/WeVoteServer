@@ -103,8 +103,8 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
 
     # Cache original and resized images in a thread
     submit_web_function_job('voter_cache_facebook_images_process', {
-                        'voter': voter,
-                        'facebook_auth_response': facebook_auth_response,
+                        'voter_id': voter.id,
+                        'facebook_auth_response_id': facebook_auth_response.id,
                     })
 
     status += " FACEBOOK_IMAGES_SCHEDULED_TO_BE_CACHED_IN_LAMBDA"
@@ -344,7 +344,7 @@ def facebook_disconnect_for_api(voter_device_id):  # facebookDisconnect
 
 
 def caching_facebook_images_for_retrieve_process(repair_facebook_related_voter_caching_now,
-                                                 facebook_auth_response,
+                                                 facebook_auth_response_id,
                                                  voter_we_vote_id_attached_to_facebook,
                                                  voter_we_vote_id_attached_to_facebook_email,
                                                  voter_we_vote_id):
@@ -353,6 +353,9 @@ def caching_facebook_images_for_retrieve_process(repair_facebook_related_voter_c
 
     t0 = time()
     status = ''
+
+    facebook_manager = FacebookManager()
+    facebook_auth_response = facebook_manager.retrieve_facebook_auth_response_by_id(facebook_auth_response_id)
 
     if repair_facebook_related_voter_caching_now:
         voter_manager = VoterManager()
@@ -655,7 +658,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
     # Cache original and resized images in a Lambda for read
     submit_web_function_job('caching_facebook_images_for_retrieve_process', {
                         'repair_facebook_related_voter_caching_now': repair_facebook_related_voter_caching_now,
-                        'facebook_auth_response': facebook_auth_response,
+                        'facebook_auth_response_id': facebook_auth_response.id,
                         'voter_we_vote_id_attached_to_facebook': voter_we_vote_id_attached_to_facebook,
                         'voter_we_vote_id_attached_to_facebook_email': voter_we_vote_id_attached_to_facebook_email,
                         'voter_we_vote_id': voter_we_vote_id,

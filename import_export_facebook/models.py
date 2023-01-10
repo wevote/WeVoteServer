@@ -2,15 +2,16 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-import facebook
 import json
 import re
+
+import facebook
 import requests
 from django.core.validators import RegexValidator
 from django.db import models
 
 import wevote_functions.admin
-from config.base import get_environment_variable, get_environment_variable_default
+from config.base import get_environment_variable_default
 from email_outbound.models import SEND_STATUS_CHOICES, TO_BE_PROCESSED
 from exception.models import handle_exception, print_to_log
 from wevote_functions.functions import generate_random_string, positive_value_exists, convert_to_int
@@ -29,6 +30,8 @@ class FacebookAuthResponse(models.Model):
     """
     This is the authResponse data from a Facebook authentication
     """
+    objects = None
+    DoesNotExist = None
     voter_device_id = models.CharField(
         verbose_name="voter_device_id initiating Facebook Auth", max_length=255, null=False, blank=False, unique=True)
     datetime_of_authorization = models.DateTimeField(verbose_name='date and time of action', null=False, auto_now=True)
@@ -75,6 +78,8 @@ class FacebookLinkToVoter(models.Model):
     """
     This is the link between a Facebook account and a We Vote voter account
     """
+    DoesNotExist = None
+    objects = None
     voter_we_vote_id = models.CharField(verbose_name="we vote id for the email owner", max_length=255, unique=True)
     facebook_user_id = models.BigIntegerField(verbose_name="facebook big integer id", null=False, unique=True)
     secret_key = models.CharField(
@@ -105,6 +110,8 @@ class FacebookUser(models.Model):
     """
     My facebook friends details, from the perspective of facebook id of me
     """
+    DoesNotExist = None
+    objects = None
     facebook_user_id = models.BigIntegerField(verbose_name="facebook id of user", null=False, unique=False)
     facebook_user_name = models.CharField(
         verbose_name="User name from Facebook", max_length=255, null=True, blank=True, unique=False)
@@ -148,8 +155,10 @@ class FacebookUser(models.Model):
 
 class FacebookFriendsUsingWeVote(models.Model):
     """
-    My facebook friends ids who are already using Wvote App, from the perspective of facebook id of me
+    My facebook friends ids who are already using Wevote App, from the perspective of facebook id of me
     """
+    DoesNotExist = None
+    objects = None
     facebook_id_of_me = models.BigIntegerField(verbose_name="facebook id of viewer", null=False, unique=False)
     facebook_id_of_my_friend = models.BigIntegerField(verbose_name="facebook id of my friend", null=False, unique=False)
 
@@ -336,6 +345,12 @@ class FacebookManager(models.Manager):
             'facebook_auth_response': facebook_auth_response,
         }
         return results
+
+
+    def retrieve_facebook_auth_response_by_id(self, facebook_auth_response_id, read_only=False):
+        facebook_auth_response_on_stage = FacebookAuthResponse.objects.get(id=facebook_auth_response_id)
+        return facebook_auth_response_on_stage
+
 
     def delete_facebook_auth_responses(self, facebook_user_id):
         """

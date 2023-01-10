@@ -1739,12 +1739,15 @@ def voter_create_for_api(voter_device_id):  # voterCreate
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_cache_facebook_images_process(voter, facebook_auth_response):
+def voter_cache_facebook_images_process(voter_id, facebook_auth_response_id):
     # Called by this server running in an AWS Lambda, invoked from a SQS queue
     # Cache original and resized images
 
     t0 = time()
     # print("process started")
+    facebook_manager = FacebookManager()
+    facebook_auth_response = facebook_manager.retrieve_facebook_auth_response_by_id(facebook_auth_response_id)
+    voter = Voter.objects.get(id=voter_id)  # This voter existed immediately before the call -- so it is safe
 
     cache_results = cache_master_and_resized_image(
         voter_we_vote_id=voter.we_vote_id,
@@ -1836,8 +1839,8 @@ def voter_merge_two_accounts_for_facebook(facebook_secret_key, facebook_user_id,
 
     # Cache original and resized images in a Lambda
     submit_web_function_job('voter_cache_facebook_images_process', {
-                        'voter': facebook_owner_voter,
-                        'facebook_auth_response': facebook_auth_response,
+                        'voter_id': facebook_owner_voter.id,
+                        'facebook_auth_response_id': facebook_auth_response.id,
                     })
     status += " FACEBOOK_IMAGES_CACHED_IN_LAMBDA"
 
