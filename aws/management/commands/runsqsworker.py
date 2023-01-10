@@ -100,13 +100,13 @@ def worker_run(queue_url):
 
         if 'Messages' in response.keys() and len(response['Messages']) > 0:
             message = response['Messages'][0]
-            logger.error("(Ok) SQS -- Got message: ", message)
             receipt_handle = message['ReceiptHandle']
             processed = False
 
 
             if 'Function' in message['MessageAttributes'].keys():
                 function = message['MessageAttributes']['Function']['StringValue']
+                logger.error(f"(Ok) SQS -- Got message for function: {function}")
                 print(f"Calling function [{function}]")
                 body = json.loads(message['Body'])
                 try:
