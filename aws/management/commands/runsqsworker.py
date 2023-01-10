@@ -33,7 +33,7 @@ from config.base import get_environment_variable
 # Make sure the QueueUrl displayed matches AWS_SQS_WEB_QUEUE_URL in
 #  config file environment-variables.json
 #
-# Then start the queue processing code (in a seperate python server instance) by opening a terminal window and running
+# Then start the queue processing code (in a separate python server instance) by opening a terminal window and running
 #    python manage.py runsqsworker
 # you will see looging from the sqs worker in that terminal
 
