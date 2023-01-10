@@ -1303,7 +1303,7 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
     dt1 = t2 - t1
     dt2 = t3 - t2
     dt = t3 - t0
-    logger.error('(not an error) voter_facebook_sign_in_save_view step 1 took ' + "{:.6f}".format(dt0) +
+    logger.error('(Ok) voter_facebook_sign_in_save_view step 1 took ' + "{:.6f}".format(dt0) +
                  ' seconds, step 2 took ' + "{:.6f}".format(dt1) +
                  ' seconds, step 3 took ' + "{:.6f}".format(dt2) +
                  ' seconds, total took ' + "{:.6f}".format(dt) + ' seconds')

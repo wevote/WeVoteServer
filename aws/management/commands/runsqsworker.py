@@ -3,7 +3,10 @@ import os
 
 from django.core.management.base import BaseCommand
 
+import wevote_functions.admin
 from config.base import get_environment_variable
+
+logger = wevote_functions.admin.get_logger(__name__)
 
 # For testing the job queue system locally, you can run an SQS 
 # server locally using localstack within docker.
@@ -30,12 +33,12 @@ from config.base import get_environment_variable
 # Create a sqs queue, and copy the QueueUrl it reports to environment-variables.json
 #   awslocal sqs create-queue --queue-name job-queue.fifo --attributes FifoQueue=true,ContentBasedDeduplication=true
 #
-# Make sure the QueueUrl displayed matches AWS_SQS_WEB_QUEUE_URL in
-#  config file environment-variables.json
+# Make sure the QueueUrl displayed matches AWS_SQS_WEB_QUEUE_URL in the config file environment-variables.json
 #
 # Then start the queue processing code (in a separate python server instance) by opening a terminal window and running
-#    python manage.py runsqsworker
-# you will see looging from the sqs worker in that terminal
+#      python manage.py runsqsworker
+#
+#   you will see logging from the sqs worker in that terminal
 
 
 # max time (in sec) that a job may take to complete
@@ -45,7 +48,7 @@ MAX_JOB_PROCESSING_TIME = 60
 MAX_JOB_RETRY_ATTEMPTS = 5
 
 def process_request(function, body, message):
-    # print('sqs job execute process_request ' + function + '  ' + str(body))
+    logger.error('(Ok) SQS job execute process_request ' + function + '  ' + str(body))
 
     if function == 'caching_facebook_images_for_retrieve_process':
         from import_export_facebook.controllers import caching_facebook_images_for_retrieve_process
@@ -67,7 +70,7 @@ def process_request(function, body, message):
 
         voter_cache_facebook_images_process(voter_id, facebook_auth_response_id)
     else:
-        print(f"Job references unknown function [{function}], deleting.")
+        logger.error(f"SQS Job references unknown function [{function}], deleting.")
 
     return True
 
@@ -97,7 +100,7 @@ def worker_run(queue_url):
 
         if 'Messages' in response.keys() and len(response['Messages']) > 0:
             message = response['Messages'][0]
-            print("Got message:", message)
+            logger.error("(Ok) SQS -- Got message: ", message)
             receipt_handle = message['ReceiptHandle']
             processed = False
 
@@ -112,7 +115,7 @@ def worker_run(queue_url):
                     print("Failed to call function {function}:", e)
 
             else:
-                print("No function provided in SQS message, deleting invalid request.")
+                logger.error("SQS No function provided in SQS message, deleting invalid request.")
                 processed = True
 
             # expire messages after max number of retries
