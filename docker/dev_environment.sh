@@ -12,7 +12,7 @@ DB_NAME="wevotedb"
 set -e
 
 # determine base WeVoteServer directory
-BASEDIR=$(dirname $0)/..
+BASEDIR=$(cd $(dirname $0)/..; pwd)
 
 usage() {
 	echo ""
