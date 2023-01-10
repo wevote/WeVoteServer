@@ -107,7 +107,7 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
                         'facebook_auth_response_id': facebook_auth_response.id,
                     })
 
-    status += " FACEBOOK_IMAGES_SCHEDULED_TO_BE_CACHED_IN_LAMBDA"
+    status += " FACEBOOK_IMAGES_SCHEDULED_TO_BE_CACHED_VIA_SQS"
     success = True
 
     # ##### Make the facebook_email an email for the current voter (and possibly the primary email)
@@ -192,7 +192,7 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
 def facebook_friends_action_for_api(voter_device_id):   # facebookFriendsAction
     """
     This is used to retrieve facebook friends who are using WeVote app by facebook 'friends' API.
-    However we use the Facebook "games" api "invitable_friends" data on the fly from the webapp, to invite facebook
+    However, we use the Facebook "games" api "invitable_friends" data on the fly from the webapp, to invite facebook
     friends who are not using we vote.
     :param voter_device_id:
     :return:
@@ -348,7 +348,7 @@ def caching_facebook_images_for_retrieve_process(repair_facebook_related_voter_c
                                                  voter_we_vote_id_attached_to_facebook,
                                                  voter_we_vote_id_attached_to_facebook_email,
                                                  voter_we_vote_id):
-    # Called by this server running in an AWS Lambda, invoked from a SQS queue
+    # Invoked from a SQS queue message (job)
     # Cache original and resized images
 
     t0 = time()
@@ -413,9 +413,10 @@ def caching_facebook_images_for_retrieve_process(repair_facebook_related_voter_c
                                         facebook_profile_image_url_https,
                                         facebook_background_image_url_https)
     dtc = time() - t0
-    logger.error('(Not an error) Processing the facebook images for a RETRIEVE in a Lambda for voter %s %s (%s) took %.3f seconds' %
-                 (facebook_auth_response.facebook_first_name, facebook_auth_response.facebook_last_name,
-                  voter_we_vote_id_for_cache, dtc))
+    logger.error(
+        '(Ok) SQS Processing the facebook images for a RETRIEVE for voter %s %s (%s) took %.3f seconds' %
+        (facebook_auth_response.facebook_first_name, facebook_auth_response.facebook_last_name,
+         voter_we_vote_id_for_cache, dtc))
     logger.debug('caching_facebook_images_for_retrieve_process status: ' + status)
 
 
@@ -655,7 +656,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
                 status += "FACEBOOK_LINKED_VOTER_NOT_REPAIRED "
     t3 = time()
 
-    # Cache original and resized images in a Lambda for read
+    # Cache original and resized images in a SQS message (job) for read
     submit_web_function_job('caching_facebook_images_for_retrieve_process', {
                         'repair_facebook_related_voter_caching_now': repair_facebook_related_voter_caching_now,
                         'facebook_auth_response_id': facebook_auth_response.id,
@@ -664,7 +665,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
                         'voter_we_vote_id': voter_we_vote_id,
                     })
 
-    status += " FACEBOOK_IMAGES_SCHEDULED_TO_BE_CACHED_IN_LAMBDA_BY_RETRIEVE"
+    status += " FACEBOOK_IMAGES_SCHEDULED_TO_BE_CACHED_VIA_SQS_BY_RETRIEVE"
     t4 = time()
 
     fbuser = None
@@ -686,9 +687,9 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
     dt3 = t4 - t3
     dt4 = t5 - t4
     dt = t5 - t0
-    logger.error('(not an error) RETRIEVE voter_facebook_sign_in_retrieve_for_api step 1 took ' + "{:.6f}".format(dt0) +
+    logger.error('(Ok) RETRIEVE voter_facebook_sign_in_retrieve_for_api step 1 took ' + "{:.6f}".format(dt0) +
                  ' seconds, step 2 took ' + "{:.6f}".format(dt1) +
-                 ' seconds, step 3 took ' + "{:.6f}".format(dt2) +
+                 ' seconds, step 3 (SQS queueing) took ' + "{:.6f}".format(dt2) +
                  ' seconds, step 4 took ' + "{:.6f}".format(dt3) +
                  ' seconds, step 5 took ' + "{:.6f}".format(dt4) +
                  ' seconds, total took ' + "{:.6f}".format(dt) + ' seconds')

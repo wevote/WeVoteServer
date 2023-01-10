@@ -53,7 +53,7 @@ def donation_with_stripe_view(request):  # donationWithStripe
     signed_in_facebook = voter.signed_in_facebook() if voter else False
     # Dale would like to allow not-signed in donors, so this is temporary so we can gather (log) some info
     if not voter_found or not (signed_in_twitter or signed_in_facebook):
-        logger.error('(not an error) DONATION voter not found (%s) %s - %s, signedIn %s, twitter %s, facebook %s, request %s' %
+        logger.error('(Ok) DONATION voter not found (%s) %s - %s, signedIn %s, twitter %s, facebook %s, request %s' %
                      (ip_address, name, we_vote_id, signed_in, signed_in_twitter, signed_in_facebook, dict(request.GET)))
         return HttpResponseForbidden("error")
 
@@ -64,7 +64,7 @@ def donation_with_stripe_view(request):  # donationWithStripe
         return HttpResponseNotFound("Stripe transactions disabled by WeVote")
 
 
-    logger.error('(not an error) DONATION voter PASSED SCREEN (%s) %s - %s, signedIn %s, twitter %s, facebook %s' %
+    logger.error('(Ok) DONATION voter PASSED SCREEN (%s) %s - %s, signedIn %s, twitter %s, facebook %s' %
                  (ip_address, name, we_vote_id, signed_in, signed_in_twitter, signed_in_facebook))
 
     # Handle the hopefully valid API call
@@ -92,7 +92,7 @@ def donation_with_stripe_view(request):  # donationWithStripe
         voter_manager.fetch_linked_organization_we_vote_id_by_voter_we_vote_id(voter_we_vote_id)
 
     if positive_value_exists(token):
-        logger.error('(not an error) DONATION donation_with_stripe_for_app called '
+        logger.error('(Ok) DONATION donation_with_stripe_for_app called '
                      '(%s) %s - %s, signedIn %s, twitter %s, facebook %s, request %s' %
                      (ip_address, name, we_vote_id, signed_in, signed_in_twitter, signed_in_facebook,
                       dict(request.GET)))
@@ -163,7 +163,7 @@ def donation_refund_view(request):  # donationRefund
         voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
         if len(charge_id) > 1:
             results = donation_refund_for_api(request, charge_id, voter_we_vote_id)
-            logger.error('(not an error) DONATION REFUNDED donation_refund_for_api (%s) charge_id %s, voter_we_vote_id %s' %
+            logger.error('(Ok) DONATION REFUNDED donation_refund_for_api (%s) charge_id %s, voter_we_vote_id %s' %
                          (ip_address, charge_id, voter_we_vote_id))
             json_data = {
                 'success': str(results),

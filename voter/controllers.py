@@ -1740,7 +1740,7 @@ def voter_create_for_api(voter_device_id):  # voterCreate
 
 
 def voter_cache_facebook_images_process(voter_id, facebook_auth_response_id):
-    # Called by this server running in an AWS Lambda, invoked from a SQS queue
+    # Invoked from an SQS queue message (job)
     # Cache original and resized images
 
     t0 = time()
@@ -1766,9 +1766,11 @@ def voter_cache_facebook_images_process(voter_id, facebook_auth_response_id):
         we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
         we_vote_hosted_profile_image_url_tiny)
     dtc = time() - t0
-    # 12/20/22: takes 1.2 seconds on my local postgres, leave this logger in for a few months, so we can gather data
-    logger.error('(Not an error) Processing the facebook images in a Lambda for voter %s %s (%s) took %.3f seconds' %
-                 (voter.first_name, voter.last_name, voter.we_vote_id, dtc))
+    # 12/20/22: This takes 1.2 seconds on my local postgres, but 5 to 15 seconds in production,
+    # leave this logger active for a few months, so we can gather data
+    logger.error(
+        '(Ok) SQS Processing the facebook images for voter %s %s (%s) took %.3f seconds' %
+        (voter.first_name, voter.last_name, voter.we_vote_id, dtc))
     # print("process finished")
 
 
@@ -1837,12 +1839,12 @@ def voter_merge_two_accounts_for_facebook(facebook_secret_key, facebook_user_id,
             }
             return None, None, error_results
 
-    # Cache original and resized images in a Lambda
+    # Cache original and resized images in a SQS message (job)
     submit_web_function_job('voter_cache_facebook_images_process', {
                         'voter_id': facebook_owner_voter.id,
                         'facebook_auth_response_id': facebook_auth_response.id,
                     })
-    status += " FACEBOOK_IMAGES_CACHED_IN_LAMBDA"
+    status += " FACEBOOK_IMAGES_SCHEDULED_TO_BE_CACHED_VIA_SQS"
 
     # ##### Store the facebook_email as a verified email for facebook_owner_voter
     if positive_value_exists(facebook_auth_response.facebook_email):
