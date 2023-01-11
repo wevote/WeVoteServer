@@ -2087,8 +2087,8 @@ class VoterManager(BaseUserManager):
                 voter = results['voter']
                 logger.error(
                     '(Ok) save_facebook_user_values DOUBLE_CHECK ' +
-                    '%s %s (%s)(%s) active "%s" hosted_profile_image %s hosted_profile_facebook_image %s' %
-                    (voter.first_name, voter.last_name, voter.we_vote_id, voter.facebook_id,
+                    '%s %s (%s)(%s) at %s active "%s" hosted_profile_image %s hosted_profile_facebook_image %s' %
+                    (voter.first_name, voter.last_name, voter.we_vote_id, voter.facebook_id, voter.date_last_changed,
                      voter.profile_image_type_currently_active, voter.we_vote_hosted_profile_image_url_large,
                      voter.we_vote_hosted_profile_facebook_image_url_large))
 

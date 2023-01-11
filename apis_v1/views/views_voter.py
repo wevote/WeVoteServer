@@ -1246,6 +1246,7 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
     )
 
     t1 = time()
+    t2 = time()
 
     status = results['status']
     merge_occurred = False
