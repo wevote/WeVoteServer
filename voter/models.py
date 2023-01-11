@@ -2075,9 +2075,9 @@ class VoterManager(BaseUserManager):
 
             # 1/11/23, this SQS job is run asynchronously, and voter merge currently takes many seconds to complete,
             # during which time it can overwrite this good data with stale data.  So verify, and overwrite if necessary,
-            # the data for 2*10=20 seconds
+            # the data for 2*15=30 seconds
             loop = 0
-            while loop < 10:
+            while loop < 15:
                 loop += 1
                 voter_readwrite = Voter.objects.get(id=voter.id)
                 voter_readonly = Voter.objects.using('readonly').get(id=voter.id)
