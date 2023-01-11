@@ -4,6 +4,7 @@
 
 import string
 import sys
+import time
 from datetime import datetime, timedelta
 
 import pytz
@@ -2036,6 +2037,7 @@ class VoterManager(BaseUserManager):
                                   we_vote_hosted_profile_image_url_large=None,
                                   we_vote_hosted_profile_image_url_medium=None,
                                   we_vote_hosted_profile_image_url_tiny=None):
+        # 1/11/23: This is now only called from voter_cache_facebook_images_process() within an SQS job
         status = ''
         try:
             hosted_profile_facebook_saved = False
@@ -2060,7 +2062,6 @@ class VoterManager(BaseUserManager):
                 voter.we_vote_hosted_profile_facebook_image_url_medium = we_vote_hosted_profile_image_url_medium
             if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
                 voter.we_vote_hosted_profile_facebook_image_url_tiny = we_vote_hosted_profile_image_url_tiny
-            init_active = voter.profile_image_type_currently_active
             if voter.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN or not \
                     positive_value_exists(voter.profile_image_type_currently_active):
                 voter.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_FACEBOOK
@@ -2072,25 +2073,31 @@ class VoterManager(BaseUserManager):
                     voter.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
                 if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
                     voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
-            logger.error(
-                '(Ok) save_facebook_user_values %s %s (%s)(%s) active "%s" -> "%s" cached_fb %s hosted_lg %s lgSave %s lgFbSave %s' %
-                (voter.first_name, voter.last_name, voter.we_vote_id, facebook_auth_response.facebook_user_id,
-                 init_active, voter.profile_image_type_currently_active, cached_facebook_profile_image_url_https,
-                 we_vote_hosted_profile_image_url_large, hosted_profile_facebook_saved,
-                 hosted_profile_image_saved))
 
-            voter.save()
-
-            voter_manager = VoterManager()
-            results = voter_manager.retrieve_voter_by_we_vote_id(voter.we_vote_id)
-            if results['voter_found']:
-                voter = results['voter']
+            # 1/11/23, this SQS job is run asynchronously, and voter merge currently takes many seconds to complete,
+            # during which time it can overwrite this good data with stale data.  So verify, and overwrite if necessary,
+            # the data for 2*6=12 seconds
+            loop = 0
+            while loop < 6:
+                loop += 1
                 logger.error(
-                    '(Ok) save_facebook_user_values DOUBLE_CHECK ' +
-                    '%s %s (%s)(%s) at %s active "%s" hosted_profile_image %s hosted_profile_facebook_image %s' %
-                    (voter.first_name, voter.last_name, voter.we_vote_id, voter.facebook_id, voter.date_last_changed,
-                     voter.profile_image_type_currently_active, voter.we_vote_hosted_profile_image_url_large,
-                     voter.we_vote_hosted_profile_facebook_image_url_large))
+                    '(Ok) save_facebook_user_values loop #\
+                    %s -- %s %s (%s)(%s) active "%s" hosted_image %s lgSaved %s lgFbSaved %s' %
+                    (loop, voter.first_name, voter.last_name, voter.we_vote_id, facebook_auth_response.facebook_user_id,
+                     voter.profile_image_type_currently_active, we_vote_hosted_profile_image_url_large,
+                     hosted_profile_facebook_saved, hosted_profile_image_saved))
+
+                if voter.we_vote_hosted_profile_image_url_large != we_vote_hosted_profile_image_url_large or loop == 1:
+                    if loop > 1:
+                        logger.error(
+                            '(Ok) save_facebook_user_values STALE data overwritten in loop iteration %s ' % loop)
+                    voter.save()
+                time.sleep(2)      # pause this process for 2 seconds
+                # reload the voter, so we can check to see if the main process overwrote the images with stale data
+                voter_manager = VoterManager()
+                results = voter_manager.retrieve_voter_by_we_vote_id(voter.we_vote_id)
+                if results['voter_found']:
+                    voter = results['voter']
 
             success = True
             status += "SAVED_FACEBOOK_USER_VALUES "
