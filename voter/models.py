@@ -2076,21 +2076,22 @@ class VoterManager(BaseUserManager):
 
             # 1/11/23, this SQS job is run asynchronously, and voter merge currently takes many seconds to complete,
             # during which time it can overwrite this good data with stale data.  So verify, and overwrite if necessary,
-            # the data for 2*6=12 seconds
+            # the data for 2*10=20 seconds
             loop = 0
-            while loop < 6:
+            while loop < 10:
                 loop += 1
                 logger.error(
                     '(Ok) save_facebook_user_values loop #\
-                    %s -- %s %s (%s)(%s) active "%s" hosted_image %s lgSaved %s lgFbSaved %s' %
+                    %s -- %s %s (%s)(%s) at %s active "%s" hosted_image %s lgSaved %s lgFbSaved %s' %
                     (loop, voter.first_name, voter.last_name, voter.we_vote_id, facebook_auth_response.facebook_user_id,
-                     voter.profile_image_type_currently_active, we_vote_hosted_profile_image_url_large,
+                     voter.date_last_changed, voter.profile_image_type_currently_active, we_vote_hosted_profile_image_url_large,
                      hosted_profile_facebook_saved, hosted_profile_image_saved))
 
                 if voter.we_vote_hosted_profile_image_url_large != we_vote_hosted_profile_image_url_large or loop == 1:
                     if loop > 1:
                         logger.error(
-                            '(Ok) save_facebook_user_values STALE data overwritten in loop iteration %s ' % loop)
+                            '(Ok) save_facebook_user_values STALE data overwritten in loop iteration %s - stale: %s' %
+                            (loop, voter.we_vote_hosted_profile_image_url_large))
                     voter.save()
                 time.sleep(2)      # pause this process for 2 seconds
                 # reload the voter, so we can check to see if the main process overwrote the images with stale data
