@@ -692,7 +692,6 @@ class VoterManager(BaseUserManager):
                 handle_record_not_saved_exception(e, logger=logger)
                 logger.error("create_voter general exception (#1): " + str(e))
 
-
         except Exception as e:
             handle_record_not_saved_exception(e, logger=logger)
             logger.error("create_voter general exception (#2): " + str(e))
@@ -2080,12 +2079,17 @@ class VoterManager(BaseUserManager):
             loop = 0
             while loop < 10:
                 loop += 1
+                voter_readwrite = Voter.objects.get(id=voter.id)
+                voter_readonly = Voter.objects.using('readonly').get(id=voter.id)
                 logger.error(
-                    '(Ok) save_facebook_user_values loop #\
-                    %s -- %s %s (%s)(%s) at %s active "%s" hosted_image %s lgSaved %s lgFbSaved %s' %
+                    '(Ok) save_facebook_user_values loop #%s  voter_readonly  %s voter_readwrite %s' %
+                    (loop, voter_readonly.we_vote_hosted_profile_image_url_large,
+                     voter_readwrite.we_vote_hosted_profile_image_url_large))
+                logger.error(
+                    '(Ok) save_facebook_user_values loop # %s -- %s %s (%s)(%s) at %s active %s  %s  %s  %s' %
                     (loop, voter.first_name, voter.last_name, voter.we_vote_id, facebook_auth_response.facebook_user_id,
-                     voter.date_last_changed, voter.profile_image_type_currently_active, we_vote_hosted_profile_image_url_large,
-                     hosted_profile_facebook_saved, hosted_profile_image_saved))
+                     voter.date_last_changed, voter.profile_image_type_currently_active,
+                     we_vote_hosted_profile_image_url_large, hosted_profile_facebook_saved, hosted_profile_image_saved))
 
                 if voter.we_vote_hosted_profile_image_url_large != we_vote_hosted_profile_image_url_large or loop == 1:
                     if loop > 1:
