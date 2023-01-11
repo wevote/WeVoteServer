@@ -1246,8 +1246,6 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
     )
 
     t1 = time()
-    t2 = time()
-
 
     status = results['status']
     merge_occurred = False
@@ -1305,7 +1303,7 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
     dt = t3 - t0
     logger.error('(Ok) voter_facebook_sign_in_save_view step 1 took ' + "{:.6f}".format(dt0) +
                  ' seconds, step 2 took ' + "{:.6f}".format(dt1) +
-                 ' seconds, step 3 took ' + "{:.6f}".format(dt2) +
+                 ' seconds, step 3 (merge) took ' + "{:.6f}".format(dt2) +
                  ' seconds, total took ' + "{:.6f}".format(dt) + ' seconds')
 
 
