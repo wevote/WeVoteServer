@@ -30,6 +30,8 @@ usage() {
 	echo "                 except for database storage volume."
 	echo "    deletedb   - Removes database storage volume (docker volume.) "
 	echo "                 WARNING: this permanetly removes all wevote database data!"
+	echo "    localstack - Creates and starts localstack container (only needed"
+	echo "                 when local SQS testing or other advanced uses.)"
 	exit 1
 }
 
@@ -59,16 +61,15 @@ create_wevote_docker_network() {
 
 start_wevote_localstack() {
 	if [ -z "$(docker container ls -a | grep $DOCKER_LOCALSTACK_NAME)" ]; then
-		echo "Creating wevote localstack container.."
+		echo "Creating localstack container.."
 
 		# start docker container for postgres db
 		docker run --network=$DOCKER_NETWORK \
 			-d --name=$DOCKER_LOCALSTACK_NAME \
 			$DOCKER_LOCALSTACK_TAG
 	else
-		echo "Wevote localstack container already exists, checking if running.."
 		if [ -z "$(docker ps | grep $DOCKER_LOCALSTACK_NAME)" ]; then
-			echo "Starting wevote localstack container..."
+			echo "Starting localstack container..."
 			docker start $DOCKER_LOCALSTACK_NAME
 		fi
 	fi
@@ -76,7 +77,7 @@ start_wevote_localstack() {
 
 start_wevote_db() {
 	if [ -z "$(docker container ls -a | grep $DOCKER_DB_NAME)" ]; then
-		echo "Creating wevote database container.."
+		echo "Creating postgres container.."
 		# build db docker container
 		docker build -t $DOCKER_DB_TAG \
 			-f $BASEDIR/docker/Dockerfile.db $BASEDIR/docker
@@ -92,14 +93,13 @@ start_wevote_db() {
 			$DOCKER_DB_TAG
 
 		# create dev database (sleep to make sure pg is started)
-		echo "Waiting for database container to start..."
+		echo "Waiting for postgres container to start..."
 		sleep 3
 		echo "Creating wevote db ($DB_NAME)..."
 		docker exec $DOCKER_DB_NAME psql -U postgres -c "CREATE DATABASE $DB_NAME" || true
 	else
-		echo "Wevote database container already exists, checking if running.."
 		if [ -z "$(docker ps | grep $DOCKER_DB_NAME)" ]; then
-			echo "Starting wevote database container..."
+			echo "Starting postgres container..."
 			docker start $DOCKER_DB_NAME
 		fi
 	fi
@@ -148,9 +148,11 @@ remove_all() {
 if [ "$CMD" = "start" ]; then
 	create_wevote_docker_network
 	start_wevote_db
-	start_wevote_localstack
 	build_wevote_api
 	run_wevote_api
+elif [ "$CMD" = "localstack" ]; then
+	create_wevote_docker_network
+	start_wevote_localstack
 elif [ "$CMD" = "stop" ]; then
 	stop_all
 elif [ "$CMD" = "delete" ]; then
