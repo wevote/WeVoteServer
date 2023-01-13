@@ -3,8 +3,10 @@
 # dev env settings
 DOCKER_API_NAME="wevote-api"
 DOCKER_DB_NAME="wevote-db"
+DOCKER_LOCALSTACK_NAME="wevote-localstack"
 DOCKER_API_TAG="${DOCKER_API_NAME}:latest"
 DOCKER_DB_TAG="${DOCKER_DB_NAME}:latest"
+DOCKER_LOCALSTACK_TAG="localstack/localstack"
 DOCKER_NETWORK="wevote"
 DOCKER_DB_VOLUME="wevote-postgres-data"
 DB_NAME="wevotedb"
@@ -48,13 +50,32 @@ if [ -z "$CMD" ]; then
 fi
 
 
-if [ "$CMD" = "start" ]; then
-
+create_wevote_docker_network() {
 	if [ -z "$(docker network ls | grep $DOCKER_NETWORK)" ]; then
-		echo "Creating docker network.."
+		echo "Creating WeVote docker network.."
 		docker network create $DOCKER_NETWORK
 	fi
+}
 
+start_wevote_localstack() {
+	if [ -z "$(docker container ls -a | grep $DOCKER_LOCALSTACK_NAME)" ]; then
+		echo "Creating wevote localstack container.."
+
+		# start docker container for postgres db
+		docker run --network=$DOCKER_NETWORK \
+			-d --name=$DOCKER_LOCALSTACK_NAME \
+			-p 4566:4566 -p 4510-4559:4510-4559 \
+			$DOCKER_LOCALSTACK_TAG
+	else
+		echo "Wevote localstack container already exists, checking if running.."
+		if [ -z "$(docker ps | grep $DOCKER_LOCALSTACK_NAME)" ]; then
+			echo "Starting wevote localstack container..."
+			docker start $DOCKER_LOCALSTACK_NAME
+		fi
+	fi
+}
+
+start_wevote_db() {
 	if [ -z "$(docker container ls -a | grep $DOCKER_DB_NAME)" ]; then
 		echo "Creating wevote database container.."
 		# build db docker container
@@ -83,19 +104,21 @@ if [ "$CMD" = "start" ]; then
 			docker start $DOCKER_DB_NAME
 		fi
 	fi
+}
 
+build_wevote_api() {
 	# build API docker container
 	docker build --pull -t $DOCKER_API_TAG -f docker/Dockerfile.api $BASEDIR
-
 	if [ ! -e $BASEDIR/config/environment_variables.json ]; then
 		echo "Creating developer configuration file in config/environment_variables.json..."
 		cat $BASEDIR/config/environment_variables-template.json | \
 			sed "s/WeVoteServerDB/$DB_NAME/" | \
 			sed -E "s/(DATABASE_HOST.*\":.*)\"\"/\1\"${DOCKER_DB_NAME}\"/" \
 			> $BASEDIR/config/environment_variables.json
-		
 	fi
+}
 
+run_wevote_api() {
 	# run docker container in foreground
 	docker run --network=$DOCKER_NETWORK \
 		-p 127.0.0.1:8000:8000 \
@@ -104,33 +127,37 @@ if [ "$CMD" = "start" ]; then
 		-v $BASEDIR:/wevote \
 		-it --rm \
 		$DOCKER_API_TAG
+}
 
-elif [ "$CMD" = "stop" ]; then
-	echo "Stopping wevote containers.."
-	docker stop $DOCKER_DB_NAME 2>/dev/null
-	docker stop $DOCKER_API_NAME 2>/dev/null
-elif [ "$CMD" = "delete" ]; then
-	echo "Removing WeVote developer environment.."
-
-	if [ ! -z "$(docker ps | grep $DOCKER_API_NAME)" ]; then
-		echo "Stopping wevote-api container.."
-		docker stop $DOCKER_API_NAME
-	fi
-
-	echo "Removing wevote-api container.."
-	docker rm $DOCKER_API_NAME 2>/dev/null || true
-
-	if [ ! -z "$(docker ps | grep $DOCKER_DB_NAME)" ]; then
-		echo "Stopping postgresql container.."
-		docker stop $DOCKER_DB_NAME
-	fi
-
-	echo "Removing postgresql container.."
-	docker rm $DOCKER_DB_NAME 2>/dev/null || true
-
+stop_all() {
+	echo "Stopping all running WeVote API containers.."
+	for container in $DOCKER_API_NAME $DOCKER_DB_NAME $DOCKER_LOCALSTACK_NAME; do
+		if [ ! -z "$(docker ps | grep $container)" ]; then
+			docker stop $container
+		fi
+	done
+}
+remove_all() {
+	echo "Removing WeVote API containers.."
+	for container in $DOCKER_API_NAME $DOCKER_DB_NAME $DOCKER_LOCALSTACK_NAME; do
+		docker rm $container 2>/dev/null || true
+	done
 	echo "Removing wevote docker network.."
 	docker network rm $DOCKER_NETWORK 2>/dev/null || true
+}
 
+if [ "$CMD" = "start" ]; then
+	create_wevote_docker_network
+	start_wevote_db
+	start_wevote_localstack
+	build_wevote_api
+	run_wevote_api
+elif [ "$CMD" = "stop" ]; then
+	stop_all
+elif [ "$CMD" = "delete" ]; then
+	echo "Removing WeVote developer environment.."
+	stop_all
+	remove_all
 elif [ "$CMD" = "deletedb" ]; then
 	echo "Removing postgres data volume.."
 	docker volume rm $DOCKER_DB_VOLUME 2>/dev/null || true
