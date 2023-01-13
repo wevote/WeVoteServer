@@ -28,9 +28,22 @@ This method requires [Docker](https://docs.docker.com/get-docker/) to be install
     ```
     docker/dev_environment.sh start
     ```
-    This command will start a background postgres database container (named `wevote-db`) that will host your development database. It will also build and launch the WeVote API container. The WeVote API container will run in the foreground, where you can monitor the service logs while developing. 
+    This command will start a background postgres database container (named `wevote-db`) that will host your development database. It will also build and launch the WeVote API container. The WeVote API container will run in the foreground, where you can monitor the service logs while developing. This command may take a few minutes to build the API container the first time it is run.
 
     Once the WeVote API container is running, you can access your local WeVote API dev environment at:
         [http://localhost:8000/](http://localhost:8000/)
+
+    When you are done developing, press Control-C to stop your local WeVote API container in the running terminal. To shut down the database container (and localstack container, if running), you can use the following command:
+    ```
+    docker/dev_environment.sh stop
+    ```
+    Once stopped, there will be no running WeVote API resources. To delete the underlying containers (except Postgres database volume), use the following command:
+    ```
+    docker/dev_environment.sh delete
+    ```
+    The WeVote API Postgres database is stored in a separate docker volume. To completely remove the database volume, use the following command:
+    ```
+    docker/dev_environment.sh deletedb
+    ```
 
 [Back to root README](../README.md)
