@@ -64,7 +64,6 @@ start_wevote_localstack() {
 		# start docker container for postgres db
 		docker run --network=$DOCKER_NETWORK \
 			-d --name=$DOCKER_LOCALSTACK_NAME \
-			-p 4566:4566 -p 4510-4559:4510-4559 \
 			$DOCKER_LOCALSTACK_TAG
 	else
 		echo "Wevote localstack container already exists, checking if running.."
@@ -130,7 +129,7 @@ run_wevote_api() {
 }
 
 stop_all() {
-	echo "Stopping all running WeVote API containers.."
+	echo "Stopping any running WeVote API containers.."
 	for container in $DOCKER_API_NAME $DOCKER_DB_NAME $DOCKER_LOCALSTACK_NAME; do
 		if [ ! -z "$(docker ps | grep $container)" ]; then
 			docker stop $container
@@ -155,7 +154,6 @@ if [ "$CMD" = "start" ]; then
 elif [ "$CMD" = "stop" ]; then
 	stop_all
 elif [ "$CMD" = "delete" ]; then
-	echo "Removing WeVote developer environment.."
 	stop_all
 	remove_all
 elif [ "$CMD" = "deletedb" ]; then
