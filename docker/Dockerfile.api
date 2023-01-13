@@ -1,0 +1,11 @@
+FROM public.ecr.aws/x6s9a3m0/wevote-base:latest
+
+COPY requirements.txt .
+
+RUN python -m pip install -r requirements.txt --no-cache-dir
+
+EXPOSE 8000
+WORKDIR /wevote
+CMD ["/wevote/docker/entrypoint_api_server.sh"]
+
+
