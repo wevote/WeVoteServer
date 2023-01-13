@@ -13,13 +13,11 @@ To get started as a We Vote developer, <a href="https://www.clahub.com/agreement
 
 ## Installing Python/Django API Server
 
-We have two sets of install instuctions, the first is a simplified version specifically for the Mac, and the second is a 
-more detailed set with more options for Linux and AWS
+To install and develop the WeVote API server, follow the instructions below based on your preferred environment. 
 
 1. Use these [Simplified Instructions for Mac](docs/README_MAC_SIMPLIFIED_INSTALL.md) leveraging the free (and powerful) PyCharm IDE and debugger (**recommended!**) 
 
-2. Or use these more detailed [Installation instructions](docs/README_API_INSTALL.md) that also cover installation on Linux and in AWS 
-
+2. For advanced users, use the [Docker Based Development](docs/README_API_INSTALL_DOCKER.md) for OSX and Linux users.
 
 ## Installing We Vote Mobile Web Application (React/Flux)
 
