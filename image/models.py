@@ -50,6 +50,7 @@ class WeVoteImage(models.Model):
     """
     We cache we vote images info for one handle here.
     """
+    objects = None
     voter_we_vote_id = models.CharField(
         verbose_name="voter we vote permanent id", max_length=255, null=True, blank=True)
     campaignx_we_vote_id = models.CharField(max_length=255, null=True, blank=True)
@@ -1121,6 +1122,62 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
+    def retrieve_latest_facebook_images_for_voter(self, voter_we_vote_id, facebook_profile_image_url_https):
+        status = ''
+        success = False
+        we_vote_image_list_found = False
+        we_vote_hosted_profile_image_url_large = ''
+        we_vote_hosted_profile_image_url_medium = ''
+        we_vote_hosted_profile_image_url_tiny = ''
+        cached_facebook_profile_image_url_https = ''
+        try:
+            we_vote_image_queryset = WeVoteImage.objects.all()
+            we_vote_image_queryset = we_vote_image_queryset.filter(
+                voter_we_vote_id__iexact=voter_we_vote_id,
+                facebook_profile_image_url_https__iexact=facebook_profile_image_url_https,
+            )
+            we_vote_image_queryset = we_vote_image_queryset.order_by('id')
+            last_entry = we_vote_image_queryset.last()
+
+            images_queryset = WeVoteImage.objects.all()
+            images_list = images_queryset.filter(we_vote_parent_image_id=last_entry.id)
+
+            if len(images_list) == 3:
+                success = True
+                images_found = True
+                status += ' CACHED_WE_VOTE_IMAGE_LIST_RETRIEVED '
+                for image in images_list:
+                    if image.kind_of_image_large:
+                        we_vote_hosted_profile_image_url_large = image.we_vote_image_url
+                    elif image.kind_of_image_medium:
+                        we_vote_hosted_profile_image_url_medium = image.we_vote_image_url
+                    elif image.kind_of_image_tiny:
+                        we_vote_hosted_profile_image_url_tiny = image.we_vote_image_url
+                        cached_facebook_profile_image_url_https = image.facebook_profile_image_url_https
+            else:
+                success = True
+                we_vote_image_list_found = False
+                status += ' NO_CACHED_WE_VOTE_IMAGE_LIST_RETRIEVED '
+
+        except Exception as e:
+            we_vote_image_list_found = False
+            handle_exception(
+                e, logger=logger, exception_message=
+                "FAILED_TO RETRIEVE_CACHED_WE_VOTE_IMAGE_LIST_IN_retrieve_latest_facebook_lookup_url_for_voter")
+            return None
+
+        results = {
+            'success':                                  success,
+            'status':                                   status,
+            'we_vote_image_list_found':                 we_vote_image_list_found,
+            'we_vote_hosted_profile_image_url_large':   we_vote_hosted_profile_image_url_large,
+            'we_vote_hosted_profile_image_url_medium':  we_vote_hosted_profile_image_url_medium,
+            'we_vote_hosted_profile_image_url_tiny':    we_vote_hosted_profile_image_url_tiny,
+            'cached_facebook_profile_image_url_https':  cached_facebook_profile_image_url_https,
+        }
+        return results
+
+
     def retrieve_we_vote_image_list_from_we_vote_id(self, voter_we_vote_id=None, candidate_we_vote_id=None,
                                                     organization_we_vote_id=None, issue_we_vote_id=None):
         """
@@ -1251,6 +1308,7 @@ class WeVoteImageManager(models.Manager):
             voter_uploaded_profile_image_url_https=None,
             voter_we_vote_id=None,
             wikipedia_profile_image_url=None,
+            we_vote_image_url=None,
     ):
         """
 
@@ -1279,14 +1337,25 @@ class WeVoteImageManager(models.Manager):
         :param voter_uploaded_profile_image_url_https:
         :param voter_we_vote_id:
         :param wikipedia_profile_image_url:
+        :param we_vote_image_url:           The image that will end up in the voter.we_vote_image_url field,
+                                            the processed facebook_profile_image_url_https (for a facebook sign in)
         :return:
         """
         status = ""
         we_vote_image_on_stage = WeVoteImage()
         we_vote_image_found = False
+
+        # Handle facebook signins differently, in a more concise way
+        if positive_value_exists(facebook_profile_image_url_https):
+            return self.retrieve_we_vote_image_from_facebook_url(we_vote_image_url)
+
         # Getting original image url
         twitter_profile_image_url_https = self.twitter_profile_image_url_https_original(twitter_profile_image_url_https)
         try:
+            # Getting original image url
+            # TODO: Jan 2023, The twitter image is no longer the master.  Using twitter_profile_image_url_https as a
+            #  master may be a bug for non-twitter and non-facebook signins
+
             # check if multiple records exist
             we_vote_image_on_stage_query = WeVoteImage.objects.filter(
                 ballotpedia_profile_image_url__iexact=ballotpedia_profile_image_url,
@@ -1314,6 +1383,45 @@ class WeVoteImageManager(models.Manager):
                 voter_uploaded_profile_image_url_https__iexact=voter_uploaded_profile_image_url_https,
                 voter_we_vote_id__iexact=voter_we_vote_id,
                 wikipedia_profile_image_url__iexact=wikipedia_profile_image_url,
+            ).order_by('-date_image_saved')
+            we_vote_image_on_stage_list = list(we_vote_image_on_stage_query)
+            no_of_existing_entries = len(we_vote_image_on_stage_list)
+            if no_of_existing_entries:
+                we_vote_image_on_stage = we_vote_image_on_stage_query.first()
+                we_vote_image_found = True
+            else:
+                we_vote_image_found = False
+            success = True
+        except WeVoteImage.MultipleObjectsReturned as e:
+            handle_record_found_more_than_one_exception(e, logger=logger)
+            status += "retrieve_we_vote_image_from_url MultipleObjectsReturned: " + str(e) + " "
+            success = False
+        except WeVoteImage.DoesNotExist as e:
+            status += "retrieve_we_vote_image_from_url failed: " + str(e) + " "
+            success = True
+
+        results = {
+            'success':                  success,
+            'we_vote_image_found':      we_vote_image_found,
+            'we_vote_image':            we_vote_image_on_stage
+        }
+        return results
+
+    def retrieve_we_vote_image_from_facebook_url( self, we_vote_image_url):
+        """
+
+        :param we_vote_image_url:           The image that will end up in the voter.we_vote_image_url field,
+                                            the processed facebook_profile_image_url_https (for a facebook sign in)
+        :return:
+        """
+        status = ""
+        we_vote_image_on_stage = WeVoteImage()
+        we_vote_image_found = False
+
+        try:
+            # check if multiple records exist
+            we_vote_image_on_stage_query = WeVoteImage.objects.filter(
+                we_vote_image_url__iexact=we_vote_image_url,
             ).order_by('-date_image_saved')
             we_vote_image_on_stage_list = list(we_vote_image_on_stage_query)
             no_of_existing_entries = len(we_vote_image_on_stage_list)
@@ -1591,35 +1699,51 @@ class WeVoteImageManager(models.Manager):
         """
         we_vote_image_on_stage = WeVoteImage()
         status = ""
+        success = False
+        we_vote_image_found = False
         try:
-            we_vote_image_on_stage = WeVoteImage.objects.get(
-                candidate_we_vote_id__iexact=candidate_we_vote_id,
-                is_active_version=is_active_version,
-                issue_we_vote_id__iexact=issue_we_vote_id,
-                kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
-                kind_of_image_ctcl_profile=kind_of_image_ctcl_profile,
-                kind_of_image_facebook_background=kind_of_image_facebook_background,
-                kind_of_image_facebook_profile=kind_of_image_facebook_profile,
-                kind_of_image_issue=kind_of_image_issue,
-                kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
-                kind_of_image_large=kind_of_image_large,
-                kind_of_image_maplight=kind_of_image_maplight,
-                kind_of_image_medium=kind_of_image_medium,
-                kind_of_image_original=kind_of_image_original,
-                kind_of_image_other_source=kind_of_image_other_source,
-                kind_of_image_tiny=kind_of_image_tiny,
-                kind_of_image_twitter_background=kind_of_image_twitter_background,
-                kind_of_image_twitter_banner=kind_of_image_twitter_banner,
-                kind_of_image_twitter_profile=kind_of_image_twitter_profile,
-                kind_of_image_vote_smart=kind_of_image_vote_smart,
-                kind_of_image_vote_usa_profile=kind_of_image_vote_usa_profile,
-                kind_of_image_voter_uploaded_profile=kind_of_image_voter_uploaded_profile,
-                kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
-                organization_we_vote_id__iexact=organization_we_vote_id,
-                voter_we_vote_id__iexact=voter_we_vote_id,
-            )
-            success = True
-            we_vote_image_found = True
+            if kind_of_image_facebook_profile:
+                image_query = WeVoteImage.objects.all()
+                image_query = image_query.filter(
+                    kind_of_image_facebook_profile=kind_of_image_facebook_profile,
+                    is_active_version=is_active_version,
+                    kind_of_image_original=kind_of_image_original,
+                    voter_we_vote_id=voter_we_vote_id)
+                image_query = image_query.order_by('-id')
+                image_query_list = list(image_query)
+                if len(image_query_list):
+                    success = True
+                    we_vote_image_found = True
+                    we_vote_image_on_stage = image_query_list[0]
+            else:
+                we_vote_image_on_stage = WeVoteImage.objects.get(
+                    candidate_we_vote_id__iexact=candidate_we_vote_id,
+                    is_active_version=is_active_version,
+                    issue_we_vote_id__iexact=issue_we_vote_id,
+                    kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
+                    kind_of_image_ctcl_profile=kind_of_image_ctcl_profile,
+                    kind_of_image_facebook_background=kind_of_image_facebook_background,
+                    kind_of_image_facebook_profile=kind_of_image_facebook_profile,
+                    kind_of_image_issue=kind_of_image_issue,
+                    kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
+                    kind_of_image_large=kind_of_image_large,
+                    kind_of_image_maplight=kind_of_image_maplight,
+                    kind_of_image_medium=kind_of_image_medium,
+                    kind_of_image_original=kind_of_image_original,
+                    kind_of_image_other_source=kind_of_image_other_source,
+                    kind_of_image_tiny=kind_of_image_tiny,
+                    kind_of_image_twitter_background=kind_of_image_twitter_background,
+                    kind_of_image_twitter_banner=kind_of_image_twitter_banner,
+                    kind_of_image_twitter_profile=kind_of_image_twitter_profile,
+                    kind_of_image_vote_smart=kind_of_image_vote_smart,
+                    kind_of_image_vote_usa_profile=kind_of_image_vote_usa_profile,
+                    kind_of_image_voter_uploaded_profile=kind_of_image_voter_uploaded_profile,
+                    kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
+                    organization_we_vote_id__iexact=organization_we_vote_id,
+                    voter_we_vote_id__iexact=voter_we_vote_id,
+                )
+                success = True
+                we_vote_image_found = True
             status += ' RECENT_CACHED_WE_VOTE_IMAGE_RETRIEVED '
         except WeVoteImage.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
@@ -1875,6 +1999,7 @@ class WeVoteImageManager(models.Manager):
                                   aws_access_key_id=AWS_ACCESS_KEY_ID,
                                   aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
             upload_image_from_location = "/tmp/" + we_vote_image_file_name
+            # print('-------------- temp file upload to aws ' +  upload_image_from_location)
             content_type = "image/{image_format}".format(image_format=image_format)
             client.upload_file(upload_image_from_location, AWS_STORAGE_BUCKET_NAME, we_vote_image_file_location,
                                ExtraArgs={'ContentType': content_type})

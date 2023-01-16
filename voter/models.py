@@ -2073,37 +2073,19 @@ class VoterManager(BaseUserManager):
                 if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
                     voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
 
-            # 1/11/23, this SQS job is run asynchronously, and voter merge currently takes many seconds to complete,
-            # during which time it can overwrite this good data with stale data.  So verify, and overwrite if necessary,
-            # the data for 2*15=30 seconds
-            loop = 0
-            while loop < 15:
-                loop += 1
-                voter_readwrite = Voter.objects.get(id=voter.id)
-                voter_readonly = Voter.objects.using('readonly').get(id=voter.id)
-                logger.error(
-                    '(Ok) save_facebook_user_values loop #%s  voter_readonly  %s voter_readwrite %s' %
-                    (loop, voter_readonly.we_vote_hosted_profile_image_url_large,
-                     voter_readwrite.we_vote_hosted_profile_image_url_large))
-                logger.error(
-                    '(Ok) save_facebook_user_values loop # %s -- %s %s (%s)(%s) at %s active %s  %s  %s  %s' %
-                    (loop, voter.first_name, voter.last_name, voter.we_vote_id, facebook_auth_response.facebook_user_id,
-                     voter.date_last_changed, voter.profile_image_type_currently_active,
-                     we_vote_hosted_profile_image_url_large, hosted_profile_facebook_saved, hosted_profile_image_saved))
+            # voter_readwrite = Voter.objects.get(id=voter.id)
+            # voter_readonly = Voter.objects.using('readonly').get(id=voter.id)
+            # logger.error(
+            #     '(Ok) save_facebook_user_values  voter_readonly %s  voter_readwrite %s' %
+            #     (voter_readonly.we_vote_hosted_profile_image_url_large,
+            #      voter_readwrite.we_vote_hosted_profile_image_url_large))
 
-                if voter.we_vote_hosted_profile_image_url_large != we_vote_hosted_profile_image_url_large or loop == 1:
-                    if loop > 1:
-                        logger.error(
-                            '(Ok) save_facebook_user_values STALE data overwritten in loop iteration %s - stale: %s' %
-                            (loop, voter.we_vote_hosted_profile_image_url_large))
-                    voter.save()
-                time.sleep(2)      # pause this process for 2 seconds
-                # reload the voter, so we can check to see if the main process overwrote the images with stale data
-                voter_manager = VoterManager()
-                results = voter_manager.retrieve_voter_by_we_vote_id(voter.we_vote_id)
-                if results['voter_found']:
-                    voter = results['voter']
-
+            logger.error(
+                '(Ok) save_facebook_user_values %s %s (%s)(%s) at %s active %s  %s  %s  %s' %
+                (voter.first_name, voter.last_name, voter.we_vote_id, facebook_auth_response.facebook_user_id,
+                 voter.date_last_changed, voter.profile_image_type_currently_active,
+                 we_vote_hosted_profile_image_url_large, hosted_profile_facebook_saved, hosted_profile_image_saved))
+            voter.save()
             success = True
             status += "SAVED_FACEBOOK_USER_VALUES "
         except Exception as e:

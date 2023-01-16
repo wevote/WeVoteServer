@@ -68,7 +68,7 @@ def process_request(function, body, message):
         voter_id = body['voter_id']
         facebook_auth_response_id = body['facebook_auth_response_id']
 
-        voter_cache_facebook_images_process(voter_id, facebook_auth_response_id)
+        voter_cache_facebook_images_process(voter_id, facebook_auth_response_id, False)
     else:
         logger.error(f"SQS Job references unknown function [{function}], deleting.")
 

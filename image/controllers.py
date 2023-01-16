@@ -286,8 +286,11 @@ def cache_image_if_not_cached(
     )
 
     # If recent cached image matches with the current one the image is already cached
+    # Jan 2022: Facebook reuses the same hash for the download link facebook_profile_image_url_https if you change
+    # profile picture quickly enough (timing uncertain), so we can use that as a criteria.  Since we are processing
+    # these asynchronously in a SQS job, run the job each time the voter signs in with Facebook.
     cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
-    if cached_we_vote_image_results['we_vote_image_found'] and \
+    if cached_we_vote_image_results['we_vote_image_found'] and not kind_of_image_facebook_profile and (\
             image_url_https == cached_we_vote_image.ballotpedia_profile_image_url or \
             image_url_https == cached_we_vote_image.facebook_background_image_url_https or \
             image_url_https == cached_we_vote_image.facebook_profile_image_url_https or \
@@ -302,7 +305,7 @@ def cache_image_if_not_cached(
             image_url_https == cached_we_vote_image.photo_url_from_ctcl or \
             image_url_https == cached_we_vote_image.photo_url_from_vote_usa or \
             image_url_https == cached_we_vote_image.voter_uploaded_profile_image_url_https or \
-            image_url_https == cached_we_vote_image.wikipedia_profile_image_url:
+            image_url_https == cached_we_vote_image.wikipedia_profile_image_url):
         cache_image_results = IMAGE_ALREADY_CACHED
     else:
         # Image is not cached so caching it
@@ -727,6 +730,7 @@ def cache_image_locally(
     we_vote_image_manager = WeVoteImageManager()
 
     # create we_vote_image entry with voter_we_vote_id and google_civic_election_id and kind_of_image
+    # Blank wevoteimage created at the point, with no urls
     create_we_vote_image_results = we_vote_image_manager.create_we_vote_image(
         candidate_we_vote_id=candidate_we_vote_id,
         facebook_background_image_offset_x=facebook_background_image_offset_x,
@@ -984,6 +988,7 @@ def cache_image_locally(
         we_vote_image_url = "https://{bucket_name}.s3.amazonaws.com/{we_vote_image_file_location}" \
                             "".format(bucket_name=AWS_STORAGE_BUCKET_NAME,
                                       we_vote_image_file_location=we_vote_image_file_location)
+        print('new image created  -------------  we_vote_image_url: ', we_vote_image_url)
         save_aws_info = we_vote_image_manager.save_we_vote_image_aws_info(we_vote_image, we_vote_image_url,
                                                                           we_vote_image_file_location,
                                                                           we_vote_parent_image_id, is_active_version)
@@ -998,6 +1003,7 @@ def cache_image_locally(
                 'image_stored_from_source': image_stored_from_source,
                 'image_stored_locally':     image_stored_locally,
                 'image_stored_to_aws':      image_stored_to_aws,
+                'image_url_https':          we_vote_image_url,
             }
             delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
             log_and_time_cache_action(False, time0, 'cache_image_locally -- IMAGE_STORED_TO_AWS with error')
@@ -1012,6 +1018,7 @@ def cache_image_locally(
             'image_stored_from_source':     False,
             'image_stored_locally':         image_stored_locally,
             'image_stored_to_aws':          image_stored_to_aws,
+            'image_url_https':                    '',
         }
         delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
         log_and_time_cache_action(False, time0, 'cache_image_locally -- save_source_info_results problem')
@@ -1026,6 +1033,7 @@ def cache_image_locally(
         'image_stored_from_source':     image_stored_from_source,
         'image_stored_locally':         image_stored_locally,
         'image_stored_to_aws':          image_stored_to_aws,
+        'image_url_https':              we_vote_image_url,
     }
     log_and_time_cache_action(False, time0, 'cache_image_locally -- final')
     return results
@@ -2269,7 +2277,7 @@ def create_resized_image_if_not_created(we_vote_image):
     elif we_vote_image.kind_of_image_facebook_background:
         image_url_https = we_vote_image.facebook_background_image_url_https
     elif we_vote_image.kind_of_image_facebook_profile:
-        image_url_https = we_vote_image.facebook_profile_image_url_https
+        image_url_https = we_vote_image.we_vote_image_url
     elif we_vote_image.kind_of_image_linkedin_profile:
         image_url_https = we_vote_image.linkedin_profile_image_url
     elif we_vote_image.kind_of_image_maplight:
@@ -3123,7 +3131,9 @@ def create_resized_images(
         vote_smart_image_url_https=None,
         voter_uploaded_profile_image_url_https=None,
         voter_we_vote_id=None,
-        wikipedia_profile_image_url=None):
+        wikipedia_profile_image_url=None,
+        we_vote_image_url=None,
+):
     """
     Create resized images
     :param ballotpedia_profile_image_url:
@@ -3145,6 +3155,7 @@ def create_resized_images(
     :param voter_uploaded_profile_image_url_https:
     :param voter_we_vote_id:
     :param wikipedia_profile_image_url:
+    :param we_vote_image_url:
     :return:
     """
     time0 = log_and_time_cache_action(True, 0, 'cache_resized_images')
@@ -3176,6 +3187,7 @@ def create_resized_images(
         voter_uploaded_profile_image_url_https=voter_uploaded_profile_image_url_https,
         voter_we_vote_id=voter_we_vote_id,
         wikipedia_profile_image_url=wikipedia_profile_image_url,
+        we_vote_image_url=we_vote_image_url,
     )
     if cached_we_vote_image_results['we_vote_image_found']:
         cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
@@ -3394,6 +3406,8 @@ def cache_master_and_resized_image(
             wikipedia_profile_image_url=wikipedia_profile_image_url)
     except Exception as e:
         status += "ERROR_IN-cache_master_images: " + str(e) + " "
+        print(" ------- --------- ERROR_IN-cache_master_images: " + str(e))
+        cache_master_images_results['cached_ballotpedia_image'] = False
 
     if cache_master_images_results['cached_ballotpedia_image'] is True or \
             cache_master_images_results['cached_ballotpedia_image'] == IMAGE_ALREADY_CACHED:
@@ -3428,8 +3442,10 @@ def cache_master_and_resized_image(
     if cache_master_images_results['cached_facebook_profile_image'] is True or \
             cache_master_images_results['cached_facebook_profile_image'] == IMAGE_ALREADY_CACHED:
         try:
-            # NOTE 2021-07-17 I think we want to start calling facebook_profile_image_url_https -> photo_url_from_facebook
-            # since facebook_profile_image_url_https isn't stored on We Vote servers yet at this point.
+            # NOTE 2021-07-17 I think we want to start calling facebook_profile_image_url_https ->
+            # photo_download_url_from_facebook since facebook_profile_image_url_https isn't stored on We Vote servers
+            # yet at this point and (2023-01-14) that link and hash is reused throughout the day as the voters facebook
+            # profile picture is changed by the voter
             create_resized_image_results = create_resized_images(
                 voter_we_vote_id=voter_we_vote_id,
                 candidate_we_vote_id=candidate_we_vote_id,
@@ -3740,7 +3756,6 @@ def cache_master_images(
             organization_we_vote_id=organization_we_vote_id, facebook_user_id=facebook_user_id,
             is_active_version=True, kind_of_image_facebook_profile=True, kind_of_image_original=True)
 
-    if facebook_background_image_url_https:
         cache_all_kind_of_images_results['cached_facebook_background_image'] = cache_image_if_not_cached(
             google_civic_election_id=google_civic_election_id,
             image_url_https=facebook_background_image_url_https,
