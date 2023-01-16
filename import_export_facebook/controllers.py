@@ -1,7 +1,6 @@
 # import_export_facebook/controllers.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-
 import re
 from time import time
 
@@ -10,10 +9,10 @@ from aws.controllers import submit_web_function_job
 from config.base import get_environment_variable
 from email_outbound.models import EmailManager
 from friend.models import FriendManager
-from image.controllers import FACEBOOK, cache_master_and_resized_image
 from import_export_facebook.models import FacebookManager
 from organization.models import OrganizationManager, INDIVIDUAL
-from voter.models import VoterManager
+from voter.controllers import voter_cache_facebook_images_process
+from voter.models import VoterManager, Voter
 from wevote_functions.functions import is_voter_device_id_valid, \
     positive_value_exists
 
@@ -82,16 +81,6 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
     link_results = facebook_manager.create_facebook_link_to_voter(facebook_auth_response.facebook_user_id,
                                                                   voter.we_vote_id)
 
-    # Prior to Sept 2, 2021 -- you only had one shot at updating the voter info on a facebook sign-in
-    # if not link_results['facebook_link_to_voter_saved']:
-    #     error_results = {
-    #         'status':                   link_results['status'],
-    #         'success':                  False,
-    #         'voter_device_id':          voter_device_id,
-    #         'facebook_account_created': facebook_account_created,
-    #     }
-    #     return error_results
-
     facebook_account_created = True
     facebook_link_to_voter = link_results['facebook_link_to_voter']
 
@@ -101,11 +90,17 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
         if positive_value_exists(photo_url):
             facebook_auth_response.facebook_profile_image_url_https = photo_url
 
-    # Cache original and resized images in a thread
-    submit_web_function_job('voter_cache_facebook_images_process', {
+    # Cache original and resized images in a SQS job
+     # print('------------------------ submit_web_function_job in process', os.getpid())
+    process_in_sqs_job = True
+    if process_in_sqs_job:
+        submit_web_function_job('voter_cache_facebook_images_process', {
                         'voter_id': voter.id,
                         'facebook_auth_response_id': facebook_auth_response.id,
+                        'is_retrieve': False,
                     })
+    else:
+        voter_cache_facebook_images_process(voter.id, facebook_auth_response.id, False)
 
     status += " FACEBOOK_IMAGES_SCHEDULED_TO_BE_CACHED_VIA_SQS"
     success = True
@@ -354,69 +349,33 @@ def caching_facebook_images_for_retrieve_process(repair_facebook_related_voter_c
     t0 = time()
     status = ''
 
+    # print('----------- INSIDE SQS PROCESS caching_facebook_images_for_retrieve_process 369  facebook_auth_response_id ', facebook_auth_response_id)
     facebook_manager = FacebookManager()
     facebook_auth_response = facebook_manager.retrieve_facebook_auth_response_by_id(facebook_auth_response_id)
+    voter = Voter.objects.get(we_vote_id=voter_we_vote_id)  # Voter existed immediately before the call, so safe
 
-    if repair_facebook_related_voter_caching_now:
-        voter_manager = VoterManager()
-        repair_results = voter_manager.repair_facebook_related_voter_caching(facebook_auth_response.facebook_user_id)
-        status += repair_results['status']
-
-    if positive_value_exists(voter_we_vote_id_attached_to_facebook):
-        existing_facebook_account_found = True
-        voter_we_vote_id_for_cache = voter_we_vote_id_attached_to_facebook
-    elif positive_value_exists(voter_we_vote_id_attached_to_facebook_email):
-        existing_facebook_account_found = True
-        voter_we_vote_id_for_cache = voter_we_vote_id_attached_to_facebook_email
-    else:
-        existing_facebook_account_found = False
-        voter_we_vote_id_for_cache = voter_we_vote_id
-
-    # Cache original and resized images
-    cache_results = cache_master_and_resized_image(
-        voter_we_vote_id=voter_we_vote_id_for_cache,
-        facebook_user_id=facebook_auth_response.facebook_user_id,
-        facebook_profile_image_url_https=facebook_auth_response.facebook_profile_image_url_https,
-        facebook_background_image_url_https=facebook_auth_response.facebook_background_image_url_https,
-        facebook_background_image_offset_x=facebook_auth_response.facebook_background_image_offset_x,
-        facebook_background_image_offset_y=facebook_auth_response.facebook_background_image_offset_y,
-        image_source=FACEBOOK)
-    cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
-    cached_facebook_background_image_url_https = cache_results['cached_facebook_background_image_url_https']
-    we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
-    we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
-    we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
-
-    if positive_value_exists(cached_facebook_profile_image_url_https):
-        facebook_profile_image_url_https = cached_facebook_profile_image_url_https
-    else:
-        facebook_profile_image_url_https = facebook_auth_response.facebook_profile_image_url_https
-
-    if positive_value_exists(cached_facebook_background_image_url_https):
-        facebook_background_image_url_https = cached_facebook_background_image_url_https
-    else:
-        facebook_background_image_url_https = facebook_auth_response.facebook_background_image_url_https
+    results = voter_cache_facebook_images_process(voter.id, facebook_auth_response_id, True)
 
     facebook_manager = FacebookManager()
     facebook_user_results = facebook_manager.update_or_create_facebook_user(
         facebook_auth_response.facebook_user_id, facebook_auth_response.facebook_first_name,
         facebook_auth_response.facebook_middle_name, facebook_auth_response.facebook_last_name,
-        facebook_profile_image_url_https=facebook_profile_image_url_https,
-        facebook_background_image_url_https=facebook_background_image_url_https,
-        we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
-        we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
-        we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny,
+        facebook_profile_image_url_https=facebook_auth_response.facebook_profile_image_url_https,
+        facebook_background_image_url_https=facebook_auth_response.facebook_background_image_url_https,
+        we_vote_hosted_profile_image_url_large=results['we_vote_hosted_profile_image_url_large'],
+        we_vote_hosted_profile_image_url_medium=results['we_vote_hosted_profile_image_url_medium'],
+        we_vote_hosted_profile_image_url_tiny=results['we_vote_hosted_profile_image_url_tiny'],
         facebook_email=facebook_auth_response.facebook_email)
     status += facebook_user_results['status']
 
     update_organization_facebook_images(facebook_auth_response.facebook_user_id,
-                                        facebook_profile_image_url_https,
-                                        facebook_background_image_url_https)
+                                        facebook_auth_response.facebook_profile_image_url_https,
+                                        facebook_auth_response.facebook_background_image_url_https)
     dtc = time() - t0
     logger.error(
         '(Ok) SQS Processing the facebook images for a RETRIEVE for voter %s %s (%s) took %.3f seconds' %
         (facebook_auth_response.facebook_first_name, facebook_auth_response.facebook_last_name,
-         voter_we_vote_id_for_cache, dtc))
+         voter_we_vote_id, dtc))
     logger.debug('caching_facebook_images_for_retrieve_process status: ' + status)
 
 
@@ -657,6 +616,11 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
     t3 = time()
 
     # Cache original and resized images in a SQS message (job) for read
+
+    # caching_facebook_images_for_retrieve_process(
+    #     repair_facebook_related_voter_caching_now, facebook_auth_response.id, voter_we_vote_id_attached_to_facebook,
+    #     voter_we_vote_id_attached_to_facebook_email, voter_we_vote_id)  # sleep10
+    # print('----- BEFORE SQS CALL caching_facebook_images_for_retrieve_process in process', os.getpid())
     submit_web_function_job('caching_facebook_images_for_retrieve_process', {
                         'repair_facebook_related_voter_caching_now': repair_facebook_related_voter_caching_now,
                         'facebook_auth_response_id': facebook_auth_response.id,

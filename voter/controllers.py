@@ -45,8 +45,9 @@ from friend.controllers import delete_friend_invitations_for_voter, delete_frien
     store_internal_friend_invitation_with_two_voters, store_internal_friend_invitation_with_unknown_email
 from friend.models import FriendManager
 from geoip.controllers import voter_location_retrieve_from_ip_for_api
-from image.controllers import cache_master_and_resized_image, cache_voter_master_uploaded_image, FACEBOOK, \
-    PROFILE_IMAGE_ORIGINAL_MAX_WIDTH, PROFILE_IMAGE_ORIGINAL_MAX_HEIGHT
+from image.controllers import cache_voter_master_uploaded_image, PROFILE_IMAGE_ORIGINAL_MAX_WIDTH, \
+    PROFILE_IMAGE_ORIGINAL_MAX_HEIGHT, cache_image_locally, create_resized_images
+from image.models import WeVoteImageManager
 from import_export_facebook.models import FacebookManager
 from import_export_twitter.models import TwitterAuthManager
 from organization.controllers import delete_membership_link_entries_for_voter, delete_organization_complete, \
@@ -1739,27 +1740,52 @@ def voter_create_for_api(voter_device_id):  # voterCreate
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_cache_facebook_images_process(voter_id, facebook_auth_response_id):
-    # Invoked from an SQS queue message (job)
+def voter_cache_facebook_images_process(voter_id, facebook_auth_response_id, is_retrieve):
+    # Invoked from an SQS queue message (job) when voter signs in "for the first time" on a device, ie there is no
+    # Facebook tab that is already signed in, or cookies/local storage/session storage that are equiv. to a sign in
+    # It is also called with is_retrieve True when a redirect is not needed to sign in via Facebook
     # Cache original and resized images
 
     t0 = time()
     # print("process started")
     facebook_manager = FacebookManager()
     facebook_auth_response = facebook_manager.retrieve_facebook_auth_response_by_id(facebook_auth_response_id)
-    voter = Voter.objects.get(id=voter_id)  # This voter existed immediately before the call -- so it is safe
+    voter = Voter.objects.get(id=voter_id)  # This voter existed immediately before the call -- so this is safe
+    voter.last_login = now()                # TODO: 1/12/2023, We should do this for the other sign in methods too
+    voter.profile_image_type_currently_active = "FACEBOOK"
+    voter.save()
 
-    cache_results = cache_master_and_resized_image(
+    # print('^^^ voter_cache_facebook_images_process BEFORE in process', os.getpid())
+
+    initial_cache_results = cache_image_locally(
+        image_url_https=facebook_auth_response.facebook_profile_image_url_https,
+        is_active_version=True,
+        kind_of_image_facebook_profile=True,
+        voter_we_vote_id=voter.we_vote_id)
+    image_url_https = initial_cache_results['image_url_https']
+
+    we_vote_image_manager = WeVoteImageManager()
+    set_active_results = we_vote_image_manager.set_active_version_false_for_other_images(
+        kind_of_image_facebook_profile=True,
+        image_url_https=image_url_https,
+        voter_we_vote_id=voter.we_vote_id)
+
+    create_resized_image_results = create_resized_images(
         voter_we_vote_id=voter.we_vote_id,
-        facebook_user_id=facebook_auth_response.facebook_user_id,
-        facebook_profile_image_url_https=facebook_auth_response.facebook_profile_image_url_https,
-        image_source=FACEBOOK)
-    cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
-    we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
-    we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
-    we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+        facebook_profile_image_url_https=image_url_https,
+        we_vote_image_url=image_url_https,
+    )
 
-    # Update the facebook photo
+    #  Get the latest Facebook images from the wevoteimage table
+    we_vote_image_manager = WeVoteImageManager()
+    latest_image_results = we_vote_image_manager.retrieve_latest_facebook_images_for_voter(
+        voter.we_vote_id, facebook_auth_response.facebook_profile_image_url_https)
+    cached_facebook_profile_image_url_https = latest_image_results['cached_facebook_profile_image_url_https']
+    we_vote_hosted_profile_image_url_large = latest_image_results['we_vote_hosted_profile_image_url_large']
+    we_vote_hosted_profile_image_url_medium = latest_image_results['we_vote_hosted_profile_image_url_medium']
+    we_vote_hosted_profile_image_url_tiny = latest_image_results['we_vote_hosted_profile_image_url_tiny']
+
+    # Update the facebook photos in the Voter record
     voter_manager = VoterManager()
     voter_manager.save_facebook_user_values(
         voter, facebook_auth_response, cached_facebook_profile_image_url_https,
@@ -1768,11 +1794,16 @@ def voter_cache_facebook_images_process(voter_id, facebook_auth_response_id):
     dtc = time() - t0
     # 12/20/22: This takes 1.2 seconds on my local postgres, but 5 to 15 seconds in production,
     # leave this logger active for a few months, so we can gather data
-    logger.error(
-        '(Ok) SQS Processing the facebook images for voter %s %s (%s) took %.3f seconds' %
-        (voter.first_name, voter.last_name, voter.we_vote_id, dtc))
-    # print("process finished")
+    method = "(For a new Facebook sign in)" if is_retrieve else "(Facebook sign in without redirect)"
 
+    logger.error(
+        '(Ok) SQS Processing the facebook images for voter %s %s %s (%s) took %.3f seconds' %
+        (method, voter.first_name, voter.last_name, voter.we_vote_id, dtc))
+    return {
+        'we_vote_hosted_profile_image_url_large': we_vote_hosted_profile_image_url_large,
+        'we_vote_hosted_profile_image_url_medium': we_vote_hosted_profile_image_url_medium,
+        'we_vote_hosted_profile_image_url_tiny': we_vote_hosted_profile_image_url_tiny,
+    }
 
 def voter_merge_two_accounts_for_facebook(facebook_secret_key, facebook_user_id, from_voter, voter_device_id,
                                           current_voter_found, status):
@@ -1840,10 +1871,16 @@ def voter_merge_two_accounts_for_facebook(facebook_secret_key, facebook_user_id,
             return None, None, error_results
 
     # Cache original and resized images in a SQS message (job)
-    submit_web_function_job('voter_cache_facebook_images_process', {
+    process_in_sqs_job = True
+    if process_in_sqs_job:
+        submit_web_function_job('voter_cache_facebook_images_process', {
                         'voter_id': facebook_owner_voter.id,
                         'facebook_auth_response_id': facebook_auth_response.id,
+                        'is_retrieve': False,
                     })
+    else:
+        voter_cache_facebook_images_process(facebook_owner_voter.id, facebook_auth_response.id, False)
+
     status += " FACEBOOK_IMAGES_SCHEDULED_TO_BE_CACHED_VIA_SQS"
 
     # ##### Store the facebook_email as a verified email for facebook_owner_voter
