@@ -106,7 +106,7 @@ def worker_run(queue_url):
 
             if 'Function' in message['MessageAttributes'].keys():
                 function = message['MessageAttributes']['Function']['StringValue']
-                logger.error(f"(Ok) SQS -- Got message for function: {function}")
+                logger.error("(Ok) SQS -- Got message for function: %s in pid %d" % (function, os.getpid()))
                 print(f"Calling function [{function}]")
                 body = json.loads(message['Body'])
                 try:

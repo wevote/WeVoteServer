@@ -51,6 +51,7 @@ def voter_location_retrieve_from_ip_for_api(request, ip_address=''):
             'city':                 '',
             'region':               '',
             'postal_code':          '',
+            'country_code':         '',
             'ip_address':           ip_address,
             'x_forwarded_for':      x_forwarded_for,
             'http_x_forwarded_for': http_x_forwarded_for,
@@ -76,6 +77,7 @@ def voter_location_retrieve_from_ip_for_api(request, ip_address=''):
             'city':                 '',
             'region':               '',
             'postal_code':          '',
+            'country_code':         '',
             'ip_address':           ip_address,
             'x_forwarded_for':      x_forwarded_for,
             'http_x_forwarded_for': http_x_forwarded_for,
@@ -87,6 +89,7 @@ def voter_location_retrieve_from_ip_for_api(request, ip_address=''):
     city = ''
     region = ''  # could be state_code
     postal_code = ''
+    country_code = ''
     success = True
     voter_location_found = False
     try:
@@ -103,6 +106,8 @@ def voter_location_retrieve_from_ip_for_api(request, ip_address=''):
         if response.postal.code:
             postal_code = response.postal.code
             voter_location += postal_code
+        if response.country.iso_code:
+            country_code = response.country.iso_code
         if positive_value_exists(voter_location):
             status = 'LOCATION_FOUND'
             voter_location_found = True
@@ -123,6 +128,7 @@ def voter_location_retrieve_from_ip_for_api(request, ip_address=''):
         'city':                 city,
         'region':               region,
         'postal_code':          postal_code,
+        'country_code':         country_code,
         'ip_address':           ip_address,
         'x_forwarded_for':      x_forwarded_for,
         'http_x_forwarded_for': http_x_forwarded_for,

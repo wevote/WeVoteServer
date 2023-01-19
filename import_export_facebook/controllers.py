@@ -353,6 +353,7 @@ def caching_facebook_images_for_retrieve_process(repair_facebook_related_voter_c
     facebook_manager = FacebookManager()
     facebook_auth_response = facebook_manager.retrieve_facebook_auth_response_by_id(facebook_auth_response_id)
     voter = Voter.objects.get(we_vote_id=voter_we_vote_id)  # Voter existed immediately before the call, so safe
+    logger.error('(Ok) caching_facebook_images_for_retrieve_process voter %s' % voter.we_vote_id)
 
     results = voter_cache_facebook_images_process(voter.id, facebook_auth_response_id, True)
 

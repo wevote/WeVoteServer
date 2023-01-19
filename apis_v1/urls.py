@@ -140,7 +140,7 @@ urlpatterns = [
               name='friendInviteResponseView'),
       re_path(r'^friendList/', views_friend.friend_list_view, name='friendListView'),
       re_path(r'^friendListsAll/', views_friend.friend_lists_all_view, name='friendListsAllView'),
-      re_path(r'^googleRecaptchaVerifyView/$', views_donation.google_recaptcha_verify_view,
+      re_path(r'^googleRecaptchaVerify/$', views_donation.google_recaptcha_verify_view,
               name='googleRecaptchaVerifyView'),
       re_path(r'^issueDescriptionsRetrieve/', issue_descriptions_retrieve_view,
               name='issueDescriptionsRetrieveView'),

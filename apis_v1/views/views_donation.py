@@ -12,6 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 import wevote_functions.admin
 from config.base import get_environment_variable
+from geoip.controllers import voter_location_retrieve_from_ip_for_api
 from stripe_donations.controllers import donation_active_paid_plan_retrieve, donation_with_stripe_for_api, \
     donation_process_stripe_webhook_event, \
     donation_refund_for_api, donation_subscription_cancellation_for_api, donation_journal_history_for_a_voter
@@ -508,12 +509,16 @@ def google_recaptcha_verify_view(request):            # googleRecaptchaVerifyVie
         'response': token,
         'remote_ip': remote_ip,
     })
+    success = False
+    captcha_score = 0
 
-    # print params
-    data = urlopen(recaptcha_uri, params.encode('utf-8')).read()
-    result = json.loads(data)
-    success = result.get('success', None)
-    captcha_score = result.get('score', None)
+    geoip_results = voter_location_retrieve_from_ip_for_api(request)
+    country_code = geoip_results['country_code']
+    if country_code == 'US':
+        data = urlopen(recaptcha_uri, params.encode('utf-8')).read()
+        result = json.loads(data)
+        success = result.get('success', None)
+        captcha_score = result.get('score', None)
 
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     we_vote_id = 'failed'
@@ -525,13 +530,19 @@ def google_recaptcha_verify_view(request):            # googleRecaptchaVerifyVie
         we_vote_id = voter.we_vote_id
     except Exception as e:
         success = False
-        logger.error('google_recaptcha_verify_view failed to retrieve a voter for device_id: ', voter_device_id, e)
+        logger.error('google_recaptcha_verify failed to retrieve a voter for device_id: ', voter_device_id, e)
 
-    logger.error("reCAPTCHA ip: %s, we_vote_id: %s, verified: %s, score: %s" % (remote_ip, we_vote_id, success,
-                                                                                captcha_score))
+    if success:
+        logger.error("(Ok) reCAPTCHA PASSED ip: %s, country %s, we_vote_id: %s, verified: %s, score: %s" %
+                     (remote_ip, country_code, we_vote_id, success, captcha_score))
+    else:
+        logger.error("(Ok) reCAPTCHA BLOCKED ip: %s, country %s, we_vote_id: %s, verified: %s, score: %s" %
+                     (remote_ip, country_code, we_vote_id, success, captcha_score))
+
     results = {
         'success': success,
         'captcha_score': captcha_score,
+        'country_code': country_code,
     }
 
     return HttpResponse(json.dumps(results), content_type='application/json')
