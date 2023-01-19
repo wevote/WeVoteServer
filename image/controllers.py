@@ -19,7 +19,7 @@ from position.controllers import reset_all_position_image_details_from_candidate
     update_all_position_details_from_candidate
 from twitter.functions import retrieve_twitter_user_info
 from twitter.models import TwitterUserManager
-from voter.models import VoterManager, VoterDeviceLink, VoterDeviceLinkManager, VoterAddressManager, VoterAddress, Voter
+from voter.models import VoterManager, VoterDeviceLink, VoterDeviceLinkManager, VoterAddressManager, Voter
 from voter_guide.models import VoterGuideManager
 from wevote_functions.functions import positive_value_exists, convert_to_int
 from .functions import analyze_remote_url, analyze_image_file, analyze_image_in_memory
@@ -988,7 +988,7 @@ def cache_image_locally(
         we_vote_image_url = "https://{bucket_name}.s3.amazonaws.com/{we_vote_image_file_location}" \
                             "".format(bucket_name=AWS_STORAGE_BUCKET_NAME,
                                       we_vote_image_file_location=we_vote_image_file_location)
-        print('new image created  -------------  we_vote_image_url: ', we_vote_image_url)
+        # logger.error('(Ok) New image created in cache_image_locally we_vote_image_url: %s' % we_vote_image_url)
         save_aws_info = we_vote_image_manager.save_we_vote_image_aws_info(we_vote_image, we_vote_image_url,
                                                                           we_vote_image_file_location,
                                                                           we_vote_parent_image_id, is_active_version)
@@ -3051,6 +3051,8 @@ def cache_resized_image_locally(
                                       we_vote_image_file_location=we_vote_image_file_location)
         # if we_vote_image_url is not empty then save we_vote_image_wes_info else delete we_vote_image entry
         if we_vote_image_url is not None and we_vote_image_url != "":
+            # logger.error('(Ok) New image created in cache_resized_image_locally we_vote_image_url: %s' %
+            #              we_vote_image_url)
             save_aws_info = we_vote_image_manager.save_we_vote_image_aws_info(
                 we_vote_image=we_vote_image,
                 we_vote_image_url=we_vote_image_url,
