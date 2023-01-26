@@ -9,10 +9,9 @@ from voter.models import VoterDeviceLink
  
 import json
 
-# Tests both campaignRetrieveView and campaignRetrieveAsOwnerView
+# Inheriting from TransactionTestCase enables test mirror to redirect
+# queries from 'readonly' database to 'default'. 
 
-# Inheriting from TransactionTestCase enables test mirror 
-# to redirect queries from 'readonly' database to 'default'. 
 
 class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
     databases = ["default", "readonly"]
@@ -40,8 +39,6 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
         response1 = self.client2.get(self.campaign_retrieve_url)
         json_data1 = json.loads(response1.content.decode())
         
-        # print("\ncampaign_retrieve_url:" + "\n")
-        # print(response1.content)
 
         self.assertEqual('status' in json_data1,
                          True,
@@ -61,8 +58,6 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
         response2 = self.client2.get(self.campaign_retrieve_as_owner_url)
         json_data2 = json.loads(response2.content.decode())
         
-        # print("\ncampaign_retrieve_as_owner:" + "\n")
-        # print(response2.content)
 
         self.assertEqual('status' in json_data2,
                          True,
@@ -86,8 +81,6 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
         response1 = self.client2.get(self.generate_voter_device_id_url)
         json_data1 = json.loads(response1.content.decode())
 
-        # print("\ngenerate_voter_device_id_url:" + "\n")
-        # print(response1.content)
 
         self.assertEqual('voter_device_id' in json_data1,
                          True,
@@ -110,8 +103,6 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
         response2 = self.client2.get(self.voter_create_url, {'voter_device_id': voter_device_id})
         json_data2 = json.loads(response2.content.decode())
         
-        # print("\nvoter_create_url:" + "\n")
-        # print(response2.content)
 
         self.assertEqual('voter_we_vote_id' in json_data2,
                          True,
@@ -135,8 +126,6 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
         response11 = self.client2.get(self.voter_address_save_url, {'voter_device_id': voter_device_id, 'voter_we_vote_id': voter_we_vote_id, 'text_for_map_search': voter_address, 'simple_save': True})
         json_data11 = json.loads(response11.content.decode())
         
-        # print("\nvoter_address_save_url:" + "\n")
-        # print(response11.content)
         
 
 
@@ -145,8 +134,6 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
         response3 = self.client2.get(self.voter_retrieve_url,{'voter_device_id': voter_device_id})
         json_data3 = json.loads(response3.content.decode())
         
-        # print("\nvoter_retrieve_url:" + "\n")
-        # print(response3.content) 
 
         self.assertEqual('linked_organization_we_vote_id' in json_data3,
                          True,
@@ -170,8 +157,6 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
         response4 = self.client2.get(self.campaign_save_url, {'voter_device_id': voter_device_id, 'voter_we_vote_id': voter_we_vote_id, 'organization_we_vote_id': organization_we_vote_id, 'in_draft_mode': False, 'in_draft_mode_changed': True})
         json_data4 = json.loads(response4.content.decode())
         
-        # print("\ncampaign_save_url:" + "\n")
-        # print(response4.content)
 
         self.assertEqual('campaignx_we_vote_id' in json_data4,
                          True,
@@ -194,8 +179,6 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
         response5 = self.client2.get(self.campaign_retrieve_url, {'voter_device_id': voter_device_id, 'campaignx_we_vote_id': campaignx_we_vote_id})
         json_data5 = json.loads(response5.content.decode())
         
-        # print("\ncampaign_retrieve_url:" + "\n")
-        # print(response5.content)
 
         self.assertEqual(json_data5['status'],
                          "CAMPAIGNX_FOUND_WITH_WE_VOTE_ID ",
@@ -217,8 +200,6 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
         response6 = self.client2.get(self.campaign_retrieve_as_owner_url, {'voter_device_id': voter_device_id, 'campaignx_we_vote_id': campaignx_we_vote_id})
         json_data6 = json.loads(response6.content.decode())
         
-        # print("\ncampaign_retrieve_as_owner:" + "\n")
-        # print(response6.content)
 
         self.assertEqual(json_data6['status'],
                          "RETRIEVE_CAMPAIGNX_AS_OWNER_FOUND_WITH_WE_VOTE_ID ",
@@ -252,8 +233,6 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
         response12 = self.client2.get(self.voter_address_save_url, {'voter_device_id': voter_device_id_2, 'voter_we_vote_id': voter_we_vote_id_2, 'text_for_map_search': voter_address_2, 'simple_save': True})
         json_data12 = json.loads(response12.content.decode())
         
-        # print("\nvoter_address_save_url:" + "\n")
-        # print(response12.content)
 
 
 
@@ -261,8 +240,6 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
         response9 = self.client2.get(self.campaign_retrieve_as_owner_url, {'voter_device_id': voter_device_id_2, 'campaignx_we_vote_id': campaignx_we_vote_id})
         json_data9 = json.loads(response9.content.decode())
 
-        # print("\ncampaign_retrieve_as_owner:" + "\n")
-        # print(response9.content)
         
         self.assertEqual(json_data9['status'],
                          "RETRIEVE_CAMPAIGNX_AS_OWNER_FOUND_WITH_WE_VOTE_ID ",
@@ -283,9 +260,7 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
 
         response10 = self.client2.get(self.campaign_retrieve_url, {'voter_device_id': voter_device_id, 'campaignx_we_vote_id': campaignx_we_vote_id_2})
         json_data10 = json.loads(response10.content.decode())
-
-        # print("\ncampaign_retrieve with invalid id:" + "\n")
-        # print(response10.content)        
+     
 
         self.assertEqual(json_data10['status'],
                          "CAMPAIGNX_NOT_FOUND_DoesNotExist CAMPAIGNX_NOT_FOUND: CAMPAIGNX_NOT_FOUND_DoesNotExist  ",
@@ -305,14 +280,18 @@ class WeVoteAPIsV1TestsCampaignRetrieve(TransactionTestCase):
         #### Direct database access ####
         # Allows views of the 'readonly' database to compare against
         # the 'default' database views used in the rest of the code:
-        
+
         # The explanation for .using() is here: 
         # https://docs.djangoproject.com/en/dev/topics/db/multi-db/#manually-selecting-a-database
-
+        
         # device_entry = VoterDeviceLink.objects.using('readonly').all().values()
-        # print("Readonly voter device ID: ")
+        # print()
+        # print("\nReadonly voter device ID: ")
         # print(device_entry)
+        # print()
 
         # device_entry_2 = VoterDeviceLink.objects.using('default').all().values()
-        # print("Default voter device ID: ")
+        # print("\nDefault voter device ID: ")
         # print(device_entry_2)
+        # print()
+        
