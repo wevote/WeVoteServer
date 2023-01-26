@@ -2414,6 +2414,7 @@ def candidate_politician_match_this_year_view(request):
     candidate_list_manager = CandidateListManager()
     results = candidate_list_manager.retrieve_all_candidates_for_one_year(
         candidate_year=candidate_year,
+        candidates_limit=1000,
         is_missing_politician_we_vote_id=True,
         limit_to_this_state_code=state_code,
         return_list_of_objects=True,
