@@ -1,0 +1,316 @@
+{# templates/representative/representative_merge.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if representative_option1 %}Merge {{ representative_option1.representative_name  }}{% else %}CANNOT MERGE{% endif %}{% endblock %}
+
+{%  block content %}
+<a href="{% url 'representative:representative_list' %}">< Back to Representatives</a>
+  <br /></r />
+<a href="{% url 'representative:find_and_merge_duplicate_representatives' %}?representative_year={{ representative_year }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&find_number_of_duplicates=1"
+   target="_blank" >Click to find number of possible duplicates <span class="glyphicon glyphicon-new-window"></span></a> (takes 30-60 seconds)
+
+<h1>{% if representative_option1 %}Merge {{ representative_option1.representative_name }}{% else %}CANNOT MERGE{% endif %}</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form action="{% url 'representative:representative_merge_process' %}" method="post">
+{% csrf_token %}
+{% if representative_option1 and representative_option2 %}
+<table>
+    <tr>
+        <th>&nbsp;</th>
+        <th>Representative Option 1</th>
+        <th>Representative Option 2</th>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td><a href="{% url 'representative:representative_edit' representative_id=representative_option1.id %}"
+               target="_blank">view representative 1 <span class="glyphicon glyphicon-new-window"></span></a></td>
+        <td><a href="{% url 'representative:representative_edit' representative_id=representative_option2.id %}"
+               target="_blank">view representative 2 <span class="glyphicon glyphicon-new-window"></span></a></td>
+    </tr>
+    <tr>
+        <td>
+            {% if representative_option1.politician_we_vote_id and representative_option2.politician_we_vote_id and representative_option1.politician_we_vote_id != representative_option2.politician_we_vote_id %}
+            <strong><span style="color: red">Politician ***CONFLICT***</span></strong>&nbsp;
+            {% endif %}
+        </td>
+        <td>
+            {% if representative_option1.politician_we_vote_id %}
+            <a href="{% url 'politician:politician_we_vote_id_edit' politician_we_vote_id=representative_option1.politician_we_vote_id %}"
+               target="_blank">view politician 1 <span class="glyphicon glyphicon-new-window"></span></a>
+            {% endif %}
+        </td>
+        <td>
+            {% if representative_option2.politician_we_vote_id %}
+            <a href="{% url 'politician:politician_we_vote_id_edit' politician_we_vote_id=representative_option2.politician_we_vote_id %}"
+               target="_blank">view politician 2 <span class="glyphicon glyphicon-new-window"></span></a>
+            {% endif %}
+        </td>
+    </tr>
+
+{% include "representative/representative_merge_one_field_decision.html" with field_name="politician_we_vote_id" field_label="Politician We Vote ID" conflict_status=conflict_values.politician_we_vote_id representative1_field_value=representative_option1.politician_we_vote_id representative2_field_value=representative_option2.politician_we_vote_id representative1=representative_option1 representative2=representative_option2 %}
+
+{% include "representative/representative_merge_one_field_decision.html" with field_name="politician_id" field_label="Politician ID" conflict_status=conflict_values.politician_id representative1_field_value=representative_option1.politician_id representative2_field_value=representative_option2.politician_id representative1=representative_option1 representative2=representative_option2 %}
+
+{% include "representative/representative_merge_one_field_decision.html" with field_name="representative_name" field_label="Representative Name" conflict_status=conflict_values.representative_name representative1_field_value=representative_option1.representative_name representative2_field_value=representative_option2.representative_name representative1=representative_option1 representative2=representative_option2 %}
+
+
+{# ####### google_civic_representative_name ####### #}
+    <tr>
+        <td><span class="u-no-break">Google Civic Representative Name</span></td>
+        <td>{{ representative_option1.google_civic_representative_name|default_if_none:"" }}</td>
+        <td>{{ representative_option2.google_civic_representative_name|default_if_none:"" }}</td>
+    </tr>
+{% if representative_option1.google_civic_representative_name2 or representative_option2.google_civic_representative_name2 %}
+    <tr>
+        <td><span class="u-no-break">Google Civic Representative Name 2</span></td>
+        <td>{{ representative_option1.google_civic_representative_name2|default_if_none:"" }}</td>
+        <td>{{ representative_option2.google_civic_representative_name2|default_if_none:"" }}</td>
+    </tr>
+{% endif %}
+{% if representative_option1.google_civic_representative_name3 or representative_option2.google_civic_representative_name3 %}
+    <tr>
+        <td><span class="u-no-break">Google Civic Representative Name 3</span></td>
+        <td>{{ representative_option1.google_civic_representative_name3|default_if_none:"" }}</td>
+        <td>{{ representative_option2.google_civic_representative_name3|default_if_none:"" }}</td>
+    </tr>
+{% endif %}
+
+{% include "representative/representative_merge_one_field_decision.html" with field_name="ballotpedia_representative_name" field_label="Representative Name (from Ballotpedia)" conflict_status=conflict_values.ballotpedia_representative_name representative1_field_value=representative_option1.ballotpedia_representative_name representative2_field_value=representative_option2.ballotpedia_representative_name representative1=representative_option1 representative2=representative_option2 %}
+
+{% include "representative/representative_merge_one_field_decision.html" with field_name="office_held_name" field_label="Office Name" conflict_status=conflict_values.office_held_name representative1_field_value=representative_option1.office_held_name representative2_field_value=representative_option2.office_held_name representative1=representative_option1 representative2=representative_option2 %}
+
+{% include "representative/representative_merge_one_field_decision.html" with field_name="office_held_we_vote_id" field_label="Office Held We Vote Id" conflict_status=conflict_values.office_held_we_vote_id representative1_field_value=representative_option1.office_held_we_vote_id representative2_field_value=representative_option2.office_held_we_vote_id representative1=representative_option1 representative2=representative_option2 %}
+
+{% include "representative/representative_merge_one_field_decision.html" with field_name="political_party" field_label="Political Party" conflict_status=conflict_values.political_party representative1_field_value=representative_option1.political_party representative2_field_value=representative_option2.political_party representative1=representative_option1 representative2=representative_option2 %}
+
+    <tr>
+        <td>Years In Office</td>
+        <td>{{ representative_option1.years_in_office_flags|default_if_none:"" }}</td>
+        <td>{{ representative_option2.years_in_office_flags|default_if_none:"" }}</td>
+    </tr>
+
+    {% if representative_option1.id != None or representative_option2.id != None %}
+    <tr>
+        <td>ID</td>
+        <td>{{ representative_option1.id|default_if_none:"" }}</td>
+        <td>{{ representative_option2.id|default_if_none:"" }}</td>
+    </tr>
+    {% endif %}
+    {% if representative_option1.we_vote_id != None or representative_option2.we_vote_id != None %}
+    <tr>
+        <td>We Vote ID</td>
+        <td>{{ representative_option1.we_vote_id|default_if_none:"" }}</td>
+        <td>{{ representative_option2.we_vote_id|default_if_none:"" }}</td>
+    </tr>
+    {% endif %}
+
+{% include "representative/representative_merge_one_field_decision.html" with field_name="ocd_division_id" field_label="OCD Division ID" conflict_status=conflict_values.ocd_division_id representative1_field_value=representative_option1.ocd_division_id representative2_field_value=representative_option2.ocd_division_id representative1=representative_option1 representative2=representative_option2 %}
+
+{% include "representative/representative_merge_one_field_decision.html" with field_name="vote_usa_politician_id" field_label="Vote USA Politician ID" conflict_status=conflict_values.vote_usa_politician_id representative1_field_value=representative_option1.vote_usa_politician_id representative2_field_value=representative_option2.vote_usa_politician_id representative1=representative_option1 representative2=representative_option2 %}
+
+{% include "representative/representative_merge_one_field_decision.html" with field_name="state_code" field_label="State Code" conflict_status=conflict_values.state_code representative1_field_value=representative_option1.state_code representative2_field_value=representative_option2.state_code representative1=representative_option1 representative2=representative_option2 %}
+
+
+{# ####### representative_url ####### #}
+    <tr>
+        <td><span class="u-no-break">Website</span></td>
+        <td>
+            {% if 'http' in representative_option1.representative_url %}
+            <a href="{{ representative_option1.representative_url }}" target="_blank">
+                {{ representative_option1.representative_url|default_if_none:"" }}
+            <span class="glyphicon glyphicon-new-window"></span>
+            </a>
+            {% else %}
+                {{ representative_option1.representative_url|default_if_none:"" }}
+            {% endif %}
+        </td>
+        <td>
+            {% if 'http' in representative_option2.representative_url %}
+            <a href="{{ representative_option2.representative_url }}" target="_blank">
+                {{ representative_option2.representative_url|default_if_none:"" }}
+            <span class="glyphicon glyphicon-new-window"></span>
+            </a>
+            {% else %}
+                {{ representative_option2.representative_url|default_if_none:"" }}
+            {% endif %}
+        </td>
+    </tr>
+{% if representative_option1.representative_url2 or representative_option2.representative_url2 %}
+    <tr>
+        <td><span class="u-no-break">Website2</span></td>
+        <td>
+            {% if 'http' in representative_option1.representative_url2 %}
+            <a href="{{ representative_option1.representative_url2 }}" target="_blank">
+                {{ representative_option1.representative_url2|default_if_none:"" }}
+            <span class="glyphicon glyphicon-new-window"></span>
+            </a>
+            {% else %}
+                {{ representative_option1.representative_url2|default_if_none:"" }}
+            {% endif %}
+        </td>
+        <td>
+            {% if 'http' in representative_option2.representative_url2 %}
+            <a href="{{ representative_option2.representative_url2 }}" target="_blank">
+                {{ representative_option2.representative_url2|default_if_none:"" }}
+            <span class="glyphicon glyphicon-new-window"></span>
+            </a>
+            {% else %}
+                {{ representative_option2.representative_url2|default_if_none:"" }}
+            {% endif %}
+        </td>
+    </tr>
+{% endif %}
+{% if representative_option1.representative_url3 or representative_option2.representative_url3 %}
+    <tr>
+        <td><span class="u-no-break">Website 3</span></td>
+        <td>
+            {% if 'http' in representative_option1.representative_url3 %}
+            <a href="{{ representative_option1.representative_url3 }}" target="_blank">
+                {{ representative_option1.representative_url3|default_if_none:"" }}
+            <span class="glyphicon glyphicon-new-window"></span>
+            </a>
+            {% else %}
+                {{ representative_option1.representative_url3|default_if_none:"" }}
+            {% endif %}
+        </td>
+        <td>
+            {% if 'http' in representative_option2.representative_url3 %}
+            <a href="{{ representative_option2.representative_url3 }}" target="_blank">
+                {{ representative_option2.representative_url3|default_if_none:"" }}
+            <span class="glyphicon glyphicon-new-window"></span>
+            </a>
+            {% else %}
+                {{ representative_option2.representative_url3|default_if_none:"" }}
+            {% endif %}
+        </td>
+    </tr>
+{% endif %}
+
+{% include "representative/representative_merge_one_field_decision.html" with field_name="wikipedia_url" field_label="Wikipedia URL" conflict_status=conflict_values.wikipedia_url representative1_field_value=representative_option1.wikipedia_url representative2_field_value=representative_option2.wikipedia_url representative1=representative_option1 representative2=representative_option2 %}
+
+{% include "representative/representative_merge_one_field_decision.html" with field_name="ballotpedia_representative_url" field_label="Ballotpedia URL" conflict_status=conflict_values.ballotpedia_representative_url representative1_field_value=representative_option1.ballotpedia_representative_url representative2_field_value=representative_option2.ballotpedia_representative_url representative1=representative_option1 representative2=representative_option2 %}
+
+{% include "representative/representative_merge_one_field_decision.html" with field_name="representative_contact_form_url" field_label="Representative Contact URL" conflict_status=conflict_values.representative_contact_form_url representative1_field_value=representative_option1.representative_contact_form_url representative2_field_value=representative_option2.representative_contact_form_url representative1=representative_option1 representative2=representative_option2 %}
+
+    <tr>
+        <td>Twitter Handles</td>
+        <td>
+            {{ representative_option1.representative_twitter_handle|default_if_none:"" }}
+            {% if representative_option1.representative_twitter_handle2 %}
+                <br />{{ representative_option1.representative_twitter_handle2|default_if_none:"" }}
+            {% endif %}
+            {% if representative_option1.representative_twitter_handle3 %}
+                <br />{{ representative_option1.representative_twitter_handle3|default_if_none:"" }}
+            {% endif %}
+        </td>
+        <td>
+            {{ representative_option2.representative_twitter_handle|default_if_none:"" }}
+            {% if representative_option2.representative_twitter_handle2 %}
+                <br />{{ representative_option2.representative_twitter_handle2|default_if_none:"" }}
+            {% endif %}
+            {% if representative_option2.representative_twitter_handle3 %}
+                <br />{{ representative_option2.representative_twitter_handle3|default_if_none:"" }}
+            {% endif %}
+        </td>
+    </tr>
+
+{% include "representative/representative_merge_one_field_decision.html" with field_name="twitter_handle_updates_failing" field_label="Twitter Updates Failing" conflict_status=conflict_values.twitter_handle_updates_failing representative1_field_value=representative_option1.twitter_handle_updates_failing representative2_field_value=representative_option2.twitter_handle_updates_failing representative1=representative_option1 representative2=representative_option2 %}
+
+{% include "representative/representative_merge_one_field_decision.html" with field_name="twitter_handle2_updates_failing" field_label="Twitter Handle 2 Updates Failing" conflict_status=conflict_values.twitter_handle2_updates_failing representative1_field_value=representative_option1.twitter_handle2_updates_failing representative2_field_value=representative_option2.twitter_handle2_updates_failing representative1=representative_option1 representative2=representative_option2 %}
+
+{% include "representative/representative_merge_one_field_decision.html" with field_name="twitter_url" field_label="Twitter URL (from Google)" conflict_status=conflict_values.twitter_url representative1_field_value=representative_option1.twitter_url representative2_field_value=representative_option2.twitter_url representative1=representative_option1 representative2=representative_option2 %}
+
+{% include "representative/representative_merge_one_field_decision.html" with field_name="twitter_name" field_label="Twitter Name" conflict_status=conflict_values.twitter_name representative1_field_value=representative_option1.twitter_name representative2_field_value=representative_option2.twitter_name representative1=representative_option1 representative2=representative_option2 %}
+
+{% include "representative/representative_merge_one_field_decision.html" with field_name="twitter_location" field_label="Twitter Location" conflict_status=conflict_values.twitter_location representative1_field_value=representative_option1.twitter_location representative2_field_value=representative_option2.twitter_location representative1=representative_option1 representative2=representative_option2 %}
+
+{% include "representative/representative_merge_one_field_decision.html" with field_name="instagram_handle" field_label="Instagram Handle" conflict_status=conflict_values.instagram_handle representative1_field_value=representative_option1.instagram_handle representative2_field_value=representative_option2.instagram_handle representative1=representative_option1 representative2=representative_option2 %}
+
+{% include "representative/representative_merge_one_field_decision.html" with field_name="facebook_url" field_label="Facebook URL" conflict_status=conflict_values.facebook_url representative1_field_value=representative_option1.facebook_url representative2_field_value=representative_option2.facebook_url representative1=representative_option1 representative2=representative_option2 %}
+
+{% include "representative/representative_merge_one_field_decision.html" with field_name="facebook_url_is_broken" field_label="Facebook URL Broken" conflict_status=conflict_values.facebook_url_is_broken representative1_field_value=representative_option1.facebook_url_is_broken representative2_field_value=representative_option2.facebook_url_is_broken representative1=representative_option1 representative2=representative_option2 %}
+
+{% include "representative/representative_merge_one_field_decision.html" with field_name="youtube_url" field_label="YouTube URL" conflict_status=conflict_values.youtube_url representative1_field_value=representative_option1.youtube_url representative2_field_value=representative_option2.youtube_url representative1=representative_option1 representative2=representative_option2 %}
+
+{% include "representative/representative_merge_one_field_decision.html" with field_name="linkedin_url" field_label="LinkedIn URL" conflict_status=conflict_values.linkedin_url representative1_field_value=representative_option1.linkedin_url representative2_field_value=representative_option2.linkedin_url representative1=representative_option1 representative2=representative_option2 %}
+
+{# ####### representative_email ####### #}
+    <tr>
+        <td><span class="u-no-break">Email</span></td>
+        <td>{{ representative_option1.representative_email|default_if_none:"" }}</td>
+        <td>{{ representative_option2.representative_email|default_if_none:"" }}</td>
+    </tr>
+{% if representative_option1.representative_email2 or representative_option2.representative_email2 %}
+    <tr>
+        <td><span class="u-no-break">Email 2</span></td>
+        <td>{{ representative_option1.representative_email2|default_if_none:"" }}</td>
+        <td>{{ representative_option2.representative_email2|default_if_none:"" }}</td>
+    </tr>
+{% endif %}
+{% if representative_option1.representative_email3 or representative_option2.representative_email3 %}
+    <tr>
+        <td><span class="u-no-break">Email 3</span></td>
+        <td>{{ representative_option1.representative_email3|default_if_none:"" }}</td>
+        <td>{{ representative_option2.representative_email3|default_if_none:"" }}</td>
+    </tr>
+{% endif %}
+
+{# ####### representative_phone ####### #}
+    <tr>
+        <td><span class="u-no-break">Phone</span></td>
+        <td>{{ representative_option1.representative_phone|default_if_none:"" }}</td>
+        <td>{{ representative_option2.representative_phone|default_if_none:"" }}</td>
+    </tr>
+{% if representative_option1.representative_phone2 or representative_option2.representative_phone2 %}
+    <tr>
+        <td><span class="u-no-break">Phone 2</span></td>
+        <td>{{ representative_option1.representative_phone2|default_if_none:"" }}</td>
+        <td>{{ representative_option2.representative_phone2|default_if_none:"" }}</td>
+    </tr>
+{% endif %}
+{% if representative_option1.representative_phone3 or representative_option2.representative_phone3 %}
+    <tr>
+        <td><span class="u-no-break">Phone 3</span></td>
+        <td>{{ representative_option1.representative_phone3|default_if_none:"" }}</td>
+        <td>{{ representative_option2.representative_phone3|default_if_none:"" }}</td>
+    </tr>
+{% endif %}
+
+{% include "representative/representative_merge_one_field_decision.html" with field_name="photo_url_from_google_civic" field_label="Photo (from Google)" conflict_status=conflict_values.photo_url_from_google_civic representative1_field_value=representative_option1.photo_url_from_google_civic representative2_field_value=representative_option2.photo_url_from_google_civic representative1=representative_option1 representative2=representative_option2 %}
+
+{# Displayed photo #}
+{% include "representative/representative_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_tiny" field_label="We Vote Image (Tiny)" conflict_status=conflict_values.we_vote_hosted_profile_image_url_tiny representative1_field_value=representative_option1.we_vote_hosted_profile_image_url_tiny representative2_field_value=representative_option2.we_vote_hosted_profile_image_url_tiny representative1=representative_option1 representative2=representative_option2 %}
+
+{% include "representative/representative_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_medium" field_label="We Vote Image (Medium)" conflict_status=conflict_values.we_vote_hosted_profile_image_url_medium representative1_field_value=representative_option1.we_vote_hosted_profile_image_url_medium representative2_field_value=representative_option2.we_vote_hosted_profile_image_url_medium representative1=representative_option1 representative2=representative_option2 %}
+
+{% include "representative/representative_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_large" field_label="We Vote Image (Large)" conflict_status=conflict_values.we_vote_hosted_profile_image_url_large representative1_field_value=representative_option1.we_vote_hosted_profile_image_url_large representative2_field_value=representative_option2.we_vote_hosted_profile_image_url_large representative1=representative_option1 representative2=representative_option2 %}
+    <tr>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>
+          <a href="{% url 'representative:representative_list' %}">cancel</a>&nbsp; <input type="submit" value="Skip - Not Duplicates" name="skip" />&nbsp;
+        </td>
+        <td></td>
+        <td><input type="submit" value="Merge Representatives" name="merge" /></td>
+    </tr>
+</table>
+<input type="hidden" name="representative_year" value="{{ representative_year }}" />
+{% if remove_duplicate_process %}
+    <input type="hidden" name="remove_duplicate_process" value="1" />
+{% endif %}
+<input type="hidden" name="state_code" value="{% if state_code %}{{ state_code }}{% else %}{{ representative_option2.state_code }}{% endif %}" />
+<input type="hidden" name="google_civic_election_id" value="{% if google_civic_election_id %}{{ google_civic_election_id }}{% else %}{{ representative_option1.google_civic_election_id }}{% endif %}" />
+<input type="hidden" name="representative1_we_vote_id" value="{{ representative_option1.we_vote_id }}" />
+<input type="hidden" name="representative2_we_vote_id" value="{{ representative_option2.we_vote_id }}" />
+{% else %}
+<input type="submit" value="CANNOT MERGE" />
+{% endif %}
+</form>
+
+<br />
+
+{% endblock %}

@@ -7,72 +7,47 @@
 
 <h1>Offices Currently Held By Elected Representatives</h1>
 
-<br/>
-
-<form id="update_office" name="office_held_update" method="get" action="{% url 'office_held:office_held_update' %}">
-        {#% csrf_token %#}
-    <input type="submit" value="Update current office helds and officials from Google Civic for state ...">
-    {% if state_list %}
-        <select id="update_state_code_id" name="update_state_code">
-            <option value="">
-                -- Choose State to Update --</option>
-                {% for key, state in state_list %}
-                    <option value="{{ key }}"
-                            {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
-                        {{ state }}</option>
-                {% endfor %}
-        </select>
-    {% endif %}
-
-    <input type="hidden" id="started_update" name="started_update" value="stop">
-    <br/>
-    <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-    <span id="realTimeStatus"></span>
-</form>
-
-<br/>
-
 <p>
     <a href="{% url 'office_held:office_held_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Office Held</a>
 </p>
 
 <form name="organization_position_choose_election" method="get" action="{% url 'office_held:office_held_list' %}">
-    {% csrf_token %}
+{% csrf_token %}
 
-    {% if state_list %}
-        <select id="state_code_id" name="state_code">
-            <option value="">
-                -- Filter by State Served --</option>
-        {% for key, state in state_list %}
-            <option value="{{ key }}"
-                    {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
-                {{ state }}</option>
-        {% endfor %}
-        </select>
-        {% if state_code != "" %}
-        <a href="{% url 'office_held:office_held_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}&show_all=1">
-            Show all Offices Held in this state</a>
-        {% endif %}
-        {% endif %}
-        <br/><br/>
-        {% if office_held_search %}
-            <a href="{% url 'office_held:office_held_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-                 clear search</a>&nbsp;
-        {% endif %}
-        <input type="text" name="office_held_search" id="office_held_search_id" value="{{ office_held_search }}" style="width: 450px" />
-        <input type="submit" value="Search for Office Held" />
-        {# End of if state_list #}
+{% if state_list %}
+<select id="state_code_id" name="state_code">
+    <option value="">
+        -- Filter by State Served --</option>
+{% for key, state in state_list %}
+    <option value="{{ key }}"
+            {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
+        {{ state }}</option>
+{% endfor %}
+</select>
+{% if state_code != "" %}
+<a href="{% url 'office_held:office_held_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}&show_all=1">
+    Show all Offices Held in this state</a>
+{% endif %}
+{% endif %}
+<br/><br/>
+{% if office_held_search %}
+    <a href="{% url 'office_held:office_held_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+         clear search</a>&nbsp;
+{% endif %}
+<input type="text" name="office_held_search" id="office_held_search_id" value="{{ office_held_search }}" style="width: 450px" />
+<input type="submit" value="Search for Office Held" />
+{# End of if state_list #}
 
-        {% if office_held_list %}
-            {% if google_civic_election_id %}
-            <ul>
-                <li>Prepare: <a href="{% url 'office:find_and_merge_duplicate_offices' %}?google_civic_election_id={{ google_civic_election_id }}"
-                                target="_blank" >
-                Find and Merge Duplicate Offices Held for this Election</a> (in new window - about 1 minute)</li>
-            </ul>
+{% if office_held_list %}
+    {% if google_civic_election_id %}
+    <ul>
+        <li>Prepare: <a href="{% url 'office:find_and_merge_duplicate_offices' %}?google_civic_election_id={{ google_civic_election_id }}"
+                        target="_blank" >
+        Find and Merge Duplicate Offices Held for this Election</a> (in new window - about 1 minute)</li>
+    </ul>
 
-            {% endif %}
-        {% endif %}
+    {% endif %}
+{% endif %}
 
 {% if office_held_list %}
     <br/>
@@ -80,27 +55,24 @@
       <thead>
         <tr>
             <th>&nbsp;</th>
-            <th>ID</th>
-            <th>We Vote ID</th>
             <th>Office Held Name</th>
+            <th>District</th>
             <th>State</th>
-            <th>Number Elected</th>
-            <th>Ocd Division ID</th>
-            <th>Ballotpedia office ID</th>
+            <th>IDs</th>
         </tr>
       </thead>
     {% for office_held in office_held_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{{ office_held.id }}</td>
-            <td>{{ office_held.we_vote_id }}</td>
             <td>
-                <a href="{% url 'office_held:office_held_summary' office_held.id %}">{{ office_held.office_held_name }}</a>
+                <a href="{% url 'office_held:office_held_summary' office_held.we_vote_id %}">{{ office_held.office_held_name }}</a>
             </td>
-            <td>{{ office_held.state_code }}</td>
-            <td>{{ office_held.number_elected }}</td>
-            <td>{{ office_held.ocd_division_id }}</td>
-            <td>{{ office_held.ballotpedia_office_id }}</td>
+            <td>{{ office_held.district_name|default_if_none:"" }}</td>
+            <td>{{ office_held.state_code|default_if_none:"" }}</td>
+            <td>
+                {{ office_held.we_vote_id|default_if_none:"" }} - {{ office_held.id|default_if_none:"" }}
+                {% if office_held.ocd_division_id %} - {{ office_held.ocd_division_id|default_if_none:"" }}{% endif %}
+            </td>
         </tr>
     {% endfor %}
     </table>

@@ -1,0 +1,33 @@
+{# templates/representative/representative_merge_one_field_decision.html #}
+
+{% if representative1_field_value != None or representative2_field_value != None %}
+<tr>
+    <td>{{ field_label }}</td>
+{% if conflict_status == "CONFLICT" %}
+    <td><input type="radio" name="{{ field_name }}_choice" value="{{ representative1.we_vote_id }}" checked /><span class="bold-select"> {{ representative1_field_value|default_if_none:"" }}</span>&nbsp;&nbsp;</td>
+    <td><input type="radio" name="{{ field_name }}_choice" value="{{ representative2.we_vote_id }}" /><span class="bold-select"> {{ representative2_field_value|default_if_none:"" }}</span></td>
+{% else %}
+    <td>
+    {% if 'http' in representative1_field_value %}
+        <a href="{{ representative1_field_value }}" target="_blank">
+        {% if conflict_status == "REPRESENTATIVE1" %}<strong>{{ representative1_field_value|default_if_none:"" }}</strong>{% else %}{{ representative1_field_value|default_if_none:"" }}{% endif %}
+        <span class="glyphicon glyphicon-new-window"></span>
+        </a>
+    {% else %}
+        {% if conflict_status == "REPRESENTATIVE1" %}<strong>{{ representative1_field_value|default_if_none:"" }}</strong>{% else %}{{ representative1_field_value|default_if_none:"" }}{% endif %}
+    {% endif %}
+        &nbsp;&nbsp;
+    </td>
+    <td>
+    {% if 'http' in representative2_field_value %}
+        <a href="{{ representative2_field_value }}" target="_blank">
+        {% if conflict_status == "REPRESENTATIVE2" %}<strong>{{ representative2_field_value|default_if_none:"" }}</strong>{% else %}{{ representative2_field_value|default_if_none:"" }}{% endif %}
+        <span class="glyphicon glyphicon-new-window"></span>
+        </a>
+    {% else %}
+        {% if conflict_status == "REPRESENTATIVE2" %}<strong>{{ representative2_field_value|default_if_none:"" }}</strong>{% else %}{{ representative2_field_value|default_if_none:"" }}{% endif %}
+    {% endif %}
+    </td>
+{% endif %}
+</tr>
+{% endif %}

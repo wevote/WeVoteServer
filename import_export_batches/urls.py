@@ -46,6 +46,8 @@ urlpatterns = [
             views_admin.batch_process_system_toggle_view, name='batch_process_system_toggle', ),
     re_path(r'^import_ballot_items_for_location/$',
             views_admin.import_ballot_items_for_location_view, name='import_ballot_items_for_location'),
+    re_path(r'^import_representatives_for_location/$',
+            views_admin.import_representatives_for_location_view, name='import_representatives_for_location'),
     re_path(r'^process_next_activity_notices/$',
             views_admin.process_next_activity_notices_view, name='process_next_activity_notices'),
     re_path(r'^process_next_ballot_items/$',

@@ -33,29 +33,31 @@ def add_twitter_handle_to_next_politician_spot(politician, twitter_handle):
 
     if not positive_value_exists(politician.politician_twitter_handle):
         politician.politician_twitter_handle = twitter_handle
+        politician.twitter_handle_updates_failing = False
         values_changed = True
-    elif twitter_handle == politician.politician_twitter_handle:
+    elif twitter_handle.lower() == politician.politician_twitter_handle.lower():
         # The value is already stored in politician.politician_twitter_handle so doesn't need
         # to be added anywhere below
         pass
     elif not positive_value_exists(politician.politician_twitter_handle2):
         politician.politician_twitter_handle2 = twitter_handle
+        politician.twitter_handle2_updates_failing = False
         values_changed = True
-    elif twitter_handle == politician.politician_twitter_handle2:
+    elif twitter_handle.lower() == politician.politician_twitter_handle2.lower():
         # The value is already stored in politician.politician_twitter_handle2 so doesn't need
         # to be added to politician.politician_twitter_handle3
         pass
     elif not positive_value_exists(politician.politician_twitter_handle3):
         politician.politician_twitter_handle3 = twitter_handle
         values_changed = True
-    elif twitter_handle == politician.politician_twitter_handle3:
+    elif twitter_handle.lower() == politician.politician_twitter_handle3.lower():
         # The value is already stored in politician.politician_twitter_handle3 so doesn't need
         # to be added to politician.politician_twitter_handle4
         pass
     elif not positive_value_exists(politician.politician_twitter_handle4):
         politician.politician_twitter_handle4 = twitter_handle
         values_changed = True
-    elif twitter_handle == politician.politician_twitter_handle4:
+    elif twitter_handle.lower() == politician.politician_twitter_handle4.lower():
         # The value is already stored in politician.politician_twitter_handle4 so doesn't need
         # to be added to politician.politician_twitter_handle5
         pass
@@ -719,3 +721,103 @@ def politicians_import_from_structured_json(structured_json):
         'not_processed':    politicians_not_processed,
     }
     return politicians_results
+
+
+def update_politician_from_candidate(politician, candidate):
+    status = ''
+    success = True
+    save_changes = False
+    politician_facebook_url_missing = \
+        not positive_value_exists(politician.facebook_url) or politician.facebook_url_is_broken
+    candidate_facebook_url_exists = \
+        positive_value_exists(candidate.facebook_url) and not candidate.facebook_url_is_broken
+    if politician_facebook_url_missing and candidate_facebook_url_exists:
+        politician.facebook_url = candidate.facebook_url
+        politician.facebook_url_is_broken = False
+        save_changes = True
+    if not positive_value_exists(politician.instagram_followers_count) and \
+            positive_value_exists(candidate.instagram_followers_count):
+        politician.instagram_followers_count = candidate.instagram_followers_count
+        save_changes = True
+    if not positive_value_exists(politician.instagram_handle) and \
+            positive_value_exists(candidate.instagram_handle):
+        politician.instagram_handle = candidate.instagram_handle
+        save_changes = True
+    if not positive_value_exists(politician.politician_email_address) and \
+            positive_value_exists(candidate.candidate_email):
+        politician.politician_email_address = candidate.candidate_email
+        save_changes = True
+    if not positive_value_exists(politician.politician_phone_number) and \
+            positive_value_exists(candidate.candidate_phone):
+        politician.politician_phone_number = candidate.candidate_phone
+        save_changes = True
+    if not positive_value_exists(politician.twitter_description) and \
+            positive_value_exists(candidate.twitter_description):
+        politician.twitter_description = candidate.twitter_description
+        save_changes = True
+    if not positive_value_exists(politician.twitter_followers_count) and \
+            positive_value_exists(candidate.twitter_followers_count):
+        politician.twitter_followers_count = candidate.twitter_followers_count
+        save_changes = True
+    if positive_value_exists(candidate.candidate_twitter_handle) and not candidate.candidate_twitter_updates_failing:
+        twitter_results = add_twitter_handle_to_next_politician_spot(
+            politician, candidate.candidate_twitter_handle)
+        if twitter_results['success']:
+            politician = twitter_results['politician']
+    if positive_value_exists(candidate.candidate_twitter_handle2) and not candidate.twitter_handle2_updates_failing:
+        twitter_results = add_twitter_handle_to_next_politician_spot(
+            politician, candidate.candidate_twitter_handle2)
+        if twitter_results['success']:
+            politician = twitter_results['politician']
+    if positive_value_exists(candidate.candidate_twitter_handle3):
+        twitter_results = add_twitter_handle_to_next_politician_spot(
+            politician, candidate.candidate_twitter_handle3)
+        if twitter_results['success']:
+            politician = twitter_results['politician']
+    if not positive_value_exists(politician.twitter_location) and \
+            positive_value_exists(candidate.twitter_location):
+        politician.twitter_location = candidate.twitter_location
+        save_changes = True
+    if not positive_value_exists(politician.twitter_name) and \
+            positive_value_exists(candidate.twitter_name):
+        politician.twitter_name = candidate.twitter_name
+        save_changes = True
+    if not positive_value_exists(politician.politician_contact_form_url) and \
+            positive_value_exists(candidate.candidate_contact_form_url):
+        politician.politician_contact_form_url = candidate.candidate_contact_form_url
+        save_changes = True
+    if not positive_value_exists(politician.politician_url) and \
+            positive_value_exists(candidate.candidate_url):
+        politician.politician_url = candidate.candidate_url
+        save_changes = True
+    if not positive_value_exists(politician.vote_usa_politician_id) and \
+            positive_value_exists(candidate.vote_usa_politician_id):
+        politician.vote_usa_politician_id = candidate.vote_usa_politician_id
+        save_changes = True
+    if not positive_value_exists(politician.we_vote_hosted_profile_image_url_large):
+        if positive_value_exists(candidate.we_vote_hosted_profile_image_url_large):
+            politician.we_vote_hosted_profile_image_url_large = \
+                candidate.we_vote_hosted_profile_image_url_large
+            save_changes = True
+    if not positive_value_exists(politician.we_vote_hosted_profile_image_url_medium):
+        if positive_value_exists(candidate.we_vote_hosted_profile_image_url_medium):
+            politician.we_vote_hosted_profile_image_url_medium = \
+                candidate.we_vote_hosted_profile_image_url_medium
+            save_changes = True
+    if not positive_value_exists(politician.we_vote_hosted_profile_image_url_tiny):
+        if positive_value_exists(candidate.we_vote_hosted_profile_image_url_tiny):
+            politician.we_vote_hosted_profile_image_url_tiny = \
+                candidate.we_vote_hosted_profile_image_url_tiny
+            save_changes = True
+    if not positive_value_exists(politician.youtube_url) and \
+            positive_value_exists(candidate.youtube_url):
+        politician.youtube_url = candidate.youtube_url
+        save_changes = True
+
+    results = {
+        'success':      success,
+        'status':       status,
+        'politician':   politician,
+        'save_changes': save_changes,
+    }
+    return results

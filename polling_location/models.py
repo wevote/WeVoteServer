@@ -19,6 +19,8 @@ KIND_OF_LOG_ENTRY_API_END_POINT_CRASH = 'API_END_POINT_CRASH'
 KIND_OF_LOG_ENTRY_BALLOT_RECEIVED = 'BALLOT_RECEIVED'
 KIND_OF_LOG_ENTRY_NO_CONTESTS = 'NO_CONTESTS'
 KIND_OF_LOG_ENTRY_NO_BALLOT_JSON = 'NO_BALLOT_JSON'
+KIND_OF_LOG_ENTRY_NO_OFFICES_HELD = 'NO_OFFICES_HELD'
+KIND_OF_LOG_ENTRY_REPRESENTATIVES_RECEIVED = 'REPRESENTATIVES_RECEIVED'
 MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK = 125  # 125. Formerly 250 and 111
 MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK_FOR_LARGE_STATE = 95
 MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK_FOR_EXTRA_LARGE_STATE = 51
@@ -58,6 +60,7 @@ class PollingLocation(models.Model):
     longitude = models.FloatField(default=None, null=True)
 
     ctcl_error_count = models.PositiveIntegerField(default=None, null=True)
+    google_civic_error_count = models.PositiveIntegerField(default=None, null=True)
     google_response_address_not_found = models.PositiveIntegerField(
         verbose_name="how many times Google can't find address", default=None, null=True)
     vote_usa_error_count = models.PositiveIntegerField(default=None, null=True)
@@ -126,6 +129,7 @@ class PollingLocationLogEntry(models.Model):
     google_civic_election_id = models.PositiveIntegerField(null=True, unique=False, db_index=True)
     is_from_ballotpedia = models.BooleanField(default=False, null=True, db_index=True)  # Error from Ballotpedia
     is_from_ctcl = models.BooleanField(default=False, null=True, db_index=True)  # Error from retrieving data from CTCL
+    is_from_google_civic = models.BooleanField(default=False, null=True, db_index=True)
     is_from_vote_usa = models.BooleanField(default=False, null=True, db_index=True)  # Error retrieving from Vote USA
     kind_of_log_entry = models.CharField(max_length=50, default=None, null=True, db_index=True)
     log_entry_deleted = models.BooleanField(default=False, db_index=True)
@@ -144,6 +148,7 @@ class PollingLocationManager(models.Manager):
             google_civic_election_id=None,
             is_from_ballotpedia=None,
             is_from_ctcl=None,
+            is_from_google_civic=None,
             is_from_vote_usa=None,
             kind_of_log_entry=None,
             log_entry_message=None,
@@ -160,7 +165,7 @@ class PollingLocationManager(models.Manager):
         polling_location_log_entry = None
         missing_required_variable = False
 
-        if not is_from_ballotpedia and not is_from_ctcl and not is_from_vote_usa:
+        if not is_from_ballotpedia and not is_from_ctcl and not is_from_google_civic and not is_from_vote_usa:
             missing_required_variable = True
             status += 'MISSING_IS_FROM_SOURCE '
         if not kind_of_log_entry:
@@ -188,6 +193,7 @@ class PollingLocationManager(models.Manager):
                 google_civic_election_id=google_civic_election_id,
                 is_from_ballotpedia=is_from_ballotpedia,
                 is_from_ctcl=is_from_ctcl,
+                is_from_google_civic=is_from_google_civic,
                 is_from_vote_usa=is_from_vote_usa,
                 kind_of_log_entry=kind_of_log_entry,
                 log_entry_message=log_entry_message,
@@ -365,6 +371,7 @@ class PollingLocationManager(models.Manager):
     def update_polling_location_with_log_counts(
             self,
             is_from_ctcl=False,
+            is_from_google_civic=False,
             is_from_vote_usa=False,
             is_no_contests=False,
             is_successful_retrieve=False,
@@ -373,6 +380,7 @@ class PollingLocationManager(models.Manager):
             update_error_counts=False):
         status = ''
         update_ctcl_error_count = False
+        update_google_civic_error_count = False
         update_no_contests_count = False
         update_successful_retrieve_count = False
         update_vote_usa_error_count = False
@@ -385,11 +393,14 @@ class PollingLocationManager(models.Manager):
         # KIND_OF_LOG_ENTRY_NO_BALLOT_JSON = 'NO_BALLOT_JSON'
         try:
             if positive_value_exists(update_error_counts):
-                if not positive_value_exists(is_from_ctcl) and not positive_value_exists(is_from_vote_usa):
+                if not positive_value_exists(is_from_ctcl) \
+                        and not positive_value_exists(is_from_google_civic) \
+                        and not positive_value_exists(is_from_vote_usa):
                     update_ctcl_error_count = True
                     update_vote_usa_error_count = True
                 else:
                     update_ctcl_error_count = positive_value_exists(is_from_ctcl)
+                    update_google_civic_error_count = positive_value_exists(is_from_google_civic)
                     update_vote_usa_error_count = positive_value_exists(is_from_vote_usa)
 
             if positive_value_exists(update_ctcl_error_count):
@@ -403,6 +414,19 @@ class PollingLocationManager(models.Manager):
                 ])
                 count_query = count_query.filter(log_entry_deleted=False)
                 update_values['ctcl_error_count'] = count_query.count()
+
+            if positive_value_exists(update_google_civic_error_count):
+                count_query = PollingLocationLogEntry.objects.using('analytics').all()
+                count_query = count_query.filter(polling_location_we_vote_id__iexact=polling_location_we_vote_id)
+                count_query = count_query.filter(is_from_google_civic=True)
+                count_query = count_query.filter(kind_of_log_entry__in=[
+                    KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR,
+                    KIND_OF_LOG_ENTRY_API_END_POINT_CRASH,
+                    KIND_OF_LOG_ENTRY_NO_BALLOT_JSON,
+                    KIND_OF_LOG_ENTRY_NO_OFFICES_HELD,
+                ])
+                count_query = count_query.filter(log_entry_deleted=False)
+                update_values['google_civic_error_count'] = count_query.count()
 
             if positive_value_exists(update_vote_usa_error_count):
                 count_query = PollingLocationLogEntry.objects.using('analytics').all()
@@ -446,6 +470,7 @@ class PollingLocationManager(models.Manager):
                 count_query = count_query.filter(polling_location_we_vote_id__iexact=polling_location_we_vote_id)
                 count_query = count_query.filter(kind_of_log_entry__in=[
                     KIND_OF_LOG_ENTRY_BALLOT_RECEIVED,
+                    KIND_OF_LOG_ENTRY_REPRESENTATIVES_RECEIVED,
                 ])
                 count_query = count_query.filter(log_entry_deleted=False)
                 update_values['successful_retrieve_count'] = count_query.count()

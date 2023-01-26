@@ -182,7 +182,31 @@
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_contact_form_url" field_label="Candidate Contact URL" conflict_status=conflict_values.candidate_contact_form_url candidate1_field_value=candidate_option1.candidate_contact_form_url candidate2_field_value=candidate_option2.candidate_contact_form_url candidate1=candidate_option1 candidate2=candidate_option2 %}
 
-{% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_twitter_handle" field_label="Twitter Handle" conflict_status=conflict_values.candidate_twitter_handle candidate1_field_value=candidate_option1.candidate_twitter_handle candidate2_field_value=candidate_option2.candidate_twitter_handle candidate1=candidate_option1 candidate2=candidate_option2 %}
+    <tr>
+        <td>Twitter Handles</td>
+        <td>
+            {{ candidate_option1.candidate_twitter_handle|default_if_none:"" }}
+            {% if candidate_option1.candidate_twitter_handle2 %}
+                <br />{{ candidate_option1.candidate_twitter_handle2|default_if_none:"" }}
+            {% endif %}
+            {% if candidate_option1.candidate_twitter_handle3 %}
+                <br />{{ candidate_option1.candidate_twitter_handle3|default_if_none:"" }}
+            {% endif %}
+        </td>
+        <td>
+            {{ candidate_option2.candidate_twitter_handle|default_if_none:"" }}
+            {% if candidate_option2.candidate_twitter_handle2 %}
+                <br />{{ candidate_option2.candidate_twitter_handle2|default_if_none:"" }}
+            {% endif %}
+            {% if candidate_option2.candidate_twitter_handle3 %}
+                <br />{{ candidate_option2.candidate_twitter_handle3|default_if_none:"" }}
+            {% endif %}
+        </td>
+    </tr>
+
+{% include "candidate/candidate_merge_one_field_decision.html" with field_name="candidate_twitter_updates_failing" field_label="Twitter Handle Updates Failing" conflict_status=conflict_values.candidate_twitter_updates_failing candidate1_field_value=candidate_option1.candidate_twitter_updates_failing candidate2_field_value=candidate_option2.candidate_twitter_updates_failing candidate1=candidate_option1 candidate2=candidate_option2 %}
+
+{% include "candidate/candidate_merge_one_field_decision.html" with field_name="twitter_handle2_updates_failing" field_label="Twitter Handle2 Updates Failing" conflict_status=conflict_values.twitter_handle2_updates_failing candidate1_field_value=candidate_option1.twitter_handle2_updates_failing candidate2_field_value=candidate_option2.twitter_handle2_updates_failing candidate1=candidate_option1 candidate2=candidate_option2 %}
 
 {% include "candidate/candidate_merge_one_field_decision.html" with field_name="crowdpac_candidate_id" field_label="Crowdpac Candidate Id" conflict_status=conflict_values.crowdpac_candidate_id candidate1_field_value=candidate_option1.crowdpac_candidate_id candidate2_field_value=candidate_option2.crowdpac_candidate_id candidate1=candidate_option1 candidate2=candidate_option2 %}
 

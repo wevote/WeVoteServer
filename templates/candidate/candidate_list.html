@@ -374,7 +374,7 @@
                     {% if candidate.candidate_photo_url %}
                     <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}"
                        target="_blank">
-                        <img src='{{ candidate.candidate_photo_url }}' height="25px" />
+                        <img src='{{ candidate.candidate_photo_url }}' height="48px" />
                     </a>
                     {% endif %}
                 </td>

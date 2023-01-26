@@ -11,7 +11,24 @@
 
 <br/>
 
-<a href="{% url 'representative:representative_new' %}?state_code={{ state_code }}">Add New Representative</a>
+<a href="{% url 'representative:representative_new' %}?state_code={{ state_code }}">Add New Representative</a>{% if state_code %},
+<a href="{% url 'representative:find_and_merge_duplicate_representatives' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank" >
+    Find and Merge Duplicate Representatives for this State <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute){% endif %}
+{% if show_this_year %}
+    <ul>
+{#        <li>Prepare: <a href="{% url 'representative:find_and_merge_duplicate_representatives' %}?show_this_year={{ show_this_year }}&state_code={{ state_code }}"#}
+{#                        target="_blank" >#}
+{#        Find and Merge Duplicate Candidates for this Year <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>#}
+{##}
+        <li>Prepare: <a href="{% url 'representative:representative_politician_match_this_year' %}?show_this_year={{ show_this_year }}&state_code={{ state_code }}"
+        target="_blank">
+        Match Representatives to Politicians (and Create Politicians) for this Year <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
+        <li>Prepare: <a href="{% url 'representative:update_representatives_from_politicians' %}?show_this_year={{ show_this_year }}&state_code={{ state_code }}"
+        target="_blank">
+        Update Representatives from Politicians for this Year <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
+    </ul>
+{% endif %}
+
 <br/><br/>
 
 <form name="state_code_form" method="get" action="{% url 'representative:representative_list' %}">
@@ -27,13 +44,21 @@
                 {{ state }}</option>
         {% endfor %}
         </select>
-        {% if state_code != "" %}
-        <a href="{% url 'representative:representative_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&representative_search={{ representative_search }}&show_all=1">
-            Show all Representatives in this state</a>
-        <br/><br/>
-        {% endif %}
     {% endif %}{# End of if state_list #}
 
+    {% if years_available %}
+    <select id="show_this_year_id" name="show_this_year">
+        <option value="0" {% if 0 == show_this_year|convert_to_int %} selected="selected"{% endif %}>
+            -- Choose Year --</option>
+        {% for year in years_available %}
+        <option value="{{ year }}"
+                {% if show_this_year|slugify == year|slugify %} selected="selected"{% endif %}>
+            {% if show_this_year|slugify == year|slugify %}Limited To {% endif %}
+            {{ year }}</option>
+        {% endfor %}
+    </select>
+    {% endif %}{# End of if years_available #}
+    &nbsp;&nbsp;
     {% if representative_search %}
     <a href="{% url 'representative:representative_list' %}?state_code={{ state_code }}">
          clear search</a>&nbsp;
@@ -54,30 +79,58 @@
             <td>Twitter Handle</td>
             <td>Website</td>
             <td>We Vote Id</td>
-            <td>Vote Smart Id</td>
         </tr>
     {% for representative in representative_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>
-                {% if representative.representative_photo_url %}
+                {% if representative.we_vote_hosted_profile_image_url_medium %}
                 <a href="{% url 'representative:representative_edit' representative.id %}?google_civic_election_id={{ google_civic_election_id }}">
-                    <img src='{{ representative.photo_url }}' height="25px" />
+                    <img src='{{ representative.we_vote_hosted_profile_image_url_medium }}' height="48px" />
                 </a>
                 {% endif %}
             </td>
-            <td><a href="{% url 'representative:representative_edit' representative.id %}?google_civic_election_id={{ google_civic_election_id }}">{{ representative.representative_name }}</a></td>
-            <td>{{ representative.office_held_name }}</td>
+            <td>
+                <a href="{% url 'representative:representative_edit' representative.id %}?google_civic_election_id={{ google_civic_election_id }}">{{ representative.representative_name }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+                <br />
+                <span class="u-no-break">In office:
+        {% if representative.year_in_office_2023 %}2023 {% endif %}
+        {% if representative.year_in_office_2024 %}2024 {% endif %}
+        {% if representative.year_in_office_2025 %}2025 {% endif %}
+        {% if representative.year_in_office_2026 %}2026 {% endif %}
+                </span>
+            </td>
+            <td>
+                <a href="{% url 'office_held:office_held_summary' representative.office_held_we_vote_id %}" target="_blank">{{ representative.office_held_name }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+            </td>
             <td>{{ representative.state_code }}</td>
-            <td>{% if representative.representative_twitter_handle %}<a href="https://twitter.com/{{ representative.representative_twitter_handle }}"
+            <td>
+                {% if representative.representative_twitter_handle %}<a href="https://twitter.com/{{ representative.representative_twitter_handle }}"
                     target="_blank">{{ representative.representative_twitter_handle }}</a><br />
                 ({{ representative.twitter_followers_count|intcomma }} followers){% endif %}</td>
-            <td>{% if representative.representative_url %}<a href="{{ representative.representative_url }}" target="_blank">{{ representative.representative_url }}</a>{% endif %}</td>
-            <td>{{ representative.we_vote_id }}</td>
-            <td>{{ representative.vote_smart_id|default_if_none:"" }}</td>
+            <td>
+                {% if representative.wikipedia_url %}<span class="u-no-break"><a href="{{ representative.wikipedia_url }}" target="_blank">{{ representative.wikipedia_url }}</a></span>&nbsp;{% endif %}
+                {% if representative.representative_url %}<span class="u-no-break"><a href="{{ representative.representative_url }}" target="_blank">{{ representative.representative_url }}</a></span>&nbsp;{% endif %}
+                {% if representative.representative_url2 %}<span class="u-no-break"><a href="{{ representative.representative_url2 }}" target="_blank">{{ representative.representative_url2 }}</a></span>&nbsp;{% endif %}
+                {% if representative.representative_url3 %}<span class="u-no-break"><a href="{{ representative.representative_url3 }}" target="_blank">{{ representative.representative_url3 }}</a></span>&nbsp;{% endif %}
+            </td>
+            <td>
+                {{ representative.we_vote_id }}
+                {% if representative.politician_we_vote_id %}
+                    -
+                    <a href="{% url 'politician:politician_we_vote_id_edit' representative.politician_we_vote_id %}?" target="_blank">
+                    {{ representative.politician_we_vote_id }}&nbsp;<span class="glyphicon glyphicon-new-window"></span>
+                    </a>
+                {% endif %}
+            </td>
         </tr>
     {% endfor %}
     </table>
+
+    {% if state_code != "" %}
+    <a href="{% url 'representative:representative_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&representative_search={{ representative_search }}&show_all=1">
+        Show all Representatives in this state</a>
+    {% endif %}
 
     <p></p>
 {% else %}
@@ -88,6 +141,11 @@
 {% endif %}
 
     <script>
+        $(function() {
+            $('#show_this_year_id').change(function() {
+                this.form.submit();
+            });
+        });
         $(function() {
             $('#state_code_id').change(function() {
                 this.form.submit();

@@ -82,6 +82,8 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'state_code',
     'twitter_description',
     'twitter_followers_count',
+    'candidate_twitter_updates_failing',
+    'twitter_handle2_updates_failing',
     'twitter_location',
     'twitter_name',
     'twitter_profile_background_image_url_https',
@@ -113,6 +115,10 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'withdrawal_date',
     'withdrawn_from_election',
     'youtube_url',
+]
+
+CANDIDATE_UNIQUE_ATTRIBUTES_TO_BE_CLEARED = [
+    'maplight_id',
 ]
 
 KIND_OF_LOG_ENTRY_HANDLE_NOT_FOUND_BY_TWITTER = 'HANDLE_NOT_FOUND_BY_TWITTER'
@@ -888,43 +894,6 @@ class CandidateListManager(models.Manager):
             'google_civic_election_id_list':    google_civic_election_id_list,
             'state_code':                       state_code,
             'candidate_count':                  candidate_count,
-        }
-        return results
-
-    def is_automatic_merge_ok(self, candidate_option1, candidate_option2):
-        automatic_merge_ok = True
-        status = ""
-        if candidate_option1.candidate_name != candidate_option2.candidate_name:
-            automatic_merge_ok = False
-            status += " candidate_name:"
-        candidate1_twitter_handle = str(candidate_option1.candidate_twitter_handle)
-        candidate2_twitter_handle = str(candidate_option2.candidate_twitter_handle)
-        if candidate1_twitter_handle.lower() != candidate2_twitter_handle.lower():
-            automatic_merge_ok = False
-            status += " candidate_twitter_handle:"
-        if candidate_option1.candidate_url != candidate_option2.candidate_url:
-            automatic_merge_ok = False
-            status += " candidate_url:"
-        if candidate_option1.candidate_contact_form_url != candidate_option2.candidate_contact_form_url:
-            automatic_merge_ok = False
-            status += " candidate_contact_form_url:"
-
-        if not automatic_merge_ok:
-            status += "Different: " + status
-
-        results = {
-            "status":               status,
-            "automatic_merge_ok":   automatic_merge_ok,
-        }
-        return results
-
-    def do_automatic_merge(self, candidate_option1, candidate_option2):
-        success = False
-        status = "do_automatic_merge NOT IMPLEMENTED YET"
-
-        results = {
-            'success':                  success,
-            'status':                   status,
         }
         return results
 
@@ -2457,7 +2426,8 @@ class CandidateCampaign(models.Model):
     candidate_twitter_handle = models.CharField(max_length=255, null=True, unique=False)
     candidate_twitter_handle2 = models.CharField(max_length=255, null=True, unique=False)
     candidate_twitter_handle3 = models.CharField(max_length=255, null=True, unique=False)
-    candidate_twitter_updates_failing = models.BooleanField(default=False)
+    candidate_twitter_updates_failing = models.BooleanField(default=False)  # twitter_handle_updates_failing
+    twitter_handle2_updates_failing = models.BooleanField(default=False)
     twitter_name = models.CharField(
         verbose_name="candidate plain text name from twitter", max_length=255, null=True, blank=True)
     twitter_location = models.CharField(
@@ -2508,7 +2478,7 @@ class CandidateCampaign(models.Model):
     go_fund_me_url = models.TextField(blank=True, null=True)
     google_plus_url = models.URLField(verbose_name='google plus url of candidate', blank=True, null=True)
     vimeo_url = models.TextField(blank=True, null=True)
-    youtube_url = models.URLField(verbose_name='youtube url of candidate', blank=True, null=True)
+    youtube_url = models.TextField(blank=True, null=True)
     # The email address for the candidate's campaign.
     candidate_email = models.CharField(verbose_name="candidate email", max_length=255, null=True, blank=True)
     # The voice phone number for the candidate's campaign office.
@@ -2519,8 +2489,8 @@ class CandidateCampaign(models.Model):
         verbose_name="Page title on Wikipedia", max_length=255, null=True, blank=True)
     wikipedia_photo_url = models.TextField(
         verbose_name='url of wikipedia logo', blank=True, null=True)
-    linkedin_url = models.CharField(
-        verbose_name="linkedin url of candidate", max_length=255, null=True, blank=True)
+    wikipedia_url = models.TextField(null=True)
+    linkedin_url = models.TextField(null=True, blank=True)
     linkedin_photo_url = models.TextField(verbose_name='url of linkedin logo', blank=True, null=True)
 
     # other_source_url is the location (ex/ http://mywebsite.com/candidate1.html) where we find

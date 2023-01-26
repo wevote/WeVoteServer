@@ -1,0 +1,5 @@
+{# templates/polling_location/offices_held_for_location_one_office.html #}
+{% if office_held_name %}
+    &nbsp;/&nbsp;
+    <a href="{% url 'office_held:office_held_summary' office_held_we_vote_id %}" class="u-no-break" target="_blank">{{ office_held_name }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+{% endif %}

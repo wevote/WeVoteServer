@@ -1062,6 +1062,39 @@ def convert_district_scope_to_ballotpedia_race_office_level(district_scope):
         return ''
 
 
+def convert_level_to_race_office_level(level):
+    federal_level_list = ['country']
+    local_level_list = ['administrativeArea2']
+    state_level_list = ['administrativeArea1']
+    #   deputyHeadOfGovernment -
+    #   executiveCouncil -
+    #   governmentOfficer -
+    #   headOfGovernment -
+    #   headOfState -
+    #   highestCourtJudge -
+    #   judge -
+    #   legislatorLowerBody -
+    #   legislatorUpperBody -
+    #   schoolBoard -
+    #   specialPurposeOfficer -
+    # federal_role_list = ['headOfGovernment', 'headOfState', 'legislatorUpperBody', 'legislatorLowerBody']
+    # local_role_list = []
+    # state_role_list = []
+    if level in federal_level_list:
+        return 'Federal'
+    elif level in local_level_list:
+        return 'Local'
+    elif level in state_level_list:
+        return 'State'
+    # elif role in federal_role_list:
+    #     return 'Federal'
+    # elif role in local_role_list:
+    #     return 'Local'
+    # elif role in state_role_list:
+    #     return 'State'
+    else:
+        return ''
+
 def extract_email_addresses_from_string(incoming_string):
     """
     Thanks to https://gist.github.com/dideler/5219706

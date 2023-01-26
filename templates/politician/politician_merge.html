@@ -95,6 +95,10 @@
         </td>
     </tr>
 
+{% include "politician/politician_merge_one_field_decision.html" with field_name="twitter_handle_updates_failing" field_label="Twitter Handle1 Updates Failing" conflict_status=conflict_values.twitter_handle_updates_failing politician1_field_value=politician_option1.twitter_handle_updates_failing politician2_field_value=politician_option2.twitter_handle_updates_failing politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="twitter_handle2_updates_failing" field_label="Twitter Handle2 Updates Failing" conflict_status=conflict_values.twitter_handle2_updates_failing politician1_field_value=politician_option1.twitter_handle2_updates_failing politician2_field_value=politician_option2.twitter_handle2_updates_failing politician1=politician_option1 politician2=politician_option2 %}
+
 {% include "politician/politician_merge_one_field_decision.html" with field_name="political_party" field_label="Party" conflict_status=conflict_values.political_party politician1_field_value=politician_option1.political_party politician2_field_value=politician_option2.political_party politician1=politician_option1 politician2=politician_option2 %}
 
     {% if politician_option1.id != None or politician_option2.id != None %}

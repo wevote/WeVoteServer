@@ -80,8 +80,7 @@ th, td {
                             target="_blank">
                         {{ candidate.politician_we_vote_id }} <span class="glyphicon glyphicon-new-window"></span></a>
                     {% else %}
-                        &nbsp;&nbsp;&nbsp;&nbsp;(<a href="{% url 'candidate:candidate_politician_match' %}?candidate_id={{ candidate.id }}&google_civic_election_id={{ google_civic_election_id }}"
-                            target="_blank">match to politician <span class="glyphicon glyphicon-new-window"></span></a>)
+                        &nbsp;&nbsp;&nbsp;&nbsp;(<a href="{% url 'candidate:candidate_politician_match' %}?candidate_id={{ candidate.id }}&google_civic_election_id={{ google_civic_election_id }}">match to politician</a>)
                     {% endif %}
                     {% if candidate.candidate_merge_possibility_found %}
                         &nbsp;&nbsp;&nbsp;&nbsp;(<a href="{% url 'candidate:find_duplicate_candidate' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}"
@@ -373,6 +372,9 @@ th, td {
         <input type="text" name="candidate_twitter_handle" id="candidate_twitter_handle_id" class="form-control"
                value="{% if candidate %}{{ candidate.candidate_twitter_handle|default_if_none:"" }}{% else %}{{ candidate_twitter_handle|default_if_none:"" }}{% endif %}" />
     {% if candidate.candidate_twitter_handle %}
+        <input type="checkbox" name="candidate_twitter_updates_failing" id="candidate_twitter_updates_failing_id" value="1"
+                {% if candidate.candidate_twitter_updates_failing %}checked{% endif %} />
+        <label for="candidate_twitter_updates_failing_id" style="font-weight: normal !important;">Twitter Updates Failing{% if candidate.candidate_twitter_updates_failing %}. <span style="color: darkgray">Our automated Twitter data update script had trouble retrieving a handle. Uncheck when fixed.</span>{% endif %}</label><br />
         <a href="https://twitter.com/{{ candidate.candidate_twitter_handle|iriencode }}"
            target="_blank">view on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
         <a href="{% url 'import_export_twitter:refresh_twitter_candidate_details' candidate.id %}">Refresh Twitter Details</a>&nbsp;&nbsp;&nbsp;
@@ -464,6 +466,9 @@ th, td {
         <input type="text" name="candidate_twitter_handle2" id="candidate_twitter_handle2_id" class="form-control"
                value="{% if candidate %}{{ candidate.candidate_twitter_handle2|default_if_none:"" }}{% else %}{{ candidate_twitter_handle2|default_if_none:"" }}{% endif %}" />
     {% if candidate.candidate_twitter_handle2 %}
+        <input type="checkbox" name="twitter_handle2_updates_failing" id="twitter_handle2_updates_failing_id" value="1"
+                {% if candidate.twitter_handle2_updates_failing %}checked{% endif %} />
+        <label for="twitter_handle2_updates_failing_id" style="font-weight: normal !important;">Twitter Handle 2 Updates Failing{% if candidate.twitter_handle2_updates_failing %}. <span style="color: darkgray">Our automated Twitter data update script had trouble retrieving a handle. Uncheck when fixed.</span>{% endif %}</label><br />
         <a href="https://twitter.com/{{ candidate.candidate_twitter_handle2|iriencode }}"
            target="_blank">view on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
     {% endif %}
@@ -854,7 +859,7 @@ th, td {
             <td>
                 {% if candidate.candidate_photo_url %}
                 <a href="{% url 'candidate:candidate_edit' candidate.id %}">
-                    <img src='{{ candidate.candidate_photo_url }}' height="25px" />
+                    <img src='{{ candidate.candidate_photo_url }}' height="48px" />
                 </a>
                 {% endif %}
             </td>
