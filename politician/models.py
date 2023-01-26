@@ -63,6 +63,8 @@ POLITICIAN_UNIQUE_IDENTIFIERS = [
     'politician_youtube_id',
     'state_code',
     'thomas_id',
+    'twitter_handle_updates_failing',
+    'twitter_handle2_updates_failing',
     'vote_smart_id',
     'vote_usa_politician_id',
     'washington_post_id',
@@ -131,8 +133,10 @@ class Politician(models.Model):
                               max_length=200, null=True, unique=True, blank=True)
     cspan_id = models.CharField(verbose_name="cspan unique identifier",
                                 max_length=200, null=True, blank=True, unique=False)
+    # DEPRECATE THIS
     wikipedia_id = models.CharField(verbose_name="wikipedia url",
                                     max_length=500, default=None, null=True, blank=True)
+    wikipedia_url = models.TextField(null=True)
     # The candidate's name as passed over by Ballotpedia
     ballotpedia_politician_name = models.CharField(
         verbose_name="name exactly as received from ballotpedia", max_length=255, null=True, blank=True)
@@ -163,6 +167,8 @@ class Politician(models.Model):
     politician_twitter_handle3 = models.CharField(max_length=255, null=True, unique=False)
     politician_twitter_handle4 = models.CharField(max_length=255, null=True, unique=False)
     politician_twitter_handle5 = models.CharField(max_length=255, null=True, unique=False)
+    twitter_handle_updates_failing = models.BooleanField(default=False)
+    twitter_handle2_updates_failing = models.BooleanField(default=False)
     vote_usa_politician_id = models.CharField(
         verbose_name="Vote USA permanent id for this candidate", max_length=64, default=None, null=True, blank=True)
     # This is the master image url cached on We Vote servers. See photo_url_from_vote_usa for Vote USA URL.
@@ -178,6 +184,7 @@ class Politician(models.Model):
     instagram_handle = models.TextField(verbose_name="politician's instagram handle", blank=True, null=True)
     instagram_followers_count = models.IntegerField(
         verbose_name="count of candidate's instagram followers", null=True, blank=True)
+    linkedin_url = models.TextField(null=True, blank=True)
     politician_facebook_id = models.CharField(
         verbose_name='politician facebook user name', max_length=255, null=True, unique=False)
     politician_phone_number = models.CharField(
@@ -203,7 +210,9 @@ class Politician(models.Model):
         verbose_name='profile banner image from twitter', blank=True, null=True)
     twitter_description = models.CharField(
         verbose_name="Text description of this organization from twitter.", max_length=255, null=True, blank=True)
+    youtube_url = models.TextField(blank=True, null=True)
     date_last_updated = models.DateTimeField(null=True, auto_now=True)
+    date_last_updated_from_candidate = models.DateTimeField(null=True, default=None)
 
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
@@ -290,10 +299,10 @@ class PoliticianManager(models.Manager):
     def __init__(self):
         pass
 
-    def create_politician_from_candidate(self, candidate):
+    def create_politician_from_candidate_or_representative(self, candidate_or_rep):
         """
-        Take We Vote candidate object, and create a new politician entry
-        :param candidate:
+        Take We Vote candidate or representative object, and create a new politician entry
+        :param candidate_or_rep:
         :return:
         """
         status = ''
@@ -304,70 +313,72 @@ class PoliticianManager(models.Manager):
         politician_id = 0
         politician_we_vote_id = ''
 
-        first_name = extract_first_name_from_full_name(candidate.candidate_name)
-        middle_name = extract_middle_name_from_full_name(candidate.candidate_name)
-        last_name = extract_last_name_from_full_name(candidate.candidate_name)
-        political_party_constant = convert_to_political_party_constant(candidate.party)
-        political_party = candidate_party_display(political_party_constant)
-        if positive_value_exists(candidate.birth_day_text):
-            try:
-                birth_date = datetime.datetime.strptime(candidate.birth_day_text, '%Y-%m-%d')
-            except Exception as e:
+        birth_date = None
+        gender = UNKNOWN
+        if 'cand' in candidate_or_rep.we_vote_id:
+            object_is_candidate = True
+            first_name = extract_first_name_from_full_name(candidate_or_rep.candidate_name)
+            middle_name = extract_middle_name_from_full_name(candidate_or_rep.candidate_name)
+            last_name = extract_last_name_from_full_name(candidate_or_rep.candidate_name)
+            political_party_constant = convert_to_political_party_constant(candidate_or_rep.party)
+            political_party = candidate_party_display(political_party_constant)
+            if positive_value_exists(candidate_or_rep.birth_day_text):
+                try:
+                    birth_date = datetime.datetime.strptime(candidate_or_rep.birth_day_text, '%Y-%m-%d')
+                except Exception as e:
+                    birth_date = None
+                    status += "FAILED_CONVERTING_BIRTH_DAY_TEXT: " + str(e) + " " + str(candidate_or_rep.birth_day_text) + " "
+            else:
                 birth_date = None
-                status += "FAILED_CONVERTING_BIRTH_DAY_TEXT: " + str(e) + " " + str(candidate.birth_day_text) + " "
-        else:
-            birth_date = None
-        if positive_value_exists(candidate.candidate_gender):
-            if candidate.candidate_gender.lower() == 'female':
-                gender = FEMALE
-            elif candidate.candidate_gender.lower() == 'male':
-                gender = MALE
-            elif candidate.candidate_gender.lower() in ['nonbinary', 'non-binary', 'non binary']:
-                gender = GENDER_NEUTRAL
+            if positive_value_exists(candidate_or_rep.candidate_gender):
+                if candidate_or_rep.candidate_gender.lower() == 'female':
+                    gender = FEMALE
+                elif candidate_or_rep.candidate_gender.lower() == 'male':
+                    gender = MALE
+                elif candidate_or_rep.candidate_gender.lower() in ['nonbinary', 'non-binary', 'non binary']:
+                    gender = GENDER_NEUTRAL
+                else:
+                    gender = UNKNOWN
             else:
                 gender = UNKNOWN
         else:
-            gender = UNKNOWN
+            # If here we are looking at representative object
+            object_is_candidate = False
+            first_name = extract_first_name_from_full_name(candidate_or_rep.representative_name)
+            middle_name = extract_middle_name_from_full_name(candidate_or_rep.representative_name)
+            last_name = extract_last_name_from_full_name(candidate_or_rep.representative_name)
+            political_party_constant = convert_to_political_party_constant(candidate_or_rep.political_party)
+            political_party = candidate_party_display(political_party_constant)
         try:
             politician = Politician.objects.create(
-                ballotpedia_politician_name=candidate.ballotpedia_candidate_name,
-                ballotpedia_politician_url=candidate.ballotpedia_candidate_url,
                 birth_date=birth_date,
-                facebook_url=candidate.facebook_url,
-                facebook_url_is_broken=candidate.facebook_url_is_broken,
+                facebook_url=candidate_or_rep.facebook_url,
+                facebook_url_is_broken=candidate_or_rep.facebook_url_is_broken,
                 first_name=first_name,
                 gender=gender,
-                google_civic_candidate_name=candidate.google_civic_candidate_name,
-                google_civic_candidate_name2=candidate.google_civic_candidate_name2,
-                google_civic_candidate_name3=candidate.google_civic_candidate_name3,
-                instagram_followers_count=candidate.instagram_followers_count,
-                instagram_handle=candidate.instagram_handle,
+                instagram_followers_count=candidate_or_rep.instagram_followers_count,
+                instagram_handle=candidate_or_rep.instagram_handle,
                 last_name=last_name,
-                maplight_id=candidate.maplight_id,
+                linkedin_url=candidate_or_rep.linkedin_url,
                 middle_name=middle_name,
                 political_party=political_party,
-                politician_email_address=candidate.candidate_email,
-                politician_name=candidate.candidate_name,
-                politician_phone_number=candidate.candidate_phone,
-                politician_contact_form_url=candidate.candidate_contact_form_url,
-                politician_url=candidate.candidate_url,
-                # See below
-                # politician_twitter_handle=candidate.candidate_twitter_handle,
-                state_code=candidate.state_code,
-                twitter_description=candidate.twitter_description,
-                twitter_followers_count=candidate.twitter_followers_count,
-                twitter_name=candidate.twitter_name,
-                twitter_location=candidate.twitter_location,
-                twitter_profile_background_image_url_https=candidate.twitter_profile_background_image_url_https,
-                twitter_profile_banner_url_https=candidate.twitter_profile_banner_url_https,
-                twitter_profile_image_url_https=candidate.twitter_profile_image_url_https,
-                vote_smart_id=candidate.vote_smart_id,
-                vote_usa_politician_id=candidate.vote_usa_politician_id,
-                vote_usa_profile_image_url_https=candidate.vote_usa_profile_image_url_https,
-                we_vote_hosted_profile_image_url_large=candidate.we_vote_hosted_profile_image_url_large,
-                we_vote_hosted_profile_image_url_medium=candidate.we_vote_hosted_profile_image_url_medium,
-                we_vote_hosted_profile_image_url_tiny=candidate.we_vote_hosted_profile_image_url_tiny,
+                state_code=candidate_or_rep.state_code,
+                twitter_description=candidate_or_rep.twitter_description,
+                twitter_followers_count=candidate_or_rep.twitter_followers_count,
+                twitter_name=candidate_or_rep.twitter_name,
+                twitter_location=candidate_or_rep.twitter_location,
+                twitter_profile_background_image_url_https=candidate_or_rep.twitter_profile_background_image_url_https,
+                twitter_profile_banner_url_https=candidate_or_rep.twitter_profile_banner_url_https,
+                twitter_profile_image_url_https=candidate_or_rep.twitter_profile_image_url_https,
+                twitter_handle2_updates_failing=candidate_or_rep.twitter_handle2_updates_failing,
+                vote_usa_politician_id=candidate_or_rep.vote_usa_politician_id,
+                we_vote_hosted_profile_image_url_large=candidate_or_rep.we_vote_hosted_profile_image_url_large,
+                we_vote_hosted_profile_image_url_medium=candidate_or_rep.we_vote_hosted_profile_image_url_medium,
+                we_vote_hosted_profile_image_url_tiny=candidate_or_rep.we_vote_hosted_profile_image_url_tiny,
+                wikipedia_url=candidate_or_rep.wikipedia_url,
+                youtube_url=candidate_or_rep.youtube_url,
             )
+            status += "POLITICIAN_CREATED "
             politician_created = True
             politician_found = True
             politician_id = politician.id
@@ -377,31 +388,65 @@ class PoliticianManager(models.Manager):
             success = False
 
         if politician_found:
+            twitter_handles = []
             try:
-                twitter_handle_changes = False
-                twitter_handles = []
-                if positive_value_exists(candidate.candidate_twitter_handle):
-                    twitter_handles.append(candidate.candidate_twitter_handle)
-                if positive_value_exists(candidate.candidate_twitter_handle2):
-                    twitter_handles.append(candidate.candidate_twitter_handle2)
-                if positive_value_exists(candidate.candidate_twitter_handle3):
-                    twitter_handles.append(candidate.candidate_twitter_handle3)
+                if object_is_candidate:
+                    politician.ballotpedia_politician_url = candidate_or_rep.ballotpedia_candidate_url
+                    politician.ballotpedia_politician_name = candidate_or_rep.ballotpedia_candidate_name
+                    politician.politician_contact_form_url = candidate_or_rep.candidate_contact_form_url
+                    politician.politician_url = candidate_or_rep.candidate_url
+                    politician.google_civic_candidate_name = candidate_or_rep.google_civic_candidate_name
+                    politician.google_civic_candidate_name2 = candidate_or_rep.google_civic_candidate_name2
+                    politician.google_civic_candidate_name3 = candidate_or_rep.google_civic_candidate_name3
+                    politician.maplight_id = candidate_or_rep.maplight_id
+                    politician.politician_email_address = candidate_or_rep.candidate_email
+                    politician.politician_name = candidate_or_rep.candidate_name
+                    politician.politician_phone_number = candidate_or_rep.candidate_phone
+                    politician.twitter_handle_updates_failing = candidate_or_rep.candidate_twitter_updates_failing
+                    politician.vote_smart_id = candidate_or_rep.vote_smart_id
+                    politician.vote_usa_politician_id = candidate_or_rep.vote_usa_politician_id
+                    politician.vote_usa_profile_image_url_https = candidate_or_rep.vote_usa_profile_image_url_https
+
+                    if positive_value_exists(candidate_or_rep.candidate_twitter_handle):
+                        twitter_handles.append(candidate_or_rep.candidate_twitter_handle)
+                    if positive_value_exists(candidate_or_rep.candidate_twitter_handle2):
+                        twitter_handles.append(candidate_or_rep.candidate_twitter_handle2)
+                    if positive_value_exists(candidate_or_rep.candidate_twitter_handle3):
+                        twitter_handles.append(candidate_or_rep.candidate_twitter_handle3)
+                else:
+                    politician.ballotpedia_politician_url = candidate_or_rep.ballotpedia_representative_url
+                    politician.google_civic_candidate_name = candidate_or_rep.google_civic_representative_name
+                    politician.google_civic_candidate_name2 = candidate_or_rep.google_civic_representative_name2
+                    politician.google_civic_candidate_name3 = candidate_or_rep.google_civic_representative_name3
+                    politician.politician_contact_form_url = candidate_or_rep.representative_contact_form_url
+                    politician.politician_email_address = candidate_or_rep.representative_email
+                    politician.politician_name = candidate_or_rep.representative_name
+                    politician.politician_phone_number = candidate_or_rep.representative_phone
+                    politician.politician_url = candidate_or_rep.representative_url
+                    politician.twitter_handle_updates_failing = candidate_or_rep.twitter_handle_updates_failing
+
+                    if positive_value_exists(candidate_or_rep.representative_twitter_handle):
+                        twitter_handles.append(candidate_or_rep.representative_twitter_handle)
+                    if positive_value_exists(candidate_or_rep.representative_twitter_handle2):
+                        twitter_handles.append(candidate_or_rep.representative_twitter_handle2)
+                    if positive_value_exists(candidate_or_rep.representative_twitter_handle3):
+                        twitter_handles.append(candidate_or_rep.representative_twitter_handle3)
+
                 if len(twitter_handles) > 0:
                     from politician.controllers import add_twitter_handle_to_next_politician_spot
                 for one_twitter_handle in twitter_handles:
                     twitter_results = add_twitter_handle_to_next_politician_spot(
                         politician, one_twitter_handle)
                     if twitter_results['success']:
-                        twitter_handle_changes = True
+                        changes_found = True
                         if twitter_results['values_changed']:
                             politician = twitter_results['politician']
                     else:
                         status += twitter_results['status']
                         success = False
-                if twitter_handle_changes:
-                    politician.save()
+                politician.save()
             except Exception as e:
-                status += "FAILED_TO_ADD_CANDIDATE_TWITTER_HANDLE: " + str(e) + " "
+                status += "FAILED_TO_ADD_CANDIDATE_TWITTER_HANDLE_OR_OTHER_FIELDS: " + str(e) + " "
                 success = False
         results = {
             'success':                      success,

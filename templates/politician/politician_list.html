@@ -14,6 +14,9 @@
         <li><a href="{% url 'politician:find_and_merge_duplicate_politicians' %}?state_code={{ state_code }}"
                         target="_blank" >
             Find and Merge Duplicate Politicians <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
+        <li><a href="{% url 'politician:update_politicians_from_candidates' %}?state_code={{ state_code }}"
+                        target="_blank" >
+            Update Politicians from Candidates <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
         <li><a href="{% url 'candidate:repair_imported_names' %}?is_candidate=false" >Repair Politician Names</a></li>
     </ul>
 
@@ -68,7 +71,7 @@
                 {% if politician.we_vote_hosted_profile_image_url_tiny %}
                 <a href="{% url 'politician:politician_edit' politician.id %}?google_civic_election_id={{ google_civic_election_id }}"
                    target="_blank">
-                    <img src='{{ politician.we_vote_hosted_profile_image_url_tiny }}' height="25px" />
+                    <img src='{{ politician.we_vote_hosted_profile_image_url_tiny }}' height="48px" />
                 </a>
                 {% endif %}
             </td>
@@ -77,6 +80,12 @@
             <td>{{ politician.state_code }}</td>
             <td>
                 {{ politician.id }} - {{ politician.we_vote_id }}
+                {% if politician.linked_representative_we_vote_id_list %}
+                    <br />
+                    {% for representative_we_vote_id in politician.linked_representative_we_vote_id_list %}
+                        <span style="color: #999">{{ representative_we_vote_id }}&nbsp;</span>
+                    {% endfor %}
+                {% endif %}
                 {% if politician.vote_usa_politician_id %}
                     <br />{{ politician.vote_usa_politician_id|default_if_none:"" }}
                 {% endif %}

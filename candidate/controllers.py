@@ -10,7 +10,6 @@ from django.utils.timezone import now
 import wevote_functions.admin
 from apis_v1.views.views_extension import process_pdf_to_html
 from ballot.models import CANDIDATE
-from bookmark.models import BookmarkItemList
 from config.base import get_environment_variable
 from election.models import ElectionManager
 from exception.models import handle_exception
@@ -30,7 +29,8 @@ from wevote_functions.functions import add_period_to_middle_name_initial, add_pe
     extract_twitter_handle_from_text_string, extract_website_from_url, \
     remove_period_from_middle_name_initial, remove_period_from_name_prefix_and_suffix
 from .models import CandidateListManager, CandidateCampaign, CandidateManager, \
-    CANDIDATE_UNIQUE_IDENTIFIERS, PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_UNKNOWN
+    CANDIDATE_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, CANDIDATE_UNIQUE_IDENTIFIERS, PROFILE_IMAGE_TYPE_FACEBOOK, \
+    PROFILE_IMAGE_TYPE_UNKNOWN
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -142,14 +142,14 @@ def add_twitter_handle_to_next_candidate_spot(candidate, twitter_handle):
     if not positive_value_exists(candidate.candidate_twitter_handle):
         candidate.candidate_twitter_handle = twitter_handle
         values_changed = True
-    elif twitter_handle == candidate.candidate_twitter_handle:
+    elif twitter_handle.lower() == candidate.candidate_twitter_handle.lower():
         # The value is already stored in candidate.candidate_twitter_handle so doesn't need
         # to be added anywhere below
         pass
     elif not positive_value_exists(candidate.candidate_twitter_handle2):
         candidate.candidate_twitter_handle2 = twitter_handle
         values_changed = True
-    elif twitter_handle == candidate.candidate_twitter_handle2:
+    elif twitter_handle.lower() == candidate.candidate_twitter_handle2.lower():
         # The value is already stored in candidate.candidate_twitter_handle2 so doesn't need
         # to be added to candidate.candidate_twitter_handle3
         pass
@@ -650,10 +650,18 @@ def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, adm
             candidate2_link.candidate_we_vote_id = candidate1_we_vote_id
             candidate2_link.save()
 
-    # Note: wait to wrap in try/except block
-    candidate1_on_stage.save()
+    # Clear 'unique=True' fields in candidate2_on_stage, which need to be Null before candidate1_on_stage can be saved
+    #  with updated values
+    candidate2_updated = False
+    for attribute in CANDIDATE_UNIQUE_ATTRIBUTES_TO_BE_CLEARED:
+        setattr(candidate2_on_stage, attribute, None)
+        candidate2_updated = True
+    if candidate2_updated:
+        candidate2_on_stage.save()
     # 2021-10-16 Uses image data from master table which we aren't updating with the merge yet
     # refresh_candidate_data_from_master_tables(candidate1_on_stage.we_vote_id)
+
+    candidate1_on_stage.save()
 
     # Remove candidate 2
     candidate2_on_stage.delete()
@@ -2026,7 +2034,7 @@ def candidate_politician_match(we_vote_candidate):
         return results
     else:
         # Create new politician for this candidate
-        create_results = politician_manager.create_politician_from_candidate(we_vote_candidate)
+        create_results = politician_manager.create_politician_from_candidate_or_representative(we_vote_candidate)
         status += create_results['status']
         if create_results['politician_found']:
             politician = create_results['politician']

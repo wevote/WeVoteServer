@@ -2143,6 +2143,89 @@ def import_ballot_items_for_location_view(request):
                                         )
 
 
+@login_required
+def import_representatives_for_location_view(request):
+    """
+    Reach out to external data source API to retrieve the current representatives for one location.
+    """
+    status = ""
+    success = True
+
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    polling_location_we_vote_id = request.GET.get('polling_location_we_vote_id', "")
+    state_code = request.GET.get('state_code', "")
+    use_google_civic = positive_value_exists(request.GET.get('use_google_civic', False))
+    use_ballotpedia = positive_value_exists(request.GET.get('use_ballotpedia', False))
+    use_ctcl = positive_value_exists(request.GET.get('use_ctcl', False))
+    use_vote_usa = positive_value_exists(request.GET.get('use_vote_usa', False))
+
+    polling_location_manager = PollingLocationManager()
+    polling_location_state_code = ""
+    if positive_value_exists(polling_location_we_vote_id):
+        results = polling_location_manager.retrieve_polling_location_by_id(0, polling_location_we_vote_id)
+        if results['polling_location_found']:
+            polling_location = results['polling_location']
+            polling_location_we_vote_id = polling_location.we_vote_id
+            polling_location_state_code = polling_location.state
+        else:
+            status += results['status']
+            success = False
+    else:
+        success = False
+
+    kind_of_batch = ""
+
+    update_or_create_rules = {
+        'create_candidates':    True,
+        'create_offices':       True,
+        'create_measures':      True,
+        'update_candidates':    False,
+        'update_offices':       False,
+        'update_measures':      False,
+    }
+
+    # See pattern in 'import_ballot_items_for_location_view' if we want to support other data providers
+    if not success:
+        status += "FAILED_RETRIEVING_POLLING_LOCATION_PRIOR_TO_IMPORTING_REPRESENTATIVES "
+    elif positive_value_exists(use_ballotpedia):
+        status += "BALLOTPEDIA_NOT_SUPPORTED_AS_DATA_SOURCE "
+    elif positive_value_exists(use_ctcl):
+        status += "CTCL_NOT_SUPPORTED_AS_DATA_SOURCE "
+    elif positive_value_exists(use_google_civic):
+        status += "USE_GOOGLE_CIVIC_IS_DATA_SOURCE "
+        from import_export_google_civic.controllers \
+            import retrieve_google_civic_representatives_from_polling_location_api
+        results = retrieve_google_civic_representatives_from_polling_location_api(
+            polling_location_we_vote_id=polling_location_we_vote_id,
+            state_code=state_code,
+            update_or_create_rules=update_or_create_rules,
+        )
+        status += results['status']
+    elif positive_value_exists(use_vote_usa):
+        status += "VOTE_USA_NOT_SUPPORTED_AS_DATA_SOURCE "
+    else:
+        # Should not be possible to get here
+        pass
+
+    messages.add_message(request, messages.INFO, status)
+    if positive_value_exists(polling_location_we_vote_id):
+        return HttpResponseRedirect(reverse('polling_location:polling_location_summary_by_we_vote_id',
+                                            args=(polling_location_we_vote_id,)) +
+                                    "?polling_location_we_vote_id=" + str(polling_location_we_vote_id) +
+                                    "&state_code=" + str(state_code)
+                                    )
+    else:
+        return HttpResponseRedirect(reverse('polling_location:polling_location_list',
+                                            args=()) +
+                                    "?polling_location_we_vote_id=" + str(polling_location_we_vote_id) +
+                                    "&state_code=" + str(state_code)
+                                    )
+
+
 def process_next_activity_notices_view(request):
     json_results = process_next_activity_notices()
 

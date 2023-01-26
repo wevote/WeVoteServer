@@ -581,7 +581,7 @@ def retrieve_vote_usa_ballot_items_from_polling_location_api(
                     #  we can move on to other ballot returned entries.
                     status += "CONTESTS_BUT_NO_INCOMING_BALLOT_ITEMS_FOUND_VOTE_USA "
             else:
-                # Create BallotReturnedEmpty entry so we don't keep retrieving this map point
+                # Create BallotReturnedEmpty entry, so we don't keep retrieving this map point
                 status += "NO_INCOMING_BALLOT_ITEMS_FOUND_VOTE_USA "
                 ballot_returned_manager = BallotReturnedManager()
                 results = ballot_returned_manager.create_ballot_returned_empty(

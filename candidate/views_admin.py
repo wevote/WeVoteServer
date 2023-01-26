@@ -714,7 +714,8 @@ def candidate_list_view(request):
             logger.error("Find facebook URLs without facebook pictures in candidate: ", e)
 
     status_print_list = ""
-    status_print_list += "candidate_list_count: " + str(candidate_list_count) + " "
+    status_print_list += "{candidate_list_count:,} candidates found." \
+                         "".format(candidate_list_count=candidate_list_count)
 
     if find_candidates_linked_to_multiple_offices:
         status_print_list += "candidates_linked_to_multiple_offices: " + str(candidates_linked_to_multiple_offices) + " "
@@ -1617,6 +1618,10 @@ def candidate_edit_process_view(request):
     candidate_twitter_handle3 = request.POST.get('candidate_twitter_handle3', False)
     if positive_value_exists(candidate_twitter_handle3):
         candidate_twitter_handle3 = extract_twitter_handle_from_text_string(candidate_twitter_handle3)
+    candidate_twitter_updates_failing = request.POST.get('candidate_twitter_updates_failing', False)
+    candidate_twitter_updates_failing = positive_value_exists(candidate_twitter_updates_failing)
+    twitter_handle2_updates_failing = request.POST.get('twitter_handle2_updates_failing', False)
+    twitter_handle2_updates_failing = positive_value_exists(twitter_handle2_updates_failing)
     candidate_url = request.POST.get('candidate_url', False)
     candidate_contact_form_url = request.POST.get('candidate_contact_form_url', False)
     facebook_url = request.POST.get('facebook_url', False)
@@ -1947,6 +1952,8 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
             if photo_url_from_vote_usa is not False:
                 candidate_on_stage.photo_url_from_vote_usa = photo_url_from_vote_usa
+            candidate_on_stage.candidate_twitter_updates_failing = candidate_twitter_updates_failing
+            candidate_on_stage.twitter_handle2_updates_failing = twitter_handle2_updates_failing
             if vote_smart_id is not False:
                 candidate_on_stage.vote_smart_id = vote_smart_id
             if vote_usa_politician_id is not False:
@@ -2110,6 +2117,8 @@ def candidate_edit_process_view(request):
                     candidate_on_stage.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
                 if photo_url_from_vote_usa is not False:
                     candidate_on_stage.photo_url_from_vote_usa = photo_url_from_vote_usa
+                candidate_on_stage.candidate_twitter_updates_failing = candidate_twitter_updates_failing
+                candidate_on_stage.twitter_handle2_updates_failing = twitter_handle2_updates_failing
                 if vote_smart_id is not False:
                     candidate_on_stage.vote_smart_id = vote_smart_id
                 if vote_usa_politician_id is not False:
@@ -2426,7 +2435,7 @@ def candidate_politician_match_this_year_view(request):
     multiple_politicians_found = 0
     other_results = 0
 
-    message = "About to loop through all of the candidates in this election to make sure we have a politician record."
+    message = "About to loop through all of the candidates this year to make sure we have a politician record."
     print_to_log(logger, exception_message_optional=message)
 
     # Loop through all the candidates from this year

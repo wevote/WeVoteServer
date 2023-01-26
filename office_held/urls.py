@@ -12,10 +12,9 @@ urlpatterns = [
     re_path(r'^delete/$', views_admin.office_held_delete_process_view, name='office_held_delete_process'),
     re_path(r'^edit_process/$', views_admin.office_held_edit_process_view, name='office_held_edit_process'),
     re_path(r'^new/$', views_admin.office_held_new_view, name='office_held_new'),
-    re_path(r'^update/$', views_admin.office_held_update_view, name='office_held_update'),
     re_path(r'^real_time_status/$', views_admin.office_held_update_status, name='office_held_update_status'),
     re_path(r'^(?P<office_held_id>[0-9]+)/edit/$', views_admin.office_held_edit_view, name='office_held_edit'),
-    re_path(r'^(?P<office_held_id>[0-9]+)/summary/$', views_admin.office_held_summary_view,
-        name='office_held_summary'),
+    re_path(r'^(?P<office_held_we_vote_id>wv[\w]{2}officeheld[\w]+)/summary/$',
+            views_admin.office_held_summary_view, name='office_held_summary'),
 
 ]

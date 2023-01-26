@@ -20,6 +20,7 @@ from django.db.models import F, Q
 from django.shortcuts import render
 from election.models import Election, ElectionManager
 from exception.models import handle_record_found_more_than_one_exception
+from office_held.models import OfficesHeldForLocation
 from voter.models import voter_has_authority
 from wevote_functions.functions import convert_state_code_to_state_text, convert_to_float, convert_to_int, \
     positive_value_exists, process_request_from_master, STATE_CODE_MAP, STATE_GEOGRAPHIC_CENTER
@@ -1052,6 +1053,7 @@ def polling_location_summary_internal_view(
     try:
         if positive_value_exists(polling_location_id):
             polling_location_on_stage = PollingLocation.objects.get(id=polling_location_id)
+            polling_location_we_vote_id = polling_location_on_stage.we_vote_id
         else:
             polling_location_on_stage = PollingLocation.objects.get(we_vote_id=polling_location_we_vote_id)
         state_code = polling_location_on_stage.state
@@ -1064,6 +1066,7 @@ def polling_location_summary_internal_view(
 
     ballot_returned_list = []
     ballot_returned_list_found = False
+    offices_held_for_location_list = []
     if polling_location_on_stage_found:
         ballot_returned_queryset = BallotReturned.objects.using('readonly').all()
         if positive_value_exists(google_civic_election_id):
@@ -1071,11 +1074,14 @@ def polling_location_summary_internal_view(
                 google_civic_election_id=google_civic_election_id)
         ballot_returned_queryset = ballot_returned_queryset.filter(
             polling_location_we_vote_id=polling_location_we_vote_id)
-
         ballot_returned_list = list(ballot_returned_queryset)
-
         if len(ballot_returned_list):
             ballot_returned_list_found = True
+
+        queryset = OfficesHeldForLocation.objects.using('readonly').all()
+        queryset = queryset.filter(polling_location_we_vote_id=polling_location_we_vote_id)
+        queryset = queryset.order_by('-date_last_retrieved')
+        offices_held_for_location_list = list(queryset)
 
     election = None
     if positive_value_exists(google_civic_election_id):
@@ -1121,6 +1127,7 @@ def polling_location_summary_internal_view(
         'election_list':                election_list,
         'google_civic_election_id':     google_civic_election_id,
         'messages_on_stage':            messages_on_stage,
+        'offices_held_for_location_list':   offices_held_for_location_list,
         'polling_location':             polling_location_on_stage,
         'use_ctcl_as_data_source_override': use_ctcl_as_data_source_override,
     }

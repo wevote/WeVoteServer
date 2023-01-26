@@ -1,7 +1,18 @@
 {# templates/polling_location/polling_location_summary.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Map Point{% if polling_location %}: {{ polling_location.location_name }}{% else %} Not Found{% endif %}{% endblock %}
+{% block title %}Map Point{% if polling_location %}
+    {% if polling_location.location_name %}: {{ polling_location.location_name }}
+    {% elif polling_location.city %}:
+        {% if polling_location.line1 %}{{ polling_location.line1 }}, {% endif %}
+        {% if polling_location.line2 %}{{ polling_location.line2 }},{% endif %}
+        {% if polling_location.city or polling_location.state or polling_location.zip_long %}
+            {% if polling_location.city %}{{ polling_location.city }},{% endif %}
+            {% if polling_location.state %}{{ polling_location.state }} {% endif %}
+            {% if polling_location.zip_long %}{{ polling_location.get_formatted_zip }}{% endif %}
+        {% endif %}
+    {% endif %}
+{% else %} Not Found{% endif %}{% endblock %}
 
 {%  block content %}
 {% load template_filters %}
@@ -75,8 +86,10 @@
         <li>Prepare: <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=IMPORT_BALLOT_ITEM&google_civic_election_id={{ google_civic_election_id }}&state_code={{ polling_location.state|default_if_none:"" }}&polling_location_we_vote_id={{ polling_location.we_vote_id }}">
             Import Complete Ballot at One Location (Import/Export Batches)</a></li>
 
-    <li><a href="{% url 'ballot:ballot_item_list_edit' 0 %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ polling_location.state|default_if_none:"" }}&polling_location_we_vote_id={{ polling_location.we_vote_id }}">
-       Create Ballot for this Election for one Location</a> (so voters can find a ballot before Google Civic data is live)</li>
+        <li><a href="{% url 'import_export_batches:import_representatives_for_location' %}?use_google_civic=1&polling_location_we_vote_id={{ polling_location.we_vote_id }}&state_code={{ polling_location.state|default_if_none:"" }}">
+            Google Civic: Retrieve Representatives for this Map Point</a></li>
+        <li><a href="{% url 'ballot:ballot_item_list_edit' 0 %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ polling_location.state|default_if_none:"" }}&polling_location_we_vote_id={{ polling_location.we_vote_id }}">
+           Create Ballot for this Election for one Location</a> (so voters can find a ballot before Google Civic data is live)</li>
 </ul>
 <br />
 {% if polling_location.polling_location_log_entry_list %}
@@ -94,7 +107,7 @@
             <tr>
                 <td>{{ log_entry.date_time|date:"M d, Y H:i" }}</td>
                 <td>
-                    {{ log_entry.kind_of_log_entry }}{% if log_entry.is_from_ctcl %}/CTCL{% endif %}{% if log_entry.is_from_vote_usa %}/Vote&nbsp;USA{% endif %}
+                    {{ log_entry.kind_of_log_entry }}{% if log_entry.is_from_ctcl %}/CTCL{% endif %}{% if log_entry.is_from_google_civic %}/Google Civic{% endif %}{% if log_entry.is_from_vote_usa %}/Vote&nbsp;USA{% endif %}
                 </td>
             {% if not google_civic_election_id %}
                 <td>
@@ -115,7 +128,64 @@
 {% endif %}
 
   <br />
-  <br />
+{% if offices_held_for_location_list %}
+  <h4>Offices Held for this Map Point</h4>
+
+    <table class="table">
+    {% for offices_held_for_location in offices_held_for_location_list %}
+    {% if forloop.counter == 1 or forloop.counter|divisibleby:35 %}
+       <thead>
+       <tr>
+            <th></th>
+            <th>Date/Time</th>
+            <th>Offices</th>
+        </tr>
+        </thead>
+    {% endif %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ offices_held_for_location.date_last_retrieved|date:"M d, Y" }}</td>
+            <td>
+            {% if offices_held_for_location.office_held_name_01 %}
+                <a href="{% url 'office_held:office_held_summary' offices_held_for_location.office_held_we_vote_id_01 %}" target="_blank">{{ offices_held_for_location.office_held_name_01 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+            {% endif %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_02 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_02 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_03 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_03 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_04 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_04 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_05 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_05 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_06 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_06 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_07 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_07 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_08 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_08 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_09 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_09 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_10 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_10 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_11 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_11 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_12 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_12 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_13 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_13 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_14 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_14 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_15 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_15 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_16 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_16 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_17 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_17 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_18 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_18 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_19 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_19 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_20 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_20 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_21 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_21 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_22 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_22 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_23 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_23 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_24 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_24 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_25 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_25 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_26 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_26 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_27 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_27 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_28 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_28 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_29 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_29 %}
+{% include "polling_location/offices_held_for_location_one_office.html" with office_held_name=offices_held_for_location.office_held_name_30 office_held_we_vote_id=offices_held_for_location.office_held_we_vote_id_30 %}
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+    <br />
+{% else %}
+    <p>(This map point is not being used by OfficeHeldForLocation entries.)</p>
+{% endif %}
 {% if ballot_returned_list %}
   <h4>Ballot Returned Entries that Rely on this Map Point</h4>
 

@@ -169,14 +169,14 @@ class TwitterUserManager(models.Manager):
         """
 
         created = False
-        
+        status = ""
         is_retweet_boolean = False
         if "retweeted_status" in tweet_json._json:
             is_retweet_boolean = True
 
         if not tweet_json: 
             success = False
-            status = 'MISSING_TWEET_JSON '
+            status += 'MISSING_TWEET_JSON '
         else:
             new_tweet, created = Tweet.objects.update_or_create(
                 author_handle = tweet_json.user._json['screen_name'],
@@ -190,11 +190,11 @@ class TwitterUserManager(models.Manager):
                 organization_we_vote_id= organization_we_vote_id)
             if new_tweet or len(new_tweet):
                 success = True
-                status = 'TWEET_SAVED'
+                status += 'TWEET_SAVED '
             else:
                 success = False
                 created = False
-                status = 'TWEET_NOT_UPDATED_OR_CREATED'
+                status += 'TWEET_NOT_UPDATED_OR_CREATED '
 
         results = {
             'success':                  success,
@@ -209,16 +209,16 @@ class TwitterUserManager(models.Manager):
         :param organization_we_vote_id:
         :return:
         """
-
+        status = ""
         tweet_list = []
         try:
             tweet_list_query = Tweet.objects.filter(organization_we_vote_id__iexact=organization_we_vote_id)
             tweet_list_query = tweet_list_query.order_by('date_published').reverse()
             tweet_list = list(tweet_list_query)
-            status = "TWEET_FOUND"
+            status += "TWEET_FOUND "
             success = True
         except Exception as e:
-            status = "RETRIEVE_TWEETS_CACHED_LOCALLY_FAILED"
+            status += "RETRIEVE_TWEETS_CACHED_LOCALLY_FAILED "
             success = False
 
         results = {
@@ -323,6 +323,7 @@ class TwitterUserManager(models.Manager):
             organization_we_vote_id=organization_we_vote_id)
 
     def create_twitter_link_to_organization(self, twitter_id, organization_we_vote_id):
+        status = ""
         if not positive_value_exists(twitter_id) or not \
                 positive_value_exists(organization_we_vote_id):
             twitter_link_to_organization = TwitterLinkToOrganization()
@@ -343,12 +344,12 @@ class TwitterUserManager(models.Manager):
             )
             twitter_link_to_organization_saved = True
             success = True
-            status = "TWITTER_LINK_TO_ORGANIZATION_CREATED"
+            status += "TWITTER_LINK_TO_ORGANIZATION_CREATED "
         except Exception as e:
             twitter_link_to_organization_saved = False
             twitter_link_to_organization = TwitterLinkToOrganization()
             success = False
-            status = "TWITTER_LINK_TO_ORGANIZATION_NOT_CREATED: " + str(e) + " "
+            status += "TWITTER_LINK_TO_ORGANIZATION_NOT_CREATED: " + str(e) + " "
 
         results = {
             'success':                              success,
@@ -359,7 +360,7 @@ class TwitterUserManager(models.Manager):
         return results
 
     def create_twitter_link_to_voter(self, twitter_id, voter_we_vote_id):
-
+        status = ""
         # Any attempts to save a twitter_link using either twitter_id or voter_we_vote_id that already
         #  exist in the table will fail, since those fields are required to be unique.
         twitter_secret_key = generate_random_string(12)
@@ -372,12 +373,12 @@ class TwitterUserManager(models.Manager):
             )
             twitter_link_to_voter_saved = True
             success = True
-            status = "TWITTER_LINK_TO_VOTER_CREATED"
+            status += "TWITTER_LINK_TO_VOTER_CREATED "
         except Exception as e:
             twitter_link_to_voter_saved = False
             twitter_link_to_voter = TwitterLinkToVoter()
             success = False
-            status = "TWITTER_LINK_TO_VOTER_NOT_CREATED"
+            status += "TWITTER_LINK_TO_VOTER_NOT_CREATED "
 
         results = {
             'success':                      success,
@@ -388,12 +389,13 @@ class TwitterUserManager(models.Manager):
         return results
 
     def delete_twitter_link_possibilities(self, candidate_campaign_we_vote_id):
+        status = ""
         try:
             TwitterLinkPossibility.objects.filter(candidate_campaign_we_vote_id=candidate_campaign_we_vote_id).delete()
-            status = "TWITTER_LINK_TO_POSSIBILITY_DELETED"
+            status += "TWITTER_LINK_TO_POSSIBILITY_DELETED "
             success = True
         except Exception as e:
-            status = "TWITTER_LINK_TO_POSSIBILITY_NOT_DELETED"
+            status += "TWITTER_LINK_TO_POSSIBILITY_NOT_DELETED "
             success = False
 
         results = {
@@ -432,7 +434,7 @@ class TwitterUserManager(models.Manager):
             twitter_user = results['twitter_user']
             twitter_user_id = twitter_user.twitter_id
         else:
-            status += "RETRIEVE_TWITTER_ERROR: " + results['status']
+            status += "RETRIEVE_TWITTER_ERROR: " + results['status'] + " "
             results = {
                 'success':  False,
                 'status':   status,
@@ -499,6 +501,7 @@ class TwitterUserManager(models.Manager):
         :param read_only:
         :return:
         """
+        status = ""
         twitter_link_to_organization = TwitterLinkToOrganization()
         twitter_link_to_organization_id = 0
 
@@ -531,11 +534,11 @@ class TwitterUserManager(models.Manager):
         except TwitterLinkToOrganization.DoesNotExist:
             twitter_link_to_organization_found = False
             success = True
-            status = "RETRIEVE_TWITTER_LINK_TO_ORGANIZATION_NOT_FOUND"
+            status += "RETRIEVE_TWITTER_LINK_TO_ORGANIZATION_NOT_FOUND"
         except Exception as e:
             twitter_link_to_organization_found = False
             success = False
-            status = 'FAILED retrieve_twitter_link_to_organization: ' + str(e) + " "
+            status += 'FAILED retrieve_twitter_link_to_organization: ' + str(e) + " "
 
         results = {
             'success':      success,
@@ -581,7 +584,7 @@ class TwitterUserManager(models.Manager):
             success = True
         except Exception as e:
             success = False
-            status = 'FAILED retrieve_twitter_link_to_organization_list: ' + str(e) + " "
+            status += 'FAILED retrieve_twitter_link_to_organization_list: ' + str(e) + " "
 
         results = {
             'success':                                  success,
@@ -702,7 +705,7 @@ class TwitterUserManager(models.Manager):
         :return:
         """
         twitter_user_found = False
-        twitter_user = TwitterUser()
+        twitter_user = None
         success = False
         status = ""
 
@@ -754,10 +757,11 @@ class TwitterUserManager(models.Manager):
         }
         return results
 
-    def retrieve_twitter_user(self, twitter_user_id, twitter_handle='', read_only=False):
+    def retrieve_twitter_user(self, twitter_user_id=0, twitter_handle='', read_only=False):
         twitter_user_on_stage = TwitterUser()
         twitter_user_found = False
         success = False
+        status = ""
 
         # Strip out the twitter handles "False" or "None"
         if twitter_handle:
@@ -767,7 +771,7 @@ class TwitterUserManager(models.Manager):
 
         try:
             if positive_value_exists(twitter_user_id):
-                status = "RETRIEVE_TWITTER_USER_FOUND_WITH_TWITTER_USER_ID"
+                status += "RETRIEVE_TWITTER_USER_FOUND_WITH_TWITTER_USER_ID "
                 if read_only:
                     twitter_user_on_stage = TwitterUser.objects.using('readonly').get(twitter_id=twitter_user_id)
                 else:
@@ -775,7 +779,7 @@ class TwitterUserManager(models.Manager):
                 twitter_user_found = True
                 success = True
             elif positive_value_exists(twitter_handle):
-                status = "RETRIEVE_TWITTER_USER_FOUND_WITH_HANDLE"
+                status += "RETRIEVE_TWITTER_USER_FOUND_WITH_HANDLE "
                 if read_only:
                     twitter_user_on_stage = TwitterUser.objects.using('readonly').get(
                         twitter_handle__iexact=twitter_handle)
@@ -784,14 +788,14 @@ class TwitterUserManager(models.Manager):
                 twitter_user_found = True
                 success = True
             else:
-                status = "RETRIEVE_TWITTER_USER_INSUFFICIENT_VARIABLES"
+                status += "RETRIEVE_TWITTER_USER_INSUFFICIENT_VARIABLES "
         except TwitterUser.MultipleObjectsReturned as e:
             success = False
-            status = "RETRIEVE_TWITTER_USER_MULTIPLE_FOUND"
+            status += "RETRIEVE_TWITTER_USER_MULTIPLE_FOUND "
             handle_record_found_more_than_one_exception(e, logger=logger, exception_message_optional=status)
         except TwitterUser.DoesNotExist:
             success = True
-            status = "RETRIEVE_TWITTER_USER_NONE_FOUND"
+            status += "RETRIEVE_TWITTER_USER_NONE_FOUND "
 
         results = {
             'success':                  success,
@@ -823,7 +827,7 @@ class TwitterUserManager(models.Manager):
                     lst = response.data
                     for i in range(len(lst)):
                         list_of_usernames.append(lst[i].username)
-            status = "TWEEPY_LOADED_" + str(len(list_of_usernames)) + "_TWITTER_USERNAMES "
+            status += "TWEEPY_LOADED_" + str(len(list_of_usernames)) + "_TWITTER_USERNAMES "
             success = True
 
         except tweepy.TooManyRequests:
@@ -858,7 +862,7 @@ class TwitterUserManager(models.Manager):
 
         if not positive_value_exists(twitter_id_of_me):
             success = False
-            status = 'RETRIEVE_TWITTER_WHO_I_FOLLOW-MISSING_TWITTER_ID '
+            status += 'RETRIEVE_TWITTER_WHO_I_FOLLOW-MISSING_TWITTER_ID '
             results = {
                 'success':                          success,
                 'status':                           status,
@@ -906,17 +910,18 @@ class TwitterUserManager(models.Manager):
         :param twitter_id_of_me:
         :return: twitter_next_cursor
         """
+        status = ""
         try:
             twitter_next_cursor_state = TwitterCursorState.objects.get(
                 twitter_id_of_me=twitter_id_of_me,)
             twitter_next_cursor = twitter_next_cursor_state.twitter_next_cursor
             success = True
-            status = "RETRIEVE_TWITTER_NEXT_CURSOR_FOUND_WITH_TWITTER_ID"
+            status += "RETRIEVE_TWITTER_NEXT_CURSOR_FOUND_WITH_TWITTER_ID "
         except TwitterCursorState.DoesNotExist:
             twitter_next_cursor = 0
             twitter_next_cursor_state = TwitterCursorState()
             success = True
-            status = "RETRIEVE_TWITTER_NEXT_CURSOR_NONE_FOUND"
+            status += "RETRIEVE_TWITTER_NEXT_CURSOR_NONE_FOUND "
 
         results = {
             'success':              success,
@@ -934,6 +939,7 @@ class TwitterUserManager(models.Manager):
         :param twitter_ids_i_follow:
         :return:
         """
+        status = ""
         twitter_who_i_follow = TwitterWhoIFollow()
         try:
             for twitter_id_i_follow in twitter_ids_i_follow:
@@ -950,12 +956,12 @@ class TwitterUserManager(models.Manager):
                 )
             twitter_who_i_follow_saved = True
             success = True
-            status = "TWITTER_WHO_I_FOLLOW_CREATED"
+            status += "TWITTER_WHO_I_FOLLOW_CREATED "
         except Exception:
             twitter_who_i_follow_saved = False
             twitter_who_i_follow = TwitterWhoIFollow()
             success = False
-            status = "TWITTER_WHO_I_FOLLOW_NOT_CREATED"
+            status += "TWITTER_WHO_I_FOLLOW_NOT_CREATED "
         results = {
             'success':                      success,
             'status':                       status,
@@ -972,6 +978,7 @@ class TwitterUserManager(models.Manager):
         :param twitter_next_cursor:
         :return:
         """
+        status = ""
         try:
             twitter_next_cursor_state, created = TwitterCursorState.objects.update_or_create(
                 twitter_id_of_me=twitter_id_of_me,
@@ -984,12 +991,12 @@ class TwitterUserManager(models.Manager):
             )
             twitter_next_cursor_state_saved = True
             success = True
-            status = "TWITTER_NEXT_CURSOR_STATE_CREATED"
+            status += "TWITTER_NEXT_CURSOR_STATE_CREATED "
         except Exception:
             twitter_next_cursor_state_saved = False
             twitter_next_cursor_state = TwitterCursorState()
             success = False
-            status = "TWITTER_NEXT_CURSOR_STATE_NOT_CREATED"
+            status += "TWITTER_NEXT_CURSOR_STATE_NOT_CREATED "
         results = {
             'success':                          success,
             'status':                           status,
@@ -1004,6 +1011,7 @@ class TwitterUserManager(models.Manager):
         """
         Reset an twitter user entry with original image details from we vote image.
         """
+        status = ""
         if positive_value_exists(twitter_id):
             twitter_results = self.retrieve_twitter_user(twitter_id)
             twitter_user_found = twitter_results['twitter_user_found']
@@ -1022,13 +1030,13 @@ class TwitterUserManager(models.Manager):
                 twitter_user.save()
 
                 success = True
-                status = 'RESET_TWITTER_USER_IMAGE_DETAILS'
+                status += 'RESET_TWITTER_USER_IMAGE_DETAILS '
             else:
                 success = False
-                status = 'TWITTER_USER_NOT_FOUND'
+                status += 'TWITTER_USER_NOT_FOUND '
         else:
             success = False
-            status = 'TWITTER_ID_MISSING'
+            status += 'TWITTER_ID_MISSING '
             twitter_user = ''
 
         results = {
@@ -1044,7 +1052,7 @@ class TwitterUserManager(models.Manager):
                                                 we_vote_hosted_profile_image_url_large=None,
                                                 we_vote_hosted_profile_image_url_medium=None,
                                                 we_vote_hosted_profile_image_url_tiny=None):
-
+        status = ""
         if 'screen_name' not in twitter_json:
             results = {
                 'success':              False,
@@ -1110,13 +1118,13 @@ class TwitterUserManager(models.Manager):
             twitter_user_on_stage.save()
             success = True
             twitter_user_found = True
-            status = 'CREATED_TWITTER_USER'
+            status += 'CREATED_TWITTER_USER '
         except Exception as e:
             success = False
             twitter_user_found = False
             logger.error("save_new_twitter_user_from_twitter_json caught: ", str(e))
 
-            status = 'FAILED_TO_CREATE_NEW_TWITTER_USER'
+            status += 'FAILED_TO_CREATE_NEW_TWITTER_USER '
             twitter_user_on_stage = TwitterUser()
 
         results = {
