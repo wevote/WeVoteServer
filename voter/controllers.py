@@ -2390,6 +2390,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
     from_voter_we_vote_id = ""
     to_voter_id = 0
     to_voter_we_vote_id = ""
+    t0 = time()
 
     voter_device_id = voter_device_link.voter_device_id
 
@@ -2437,6 +2438,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
 
     voter_device_link_manager = VoterDeviceLinkManager()
 
+    t1 = time()
     # The from_voter and to_voter may both have their own linked_organization_we_vote_id
     organization_manager = OrganizationManager()
     from_voter_linked_organization_we_vote_id = from_voter.linked_organization_we_vote_id
@@ -2475,6 +2477,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
             except Exception as e:
                 status += "FAILED_TO_REMOVE_LINKED_ORGANIZATION_WE_VOTE_ID-TO_VOTER " + str(e) + " "
 
+    t2 = time()
     # If the to_voter does not have a linked_organization_we_vote_id, then we should move the from_voter's
     #  organization_we_vote_id
     if not positive_value_exists(to_voter_linked_organization_we_vote_id):
@@ -2487,6 +2490,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
     move_apple_user_results = move_apple_user_entries_to_another_voter(
         from_voter_we_vote_id, to_voter_we_vote_id)
     status += move_apple_user_results['status']
+    t3 = time()
 
     # Data healing scripts before we try to move the positions
     position_list_manager = PositionListManager()
@@ -2497,6 +2501,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
         repair_results = position_list_manager.repair_all_positions_for_voter(to_voter_id)
         status += repair_results['status']
 
+    t4 = time()
     # Transfer positions from voter to new_owner_voter
     move_positions_results = move_positions_to_another_voter(
         from_voter_id, from_voter_we_vote_id,
@@ -2522,6 +2527,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
 
         status += " " + move_organization_to_another_complete_results['status']
 
+    t5 = time()
     # Transfer friends from voter to new_owner_voter
     move_friends_results = move_friends_to_another_voter(
         from_voter_we_vote_id, to_voter_we_vote_id, to_voter_linked_organization_we_vote_id)
@@ -2555,6 +2561,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
         from_voter_we_vote_id, to_voter_we_vote_id)
     status += move_membership_link_results['status']
 
+    t6 = time()
     # Transfer the OrganizationTeamMember entries to new voter
     move_organization_team_member_results = move_organization_team_member_entries_to_another_voter(
         from_voter_we_vote_id, to_voter_we_vote_id,
@@ -2573,6 +2580,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
         from_voter = move_email_addresses_results['from_voter']
         new_owner_voter = move_email_addresses_results['to_voter']
 
+    t7 = time()
     # Bring over all sms phone numbers from the from_voter over to the to_voter
     move_sms_phone_number_results = move_sms_phone_number_entries_to_another_voter(
         from_voter_we_vote_id, to_voter_we_vote_id, from_voter=from_voter, to_voter=new_owner_voter)
@@ -2594,6 +2602,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
         from_voter_we_vote_id, to_voter_we_vote_id)
     status += " " + move_voter_contact_email_results['status']
 
+    t8 = time()
     # Bring over the voter's plans to vote
     move_voter_plan_results = move_voter_plan_to_another_voter(from_voter, new_owner_voter)
     status += " " + move_voter_plan_results['status']
@@ -2615,6 +2624,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
         from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id)
     status += " " + move_shared_items_results['status']
 
+    t9 = time()
     # Transfer ActivityNoticeSeed and ActivityNotice entries from voter to new_owner_voter
     move_activity_results = move_activity_notices_to_another_voter(
         from_voter_we_vote_id, to_voter_we_vote_id,
@@ -2636,6 +2646,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
         to_voter=new_owner_voter)
     status += " " + move_activity_comment_results['status']
 
+    t10 = time()
     # Transfer CampaignX related info from voter to new_owner_voter
     move_campaignx_results = move_campaignx_to_another_voter(
         from_voter_we_vote_id, to_voter_we_vote_id,
@@ -2643,10 +2654,12 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
         to_organization_name=organization_full_name)
     status += " " + move_campaignx_results['status']
 
+    t10 = time()
     # Bring over Analytics information
     move_analytics_results = move_analytics_info_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id)
     status += " " + move_analytics_results['status']
 
+    t11 = time()
     # Bring over the voter-table data
     merge_voter_accounts_results = merge_voter_accounts(from_voter, new_owner_voter)
     new_owner_voter = merge_voter_accounts_results['to_voter']
@@ -2656,6 +2669,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
     transfer_voter_images_results = transfer_voter_images_to_organization(voter=new_owner_voter)
     status += " " + transfer_voter_images_results['status']
 
+    t12 = time()
     # Send any friend invitations set up before sign in
     email_manager = EmailManager()
     real_name_only = True
@@ -2681,6 +2695,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
 
     # TODO If no errors, delete the voter account
 
+    t13 = time()
     # And finally, relink the current voter_device_id to email_owner_voter
     update_link_results = voter_device_link_manager.update_voter_device_link(voter_device_link, new_owner_voter)
     if update_link_results['voter_device_link_updated']:
@@ -2693,6 +2708,38 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
     # Data healing scripts
     repair_results = position_list_manager.repair_all_positions_for_voter(new_owner_voter.id)
     status += repair_results['status']
+
+    t14 = time()
+    dt0 = t1 - t0
+    dt1 = t2 - t1
+    dt2 = t3 - t2
+    dt3 = t4 - t3
+    dt4 = t5 - t4
+    dt5 = t6 - t5
+    dt6 = t7 - t6
+    dt7 = t8 - t7
+    dt8 = t9 - t8
+    dt9 = t10 - t9
+    dt10 = t11 - t10
+    dt11 = t12 - t11
+    dt12 = t13 - t12
+    dt13 = t14 - t13
+    dt = t14 - t0
+    logger.error('(Ok) voter_merge_two_accounts_action step 1 took ' + "{:.6f}".format(dt0) +
+                 ' seconds, step 2 took ' + "{:.6f}".format(dt1) +
+                 ' seconds, step 3 took ' + "{:.6f}".format(dt2) +
+                 ' seconds, step 4 took ' + "{:.6f}".format(dt3) +
+                 ' seconds, step 5 took ' + "{:.6f}".format(dt4) +
+                 ' seconds, step 6 took ' + "{:.6f}".format(dt5) +
+                 ' seconds, step 7 took ' + "{:.6f}".format(dt6) +
+                 ' seconds, step 8 took ' + "{:.6f}".format(dt7) +
+                 ' seconds, step 9 took ' + "{:.6f}".format(dt8) +
+                 ' seconds, step 10 took ' + "{:.6f}".format(dt9) +
+                 ' seconds, step 11 took ' + "{:.6f}".format(dt10) +
+                 ' seconds, step 12 took ' + "{:.6f}".format(dt11) +
+                 ' seconds, step 13 took ' + "{:.6f}".format(dt12) +
+                 ' seconds, step 14 took ' + "{:.6f}".format(dt13) +
+                 ' seconds, total took ' + "{:.6f}".format(dt) + ' seconds')
 
     results = {
         'status':                       status,
