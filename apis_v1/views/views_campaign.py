@@ -89,7 +89,6 @@ def campaignx_retrieve_view(request):  # campaignRetrieve (CDN)
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     campaignx_we_vote_id = request.GET.get('campaignx_we_vote_id', '')
     hostname = request.GET.get('hostname', '')
-    print("\nhostname: " + hostname)              #*****EDIT*****#
     seo_friendly_path = request.GET.get('seo_friendly_path', '')
     json_data = campaignx_retrieve_for_api(
         request=request,
