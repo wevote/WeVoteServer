@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 from django.http import HttpResponseRedirect
 from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
+from django.utils.timezone import localtime, now
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
@@ -1179,7 +1180,7 @@ def update_representative_from_politician_view(request):
             save_changes = results['save_changes']
             representative = results['representative']
             if save_changes:
-                representative.date_last_updated_from_politician = datetime.now()
+                representative.date_last_updated_from_politician = localtime(now()).date()
                 representative.save()
                 message = "Representative updated."
                 messages.add_message(request, messages.INFO, message)

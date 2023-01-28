@@ -2,6 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from django.db.models import Q
 from candidate.controllers import add_name_to_next_spot, move_candidates_to_another_politician
 from representative.controllers import move_representatives_to_another_politician
 from politician.models import Politician, PoliticianManager, POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, \
@@ -186,6 +187,174 @@ def find_duplicate_politician(we_vote_politician, ignore_politician_id_list):
     return results
 
 
+def find_candidates_to_link_to_this_politician(politician=None):
+    """
+    Find Candidates to Link to this Politician
+    Finding Candidates that *might* be "children" of this politician
+
+    :param politician:
+    :return:
+    """
+    if not hasattr(politician, 'we_vote_id'):
+        return []
+    from candidate.models import CandidateCampaign
+    try:
+        related_candidate_list = CandidateCampaign.objects.all()
+        related_candidate_list = related_candidate_list.exclude(
+            politician_we_vote_id__iexact=politician.we_vote_id)
+
+        filters = []
+        new_filter = \
+            Q(candidate_name__icontains=politician.first_name) & \
+            Q(candidate_name__icontains=politician.last_name)
+        filters.append(new_filter)
+
+        if positive_value_exists(politician.politician_twitter_handle):
+            new_filter = (
+                Q(candidate_twitter_handle__iexact=politician.politician_twitter_handle) |
+                Q(candidate_twitter_handle2__iexact=politician.politician_twitter_handle) |
+                Q(candidate_twitter_handle3__iexact=politician.politician_twitter_handle)
+            )
+            filters.append(new_filter)
+
+        if positive_value_exists(politician.politician_twitter_handle2):
+            new_filter = (
+                Q(candidate_twitter_handle__iexact=politician.politician_twitter_handle2) |
+                Q(candidate_twitter_handle2__iexact=politician.politician_twitter_handle2) |
+                Q(candidate_twitter_handle3__iexact=politician.politician_twitter_handle2)
+            )
+            filters.append(new_filter)
+
+        if positive_value_exists(politician.politician_twitter_handle3):
+            new_filter = (
+                Q(candidate_twitter_handle__iexact=politician.politician_twitter_handle3) |
+                Q(candidate_twitter_handle2__iexact=politician.politician_twitter_handle3) |
+                Q(candidate_twitter_handle3__iexact=politician.politician_twitter_handle3)
+            )
+            filters.append(new_filter)
+
+        if positive_value_exists(politician.politician_twitter_handle4):
+            new_filter = (
+                Q(candidate_twitter_handle__iexact=politician.politician_twitter_handle4) |
+                Q(candidate_twitter_handle2__iexact=politician.politician_twitter_handle4) |
+                Q(candidate_twitter_handle3__iexact=politician.politician_twitter_handle4)
+            )
+            filters.append(new_filter)
+
+        if positive_value_exists(politician.politician_twitter_handle5):
+            new_filter = (
+                Q(candidate_twitter_handle__iexact=politician.politician_twitter_handle5) |
+                Q(candidate_twitter_handle2__iexact=politician.politician_twitter_handle5) |
+                Q(candidate_twitter_handle3__iexact=politician.politician_twitter_handle5)
+            )
+            filters.append(new_filter)
+
+        if positive_value_exists(politician.vote_smart_id):
+            new_filter = Q(vote_smart_id=politician.vote_smart_id)
+            filters.append(new_filter)
+
+        if positive_value_exists(politician.vote_usa_politician_id):
+            new_filter = Q(vote_usa_politician_id=politician.vote_usa_politician_id)
+            filters.append(new_filter)
+
+        # Add the first query
+        if len(filters):
+            final_filters = filters.pop()
+
+            # ...and "OR" the remaining items in the list
+            for item in filters:
+                final_filters |= item
+
+            related_candidate_list = related_candidate_list.filter(final_filters)
+
+        related_candidate_list = related_candidate_list.order_by('candidate_name')[:20]
+    except Exception as e:
+        related_candidate_list = []
+    return related_candidate_list
+
+
+def find_representatives_to_link_to_this_politician(politician=None):
+    """
+    Find Representatives to Link to this Politician
+    Finding Representatives that *might* be "children" of this politician
+
+    :param politician:
+    :return:
+    """
+    if not hasattr(politician, 'we_vote_id'):
+        return []
+    from representative.models import Representative
+    try:
+        related_representative_list = Representative.objects.all()
+        related_representative_list = related_representative_list.exclude(
+            politician_we_vote_id__iexact=politician.we_vote_id)
+
+        filters = []
+        new_filter = \
+            Q(representative_name__icontains=politician.first_name) & \
+            Q(representative_name__icontains=politician.last_name)
+        filters.append(new_filter)
+
+        if positive_value_exists(politician.politician_twitter_handle):
+            new_filter = (
+                Q(representative_twitter_handle__iexact=politician.politician_twitter_handle) |
+                Q(representative_twitter_handle2__iexact=politician.politician_twitter_handle) |
+                Q(representative_twitter_handle3__iexact=politician.politician_twitter_handle)
+            )
+            filters.append(new_filter)
+
+        if positive_value_exists(politician.politician_twitter_handle2):
+            new_filter = (
+                Q(representative_twitter_handle__iexact=politician.politician_twitter_handle2) |
+                Q(representative_twitter_handle2__iexact=politician.politician_twitter_handle2) |
+                Q(representative_twitter_handle3__iexact=politician.politician_twitter_handle2)
+            )
+            filters.append(new_filter)
+
+        if positive_value_exists(politician.politician_twitter_handle3):
+            new_filter = (
+                Q(representative_twitter_handle__iexact=politician.politician_twitter_handle3) |
+                Q(representative_twitter_handle2__iexact=politician.politician_twitter_handle3) |
+                Q(representative_twitter_handle3__iexact=politician.politician_twitter_handle3)
+            )
+            filters.append(new_filter)
+
+        if positive_value_exists(politician.politician_twitter_handle4):
+            new_filter = (
+                Q(representative_twitter_handle__iexact=politician.politician_twitter_handle4) |
+                Q(representative_twitter_handle2__iexact=politician.politician_twitter_handle4) |
+                Q(representative_twitter_handle3__iexact=politician.politician_twitter_handle4)
+            )
+            filters.append(new_filter)
+
+        if positive_value_exists(politician.politician_twitter_handle5):
+            new_filter = (
+                Q(representative_twitter_handle__iexact=politician.politician_twitter_handle5) |
+                Q(representative_twitter_handle2__iexact=politician.politician_twitter_handle5) |
+                Q(representative_twitter_handle3__iexact=politician.politician_twitter_handle5)
+            )
+            filters.append(new_filter)
+
+        if positive_value_exists(politician.vote_usa_politician_id):
+            new_filter = Q(vote_usa_politician_id=politician.vote_usa_politician_id)
+            filters.append(new_filter)
+
+        # Add the first query
+        if len(filters):
+            final_filters = filters.pop()
+
+            # ...and "OR" the remaining items in the list
+            for item in filters:
+                final_filters |= item
+
+            related_representative_list = related_representative_list.filter(final_filters)
+
+        related_representative_list = related_representative_list.order_by('representative_name')[:20]
+    except Exception as e:
+        related_representative_list = []
+    return related_representative_list
+
+
 def figure_out_politician_conflict_values(politician1, politician2):
     status = ''
     success = True
@@ -202,16 +371,7 @@ def figure_out_politician_conflict_values(politician1, politician2):
             elif politician2_attribute_value is None or politician2_attribute_value == "":
                 politician_merge_conflict_values[attribute] = 'POLITICIAN1'
             else:
-                if attribute == "politician_url":
-                    # If there is a link with 'http' in politician 2, and politician 1 doesn't have 'http',
-                    #  use the one with 'http'
-                    if 'http' in politician2_attribute_value and 'http' not in politician1_attribute_value:
-                        politician_merge_conflict_values[attribute] = 'POLITICIAN2'
-                    elif politician1_attribute_value.lower() == politician2_attribute_value.lower():
-                        politician_merge_conflict_values[attribute] = 'MATCHING'
-                    else:
-                        politician_merge_conflict_values[attribute] = 'CONFLICT'
-                elif attribute == "politician_name" or attribute == "state_code":
+                if attribute == "politician_name" or attribute == "state_code":
                     if politician1_attribute_value.lower() == politician2_attribute_value.lower():
                         politician_merge_conflict_values[attribute] = 'MATCHING'
                     else:
@@ -383,6 +543,59 @@ def merge_these_two_politicians(
             politician1_on_stage, politician2_on_stage.politician_twitter_handle5)
         if twitter_results['success']:
             politician1_on_stage = twitter_results['politician']
+
+    # Preserve unique politician_url -> politician_url5
+    from representative.controllers import add_value_to_next_representative_spot
+    if positive_value_exists(politician2_on_stage.politician_url):
+        results = add_value_to_next_representative_spot(
+            field_name_base='politician_url',
+            new_value_to_add=politician2_on_stage.politician_url,
+            representative=politician1_on_stage,
+        )
+        if results['success'] and results['values_changed']:
+            politician1_on_stage = results['representative']
+        if not results['success']:
+            status += results['status']
+    if positive_value_exists(politician2_on_stage.politician_url2):
+        results = add_value_to_next_representative_spot(
+            field_name_base='politician_url',
+            new_value_to_add=politician2_on_stage.politician_url2,
+            representative=politician1_on_stage,
+        )
+        if results['success'] and results['values_changed']:
+            politician1_on_stage = results['representative']
+        if not results['success']:
+            status += results['status']
+    if positive_value_exists(politician2_on_stage.politician_url3):
+        results = add_value_to_next_representative_spot(
+            field_name_base='politician_url',
+            new_value_to_add=politician2_on_stage.politician_url3,
+            representative=politician1_on_stage,
+        )
+        if results['success'] and results['values_changed']:
+            politician1_on_stage = results['representative']
+        if not results['success']:
+            status += results['status']
+    if positive_value_exists(politician2_on_stage.politician_url4):
+        results = add_value_to_next_representative_spot(
+            field_name_base='politician_url',
+            new_value_to_add=politician2_on_stage.politician_url4,
+            representative=politician1_on_stage,
+        )
+        if results['success'] and results['values_changed']:
+            politician1_on_stage = results['representative']
+        if not results['success']:
+            status += results['status']
+    if positive_value_exists(politician2_on_stage.politician_url5):
+        results = add_value_to_next_representative_spot(
+            field_name_base='politician_url',
+            new_value_to_add=politician2_on_stage.politician_url5,
+            representative=politician1_on_stage,
+        )
+        if results['success'] and results['values_changed']:
+            politician1_on_stage = results['representative']
+        if not results['success']:
+            status += results['status']
 
     # Update candidates to new politician ids
     candidate_results = move_candidates_to_another_politician(
@@ -581,6 +794,8 @@ def politicians_import_from_structured_json(structured_json):
                 updated_politician_values['instagram_handle'] = one_politician['instagram_handle']
             if 'last_name' in one_politician:
                 updated_politician_values['last_name'] = one_politician['last_name']
+            if 'linkedin_url' in one_politician:
+                updated_politician_values['linkedin_url'] = one_politician['linkedin_url']
             if 'lis_id' in one_politician:
                 updated_politician_values['lis_id'] = one_politician['lis_id']
             if 'maplight_id' in one_politician:
@@ -615,6 +830,14 @@ def politicians_import_from_structured_json(structured_json):
                 updated_politician_values['politician_twitter_handle5'] = one_politician['politician_twitter_handle5']
             if 'politician_url' in one_politician:
                 updated_politician_values['politician_url'] = one_politician['politician_url']
+            if 'politician_url2' in one_politician:
+                updated_politician_values['politician_url2'] = one_politician['politician_url2']
+            if 'politician_url3' in one_politician:
+                updated_politician_values['politician_url3'] = one_politician['politician_url3']
+            if 'politician_url4' in one_politician:
+                updated_politician_values['politician_url4'] = one_politician['politician_url4']
+            if 'politician_url5' in one_politician:
+                updated_politician_values['politician_url5'] = one_politician['politician_url5']
             if 'politician_youtube_id' in one_politician:
                 updated_politician_values['politician_youtube_id'] = one_politician['politician_youtube_id']
             if 'state_code' in one_politician:
@@ -638,6 +861,8 @@ def politicians_import_from_structured_json(structured_json):
                     one_politician['we_vote_hosted_profile_image_url_tiny']
             if 'wikipedia_id' in one_politician:
                 updated_politician_values['wikipedia_id'] = one_politician['wikipedia_id']
+            if 'wikipedia_url' in one_politician:
+                updated_politician_values['wikipedia_url'] = one_politician['wikipedia_url']
 
             results = politician_manager.update_or_create_politician(
                 updated_politician_values=updated_politician_values,
@@ -727,6 +952,15 @@ def update_politician_from_candidate(politician, candidate):
     status = ''
     success = True
     save_changes = False
+    from representative.controllers import add_value_to_next_representative_spot
+    if not positive_value_exists(politician.ballotpedia_politician_name) and \
+            positive_value_exists(candidate.ballotpedia_candidate_name):
+        politician.ballotpedia_politician_name = candidate.ballotpedia_candidate_name
+        save_changes = True
+    if not positive_value_exists(politician.ballotpedia_politician_url) and \
+            positive_value_exists(candidate.ballotpedia_candidate_url):
+        politician.ballotpedia_politician_url = candidate.ballotpedia_candidate_url
+        save_changes = True
     politician_facebook_url_missing = \
         not positive_value_exists(politician.facebook_url) or politician.facebook_url_is_broken
     candidate_facebook_url_exists = \
@@ -735,6 +969,43 @@ def update_politician_from_candidate(politician, candidate):
         politician.facebook_url = candidate.facebook_url
         politician.facebook_url_is_broken = False
         save_changes = True
+    if positive_value_exists(candidate.candidate_name) and positive_value_exists(politician.politician_name) \
+            and candidate.candidate_name != politician.politician_name:
+        name_results = add_value_to_next_representative_spot(
+            field_name_base='google_civic_candidate_name',
+            look_at_alternate_names=True,
+            representative=politician,
+            new_value_to_add=candidate.candidate_name)
+        if name_results['success']:
+            politician = name_results['representative']
+            save_changes = save_changes or name_results['values_changed']
+    if positive_value_exists(candidate.google_civic_candidate_name):
+        name_results = add_value_to_next_representative_spot(
+            field_name_base='google_civic_candidate_name',
+            look_at_alternate_names=True,
+            representative=politician,
+            new_value_to_add=candidate.google_civic_candidate_name)
+        if name_results['success']:
+            politician = name_results['representative']
+            save_changes = save_changes or name_results['values_changed']
+    if positive_value_exists(candidate.google_civic_candidate_name2):
+        name_results = add_value_to_next_representative_spot(
+            field_name_base='google_civic_candidate_name',
+            look_at_alternate_names=True,
+            representative=politician,
+            new_value_to_add=candidate.google_civic_candidate_name2)
+        if name_results['success']:
+            politician = name_results['representative']
+            save_changes = save_changes or name_results['values_changed']
+    if positive_value_exists(candidate.google_civic_candidate_name3):
+        name_results = add_value_to_next_representative_spot(
+            field_name_base='google_civic_candidate_name',
+            look_at_alternate_names=True,
+            representative=politician,
+            new_value_to_add=candidate.google_civic_candidate_name3)
+        if name_results['success']:
+            politician = name_results['representative']
+            save_changes = save_changes or name_results['values_changed']
     if not positive_value_exists(politician.instagram_followers_count) and \
             positive_value_exists(candidate.instagram_followers_count):
         politician.instagram_followers_count = candidate.instagram_followers_count
@@ -742,6 +1013,10 @@ def update_politician_from_candidate(politician, candidate):
     if not positive_value_exists(politician.instagram_handle) and \
             positive_value_exists(candidate.instagram_handle):
         politician.instagram_handle = candidate.instagram_handle
+        save_changes = True
+    if not positive_value_exists(politician.linkedin_url) and \
+            positive_value_exists(candidate.linkedin_url):
+        politician.linkedin_url = candidate.linkedin_url
         save_changes = True
     if not positive_value_exists(politician.politician_email_address) and \
             positive_value_exists(candidate.candidate_email):
@@ -759,7 +1034,7 @@ def update_politician_from_candidate(politician, candidate):
             positive_value_exists(candidate.twitter_followers_count):
         politician.twitter_followers_count = candidate.twitter_followers_count
         save_changes = True
-    if positive_value_exists(candidate.candidate_twitter_handle) and not candidate.candidate_twitter_updates_failing:
+    if positive_value_exists(candidate.candidate_twitter_handle) and not candidate.twitter_handle_updates_failing:
         twitter_results = add_twitter_handle_to_next_politician_spot(
             politician, candidate.candidate_twitter_handle)
         if twitter_results['success']:
@@ -786,10 +1061,15 @@ def update_politician_from_candidate(politician, candidate):
             positive_value_exists(candidate.candidate_contact_form_url):
         politician.politician_contact_form_url = candidate.candidate_contact_form_url
         save_changes = True
-    if not positive_value_exists(politician.politician_url) and \
-            positive_value_exists(candidate.candidate_url):
-        politician.politician_url = candidate.candidate_url
-        save_changes = True
+    if positive_value_exists(candidate.candidate_url):
+        name_results = add_value_to_next_representative_spot(
+            field_name_base='politician_url',
+            look_at_alternate_names=True,
+            representative=politician,
+            new_value_to_add=candidate.candidate_url)
+        if name_results['success']:
+            politician = name_results['representative']
+            save_changes = save_changes or name_results['values_changed']
     if not positive_value_exists(politician.vote_usa_politician_id) and \
             positive_value_exists(candidate.vote_usa_politician_id):
         politician.vote_usa_politician_id = candidate.vote_usa_politician_id
@@ -809,6 +1089,10 @@ def update_politician_from_candidate(politician, candidate):
             politician.we_vote_hosted_profile_image_url_tiny = \
                 candidate.we_vote_hosted_profile_image_url_tiny
             save_changes = True
+    if not positive_value_exists(politician.wikipedia_url) and \
+            positive_value_exists(candidate.wikipedia_url):
+        politician.wikipedia_url = candidate.wikipedia_url
+        save_changes = True
     if not positive_value_exists(politician.youtube_url) and \
             positive_value_exists(candidate.youtube_url):
         politician.youtube_url = candidate.youtube_url

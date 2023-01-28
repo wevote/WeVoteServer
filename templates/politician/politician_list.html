@@ -77,7 +77,7 @@
             </td>
             <td><a href="{% url 'politician:politician_edit' politician.id %}?google_civic_election_id={{ google_civic_election_id }}"
                    target="_blank">{{ politician.politician_name }} <span class="glyphicon glyphicon-new-window"></span></a></td>
-            <td>{{ politician.state_code }}</td>
+            <td>{{ politician.state_code|default_if_none:"" }}</td>
             <td>
                 {{ politician.id }} - {{ politician.we_vote_id }}
                 {% if politician.linked_representative_we_vote_id_list %}
@@ -106,7 +106,13 @@
                 {% if politician.politician_twitter_handle5 %}<br /><a href="https://twitter.com/{{ politician.politician_twitter_handle5 }}"
                     target="_blank">{{ politician.politician_twitter_handle5 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
             </td>
-            <td>{% if politician.politician_url %}<a href="{{ politician.politician_url }}" target="_blank">{{ politician.politician_url }}</a>{% endif %}</td>
+            <td>
+                {% if politician.politician_url %}<a href="{{ politician.politician_url }}" target="_blank">{{ politician.politician_url }}</a>{% endif %}
+                {% if politician.politician_url2 %}<br /><a href="{{ politician.politician_url2 }}" target="_blank">{{ politician.politician_url2 }}</a>{% endif %}
+                {% if politician.politician_url3 %}<br /><a href="{{ politician.politician_url3 }}" target="_blank">{{ politician.politician_url3 }}</a>{% endif %}
+                {% if politician.politician_url4 %}<br /><a href="{{ politician.politician_url4 }}" target="_blank">{{ politician.politician_url4 }}</a>{% endif %}
+                {% if politician.politician_url5 %}<br /><a href="{{ politician.politician_url5 }}" target="_blank">{{ politician.politician_url5 }}</a>{% endif %}
+            </td>
             <td>{% if politician.linked_candidate_list_count > 0 %}{{ politician.linked_candidate_list_count }}{% endif %}</td>
             <td>{% if politician.related_candidate_list_count > 0 %}{{ politician.related_candidate_list_count }}{% endif %}</td>
         </tr>

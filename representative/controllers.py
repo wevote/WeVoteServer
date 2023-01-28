@@ -16,6 +16,14 @@ def add_value_to_next_representative_spot(
         look_at_alternate_names=False,
         representative=None,
         new_value_to_add=''):
+    """
+    This function can be used with Representative, CandidateCampaign and Politician
+    :param field_name_base:
+    :param look_at_alternate_names:
+    :param representative:
+    :param new_value_to_add:
+    :return:
+    """
     status = ''
     success = True
     values_changed = False
@@ -61,12 +69,14 @@ def add_value_to_next_representative_spot(
                 new_value_modified = add_results['modified_name']
 
     current_value1 = getattr(representative, field_name_base, '')
-    current_value2 = getattr(representative, field_name_base + '1', '')
-    current_value3 = getattr(representative, field_name_base + '2', '')
+    current_value2 = getattr(representative, field_name_base + '2', '')
+    current_value3 = getattr(representative, field_name_base + '3', '')
+    current_value4 = getattr(representative, field_name_base + '4', '')
+    current_value5 = getattr(representative, field_name_base + '5', '')
     if not positive_value_exists(current_value1):
-        # representative.google_civic_candidate_name = new_value_to_add
         setattr(representative, field_name_base, new_value_to_add)
-        if field_name_base == 'representative_twitter_handle':
+        if field_name_base in \
+                ['candidate_twitter_handle', 'politician_twitter_handle', 'representative_twitter_handle']:
             representative.twitter_handle_updates_failing = False
         values_changed = True
     elif new_value_to_add.lower() == current_value1.lower():
@@ -78,9 +88,9 @@ def add_value_to_next_representative_spot(
         # don't store it if the alternate without/with the period already is stored
         pass
     elif not positive_value_exists(current_value2):
-        # representative.google_civic_candidate_name2 = new_value_to_add
         setattr(representative, field_name_base + '2', new_value_to_add)
-        if field_name_base == 'representative_twitter_handle':
+        if field_name_base in \
+                ['candidate_twitter_handle2', 'politician_twitter_handle2', 'representative_twitter_handle2']:
             representative.twitter_handle2_updates_failing = False
         values_changed = True
     elif new_value_to_add.lower() == current_value2.lower():
@@ -92,7 +102,6 @@ def add_value_to_next_representative_spot(
         # don't store it if the alternate without/with the period already is stored
         pass
     elif not positive_value_exists(current_value3):
-        # representative.google_civic_candidate_name3 = new_value_to_add
         setattr(representative, field_name_base + '3', new_value_to_add)
         values_changed = True
     elif new_value_to_add.lower() == current_value3.lower():
@@ -103,7 +112,23 @@ def add_value_to_next_representative_spot(
         # If representative.google_civic_candidate_name3 has a middle initial with/without a period
         # don't store it if the alternate without/with the period already is stored
         pass
-    # We only support 3 alternate candidate names so far
+    elif not positive_value_exists(current_value4):
+        setattr(representative, field_name_base + '4', new_value_to_add)
+        values_changed = True
+    elif new_value_to_add.lower() == current_value4.lower():
+        # The value is already stored in representative.google_civic_candidate_name2 so doesn't need
+        # to be added to representative.google_civic_candidate_name3
+        pass
+    # Not currently supported for a 4th name
+    # elif name_changed and current_value4.lower() == new_value_modified.lower():
+    #     # If representative.google_civic_candidate_name3 has a middle initial with/without a period
+    #     # don't store it if the alternate without/with the period already is stored
+    #     pass
+    elif not positive_value_exists(current_value5):
+        setattr(representative, field_name_base + '5', new_value_to_add)
+        values_changed = True
+    else:
+        status += "{field_name_base}5 FULL-COULD_NOT_STORE_VALUE ".format(field_name_base=field_name_base)
     return {
         'success':          success,
         'status':           status,
@@ -742,6 +767,10 @@ def update_representative_from_politician(representative=None, politician=None):
     status = ''
     success = True
     save_changes = False
+    if not positive_value_exists(representative.ballotpedia_representative_url) and \
+            positive_value_exists(politician.ballotpedia_politician_url):
+        representative.ballotpedia_representative_url = politician.ballotpedia_politician_url
+        save_changes = True
     representative_facebook_url_missing = \
         not positive_value_exists(representative.facebook_url) or representative.facebook_url_is_broken
     politician_facebook_url_exists = \
@@ -750,6 +779,43 @@ def update_representative_from_politician(representative=None, politician=None):
         representative.facebook_url = politician.facebook_url
         representative.facebook_url_is_broken = False
         save_changes = True
+    if positive_value_exists(politician.politician_name) and positive_value_exists(representative.representative_name) \
+            and politician.politician_name != representative.representative_name:
+        name_results = add_value_to_next_representative_spot(
+            field_name_base='google_civic_representative_name',
+            look_at_alternate_names=True,
+            representative=representative,
+            new_value_to_add=politician.politician_name)
+        if name_results['success']:
+            representative = name_results['representative']
+            save_changes = save_changes or name_results['values_changed']
+    if positive_value_exists(politician.google_civic_candidate_name):
+        name_results = add_value_to_next_representative_spot(
+            field_name_base='google_civic_representative_name',
+            look_at_alternate_names=True,
+            representative=representative,
+            new_value_to_add=politician.google_civic_candidate_name)
+        if name_results['success']:
+            representative = name_results['representative']
+            save_changes = save_changes or name_results['values_changed']
+    if positive_value_exists(politician.google_civic_candidate_name2):
+        name_results = add_value_to_next_representative_spot(
+            field_name_base='google_civic_representative_name',
+            look_at_alternate_names=True,
+            representative=representative,
+            new_value_to_add=politician.google_civic_candidate_name2)
+        if name_results['success']:
+            representative = name_results['representative']
+            save_changes = save_changes or name_results['values_changed']
+    if positive_value_exists(politician.google_civic_candidate_name3):
+        name_results = add_value_to_next_representative_spot(
+            field_name_base='google_civic_representative_name',
+            look_at_alternate_names=True,
+            representative=representative,
+            new_value_to_add=politician.google_civic_candidate_name3)
+        if name_results['success']:
+            representative = name_results['representative']
+            save_changes = save_changes or name_results['values_changed']
     if not positive_value_exists(representative.instagram_followers_count) and \
             positive_value_exists(politician.instagram_followers_count):
         representative.instagram_followers_count = politician.instagram_followers_count
@@ -757,6 +823,10 @@ def update_representative_from_politician(representative=None, politician=None):
     if not positive_value_exists(representative.instagram_handle) and \
             positive_value_exists(politician.instagram_handle):
         representative.instagram_handle = politician.instagram_handle
+        save_changes = True
+    if not positive_value_exists(representative.linkedin_url) and \
+            positive_value_exists(politician.linkedin_url):
+        representative.linkedin_url = politician.linkedin_url
         save_changes = True
     if not positive_value_exists(representative.representative_contact_form_url) and \
             positive_value_exists(politician.politician_contact_form_url):
@@ -807,12 +877,45 @@ def update_representative_from_politician(representative=None, politician=None):
         representative.twitter_name = politician.twitter_name
         save_changes = True
     if positive_value_exists(politician.politician_url):
-        twitter_results = add_value_to_next_representative_spot(
+        results = add_value_to_next_representative_spot(
             field_name_base='representative_url',
             representative=representative,
             new_value_to_add=politician.politician_url)
-        if twitter_results['success']:
-            representative = twitter_results['representative']
+        if results['success']:
+            representative = results['representative']
+            save_changes = True
+    if positive_value_exists(politician.politician_url2):
+        results = add_value_to_next_representative_spot(
+            field_name_base='representative_url',
+            representative=representative,
+            new_value_to_add=politician.politician_url2)
+        if results['success']:
+            representative = results['representative']
+            save_changes = True
+    if positive_value_exists(politician.politician_url3):
+        results = add_value_to_next_representative_spot(
+            field_name_base='representative_url',
+            representative=representative,
+            new_value_to_add=politician.politician_url3)
+        if results['success']:
+            representative = results['representative']
+            save_changes = True
+    if positive_value_exists(politician.politician_url4):
+        results = add_value_to_next_representative_spot(
+            field_name_base='representative_url',
+            representative=representative,
+            new_value_to_add=politician.politician_url4)
+        if results['success']:
+            representative = results['representative']
+            save_changes = True
+    if positive_value_exists(politician.politician_url5):
+        results = add_value_to_next_representative_spot(
+            field_name_base='representative_url',
+            representative=representative,
+            new_value_to_add=politician.politician_url5)
+        if results['success']:
+            representative = results['representative']
+            save_changes = True
     if not positive_value_exists(representative.vote_usa_politician_id) and \
             positive_value_exists(politician.vote_usa_politician_id):
         representative.vote_usa_politician_id = politician.vote_usa_politician_id
@@ -832,6 +935,10 @@ def update_representative_from_politician(representative=None, politician=None):
             representative.we_vote_hosted_profile_image_url_tiny = \
                 politician.we_vote_hosted_profile_image_url_tiny
             save_changes = True
+    if not positive_value_exists(representative.wikipedia_url) and \
+            positive_value_exists(politician.wikipedia_url):
+        representative.wikipedia_url = politician.wikipedia_url
+        save_changes = True
     if not positive_value_exists(representative.youtube_url) and \
             positive_value_exists(politician.youtube_url):
         representative.youtube_url = politician.youtube_url

@@ -321,7 +321,7 @@ def fetch_number_of_candidates_needing_twitter_update():
         try:
             candidate_queryset = CandidateCampaign.objects.using('readonly').all()
             candidate_queryset = candidate_queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
-            candidate_queryset = candidate_queryset.exclude(candidate_twitter_updates_failing=True)
+            candidate_queryset = candidate_queryset.exclude(twitter_handle_updates_failing=True)
             candidate_queryset = candidate_queryset.exclude(
                 Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle=""))
             candidate_count = candidate_queryset.count()
@@ -648,7 +648,7 @@ def refresh_twitter_candidate_details(candidate):
             save_position_from_candidate_results = update_all_position_details_from_candidate(candidate)
         elif results['twitter_user_not_found_in_twitter'] or results['twitter_user_suspended_by_twitter']:
             try:
-                candidate.candidate_twitter_updates_failing = True
+                candidate.twitter_handle_updates_failing = True
                 candidate.save()
                 status += "HANDLE_NOT_FOUND_OR_SUSPENDED "
             except Exception as e:
@@ -1123,7 +1123,7 @@ def retrieve_and_update_candidates_needing_twitter_update(
         candidate_queryset = candidate_queryset.filter(we_vote_id__in=candidate_we_vote_id_list)
         candidate_queryset = candidate_queryset.exclude(
             Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle=""))
-        candidate_queryset = candidate_queryset.exclude(candidate_twitter_updates_failing=True)
+        candidate_queryset = candidate_queryset.exclude(twitter_handle_updates_failing=True)
         if positive_value_exists(state_code):
             candidate_queryset = candidate_queryset.filter(state_code__iexact=state_code)
         candidates_to_update = candidate_queryset.count()

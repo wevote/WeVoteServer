@@ -225,6 +225,58 @@
 </div>
 
 <div class="form-group">
+    <label for="politician_url2_id" class="col-sm-3 control-label">
+        Website 2
+        {% if politician.politician_url2 %}
+        <a href="{{ politician.politician_url2 }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
+        {% endif %}
+    </label>
+    <div class="col-sm-8">
+        <input type="text" name="politician_url2" id="politician_url2_id" class="form-control"
+               value="{% if politician %}{{ politician.politician_url2|default_if_none:"" }}{% else %}{{ politician_url2|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="politician_url3_id" class="col-sm-3 control-label">
+        Website 3
+        {% if politician.politician_url3 %}
+        <a href="{{ politician.politician_url3 }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
+        {% endif %}
+    </label>
+    <div class="col-sm-8">
+        <input type="text" name="politician_url3" id="politician_url3_id" class="form-control"
+               value="{% if politician %}{{ politician.politician_url3|default_if_none:"" }}{% else %}{{ politician_url3|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="politician_url4_id" class="col-sm-3 control-label">
+        Website 4
+        {% if politician.politician_url4 %}
+        <a href="{{ politician.politician_url4 }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
+        {% endif %}
+    </label>
+    <div class="col-sm-8">
+        <input type="text" name="politician_url4" id="politician_url4_id" class="form-control"
+               value="{% if politician %}{{ politician.politician_url4|default_if_none:"" }}{% else %}{{ politician_url4|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="politician_url5_id" class="col-sm-3 control-label">
+        Website 5
+        {% if politician.politician_url5 %}
+        <a href="{{ politician.politician_url5 }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
+        {% endif %}
+    </label>
+    <div class="col-sm-8">
+        <input type="text" name="politician_url5" id="politician_url5_id" class="form-control"
+               value="{% if politician %}{{ politician.politician_url5|default_if_none:"" }}{% else %}{{ politician_url5|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
     <label for="politician_contact_form_url_id" class="col-sm-3 control-label">
         Politician Contact Form
         {% if politician.politician_contact_form_url %}
@@ -281,12 +333,34 @@
 
 <div class="form-group">
     <label for="ballotpedia_politician_url_id" class="col-sm-3 control-label">
-        Ballotpedia Candidate Page
+        Ballotpedia Politician Page
         {% if politician and politician.ballotpedia_politician_url %}(<a href="{{ politician.ballotpedia_politician_url }}" target="_blank">Go</a>){% endif %}
     </label>
     <div class="col-sm-8">
         <input type="text" name="ballotpedia_politician_url" id="ballotpedia_politician_url_id" class="form-control"
                value="{% if politician %}{{ politician.ballotpedia_politician_url|default_if_none:"" }}{% else %}{{ ballotpedia_politician_url|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="wikipedia_url_id" class="col-sm-3 control-label">
+        Wikipedia Page
+        {% if politician and politician.wikipedia_url %}(<a href="{{ politician.wikipedia_url }}" target="_blank">Go</a>){% endif %}
+    </label>
+    <div class="col-sm-8">
+        <input type="text" name="wikipedia_url" id="wikipedia_url_id" class="form-control"
+               value="{% if politician %}{{ politician.wikipedia_url|default_if_none:"" }}{% else %}{{ wikipedia_url|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="linkedin_url_id" class="col-sm-3 control-label">
+        LinkedIn
+        {% if politician and politician.linkedin_url %}(<a href="{{ politician.linkedin_url }}" target="_blank">Go</a>){% endif %}
+    </label>
+    <div class="col-sm-8">
+        <input type="text" name="linkedin_url" id="linkedin_url_id" class="form-control"
+               value="{% if politician %}{{ politician.linkedin_url|default_if_none:"" }}{% else %}{{ linkedin_url|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
 
@@ -506,7 +580,7 @@
                            id="unlink_representative_{{ representative.id }}_from_politician_id"
                            value=1
                     />
-                    unlink from politician
+                    unlink rep from politician
                 </span>
             </td>
             <td class="padded">{{ representative.state_code }}</td>
@@ -649,35 +723,45 @@
             <td>We Vote Id</td>
             <td>Vote Smart Id</td>
         </tr>
-    {% for politician in duplicate_politician_list %}
+    {% for found_politician in duplicate_politician_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>
-                {% if politician.politician_photo_url %}
-                <a href="{% url 'politician:politician_edit' politician.id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
-                    <img src='{{ politician.politician_photo_url }}' height="48px" />
+                {% if found_politician.politician_photo_url %}
+                <a href="{% url 'politician:politician_edit' found_politician.id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
+                    <img src='{{ found_politician.politician_photo_url }}' height="48px" />
                 </a>
                 {% endif %}
             </td>
-            <td><a href="{% url 'politician:politician_edit' politician.id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">{{ politician.politician_name }} <span class="glyphicon glyphicon-new-window"></span></a></td>
-            <td>{{ politician.state_code }}</td>
             <td>
-                {% if politician.politician_twitter_handle %}<a href="https://twitter.com/{{ politician.politician_twitter_handle }}"
-                    target="_blank">{{ politician.politician_twitter_handle }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a><br />
-                ({{ politician.twitter_followers_count|intcomma }} followers){% endif %}
-                {% if politician.politician_twitter_handle2 %}<br /><a href="https://twitter.com/{{ politician.politician_twitter_handle2 }}"
-                    target="_blank">{{ politician.politician_twitter_handle2 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
-                {% if politician.politician_twitter_handle3 %}<br /><a href="https://twitter.com/{{ politician.politician_twitter_handle3 }}"
-                    target="_blank">{{ politician.politician_twitter_handle3 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
-                {% if politician.politician_twitter_handle4 %}<br /><a href="https://twitter.com/{{ politician.politician_twitter_handle4 }}"
-                    target="_blank">{{ politician.politician_twitter_handle4 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
-                {% if politician.politician_twitter_handle5 %}<br /><a href="https://twitter.com/{{ politician.politician_twitter_handle5 }}"
-                    target="_blank">{{ politician.politician_twitter_handle5 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                <a href="{% url 'politician:politician_edit' found_politician.id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">{{ found_politician.politician_name }} <span class="glyphicon glyphicon-new-window"></span></a>
+                <br />
+                <a href="{% url 'politician:compare_two_politicians_for_merge' %}?politician1_we_vote_id={{ politician.we_vote_id }}&politician2_we_vote_id={{ found_politician.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank" class="u-no-break">compare for merge</a>
             </td>
-            <td>{% if politician.politician_url %}<a href="{{ politician.politician_url }}" target="_blank">{{ politician.politician_url }} <span class="glyphicon glyphicon-new-window"></span></a>{% endif %}</td>
-            <td>{{ politician.id }}</td>
-            <td>{{ politician.we_vote_id }}</td>
-            <td>{{ politician.vote_smart_id }}</td>
+            <td>{{ found_politician.state_code|default_if_none:"" }}</td>
+            <td>
+                {% if found_politician.politician_twitter_handle %}<a href="https://twitter.com/{{ found_politician.politician_twitter_handle }}"
+                    target="_blank">{{ found_politician.politician_twitter_handle }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a><br />
+                ({{ found_politician.twitter_followers_count|intcomma }} followers){% endif %}
+                {% if found_politician.politician_twitter_handle2 %}<br /><a href="https://twitter.com/{{ found_politician.politician_twitter_handle2 }}"
+                    target="_blank">{{ found_politician.politician_twitter_handle2 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                {% if found_politician.politician_twitter_handle3 %}<br /><a href="https://twitter.com/{{ found_politician.politician_twitter_handle3 }}"
+                    target="_blank">{{ found_politician.politician_twitter_handle3 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                {% if found_politician.politician_twitter_handle4 %}<br /><a href="https://twitter.com/{{ found_politician.politician_twitter_handle4 }}"
+                    target="_blank">{{ found_politician.politician_twitter_handle4 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                {% if found_politician.politician_twitter_handle5 %}<br /><a href="https://twitter.com/{{ found_politician.politician_twitter_handle5 }}"
+                    target="_blank">{{ found_politician.politician_twitter_handle5 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+            </td>
+            <td>
+                {% if found_politician.politician_url %}<a href="{{ found_politician.politician_url }}" target="_blank">{{ found_politician.politician_url }} <span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                {% if found_politician.politician_url2 %}<br /><a href="{{ found_politician.politician_url2 }}" target="_blank">{{ found_politician.politician_url2 }} <span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                {% if found_politician.politician_url3 %}<br /><a href="{{ found_politician.politician_url3 }}" target="_blank">{{ found_politician.politician_url3 }} <span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                {% if found_politician.politician_url4 %}<br /><a href="{{ found_politician.politician_url4 }}" target="_blank">{{ found_politician.politician_url4 }} <span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                {% if found_politician.politician_url5 %}<br /><a href="{{ found_politician.politician_url5 }}" target="_blank">{{ found_politician.politician_url5 }} <span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+            </td>
+            <td>{{ found_politician.id }}</td>
+            <td>{{ found_politician.we_vote_id }}</td>
+            <td>{{ found_politician.vote_smart_id }}</td>
         </tr>
     {% endfor %}
     </table>
