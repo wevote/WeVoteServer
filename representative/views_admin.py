@@ -1270,8 +1270,8 @@ def update_representatives_from_politicians_view(request):
                 representatives_without_changes += 1
 
     message = \
-        "Representatives updated: {representatives_updated:,}." \
-        "Representatives without changes: {representatives_without_changes:,}." \
+        "Representatives updated: {representatives_updated:,}. " \
+        "Representatives without changes: {representatives_without_changes:,}. " \
         "".format(
             representatives_updated=representatives_updated,
             representatives_without_changes=representatives_without_changes)

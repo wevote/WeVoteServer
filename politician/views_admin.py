@@ -1026,7 +1026,9 @@ def politician_edit_process_view(request):
 
     ballotpedia_politician_name = request.POST.get('ballotpedia_politician_name', False)
     ballotpedia_politician_url = request.POST.get('ballotpedia_politician_url', False)
+    birth_date = request.POST.get('birth_date', False)
     first_name = request.POST.get('first_name', False)
+    gender = request.POST.get('gender', False)
     middle_name = request.POST.get('middle_name', False)
     last_name = request.POST.get('last_name', False)
     google_civic_candidate_name = request.POST.get('google_civic_candidate_name', False)
@@ -1185,17 +1187,26 @@ def politician_edit_process_view(request):
             return HttpResponseRedirect(reverse('politician:politician_new', args=()) + url_variables)
         elif politician_on_stage_found:
             # Update
-            # from politician.controllers import add_twitter_handle_to_next_politician_spot
             if ballotpedia_politician_name is not False:
                 politician_on_stage.ballotpedia_politician_name = ballotpedia_politician_name
             if ballotpedia_politician_url is not False:
                 politician_on_stage.ballotpedia_politician_url = ballotpedia_politician_url
+            try:
+                if birth_date is not False:
+                    if birth_date == '':
+                        politician_on_stage.birth_date = None
+                    else:
+                        politician_on_stage.birth_date = datetime.strptime(birth_date, '%b. %d, %Y')
+            except Exception as e:
+                messages.add_message(request, messages.ERROR, 'Could not save birthdate:' + str(e))
             if first_name is not False:
                 politician_on_stage.first_name = first_name
             if middle_name is not False:
                 politician_on_stage.middle_name = middle_name
             if last_name is not False:
                 politician_on_stage.last_name = last_name
+            if gender is not False:
+                politician_on_stage.gender = gender
             if google_civic_candidate_name is not False:
                 politician_on_stage.google_civic_candidate_name = google_civic_candidate_name
             if google_civic_candidate_name2 is not False:
@@ -1288,9 +1299,19 @@ def politician_edit_process_view(request):
                     politician_on_stage.ballotpedia_politician_name = ballotpedia_politician_name
                 if ballotpedia_politician_url is not False:
                     politician_on_stage.ballotpedia_politician_url = ballotpedia_politician_url
+                try:
+                    if birth_date is not False:
+                        if birth_date == '':
+                            politician_on_stage.birth_date = None
+                        else:
+                            politician_on_stage.birth_date = datetime.strptime(birth_date, '%b. %d, %Y')
+                except Exception as e:
+                    messages.add_message(request, messages.ERROR, 'Could not save birthdate:' + str(e))
                 politician_on_stage.first_name = extract_first_name_from_full_name(politician_name)
                 politician_on_stage.middle_name = extract_middle_name_from_full_name(politician_name)
                 politician_on_stage.last_name = extract_last_name_from_full_name(politician_name)
+                if gender is not False:
+                    politician_on_stage.gender = gender
                 if google_civic_candidate_name is not False:
                     politician_on_stage.google_civic_candidate_name = google_civic_candidate_name
                 if google_civic_candidate_name2 is not False:
