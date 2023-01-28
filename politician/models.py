@@ -59,7 +59,7 @@ POLITICIAN_UNIQUE_IDENTIFIERS = [
     'politician_googleplus_id',
     'politician_name',
     'politician_phone_number',
-    'politician_url',
+    # 'politician_url',  # We have 5 options now and merge them automatically
     'politician_youtube_id',
     'state_code',
     'thomas_id',
@@ -157,8 +157,11 @@ class Politician(models.Model):
     # The full name of the party the official belongs to.
     political_party = models.CharField(verbose_name="politician political party", max_length=255, null=True)
     state_code = models.CharField(verbose_name="politician home state", max_length=2, null=True)
-    politician_url = models.URLField(
-        verbose_name='latest website url of politician', max_length=255, blank=True, null=True)
+    politician_url = models.TextField(blank=True, null=True)
+    politician_url2 = models.TextField(blank=True, null=True)
+    politician_url3 = models.TextField(blank=True, null=True)
+    politician_url4 = models.TextField(blank=True, null=True)
+    politician_url5 = models.TextField(blank=True, null=True)
     politician_contact_form_url = models.URLField(
         verbose_name='website url of contact form', max_length=255, blank=True, null=True)
 
@@ -370,6 +373,7 @@ class PoliticianManager(models.Manager):
                 twitter_profile_background_image_url_https=candidate_or_rep.twitter_profile_background_image_url_https,
                 twitter_profile_banner_url_https=candidate_or_rep.twitter_profile_banner_url_https,
                 twitter_profile_image_url_https=candidate_or_rep.twitter_profile_image_url_https,
+                twitter_handle_updates_failing=candidate_or_rep.twitter_handle_updates_failing,
                 twitter_handle2_updates_failing=candidate_or_rep.twitter_handle2_updates_failing,
                 vote_usa_politician_id=candidate_or_rep.vote_usa_politician_id,
                 we_vote_hosted_profile_image_url_large=candidate_or_rep.we_vote_hosted_profile_image_url_large,
@@ -402,7 +406,6 @@ class PoliticianManager(models.Manager):
                     politician.politician_email_address = candidate_or_rep.candidate_email
                     politician.politician_name = candidate_or_rep.candidate_name
                     politician.politician_phone_number = candidate_or_rep.candidate_phone
-                    politician.twitter_handle_updates_failing = candidate_or_rep.candidate_twitter_updates_failing
                     politician.vote_smart_id = candidate_or_rep.vote_smart_id
                     politician.vote_usa_politician_id = candidate_or_rep.vote_usa_politician_id
                     politician.vote_usa_profile_image_url_https = candidate_or_rep.vote_usa_profile_image_url_https
@@ -414,6 +417,7 @@ class PoliticianManager(models.Manager):
                     if positive_value_exists(candidate_or_rep.candidate_twitter_handle3):
                         twitter_handles.append(candidate_or_rep.candidate_twitter_handle3)
                 else:
+                    from representative.controllers import add_value_to_next_representative_spot
                     politician.ballotpedia_politician_url = candidate_or_rep.ballotpedia_representative_url
                     politician.google_civic_candidate_name = candidate_or_rep.google_civic_representative_name
                     politician.google_civic_candidate_name2 = candidate_or_rep.google_civic_representative_name2
@@ -422,8 +426,36 @@ class PoliticianManager(models.Manager):
                     politician.politician_email_address = candidate_or_rep.representative_email
                     politician.politician_name = candidate_or_rep.representative_name
                     politician.politician_phone_number = candidate_or_rep.representative_phone
-                    politician.politician_url = candidate_or_rep.representative_url
-                    politician.twitter_handle_updates_failing = candidate_or_rep.twitter_handle_updates_failing
+                    if positive_value_exists(candidate_or_rep.representative_url):
+                        results = add_value_to_next_representative_spot(
+                            field_name_base='politician_url',
+                            new_value_to_add=candidate_or_rep.representative_url,
+                            representative=politician,
+                        )
+                        if results['success'] and results['values_changed']:
+                            politician = results['representative']
+                        if not results['success']:
+                            status += results['status']
+                    if positive_value_exists(candidate_or_rep.representative_url2):
+                        results = add_value_to_next_representative_spot(
+                            field_name_base='politician_url',
+                            new_value_to_add=candidate_or_rep.representative_url2,
+                            representative=politician,
+                        )
+                        if results['success'] and results['values_changed']:
+                            politician = results['representative']
+                        if not results['success']:
+                            status += results['status']
+                    if positive_value_exists(candidate_or_rep.representative_url3):
+                        results = add_value_to_next_representative_spot(
+                            field_name_base='politician_url',
+                            new_value_to_add=candidate_or_rep.representative_url3,
+                            representative=politician,
+                        )
+                        if results['success'] and results['values_changed']:
+                            politician = results['representative']
+                        if not results['success']:
+                            status += results['status']
 
                     if positive_value_exists(candidate_or_rep.representative_twitter_handle):
                         twitter_handles.append(candidate_or_rep.representative_twitter_handle)

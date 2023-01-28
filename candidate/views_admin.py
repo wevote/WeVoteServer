@@ -1594,21 +1594,23 @@ def candidate_edit_process_view(request):
     candidate_year = 0
 
     status = ""
-    look_for_politician = request.POST.get('look_for_politician', False)  # If this comes in with value, don't save
-    remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
-    refresh_from_twitter = request.POST.get('refresh_from_twitter', False)
 
+    ballot_guide_official_statement = request.POST.get('ballot_guide_official_statement', False)
+    ballotpedia_candidate_id = request.POST.get('ballotpedia_candidate_id', False)
+    ballotpedia_candidate_name = request.POST.get('ballotpedia_candidate_name', False)
+    ballotpedia_candidate_url = request.POST.get('ballotpedia_candidate_url', False)
+    ballotpedia_candidate_summary = request.POST.get('ballotpedia_candidate_summary', False)
+    ballotpedia_office_id = request.POST.get('ballotpedia_office_id', False)
+    ballotpedia_person_id = request.POST.get('ballotpedia_person_id', False)
+    ballotpedia_race_id = request.POST.get('ballotpedia_race_id', False)
     candidate_id = convert_to_int(request.POST.get('candidate_id', 0))
     if not positive_value_exists(candidate_id):
         candidate_id = convert_to_int(request.GET.get('candidate_id', 0))
-    reject_twitter_link_possibility_id = convert_to_int(request.POST.get('reject_twitter_link_possibility_id', 0))
-    redirect_to_candidate_list = positive_value_exists(request.POST.get('redirect_to_candidate_list', False))
     candidate_name = request.POST.get('candidate_name', False)
-    google_civic_candidate_name = request.POST.get('google_civic_candidate_name', False)
-    google_civic_candidate_name2 = request.POST.get('google_civic_candidate_name2', False)
-    google_civic_candidate_name3 = request.POST.get('google_civic_candidate_name3', False)
-    hide_candidate_tools = request.POST.get('hide_candidate_tools', False)
-    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    candidate_url = request.POST.get('candidate_url', False)
+    candidate_contact_form_url = request.POST.get('candidate_contact_form_url', False)
+    candidate_email = request.POST.get('candidate_email', False)
+    candidate_phone = request.POST.get('candidate_phone', False)
     candidate_twitter_handle = request.POST.get('candidate_twitter_handle', False)
     if positive_value_exists(candidate_twitter_handle):
         candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle)
@@ -1618,45 +1620,45 @@ def candidate_edit_process_view(request):
     candidate_twitter_handle3 = request.POST.get('candidate_twitter_handle3', False)
     if positive_value_exists(candidate_twitter_handle3):
         candidate_twitter_handle3 = extract_twitter_handle_from_text_string(candidate_twitter_handle3)
-    candidate_twitter_updates_failing = request.POST.get('candidate_twitter_updates_failing', False)
-    candidate_twitter_updates_failing = positive_value_exists(candidate_twitter_updates_failing)
-    twitter_handle2_updates_failing = request.POST.get('twitter_handle2_updates_failing', False)
-    twitter_handle2_updates_failing = positive_value_exists(twitter_handle2_updates_failing)
-    candidate_url = request.POST.get('candidate_url', False)
-    candidate_contact_form_url = request.POST.get('candidate_contact_form_url', False)
+    contest_office_id = request.POST.get('contest_office_id', False)
+    do_not_display_on_ballot = positive_value_exists(request.POST.get('do_not_display_on_ballot', False))
     facebook_url = request.POST.get('facebook_url', False)
+    google_civic_candidate_name = request.POST.get('google_civic_candidate_name', False)
+    google_civic_candidate_name2 = request.POST.get('google_civic_candidate_name2', False)
+    google_civic_candidate_name3 = request.POST.get('google_civic_candidate_name3', False)
+    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    google_search_image_file = request.POST.get('google_search_image_file', False)
+    google_search_link = request.POST.get('google_search_link', False)
+    hide_candidate_tools = request.POST.get('hide_candidate_tools', False)
     instagram_handle = request.POST.get('instagram_handle', False)
     if positive_value_exists(instagram_handle):
         instagram_handle = extract_instagram_handle_from_text_string(instagram_handle)
-    candidate_email = request.POST.get('candidate_email', False)
-    candidate_phone = request.POST.get('candidate_phone', False)
-    contest_office_id = request.POST.get('contest_office_id', False)
-    ballot_guide_official_statement = request.POST.get('ballot_guide_official_statement', False)
-    party = request.POST.get('party', False)
-    ballotpedia_candidate_id = request.POST.get('ballotpedia_candidate_id', False)
-    ballotpedia_candidate_name = request.POST.get('ballotpedia_candidate_name', False)
-    ballotpedia_candidate_url = request.POST.get('ballotpedia_candidate_url', False)
-    ballotpedia_candidate_summary = request.POST.get('ballotpedia_candidate_summary', False)
-    ballotpedia_office_id = request.POST.get('ballotpedia_office_id', False)
-    ballotpedia_person_id = request.POST.get('ballotpedia_person_id', False)
-    ballotpedia_race_id = request.POST.get('ballotpedia_race_id', False)
-    vote_usa_politician_id = request.POST.get('vote_usa_politician_id', False)
-    vote_usa_office_id = request.POST.get('vote_usa_office_id', False)
-    photo_url_from_vote_usa = request.POST.get('photo_url_from_vote_usa', False)
-    vote_smart_id = request.POST.get('vote_smart_id', False)
+    linkedin_url = request.POST.get('linkedin_url', False)
+    look_for_politician = request.POST.get('look_for_politician', False)  # If this comes in with value, don't save
     maplight_id = request.POST.get('maplight_id', False)
     page = convert_to_int(request.POST.get('page', 0))
-    state_code = request.POST.get('state_code', False)
+    party = request.POST.get('party', False)
+    photo_url_from_vote_usa = request.POST.get('photo_url_from_vote_usa', False)
     politician_we_vote_id = request.POST.get('politician_we_vote_id', False)
     profile_image_type_currently_active = request.POST.get('profile_image_type_currently_active', False)
-    google_search_image_file = request.POST.get('google_search_image_file', False)
-    google_search_link = request.POST.get('google_search_link', False)
+    redirect_to_candidate_list = positive_value_exists(request.POST.get('redirect_to_candidate_list', False))
+    refresh_from_twitter = request.POST.get('refresh_from_twitter', False)
+    reject_twitter_link_possibility_id = convert_to_int(request.POST.get('reject_twitter_link_possibility_id', 0))
+    remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
+    select_for_marking_twitter_link_possibility_ids = request.POST.getlist('select_for_marking_checks[]')
+    state_code = request.POST.get('state_code', False)
+    twitter_handle_updates_failing = request.POST.get('twitter_handle_updates_failing', False)
+    twitter_handle_updates_failing = positive_value_exists(twitter_handle_updates_failing)
+    twitter_handle2_updates_failing = request.POST.get('twitter_handle2_updates_failing', False)
+    twitter_handle2_updates_failing = positive_value_exists(twitter_handle2_updates_failing)
     twitter_url = request.POST.get('twitter_url', False)
+    vote_smart_id = request.POST.get('vote_smart_id', False)
+    vote_usa_office_id = request.POST.get('vote_usa_office_id', False)
+    vote_usa_politician_id = request.POST.get('vote_usa_politician_id', False)
+    which_marking = request.POST.get('which_marking')
+    wikipedia_url = request.POST.get('wikipedia_url', False)
     withdrawal_date = request.POST.get('withdrawal_date', False)
     withdrawn_from_election = positive_value_exists(request.POST.get('withdrawn_from_election', False))
-    do_not_display_on_ballot = positive_value_exists(request.POST.get('do_not_display_on_ballot', False))
-    select_for_marking_twitter_link_possibility_ids = request.POST.getlist('select_for_marking_checks[]')
-    which_marking = request.POST.get('which_marking')
 
     url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
                     "&ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
@@ -1911,27 +1913,6 @@ def candidate_edit_process_view(request):
             return HttpResponseRedirect(reverse('candidate:candidate_new', args=()) + url_variables)
         elif candidate_on_stage_found:
             # Update
-            if candidate_name is not False:
-                candidate_on_stage.candidate_name = candidate_name
-            if candidate_twitter_handle is not False:
-                candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
-            if candidate_twitter_handle2 is not False:
-                candidate_on_stage.candidate_twitter_handle2 = candidate_twitter_handle2
-            if candidate_twitter_handle3 is not False:
-                candidate_on_stage.candidate_twitter_handle3 = candidate_twitter_handle3
-            if candidate_url is not False:
-                candidate_on_stage.candidate_url = candidate_url
-            if candidate_contact_form_url is not False:
-                candidate_on_stage.candidate_contact_form_url = candidate_contact_form_url
-            if facebook_url is not False:
-                candidate_on_stage.facebook_url = facebook_url
-            if instagram_handle is not False:
-                candidate_on_stage.instagram_handle = instagram_handle
-            candidate_on_stage.is_battleground_race = is_battleground_race
-            if candidate_email is not False:
-                candidate_on_stage.candidate_email = candidate_email
-            if candidate_phone is not False:
-                candidate_on_stage.candidate_phone = candidate_phone
             if party is not False:
                 candidate_on_stage.party = party
             if ballot_guide_official_statement is not False:
@@ -1950,35 +1931,60 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.ballotpedia_person_id = convert_to_int(ballotpedia_person_id)
             if ballotpedia_race_id is not False:
                 candidate_on_stage.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
-            if photo_url_from_vote_usa is not False:
-                candidate_on_stage.photo_url_from_vote_usa = photo_url_from_vote_usa
-            candidate_on_stage.candidate_twitter_updates_failing = candidate_twitter_updates_failing
-            candidate_on_stage.twitter_handle2_updates_failing = twitter_handle2_updates_failing
-            if vote_smart_id is not False:
-                candidate_on_stage.vote_smart_id = vote_smart_id
-            if vote_usa_politician_id is not False:
-                candidate_on_stage.vote_usa_politician_id = vote_usa_politician_id
-            if vote_usa_office_id is not False:
-                candidate_on_stage.vote_usa_office_id = vote_usa_office_id
-            if maplight_id is not False:
-                candidate_on_stage.maplight_id = maplight_id
+            if candidate_name is not False:
+                candidate_on_stage.candidate_name = candidate_name
+            if candidate_twitter_handle is not False:
+                candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
+            if candidate_twitter_handle2 is not False:
+                candidate_on_stage.candidate_twitter_handle2 = candidate_twitter_handle2
+            if candidate_twitter_handle3 is not False:
+                candidate_on_stage.candidate_twitter_handle3 = candidate_twitter_handle3
+            if candidate_url is not False:
+                candidate_on_stage.candidate_url = candidate_url
+            if candidate_contact_form_url is not False:
+                candidate_on_stage.candidate_contact_form_url = candidate_contact_form_url
+            if candidate_email is not False:
+                candidate_on_stage.candidate_email = candidate_email
+            if candidate_phone is not False:
+                candidate_on_stage.candidate_phone = candidate_phone
+            candidate_on_stage.do_not_display_on_ballot = do_not_display_on_ballot
+            if facebook_url is not False:
+                candidate_on_stage.facebook_url = facebook_url
             if google_civic_candidate_name is not False:
                 candidate_on_stage.google_civic_candidate_name = google_civic_candidate_name
             if google_civic_candidate_name2 is not False:
                 candidate_on_stage.google_civic_candidate_name2 = google_civic_candidate_name2
             if google_civic_candidate_name3 is not False:
                 candidate_on_stage.google_civic_candidate_name3 = google_civic_candidate_name3
+            if instagram_handle is not False:
+                candidate_on_stage.instagram_handle = instagram_handle
+            candidate_on_stage.is_battleground_race = is_battleground_race
+            if linkedin_url is not False:
+                candidate_on_stage.linkedin_url = linkedin_url
+            if maplight_id is not False:
+                candidate_on_stage.maplight_id = maplight_id
+            if photo_url_from_vote_usa is not False:
+                candidate_on_stage.photo_url_from_vote_usa = photo_url_from_vote_usa
             if state_code is not False:
                 candidate_on_stage.state_code = state_code
+            candidate_on_stage.twitter_handle_updates_failing = twitter_handle_updates_failing
+            candidate_on_stage.twitter_handle2_updates_failing = twitter_handle2_updates_failing
             if twitter_url is not False:
                 candidate_on_stage.twitter_url = twitter_url
+            if vote_smart_id is not False:
+                candidate_on_stage.vote_smart_id = vote_smart_id
+            if vote_usa_politician_id is not False:
+                candidate_on_stage.vote_usa_politician_id = vote_usa_politician_id
+            if vote_usa_office_id is not False:
+                candidate_on_stage.vote_usa_office_id = vote_usa_office_id
+            if wikipedia_url is not False:
+                candidate_on_stage.wikipedia_url = wikipedia_url
             candidate_on_stage.withdrawn_from_election = withdrawn_from_election
             if withdrawn_from_election:
                 if positive_value_exists(withdrawal_date):
                     candidate_on_stage.withdrawal_date = withdrawal_date
                 else:
                     candidate_on_stage.withdrawal_date = None
-            candidate_on_stage.do_not_display_on_ballot = do_not_display_on_ballot
 
             if google_search_image_file:
                 # If google search image exist then cache master and resized images and save them to candidate table
@@ -2065,40 +2071,6 @@ def candidate_edit_process_view(request):
                     candidate_name=candidate_name,
                     state_code=best_state_code,
                 )
-                if google_civic_candidate_name is not False:
-                    candidate_on_stage.google_civic_candidate_name = google_civic_candidate_name
-                if google_civic_candidate_name2 is not False:
-                    candidate_on_stage.google_civic_candidate_name2 = google_civic_candidate_name2
-                if google_civic_candidate_name3 is not False:
-                    candidate_on_stage.google_civic_candidate_name3 = google_civic_candidate_name3
-                if candidate_twitter_handle is not False:
-                    candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
-                if candidate_twitter_handle2 is not False:
-                    candidate_on_stage.candidate_twitter_handle2 = candidate_twitter_handle2
-                if candidate_twitter_handle3 is not False:
-                    candidate_on_stage.candidate_twitter_handle3 = candidate_twitter_handle3
-                if twitter_url is not False:
-                    candidate_on_stage.twitter_url = twitter_url
-                if withdrawn_from_election:
-                    candidate_on_stage.withdrawn_from_election = withdrawn_from_election
-                    candidate_on_stage.withdrawal_date = withdrawal_date
-                if do_not_display_on_ballot:
-                    candidate_on_stage.do_not_display_on_ballot = do_not_display_on_ballot
-                if candidate_url is not False:
-                    candidate_on_stage.candidate_url = candidate_url
-                if candidate_contact_form_url is not False:
-                    candidate_on_stage.candidate_contact_form_url = candidate_contact_form_url
-                if facebook_url is not False:
-                    candidate_on_stage.facebook_url = facebook_url
-                if instagram_handle is not False:
-                    candidate_on_stage.instagram_handle = instagram_handle
-                candidate_on_stage.is_battleground_race = is_battleground_race
-                if candidate_email is not False:
-                    candidate_on_stage.candidate_email = candidate_email
-                if candidate_phone is not False:
-                    candidate_on_stage.candidate_phone = candidate_phone
-                if party is not False:
-                    candidate_on_stage.party = party
                 if ballot_guide_official_statement is not False:
                     candidate_on_stage.ballot_guide_official_statement = ballot_guide_official_statement
                 if ballotpedia_candidate_id is not False:
@@ -2115,9 +2087,46 @@ def candidate_edit_process_view(request):
                     candidate_on_stage.ballotpedia_person_id = convert_to_int(ballotpedia_person_id)
                 if ballotpedia_race_id is not False:
                     candidate_on_stage.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
+                if candidate_email is not False:
+                    candidate_on_stage.candidate_email = candidate_email
+                if candidate_phone is not False:
+                    candidate_on_stage.candidate_phone = candidate_phone
+                if candidate_twitter_handle is not False:
+                    candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
+                if candidate_twitter_handle2 is not False:
+                    candidate_on_stage.candidate_twitter_handle2 = candidate_twitter_handle2
+                if candidate_twitter_handle3 is not False:
+                    candidate_on_stage.candidate_twitter_handle3 = candidate_twitter_handle3
+                if candidate_url is not False:
+                    candidate_on_stage.candidate_url = candidate_url
+                if candidate_contact_form_url is not False:
+                    candidate_on_stage.candidate_contact_form_url = candidate_contact_form_url
+                if do_not_display_on_ballot:
+                    candidate_on_stage.do_not_display_on_ballot = do_not_display_on_ballot
+                if facebook_url is not False:
+                    candidate_on_stage.facebook_url = facebook_url
+                if google_civic_candidate_name is not False:
+                    candidate_on_stage.google_civic_candidate_name = google_civic_candidate_name
+                if google_civic_candidate_name2 is not False:
+                    candidate_on_stage.google_civic_candidate_name2 = google_civic_candidate_name2
+                if google_civic_candidate_name3 is not False:
+                    candidate_on_stage.google_civic_candidate_name3 = google_civic_candidate_name3
+                if instagram_handle is not False:
+                    candidate_on_stage.instagram_handle = instagram_handle
+                candidate_on_stage.is_battleground_race = is_battleground_race
+                if linkedin_url is not False:
+                    candidate_on_stage.linkedin_url = linkedin_url
+                if maplight_id is not False:
+                    candidate_on_stage.maplight_id = maplight_id
+                if party is not False:
+                    candidate_on_stage.party = party
                 if photo_url_from_vote_usa is not False:
                     candidate_on_stage.photo_url_from_vote_usa = photo_url_from_vote_usa
-                candidate_on_stage.candidate_twitter_updates_failing = candidate_twitter_updates_failing
+                if politician_we_vote_id is not False:
+                    candidate_on_stage.politician_we_vote_id = politician_we_vote_id
+                if twitter_url is not False:
+                    candidate_on_stage.twitter_url = twitter_url
+                candidate_on_stage.twitter_handle_updates_failing = twitter_handle_updates_failing
                 candidate_on_stage.twitter_handle2_updates_failing = twitter_handle2_updates_failing
                 if vote_smart_id is not False:
                     candidate_on_stage.vote_smart_id = vote_smart_id
@@ -2125,10 +2134,11 @@ def candidate_edit_process_view(request):
                     candidate_on_stage.vote_usa_politician_id = vote_usa_politician_id
                 if vote_usa_office_id is not False:
                     candidate_on_stage.vote_usa_office_id = vote_usa_office_id
-                if maplight_id is not False:
-                    candidate_on_stage.maplight_id = maplight_id
-                if politician_we_vote_id is not False:
-                    candidate_on_stage.politician_we_vote_id = politician_we_vote_id
+                if wikipedia_url is not False:
+                    candidate_on_stage.wikipedia_url = wikipedia_url
+                if withdrawn_from_election:
+                    candidate_on_stage.withdrawn_from_election = withdrawn_from_election
+                    candidate_on_stage.withdrawal_date = withdrawal_date
 
                 candidate_on_stage.save()
                 candidate_id = candidate_on_stage.id

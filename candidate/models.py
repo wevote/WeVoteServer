@@ -82,7 +82,7 @@ CANDIDATE_UNIQUE_IDENTIFIERS = [
     'state_code',
     'twitter_description',
     'twitter_followers_count',
-    'candidate_twitter_updates_failing',
+    'twitter_handle_updates_failing',
     'twitter_handle2_updates_failing',
     'twitter_location',
     'twitter_name',
@@ -2426,7 +2426,9 @@ class CandidateCampaign(models.Model):
     candidate_twitter_handle = models.CharField(max_length=255, null=True, unique=False)
     candidate_twitter_handle2 = models.CharField(max_length=255, null=True, unique=False)
     candidate_twitter_handle3 = models.CharField(max_length=255, null=True, unique=False)
+    # DEPRECATED, but saved, so we can move data to twitter_handle_updates_failing
     candidate_twitter_updates_failing = models.BooleanField(default=False)  # twitter_handle_updates_failing
+    twitter_handle_updates_failing = models.BooleanField(default=False)  # twitter_handle_updates_failing
     twitter_handle2_updates_failing = models.BooleanField(default=False)
     twitter_name = models.CharField(
         verbose_name="candidate plain text name from twitter", max_length=255, null=True, blank=True)
