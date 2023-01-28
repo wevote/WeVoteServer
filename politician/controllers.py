@@ -6,7 +6,7 @@ from django.db.models import Q
 from candidate.controllers import add_name_to_next_spot, move_candidates_to_another_politician
 from representative.controllers import move_representatives_to_another_politician
 from politician.models import Politician, PoliticianManager, POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, \
-    POLITICIAN_UNIQUE_IDENTIFIERS
+    POLITICIAN_UNIQUE_IDENTIFIERS, UNKNOWN
 from position.controllers import move_positions_to_another_politician
 from config.base import get_environment_variable
 import wevote_functions.admin
@@ -370,23 +370,57 @@ def figure_out_politician_conflict_values(politician1, politician2):
                 politician_merge_conflict_values[attribute] = 'POLITICIAN2'
             elif politician2_attribute_value is None or politician2_attribute_value == "":
                 politician_merge_conflict_values[attribute] = 'POLITICIAN1'
-            else:
-                if attribute == "politician_name" or attribute == "state_code":
-                    if politician1_attribute_value.lower() == politician2_attribute_value.lower():
-                        politician_merge_conflict_values[attribute] = 'MATCHING'
+            elif attribute == "facebook_url":
+                if politician1_attribute_value.lower() == politician2_attribute_value.lower():
+                    # Give preference to value with both upper and lower case letters
+                    if any(char.isupper() for char in politician1_attribute_value) \
+                            and any(char.islower() for char in politician1_attribute_value):
+                        politician_merge_conflict_values[attribute] = 'POLITICIAN1'
                     else:
-                        politician_merge_conflict_values[attribute] = 'CONFLICT'
-                elif attribute == "political_party":
-                    if convert_to_political_party_constant(politician1_attribute_value) == \
-                            convert_to_political_party_constant(politician2_attribute_value):
-                        politician_merge_conflict_values[attribute] = 'MATCHING'
+                        politician_merge_conflict_values[attribute] = 'POLITICIAN2'
+                else:
+                    politician_merge_conflict_values[attribute] = 'CONFLICT'
+            elif attribute == "facebook_url_is_broken":
+                politician1_facebook_url = getattr(politician1, 'facebook_url')
+                politician2_facebook_url = getattr(politician2, 'facebook_url')
+                if politician1_facebook_url.lower() == politician2_facebook_url.lower():
+                    # If facebook_url is matching, then automatically honor True value in facebook_url_is_broken
+                    if positive_value_exists(politician1_attribute_value):
+                        politician_merge_conflict_values[attribute] = 'POLITICIAN1'
+                    elif positive_value_exists(politician2_attribute_value):
+                        politician_merge_conflict_values[attribute] = 'POLITICIAN2'
                     else:
-                        politician_merge_conflict_values[attribute] = 'CONFLICT'
+                        politician_merge_conflict_values[attribute] = 'MATCHING'
                 else:
                     if politician1_attribute_value == politician2_attribute_value:
                         politician_merge_conflict_values[attribute] = 'MATCHING'
                     else:
                         politician_merge_conflict_values[attribute] = 'CONFLICT'
+            elif attribute == "gender":
+                if politician1_attribute_value == politician2_attribute_value:
+                    politician_merge_conflict_values[attribute] = 'MATCHING'
+                elif politician1_attribute_value is UNKNOWN and positive_value_exists(politician2_attribute_value):
+                    politician_merge_conflict_values[attribute] = 'POLITICIAN2'
+                elif politician2_attribute_value is UNKNOWN and positive_value_exists(politician1_attribute_value):
+                    politician_merge_conflict_values[attribute] = 'POLITICIAN1'
+                else:
+                    politician_merge_conflict_values[attribute] = 'CONFLICT'
+            elif attribute == "politician_name" or attribute == "state_code":
+                if politician1_attribute_value.lower() == politician2_attribute_value.lower():
+                    politician_merge_conflict_values[attribute] = 'MATCHING'
+                else:
+                    politician_merge_conflict_values[attribute] = 'CONFLICT'
+            elif attribute == "political_party":
+                if convert_to_political_party_constant(politician1_attribute_value) == \
+                        convert_to_political_party_constant(politician2_attribute_value):
+                    politician_merge_conflict_values[attribute] = 'MATCHING'
+                else:
+                    politician_merge_conflict_values[attribute] = 'CONFLICT'
+            else:
+                if politician1_attribute_value == politician2_attribute_value:
+                    politician_merge_conflict_values[attribute] = 'MATCHING'
+                else:
+                    politician_merge_conflict_values[attribute] = 'CONFLICT'
         except AttributeError:
             status += "COULD_NOT_PROCESS_ATTRIBUTE: " + str(attribute) + " "
             success = False
@@ -421,6 +455,9 @@ def merge_if_duplicate_politicians(politician1_on_stage, politician2_on_stage, c
             elif positive_value_exists(getattr(politician2_on_stage, attribute)):
                 # If we are here, politician1 does NOT have an image, but politician2 does
                 merge_choices[attribute] = getattr(politician2_on_stage, attribute)
+        # elif attribute == "gender":
+        #     if politician2_on_stage.gender != UNKNOWN:
+        #         pass
         else:
             conflict_value = conflict_values.get(attribute, None)
             if conflict_value == "CONFLICT":

@@ -59,7 +59,7 @@
         <tr>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td>Candidate Name</td>
+            <td>Representative Name</td>
             <td>Party</td>
             <td>State</td>
             <td>Twitter Handle</td>
@@ -100,6 +100,8 @@
             </td>
             <td>
                 {% if representative.representative_url %}<a href="{{ representative.representative_url }}" target="_blank">{{ representative.representative_url }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a><br />{% endif %}
+                {% if representative.representative_url2 %}<a href="{{ representative.representative_url2 }}" target="_blank">{{ representative.representative_url2 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a><br />{% endif %}
+                {% if representative.representative_url3 %}<a href="{{ representative.representative_url3 }}" target="_blank">{{ representative.representative_url3 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a><br />{% endif %}
                 {% if representative.wikipedia_url %}<a href="{{ representative.wikipedia_url }}" target="_blank">{{ representative.wikipedia_url }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
             </td>
             <td><a href="{% url 'representative:representative_edit' representative.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" style="font-size: .65em">(edit)</a></td>
