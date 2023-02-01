@@ -11,6 +11,7 @@ from wevote_functions.admin import get_logger
 
 logger = get_logger(__name__)
 
+# with these constant settings, one IP can load /more/donate 5 times in 60 minutes, or no more than 30 times in a week
 MAX_NUMBER_OF_STRIPE_FORM_RENDERS_MINUTES = 5
 NUMBER_OF_MINUTES_RANGE = 60
 MAX_NUMBER_OF_STRIPE_FORM_RENDERS_DAYS = 30
