@@ -1188,7 +1188,8 @@ def retrieve_google_civic_representatives_from_polling_location_api(
         longitude = polling_location.longitude
         text_for_map_search = polling_location.get_text_for_map_search()
     elif positive_value_exists(polling_location_we_vote_id):
-        results = polling_location_manager.retrieve_polling_location_by_id(0, polling_location_we_vote_id)
+        results = polling_location_manager.retrieve_polling_location_by_id(
+            0, polling_location_we_vote_id, read_only=True)
         if results['polling_location_found']:
             polling_location = results['polling_location']
             latitude = polling_location.latitude
@@ -1220,7 +1221,7 @@ def retrieve_google_civic_representatives_from_polling_location_api(
                 state_code = "na"
 
         try:
-            # Get the representatives info at this address
+            # Get representatives info for this address
             response = requests.get(
                 REPRESENTATIVES_BY_ADDRESS_URL,
                 params={
@@ -1234,7 +1235,7 @@ def retrieve_google_civic_representatives_from_polling_location_api(
             log_entry_message = status
             results = polling_location_manager.create_polling_location_log_entry(
                 batch_process_id=batch_process_id,
-                is_from_vote_usa=True,
+                is_from_google_civic=True,
                 kind_of_log_entry=KIND_OF_LOG_ENTRY_API_END_POINT_CRASH,
                 log_entry_message=log_entry_message,
                 polling_location_we_vote_id=polling_location_we_vote_id,
@@ -1243,7 +1244,7 @@ def retrieve_google_civic_representatives_from_polling_location_api(
             )
             status += results['status']
             results = polling_location_manager.update_polling_location_with_log_counts(
-                is_from_vote_usa=True,
+                is_from_google_civic=True,
                 polling_location_we_vote_id=polling_location_we_vote_id,
                 update_error_counts=True,
             )
@@ -1355,6 +1356,7 @@ def retrieve_google_civic_representatives_from_polling_location_api(
                     if not results['success']:
                         status += results['status']
                     results = polling_location_manager.update_polling_location_with_log_counts(
+                        is_from_google_civic=True,
                         polling_location_we_vote_id=polling_location_we_vote_id,
                         update_data_counts=True,
                         is_successful_retrieve=True,
