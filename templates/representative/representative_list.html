@@ -77,7 +77,8 @@
             <td>Office Held Name</td>
             <td>State</td>
             <td>Twitter Handle</td>
-            <td>Website</td>
+            <td>Email(s)</td>
+            <td>Website(s)</td>
             <td>We Vote Id</td>
         </tr>
     {% for representative in representative_list %}
@@ -107,7 +108,13 @@
             <td>
                 {% if representative.representative_twitter_handle %}<a href="https://twitter.com/{{ representative.representative_twitter_handle }}"
                     target="_blank">{{ representative.representative_twitter_handle }}</a><br />
-                ({{ representative.twitter_followers_count|intcomma }} followers){% endif %}</td>
+                ({{ representative.twitter_followers_count|intcomma }} followers){% endif %}
+            </td>
+            <td>
+                {% if representative.representative_email %}<span class="u-no-break">{{ representative.representative_email }}</span>&nbsp;{% endif %}
+                {% if representative.representative_email2 %}<span class="u-no-break">{{ representative.representative_email2 }}</span>&nbsp;{% endif %}
+                {% if representative.representative_email3 %}<span class="u-no-break">{{ representative.representative_email3 }}</span>&nbsp;{% endif %}
+            </td>
             <td>
                 {% if representative.wikipedia_url %}<span class="u-no-break"><a href="{{ representative.wikipedia_url }}" target="_blank">{{ representative.wikipedia_url }}</a></span>&nbsp;{% endif %}
                 {% if representative.representative_url %}<span class="u-no-break"><a href="{{ representative.representative_url }}" target="_blank">{{ representative.representative_url }}</a></span>&nbsp;{% endif %}

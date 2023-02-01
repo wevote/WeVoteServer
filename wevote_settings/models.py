@@ -332,6 +332,23 @@ def fetch_batch_process_system_ballot_items_on():
         return False
 
 
+def fetch_batch_process_system_representatives_on():
+    we_vote_settings_manager = WeVoteSettingsManager()
+    results = we_vote_settings_manager.fetch_setting_results('batch_process_system_representatives_on', read_only=True)
+    if results['success']:
+        if results['we_vote_setting_found']:
+            return results['setting_value']
+        else:
+            # Create the setting the first time
+            results = we_vote_settings_manager.save_setting(
+                setting_name='batch_process_system_representatives_on',
+                setting_value=True,
+                value_type=WeVoteSetting.BOOLEAN)
+            return results['success']
+    else:
+        return False
+
+
 def fetch_batch_process_system_search_twitter_on():
     we_vote_settings_manager = WeVoteSettingsManager()
     results = we_vote_settings_manager.fetch_setting_results('batch_process_system_search_twitter_on', read_only=True)

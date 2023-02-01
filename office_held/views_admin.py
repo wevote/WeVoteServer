@@ -14,10 +14,8 @@ from django.shortcuts import render
 from django.db.models import Q
 from election.models import Election, ElectionManager
 import exception.models
-from import_export_google_civic.controllers import retrieve_representatives_from_google_civic_api
 import json
 from office_held.models import OfficeHeld, OfficeHeldManager
-from polling_location.models import PollingLocationManager
 from representative.models import Representative, RepresentativeManager
 from voter.models import voter_has_authority
 import wevote_functions.admin
@@ -165,24 +163,22 @@ def office_held_new_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     state_code = request.GET.get('state_code', "")
 
     office_held_manager = OfficeHeldManager()
     updated_office_held_list = []
-    results = office_held_manager.retrieve_all_offices_held_for_upcoming_election(
-        google_civic_election_id, state_code, True)
-    if results['office_held_list_found']:
-        office_held_list = results['office_held_list_objects']
-        # TODO fetch representatives count instead candidate
-        # for office_held in office_held_list:
-        #     office_held.candidate_count = fetch_candidate_count_for_office(office_held.id)
-        #     updated_office_held_list.append(office_held)
+    # results = office_held_manager.retrieve_all_offices_held_for_upcoming_election(
+    #     google_civic_election_id, state_code, True)
+    # if results['office_held_list_found']:
+    #     office_held_list = results['office_held_list_objects']
+    #     # TODO fetch representatives count instead candidate
+    #     # for office_held in office_held_list:
+    #     #     office_held.candidate_count = fetch_candidate_count_for_office(office_held.id)
+    #     #     updated_office_held_list.append(office_held)
 
     messages_on_stage = get_messages(request)
     template_values = {
         'messages_on_stage':        messages_on_stage,
-        'google_civic_election_id': google_civic_election_id,
         'office_held_list':      updated_office_held_list,
     }
     return render(request, 'office_held/office_held_edit.html', template_values)

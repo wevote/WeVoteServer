@@ -82,10 +82,11 @@ def attach_defaults_values_to_offices_held_object(offices_held_for_location, def
         offices_held_for_location.state_code = defaults['state_code']
     if 'voter_we_vote_id' in defaults:
         offices_held_for_location.voter_we_vote_id = defaults['voter_we_vote_id']
-    if 'years_retrieved_flag_integer_to_set' in defaults:
-        offices_held_for_location.set_years_retrieved_flags(defaults['years_retrieved_flag_integer_to_set'])
-    if 'years_retrieved_flag_integer_to_unset' in defaults:
-        offices_held_for_location.unset_years_retrieved_flags(defaults['years_retrieved_flag_integer_to_unset'])
+    year_with_data_list = OFFICE_HELD_YEARS_AVAILABLE
+    for year in year_with_data_list:
+        year_with_data_key = 'year_with_data_' + str(year)
+        if year_with_data_key in defaults:
+            setattr(offices_held_for_location, year_with_data_key, defaults[year_with_data_key])
     index_number = 1
     while index_number < 31:
         office_held_name_field_name = "office_held_name_{:02d}".format(index_number)
@@ -175,7 +176,6 @@ class OfficeHeld(models.Model):
     state_code = models.CharField(verbose_name="state this office_held serves", max_length=2, null=True, blank=True)
     # Which years do we have representative data? This is cached data built up from master
     #  data in the Representative.years_in_office_flags field
-    # years_with_data_flags = models.PositiveIntegerField(default=0)
     # As we add more years here, update attach_defaults_values_to_office_held_object
     year_with_data_2023 = models.BooleanField(default=None, null=True)
     year_with_data_2024 = models.BooleanField(default=None, null=True)
@@ -480,12 +480,14 @@ class OfficeHeldManager(models.Manager):
     def create_offices_held_for_location_row_entry(
             self,
             polling_location_we_vote_id=None,
+            state_code=None,
             voter_we_vote_id=None,
             defaults={}):
         """
         Create OfficesHeldForLocation table entry with information about the OfficeHeld entries associated
         with one location.
         :param polling_location_we_vote_id:
+        :param state_code:
         :param voter_we_vote_id:
         :param defaults:
         :return:
@@ -500,6 +502,7 @@ class OfficeHeldManager(models.Manager):
         try:
             offices_held_for_location = OfficesHeldForLocation.objects.create(
                 polling_location_we_vote_id=polling_location_we_vote_id,
+                state_code=state_code,
                 voter_we_vote_id=voter_we_vote_id)
             if offices_held_for_location:
                 status += "OFFICES_HELD_FOR_LOCATION_CREATED "
@@ -604,16 +607,9 @@ class OfficeHeldManager(models.Manager):
         }
         return results
 
-    def retrieve_all_offices_held_for_upcoming_election(self, google_civic_election_id=0, state_code="",
-                                                           return_list_of_objects=False):
-        office_held_list = []
-        return self.retrieve_offices_held(google_civic_election_id, state_code, office_held_list,
-                                             return_list_of_objects)
-
     def retrieve_offices_held_by_list(self, office_list, return_list_of_objects=False):
-        google_civic_election_id = 0
         state_code = ""
-        return self.retrieve_offices_held(google_civic_election_id, state_code, office_list, return_list_of_objects)
+        return self.retrieve_offices_held(state_code, office_list, return_list_of_objects)
 
     def retrieve_offices_held(
             self,
@@ -627,12 +623,6 @@ class OfficeHeldManager(models.Manager):
 
         try:
             office_held_queryset = OfficeHeld.objects.all()
-            if positive_value_exists(google_civic_election_id):
-                office_held_queryset = office_held_queryset.filter(
-                    google_civic_election_id=google_civic_election_id)
-            else:
-                # TODO Limit this search to upcoming_elections only
-                pass
             if positive_value_exists(state_code):
                 office_held_queryset = office_held_queryset.filter(state_code__iexact=state_code)
             if len(office_held_list):
@@ -672,7 +662,6 @@ class OfficeHeldManager(models.Manager):
         results = {
             'success':                      success,
             'status':                       status,
-            'google_civic_election_id':     google_civic_election_id,
             'state_code':                   state_code,
             'office_held_list_found':    office_held_list_found,
             'office_held_list_objects':  office_held_list_objects if return_list_of_objects else [],
@@ -803,6 +792,7 @@ class OfficeHeldManager(models.Manager):
 
 class OfficesHeldForLocation(models.Model):
     date_last_retrieved = models.DateField(null=True, auto_now=False)
+    date_last_updated = models.DateField(null=True, auto_now=True)
     office_held_name_01 = models.CharField(max_length=255, null=True)
     office_held_name_02 = models.CharField(max_length=255, null=True)
     office_held_name_03 = models.CharField(max_length=255, null=True)
@@ -867,11 +857,9 @@ class OfficesHeldForLocation(models.Model):
     polling_location_we_vote_id = models.CharField(default=None, max_length=255, null=True, unique=False, db_index=True)
     state_code = models.CharField(max_length=2, null=True, db_index=True)
     voter_we_vote_id = models.CharField(default=None, max_length=255, null=True)
-    # Which year(s) was this list retrieved in?
-    years_retrieved_flags = models.PositiveIntegerField(default=0)
-
-    def set_years_retrieved_flags(self, years_retrieved_flag_integer_to_set):
-        self.years_retrieved_flags |= years_retrieved_flag_integer_to_set
-
-    def unset_years_retrieved_flags(self, years_in_office_flag_integer_to_unset):
-        self.years_retrieved_flags = ~years_in_office_flag_integer_to_unset & self.years_retrieved_flags
+    # Which years do we have OfficesHeldForLocation data?
+    # As we add more years here, update attach_defaults_values_to_offices_held_object
+    year_with_data_2023 = models.BooleanField(default=None, null=True)
+    year_with_data_2024 = models.BooleanField(default=None, null=True)
+    year_with_data_2025 = models.BooleanField(default=None, null=True)
+    year_with_data_2026 = models.BooleanField(default=None, null=True)

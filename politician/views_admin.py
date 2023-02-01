@@ -123,7 +123,7 @@ def find_and_merge_duplicate_politicians_view(request):
         read_only=False)
     politician_list = results['politician_list']
 
-    # Loop through all of the politicians to see how many have possible duplicates
+    # Loop through all the politicians to see how many have possible duplicates
     if positive_value_exists(find_number_of_duplicates):
         ignore_politician_id_list = []
         duplicate_politician_count = 0
@@ -140,7 +140,7 @@ def find_and_merge_duplicate_politicians_view(request):
                                  "possible duplicates."
                                  "".format(duplicate_politician_count=duplicate_politician_count))
 
-    # Loop through all of the politicians in this election
+    # Loop through all the politicians in this election
     for we_vote_politician in politician_list:
         ignore_politician_id_list = []
         # Add current politician entry to the ignore list

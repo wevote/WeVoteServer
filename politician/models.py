@@ -196,8 +196,11 @@ class Politician(models.Model):
         verbose_name='politician googleplus profile name', max_length=255, null=True, unique=False)
     politician_youtube_id = models.CharField(
         verbose_name='politician youtube profile name', max_length=255, null=True, unique=False)
-    politician_email_address = models.CharField(
-        verbose_name='politician email address', max_length=255, null=True, unique=False)
+    # DEPRECATE after transferring all data to politician_email
+    politician_email_address = models.CharField(max_length=255, null=True, unique=False)
+    politician_email = models.CharField(max_length=255, null=True, unique=False)
+    politician_email2 = models.CharField(max_length=255, null=True, unique=False)
+    politician_email3 = models.CharField(max_length=255, null=True, unique=False)
     twitter_name = models.CharField(
         verbose_name="candidate plain text name from twitter", max_length=255, null=True, blank=True)
     twitter_location = models.CharField(
@@ -630,7 +633,7 @@ class PoliticianManager(models.Manager):
     ):
         politician_list = []
         politician_list_found = False
-        politician = Politician()
+        politician = None
         politician_found = False
         status = ''
 

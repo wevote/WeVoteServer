@@ -363,7 +363,15 @@ def figure_out_politician_conflict_values(politician1, politician2):
     for attribute in POLITICIAN_UNIQUE_IDENTIFIERS:
         try:
             politician1_attribute_value = getattr(politician1, attribute)
+            try:
+                politician1_attribute_value_lower_case = politician1_attribute_value.lower()
+            except Exception:
+                politician1_attribute_value_lower_case = None
             politician2_attribute_value = getattr(politician2, attribute)
+            try:
+                politician2_attribute_value_lower_case = politician1_attribute_value.lower()
+            except Exception:
+                politician2_attribute_value_lower_case = None
             if politician1_attribute_value is None and politician2_attribute_value is None:
                 politician_merge_conflict_values[attribute] = 'MATCHING'
             elif politician1_attribute_value is None or politician1_attribute_value == "":
@@ -371,7 +379,7 @@ def figure_out_politician_conflict_values(politician1, politician2):
             elif politician2_attribute_value is None or politician2_attribute_value == "":
                 politician_merge_conflict_values[attribute] = 'POLITICIAN1'
             elif attribute == "facebook_url":
-                if politician1_attribute_value.lower() == politician2_attribute_value.lower():
+                if politician1_attribute_value_lower_case == politician2_attribute_value_lower_case:
                     # Give preference to value with both upper and lower case letters
                     if any(char.isupper() for char in politician1_attribute_value) \
                             and any(char.islower() for char in politician1_attribute_value):
@@ -381,9 +389,17 @@ def figure_out_politician_conflict_values(politician1, politician2):
                 else:
                     politician_merge_conflict_values[attribute] = 'CONFLICT'
             elif attribute == "facebook_url_is_broken":
-                politician1_facebook_url = getattr(politician1, 'facebook_url')
-                politician2_facebook_url = getattr(politician2, 'facebook_url')
-                if politician1_facebook_url.lower() == politician2_facebook_url.lower():
+                politician1_facebook_url = getattr(politician1, 'facebook_url', '')
+                try:
+                    politician1_facebook_url_lower_case = politician1_facebook_url.lower()
+                except Exception:
+                    politician1_facebook_url_lower_case = None
+                politician2_facebook_url = getattr(politician2, 'facebook_url', '')
+                try:
+                    politician2_facebook_url_lower_case = politician1_facebook_url.lower()
+                except Exception:
+                    politician2_facebook_url_lower_case = None
+                if politician1_facebook_url_lower_case == politician2_facebook_url_lower_case:
                     # If facebook_url is matching, then automatically honor True value in facebook_url_is_broken
                     if positive_value_exists(politician1_attribute_value):
                         politician_merge_conflict_values[attribute] = 'POLITICIAN1'
@@ -406,7 +422,7 @@ def figure_out_politician_conflict_values(politician1, politician2):
                 else:
                     politician_merge_conflict_values[attribute] = 'CONFLICT'
             elif attribute == "politician_name" or attribute == "state_code":
-                if politician1_attribute_value.lower() == politician2_attribute_value.lower():
+                if politician1_attribute_value_lower_case == politician2_attribute_value_lower_case:
                     politician_merge_conflict_values[attribute] = 'MATCHING'
                 else:
                     politician_merge_conflict_values[attribute] = 'CONFLICT'
@@ -421,8 +437,8 @@ def figure_out_politician_conflict_values(politician1, politician2):
                     politician_merge_conflict_values[attribute] = 'MATCHING'
                 else:
                     politician_merge_conflict_values[attribute] = 'CONFLICT'
-        except AttributeError:
-            status += "COULD_NOT_PROCESS_ATTRIBUTE: " + str(attribute) + " "
+        except AttributeError as e:
+            status += "COULD_NOT_PROCESS_ATTRIBUTE: " + str(attribute) + ": " + str(e)
             success = False
 
     return {
@@ -433,7 +449,7 @@ def figure_out_politician_conflict_values(politician1, politician2):
 
 
 def merge_if_duplicate_politicians(politician1_on_stage, politician2_on_stage, conflict_values):
-    success = False
+    success = True
     status = "MERGE_IF_DUPLICATE_POLITICIANS "
     politicians_merged = False
     decisions_required = False
@@ -455,9 +471,6 @@ def merge_if_duplicate_politicians(politician1_on_stage, politician2_on_stage, c
             elif positive_value_exists(getattr(politician2_on_stage, attribute)):
                 # If we are here, politician1 does NOT have an image, but politician2 does
                 merge_choices[attribute] = getattr(politician2_on_stage, attribute)
-        # elif attribute == "gender":
-        #     if politician2_on_stage.gender != UNKNOWN:
-        #         pass
         else:
             conflict_value = conflict_values.get(attribute, None)
             if conflict_value == "CONFLICT":
@@ -477,9 +490,13 @@ def merge_if_duplicate_politicians(politician1_on_stage, politician2_on_stage, c
             clear_these_attributes_from_politician2
         )
 
-        if merge_results['politicians_merged']:
-            success = True
+        if not merge_results['success']:
+            success = False
+            status += merge_results['status']
+        elif merge_results['politicians_merged']:
             politicians_merged = True
+        else:
+            status += "NOT_MERGED "
 
     results = {
         'success':              success,

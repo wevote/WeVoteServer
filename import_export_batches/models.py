@@ -87,6 +87,7 @@ BATCH_SET_SOURCE_CTCL = 'CTCL'
 BATCH_SET_SOURCE_IMPORT_EXPORT_ENDORSEMENTS = 'IMPORT_EXPORT_ENDORSEMENTS'
 BATCH_SET_SOURCE_IMPORT_BALLOTPEDIA_BALLOT_ITEMS = 'IMPORT_BALLOTPEDIA_BALLOT_ITEMS'
 BATCH_SET_SOURCE_IMPORT_CTCL_BALLOT_ITEMS = 'IMPORT_CTCL_BALLOT_ITEMS'
+BATCH_SET_SOURCE_IMPORT_GOOGLE_CIVIC_REPRESENTATIVES = 'IMPORT_GOOGLE_CIVIC_REPRESENTATIVES'
 BATCH_SET_SOURCE_IMPORT_VOTE_USA_BALLOT_ITEMS = 'IMPORT_VOTE_USA_BALLOT_ITEMS'
 
 # Match incoming headers (on left), and place the values in the variable name on the
@@ -548,6 +549,27 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS = {
     'voter_id': 'voter_id',
 }
 
+# TODO Update these for representatives
+BATCH_IMPORT_KEYS_ACCEPTED_FOR_REPRESENTATIVES = {
+    'contest_office_we_vote_id': 'contest_office_we_vote_id',
+    'contest_office_id': 'contest_office_id',
+    'contest_office_name': 'contest_office_name',
+    'candidate_name': 'candidate_name',
+    'candidate_twitter_handle': 'candidate_twitter_handle',
+    'contest_measure_we_vote_id': 'contest_measure_we_vote_id',
+    'contest_measure_id': 'contest_measure_id',
+    'contest_measure_name': 'contest_measure_name',
+    'contest_measure_text': 'contest_measure_text',
+    'contest_measure_url': 'contest_measure_url',
+    'election_day_text': 'election_day_text',
+    'local_ballot_order': 'local_ballot_order',
+    'no_vote_description': 'no_vote_description',
+    'yes_vote_description': 'yes_vote_description',
+    'polling_location_we_vote_id': 'polling_location_we_vote_id',
+    'state_code': 'state_code',
+    'voter_id': 'voter_id',
+}
+
 BATCH_HEADER_MAP_BALLOT_ITEMS_TO_BALLOTPEDIA_BALLOT_ITEMS = BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
 
 BATCH_HEADER_MAP_BALLOT_ITEMS_GOOGLE_CIVIC_EMULATION = {
@@ -609,9 +631,10 @@ CALCULATE_SITEWIDE_DAILY_METRICS = "CALCULATE_SITEWIDE_DAILY_METRICS"
 CALCULATE_SITEWIDE_ELECTION_METRICS = "CALCULATE_SITEWIDE_ELECTION_METRICS"
 CALCULATE_SITEWIDE_VOTER_METRICS = "CALCULATE_SITEWIDE_VOTER_METRICS"
 GENERATE_VOTER_GUIDES = "GENERATE_VOTER_GUIDES"
-RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS = "RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS"
 REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS = "REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS"
 REFRESH_BALLOT_ITEMS_FROM_VOTERS = "REFRESH_BALLOT_ITEMS_FROM_VOTERS"
+RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS = "RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS"
+RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS = "RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS"
 SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE = "SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE"
 UPDATE_TWITTER_DATA_FROM_TWITTER = "UPDATE_TWITTER_DATA_FROM_TWITTER"
 
@@ -4619,6 +4642,7 @@ class BatchSet(models.Model):
     batch_set_source = models.CharField(max_length=255)
     batch_process_id = models.PositiveIntegerField(default=0, null=True, blank=True, db_index=True)
     batch_process_ballot_item_chunk_id = models.PositiveIntegerField(default=0, null=True, blank=True, db_index=True)
+    batch_process_representatives_chunk_id = models.PositiveIntegerField(default=0, null=True, db_index=True)
     source_uri = models.URLField(max_length=255, blank=True, null=True, verbose_name='uri where data is coming from')
     import_date = models.DateTimeField(verbose_name="date when batch set was imported", null=True, auto_now=True)
 
@@ -4970,6 +4994,7 @@ class BatchProcessManager(models.Manager):
                     REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,
                     REFRESH_BALLOT_ITEMS_FROM_VOTERS,
                     RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,
+                    RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS,
                     SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE,
                     UPDATE_TWITTER_DATA_FROM_TWITTER,
                 ]:
@@ -5018,6 +5043,7 @@ class BatchProcessManager(models.Manager):
             self,
             batch_process_id=0,
             batch_process_ballot_item_chunk_id=0,
+            batch_process_representatives_chunk_id=0,
             batch_set_id=0,
             critical_failure=False,
             google_civic_election_id=0,
@@ -5032,11 +5058,13 @@ class BatchProcessManager(models.Manager):
         batch_process_log_entry_saved = False
         batch_process_id = convert_to_int(batch_process_id)
         batch_process_ballot_item_chunk_id = convert_to_int(batch_process_ballot_item_chunk_id)
+        batch_process_representatives_chunk_id = convert_to_int(batch_process_representatives_chunk_id)
 
         try:
             batch_process_log_entry = BatchProcessLogEntry.objects.create(
                 batch_process_id=batch_process_id,
                 batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk_id,
+                batch_process_representatives_chunk_id=batch_process_representatives_chunk_id,
                 critical_failure=critical_failure,
                 kind_of_process=kind_of_process,
                 state_code=state_code,
@@ -5314,13 +5342,12 @@ class BatchProcessManager(models.Manager):
         batch_process_list_found = False
         filtered_batch_process_list = []
 
-        election_manager = ElectionManager()
         if positive_value_exists(for_upcoming_elections):
+            election_manager = ElectionManager()
             results = election_manager.retrieve_upcoming_elections()
             election_list = results['election_list']
         else:
-            results = election_manager.retrieve_elections()
-            election_list = results['election_list']
+            election_list = []
 
         try:
             batch_process_queryset = BatchProcess.objects.all()
@@ -5373,6 +5400,8 @@ class BatchProcessManager(models.Manager):
                             REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, REFRESH_BALLOT_ITEMS_FROM_VOTERS,
                             RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS]:
                         checked_out_expiration_time = 1800  # 30 minutes * 60 seconds
+                    elif batch_process.kind_of_process in [RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS]:
+                        checked_out_expiration_time = 120  # 2 minutes * 60 seconds
                     elif batch_process.kind_of_process in [
                             AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID, AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT,
                             CALCULATE_ORGANIZATION_DAILY_METRICS, CALCULATE_ORGANIZATION_ELECTION_METRICS,
@@ -5597,6 +5626,7 @@ class BatchProcessLogEntry(models.Model):
     """
     batch_process_id = models.PositiveIntegerField(default=0, null=False, db_index=True)
     batch_process_ballot_item_chunk_id = models.PositiveIntegerField(default=0, null=False, db_index=True)
+    batch_process_representatives_chunk_id = models.PositiveIntegerField(default=0, null=False, db_index=True)
     batch_set_id = models.PositiveIntegerField(default=0, null=False, db_index=True)
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(
@@ -5616,6 +5646,29 @@ class BatchProcessLogEntry(models.Model):
     kind_of_process = models.CharField(max_length=50, default="")
     analytics_date_as_integer = models.PositiveIntegerField(default=None, null=True)
     status = models.TextField(null=True, blank=True)
+
+
+class BatchProcessRepresentativesChunk(models.Model):
+    """
+    """
+    batch_process_id = models.PositiveIntegerField(default=0, null=False, db_index=True)
+    batch_set_id = models.PositiveIntegerField(default=0, null=False, db_index=True)
+    state_code = models.CharField(max_length=2, null=True)
+
+    retrieve_date_started = models.DateTimeField(null=True)
+    retrieve_date_completed = models.DateTimeField(null=True)
+    retrieve_timed_out = models.BooleanField(default=None, null=True)
+    retrieve_row_count = models.PositiveIntegerField(default=0, null=False)
+
+    politician_matching_date_started = models.DateTimeField(null=True)  # analyze_date_started
+    politician_matching_date_completed = models.DateTimeField(null=True)
+    politician_matching_timed_out = models.BooleanField(default=None, null=True)
+    politician_matching_row_count = models.PositiveIntegerField(default=0, null=False)
+
+    politician_deduplication_date_started = models.DateTimeField(null=True)  # create_date_started
+    politician_deduplication_date_completed = models.DateTimeField(null=True)
+    politician_deduplication_timed_out = models.BooleanField(default=None, null=True)
+    politician_deduplication_row_count = models.PositiveIntegerField(default=0, null=False)
 
 
 class BatchRowTranslationMap(models.Model):
