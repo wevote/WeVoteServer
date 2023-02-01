@@ -7,12 +7,12 @@ from .models import BatchManager, BatchDescription, BatchHeaderMap, BatchRow, Ba
     BatchRowActionCandidate, BatchRowActionPollingLocation, BatchRowActionPosition, BatchRowActionBallotItem, \
     CLEAN_DATA_MANUALLY, POSITION, IMPORT_DELETE, IMPORT_ALREADY_DELETED, \
     IMPORT_CREATE, IMPORT_ADD_TO_EXISTING, IMPORT_DATA_ALREADY_MATCHING, IMPORT_QUERY_ERROR, \
-    IMPORT_TO_BE_DETERMINED, DO_NOT_PROCESS, \
+    IMPORT_TO_BE_DETERMINED, DO_NOT_PROCESS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_OFFICES_HELD, BATCH_IMPORT_KEYS_ACCEPTED_FOR_MEASURES, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLLING_LOCATIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS, \
-    BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
+    BATCH_IMPORT_KEYS_ACCEPTED_FOR_REPRESENTATIVES
 from ballot.models import BallotItem, BallotItemListManager, BallotItemManager, BallotReturnedManager
 from candidate.controllers import retrieve_next_or_most_recent_office_for_candidate
 from candidate.models import CandidateCampaign, CandidateListManager, CandidateManager
@@ -50,6 +50,7 @@ IMPORT_POLLING_LOCATION = 'IMPORT_POLLING_LOCATION'
 IMPORT_VOTER = 'IMPORT_VOTER'
 MEASURE = 'MEASURE'
 POLITICIAN = 'POLITICIAN'
+REPRESENTATIVES = 'REPRESENTATIVES'
 
 
 def create_batch_row_actions(
@@ -285,6 +286,34 @@ def create_batch_row_actions(
                 voter_id = batch_row_action_ballot_item.voter_id
 
                 batch_row_action_list.append(batch_row_action_ballot_item)
+            elif kind_of_batch == REPRESENTATIVES:
+                results = create_batch_row_action_ballot_item(
+                    batch_description=batch_description,
+                    batch_header_map=batch_header_map,
+                    one_batch_row=one_batch_row,
+                    election_objects_dict=election_objects_dict,
+                    measure_objects_dict=measure_objects_dict,
+                    office_objects_dict=office_objects_dict,
+                )
+                election_objects_dict = results['election_objects_dict']
+                measure_objects_dict = results['measure_objects_dict']
+                office_objects_dict = results['office_objects_dict']
+
+                if results['batch_row_action_updated']:
+                    number_of_batch_actions_updated += 1
+                    success = True
+                elif results['batch_row_action_created']:
+                    number_of_batch_actions_created += 1
+                    success = True
+                elif results['batch_row_action_delete_created']:
+                    number_of_batch_actions_created += 1
+                    success = True
+
+                batch_row_action_ballot_item = results['batch_row_action_ballot_item']
+                polling_location_we_vote_id = batch_row_action_ballot_item.polling_location_we_vote_id
+                voter_id = batch_row_action_ballot_item.voter_id
+
+                batch_row_action_list.append(batch_row_action_ballot_item)
     else:
         status += "CREATE_BATCH_ROW_CONDITIONS_NOT_MET " \
                   "[batch_description_found and batch_header_map_found and batch_row_action_list_found " \
@@ -293,6 +322,99 @@ def create_batch_row_actions(
     existing_ballot_item_list = []
     number_of_batch_action_deletes_created = 0
     if kind_of_batch == IMPORT_BALLOT_ITEM:
+        # Only deal with deleting ballot items if we are NOT looking at just one batch row
+        if not positive_value_exists(batch_row_id):
+            if delete_analysis_only:
+                # If here we need to retrieve existing batch_row_actions
+                batch_manager = BatchManager()
+                results = batch_manager.retrieve_batch_row_action_ballot_item_list(
+                    batch_header_id, limit_to_kind_of_action_list=[IMPORT_CREATE, IMPORT_ADD_TO_EXISTING])
+                if results['batch_row_action_list_found']:
+                    batch_row_action_list = results['batch_row_action_list']
+                    if positive_value_exists(batch_description.polling_location_we_vote_id):
+                        polling_location_we_vote_id = batch_description.polling_location_we_vote_id
+                    elif len(batch_row_action_list):
+                        batch_row_action_ballot_item = batch_row_action_list[0]
+                        polling_location_we_vote_id = batch_row_action_ballot_item.polling_location_we_vote_id
+                        voter_id = batch_row_action_ballot_item.voter_id
+
+            if batch_description_found and batch_header_map_found:
+                # Start by retrieving existing ballot items for this map point
+                if positive_value_exists(polling_location_we_vote_id) and \
+                        positive_value_exists(batch_description.google_civic_election_id):
+                    ballot_item_list_manager = BallotItemListManager()
+                    google_civic_election_id_list = [batch_description.google_civic_election_id]
+                    results = ballot_item_list_manager.retrieve_all_ballot_items_for_polling_location(
+                        polling_location_we_vote_id=polling_location_we_vote_id,
+                        google_civic_election_id_list=google_civic_election_id_list,
+                        read_only=False)
+                    if results['ballot_item_list_found']:
+                        existing_ballot_item_list = results['ballot_item_list']
+            else:
+                status += "COULD_NOT_RETRIEVE_EXISTING_BALLOT_ITEMS " \
+                          "[ELSE if batch_description_found and batch_header_map_found] "
+
+        if existing_ballot_item_list and len(existing_ballot_item_list):
+            # If we are here, then we are checking to see if there were previous ballot items
+            # that have since been deleted
+            # Note that we should not be here if we are looking at only one batch row
+            election_manager = ElectionManager()
+            for existing_ballot_item in existing_ballot_item_list:
+                batch_row_action_found = False
+                batch_row_action_delete_exists = False
+                for batch_row_action in batch_row_action_list:
+                    if batch_row_action_found:
+                        continue
+                    elif positive_value_exists(batch_row_action.contest_measure_we_vote_id) and \
+                            batch_row_action.contest_measure_we_vote_id == \
+                            existing_ballot_item.contest_measure_we_vote_id:
+                        batch_row_action_found = True
+                    elif positive_value_exists(batch_row_action.contest_office_we_vote_id) and \
+                            batch_row_action.contest_office_we_vote_id == \
+                            existing_ballot_item.contest_office_we_vote_id:
+                        batch_row_action_found = True
+                    else:
+                        # Doesn't match this existing_ballot_item
+                        pass
+                if not positive_value_exists(batch_row_action_found):
+                    # If here we know that a ballot item already exists, and the current data would NOT be
+                    #  creating/updating a ballot item. Create a delete action.
+                    ballot_item_deleting_turned_on = True
+                    election = None
+                    election_found = False
+                    google_civic_election_id = ''
+                    if hasattr(existing_ballot_item, 'google_civic_election_id'):
+                        google_civic_election_id = existing_ballot_item.google_civic_election_id
+                    state_code = ''
+                    if hasattr(existing_ballot_item, 'state_code'):
+                        state_code = existing_ballot_item.state_code
+                    if google_civic_election_id in election_objects_dict:
+                        election = election_objects_dict[google_civic_election_id]
+                        election_found = True
+                    else:
+                        results = election_manager.retrieve_election(google_civic_election_id)
+                        if results['election_found']:
+                            election = results['election']
+                            election_found = True
+                            election_objects_dict[google_civic_election_id] = election
+                    if positive_value_exists(state_code) and \
+                            election_found and \
+                            hasattr(election, 'use_ctcl_as_data_source_by_state_code') and \
+                            positive_value_exists(election.use_ctcl_as_data_source_by_state_code):
+                        # If we are pulling from two data sources, we don't want to delete ballot item entries
+                        if state_code.lower() in election.use_ctcl_as_data_source_by_state_code.lower():
+                            ballot_item_deleting_turned_on = False
+                    # Only schedule the deletion of the ballot_item when we are only using one data source
+                    #  (Like Vote USA, or CTCL exclusively)
+                    if positive_value_exists(ballot_item_deleting_turned_on):
+                        results = create_batch_row_action_ballot_item_delete(batch_description, existing_ballot_item)
+                        batch_row_action_delete_exists = results['batch_row_action_delete_exists']
+
+                if positive_value_exists(batch_row_action_delete_exists):
+                    number_of_batch_action_deletes_created += 1
+        else:
+            status += "EXISTING_BALLOT_ITEM_LIST_EMPTY "
+    elif kind_of_batch == REPRESENTATIVES:
         # Only deal with deleting ballot items if we are NOT looking at just one batch row
         if not positive_value_exists(batch_row_id):
             if delete_analysis_only:
@@ -3601,6 +3723,9 @@ def create_batch_header_translation_suggestions(batch_header, kind_of_batch, inc
     elif kind_of_batch == POSITION:
         kind_of_batch_recognized = True
         batch_import_keys_accepted_dict = BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS
+    elif kind_of_batch == REPRESENTATIVES:
+        kind_of_batch_recognized = True
+        batch_import_keys_accepted_dict = BATCH_IMPORT_KEYS_ACCEPTED_FOR_REPRESENTATIVES
     else:
         kind_of_batch_recognized = False
         batch_import_keys_accepted_dict = {}

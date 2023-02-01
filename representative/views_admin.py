@@ -97,7 +97,6 @@ def find_and_merge_duplicate_representatives_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    ignore_representative_we_vote_id_list = []
     find_number_of_duplicates = request.GET.get('find_number_of_duplicates', 0)
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     google_civic_election_id = convert_to_int(google_civic_election_id)
@@ -108,14 +107,13 @@ def find_and_merge_duplicate_representatives_view(request):
     try:
         representative_query = Representative.objects.all()
         representative_query = representative_query.filter(state_code__iexact=state_code)
-        if positive_value_exists(ignore_representative_we_vote_id_list):
-            representative_query = representative_query.exclude(we_vote_id__in=ignore_representative_we_vote_id_list)
         representative_list = list(representative_query)
     except Exception as e:
         status += "REPRESENTATIVE_QUERY_FAILED: " + str(e) + " "
 
     # Loop through all the representatives in this election to see how many have possible duplicates
     if positive_value_exists(find_number_of_duplicates):
+        ignore_representative_we_vote_id_list = []
         duplicate_representative_count = 0
         for we_vote_representative in representative_list:
             # Note that we don't reset the ignore_representative_list. We don't search for a duplicate both directions

@@ -5,7 +5,7 @@
 from .models import ACTIVITY_NOTICE_PROCESS, API_REFRESH_REQUEST, \
     BatchDescription, BatchHeader, BatchHeaderMap, BatchManager, \
     BatchProcess, BatchProcessAnalyticsChunk, BatchProcessBallotItemChunk, BatchProcessLogEntry, BatchProcessManager, \
-    BatchRow, BatchRowActionBallotItem, BatchRowActionPollingLocation, \
+    BatchProcessRepresentativesChunk, BatchRow, BatchRowActionBallotItem, BatchRowActionPollingLocation, \
     BatchSet, \
     CONTEST_OFFICE, OFFICE_HELD, IMPORT_BALLOT_ITEM, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES, BATCH_IMPORT_KEYS_ACCEPTED_FOR_CONTEST_OFFICES, \
@@ -13,14 +13,15 @@ from .models import ACTIVITY_NOTICE_PROCESS, API_REFRESH_REQUEST, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_ORGANIZATIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS, \
     BATCH_IMPORT_KEYS_ACCEPTED_FOR_POSITIONS, BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS, \
     BATCH_SET_SOURCE_IMPORT_BALLOTPEDIA_BALLOT_ITEMS, BATCH_SET_SOURCE_IMPORT_CTCL_BALLOT_ITEMS, \
-    BATCH_SET_SOURCE_IMPORT_VOTE_USA_BALLOT_ITEMS, \
+    BATCH_SET_SOURCE_IMPORT_GOOGLE_CIVIC_REPRESENTATIVES, BATCH_SET_SOURCE_IMPORT_VOTE_USA_BALLOT_ITEMS, \
     IMPORT_CREATE, IMPORT_DELETE, IMPORT_ALREADY_DELETED, IMPORT_ADD_TO_EXISTING, IMPORT_POLLING_LOCATION, \
     IMPORT_VOTER, REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, \
-    REFRESH_BALLOT_ITEMS_FROM_VOTERS, RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS
+    REFRESH_BALLOT_ITEMS_FROM_VOTERS, RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, \
+    RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS
 from .controllers import create_batch_header_translation_suggestions, create_batch_row_actions, \
     update_or_create_batch_header_mapping, export_voter_list_with_emails, import_data_from_batch_row_actions
 from .controllers_batch_process import process_next_activity_notices, process_next_ballot_items, \
-    process_next_general_maintenance
+    process_next_general_maintenance, process_next_representatives
 from .controllers_ballotpedia import store_ballotpedia_json_response_to_import_batch_system
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.models import BallotReturnedListManager, BallotReturnedManager, MEASURE, CANDIDATE, POLITICIAN
@@ -40,11 +41,12 @@ from exception.models import handle_exception
 from import_export_ballotpedia.controllers import groom_ballotpedia_data_for_processing, \
     process_ballotpedia_voter_districts, BALLOTPEDIA_API_SAMPLE_BALLOT_RESULTS_URL
 from import_export_ctcl.controllers import CTCL_VOTER_INFO_URL
+from import_export_google_civic.controllers import REPRESENTATIVES_BY_ADDRESS_URL
 from import_export_vote_usa.controllers import VOTE_USA_VOTER_INFO_URL
 import json
 import math
-from polling_location.models import KIND_OF_LOG_ENTRY_BALLOT_RECEIVED, MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK,\
-    PollingLocation, PollingLocationManager
+from polling_location.models import KIND_OF_LOG_ENTRY_BALLOT_RECEIVED, KIND_OF_LOG_ENTRY_REPRESENTATIVES_RECEIVED, \
+    MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK, PollingLocation, PollingLocationManager
 from position.models import POSITION
 import random
 import requests
@@ -1522,6 +1524,8 @@ def batch_process_system_toggle_view(request):
         setting_name = 'batch_process_system_api_refresh_on'
     elif kind_of_process == 'BALLOT_ITEMS':
         setting_name = 'batch_process_system_ballot_items_on'
+    elif kind_of_process == 'REPRESENTATIVES':
+        setting_name = 'batch_process_system_representatives_on'
     elif kind_of_process == 'CALCULATE_ANALYTICS':
         setting_name = 'batch_process_system_calculate_analytics_on'
     elif kind_of_process == 'GENERATE_VOTER_GUIDES':
@@ -1690,6 +1694,9 @@ def batch_process_list_view(request):
             elif kind_of_processes_to_show == "GENERATE_VOTER_GUIDES":
                 processes = ['GENERATE_VOTER_GUIDES']
                 batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=processes)
+            elif kind_of_processes_to_show == "REPRESENTATIVES":
+                processes = ['RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS']
+                batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=processes)
             elif kind_of_processes_to_show == "SEARCH_TWITTER":
                 search_twitter_processes = ['SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE']
                 batch_process_queryset = batch_process_queryset.filter(kind_of_process__in=search_twitter_processes)
@@ -1777,10 +1784,12 @@ def batch_process_list_view(request):
                 batch_process.ballot_item_chunks_expected = \
                     int(math.ceil(batch_process.polling_location_count / map_points_retrieved_each_batch_chunk)) + 1
         # Add the processing "chunks" under each Batch Process
-        batch_process_ballot_item_chunk_list = []
-        batch_process_ballot_item_chunk_list_found = False
         batch_process_analytics_chunk_list = []
         batch_process_analytics_chunk_list_found = False
+        batch_process_ballot_item_chunk_list = []
+        batch_process_ballot_item_chunk_list_found = False
+        batch_process_representatives_chunk_list = []
+        batch_process_representatives_chunk_list_found = False
         try:
             batch_process_chunk_queryset = BatchProcessBallotItemChunk.objects.all()
             batch_process_chunk_queryset = batch_process_chunk_queryset.filter(batch_process_id=batch_process.id)
@@ -1806,13 +1815,25 @@ def batch_process_list_view(request):
                 batch_process_analytics_chunk_list = list(batch_process_chunk_queryset)
                 batch_process_analytics_chunk_list_found = \
                     positive_value_exists(len(batch_process_analytics_chunk_list))
-            except BatchProcessBallotItemChunk.DoesNotExist:
-                # BatchProcessBallotItemChunk not found. Not a problem.
-                status += 'NO_BatchProcessAnalyticsChunk_FOUND_DoesNotExist '
             except Exception as e:
-                status += 'FAILED BatchProcessAnalyticsChunk ' + str(e) + ' '
+                status += 'FAILED BatchProcessAnalyticsChunk: ' + str(e) + ' '
             batch_process.batch_process_analytics_chunk_list = batch_process_analytics_chunk_list
             batch_process.batch_process_analytics_chunk_list_found = batch_process_analytics_chunk_list_found
+
+        if not positive_value_exists(batch_process_analytics_chunk_list_found):
+            try:
+                batch_process_chunk_queryset = BatchProcessRepresentativesChunk.objects.all()
+                batch_process_chunk_queryset = batch_process_chunk_queryset.filter(batch_process_id=batch_process.id)
+                batch_process_chunk_queryset = batch_process_chunk_queryset.order_by("-id")
+                batch_process_representatives_chunk_list = list(batch_process_chunk_queryset)
+                batch_process_representatives_chunk_list_found = \
+                    positive_value_exists(len(batch_process_representatives_chunk_list))
+            except Exception as e:
+                status += 'FAILED BatchProcessRepresentativesChunk: ' + str(e) + ' '
+            batch_process.batch_process_representatives_chunk_list = batch_process_representatives_chunk_list
+            batch_process.batch_process_representatives_chunk_list_found = \
+                batch_process_representatives_chunk_list_found
+            batch_process.ballot_item_chunk_count = len(batch_process.batch_process_representatives_chunk_list)
 
     # Make sure we always include the current election in the election_list, even if it is older
     use_ballotpedia_as_data_source = False
@@ -1870,16 +1891,8 @@ def batch_process_list_view(request):
     from wevote_settings.models import fetch_batch_process_system_on, fetch_batch_process_system_activity_notices_on, \
         fetch_batch_process_system_api_refresh_on, fetch_batch_process_system_ballot_items_on, \
         fetch_batch_process_system_calculate_analytics_on, fetch_batch_process_system_generate_voter_guides_on, \
-        fetch_batch_process_system_search_twitter_on, \
+        fetch_batch_process_system_representatives_on, fetch_batch_process_system_search_twitter_on, \
         fetch_batch_process_system_update_twitter_on
-    batch_process_system_on = fetch_batch_process_system_on()
-    batch_process_system_activity_notices_on = fetch_batch_process_system_activity_notices_on()
-    batch_process_system_api_refresh_on = fetch_batch_process_system_api_refresh_on()
-    batch_process_system_ballot_items_on = fetch_batch_process_system_ballot_items_on()
-    batch_process_system_calculate_analytics_on = fetch_batch_process_system_calculate_analytics_on()
-    batch_process_system_generate_voter_guides_on = fetch_batch_process_system_generate_voter_guides_on()
-    batch_process_system_search_twitter_on = fetch_batch_process_system_search_twitter_on()
-    batch_process_system_update_twitter_on = fetch_batch_process_system_update_twitter_on()
 
     ballot_returned_oldest_date = ""
     ballot_returned_voter_oldest_date = ""
@@ -1916,14 +1929,15 @@ def batch_process_list_view(request):
         'ballot_returned_voter_oldest_date':    ballot_returned_voter_oldest_date,
         'batch_process_id':                     batch_process_id,
         'batch_process_list':                   batch_process_list,
-        'batch_process_system_on':              batch_process_system_on,
-        'batch_process_system_activity_notices_on':     batch_process_system_activity_notices_on,
-        'batch_process_system_api_refresh_on':          batch_process_system_api_refresh_on,
-        'batch_process_system_ballot_items_on':         batch_process_system_ballot_items_on,
-        'batch_process_system_calculate_analytics_on':  batch_process_system_calculate_analytics_on,
-        'batch_process_system_generate_voter_guides_on':    batch_process_system_generate_voter_guides_on,
-        'batch_process_system_search_twitter_on':       batch_process_system_search_twitter_on,
-        'batch_process_system_update_twitter_on':       batch_process_system_update_twitter_on,
+        'batch_process_system_on':                      fetch_batch_process_system_on(),
+        'batch_process_system_activity_notices_on':     fetch_batch_process_system_activity_notices_on(),
+        'batch_process_system_api_refresh_on':          fetch_batch_process_system_api_refresh_on(),
+        'batch_process_system_ballot_items_on':         fetch_batch_process_system_ballot_items_on(),
+        'batch_process_system_calculate_analytics_on':  fetch_batch_process_system_calculate_analytics_on(),
+        'batch_process_system_generate_voter_guides_on': fetch_batch_process_system_generate_voter_guides_on(),
+        'batch_process_system_representatives_on':      fetch_batch_process_system_representatives_on(),
+        'batch_process_system_search_twitter_on':       fetch_batch_process_system_search_twitter_on(),
+        'batch_process_system_update_twitter_on':       fetch_batch_process_system_update_twitter_on(),
         'batch_process_search':                 batch_process_search,
         'election_list':                        election_list,
         'google_civic_election_id':             google_civic_election_id,
@@ -2143,89 +2157,6 @@ def import_ballot_items_for_location_view(request):
                                         )
 
 
-@login_required
-def import_representatives_for_location_view(request):
-    """
-    Reach out to external data source API to retrieve the current representatives for one location.
-    """
-    status = ""
-    success = True
-
-    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'political_data_manager'}
-    if not voter_has_authority(request, authority_required):
-        return redirect_to_sign_in_page(request, authority_required)
-
-    polling_location_we_vote_id = request.GET.get('polling_location_we_vote_id', "")
-    state_code = request.GET.get('state_code', "")
-    use_google_civic = positive_value_exists(request.GET.get('use_google_civic', False))
-    use_ballotpedia = positive_value_exists(request.GET.get('use_ballotpedia', False))
-    use_ctcl = positive_value_exists(request.GET.get('use_ctcl', False))
-    use_vote_usa = positive_value_exists(request.GET.get('use_vote_usa', False))
-
-    polling_location_manager = PollingLocationManager()
-    polling_location_state_code = ""
-    if positive_value_exists(polling_location_we_vote_id):
-        results = polling_location_manager.retrieve_polling_location_by_id(0, polling_location_we_vote_id)
-        if results['polling_location_found']:
-            polling_location = results['polling_location']
-            polling_location_we_vote_id = polling_location.we_vote_id
-            polling_location_state_code = polling_location.state
-        else:
-            status += results['status']
-            success = False
-    else:
-        success = False
-
-    kind_of_batch = ""
-
-    update_or_create_rules = {
-        'create_candidates':    True,
-        'create_offices':       True,
-        'create_measures':      True,
-        'update_candidates':    False,
-        'update_offices':       False,
-        'update_measures':      False,
-    }
-
-    # See pattern in 'import_ballot_items_for_location_view' if we want to support other data providers
-    if not success:
-        status += "FAILED_RETRIEVING_POLLING_LOCATION_PRIOR_TO_IMPORTING_REPRESENTATIVES "
-    elif positive_value_exists(use_ballotpedia):
-        status += "BALLOTPEDIA_NOT_SUPPORTED_AS_DATA_SOURCE "
-    elif positive_value_exists(use_ctcl):
-        status += "CTCL_NOT_SUPPORTED_AS_DATA_SOURCE "
-    elif positive_value_exists(use_google_civic):
-        status += "USE_GOOGLE_CIVIC_IS_DATA_SOURCE "
-        from import_export_google_civic.controllers \
-            import retrieve_google_civic_representatives_from_polling_location_api
-        results = retrieve_google_civic_representatives_from_polling_location_api(
-            polling_location_we_vote_id=polling_location_we_vote_id,
-            state_code=state_code,
-            update_or_create_rules=update_or_create_rules,
-        )
-        status += results['status']
-    elif positive_value_exists(use_vote_usa):
-        status += "VOTE_USA_NOT_SUPPORTED_AS_DATA_SOURCE "
-    else:
-        # Should not be possible to get here
-        pass
-
-    messages.add_message(request, messages.INFO, status)
-    if positive_value_exists(polling_location_we_vote_id):
-        return HttpResponseRedirect(reverse('polling_location:polling_location_summary_by_we_vote_id',
-                                            args=(polling_location_we_vote_id,)) +
-                                    "?polling_location_we_vote_id=" + str(polling_location_we_vote_id) +
-                                    "&state_code=" + str(state_code)
-                                    )
-    else:
-        return HttpResponseRedirect(reverse('polling_location:polling_location_list',
-                                            args=()) +
-                                    "?polling_location_we_vote_id=" + str(polling_location_we_vote_id) +
-                                    "&state_code=" + str(state_code)
-                                    )
-
-
 def process_next_activity_notices_view(request):
     json_results = process_next_activity_notices()
 
@@ -2314,7 +2245,9 @@ def batch_process_log_entry_list_view(request):
             batch_process_queryset = batch_process_queryset.filter(batch_process_id=batch_process_id)
         if positive_value_exists(batch_process_chunk_id):
             batch_process_queryset = batch_process_queryset.filter(
-                batch_process_ballot_item_chunk_id=batch_process_chunk_id)
+                Q(batch_process_ballot_item_chunk_id=batch_process_chunk_id) |
+                Q(batch_process_representatives_chunk_id=batch_process_chunk_id)
+            )
         if positive_value_exists(google_civic_election_id):
             batch_process_queryset = batch_process_queryset.filter(google_civic_election_id=google_civic_election_id)
         elif positive_value_exists(show_all_elections):

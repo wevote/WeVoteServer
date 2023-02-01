@@ -121,7 +121,13 @@
         <tr>
             <td style="white-space: nowrap">{{ batch_process_log_entry.date_added|localtime|default_if_none:"" }}</td>
             <td>{{ batch_process_log_entry.batch_process_id|default_if_none:"" }}</td>
-            <td>{{ batch_process_log_entry.batch_process_ballot_item_chunk_id|default_if_none:"" }}</td>
+            <td>
+                {% if batch_process_log_entry.batch_process_ballot_item_chunk_id %}
+                    {{ batch_process_log_entry.batch_process_ballot_item_chunk_id|default_if_none:"" }}
+                {% elif batch_process_log_entry.batch_process_representatives_chunk_id %}
+                    {{ batch_process_log_entry.batch_process_representatives_chunk_id|default_if_none:"" }}
+                {% endif %}
+            </td>
             <td>{{ batch_process_log_entry.batch_set_id|default_if_none:"" }}</td>
             <td>{{ batch_process_log_entry.kind_of_process }}</td>
             <td>{{ batch_process_log_entry.google_civic_election_id|default_if_none:"" }}</td>

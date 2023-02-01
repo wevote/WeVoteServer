@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import retrieve_representatives_from_google_civic_api, store_representatives_from_google_civic_api
+from .controllers_representatives import retrieve_representatives_from_google_civic_api, store_representatives_from_google_civic_api
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.controllers import refresh_voter_ballots_from_polling_location
 from ballot.models import BallotItemListManager, BallotReturnedListManager, BallotReturnedManager, \
@@ -246,7 +246,7 @@ def retrieve_representatives_for_one_address_view(request):
                                         )
         except Exception as e:
             messages.add_message(request, messages.ERROR,
-                                 'Polling location could not be found. ')
+                                 'Polling location could not be found: ' + str(e))
             return HttpResponseRedirect(reverse('polling_location:polling_location_summary_by_we_vote_id',
                                                 args=(polling_location_we_vote_id,)) +
                                         "?state_code=" + str(state_code) +

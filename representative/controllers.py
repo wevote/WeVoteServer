@@ -1,6 +1,7 @@
 # representative/controllers.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
+from django.db.models import Q
 from politician.models import PoliticianManager
 import wevote_functions.admin
 from wevote_functions.functions import add_period_to_middle_name_initial, add_period_to_name_prefix_and_suffix, \
@@ -218,7 +219,15 @@ def figure_out_representative_conflict_values(representative1, representative2):
     for attribute in REPRESENTATIVE_UNIQUE_IDENTIFIERS:
         try:
             representative1_attribute_value = getattr(representative1, attribute)
+            try:
+                representative1_attribute_value_lower_case = representative1_attribute_value.lower()
+            except Exception:
+                representative1_attribute_value_lower_case = None
             representative2_attribute_value = getattr(representative2, attribute)
+            try:
+                representative2_attribute_value_lower_case = representative2_attribute_value.lower()
+            except Exception:
+                representative2_attribute_value_lower_case = None
             if representative1_attribute_value is None and representative2_attribute_value is None:
                 representative_merge_conflict_values[attribute] = 'MATCHING'
             elif representative1_attribute_value is None or representative1_attribute_value == "":
@@ -236,13 +245,13 @@ def figure_out_representative_conflict_values(representative1, representative2):
                     #  use the one with 'http'
                     if 'http' in representative2_attribute_value and 'http' not in representative1_attribute_value:
                         representative_merge_conflict_values[attribute] = 'REPRESENTATIVE2'
-                    elif representative1_attribute_value.lower() == representative2_attribute_value.lower():
+                    elif representative1_attribute_value_lower_case == representative2_attribute_value_lower_case:
                         representative_merge_conflict_values[attribute] = 'MATCHING'
                     else:
                         representative_merge_conflict_values[attribute] = 'CONFLICT'
                 elif attribute == "representative_name" \
                         or attribute == "state_code":
-                    if representative1_attribute_value.lower() == representative2_attribute_value.lower():
+                    if representative1_attribute_value_lower_case == representative2_attribute_value_lower_case:
                         representative_merge_conflict_values[attribute] = 'MATCHING'
                     else:
                         representative_merge_conflict_values[attribute] = 'CONFLICT'
@@ -338,6 +347,61 @@ def find_duplicate_representative(we_vote_representative, ignore_representative_
         'status':                                   status,
         'representative_merge_possibility_found':   False,
         'representative_list':                      [],
+    }
+    return results
+
+
+def match_representatives_to_politicians_first_attempt(state_code=''):
+    """
+    Find any 50 representatives with politician_match_attempted == False, and attempt to match them to:
+    a) existing politician
+    b) or create new politician (we can deduplicate later)
+    :param state_code:
+    :return:
+    """
+    queryset = Representative.objects.all()
+    queryset = queryset.filter(politician_match_attempted=False)
+    queryset = queryset.filter(Q(politician_we_vote_id__isnull=True) | Q(politician_we_vote_id=""))
+    if positive_value_exists(state_code):
+        queryset = queryset.filter(state_code__iexact=state_code)
+    representative_list = list(queryset[:50])
+    num_representatives_reviewed = 0
+    new_politicians_created = 0
+    existing_politician_found = 0
+    multiple_politicians_found = 0
+    other_results = 0
+    status = ""
+    success = True
+
+    status += "About to loop through up to 50 representatives to match to a politician record. "
+
+    # Loop through all the representatives from this year
+    for we_vote_representative in representative_list:
+        num_representatives_reviewed += 1
+        match_results = representative_politician_match(we_vote_representative)
+        if match_results['politician_created']:
+            new_politicians_created += 1
+        elif match_results['politician_found']:
+            existing_politician_found += 1
+        elif match_results['politician_list_found']:
+            multiple_politicians_found += 1
+        else:
+            other_results += 1
+        if not match_results['success']:
+            status += match_results['status']
+        try:
+            we_vote_representative.politician_match_attempted = True
+            we_vote_representative.save()
+        except Exception as e:
+            status += "FAILED-POLITICIAN_MATCH_ATTEMPTED: " + str(e) + " "
+
+    results = {
+        'multiple_possible_politicians_found':  multiple_politicians_found,
+        'matched_to_existing_politician':       existing_politician_found,
+        'new_politicians_created':              new_politicians_created,
+        'number_of_representatives_reviewed':   num_representatives_reviewed,
+        'success':                              success,
+        'status':                               status,
     }
     return results
 
@@ -635,6 +699,134 @@ def move_representatives_to_another_politician(
         'status':                           status,
         'success':                          success,
         'representatives_entries_moved':  representatives_entries_moved,
+    }
+    return results
+
+
+def deduplicate_politicians_first_attempt(state_code=''):
+    merge_errors = 0
+    multiple_possible_politicians_found = 0
+    no_merge_options_found = 0
+    number_of_politicians_reviewed = 0
+    decisions_required = 0
+    politicians_merged = 0
+    politicians_not_merged = 0
+    status = ""
+    success = True
+    try:
+        representative_query = Representative.objects.all()
+        representative_query = representative_query.filter(politician_deduplication_attempted=False)
+        representative_query = representative_query.exclude(
+            Q(politician_we_vote_id__isnull=True) | Q(politician_we_vote_id=""))
+        if positive_value_exists(state_code):
+            representative_query = representative_query.filter(state_code__iexact=state_code)
+        representative_list = list(representative_query[:50])
+    except Exception as e:
+        status += "REPRESENTATIVE_QUERY_FAILED: " + str(e) + " "
+        success = False
+        results = {
+            'decisions_required':                   decisions_required,
+            'merge_errors':                         merge_errors,
+            'multiple_possible_politicians_found':  multiple_possible_politicians_found,
+            'no_merge_options_found':               no_merge_options_found,
+            'number_of_politicians_reviewed':       number_of_politicians_reviewed,
+            'politicians_merged':                   politicians_merged,
+            'politicians_not_merged':               politicians_not_merged,
+            'success':                              success,
+            'status':                               status,
+        }
+        return results
+
+    # Get all the politician_we_vote_ids, so we can get all politicians in a single query
+    politician_we_vote_id_list = []
+    for we_vote_representative in representative_list:
+        politician_we_vote_id_list.append(we_vote_representative.politician_we_vote_id)
+
+    politician_dict = {}
+    if len(politician_we_vote_id_list) > 0:
+        from politician.models import Politician
+        try:
+            queryset = Politician.objects.using('readonly').all()
+            queryset = queryset.filter(we_vote_id__in=politician_we_vote_id_list)
+            politician_list = list(queryset)
+            for politician in politician_list:
+                politician_dict[politician.we_vote_id] = politician
+        except Exception as e:
+            status += "COULD_NOT_RETRIEVE_POLITICIANS: " + str(e) + " "
+            success = False
+            results = {
+                'decisions_required':                   decisions_required,
+                'merge_errors':                         merge_errors,
+                'multiple_possible_politicians_found':  multiple_possible_politicians_found,
+                'no_merge_options_found':               no_merge_options_found,
+                'number_of_politicians_reviewed':       number_of_politicians_reviewed,
+                'politicians_merged':                   politicians_merged,
+                'politicians_not_merged':               politicians_not_merged,
+                'success':                              success,
+                'status':                               status,
+            }
+            return results
+
+    from politician.controllers import find_duplicate_politician, merge_if_duplicate_politicians
+    politician_manager = PoliticianManager()
+    for we_vote_representative in representative_list:
+        if not positive_value_exists(we_vote_representative.politician_we_vote_id):
+            continue
+        if we_vote_representative.politician_we_vote_id not in politician_dict:
+            continue
+        we_vote_politician = politician_dict[we_vote_representative.politician_we_vote_id]
+        number_of_politicians_reviewed += 1
+        # Add current politician entry to ignore list
+        ignore_politician_we_vote_id_list = [we_vote_politician.we_vote_id]
+        # Now check to for other politicians we have labeled as "not a duplicate"
+        not_a_duplicate_list = politician_manager.fetch_politicians_are_not_duplicates_list_we_vote_ids(
+            we_vote_politician.we_vote_id)
+        ignore_politician_we_vote_id_list += not_a_duplicate_list
+
+        results = find_duplicate_politician(we_vote_politician, ignore_politician_we_vote_id_list)
+        if results['politician_merge_possibility_found']:
+            politician_option1_for_template = we_vote_politician
+            politician_option2_for_template = results['politician_merge_possibility']
+
+            # Can we automatically merge these politicians?
+            merge_results = merge_if_duplicate_politicians(
+                politician_option1_for_template,
+                politician_option2_for_template,
+                results['politician_merge_conflict_values'])
+
+            if not merge_results['success']:
+                merge_errors += 1
+                politicians_not_merged += 1
+                status += merge_results['status']
+            elif merge_results['decisions_required']:
+                decisions_required += 1
+                politicians_not_merged += 1
+                status += "DECISIONS_REQUIRED "
+            elif merge_results['politicians_merged']:
+                politicians_merged += 1
+                status += "MERGED_WITH_OTHER_POLITICIAN "
+            else:
+                multiple_possible_politicians_found += 1
+                status += "COULD_NOT_MERGE "
+        else:
+            no_merge_options_found += 1
+            politicians_not_merged += 1
+        try:
+            we_vote_representative.politician_deduplication_attempted = True
+            we_vote_representative.save()
+        except Exception as e:
+            status += "FAILED_UPDATING_politician_deduplication_attempted: " + str(e) + " "
+
+    results = {
+        'decisions_required':                   decisions_required,
+        'merge_errors':                         merge_errors,
+        'multiple_possible_politicians_found':  multiple_possible_politicians_found,
+        'no_merge_options_found':               no_merge_options_found,
+        'number_of_politicians_reviewed':       number_of_politicians_reviewed,
+        'politicians_merged':                   politicians_merged,
+        'politicians_not_merged':               politicians_not_merged,
+        'success':                              success,
+        'status':                               status,
     }
     return results
 

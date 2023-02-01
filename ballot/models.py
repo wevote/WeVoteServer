@@ -41,11 +41,14 @@ DISTANCE_LIMIT_IN_MILES = 25
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+
 class Sin(Func):
     function = 'SIN'
 
+
 class Cos(Func):
     function = 'COS'
+
 
 class ACos(Func):
     function = 'ACOS'

@@ -11,15 +11,17 @@
   Batch Processes{% if batch_process_list %} ({{ batch_process_list|length }}){% endif %}
   {% if not batch_process_system_on %} - BATCH SYSTEM OFF{% endif %}
 </h1>
-{% if not batch_process_system_activity_notices_on or not batch_process_system_api_refresh_on or not batch_process_system_ballot_items_on or not batch_process_system_calculate_analytics_on or not batch_process_system_generate_voter_guides_on or not batch_process_system_search_twitter_on or not batch_process_system_update_twitter_on %}
+{% if not batch_process_system_activity_notices_on or not batch_process_system_api_refresh_on or not batch_process_system_ballot_items_on or not batch_process_system_representatives_on or not batch_process_system_calculate_analytics_on or not batch_process_system_generate_voter_guides_on or not batch_process_system_search_twitter_on or not batch_process_system_update_twitter_on %}
 <h2>
-    {% if not batch_process_system_activity_notices_on %} <span style="color: darkred;">[Activity Processing OFF]</span>{% endif %}
-    {% if not batch_process_system_api_refresh_on %} <span style="color: darkred;">[API Refresh OFF]</span>{% endif %}
-    {% if not batch_process_system_ballot_items_on %} <span style="color: darkred;">[Ballot Item Processing OFF]</span>{% endif %}
-    {% if not batch_process_system_calculate_analytics_on %} <span style="color: darkred;">[Analytics Processing OFF]</span>{% endif %}
-    {% if not batch_process_system_generate_voter_guides_on %} <span style="color: darkred;">[Generate Voter Guides OFF]</span>{% endif %}
-    {% if not batch_process_system_search_twitter_on %} <span style="color: darkred;">[Twitter Searching OFF]</span>{% endif %}
-    {% if not batch_process_system_update_twitter_on %} <span style="color: darkred;">[Twitter Updates OFF]</span>{% endif %}
+PROCESSING TURNED OFF:
+    {% if not batch_process_system_activity_notices_on %} <span style="color: darkred;">[Activity]</span>{% endif %}
+    {% if not batch_process_system_api_refresh_on %} <span style="color: darkred;">[API Refresh]</span>{% endif %}
+    {% if not batch_process_system_ballot_items_on %} <span style="color: darkred;">[Ballot Item]</span>{% endif %}
+    {% if not batch_process_system_representatives_on %} <span style="color: darkred;">[Representatives]</span>{% endif %}
+    {% if not batch_process_system_calculate_analytics_on %} <span style="color: darkred;">[Analytics]</span>{% endif %}
+    {% if not batch_process_system_generate_voter_guides_on %} <span style="color: darkred;">[Generate Voter Guides]</span>{% endif %}
+    {% if not batch_process_system_search_twitter_on %} <span style="color: darkred;">[Twitter Searching]</span>{% endif %}
+    {% if not batch_process_system_update_twitter_on %} <span style="color: darkred;">[Twitter Updates]</span>{% endif %}
 </h2>
 {% endif %}
 
@@ -33,27 +35,31 @@
         <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=ACTIVITY_NOTICE_PROCESS&{{ toggle_system_url_variables }}" >
         {% if batch_process_system_activity_notices_on %}Turn OFF Activity Processing{% else %}<strong>Turn ON Activity Processing</strong>{% endif %}
         </a>
-        &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;
         <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=API_REFRESH_REQUEST&{{ toggle_system_url_variables }}" >
         {% if batch_process_system_api_refresh_on %}Turn OFF API Refresh{% else %}<strong>Turn ON API Refresh</strong>{% endif %}
         </a>
-        &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;
         <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=BALLOT_ITEMS&{{ toggle_system_url_variables }}" >
-        {% if batch_process_system_ballot_items_on %}Turn OFF Ballot Item Processing{% else %}<strong>Turn ON Ballot Item Processing</strong>{% endif %}
+        {% if batch_process_system_ballot_items_on %}Turn OFF Ballot Items{% else %}<strong>Turn ON Ballot Items</strong>{% endif %}
         </a>
-        &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;
+        <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=REPRESENTATIVES&{{ toggle_system_url_variables }}" >
+        {% if batch_process_system_representatives_on %}Turn OFF Representatives{% else %}<strong>Turn ON Representatives</strong>{% endif %}
+        </a>
+        &nbsp;&nbsp;
         <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=CALCULATE_ANALYTICS&{{ toggle_system_url_variables }}" >
-        {% if batch_process_system_calculate_analytics_on %}Turn OFF Analytics Processing{% else %}<strong>Turn ON Analytics Processing</strong>{% endif %}
+        {% if batch_process_system_calculate_analytics_on %}Turn OFF Analytics{% else %}<strong>Turn ON Analytics</strong>{% endif %}
         </a>
-        &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;
         <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=GENERATE_VOTER_GUIDES&{{ toggle_system_url_variables }}" >
         {% if batch_process_system_generate_voter_guides_on %}Turn OFF Generate Voter Guides{% else %}<strong>Turn ON Generate Voter Guides</strong>{% endif %}
         </a>
-        &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;
         <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=SEARCH_TWITTER&{{ toggle_system_url_variables }}" >
         {% if batch_process_system_search_twitter_on %}Turn OFF Twitter Search{% else %}<strong>Turn ON Twitter Search</strong>{% endif %}
         </a>
-        &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;
         <a href="{% url 'import_export_batches:batch_process_system_toggle' %}?kind_of_process=UPDATE_TWITTER_DATA&{{ toggle_system_url_variables }}" >
         {% if batch_process_system_update_twitter_on %}Turn OFF Twitter Updates{% else %}<strong>Turn ON Twitter Updates</strong>{% endif %}
         </a>
@@ -73,6 +79,10 @@
         &nbsp;&nbsp;&nbsp;
         <a href="{% url 'import_export_batches:process_next_general_maintenance' %}" target="_blank" >
            Start General Maintenance (Analytics, API Refresh, Search Twitter) <span class="glyphicon glyphicon-new-window"></span>
+        </a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="{% url 'import_export_batches:process_next_representatives' %}" target="_blank" >
+           Start Representatives Processing <span class="glyphicon glyphicon-new-window"></span>
         </a>
         &nbsp;&nbsp;&nbsp;
     </li>
@@ -148,6 +158,9 @@
         <option value="BALLOT_ITEMS"
         {% if kind_of_processes_to_show == "BALLOT_ITEMS" %} selected="selected"{% endif %}>
             Ballot Items</option>
+        <option value="REPRESENTATIVES"
+        {% if kind_of_processes_to_show == "REPRESENTATIVES" %} selected="selected"{% endif %}>
+            Representatives</option>
         <option value="SEARCH_TWITTER"
         {% if kind_of_processes_to_show == "SEARCH_TWITTER" %} selected="selected"{% endif %}>
             Search Twitter</option>
@@ -268,6 +281,18 @@
                 (Oldest: {{ ballot_returned_voter_oldest_date }})
         </li>
     {% endif %}
+    </ol>
+{% endif %}
+{% if state_code %}
+    <ol>
+        <li>
+            <a href="{% url 'import_export_batches:retrieve_representatives_for_polling_locations' %}?state_code={{ state_code }}&use_batch_process=1">
+                <strong>Retrieve</strong> Representatives from Brand New Map Points, up to
+                50
+{#                {{ map_points_retrieved_each_batch_chunk }}#}
+                at a time{% if state_code %} (for {{ state_code|upper }}){% endif %}
+            </a>
+        </li>
     </ol>
 {% endif %}
 
@@ -440,6 +465,77 @@
                         <td>
                           {% if batch_process_ballot_item_chunk.create_date_completed %}
                             {{ batch_process_ballot_item_chunk.create_row_count|default_if_none:"" }}
+                          {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </td>
+        </tr>
+        {% elif batch_process.batch_process_representatives_chunk_list %}
+        <tr style="color: darkgray;">
+            <td>&nbsp;</td>
+            <td colspan="6">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Chunk ID</th>
+                            <th>Set ID</th>
+                            <th>Retrieve Start</th>
+                            <th>Completed</th>
+                            <th>Count</th>
+                            <th>Politician Matching</th>
+                            <th>Completed</th>
+                            <th>Count</th>
+                            <th>Politician Deduplication</th>
+                            <th>Completed</th>
+                            <th>Count</th>
+                        </tr>
+                    </thead>
+                    {% for batch_process_representatives_chunk in batch_process.batch_process_representatives_chunk_list %}
+                    <tr>
+                        <td>{{ forloop.revcounter }}</td>
+                        <td>
+                          {{ batch_process_representatives_chunk.id }}
+                          (<a href="{% url 'import_export_batches:batch_process_log_entry_list' %}?batch_process_id={{ batch_process.id }}&batch_process_chunk_id={{ batch_process_representatives_chunk.id }}&google_civic_election_id={{ batch_process.google_civic_election_id }}&state_code={{ batch_process.state_code }}"
+                              target="_blank">log</a>)
+                        </td>
+                        <td>
+                          {{ batch_process_representatives_chunk.batch_set_id }}
+                          (<a href="{% url 'import_export_batches:batch_set_list' %}?batch_process_id={{ batch_process.id }}&batch_set_id={{ batch_process_representatives_chunk.batch_set_id }}&batch_process_chunk_id={{ batch_process_representatives_chunk.id }}&google_civic_election_id={{ batch_process.google_civic_election_id }}&state_code={{ batch_process.state_code }}"
+                              target="_blank">go</a>)
+                        </td>
+                        <td>{{ batch_process_representatives_chunk.retrieve_date_started|localtime|default_if_none:"" }}</td>
+                        <td>
+                          {{ batch_process_representatives_chunk.retrieve_date_completed|localtime|default_if_none:"" }}
+                          {% if batch_process_representatives_chunk.retrieve_timed_out %} *{% endif %}
+                        </td>
+                        <td>
+                          {% if batch_process_representatives_chunk.retrieve_date_completed %}
+                            {{ batch_process_representatives_chunk.retrieve_row_count|default_if_none:"" }}
+                          {% endif %}
+                        </td>
+
+                        <td>{{ batch_process_representatives_chunk.politician_matching_date_started|localtime|default_if_none:"" }}</td>
+                        <td>
+                          {{ batch_process_representatives_chunk.politician_matching_date_completed|localtime|default_if_none:"" }}
+                          {% if batch_process_representatives_chunk.politician_matching_timed_out %} *{% endif %}
+                        </td>
+                        <td>
+                          {% if batch_process_representatives_chunk.politician_matching_date_completed %}
+                            {{ batch_process_representatives_chunk.politician_matching_row_count|default_if_none:"" }}
+                          {% endif %}
+                        </td>
+
+                        <td>{{ batch_process_representatives_chunk.politician_deduplication_date_started|localtime|default_if_none:"" }}</td>
+                        <td>
+                          {{ batch_process_representatives_chunk.politician_deduplication_date_completed|localtime|default_if_none:"" }}
+                          {% if batch_process_representatives_chunk.politician_deduplication_timed_out %} *{% endif %}
+                        </td>
+                        <td>
+                          {% if batch_process_representatives_chunk.politician_deduplication_date_completed %}
+                            {{ batch_process_representatives_chunk.politician_deduplication_row_count|default_if_none:"" }}
                           {% endif %}
                         </td>
                     </tr>

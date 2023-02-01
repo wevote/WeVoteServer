@@ -4,7 +4,7 @@
 
 from django.conf.urls import re_path
 
-from . import views_admin
+from . import views_admin, views_representatives
 
 
 urlpatterns = [
@@ -47,13 +47,15 @@ urlpatterns = [
     re_path(r'^import_ballot_items_for_location/$',
             views_admin.import_ballot_items_for_location_view, name='import_ballot_items_for_location'),
     re_path(r'^import_representatives_for_location/$',
-            views_admin.import_representatives_for_location_view, name='import_representatives_for_location'),
+            views_representatives.import_representatives_for_location_view, name='import_representatives_for_location'),
     re_path(r'^process_next_activity_notices/$',
             views_admin.process_next_activity_notices_view, name='process_next_activity_notices'),
     re_path(r'^process_next_ballot_items/$',
             views_admin.process_next_ballot_items_view, name='process_next_ballot_items'),
     re_path(r'^process_next_general_maintenance/$',
             views_admin.process_next_general_maintenance_view, name='process_next_general_maintenance'),
+    re_path(r'^process_next_representatives/$',
+            views_representatives.process_next_representatives_view, name='process_next_representatives'),
     re_path(r'^refresh_ballots_for_voters_api_v4/$',
             views_admin.refresh_ballots_for_voters_api_v4_view,
             name='refresh_ballots_for_voters_api_v4'),
@@ -63,4 +65,7 @@ urlpatterns = [
     re_path(r'^retrieve_ballots_for_polling_locations_api_v4/$',
             views_admin.retrieve_ballots_for_polling_locations_api_v4_view,
             name='retrieve_ballots_for_polling_locations_api_v4'),
+    re_path(r'^retrieve_representatives_for_polling_locations/$',
+            views_representatives.retrieve_representatives_for_polling_locations_view,
+            name='retrieve_representatives_for_polling_locations'),
 ]

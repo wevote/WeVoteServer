@@ -223,8 +223,10 @@ class Representative(models.Model):
     photo_url_from_google_civic = models.TextField(null=True, blank=True)
     # The full name of the party the representative is a member of.
     political_party = models.CharField(verbose_name="political_party", max_length=255, null=True, blank=True)
-    # politician (internal) link to local We Vote Politician entry. During setup we need to allow this to be null.
+    # politician (internal) link to local We Vote Politician entry. During setup, we need to allow this to be null.
     politician_id = models.BigIntegerField(verbose_name="politician unique identifier", null=True, blank=True)
+    politician_deduplication_attempted = models.BooleanField(default=False)
+    politician_match_attempted = models.BooleanField(default=False)
     # The persistent We Vote unique ID of the Politician, so we can export and import into other databases.
     politician_we_vote_id = models.CharField(max_length=255, null=True, blank=True)
     representative_contact_form_url = models.TextField(max_length=255, blank=True, null=True)

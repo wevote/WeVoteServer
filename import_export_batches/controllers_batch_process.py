@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .controllers import create_batch_row_actions, import_data_from_batch_row_actions
+from .controllers_representatives import process_one_representatives_batch_process
 from .models import ACTIVITY_NOTICE_PROCESS, API_REFRESH_REQUEST, \
     AUGMENT_ANALYTICS_ACTION_WITH_ELECTION_ID, AUGMENT_ANALYTICS_ACTION_WITH_FIRST_VISIT, \
     BatchDescription, BatchManager, BatchProcessManager, \
@@ -13,7 +14,8 @@ from .models import ACTIVITY_NOTICE_PROCESS, API_REFRESH_REQUEST, \
     CALCULATE_SITEWIDE_VOTER_METRICS, \
     GENERATE_VOTER_GUIDES, IMPORT_CREATE, IMPORT_DELETE, \
     RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, \
-    REFRESH_BALLOT_ITEMS_FROM_VOTERS, SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE, UPDATE_TWITTER_DATA_FROM_TWITTER
+    RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS, REFRESH_BALLOT_ITEMS_FROM_VOTERS, \
+    SEARCH_TWITTER_FOR_CANDIDATE_TWITTER_HANDLE, UPDATE_TWITTER_DATA_FROM_TWITTER
 from activity.controllers import process_activity_notice_seeds_triggered_by_batch_process
 from analytics.controllers import calculate_sitewide_daily_metrics, \
     process_one_analytics_batch_process_augment_with_election_id, \
@@ -23,7 +25,7 @@ from analytics.models import AnalyticsManager
 from api_internal_cache.models import ApiInternalCacheManager
 from ballot.models import BallotReturnedListManager
 from candidate.models import CandidateListManager
-from datetime import datetime, timedelta
+from datetime import timedelta
 from django.db.models import Q
 from django.utils.timezone import localtime, now
 from election.models import ElectionManager
@@ -41,7 +43,8 @@ import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 from wevote_settings.models import fetch_batch_process_system_on, fetch_batch_process_system_activity_notices_on, \
     fetch_batch_process_system_api_refresh_on, fetch_batch_process_system_ballot_items_on, \
-    fetch_batch_process_system_calculate_analytics_on, fetch_batch_process_system_search_twitter_on, \
+    fetch_batch_process_system_representatives_on, fetch_batch_process_system_calculate_analytics_on, \
+    fetch_batch_process_system_search_twitter_on, \
     fetch_batch_process_system_generate_voter_guides_on, fetch_batch_process_system_update_twitter_on
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -63,6 +66,7 @@ POLITICIAN = 'POLITICIAN'
 NUMBER_OF_SIMULTANEOUS_BATCH_PROCESSES = 4  # Four processes at a time
 NUMBER_OF_SIMULTANEOUS_BALLOT_ITEM_BATCH_PROCESSES = 4  # Four processes at a time
 NUMBER_OF_SIMULTANEOUS_GENERAL_MAINTENANCE_BATCH_PROCESSES = 1
+NUMBER_OF_SIMULTANEOUS_REPRESENTATIVE_BATCH_PROCESSES = 1  # One processes at a time because of rate limiting
 
 
 def process_next_activity_notices():
@@ -860,6 +864,229 @@ def process_next_general_maintenance():
     return results
 
 
+def process_next_representatives():
+    success = True
+    status = ""
+
+    if not fetch_batch_process_system_on():
+        status += "BATCH_PROCESS_SYSTEM_TURNED_OFF-REPRESENTATIVES "
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    if not fetch_batch_process_system_representatives_on():
+        status += "BATCH_PROCESS_SYSTEM_REPRESENTATIVES_TURNED_OFF "
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    batch_process_manager = BatchProcessManager()
+    # If we have more than NUMBER_OF_SIMULTANEOUS_REPRESENTATIVE_BATCH_PROCESSES batch_processes that are still active,
+    # don't start a new import ballot item batch_process
+    representatives_kind_of_processes = [RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS]
+
+    # Retrieve list of all BatchProcess scheduled or running
+    #  NOTE: We do not run directly from this list below
+    batch_process_list_already_scheduled = []
+    results = batch_process_manager.retrieve_batch_process_list(
+        kind_of_process_list=representatives_kind_of_processes,
+        process_needs_to_be_run=True,
+        for_upcoming_elections=False)
+    if not positive_value_exists(results['success']):
+        success = False
+        batch_process_manager.create_batch_process_log_entry(
+            critical_failure=True,
+            status=results['status'],
+        )
+        status += results['status']
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+    elif positive_value_exists(results['batch_process_list_found']):
+        batch_process_list_already_scheduled = results['batch_process_list']
+    status += "BATCH_PROCESSES_ALREADY_SCHEDULED: " + str(len(batch_process_list_already_scheduled)) + ", "
+
+    batch_process_list = []
+    if len(batch_process_list_already_scheduled) > 0:
+        batch_process_list = results['batch_process_list']
+    else:
+        # Retrieve list of all ballot item BatchProcesses which have been started but not completed, so we can decide
+        #  our next steps
+        results = batch_process_manager.retrieve_batch_process_list(
+            kind_of_process_list=representatives_kind_of_processes,
+            process_active=True,
+            for_upcoming_elections=False)
+        if not positive_value_exists(results['success']):
+            success = False
+            batch_process_manager.create_batch_process_log_entry(
+                critical_failure=True,
+                status=results['status'],
+            )
+            status += results['status']
+            results = {
+                'success': success,
+                'status': status,
+            }
+            return results
+
+        # Note this batch_process_list does not included checked out items that haven't timed out
+        #  These are all batch processes that need to be worked on
+        if positive_value_exists(results['batch_process_list_found']):
+            batch_process_list = results['batch_process_list']
+        status += "BATCH_PROCESSES_TO_BE_RESTARTED: " + str(len(batch_process_list)) + ", "
+
+    # If there are any started processes that are not currently checked out, or checked out but timed out
+    process_restarted = False
+    if batch_process_list and len(batch_process_list) > 0:
+        for batch_process in batch_process_list:
+            if batch_process.kind_of_process in \
+                    [RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS]:
+                process_restarted = True
+                # When a batch_process is running, we set date_checked_out to show it is being worked on
+                results = process_one_representatives_batch_process(batch_process)
+                status += results['status']
+                # Now that the process is complete, we reset date_checked_out to "NULL"
+                try:
+                    # Before saving batch_process, make sure we have the latest version, since there were
+                    #  updates in process_one_representatives_batch_process
+                    batch_process_results = \
+                        batch_process_manager.retrieve_batch_process(batch_process_id=batch_process.id)
+                    if positive_value_exists(batch_process_results['batch_process_found']):
+                        batch_process = batch_process_results['batch_process']
+                    batch_process.date_checked_out = None
+                    batch_process.save()
+                except Exception as e:
+                    status += "ERROR-COULD_NOT_SET_REPRESENTATIVES_CHECKED_OUT_TIME_TO_NULL: " + str(e) + " "
+                    handle_exception(e, logger=logger, exception_message=status)
+                    batch_process_manager.create_batch_process_log_entry(
+                        batch_process_id=batch_process.id,
+                        google_civic_election_id=batch_process.google_civic_election_id,
+                        kind_of_process=batch_process.kind_of_process,
+                        state_code=batch_process.state_code,
+                        status=status,
+                    )
+            else:
+                status += "KIND_OF_REPRESENTATIVES_PROCESS_NOT_RECOGNIZED1 "
+
+    # If a process was started immediately above, exit
+    if process_restarted:
+        status += "BATCH_PROCESS_REPRESENTATIVES_STARTED_PREVIOUSLY_WAS_RESTARTED "
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    # ############################
+    # Processing Representatives
+    results = batch_process_manager.count_next_steps(
+        kind_of_process_list=representatives_kind_of_processes,
+        is_active=True)
+    if not results['success']:
+        # Exit out -- we have database problem
+        status += "PROBLEM_COUNTING_BATCH_PROCESSES_REPRESENTATIVES-RUNNING: "
+        status += results['status']
+        batch_process_manager.create_batch_process_log_entry(
+            critical_failure=True,
+            status=status,
+        )
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+    batch_processes_running_count = results['batch_process_count']
+    status += "REPRESENTATIVE_BATCH_PROCESSES_RUNNING_COUNT: " + str(batch_processes_running_count) + ", "
+
+    # If less than NUMBER_OF_SIMULTANEOUS_REPRESENTATIVE_BATCH_PROCESSES total active processes,
+    #  then add a new batch_process (importing ballot items) to the current queue
+    if batch_processes_running_count < NUMBER_OF_SIMULTANEOUS_REPRESENTATIVE_BATCH_PROCESSES:
+        results = batch_process_manager.retrieve_batch_process_list(
+            for_upcoming_elections=False,
+            kind_of_process_list=representatives_kind_of_processes,
+            process_active=False,
+            process_queued=True)
+        if not positive_value_exists(results['success']):
+            success = False
+            batch_process_manager.create_batch_process_log_entry(
+                critical_failure=True,
+                status=results['status'],
+            )
+            status += results['status']
+            results = {
+                'success': success,
+                'status': status,
+            }
+            return results
+
+        if positive_value_exists(results['batch_process_list_found']):
+            new_batch_process_list = results['batch_process_list']
+            new_batch_process_list_count = len(new_batch_process_list)
+            status += "NEW_BATCH_PROCESS_LIST_COUNT: " + str(new_batch_process_list_count) + ", ADDING ONE REP "
+            for batch_process in new_batch_process_list:
+                # Bring the batch_process_list up by 1 item
+                batch_process_started = False
+                kind_of_process = ""
+                try:
+                    kind_of_process = batch_process.kind_of_process
+                    batch_process.date_started = now()
+                    batch_process.save()
+                    batch_process_started = True
+                except Exception as e:
+                    status += "ERROR-BATCH_PROCESS_REPRESENTATIVES-CANNOT_SAVE_DATE_STARTED: " + str(e) + " "
+                    handle_exception(e, logger=logger, exception_message=status)
+                    batch_process_manager.create_batch_process_log_entry(
+                        batch_process_id=batch_process.id,
+                        kind_of_process=kind_of_process,
+                        status=status,
+                    )
+
+                if batch_process_started:
+                    if batch_process.kind_of_process in [RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS]:
+                        # Now process the batch
+                        results = process_one_representatives_batch_process(batch_process)
+                        status += results['status']
+
+                        # Before a batch_process runs, we set `date_checked_out`, like you check out a library book
+                        #  When the process is complete, we reset `date_checked_out` to "NULL"
+                        try:
+                            # Before saving batch_process, make sure we have the latest version.
+                            # (For example, it might have been paused since it was first retrieved.)
+                            batch_process_results = \
+                                batch_process_manager.retrieve_batch_process(batch_process_id=batch_process.id)
+                            if positive_value_exists(batch_process_results['batch_process_found']):
+                                batch_process = batch_process_results['batch_process']
+
+                            batch_process.date_checked_out = None
+                            batch_process.save()
+                        except Exception as e:
+                            status += "ERROR-COULD_NOT_SET_REPRESENTATIVES_CHECKED_OUT_TIME_TO_NULL: " + str(e) + " "
+                            handle_exception(e, logger=logger, exception_message=status)
+                            batch_process_manager.create_batch_process_log_entry(
+                                batch_process_id=batch_process.id,
+                                google_civic_election_id=batch_process.google_civic_election_id,
+                                kind_of_process=batch_process.kind_of_process,
+                                state_code=batch_process.state_code,
+                                status=status,
+                            )
+                    else:
+                        status += "KIND_OF_REPRESENTATIVES_PROCESS_NOT_RECOGNIZED2 "
+
+                break
+
+    results = {
+        'success': success,
+        'status': status,
+    }
+    return results
+
+
 def process_one_analytics_batch_process(batch_process):
     from import_export_batches.models import BatchProcessManager
     batch_process_manager = BatchProcessManager()
@@ -1451,11 +1678,13 @@ def process_one_ballot_item_batch_process(batch_process):
                 #         return results
             else:
                 status += "RETRIEVE_DATE_STARTED-NO_BATCH_SET_ID_FOUND-BATCH_IS_COMPLETE "
-                results = mark_batch_process_as_complete(batch_process, batch_process_ballot_item_chunk,
-                                                         google_civic_election_id=google_civic_election_id,
-                                                         kind_of_process=kind_of_process,
-                                                         state_code=state_code,
-                                                         status=status)
+                results = mark_batch_process_as_complete(
+                    batch_process=batch_process,
+                    batch_process_ballot_item_chunk=batch_process_ballot_item_chunk,
+                    google_civic_election_id=google_civic_election_id,
+                    kind_of_process=kind_of_process,
+                    state_code=state_code,
+                    status=status)
                 status += results['status']
                 results = {
                     'success': success,
@@ -1533,7 +1762,8 @@ def process_one_ballot_item_batch_process(batch_process):
                 #         # Update batch_process.date_completed to now
                 #         status += "ANALYZE_DATE_STARTED-NO_RETRIEVE_VALUES_FOUND-BATCH_IS_COMPLETE2 "
                 #         results = mark_batch_process_as_complete(
-                #             batch_process, batch_process_ballot_item_chunk,
+                #             batch_process=batch_process,
+                #             batch_process_ballot_item_chunk=batch_process_ballot_item_chunk,
                 #             batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
                 #             google_civic_election_id=google_civic_election_id,
                 #             kind_of_process=kind_of_process,
@@ -1680,12 +1910,14 @@ def process_one_ballot_item_batch_process(batch_process):
             #         # If no batch rows were found, we know the entire batch_process is finished.
             #         # Update batch_process.date_completed to now
             #         status += "ANALYZE_DATE_STARTED-REFRESH_BALLOT_ITEMS_FROM_VOTERS-ANALYZE_ROW_COUNT_ZERO "
-            #         results = mark_batch_process_as_complete(batch_process, batch_process_ballot_item_chunk,
-            #                                                  batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
-            #                                                  google_civic_election_id=google_civic_election_id,
-            #                                                  kind_of_process=kind_of_process,
-            #                                                  state_code=state_code,
-            #                                                  status=status)
+            #         results = mark_batch_process_as_complete(
+            #             batch_process=batch_process,
+            #             batch_process_ballot_item_chunk=batch_process_ballot_item_chunk,
+            #             batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
+            #             google_civic_election_id=google_civic_election_id,
+            #             kind_of_process=kind_of_process,
+            #             state_code=state_code,
+            #             status=status)
             #         status += results['status']
             #         results = {
             #             'success': success,
@@ -1797,7 +2029,8 @@ def process_one_ballot_item_batch_process(batch_process):
                         # Update batch_process.date_completed to now
                         status += "ANALYZE_DATE_STARTED-REFRESH_BALLOT_ITEMS_FROM_VOTERS-ANALYZE_ROW_COUNT_ZERO "
                         results = mark_batch_process_as_complete(
-                            batch_process, batch_process_ballot_item_chunk,
+                            batch_process=batch_process,
+                            batch_process_ballot_item_chunk=batch_process_ballot_item_chunk,
                             batch_set_id=batch_process_ballot_item_chunk.batch_set_id,
                             google_civic_election_id=google_civic_election_id,
                             kind_of_process=kind_of_process,
@@ -2132,7 +2365,7 @@ def process_activity_notice_batch_process(batch_process):
             # Update batch_process.date_completed to now
             status += "ACTIVITY_NOTICE-TIMED_OUT "
             results = mark_batch_process_as_complete(
-                batch_process,
+                batch_process=batch_process,
                 kind_of_process=kind_of_process,
                 status=status)
             status += results['status']
@@ -2812,19 +3045,23 @@ def process_batch_set(batch_set_id=0, analyze_all=False, create_all=False, delet
     return results
 
 
-def mark_batch_process_as_complete(batch_process=None,
-                                   batch_process_ballot_item_chunk=None,
-                                   batch_set_id=0,
-                                   google_civic_election_id=None,
-                                   kind_of_process="",
-                                   state_code=None,
-                                   status=""):
+def mark_batch_process_as_complete(
+        batch_process=None,
+        batch_process_ballot_item_chunk=None,
+        batch_process_representatives_chunk=None,
+        batch_set_id=0,
+        google_civic_election_id=None,
+        kind_of_process="",
+        state_code=None,
+        status=""):
     success = True
     batch_process_updated = False
     batch_process_ballot_item_chunk_updated = False
+    batch_process_representatives_chunk_updated = False
     batch_process_manager = BatchProcessManager()
     batch_process_id = 0
     batch_process_ballot_item_chunk_id = 0
+    batch_process_representatives_chunk_id = 0
 
     if batch_process:
         try:
@@ -2851,6 +3088,7 @@ def mark_batch_process_as_complete(batch_process=None,
             batch_process_manager.create_batch_process_log_entry(
                 batch_process_id=batch_process_id,
                 batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk_id,
+                batch_process_representatives_chunk_id=batch_process_representatives_chunk_id,
                 batch_set_id=batch_set_id,
                 google_civic_election_id=google_civic_election_id,
                 kind_of_process=kind_of_process,
@@ -2889,11 +3127,51 @@ def mark_batch_process_as_complete(batch_process=None,
                 state_code=state_code,
                 status=status,
             )
+    elif batch_process_representatives_chunk:
+        try:
+            batch_process_representatives_chunk_id = batch_process_representatives_chunk.id
+            if batch_process_representatives_chunk.retrieve_date_started is None:
+                batch_process_representatives_chunk.retrieve_date_started = now()
+            if batch_process_representatives_chunk.retrieve_date_completed is None:
+                batch_process_representatives_chunk.retrieve_date_completed = now()
+            if batch_process_representatives_chunk.analyze_date_started is None:
+                batch_process_representatives_chunk.analyze_date_started = now()
+            if batch_process_representatives_chunk.analyze_date_completed is None:
+                batch_process_representatives_chunk.analyze_date_completed = now()
+            if batch_process_representatives_chunk.create_date_started is None:
+                batch_process_representatives_chunk.create_date_started = now()
+            if batch_process_representatives_chunk.create_date_completed is None:
+                batch_process_representatives_chunk.create_date_completed = now()
+            batch_process_representatives_chunk.save()
+            batch_process_representatives_chunk_updated = True
+            status += "BATCH_PROCESS_REPRESENTATIVES_CHUNK_MARKED_COMPLETE "
+        except Exception as e:
+            success = False
+            status += "ERROR-CANNOT_MARK_BATCH_PROCESS_REPRESENTATIVES_CHUNK_AS_COMPLETE: " + str(e) + " "
+            handle_exception(e, logger=logger, exception_message=status)
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process_id,
+                batch_process_representatives_chunk_id=batch_process_representatives_chunk_id,
+                batch_set_id=batch_set_id,
+                kind_of_process=kind_of_process,
+                state_code=state_code,
+                status=status,
+            )
 
-    if batch_process_ballot_item_chunk_updated or batch_process_ballot_item_chunk_updated:
+    if batch_process_ballot_item_chunk or batch_process_ballot_item_chunk_updated:
         batch_process_manager.create_batch_process_log_entry(
             batch_process_id=batch_process_id,
             batch_process_ballot_item_chunk_id=batch_process_ballot_item_chunk_id,
+            batch_set_id=batch_set_id,
+            google_civic_election_id=google_civic_election_id,
+            kind_of_process=kind_of_process,
+            state_code=state_code,
+            status=status,
+        )
+    elif batch_process_representatives_chunk or batch_process_representatives_chunk_updated:
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process_id,
+            batch_process_representatives_chunk_id=batch_process_representatives_chunk_id,
             batch_set_id=batch_set_id,
             google_civic_election_id=google_civic_election_id,
             kind_of_process=kind_of_process,
@@ -2908,6 +3186,8 @@ def mark_batch_process_as_complete(batch_process=None,
         'batch_process_updated':                    batch_process_updated,
         'batch_process_ballot_item_chunk':          batch_process_ballot_item_chunk,
         'batch_process_ballot_item_chunk_updated':  batch_process_ballot_item_chunk_updated,
+        'batch_process_representatives_chunk':      batch_process_representatives_chunk,
+        'batch_process_representatives_chunk_updated': batch_process_representatives_chunk_updated,
     }
     return results
 
@@ -3011,5 +3291,53 @@ def schedule_refresh_ballots_for_voters_api_v4(
     results = {
         'success':  success,
         'status':   status,
+    }
+    return results
+
+
+def schedule_retrieve_representatives_for_polling_locations(
+        state_code="",
+        refresh_representatives=False,
+        use_ballotpedia=False,
+        use_ctcl=False,
+        use_vote_usa=False):
+    status = ""
+
+    if positive_value_exists(refresh_representatives):
+        kind_of_process = REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS
+    else:
+        kind_of_process = RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS
+    status += "SCHEDULING: " + str(kind_of_process) + " "
+
+    batch_process_manager = BatchProcessManager()
+    results = batch_process_manager.create_batch_process(
+        kind_of_process=kind_of_process,
+        state_code=state_code,
+        use_ballotpedia=use_ballotpedia,
+        use_ctcl=use_ctcl,
+        use_vote_usa=use_vote_usa)
+    status += results['status']
+    success = results['success']
+    if results['batch_process_saved']:
+        batch_process = results['batch_process']
+        status += "RETRIEVE_REPRESENTATIVES_BATCH_PROCESS_SAVED "
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=batch_process.kind_of_process,
+            state_code=batch_process.state_code,
+            status=status,
+        )
+    else:
+        status += "FAILED_TO_SCHEDULE_RETRIEVE_REPRESENTATIVES-" + str(kind_of_process) + " "
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=0,
+            kind_of_process=kind_of_process,
+            state_code=state_code,
+            status=status,
+        )
+
+    results = {
+        'success':              success,
+        'status':               status,
     }
     return results

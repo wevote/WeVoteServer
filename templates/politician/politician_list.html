@@ -59,7 +59,8 @@
             <th>State</th>
             <th>ID - We Vote ID</th>
             <th>Twitter Handle</th>
-            <th>Website</th>
+            <th>Email(s)</th>
+            <th>Website(s)</th>
             <th>Candidates Linked</th>
             <th>Related Candidates?</th>
         </tr>
@@ -105,6 +106,12 @@
                     target="_blank">{{ politician.politician_twitter_handle4 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
                 {% if politician.politician_twitter_handle5 %}<br /><a href="https://twitter.com/{{ politician.politician_twitter_handle5 }}"
                     target="_blank">{{ politician.politician_twitter_handle5 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+            </td>
+            <td>
+                {% if politician.politician_email_address %}{{ politician.politician_email_address }}&nbsp;{% endif %}
+                {% if politician.politician_email %}{{ politician.politician_email }}&nbsp;{% endif %}
+                {% if politician.politician_email2 %}{{ politician.politician_email2 }}&nbsp;{% endif %}
+                {% if politician.politician_email3 %}{{ politician.politician_email3 }}&nbsp;{% endif %}
             </td>
             <td>
                 {% if politician.politician_url %}<a href="{{ politician.politician_url }}" target="_blank">{{ politician.politician_url }}</a>{% endif %}
