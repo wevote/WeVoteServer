@@ -84,7 +84,7 @@ APIs due to the automatically generated certs that runsslserver creates and uses
 that is tied to a legitimate Certificate Authority.  I only use them for this purpose, so if you need a copy ask me.
 These are used as shown...
 ```
-runsslserver wevotedeveloper.com:8000 --certificate cert/wevotedeveloper.com.crt --key cert/wevotedeveloper.com_key.txt
+runsslserver wevotedeveloper.com:8000 --certificate certs/wevotedeveloper.com.crt --key certs/wevotedeveloper.com_key.txt
 ```
 
 ## Fixing "NET::ERR_CERT_COMMON_NAME_INVALID" errors in the DevTools ERROR Console
