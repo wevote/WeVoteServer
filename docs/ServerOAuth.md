@@ -76,8 +76,16 @@ you need to add that domain to your 127.0.0.1 line in /etc/hosts.  After the cha
 
 You will need to elevate your privileges with sudo to make this edit to this linux system file ... ` % sudo vi /etc/hosts` or with some other editor.
 
-Note July 2022:  The auto generated certificate that is made by runsslserver generates warnings in browsers (not really a problem),
+**Note July 2022:**  The auto generated certificate that is made by runsslserver generates warnings in browsers (not really a problem),
 but may stop the JavaScript builtin fetch() function from completing.  The browser extension has to use fetch.
+
+**Note January 2023:**  All of the sudden, Cordova in Xcode, for iOS, when pointed at a local Python API server started refusing to load
+APIs due to the automatically generated certs that runsslserver creates and uses.  So I (Steve) made real certs for wevotedeveloper.com,
+that is tied to a legitimate Certificate Authority.  I only use them for this purpose, so if you need a copy ask me.
+These are used as shown...
+```
+runsslserver wevotedeveloper.com:8000 --certificate cert/wevotedeveloper.com.crt --key cert/wevotedeveloper.com_key.txt
+```
 
 ## Fixing "NET::ERR_CERT_COMMON_NAME_INVALID" errors in the DevTools ERROR Console
 

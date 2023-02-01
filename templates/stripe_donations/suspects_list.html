@@ -141,6 +141,11 @@ tr, th, td {
         </div>
     </div>
 </div>
+<div style="padding-top: 30px">
+    For testing ip history blocking:
+    <input type="text" name="ip_address" id="ip_address_id" style="width: 140px" />
+    <input type="submit" id="ip_address_button" value="Clear History Records For This IP" />
+</div>
 
 
 <script>
@@ -194,6 +199,15 @@ tr, th, td {
       href += '?set_stripe_enabled=' + newState;
       window.location.href = href;
     }
+  })
+  $('#ip_address_button').click(function(evt) {
+      const id = $('#ip_address_id')
+      const address = id.val();
+      id.val('');   // clear field
+      $.get(window.location.origin + "/apis/v1/ipHistoryClearForOneIp/",
+          {ip_address: address},
+          (results) => console.log('ipHistoryClearForOneIp: ' + JSON.stringify(results)),
+      );
   })
   // Inline for each page load, remove the old get param
   if (window.location.href.includes('set_stripe_enabled=')) {

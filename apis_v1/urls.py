@@ -31,6 +31,7 @@ from organization.views_admin import organizations_sync_out_view
 from politician.views_admin import politicians_sync_out_view
 from polling_location.views_admin import polling_locations_sync_out_view
 from position.views_admin import positions_sync_out_view
+from stripe_ip_history.views_admin import stripe_ip_history_clear_for_one_ip
 from voter_guide.views_admin import voter_guides_sync_out_view
 
 urlpatterns = [
@@ -142,6 +143,8 @@ urlpatterns = [
       re_path(r'^friendListsAll/', views_friend.friend_lists_all_view, name='friendListsAllView'),
       re_path(r'^googleRecaptchaVerify/$', views_donation.google_recaptcha_verify_view,
               name='googleRecaptchaVerifyView'),
+      re_path(r'^ipHistoryClearForOneIp/', stripe_ip_history_clear_for_one_ip,
+              name=''),
       re_path(r'^issueDescriptionsRetrieve/', issue_descriptions_retrieve_view,
               name='issueDescriptionsRetrieveView'),
       re_path(r'^issueFollow/', views_voter.voter_issue_follow_view, name='issueFollowView'),

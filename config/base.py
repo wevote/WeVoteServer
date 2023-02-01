@@ -219,6 +219,7 @@ INSTALLED_APPS = (
     'share',
     'sms',
     'stripe_donations',
+    'stripe_ip_history',
     'support_oppose_deciding',
     'tag',
     'twitter',  # See also import_export_twitter

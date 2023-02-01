@@ -2646,7 +2646,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
         to_voter=new_owner_voter)
     status += " " + move_activity_comment_results['status']
 
-    t10 = time()
+    # t10 = time()
     # Transfer CampaignX related info from voter to new_owner_voter
     move_campaignx_results = move_campaignx_to_another_voter(
         from_voter_we_vote_id, to_voter_we_vote_id,

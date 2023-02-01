@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 import json
+import urllib
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
@@ -18,6 +19,7 @@ from stripe_donations.controllers import donation_active_paid_plan_retrieve, don
     donation_refund_for_api, donation_subscription_cancellation_for_api, donation_journal_history_for_a_voter
 from stripe_donations.controllers import donation_lists_for_a_voter
 from stripe_donations.models import StripeManager
+from stripe_ip_history.controllers import check_for_excessive_stripe_access
 from voter.models import fetch_voter_we_vote_id_from_voter_device_link, VoterManager
 from wevote_functions.functions import get_ip_from_headers, positive_value_exists, get_voter_device_id
 from wevote_settings.models import fetch_stripe_processing_enabled_state
@@ -45,25 +47,27 @@ def donation_with_stripe_view(request):  # donationWithStripe
     results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
     ip_address = get_ip_from_headers(request)
     voter_found = positive_value_exists(results['voter_found'])
-    voter = results['voter'] if voter_found else 0
-    we_vote_id = voter.we_vote_id if voter else 'no id'
-    name = voter.first_name if voter else 'no'
-    name += (" " + voter.last_name) if voter else ' name'
-    signed_in = voter.is_signed_in() if voter else False
-    signed_in_twitter = voter.signed_in_twitter() if voter else False
-    signed_in_facebook = voter.signed_in_facebook() if voter else False
-    # Dale would like to allow not-signed in donors, so this is temporary so we can gather (log) some info
-    if not voter_found or not (signed_in_twitter or signed_in_facebook):
-        logger.error('(Ok) DONATION voter not found (%s) %s - %s, signedIn %s, twitter %s, facebook %s, request %s' %
-                     (ip_address, name, we_vote_id, signed_in, signed_in_twitter, signed_in_facebook, dict(request.GET)))
+    if voter_found:
+        voter = results['voter']
+        we_vote_id = voter.we_vote_id
+        name = voter.first_name
+        name += (" " + voter.last_name) if voter else ' name'
+        signed_in = voter.is_signed_in() if voter else False
+        signed_in_twitter = voter.signed_in_twitter() if voter else False
+        signed_in_facebook = voter.signed_in_facebook() if voter else False
+        logger.error('(Ok) DONATION voter found (%s) %s - %s, signedIn %s, twitter %s, facebook %s, request %s' %
+                     (ip_address, name, we_vote_id, signed_in, signed_in_twitter, signed_in_facebook,
+                      dict(request.GET)))
+    else:
+        logger.error('(Ok) DONATION voter NOT found (%s) request %s' % (ip_address, dict(request.GET)))
         return HttpResponseForbidden("error")
 
     # 1/2/2023:  If disabled on the "Stripe Fraudulent and Suspect Charges" page, no stripe charges can go through
     if not fetch_stripe_processing_enabled_state():
-        logger.error('DONATION request arrived while API disabled (%s) %s - %s, signedIn %s, twitter %s, facebook %s, request %s' %
-                     (ip_address, name, we_vote_id, signed_in, signed_in_twitter, signed_in_facebook, dict(request.GET)))
+        logger.error(
+            'DONATION request arrived while API disabled (%s) %s - %s, signedIn %s, twitter %s, facebook %s, request %s'
+            % (ip_address, name, we_vote_id, signed_in, signed_in_twitter, signed_in_facebook, dict(request.GET)))
         return HttpResponseNotFound("Stripe transactions disabled by WeVote")
-
 
     logger.error('(Ok) DONATION voter PASSED SCREEN (%s) %s - %s, signedIn %s, twitter %s, facebook %s' %
                  (ip_address, name, we_vote_id, signed_in, signed_in_twitter, signed_in_facebook))
@@ -469,7 +473,7 @@ def log_to_cloudwatch_view(request):            # logToCloudWatch
     # CloudWatch WeVoteServer Python logs
 
     error_level = request.GET.get('error_level', 'ERROR')
-    message = request.GET.get('message', 'No message supplied')
+    message = urllib.parse.unquote(request.GET.get('message', 'No message supplied'))
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     ip_address = get_ip_from_headers(request)
     we_vote_id = 'failed'
@@ -514,35 +518,60 @@ def google_recaptcha_verify_view(request):            # googleRecaptchaVerifyVie
 
     geoip_results = voter_location_retrieve_from_ip_for_api(request)
     country_code = geoip_results['country_code']
+    blocked_by_country = False
+    blocked_by_frequency_hourly = False
+    blocked_by_frequency_weekly = False
+    captcha_score = 0.0
+    captcha_success = False
+
     if country_code == 'US':
         data = urlopen(recaptcha_uri, params.encode('utf-8')).read()
         result = json.loads(data)
-        success = result.get('success', None)
+        captcha_success = result.get('success', None)
         captcha_score = result.get('score', None)
+    else:
+        blocked_by_country = True
+
+    blocked_by_captcha = captcha_score < 0.5
+    blocked_by_frequency_hours = False
+    blocked_by_frequency_days = False
 
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     we_vote_id = 'failed'
+    email = ''
 
     try:
         voter_manager = VoterManager()
         results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
         voter = results['voter']
         we_vote_id = voter.we_vote_id
+        email = voter.email
+
+        access_results = check_for_excessive_stripe_access(
+            remote_ip, country_code, we_vote_id, email, captcha_score, captcha_success, blocked_by_captcha,
+            blocked_by_country)
+        success = access_results['success']
+        blocked_by_frequency_hours = access_results['blocked_by_frequency_hours']
+        blocked_by_frequency_days = access_results['blocked_by_frequency_days']
+
     except Exception as e:
         success = False
         logger.error('google_recaptcha_verify failed to retrieve a voter for device_id: ', voter_device_id, e)
 
-    if success:
-        logger.error("(Ok) reCAPTCHA PASSED ip: %s, country %s, we_vote_id: %s, verified: %s, score: %s" %
-                     (remote_ip, country_code, we_vote_id, success, captcha_score))
-    else:
-        logger.error("(Ok) reCAPTCHA BLOCKED ip: %s, country %s, we_vote_id: %s, verified: %s, score: %s" %
-                     (remote_ip, country_code, we_vote_id, success, captcha_score))
+    # We don't want to supply the potential "card tester" with the reason they are blocked via a JavaScript debugger
+    blocked_by_other = blocked_by_country or blocked_by_frequency_hours or blocked_by_frequency_days
+    was_blocked = blocked_by_captcha or blocked_by_other
+    block = "BLOCKED" if was_blocked else "PASSED"
+    log_template = "(Ok) reCAPTCHA %s ip: %s, country %s, we_vote_id: %s, verified: %s, score: %.2f, " \
+                   "blockedByCaptcha: %s, blockedByCountry: %s, blockedByHours: %s, blockedByDays: %s"
+    logger.error(log_template % (block, remote_ip, country_code, we_vote_id, success, captcha_score, blocked_by_captcha,
+                 blocked_by_country, blocked_by_frequency_hours, blocked_by_frequency_days))
 
     results = {
-        'success': success,
-        'captcha_score': captcha_score,
-        'country_code': country_code,
+        'allowedToDonate': not was_blocked,
+        'captchaScore': captcha_score,
+        'blockedByCaptcha': blocked_by_captcha,
+        'blockedByOther': blocked_by_other,
     }
 
     return HttpResponse(json.dumps(results), content_type='application/json')
