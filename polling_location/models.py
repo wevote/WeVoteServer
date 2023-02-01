@@ -425,6 +425,7 @@ class PollingLocationManager(models.Manager):
                     KIND_OF_LOG_ENTRY_API_END_POINT_CRASH,
                     KIND_OF_LOG_ENTRY_NO_BALLOT_JSON,
                     KIND_OF_LOG_ENTRY_NO_OFFICES_HELD,
+                    KIND_OF_LOG_ENTRY_RATE_LIMIT_ERROR,
                 ])
                 count_query = count_query.filter(log_entry_deleted=False)
                 update_values['google_civic_error_count'] = count_query.count()
@@ -910,16 +911,23 @@ class PollingLocationManager(models.Manager):
     def retrieve_polling_location_by_we_vote_id(self, polling_location_we_vote_id=''):
         return self.retrieve_polling_location_by_id(polling_location_we_vote_id=polling_location_we_vote_id)
 
-    def retrieve_polling_location_by_id(self, polling_location_id=0, polling_location_we_vote_id=''):
+    def retrieve_polling_location_by_id(self, polling_location_id=0, polling_location_we_vote_id='', read_only=False):
         # Retrieve a polling_location entry
         polling_location = None
         status = ""
         try:
             if positive_value_exists(polling_location_id):
-                polling_location = PollingLocation.objects.get(id=polling_location_id)
+                if read_only:
+                    polling_location = PollingLocation.objects.using('readonly').get(id=polling_location_id)
+                else:
+                    polling_location = PollingLocation.objects.get(id=polling_location_id)
                 polling_location_found = True if polling_location.id else False
             elif positive_value_exists(polling_location_we_vote_id):
-                polling_location = PollingLocation.objects.get(we_vote_id__iexact=polling_location_we_vote_id)
+                if read_only:
+                    polling_location = PollingLocation.objects.using('readonly')\
+                        .get(we_vote_id__iexact=polling_location_we_vote_id)
+                else:
+                    polling_location = PollingLocation.objects.get(we_vote_id__iexact=polling_location_we_vote_id)
                 polling_location_found = True if polling_location.id else False
             else:
                 polling_location_found = False
