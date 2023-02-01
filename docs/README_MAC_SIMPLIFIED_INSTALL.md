@@ -662,3 +662,70 @@ that occurred, what was done to work around them.**
     pip install -e git+git://GitHub.com/necaris/python3-openid.git@master#egg=openid
     pip install -e git+git://GitHub.com/necaris/python3-openid.git@master#egg=python3-openid
     ```
+   
+-----------
+     
+## January 27, 2023, Saving of the new "Profile Image" while Testing Facebook Sign in 
+In order to speed up signin with facebook, we removed the scaling and saving of the facebook profile image from in-line in 
+to having them be executed in parallel so that the sign-in occurs much quicker for the voter.
+
+Gunicorn, the application server that the Python API Server runs in production, does not handle threads well, so instead
+we run them in a queue in a seperate process.  We use the AWS SQS queue manager to queue up the processing requests that potentially could be coming in from multiple 
+Voters, and execute them in a full image of the WeVote API Server.
+
+In order to run all these AWS features locally on your Mac, do the following:
+
+1) Download the docker CLI from https://docs.docker.com/desktop/install/mac-install/
+2) Find the downloaded file, and substitute your Downloads path into following set of commands
+   ```
+    (venv2) WeVoteServer % sudo hdiutil attach '/Users/stevepodell/Downloads/Docker (1).dmg'
+    (venv2) WeVoteServer % sudo /Volumes/Docker/Docker.app/Contents/MacOS/install
+    (venv2) WeVoteServer % sudo hdiutil detach /Volumes/Docker
+   ```
+3) MacOS modal dialog that appears, allow docker to make some symbolic links -- allow this.
+4) Once the Docker Desktop starts, and shows as running, typing 'docker -v' at the command line, to confirm that the CLI portion is running
+   ```
+    (venv2) stevepodell@StevesM1Dec2021 tmp % docker -v
+    Docker version 20.10.21, build baeda1f
+    (venv2) stevepodell@StevesM1Dec2021 tmp % 
+   ```
+5) Check to see if awslocal is installed
+    ```
+   ( venv2) stevepodell@StevesM1Dec2021 WeVoteServer % awslocal --version
+    aws-cli/2.9.13 Python/3.9.11 Darwin/22.3.0 exe/x86_64 prompt/off
+    (venv2) stevepodell@StevesM1Dec2021 WeVoteServer % 
+   ```
+6) if aws (awslocal) is not available at the command line, follow instructions at
+   https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html#getting-started-install-instructions
+7) Check to see if you have localstack installed
+    ```
+    (venv2) stevepodell@StevesM1Dec2021 WeVoteServer % localstack --version
+    1.3.1
+    (venv2) stevepodell@StevesM1Dec2021 WeVoteServer % 
+   ```
+8) If you do not already have localstack installed
+    ```
+    pip install localstack localstack-client awscli-local
+    ```
+9) Start localstack
+   ```
+   localstack start -d
+   ```
+10) Wait for sqs service to launch   
+11) Create a sqs queue, and copy the QueueUrl it reports to environment-variables.json
+    ```
+    awslocal sqs create-queue --queue-name job-queue.fifo --attributes FifoQueue=true,ContentBasedDeduplication=true
+    ```
+12) Make sure the QueueUrl displayed matches AWS_SQS_WEB_QUEUE_URL in the config file environment-variables.json
+    It is likely to look like this...
+    ```
+    "AWS_SQS_WEB_QUEUE_URL":          "http://localhost:4566/000000000000/job-queue.fifo",
+    ```
+13) Then start the queue processing code (in a separate python server instance) by opening a terminal window and running
+    ```
+    python manage.py runsqsworker
+    ```
+14) You will see logging from the sqs worker in that terminal
+
+Note that if you change any code, that would be needed in the instance of the API Server running under SQS, you will need to
+kill the runsqsworker in the terminal window, and restart it.
