@@ -152,3 +152,5 @@ web_app/build/*
 *.pyc
 staticfiles
 /cert/
+/cert/wevotedeveloper.com.crt
+/cert/wevotedeveloper.com_key.txt
