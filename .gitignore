@@ -136,6 +136,11 @@ node_modules/
 ##################
 .sass-cache
 
+# Heroku Related #
+##################
+*.pyc
+staticfiles
+
 # Other #
 #########
 /geoip/import_data/*
@@ -147,10 +152,6 @@ config/environment_variables.json
 config/environment_variables*.bak.json
 web_app/build/*
 
-# Heroku Related #
-##################
-*.pyc
-staticfiles
 /cert/
 /cert/wevotedeveloper.com.crt
 /cert/wevotedeveloper.com_key.txt
