@@ -124,7 +124,7 @@ There has to be a better way to do this, but this is what I went through...
 
 For example to add the apple "app" at WeVoteServer/apple
 1) Make the subdirectory, and copy or create preliminary files in the directory
-2) Make sure that there is __init__.py, it can be completely empty. In this example it would be at WeVoteServer/apple/__init__.py
+2) Make sure that there is an `__init__.py`, it can be completely empty. In this example it would be at `WeVoteServer/apple/__init__.py`
 3) Assuming that the "app" has a database table, create the column layout in the models file in a class that extends "models.Model"
 We have dozens of Manager files and dozens of Model files that have classes that unnecessarily 
 extend 'model.Models' and for each of these classes Django's ORM creates a useless empty table with

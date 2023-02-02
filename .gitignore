@@ -146,9 +146,9 @@ node_modules/
 config/environment_variables.json
 config/environment_variables*.bak.json
 web_app/build/*
-/cert/*
 
 # Heroku Related #
 ##################
 *.pyc
 staticfiles
+/cert/
