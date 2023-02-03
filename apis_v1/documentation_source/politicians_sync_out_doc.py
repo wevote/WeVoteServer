@@ -65,6 +65,8 @@ def politicians_sync_out_doc_template_values(url_root):
                    '  "ctcl_uuid": string,\n' \
                    '  "politician_facebook_id": string,\n' \
                    '  "politician_phone_number": string,\n' \
+                   '  "politician_phone_number2": string,\n' \
+                   '  "politician_phone_number3": string,\n' \
                    '  "politician_googleplus_id": string,\n' \
                    '  "politician_youtube_id": string,\n' \
                    '  "politician_email_address": string DEPRECATING,\n' \

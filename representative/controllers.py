@@ -1052,6 +1052,20 @@ def update_representative_from_politician(representative=None, politician=None):
             new_value_to_add=politician.politician_phone_number)
         if twitter_results['success']:
             representative = twitter_results['representative']
+    if positive_value_exists(politician.politician_phone_number2):
+        twitter_results = add_value_to_next_representative_spot(
+            field_name_base='representative_phone',
+            representative=representative,
+            new_value_to_add=politician.politician_phone_number2)
+        if twitter_results['success']:
+            representative = twitter_results['representative']
+    if positive_value_exists(politician.politician_phone_number3):
+        twitter_results = add_value_to_next_representative_spot(
+            field_name_base='representative_phone',
+            representative=representative,
+            new_value_to_add=politician.politician_phone_number3)
+        if twitter_results['success']:
+            representative = twitter_results['representative']
     if positive_value_exists(politician.politician_twitter_handle) and not politician.twitter_handle_updates_failing:
         twitter_results = add_value_to_next_representative_spot(
             field_name_base='representative_twitter_handle',

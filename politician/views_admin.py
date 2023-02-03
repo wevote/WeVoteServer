@@ -350,34 +350,38 @@ def politician_list_view(request):
     politician_search = request.GET.get('politician_search', '')
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     show_all = positive_value_exists(request.GET.get('show_all', False))
+    show_related_candidates = positive_value_exists(request.GET.get('show_related_candidates', False))
     show_politicians_with_email = request.GET.get('show_politicians_with_email', False)
 
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
 
-    if positive_value_exists(state_code):
-        politician_query = Politician.objects.all()
-        politician_query = politician_query.filter(state_code__iexact=state_code)
-        politician_query = politician_query.exclude(
-            Q(politician_email_address__isnull=True) |
-            Q(politician_email_address="")
-        )
-        # Do not return entries where the values already match
-        politician_query = politician_query.exclude(politician_email__iexact=F('politician_email_address'))
-        list_to_update = list(politician_query[:1000])  # Only update 1000 at a time
-        updated_count = 0
-        updated_list = []
-        for one_item in list_to_update:
-            one_item.politician_email = one_item.politician_email_address
-            updated_list.append(one_item)
-            updated_count += 1
-        politician_query.bulk_update(updated_list, ['politician_email'])
-        if positive_value_exists(updated_count):
-            messages.add_message(request, messages.INFO,
-                                 "Emails updated: {updated_count:,}"
-                                 "".format(updated_count=updated_count))
-        else:
-            messages.add_message(request, messages.INFO, "No emails updated.")
+    politician_query = Politician.objects.all()
+    politician_query = politician_query.exclude(
+        Q(politician_email_address__isnull=True) |
+        Q(politician_email_address="")
+    )
+    # Do not return entries where the values already match
+    # politician_query = politician_query.exclude(politician_email__iexact=F('politician_email_address'))
+    # Only include entries where politician_email is empty
+    politician_query = politician_query.filter(
+        Q(politician_email__isnull=True) |
+        Q(politician_email="")
+    )
+    list_to_update = list(politician_query[:1000])  # Only update 1000 at a time
+    updated_count = 0
+    updated_list = []
+    for one_item in list_to_update:
+        one_item.politician_email = one_item.politician_email_address
+        updated_list.append(one_item)
+        updated_count += 1
+    politician_query.bulk_update(updated_list, ['politician_email'])
+    if positive_value_exists(updated_count):
+        messages.add_message(request, messages.INFO,
+                             "Emails updated: {updated_count:,}"
+                             "".format(updated_count=updated_count))
+    else:
+        messages.add_message(request, messages.INFO, "No emails updated.")
 
     politician_list = []
     politician_list_count = 0
@@ -416,22 +420,23 @@ def politician_list_view(request):
                 new_filter = Q(last_name__iexact=one_word)
                 filters.append(new_filter)
 
+                new_filter = (
+                    Q(politician_email__icontains=one_word) |
+                    Q(politician_email2__icontains=one_word) |
+                    Q(politician_email3__icontains=one_word)
+                )
+                filters.append(new_filter)
+
                 new_filter = Q(politician_name__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(politician_twitter_handle__icontains=one_word)
-                filters.append(new_filter)
-
-                new_filter = Q(politician_twitter_handle2__icontains=one_word)
-                filters.append(new_filter)
-
-                new_filter = Q(politician_twitter_handle3__icontains=one_word)
-                filters.append(new_filter)
-
-                new_filter = Q(politician_twitter_handle4__icontains=one_word)
-                filters.append(new_filter)
-
-                new_filter = Q(politician_twitter_handle5__icontains=one_word)
+                new_filter = (
+                    Q(politician_twitter_handle__icontains=one_word) |
+                    Q(politician_twitter_handle2__icontains=one_word) |
+                    Q(politician_twitter_handle3__icontains=one_word) |
+                    Q(politician_twitter_handle4__icontains=one_word) |
+                    Q(politician_twitter_handle5__icontains=one_word)
+                )
                 filters.append(new_filter)
 
                 new_filter = Q(political_party__icontains=one_word)
@@ -463,87 +468,97 @@ def politician_list_view(request):
         # This is fine
         pass
 
-    # Cycle through all Politicians and find unlinked Candidates that *might* be "children" of this politician
+    # Attach candidates linked to these politicians
     temp_politician_list = []
     for one_politician in politician_list:
         try:
-            linked_candidate_query = CandidateCampaign.objects.all()
+            linked_candidate_query = CandidateCampaign.objects.using('readonly').all()
             linked_candidate_query = linked_candidate_query.filter(
                 Q(politician_we_vote_id__iexact=one_politician.we_vote_id) |
                 Q(politician_id=one_politician.id))
             linked_candidate_list_count = linked_candidate_query.count()
             one_politician.linked_candidate_list_count = linked_candidate_list_count
-
-            related_candidate_list = CandidateCampaign.objects.all()
-            related_candidate_list = related_candidate_list.exclude(politician_we_vote_id=one_politician.we_vote_id)
-
-            filters = []
-            new_filter = Q(candidate_name__icontains=one_politician.first_name) & \
-                Q(candidate_name__icontains=one_politician.last_name)
-            filters.append(new_filter)
-
-            if positive_value_exists(one_politician.politician_twitter_handle):
-                new_filter = (
-                    Q(candidate_twitter_handle__iexact=one_politician.politician_twitter_handle) |
-                    Q(candidate_twitter_handle2__iexact=one_politician.politician_twitter_handle) |
-                    Q(candidate_twitter_handle3__iexact=one_politician.politician_twitter_handle)
-                )
-                filters.append(new_filter)
-
-            if positive_value_exists(one_politician.politician_twitter_handle2):
-                new_filter = (
-                    Q(candidate_twitter_handle__iexact=one_politician.politician_twitter_handle2) |
-                    Q(candidate_twitter_handle2__iexact=one_politician.politician_twitter_handle2) |
-                    Q(candidate_twitter_handle3__iexact=one_politician.politician_twitter_handle2)
-                )
-                filters.append(new_filter)
-
-            if positive_value_exists(one_politician.politician_twitter_handle3):
-                new_filter = (
-                    Q(candidate_twitter_handle__iexact=one_politician.politician_twitter_handle3) |
-                    Q(candidate_twitter_handle2__iexact=one_politician.politician_twitter_handle3) |
-                    Q(candidate_twitter_handle3__iexact=one_politician.politician_twitter_handle3)
-                )
-                filters.append(new_filter)
-
-            if positive_value_exists(one_politician.politician_twitter_handle4):
-                new_filter = (
-                    Q(candidate_twitter_handle__iexact=one_politician.politician_twitter_handle4) |
-                    Q(candidate_twitter_handle2__iexact=one_politician.politician_twitter_handle4) |
-                    Q(candidate_twitter_handle3__iexact=one_politician.politician_twitter_handle4)
-                )
-                filters.append(new_filter)
-
-            if positive_value_exists(one_politician.politician_twitter_handle5):
-                new_filter = (
-                    Q(candidate_twitter_handle__iexact=one_politician.politician_twitter_handle5) |
-                    Q(candidate_twitter_handle2__iexact=one_politician.politician_twitter_handle5) |
-                    Q(candidate_twitter_handle3__iexact=one_politician.politician_twitter_handle5)
-                )
-                filters.append(new_filter)
-
-            if positive_value_exists(one_politician.vote_smart_id):
-                new_filter = Q(vote_smart_id=one_politician.vote_smart_id)
-                filters.append(new_filter)
-
-            # Add the first query
-            if len(filters):
-                final_filters = filters.pop()
-
-                # ...and "OR" the remaining items in the list
-                for item in filters:
-                    final_filters |= item
-
-                related_candidate_list = related_candidate_list.filter(final_filters)
-
-            related_candidate_list_count = related_candidate_list.count()
+            temp_politician_list.append(one_politician)
         except Exception as e:
-            related_candidate_list_count = 0
-
-        one_politician.related_candidate_list_count = related_candidate_list_count
-        temp_politician_list.append(one_politician)
+            pass
 
     politician_list = temp_politician_list
+
+    # Cycle through all Politicians and find unlinked Candidates that *might* be "children" of this politician
+    if show_related_candidates:
+        temp_politician_list = []
+        for one_politician in politician_list:
+            try:
+                related_candidate_list = CandidateCampaign.objects.using('readonly').all()
+                related_candidate_list = related_candidate_list.exclude(politician_we_vote_id=one_politician.we_vote_id)
+
+                filters = []
+                new_filter = Q(candidate_name__icontains=one_politician.first_name) & \
+                    Q(candidate_name__icontains=one_politician.last_name)
+                filters.append(new_filter)
+
+                if positive_value_exists(one_politician.politician_twitter_handle):
+                    new_filter = (
+                        Q(candidate_twitter_handle__iexact=one_politician.politician_twitter_handle) |
+                        Q(candidate_twitter_handle2__iexact=one_politician.politician_twitter_handle) |
+                        Q(candidate_twitter_handle3__iexact=one_politician.politician_twitter_handle)
+                    )
+                    filters.append(new_filter)
+
+                if positive_value_exists(one_politician.politician_twitter_handle2):
+                    new_filter = (
+                        Q(candidate_twitter_handle__iexact=one_politician.politician_twitter_handle2) |
+                        Q(candidate_twitter_handle2__iexact=one_politician.politician_twitter_handle2) |
+                        Q(candidate_twitter_handle3__iexact=one_politician.politician_twitter_handle2)
+                    )
+                    filters.append(new_filter)
+
+                if positive_value_exists(one_politician.politician_twitter_handle3):
+                    new_filter = (
+                        Q(candidate_twitter_handle__iexact=one_politician.politician_twitter_handle3) |
+                        Q(candidate_twitter_handle2__iexact=one_politician.politician_twitter_handle3) |
+                        Q(candidate_twitter_handle3__iexact=one_politician.politician_twitter_handle3)
+                    )
+                    filters.append(new_filter)
+
+                if positive_value_exists(one_politician.politician_twitter_handle4):
+                    new_filter = (
+                        Q(candidate_twitter_handle__iexact=one_politician.politician_twitter_handle4) |
+                        Q(candidate_twitter_handle2__iexact=one_politician.politician_twitter_handle4) |
+                        Q(candidate_twitter_handle3__iexact=one_politician.politician_twitter_handle4)
+                    )
+                    filters.append(new_filter)
+
+                if positive_value_exists(one_politician.politician_twitter_handle5):
+                    new_filter = (
+                        Q(candidate_twitter_handle__iexact=one_politician.politician_twitter_handle5) |
+                        Q(candidate_twitter_handle2__iexact=one_politician.politician_twitter_handle5) |
+                        Q(candidate_twitter_handle3__iexact=one_politician.politician_twitter_handle5)
+                    )
+                    filters.append(new_filter)
+
+                if positive_value_exists(one_politician.vote_smart_id):
+                    new_filter = Q(vote_smart_id=one_politician.vote_smart_id)
+                    filters.append(new_filter)
+
+                # Add the first query
+                if len(filters):
+                    final_filters = filters.pop()
+
+                    # ...and "OR" the remaining items in the list
+                    for item in filters:
+                        final_filters |= item
+
+                    related_candidate_list = related_candidate_list.filter(final_filters)
+
+                related_candidate_list_count = related_candidate_list.count()
+            except Exception as e:
+                related_candidate_list_count = 0
+
+            one_politician.related_candidate_list_count = related_candidate_list_count
+            temp_politician_list.append(one_politician)
+
+        politician_list = temp_politician_list
 
     # Now find all representative ids related to this politician
     temp_politician_list = []
@@ -578,6 +593,7 @@ def politician_list_view(request):
         'election_list':                election_list,
         'show_all':                     show_all,
         'show_politicians_with_email':  show_politicians_with_email,
+        'show_related_candidates':      show_related_candidates,
         'state_code':                   state_code,
         'state_list':                   sorted_state_list,
     }
@@ -794,6 +810,8 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
     # These variables are here because there was an error on the edit_process_view and the voter needs to try again
     ballotpedia_politician_url = request.GET.get('ballotpedia_politician_url', False)
     facebook_url = request.GET.get('facebook_url', False)
+    facebook_url2 = request.GET.get('facebook_url2', False)
+    facebook_url3 = request.GET.get('facebook_url3', False)
     google_civic_candidate_name = request.GET.get('google_civic_candidate_name', False)
     google_civic_candidate_name2 = request.GET.get('google_civic_candidate_name2', False)
     google_civic_candidate_name3 = request.GET.get('google_civic_candidate_name3', False)
@@ -804,6 +822,8 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
     politician_email3 = request.GET.get('politician_email3', False)
     politician_name = request.GET.get('politician_name', False)
     politician_phone_number = request.GET.get('politician_phone_number', False)
+    politician_phone_number2 = request.GET.get('politician_phone_number2', False)
+    politician_phone_number3 = request.GET.get('politician_phone_number3', False)
     politician_twitter_handle = request.GET.get('politician_twitter_handle', False)
     politician_twitter_handle2 = request.GET.get('politician_twitter_handle2', False)
     politician_twitter_handle3 = request.GET.get('politician_twitter_handle3', False)
@@ -993,6 +1013,8 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             'ballotpedia_politician_url':   ballotpedia_politician_url,
             'duplicate_politician_list':    duplicate_politician_list,
             'facebook_url':                 facebook_url,
+            'facebook_url2':                facebook_url2,
+            'facebook_url3':                facebook_url3,
             'google_civic_candidate_name':  google_civic_candidate_name,
             'google_civic_candidate_name2': google_civic_candidate_name2,
             'google_civic_candidate_name3': google_civic_candidate_name3,
@@ -1007,6 +1029,8 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             'politician_email3':            politician_email3,
             'politician_name':              politician_name,
             'politician_phone_number':      politician_phone_number,
+            'politician_phone_number2':     politician_phone_number2,
+            'politician_phone_number3':     politician_phone_number3,
             'politician_position_list':     politician_position_list,
             'politician_twitter_handle':    politician_twitter_handle,
             'politician_twitter_handle2':   politician_twitter_handle2,
@@ -1075,6 +1099,9 @@ def politician_edit_process_view(request):
     gender = request.POST.get('gender', False)
     middle_name = request.POST.get('middle_name', False)
     last_name = request.POST.get('last_name', False)
+    facebook_url = request.POST.get('facebook_url', False)
+    facebook_url2 = request.POST.get('facebook_url2', False)
+    facebook_url3 = request.POST.get('facebook_url3', False)
     google_civic_candidate_name = request.POST.get('google_civic_candidate_name', False)
     google_civic_candidate_name2 = request.POST.get('google_civic_candidate_name2', False)
     google_civic_candidate_name3 = request.POST.get('google_civic_candidate_name3', False)
@@ -1086,6 +1113,8 @@ def politician_edit_process_view(request):
     politician_id = convert_to_int(request.POST['politician_id'])
     politician_name = request.POST.get('politician_name', False)
     politician_phone_number = request.POST.get('politician_phone_number', False)
+    politician_phone_number2 = request.POST.get('politician_phone_number2', False)
+    politician_phone_number3 = request.POST.get('politician_phone_number3', False)
     politician_twitter_handle = request.POST.get('politician_twitter_handle', False)
     if positive_value_exists(politician_twitter_handle):
         politician_twitter_handle = extract_twitter_handle_from_text_string(politician_twitter_handle)
@@ -1214,6 +1243,8 @@ def politician_edit_process_view(request):
                     "&politician_email2=" + str(politician_email2) + \
                     "&politician_email3=" + str(politician_email3) + \
                     "&politician_phone_number=" + str(politician_phone_number) + \
+                    "&politician_phone_number2=" + str(politician_phone_number2) + \
+                    "&politician_phone_number3=" + str(politician_phone_number3) + \
                     "&politician_twitter_handle=" + str(politician_twitter_handle) + \
                     "&politician_twitter_handle2=" + str(politician_twitter_handle2) + \
                     "&politician_twitter_handle3=" + str(politician_twitter_handle3) + \
@@ -1247,6 +1278,12 @@ def politician_edit_process_view(request):
                         politician_on_stage.birth_date = datetime.strptime(birth_date, '%b. %d, %Y')
             except Exception as e:
                 messages.add_message(request, messages.ERROR, 'Could not save birthdate:' + str(e))
+            if facebook_url is not False:
+                politician_on_stage.facebook_url = facebook_url
+            if facebook_url2 is not False:
+                politician_on_stage.facebook_url2 = facebook_url2
+            if facebook_url3 is not False:
+                politician_on_stage.facebook_url3 = facebook_url3
             if first_name is not False:
                 politician_on_stage.first_name = first_name
             if middle_name is not False:
@@ -1279,6 +1316,10 @@ def politician_edit_process_view(request):
                 politician_on_stage.politician_name = politician_name
             if politician_phone_number is not False:
                 politician_on_stage.politician_phone_number = politician_phone_number
+            if politician_phone_number2 is not False:
+                politician_on_stage.politician_phone_number2 = politician_phone_number2
+            if politician_phone_number3 is not False:
+                politician_on_stage.politician_phone_number3 = politician_phone_number3
             # Reset all politician_twitter_handles
             politician_on_stage.politician_twitter_handle = None
             politician_on_stage.politician_twitter_handle2 = None
@@ -1359,6 +1400,12 @@ def politician_edit_process_view(request):
                             politician_on_stage.birth_date = datetime.strptime(birth_date, '%b. %d, %Y')
                 except Exception as e:
                     messages.add_message(request, messages.ERROR, 'Could not save birthdate:' + str(e))
+                if facebook_url is not False:
+                    politician_on_stage.facebook_url = facebook_url
+                if facebook_url2 is not False:
+                    politician_on_stage.facebook_url2 = facebook_url2
+                if facebook_url3 is not False:
+                    politician_on_stage.facebook_url3 = facebook_url3
                 politician_on_stage.first_name = extract_first_name_from_full_name(politician_name)
                 politician_on_stage.middle_name = extract_middle_name_from_full_name(politician_name)
                 politician_on_stage.last_name = extract_last_name_from_full_name(politician_name)
@@ -1386,6 +1433,10 @@ def politician_edit_process_view(request):
                     politician_on_stage.politician_email3 = politician_email3
                 if politician_phone_number is not False:
                     politician_on_stage.politician_phone_number = politician_phone_number
+                if politician_phone_number2 is not False:
+                    politician_on_stage.politician_phone_number2 = politician_phone_number2
+                if politician_phone_number3 is not False:
+                    politician_on_stage.politician_phone_number3 = politician_phone_number3
                 if politician_twitter_handle is not False:
                     add_results = add_twitter_handle_to_next_politician_spot(
                         politician_on_stage, politician_twitter_handle)
@@ -1725,7 +1776,11 @@ def politicians_sync_out_view(request):  # politiciansSyncOut
             'cspan_id',
             'ctcl_uuid',
             'facebook_url',
+            'facebook_url2',
+            'facebook_url3',
             'facebook_url_is_broken',
+            'facebook_url2_is_broken',
+            'facebook_url3_is_broken',
             'fec_id',
             'first_name',
             'full_name_assembled',
@@ -1752,6 +1807,8 @@ def politicians_sync_out_view(request):  # politiciansSyncOut
             'politician_googleplus_id',
             'politician_name',
             'politician_phone_number',
+            'politician_phone_number2',
+            'politician_phone_number3',
             'politician_twitter_handle',
             'politician_twitter_handle2',
             'politician_twitter_handle3',

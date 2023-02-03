@@ -57,6 +57,11 @@
       <input type="checkbox" name="show_all" id="show_all_id" value="1"
              {% if show_all %}checked{% endif %} /> Show up to 200 politicians
     </label>
+    &nbsp;&nbsp;
+    <label for="show_related_candidates_id">
+      <input type="checkbox" name="show_related_candidates" id="show_related_candidates_id" value="1"
+             {% if show_related_candidates %}checked{% endif %} /> Show related candidates count
+    </label>
 </form>
 
 {% if politician_list %}
@@ -72,7 +77,9 @@
             <th>Email(s)</th>
             <th>Website(s)</th>
             <th>Candidates Linked</th>
+        {% if show_related_candidates %}
             <th>Related Candidates?</th>
+        {% endif %}
         </tr>
       </thead>
     {% for politician in politician_list %}
@@ -122,6 +129,9 @@
                 {% if politician.politician_email %}{{ politician.politician_email }}&nbsp;{% endif %}
                 {% if politician.politician_email2 %}{{ politician.politician_email2 }}&nbsp;{% endif %}
                 {% if politician.politician_email3 %}{{ politician.politician_email3 }}&nbsp;{% endif %}
+                {% if politician.politician_phone_number %}{{ politician.politician_phone_number }}&nbsp;{% endif %}
+                {% if politician.politician_phone_number2 %}{{ politician.politician_phone_number2 }}&nbsp;{% endif %}
+                {% if politician.politician_phone_number3 %}{{ politician.politician_phone_number3 }}&nbsp;{% endif %}
             </td>
             <td>
                 {% if politician.politician_url %}<a href="{{ politician.politician_url }}" target="_blank">{{ politician.politician_url }}</a>{% endif %}
@@ -129,9 +139,14 @@
                 {% if politician.politician_url3 %}<br /><a href="{{ politician.politician_url3 }}" target="_blank">{{ politician.politician_url3 }}</a>{% endif %}
                 {% if politician.politician_url4 %}<br /><a href="{{ politician.politician_url4 }}" target="_blank">{{ politician.politician_url4 }}</a>{% endif %}
                 {% if politician.politician_url5 %}<br /><a href="{{ politician.politician_url5 }}" target="_blank">{{ politician.politician_url5 }}</a>{% endif %}
+                {% if politician.facebook_url %}<a href="{{ politician.facebook_url }}" target="_blank">{{ politician.facebook_url }}</a>{% endif %}
+                {% if politician.facebook_url2 %}<br /><a href="{{ politician.facebook_url2 }}" target="_blank">{{ politician.facebook_url2 }}</a>{% endif %}
+                {% if politician.facebook_url3 %}<br /><a href="{{ politician.facebook_url3 }}" target="_blank">{{ politician.facebook_url3 }}</a>{% endif %}
             </td>
             <td>{% if politician.linked_candidate_list_count > 0 %}{{ politician.linked_candidate_list_count }}{% endif %}</td>
+        {% if show_related_candidates %}
             <td>{% if politician.related_candidate_list_count > 0 %}{{ politician.related_candidate_list_count }}{% endif %}</td>
+        {% endif %}
         </tr>
     {% endfor %}
     </table>
@@ -152,6 +167,11 @@
         });
         $(function() {
             $('#show_politicians_with_email_id').change(function() {
+                this.form.submit();
+            });
+        });
+        $(function() {
+            $('#show_related_candidates_id').change(function() {
                 this.form.submit();
             });
         });

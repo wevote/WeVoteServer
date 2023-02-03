@@ -1662,8 +1662,12 @@ def create_batch_row_action_politician(batch_description, batch_header_map, one_
     youtube_id = batch_manager.retrieve_value_from_batch_row("politician_youtube_id", batch_header_map, one_batch_row)
     googleplus_id = batch_manager.retrieve_value_from_batch_row("politician_googleplus_id", batch_header_map,
                                                                 one_batch_row)
-    phone_number = batch_manager.retrieve_value_from_batch_row("politician_phone_number", batch_header_map,
-                                                               one_batch_row)
+    politician_phone_number = batch_manager.retrieve_value_from_batch_row("politician_phone_number", batch_header_map,
+                                                                          one_batch_row)
+    politician_phone_number2 = batch_manager.retrieve_value_from_batch_row("politician_phone_number2", batch_header_map,
+                                                                           one_batch_row)
+    politician_phone_number3 = batch_manager.retrieve_value_from_batch_row("politician_phone_number3", batch_header_map,
+                                                                           one_batch_row)
 
     # extract twitter handle from politician_twitter_url
     politician_twitter_handle = extract_twitter_handle_from_text_string(politician_twitter_url)
@@ -1826,7 +1830,9 @@ def create_batch_row_action_politician(batch_description, batch_header_map, one_
         batch_row_action_politician.politician_email = politician_email
         batch_row_action_politician.politician_email2 = politician_email2
         batch_row_action_politician.politician_email3 = politician_email3
-        batch_row_action_politician.politician_phone_number = phone_number
+        batch_row_action_politician.politician_phone_number = politician_phone_number
+        batch_row_action_politician.politician_phone_number2 = politician_phone_number2
+        batch_row_action_politician.politician_phone_number3 = politician_phone_number3
         batch_row_action_politician.politician_twitter_handle = politician_twitter_handle
         batch_row_action_politician.politician_twitter_handle2 = politician_twitter_handle2
         batch_row_action_politician.politician_twitter_handle3 = politician_twitter_handle3
@@ -4646,6 +4652,8 @@ def import_politician_data_from_batch_row_actions(batch_header_id, batch_row_id,
         politician_email2 = one_batch_row_action.politician_email2
         politician_email3 = one_batch_row_action.politician_email3
         politician_phone_number = one_batch_row_action.politician_phone_number
+        politician_phone_number2 = one_batch_row_action.politician_phone_number2
+        politician_phone_number3 = one_batch_row_action.politician_phone_number3
         politician_twitter_handle = one_batch_row_action.politician_twitter_handle
         politician_twitter_handle2 = one_batch_row_action.politician_twitter_handle2
         politician_twitter_handle3 = one_batch_row_action.politician_twitter_handle3
@@ -4674,6 +4682,8 @@ def import_politician_data_from_batch_row_actions(batch_header_id, batch_row_id,
                     politician_email2=politician_email2,
                     politician_email3=politician_email3,
                     politician_phone_number=politician_phone_number,
+                    politician_phone_number2=politician_phone_number2,
+                    politician_phone_number3=politician_phone_number3,
                     politician_twitter_handle=politician_twitter_handle,
                     politician_twitter_handle2=politician_twitter_handle2,
                     politician_twitter_handle3=politician_twitter_handle3,
@@ -4714,6 +4724,8 @@ def import_politician_data_from_batch_row_actions(batch_header_id, batch_row_id,
                     politician_twitter_handle4=politician_twitter_handle4,
                     politician_twitter_handle5=politician_twitter_handle5,
                     politician_phone_number=politician_phone_number,
+                    politician_phone_number2=politician_phone_number2,
+                    politician_phone_number3=politician_phone_number3,
                     politician_facebook_id=politician_facebook_id,
                     politician_googleplus_id=politician_googleplus_id,
                     politician_youtube_id=politician_youtube_id,

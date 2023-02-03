@@ -154,7 +154,27 @@
         </td>
     </tr>
 
-{% include "politician/politician_merge_one_field_decision.html" with field_name="politician_phone_number" field_label="Phone Number" conflict_status=conflict_values.politician_phone_number politician1_field_value=politician_option1.politician_phone_number politician2_field_value=politician_option2.politician_phone_number politician1=politician_option1 politician2=politician_option2 %}
+    <tr>
+        <td>Politician Phones</td>
+        <td>
+            {{ politician_option1.politician_phone_number|default_if_none:"" }}
+            {% if politician_option1.politician_phone_number2 %}
+                <br />{{ politician_option1.politician_phone_number2|default_if_none:"" }}
+            {% endif %}
+            {% if politician_option1.politician_phone_number3 %}
+                <br />{{ politician_option1.politician_phone_number3|default_if_none:"" }}
+            {% endif %}
+        </td>
+        <td>
+            {{ politician_option2.politician_phone_number|default_if_none:"" }}
+            {% if politician_option2.politician_phone_number2 %}
+                <br />{{ politician_option2.politician_phone_number2|default_if_none:"" }}
+            {% endif %}
+            {% if politician_option2.politician_phone_number3 %}
+                <br />{{ politician_option2.politician_phone_number3|default_if_none:"" }}
+            {% endif %}
+        </td>
+    </tr>
 
     <tr>
         <td>Politician Websites</td>
@@ -192,7 +212,28 @@
 
 {% include "politician/politician_merge_one_field_decision.html" with field_name="politician_contact_form_url" field_label="Politician Contact Form" conflict_status=conflict_values.politician_contact_form_url politician1_field_value=politician_option1.politician_contact_form_url politician2_field_value=politician_option2.politician_contact_form_url politician1=politician_option1 politician2=politician_option2 %}
 
-{% include "politician/politician_merge_one_field_decision.html" with field_name="facebook_url" field_label="Facebook" conflict_status=conflict_values.facebook_url politician1_field_value=politician_option1.facebook_url politician2_field_value=politician_option2.facebook_url politician1=politician_option1 politician2=politician_option2 %}
+
+    <tr>
+        <td>Facebook URLs</td>
+        <td>
+            {{ politician_option1.facebook_url|default_if_none:"" }}
+            {% if politician_option1.facebook_url2 %}
+                <br />{{ politician_option1.facebook_url2|default_if_none:"" }}
+            {% endif %}
+            {% if politician_option1.facebook_url3 %}
+                <br />{{ politician_option1.facebook_url3|default_if_none:"" }}
+            {% endif %}
+        </td>
+        <td>
+            {{ politician_option2.facebook_url|default_if_none:"" }}
+            {% if politician_option2.facebook_url2 %}
+                <br />{{ politician_option2.facebook_url2|default_if_none:"" }}
+            {% endif %}
+            {% if politician_option2.facebook_url3 %}
+                <br />{{ politician_option2.facebook_url3|default_if_none:"" }}
+            {% endif %}
+        </td>
+    </tr>
 
 {% include "politician/politician_merge_one_field_decision.html" with field_name="facebook_url_is_broken" field_label="Facebook URL Broken" conflict_status=conflict_values.facebook_url_is_broken politician1_field_value=politician_option1.facebook_url_is_broken politician2_field_value=politician_option2.facebook_url_is_broken politician1=politician_option1 politician2=politician_option2 %}
 

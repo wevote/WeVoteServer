@@ -125,6 +125,8 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_CANDIDATES = {
     'election_day': 'election_day',
     'email': 'vote_usa_candidate_email',
     'facebook_url': 'facebook_url',
+    'facebook_url2': 'facebook_url2',
+    'facebook_url3': 'facebook_url3',
     'facebook url': 'vote_usa_facebook_url',
     'google_civic_election_id': 'google_civic_election_id',
     'party': 'vote_usa_party_name',
@@ -481,6 +483,8 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS = {
     'politician_youtube_id': 'politician_youtube_id',
     'politician_googleplus_id': 'politician_googleplus_id',
     'politician_phone_number': 'politician_phone_number',
+    'politician_phone_number2': 'politician_phone_number2',
+    'politician_phone_number3': 'politician_phone_number3',
     'politician_batch_id': 'politician_batch_id',
 }
 
@@ -6047,8 +6051,10 @@ class BatchRowActionPolitician(models.Model):
     # The full name of the party the official belongs to.
     political_party = models.CharField(verbose_name="politician political party", max_length=255, null=True)
     state_code = models.CharField(verbose_name="politician home state", max_length=2, null=True)
-    politician_url = models.URLField(
-        verbose_name='latest website url of politician', max_length=255, blank=True, null=True)
+    facebook_url = models.TextField(blank=True, null=True)
+    facebook_url2 = models.TextField(blank=True, null=True)
+    facebook_url3 = models.TextField(blank=True, null=True)
+    politician_url = models.TextField(blank=True, null=True)
 
     politician_twitter_handle = models.CharField(max_length=255, null=True, unique=False)
     politician_twitter_handle2 = models.CharField(max_length=255, null=True, unique=False)
@@ -6064,8 +6070,9 @@ class BatchRowActionPolitician(models.Model):
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True)
     politician_facebook_id = models.CharField(verbose_name='politician facebook user name', max_length=255, null=True,
                                               unique=False)
-    politician_phone_number = models.CharField(verbose_name='politician phone number', max_length=255, null=True,
-                                               unique=False)
+    politician_phone_number = models.CharField(max_length=255, null=True, unique=False)
+    politician_phone_number2 = models.CharField(max_length=255, null=True, unique=False)
+    politician_phone_number3 = models.CharField(max_length=255, null=True, unique=False)
     politician_googleplus_id = models.CharField(verbose_name='politician googleplus profile name', max_length=255,
                                                 null=True, unique=False)
     politician_youtube_id = models.CharField(verbose_name='politician youtube profile name', max_length=255, null=True,

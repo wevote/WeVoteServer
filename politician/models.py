@@ -37,8 +37,8 @@ POLITICIAN_UNIQUE_IDENTIFIERS = [
     'birth_date',
     'cspan_id',
     'ctcl_uuid',
-    'facebook_url',
-    'facebook_url_is_broken',
+    # 'facebook_url',  # We now have 3 options and merge them automatically
+    # 'facebook_url_is_broken',
     'fec_id',
     'first_name',
     'gender',
@@ -58,7 +58,7 @@ POLITICIAN_UNIQUE_IDENTIFIERS = [
     'politician_facebook_id',
     'politician_googleplus_id',
     'politician_name',
-    'politician_phone_number',
+    # 'politician_phone_number',  # We now have 3 options and merge them automatically
     # 'politician_url',  # We have 5 options now and merge them automatically
     'politician_youtube_id',
     'state_code',
@@ -102,7 +102,11 @@ class Politician(models.Model):
     politician_name = models.CharField(verbose_name="official full name",
                                        max_length=255, default=None, null=True, blank=True)
     facebook_url = models.TextField(verbose_name='facebook url of candidate', blank=True, null=True)
+    facebook_url2 = models.TextField(blank=True, null=True)
+    facebook_url3 = models.TextField(blank=True, null=True)
     facebook_url_is_broken = models.BooleanField(verbose_name="facebook url is broken", default=False)
+    facebook_url2_is_broken = models.BooleanField(default=False)
+    facebook_url3_is_broken = models.BooleanField(default=False)
     # This is the politician's name from GoogleCivicCandidateCampaign
     google_civic_candidate_name = models.CharField(
         verbose_name="full name from google civic", max_length=255, default=None, null=True, blank=True)
@@ -190,8 +194,9 @@ class Politician(models.Model):
     linkedin_url = models.TextField(null=True, blank=True)
     politician_facebook_id = models.CharField(
         verbose_name='politician facebook user name', max_length=255, null=True, unique=False)
-    politician_phone_number = models.CharField(
-        verbose_name='politician phone number', max_length=255, null=True, unique=False)
+    politician_phone_number = models.CharField(max_length=255, null=True, unique=False)
+    politician_phone_number2 = models.CharField(max_length=255, null=True, unique=False)
+    politician_phone_number3 = models.CharField(max_length=255, null=True, unique=False)
     politician_googleplus_id = models.CharField(
         verbose_name='politician googleplus profile name', max_length=255, null=True, unique=False)
     politician_youtube_id = models.CharField(
@@ -1149,6 +1154,8 @@ class PoliticianManager(models.Manager):
             politician_email2='',
             politician_email3='',
             politician_phone_number='',
+            politician_phone_number2='',
+            politician_phone_number3='',
             politician_twitter_handle='',
             politician_twitter_handle2='',
             politician_twitter_handle3='',
@@ -1170,6 +1177,8 @@ class PoliticianManager(models.Manager):
         :param politician_email2:
         :param politician_email3:
         :param politician_phone_number:
+        :param politician_phone_number2:
+        :param politician_phone_number3:
         :param politician_twitter_handle:
         :param politician_twitter_handle2:
         :param politician_twitter_handle3:
@@ -1198,6 +1207,8 @@ class PoliticianManager(models.Manager):
                 politician_email2=politician_email2,
                 politician_email3=politician_email3,
                 politician_phone_number=politician_phone_number,
+                politician_phone_number2=politician_phone_number2,
+                politician_phone_number3=politician_phone_number3,
                 politician_twitter_handle=politician_twitter_handle,
                 politician_twitter_handle2=politician_twitter_handle2,
                 politician_twitter_handle3=politician_twitter_handle3,
@@ -1247,6 +1258,8 @@ class PoliticianManager(models.Manager):
             politician_twitter_handle4='',
             politician_twitter_handle5='',
             politician_phone_number='',
+            politician_phone_number2='',
+            politician_phone_number3='',
             politician_facebook_id='',
             politician_googleplus_id='',
             politician_youtube_id='',
@@ -1269,6 +1282,8 @@ class PoliticianManager(models.Manager):
         :param politician_twitter_handle4:
         :param politician_twitter_handle5:
         :param politician_phone_number:
+        :param politician_phone_number2:
+        :param politician_phone_number3:
         :param politician_facebook_id:
         :param politician_googleplus_id:
         :param politician_youtube_id:
@@ -1297,6 +1312,8 @@ class PoliticianManager(models.Manager):
                 existing_politician_entry.politician_email2 = politician_email2
                 existing_politician_entry.politician_email3 = politician_email3
                 existing_politician_entry.politician_phone_number = politician_phone_number
+                existing_politician_entry.politician_phone_number2 = politician_phone_number2
+                existing_politician_entry.politician_phone_number3 = politician_phone_number3
                 existing_politician_entry.politician_twitter_handle = politician_twitter_handle
                 existing_politician_entry.politician_twitter_handle2 = politician_twitter_handle2
                 existing_politician_entry.politician_twitter_handle3 = politician_twitter_handle3
