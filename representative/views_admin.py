@@ -344,6 +344,7 @@ def representative_list_view(request):
                 )
             else:
                 queryset = queryset.filter(state_code__iexact=state_code)
+
         if positive_value_exists(show_representatives_with_email):
             queryset = queryset.annotate(representative_email_length=Length('representative_email'))
             queryset = queryset.annotate(representative_email2_length=Length('representative_email2'))
@@ -364,10 +365,21 @@ def representative_list_view(request):
             for one_word in search_words:
                 filters = []
 
+                new_filter = (
+                    Q(representative_email__icontains=one_word) |
+                    Q(representative_email2__icontains=one_word) |
+                    Q(representative_email3__icontains=one_word)
+                )
+                filters.append(new_filter)
+
                 new_filter = Q(representative_name__icontains=one_word)
                 filters.append(new_filter)
 
-                new_filter = Q(representative_twitter_handle__icontains=one_word)
+                new_filter = (
+                    Q(representative_twitter_handle__icontains=one_word) |
+                    Q(representative_twitter_handle2__icontains=one_word) |
+                    Q(representative_twitter_handle3__icontains=one_word)
+                )
                 filters.append(new_filter)
 
                 new_filter = Q(political_party__icontains=one_word)

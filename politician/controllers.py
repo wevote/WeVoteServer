@@ -384,40 +384,41 @@ def figure_out_politician_conflict_values(politician1, politician2):
                 politician_merge_conflict_values[attribute] = 'POLITICIAN2'
             elif politician2_attribute_value is None or politician2_attribute_value == "":
                 politician_merge_conflict_values[attribute] = 'POLITICIAN1'
-            elif attribute == "facebook_url":
-                if politician1_attribute_value_lower_case == politician2_attribute_value_lower_case:
-                    # Give preference to value with both upper and lower case letters
-                    if any(char.isupper() for char in politician1_attribute_value) \
-                            and any(char.islower() for char in politician1_attribute_value):
-                        politician_merge_conflict_values[attribute] = 'POLITICIAN1'
-                    else:
-                        politician_merge_conflict_values[attribute] = 'POLITICIAN2'
-                else:
-                    politician_merge_conflict_values[attribute] = 'CONFLICT'
-            elif attribute == "facebook_url_is_broken":
-                politician1_facebook_url = getattr(politician1, 'facebook_url', '')
-                try:
-                    politician1_facebook_url_lower_case = politician1_facebook_url.lower()
-                except Exception:
-                    politician1_facebook_url_lower_case = None
-                politician2_facebook_url = getattr(politician2, 'facebook_url', '')
-                try:
-                    politician2_facebook_url_lower_case = politician2_facebook_url.lower()
-                except Exception:
-                    politician2_facebook_url_lower_case = None
-                if politician1_facebook_url_lower_case == politician2_facebook_url_lower_case:
-                    # If facebook_url is matching, then automatically honor "True" in facebook_url_is_broken
-                    if positive_value_exists(politician1_attribute_value):
-                        politician_merge_conflict_values[attribute] = 'POLITICIAN1'
-                    elif positive_value_exists(politician2_attribute_value):
-                        politician_merge_conflict_values[attribute] = 'POLITICIAN2'
-                    else:
-                        politician_merge_conflict_values[attribute] = 'MATCHING'
-                else:
-                    if politician1_attribute_value == politician2_attribute_value:
-                        politician_merge_conflict_values[attribute] = 'MATCHING'
-                    else:
-                        politician_merge_conflict_values[attribute] = 'CONFLICT'
+            # We now offer multiple politician facebook_url fields
+            # elif attribute == "facebook_url":
+            #     if politician1_attribute_value_lower_case == politician2_attribute_value_lower_case:
+            #         # Give preference to value with both upper and lower case letters
+            #         if any(char.isupper() for char in politician1_attribute_value) \
+            #                 and any(char.islower() for char in politician1_attribute_value):
+            #             politician_merge_conflict_values[attribute] = 'POLITICIAN1'
+            #         else:
+            #             politician_merge_conflict_values[attribute] = 'POLITICIAN2'
+            #     else:
+            #         politician_merge_conflict_values[attribute] = 'CONFLICT'
+            # elif attribute == "facebook_url_is_broken":
+            #     politician1_facebook_url = getattr(politician1, 'facebook_url', '')
+            #     try:
+            #         politician1_facebook_url_lower_case = politician1_facebook_url.lower()
+            #     except Exception:
+            #         politician1_facebook_url_lower_case = None
+            #     politician2_facebook_url = getattr(politician2, 'facebook_url', '')
+            #     try:
+            #         politician2_facebook_url_lower_case = politician2_facebook_url.lower()
+            #     except Exception:
+            #         politician2_facebook_url_lower_case = None
+            #     if politician1_facebook_url_lower_case == politician2_facebook_url_lower_case:
+            #         # If facebook_url is matching, then automatically honor "True" in facebook_url_is_broken
+            #         if positive_value_exists(politician1_attribute_value):
+            #             politician_merge_conflict_values[attribute] = 'POLITICIAN1'
+            #         elif positive_value_exists(politician2_attribute_value):
+            #             politician_merge_conflict_values[attribute] = 'POLITICIAN2'
+            #         else:
+            #             politician_merge_conflict_values[attribute] = 'MATCHING'
+            #     else:
+            #         if politician1_attribute_value == politician2_attribute_value:
+            #             politician_merge_conflict_values[attribute] = 'MATCHING'
+            #         else:
+            #             politician_merge_conflict_values[attribute] = 'CONFLICT'
             elif attribute == "gender":
                 if politician1_attribute_value == politician2_attribute_value:
                     politician_merge_conflict_values[attribute] = 'MATCHING'
@@ -602,6 +603,39 @@ def merge_these_two_politicians(
             # Don't completely fail if in attribute can't be saved.
             status += "ATTRIBUTE_SAVE_FAILED (" + str(attribute) + ") " + str(e) + " "
 
+    # Preserve unique facebook_url -> facebook_url3
+    from representative.controllers import add_value_to_next_representative_spot
+    if positive_value_exists(politician2_on_stage.facebook_url):
+        results = add_value_to_next_representative_spot(
+            field_name_base='facebook_url',
+            new_value_to_add=politician2_on_stage.facebook_url,
+            representative=politician1_on_stage,
+        )
+        if results['success'] and results['values_changed']:
+            politician1_on_stage = results['representative']
+        if not results['success']:
+            status += results['status']
+    if positive_value_exists(politician2_on_stage.facebook_url2):
+        results = add_value_to_next_representative_spot(
+            field_name_base='facebook_url',
+            new_value_to_add=politician2_on_stage.facebook_url2,
+            representative=politician1_on_stage,
+        )
+        if results['success'] and results['values_changed']:
+            politician1_on_stage = results['representative']
+        if not results['success']:
+            status += results['status']
+    if positive_value_exists(politician2_on_stage.facebook_url3):
+        results = add_value_to_next_representative_spot(
+            field_name_base='facebook_url',
+            new_value_to_add=politician2_on_stage.facebook_url3,
+            representative=politician1_on_stage,
+        )
+        if results['success'] and results['values_changed']:
+            politician1_on_stage = results['representative']
+        if not results['success']:
+            status += results['status']
+
     # Preserve unique politician_name & google_civic_candidate_name, _name2, _name3
     if politician2_on_stage.politician_name != politician1_on_stage.politician_name:
         politician1_on_stage = add_name_to_next_spot(
@@ -617,7 +651,6 @@ def merge_these_two_politicians(
             politician1_on_stage, politician2_on_stage.google_civic_candidate_name3)
 
     # Preserve unique politician_email -> politician_email3
-    from representative.controllers import add_value_to_next_representative_spot
     # TEMP UNTIL WE DEPRECATE THIS FIELD
     if positive_value_exists(politician2_on_stage.politician_email_address):
         results = add_value_to_next_representative_spot(
@@ -653,6 +686,38 @@ def merge_these_two_politicians(
         results = add_value_to_next_representative_spot(
             field_name_base='politician_email',
             new_value_to_add=politician2_on_stage.politician_email3,
+            representative=politician1_on_stage,
+        )
+        if results['success'] and results['values_changed']:
+            politician1_on_stage = results['representative']
+        if not results['success']:
+            status += results['status']
+
+    # Preserve unique politician_phone_number -> politician_phone_number3
+    if positive_value_exists(politician2_on_stage.politician_phone_number):
+        results = add_value_to_next_representative_spot(
+            field_name_base='politician_phone_number',
+            new_value_to_add=politician2_on_stage.politician_phone_number,
+            representative=politician1_on_stage,
+        )
+        if results['success'] and results['values_changed']:
+            politician1_on_stage = results['representative']
+        if not results['success']:
+            status += results['status']
+    if positive_value_exists(politician2_on_stage.politician_phone_number2):
+        results = add_value_to_next_representative_spot(
+            field_name_base='politician_phone_number',
+            new_value_to_add=politician2_on_stage.politician_phone_number2,
+            representative=politician1_on_stage,
+        )
+        if results['success'] and results['values_changed']:
+            politician1_on_stage = results['representative']
+        if not results['success']:
+            status += results['status']
+    if positive_value_exists(politician2_on_stage.politician_phone_number3):
+        results = add_value_to_next_representative_spot(
+            field_name_base='politician_phone_number',
+            new_value_to_add=politician2_on_stage.politician_phone_number3,
             representative=politician1_on_stage,
         )
         if results['success'] and results['values_changed']:
@@ -905,8 +970,16 @@ def politicians_import_from_structured_json(structured_json):
                 updated_politician_values['ctcl_uuid'] = one_politician['ctcl_uuid']
             if 'facebook_url' in one_politician:
                 updated_politician_values['facebook_url'] = one_politician['facebook_url']
+            if 'facebook_url2' in one_politician:
+                updated_politician_values['facebook_url2'] = one_politician['facebook_url2']
+            if 'facebook_url' in one_politician:
+                updated_politician_values['facebook_url3'] = one_politician['facebook_url3']
             if 'facebook_url_is_broken' in one_politician:
                 updated_politician_values['facebook_url_is_broken'] = one_politician['facebook_url_is_broken']
+            if 'facebook_url2_is_broken' in one_politician:
+                updated_politician_values['facebook_url2_is_broken'] = one_politician['facebook_url2_is_broken']
+            if 'facebook_url3_is_broken' in one_politician:
+                updated_politician_values['facebook_url3_is_broken'] = one_politician['facebook_url3_is_broken']
             if 'fec_id' in one_politician:
                 updated_politician_values['fec_id'] = one_politician['fec_id']
             if 'first_name' in one_politician:
@@ -964,6 +1037,10 @@ def politicians_import_from_structured_json(structured_json):
                 updated_politician_values['politician_name'] = one_politician['politician_name']
             if 'politician_phone_number' in one_politician:
                 updated_politician_values['politician_phone_number'] = one_politician['politician_phone_number']
+            if 'politician_phone_number2' in one_politician:
+                updated_politician_values['politician_phone_number2'] = one_politician['politician_phone_number2']
+            if 'politician_phone_number3' in one_politician:
+                updated_politician_values['politician_phone_number3'] = one_politician['politician_phone_number3']
             if 'politician_twitter_handle' in one_politician:
                 updated_politician_values['politician_twitter_handle'] = one_politician['politician_twitter_handle']
             if 'politician_twitter_handle2' in one_politician:
@@ -1107,14 +1184,16 @@ def update_politician_from_candidate(politician, candidate):
             positive_value_exists(candidate.ballotpedia_candidate_url):
         politician.ballotpedia_politician_url = candidate.ballotpedia_candidate_url
         save_changes = True
-    politician_facebook_url_missing = \
-        not positive_value_exists(politician.facebook_url) or politician.facebook_url_is_broken
     candidate_facebook_url_exists = \
         positive_value_exists(candidate.facebook_url) and not candidate.facebook_url_is_broken
-    if politician_facebook_url_missing and candidate_facebook_url_exists:
-        politician.facebook_url = candidate.facebook_url
-        politician.facebook_url_is_broken = False
-        save_changes = True
+    if candidate_facebook_url_exists:
+        name_results = add_value_to_next_representative_spot(
+            field_name_base='facebook_url',
+            representative=politician,
+            new_value_to_add=candidate.facebook_url)
+        if name_results['success']:
+            politician = name_results['representative']
+            save_changes = save_changes or name_results['values_changed']
     if positive_value_exists(candidate.candidate_name) and positive_value_exists(politician.politician_name) \
             and candidate.candidate_name != politician.politician_name:
         name_results = add_value_to_next_representative_spot(
