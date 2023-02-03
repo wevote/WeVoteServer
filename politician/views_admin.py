@@ -10,7 +10,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Q
+from django.db.models import F, Q
+from django.db.models.functions import Length
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -348,17 +349,54 @@ def politician_list_view(request):
     state_code = request.GET.get('state_code', '')
     politician_search = request.GET.get('politician_search', '')
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-    show_all = request.GET.get('show_all', False)
+    show_all = positive_value_exists(request.GET.get('show_all', False))
+    show_politicians_with_email = request.GET.get('show_politicians_with_email', False)
 
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
 
+    if positive_value_exists(state_code):
+        politician_query = Politician.objects.all()
+        politician_query = politician_query.filter(state_code__iexact=state_code)
+        politician_query = politician_query.exclude(
+            Q(politician_email_address__isnull=True) |
+            Q(politician_email_address="")
+        )
+        # Do not return entries where the values already match
+        politician_query = politician_query.exclude(politician_email__iexact=F('politician_email_address'))
+        list_to_update = list(politician_query[:1000])  # Only update 1000 at a time
+        updated_count = 0
+        updated_list = []
+        for one_item in list_to_update:
+            one_item.politician_email = one_item.politician_email_address
+            updated_list.append(one_item)
+            updated_count += 1
+        politician_query.bulk_update(updated_list, ['politician_email'])
+        if positive_value_exists(updated_count):
+            messages.add_message(request, messages.INFO,
+                                 "Emails updated: {updated_count:,}"
+                                 "".format(updated_count=updated_count))
+        else:
+            messages.add_message(request, messages.INFO, "No emails updated.")
+
     politician_list = []
     politician_list_count = 0
     try:
-        politician_query = Politician.objects.all()
+        politician_query = Politician.objects.using('readonly').all()
         if positive_value_exists(state_code):
             politician_query = politician_query.filter(state_code__iexact=state_code)
+        if positive_value_exists(show_politicians_with_email):
+            politician_query = \
+                politician_query.annotate(politician_email_address_length=Length('politician_email_address'))
+            politician_query = politician_query.annotate(politician_email_length=Length('politician_email'))
+            politician_query = politician_query.annotate(politician_email2_length=Length('politician_email2'))
+            politician_query = politician_query.annotate(politician_email3_length=Length('politician_email3'))
+            politician_query = politician_query.filter(
+                Q(politician_email_address_length__gt=2) |
+                Q(politician_email_length__gt=2) |
+                Q(politician_email2_length__gt=2) |
+                Q(politician_email3_length__gt=2)
+            )
 
         if positive_value_exists(politician_search):
             search_words = politician_search.split()
@@ -420,7 +458,7 @@ def politician_list_view(request):
             politician_list = politician_query.order_by('politician_name')[:25]
         else:
             # We still want to limit to 200
-            politician_list = politician_query.order_by('politician_name')[:20]
+            politician_list = politician_query.order_by('politician_name')[:200]
     except ObjectDoesNotExist:
         # This is fine
         pass
@@ -533,13 +571,15 @@ def politician_list_view(request):
                          "".format(politician_list_count=politician_list_count))
 
     template_values = {
-        'messages_on_stage':        messages_on_stage,
-        'google_civic_election_id': google_civic_election_id,
-        'politician_list':          politician_list,
-        'politician_search':        politician_search,
-        'election_list':            election_list,
-        'state_code':               state_code,
-        'state_list':               sorted_state_list,
+        'messages_on_stage':            messages_on_stage,
+        'google_civic_election_id':     google_civic_election_id,
+        'politician_list':              politician_list,
+        'politician_search':            politician_search,
+        'election_list':                election_list,
+        'show_all':                     show_all,
+        'show_politicians_with_email':  show_politicians_with_email,
+        'state_code':                   state_code,
+        'state_list':                   sorted_state_list,
     }
     return render(request, 'politician/politician_list.html', template_values)
 

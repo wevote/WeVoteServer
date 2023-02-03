@@ -21,6 +21,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
 from django.db.models import Q
+from django.db.models.functions import Length
 from office_held.models import OfficeHeld, OfficeHeldManager
 from election.models import Election
 from politician.models import Politician, PoliticianManager
@@ -324,7 +325,8 @@ def representative_list_view(request):
     state_code = request.GET.get('state_code', '')
     representative_search = request.GET.get('representative_search', '')
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-    show_all = request.GET.get('show_all', False)
+    show_all = positive_value_exists(request.GET.get('show_all', False))
+    show_representatives_with_email = request.GET.get('show_representatives_with_email', False)
     representative_count = 0
     representative_list = []
     show_this_year = convert_to_int(request.GET.get('show_this_year', 0))
@@ -342,6 +344,15 @@ def representative_list_view(request):
                 )
             else:
                 queryset = queryset.filter(state_code__iexact=state_code)
+        if positive_value_exists(show_representatives_with_email):
+            queryset = queryset.annotate(representative_email_length=Length('representative_email'))
+            queryset = queryset.annotate(representative_email2_length=Length('representative_email2'))
+            queryset = queryset.annotate(representative_email3_length=Length('representative_email3'))
+            queryset = queryset.filter(
+                Q(representative_email_length__gt=2) |
+                Q(representative_email2_length__gt=2) |
+                Q(representative_email3_length__gt=2)
+            )
 
         if positive_value_exists(show_this_year):
             if show_this_year in OFFICE_HELD_YEARS_AVAILABLE:
@@ -376,12 +387,10 @@ def representative_list_view(request):
                     queryset = queryset.filter(final_filters)
 
         representative_count = queryset.count()
-        if not positive_value_exists(show_all):
-            representative_list = list(queryset.order_by('representative_name')[:100])
-        elif positive_value_exists(representative_search):
-            representative_list = list(queryset)
+        if positive_value_exists(show_all):
+            representative_list = list(queryset[:1000])
         else:
-            representative_list = list(queryset[:500])
+            representative_list = list(queryset[:200])
     except ObjectDoesNotExist:
         # This is fine
         pass
@@ -432,6 +441,8 @@ def representative_list_view(request):
         'election_list':            election_list,
         'representative_list':      representative_list,
         'representative_search':    representative_search,
+        'show_all':                 show_all,
+        'show_representatives_with_email':  show_representatives_with_email,
         'show_this_year':           show_this_year,
         'state_code':               state_code,
         'state_list':               sorted_state_list,
@@ -1104,10 +1115,9 @@ def representative_retrieve_photos_view(request, representative_id):  # TODO DAL
     we_vote_representative = results['representative']
 
     display_messages = True
-    retrieve_representative_results = retrieve_representative_photos(we_vote_representative, force_retrieve)
-
-    if retrieve_representative_results['status'] and display_messages:
-        messages.add_message(request, messages.INFO, retrieve_representative_results['status'])
+    # retrieve_representative_results = retrieve_representative_photos(we_vote_representative, force_retrieve)
+    # if retrieve_representative_results['status'] and display_messages:
+    #     messages.add_message(request, messages.INFO, retrieve_representative_results['status'])
     return HttpResponseRedirect(reverse('representative:representative_edit', args=(representative_id,)))
 
 
@@ -1252,7 +1262,7 @@ def update_representatives_from_politicians_view(request):
             politician = politician_list_by_we_vote_id[we_vote_representative.politician_we_vote_id]
         else:
             politician = None
-            we_vote_representative.date_last_updated_from_politician = datetime.now()
+            we_vote_representative.date_last_updated_from_politician = localtime(now()).date()
             we_vote_representative.save()
         if not politician or not hasattr(politician, 'we_vote_id'):
             continue
@@ -1260,7 +1270,7 @@ def update_representatives_from_politicians_view(request):
         if results['success']:
             save_changes = results['save_changes']
             we_vote_representative = results['representative']
-            we_vote_representative.date_last_updated_from_politician = datetime.now()
+            we_vote_representative.date_last_updated_from_politician = localtime(now()).date()
             we_vote_representative.save()
             if save_changes:
                 representatives_updated += 1

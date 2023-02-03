@@ -60,11 +60,21 @@
     {% endif %}{# End of if years_available #}
     &nbsp;&nbsp;
     {% if representative_search %}
-    <a href="{% url 'representative:representative_list' %}?state_code={{ state_code }}">
+    <a href="{% url 'representative:representative_list' %}?state_code={{ state_code }}&show_representatives_with_email={{ show_representatives_with_email }}&show_all={{ show_all }}">
          clear search</a>&nbsp;
     {% endif %}
     <input type="text" name="representative_search" id="representative_search_id" value="{{ representative_search }}" />
     <input type="submit" value="Search for Representative" />
+    &nbsp;&nbsp;
+    <label for="show_representatives_with_email_id">
+      <input type="checkbox" name="show_representatives_with_email" id="show_representatives_with_email_id" value="1"
+             {% if show_representatives_with_email %}checked{% endif %} /> Has Email
+    </label>
+    &nbsp;&nbsp;
+    <label for="show_all_id">
+      <input type="checkbox" name="show_all" id="show_all_id" value="1"
+             {% if show_all %}checked{% endif %} /> Show up to 1000 politicians
+    </label>
 </form>
 <br/>
 
@@ -134,11 +144,6 @@
     {% endfor %}
     </table>
 
-    {% if state_code != "" %}
-    <a href="{% url 'representative:representative_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&representative_search={{ representative_search }}&show_all=1">
-        Show all Representatives in this state</a>
-    {% endif %}
-
     <p></p>
 {% else %}
     <p>(no representatives found)</p>
@@ -148,6 +153,16 @@
 {% endif %}
 
     <script>
+        $(function() {
+            $('#show_all_id').change(function() {
+                this.form.submit();
+            });
+        });
+        $(function() {
+            $('#show_representatives_with_email_id').change(function() {
+                this.form.submit();
+            });
+        });
         $(function() {
             $('#show_this_year_id').change(function() {
                 this.form.submit();
