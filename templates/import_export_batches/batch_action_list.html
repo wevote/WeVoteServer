@@ -913,7 +913,11 @@
                             <br />{{ one_batch_row.batch_row_action.politician_twitter_handle5|default_if_none:"" }}
                         {% endif %}
                         </td>
-                        <td>{{ one_batch_row.batch_row_action.politician_email_address|default_if_none:"" }}</td>
+                        <td>
+                            {{ one_batch_row.batch_row_action.politician_email|default_if_none:"" }}
+                            {{ one_batch_row.batch_row_action.politician_email2|default_if_none:"" }}
+                            {{ one_batch_row.batch_row_action.politician_email3|default_if_none:"" }}
+                        </td>
                         <td>{{ one_batch_row.batch_row_action.politician_url|default_if_none:"" }}</td>
                     </tr>
                     {% if one_batch_row.batch_row_action.status %}

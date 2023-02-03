@@ -1653,8 +1653,12 @@ def create_batch_row_action_politician(batch_description, batch_header_map, one_
     middle_name = batch_manager.retrieve_value_from_batch_row("politician_middle_name", batch_header_map, one_batch_row)
     last_name = batch_manager.retrieve_value_from_batch_row("politician_last_name", batch_header_map, one_batch_row)
     website_url = batch_manager.retrieve_value_from_batch_row("politician_website_url", batch_header_map, one_batch_row)
-    email_address = batch_manager.retrieve_value_from_batch_row("politician_email_address", batch_header_map,
-                                                                one_batch_row)
+    # FORMERLY politician_email_address
+    # email_address = batch_manager.retrieve_value_from_batch_row("politician_email_address", batch_header_map,
+    #                                                             one_batch_row)
+    politician_email = batch_manager.retrieve_value_from_batch_row("politician_email", batch_header_map, one_batch_row)
+    politician_email2 = batch_manager.retrieve_value_from_batch_row("politician_email2", batch_header_map, one_batch_row)
+    politician_email3 = batch_manager.retrieve_value_from_batch_row("politician_email3", batch_header_map, one_batch_row)
     youtube_id = batch_manager.retrieve_value_from_batch_row("politician_youtube_id", batch_header_map, one_batch_row)
     googleplus_id = batch_manager.retrieve_value_from_batch_row("politician_googleplus_id", batch_header_map,
                                                                 one_batch_row)
@@ -1819,7 +1823,9 @@ def create_batch_row_action_politician(batch_description, batch_header_map, one_
         batch_row_action_politician.state_code = state_code
         batch_row_action_politician.political_party = party_name
         batch_row_action_politician.ctcl_uuid = ctcl_uuid
-        batch_row_action_politician.politician_email_address = email_address
+        batch_row_action_politician.politician_email = politician_email
+        batch_row_action_politician.politician_email2 = politician_email2
+        batch_row_action_politician.politician_email3 = politician_email3
         batch_row_action_politician.politician_phone_number = phone_number
         batch_row_action_politician.politician_twitter_handle = politician_twitter_handle
         batch_row_action_politician.politician_twitter_handle2 = politician_twitter_handle2
@@ -4635,7 +4641,10 @@ def import_politician_data_from_batch_row_actions(batch_header_id, batch_row_id,
         politician_last_name = one_batch_row_action.last_name
         ctcl_uuid = one_batch_row_action.ctcl_uuid
         political_party = one_batch_row_action.political_party
-        politician_email_address = one_batch_row_action.politician_email_address
+        # politician_email_address = one_batch_row_action.politician_email_address
+        politician_email = one_batch_row_action.politician_email
+        politician_email2 = one_batch_row_action.politician_email2
+        politician_email3 = one_batch_row_action.politician_email3
         politician_phone_number = one_batch_row_action.politician_phone_number
         politician_twitter_handle = one_batch_row_action.politician_twitter_handle
         politician_twitter_handle2 = one_batch_row_action.politician_twitter_handle2
@@ -4655,23 +4664,25 @@ def import_politician_data_from_batch_row_actions(batch_header_id, batch_row_id,
             politician_manager = PoliticianManager()
             if create_entry_flag:
                 results = politician_manager.create_politician_row_entry(
-                    politician_name,
-                    politician_first_name,
-                    politician_middle_name,
-                    politician_last_name,
-                    ctcl_uuid,
-                    political_party,
-                    politician_email_address,
-                    politician_phone_number,
-                    politician_twitter_handle,
-                    politician_twitter_handle2,
-                    politician_twitter_handle3,
-                    politician_twitter_handle4,
-                    politician_twitter_handle5,
-                    politician_facebook_id,
-                    politician_googleplus_id,
-                    politician_youtube_id,
-                    politician_website_url)
+                    politician_name=politician_name,
+                    politician_first_name=politician_first_name,
+                    politician_middle_name=politician_middle_name,
+                    politician_last_name=politician_last_name,
+                    ctcl_uuid=ctcl_uuid,
+                    political_party=political_party,
+                    politician_email=politician_email,
+                    politician_email2=politician_email2,
+                    politician_email3=politician_email3,
+                    politician_phone_number=politician_phone_number,
+                    politician_twitter_handle=politician_twitter_handle,
+                    politician_twitter_handle2=politician_twitter_handle2,
+                    politician_twitter_handle3=politician_twitter_handle3,
+                    politician_twitter_handle4=politician_twitter_handle4,
+                    politician_twitter_handle5=politician_twitter_handle5,
+                    politician_facebook_id=politician_facebook_id,
+                    politician_googleplus_id=politician_googleplus_id,
+                    politician_youtube_id=politician_youtube_id,
+                    politician_website_url=politician_website_url)
                 if results['new_politician_created']:
                     number_of_politicians_created += 1
                     success = True
@@ -4688,24 +4699,26 @@ def import_politician_data_from_batch_row_actions(batch_header_id, batch_row_id,
             elif update_entry_flag:
                 politician_we_vote_id = one_batch_row_action.politician_we_vote_id
                 results = politician_manager.update_politician_row_entry(
-                    politician_name,
-                    politician_first_name,
-                    politician_middle_name,
-                    politician_last_name,
-                    ctcl_uuid,
-                    political_party,
-                    politician_email_address,
-                    politician_twitter_handle,
-                    politician_twitter_handle2,
-                    politician_twitter_handle3,
-                    politician_twitter_handle4,
-                    politician_twitter_handle5,
-                    politician_phone_number,
-                    politician_facebook_id,
-                    politician_googleplus_id,
-                    politician_youtube_id,
-                    politician_website_url,
-                    politician_we_vote_id)
+                    politician_name=politician_name,
+                    politician_first_name=politician_first_name,
+                    politician_middle_name=politician_middle_name,
+                    politician_last_name=politician_last_name,
+                    ctcl_uuid=ctcl_uuid,
+                    political_party=political_party,
+                    politician_email=politician_email,
+                    politician_email2=politician_email2,
+                    politician_email3=politician_email3,
+                    politician_twitter_handle=politician_twitter_handle,
+                    politician_twitter_handle2=politician_twitter_handle2,
+                    politician_twitter_handle3=politician_twitter_handle3,
+                    politician_twitter_handle4=politician_twitter_handle4,
+                    politician_twitter_handle5=politician_twitter_handle5,
+                    politician_phone_number=politician_phone_number,
+                    politician_facebook_id=politician_facebook_id,
+                    politician_googleplus_id=politician_googleplus_id,
+                    politician_youtube_id=politician_youtube_id,
+                    politician_website_url=politician_website_url,
+                    politician_we_vote_id=politician_we_vote_id)
                 if results['politician_updated']:
                     number_of_politicians_updated += 1
                     success = True

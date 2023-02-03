@@ -67,7 +67,10 @@ def politicians_sync_out_doc_template_values(url_root):
                    '  "politician_phone_number": string,\n' \
                    '  "politician_googleplus_id": string,\n' \
                    '  "politician_youtube_id": string,\n' \
-                   '  "politician_email_address": string,\n' \
+                   '  "politician_email_address": string DEPRECATING,\n' \
+                   '  "politician_email": string,\n' \
+                   '  "politician_email2": string,\n' \
+                   '  "politician_email3": string,\n' \
                    '}]'
 
     template_values = {

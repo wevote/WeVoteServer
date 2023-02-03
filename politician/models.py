@@ -54,7 +54,7 @@ POLITICIAN_UNIQUE_IDENTIFIERS = [
     'opensecrets_id',
     'political_party',
     'politician_contact_form_url',
-    'politician_email_address',
+    # 'politician_email',  # We now have 3 options and merge them automatically
     'politician_facebook_id',
     'politician_googleplus_id',
     'politician_name',
@@ -406,7 +406,7 @@ class PoliticianManager(models.Manager):
                     politician.google_civic_candidate_name2 = candidate_or_rep.google_civic_candidate_name2
                     politician.google_civic_candidate_name3 = candidate_or_rep.google_civic_candidate_name3
                     politician.maplight_id = candidate_or_rep.maplight_id
-                    politician.politician_email_address = candidate_or_rep.candidate_email
+                    politician.politician_email = candidate_or_rep.candidate_email
                     politician.politician_name = candidate_or_rep.candidate_name
                     politician.politician_phone_number = candidate_or_rep.candidate_phone
                     politician.vote_smart_id = candidate_or_rep.vote_smart_id
@@ -426,7 +426,9 @@ class PoliticianManager(models.Manager):
                     politician.google_civic_candidate_name2 = candidate_or_rep.google_civic_representative_name2
                     politician.google_civic_candidate_name3 = candidate_or_rep.google_civic_representative_name3
                     politician.politician_contact_form_url = candidate_or_rep.representative_contact_form_url
-                    politician.politician_email_address = candidate_or_rep.representative_email
+                    politician.politician_email = candidate_or_rep.representative_email
+                    politician.politician_email2 = candidate_or_rep.representative_email2
+                    politician.politician_email3 = candidate_or_rep.representative_email3
                     politician.politician_name = candidate_or_rep.representative_name
                     politician.politician_phone_number = candidate_or_rep.representative_phone
                     if positive_value_exists(candidate_or_rep.representative_url):
@@ -1137,23 +1139,25 @@ class PoliticianManager(models.Manager):
 
     def create_politician_row_entry(
             self,
-            politician_name,
-            politician_first_name,
-            politician_middle_name,
-            politician_last_name,
-            ctcl_uuid,
-            political_party,
-            politician_email_address,
-            politician_phone_number,
-            politician_twitter_handle,
-            politician_twitter_handle2,
-            politician_twitter_handle3,
-            politician_twitter_handle4,
-            politician_twitter_handle5,
-            politician_facebook_id,
-            politician_googleplus_id,
-            politician_youtube_id,
-            politician_website_url):
+            politician_name='',
+            politician_first_name='',
+            politician_middle_name='',
+            politician_last_name='',
+            ctcl_uuid='',
+            political_party='',
+            politician_email='',
+            politician_email2='',
+            politician_email3='',
+            politician_phone_number='',
+            politician_twitter_handle='',
+            politician_twitter_handle2='',
+            politician_twitter_handle3='',
+            politician_twitter_handle4='',
+            politician_twitter_handle5='',
+            politician_facebook_id='',
+            politician_googleplus_id='',
+            politician_youtube_id='',
+            politician_website_url=''):
         """
 
         :param politician_name:
@@ -1162,7 +1166,9 @@ class PoliticianManager(models.Manager):
         :param politician_last_name:
         :param ctcl_uuid:
         :param political_party:
-        :param politician_email_address:
+        :param politician_email:
+        :param politician_email2:
+        :param politician_email3:
         :param politician_phone_number:
         :param politician_twitter_handle:
         :param politician_twitter_handle2:
@@ -1188,7 +1194,9 @@ class PoliticianManager(models.Manager):
                 middle_name=politician_middle_name,
                 last_name=politician_last_name,
                 political_party=political_party,
-                politician_email_address=politician_email_address,
+                politician_email=politician_email,
+                politician_email2=politician_email2,
+                politician_email3=politician_email3,
                 politician_phone_number=politician_phone_number,
                 politician_twitter_handle=politician_twitter_handle,
                 politician_twitter_handle2=politician_twitter_handle2,
@@ -1224,24 +1232,26 @@ class PoliticianManager(models.Manager):
 
     def update_politician_row_entry(
             self,
-            politician_name,
-            politician_first_name,
-            politician_middle_name,
-            politician_last_name,
-            ctcl_uuid,
-            political_party,
-            politician_email_address,
-            politician_twitter_handle,
-            politician_twitter_handle2,
-            politician_twitter_handle3,
-            politician_twitter_handle4,
-            politician_twitter_handle5,
-            politician_phone_number,
-            politician_facebook_id,
-            politician_googleplus_id,
-            politician_youtube_id,
-            politician_website_url,
-            politician_we_vote_id):
+            politician_name='',
+            politician_first_name='',
+            politician_middle_name='',
+            politician_last_name='',
+            ctcl_uuid='',
+            political_party='',
+            politician_email='',
+            politician_email2='',
+            politician_email3='',
+            politician_twitter_handle='',
+            politician_twitter_handle2='',
+            politician_twitter_handle3='',
+            politician_twitter_handle4='',
+            politician_twitter_handle5='',
+            politician_phone_number='',
+            politician_facebook_id='',
+            politician_googleplus_id='',
+            politician_youtube_id='',
+            politician_website_url='',
+            politician_we_vote_id=''):
         """
 
         :param politician_name:
@@ -1250,7 +1260,9 @@ class PoliticianManager(models.Manager):
         :param politician_last_name:
         :param ctcl_uuid:
         :param political_party:
-        :param politician_email_address:
+        :param politician_email:
+        :param politician_email2:
+        :param politician_email3:
         :param politician_twitter_handle:
         :param politician_twitter_handle2:
         :param politician_twitter_handle3:
@@ -1281,6 +1293,9 @@ class PoliticianManager(models.Manager):
                 existing_politician_entry.last_name = politician_last_name
                 existing_politician_entry.party_name = political_party
                 existing_politician_entry.ctcl_uuid = ctcl_uuid
+                existing_politician_entry.politician_email = politician_email
+                existing_politician_entry.politician_email2 = politician_email2
+                existing_politician_entry.politician_email3 = politician_email3
                 existing_politician_entry.politician_phone_number = politician_phone_number
                 existing_politician_entry.politician_twitter_handle = politician_twitter_handle
                 existing_politician_entry.politician_twitter_handle2 = politician_twitter_handle2
@@ -1291,7 +1306,6 @@ class PoliticianManager(models.Manager):
                 existing_politician_entry.politician_googleplus_id = politician_googleplus_id
                 existing_politician_entry.politician_youtube_id = politician_youtube_id
                 existing_politician_entry.politician_url = politician_website_url
-                existing_politician_entry.politician_email_address = politician_email_address
                 # now go ahead and save this entry (update)
                 existing_politician_entry.save()
                 politician_updated = True

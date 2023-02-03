@@ -4,8 +4,18 @@
 <tr>
     <td>{{ field_label }}</td>
 {% if conflict_status == "CONFLICT" %}
-    <td><input type="radio" name="{{ field_name }}_choice" value="{{ politician1.we_vote_id }}" checked /><span class="bold-select"> {{ politician1_field_value|default_if_none:"" }}</span></td>
-    <td><input type="radio" name="{{ field_name }}_choice" value="{{ politician2.we_vote_id }}" /><span class="bold-select"> {{ politician2_field_value|default_if_none:"" }}</span></td>
+    <td>
+        <input type="radio" name="{{ field_name }}_choice" value="{{ politician1.we_vote_id }}" checked /><span class="bold-select"> {{ politician1_field_value|default_if_none:"" }}</span>
+        {% if 'http' in politician1_field_value %}
+            <a href="{{ politician1_field_value }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>&nbsp;
+        {% endif %}
+    </td>
+    <td>
+        <input type="radio" name="{{ field_name }}_choice" value="{{ politician2.we_vote_id }}" /><span class="bold-select"> {{ politician2_field_value|default_if_none:"" }}</span>
+        {% if 'http' in politician2_field_value %}
+            <a href="{{ politician2_field_value }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>&nbsp;
+        {% endif %}
+    </td>
 {% else %}
     <td>
     {% if 'http' in politician1_field_value %}

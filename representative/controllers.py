@@ -1024,11 +1024,25 @@ def update_representative_from_politician(representative=None, politician=None):
             positive_value_exists(politician.politician_contact_form_url):
         representative.representative_contact_form_url = politician.politician_contact_form_url
         save_changes = True
-    if positive_value_exists(politician.politician_email_address):
+    if positive_value_exists(politician.politician_email):
         twitter_results = add_value_to_next_representative_spot(
             field_name_base='representative_email',
             representative=representative,
-            new_value_to_add=politician.politician_email_address)
+            new_value_to_add=politician.politician_email)
+        if twitter_results['success']:
+            representative = twitter_results['representative']
+    if positive_value_exists(politician.politician_email2):
+        twitter_results = add_value_to_next_representative_spot(
+            field_name_base='representative_email',
+            representative=representative,
+            new_value_to_add=politician.politician_email2)
+        if twitter_results['success']:
+            representative = twitter_results['representative']
+    if positive_value_exists(politician.politician_email3):
+        twitter_results = add_value_to_next_representative_spot(
+            field_name_base='representative_email',
+            representative=representative,
+            new_value_to_add=politician.politician_email3)
         if twitter_results['success']:
             representative = twitter_results['representative']
     if positive_value_exists(politician.politician_phone_number):

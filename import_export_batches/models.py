@@ -474,7 +474,10 @@ BATCH_IMPORT_KEYS_ACCEPTED_FOR_POLITICIANS = {
     'politician_middle_name': 'politician_middle_name',
     'politician_last_name': 'politician_last_name',
     'politician_website_url': 'politician_website_url',
-    'politician_email_address': 'politician_email_address',
+    'politician_email_address': 'politician_email',
+    'politician_email': 'politician_email',
+    'politician_email2': 'politician_email2',
+    'politician_email3': 'politician_email3',
     'politician_youtube_id': 'politician_youtube_id',
     'politician_googleplus_id': 'politician_googleplus_id',
     'politician_phone_number': 'politician_phone_number',
@@ -2897,7 +2900,7 @@ class BatchManager(models.Manager):
                             batch_header_map_003='politician_middle_name',
                             batch_header_map_004='politician_last_name',
                             batch_header_map_005='politician_party_name',
-                            batch_header_map_006='politician_email_address',
+                            batch_header_map_006='politician_email',
                             batch_header_map_007='politician_phone_number',
                             batch_header_map_008='politician_website_url',
                             batch_header_map_009='politician_facebook_id',
@@ -6067,8 +6070,12 @@ class BatchRowActionPolitician(models.Model):
                                                 null=True, unique=False)
     politician_youtube_id = models.CharField(verbose_name='politician youtube profile name', max_length=255, null=True,
                                              unique=False)
+    # DEPRECATE AFTER MIGRATING
     politician_email_address = models.CharField(verbose_name='politician email address', max_length=80, null=True,
                                                 unique=False)
+    politician_email = models.CharField(max_length=255, null=True, unique=False)
+    politician_email2 = models.CharField(max_length=255, null=True, unique=False)
+    politician_email3 = models.CharField(max_length=255, null=True, unique=False)
 
     status = models.TextField(verbose_name="batch row action politician status", null=True, blank=True, default="")
 
