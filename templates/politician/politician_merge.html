@@ -132,7 +132,27 @@
 
 {% include "politician/politician_merge_one_field_decision.html" with field_name="gender" field_label="Gender" conflict_status=conflict_values.gender politician1_field_value=politician_option1.gender politician2_field_value=politician_option2.gender politician1=politician_option1 politician2=politician_option2 %}
 
-{% include "politician/politician_merge_one_field_decision.html" with field_name="politician_email_address" field_label="Politician Email" conflict_status=conflict_values.politician_email_address politician1_field_value=politician_option1.politician_email_address politician2_field_value=politician_option2.politician_email_address politician1=politician_option1 politician2=politician_option2 %}
+    <tr>
+        <td>Politician Emails</td>
+        <td>
+            {{ politician_option1.politician_email|default_if_none:"" }}
+            {% if politician_option1.politician_email2 %}
+                <br />{{ politician_option1.politician_email2|default_if_none:"" }}
+            {% endif %}
+            {% if politician_option1.politician_email3 %}
+                <br />{{ politician_option1.politician_email3|default_if_none:"" }}
+            {% endif %}
+        </td>
+        <td>
+            {{ politician_option2.politician_email|default_if_none:"" }}
+            {% if politician_option2.politician_email2 %}
+                <br />{{ politician_option2.politician_email2|default_if_none:"" }}
+            {% endif %}
+            {% if politician_option2.politician_email3 %}
+                <br />{{ politician_option2.politician_email3|default_if_none:"" }}
+            {% endif %}
+        </td>
+    </tr>
 
 {% include "politician/politician_merge_one_field_decision.html" with field_name="politician_phone_number" field_label="Phone Number" conflict_status=conflict_values.politician_phone_number politician1_field_value=politician_option1.politician_phone_number politician2_field_value=politician_option2.politician_phone_number politician1=politician_option1 politician2=politician_option2 %}
 

@@ -1794,6 +1794,26 @@ def add_period_to_middle_name_initial(name):
     return results
 
 
+def remove_middle_initial_from_name(name):
+    modified_name = name
+    uppercase_a_through_z = list(string.ascii_uppercase)
+    for middle_initial in uppercase_a_through_z:
+        modified_name = modified_name.replace(" {middle_initial} ".format(middle_initial=middle_initial), ' ')
+        modified_name = modified_name.replace(" {middle_initial}. ".format(middle_initial=middle_initial), ' ')
+    if len(name) != len(modified_name):
+        name_changed = True
+    else:
+        name_changed = False
+    results = {
+        'status': "REMOVE_MIDDLE_INITIAL ",
+        'success': True,
+        'incoming_name': name,
+        'modified_name': modified_name,
+        'name_changed': name_changed,
+    }
+    return results
+
+
 def remove_period_from_middle_name_initial(name):
     modified_name = name.replace(' A. ', ' A ')
     modified_name = modified_name.replace(' B. ', ' B ')

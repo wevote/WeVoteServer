@@ -759,7 +759,9 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
     google_civic_candidate_name3 = request.GET.get('google_civic_candidate_name3', False)
     instagram_handle = request.GET.get('instagram_handle', False)
     politician_contact_form_url = request.GET.get('politician_contact_form_url', False)
-    politician_email_address = request.GET.get('politician_email_address', False)
+    politician_email = request.GET.get('politician_email', False)
+    politician_email2 = request.GET.get('politician_email2', False)
+    politician_email3 = request.GET.get('politician_email3', False)
     politician_name = request.GET.get('politician_name', False)
     politician_phone_number = request.GET.get('politician_phone_number', False)
     politician_twitter_handle = request.GET.get('politician_twitter_handle', False)
@@ -960,7 +962,9 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             'maplight_id':                  maplight_id,
             'messages_on_stage':            messages_on_stage,
             'politician':                   politician_on_stage,
-            'politician_email_address':     politician_email_address,
+            'politician_email':             politician_email,
+            'politician_email2':            politician_email2,
+            'politician_email3':            politician_email3,
             'politician_name':              politician_name,
             'politician_phone_number':      politician_phone_number,
             'politician_position_list':     politician_position_list,
@@ -1036,7 +1040,9 @@ def politician_edit_process_view(request):
     google_civic_candidate_name3 = request.POST.get('google_civic_candidate_name3', False)
     instagram_handle = request.POST.get('instagram_handle', False)
     linkedin_url = request.POST.get('linkedin_url', False)
-    politician_email_address = request.POST.get('politician_email_address', False)
+    politician_email = request.POST.get('politician_email', False)
+    politician_email2 = request.POST.get('politician_email2', False)
+    politician_email3 = request.POST.get('politician_email3', False)
     politician_id = convert_to_int(request.POST['politician_id'])
     politician_name = request.POST.get('politician_name', False)
     politician_phone_number = request.POST.get('politician_phone_number', False)
@@ -1164,7 +1170,9 @@ def politician_edit_process_view(request):
                     "&instagram_handle=" + str(instagram_handle) + \
                     "&politician_contact_form_url=" + str(politician_contact_form_url) + \
                     "&politician_name=" + str(politician_name) + \
-                    "&politician_email_address=" + str(politician_email_address) + \
+                    "&politician_email=" + str(politician_email) + \
+                    "&politician_email2=" + str(politician_email2) + \
+                    "&politician_email3=" + str(politician_email3) + \
                     "&politician_phone_number=" + str(politician_phone_number) + \
                     "&politician_twitter_handle=" + str(politician_twitter_handle) + \
                     "&politician_twitter_handle2=" + str(politician_twitter_handle2) + \
@@ -1221,8 +1229,12 @@ def politician_edit_process_view(request):
                 politician_on_stage.maplight_id = maplight_id
             if politician_contact_form_url is not False:
                 politician_on_stage.politician_contact_form_url = politician_contact_form_url
-            if politician_email_address is not False:
-                politician_on_stage.politician_email_address = politician_email_address
+            if politician_email is not False:
+                politician_on_stage.politician_email = politician_email
+            if politician_email2 is not False:
+                politician_on_stage.politician_email2 = politician_email2
+            if politician_email3 is not False:
+                politician_on_stage.politician_email3 = politician_email3
             if politician_name is not False:
                 politician_on_stage.politician_name = politician_name
             if politician_phone_number is not False:
@@ -1326,8 +1338,12 @@ def politician_edit_process_view(request):
                     politician_on_stage.maplight_id = maplight_id
                 if politician_contact_form_url is not False:
                     politician_on_stage.politician_contact_form_url = politician_contact_form_url
-                if politician_email_address is not False:
-                    politician_on_stage.politician_email_address = politician_email_address
+                if politician_email is not False:
+                    politician_on_stage.politician_email = politician_email
+                if politician_email2 is not False:
+                    politician_on_stage.politician_email2 = politician_email2
+                if politician_email3 is not False:
+                    politician_on_stage.politician_email3 = politician_email3
                 if politician_phone_number is not False:
                     politician_on_stage.politician_phone_number = politician_phone_number
                 if politician_twitter_handle is not False:
@@ -1689,7 +1705,9 @@ def politicians_sync_out_view(request):  # politiciansSyncOut
             'opensecrets_id',
             'political_party',
             'politician_contact_form_url',
-            'politician_email_address',
+            'politician_email',
+            'politician_email2',
+            'politician_email3',
             'politician_facebook_id',
             'politician_googleplus_id',
             'politician_name',
