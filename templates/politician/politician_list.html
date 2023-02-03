@@ -42,7 +42,7 @@
     {% endif %}{# End of if state_list #}
 
     {% if politician_search %}
-    <a href="{% url 'politician:politician_list' %}?state_code={{ state_code }}&show_politicians_with_email={{ show_politicians_with_email }}">
+    <a href="{% url 'politician:politician_list' %}?state_code={{ state_code }}&show_all={{ show_all }}&show_politicians_with_email={{ show_politicians_with_email }}">
          clear search</a>&nbsp;
     {% endif %}
     <input type="text" name="politician_search" id="politician_search_id" value="{{ politician_search }}" />
