@@ -22,6 +22,7 @@ import json
 from polling_location.models import KIND_OF_LOG_ENTRY_REPRESENTATIVES_RECEIVED, PollingLocation, PollingLocationManager
 import random
 import requests
+from representative.models import RepresentativeManager
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
@@ -187,14 +188,15 @@ def retrieve_representatives_for_polling_locations_internal_view(
     batch_process_representatives_chunk_id = 0
     batch_set_id = 0
     retrieve_row_count = 0
+    batch_process_manager = BatchProcessManager()
     polling_location_manager = PollingLocationManager()
+    representative_manager = RepresentativeManager()
     try:
         if positive_value_exists(refresh_representatives):
             kind_of_process = REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS
         else:
             kind_of_process = RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS
 
-        batch_process_manager = BatchProcessManager()
         if not positive_value_exists(batch_process_date_started) or not positive_value_exists(batch_process_id):
             try:
                 if not positive_value_exists(batch_process_id):
@@ -252,27 +254,26 @@ def retrieve_representatives_for_polling_locations_internal_view(
                 if one_log_entry.polling_location_we_vote_id not in polling_location_we_vote_id_list_already_retrieved:
                     polling_location_we_vote_id_list_already_retrieved.append(one_log_entry.polling_location_we_vote_id)
 
-        # # For both REFRESH and RETRIEVE, find polling locations/map points which have come up empty
-        # #  (from this data source) in previous chunks since when this process started
-        # polling_location_we_vote_id_list_returned_empty = []
-        # results = ballot_returned_list_manager.\
-        #     retrieve_polling_location_we_vote_id_list_from_ballot_returned_empty(
-        #         batch_process_date_started=batch_process_date_started,
-        #         is_from_ctcl=use_ctcl,
-        #         is_from_vote_usa=use_vote_usa,
-        #         google_civic_election_id=google_civic_election_id,
-        #         state_code=state_code,
-        #     )
-        # if results['polling_location_we_vote_id_list_found']:
-        #     polling_location_we_vote_id_list_returned_empty = results['polling_location_we_vote_id_list']
-        #
-        # status += "REFRESH_BALLOT_RETURNED: " + str(refresh_representatives) + " "
+        # Find polling locations/map points which have come up empty
+        #  (from this data source) in previous chunks since when this process started
+        polling_location_we_vote_id_list_representatives_missing = []
+        results = representative_manager.\
+            retrieve_polling_location_we_vote_id_list_from_representatives_are_missing(
+                batch_process_date_started=batch_process_date_started,
+                is_from_google_civic=True,
+                state_code=state_code,
+            )
+        if results['polling_location_we_vote_id_list_found']:
+            polling_location_we_vote_id_list_representatives_missing = results['polling_location_we_vote_id_list']
+
+        status += "REFRESH_REPRESENTATIVES: " + str(refresh_representatives) + " "
 
         # # For both REFRESH and RETRIEVE, see if the number of map points for this state exceed the "large" threshold
         # refresh_or_retrieve_limit = \
         #     polling_location_manager.calculate_number_of_map_points_to_retrieve_with_each_batch_chunk(state_code)
         # Because of Google Civic rate limits per minute, we want to limit to 50 per process.
-        refresh_or_retrieve_limit = 50
+        from polling_location.models import MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK_FOR_REPRESENTATIVES_API
+        refresh_or_retrieve_limit = MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK_FOR_REPRESENTATIVES_API
 
         # if positive_value_exists(refresh_representatives):
         #     # REFRESH branch
@@ -281,7 +282,7 @@ def retrieve_representatives_for_polling_locations_internal_view(
         #     # exclude map points already retrieved in this batch and those returned empty since this process started
         #     polling_location_we_vote_id_list_to_exclude = \
         #         list(set(polling_location_we_vote_id_list_already_retrieved +
-        #                  polling_location_we_vote_id_list_returned_empty))
+        #                  polling_location_we_vote_id_list_representatives_missing))
         #     polling_location_we_vote_id_list_to_retrieve = \
         #         list(set(polling_location_we_vote_id_list_from_offices_held_for_location) -
         #              set(polling_location_we_vote_id_list_to_exclude))
@@ -309,8 +310,8 @@ def retrieve_representatives_for_polling_locations_internal_view(
         # exclude map points already retrieved in this batch and those returned empty since this process started
         polling_location_we_vote_id_list_to_exclude = \
             list(set(polling_location_we_vote_id_list_from_offices_held_for_location +
-                     polling_location_we_vote_id_list_already_retrieved))
-        #  + polling_location_we_vote_id_list_returned_empty
+                     polling_location_we_vote_id_list_already_retrieved +
+                     polling_location_we_vote_id_list_representatives_missing))
         polling_location_query = \
             polling_location_query.exclude(we_vote_id__in=polling_location_we_vote_id_list_to_exclude)
         polling_location_query = polling_location_query.exclude(polling_location_deleted=True)

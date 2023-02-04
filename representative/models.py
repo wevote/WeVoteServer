@@ -417,6 +417,40 @@ class RepresentativeManager(models.Manager):
     def __unicode__(self):
         return "RepresentativeManager"
 
+    def retrieve_polling_location_we_vote_id_list_from_representatives_are_missing(
+            self,
+            batch_process_date_started=None,
+            is_from_google_civic=False,
+            state_code=''):
+        polling_location_we_vote_id_list = []
+        status = ''
+        success = True
+
+        try:
+            query = RepresentativesMissingFromPollingLocation.objects.using('readonly')\
+                .order_by('-date_last_updated')\
+                .filter(issue_resolved=False)\
+                .exclude(Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id=""))
+            if batch_process_date_started:
+                query = query.filter(date_last_updated__gt=batch_process_date_started)
+            if positive_value_exists(is_from_google_civic):
+                query = query.filter(is_from_google_civic=True)
+            if positive_value_exists(state_code):
+                query = query.filter(state_code__iexact=state_code)
+            query = query.values_list('polling_location_we_vote_id', flat=True).distinct()
+            polling_location_we_vote_id_list = list(query)
+        except Exception as e:
+            status += "COULD_NOT_RETRIEVE_POLLING_LOCATION_LIST-EMPTY: " + str(e) + " "
+        # status += "PL_LIST: " + str(polling_location_we_vote_id_list) + " "
+        polling_location_we_vote_id_list_found = positive_value_exists(len(polling_location_we_vote_id_list))
+        results = {
+            'success':                                  success,
+            'status':                                   status,
+            'polling_location_we_vote_id_list_found':   polling_location_we_vote_id_list_found,
+            'polling_location_we_vote_id_list':         polling_location_we_vote_id_list,
+        }
+        return results
+
     def retrieve_representative_from_id(self, representative_id, read_only=False):
         representative_manager = RepresentativeManager()
         return representative_manager.retrieve_representative(
@@ -1041,6 +1075,40 @@ class RepresentativeManager(models.Manager):
             }
         return results
 
+    def create_representatives_missing(
+            self,
+            is_from_google_civic=False,
+            polling_location_we_vote_id='',
+            state_code=None,
+            defaults={}
+    ):
+        entry_created = False
+        representatives_missing = None
+        representatives_missing_found = False
+        status = ''
+        success = True
+
+        try:
+            representatives_missing, entry_created = RepresentativesMissingFromPollingLocation.objects.update_or_create(
+                is_from_google_civic=is_from_google_civic,
+                polling_location_we_vote_id=polling_location_we_vote_id,
+                state_code=state_code,
+                defaults=defaults)
+            representatives_missing_found = True
+            status += "REPRESENTATIVES_MISSING_CREATED "
+        except Exception as e:
+            status += "REPRESENTATIVES_MISSING_NOT_CREATED: " + str(e) + " "
+            success = False
+
+        results = {
+            'status':                           status,
+            'success':                          success,
+            'representatives_missing':          representatives_missing,
+            'representatives_missing_created':  entry_created,
+            'representatives_missing_found':    representatives_missing_found,
+        }
+        return results
+
     def update_representative_row_entry(self, representative_we_vote_id, update_values):
         """
         Update Representative table entry with matching we_vote_id
@@ -1354,6 +1422,22 @@ class RepresentativesAreNotDuplicates(models.Model):
         else:
             # If the we_vote_id passed in wasn't found, don't return another we_vote_id
             return ""
+
+
+class RepresentativesMissingFromPollingLocation(models.Model):
+    """
+    We asked for representatives from this Polling Location, but none came back
+    """
+    date_last_updated = models.DateTimeField(
+        verbose_name='date representatives last requested', auto_now=True, db_index=True)
+    error_message = models.TextField(default=None, null=True)
+    is_from_google_civic = models.BooleanField(default=False)
+    issue_resolved = models.BooleanField(default=False)
+    # The map point for which this ballot was retrieved
+    polling_location_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id of the map point", max_length=255, default=None, null=True,
+        blank=True, unique=False)
+    state_code = models.CharField(max_length=2, null=True, db_index=True)
 
 
 class RepresentativeToOfficeHeldLink(models.Model):

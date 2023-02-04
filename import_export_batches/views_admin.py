@@ -1764,15 +1764,23 @@ def batch_process_list_view(request):
     for batch_process in batch_process_list:
         if batch_process.kind_of_process in [
             RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,
+            RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS,
         ]:
             state_code_lower_case = ''
             map_points_retrieved_each_batch_chunk = 101  # Signals that a state_code wasn't found
             if positive_value_exists(batch_process.state_code):
                 state_code_lower_case = batch_process.state_code.lower()
-                # For both REFRESH and RETRIEVE, see if number of map points for this state exceed the "large" threshold
-                map_points_retrieved_each_batch_chunk = \
-                    polling_location_manager.calculate_number_of_map_points_to_retrieve_with_each_batch_chunk(
-                        state_code_lower_case)
+                if batch_process.kind_of_process in [
+                    RETRIEVE_BALLOT_ITEMS_FROM_POLLING_LOCATIONS, REFRESH_BALLOT_ITEMS_FROM_POLLING_LOCATIONS,
+                ]:
+                    # For both REFRESH and RETRIEVE, see if number of map points for state exceeds the "large" threshold
+                    map_points_retrieved_each_batch_chunk = \
+                        polling_location_manager.calculate_number_of_map_points_to_retrieve_with_each_batch_chunk(
+                            state_code_lower_case)
+                elif batch_process.kind_of_process in [RETRIEVE_REPRESENTATIVES_FROM_POLLING_LOCATIONS]:
+                    from polling_location.models import MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK_FOR_REPRESENTATIVES_API
+                    map_points_retrieved_each_batch_chunk = \
+                        MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK_FOR_REPRESENTATIVES_API
             if state_code_lower_case in state_codes_map_point_counts_dict:
                 batch_process.polling_location_count = state_codes_map_point_counts_dict[state_code_lower_case]
                 batch_process.ballot_item_chunks_expected = \
