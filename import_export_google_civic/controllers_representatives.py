@@ -1150,6 +1150,7 @@ def retrieve_google_civic_representatives_from_polling_location_api(
     polling_location_found = False
     batch_header_id = 0
     successful_representatives_api_call = False
+    representative_manager = RepresentativeManager()
 
     if not positive_value_exists(polling_location_we_vote_id) and not polling_location:
         status += "MISSING_POLLING_LOCATION_INFO_FOR_REPRESENTATIVES "
@@ -1380,7 +1381,7 @@ def retrieve_google_civic_representatives_from_polling_location_api(
                                 if 'reason' in one_error:
                                     if one_error['reason'] == "notFound":
                                         # Representatives not found at this location
-                                        address_not_found = True
+                                        kind_of_log_entry = KIND_OF_LOG_ENTRY_NO_OFFICES_HELD
                                         status += "ERROR_REPRESENTATIVES_notFound "
                                     elif one_error['reason'] == "parseError":
                                         kind_of_log_entry = KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR
@@ -1397,6 +1398,20 @@ def retrieve_google_civic_representatives_from_polling_location_api(
                 except Exception as e:
                     status += "PROBLEM_GETTING_REPRESENTATIVES_ERRORS_GOOGLE_CIVIC: " + str(e) + " "
                     log_entry_message += status
+                if kind_of_log_entry in [
+                    KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR, KIND_OF_LOG_ENTRY_NO_OFFICES_HELD,
+                ]:
+                    defaults = {
+                        'error_message':    status,
+                        'issue_resolved':   False,
+                    }
+                    error_results = representative_manager.create_representatives_missing(
+                        is_from_google_civic=True,
+                        polling_location_we_vote_id=polling_location_we_vote_id,
+                        state_code=state_code,
+                        defaults=defaults,
+                    )
+                    status += error_results['status']
                 results = polling_location_manager.create_polling_location_log_entry(
                     batch_process_id=batch_process_id,
                     is_from_google_civic=True,

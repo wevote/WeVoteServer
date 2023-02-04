@@ -64,33 +64,37 @@
     <tr>
         <td>Twitter Handles</td>
         <td>
-            {{ politician_option1.politician_twitter_handle|default_if_none:"" }}
+            {% if politician_option1.politician_twitter_handle %}
+                <a href="https://twitter.com/{{ politician_option1.politician_twitter_handle|default_if_none:"" }}" target="_blank">{{ politician_option1.politician_twitter_handle|default_if_none:"" }}<span class="glyphicon glyphicon-new-window"></span></a>
+            {% endif %}
             {% if politician_option1.politician_twitter_handle2 %}
-                <br />{{ politician_option1.politician_twitter_handle2|default_if_none:"" }}
+                <br /><a href="https://twitter.com/{{ politician_option1.politician_twitter_handle2|default_if_none:"" }}" target="_blank">{{ politician_option1.politician_twitter_handle2|default_if_none:"" }}<span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
             {% if politician_option1.politician_twitter_handle3 %}
-                <br />{{ politician_option1.politician_twitter_handle3|default_if_none:"" }}
+                <br /><a href="https://twitter.com/{{ politician_option1.politician_twitter_handle3|default_if_none:"" }}" target="_blank">{{ politician_option1.politician_twitter_handle3|default_if_none:"" }}<span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
             {% if politician_option1.politician_twitter_handle4 %}
-                <br />{{ politician_option1.politician_twitter_handle4|default_if_none:"" }}
+                <br /><a href="https://twitter.com/{{ politician_option1.politician_twitter_handle4|default_if_none:"" }}" target="_blank">{{ politician_option1.politician_twitter_handle4|default_if_none:"" }}<span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
             {% if politician_option1.politician_twitter_handle5 %}
-                <br />{{ politician_option1.politician_twitter_handle5|default_if_none:"" }}
+                <br /><a href="https://twitter.com/{{ politician_option1.politician_twitter_handle5|default_if_none:"" }}" target="_blank">{{ politician_option1.politician_twitter_handle5|default_if_none:"" }}<span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
         </td>
         <td>
-            {{ politician_option2.politician_twitter_handle|default_if_none:"" }}
+            {% if politician_option2.politician_twitter_handle %}
+                <a href="https://twitter.com/{{ politician_option2.politician_twitter_handle|default_if_none:"" }}" target="_blank">{{ politician_option2.politician_twitter_handle|default_if_none:"" }}<span class="glyphicon glyphicon-new-window"></span></a>
+            {% endif %}
             {% if politician_option2.politician_twitter_handle2 %}
-                <br />{{ politician_option2.politician_twitter_handle2|default_if_none:"" }}
+                <br /><a href="https://twitter.com/{{ politician_option2.politician_twitter_handle2|default_if_none:"" }}" target="_blank">{{ politician_option2.politician_twitter_handle2|default_if_none:"" }}<span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
             {% if politician_option2.politician_twitter_handle3 %}
-                <br />{{ politician_option2.politician_twitter_handle3|default_if_none:"" }}
+                <br /><a href="https://twitter.com/{{ politician_option2.politician_twitter_handle3|default_if_none:"" }}" target="_blank">{{ politician_option2.politician_twitter_handle3|default_if_none:"" }}<span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
             {% if politician_option2.politician_twitter_handle4 %}
-                <br />{{ politician_option2.politician_twitter_handle4|default_if_none:"" }}
+                <br /><a href="https://twitter.com/{{ politician_option2.politician_twitter_handle4|default_if_none:"" }}" target="_blank">{{ politician_option2.politician_twitter_handle4|default_if_none:"" }}<span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
             {% if politician_option2.politician_twitter_handle5 %}
-                <br />{{ politician_option2.politician_twitter_handle5|default_if_none:"" }}
+                <br /><a href="https://twitter.com/{{ politician_option2.politician_twitter_handle5|default_if_none:"" }}" target="_blank">{{ politician_option2.politician_twitter_handle5|default_if_none:"" }}<span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
         </td>
     </tr>
@@ -179,58 +183,65 @@
     <tr>
         <td>Politician Websites</td>
         <td>
-            {{ politician_option1.politician_url|default_if_none:"" }}
+            {% if politician_option1.politician_url %}
+                <a href="{{ politician_option1.politician_url|default_if_none:"" }}" target="_blank">{{ politician_option1.politician_url|default_if_none:"" }}<span class="glyphicon glyphicon-new-window"></span></a>
+            {% endif %}
             {% if politician_option1.politician_url2 %}
-                <br />{{ politician_option1.politician_url2|default_if_none:"" }}
+                <br /><a href="{{ politician_option1.politician_url2|default_if_none:"" }}" target="_blank">{{ politician_option1.politician_url2|default_if_none:"" }}<span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
             {% if politician_option1.politician_url3 %}
-                <br />{{ politician_option1.politician_url3|default_if_none:"" }}
+                <br /><a href="{{ politician_option1.politician_url3|default_if_none:"" }}" target="_blank">{{ politician_option1.politician_url3|default_if_none:"" }}<span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
             {% if politician_option1.politician_url4 %}
-                <br />{{ politician_option1.politician_url4|default_if_none:"" }}
+                <br /><a href="{{ politician_option1.politician_url4|default_if_none:"" }}" target="_blank">{{ politician_option1.politician_url4|default_if_none:"" }}<span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
             {% if politician_option1.politician_url5 %}
-                <br />{{ politician_option1.politician_url5|default_if_none:"" }}
+                <br /><a href="{{ politician_option1.politician_url5|default_if_none:"" }}" target="_blank">{{ politician_option1.politician_url5|default_if_none:"" }}<span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
         </td>
         <td>
-            {{ politician_option2.politician_url|default_if_none:"" }}
+            {% if politician_option2.politician_url %}
+                <a href="{{ politician_option2.politician_url|default_if_none:"" }}" target="_blank">{{ politician_option2.politician_url|default_if_none:"" }}<span class="glyphicon glyphicon-new-window"></span></a>
+            {% endif %}
             {% if politician_option2.politician_url2 %}
-                <br />{{ politician_option2.politician_url2|default_if_none:"" }}
+                <br /><a href="{{ politician_option2.politician_url2|default_if_none:"" }}" target="_blank">{{ politician_option2.politician_url2|default_if_none:"" }}<span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
             {% if politician_option2.politician_url3 %}
-                <br />{{ politician_option2.politician_url3|default_if_none:"" }}
+                <br /><a href="{{ politician_option2.politician_url3|default_if_none:"" }}" target="_blank">{{ politician_option2.politician_url3|default_if_none:"" }}<span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
             {% if politician_option2.politician_url4 %}
-                <br />{{ politician_option2.politician_url4|default_if_none:"" }}
+                <br /><a href="{{ politician_option2.politician_url4|default_if_none:"" }}" target="_blank">{{ politician_option2.politician_url4|default_if_none:"" }}<span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
             {% if politician_option2.politician_url5 %}
-                <br />{{ politician_option2.politician_url5|default_if_none:"" }}
+                <br /><a href="{{ politician_option2.politician_url5|default_if_none:"" }}" target="_blank">{{ politician_option2.politician_url5|default_if_none:"" }}<span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
         </td>
     </tr>
 
 {% include "politician/politician_merge_one_field_decision.html" with field_name="politician_contact_form_url" field_label="Politician Contact Form" conflict_status=conflict_values.politician_contact_form_url politician1_field_value=politician_option1.politician_contact_form_url politician2_field_value=politician_option2.politician_contact_form_url politician1=politician_option1 politician2=politician_option2 %}
 
-
     <tr>
         <td>Facebook URLs</td>
         <td>
-            {{ politician_option1.facebook_url|default_if_none:"" }}
+            {% if politician_option1.facebook_url %}
+                <a href="{{ politician_option1.facebook_url|default_if_none:"" }}" target="_blank">{{ politician_option1.facebook_url|default_if_none:"" }}<span class="glyphicon glyphicon-new-window"></span></a>
+            {% endif %}
             {% if politician_option1.facebook_url2 %}
-                <br />{{ politician_option1.facebook_url2|default_if_none:"" }}
+                <br />{{ politician_option1.facebook_url2|default_if_none:"" }}<span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
             {% if politician_option1.facebook_url3 %}
-                <br />{{ politician_option1.facebook_url3|default_if_none:"" }}
+                <br />{{ politician_option1.facebook_url3|default_if_none:"" }}<span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
         </td>
         <td>
-            {{ politician_option2.facebook_url|default_if_none:"" }}
+            {% if politician_option2.facebook_url %}
+                <a href="{{ politician_option2.facebook_url|default_if_none:"" }}" target="_blank">{{ politician_option2.facebook_url|default_if_none:"" }}<span class="glyphicon glyphicon-new-window"></span></a>
+            {% endif %}
             {% if politician_option2.facebook_url2 %}
-                <br />{{ politician_option2.facebook_url2|default_if_none:"" }}
+                <br /><a href="{{ politician_option2.facebook_url2|default_if_none:"" }}" target="_blank">{{ politician_option2.facebook_url2|default_if_none:"" }}<span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
             {% if politician_option2.facebook_url3 %}
-                <br />{{ politician_option2.facebook_url3|default_if_none:"" }}
+                <br /><a href="{{ politician_option2.facebook_url3|default_if_none:"" }}" target="_blank">{{ politician_option2.facebook_url3|default_if_none:"" }}<span class="glyphicon glyphicon-new-window"></span></a>
             {% endif %}
         </td>
     </tr>
