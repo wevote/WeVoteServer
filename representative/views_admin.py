@@ -30,7 +30,9 @@ from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP, \
     extract_instagram_handle_from_text_string, extract_twitter_handle_from_text_string, \
-    convert_to_political_party_constant
+    convert_to_political_party_constant, \
+    extract_first_name_from_full_name, \
+    extract_last_name_from_full_name
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE, OFFICE_HELD_YEARS_AVAILABLE
 
 OFFICES_SYNC_URL = get_environment_variable("OFFICES_SYNC_URL")  # officesSyncOut
@@ -321,16 +323,17 @@ def representative_list_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    messages_on_stage = get_messages(request)
-    state_code = request.GET.get('state_code', '')
-    representative_search = request.GET.get('representative_search', '')
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    messages_on_stage = get_messages(request)
+    missing_politician = positive_value_exists(request.GET.get('missing_politician', False))
+    representative_search = request.GET.get('representative_search', '')
     show_all = positive_value_exists(request.GET.get('show_all', False))
     show_representatives_with_email = request.GET.get('show_representatives_with_email', False)
+    show_this_year = convert_to_int(request.GET.get('show_this_year', 0))
+    state_code = request.GET.get('state_code', '')
+
     representative_count = 0
     representative_list = []
-    show_this_year = convert_to_int(request.GET.get('show_this_year', 0))
-
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
 
@@ -353,6 +356,12 @@ def representative_list_view(request):
                 Q(representative_email_length__gt=2) |
                 Q(representative_email2_length__gt=2) |
                 Q(representative_email3_length__gt=2)
+            )
+
+        if positive_value_exists(missing_politician):
+            queryset = queryset.filter(
+                Q(politician_we_vote_id__isnull=True) |
+                Q(politician_we_vote_id='')
             )
 
         if positive_value_exists(show_this_year):
@@ -449,6 +458,7 @@ def representative_list_view(request):
 
     template_values = {
         'messages_on_stage':        messages_on_stage,
+        'missing_politician':       missing_politician,
         'google_civic_election_id': google_civic_election_id,
         'election_list':            election_list,
         'representative_list':      representative_list,
@@ -691,11 +701,28 @@ def representative_edit_view(request, representative_id):
     # Find possible duplicate representatives
     try:
         at_least_one_filter = False
-        duplicate_representative_query = Representative.objects.all()
+        duplicate_representative_query = Representative.objects.using('readonly').all()
+        duplicate_representative_query = \
+            duplicate_representative_query.filter(state_code=representative_on_stage.state_code)
         duplicate_representative_query = duplicate_representative_query.exclude(
             we_vote_id__iexact=representative_on_stage.we_vote_id)
-
         filter_list = Q(representative_name__icontains=representative_on_stage.representative_name)
+        filter_list |= Q(google_civic_representative_name__iexact=representative_on_stage.representative_name)
+        filter_list |= Q(google_civic_representative_name2__iexact=representative_on_stage.representative_name)
+        filter_list |= Q(google_civic_representative_name3__iexact=representative_on_stage.representative_name)
+        if positive_value_exists(representative_on_stage.google_civic_representative_name):
+            at_least_one_filter = True
+            filter_list |= Q(representative_name__iexact=representative_on_stage.google_civic_representative_name)
+            filter_list |= \
+                Q(google_civic_representative_name__iexact=representative_on_stage.google_civic_representative_name)
+            filter_list |= \
+                Q(google_civic_representative_name2__iexact=representative_on_stage.google_civic_representative_name)
+            filter_list |= \
+                Q(google_civic_representative_name3__iexact=representative_on_stage.google_civic_representative_name)
+
+        if positive_value_exists(representative_on_stage.facebook_url):
+            at_least_one_filter = True
+            filter_list |= Q(representative_twitter_handle=representative_on_stage.facebook_url)
 
         if positive_value_exists(representative_on_stage.instagram_handle):
             at_least_one_filter = True
@@ -742,6 +769,113 @@ def representative_edit_view(request, representative_id):
         # This is fine
         pass
 
+    # Find possible politicians to match with representative
+    possible_politician_list = []
+    if positive_value_exists(representative_on_stage.politician_we_vote_id):
+        # Don't search for
+        pass
+    elif positive_value_exists(representative_on_stage.representative_name) or \
+            positive_value_exists(representative_on_stage.facebook_url) or \
+            positive_value_exists(representative_on_stage.google_civic_reprentative_name) or \
+            positive_value_exists(representative_on_stage.representative_twitter_handle) or \
+            positive_value_exists(representative_on_stage.representative_email):
+        try:
+            possible_politician_list = Politician.objects.using('readonly').all()
+            possible_politician_list = possible_politician_list.filter(state_code=representative_on_stage.state_code)
+
+            filters = []
+            if positive_value_exists(representative_on_stage.representative_name):
+                new_filter = (
+                    Q(google_civic_candidate_name__icontains=representative_on_stage.representative_name) |
+                    Q(google_civic_candidate_name2__icontains=representative_on_stage.representative_name) |
+                    Q(google_civic_candidate_name3__icontains=representative_on_stage.representative_name) |
+                    Q(politician_name__icontains=representative_on_stage.representative_name)
+                )
+                filters.append(new_filter)
+
+            first_name = extract_first_name_from_full_name(representative_on_stage.representative_name)
+            last_name = extract_last_name_from_full_name(representative_on_stage.representative_name)
+            if positive_value_exists(first_name) or positive_value_exists(last_name):
+                new_filter = Q(first_name__icontains=first_name) & Q(last_name__icontains=last_name)
+                filters.append(new_filter)
+
+            if positive_value_exists(representative_on_stage.representative_email):
+                new_filter = (
+                    Q(politician_email__icontains=representative_on_stage.representative_email) |
+                    Q(politician_email2__icontains=representative_on_stage.representative_email) |
+                    Q(politician_email3__icontains=representative_on_stage.representative_email)
+                )
+                filters.append(new_filter)
+
+            if positive_value_exists(representative_on_stage.representative_email2):
+                new_filter = (
+                    Q(politician_email__icontains=representative_on_stage.representative_email2) |
+                    Q(politician_email2__icontains=representative_on_stage.representative_email2) |
+                    Q(politician_email3__icontains=representative_on_stage.representative_email2)
+                )
+                filters.append(new_filter)
+
+            if positive_value_exists(representative_on_stage.representative_email3):
+                new_filter = (
+                    Q(politician_email__icontains=representative_on_stage.representative_email3) |
+                    Q(politician_email2__icontains=representative_on_stage.representative_email3) |
+                    Q(politician_email3__icontains=representative_on_stage.representative_email3)
+                )
+                filters.append(new_filter)
+
+            if positive_value_exists(representative_on_stage.representative_twitter_handle):
+                new_filter = (
+                    Q(politician_twitter_handle__icontains=representative_on_stage.representative_twitter_handle) |
+                    Q(politician_twitter_handle2__icontains=representative_on_stage.representative_twitter_handle) |
+                    Q(politician_twitter_handle3__icontains=representative_on_stage.representative_twitter_handle) |
+                    Q(politician_twitter_handle4__icontains=representative_on_stage.representative_twitter_handle) |
+                    Q(politician_twitter_handle5__icontains=representative_on_stage.representative_twitter_handle)
+                )
+                filters.append(new_filter)
+
+            if positive_value_exists(representative_on_stage.representative_twitter_handle2):
+                new_filter = (
+                    Q(politician_twitter_handle__icontains=representative_on_stage.representative_twitter_handle2) |
+                    Q(politician_twitter_handle2__icontains=representative_on_stage.representative_twitter_handle2) |
+                    Q(politician_twitter_handle3__icontains=representative_on_stage.representative_twitter_handle2) |
+                    Q(politician_twitter_handle4__icontains=representative_on_stage.representative_twitter_handle2) |
+                    Q(politician_twitter_handle5__icontains=representative_on_stage.representative_twitter_handle2)
+                )
+                filters.append(new_filter)
+
+            if positive_value_exists(representative_on_stage.representative_twitter_handle3):
+                new_filter = (
+                    Q(politician_twitter_handle__icontains=representative_on_stage.representative_twitter_handle3) |
+                    Q(politician_twitter_handle2__icontains=representative_on_stage.representative_twitter_handle3) |
+                    Q(politician_twitter_handle3__icontains=representative_on_stage.representative_twitter_handle3) |
+                    Q(politician_twitter_handle4__icontains=representative_on_stage.representative_twitter_handle3) |
+                    Q(politician_twitter_handle5__icontains=representative_on_stage.representative_twitter_handle3)
+                )
+                filters.append(new_filter)
+
+            if positive_value_exists(representative_on_stage.facebook_url):
+                new_filter = (
+                    Q(facebook_url__icontains=representative_on_stage.facebook_url) |
+                    Q(facebook_url2__icontains=representative_on_stage.facebook_url) |
+                    Q(facebook_url3__icontains=representative_on_stage.facebook_url)
+                )
+                filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                possible_politician_list = possible_politician_list.filter(final_filters)
+
+            possible_politician_list = possible_politician_list.order_by('politician_name')[:20]
+        except ObjectDoesNotExist:
+            # This is fine, create new
+            pass
+
     template_values = {
         'messages_on_stage':                messages_on_stage,
         'representative':                   representative_on_stage,
@@ -753,6 +887,7 @@ def representative_edit_view(request, representative_id):
         'representative_twitter_handle':    representative_twitter_handle,
         'representative_url':               representative_url,
         'political_party':                  political_party,
+        'possible_politician_list':         possible_politician_list,
     }
     return render(request, 'representative/representative_edit.html', template_values)
 

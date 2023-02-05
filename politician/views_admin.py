@@ -356,32 +356,21 @@ def politician_list_view(request):
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
 
+    # Are there any entries where politician_email doesn't match politician_email_address?
     politician_query = Politician.objects.all()
     politician_query = politician_query.exclude(
         Q(politician_email_address__isnull=True) |
         Q(politician_email_address="")
     )
     # Do not return entries where the values already match
-    # politician_query = politician_query.exclude(politician_email__iexact=F('politician_email_address'))
-    # Only include entries where politician_email is empty
-    politician_query = politician_query.filter(
-        Q(politician_email__isnull=True) |
-        Q(politician_email="")
-    )
-    list_to_update = list(politician_query[:1000])  # Only update 1000 at a time
-    updated_count = 0
-    updated_list = []
-    for one_item in list_to_update:
-        one_item.politician_email = one_item.politician_email_address
-        updated_list.append(one_item)
-        updated_count += 1
-    politician_query.bulk_update(updated_list, ['politician_email'])
-    if positive_value_exists(updated_count):
-        messages.add_message(request, messages.INFO,
-                             "Emails updated: {updated_count:,}"
-                             "".format(updated_count=updated_count))
-    else:
-        messages.add_message(request, messages.INFO, "No emails updated.")
+    politician_query = politician_query.exclude(politician_email__iexact=F('politician_email_address'))
+    list_found = list(politician_query[:10])  # Only update 10 at a time
+    if len(list_found) > 0:
+        we_vote_id_string = ''
+        for one_politician in list_found:
+            we_vote_id_string += str(one_politician.we_vote_id) + " "
+        messages.add_message(request, messages.ERROR,
+                             'politician_email mismatch with politician_email_address:' + str(we_vote_id_string))
 
     politician_list = []
     politician_list_count = 0
