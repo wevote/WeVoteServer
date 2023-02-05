@@ -124,6 +124,10 @@
 
 {% include "politician/politician_merge_one_field_decision.html" with field_name="ballotpedia_politician_url" field_label="Ballotpedia Politician URL" conflict_status=conflict_values.ballotpedia_politician_url politician1_field_value=politician_option1.ballotpedia_politician_url politician2_field_value=politician_option2.ballotpedia_politician_url politician1=politician_option1 politician2=politician_option2 %}
 
+{% include "politician/politician_merge_one_field_decision.html" with field_name="wikipedia_id" field_label="Wikipedia ID" conflict_status=conflict_values.wikipedia_id politician1_field_value=politician_option1.wikipedia_id politician2_field_value=politician_option2.wikipedia_id politician1=politician_option1 politician2=politician_option2 %}
+
+{% include "politician/politician_merge_one_field_decision.html" with field_name="wikipedia_url" field_label="Wikipedia URL" conflict_status=conflict_values.wikipedia_url politician1_field_value=politician_option1.wikipedia_url politician2_field_value=politician_option2.wikipedia_url politician1=politician_option1 politician2=politician_option2 %}
+
 {% include "politician/politician_merge_one_field_decision.html" with field_name="ballotpedia_id" field_label="Ballotpedia ID" conflict_status=conflict_values.ballotpedia_id politician1_field_value=politician_option1.ballotpedia_id politician2_field_value=politician_option2.ballotpedia_id politician1=politician_option1 politician2=politician_option2 %}
 
 {% include "politician/politician_merge_one_field_decision.html" with field_name="bioguide_id" field_label="Bioguide ID" conflict_status=conflict_values.bioguide_id politician1_field_value=politician_option1.bioguide_id politician2_field_value=politician_option2.bioguide_id politician1=politician_option1 politician2=politician_option2 %}
@@ -268,8 +272,6 @@
 {% include "politician/politician_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_medium" field_label="We Vote Image (Medium)" conflict_status=conflict_values.we_vote_hosted_profile_image_url_medium politician1_field_value=politician_option1.we_vote_hosted_profile_image_url_medium politician2_field_value=politician_option2.we_vote_hosted_profile_image_url_medium politician1=politician_option1 politician2=politician_option2 %}
 
 {% include "politician/politician_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_large" field_label="We Vote Image (Large)" conflict_status=conflict_values.we_vote_hosted_profile_image_url_large politician1_field_value=politician_option1.we_vote_hosted_profile_image_url_large politician2_field_value=politician_option2.we_vote_hosted_profile_image_url_large politician1=politician_option1 politician2=politician_option2 %}
-
-{% include "politician/politician_merge_one_field_decision.html" with field_name="wikipedia_id" field_label="Wikipedia ID" conflict_status=conflict_values.wikipedia_id politician1_field_value=politician_option1.wikipedia_id politician2_field_value=politician_option2.wikipedia_id politician1=politician_option1 politician2=politician_option2 %}
     <tr>
         <td>Linked Candidates</td>
         <td>

@@ -392,6 +392,60 @@
 {% endif %}
 
 
+{% if possible_politician_list %}
+    <h4>Possible Matching Politicians</h4>
+    <table class="table">
+        <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>Politician Name</td>
+            <td>State</td>
+            <td>Twitter Handle</td>
+            <td>Website</td>
+            <td>Id</td>
+            <td>We Vote Id</td>
+        </tr>
+    {% for found_politician in possible_politician_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                {% if found_politician.politician_photo_url %}
+                <a href="{% url 'politician:politician_edit' found_politician.id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
+                    <img src='{{ found_politician.politician_photo_url }}' height="48px" />
+                </a>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{% url 'politician:politician_edit' found_politician.id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">{{ found_politician.politician_name }} <span class="glyphicon glyphicon-new-window"></span></a>
+            </td>
+            <td>{{ found_politician.state_code|default_if_none:"" }}</td>
+            <td>
+                {% if found_politician.politician_twitter_handle %}<a href="https://twitter.com/{{ found_politician.politician_twitter_handle }}"
+                    target="_blank">{{ found_politician.politician_twitter_handle }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a><br />
+                ({{ found_politician.twitter_followers_count|intcomma }} followers){% endif %}
+                {% if found_politician.politician_twitter_handle2 %}<br /><a href="https://twitter.com/{{ found_politician.politician_twitter_handle2 }}"
+                    target="_blank">{{ found_politician.politician_twitter_handle2 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                {% if found_politician.politician_twitter_handle3 %}<br /><a href="https://twitter.com/{{ found_politician.politician_twitter_handle3 }}"
+                    target="_blank">{{ found_politician.politician_twitter_handle3 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                {% if found_politician.politician_twitter_handle4 %}<br /><a href="https://twitter.com/{{ found_politician.politician_twitter_handle4 }}"
+                    target="_blank">{{ found_politician.politician_twitter_handle4 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                {% if found_politician.politician_twitter_handle5 %}<br /><a href="https://twitter.com/{{ found_politician.politician_twitter_handle5 }}"
+                    target="_blank">{{ found_politician.politician_twitter_handle5 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+            </td>
+            <td>
+                {% if found_politician.politician_url %}<a href="{{ found_politician.politician_url }}" target="_blank">{{ found_politician.politician_url }} <span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                {% if found_politician.politician_url2 %}<br /><a href="{{ found_politician.politician_url2 }}" target="_blank">{{ found_politician.politician_url2 }} <span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                {% if found_politician.politician_url3 %}<br /><a href="{{ found_politician.politician_url3 }}" target="_blank">{{ found_politician.politician_url3 }} <span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                {% if found_politician.politician_url4 %}<br /><a href="{{ found_politician.politician_url4 }}" target="_blank">{{ found_politician.politician_url4 }} <span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                {% if found_politician.politician_url5 %}<br /><a href="{{ found_politician.politician_url5 }}" target="_blank">{{ found_politician.politician_url5 }} <span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+            </td>
+            <td>{{ found_politician.id }}</td>
+            <td>{{ found_politician.we_vote_id }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+{% endif %}
+
 
 
     {% if representative.photo_url %}
