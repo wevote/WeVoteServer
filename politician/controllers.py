@@ -484,11 +484,11 @@ def figure_out_politician_conflict_values(politician1, politician2):
     }
 
 
-def merge_if_duplicate_politicians(politician1_on_stage, politician2_on_stage, conflict_values):
+def merge_if_duplicate_politicians(politician1, politician2, conflict_values):
     """
     See also figure_out_politician_conflict_values
-    :param politician1_on_stage:
-    :param politician2_on_stage:
+    :param politician1:
+    :param politician2:
     :param conflict_values:
     :return:
     """
@@ -496,8 +496,8 @@ def merge_if_duplicate_politicians(politician1_on_stage, politician2_on_stage, c
     status = "MERGE_IF_DUPLICATE_POLITICIANS "
     politicians_merged = False
     decisions_required = False
-    politician1_we_vote_id = politician1_on_stage.we_vote_id
-    politician2_we_vote_id = politician2_on_stage.we_vote_id
+    politician1_we_vote_id = politician1.we_vote_id
+    politician2_we_vote_id = politician2.we_vote_id
 
     # Are there any comparisons that require admin intervention?
     merge_choices = {}
@@ -508,19 +508,47 @@ def merge_if_duplicate_politicians(politician1_on_stage, politician2_on_stage, c
                 or attribute == "we_vote_hosted_profile_image_url_large" \
                 or attribute == "we_vote_hosted_profile_image_url_medium" \
                 or attribute == "we_vote_hosted_profile_image_url_tiny":
-            if positive_value_exists(getattr(politician1_on_stage, attribute)):
+            if positive_value_exists(getattr(politician1, attribute)):
                 # We can proceed because politician1 has a valid image, so we can default to choosing that one
                 pass
-            elif positive_value_exists(getattr(politician2_on_stage, attribute)):
+            elif positive_value_exists(getattr(politician2, attribute)):
                 # If we are here, politician1 does NOT have an image, but politician2 does
-                merge_choices[attribute] = getattr(politician2_on_stage, attribute)
+                merge_choices[attribute] = getattr(politician2, attribute)
         else:
             conflict_value = conflict_values.get(attribute, None)
             if conflict_value == "CONFLICT":
-                decisions_required = True
-                break
+                if attribute == "politician_name" \
+                        or attribute == "first_name" \
+                        or attribute == "middle_name" \
+                        or attribute == "last_name":
+                    # If the lower case versions of the name attribute are identical, choose the name
+                    #  that has upper and lower case letters, and do not require a decision
+                    politician1_attribute_value = getattr(politician1, attribute)
+                    try:
+                        politician1_attribute_value_lower_case = politician1_attribute_value.lower()
+                    except Exception:
+                        politician1_attribute_value_lower_case = None
+                    politician2_attribute_value = getattr(politician2, attribute)
+                    try:
+                        politician2_attribute_value_lower_case = politician2_attribute_value.lower()
+                    except Exception:
+                        politician2_attribute_value_lower_case = None
+                    if positive_value_exists(politician1_attribute_value_lower_case) \
+                            and politician1_attribute_value_lower_case == politician2_attribute_value_lower_case:
+                        # Give preference to value with both upper and lower case letters (as opposed to all uppercase)
+                        if any(char.isupper() for char in politician1_attribute_value) \
+                                and any(char.islower() for char in politician1_attribute_value):
+                            merge_choices[attribute] = getattr(politician1, attribute)
+                        else:
+                            merge_choices[attribute] = getattr(politician2, attribute)
+                    else:
+                        decisions_required = True
+                        break
+                else:
+                    decisions_required = True
+                    break
             elif conflict_value == "POLITICIAN2":
-                merge_choices[attribute] = getattr(politician2_on_stage, attribute)
+                merge_choices[attribute] = getattr(politician2, attribute)
                 if attribute in POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED:
                     clear_these_attributes_from_politician2.append(attribute)
 
@@ -546,7 +574,7 @@ def merge_if_duplicate_politicians(politician1_on_stage, politician2_on_stage, c
         'status':               status,
         'politicians_merged':   politicians_merged,
         'decisions_required':   decisions_required,
-        'politician':           politician1_on_stage,
+        'politician':           politician1,
     }
     return results
 
@@ -570,8 +598,8 @@ def merge_these_two_politicians(
     # Politician 1 is the one we keep, and Politician 2 is the one we will merge into Politician 1
     politician1_results = politician_manager.retrieve_politician(we_vote_id=politician1_we_vote_id)
     if politician1_results['politician_found']:
-        politician1_on_stage = politician1_results['politician']
-        politician1_id = politician1_on_stage.id
+        politician1 = politician1_results['politician']
+        politician1_id = politician1.id
     else:
         results = {
             'success': False,
@@ -583,8 +611,8 @@ def merge_these_two_politicians(
 
     politician2_results = politician_manager.retrieve_politician(we_vote_id=politician2_we_vote_id)
     if politician2_results['politician_found']:
-        politician2_on_stage = politician2_results['politician']
-        politician2_id = politician2_on_stage.id
+        politician2 = politician2_results['politician']
+        politician2_id = politician2.id
     else:
         results = {
             'success': False,
@@ -598,209 +626,205 @@ def merge_these_two_politicians(
     for attribute in POLITICIAN_UNIQUE_IDENTIFIERS:
         try:
             if attribute in admin_merge_choices:
-                setattr(politician1_on_stage, attribute, admin_merge_choices[attribute])
+                setattr(politician1, attribute, admin_merge_choices[attribute])
         except Exception as e:
             # Don't completely fail if in attribute can't be saved.
             status += "ATTRIBUTE_SAVE_FAILED (" + str(attribute) + ") " + str(e) + " "
 
     # Preserve unique facebook_url -> facebook_url3
     from representative.controllers import add_value_to_next_representative_spot
-    if positive_value_exists(politician2_on_stage.facebook_url):
+    if positive_value_exists(politician2.facebook_url):
         results = add_value_to_next_representative_spot(
             field_name_base='facebook_url',
-            new_value_to_add=politician2_on_stage.facebook_url,
-            representative=politician1_on_stage,
+            new_value_to_add=politician2.facebook_url,
+            representative=politician1,
         )
         if results['success'] and results['values_changed']:
-            politician1_on_stage = results['representative']
+            politician1 = results['representative']
         if not results['success']:
             status += results['status']
-    if positive_value_exists(politician2_on_stage.facebook_url2):
+    if positive_value_exists(politician2.facebook_url2):
         results = add_value_to_next_representative_spot(
             field_name_base='facebook_url',
-            new_value_to_add=politician2_on_stage.facebook_url2,
-            representative=politician1_on_stage,
+            new_value_to_add=politician2.facebook_url2,
+            representative=politician1,
         )
         if results['success'] and results['values_changed']:
-            politician1_on_stage = results['representative']
+            politician1 = results['representative']
         if not results['success']:
             status += results['status']
-    if positive_value_exists(politician2_on_stage.facebook_url3):
+    if positive_value_exists(politician2.facebook_url3):
         results = add_value_to_next_representative_spot(
             field_name_base='facebook_url',
-            new_value_to_add=politician2_on_stage.facebook_url3,
-            representative=politician1_on_stage,
+            new_value_to_add=politician2.facebook_url3,
+            representative=politician1,
         )
         if results['success'] and results['values_changed']:
-            politician1_on_stage = results['representative']
+            politician1 = results['representative']
         if not results['success']:
             status += results['status']
 
     # Preserve unique politician_name & google_civic_candidate_name, _name2, _name3
-    if politician2_on_stage.politician_name != politician1_on_stage.politician_name:
-        politician1_on_stage = add_name_to_next_spot(
-            politician1_on_stage, politician2_on_stage.politician_name)
-    if positive_value_exists(politician2_on_stage.google_civic_candidate_name):
-        politician1_on_stage = add_name_to_next_spot(
-            politician1_on_stage, politician2_on_stage.google_civic_candidate_name)
-    if positive_value_exists(politician2_on_stage.google_civic_candidate_name2):
-        politician1_on_stage = add_name_to_next_spot(
-            politician1_on_stage, politician2_on_stage.google_civic_candidate_name2)
-    if positive_value_exists(politician2_on_stage.google_civic_candidate_name3):
-        politician1_on_stage = add_name_to_next_spot(
-            politician1_on_stage, politician2_on_stage.google_civic_candidate_name3)
+    if politician2.politician_name != politician1.politician_name:
+        politician1 = add_name_to_next_spot(politician1, politician2.politician_name)
+    if positive_value_exists(politician2.google_civic_candidate_name):
+        politician1 = add_name_to_next_spot(politician1, politician2.google_civic_candidate_name)
+    if positive_value_exists(politician2.google_civic_candidate_name2):
+        politician1 = add_name_to_next_spot(politician1, politician2.google_civic_candidate_name2)
+    if positive_value_exists(politician2.google_civic_candidate_name3):
+        politician1 = add_name_to_next_spot(politician1, politician2.google_civic_candidate_name3)
 
     # Preserve unique politician_email -> politician_email3
     # TEMP UNTIL WE DEPRECATE THIS FIELD
-    if positive_value_exists(politician2_on_stage.politician_email_address):
+    if positive_value_exists(politician2.politician_email_address):
         results = add_value_to_next_representative_spot(
             field_name_base='politician_email',
-            new_value_to_add=politician2_on_stage.politician_email_address,
-            representative=politician1_on_stage,
+            new_value_to_add=politician2.politician_email_address,
+            representative=politician1,
         )
         if results['success'] and results['values_changed']:
-            politician1_on_stage = results['representative']
+            politician1 = results['representative']
         if not results['success']:
             status += results['status']
-    if positive_value_exists(politician2_on_stage.politician_email):
+    if positive_value_exists(politician2.politician_email):
         results = add_value_to_next_representative_spot(
             field_name_base='politician_email',
-            new_value_to_add=politician2_on_stage.politician_email,
-            representative=politician1_on_stage,
+            new_value_to_add=politician2.politician_email,
+            representative=politician1,
         )
         if results['success'] and results['values_changed']:
-            politician1_on_stage = results['representative']
+            politician1 = results['representative']
         if not results['success']:
             status += results['status']
-    if positive_value_exists(politician2_on_stage.politician_email2):
+    if positive_value_exists(politician2.politician_email2):
         results = add_value_to_next_representative_spot(
             field_name_base='politician_email',
-            new_value_to_add=politician2_on_stage.politician_email2,
-            representative=politician1_on_stage,
+            new_value_to_add=politician2.politician_email2,
+            representative=politician1,
         )
         if results['success'] and results['values_changed']:
-            politician1_on_stage = results['representative']
+            politician1 = results['representative']
         if not results['success']:
             status += results['status']
-    if positive_value_exists(politician2_on_stage.politician_email3):
+    if positive_value_exists(politician2.politician_email3):
         results = add_value_to_next_representative_spot(
             field_name_base='politician_email',
-            new_value_to_add=politician2_on_stage.politician_email3,
-            representative=politician1_on_stage,
+            new_value_to_add=politician2.politician_email3,
+            representative=politician1,
         )
         if results['success'] and results['values_changed']:
-            politician1_on_stage = results['representative']
+            politician1 = results['representative']
         if not results['success']:
             status += results['status']
 
     # Preserve unique politician_phone_number -> politician_phone_number3
-    if positive_value_exists(politician2_on_stage.politician_phone_number):
+    if positive_value_exists(politician2.politician_phone_number):
         results = add_value_to_next_representative_spot(
             field_name_base='politician_phone_number',
-            new_value_to_add=politician2_on_stage.politician_phone_number,
-            representative=politician1_on_stage,
+            new_value_to_add=politician2.politician_phone_number,
+            representative=politician1,
         )
         if results['success'] and results['values_changed']:
-            politician1_on_stage = results['representative']
+            politician1 = results['representative']
         if not results['success']:
             status += results['status']
-    if positive_value_exists(politician2_on_stage.politician_phone_number2):
+    if positive_value_exists(politician2.politician_phone_number2):
         results = add_value_to_next_representative_spot(
             field_name_base='politician_phone_number',
-            new_value_to_add=politician2_on_stage.politician_phone_number2,
-            representative=politician1_on_stage,
+            new_value_to_add=politician2.politician_phone_number2,
+            representative=politician1,
         )
         if results['success'] and results['values_changed']:
-            politician1_on_stage = results['representative']
+            politician1 = results['representative']
         if not results['success']:
             status += results['status']
-    if positive_value_exists(politician2_on_stage.politician_phone_number3):
+    if positive_value_exists(politician2.politician_phone_number3):
         results = add_value_to_next_representative_spot(
             field_name_base='politician_phone_number',
-            new_value_to_add=politician2_on_stage.politician_phone_number3,
-            representative=politician1_on_stage,
+            new_value_to_add=politician2.politician_phone_number3,
+            representative=politician1,
         )
         if results['success'] and results['values_changed']:
-            politician1_on_stage = results['representative']
+            politician1 = results['representative']
         if not results['success']:
             status += results['status']
 
     # Preserve unique politician_twitter_handle -> politician_twitter_handle5
-    if positive_value_exists(politician2_on_stage.politician_twitter_handle):
+    if positive_value_exists(politician2.politician_twitter_handle):
         twitter_results = add_twitter_handle_to_next_politician_spot(
-            politician1_on_stage, politician2_on_stage.politician_twitter_handle)
+            politician1, politician2.politician_twitter_handle)
         if twitter_results['success']:
-            politician1_on_stage = twitter_results['politician']
-    if positive_value_exists(politician2_on_stage.politician_twitter_handle2):
+            politician1 = twitter_results['politician']
+    if positive_value_exists(politician2.politician_twitter_handle2):
         twitter_results = add_twitter_handle_to_next_politician_spot(
-            politician1_on_stage, politician2_on_stage.politician_twitter_handle2)
+            politician1, politician2.politician_twitter_handle2)
         if twitter_results['success']:
-            politician1_on_stage = twitter_results['politician']
-    if positive_value_exists(politician2_on_stage.politician_twitter_handle3):
+            politician1 = twitter_results['politician']
+    if positive_value_exists(politician2.politician_twitter_handle3):
         twitter_results = add_twitter_handle_to_next_politician_spot(
-            politician1_on_stage, politician2_on_stage.politician_twitter_handle3)
+            politician1, politician2.politician_twitter_handle3)
         if twitter_results['success']:
-            politician1_on_stage = twitter_results['politician']
-    if positive_value_exists(politician2_on_stage.politician_twitter_handle4):
+            politician1 = twitter_results['politician']
+    if positive_value_exists(politician2.politician_twitter_handle4):
         twitter_results = add_twitter_handle_to_next_politician_spot(
-            politician1_on_stage, politician2_on_stage.politician_twitter_handle4)
+            politician1, politician2.politician_twitter_handle4)
         if twitter_results['success']:
-            politician1_on_stage = twitter_results['politician']
-    if positive_value_exists(politician2_on_stage.politician_twitter_handle5):
+            politician1 = twitter_results['politician']
+    if positive_value_exists(politician2.politician_twitter_handle5):
         twitter_results = add_twitter_handle_to_next_politician_spot(
-            politician1_on_stage, politician2_on_stage.politician_twitter_handle5)
+            politician1, politician2.politician_twitter_handle5)
         if twitter_results['success']:
-            politician1_on_stage = twitter_results['politician']
+            politician1 = twitter_results['politician']
 
     # Preserve unique politician_url -> politician_url5
-    if positive_value_exists(politician2_on_stage.politician_url):
+    if positive_value_exists(politician2.politician_url):
         results = add_value_to_next_representative_spot(
             field_name_base='politician_url',
-            new_value_to_add=politician2_on_stage.politician_url,
-            representative=politician1_on_stage,
+            new_value_to_add=politician2.politician_url,
+            representative=politician1,
         )
         if results['success'] and results['values_changed']:
-            politician1_on_stage = results['representative']
+            politician1 = results['representative']
         if not results['success']:
             status += results['status']
-    if positive_value_exists(politician2_on_stage.politician_url2):
+    if positive_value_exists(politician2.politician_url2):
         results = add_value_to_next_representative_spot(
             field_name_base='politician_url',
-            new_value_to_add=politician2_on_stage.politician_url2,
-            representative=politician1_on_stage,
+            new_value_to_add=politician2.politician_url2,
+            representative=politician1,
         )
         if results['success'] and results['values_changed']:
-            politician1_on_stage = results['representative']
+            politician1 = results['representative']
         if not results['success']:
             status += results['status']
-    if positive_value_exists(politician2_on_stage.politician_url3):
+    if positive_value_exists(politician2.politician_url3):
         results = add_value_to_next_representative_spot(
             field_name_base='politician_url',
-            new_value_to_add=politician2_on_stage.politician_url3,
-            representative=politician1_on_stage,
+            new_value_to_add=politician2.politician_url3,
+            representative=politician1,
         )
         if results['success'] and results['values_changed']:
-            politician1_on_stage = results['representative']
+            politician1 = results['representative']
         if not results['success']:
             status += results['status']
-    if positive_value_exists(politician2_on_stage.politician_url4):
+    if positive_value_exists(politician2.politician_url4):
         results = add_value_to_next_representative_spot(
             field_name_base='politician_url',
-            new_value_to_add=politician2_on_stage.politician_url4,
-            representative=politician1_on_stage,
+            new_value_to_add=politician2.politician_url4,
+            representative=politician1,
         )
         if results['success'] and results['values_changed']:
-            politician1_on_stage = results['representative']
+            politician1 = results['representative']
         if not results['success']:
             status += results['status']
-    if positive_value_exists(politician2_on_stage.politician_url5):
+    if positive_value_exists(politician2.politician_url5):
         results = add_value_to_next_representative_spot(
             field_name_base='politician_url',
-            new_value_to_add=politician2_on_stage.politician_url5,
-            representative=politician1_on_stage,
+            new_value_to_add=politician2.politician_url5,
+            representative=politician1,
         )
         if results['success'] and results['values_changed']:
-            politician1_on_stage = results['representative']
+            politician1 = results['representative']
         if not results['success']:
             status += results['status']
 
@@ -871,28 +895,28 @@ def merge_these_two_politicians(
         }
         return results
 
-    # Clear 'unique=True' fields in politician2_on_stage, which need to be Null before politician1_on_stage can be saved
+    # Clear 'unique=True' fields in politician2, which need to be Null before politician1 can be saved
     #  with updated values
     politician2_updated = False
     for attribute in clear_these_attributes_from_politician2:
-        setattr(politician2_on_stage, attribute, None)
+        setattr(politician2, attribute, None)
         politician2_updated = True
     if politician2_updated:
-        politician2_on_stage.save()
+        politician2.save()
 
     # Note: wait to wrap in try/except block
-    politician1_on_stage.save()
+    politician1.save()
     # 2021-10-16 Uses image data from master table which we aren't updating with the merge yet
-    # refresh_politician_data_from_master_tables(politician1_on_stage.we_vote_id)
+    # refresh_politician_data_from_master_tables(politician1.we_vote_id)
 
     # Remove politician 2
-    politician2_on_stage.delete()
+    politician2.delete()
 
     results = {
         'success': True,
         'status': status,
         'politicians_merged': True,
-        'politician': politician1_on_stage,
+        'politician': politician1,
     }
     return results
 

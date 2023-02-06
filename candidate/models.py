@@ -3975,6 +3975,17 @@ class CandidateManager(models.Manager):
             we_vote_hosted_profile_image_url_tiny):
         """
         Update a candidate entry with details retrieved from the Twitter API.
+        twitter_json values expected:
+            description
+            id
+            followers_count
+            location
+            name
+            profile_background_image_url_https
+            profile_banner_url
+            profile_image_url_https
+            screen_name
+            calculated from nested arrays: expanded_url
         """
         success = False
         status = "ENTERING_UPDATE_CANDIDATE_TWITTER_DETAILS"
