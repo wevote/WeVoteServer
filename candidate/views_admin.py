@@ -1318,6 +1318,8 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
     candidate_contact_form_url = request.GET.get('candidate_contact_form_url', False)
     facebook_url = request.GET.get('facebook_url', False)
     instagram_handle = request.GET.get('instagram_handle', False)
+    if positive_value_exists(instagram_handle):
+        instagram_handle = extract_instagram_handle_from_text_string(instagram_handle)
     candidate_email = request.GET.get('candidate_email', False)
     candidate_phone = request.GET.get('candidate_phone', False)
     party = request.GET.get('party', False)

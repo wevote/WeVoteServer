@@ -33,7 +33,7 @@ from position.models import PositionEntered, PositionListManager
 from representative.models import Representative
 from voter.models import voter_has_authority
 from wevote_functions.functions import convert_to_int, convert_to_political_party_constant, \
-    extract_first_name_from_full_name, \
+    extract_first_name_from_full_name, extract_instagram_handle_from_text_string, \
     extract_middle_name_from_full_name, \
     extract_last_name_from_full_name, extract_twitter_handle_from_text_string, \
     positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization
@@ -254,7 +254,8 @@ def render_politician_merge_form(
     politician2_linked_candidate_photos = []
     politician2_candidate_results = candidate_list_manager.retrieve_candidates_from_politician(
         politician_id=politician_option2_for_template.id,
-        politician_we_vote_id=politician_option2_for_template.we_vote_id)
+        politician_we_vote_id=politician_option2_for_template.we_vote_id,
+        read_only=True)
     if politician2_candidate_results['candidate_list_found']:
         is_first = True
         is_first_office = True
@@ -805,6 +806,8 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
     google_civic_candidate_name2 = request.GET.get('google_civic_candidate_name2', False)
     google_civic_candidate_name3 = request.GET.get('google_civic_candidate_name3', False)
     instagram_handle = request.GET.get('instagram_handle', False)
+    if positive_value_exists(instagram_handle):
+        instagram_handle = extract_instagram_handle_from_text_string(instagram_handle)
     politician_contact_form_url = request.GET.get('politician_contact_form_url', False)
     politician_email = request.GET.get('politician_email', False)
     politician_email2 = request.GET.get('politician_email2', False)
@@ -1095,6 +1098,8 @@ def politician_edit_process_view(request):
     google_civic_candidate_name2 = request.POST.get('google_civic_candidate_name2', False)
     google_civic_candidate_name3 = request.POST.get('google_civic_candidate_name3', False)
     instagram_handle = request.POST.get('instagram_handle', False)
+    if positive_value_exists(instagram_handle):
+        instagram_handle = extract_instagram_handle_from_text_string(instagram_handle)
     linkedin_url = request.POST.get('linkedin_url', False)
     politician_email = request.POST.get('politician_email', False)
     politician_email2 = request.POST.get('politician_email2', False)
