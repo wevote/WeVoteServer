@@ -141,7 +141,7 @@ node_modules/
 *.pyc
 staticfiles
 
-# Other #
+# WeVote Specific #
 #########
 /geoip/import_data/*
 !/geoip/import_data/__init__.py
@@ -151,7 +151,7 @@ staticfiles
 config/environment_variables.json
 config/environment_variables*.bak.json
 web_app/build/*
-
 /cert/
 /cert/wevotedeveloper.com.crt
 /cert/wevotedeveloper.com_key.txt
+WeVoteServerDB*.pgsql

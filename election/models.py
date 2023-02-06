@@ -643,14 +643,21 @@ class ElectionManager(models.Manager):
         }
         return results
 
-    def retrieve_prior_elections_this_year(self, state_code="", without_state_code=False):
+    def retrieve_prior_elections_this_year(self, state_code="", without_state_code=False, starting_year=0):
         status = ""
         success = True
         election_list_found = False
         prior_election_list = []
+        year = 0
         today = datetime.now().date()
         we_vote_date_string = convert_date_to_we_vote_date_string(today)
-        first_day_this_year_string = "{year}-01-01".format(year=today.year)
+        if positive_value_exists(starting_year):
+            year = int(starting_year)
+            if 2020 < year < 2050:
+                first_day_this_year_string = str(year) + "-01-01"
+        if not positive_value_exists(year):
+            first_day_this_year_string = "{year}-01-01".format(year=today.year)
+
         try:
             election_list_query = Election.objects.using('readonly').all()
             election_list_query = election_list_query.filter(
@@ -683,11 +690,12 @@ class ElectionManager(models.Manager):
         }
         return results
 
-    def retrieve_prior_google_civic_election_id_list_this_year(self, limit_to_this_state_code=''):
+    def retrieve_prior_google_civic_election_id_list_this_year(self, limit_to_this_state_code='', starting_year=0):
         status = ""
         success = True
         prior_google_civic_election_id_list = []
-        results = self.retrieve_prior_elections_this_year(state_code=limit_to_this_state_code)
+        results = self.retrieve_prior_elections_this_year(state_code=limit_to_this_state_code,
+                                                          starting_year=starting_year)
         if results['election_list_found']:
             election_list = results['election_list']
             for one_election in election_list:

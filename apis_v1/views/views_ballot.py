@@ -39,7 +39,8 @@ def all_ballot_items_retrieve_view(request):  # allBallotItemsRetrieve
 
 
 def ballot_item_highlights_retrieve_view(request):  # ballotItemHighlightsRetrieve
-    json_data = ballot_item_highlights_retrieve_for_api()
+    starting_year = request.GET.get('starting_year', 0)
+    json_data = ballot_item_highlights_retrieve_for_api(starting_year)
     response = HttpResponse(json.dumps(json_data), content_type='application/json')
     return response
 
