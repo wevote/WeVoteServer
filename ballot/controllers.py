@@ -2882,7 +2882,7 @@ def voter_ballot_items_retrieve_for_one_election_for_api(
     return results
 
 
-def ballot_item_highlights_retrieve_for_api():  # ballotItemHighlightsRetrieve
+def ballot_item_highlights_retrieve_for_api(starting_year):  # ballotItemHighlightsRetrieve
     from candidate.controllers import retrieve_candidate_list_for_all_prior_elections_this_year, \
         retrieve_candidate_list_for_all_upcoming_elections
     from voter_guide.controllers import URLS_TO_NEVER_HIGHLIGHT
@@ -2915,7 +2915,7 @@ def ballot_item_highlights_retrieve_for_api():  # ballotItemHighlightsRetrieve
                         highlight_list.append(one_highlight)
 
     results = retrieve_candidate_list_for_all_prior_elections_this_year(
-        super_light_candidate_list=super_light_candidate_list)
+        super_light_candidate_list=super_light_candidate_list, starting_year=starting_year)
     if results['candidate_list_found']:
         all_possible_candidates_list_light = results['candidate_list_light']
         for one_possible_candidate in all_possible_candidates_list_light:

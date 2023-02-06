@@ -15,12 +15,18 @@ def ballot_item_highlights_retrieve_doc_template_values(url_root):
         },
     ]
     optional_query_parameter_list = [
+        {
+            'name':         'starting_year',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'For testing with old endorsement sites, the year election data should start in',
+        },
     ]
 
     potential_status_codes_list = [
     ]
 
     try_now_link_variables_dict = {
+        'starting_year': '0'
     }
 
     api_response = '{\n' \

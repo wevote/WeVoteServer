@@ -2137,7 +2137,8 @@ def retrieve_candidate_list_for_all_prior_elections_this_year(
         prior_google_civic_election_id_list=[],
         limit_to_this_state_code="",
         return_list_of_objects=False,
-        super_light_candidate_list=False):
+        super_light_candidate_list=False,
+        starting_year=0):
 
     status = ""
     success = True
@@ -2149,7 +2150,8 @@ def retrieve_candidate_list_for_all_prior_elections_this_year(
             or not positive_value_exists(len(prior_google_civic_election_id_list)):
         election_manager = ElectionManager()
         election_list_results = \
-            election_manager.retrieve_prior_google_civic_election_id_list_this_year(limit_to_this_state_code)
+            election_manager.retrieve_prior_google_civic_election_id_list_this_year(limit_to_this_state_code,
+                                                                                    starting_year)
 
         prior_google_civic_election_id_list = election_list_results['prior_google_civic_election_id_list']
         status += election_list_results['status']
