@@ -16,13 +16,15 @@ from image.controllers import delete_cached_images_for_voter, delete_cached_imag
     delete_cached_images_for_organization, delete_stored_images_for_voter
 from organization.controllers import update_social_media_statistics_in_other_tables
 from organization.models import OrganizationManager
+from politician.models import PoliticianManager
+from representative.models import RepresentativeManager
 from twitter.functions import retrieve_twitter_user_info
 from voter.models import voter_has_authority, VoterManager
 from wevote_functions.functions import convert_to_int, positive_value_exists
 from .controllers import delete_possible_twitter_handles, retrieve_possible_twitter_handles, \
     retrieve_possible_twitter_handles_in_bulk
 from .controllers import refresh_twitter_candidate_details, refresh_twitter_data_for_organizations, \
-    refresh_twitter_organization_details, \
+    refresh_twitter_organization_details, refresh_twitter_politician_details, refresh_twitter_representative_details, \
     scrape_social_media_from_one_site, refresh_twitter_candidate_details_for_election, \
     scrape_and_save_social_media_for_candidates_in_one_election, scrape_and_save_social_media_from_all_organizations, \
     transfer_candidate_twitter_handles_from_google_civic
@@ -189,7 +191,7 @@ def refresh_twitter_candidate_details_view(request, candidate_id):
 
     candidate = results['candidate']
 
-    results = refresh_twitter_candidate_details(candidate)
+    results = refresh_twitter_candidate_details(candidate, use_cached_data_if_within_x_days=1)
 
     return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 
@@ -220,44 +222,43 @@ def refresh_twitter_organization_details_view(request, organization_id):
 
 
 @login_required
-def refresh_twitter_politician_details_view(request, politician_id):  # TODO DALE Get this working for politicians
+def refresh_twitter_politician_details_view(request, politician_id):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    # candidate_manager = CandidateManager()
-    # results = candidate_manager.retrieve_candidate(candidate_id)
-    #
-    # if not results['candidate_found']:
-    #     messages.add_message(request, messages.INFO, results['status'])
-    #     return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
-    #
-    # candidate = results['candidate']
-    #
-    # results = refresh_twitter_candidate_details(candidate)
+    politician_manager = PoliticianManager()
+    results = politician_manager.retrieve_politician(politician_id=politician_id)
+
+    if not results['politician_found']:
+        messages.add_message(request, messages.INFO, results['status'])
+        return HttpResponseRedirect(reverse('politician:politician_edit', args=(politician_id,)))
+
+    politician = results['politician']
+
+    results = refresh_twitter_politician_details(politician, use_cached_data_if_within_x_days=0)
 
     return HttpResponseRedirect(reverse('politician:politician_edit', args=(politician_id,)))
 
 
 @login_required
 def refresh_twitter_representative_details_view(request, representative_id):
-    # TODO DALE Get this working for representatives
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    # candidate_manager = CandidateManager()
-    # results = candidate_manager.retrieve_candidate(candidate_id)
-    #
-    # if not results['candidate_found']:
-    #     messages.add_message(request, messages.INFO, results['status'])
-    #     return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
-    #
-    # candidate = results['candidate']
-    #
-    # results = refresh_twitter_candidate_details(candidate)
+    representative_manager = RepresentativeManager()
+    results = representative_manager.retrieve_representative(representative_id=representative_id)
+
+    if not results['representative_found']:
+        messages.add_message(request, messages.INFO, results['status'])
+        return HttpResponseRedirect(reverse('representative:representative_edit', args=(representative_id,)))
+
+    representative = results['representative']
+
+    results = refresh_twitter_representative_details(representative, use_cached_data_if_within_x_days=0)
 
     return HttpResponseRedirect(reverse('representative:representative_edit', args=(representative_id,)))
 

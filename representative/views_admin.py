@@ -943,6 +943,9 @@ def representative_edit_process_view(request):
     politician_we_vote_id = request.POST.get('politician_we_vote_id', False)
     if politician_we_vote_id is not False:
         defaults['politician_we_vote_id'] = politician_we_vote_id
+    profile_image_type_currently_active = request.POST.get('profile_image_type_currently_active', False)
+    if profile_image_type_currently_active is not False:
+        defaults['profile_image_type_currently_active'] = profile_image_type_currently_active
     representative_email = request.POST.get('representative_email', False)
     if representative_email is not False:
         defaults['representative_email'] = representative_email
@@ -1077,7 +1080,8 @@ def representative_edit_process_view(request):
                     office_held_we_vote_id=office_held_we_vote_id,
                     representative_name=representative_name,
                 )
-                representative_on_stage = attach_defaults_values_to_representative_object(representative_on_stage, defaults)
+                representative_on_stage = \
+                    attach_defaults_values_to_representative_object(representative_on_stage, defaults)
 
                 representative_on_stage.save()
                 representative_id = representative_on_stage.id

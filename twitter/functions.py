@@ -30,7 +30,23 @@ TWITTER_USER_SUSPENDED_LOG_RESPONSES = [
 ]
 
 
-def retrieve_twitter_user_info(twitter_user_id, twitter_handle=''):
+def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle=''):
+    """
+    twitter_json values expected:
+        description
+        id
+        followers_count
+        location
+        name
+        profile_background_image_url_https
+        profile_banner_url
+        profile_image_url_https
+        screen_name
+        calculated from nested arrays: expanded_url
+    :param twitter_user_id:
+    :param twitter_handle:
+    :return:
+    """
     status = ""
     success = True
     twitter_user_not_found_in_twitter = False
