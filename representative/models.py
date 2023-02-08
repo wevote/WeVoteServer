@@ -5,6 +5,8 @@
 from django.db import models
 from django.db.models import Q
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
+from candidate.models import PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
+    PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_VOTE_USA, PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES
 from office_held.models import OfficeHeld, OfficeHeldManager
 from wevote_settings.constants import OFFICE_HELD_YEARS_AVAILABLE
 from wevote_settings.models import fetch_next_we_vote_id_representative_integer, fetch_site_unique_id_prefix
@@ -104,6 +106,8 @@ def attach_defaults_values_to_representative_object(representative, defaults):
         representative.politician_id = defaults['politician_id']
     if 'politician_we_vote_id' in defaults:
         representative.politician_we_vote_id = defaults['politician_we_vote_id']
+    if 'profile_image_type_currently_active' in defaults:
+        representative.profile_image_type_currently_active = defaults['profile_image_type_currently_active']
     if 'representative_contact_form_url' in defaults:
         representative.representative_contact_form_url = defaults['representative_contact_form_url']
     if 'representative_email' in defaults:
@@ -264,9 +268,31 @@ class Representative(models.Model):
     twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
                                            max_length=255, null=True, blank=True)
     vote_usa_politician_id = models.CharField(max_length=255, null=True, unique=False)
+
+    # Which representative image is currently active?
+    profile_image_type_currently_active = models.CharField(
+        max_length=10, choices=PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES, default=PROFILE_IMAGE_TYPE_UNKNOWN)
+    # Image for representative from Facebook, cached on We Vote's servers. See also facebook_profile_image_url_https.
+    we_vote_hosted_profile_facebook_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_facebook_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_facebook_image_url_tiny = models.TextField(blank=True, null=True)
+    # Image for representative from Twitter, cached on We Vote's servers. See master twitter_profile_image_url_https.
+    we_vote_hosted_profile_twitter_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_twitter_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_twitter_image_url_tiny = models.TextField(blank=True, null=True)
+    # Image for representative uploaded to We Vote's servers.
+    we_vote_hosted_profile_uploaded_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_uploaded_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_uploaded_image_url_tiny = models.TextField(blank=True, null=True)
+    # Image for representative from Vote USA, cached on We Vote's servers. See master vote_usa_profile_image_url_https.
+    we_vote_hosted_profile_vote_usa_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_vote_usa_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_vote_usa_image_url_tiny = models.TextField(blank=True, null=True)
+    # Image we are using as the profile photo (could be sourced from Twitter, Facebook, etc.)
     we_vote_hosted_profile_image_url_large = models.TextField(null=True)
     we_vote_hosted_profile_image_url_medium = models.TextField(null=True)
     we_vote_hosted_profile_image_url_tiny = models.TextField(null=True)
+
     wikipedia_url = models.TextField(null=True)
     # Which years did this representative serve. This is master data we also cache in RepresentativeToOfficeHeldLink
     # years_in_office_flags = models.PositiveIntegerField(default=0)
@@ -759,6 +785,164 @@ class RepresentativeManager(models.Manager):
         results = self.retrieve_representatives_are_not_duplicates_list(representative_we_vote_id)
         return results['representatives_are_not_duplicates_list_we_vote_ids']
 
+    def save_fresh_twitter_details_to_representative(
+            self,
+            representative=None,
+            representative_we_vote_id='',
+            twitter_user=None):
+        """
+        Update a representative entry with details retrieved from the Twitter API.
+        """
+        representative_updated = False
+        success = True
+        status = ""
+        values_changed = False
+
+        if not hasattr(twitter_user, 'twitter_id'):
+            success = False
+            status += "VALID_TWITTER_USER_NOT_PROVIDED "
+
+        if success:
+            if not hasattr(representative, 'representative_twitter_handle') \
+                    and positive_value_exists(representative_we_vote_id):
+                # Retrieve representative to update
+                pass
+
+        if not hasattr(representative, 'representative_twitter_handle'):
+            status += "VALID_POLITICIAN_NOT_PROVIDED_TO_UPDATE_TWITTER_DETAILS "
+            success = False
+
+        if not positive_value_exists(representative.representative_twitter_handle):
+            status += "POLITICIAN_TWITTER_HANDLE_MISSING "
+            success = False
+
+        if success:
+            if representative.representative_twitter_handle.lower() != twitter_user.twitter_handle.lower():
+                status += "POLITICIAN_TWITTER_HANDLE_MISMATCH "
+                success = False
+
+        if not success:
+            results = {
+                'success':              success,
+                'status':               status,
+                'representative':           representative,
+                'representative_updated':   representative_updated,
+            }
+            return results
+
+        if positive_value_exists(twitter_user.twitter_description):
+            if twitter_user.twitter_description != representative.twitter_description:
+                representative.twitter_description = twitter_user.twitter_description
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_followers_count):
+            if twitter_user.twitter_followers_count != representative.twitter_followers_count:
+                representative.twitter_followers_count = twitter_user.twitter_followers_count
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_handle):
+            # In case the capitalization of the name changes
+            if twitter_user.twitter_handle != representative.representative_twitter_handle:
+                representative.representative_twitter_handle = twitter_user.twitter_handle
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_handle_updates_failing):
+            if twitter_user.twitter_handle_updates_failing != representative.twitter_handle_updates_failing:
+                representative.twitter_handle_updates_failing = twitter_user.twitter_handle_updates_failing
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_id):
+            if twitter_user.twitter_id != representative.twitter_user_id:
+                representative.twitter_user_id = twitter_user.twitter_id
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_location):
+            if twitter_user.twitter_location != representative.twitter_location:
+                representative.twitter_location = twitter_user.twitter_location
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_name):
+            if twitter_user.twitter_name != representative.twitter_name:
+                representative.twitter_name = twitter_user.twitter_name
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_profile_image_url_https):
+            if twitter_user.twitter_profile_image_url_https != representative.twitter_profile_image_url_https:
+                representative.twitter_profile_image_url_https = twitter_user.twitter_profile_image_url_https
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_profile_background_image_url_https):
+            if twitter_user.twitter_profile_background_image_url_https != \
+                    representative.twitter_profile_background_image_url_https:
+                representative.twitter_profile_background_image_url_https = \
+                    twitter_user.twitter_profile_background_image_url_https
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_profile_banner_url_https):
+            if twitter_user.twitter_profile_banner_url_https != representative.twitter_profile_banner_url_https:
+                representative.twitter_profile_banner_url_https = twitter_user.twitter_profile_banner_url_https
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_url):
+            from representative.controllers import add_value_to_next_representative_spot
+            results = add_value_to_next_representative_spot(
+                field_name_base='representative_url',
+                new_value_to_add=twitter_user.twitter_url,
+                representative=representative,
+            )
+            if results['success'] and results['values_changed']:
+                representative = results['representative']
+                values_changed = True
+            if not results['success']:
+                status += results['status']
+        if positive_value_exists(twitter_user.we_vote_hosted_profile_image_url_large):
+            if twitter_user.we_vote_hosted_profile_image_url_large != \
+                    representative.we_vote_hosted_profile_twitter_image_url_large:
+                representative.we_vote_hosted_profile_twitter_image_url_large = \
+                    twitter_user.we_vote_hosted_profile_image_url_large
+                values_changed = True
+        if positive_value_exists(twitter_user.we_vote_hosted_profile_image_url_medium):
+            if twitter_user.we_vote_hosted_profile_image_url_medium != \
+                    representative.we_vote_hosted_profile_twitter_image_url_medium:
+                representative.we_vote_hosted_profile_twitter_image_url_medium = \
+                    twitter_user.we_vote_hosted_profile_image_url_medium
+                values_changed = True
+        if positive_value_exists(twitter_user.we_vote_hosted_profile_image_url_tiny):
+            if twitter_user.we_vote_hosted_profile_image_url_tiny != \
+                    representative.we_vote_hosted_profile_twitter_image_url_tiny:
+                representative.we_vote_hosted_profile_twitter_image_url_tiny = \
+                    twitter_user.we_vote_hosted_profile_image_url_tiny
+                values_changed = True
+
+        if representative.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN and \
+                positive_value_exists(twitter_user.we_vote_hosted_profile_image_url_large):
+            representative.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_TWITTER
+            values_changed = True
+        if representative.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_TWITTER:
+            if twitter_user.we_vote_hosted_profile_image_url_large != \
+                    representative.we_vote_hosted_profile_image_url_large:
+                representative.we_vote_hosted_profile_image_url_large = \
+                    twitter_user.we_vote_hosted_profile_image_url_large
+                values_changed = True
+            if twitter_user.we_vote_hosted_profile_image_url_medium != \
+                    representative.we_vote_hosted_profile_image_url_medium:
+                representative.we_vote_hosted_profile_image_url_medium = \
+                    twitter_user.we_vote_hosted_profile_image_url_medium
+                values_changed = True
+            if twitter_user.we_vote_hosted_profile_image_url_tiny != \
+                    representative.we_vote_hosted_profile_image_url_tiny:
+                representative.we_vote_hosted_profile_image_url_tiny = \
+                    twitter_user.we_vote_hosted_profile_image_url_tiny
+                values_changed = True
+
+        if values_changed:
+            try:
+                representative.save()
+                representative_updated = True
+                success = True
+                status += "SAVED_REPRESENTATIVE_TWITTER_DETAILS "
+            except Exception as e:
+                success = False
+                status += "NO_CHANGES_SAVED_TO_REPRESENTATIVE_TWITTER_DETAILS: " + str(e) + " "
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'representative':           representative,
+            'representative_updated':   representative_updated,
+        }
+        return results
+
     def update_or_create_representatives_are_not_duplicates(
             self,
             representative1_we_vote_id,
@@ -1160,9 +1344,7 @@ class RepresentativeManager(models.Manager):
             ignore_representative_we_vote_id_list=[],
             ocd_division_id='',
             read_only=True,
-            representative_twitter_handle='',
-            representative_twitter_handle2='',
-            representative_twitter_handle3='',
+            representative_twitter_handle_list=[],
             representative_name='',
             state_code=''):
         keep_looking_for_duplicates = True
@@ -1171,23 +1353,37 @@ class RepresentativeManager(models.Manager):
         representative_list = []
         representative_list_found = False
         multiple_entries_found = False
-        representative_twitter_handle = extract_twitter_handle_from_text_string(representative_twitter_handle)
-        representative_twitter_handle2 = extract_twitter_handle_from_text_string(representative_twitter_handle2)
-        representative_twitter_handle3 = extract_twitter_handle_from_text_string(representative_twitter_handle3)
         success = True
         status = ""
 
-        if keep_looking_for_duplicates and positive_value_exists(representative_twitter_handle):
+        if keep_looking_for_duplicates and positive_value_exists(len(representative_twitter_handle_list)):
             try:
                 if positive_value_exists(read_only):
                     representative_query = Representative.objects.using('readonly').all()
                 else:
                     representative_query = Representative.objects.all()
-                representative_query = representative_query.filter(
-                    representative_twitter_handle__iexact=representative_twitter_handle,
-                    ocd_division_id=ocd_division_id)
+                if positive_value_exists(ocd_division_id):
+                    representative_query = representative_query.filter(ocd_division_id=ocd_division_id)
                 if positive_value_exists(state_code):
                     representative_query = representative_query.filter(state_code__iexact=state_code)
+
+                twitter_filters = []
+                for one_twitter_handle in representative_twitter_handle_list:
+                    one_twitter_handle_cleaned = extract_twitter_handle_from_text_string(one_twitter_handle)
+                    new_filter = (
+                        Q(representative_twitter_handle__iexact=one_twitter_handle_cleaned) |
+                        Q(representative_twitter_handle2__iexact=one_twitter_handle_cleaned) |
+                        Q(representative_twitter_handle3__iexact=one_twitter_handle_cleaned)
+                    )
+                    twitter_filters.append(new_filter)
+
+                # Add the first query
+                final_filters = twitter_filters.pop()
+                # ...and "OR" the remaining items in the list
+                for item in twitter_filters:
+                    final_filters |= item
+
+                representative_query = representative_query.filter(final_filters)
 
                 if positive_value_exists(ignore_representative_we_vote_id_list):
                     representative_query = representative_query.exclude(

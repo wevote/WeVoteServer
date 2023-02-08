@@ -34,6 +34,53 @@
 <p><a href="{% url 'politician:politician_list' %}?state_code={{ state_code }}">cancel</a>
 <input name="submit_text" type="submit" value="{% if politician %}Update Politician{% else %}Save New Politician{% endif %}" /></p>
 
+
+<div class="form-group">
+    <label for="profile_image_type_currently_active_id" class="col-sm-3 control-label">
+        Politician Photo Choice<br />
+        <span style="color: darkgray">{{ politician.profile_image_type_currently_active }}</span>
+    </label>
+    <div class="col-sm-8">
+        <span style="float: left; padding: 8px 20px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="UNKNOWN"
+                {% if politician.profile_image_type_currently_active == 'UNKNOWN' %} checked {% endif %}
+                />
+        {% if politician.we_vote_hosted_profile_twitter_image_url_tiny %}
+            <span style="text-decoration: line-through">Unknown</span>
+        {% else %}
+            Unknown
+        {% endif %}
+        </span>
+        {% if politician.we_vote_hosted_profile_facebook_image_url_tiny %}
+        <span style="float: left; padding: 8px 20px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="FACEBOOK"
+                {% if politician.profile_image_type_currently_active == 'FACEBOOK' %} checked {% endif %}
+                />
+            <img src='{{ politician.we_vote_hosted_profile_facebook_image_url_tiny }}' />
+            Facebook
+        </span>
+        {% endif %}
+        {% if politician.we_vote_hosted_profile_twitter_image_url_tiny %}
+        <span style="float: left; padding: 8px 20px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="TWITTER"
+                {% if politician.profile_image_type_currently_active == 'TWITTER' %} checked {% endif %}
+                />
+            <img src='{{ politician.we_vote_hosted_profile_twitter_image_url_tiny }}' />
+            Twitter
+        </span>
+        {% endif %}
+        {% if politician.we_vote_hosted_profile_vote_usa_image_url_tiny %}
+        <span style="float: left; padding: 8px 25px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="VOTE_USA"
+                {% if politician.profile_image_type_currently_active == 'VOTE_USA' %} checked {% endif %}
+                />
+            <img src='{{ politician.we_vote_hosted_profile_vote_usa_image_url_tiny }}' />
+            Vote USA
+        {% endif %}
+        </span>
+    </div>
+</div>
+
 <div class="form-group" style="height: 64px;">
     <label for="politician_name_id" class="col-sm-3 control-label">Politician Name</label>
     <div class="col-sm-8">

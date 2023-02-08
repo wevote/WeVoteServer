@@ -286,7 +286,7 @@ PROCESSING TURNED OFF:
 {% if state_code %}
     <ol>
         <li>
-            <a href="{% url 'import_export_batches:retrieve_representatives_for_polling_locations' %}?state_code={{ state_code }}&use_batch_process=1">
+            <a href="{% url 'import_export_batches:retrieve_representatives_for_polling_locations' %}?state_code={{ state_code }}&use_batch_process=1&kind_of_processes_to_show={{ kind_of_processes_to_show }}">
                 <strong>Retrieve</strong> Representatives from Brand New Map Points, up to
                 50
 {#                {{ map_points_retrieved_each_batch_chunk }}#}
@@ -358,11 +358,11 @@ PROCESSING TURNED OFF:
             <td>
               {{ batch_process.id }}
               {% if batch_process.batch_process_paused %}
-              <a href="{% url 'import_export_batches:batch_process_pause_toggle' %}?batch_process_id={{ batch_process.id }}{% if google_civic_election_id %}&google_civic_election_id={{ batch_process.google_civic_election_id }}{% endif %}{% if state_code %}&state_code={{ batch_process.state_code }}{% endif %}">
+              <a href="{% url 'import_export_batches:batch_process_pause_toggle' %}?batch_process_id={{ batch_process.id }}{% if google_civic_election_id %}&google_civic_election_id={{ batch_process.google_civic_election_id }}{% endif %}{% if state_code %}&state_code={{ batch_process.state_code }}{% endif %}&kind_of_processes_to_show={{ kind_of_processes_to_show }}">
                 activate
               </a>
               {% else %}
-              <a href="{% url 'import_export_batches:batch_process_pause_toggle' %}?batch_process_id={{ batch_process.id }}{% if google_civic_election_id %}&google_civic_election_id={{ batch_process.google_civic_election_id }}{% endif %}{% if state_code %}&state_code={{ batch_process.state_code }}{% endif %}">
+              <a href="{% url 'import_export_batches:batch_process_pause_toggle' %}?batch_process_id={{ batch_process.id }}{% if google_civic_election_id %}&google_civic_election_id={{ batch_process.google_civic_election_id }}{% endif %}{% if state_code %}&state_code={{ batch_process.state_code }}{% endif %}&kind_of_processes_to_show={{ kind_of_processes_to_show }}">
                 pause
               </a>
               {% endif %}

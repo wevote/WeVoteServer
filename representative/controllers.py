@@ -286,13 +286,18 @@ def find_duplicate_representative(we_vote_representative, ignore_representative_
 
     representative_list_manager = RepresentativeManager()
     try:
+        representative_twitter_handle_list = []
+        if positive_value_exists(we_vote_representative.representative_twitter_handle):
+            representative_twitter_handle_list.append(we_vote_representative.representative_twitter_handle)
+        if positive_value_exists(we_vote_representative.representative_twitter_handle2):
+            representative_twitter_handle_list.append(we_vote_representative.representative_twitter_handle2)
+        if positive_value_exists(we_vote_representative.representative_twitter_handle3):
+            representative_twitter_handle_list.append(we_vote_representative.representative_twitter_handle3)
         results = representative_list_manager.retrieve_representatives_from_non_unique_identifiers(
             ignore_representative_we_vote_id_list=ignore_representative_we_vote_id_list,
             ocd_division_id=we_vote_representative.ocd_division_id,
             representative_name=we_vote_representative.representative_name,
-            representative_twitter_handle=we_vote_representative.representative_twitter_handle,
-            representative_twitter_handle2=we_vote_representative.representative_twitter_handle2,
-            representative_twitter_handle3=we_vote_representative.representative_twitter_handle3,
+            representative_twitter_handle_list=representative_twitter_handle_list,
             state_code=we_vote_representative.state_code,
             read_only=read_only,
         )

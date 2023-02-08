@@ -135,6 +135,7 @@ def retrieve_representatives_for_polling_locations_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    kind_of_processes_to_show = request.GET.get('kind_of_processes_to_show', '')
     state_code = request.GET.get('state_code', '')
     refresh_representatives = request.GET.get('refresh_representatives', False)
     use_batch_process = request.GET.get('use_batch_process', False)
@@ -157,7 +158,8 @@ def retrieve_representatives_for_polling_locations_view(request):
             use_vote_usa=use_vote_usa)
         messages.add_message(request, messages.INFO, results['status'])
         return HttpResponseRedirect(reverse('import_export_batches:batch_process_list', args=()) +
-                                    '?state_code=' + str(state_code)
+                                    '?state_code=' + str(state_code) +
+                                    '&kind_of_processes_to_show=' + str(kind_of_processes_to_show)
                                     )
     else:
         return retrieve_representatives_for_polling_locations_internal_view(

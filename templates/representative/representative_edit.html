@@ -19,6 +19,54 @@
 
 <input type="hidden" name="representative_id" value="{% if representative %}{{ representative.id }}{% else %}0{% endif %}">
 
+
+
+<div class="form-group">
+    <label for="profile_image_type_currently_active_id" class="col-sm-3 control-label">
+        Representative Photo Choice<br />
+        <span style="color: darkgray">{{ representative.profile_image_type_currently_active }}</span>
+    </label>
+    <div class="col-sm-8">
+        <span style="float: left; padding: 8px 20px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="UNKNOWN"
+                {% if representative.profile_image_type_currently_active == 'UNKNOWN' %} checked {% endif %}
+                />
+        {% if representative.we_vote_hosted_profile_twitter_image_url_tiny %}
+            <span style="text-decoration: line-through">Unknown</span>
+        {% else %}
+            Unknown
+        {% endif %}
+        </span>
+        {% if representative.we_vote_hosted_profile_facebook_image_url_tiny %}
+        <span style="float: left; padding: 8px 20px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="FACEBOOK"
+                {% if representative.profile_image_type_currently_active == 'FACEBOOK' %} checked {% endif %}
+                />
+            <img src='{{ representative.we_vote_hosted_profile_facebook_image_url_tiny }}' />
+            Facebook
+        </span>
+        {% endif %}
+        {% if representative.we_vote_hosted_profile_twitter_image_url_tiny %}
+        <span style="float: left; padding: 8px 20px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="TWITTER"
+                {% if representative.profile_image_type_currently_active == 'TWITTER' %} checked {% endif %}
+                />
+            <img src='{{ representative.we_vote_hosted_profile_twitter_image_url_tiny }}' />
+            Twitter
+        </span>
+        {% endif %}
+        {% if representative.we_vote_hosted_profile_vote_usa_image_url_tiny %}
+        <span style="float: left; padding: 8px 25px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="VOTE_USA"
+                {% if representative.profile_image_type_currently_active == 'VOTE_USA' %} checked {% endif %}
+                />
+            <img src='{{ representative.we_vote_hosted_profile_vote_usa_image_url_tiny }}' />
+            Vote USA
+        {% endif %}
+        </span>
+    </div>
+</div>
+
 <div class="form-group">
     <label for="representative_name_id" class="col-sm-3 control-label">Representative Name</label>
     <div class="col-sm-8">

@@ -2452,7 +2452,7 @@ class CandidateCampaign(models.Model):
     # This is the master image url cached on We Vote servers. See photo_url_from_vote_usa for Vote USA URL.
     vote_usa_profile_image_url_https = models.TextField(null=True, blank=True, default=None)
 
-    # Which voter image is currently active?
+    # Which candidate image is currently active?
     profile_image_type_currently_active = models.CharField(
         max_length=10, choices=PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES, default=PROFILE_IMAGE_TYPE_UNKNOWN)
     # Image for candidate from Facebook, cached on We Vote's servers. See also facebook_profile_image_url_https.
@@ -3963,117 +3963,137 @@ class CandidateManager(models.Manager):
         }
         return results
 
-    def update_candidate_twitter_details(
+    def save_fresh_twitter_details_to_candidate(
             self,
-            candidate,
-            twitter_json,
-            cached_twitter_profile_image_url_https,
-            cached_twitter_profile_background_image_url_https,
-            cached_twitter_profile_banner_url_https,
-            we_vote_hosted_profile_image_url_large,
-            we_vote_hosted_profile_image_url_medium,
-            we_vote_hosted_profile_image_url_tiny):
+            candidate=None,
+            candidate_we_vote_id='',
+            twitter_user=None):
         """
         Update a candidate entry with details retrieved from the Twitter API.
-        twitter_json values expected:
-            description
-            id
-            followers_count
-            location
-            name
-            profile_background_image_url_https
-            profile_banner_url
-            profile_image_url_https
-            screen_name
-            calculated from nested arrays: expanded_url
         """
-        success = False
-        status = "ENTERING_UPDATE_CANDIDATE_TWITTER_DETAILS"
+        candidate_updated = False
+        success = True
+        status = ""
         values_changed = False
 
-        if candidate:
-            if 'id' in twitter_json and positive_value_exists(twitter_json['id']):
-                if convert_to_int(twitter_json['id']) != candidate.twitter_user_id:
-                    candidate.twitter_user_id = convert_to_int(twitter_json['id'])
-                    values_changed = True
-            if 'screen_name' in twitter_json and positive_value_exists(twitter_json['screen_name']):
-                if twitter_json['screen_name'] != candidate.candidate_twitter_handle:
-                    candidate.candidate_twitter_handle = twitter_json['screen_name']
-                    values_changed = True
-            if 'name' in twitter_json and positive_value_exists(twitter_json['name']):
-                if twitter_json['name'] != candidate.twitter_name:
-                    candidate.twitter_name = twitter_json['name']
-                    values_changed = True
-            if 'followers_count' in twitter_json and positive_value_exists(twitter_json['followers_count']):
-                if convert_to_int(twitter_json['followers_count']) != candidate.twitter_followers_count:
-                    candidate.twitter_followers_count = convert_to_int(twitter_json['followers_count'])
-                    values_changed = True
+        if not hasattr(twitter_user, 'twitter_id'):
+            success = False
+            status += "VALID_TWITTER_USER_NOT_PROVIDED "
 
-            if positive_value_exists(cached_twitter_profile_image_url_https):
-                candidate.twitter_profile_image_url_https = cached_twitter_profile_image_url_https
+        if success:
+            if not hasattr(candidate, 'candidate_twitter_handle') and positive_value_exists(candidate_we_vote_id):
+                # Retrieve candidate to update
+                pass
+
+        if not hasattr(candidate, 'candidate_twitter_handle'):
+            status += "VALID_CANDIDATE_NOT_PROVIDED_TO_UPDATE_TWITTER_DETAILS "
+            success = False
+
+        if not positive_value_exists(candidate.candidate_twitter_handle):
+            status += "CANDIDATE_TWITTER_HANDLE_MISSING "
+            success = False
+
+        if success:
+            if candidate.candidate_twitter_handle.lower() != twitter_user.twitter_handle.lower():
+                status += "CANDIDATE_TWITTER_HANDLE_MISMATCH "
+                success = False
+
+        if not success:
+            results = {
+                'success':              success,
+                'status':               status,
+                'candidate':            candidate,
+                'candidate_updated':    candidate_updated,
+            }
+            return results
+
+        if positive_value_exists(twitter_user.twitter_description):
+            if twitter_user.twitter_description != candidate.twitter_description:
+                candidate.twitter_description = twitter_user.twitter_description
                 values_changed = True
-            elif 'profile_image_url_https' in twitter_json and positive_value_exists(
-                    twitter_json['profile_image_url_https']):
-                if twitter_json['profile_image_url_https'] != candidate.twitter_profile_image_url_https:
-                    candidate.twitter_profile_image_url_https = twitter_json['profile_image_url_https']
-                    values_changed = True
-
-            if positive_value_exists(cached_twitter_profile_banner_url_https):
-                candidate.twitter_profile_banner_url_https = cached_twitter_profile_banner_url_https
+        if positive_value_exists(twitter_user.twitter_followers_count):
+            if twitter_user.twitter_followers_count != candidate.twitter_followers_count:
+                candidate.twitter_followers_count = twitter_user.twitter_followers_count
                 values_changed = True
-            elif ('profile_banner_url' in twitter_json) and positive_value_exists(twitter_json['profile_banner_url']):
-                if twitter_json['profile_banner_url'] != candidate.twitter_profile_banner_url_https:
-                    candidate.twitter_profile_banner_url_https = twitter_json['profile_banner_url']
-                    values_changed = True
-
-            if positive_value_exists(cached_twitter_profile_background_image_url_https):
-                candidate.twitter_profile_background_image_url_https = cached_twitter_profile_background_image_url_https
+        if positive_value_exists(twitter_user.twitter_handle):
+            # In case the capitalization of the name changes
+            if twitter_user.twitter_handle != candidate.candidate_twitter_handle:
+                candidate.candidate_twitter_handle = twitter_user.twitter_handle
                 values_changed = True
-            elif 'profile_background_image_url_https' in twitter_json and positive_value_exists(
-                    twitter_json['profile_background_image_url_https']):
-                if twitter_json['profile_background_image_url_https'] != \
-                        candidate.twitter_profile_background_image_url_https:
-                    candidate.twitter_profile_background_image_url_https = \
-                        twitter_json['profile_background_image_url_https']
-                    values_changed = True
-
-            candidate.we_vote_hosted_profile_twitter_image_url_large = we_vote_hosted_profile_image_url_large
-            candidate.we_vote_hosted_profile_twitter_image_url_medium = we_vote_hosted_profile_image_url_medium
-            candidate.we_vote_hosted_profile_twitter_image_url_tiny = we_vote_hosted_profile_image_url_tiny
-
-            if candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
-                candidate.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_TWITTER
+        if positive_value_exists(twitter_user.twitter_handle_updates_failing):
+            if twitter_user.twitter_handle_updates_failing != candidate.twitter_handle_updates_failing:
+                candidate.twitter_handle_updates_failing = twitter_user.twitter_handle_updates_failing
                 values_changed = True
-            if candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_TWITTER:
-                candidate.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
-                candidate.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
-                candidate.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+        if positive_value_exists(twitter_user.twitter_id):
+            if twitter_user.twitter_id != candidate.twitter_user_id:
+                candidate.twitter_user_id = twitter_user.twitter_id
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_location):
+            if twitter_user.twitter_location != candidate.twitter_location:
+                candidate.twitter_location = twitter_user.twitter_location
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_name):
+            if twitter_user.twitter_name != candidate.twitter_name:
+                candidate.twitter_name = twitter_user.twitter_name
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_profile_image_url_https):
+            if twitter_user.twitter_profile_image_url_https != candidate.twitter_profile_image_url_https:
+                candidate.twitter_profile_image_url_https = twitter_user.twitter_profile_image_url_https
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_profile_background_image_url_https):
+            if twitter_user.twitter_profile_background_image_url_https != \
+                    candidate.twitter_profile_background_image_url_https:
+                candidate.twitter_profile_background_image_url_https = \
+                    twitter_user.twitter_profile_background_image_url_https
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_profile_banner_url_https):
+            if twitter_user.twitter_profile_banner_url_https != candidate.twitter_profile_banner_url_https:
+                candidate.twitter_profile_banner_url_https = twitter_user.twitter_profile_banner_url_https
+                values_changed = True
+        if not positive_value_exists(candidate.candidate_url):
+            if positive_value_exists(twitter_user.twitter_url):
+                if twitter_user.twitter_url != candidate.candidate_url:
+                    candidate.candidate_url = twitter_user.twitter_url
+                    values_changed = True
+        if positive_value_exists(twitter_user.we_vote_hosted_profile_image_url_large):
+            if twitter_user.we_vote_hosted_profile_image_url_large != \
+                    candidate.we_vote_hosted_profile_twitter_image_url_large:
+                candidate.we_vote_hosted_profile_twitter_image_url_large = \
+                    twitter_user.we_vote_hosted_profile_image_url_large
+                values_changed = True
+        if positive_value_exists(twitter_user.we_vote_hosted_profile_image_url_medium):
+            if twitter_user.we_vote_hosted_profile_image_url_medium != \
+                    candidate.we_vote_hosted_profile_twitter_image_url_medium:
+                candidate.we_vote_hosted_profile_twitter_image_url_medium = \
+                    twitter_user.we_vote_hosted_profile_image_url_medium
+                values_changed = True
+        if positive_value_exists(twitter_user.we_vote_hosted_profile_image_url_tiny):
+            if twitter_user.we_vote_hosted_profile_image_url_tiny != \
+                    candidate.we_vote_hosted_profile_twitter_image_url_tiny:
+                candidate.we_vote_hosted_profile_twitter_image_url_tiny = \
+                    twitter_user.we_vote_hosted_profile_image_url_tiny
                 values_changed = True
 
-            if 'description' in twitter_json:  # No value required to update description (so we can clear out)
-                if twitter_json['description'] != candidate.twitter_description:
-                    candidate.twitter_description = twitter_json['description']
-                    values_changed = True
-            if 'location' in twitter_json:  # No value required to update location (so we can clear out)
-                if twitter_json['location'] != candidate.twitter_location:
-                    candidate.twitter_location = twitter_json['location']
-                    values_changed = True
-            if not positive_value_exists(candidate.candidate_url):
-                # Only use the URL from Twitter if a candidate_url doesn't already exist
-                if 'entities' in twitter_json and \
-                        'url' in twitter_json['entities'] and \
-                        'urls' in twitter_json['entities']['url'] and \
-                        len(twitter_json['entities']['url']['urls']) > 0:
-                    # scan and pick the first encountered
-                    for url_data in twitter_json['entities']['url']['urls']:
-                        if 'expanded_url' in url_data and positive_value_exists(url_data['expanded_url']):
-                            if url_data['expanded_url'] != candidate.candidate_url:
-                                candidate.candidate_url = url_data['expanded_url']
-                                values_changed = True
-                                break
+        if candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN and \
+                positive_value_exists(twitter_user.we_vote_hosted_profile_image_url_large):
+            candidate.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_TWITTER
+            values_changed = True
+        if candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_TWITTER:
+            if twitter_user.we_vote_hosted_profile_image_url_large != candidate.we_vote_hosted_profile_image_url_large:
+                candidate.we_vote_hosted_profile_image_url_large = twitter_user.we_vote_hosted_profile_image_url_large
+                values_changed = True
+            if twitter_user.we_vote_hosted_profile_image_url_medium != \
+                    candidate.we_vote_hosted_profile_image_url_medium:
+                candidate.we_vote_hosted_profile_image_url_medium = twitter_user.we_vote_hosted_profile_image_url_medium
+                values_changed = True
+            if twitter_user.we_vote_hosted_profile_image_url_tiny != candidate.we_vote_hosted_profile_image_url_tiny:
+                candidate.we_vote_hosted_profile_image_url_tiny = twitter_user.we_vote_hosted_profile_image_url_tiny
+                values_changed = True
 
+        if values_changed:
             try:
                 candidate.save()
+                candidate_updated = True
                 success = True
                 status += "SAVED_CANDIDATE_TWITTER_DETAILS "
             except Exception as e:
@@ -4081,9 +4101,10 @@ class CandidateManager(models.Manager):
                 status += "NO_CHANGES_SAVED_TO_CANDIDATE_TWITTER_DETAILS: " + str(e) + " "
 
         results = {
-            'success':      success,
-            'status':       status,
-            'candidate':    candidate,
+            'success':              success,
+            'status':               status,
+            'candidate':            candidate,
+            'candidate_updated':    candidate_updated,
         }
         return results
 

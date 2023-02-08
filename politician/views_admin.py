@@ -1131,6 +1131,7 @@ def politician_edit_process_view(request):
     politician_url4 = request.POST.get('politician_url4', False)
     politician_url5 = request.POST.get('politician_url5', False)
     political_party = request.POST.get('political_party', False)
+    profile_image_type_currently_active = request.POST.get('profile_image_type_currently_active', False)
     twitter_handle_updates_failing = request.POST.get('twitter_handle_updates_failing', False)
     twitter_handle_updates_failing = positive_value_exists(twitter_handle_updates_failing)
     twitter_handle2_updates_failing = request.POST.get('twitter_handle2_updates_failing', False)
@@ -1358,6 +1359,8 @@ def politician_edit_process_view(request):
             if political_party is not False:
                 political_party = convert_to_political_party_constant(political_party)
                 politician_on_stage.political_party = political_party
+            if profile_image_type_currently_active is not False:
+                politician_on_stage.profile_image_type_currently_active = profile_image_type_currently_active
             if state_code is not False:
                 politician_on_stage.state_code = state_code
             politician_on_stage.twitter_handle_updates_failing = twitter_handle_updates_failing
@@ -1469,6 +1472,8 @@ def politician_edit_process_view(request):
                 if political_party is not False:
                     political_party = convert_to_political_party_constant(political_party)
                     politician_on_stage.political_party = political_party
+                if profile_image_type_currently_active is not False:
+                    politician_on_stage.profile_image_type_currently_active = profile_image_type_currently_active
                 politician_on_stage.twitter_handle_updates_failing = twitter_handle_updates_failing
                 politician_on_stage.twitter_handle2_updates_failing = twitter_handle2_updates_failing
                 if vote_smart_id is not False:

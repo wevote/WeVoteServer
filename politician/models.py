@@ -7,6 +7,8 @@ import datetime
 from django.db import models
 from django.db.models import Q
 import wevote_functions.admin
+from candidate.models import PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
+    PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_VOTE_USA, PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from tag.models import Tag
 from wevote_functions.functions import candidate_party_display, convert_to_political_party_constant, \
@@ -176,16 +178,35 @@ class Politician(models.Model):
     politician_twitter_handle5 = models.CharField(max_length=255, null=True, unique=False)
     twitter_handle_updates_failing = models.BooleanField(default=False)
     twitter_handle2_updates_failing = models.BooleanField(default=False)
+    twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)
     vote_usa_politician_id = models.CharField(
         verbose_name="Vote USA permanent id for this candidate", max_length=64, default=None, null=True, blank=True)
     # This is the master image url cached on We Vote servers. See photo_url_from_vote_usa for Vote USA URL.
     vote_usa_profile_image_url_https = models.TextField(null=True, blank=True, default=None)
-    we_vote_hosted_profile_image_url_large = models.TextField(
-        verbose_name='we vote hosted large image url', blank=True, null=True)
-    we_vote_hosted_profile_image_url_medium = models.TextField(
-        verbose_name='we vote hosted medium image url', blank=True, null=True)
-    we_vote_hosted_profile_image_url_tiny = models.TextField(
-        verbose_name='we vote hosted tiny image url', blank=True, null=True)
+
+    # Which candidate image is currently active?
+    profile_image_type_currently_active = models.CharField(
+        max_length=10, choices=PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES, default=PROFILE_IMAGE_TYPE_UNKNOWN)
+    # Image for candidate from Facebook, cached on We Vote's servers. See also facebook_profile_image_url_https.
+    we_vote_hosted_profile_facebook_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_facebook_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_facebook_image_url_tiny = models.TextField(blank=True, null=True)
+    # Image for candidate from Twitter, cached on We Vote's servers. See local master twitter_profile_image_url_https.
+    we_vote_hosted_profile_twitter_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_twitter_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_twitter_image_url_tiny = models.TextField(blank=True, null=True)
+    # Image for candidate uploaded to We Vote's servers.
+    we_vote_hosted_profile_uploaded_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_uploaded_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_uploaded_image_url_tiny = models.TextField(blank=True, null=True)
+    # Image for candidate from Vote USA, cached on We Vote's servers. See local master vote_usa_profile_image_url_https.
+    we_vote_hosted_profile_vote_usa_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_vote_usa_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_vote_usa_image_url_tiny = models.TextField(blank=True, null=True)
+    # Image we are using as the profile photo (could be sourced from Twitter, Facebook, etc.)
+    we_vote_hosted_profile_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
     # ctcl politician fields
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True)
     instagram_handle = models.TextField(verbose_name="politician's instagram handle", blank=True, null=True)
@@ -401,6 +422,7 @@ class PoliticianManager(models.Manager):
 
         if politician_found:
             twitter_handles = []
+            from representative.controllers import add_value_to_next_representative_spot
             try:
                 if object_is_candidate:
                     politician.ballotpedia_politician_url = candidate_or_rep.ballotpedia_candidate_url
@@ -425,7 +447,6 @@ class PoliticianManager(models.Manager):
                     if positive_value_exists(candidate_or_rep.candidate_twitter_handle3):
                         twitter_handles.append(candidate_or_rep.candidate_twitter_handle3)
                 else:
-                    from representative.controllers import add_value_to_next_representative_spot
                     politician.ballotpedia_politician_url = candidate_or_rep.ballotpedia_representative_url
                     politician.google_civic_candidate_name = candidate_or_rep.google_civic_representative_name
                     politician.google_civic_candidate_name2 = candidate_or_rep.google_civic_representative_name2
@@ -516,7 +537,6 @@ class PoliticianManager(models.Manager):
         exception_multiple_object_returned = False
         politician = None
         politician_found = False
-        politician_id = 0
         politician_we_vote_id = ""
         success = True
         status = ''
@@ -1806,6 +1826,159 @@ class PoliticianManager(models.Manager):
             # out += name + ' = > ' + x.person_name_normalized + ', '
 
         return results_list, number_of_rows
+
+    def save_fresh_twitter_details_to_politician(
+            self,
+            politician=None,
+            politician_we_vote_id='',
+            twitter_user=None):
+        """
+        Update a politician entry with details retrieved from the Twitter API.
+        """
+        politician_updated = False
+        success = True
+        status = ""
+        values_changed = False
+
+        if not hasattr(twitter_user, 'twitter_id'):
+            success = False
+            status += "VALID_TWITTER_USER_NOT_PROVIDED "
+
+        if success:
+            if not hasattr(politician, 'politician_twitter_handle') and positive_value_exists(politician_we_vote_id):
+                # Retrieve politician to update
+                pass
+
+        if not hasattr(politician, 'politician_twitter_handle'):
+            status += "VALID_POLITICIAN_NOT_PROVIDED_TO_UPDATE_TWITTER_DETAILS "
+            success = False
+
+        if not positive_value_exists(politician.politician_twitter_handle):
+            status += "POLITICIAN_TWITTER_HANDLE_MISSING "
+            success = False
+
+        if success:
+            if politician.politician_twitter_handle.lower() != twitter_user.twitter_handle.lower():
+                status += "POLITICIAN_TWITTER_HANDLE_MISMATCH "
+                success = False
+
+        if not success:
+            results = {
+                'success':              success,
+                'status':               status,
+                'politician':           politician,
+                'politician_updated':   politician_updated,
+            }
+            return results
+
+        if positive_value_exists(twitter_user.twitter_description):
+            if twitter_user.twitter_description != politician.twitter_description:
+                politician.twitter_description = twitter_user.twitter_description
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_followers_count):
+            if twitter_user.twitter_followers_count != politician.twitter_followers_count:
+                politician.twitter_followers_count = twitter_user.twitter_followers_count
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_handle):
+            # In case the capitalization of the name changes
+            if twitter_user.twitter_handle != politician.politician_twitter_handle:
+                politician.politician_twitter_handle = twitter_user.twitter_handle
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_handle_updates_failing):
+            if twitter_user.twitter_handle_updates_failing != politician.twitter_handle_updates_failing:
+                politician.twitter_handle_updates_failing = twitter_user.twitter_handle_updates_failing
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_id):
+            if twitter_user.twitter_id != politician.twitter_user_id:
+                politician.twitter_user_id = twitter_user.twitter_id
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_location):
+            if twitter_user.twitter_location != politician.twitter_location:
+                politician.twitter_location = twitter_user.twitter_location
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_name):
+            if twitter_user.twitter_name != politician.twitter_name:
+                politician.twitter_name = twitter_user.twitter_name
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_profile_image_url_https):
+            if twitter_user.twitter_profile_image_url_https != politician.twitter_profile_image_url_https:
+                politician.twitter_profile_image_url_https = twitter_user.twitter_profile_image_url_https
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_profile_background_image_url_https):
+            if twitter_user.twitter_profile_background_image_url_https != \
+                    politician.twitter_profile_background_image_url_https:
+                politician.twitter_profile_background_image_url_https = \
+                    twitter_user.twitter_profile_background_image_url_https
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_profile_banner_url_https):
+            if twitter_user.twitter_profile_banner_url_https != politician.twitter_profile_banner_url_https:
+                politician.twitter_profile_banner_url_https = twitter_user.twitter_profile_banner_url_https
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_url):
+            from representative.controllers import add_value_to_next_representative_spot
+            results = add_value_to_next_representative_spot(
+                field_name_base='politician_url',
+                new_value_to_add=twitter_user.twitter_url,
+                representative=politician,
+            )
+            if results['success'] and results['values_changed']:
+                politician = results['representative']
+                values_changed = True
+            if not results['success']:
+                status += results['status']
+        if positive_value_exists(twitter_user.we_vote_hosted_profile_image_url_large):
+            if twitter_user.we_vote_hosted_profile_image_url_large != \
+                    politician.we_vote_hosted_profile_twitter_image_url_large:
+                politician.we_vote_hosted_profile_twitter_image_url_large = \
+                    twitter_user.we_vote_hosted_profile_image_url_large
+                values_changed = True
+        if positive_value_exists(twitter_user.we_vote_hosted_profile_image_url_medium):
+            if twitter_user.we_vote_hosted_profile_image_url_medium != \
+                    politician.we_vote_hosted_profile_twitter_image_url_medium:
+                politician.we_vote_hosted_profile_twitter_image_url_medium = \
+                    twitter_user.we_vote_hosted_profile_image_url_medium
+                values_changed = True
+        if positive_value_exists(twitter_user.we_vote_hosted_profile_image_url_tiny):
+            if twitter_user.we_vote_hosted_profile_image_url_tiny != \
+                    politician.we_vote_hosted_profile_twitter_image_url_tiny:
+                politician.we_vote_hosted_profile_twitter_image_url_tiny = \
+                    twitter_user.we_vote_hosted_profile_image_url_tiny
+                values_changed = True
+
+        if politician.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN and \
+                positive_value_exists(twitter_user.we_vote_hosted_profile_image_url_large):
+            politician.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_TWITTER
+            values_changed = True
+        if politician.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_TWITTER:
+            if twitter_user.we_vote_hosted_profile_image_url_large != politician.we_vote_hosted_profile_image_url_large:
+                politician.we_vote_hosted_profile_image_url_large = twitter_user.we_vote_hosted_profile_image_url_large
+                values_changed = True
+            if twitter_user.we_vote_hosted_profile_image_url_medium != \
+                    politician.we_vote_hosted_profile_image_url_medium:
+                politician.we_vote_hosted_profile_image_url_medium = \
+                    twitter_user.we_vote_hosted_profile_image_url_medium
+                values_changed = True
+            if twitter_user.we_vote_hosted_profile_image_url_tiny != politician.we_vote_hosted_profile_image_url_tiny:
+                politician.we_vote_hosted_profile_image_url_tiny = twitter_user.we_vote_hosted_profile_image_url_tiny
+                values_changed = True
+
+        if values_changed:
+            try:
+                politician.save()
+                politician_updated = True
+                success = True
+                status += "SAVED_POLITICIAN_TWITTER_DETAILS "
+            except Exception as e:
+                success = False
+                status += "NO_CHANGES_SAVED_TO_POLITICIAN_TWITTER_DETAILS: " + str(e) + " "
+
+        results = {
+            'success':              success,
+            'status':               status,
+            'politician':           politician,
+            'politician_updated':   politician_updated,
+        }
+        return results
 
     def update_or_create_politicians_are_not_duplicates(self, politician1_we_vote_id, politician2_we_vote_id):
         """

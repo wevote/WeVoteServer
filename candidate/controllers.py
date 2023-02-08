@@ -5,6 +5,7 @@ import datetime as the_other_datetime
 import json
 import urllib.request
 from socket import timeout
+from django.db.models import Q
 from django.http import HttpResponse
 from django.utils.timezone import now
 import wevote_functions.admin
@@ -1810,7 +1811,8 @@ def refresh_candidate_data_from_master_tables(candidate_we_vote_id):
 
     candidate = results['candidate']
 
-    # Retrieve twitter user data from TwitterUser Table
+    # Retrieve Twitter user data from TwitterUser Table
+    twitter_user = None
     twitter_user_id = candidate.twitter_user_id
     twitter_user_results = twitter_user_manager.retrieve_twitter_user(twitter_user_id)
     if twitter_user_results['twitter_user_found']:
@@ -1850,17 +1852,16 @@ def refresh_candidate_data_from_master_tables(candidate_we_vote_id):
                 twitter_profile_banner_url_https = we_vote_image.we_vote_image_url
 
     # Refresh twitter details in CandidateCampaign
-    update_candidate_results = candidate_manager.update_candidate_twitter_details(
-        candidate, twitter_json, twitter_profile_image_url_https,
-        twitter_profile_background_image_url_https, twitter_profile_banner_url_https,
-        we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
-        we_vote_hosted_profile_image_url_tiny)
+    update_candidate_results = candidate_manager.save_fresh_twitter_details_to_candidate(
+        candidate=candidate,
+        twitter_user=twitter_user)
     status += update_candidate_results['status']
     success = update_candidate_results['success']
-
-    # Refresh contest office details in CandidateCampaign
-    candidate = candidate_manager.refresh_cached_candidate_office_info(candidate)
-    status += "REFRESHED_CANDIDATE_CAMPAIGN_FROM_CONTEST_OFFICE"
+    if update_candidate_results['candidate_updated']:
+        candidate = update_candidate_results['candidate']
+        # Refresh contest office details in CandidateCampaign
+        candidate = candidate_manager.refresh_cached_candidate_office_info(candidate)
+        status += "REFRESHED_CANDIDATE_CAMPAIGN_FROM_CONTEST_OFFICE"
 
     if not positive_value_exists(candidate.politician_id) and \
             positive_value_exists(candidate.politician_we_vote_id):
@@ -2053,6 +2054,46 @@ def candidate_politician_match(we_vote_candidate):
             'politician':                   create_results['politician'],
         }
         return results
+
+
+def retrieve_candidate_in_upcoming_election_list_by_twitter_handle(
+        read_only=False,
+        twitter_handle=''):
+    candidate_list = []
+    candidate_list_found = False
+    status = ''
+    success = True
+    try:
+        if positive_value_exists(read_only):
+            candidate_query = CandidateCampaign.objects.using('readonly').all()
+        else:
+            candidate_query = CandidateCampaign.objects.all()
+        now_as_we_vote_date_string = convert_date_to_we_vote_date_string(now())
+        now_as_integer = convert_we_vote_date_string_to_date_as_integer(now_as_we_vote_date_string)
+        candidate_query = candidate_query.filter(candidate_ultimate_election_date__gte=now_as_integer)
+        candidate_query = candidate_query.filter(
+            Q(candidate_twitter_handle__iexact=twitter_handle) |
+            Q(candidate_twitter_handle2__iexact=twitter_handle) |
+            Q(candidate_twitter_handle3__iexact=twitter_handle)
+        )
+        candidate_list = list(candidate_query)
+        if len(candidate_list):
+            candidate_list_found = True
+            status += 'CANDIDATES_RETRIEVED '
+        else:
+            status += 'NO_CANDIDATES_RETRIEVED '
+    except Exception as e:
+        handle_exception(e, logger=logger)
+        status += 'FAILED retrieve_candidate_in_upcoming_election_list_by_twitter_handle: ' + str(e) + ' '
+        success = False
+
+    results = {
+        'candidate_list_found': candidate_list_found,
+        'candidate_list':       candidate_list,
+        'status':               status,
+        'success':              success,
+    }
+    return results
 
 
 def retrieve_candidate_list_for_entire_year(
