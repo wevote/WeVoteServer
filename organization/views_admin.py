@@ -5,7 +5,7 @@
 from .controllers import full_domain_string_available, merge_these_two_organizations,\
     move_organization_followers_to_another_organization, move_organization_membership_link_to_another_organization, \
     move_organization_team_member_entries_to_another_organization, organizations_import_from_master_server, \
-    push_organization_data_to_other_table_caches, subdomain_string_available
+    organization_politician_match, push_organization_data_to_other_table_caches, subdomain_string_available
 from .controllers_fastly import add_wevote_subdomain_to_fastly, add_subdomain_route53_record, \
     get_wevote_subdomain_status
 from .models import GROUP, INDIVIDUAL, Organization, OrganizationReservedDomain, OrganizationTeamMember, \
@@ -444,12 +444,13 @@ def organization_list_view(request):
     sort_by = request.GET.get('sort_by', '')
     state_code = request.GET.get('state_code', '')
     show_all = request.GET.get('show_all', False)
-    show_more = request.GET.get('show_more', False)  # Show up to 1,000 organizations
     show_issues = request.GET.get('show_issues', '')
     show_organizations_without_email = positive_value_exists(request.GET.get('show_organizations_without_email', False))
     show_twitter_updates_failing = positive_value_exists(request.GET.get('show_twitter_updates_failing', False))
     show_organizations_to_be_analyzed = \
         positive_value_exists(request.GET.get('show_organizations_to_be_analyzed', False))
+    show_up_to_1000 = request.GET.get('show_up_to_1000', False)
+    show_up_to_2000 = request.GET.get('show_up_to_2000', False)
 
     messages_on_stage = get_messages(request)
     organization_list_query = Organization.objects.all()
@@ -621,8 +622,10 @@ def organization_list_view(request):
                          '{organization_count:,} endorsers found.'.format(organization_count=organization_count))
 
     # Limit to only showing 200 on screen
-    if positive_value_exists(show_more):
+    if positive_value_exists(show_up_to_1000):
         organization_list = organization_list_query[:1000]
+    elif positive_value_exists(show_up_to_2000):
+        organization_list = organization_list_query[:2000]
     elif positive_value_exists(show_all):
         organization_list = organization_list_query
     else:
@@ -670,10 +673,11 @@ def organization_list_view(request):
         'organization_search':      organization_search,
         'show_all':                 show_all,
         'show_issues':              show_issues,
-        'show_more':                show_more,
         'show_organizations_without_email': show_organizations_without_email,
         'show_organizations_to_be_analyzed': show_organizations_to_be_analyzed,
         'show_twitter_updates_failing': show_twitter_updates_failing,
+        'show_up_to_1000':          show_up_to_1000,
+        'show_up_to_2000':          show_up_to_2000,
         'sort_by':                  sort_by,
         'state_code':               state_code,
         'state_list':               sorted_state_list,
@@ -1259,6 +1263,7 @@ def organization_edit_process_view(request):
     organization_facebook = request.POST.get('organization_facebook', False)
     organization_type = request.POST.get('organization_type', GROUP)
     organization_website = request.POST.get('organization_website', False)
+    profile_image_type_currently_active = request.POST.get('profile_image_type_currently_active', False)
     state_served_code = request.POST.get('state_served_code', False)
     wikipedia_page_title = request.POST.get('wikipedia_page_title', False)
     wikipedia_photo_url = request.POST.get('wikipedia_photo_url', False)
@@ -1380,6 +1385,7 @@ def organization_edit_process_view(request):
                 organization_email=organization_email,
                 organization_facebook=organization_facebook,
                 organization_type=organization_type,
+                profile_image_type_currently_active=profile_image_type_currently_active,
             )
             org_results_organization_we_vote_id = org_results['organization'].we_vote_id
         create_results = twitter_user_manager.create_twitter_link_to_organization(
@@ -1393,10 +1399,8 @@ def organization_edit_process_view(request):
     try:
         if organization_on_stage_found:
             # Update
-            if issue_analysis_admin_notes is not False:
-                organization_on_stage.issue_analysis_admin_notes = issue_analysis_admin_notes.strip()
-            if issue_analysis_done is not False:
-                organization_on_stage.issue_analysis_done = issue_analysis_done
+            organization_on_stage.issue_analysis_admin_notes = issue_analysis_admin_notes.strip()
+            organization_on_stage.issue_analysis_done = positive_value_exists(issue_analysis_done)
             if organization_twitter_handle is not False:
                 if twitter_handle_can_be_saved_without_conflict:
                     organization_on_stage.organization_twitter_handle = organization_twitter_handle.strip()
@@ -1417,6 +1421,8 @@ def organization_edit_process_view(request):
                 organization_on_stage.organization_type = organization_type.strip()
             if organization_website is not False:
                 organization_on_stage.organization_website = organization_website.strip()
+            if profile_image_type_currently_active is not False:
+                organization_on_stage.profile_image_type_currently_active = profile_image_type_currently_active.strip()
             if state_served_code is not False:
                 organization_on_stage.state_served_code = state_served_code.strip()
             if wikipedia_page_title is not False:
@@ -1499,10 +1505,8 @@ def organization_edit_process_view(request):
             organization_on_stage = Organization(
                 organization_name=organization_name,
             )
-            if issue_analysis_admin_notes is not False:
-                organization_on_stage.issue_analysis_admin_notes = issue_analysis_admin_notes
-            if issue_analysis_done is not False:
-                organization_on_stage.issue_analysis_done = issue_analysis_done
+            organization_on_stage.issue_analysis_admin_notes = issue_analysis_admin_notes
+            organization_on_stage.issue_analysis_done = positive_value_exists(issue_analysis_done)
             if organization_twitter_handle is not False:
                 if twitter_handle_can_be_saved_without_conflict:
                     organization_on_stage.organization_twitter_handle = organization_twitter_handle
@@ -1514,6 +1518,8 @@ def organization_edit_process_view(request):
                 organization_on_stage.organization_instagram_handle = organization_instagram_handle
             if organization_website is not False:
                 organization_on_stage.organization_website = organization_website
+            if profile_image_type_currently_active is not False:
+                organization_on_stage.profile_image_type_currently_active = profile_image_type_currently_active
             if wikipedia_page_title is not False:
                 organization_on_stage.wikipedia_page_title = wikipedia_page_title
             if wikipedia_photo_url is not False:
@@ -1539,7 +1545,6 @@ def organization_edit_process_view(request):
     if not organization_twitter_updates_failing and not organization_on_stage.organization_twitter_updates_failing:
         results = refresh_twitter_organization_details(organization_on_stage)
         status += results['status']
-        organization_on_stage = results['organization']
 
     if positive_value_exists(organization_we_vote_id):
         push_organization_data_to_other_table_caches(organization_we_vote_id)
@@ -2426,6 +2431,59 @@ def organization_delete_existing_position_process_form_view(request, organizatio
     messages.add_message(request, messages.INFO,
                          'Position deleted.')
     return HttpResponseRedirect(reverse('organization:organization_position_list', args=([organization_id])))
+
+
+@login_required
+def organization_politician_match_view(request):
+    """
+    Try to match the current organization to an existing politician entry. If a politician entry isn't found,
+    create an entry.
+    :param request:
+    :return:
+    """
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    organization_id = request.GET.get('organization_id', 0)
+    organization_id = convert_to_int(organization_id)
+    organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
+    # google_civic_election_id is included for interface usability reasons and isn't used in the processing
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(google_civic_election_id)
+    we_vote_organization = None
+
+    organization_manager = OrganizationManager()
+    if positive_value_exists(organization_we_vote_id):
+        results = organization_manager.retrieve_organization(we_vote_id=organization_we_vote_id)
+        if not positive_value_exists(results['organization_found']):
+            messages.add_message(request, messages.ERROR,
+                                 "Representative '{organization_we_vote_id}' not found."
+                                 "".format(organization_we_vote_id=organization_we_vote_id))
+            return HttpResponseRedirect(reverse('organization:organization_edit_we_vote_id',
+                                                args=(organization_we_vote_id,)))
+        we_vote_organization = results['organization']
+    elif positive_value_exists(organization_id):
+        results = organization_manager.retrieve_organization_from_id(organization_id)
+        if not positive_value_exists(results['organization_found']):
+            messages.add_message(request, messages.ERROR,
+                                 "Representative '{organization_id}' not found."
+                                 "".format(organization_id=organization_id))
+            return HttpResponseRedirect(reverse('organization:organization_edit', args=(organization_id,)))
+        we_vote_organization = results['organization']
+    else:
+        messages.add_message(request, messages.ERROR, "Representative identifier was not passed in.")
+        return HttpResponseRedirect(reverse('organization:organization_edit', args=(organization_id,)))
+
+    # Try to find existing politician for this organization. If none found, create politician.
+    results = organization_politician_match(we_vote_organization)
+
+    display_messages = True
+    if results['status'] and display_messages:
+        messages.add_message(request, messages.INFO, results['status'])
+    return HttpResponseRedirect(reverse('organization:organization_edit', args=(organization_id,)) +
+                                "?google_civic_election_id=" + str(google_civic_election_id))
 
 
 @login_required

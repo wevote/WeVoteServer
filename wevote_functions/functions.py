@@ -450,6 +450,17 @@ DISTRICT_PAIR_PATTERNS_XTH = [
 ]
 
 
+def add_to_list_if_positive_value_exists(value=None, incoming_list=[]):
+    if not incoming_list or not positive_value_exists(incoming_list):
+        updated_list = []
+    else:
+        updated_list = incoming_list
+    if positive_value_exists(value):
+        if value not in updated_list:
+            updated_list.append(value)
+    return updated_list
+
+
 def is_ordinal_number(incoming_integer):
     if incoming_integer in range(1, 4):  # Numbers equal 1, 2, or 3
         return True

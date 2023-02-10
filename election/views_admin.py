@@ -45,13 +45,14 @@ from polling_location.models import PollingLocation, PollingLocationManager
 from position.models import ANY_STANCE, PositionEntered, PositionForFriends, PositionListManager
 import pytz
 from quick_info.models import QuickInfoManager
-from wevote_settings.models import RemoteRequestHistoryManager
 from voter.models import VoterAddressManager, VoterDeviceLink, voter_has_authority
 from voter_guide.models import VoterGuide, VoterGuidePossibility, \
     VoterGuideListManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, convert_we_vote_date_string_to_date, positive_value_exists,\
     STATE_CODE_MAP, STATE_GEOGRAPHIC_CENTER
+from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
+from wevote_settings.models import RemoteRequestHistoryManager
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -857,6 +858,7 @@ def election_list_view(request):
         if positive_value_exists(show_all_elections):
             # If here, then we want to make sure show_all_elections_this_year is False
             show_all_elections_this_year = False
+    show_this_year = convert_to_int(request.GET.get('show_this_year', 0))
 
     messages_on_stage = get_messages(request)
     office_manager = ContestOfficeManager()
@@ -872,7 +874,13 @@ def election_list_view(request):
 
     timezone = pytz.timezone("America/Los_Angeles")
     datetime_now = timezone.localize(datetime.now())
-    if positive_value_exists(show_all_elections_this_year):
+    if positive_value_exists(show_this_year):
+        first_day_of_year_to_show = "{year}-01-01".format(year=show_this_year)
+        last_day_of_year_to_show = "{year}-12-31".format(year=show_this_year)
+        election_list_query = election_list_query.filter(
+            election_day_text__gte=first_day_of_year_to_show,
+            election_day_text__lte=last_day_of_year_to_show)
+    elif positive_value_exists(show_all_elections_this_year):
         first_day_this_year = datetime_now.strftime("%Y-01-01")
         election_list_query = election_list_query.exclude(election_day_text__lt=first_day_this_year)
     elif not positive_value_exists(show_all_elections):
@@ -908,7 +916,11 @@ def election_list_view(request):
 
             election_list_query = election_list_query.filter(final_filters)
 
-    election_list = election_list_query[:200]
+    election_count = election_list_query.count()
+    messages.add_message(request, messages.INFO,
+                         '{election_count:,} elections found.'.format(election_count=election_count))
+
+    election_list = election_list_query[:500]
     election_list_modified = []
     ballot_returned_list_manager = BallotReturnedListManager()
     candidate_list_manager = CandidateListManager()
@@ -1148,7 +1160,9 @@ def election_list_view(request):
         'show_all_elections_this_year': show_all_elections_this_year,
         'show_election_statistics':     show_election_statistics,
         'show_ignored_elections':       show_ignored_elections,
+        'show_this_year':               show_this_year,
         'state_code':                   state_code,
+        'years_available':              ELECTION_YEARS_AVAILABLE,
         'vote_usa_elections_api_url':   vote_usa_elections_api_url,
     }
     return render(request, 'election/election_list.html', template_values)

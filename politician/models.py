@@ -331,10 +331,10 @@ class PoliticianManager(models.Manager):
     def __init__(self):
         pass
 
-    def create_politician_from_candidate_or_representative(self, candidate_or_rep):
+    def create_politician_from_similar_object(self, similar_object):
         """
-        Take We Vote candidate or representative object, and create a new politician entry
-        :param candidate_or_rep:
+        Take We Vote candidate, organization or representative object, and create a new politician entry
+        :param similar_object:
         :return:
         """
         status = ''
@@ -346,141 +346,206 @@ class PoliticianManager(models.Manager):
         politician_we_vote_id = ''
 
         birth_date = None
+        facebook_url = None
+        first_name = None
         gender = UNKNOWN
-        if 'cand' in candidate_or_rep.we_vote_id:
+        instagram_handle = None
+        last_name = None
+        linkedin_url = None
+        middle_name = None
+        object_is_candidate = False
+        object_is_organization = False
+        object_is_representative = False
+        political_party = None
+        state_code = None
+        vote_usa_politician_id = None
+        if 'cand' in similar_object.we_vote_id:
             object_is_candidate = True
-            first_name = extract_first_name_from_full_name(candidate_or_rep.candidate_name)
-            middle_name = extract_middle_name_from_full_name(candidate_or_rep.candidate_name)
-            last_name = extract_last_name_from_full_name(candidate_or_rep.candidate_name)
-            political_party_constant = convert_to_political_party_constant(candidate_or_rep.party)
+            facebook_url = similar_object.facebook_url
+            first_name = extract_first_name_from_full_name(similar_object.candidate_name)
+            instagram_handle = similar_object.instagram_handle
+            middle_name = extract_middle_name_from_full_name(similar_object.candidate_name)
+            last_name = extract_last_name_from_full_name(similar_object.candidate_name)
+            linkedin_url = similar_object.linkedin_url
+            political_party_constant = convert_to_political_party_constant(similar_object.party)
             political_party = candidate_party_display(political_party_constant)
-            if positive_value_exists(candidate_or_rep.birth_day_text):
+            if positive_value_exists(similar_object.birth_day_text):
                 try:
-                    birth_date = datetime.datetime.strptime(candidate_or_rep.birth_day_text, '%Y-%m-%d')
+                    birth_date = datetime.datetime.strptime(similar_object.birth_day_text, '%Y-%m-%d')
                 except Exception as e:
                     birth_date = None
-                    status += "FAILED_CONVERTING_BIRTH_DAY_TEXT: " + str(e) + " " + str(candidate_or_rep.birth_day_text) + " "
+                    status += "FAILED_CONVERTING_BIRTH_DAY_TEXT: " + str(e) + " " + str(similar_object.birth_day_text) + " "
             else:
                 birth_date = None
-            if positive_value_exists(candidate_or_rep.candidate_gender):
-                if candidate_or_rep.candidate_gender.lower() == 'female':
+            if positive_value_exists(similar_object.candidate_gender):
+                if similar_object.candidate_gender.lower() == 'female':
                     gender = FEMALE
-                elif candidate_or_rep.candidate_gender.lower() == 'male':
+                elif similar_object.candidate_gender.lower() == 'male':
                     gender = MALE
-                elif candidate_or_rep.candidate_gender.lower() in ['nonbinary', 'non-binary', 'non binary']:
+                elif similar_object.candidate_gender.lower() in ['nonbinary', 'non-binary', 'non binary']:
                     gender = GENDER_NEUTRAL
                 else:
                     gender = UNKNOWN
             else:
                 gender = UNKNOWN
-        else:
+            state_code = similar_object.state_code
+            vote_usa_politician_id = similar_object.vote_usa_politician_id
+        elif 'org' in similar_object.we_vote_id:
+            object_is_organization = True
+            facebook_url = similar_object.organization_facebook
+
+            first_name = extract_first_name_from_full_name(similar_object.organization_name)
+            instagram_handle = similar_object.organization_instagram_handle
+            middle_name = extract_middle_name_from_full_name(similar_object.organization_name)
+            last_name = extract_last_name_from_full_name(similar_object.organization_name)
+            gender = UNKNOWN
+            state_code = similar_object.state_served_code
+        elif 'rep' in similar_object.we_vote_id:
             # If here we are looking at representative object
-            object_is_candidate = False
-            first_name = extract_first_name_from_full_name(candidate_or_rep.representative_name)
-            middle_name = extract_middle_name_from_full_name(candidate_or_rep.representative_name)
-            last_name = extract_last_name_from_full_name(candidate_or_rep.representative_name)
-            political_party_constant = convert_to_political_party_constant(candidate_or_rep.political_party)
+            object_is_representative = True
+            facebook_url = similar_object.facebook_url
+            first_name = extract_first_name_from_full_name(similar_object.representative_name)
+            instagram_handle = similar_object.instagram_handle
+            middle_name = extract_middle_name_from_full_name(similar_object.representative_name)
+            last_name = extract_last_name_from_full_name(similar_object.representative_name)
+            linkedin_url = similar_object.linkedin_url
+            political_party_constant = convert_to_political_party_constant(similar_object.political_party)
             political_party = candidate_party_display(political_party_constant)
-        try:
-            politician = Politician.objects.create(
-                birth_date=birth_date,
-                facebook_url=candidate_or_rep.facebook_url,
-                facebook_url_is_broken=candidate_or_rep.facebook_url_is_broken,
-                first_name=first_name,
-                gender=gender,
-                instagram_followers_count=candidate_or_rep.instagram_followers_count,
-                instagram_handle=candidate_or_rep.instagram_handle,
-                last_name=last_name,
-                linkedin_url=candidate_or_rep.linkedin_url,
-                middle_name=middle_name,
-                political_party=political_party,
-                state_code=candidate_or_rep.state_code,
-                twitter_description=candidate_or_rep.twitter_description,
-                twitter_followers_count=candidate_or_rep.twitter_followers_count,
-                twitter_name=candidate_or_rep.twitter_name,
-                twitter_location=candidate_or_rep.twitter_location,
-                twitter_profile_background_image_url_https=candidate_or_rep.twitter_profile_background_image_url_https,
-                twitter_profile_banner_url_https=candidate_or_rep.twitter_profile_banner_url_https,
-                twitter_profile_image_url_https=candidate_or_rep.twitter_profile_image_url_https,
-                twitter_handle_updates_failing=candidate_or_rep.twitter_handle_updates_failing,
-                twitter_handle2_updates_failing=candidate_or_rep.twitter_handle2_updates_failing,
-                vote_usa_politician_id=candidate_or_rep.vote_usa_politician_id,
-                we_vote_hosted_profile_image_url_large=candidate_or_rep.we_vote_hosted_profile_image_url_large,
-                we_vote_hosted_profile_image_url_medium=candidate_or_rep.we_vote_hosted_profile_image_url_medium,
-                we_vote_hosted_profile_image_url_tiny=candidate_or_rep.we_vote_hosted_profile_image_url_tiny,
-                wikipedia_url=candidate_or_rep.wikipedia_url,
-                youtube_url=candidate_or_rep.youtube_url,
-            )
-            status += "POLITICIAN_CREATED "
-            politician_created = True
-            politician_found = True
-            politician_id = politician.id
-            politician_we_vote_id = politician.we_vote_id
-        except Exception as e:
-            status += "FAILED_TO_CREATE_POLITICIAN: " + str(e) + " "
-            success = False
+            state_code = similar_object.state_code
+            vote_usa_politician_id = similar_object.vote_usa_politician_id
+        if object_is_candidate or object_is_organization or object_is_representative:
+            try:
+                politician = Politician.objects.create(
+                    birth_date=birth_date,
+                    facebook_url=facebook_url,
+                    facebook_url_is_broken=similar_object.facebook_url_is_broken,
+                    first_name=first_name,
+                    gender=gender,
+                    instagram_followers_count=similar_object.instagram_followers_count,
+                    instagram_handle=instagram_handle,
+                    last_name=last_name,
+                    linkedin_url=linkedin_url,
+                    middle_name=middle_name,
+                    political_party=political_party,
+                    profile_image_type_currently_active=similar_object.profile_image_type_currently_active,
+                    state_code=state_code,
+                    twitter_description=similar_object.twitter_description,
+                    twitter_followers_count=similar_object.twitter_followers_count,
+                    twitter_name=similar_object.twitter_name,
+                    twitter_location=similar_object.twitter_location,
+                    twitter_profile_background_image_url_https=similar_object.twitter_profile_background_image_url_https,
+                    twitter_profile_banner_url_https=similar_object.twitter_profile_banner_url_https,
+                    twitter_profile_image_url_https=similar_object.twitter_profile_image_url_https,
+                    twitter_handle_updates_failing=similar_object.twitter_handle_updates_failing,
+                    twitter_handle2_updates_failing=similar_object.twitter_handle2_updates_failing,
+                    vote_usa_politician_id=vote_usa_politician_id,
+                    we_vote_hosted_profile_facebook_image_url_large=similar_object.we_vote_hosted_profile_facebook_image_url_large,
+                    we_vote_hosted_profile_facebook_image_url_medium=similar_object.we_vote_hosted_profile_facebook_image_url_medium,
+                    we_vote_hosted_profile_facebook_image_url_tiny=similar_object.we_vote_hosted_profile_facebook_image_url_tiny,
+                    we_vote_hosted_profile_twitter_image_url_large=similar_object.we_vote_hosted_profile_twitter_image_url_large,
+                    we_vote_hosted_profile_twitter_image_url_medium=similar_object.we_vote_hosted_profile_twitter_image_url_medium,
+                    we_vote_hosted_profile_twitter_image_url_tiny=similar_object.we_vote_hosted_profile_twitter_image_url_tiny,
+                    we_vote_hosted_profile_uploaded_image_url_large=similar_object.we_vote_hosted_profile_uploaded_image_url_large,
+                    we_vote_hosted_profile_uploaded_image_url_medium=similar_object.we_vote_hosted_profile_uploaded_image_url_medium,
+                    we_vote_hosted_profile_uploaded_image_url_tiny=similar_object.we_vote_hosted_profile_uploaded_image_url_tiny,
+                    we_vote_hosted_profile_vote_usa_image_url_large=similar_object.we_vote_hosted_profile_vote_usa_image_url_large,
+                    we_vote_hosted_profile_vote_usa_image_url_medium=similar_object.we_vote_hosted_profile_vote_usa_image_url_medium,
+                    we_vote_hosted_profile_vote_usa_image_url_tiny=similar_object.we_vote_hosted_profile_vote_usa_image_url_tiny,
+                    we_vote_hosted_profile_image_url_large=similar_object.we_vote_hosted_profile_image_url_large,
+                    we_vote_hosted_profile_image_url_medium=similar_object.we_vote_hosted_profile_image_url_medium,
+                    we_vote_hosted_profile_image_url_tiny=similar_object.we_vote_hosted_profile_image_url_tiny,
+                    wikipedia_url=similar_object.wikipedia_url,
+                    youtube_url=similar_object.youtube_url,
+                )
+                status += "POLITICIAN_CREATED "
+                politician_created = True
+                politician_found = True
+                politician_id = politician.id
+                politician_we_vote_id = politician.we_vote_id
+            except Exception as e:
+                status += "FAILED_TO_CREATE_POLITICIAN: " + str(e) + " "
+                success = False
 
         if politician_found:
-            twitter_handles = []
+            from politician.controllers import add_twitter_handle_to_next_politician_spot
             from representative.controllers import add_value_to_next_representative_spot
+            twitter_handles = []
             try:
                 if object_is_candidate:
-                    politician.ballotpedia_politician_url = candidate_or_rep.ballotpedia_candidate_url
-                    politician.ballotpedia_politician_name = candidate_or_rep.ballotpedia_candidate_name
-                    politician.politician_contact_form_url = candidate_or_rep.candidate_contact_form_url
-                    politician.politician_url = candidate_or_rep.candidate_url
-                    politician.google_civic_candidate_name = candidate_or_rep.google_civic_candidate_name
-                    politician.google_civic_candidate_name2 = candidate_or_rep.google_civic_candidate_name2
-                    politician.google_civic_candidate_name3 = candidate_or_rep.google_civic_candidate_name3
-                    politician.maplight_id = candidate_or_rep.maplight_id
-                    politician.politician_email = candidate_or_rep.candidate_email
-                    politician.politician_name = candidate_or_rep.candidate_name
-                    politician.politician_phone_number = candidate_or_rep.candidate_phone
-                    politician.vote_smart_id = candidate_or_rep.vote_smart_id
-                    politician.vote_usa_politician_id = candidate_or_rep.vote_usa_politician_id
-                    politician.vote_usa_profile_image_url_https = candidate_or_rep.vote_usa_profile_image_url_https
+                    politician.ballotpedia_politician_url = similar_object.ballotpedia_candidate_url
+                    politician.ballotpedia_politician_name = similar_object.ballotpedia_candidate_name
+                    politician.politician_contact_form_url = similar_object.candidate_contact_form_url
+                    politician.politician_url = similar_object.candidate_url
+                    politician.google_civic_candidate_name = similar_object.google_civic_candidate_name
+                    politician.google_civic_candidate_name2 = similar_object.google_civic_candidate_name2
+                    politician.google_civic_candidate_name3 = similar_object.google_civic_candidate_name3
+                    politician.maplight_id = similar_object.maplight_id
+                    politician.politician_email = similar_object.candidate_email
+                    politician.politician_name = similar_object.candidate_name
+                    politician.politician_phone_number = similar_object.candidate_phone
+                    politician.vote_smart_id = similar_object.vote_smart_id
+                    politician.vote_usa_politician_id = similar_object.vote_usa_politician_id
+                    politician.vote_usa_profile_image_url_https = similar_object.vote_usa_profile_image_url_https
 
-                    if positive_value_exists(candidate_or_rep.candidate_twitter_handle):
-                        twitter_handles.append(candidate_or_rep.candidate_twitter_handle)
-                    if positive_value_exists(candidate_or_rep.candidate_twitter_handle2):
-                        twitter_handles.append(candidate_or_rep.candidate_twitter_handle2)
-                    if positive_value_exists(candidate_or_rep.candidate_twitter_handle3):
-                        twitter_handles.append(candidate_or_rep.candidate_twitter_handle3)
-                else:
-                    politician.ballotpedia_politician_url = candidate_or_rep.ballotpedia_representative_url
-                    politician.google_civic_candidate_name = candidate_or_rep.google_civic_representative_name
-                    politician.google_civic_candidate_name2 = candidate_or_rep.google_civic_representative_name2
-                    politician.google_civic_candidate_name3 = candidate_or_rep.google_civic_representative_name3
-                    politician.politician_contact_form_url = candidate_or_rep.representative_contact_form_url
-                    politician.politician_email = candidate_or_rep.representative_email
-                    politician.politician_email2 = candidate_or_rep.representative_email2
-                    politician.politician_email3 = candidate_or_rep.representative_email3
-                    politician.politician_name = candidate_or_rep.representative_name
-                    politician.politician_phone_number = candidate_or_rep.representative_phone
-                    if positive_value_exists(candidate_or_rep.representative_url):
+                    if positive_value_exists(similar_object.candidate_twitter_handle):
+                        twitter_handles.append(similar_object.candidate_twitter_handle)
+                    if positive_value_exists(similar_object.candidate_twitter_handle2):
+                        twitter_handles.append(similar_object.candidate_twitter_handle2)
+                    if positive_value_exists(similar_object.candidate_twitter_handle3):
+                        twitter_handles.append(similar_object.candidate_twitter_handle3)
+                elif object_is_organization:
+                    politician.politician_name = similar_object.organization_name
+                    if positive_value_exists(similar_object.organization_phone1):
+                        politician.politician_phone_number = similar_object.organization_phone1
+                    email_list = []
+                    if positive_value_exists(similar_object.organization_email):
+                        email_list.append(similar_object.organization_email)
+                    if positive_value_exists(similar_object.facebook_email):
+                        email_list.append(similar_object.facebook_email)
+                    if 0 in email_list and positive_value_exists(email_list[0]):
+                        politician.politician_email = email_list[0]
+                    if 1 in email_list and positive_value_exists(email_list[1]):
+                        politician.politician_email2 = email_list[1]
+                    if positive_value_exists(similar_object.organization_twitter_handle):
+                        twitter_handles.append(similar_object.organization_twitter_handle)
+                    politician.vote_smart_id = similar_object.vote_smart_id
+                elif object_is_representative:
+                    politician.ballotpedia_politician_url = similar_object.ballotpedia_representative_url
+                    politician.google_civic_candidate_name = similar_object.google_civic_representative_name
+                    politician.google_civic_candidate_name2 = similar_object.google_civic_representative_name2
+                    politician.google_civic_candidate_name3 = similar_object.google_civic_representative_name3
+                    if positive_value_exists(similar_object.representative_twitter_handle):
+                        twitter_handles.append(similar_object.representative_twitter_handle)
+                    politician.politician_contact_form_url = similar_object.representative_contact_form_url
+                    politician.politician_email = similar_object.representative_email
+                    politician.politician_email2 = similar_object.representative_email2
+                    politician.politician_email3 = similar_object.representative_email3
+                    politician.politician_name = similar_object.representative_name
+                    politician.politician_phone_number = similar_object.representative_phone
+                    if positive_value_exists(similar_object.representative_url):
                         results = add_value_to_next_representative_spot(
                             field_name_base='politician_url',
-                            new_value_to_add=candidate_or_rep.representative_url,
+                            new_value_to_add=similar_object.representative_url,
                             representative=politician,
                         )
                         if results['success'] and results['values_changed']:
                             politician = results['representative']
                         if not results['success']:
                             status += results['status']
-                    if positive_value_exists(candidate_or_rep.representative_url2):
+                    if positive_value_exists(similar_object.representative_url2):
                         results = add_value_to_next_representative_spot(
                             field_name_base='politician_url',
-                            new_value_to_add=candidate_or_rep.representative_url2,
+                            new_value_to_add=similar_object.representative_url2,
                             representative=politician,
                         )
                         if results['success'] and results['values_changed']:
                             politician = results['representative']
                         if not results['success']:
                             status += results['status']
-                    if positive_value_exists(candidate_or_rep.representative_url3):
+                    if positive_value_exists(similar_object.representative_url3):
                         results = add_value_to_next_representative_spot(
                             field_name_base='politician_url',
-                            new_value_to_add=candidate_or_rep.representative_url3,
+                            new_value_to_add=similar_object.representative_url3,
                             representative=politician,
                         )
                         if results['success'] and results['values_changed']:
@@ -488,15 +553,13 @@ class PoliticianManager(models.Manager):
                         if not results['success']:
                             status += results['status']
 
-                    if positive_value_exists(candidate_or_rep.representative_twitter_handle):
-                        twitter_handles.append(candidate_or_rep.representative_twitter_handle)
-                    if positive_value_exists(candidate_or_rep.representative_twitter_handle2):
-                        twitter_handles.append(candidate_or_rep.representative_twitter_handle2)
-                    if positive_value_exists(candidate_or_rep.representative_twitter_handle3):
-                        twitter_handles.append(candidate_or_rep.representative_twitter_handle3)
+                    if positive_value_exists(similar_object.representative_twitter_handle):
+                        twitter_handles.append(similar_object.representative_twitter_handle)
+                    if positive_value_exists(similar_object.representative_twitter_handle2):
+                        twitter_handles.append(similar_object.representative_twitter_handle2)
+                    if positive_value_exists(similar_object.representative_twitter_handle3):
+                        twitter_handles.append(similar_object.representative_twitter_handle3)
 
-                if len(twitter_handles) > 0:
-                    from politician.controllers import add_twitter_handle_to_next_politician_spot
                 for one_twitter_handle in twitter_handles:
                     twitter_results = add_twitter_handle_to_next_politician_spot(
                         politician, one_twitter_handle)
@@ -509,7 +572,7 @@ class PoliticianManager(models.Manager):
                         success = False
                 politician.save()
             except Exception as e:
-                status += "FAILED_TO_ADD_CANDIDATE_TWITTER_HANDLE_OR_OTHER_FIELDS: " + str(e) + " "
+                status += "FAILED_TO_ADD_OTHER_FIELDS: " + str(e) + " "
                 success = False
         results = {
             'success':                      success,
@@ -642,18 +705,15 @@ class PoliticianManager(models.Manager):
         }
         return results
 
-    def retrieve_all_politicians_that_might_match_candidate(
+    def retrieve_all_politicians_that_might_match_similar_object(
             self,
-            candidate_name='',
-            candidate_twitter_handle='',
-            candidate_twitter_handle2='',
-            candidate_twitter_handle3='',
-            google_civic_candidate_name='',
-            google_civic_candidate_name2='',
-            google_civic_candidate_name3='',
+            facebook_url_list=[],
+            full_name_list=[],
+            instagram_handle='',
             maplight_id='',
             return_close_matches=True,
             state_code='',
+            twitter_handle_list=[],
             vote_smart_id='',
             vote_usa_politician_id='',
             read_only=True,
@@ -672,6 +732,52 @@ class PoliticianManager(models.Manager):
                 politician_queryset = Politician.objects.all()
 
             filters = []
+            for facebook_url in facebook_url_list:
+                filter_set = True
+                if positive_value_exists(facebook_url):
+                    new_filter = (
+                        Q(facebook_url__iexact=facebook_url) |
+                        Q(facebook_url2__iexact=facebook_url) |
+                        Q(facebook_url3__iexact=facebook_url)
+                    )
+                    filters.append(new_filter)
+
+            if positive_value_exists(instagram_handle):
+                new_filter = Q(instagram_handle__iexact=instagram_handle)
+                filter_set = True
+                filters.append(new_filter)
+
+            if positive_value_exists(maplight_id):
+                new_filter = Q(maplight_id__iexact=maplight_id)
+                filter_set = True
+                filters.append(new_filter)
+
+            for twitter_handle in twitter_handle_list:
+                if positive_value_exists(twitter_handle):
+                    filter_set = True
+                    new_filter = (
+                        Q(politician_twitter_handle__iexact=twitter_handle) |
+                        Q(politician_twitter_handle2__iexact=twitter_handle) |
+                        Q(politician_twitter_handle3__iexact=twitter_handle) |
+                        Q(politician_twitter_handle4__iexact=twitter_handle) |
+                        Q(politician_twitter_handle5__iexact=twitter_handle)
+                    )
+                    filters.append(new_filter)
+
+            for full_name in full_name_list:
+                if positive_value_exists(full_name):
+                    filter_results = self.create_politician_name_filter(
+                        filters=filters,
+                        politician_name=full_name,
+                        queryset=politician_queryset,
+                        return_close_matches=return_close_matches,
+                        state_code=state_code,
+                    )
+                    if filter_results['filter_set']:
+                        filter_set = True
+                        filters = filter_results['filters']
+                    politician_queryset = filter_results['queryset']
+
             if positive_value_exists(vote_smart_id):
                 new_filter = Q(vote_smart_id__iexact=vote_smart_id)
                 filter_set = True
@@ -681,96 +787,6 @@ class PoliticianManager(models.Manager):
                 new_filter = Q(vote_usa_politician_id__iexact=vote_usa_politician_id)
                 filter_set = True
                 filters.append(new_filter)
-
-            if positive_value_exists(maplight_id):
-                new_filter = Q(maplight_id__iexact=maplight_id)
-                filter_set = True
-                filters.append(new_filter)
-
-            if positive_value_exists(candidate_twitter_handle):
-                filter_set = True
-                new_filter = (
-                    Q(politician_twitter_handle__iexact=candidate_twitter_handle) |
-                    Q(politician_twitter_handle2__iexact=candidate_twitter_handle) |
-                    Q(politician_twitter_handle3__iexact=candidate_twitter_handle) |
-                    Q(politician_twitter_handle4__iexact=candidate_twitter_handle) |
-                    Q(politician_twitter_handle5__iexact=candidate_twitter_handle)
-                )
-                filters.append(new_filter)
-
-            if positive_value_exists(candidate_twitter_handle2):
-                filter_set = True
-                new_filter = (
-                    Q(politician_twitter_handle__iexact=candidate_twitter_handle2) |
-                    Q(politician_twitter_handle2__iexact=candidate_twitter_handle2) |
-                    Q(politician_twitter_handle3__iexact=candidate_twitter_handle2) |
-                    Q(politician_twitter_handle4__iexact=candidate_twitter_handle2) |
-                    Q(politician_twitter_handle5__iexact=candidate_twitter_handle2)
-                )
-                filters.append(new_filter)
-
-            if positive_value_exists(candidate_twitter_handle3):
-                filter_set = True
-                new_filter = (
-                    Q(politician_twitter_handle__iexact=candidate_twitter_handle3) |
-                    Q(politician_twitter_handle2__iexact=candidate_twitter_handle3) |
-                    Q(politician_twitter_handle3__iexact=candidate_twitter_handle3) |
-                    Q(politician_twitter_handle4__iexact=candidate_twitter_handle3) |
-                    Q(politician_twitter_handle5__iexact=candidate_twitter_handle3)
-                )
-                filters.append(new_filter)
-
-            if positive_value_exists(candidate_name):
-                filter_results = self.create_politician_name_filter(
-                    filters=filters,
-                    politician_name=candidate_name,
-                    queryset=politician_queryset,
-                    return_close_matches=return_close_matches,
-                    state_code=state_code,
-                )
-                if filter_results['filter_set']:
-                    filter_set = True
-                    filters = filter_results['filters']
-                politician_queryset = filter_results['queryset']
-
-            if positive_value_exists(google_civic_candidate_name):
-                filter_results = self.create_politician_name_filter(
-                    filters=filters,
-                    politician_name=google_civic_candidate_name,
-                    queryset=politician_queryset,
-                    return_close_matches=return_close_matches,
-                    state_code=state_code,
-                )
-                if filter_results['filter_set']:
-                    filter_set = True
-                    filters = filter_results['filters']
-                politician_queryset = filter_results['queryset']
-
-            if positive_value_exists(google_civic_candidate_name2):
-                filter_results = self.create_politician_name_filter(
-                    filters=filters,
-                    politician_name=google_civic_candidate_name2,
-                    queryset=politician_queryset,
-                    return_close_matches=return_close_matches,
-                    state_code=state_code,
-                )
-                if filter_results['filter_set']:
-                    filter_set = True
-                    filters = filter_results['filters']
-                politician_queryset = filter_results['queryset']
-
-            if positive_value_exists(google_civic_candidate_name3):
-                filter_results = self.create_politician_name_filter(
-                    filters=filters,
-                    politician_name=google_civic_candidate_name3,
-                    queryset=politician_queryset,
-                    return_close_matches=return_close_matches,
-                    state_code=state_code,
-                )
-                if filter_results['filter_set']:
-                    filter_set = True
-                    filters = filter_results['filters']
-                politician_queryset = filter_results['queryset']
 
             # Add the first query
             if len(filters):
@@ -1424,14 +1440,14 @@ class PoliticianManager(models.Manager):
     def retrieve_politicians_from_non_unique_identifiers(
             self,
             state_code='',
-            politician_twitter_handle_list=[],
+            twitter_handle_list=[],
             politician_name='',
             ignore_politician_id_list=[],
             read_only=False):
         """
 
         :param state_code:
-        :param politician_twitter_handle_list:
+        :param twitter_handle_list:
         :param politician_name:
         :param ignore_politician_id_list:
         :param read_only:
@@ -1446,7 +1462,7 @@ class PoliticianManager(models.Manager):
         success = True
         status = ""
 
-        if keep_looking_for_duplicates and len(politician_twitter_handle_list) > 0:
+        if keep_looking_for_duplicates and len(twitter_handle_list) > 0:
             try:
                 if positive_value_exists(read_only):
                     politician_query = Politician.objects.using('readonly').all()
@@ -1454,7 +1470,7 @@ class PoliticianManager(models.Manager):
                     politician_query = Politician.objects.all()
 
                 twitter_filters = []
-                for one_twitter_handle in politician_twitter_handle_list:
+                for one_twitter_handle in twitter_handle_list:
                     one_twitter_handle_cleaned = extract_twitter_handle_from_text_string(one_twitter_handle)
                     new_filter = (
                         Q(politician_twitter_handle__iexact=one_twitter_handle_cleaned) |
@@ -1621,17 +1637,17 @@ class PoliticianManager(models.Manager):
     def fetch_politicians_from_non_unique_identifiers_count(
             self,
             state_code='',
-            politician_twitter_handle_list=[],
+            twitter_handle_list=[],
             politician_name='',
             ignore_politician_id_list=[]):
         keep_looking_for_duplicates = True
         status = ""
 
-        if keep_looking_for_duplicates and len(politician_twitter_handle_list) > 0:
+        if keep_looking_for_duplicates and len(twitter_handle_list) > 0:
             try:
                 politician_query = Politician.objects.using('readonly').all()
                 twitter_filters = []
-                for one_twitter_handle in politician_twitter_handle_list:
+                for one_twitter_handle in twitter_handle_list:
                     one_twitter_handle_cleaned = extract_twitter_handle_from_text_string(one_twitter_handle)
                     new_filter = (
                         Q(politician_twitter_handle__iexact=one_twitter_handle_cleaned) |

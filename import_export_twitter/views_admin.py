@@ -215,7 +215,7 @@ def refresh_twitter_organization_details_view(request, organization_id):
 
     organization = results['organization']
 
-    results = refresh_twitter_organization_details(organization)
+    results = refresh_twitter_organization_details(organization, use_cached_data_if_within_x_days=0)
 
     return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_id,)) +
                                 '?google_civic_election_id=' + str(google_civic_election_id))

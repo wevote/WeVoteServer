@@ -167,7 +167,7 @@ def organizations_found_on_url(url_to_scan, state_code=''):
                     link_results = twitter_user_manager.create_twitter_link_to_organization(
                         twitter_user_id, one_organization.we_vote_id)
                     # Refresh the organization with the Twitter details
-                    refresh_twitter_organization_details(one_organization, twitter_user_id)
+                    refresh_twitter_organization_details(one_organization)
 
         voter_guide_website = extract_website_from_url(url_to_scan)
         results = organization_list_manager.organization_search_find_any_possibilities(

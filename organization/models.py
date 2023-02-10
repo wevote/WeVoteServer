@@ -6,13 +6,15 @@ from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Q
 
-import wevote_functions.admin
+from candidate.models import PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
+    PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_VOTE_USA, PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES
 from exception.models import handle_exception, \
     handle_record_found_more_than_one_exception, handle_record_not_saved_exception, handle_record_not_found_exception
 from import_export_facebook.models import FacebookManager
 from twitter.functions import retrieve_twitter_user_info
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
 from voter.models import VoterManager
+import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_org_integer, fetch_site_unique_id_prefix
 
@@ -1099,6 +1101,168 @@ class OrganizationManager(models.Manager):
                     pass
         return organization
 
+    def save_fresh_twitter_details_to_organization(
+            self,
+            organization=None,
+            organization_we_vote_id='',
+            twitter_user=None):
+        """
+        Update organization entry with details retrieved from the Twitter API.
+        """
+        organization_updated = False
+        success = True
+        status = ""
+        values_changed = False
+
+        if not hasattr(twitter_user, 'twitter_id'):
+            success = False
+            status += "VALID_TWITTER_USER_NOT_PROVIDED "
+
+        if success:
+            if not hasattr(organization, 'organization_twitter_handle') \
+                    and positive_value_exists(organization_we_vote_id):
+                # Retrieve organization to update
+                pass
+
+        if not hasattr(organization, 'organization_twitter_handle'):
+            status += "VALID_ORGANIZATION_NOT_PROVIDED_TO_UPDATE_TWITTER_DETAILS "
+            success = False
+
+        if not positive_value_exists(organization.organization_twitter_handle):
+            status += "ORGANIZATION_TWITTER_HANDLE_MISSING "
+            success = False
+
+        if success:
+            if organization.organization_twitter_handle.lower() != twitter_user.twitter_handle.lower():
+                status += "ORGANIZATION_TWITTER_HANDLE_MISMATCH "
+                success = False
+
+        if not success:
+            results = {
+                'success':              success,
+                'status':               status,
+                'organization':         organization,
+                'organization_updated': organization_updated,
+            }
+            return results
+
+        if positive_value_exists(twitter_user.twitter_description):
+            if twitter_user.twitter_description != organization.twitter_description:
+                organization.twitter_description = twitter_user.twitter_description
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_followers_count):
+            if twitter_user.twitter_followers_count != organization.twitter_followers_count:
+                organization.twitter_followers_count = twitter_user.twitter_followers_count
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_handle):
+            # In case the capitalization of the name changes
+            if twitter_user.twitter_handle != organization.organization_twitter_handle:
+                organization.organization_twitter_handle = twitter_user.twitter_handle
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_handle_updates_failing):
+            if twitter_user.twitter_handle_updates_failing != organization.twitter_handle_updates_failing:
+                organization.twitter_handle_updates_failing = twitter_user.twitter_handle_updates_failing
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_id):
+            if twitter_user.twitter_id != organization.twitter_user_id:
+                organization.twitter_user_id = twitter_user.twitter_id
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_location):
+            if twitter_user.twitter_location != organization.twitter_location:
+                organization.twitter_location = twitter_user.twitter_location
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_name):
+            if twitter_user.twitter_name != organization.twitter_name:
+                organization.twitter_name = twitter_user.twitter_name
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_profile_image_url_https):
+            if twitter_user.twitter_profile_image_url_https != organization.twitter_profile_image_url_https:
+                organization.twitter_profile_image_url_https = twitter_user.twitter_profile_image_url_https
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_profile_background_image_url_https):
+            if twitter_user.twitter_profile_background_image_url_https != \
+                    organization.twitter_profile_background_image_url_https:
+                organization.twitter_profile_background_image_url_https = \
+                    twitter_user.twitter_profile_background_image_url_https
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_profile_banner_url_https):
+            if twitter_user.twitter_profile_banner_url_https != organization.twitter_profile_banner_url_https:
+                organization.twitter_profile_banner_url_https = twitter_user.twitter_profile_banner_url_https
+                values_changed = True
+        if positive_value_exists(twitter_user.twitter_url):
+            if not positive_value_exists(organization.organization_website):
+                organization.organization_website = twitter_user.twitter_url
+                values_changed = True
+            # Use this when we add more website fields
+            # from representative.controllers import add_value_to_next_representative_spot
+            # results = add_value_to_next_representative_spot(
+            #     field_name_base='organization_website',
+            #     new_value_to_add=twitter_user.twitter_url,
+            #     representative=organization,
+            # )
+            # if results['success'] and results['values_changed']:
+            #     organization = results['organization']
+            #     values_changed = True
+            # if not results['success']:
+            #     status += results['status']
+        if positive_value_exists(twitter_user.we_vote_hosted_profile_image_url_large):
+            if twitter_user.we_vote_hosted_profile_image_url_large != \
+                    organization.we_vote_hosted_profile_twitter_image_url_large:
+                organization.we_vote_hosted_profile_twitter_image_url_large = \
+                    twitter_user.we_vote_hosted_profile_image_url_large
+                values_changed = True
+        if positive_value_exists(twitter_user.we_vote_hosted_profile_image_url_medium):
+            if twitter_user.we_vote_hosted_profile_image_url_medium != \
+                    organization.we_vote_hosted_profile_twitter_image_url_medium:
+                organization.we_vote_hosted_profile_twitter_image_url_medium = \
+                    twitter_user.we_vote_hosted_profile_image_url_medium
+                values_changed = True
+        if positive_value_exists(twitter_user.we_vote_hosted_profile_image_url_tiny):
+            if twitter_user.we_vote_hosted_profile_image_url_tiny != \
+                    organization.we_vote_hosted_profile_twitter_image_url_tiny:
+                organization.we_vote_hosted_profile_twitter_image_url_tiny = \
+                    twitter_user.we_vote_hosted_profile_image_url_tiny
+                values_changed = True
+
+        if organization.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN and \
+                positive_value_exists(twitter_user.we_vote_hosted_profile_image_url_large):
+            organization.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_TWITTER
+            values_changed = True
+        if organization.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_TWITTER:
+            if twitter_user.we_vote_hosted_profile_image_url_large != \
+                    organization.we_vote_hosted_profile_image_url_large:
+                organization.we_vote_hosted_profile_image_url_large = \
+                    twitter_user.we_vote_hosted_profile_image_url_large
+                values_changed = True
+            if twitter_user.we_vote_hosted_profile_image_url_medium != \
+                    organization.we_vote_hosted_profile_image_url_medium:
+                organization.we_vote_hosted_profile_image_url_medium = \
+                    twitter_user.we_vote_hosted_profile_image_url_medium
+                values_changed = True
+            if twitter_user.we_vote_hosted_profile_image_url_tiny != \
+                    organization.we_vote_hosted_profile_image_url_tiny:
+                organization.we_vote_hosted_profile_image_url_tiny = \
+                    twitter_user.we_vote_hosted_profile_image_url_tiny
+                values_changed = True
+
+        if values_changed:
+            try:
+                organization.save()
+                organization_updated = True
+                success = True
+                status += "SAVED_ORGANIZATION_TWITTER_DETAILS "
+            except Exception as e:
+                success = False
+                status += "NO_CHANGES_SAVED_TO_ORGANIZATION_TWITTER_DETAILS: " + str(e) + " "
+
+        results = {
+            'success':              success,
+            'status':               status,
+            'organization':         organization,
+            'organization_updated': organization_updated,
+        }
+        return results
+
     # We can use any of these four unique identifiers:
     #   organization.id, we_vote_id, organization_website, organization_twitter_handle
     # Pass in the value if we want it saved. Pass in "False" if we want to leave it the same.
@@ -1914,6 +2078,7 @@ class OrganizationManager(models.Manager):
             we_vote_hosted_profile_image_url_tiny=False):
         """
         Update an organization entry with details retrieved from the Twitter API.
+        See also newer save_fresh_organization_twitter_details.
         """
         success = False
         status = "ENTERING_UPDATE_ORGANIZATION_TWITTER_DETAILS "
@@ -2750,26 +2915,49 @@ class OrganizationListManager(models.Manager):
         }
         return results
 
-    def retrieve_possible_duplicate_organizations(self, organization_name, organization_twitter_handle, vote_smart_id,
-                                                  we_vote_id_from_master=''):
-        organization_list_objects = []
+    def retrieve_organizations_from_non_unique_identifiers(
+            self,
+            ignore_we_vote_id_list=[],
+            organization_name='',
+            read_only=True,
+            twitter_handle_list=[],
+            vote_smart_id=0):
         filters = []
+        organization = None
+        organization_found = False
+        organization_list = []
         organization_list_found = False
+        success = True
 
         try:
-            organization_queryset = Organization.objects.all()
+            if positive_value_exists(read_only):
+                queryset = Organization.objects.using('readonly').all()
+            else:
+                queryset = Organization.objects.all()
+
+            twitter_filters = []
+            for one_twitter_handle in twitter_handle_list:
+                one_twitter_handle_cleaned = extract_twitter_handle_from_text_string(one_twitter_handle)
+                new_filter = (
+                    Q(organization_twitter_handle__iexact=one_twitter_handle_cleaned)
+                )
+                twitter_filters.append(new_filter)
+
+            # Add the first query
+            final_filters = twitter_filters.pop()
+            # ...and "OR" the remaining items in the list
+            for item in twitter_filters:
+                final_filters |= item
+
+            queryset = queryset.filter(final_filters)
 
             # Ignore entries with we_vote_id coming in from master server
-            if positive_value_exists(we_vote_id_from_master):
-                organization_queryset = organization_queryset.filter(~Q(we_vote_id__iexact=we_vote_id_from_master))
+            if positive_value_exists(len(ignore_we_vote_id_list)):
+                queryset = queryset.filter(~Q(we_vote_id__in=ignore_we_vote_id_list))
 
             # We want to find organizations with *any* of these values
             if positive_value_exists(organization_name):
                 new_filter = Q(organization_name__iexact=organization_name)
-                filters.append(new_filter)
-
-            if positive_value_exists(organization_twitter_handle):
-                new_filter = Q(organization_twitter_handle__iexact=organization_twitter_handle)
                 filters.append(new_filter)
 
             if positive_value_exists(vote_smart_id):
@@ -2784,34 +2972,33 @@ class OrganizationListManager(models.Manager):
                 for item in filters:
                     final_filters |= item
 
-                organization_queryset = organization_queryset.filter(final_filters)
+                queryset = queryset.filter(final_filters)
 
-            organization_list_objects = organization_queryset
+            organization_list = list(queryset)
 
-            if len(organization_list_objects):
-                organization_list_found = True
+            if len(organization_list) > 0:
                 status = 'DUPLICATE_ORGANIZATIONS_RETRIEVED'
-                success = True
+                if len(organization_list) == 1:
+                    organization = organization_list[0]
+                    organization_found = True
+                else:
+                    organization_list_found = True
             else:
                 status = 'NO_DUPLICATE_ORGANIZATIONS_RETRIEVED'
-                success = True
-        except Organization.DoesNotExist:
-            # No organizations found. Not a problem.
-            status = 'NO_DUPLICATE_ORGANIZATIONS_FOUND_DoesNotExist'
-            organization_list_objects = []
-            success = True
         except Exception as e:
             handle_exception(e, logger=logger,
-                             exception_message="exception thrown in retrieve_possible_duplicate_organizations")
-            status = 'FAILED retrieve_possible_duplicate_organizations ' \
+                             exception_message="exception thrown in retrieve_organizations_from_non_unique_identifiers")
+            status = 'FAILED retrieve_organizations_from_non_unique_identifiers ' \
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
 
         results = {
-            'success':                      success,
-            'status':                       status,
-            'organization_list_found':      organization_list_found,
-            'organization_list':            organization_list_objects,
+            'success':                  success,
+            'status':                   status,
+            'organization':             organization,
+            'organization_found':       organization_found,
+            'organization_list':        organization_list,
+            'organization_list_found':  organization_list_found,
         }
         return results
 
@@ -2891,7 +3078,6 @@ class Organization(models.Model):
     organization_contact_form_url = models.URLField(
         verbose_name='url of the contact us form', max_length=255, blank=True, null=True)
     organization_contact_name = models.CharField(max_length=255, null=True, unique=False)
-    organization_facebook = models.URLField(verbose_name='url of facebook page', blank=True, null=True)
     organization_image = models.CharField(verbose_name='organization image', max_length=255, null=True, unique=False)
     state_served_code = models.CharField(verbose_name="state this organization serves", max_length=2,
                                          null=True, blank=True)
@@ -2908,16 +3094,19 @@ class Organization(models.Model):
     organization_phone1 = models.CharField(max_length=255, null=True, blank=True)
     organization_phone2 = models.CharField(max_length=255, null=True, blank=True)
     organization_fax = models.CharField(max_length=255, null=True, blank=True)
+    politician_we_vote_id = models.CharField(max_length=255, null=True, blank=True)
 
     # Facebook session information
     facebook_id = models.BigIntegerField(verbose_name="facebook big integer id", null=True, blank=True)
     facebook_email = models.EmailField(verbose_name='facebook email address', max_length=255, unique=False,
                                        null=True, blank=True)
+    organization_facebook = models.URLField(blank=True, null=True)  # facebook_url
     fb_username = models.CharField(unique=True, max_length=50, validators=[alphanumeric], null=True)
     facebook_profile_image_url_https = models.TextField(
         verbose_name='url of image from facebook', blank=True, null=True)
     facebook_background_image_url_https = models.TextField(
         verbose_name='url of cover image from facebook', blank=True, null=True)
+    facebook_url_is_broken = models.BooleanField(default=False)
 
     # Twitter information
     twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)
@@ -2926,6 +3115,8 @@ class Organization(models.Model):
     # organization_twitter_handle2 = models.CharField(
     #     verbose_name='organization twitter screen_name2', max_length=255, null=True, unique=False)
     organization_twitter_updates_failing = models.BooleanField(default=False)
+    twitter_handle_updates_failing = models.BooleanField(default=False)
+    twitter_handle2_updates_failing = models.BooleanField(default=False)
     twitter_name = models.CharField(
         verbose_name="org name from twitter", max_length=255, null=True, blank=True)
     twitter_location = models.CharField(
@@ -2944,13 +3135,31 @@ class Organization(models.Model):
     # Instagram
     organization_instagram_handle = models.CharField(
         verbose_name='organization instagram screen_name', max_length=255, null=True, unique=False)
+    instagram_followers_count = models.IntegerField(null=True, blank=True)
 
-    we_vote_hosted_profile_image_url_large = models.TextField(
-        verbose_name='we vote hosted large image url', blank=True, null=True)
-    we_vote_hosted_profile_image_url_medium = models.TextField(
-        verbose_name='we vote hosted medium image url', blank=True, null=True)
-    we_vote_hosted_profile_image_url_tiny = models.TextField(
-        verbose_name='we vote hosted tiny image url', blank=True, null=True)
+    # Which organization image is currently active?
+    profile_image_type_currently_active = models.CharField(
+        max_length=10, choices=PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES, default=PROFILE_IMAGE_TYPE_UNKNOWN)
+    # Image from Facebook, cached on We Vote's servers. See also facebook_profile_image_url_https.
+    we_vote_hosted_profile_facebook_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_facebook_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_facebook_image_url_tiny = models.TextField(blank=True, null=True)
+    # Image from Twitter, cached on We Vote's servers. See master twitter_profile_image_url_https.
+    we_vote_hosted_profile_twitter_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_twitter_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_twitter_image_url_tiny = models.TextField(blank=True, null=True)
+    # Image uploaded to We Vote's servers.
+    we_vote_hosted_profile_uploaded_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_uploaded_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_uploaded_image_url_tiny = models.TextField(blank=True, null=True)
+    # Image from Vote USA, cached on We Vote's servers. See master vote_usa_profile_image_url_https.
+    we_vote_hosted_profile_vote_usa_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_vote_usa_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_vote_usa_image_url_tiny = models.TextField(blank=True, null=True)
+    # Image we are using as the profile photo (could be sourced from Twitter, Facebook, etc.)
+    we_vote_hosted_profile_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
 
     wikipedia_page_id = models.BigIntegerField(verbose_name="pageid", null=True, blank=True)
     wikipedia_page_title = models.CharField(
@@ -2961,6 +3170,7 @@ class Organization(models.Model):
     wikipedia_thumbnail_height = models.IntegerField(verbose_name="height of photo", null=True, blank=True)
     wikipedia_photo_url = models.TextField(
         verbose_name='url of wikipedia logo', blank=True, null=True)
+    wikipedia_url = models.TextField(null=True)
 
     ballotpedia_page_title = models.CharField(
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
@@ -3023,6 +3233,7 @@ class Organization(models.Model):
 
     organization_endorsements_api_url = models.TextField(
         verbose_name='endorsements importer url', blank=True, null=True)
+    youtube_url = models.TextField(blank=True, null=True)
 
     def __unicode__(self):
         return str(self.organization_name)

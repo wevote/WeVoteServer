@@ -862,7 +862,7 @@ def voter_guide_create_process_view(request):
                             link_results = twitter_user_manager.create_twitter_link_to_organization(
                                 twitter_user_id, organization.we_vote_id)
                             # Refresh the organization with the Twitter details
-                            refresh_twitter_organization_details(organization, twitter_user_id)
+                            refresh_twitter_organization_details(organization)
 
         # #########################################
         # Figure out the Possible Candidates or Measures from one organization's perspective

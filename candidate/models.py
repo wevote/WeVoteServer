@@ -2398,8 +2398,7 @@ class CandidateCampaign(models.Model):
         verbose_name="google civic election id", default=0, null=True, blank=True)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
     instagram_handle = models.TextField(verbose_name="candidate's instagram handle", blank=True, null=True)
-    instagram_followers_count = models.IntegerField(
-        verbose_name="count of candidate's instagram followers", null=True, blank=True)
+    instagram_followers_count = models.IntegerField(null=True, blank=True)
     # The date of the last election this candidate relates to, converted to integer, ex/ 20201103
     candidate_ultimate_election_date = models.PositiveIntegerField(default=None, null=True)
     # The year this candidate is running for office
@@ -2413,8 +2412,8 @@ class CandidateCampaign(models.Model):
         verbose_name='website url of candidate', max_length=255, blank=True, null=True)
     candidate_contact_form_url = models.URLField(
         verbose_name='website url of candidate contact form', max_length=255, blank=True, null=True)
-    facebook_url = models.TextField(verbose_name='facebook url of candidate', blank=True, null=True)
-    facebook_url_is_broken = models.BooleanField(verbose_name="facebook url is broken", default=False)
+    facebook_url = models.TextField(blank=True, null=True)
+    facebook_url_is_broken = models.BooleanField(default=False)
     # Some ambiguity to be resolved. In some places this variable is used for photo url on Facebook servers.
     # Should be the master image url cached on We Vote servers.
     facebook_profile_image_url_https = models.TextField(
@@ -2428,7 +2427,7 @@ class CandidateCampaign(models.Model):
     candidate_twitter_handle3 = models.CharField(max_length=255, null=True, unique=False)
     # DEPRECATED, but saved, so we can move data to twitter_handle_updates_failing
     candidate_twitter_updates_failing = models.BooleanField(default=False)  # twitter_handle_updates_failing
-    twitter_handle_updates_failing = models.BooleanField(default=False)  # twitter_handle_updates_failing
+    twitter_handle_updates_failing = models.BooleanField(default=False)
     twitter_handle2_updates_failing = models.BooleanField(default=False)
     twitter_name = models.CharField(
         verbose_name="candidate plain text name from twitter", max_length=255, null=True, blank=True)

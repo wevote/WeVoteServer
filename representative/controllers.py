@@ -297,7 +297,7 @@ def find_duplicate_representative(we_vote_representative, ignore_representative_
             ignore_representative_we_vote_id_list=ignore_representative_we_vote_id_list,
             ocd_division_id=we_vote_representative.ocd_division_id,
             representative_name=we_vote_representative.representative_name,
-            representative_twitter_handle_list=representative_twitter_handle_list,
+            twitter_handle_list=representative_twitter_handle_list,
             state_code=we_vote_representative.state_code,
             read_only=read_only,
         )
@@ -836,15 +836,15 @@ def deduplicate_politicians_first_attempt(state_code=''):
     return results
 
 
-def representative_politician_match(we_vote_representative):
+def representative_politician_match(representative):
     politician_manager = PoliticianManager()
     status = ''
     success = True
 
     # Does this candidate already have a we_vote_id for a politician?
-    if positive_value_exists(we_vote_representative.politician_we_vote_id):
+    if positive_value_exists(representative.politician_we_vote_id):
         # Find existing politician. No update here for now.
-        results = politician_manager.retrieve_politician(we_vote_id=we_vote_representative.politician_we_vote_id)
+        results = politician_manager.retrieve_politician(we_vote_id=representative.politician_we_vote_id)
         status += results['status']
         if not results['success']:
             results = {
@@ -859,10 +859,10 @@ def representative_politician_match(we_vote_representative):
             return results
         elif results['politician_found']:
             politician = results['politician']
-            # Save politician_we_vote_id in we_vote_representative
-            we_vote_representative.politician_we_vote_id = politician.we_vote_id
-            we_vote_representative.politician_id = politician.id
-            we_vote_representative.save()
+            # Save politician_we_vote_id in representative
+            representative.politician_we_vote_id = politician.we_vote_id
+            representative.politician_id = politician.id
+            representative.save()
 
             results = {
                 'success':                  results['success'],
@@ -876,22 +876,36 @@ def representative_politician_match(we_vote_representative):
             return results
         else:
             # Politician wasn't found, so clear out politician_we_vote_id and politician_id
-            we_vote_representative.politician_we_vote_id = None
-            we_vote_representative.politician_id = None
-            we_vote_representative.save()
+            representative.politician_we_vote_id = None
+            representative.politician_id = None
+            representative.save()
 
     # Search the politician table for a stricter match (don't match on "dan" if "dan smith" passed in)
     #  so we set return_close_matches to False
-    results = politician_manager.retrieve_all_politicians_that_might_match_candidate(
-        candidate_name=we_vote_representative.representative_name,
-        candidate_twitter_handle=we_vote_representative.representative_twitter_handle,
-        candidate_twitter_handle2=we_vote_representative.representative_twitter_handle2,
-        candidate_twitter_handle3=we_vote_representative.representative_twitter_handle3,
-        google_civic_candidate_name=we_vote_representative.google_civic_representative_name,
-        google_civic_candidate_name2=we_vote_representative.google_civic_representative_name2,
-        google_civic_candidate_name3=we_vote_representative.google_civic_representative_name3,
+    from wevote_functions.functions import add_to_list_if_positive_value_exists
+    facebook_url_list = []
+    facebook_url_list = add_to_list_if_positive_value_exists(representative.facebook_url, facebook_url_list)
+    full_name_list = []
+    full_name_list = add_to_list_if_positive_value_exists(representative.representative_name, full_name_list)
+    full_name_list = \
+        add_to_list_if_positive_value_exists(representative.google_civic_representative_name, full_name_list)
+    full_name_list = \
+        add_to_list_if_positive_value_exists(representative.google_civic_representative_name2, full_name_list)
+    full_name_list = \
+        add_to_list_if_positive_value_exists(representative.google_civic_representative_name3, full_name_list)
+    twitter_handle_list = []
+    twitter_handle_list = \
+        add_to_list_if_positive_value_exists(representative.representative_twitter_handle, twitter_handle_list)
+    twitter_handle_list = \
+        add_to_list_if_positive_value_exists(representative.representative_twitter_handle2, twitter_handle_list)
+    twitter_handle_list = \
+        add_to_list_if_positive_value_exists(representative.representative_twitter_handle3, twitter_handle_list)
+    results = politician_manager.retrieve_all_politicians_that_might_match_similar_object(
+        facebook_url_list=facebook_url_list,
+        full_name_list=full_name_list,
+        twitter_handle_list=twitter_handle_list,
         return_close_matches=False,
-        state_code=we_vote_representative.state_code,
+        state_code=representative.state_code,
     )
     status += results['status']
     if not results['success']:
@@ -906,7 +920,7 @@ def representative_politician_match(we_vote_representative):
         }
         return results
     elif results['politician_list_found']:
-        # If here, return the list but don't link the candidate
+        # If here, return the list but don't link the representative
         politician_list = results['politician_list']
 
         results = {
@@ -920,12 +934,12 @@ def representative_politician_match(we_vote_representative):
         }
         return results
     elif results['politician_found']:
-        # Save this politician_we_vote_id with the candidate
+        # Save this politician_we_vote_id with the representative
         politician = results['politician']
-        # Save politician_we_vote_id in we_vote_representative
-        we_vote_representative.politician_we_vote_id = politician.we_vote_id
-        we_vote_representative.politician_id = politician.id
-        we_vote_representative.save()
+        # Save politician_we_vote_id in representative
+        representative.politician_we_vote_id = politician.we_vote_id
+        representative.politician_id = politician.id
+        representative.save()
 
         results = {
             'success':                  True,
@@ -939,14 +953,14 @@ def representative_politician_match(we_vote_representative):
         return results
     else:
         # Create new politician for this representative
-        create_results = politician_manager.create_politician_from_candidate_or_representative(we_vote_representative)
+        create_results = politician_manager.create_politician_from_similar_object(representative)
         status += create_results['status']
         if create_results['politician_found']:
             politician = create_results['politician']
-            # Save politician_we_vote_id in we_vote_representative
-            we_vote_representative.politician_we_vote_id = politician.we_vote_id
-            we_vote_representative.politician_id = politician.id
-            we_vote_representative.save()
+            # Save politician_we_vote_id in representative
+            representative.politician_we_vote_id = politician.we_vote_id
+            representative.politician_id = politician.id
+            representative.save()
 
         results = {
             'success':                      create_results['success'],
