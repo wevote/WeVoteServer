@@ -809,16 +809,16 @@ class RepresentativeManager(models.Manager):
                 pass
 
         if not hasattr(representative, 'representative_twitter_handle'):
-            status += "VALID_POLITICIAN_NOT_PROVIDED_TO_UPDATE_TWITTER_DETAILS "
+            status += "VALID_REPRESENTATIVE_NOT_PROVIDED_TO_UPDATE_TWITTER_DETAILS "
             success = False
 
         if not positive_value_exists(representative.representative_twitter_handle):
-            status += "POLITICIAN_TWITTER_HANDLE_MISSING "
+            status += "REPRESENTATIVE_TWITTER_HANDLE_MISSING "
             success = False
 
         if success:
             if representative.representative_twitter_handle.lower() != twitter_user.twitter_handle.lower():
-                status += "POLITICIAN_TWITTER_HANDLE_MISMATCH "
+                status += "REPRESENTATIVE_TWITTER_HANDLE_MISMATCH "
                 success = False
 
         if not success:
@@ -1344,7 +1344,7 @@ class RepresentativeManager(models.Manager):
             ignore_representative_we_vote_id_list=[],
             ocd_division_id='',
             read_only=True,
-            representative_twitter_handle_list=[],
+            twitter_handle_list=[],
             representative_name='',
             state_code=''):
         keep_looking_for_duplicates = True
@@ -1356,7 +1356,7 @@ class RepresentativeManager(models.Manager):
         success = True
         status = ""
 
-        if keep_looking_for_duplicates and positive_value_exists(len(representative_twitter_handle_list)):
+        if keep_looking_for_duplicates and positive_value_exists(len(twitter_handle_list)):
             try:
                 if positive_value_exists(read_only):
                     representative_query = Representative.objects.using('readonly').all()
@@ -1368,7 +1368,7 @@ class RepresentativeManager(models.Manager):
                     representative_query = representative_query.filter(state_code__iexact=state_code)
 
                 twitter_filters = []
-                for one_twitter_handle in representative_twitter_handle_list:
+                for one_twitter_handle in twitter_handle_list:
                     one_twitter_handle_cleaned = extract_twitter_handle_from_text_string(one_twitter_handle)
                     new_filter = (
                         Q(representative_twitter_handle__iexact=one_twitter_handle_cleaned) |
@@ -1393,7 +1393,6 @@ class RepresentativeManager(models.Manager):
                 if len(representative_list) > 0:
                     # At least one entry exists
                     status += 'BATCH_ROW_ACTION_REPRESENTATIVE_LIST_RETRIEVED '
-                    # if a single entry matches, update that entry
                     if len(representative_list) == 1:
                         multiple_entries_found = False
                         representative = representative_list[0]

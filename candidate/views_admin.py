@@ -1100,9 +1100,17 @@ def candidate_new_search_process_view(request):
 
     politician_list = []
     # If here, we specifically want to see if a politician exists, given the information submitted
-    match_results = politician_manager.retrieve_all_politicians_that_might_match_candidate(
-        candidate_name=candidate_name,
-        candidate_twitter_handle=candidate_twitter_handle,
+    from wevote_functions.functions import add_to_list_if_positive_value_exists
+    facebook_url_list = []
+    facebook_url_list = add_to_list_if_positive_value_exists(facebook_url, facebook_url_list)
+    full_name_list = []
+    full_name_list = add_to_list_if_positive_value_exists(candidate_name, full_name_list)
+    twitter_handle_list = []
+    twitter_handle_list = add_to_list_if_positive_value_exists(candidate_twitter_handle, twitter_handle_list)
+    match_results = politician_manager.retrieve_all_politicians_that_might_match_similar_object(
+        facebook_url_list=facebook_url_list,
+        full_name_list=full_name_list,
+        twitter_handle_list=twitter_handle_list,
         return_close_matches=True,
         state_code=state_code,
         vote_usa_politician_id=vote_usa_politician_id)
@@ -1838,11 +1846,19 @@ def candidate_edit_process_view(request):
     if positive_value_exists(look_for_politician):
         politician_manager = PoliticianManager()
         # If here, we specifically want to see if a politician exists, given the information submitted
-        match_results = politician_manager.retrieve_all_politicians_that_might_match_candidate(
-            candidate_name=candidate_name,
-            candidate_twitter_handle=candidate_twitter_handle,
-            candidate_twitter_handle2=candidate_twitter_handle2,
-            candidate_twitter_handle3=candidate_twitter_handle3,
+        from wevote_functions.functions import add_to_list_if_positive_value_exists
+        facebook_url_list = []
+        facebook_url_list = add_to_list_if_positive_value_exists(facebook_url, facebook_url_list)
+        full_name_list = []
+        full_name_list = add_to_list_if_positive_value_exists(candidate_name, full_name_list)
+        twitter_handle_list = []
+        twitter_handle_list = add_to_list_if_positive_value_exists(candidate_twitter_handle, twitter_handle_list)
+        twitter_handle_list = add_to_list_if_positive_value_exists(candidate_twitter_handle2, twitter_handle_list)
+        twitter_handle_list = add_to_list_if_positive_value_exists(candidate_twitter_handle3, twitter_handle_list)
+        match_results = politician_manager.retrieve_all_politicians_that_might_match_similar_object(
+            facebook_url_list=facebook_url_list,
+            full_name_list=full_name_list,
+            twitter_handle_list=twitter_handle_list,
             maplight_id=maplight_id,
             return_close_matches=True,
             state_code=best_state_code,

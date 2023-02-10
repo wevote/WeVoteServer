@@ -53,6 +53,7 @@ urlpatterns = [
             views_admin.organization_position_edit_view, name='organization_we_vote_id_position_edit', ),
     re_path(r'^pos/edit_process/$',
             views_admin.organization_position_edit_process_view, name='organization_position_edit_process'),
+    re_path(r'^politician_match/', views_admin.organization_politician_match_view, name='organization_politician_match'),
     re_path(r'^reserved_domain_list/$',
             views_admin.reserved_domain_list_view, name='reserved_domain_list'),
     re_path(r'^reserved_domain_edit/$',

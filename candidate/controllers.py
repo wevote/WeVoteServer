@@ -1929,15 +1929,15 @@ def retrieve_candidate_photos(we_vote_candidate, force_retrieve=False):
     return results
 
 
-def candidate_politician_match(we_vote_candidate):
+def candidate_politician_match(candidate):
     politician_manager = PoliticianManager()
     status = ''
     success = True
 
     # Does this candidate already have a we_vote_id for a politician?
-    if positive_value_exists(we_vote_candidate.politician_we_vote_id):
+    if positive_value_exists(candidate.politician_we_vote_id):
         # Find existing politician. No update here for now.
-        results = politician_manager.retrieve_politician(we_vote_id=we_vote_candidate.politician_we_vote_id)
+        results = politician_manager.retrieve_politician(we_vote_id=candidate.politician_we_vote_id)
         status += results['status']
         if not results['success']:
             results = {
@@ -1952,10 +1952,10 @@ def candidate_politician_match(we_vote_candidate):
             return results
         elif results['politician_found']:
             politician = results['politician']
-            # Save politician_we_vote_id in we_vote_candidate
-            we_vote_candidate.politician_we_vote_id = politician.we_vote_id
-            we_vote_candidate.politician_id = politician.id
-            we_vote_candidate.save()
+            # Save politician_we_vote_id in candidate
+            candidate.politician_we_vote_id = politician.we_vote_id
+            candidate.politician_id = politician.id
+            candidate.save()
 
             results = {
                 'success':                  results['success'],
@@ -1969,25 +1969,33 @@ def candidate_politician_match(we_vote_candidate):
             return results
         else:
             # Politician wasn't found, so clear out politician_we_vote_id and politician_id
-            we_vote_candidate.politician_we_vote_id = None
-            we_vote_candidate.politician_id = None
-            we_vote_candidate.save()
+            candidate.politician_we_vote_id = None
+            candidate.politician_id = None
+            candidate.save()
 
     # Search the politician table for a stricter match (don't match on "dan" if "dan smith" passed in)
     #  so we set return_close_matches to False
-    results = politician_manager.retrieve_all_politicians_that_might_match_candidate(
-        candidate_name=we_vote_candidate.candidate_name,
-        candidate_twitter_handle=we_vote_candidate.candidate_twitter_handle,
-        candidate_twitter_handle2=we_vote_candidate.candidate_twitter_handle2,
-        candidate_twitter_handle3=we_vote_candidate.candidate_twitter_handle3,
-        google_civic_candidate_name=we_vote_candidate.google_civic_candidate_name,
-        google_civic_candidate_name2=we_vote_candidate.google_civic_candidate_name2,
-        google_civic_candidate_name3=we_vote_candidate.google_civic_candidate_name3,
-        maplight_id=we_vote_candidate.maplight_id,
+    from wevote_functions.functions import add_to_list_if_positive_value_exists
+    facebook_url_list = []
+    facebook_url_list = add_to_list_if_positive_value_exists(candidate.facebook_url, facebook_url_list)
+    full_name_list = []
+    full_name_list = add_to_list_if_positive_value_exists(candidate.candidate_name, full_name_list)
+    full_name_list = add_to_list_if_positive_value_exists(candidate.google_civic_candidate_name, full_name_list)
+    full_name_list = add_to_list_if_positive_value_exists(candidate.google_civic_candidate_name2, full_name_list)
+    full_name_list = add_to_list_if_positive_value_exists(candidate.google_civic_candidate_name3, full_name_list)
+    twitter_handle_list = []
+    twitter_handle_list = add_to_list_if_positive_value_exists(candidate.candidate_twitter_handle, twitter_handle_list)
+    twitter_handle_list = add_to_list_if_positive_value_exists(candidate.candidate_twitter_handle2, twitter_handle_list)
+    twitter_handle_list = add_to_list_if_positive_value_exists(candidate.candidate_twitter_handle3, twitter_handle_list)
+    results = politician_manager.retrieve_all_politicians_that_might_match_similar_object(
+        facebook_url_list=facebook_url_list,
+        full_name_list=full_name_list,
+        twitter_handle_list=twitter_handle_list,
+        maplight_id=candidate.maplight_id,
         return_close_matches=False,
-        state_code=we_vote_candidate.state_code,
-        vote_smart_id=we_vote_candidate.vote_smart_id,
-        vote_usa_politician_id=we_vote_candidate.vote_usa_politician_id,
+        state_code=candidate.state_code,
+        vote_smart_id=candidate.vote_smart_id,
+        vote_usa_politician_id=candidate.vote_usa_politician_id,
     )
     status += results['status']
     if not results['success']:
@@ -2018,10 +2026,10 @@ def candidate_politician_match(we_vote_candidate):
     elif results['politician_found']:
         # Save this politician_we_vote_id with the candidate
         politician = results['politician']
-        # Save politician_we_vote_id in we_vote_candidate
-        we_vote_candidate.politician_we_vote_id = politician.we_vote_id
-        we_vote_candidate.politician_id = politician.id
-        we_vote_candidate.save()
+        # Save politician_we_vote_id in candidate
+        candidate.politician_we_vote_id = politician.we_vote_id
+        candidate.politician_id = politician.id
+        candidate.save()
 
         results = {
             'success':                  True,
@@ -2035,14 +2043,14 @@ def candidate_politician_match(we_vote_candidate):
         return results
     else:
         # Create new politician for this candidate
-        create_results = politician_manager.create_politician_from_candidate_or_representative(we_vote_candidate)
+        create_results = politician_manager.create_politician_from_similar_object(candidate)
         status += create_results['status']
         if create_results['politician_found']:
             politician = create_results['politician']
-            # Save politician_we_vote_id in we_vote_candidate
-            we_vote_candidate.politician_we_vote_id = politician.we_vote_id
-            we_vote_candidate.politician_id = politician.id
-            we_vote_candidate.save()
+            # Save politician_we_vote_id in candidate
+            candidate.politician_we_vote_id = politician.we_vote_id
+            candidate.politician_id = politician.id
+            candidate.save()
 
         results = {
             'success':                      create_results['success'],

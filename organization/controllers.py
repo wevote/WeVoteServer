@@ -28,6 +28,7 @@ from image.controllers import cache_master_and_resized_image, \
     FACEBOOK
 from image.controllers import cache_organization_sharing_image, retrieve_all_images_for_one_organization
 from import_export_facebook.models import FacebookManager
+from politician.models import PoliticianManager
 from position.controllers import delete_positions_for_organization, move_positions_to_another_organization, \
     update_position_entered_details_from_organization
 from position.models import PositionListManager
@@ -1720,13 +1721,20 @@ def filter_organizations_structured_json_for_local_duplicates(structured_json):
         we_vote_id = one_organization['we_vote_id'] if 'we_vote_id' in one_organization else ''
         organization_twitter_handle = one_organization['organization_twitter_handle'] \
             if 'organization_twitter_handle' in one_organization else ''
+        twitter_handle_list = []
+        if positive_value_exists(organization_twitter_handle):
+            twitter_handle_list.append(organization_twitter_handle)
         vote_smart_id = one_organization['vote_smart_id'] if 'vote_smart_id' in one_organization else ''
 
         # Check to see if there is an entry that matches in all critical ways, minus the we_vote_id
         we_vote_id_from_master = we_vote_id
+        ignore_we_vote_id_list = [we_vote_id_from_master]
 
-        results = organization_list_manager.retrieve_possible_duplicate_organizations(
-            organization_name, organization_twitter_handle, vote_smart_id, we_vote_id_from_master)
+        results = organization_list_manager.retrieve_organizations_from_non_unique_identifiers(
+            ignore_we_vote_id_list=ignore_we_vote_id_list,
+            organization_name=organization_name,
+            twitter_handle_list=twitter_handle_list,
+            vote_smart_id=vote_smart_id)
 
         if results['organization_list_found']:
             # There seems to be a duplicate already in this database using a different we_vote_id
@@ -3239,6 +3247,134 @@ def transform_web_app_url(web_app_root_url):
                     or positive_value_exists(configuration_results['organization_we_vote_id']):
                 web_app_root_url_verified = 'https://{hostname}'.format(hostname=configuration_results['hostname'])
     return web_app_root_url_verified
+
+
+def organization_politician_match(organization):
+    politician_manager = PoliticianManager()
+    status = ''
+    success = True
+
+    # Does this organization already have a we_vote_id for a politician?
+    if positive_value_exists(organization.politician_we_vote_id):
+        # Find existing politician. No update here for now.
+        results = politician_manager.retrieve_politician(we_vote_id=organization.politician_we_vote_id)
+        status += results['status']
+        if not results['success']:
+            results = {
+                'success':                  False,
+                'status':                   status,
+                'politician_list_found':    False,
+                'politician_list':          [],
+                'politician_found':         False,
+                'politician_created':       False,
+                'politician':               None,
+            }
+            return results
+        elif results['politician_found']:
+            politician = results['politician']
+            # Save politician_we_vote_id in organization
+            organization.politician_we_vote_id = politician.we_vote_id
+            organization.save()
+
+            results = {
+                'success':                  results['success'],
+                'status':                   status,
+                'politician_list_found':    False,
+                'politician_list':          [],
+                'politician_found':         results['politician_found'],
+                'politician_created':       False,
+                'politician':               results['politician'],
+            }
+            return results
+        else:
+            # Politician wasn't found, so clear out politician_we_vote_id and politician_id
+            organization.politician_we_vote_id = None
+            organization.save()
+
+    # Search the politician table for a stricter match (don't match on "dan" if "dan smith" passed in)
+    #  so we set return_close_matches to False
+    from wevote_functions.functions import add_to_list_if_positive_value_exists
+    facebook_url_list = []
+    facebook_url_list = add_to_list_if_positive_value_exists(organization.organization_facebook, facebook_url_list)
+    full_name_list = []
+    full_name_list = add_to_list_if_positive_value_exists(organization.organization_name, full_name_list)
+    twitter_handle_list = []
+    twitter_handle_list = \
+        add_to_list_if_positive_value_exists(organization.organization_twitter_handle, twitter_handle_list)
+    results = politician_manager.retrieve_all_politicians_that_might_match_similar_object(
+        facebook_url_list=facebook_url_list,
+        full_name_list=full_name_list,
+        instagram_handle=organization.organization_instagram_handle,
+        return_close_matches=False,
+        state_code=organization.state_served_code,
+        twitter_handle_list=twitter_handle_list,
+        vote_smart_id=organization.vote_smart_id,
+    )
+    status += results['status']
+    if not results['success']:
+        results = {
+            'success':                  False,
+            'status':                   status,
+            'politician_list_found':    False,
+            'politician_list':          [],
+            'politician_found':         False,
+            'politician_created':       False,
+            'politician':               None,
+        }
+        return results
+    elif results['politician_list_found']:
+        # If here, return the list but don't link the organization
+        politician_list = results['politician_list']
+
+        results = {
+            'success':                  True,
+            'status':                   status,
+            'politician_list_found':    True,
+            'politician_list':          politician_list,
+            'politician_found':         False,
+            'politician_created':       False,
+            'politician':               None,
+        }
+        return results
+    elif results['politician_found']:
+        # Save this politician_we_vote_id with the organization
+        politician = results['politician']
+        # Save politician_we_vote_id in we_vote_representative
+        organization.politician_we_vote_id = politician.we_vote_id
+        organization.politician_id = politician.id
+        organization.save()
+
+        results = {
+            'success':                  True,
+            'status':                   status,
+            'politician_list_found':    False,
+            'politician_list':          [],
+            'politician_found':         True,
+            'politician_created':       False,
+            'politician':               politician,
+        }
+        return results
+    else:
+        # Create new politician for this organization
+        create_results = politician_manager.create_politician_from_similar_object(organization)
+        status += create_results['status']
+        if create_results['politician_found']:
+            politician = create_results['politician']
+            # Save politician_we_vote_id in we_vote_representative
+            organization.politician_we_vote_id = politician.we_vote_id
+            organization.politician_id = politician.id
+            organization.save()
+
+        results = {
+            'success':                      create_results['success'],
+            'status':                       status,
+            'politician_list_found':        False,
+            'politician_list':              [],
+            'politician_found':             create_results['politician_found'],
+            'politician_created':           create_results['politician_created'],
+            'politician':                   create_results['politician'],
+        }
+        return results
 
 
 def update_social_media_statistics_in_other_tables(organization):

@@ -4,6 +4,8 @@
 {% block title %}{% if is_national_election %}{{ national_election.election_name }}{% else %}Elections{% endif %}{% endblock %}
 
 {%  block content %}
+{% load template_filters %}
+{% load humanize %}
 
 <h1>{% if is_national_election %}{{ national_election.election_name }} &mdash; {{ national_election.election_day_text }}{% else %}Elections{% endif %}</h1>
 <p>
@@ -46,35 +48,51 @@
     {% endif %}
         <input type="text" name="election_search" id="election_search_id" value="{{ election_search }}" />
         <input type="submit" value="Search" />
+        &nbsp;&nbsp;&nbsp;
 
-        {# Default to showing only upcoming elections #}
+    {# Default to showing only upcoming elections #}
+
+    {% if years_available %}
+    <select id="show_this_year_id" name="show_this_year">
+        <option value="0" {% if 0 == show_this_year|convert_to_int %} selected="selected"{% endif %}>
+            -- Choose Year --</option>
+        {% for year in years_available %}
+        <option value="{{ year }}"
+                {% if show_this_year|slugify == year|slugify %} selected="selected"{% endif %}>
+            {% if show_this_year|slugify == year|slugify %}Limited To {% endif %}
+            {{ year }}</option>
+        {% endfor %}
+    </select>
+    {% endif %}{# End of if years_available #}
+
+        &nbsp;&nbsp;&nbsp;
         <label for="show_all_elections_this_year_id">
           <input type="checkbox" name="show_all_elections_this_year" id="show_all_elections_this_year_id" value="1"
                  {% if show_all_elections_this_year %}checked{% endif %} /> All Elections This Year
         </label>
 
-        &nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;
         <label for="show_all_elections_id">
           <input type="checkbox" name="show_all_elections" id="show_all_elections_id" value="1"
-                 {% if show_all_elections %}checked{% endif %} /> Include Past Elections
+                 {% if show_all_elections %}checked{% endif %} /> Include Past
         </label>
 
-        &nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;
         <label for="show_ignored_elections_id">
           <input type="checkbox" name="show_ignored_elections" id="show_ignored_elections_id" value="1"
-                 {% if show_ignored_elections %}checked{% endif %} /> Show Ignored Elections
+                 {% if show_ignored_elections %}checked{% endif %} /> Show Ignored
         </label>
 
-        &nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;
         <label for="show_election_statistics_id">
           <input type="checkbox" name="show_election_statistics" id="show_election_statistics_id" value="1"
-                 {% if show_election_statistics %}checked{% endif %} /> Show Election Statistics
+                 {% if show_election_statistics %}checked{% endif %} /> Show Statistics
         </label>
 
         &nbsp;&nbsp;&nbsp;
         <label for="show_related_elections_id">
           <input type="checkbox" name="show_related_elections" id="show_related_elections_id" value="1"
-                 {% if show_related_elections %}checked{% endif %} /> Show Related Elections (2+ mins)
+                 {% if show_related_elections %}checked{% endif %} /> Show Related Elections
         </label>
     </form>
 {% endif %}
@@ -328,12 +346,14 @@
     $(function() {
         $('#show_all_elections_id').change(function() {
             this.form.show_all_elections_this_year.value = '0';
+            this.form.show_this_year.value = 0;
             this.form.submit();
         });
     });
     $(function() {
         $('#show_all_elections_this_year_id').change(function() {
             this.form.show_all_elections.value = '0';
+            this.form.show_this_year.value = 0;
             this.form.submit();
         });
     });
@@ -349,6 +369,13 @@
     });
     $(function() {
         $('#show_related_elections_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#show_this_year_id').change(function() {
+            this.form.show_all_elections.value = '0';
+            this.form.show_all_elections_this_year.value = '0'
             this.form.submit();
         });
     });

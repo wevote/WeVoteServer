@@ -92,7 +92,7 @@ def fetch_duplicate_politician_count(we_vote_politician, ignore_politician_id_li
         politician_twitter_handle_list.append(we_vote_politician.politician_twitter_handle5)
     return politician_manager.fetch_politicians_from_non_unique_identifiers_count(
         state_code=we_vote_politician.state_code,
-        politician_twitter_handle_list=politician_twitter_handle_list,
+        twitter_handle_list=politician_twitter_handle_list,
         politician_name=we_vote_politician.politician_name,
         ignore_politician_id_list=ignore_politician_id_list)
 
@@ -127,7 +127,7 @@ def find_duplicate_politician(we_vote_politician, ignore_politician_id_list):
     try:
         results = politician_manager.retrieve_politicians_from_non_unique_identifiers(
             state_code=we_vote_politician.state_code,
-            politician_twitter_handle_list=politician_twitter_handle_list,
+            twitter_handle_list=politician_twitter_handle_list,
             politician_name=we_vote_politician.politician_name,
             ignore_politician_id_list=ignore_politician_id_list)
 
