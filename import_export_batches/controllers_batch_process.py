@@ -32,6 +32,7 @@ from election.models import ElectionManager
 from exception.models import handle_exception
 from import_export_twitter.controllers import fetch_number_of_candidates_needing_twitter_search, \
     fetch_number_of_candidates_needing_twitter_update, fetch_number_of_organizations_needing_twitter_update, \
+    fetch_number_of_representatives_needing_twitter_update, \
     retrieve_and_update_candidates_needing_twitter_update, retrieve_and_update_organizations_needing_twitter_update, \
     retrieve_and_update_representatives_needing_twitter_update, retrieve_possible_twitter_handles_in_bulk
 from issue.controllers import update_issue_statistics
@@ -691,14 +692,20 @@ def process_next_general_maintenance():
         else:
             number_of_candidates_to_analyze = fetch_number_of_candidates_needing_twitter_update()
             number_of_organizations_to_analyze = 0
+            number_of_representatives_to_analyze = 0
             if positive_value_exists(number_of_candidates_to_analyze):
                 status += "CANDIDATES_NEED_TWITTER_UPDATE "
             else:
-                number_of_organizations_to_analyze = fetch_number_of_organizations_needing_twitter_update()
-                if positive_value_exists(number_of_organizations_to_analyze):
-                    status += "ORGANIZATIONS_NEED_TWITTER_UPDATE "
-            if positive_value_exists(number_of_candidates_to_analyze) or \
-                    positive_value_exists(number_of_organizations_to_analyze):
+                number_of_representatives_to_analyze = fetch_number_of_representatives_needing_twitter_update()
+                if positive_value_exists(number_of_representatives_to_analyze):
+                    status += "REPRESENTATIVES_NEED_TWITTER_UPDATE "
+                else:
+                    number_of_organizations_to_analyze = fetch_number_of_organizations_needing_twitter_update()
+                    if positive_value_exists(number_of_organizations_to_analyze):
+                        status += "ORGANIZATIONS_NEED_TWITTER_UPDATE "
+            if positive_value_exists(number_of_candidates_to_analyze) \
+                    or positive_value_exists(number_of_organizations_to_analyze) \
+                    or positive_value_exists(number_of_representatives_to_analyze):
                 results = batch_process_manager.create_batch_process(
                     kind_of_process=UPDATE_TWITTER_DATA_FROM_TWITTER)
                 status += results['status']
