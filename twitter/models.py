@@ -761,7 +761,7 @@ class TwitterUserManager(models.Manager):
         return results
 
     def retrieve_twitter_user(self, twitter_user_id=0, twitter_handle='', read_only=False):
-        twitter_user_on_stage = TwitterUser()
+        twitter_user_on_stage = None
         twitter_user_found = False
         success = False
         status = ""

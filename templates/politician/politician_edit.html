@@ -196,8 +196,8 @@
                 {% if politician.twitter_handle_updates_failing %}checked{% endif %} />
         <label for="twitter_handle_updates_failing_id" style="font-weight: normal !important;">Twitter Handle Updates Failing{% if politician.twitter_handle_updates_failing %}. <span style="color: darkgray">Our automated Twitter data update script had trouble retrieving a handle. Uncheck when fixed.</span>{% endif %}</label><br />
         <a href="https://twitter.com/{{ politician.politician_twitter_handle|iriencode }}"
-           target="_blank">view on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
-        (<a href="{% url 'import_export_twitter:refresh_twitter_politician_details' politician.id %}">Refresh Twitter Details</a>)<br />
+           target="_blank">View on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
+        <a href="{% url 'import_export_twitter:refresh_twitter_politician_details' politician.id %}">Refresh Twitter Details</a><br />
         Twitter Name: {{ politician.twitter_name }}<br />
         Twitter Description: {{ politician.twitter_description }}<br />
         Twitter Location: {{ politician.twitter_location }}<br />
@@ -217,7 +217,8 @@
                 {% if politician.twitter_handle2_updates_failing %}checked{% endif %} />
         <label for="twitter_handle2_updates_failing_id" style="font-weight: normal !important;">Twitter Handle 2 Updates Failing{% if politician.twitter_handle2_updates_failing %}. <span style="color: darkgray">Our automated Twitter data update script had trouble retrieving a handle. Uncheck when fixed.</span>{% endif %}</label><br />
         <a href="https://twitter.com/{{ politician.politician_twitter_handle2|iriencode }}"
-           target="_blank">view on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
+           target="_blank">View on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
+        <a href="{% url 'import_export_twitter:refresh_twitter_politician_details' politician.id %}?twitter_handle={{ politician.politician_twitter_handle2 }}">Make Primary Handle</a>
     {% endif %}
     </div>
 </div>
@@ -229,7 +230,8 @@
                value="{% if politician %}{{ politician.politician_twitter_handle3|default_if_none:"" }}{% else %}{{ politician_twitter_handle3|default_if_none:"" }}{% endif %}" />
     {% if politician.politician_twitter_handle3 %}
         <a href="https://twitter.com/{{ politician.politician_twitter_handle3|iriencode }}"
-           target="_blank">view on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
+           target="_blank">View on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
+        <a href="{% url 'import_export_twitter:refresh_twitter_politician_details' politician.id %}?twitter_handle={{ politician.politician_twitter_handle3 }}">Make Primary Handle</a>
     {% endif %}
     </div>
 </div>
@@ -241,7 +243,8 @@
                value="{% if politician %}{{ politician.politician_twitter_handle4|default_if_none:"" }}{% else %}{{ politician_twitter_handle4|default_if_none:"" }}{% endif %}" />
     {% if politician.politician_twitter_handle4 %}
         <a href="https://twitter.com/{{ politician.politician_twitter_handle4|iriencode }}"
-           target="_blank">view on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
+           target="_blank">View on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
+        <a href="{% url 'import_export_twitter:refresh_twitter_politician_details' politician.id %}?twitter_handle={{ politician.politician_twitter_handle4 }}">Make Primary Handle</a>
     {% endif %}
     </div>
 </div>
@@ -253,7 +256,8 @@
                value="{% if politician %}{{ politician.politician_twitter_handle5|default_if_none:"" }}{% else %}{{ politician_twitter_handle5|default_if_none:"" }}{% endif %}" />
     {% if politician.politician_twitter_handle5 %}
         <a href="https://twitter.com/{{ politician.politician_twitter_handle5|iriencode }}"
-           target="_blank">view on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
+           target="_blank">View on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
+        <a href="{% url 'import_export_twitter:refresh_twitter_politician_details' politician.id %}?twitter_handle={{ politician.politician_twitter_handle5 }}">Make Primary Handle</a>
     {% endif %}
     </div>
 </div>

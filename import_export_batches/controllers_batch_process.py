@@ -33,7 +33,7 @@ from exception.models import handle_exception
 from import_export_twitter.controllers import fetch_number_of_candidates_needing_twitter_search, \
     fetch_number_of_candidates_needing_twitter_update, fetch_number_of_organizations_needing_twitter_update, \
     retrieve_and_update_candidates_needing_twitter_update, retrieve_and_update_organizations_needing_twitter_update, \
-    retrieve_possible_twitter_handles_in_bulk
+    retrieve_and_update_representatives_needing_twitter_update, retrieve_possible_twitter_handles_in_bulk
 from issue.controllers import update_issue_statistics
 import json
 from position.models import PositionEntered
@@ -2648,6 +2648,8 @@ def process_one_search_twitter_batch_process(batch_process, status=""):
 
 def process_one_update_twitter_batch_process(batch_process, status=""):
     candidates_updated = 0
+    organizations_updated = 0
+    representatives_updated = 0
     success = True
     batch_process_manager = BatchProcessManager()
 
@@ -2675,7 +2677,7 @@ def process_one_update_twitter_batch_process(batch_process, status=""):
         }
         return results
 
-    retrieve_results = retrieve_and_update_candidates_needing_twitter_update()
+    retrieve_results = retrieve_and_update_candidates_needing_twitter_update(batch_process_id=batch_process.id)
     status += retrieve_results['status']
 
     if retrieve_results['success']:
@@ -2745,7 +2747,84 @@ def process_one_update_twitter_batch_process(batch_process, status=""):
         }
         return results
 
-    # If there weren't any candidates to update, move on to organizations
+    # If there weren't any candidates to update, move on to representatives
+    try:
+        retrieve_results = retrieve_and_update_representatives_needing_twitter_update(batch_process_id=batch_process.id)
+        status += retrieve_results['status']
+    except Exception as e:
+        status += "retrieve_and_update_representatives_needing_twitter_update: " + str(e) + " "
+        success = False
+        handle_exception(e, logger=logger, exception_message=status)
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process.id,
+            kind_of_process=kind_of_process,
+            status=status,
+        )
+
+    if success and retrieve_results['success']:
+        representatives_updated = retrieve_results['representatives_updated']
+        representatives_to_update = retrieve_results['representatives_to_update']
+        try:
+            completion_summary = \
+                "Representatives updated: {representatives_updated} " \
+                "out of {representatives_to_update}" \
+                "".format(representatives_updated=representatives_updated,
+                          representatives_to_update=representatives_to_update)
+            status += completion_summary + " "
+            batch_process.completion_summary = completion_summary
+            batch_process.date_checked_out = None
+            batch_process.date_completed = now()
+            batch_process.save()
+
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=kind_of_process,
+                status=status,
+            )
+        except Exception as e:
+            status += "REPRESENTATIVE_TWITTER_DATA_TO_UPDATE_ERROR-DATE_COMPLETED_TIME_NOT_SAVED: " + str(e) + " "
+            success = False
+            handle_exception(e, logger=logger, exception_message=status)
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=kind_of_process,
+                status=status,
+            )
+    else:
+        status += "REPRESENTATIVE_TWITTER_DATA_TO_UPDATE_FAILED-MARKED_COMPLETED "
+        success = False
+        try:
+            completion_summary = \
+                "retrieve_and_update_representatives_needing_twitter_update FAILED: {status}" \
+                "".format(status=status)
+            status += completion_summary + " "
+            batch_process.completion_summary = completion_summary
+            batch_process.date_checked_out = None
+            batch_process.date_completed = now()
+            batch_process.save()
+
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=kind_of_process,
+                status=status,
+            )
+        except Exception as e:
+            status += "REPRESENTATIVE_TWITTER_DATA_TO_UPDATE_ERROR-COMPLETION_SUMMARY_NOT_SAVED: " + str(e) + " "
+            handle_exception(e, logger=logger, exception_message=status)
+            batch_process_manager.create_batch_process_log_entry(
+                batch_process_id=batch_process.id,
+                kind_of_process=kind_of_process,
+                status=status,
+            )
+
+    if not success or positive_value_exists(representatives_updated):
+        results = {
+            'success':  success,
+            'status':   status,
+        }
+        return results
+
+    # If there weren't any representatives to update, move on to organizations
     try:
         retrieve_results = retrieve_and_update_organizations_needing_twitter_update(batch_process_id=batch_process.id)
         status += retrieve_results['status']
@@ -2764,7 +2843,7 @@ def process_one_update_twitter_batch_process(batch_process, status=""):
         organizations_to_update = retrieve_results['organizations_to_update']
         try:
             completion_summary = \
-                "Organizations Updated: {organizations_updated} " \
+                "Organizations updated: {organizations_updated} " \
                 "out of {organizations_to_update}" \
                 "".format(organizations_updated=organizations_updated,
                           organizations_to_update=organizations_to_update)

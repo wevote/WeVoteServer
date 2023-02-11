@@ -376,7 +376,7 @@ th, td {
                 {% if candidate.twitter_handle_updates_failing %}checked{% endif %} />
         <label for="twitter_handle_updates_failing_id" style="font-weight: normal !important;">Twitter Updates Failing{% if candidate.twitter_handle_updates_failing %}. <span style="color: darkgray">Our automated Twitter data update script had trouble retrieving a handle. Uncheck when fixed.</span>{% endif %}</label><br />
         <a href="https://twitter.com/{{ candidate.candidate_twitter_handle|iriencode }}"
-           target="_blank">view on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
+           target="_blank">View on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
         <a href="{% url 'import_export_twitter:refresh_twitter_candidate_details' candidate.id %}">Refresh Twitter Details</a>&nbsp;&nbsp;&nbsp;
         <a href="{% url 'import_export_twitter:delete_images_view'%}?candidate_id={{ candidate.id }}">Delete Cached Images</a><br />
         Twitter Name: {{ candidate.twitter_name }}<br />
@@ -470,7 +470,8 @@ th, td {
                 {% if candidate.twitter_handle2_updates_failing %}checked{% endif %} />
         <label for="twitter_handle2_updates_failing_id" style="font-weight: normal !important;">Twitter Handle 2 Updates Failing{% if candidate.twitter_handle2_updates_failing %}. <span style="color: darkgray">Our automated Twitter data update script had trouble retrieving a handle. Uncheck when fixed.</span>{% endif %}</label><br />
         <a href="https://twitter.com/{{ candidate.candidate_twitter_handle2|iriencode }}"
-           target="_blank">view on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
+           target="_blank">View on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
+        <a href="{% url 'import_export_twitter:refresh_twitter_candidate_details' candidate.id %}?twitter_handle={{ candidate.candidate_twitter_handle2 }}">Make Primary Handle</a>
     {% endif %}
     </div>
 </div>
@@ -482,7 +483,8 @@ th, td {
                value="{% if candidate %}{{ candidate.candidate_twitter_handle3|default_if_none:"" }}{% else %}{{ candidate_twitter_handle3|default_if_none:"" }}{% endif %}" />
     {% if candidate.candidate_twitter_handle3 %}
         <a href="https://twitter.com/{{ candidate.candidate_twitter_handle3|iriencode }}"
-           target="_blank">view on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
+           target="_blank">View on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
+        <a href="{% url 'import_export_twitter:refresh_twitter_candidate_details' candidate.id %}?twitter_handle={{ candidate.candidate_twitter_handle3 }}">Make Primary Handle</a>
     {% endif %}
     </div>
 </div>
