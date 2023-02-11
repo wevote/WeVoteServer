@@ -385,7 +385,7 @@ def fetch_number_of_representatives_needing_twitter_update(state_code=''):
 
     try:
         # Exclude representatives we have requested updates from in the last 90 days
-        remote_request_query = RemoteRequestHistory.objects.all()
+        remote_request_query = RemoteRequestHistory.objects.using('readonly').all()
         three_months_of_seconds = 60 * 60 * 24 * 90  # 60 seconds, 60 minutes, 24 hours, 90 days
         three_months_ago = now() - timedelta(seconds=three_months_of_seconds)
         remote_request_query = remote_request_query.filter(datetime_of_action__gt=three_months_ago)
@@ -401,7 +401,7 @@ def fetch_number_of_representatives_needing_twitter_update(state_code=''):
     representatives_to_update = 0
 
     try:
-        queryset = Representative.objects.all()  # Cannot be readonly
+        queryset = Representative.objects.using('readonly').all()
         queryset = queryset.exclude(we_vote_id__in=representative_we_vote_id_list_to_exclude)
         queryset = queryset.exclude(
             Q(representative_twitter_handle__isnull=True) | Q(representative_twitter_handle=""))
