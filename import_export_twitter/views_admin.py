@@ -21,8 +21,8 @@ from representative.models import RepresentativeManager
 from twitter.functions import retrieve_twitter_user_info
 from voter.models import voter_has_authority, VoterManager
 from wevote_functions.functions import convert_to_int, positive_value_exists
-from .controllers import delete_possible_twitter_handles, retrieve_possible_twitter_handles, \
-    retrieve_possible_twitter_handles_in_bulk
+from .controllers import delete_possible_twitter_handles, make_item_in_list_primary, \
+    retrieve_possible_twitter_handles, retrieve_possible_twitter_handles_in_bulk
 from .controllers import refresh_twitter_candidate_details, refresh_twitter_data_for_organizations, \
     refresh_twitter_organization_details, refresh_twitter_politician_details, refresh_twitter_representative_details, \
     scrape_social_media_from_one_site, refresh_twitter_candidate_details_for_election, \
@@ -181,6 +181,7 @@ def refresh_twitter_candidate_details_view(request, candidate_id):
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
+    twitter_handle_to_make_primary = request.GET.get('twitter_handle', '')
 
     candidate_manager = CandidateManager()
     results = candidate_manager.retrieve_candidate(candidate_id)
@@ -190,6 +191,15 @@ def refresh_twitter_candidate_details_view(request, candidate_id):
         return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 
     candidate = results['candidate']
+    if positive_value_exists(twitter_handle_to_make_primary):
+        results = make_item_in_list_primary(
+            field_name_base='candidate_twitter_handle',
+            representative=candidate,
+            value_to_make_primary=twitter_handle_to_make_primary
+        )
+        if results['values_changed']:
+            candidate = results['representative']
+            candidate.save()
 
     results = refresh_twitter_candidate_details(candidate, use_cached_data_if_within_x_days=1)
 
@@ -227,6 +237,7 @@ def refresh_twitter_politician_details_view(request, politician_id):
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
+    twitter_handle_to_make_primary = request.GET.get('twitter_handle', '')
 
     politician_manager = PoliticianManager()
     results = politician_manager.retrieve_politician(politician_id=politician_id)
@@ -236,6 +247,15 @@ def refresh_twitter_politician_details_view(request, politician_id):
         return HttpResponseRedirect(reverse('politician:politician_edit', args=(politician_id,)))
 
     politician = results['politician']
+    if positive_value_exists(twitter_handle_to_make_primary):
+        results = make_item_in_list_primary(
+            field_name_base='politician_twitter_handle',
+            representative=politician,
+            value_to_make_primary=twitter_handle_to_make_primary
+        )
+        if results['values_changed']:
+            politician = results['representative']
+            politician.save()
 
     results = refresh_twitter_politician_details(politician, use_cached_data_if_within_x_days=0)
 
@@ -248,6 +268,7 @@ def refresh_twitter_representative_details_view(request, representative_id):
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
+    twitter_handle_to_make_primary = request.GET.get('twitter_handle', '')
 
     representative_manager = RepresentativeManager()
     results = representative_manager.retrieve_representative(representative_id=representative_id)
@@ -257,6 +278,15 @@ def refresh_twitter_representative_details_view(request, representative_id):
         return HttpResponseRedirect(reverse('representative:representative_edit', args=(representative_id,)))
 
     representative = results['representative']
+    if positive_value_exists(twitter_handle_to_make_primary):
+        results = make_item_in_list_primary(
+            field_name_base='representative_twitter_handle',
+            representative=representative,
+            value_to_make_primary=twitter_handle_to_make_primary
+        )
+        if results['values_changed']:
+            representative = results['representative']
+            representative.save()
 
     results = refresh_twitter_representative_details(representative, use_cached_data_if_within_x_days=0)
 

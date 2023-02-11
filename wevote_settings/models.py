@@ -561,14 +561,11 @@ class RemoteRequestHistory(models.Model):
     datetime_of_action = models.DateTimeField(verbose_name='date and time of action', auto_now=True)
     # If a 'ballot' entry, store the election this is for
     google_civic_election_id = models.PositiveIntegerField(verbose_name="google civic election id", null=True)
-
     kind_of_action = models.CharField(verbose_name="kind of action to take", max_length=50,
                                       choices=KIND_OF_ACTION_CHOICES, null=True)
-    candidate_campaign_we_vote_id = models.CharField(verbose_name="candidate we vote id", max_length=255, unique=False,
-                                                     null=True)
-
-    organization_we_vote_id = models.CharField(verbose_name="we vote id for the org owner", max_length=255,
-                                               unique=False, null=True)
+    candidate_campaign_we_vote_id = models.CharField(max_length=255, unique=False, null=True)
+    organization_we_vote_id = models.CharField(max_length=255, unique=False, null=True)
+    representative_we_vote_id = models.CharField(max_length=255, unique=False, null=True)
     number_of_results = models.PositiveIntegerField(verbose_name="number of results", null=True, default=0)
     status = models.TextField(verbose_name="Request status message", default="", null=True, blank=True)
 
@@ -582,8 +579,9 @@ class RemoteRequestHistoryManager(models.Manager):
             self,
             kind_of_action='',
             google_civic_election_id=0,
-            candidate_campaign_we_vote_id='',
-            organization_we_vote_id='',
+            candidate_campaign_we_vote_id=None,
+            organization_we_vote_id=None,
+            representative_we_vote_id=None,
             number_of_results=0,
             status=''):
         """
@@ -592,7 +590,8 @@ class RemoteRequestHistoryManager(models.Manager):
         :param google_civic_election_id: 
         :param candidate_campaign_we_vote_id: 
         :param organization_we_vote_id: 
-        :param number_of_results: 
+        :param representative_we_vote_id:
+        :param number_of_results:
         :param status: 
         :return: 
         """
@@ -609,15 +608,16 @@ class RemoteRequestHistoryManager(models.Manager):
                 google_civic_election_id=google_civic_election_id,
                 candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
                 organization_we_vote_id=organization_we_vote_id,
+                representative_we_vote_id=representative_we_vote_id,
                 number_of_results=number_of_results,
                 status=status)
             if remote_request_history_entry:
                 success = True
-                create_status += "REMOTE_REQUEST_HISTORY_ENTRY_CREATED"
+                create_status += "REMOTE_REQUEST_HISTORY_ENTRY_CREATED "
                 remote_request_history_entry_created = True
             else:
                 success = False
-                create_status += "CREATE_REMOTE_REQUEST_HISTORY_ENTRY_FAILED"
+                create_status += "CREATE_REMOTE_REQUEST_HISTORY_ENTRY_FAILED "
         except Exception as e:
             status += "REMOTE_REQUEST_HISTORY_ENTRY_ERROR: " + str(e) + " "
             handle_record_not_saved_exception(e, logger=logger)

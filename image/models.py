@@ -136,6 +136,7 @@ class WeVoteImage(models.Model):
     kind_of_image_large = models.BooleanField(verbose_name="is image size large", default=False)
     kind_of_image_medium = models.BooleanField(verbose_name="is image size medium", default=False)
     kind_of_image_tiny = models.BooleanField(verbose_name="is image size tiny", default=False)
+    politician_we_vote_id = models.CharField(max_length=255, null=True, blank=True)
     representative_we_vote_id = models.CharField(max_length=255, null=True, blank=True)
 
     def display_kind_of_image(self):
@@ -216,6 +217,7 @@ class WeVoteImageManager(models.Manager):
             kind_of_image_voter_uploaded_profile=False,
             kind_of_image_wikipedia_profile=False,
             organization_we_vote_id=None,
+            politician_we_vote_id=None,
             representative_we_vote_id=None,
             voter_we_vote_id=None,
             ):
@@ -251,6 +253,7 @@ class WeVoteImageManager(models.Manager):
         :param kind_of_image_voter_uploaded_profile:
         :param kind_of_image_wikipedia_profile:
         :param organization_we_vote_id:
+        :param politician_we_vote_id:
         :param representative_we_vote_id:
         :param voter_we_vote_id:
         :return:
@@ -289,6 +292,7 @@ class WeVoteImageManager(models.Manager):
                 kind_of_image_voter_uploaded_profile=kind_of_image_voter_uploaded_profile,
                 kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
                 organization_we_vote_id=organization_we_vote_id,
+                politician_we_vote_id=politician_we_vote_id,
                 representative_we_vote_id=representative_we_vote_id,
                 voter_we_vote_id=voter_we_vote_id,
             )
@@ -956,6 +960,7 @@ class WeVoteImageManager(models.Manager):
             kind_of_image_voter_uploaded_profile=False,
             kind_of_image_wikipedia_profile=False,
             organization_we_vote_id=None,
+            politician_we_vote_id=None,
             representative_we_vote_id=None,
             voter_we_vote_id=None,
     ):
@@ -985,6 +990,7 @@ class WeVoteImageManager(models.Manager):
         :param kind_of_image_voter_uploaded_profile:
         :param kind_of_image_wikipedia_profile:
         :param organization_we_vote_id:
+        :param politician_we_vote_id:
         :param representative_we_vote_id:
         :param voter_we_vote_id:
         :return:
@@ -1017,6 +1023,7 @@ class WeVoteImageManager(models.Manager):
                 kind_of_image_voter_uploaded_profile=kind_of_image_voter_uploaded_profile,
                 kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
                 organization_we_vote_id=organization_we_vote_id,
+                politician_we_vote_id=politician_we_vote_id,
                 representative_we_vote_id=representative_we_vote_id,
                 voter_we_vote_id=voter_we_vote_id,
             )
@@ -1191,6 +1198,7 @@ class WeVoteImageManager(models.Manager):
             candidate_we_vote_id=None,
             issue_we_vote_id=None,
             organization_we_vote_id=None,
+            politician_we_vote_id=None,
             representative_we_vote_id=None):
         we_vote_image_list = []
         status = ""
@@ -1200,6 +1208,7 @@ class WeVoteImageManager(models.Manager):
                 voter_we_vote_id__iexact=voter_we_vote_id,
                 candidate_we_vote_id__iexact=candidate_we_vote_id,
                 organization_we_vote_id__iexact=organization_we_vote_id,
+                politician_we_vote_id__iexact=politician_we_vote_id,
                 representative_we_vote_id__iexact=representative_we_vote_id,
                 issue_we_vote_id__iexact=issue_we_vote_id,
             )
@@ -1306,6 +1315,7 @@ class WeVoteImageManager(models.Manager):
             other_source_image_url=None,
             photo_url_from_ctcl=None,
             photo_url_from_vote_usa=None,
+            politician_we_vote_id=None,
             representative_we_vote_id=None,
             twitter_profile_background_image_url_https=None,
             twitter_profile_banner_url_https=None,
@@ -1336,6 +1346,7 @@ class WeVoteImageManager(models.Manager):
         :param other_source_image_url:
         :param photo_url_from_ctcl:
         :param photo_url_from_vote_usa:
+        :param politician_we_vote_id:
         :param representative_we_vote_id:
         :param twitter_profile_background_image_url_https:
         :param twitter_profile_banner_url_https:
@@ -1383,6 +1394,7 @@ class WeVoteImageManager(models.Manager):
                 other_source_image_url__iexact=other_source_image_url,
                 photo_url_from_ctcl=photo_url_from_ctcl,
                 photo_url_from_vote_usa=photo_url_from_vote_usa,
+                politician_we_vote_id__iexact=politician_we_vote_id,
                 representative_we_vote_id__iexact=representative_we_vote_id,
                 twitter_profile_background_image_url_https__iexact=twitter_profile_background_image_url_https,
                 twitter_profile_banner_url_https__iexact=twitter_profile_banner_url_https,
@@ -1470,6 +1482,7 @@ class WeVoteImageManager(models.Manager):
             other_source_image_url=None,
             photo_url_from_ctcl=None,
             photo_url_from_vote_usa=None,
+            politician_we_vote_id=None,
             representative_we_vote_id=None,
             twitter_profile_background_image_url_https=None,
             twitter_profile_banner_url_https=None,
@@ -1495,6 +1508,7 @@ class WeVoteImageManager(models.Manager):
         :param other_source_image_url:
         :param photo_url_from_ctcl:
         :param photo_url_from_vote_usa:
+        :param politician_we_vote_id:
         :param representative_we_vote_id:
         :param twitter_profile_background_image_url_https:
         :param twitter_profile_banner_url_https:
@@ -1524,6 +1538,7 @@ class WeVoteImageManager(models.Manager):
                 other_source_image_url__iexact=other_source_image_url,
                 photo_url_from_ctcl__iexact=photo_url_from_ctcl,
                 photo_url_from_vote_usa__iexact=photo_url_from_vote_usa,
+                politician_we_vote_id__iexact=politician_we_vote_id,
                 representative_we_vote_id__iexact=representative_we_vote_id,
                 twitter_profile_background_image_url_https__iexact=twitter_profile_background_image_url_https,
                 twitter_profile_banner_url_https__iexact=twitter_profile_banner_url_https,
@@ -1587,6 +1602,7 @@ class WeVoteImageManager(models.Manager):
             kind_of_image_voter_uploaded_profile=False,
             kind_of_image_wikipedia_profile=False,
             organization_we_vote_id=None,
+            politician_we_vote_id=None,
             representative_we_vote_id=None,
             voter_we_vote_id=None,
     ):
@@ -1615,6 +1631,7 @@ class WeVoteImageManager(models.Manager):
         :param kind_of_image_voter_uploaded_profile:
         :param kind_of_image_wikipedia_profile:
         :param organization_we_vote_id:
+        :param politician_we_vote_id:
         :param representative_we_vote_id:
         :param voter_we_vote_id:
         :return:
@@ -1662,6 +1679,7 @@ class WeVoteImageManager(models.Manager):
                     kind_of_image_voter_uploaded_profile=kind_of_image_voter_uploaded_profile,
                     kind_of_image_wikipedia_profile=kind_of_image_wikipedia_profile,
                     organization_we_vote_id__iexact=organization_we_vote_id,
+                    politician_we_vote_id__iexact=politician_we_vote_id,
                     representative_we_vote_id__iexact=representative_we_vote_id,
                     voter_we_vote_id__iexact=voter_we_vote_id,
                 )
@@ -1719,6 +1737,7 @@ class WeVoteImageManager(models.Manager):
             kind_of_image_voter_uploaded_profile=False,
             kind_of_image_wikipedia_profile=False,
             organization_we_vote_id=None,
+            politician_we_vote_id=None,
             representative_we_vote_id=None,
             voter_we_vote_id=None,
     ):
@@ -1751,6 +1770,7 @@ class WeVoteImageManager(models.Manager):
         :param kind_of_image_voter_uploaded_profile:
         :param kind_of_image_wikipedia_profile:
         :param organization_we_vote_id:
+        :param politician_we_vote_id:
         :param representative_we_vote_id:
         :param voter_we_vote_id:
         :return:
@@ -1789,6 +1809,7 @@ class WeVoteImageManager(models.Manager):
                 kind_of_image_medium=kind_of_image_medium,
                 kind_of_image_tiny=kind_of_image_tiny,
                 organization_we_vote_id__iexact=organization_we_vote_id,
+                politician_we_vote_id__iexact=politician_we_vote_id,
                 representative_we_vote_id__iexact=representative_we_vote_id,
                 voter_we_vote_id__iexact=voter_we_vote_id,
             )

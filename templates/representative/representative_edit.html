@@ -189,7 +189,7 @@
         <input type="checkbox" name="twitter_handle_updates_failing" id="twitter_handle_updates_failing_id" value="1"
                 {% if representative.twitter_handle_updates_failing %}checked{% endif %} />
         <label for="twitter_handle_updates_failing_id" style="font-weight: normal !important;">Twitter Updates Failing{% if representative.twitter_handle_updates_failing %}. <span style="color: darkgray">Our automated Twitter data update script had trouble retrieving a handle. Uncheck when fixed.</span>{% endif %}</label><br />
-        (<a href="{% url 'import_export_twitter:refresh_twitter_representative_details' representative.id %}">Refresh Twitter Details</a>)<br />
+        <a href="{% url 'import_export_twitter:refresh_twitter_representative_details' representative.id %}">Refresh Twitter Details</a><br />
         Twitter Name: {{ representative.twitter_name }}<br />
         Twitter Description: {{ representative.twitter_description }}<br />
         Twitter Location: {{ representative.twitter_location }}<br />
@@ -210,9 +210,14 @@
     <div class="col-sm-8">
         <input type="text" name="representative_twitter_handle2" id="representative_twitter_handle2_id" class="form-control"
                value="{% if representative %}{{ representative.representative_twitter_handle2|default_if_none:"" }}{% else %}{{ representative_twitter_handle2|default_if_none:"" }}{% endif %}" />
+    {% if representative.representative_twitter_handle2 %}
         <input type="checkbox" name="twitter_handle2_updates_failing" id="twitter_handle2_updates_failing_id" value="1"
                 {% if representative.twitter_handle2_updates_failing %}checked{% endif %} />
         <label for="twitter_handle2_updates_failing_id" style="font-weight: normal !important;">Twitter 2 Updates Failing{% if representative.twitter_handle2_updates_failing %}. <span style="color: darkgray">Our automated Twitter data update script had trouble retrieving a handle. Uncheck when fixed.</span>{% endif %}</label><br />
+        <a href="https://twitter.com/{{ representative.representative_twitter_handle2|iriencode }}"
+           target="_blank">View on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
+        <a href="{% url 'import_export_twitter:refresh_twitter_representative_details' representative.id %}?twitter_handle={{ representative.representative_twitter_handle2 }}">Make Primary Handle</a>
+    {% endif %}
     </div>
 </div>
 
@@ -227,6 +232,14 @@
     <div class="col-sm-8">
         <input type="text" name="representative_twitter_handle3" id="representative_twitter_handle3_id" class="form-control"
                value="{% if representative %}{{ representative.representative_twitter_handle3|default_if_none:"" }}{% else %}{{ representative_twitter_handle3|default_if_none:"" }}{% endif %}" />
+    {% if representative.representative_twitter_handle3 %}
+        <input type="checkbox" name="twitter_handle3_updates_failing" id="twitter_handle3_updates_failing_id" value="1"
+                {% if representative.twitter_handle3_updates_failing %}checked{% endif %} />
+        <label for="twitter_handle3_updates_failing_id" style="font-weight: normal !important;">Twitter 2 Updates Failing{% if representative.twitter_handle3_updates_failing %}. <span style="color: darkgray">Our automated Twitter data update script had trouble retrieving a handle. Uncheck when fixed.</span>{% endif %}</label><br />
+        <a href="https://twitter.com/{{ representative.representative_twitter_handle3|iriencode }}"
+           target="_blank">View on Twitter <span class="glyphicon glyphicon-new-window"></span></a>&nbsp;&nbsp;&nbsp;
+        <a href="{% url 'import_export_twitter:refresh_twitter_representative_details' representative.id %}?twitter_handle={{ representative.representative_twitter_handle3 }}">Make Primary Handle</a>
+    {% endif %}
     </div>
 </div>
 

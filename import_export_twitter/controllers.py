@@ -34,7 +34,7 @@ from organization.models import GROUP, Organization, OrganizationListManager, Or
 from politician.models import PoliticianManager
 from position.controllers import update_all_position_details_from_candidate, \
     update_position_entered_details_from_organization, update_position_for_friends_details_from_voter
-from representative.models import RepresentativeManager
+from representative.models import Representative, RepresentativeManager
 from twitter.functions import retrieve_twitter_user_info
 from twitter.models import TwitterLinkPossibility, TwitterUserManager
 from voter.models import VoterManager
@@ -577,6 +577,82 @@ def delete_possible_twitter_handles(candidate):
     return results
 
 
+def make_item_in_list_primary(
+        field_name_base='',
+        representative=None,
+        value_to_make_primary=''):
+    """
+    This function can be used with Representative, CandidateCampaign and Politician
+    :param field_name_base:
+    :param representative:
+    :param value_to_make_primary:
+    :return:
+    """
+    status = ''
+    success = True
+    values_changed = False
+    if not positive_value_exists(value_to_make_primary):
+        status += 'VALUE_TO_MAKE_PRIMARY_MISSING-(' + str(value_to_make_primary) + "/" + str(field_name_base) + ')'
+        return {
+            'success':          False,
+            'status':           status,
+            'representative':   representative,
+            'values_changed':   values_changed,
+        }
+
+    list_of_items_to_move = []
+    save_needed = False
+
+    current_value1 = getattr(representative, field_name_base, '')
+    current_value2 = getattr(representative, field_name_base + '2', '')
+    current_value3 = getattr(representative, field_name_base + '3', '')
+    current_value4 = getattr(representative, field_name_base + '4', '')
+    current_value5 = getattr(representative, field_name_base + '5', '')
+    if positive_value_exists(current_value1):
+        if value_to_make_primary.lower() == current_value1.lower():
+            # No change needed
+            pass
+        else:
+            list_of_items_to_move.append(current_value1)
+    if positive_value_exists(current_value2):
+        if value_to_make_primary.lower() == current_value2.lower():
+            setattr(representative, field_name_base, value_to_make_primary)
+            save_needed = True
+        else:
+            list_of_items_to_move.append(current_value2)
+    if positive_value_exists(current_value3):
+        if value_to_make_primary.lower() == current_value3.lower():
+            setattr(representative, field_name_base, value_to_make_primary)
+            save_needed = True
+        else:
+            list_of_items_to_move.append(current_value3)
+    if positive_value_exists(current_value4):
+        if value_to_make_primary.lower() == current_value4.lower():
+            setattr(representative, field_name_base, value_to_make_primary)
+            save_needed = True
+        else:
+            list_of_items_to_move.append(current_value4)
+    if positive_value_exists(current_value5):
+        if value_to_make_primary.lower() == current_value5.lower():
+            setattr(representative, field_name_base, value_to_make_primary)
+            save_needed = True
+        else:
+            list_of_items_to_move.append(current_value5)
+    if save_needed:
+        for one_list_item_value in list_of_items_to_move:
+            attribute_number = 2
+            attribute_name = f"{field_name_base}{attribute_number}"
+            setattr(representative, attribute_name, one_list_item_value)
+            attribute_number += 1
+            values_changed = True
+    return {
+        'success':          success,
+        'status':           status,
+        'representative':   representative,
+        'values_changed':   values_changed,
+    }
+
+
 def refresh_twitter_candidate_details(candidate, use_cached_data_if_within_x_days=30):
     candidates_updated_count = 0
     status = ""
@@ -633,7 +709,7 @@ def refresh_twitter_politician_details(politician, use_cached_data_if_within_x_d
     twitter_user_updated = False
 
     if not politician:
-        status += "TWITTER_DETAILS_NOT_RETRIEVED-CANDIDATE_MISSING "
+        status += "TWITTER_DETAILS_NOT_RETRIEVED-POLITICIAN_MISSING "
         results = {
             'success':                  False,
             'status':                   status,
@@ -727,6 +803,8 @@ def retrieve_fresh_enough_twitter_user_for_handle(
         candidate_we_vote_id='',
         organization_id='',
         organization_we_vote_id='',
+        politician_id='',
+        politician_we_vote_id='',
         representative_id='',
         representative_we_vote_id='',
         twitter_handle='',
@@ -739,6 +817,10 @@ def retrieve_fresh_enough_twitter_user_for_handle(
         organization_id = None
     if not positive_value_exists(organization_we_vote_id):
         organization_we_vote_id = None
+    if not positive_value_exists(politician_id):
+        politician_id = None
+    if not positive_value_exists(politician_we_vote_id):
+        politician_we_vote_id = None
     if not positive_value_exists(representative_id):
         representative_id = None
     if not positive_value_exists(representative_we_vote_id):
@@ -816,6 +898,8 @@ def retrieve_fresh_enough_twitter_user_for_handle(
                 candidate_we_vote_id=candidate_we_vote_id,
                 organization_id=organization_id,
                 organization_we_vote_id=organization_we_vote_id,
+                politician_id=politician_id,
+                politician_we_vote_id=politician_we_vote_id,
                 representative_id=representative_id,
                 representative_we_vote_id=representative_we_vote_id,
                 twitter_id=twitter_user_id,
@@ -1198,6 +1282,7 @@ def retrieve_possible_twitter_handles(candidate):
 
 
 def retrieve_and_update_candidates_needing_twitter_update(
+        batch_process_id=0,
         google_civic_election_id=0,
         state_code='',
         limit=0):
@@ -1284,6 +1369,13 @@ def retrieve_and_update_candidates_needing_twitter_update(
 
         candidates_updated = 0
         status += "UPDATE_FROM_TWITTER_LOOP_TOTAL: " + str(candidates_to_update) + " "
+
+        batch_process_manager = BatchProcessManager()
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process_id,
+            kind_of_process=UPDATE_TWITTER_DATA_FROM_TWITTER,
+            status=status,
+        )
         remote_request_history_manager = RemoteRequestHistoryManager()
         for candidate in candidate_list:
             results = refresh_twitter_candidate_details(candidate)
@@ -1299,6 +1391,11 @@ def retrieve_and_update_candidates_needing_twitter_update(
             if not save_results_history['success']:
                 status += save_results_history['status']
                 success = False
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process_id,
+            kind_of_process=UPDATE_TWITTER_DATA_FROM_TWITTER,
+            status=status,
+        )
 
     results = {
         'success':              success,
@@ -1397,12 +1494,6 @@ def retrieve_and_update_organizations_needing_twitter_update(batch_process_id=0)
                 status += "REFRESH_TWITTER_ORGANIZATION_DETAILS_FAILED: " + str(e) + " "
                 organizations_not_updated += 1
 
-            batch_process_manager.create_batch_process_log_entry(
-                batch_process_id=batch_process_id,
-                kind_of_process=UPDATE_TWITTER_DATA_FROM_TWITTER,
-                status=status,
-            )
-
             # Create a record denoting that we have retrieved from Twitter for this candidate
             save_results_history = remote_request_history_manager.create_remote_request_history_entry(
                 kind_of_action=RETRIEVE_UPDATE_DATA_FROM_TWITTER,
@@ -1410,6 +1501,12 @@ def retrieve_and_update_organizations_needing_twitter_update(batch_process_id=0)
             if not save_results_history['success']:
                 status += save_results_history['status']
                 success = False
+
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process_id,
+            kind_of_process=UPDATE_TWITTER_DATA_FROM_TWITTER,
+            status=status,
+        )
 
     results = {
         'success':                  success,
@@ -1419,6 +1516,98 @@ def retrieve_and_update_organizations_needing_twitter_update(batch_process_id=0)
         'organizations_not_updated': organizations_not_updated,
     }
 
+    return results
+
+
+def retrieve_and_update_representatives_needing_twitter_update(
+        batch_process_id=0,
+        state_code='',
+        limit=0):
+    representative_we_vote_id_list_to_exclude = []
+    status = ""
+    success = True
+
+    try:
+        # Exclude representatives we have requested updates from in the last 90 days
+        remote_request_query = RemoteRequestHistory.objects.all()
+        three_months_of_seconds = 60 * 60 * 24 * 90  # 60 seconds, 60 minutes, 24 hours, 90 days
+        three_months_ago = now() - timedelta(seconds=three_months_of_seconds)
+        remote_request_query = remote_request_query.filter(datetime_of_action__gt=three_months_ago)
+        remote_request_query = remote_request_query.filter(kind_of_action__iexact=RETRIEVE_UPDATE_DATA_FROM_TWITTER)
+        remote_request_query = remote_request_query.exclude(
+            Q(representative_we_vote_id__isnull=True) | Q(representative_we_vote_id=""))
+        remote_request_query = \
+            remote_request_query.values_list('representative_we_vote_id', flat=True).distinct()
+        representative_we_vote_id_list_to_exclude = list(remote_request_query)
+    except Exception as e:
+        status += "PROBLEM_RETRIEVING_REMOTE_REQUEST_HISTORY_RETRIEVE_UPDATE_DATA_FROM_TWITTER: " + str(e) + " "
+        success = False
+
+    representatives_to_update = 0
+    representatives_updated = 0
+
+    try:
+        queryset = Representative.objects.all()  # Cannot be readonly
+        queryset = queryset.exclude(we_vote_id__in=representative_we_vote_id_list_to_exclude)
+        queryset = queryset.exclude(
+            Q(representative_twitter_handle__isnull=True) | Q(representative_twitter_handle=""))
+        queryset = queryset.exclude(twitter_handle_updates_failing=True)
+        if positive_value_exists(state_code):
+            queryset = queryset.filter(state_code__iexact=state_code)
+        representatives_to_update = queryset.count()
+    except Exception as e:
+        status += "REPRESENTATIVE_RETRIEVE_FAILED: " + str(e) + " "
+        success = False
+
+    if positive_value_exists(success):
+        # Limit so we don't overwhelm Twitter's rate limiting
+        # https://developer.twitter.com/en/docs/basics/rate-limits
+        # GET users/search is limited to 900 per 15 minutes
+        # Since we run one batch per minute, that means that 900 / 15 = 60
+        # We have other processes which might reach out to Twitter, so we limit the number of
+        # representatives we analyze to 20 per minute
+        if positive_value_exists(limit):
+            number_of_representatives_limit = limit
+        else:
+            number_of_representatives_limit = 20
+        representative_list = queryset[:number_of_representatives_limit]
+
+        representatives_updated = 0
+        status += "UPDATE_FROM_TWITTER_LOOP_TOTAL: " + str(representatives_to_update) + " "
+
+        batch_process_manager = BatchProcessManager()
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process_id,
+            kind_of_process=UPDATE_TWITTER_DATA_FROM_TWITTER,
+            status=status,
+        )
+        remote_request_history_manager = RemoteRequestHistoryManager()
+        for representative in representative_list:
+            results = refresh_twitter_representative_details(representative)
+            status += results['status']
+            if results['success']:
+                representatives_updated += 1
+
+            # Create a record denoting that we have retrieved from Twitter for this representative
+            save_results_history = remote_request_history_manager.create_remote_request_history_entry(
+                kind_of_action=RETRIEVE_UPDATE_DATA_FROM_TWITTER,
+                representative_we_vote_id=representative.we_vote_id)
+            if not save_results_history['success']:
+                status += save_results_history['status']
+                success = False
+
+        batch_process_manager.create_batch_process_log_entry(
+            batch_process_id=batch_process_id,
+            kind_of_process=UPDATE_TWITTER_DATA_FROM_TWITTER,
+            status=status,
+        )
+
+    results = {
+        'success':                      success,
+        'status':                       status,
+        'representatives_to_update':    representatives_to_update,
+        'representatives_updated':      representatives_updated,
+    }
     return results
 
 
