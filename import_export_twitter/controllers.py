@@ -379,6 +379,42 @@ def fetch_number_of_organizations_needing_twitter_update():
     return organization_count
 
 
+def fetch_number_of_representatives_needing_twitter_update(state_code=''):
+    representative_we_vote_id_list_to_exclude = []
+    status = ""
+
+    try:
+        # Exclude representatives we have requested updates from in the last 90 days
+        remote_request_query = RemoteRequestHistory.objects.using('readonly').all()
+        three_months_of_seconds = 60 * 60 * 24 * 90  # 60 seconds, 60 minutes, 24 hours, 90 days
+        three_months_ago = now() - timedelta(seconds=three_months_of_seconds)
+        remote_request_query = remote_request_query.filter(datetime_of_action__gt=three_months_ago)
+        remote_request_query = remote_request_query.filter(kind_of_action__iexact=RETRIEVE_UPDATE_DATA_FROM_TWITTER)
+        remote_request_query = remote_request_query.exclude(
+            Q(representative_we_vote_id__isnull=True) | Q(representative_we_vote_id=""))
+        remote_request_query = \
+            remote_request_query.values_list('representative_we_vote_id', flat=True).distinct()
+        representative_we_vote_id_list_to_exclude = list(remote_request_query)
+    except Exception as e:
+        status += "PROBLEM_RETRIEVING_REMOTE_REQUEST_HISTORY_RETRIEVE_UPDATE_DATA_FROM_TWITTER: " + str(e) + " "
+
+    representatives_to_update = 0
+
+    try:
+        queryset = Representative.objects.using('readonly').all()
+        queryset = queryset.exclude(we_vote_id__in=representative_we_vote_id_list_to_exclude)
+        queryset = queryset.exclude(
+            Q(representative_twitter_handle__isnull=True) | Q(representative_twitter_handle=""))
+        queryset = queryset.exclude(twitter_handle_updates_failing=True)
+        if positive_value_exists(state_code):
+            queryset = queryset.filter(state_code__iexact=state_code)
+        representatives_to_update = queryset.count()
+    except Exception as e:
+        status += "REPRESENTATIVE_RETRIEVE_FAILED: " + str(e) + " "
+
+    return representatives_to_update
+
+
 def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):  # twitterIdentityRetrieve
     status = ""
     success = True
