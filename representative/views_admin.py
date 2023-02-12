@@ -1181,6 +1181,12 @@ def representative_politician_match_this_year_view(request):
         return HttpResponseRedirect(reverse('representative:representative_list', args=()))
 
     queryset = Representative.objects.all()
+    queryset = queryset.exclude(
+        Q(politician_we_vote_id__isnull=True) |
+        Q(politician_we_vote_id="")
+    )
+    if positive_value_exists(state_code):
+        queryset = queryset.filter(state_code__iexact=state_code)
     year_field_name = 'year_in_office_' + str(show_this_year)
     queryset = queryset.filter(**{year_field_name: True})
     representative_list = list(queryset)
