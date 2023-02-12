@@ -120,8 +120,14 @@ def find_and_merge_duplicate_politicians_view(request):
     politician_manager = PoliticianManager()
 
     queryset = PoliticiansArePossibleDuplicates.objects.using('readonly').all()
-    queryset = queryset.values_list('politician1_we_vote_id', flat=True).distinct()
-    exclude_politician_we_vote_id_list = list(queryset)
+    if positive_value_exists(state_code):
+        queryset = queryset.filter(state_code__iexact=state_code)
+    queryset_politician1 = queryset.values_list('politician1_we_vote_id', flat=True).distinct()
+    exclude_politician1_we_vote_id_list = list(queryset_politician1)
+    queryset_politician2 = queryset.values_list('politician2_we_vote_id', flat=True).distinct()
+    exclude_politician2_we_vote_id_list = list(queryset_politician2)
+    exclude_politician_we_vote_id_list = \
+        list(set(exclude_politician1_we_vote_id_list + exclude_politician2_we_vote_id_list))
 
     politician_query = Politician.objects.using('readonly').all()
     politician_query = politician_query.exclude(we_vote_id__in=exclude_politician_we_vote_id_list)
@@ -148,6 +154,8 @@ def find_and_merge_duplicate_politicians_view(request):
 
     # Loop through all the politicians in this election
     for we_vote_politician in politician_list:
+        if we_vote_politician.we_vote_id in exclude_politician_we_vote_id_list:
+            continue
         ignore_politician_id_list = []
         # Add current politician entry to the ignore list
         ignore_politician_id_list.append(we_vote_politician.we_vote_id)
@@ -172,6 +180,8 @@ def find_and_merge_duplicate_politicians_view(request):
 
             if merge_results['politicians_merged']:
                 politician = merge_results['politician']
+                if politician.we_vote_id not in exclude_politician_we_vote_id_list:
+                    exclude_politician_we_vote_id_list.append(politician.we_vote_id)
                 messages.add_message(request, messages.INFO, "Politician {politician_name} automatically merged."
                                                              "".format(politician_name=politician.politician_name))
                 # No need to start over
@@ -197,6 +207,8 @@ def find_and_merge_duplicate_politicians_view(request):
                     politician2_we_vote_id=politician_option2_for_template.we_vote_id,
                     state_code=state_code,
                 )
+                if politician_option2_for_template.we_vote_id not in exclude_politician_we_vote_id_list:
+                    exclude_politician_we_vote_id_list.append(politician_option2_for_template.we_vote_id)
         else:
             # No matches found
             PoliticiansArePossibleDuplicates.objects.create(
@@ -807,6 +819,26 @@ def politician_new_view(request):
 
 
 @login_required
+def politician_delete_all_duplicates_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    state_code = request.GET.get('state_code', '')
+    if positive_value_exists(state_code):
+        queryset = PoliticiansArePossibleDuplicates.objects.filter(
+            state_code__iexact=state_code,
+        )
+        queryset.delete()
+        messages.add_message(request, messages.INFO, 'Duplicate politician data deleted.')
+    else:
+        messages.add_message(request, messages.INFO, 'Duplicate politician data NOT deleted. State code missing.')
+    return HttpResponseRedirect(reverse('politician:duplicates_list', args=()) +
+                                "?state_code=" + str(state_code))
+
+
+@login_required
 def politician_duplicates_list_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'partner_organization', 'political_data_viewer', 'verified_volunteer'}
@@ -834,10 +866,9 @@ def politician_duplicates_list_view(request):
         queryset = queryset.exclude(
             Q(politician2_we_vote_id__isnull=True) | Q(politician2_we_vote_id=''))
         if not positive_value_exists(show_all):
-            duplicates_list = list(queryset[:25])
-        else:
-            # We still want to limit to 200
             duplicates_list = list(queryset[:200])
+        else:
+            duplicates_list = list(queryset[:1000])
     except ObjectDoesNotExist:
         # This is fine
         pass
