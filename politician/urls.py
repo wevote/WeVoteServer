@@ -14,6 +14,7 @@ urlpatterns = [
             views_admin.find_and_merge_duplicate_politicians_view, name='find_and_merge_duplicate_politicians'),
     re_path(r'^edit_process/$', views_admin.politician_edit_process_view, name='politician_edit_process'),
     re_path(r'^delete/', views_admin.politician_delete_process_view, name='politician_delete_process'),
+    re_path(r'^delete_all_duplicates/$', views_admin.politician_delete_all_duplicates_view, name='delete_all_duplicates'),
     re_path(r'^import/$',
             views_admin.politicians_import_from_master_server_view, name='politicians_import_from_master_server'),
     re_path(r'^merge/$', views_admin.politician_merge_process_view, name='politician_merge_process'),

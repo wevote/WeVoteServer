@@ -9,16 +9,18 @@
 
 <h1>Duplicate Politicians</h1>
 
-{#    <ul>#}
-{#        <li><a href="{% url 'politician:politician_new' %}?state_code={{ state_code }}">Add New Politician</a></li>#}
-{#        <li><a href="{% url 'politician:find_and_merge_duplicate_politicians' %}?state_code={{ state_code }}"#}
-{#                        target="_blank" >#}
-{#            Find and Merge Duplicate Politicians <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>#}
-{#        <li><a href="{% url 'politician:update_politicians_from_candidates' %}?state_code={{ state_code }}"#}
-{#                        target="_blank" >#}
-{#            Update Politicians from Candidates <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>#}
-{#        <li><a href="{% url 'candidate:repair_imported_names' %}?is_candidate=false" >Repair Politician Names</a></li>#}
-{#    </ul>#}
+    <ul>
+        <li>
+            <a href="{% url 'politician:find_and_merge_duplicate_politicians' %}?state_code={{ state_code }}">
+            Find and merge duplicate politicians</a> (about 1 minute)
+        </li>
+    {% if state_code %}
+        <li>
+            <a href="{% url 'politician:delete_all_duplicates' %}?state_code={{ state_code }}">
+            Delete all duplicate politician data for this state</a>
+        </li>
+    {% endif %}
+    </ul>
 
 <br /><br />
 
