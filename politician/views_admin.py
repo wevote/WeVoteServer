@@ -156,8 +156,9 @@ def find_and_merge_duplicate_politicians_view(request):
     for we_vote_politician in politician_list:
         if we_vote_politician.we_vote_id in exclude_politician_we_vote_id_list:
             continue
-        ignore_politician_id_list = []
-        # Add current politician entry to the ignore list
+        # Start ignore list with all the politicians already reviewed
+        ignore_politician_id_list = exclude_politician_we_vote_id_list
+        # Add current politician entry to ignore list
         ignore_politician_id_list.append(we_vote_politician.we_vote_id)
         # Now check to for other politicians we have labeled as "not a duplicate"
         not_a_duplicate_list = politician_manager.fetch_politicians_are_not_duplicates_list_we_vote_ids(
@@ -182,26 +183,25 @@ def find_and_merge_duplicate_politicians_view(request):
                 politician = merge_results['politician']
                 if politician.we_vote_id not in exclude_politician_we_vote_id_list:
                     exclude_politician_we_vote_id_list.append(politician.we_vote_id)
-                messages.add_message(request, messages.INFO, "Politician {politician_name} automatically merged."
-                                                             "".format(politician_name=politician.politician_name))
-                # No need to start over
-                # return HttpResponseRedirect(reverse('politician:find_and_merge_duplicate_politicians', args=()) +
-                #                             "?state_code=" + str(state_code))
+                if we_vote_politician.we_vote_id not in exclude_politician_we_vote_id_list:
+                    exclude_politician_we_vote_id_list.append(we_vote_politician.we_vote_id)
+                PoliticiansArePossibleDuplicates.objects.create(
+                    politician1_we_vote_id=politician.we_vote_id,
+                    politician2_we_vote_id=None,
+                    state_code=state_code,
+                )
                 PoliticiansArePossibleDuplicates.objects.create(
                     politician1_we_vote_id=we_vote_politician.we_vote_id,
                     politician2_we_vote_id=None,
                     state_code=state_code,
                 )
+                messages.add_message(request, messages.INFO, "Politician {politician_name} automatically merged."
+                                                             "".format(politician_name=politician.politician_name))
+                # No need to start over
+                # return HttpResponseRedirect(reverse('politician:find_and_merge_duplicate_politicians', args=()) +
+                #                             "?state_code=" + str(state_code))
             else:
-                # OLD: This view function takes us to displaying a template
-                # remove_duplicate_process = True  # Try to find another politician to merge after finishing
-                # return render_politician_merge_form(
-                #     request,
-                #     politician_option1_for_template,
-                #     politician_option2_for_template,
-                #     results['politician_merge_conflict_values'],
-                #     remove_duplicate_process)
-                # NEW: Add an entry showing that this is a possible match
+                # Add an entry showing that this is a possible match
                 PoliticiansArePossibleDuplicates.objects.create(
                     politician1_we_vote_id=we_vote_politician.we_vote_id,
                     politician2_we_vote_id=politician_option2_for_template.we_vote_id,
@@ -216,11 +216,6 @@ def find_and_merge_duplicate_politicians_view(request):
                 politician2_we_vote_id=None,
                 state_code=state_code,
             )
-
-    message = "Possible duplicate politicians found. State: {state_code}" \
-              "".format(state_code=state_code)
-
-    messages.add_message(request, messages.INFO, message)
 
     return HttpResponseRedirect(reverse('politician:duplicates_list', args=()) +
                                 "?state_code={state_code}"
@@ -853,11 +848,12 @@ def politician_duplicates_list_view(request):
     show_related_candidates = positive_value_exists(request.GET.get('show_related_candidates', False))
     show_politicians_with_email = request.GET.get('show_politicians_with_email', False)
 
+    duplicates_list = []
+    duplicates_list_count = 0
+    possible_duplicates_count = 0
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
 
-    duplicates_list = []
-    duplicates_list_count = 0
     try:
         queryset = PoliticiansArePossibleDuplicates.objects.using('readonly').all()
         if positive_value_exists(state_code):
@@ -865,6 +861,7 @@ def politician_duplicates_list_view(request):
         duplicates_list_count = queryset.count()
         queryset = queryset.exclude(
             Q(politician2_we_vote_id__isnull=True) | Q(politician2_we_vote_id=''))
+        possible_duplicates_count = queryset.count()
         if not positive_value_exists(show_all):
             duplicates_list = list(queryset[:200])
         else:
@@ -902,8 +899,13 @@ def politician_duplicates_list_view(request):
             duplicates_list_modified.append(one_duplicate)
 
     messages.add_message(request, messages.INFO,
-                         "Politicians analyzed: {duplicates_list_count:,}"
-                         "".format(duplicates_list_count=duplicates_list_count))
+                         "Politicians analyzed: {duplicates_list_count:,}. "
+                         "Possible duplicate politicians found: {possible_duplicates_count}. "
+                         "State: {state_code}"
+                         "".format(
+                             duplicates_list_count=duplicates_list_count,
+                             possible_duplicates_count=possible_duplicates_count,
+                             state_code=state_code))
 
     template_values = {
         'messages_on_stage':            messages_on_stage,
