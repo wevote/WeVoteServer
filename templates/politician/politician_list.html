@@ -13,7 +13,11 @@
         <li><a href="{% url 'politician:politician_new' %}?state_code={{ state_code }}">Add New Politician</a></li>
         <li><a href="{% url 'politician:find_and_merge_duplicate_politicians' %}?state_code={{ state_code }}"
                         target="_blank" >
-            Find and Merge Duplicate Politicians <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
+            Find and Merge Duplicate Politicians <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)&nbsp;&nbsp;
+            <a href="{% url 'politician:duplicates_list' %}?state_code={{ state_code }}"
+                        target="_blank" >
+            Possible Duplicates <span class="glyphicon glyphicon-new-window"></span></a>
+        </li>
         <li><a href="{% url 'politician:update_politicians_from_candidates' %}?state_code={{ state_code }}"
                         target="_blank" >
             Update Politicians from Candidates <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>

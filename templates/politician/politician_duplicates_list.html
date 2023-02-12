@@ -1,0 +1,193 @@
+{# templates/politician/politician_duplicates_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Duplicate Politicians{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+{% load humanize %}
+
+<h1>Duplicate Politicians</h1>
+
+{#    <ul>#}
+{#        <li><a href="{% url 'politician:politician_new' %}?state_code={{ state_code }}">Add New Politician</a></li>#}
+{#        <li><a href="{% url 'politician:find_and_merge_duplicate_politicians' %}?state_code={{ state_code }}"#}
+{#                        target="_blank" >#}
+{#            Find and Merge Duplicate Politicians <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>#}
+{#        <li><a href="{% url 'politician:update_politicians_from_candidates' %}?state_code={{ state_code }}"#}
+{#                        target="_blank" >#}
+{#            Update Politicians from Candidates <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>#}
+{#        <li><a href="{% url 'candidate:repair_imported_names' %}?is_candidate=false" >Repair Politician Names</a></li>#}
+{#    </ul>#}
+
+<br /><br />
+
+<form name="state_code_form" method="get" action="{% url 'politician:duplicates_list' %}">
+    {% csrf_token %}
+
+    {% if state_list %}
+        <select id="state_code_id" name="state_code">
+            <option value="">
+                -- Filter by State Served --</option>
+        {% for key, state in state_list %}
+            <option value="{{ key }}"
+                    {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
+                {{ state }}</option>
+        {% endfor %}
+        </select>
+        {% if state_code != "" %}
+        <a href="{% url 'politician:duplicates_list' %}?politician_search={{ politician_search }}&show_all={{ show_all }}&show_politicians_with_email={{ show_politicians_with_email }}">
+            show all states</a>&nbsp;&nbsp;&nbsp;
+        {% endif %}
+    {% endif %}{# End of if state_list #}
+
+    {% if politician_search %}
+    <a href="{% url 'politician:duplicates_list' %}?state_code={{ state_code }}&show_all={{ show_all }}&show_politicians_with_email={{ show_politicians_with_email }}">
+         clear search</a>&nbsp;
+    {% endif %}
+    <input type="text" name="politician_search" id="politician_search_id" value="{{ politician_search }}" />
+    <input type="submit" value="Search for Politician" />
+</form>
+
+{% if duplicates_list %}
+    <table class="table">
+      <thead>
+        <tr>
+            <th>&nbsp;</th>
+            <th>&nbsp;</th>
+            <th>&nbsp;</th>
+            <th>Politician 1 Name</th>
+            <th>ID - We Vote ID</th>
+            <th>Twitter Handle</th>
+            <th>&nbsp;</th>
+            <th>Politician 2 Name</th>
+            <th>ID - We Vote ID</th>
+            <th>Twitter Handle</th>
+        </tr>
+      </thead>
+    {% for possible_duplicate in duplicates_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                <a href="{% url 'politician:compare_two_politicians_for_merge' %}?politician1_we_vote_id={{ possible_duplicate.politician1_we_vote_id }}&politician2_we_vote_id={{ possible_duplicate.politician2_we_vote_id }}&state_code={{ state_code }}" target="_blank" class="u-no-break">compare for merge</a>
+                <br />
+                <br />
+                <a href="{% url 'politician:not_duplicates' %}?politician1_we_vote_id={{ possible_duplicate.politician1_we_vote_id }}&politician2_we_vote_id={{ possible_duplicate.politician2_we_vote_id }}&state_code={{ state_code }}" class="u-no-break">not duplicates</a>
+            </td>
+        {% if possible_duplicate.politician1 %}
+            <td style="border-left: 1px solid #cdd0d4;">
+                {% if possible_duplicate.politician1.we_vote_hosted_profile_image_url_tiny %}
+                <a href="{% url 'politician:politician_edit' possible_duplicate.politician1.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">
+                    <img src='{{ possible_duplicate.politician1.we_vote_hosted_profile_image_url_tiny }}' height="48px" />
+                </a>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{% url 'politician:politician_edit' possible_duplicate.politician1.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">{% if possible_duplicate.politician1.politician_name %}{{ possible_duplicate.politician1.politician_name }}{% endif %} <span class="glyphicon glyphicon-new-window"></span></a>
+            </td>
+            <td>
+                {{ possible_duplicate.politician1.id }} - {{ possible_duplicate.politician1.we_vote_id }}
+                {% if possible_duplicate.politician1.linked_representative_we_vote_id_list %}
+                    <br />
+                    {% for representative_we_vote_id in possible_duplicate.politician1.linked_representative_we_vote_id_list %}
+                        <span style="color: #999">{{ representative_we_vote_id }}&nbsp;</span>
+                    {% endfor %}
+                {% endif %}
+                {% if possible_duplicate.politician1.vote_usa_politician_id %}
+                    <br />{{ possible_duplicate.politician1.vote_usa_politician_id|default_if_none:"" }}
+                {% endif %}
+                {% if possible_duplicate.politician1.vote_smart_id %}
+                    <br />VS: {{ possible_duplicate.politician1.vote_smart_id|default_if_none:"" }}
+                {% endif %}
+            </td>
+            <td>
+                {% if possible_duplicate.politician1.politician_twitter_handle %}<a href="https://twitter.com/{{ possible_duplicate.politician1.politician_twitter_handle }}"
+                    target="_blank">{{ possible_duplicate.politician1.politician_twitter_handle }} <span class="glyphicon glyphicon-new-window"></span></a><br />
+                ({{ possible_duplicate.politician1.twitter_followers_count|intcomma }} followers){% endif %}
+                {% if possible_duplicate.politician1.politician_twitter_handle2 %}<br /><a href="https://twitter.com/{{ possible_duplicate.politician1.politician_twitter_handle2 }}"
+                    target="_blank">{{ possible_duplicate.politician1.politician_twitter_handle2 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                {% if possible_duplicate.politician1.politician_twitter_handle3 %}<br /><a href="https://twitter.com/{{ possible_duplicate.politician1.politician_twitter_handle3 }}"
+                    target="_blank">{{ possible_duplicate.politician1.politician_twitter_handle3 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                {% if possible_duplicate.politician1.politician_twitter_handle4 %}<br /><a href="https://twitter.com/{{ possible_duplicate.politician1.politician_twitter_handle4 }}"
+                    target="_blank">{{ possible_duplicate.politician1.politician_twitter_handle4 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                {% if possible_duplicate.politician1.politician_twitter_handle5 %}<br /><a href="https://twitter.com/{{ possible_duplicate.politician1.politician_twitter_handle5 }}"
+                    target="_blank">{{ possible_duplicate.politician1.politician_twitter_handle5 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+            </td>
+        {% endif %}
+        {% if possible_duplicate.politician2 %}
+            <td style="border-left: 1px solid #cdd0d4;">
+                {% if possible_duplicate.politician2.we_vote_hosted_profile_image_url_tiny %}
+                <a href="{% url 'politician:politician_edit' possible_duplicate.politician2.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">
+                    <img src='{{ possible_duplicate.politician2.we_vote_hosted_profile_image_url_tiny }}' height="48px" />
+                </a>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{% url 'politician:politician_edit' possible_duplicate.politician2.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">{{ possible_duplicate.politician2.politician_name }} <span class="glyphicon glyphicon-new-window"></span></a>
+            </td>
+            <td>
+                {{ possible_duplicate.politician2.id }} - {{ possible_duplicate.politician2.we_vote_id }}
+                {% if possible_duplicate.politician2.linked_representative_we_vote_id_list %}
+                    <br />
+                    {% for representative_we_vote_id in possible_duplicate.politician2.linked_representative_we_vote_id_list %}
+                        <span style="color: #999">{{ representative_we_vote_id }}&nbsp;</span>
+                    {% endfor %}
+                {% endif %}
+                {% if possible_duplicate.politician2.vote_usa_politician_id %}
+                    <br />{{ possible_duplicate.politician2.vote_usa_politician_id|default_if_none:"" }}
+                {% endif %}
+                {% if possible_duplicate.politician2.vote_smart_id %}
+                    <br />VS: {{ possible_duplicate.politician2.vote_smart_id|default_if_none:"" }}
+                {% endif %}
+            </td>
+            <td>
+                {% if possible_duplicate.politician2.politician_twitter_handle %}<a href="https://twitter.com/{{ possible_duplicate.politician2.politician_twitter_handle }}"
+                    target="_blank">{{ possible_duplicate.politician2.politician_twitter_handle }} <span class="glyphicon glyphicon-new-window"></span></a><br />
+                ({{ possible_duplicate.politician2.twitter_followers_count|intcomma }} followers){% endif %}
+                {% if possible_duplicate.politician2.politician_twitter_handle2 %}<br /><a href="https://twitter.com/{{ possible_duplicate.politician2.politician_twitter_handle2 }}"
+                    target="_blank">{{ possible_duplicate.politician2.politician_twitter_handle2 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                {% if possible_duplicate.politician2.politician_twitter_handle3 %}<br /><a href="https://twitter.com/{{ possible_duplicate.politician2.politician_twitter_handle3 }}"
+                    target="_blank">{{ possible_duplicate.politician2.politician_twitter_handle3 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                {% if possible_duplicate.politician2.politician_twitter_handle4 %}<br /><a href="https://twitter.com/{{ possible_duplicate.politician2.politician_twitter_handle4 }}"
+                    target="_blank">{{ possible_duplicate.politician2.politician_twitter_handle4 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+                {% if possible_duplicate.politician2.politician_twitter_handle5 %}<br /><a href="https://twitter.com/{{ possible_duplicate.politician2.politician_twitter_handle5 }}"
+                    target="_blank">{{ possible_duplicate.politician2.politician_twitter_handle5 }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>{% endif %}
+            </td>
+        {% endif %}
+        </tr>
+    {% endfor %}
+    </table>
+
+    <p></p>
+{% else %}
+    <p>(no duplicates found)</p>
+{% endif %}
+
+    <script>
+        $(function() {
+            $('#show_all_id').change(function() {
+                this.form.submit();
+            });
+        });
+        $(function() {
+            $('#show_politicians_with_email_id').change(function() {
+                this.form.submit();
+            });
+        });
+        $(function() {
+            $('#show_related_candidates_id').change(function() {
+                this.form.submit();
+            });
+        });
+        $(function() {
+            $('#state_code_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+
+{% endblock %}

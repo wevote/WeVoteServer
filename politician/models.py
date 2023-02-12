@@ -326,6 +326,24 @@ class PoliticiansAreNotDuplicates(models.Model):
             return ""
 
 
+class PoliticiansArePossibleDuplicates(models.Model):
+    """
+    When checking for duplicates, there are times when we want to explicitly mark two politicians as possible duplicates
+    """
+    politician1_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
+    politician2_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
+    state_code = models.CharField(max_length=2, null=True)
+
+    def fetch_other_politician_we_vote_id(self, one_we_vote_id):
+        if one_we_vote_id == self.politician1_we_vote_id:
+            return self.politician2_we_vote_id
+        elif one_we_vote_id == self.politician2_we_vote_id:
+            return self.politician1_we_vote_id
+        else:
+            # If the we_vote_id passed in wasn't found, don't return another we_vote_id
+            return ""
+
+
 class PoliticianManager(models.Manager):
 
     def __init__(self):
