@@ -41,7 +41,7 @@ from .controllers import add_twitter_handle_to_next_politician_spot, fetch_dupli
     figure_out_politician_conflict_values, find_duplicate_politician, \
     merge_if_duplicate_politicians, merge_these_two_politicians, politicians_import_from_master_server
 from .models import Politician, PoliticianManager, POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, \
-    POLITICIAN_UNIQUE_IDENTIFIERS
+    POLITICIAN_UNIQUE_IDENTIFIERS, PoliticiansArePossibleDuplicates
 
 POLITICIANS_SYNC_URL = get_environment_variable("POLITICIANS_SYNC_URL")  # politiciansSyncOut
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
@@ -119,10 +119,15 @@ def find_and_merge_duplicate_politicians_view(request):
     state_code = request.GET.get('state_code', "")
     politician_manager = PoliticianManager()
 
-    results = politician_manager.retrieve_politicians(
-        limit_to_this_state_code=state_code,
-        read_only=False)
-    politician_list = results['politician_list']
+    queryset = PoliticiansArePossibleDuplicates.objects.using('readonly').all()
+    queryset = queryset.values_list('politician1_we_vote_id', flat=True).distinct()
+    exclude_politician_we_vote_id_list = list(queryset)
+
+    politician_query = Politician.objects.using('readonly').all()
+    politician_query = politician_query.exclude(we_vote_id__in=exclude_politician_we_vote_id_list)
+    if positive_value_exists(state_code):
+        politician_query = politician_query.filter(state_code__iexact=state_code)
+    politician_list = list(politician_query)
 
     # Loop through all the politicians to see how many have possible duplicates
     if positive_value_exists(find_number_of_duplicates):
@@ -169,27 +174,45 @@ def find_and_merge_duplicate_politicians_view(request):
                 politician = merge_results['politician']
                 messages.add_message(request, messages.INFO, "Politician {politician_name} automatically merged."
                                                              "".format(politician_name=politician.politician_name))
-                return HttpResponseRedirect(reverse('politician:find_and_merge_duplicate_politicians', args=()) +
-                                            "?state_code=" + str(state_code))
+                # No need to start over
+                # return HttpResponseRedirect(reverse('politician:find_and_merge_duplicate_politicians', args=()) +
+                #                             "?state_code=" + str(state_code))
+                PoliticiansArePossibleDuplicates.objects.create(
+                    politician1_we_vote_id=we_vote_politician.we_vote_id,
+                    politician2_we_vote_id=None,
+                    state_code=state_code,
+                )
             else:
-                # This view function takes us to displaying a template
-                remove_duplicate_process = True  # Try to find another politician to merge after finishing
-                return render_politician_merge_form(
-                    request,
-                    politician_option1_for_template,
-                    politician_option2_for_template,
-                    results['politician_merge_conflict_values'],
-                    remove_duplicate_process)
+                # OLD: This view function takes us to displaying a template
+                # remove_duplicate_process = True  # Try to find another politician to merge after finishing
+                # return render_politician_merge_form(
+                #     request,
+                #     politician_option1_for_template,
+                #     politician_option2_for_template,
+                #     results['politician_merge_conflict_values'],
+                #     remove_duplicate_process)
+                # NEW: Add an entry showing that this is a possible match
+                PoliticiansArePossibleDuplicates.objects.create(
+                    politician1_we_vote_id=we_vote_politician.we_vote_id,
+                    politician2_we_vote_id=politician_option2_for_template.we_vote_id,
+                    state_code=state_code,
+                )
+        else:
+            # No matches found
+            PoliticiansArePossibleDuplicates.objects.create(
+                politician1_we_vote_id=we_vote_politician.we_vote_id,
+                politician2_we_vote_id=None,
+                state_code=state_code,
+            )
 
-    message = "No duplicate politicians found. State: {state_code}" \
+    message = "Possible duplicate politicians found. State: {state_code}" \
               "".format(state_code=state_code)
 
     messages.add_message(request, messages.INFO, message)
 
-    return HttpResponseRedirect(reverse('politician:politician_list', args=()) +
+    return HttpResponseRedirect(reverse('politician:duplicates_list', args=()) +
                                 "?state_code={state_code}"
-                                "".format(
-                                    state_code=state_code))
+                                "".format(state_code=state_code))
 
 
 def render_politician_merge_form(
@@ -784,6 +807,88 @@ def politician_new_view(request):
 
 
 @login_required
+def politician_duplicates_list_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'partner_organization', 'political_data_viewer', 'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    messages_on_stage = get_messages(request)
+    state_code = request.GET.get('state_code', '')
+    politician_search = request.GET.get('politician_search', '')
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    show_all = positive_value_exists(request.GET.get('show_all', False))
+    show_related_candidates = positive_value_exists(request.GET.get('show_related_candidates', False))
+    show_politicians_with_email = request.GET.get('show_politicians_with_email', False)
+
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
+
+    duplicates_list = []
+    duplicates_list_count = 0
+    try:
+        queryset = PoliticiansArePossibleDuplicates.objects.using('readonly').all()
+        if positive_value_exists(state_code):
+            queryset = queryset.filter(state_code__iexact=state_code)
+        duplicates_list_count = queryset.count()
+        queryset = queryset.exclude(
+            Q(politician2_we_vote_id__isnull=True) | Q(politician2_we_vote_id=''))
+        if not positive_value_exists(show_all):
+            duplicates_list = list(queryset[:25])
+        else:
+            # We still want to limit to 200
+            duplicates_list = list(queryset[:200])
+    except ObjectDoesNotExist:
+        # This is fine
+        pass
+
+    # Attach candidates linked to these politicians
+    politicians_to_display_we_vote_id_list = []
+    for one_duplicate in duplicates_list:
+        if positive_value_exists(one_duplicate.politician1_we_vote_id):
+            politicians_to_display_we_vote_id_list.append(one_duplicate.politician1_we_vote_id)
+        if positive_value_exists(one_duplicate.politician2_we_vote_id):
+            politicians_to_display_we_vote_id_list.append(one_duplicate.politician2_we_vote_id)
+
+    politicians_dict = {}
+    try:
+        queryset = Politician.objects.using('readonly').all()
+        queryset = queryset.filter(we_vote_id__in=politicians_to_display_we_vote_id_list)
+        politician_data_list = list(queryset)
+        for one_politician in politician_data_list:
+            politicians_dict[one_politician.we_vote_id] = one_politician
+    except Exception as e:
+        pass
+
+    duplicates_list_modified = []
+    for one_duplicate in duplicates_list:
+        if positive_value_exists(one_duplicate.politician1_we_vote_id) \
+                and one_duplicate.politician1_we_vote_id in politicians_dict \
+                and positive_value_exists(one_duplicate.politician2_we_vote_id) \
+                and one_duplicate.politician2_we_vote_id in politicians_dict:
+            one_duplicate.politician1 = politicians_dict[one_duplicate.politician1_we_vote_id]
+            one_duplicate.politician2 = politicians_dict[one_duplicate.politician2_we_vote_id]
+            duplicates_list_modified.append(one_duplicate)
+
+    messages.add_message(request, messages.INFO,
+                         "Politicians analyzed: {duplicates_list_count:,}"
+                         "".format(duplicates_list_count=duplicates_list_count))
+
+    template_values = {
+        'messages_on_stage':            messages_on_stage,
+        'google_civic_election_id':     google_civic_election_id,
+        'duplicates_list':              duplicates_list_modified,
+        'politician_search':            politician_search,
+        'show_all':                     show_all,
+        'show_politicians_with_email':  show_politicians_with_email,
+        'show_related_candidates':      show_related_candidates,
+        'state_code':                   state_code,
+        'state_list':                   sorted_state_list,
+    }
+    return render(request, 'politician/politician_duplicates_list.html', template_values)
+
+
+@login_required
 def politician_edit_by_we_vote_id_view(request, politician_we_vote_id):
     politician_manager = PoliticianManager()
     politician_id = politician_manager.fetch_politician_id_from_we_vote_id(politician_we_vote_id)
@@ -1049,6 +1154,35 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             'vote_smart_id':        vote_smart_id,
         }
     return render(request, 'politician/politician_edit.html', template_values)
+
+
+@login_required
+def politician_not_duplicates_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    politician1_we_vote_id = request.GET.get('politician1_we_vote_id', '')
+    politician2_we_vote_id = request.GET.get('politician2_we_vote_id', '')
+    state_code = request.GET.get('state_code', '')
+
+    politician_manager = PoliticianManager()
+    results = politician_manager.update_or_create_politicians_are_not_duplicates(
+        politician1_we_vote_id, politician2_we_vote_id)
+    if results['success']:
+        queryset = PoliticiansArePossibleDuplicates.objects.filter(
+            politician1_we_vote_id__iexact=politician1_we_vote_id,
+            politician2_we_vote_id__iexact=politician2_we_vote_id,
+        )
+        queryset.delete()
+
+    if not results['new_politicians_are_not_duplicates_created']:
+        messages.add_message(request, messages.ERROR, 'Could not save politicians_are_not_duplicates entry: ' +
+                             results['status'])
+    messages.add_message(request, messages.INFO, 'Two politicians marked as not duplicates.')
+    return HttpResponseRedirect(reverse('politician:duplicates_list', args=()) +
+                                "?state_code=" + str(state_code))
 
 
 def politician_change_names(changes):
