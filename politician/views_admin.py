@@ -649,6 +649,12 @@ def politician_merge_process_view(request):
     if positive_value_exists(skip):
         results = politician_manager.update_or_create_politicians_are_not_duplicates(
             politician1_we_vote_id, politician2_we_vote_id)
+        if results['success']:
+            queryset = PoliticiansArePossibleDuplicates.objects.filter(
+                politician1_we_vote_id__iexact=politician1_we_vote_id,
+                politician2_we_vote_id__iexact=politician2_we_vote_id,
+            )
+            queryset.delete()
         if not results['new_politicians_are_not_duplicates_created']:
             messages.add_message(request, messages.ERROR, 'Could not save politicians_are_not_duplicates entry: ' +
                                  results['status'])
@@ -706,6 +712,11 @@ def politician_merge_process_view(request):
         politician = merge_results['politician']
         messages.add_message(request, messages.INFO, "Politician '{politician_name}' merged."
                                                      "".format(politician_name=politician.politician_name))
+        queryset = PoliticiansArePossibleDuplicates.objects.filter(
+            politician1_we_vote_id__iexact=politician1_we_vote_id,
+            politician2_we_vote_id__iexact=politician2_we_vote_id,
+        )
+        queryset.delete()
     else:
         # NOTE: We could also redirect to a page to look specifically at these two politicians, but this should
         # also get you back to looking at the two politicians
@@ -897,10 +908,12 @@ def politician_duplicates_list_view(request):
             one_duplicate.politician1 = politicians_dict[one_duplicate.politician1_we_vote_id]
             one_duplicate.politician2 = politicians_dict[one_duplicate.politician2_we_vote_id]
             duplicates_list_modified.append(one_duplicate)
+        else:
+            possible_duplicates_count -= 1
 
     messages.add_message(request, messages.INFO,
                          "Politicians analyzed: {duplicates_list_count:,}. "
-                         "Possible duplicate politicians found: {possible_duplicates_count}. "
+                         "Possible duplicate politicians found: {possible_duplicates_count:,}. "
                          "State: {state_code}"
                          "".format(
                              duplicates_list_count=duplicates_list_count,
