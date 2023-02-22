@@ -735,7 +735,7 @@ def create_batch_row_action_measure(batch_description, batch_header_map, one_bat
     batch_row_action_created = False
     state_code = ''
     status = ''
-    success = False
+    success = True
     kind_of_action = IMPORT_TO_BE_DETERMINED
     keep_looking_for_duplicates = True
 
@@ -927,10 +927,9 @@ def create_batch_row_action_measure(batch_description, batch_header_map, one_bat
         batch_row_action_measure.status = status
         batch_row_action_measure.kind_of_action = kind_of_action
         batch_row_action_measure.save()
-        success = True
     except Exception as e:
         success = False
-        status += "BATCH_ROW_ACTION_MEASURE_UNABLE_TO_SAVE "
+        status += "BATCH_ROW_ACTION_MEASURE_UNABLE_TO_SAVE: " + str(e) + " "
 
     # If a state was figured out, then update the batch_row with the state_code so we can use that for filtering
     if positive_value_exists(state_code) and state_code.lower() != one_batch_row.state_code:
@@ -938,7 +937,8 @@ def create_batch_row_action_measure(batch_description, batch_header_map, one_bat
             one_batch_row.state_code = state_code
             one_batch_row.save()
         except Exception as e:
-            pass
+            status += "BATCH_ROW_STATE_UPDATE_FAILED: " + str(e) + " "
+            success = False
 
     try:
         batch_row_changed = False
@@ -952,7 +952,8 @@ def create_batch_row_action_measure(batch_description, batch_header_map, one_bat
         if batch_row_changed:
             one_batch_row.save()
     except Exception as e:
-        pass
+        status += "BATCH_ROW_ANALYZED_OR_STATE_UPDATE_FAILED: " + str(e) + " "
+        success = False
 
     results = {
         'success':                      success,
@@ -1171,7 +1172,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
     state_code = ''
     contest_office_name_mapped = False
     status = ''
-    success = False
+    success = True
     kind_of_action = IMPORT_TO_BE_DETERMINED
     # Does a BatchRowActionContestOffice entry already exist?
     # We want to start with the BatchRowAction... entry first so we can record our findings line by line while
@@ -1196,7 +1197,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
             batch_row_action_created = False
             batch_row_action_contest_office = BatchRowActionContestOffice()
             success = False
-            status += "BATCH_ROW_ACTION_CONTEST_OFFICE_NOT_CREATED " + str(e) + " "
+            status += "BATCH_ROW_ACTION_CONTEST_OFFICE_NOT_CREATED: " + str(e) + " "
 
             results = {
                 'success': success,
@@ -1554,7 +1555,6 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
         if positive_value_exists(vote_usa_office_id):
             batch_row_action_contest_office.vote_usa_office_id = vote_usa_office_id
         batch_row_action_contest_office.save()
-        success = True
     except Exception as e:
         success = False
         status += "BATCH_ROW_ACTION_CONTEST_OFFICE_UNABLE_TO_SAVE: " + str(e) + " "
@@ -1569,6 +1569,7 @@ def create_batch_row_action_contest_office(batch_description, batch_header_map, 
             one_batch_row.save()
         except Exception as e:
             status += "COULD_NOT_SAVE_ONE_BATCH_ROW: " + str(e) + ' '
+            success = False
 
     results = {
         'success':                          success,
@@ -2107,7 +2108,7 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
     batch_row_action_created = True
     batch_row_action_updated = False
     status = ''
-    success = False
+    success = True
     contest_office_found = False
     contest_office_we_vote_id = ""
     office_ctcl_uuid = None
@@ -2547,8 +2548,8 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
         batch_row_action_candidate.vote_usa_profile_image_url_https = vote_usa_profile_image_url_https
         batch_row_action_candidate.save()
     except Exception as e:
-        success = False
         status += "BATCH_ROW_ACTION_CANDIDATE_UNABLE_TO_SAVE: " + str(e) + " "
+        success = False
 
     # If a state was figured out, then update the batch_row with the state_code so we can use that for filtering
     if positive_value_exists(state_code):
@@ -2559,7 +2560,8 @@ def create_batch_row_action_candidate(batch_description, batch_header_map, one_b
             one_batch_row.state_code = state_code
             one_batch_row.save()
         except Exception as e:
-            pass
+            status += "BATCH_ROW_ACTION_STATE_UNABLE_TO_SAVE: " + str(e) + " "
+            success = False
 
     results = {
         'success':                      success,

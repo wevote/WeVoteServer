@@ -862,7 +862,8 @@ def move_donation_info_to_another_organization(from_organization_we_vote_id, to_
 def move_donation_info_to_another_voter(from_voter, to_voter):
     """
     Within a session, if the voter donates before logging in, the donations will be created under a new unique
-    voter_we_vote_id.  Subsequently when they login, their proper voter_we_vote_id will come into effect.  If we did not
+    voter_we_vote_id.  Subsequently, when they login, their proper voter_we_vote_id will come into effect.
+    If we did not
     call this method before the end of the session, those "un-logged-in" donations would not be associated with the
     voter.
     Unfortunately at this time "un-logged-in" donations created in a session that was ended before logging in will not
@@ -878,7 +879,7 @@ def move_donation_info_to_another_voter(from_voter, to_voter):
             or not hasattr(to_voter, "we_vote_id") or not positive_value_exists(to_voter.we_vote_id):
         status += textwrap.shorten("MOVE_DONATION_INFO_MISSING_FROM_OR_TO_VOTER_ID " + status, width=255,
                                    placeholder="...")
-
+        success = False
         results = {
             'status': status,
             'success': success,
@@ -889,24 +890,38 @@ def move_donation_info_to_another_voter(from_voter, to_voter):
 
     if from_voter.we_vote_id == to_voter.we_vote_id:
         status += "MOVE_DONATION_INFO-FROM_AND_TO_VOTER_WE_VOTE_IDS_IDENTICAL "
+        success = False
+        results = {
+            'status': status,
+            'success': success,
+            'from_voter': from_voter,
+            'to_voter': to_voter,
+        }
+        return results
 
     # All we really need to do is find the donations that are associated with the "from" voter, and change their
     # voter_we_vote_id to the "to" voter.
     results = StripeManager.move_donation_payment_entries_from_voter_to_voter(from_voter, to_voter)
     status += results['status']
+    if not results['success']:
+        success = False
 
     donate_link_results = StripeManager.move_donate_link_to_voter_from_voter_to_voter(from_voter, to_voter)
     status += donate_link_results['status']
+    if not donate_link_results['success']:
+        success = False
 
     donation_plan_results = \
         StripeManager.move_stripe_subscription_entries_from_voter_to_voter(from_voter, to_voter)
     status += donation_plan_results['status']
+    if not donation_plan_results['success']:
+        success = False
 
     results = {
-        'status': status,
-        'success': success,
-        'from_voter': from_voter,
-        'to_voter': to_voter,
+        'status':       status,
+        'success':      success,
+        'from_voter':   from_voter,
+        'to_voter':     to_voter,
     }
     return results
 
@@ -1053,7 +1068,7 @@ def donation_subscription_cancellation_for_api(voter_we_vote_id, premium_plan_ty
     :return:
     """
     status = ''
-    success = False
+    success = True
     donation_plan_definition_id = 0
     stripe_customer_id = ''
     canceled_at = ''

@@ -2190,7 +2190,7 @@ def refresh_voter_ballot_items_from_google_civic_from_voter_ballot_saved(voter_b
     ballot_returned = results['ballot_returned']
 
     status = ''
-    success = False
+    success = True
     election_day_text = ''
     election_description_text = ''
     election_data_retrieved = False
@@ -2557,7 +2557,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
         return results
 
     status = ''
-    success = False
+    success = True
     election_day_text = ''
     election_description_text = ''
     election_data_retrieved = False

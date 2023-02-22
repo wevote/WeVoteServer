@@ -495,7 +495,7 @@ def heal_primary_email_data_for_voter(email_address_list, voter):
 
 def move_email_address_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id, from_voter, to_voter):
     status = "MOVE_EMAIL_ADDRESSES "
-    success = False
+    success = True
     email_addresses_moved = 0
     email_addresses_not_moved = 0
 
@@ -529,6 +529,9 @@ def move_email_address_entries_to_another_voter(from_voter_we_vote_id, to_voter_
 
     email_manager = EmailManager()
     email_address_list_results = email_manager.retrieve_voter_email_address_list(from_voter_we_vote_id)
+    if not email_address_list_results['success']:
+        status += email_address_list_results['status']
+        success = False
     if email_address_list_results['email_address_list_found']:
         email_address_list = email_address_list_results['email_address_list']
 
@@ -540,7 +543,8 @@ def move_email_address_entries_to_another_voter(from_voter_we_vote_id, to_voter_
                 email_addresses_moved += 1
             except Exception as e:
                 email_addresses_not_moved += 1
-                status += "UNABLE_TO_SAVE_EMAIL_ADDRESS "
+                status += "UNABLE_TO_SAVE_EMAIL_ADDRESS: " + str(e) + " "
+                success = False
 
         status += "MOVE_EMAIL_ADDRESSES-MOVED: " + str(email_addresses_moved) + \
                   ", NOT_MOVED: " + str(email_addresses_not_moved) + " "
@@ -549,10 +553,15 @@ def move_email_address_entries_to_another_voter(from_voter_we_vote_id, to_voter_
 
     # Now clean up the list of emails
     merge_results = email_manager.find_and_merge_all_duplicate_emails(to_voter_we_vote_id)
+    if not merge_results['success']:
+        status += merge_results['status']
+        success = False
     status += merge_results['status']
 
     email_results = email_manager.retrieve_voter_email_address_list(to_voter_we_vote_id)
     status += email_results['status']
+    if not email_results['success']:
+        success = False
     if email_results['email_address_list_found']:
         email_address_list_found = True
         email_address_list = email_results['email_address_list']
@@ -571,6 +580,7 @@ def move_email_address_entries_to_another_voter(from_voter_we_vote_id, to_voter_
             from_voter.save()
         except Exception as e:
             status += "CANNOT_CLEAR_OUT_VOTER_EMAIL_INFO: " + str(e) + " "
+            success = False
 
     # Update EmailOutboundDescription entries: Sender
     try:
@@ -579,8 +589,8 @@ def move_email_address_entries_to_another_voter(from_voter_we_vote_id, to_voter_
             update(sender_voter_we_vote_id=to_voter_we_vote_id)
         status += 'UPDATED_EMAIL_OUTBOUND-SENDER '
     except Exception as e:
+        status += 'FAILED_UPDATE_EMAIL_OUTBOUND-SENDER: ' + str(e) + " "
         success = False
-        status += 'FAILED_UPDATE_EMAIL_OUTBOUND-SENDER ' + str(e) + " "
     # Recipient
     try:
         email_scheduled_queryset = EmailOutboundDescription.objects.all()
@@ -588,8 +598,8 @@ def move_email_address_entries_to_another_voter(from_voter_we_vote_id, to_voter_
             update(recipient_voter_we_vote_id=to_voter_we_vote_id)
         status += 'UPDATED_EMAIL_OUTBOUND-RECIPIENT '
     except Exception as e:
+        status += 'FAILED_UPDATE_EMAIL_OUTBOUND-RECIPIENT: ' + str(e) + " "
         success = False
-        status += 'FAILED_UPDATE_EMAIL_OUTBOUND-RECIPIENT ' + str(e) + " "
 
     # Update EmailScheduled entries: Sender
     try:
@@ -598,8 +608,8 @@ def move_email_address_entries_to_another_voter(from_voter_we_vote_id, to_voter_
             update(sender_voter_we_vote_id=to_voter_we_vote_id)
         status += 'UPDATED_EMAIL_SCHEDULED-SENDER '
     except Exception as e:
+        status += 'FAILED_UPDATE_EMAIL_SCHEDULED-SENDER: ' + str(e) + " "
         success = False
-        status += 'FAILED_UPDATE_EMAIL_SCHEDULED-SENDER ' + str(e) + " "
     # Recipient
     try:
         email_scheduled_queryset = EmailScheduled.objects.all()
@@ -607,8 +617,8 @@ def move_email_address_entries_to_another_voter(from_voter_we_vote_id, to_voter_
             update(recipient_voter_we_vote_id=to_voter_we_vote_id)
         status += 'UPDATED_EMAIL_SCHEDULED-RECIPIENT '
     except Exception as e:
+        status += 'FAILED_UPDATE_EMAIL_SCHEDULED-RECIPIENT: ' + str(e) + " "
         success = False
-        status += 'FAILED_UPDATE_EMAIL_SCHEDULED-RECIPIENT ' + str(e) + " "
 
     results = {
         'status': status,

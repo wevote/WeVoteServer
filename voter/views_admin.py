@@ -31,14 +31,74 @@ from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, Twitte
 from wevote_functions.functions import convert_to_int, generate_random_string, get_voter_api_device_id, \
     set_voter_api_device_id, positive_value_exists
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
-from .controllers import delete_all_voter_information_permanently, process_maintenance_status_flags
+from .controllers import delete_all_voter_information_permanently, process_maintenance_status_flags, \
+    voter_merge_two_accounts_action
 from .models import fetch_voter_id_from_voter_device_link, \
     PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
     PROFILE_IMAGE_TYPE_UPLOADED, \
     Voter, VoterAddressManager, VoterDeviceLinkManager, \
-    voter_has_authority, VoterManager, voter_setup
+    voter_has_authority, VoterManager, VoterMergeLog, VoterMergeStatus, voter_setup
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+
+@login_required
+def finish_voter_merge_process_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}  # We may want to add a "voter_admin"
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    from_voter = None
+    from_voter_we_vote_id = request.GET.get('from_voter_we_vote_id', '')
+    status = ""
+    success = True
+    to_voter = None
+    to_voter_we_vote_id = request.GET.get('to_voter_we_vote_id', '')
+    voter_merge_status = None
+
+    if positive_value_exists(from_voter_we_vote_id) and positive_value_exists(to_voter_we_vote_id):
+        try:
+            from_voter = Voter.objects.get(we_vote_id=from_voter_we_vote_id)
+            to_voter = Voter.objects.get(we_vote_id=to_voter_we_vote_id)
+        except Exception as e:
+            status += "VOTER_MERGE_STATUS_RETRIEVE_VOTER_PROBLEM: " + str(e) + " "
+            success = False
+    else:
+        status += "VOTER_MERGE_STATUS_MISSING_VOTER_ID_PROBLEM "
+        success = False
+
+    if success:
+        try:
+            voter_merge_status = VoterMergeStatus.objects.get(
+                from_voter_we_vote_id=from_voter_we_vote_id,
+                to_voter_we_vote_id=to_voter_we_vote_id,
+            )
+        except Exception as e:
+            status += "VOTER_MERGE_STATUS_RETRIEVE_PROBLEM: " + str(e) + " "
+            success = False
+
+    if success:
+        results = voter_merge_two_accounts_action(
+            from_voter=from_voter,
+            to_voter=to_voter,
+            voter_merge_status=voter_merge_status,
+        )
+        status += results['status']
+        if not results['success']:
+            success = False
+
+    if success:
+        messages.add_message(
+            request, messages.INFO, str(status)
+        )
+    else:
+        messages.add_message(
+            request, messages.ERROR,
+            "VOTER_MERGE_ERROR: " + str(status)
+        )
+
+    return HttpResponseRedirect(reverse('voter:voter_list', args=()) + "?show_voter_merge_data=1")
 
 
 def login_complete_view(request):
@@ -1104,6 +1164,8 @@ def voter_list_view(request):
     is_verified_volunteer = request.GET.get('is_verified_volunteer', '')
     has_contributed = request.GET.get('has_contributed', '')
     has_friends = request.GET.get('has_friends', '')
+    show_voter_merge_data = request.GET.get('show_voter_merge_data', '')
+    has_voter_merge_problem = request.GET.get('has_voter_merge_problem', '')
 
     voter_api_device_id = get_voter_api_device_id(request)  # We look in the cookies for voter_api_device_id
     voter_manager = VoterManager()
@@ -1182,9 +1244,7 @@ def voter_list_view(request):
                 voter_query = voter_query.filter(final_filters)
     else:
         voter_query = Voter.objects.order_by(
-            '-is_admin', '-is_verified_volunteer', 'email', 'twitter_screen_name',
-            'linked_organization_we_vote_id', 'facebook_email',
-            'last_name', 'first_name')
+            '-date_last_changed')
 
     if positive_value_exists(is_admin):
         voter_query = voter_query.filter(is_admin=True)
@@ -1202,6 +1262,28 @@ def voter_list_view(request):
     if positive_value_exists(has_friends):
         voter_query = voter_query.filter(friend_count__gt=0)
         voter_query = voter_query.order_by('-friend_count')
+    from_merge_status_dict = {}
+    to_merge_status_dict = {}
+    voter_merge_status_list = []
+    if positive_value_exists(has_voter_merge_problem) or positive_value_exists(show_voter_merge_data):
+        if positive_value_exists(show_voter_merge_data):
+            queryset = VoterMergeStatus.objects.all().order_by('-id')
+            voter_merge_status_list = list(queryset[:500])
+            queryset_from_ids = queryset.values_list('from_voter_we_vote_id', flat=True).distinct()
+            from_list = list(queryset_from_ids[:500])
+            queryset_to_ids = queryset.values_list('to_voter_we_vote_id', flat=True).distinct()
+            to_list = list(queryset_to_ids[:500])
+            merge_data_we_vote_id_list = list(set(from_list + to_list))
+            voter_query = voter_query.filter(we_vote_id__in=merge_data_we_vote_id_list)
+        for voter_merge_status in voter_merge_status_list:
+            log_queryset = VoterMergeLog.objects.filter(
+                from_voter_we_vote_id__iexact=voter_merge_status.from_voter_we_vote_id,
+                to_voter_we_vote_id__iexact=voter_merge_status.to_voter_we_vote_id,
+            ).order_by('id')
+            voter_merge_log_list = list(log_queryset)
+            voter_merge_status.voter_merge_log_list = voter_merge_log_list
+            from_merge_status_dict[voter_merge_status.from_voter_we_vote_id] = voter_merge_status
+            to_merge_status_dict[voter_merge_status.to_voter_we_vote_id] = voter_merge_status
 
     voter_list_found_count = voter_query.count()
 
@@ -1215,6 +1297,10 @@ def voter_list_view(request):
         one_voter.retrieved_facebook_id = facebook_manager.fetch_facebook_id_from_voter_we_vote_id(one_voter.we_vote_id)
         spent = StripeManager.retrieve_payments_total(one_voter.we_vote_id)
         one_voter.amount_spent = spent if spent != '$0.00' else ''
+        if one_voter.we_vote_id in from_merge_status_dict:
+            one_voter.from_voter_merge_status = from_merge_status_dict[one_voter.we_vote_id]
+        if one_voter.we_vote_id in to_merge_status_dict:
+            one_voter.to_voter_merge_status = to_merge_status_dict[one_voter.we_vote_id]
         modified_voter_list.append(one_voter)
 
     # For the create new voter account form, create a proposed default password
@@ -1235,8 +1321,10 @@ def voter_list_view(request):
         'is_verified_volunteer':        is_verified_volunteer,
         'has_contributed':              has_contributed,
         'has_friends':                  has_friends,
+        'has_voter_merge_problem':      has_voter_merge_problem,
         'messages_on_stage':            messages_on_stage,
         'password_proposed':            password_proposed,
+        'show_voter_merge_data':        show_voter_merge_data,
         'voter_list':                   modified_voter_list,
         'voter_list_found_count':       voter_list_found_count,
         'voter_id_signed_in':           voter_id,

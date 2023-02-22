@@ -62,7 +62,8 @@ from sms.controllers import delete_sms_phone_number_entries_for_voter, move_sms_
 from stripe_donations.controllers import move_donation_info_to_another_voter
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
 from voter.controllers_contacts import delete_all_voter_contact_emails_for_voter
-from voter.models import Voter, VoterAddress, VoterDeviceLinkManager, VoterManager, MAINTENANCE_STATUS_FLAGS_TASK_ONE, \
+from voter.models import Voter, VoterAddress, VoterDeviceLinkManager, VoterManager, VoterMergeLog, \
+    MAINTENANCE_STATUS_FLAGS_TASK_ONE, \
     NOTIFICATION_FRIEND_REQUESTS_EMAIL, NOTIFICATION_SUGGESTED_FRIENDS_EMAIL, \
     NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_EMAIL, NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS, \
     NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL, MAINTENANCE_STATUS_FLAGS_TASK_TWO, \
@@ -763,26 +764,28 @@ def email_ballot_data_for_api(voter_device_id, email_address_array, first_name_a
 
 def merge_voter_accounts(from_voter, to_voter):
     status = "MOVE_VOTER_TABLE_INFO "  # Deal with situation where destination account already has facebook_id
-    success = False
+    success = True
 
     if not hasattr(from_voter, "we_vote_id") or not positive_value_exists(from_voter.we_vote_id) \
             or not hasattr(to_voter, "we_vote_id") or not positive_value_exists(to_voter.we_vote_id):
         status += "MOVE_VOTER_INFO_MISSING_FROM_OR_TO_VOTER_WE_VOTE_ID "
+        success = False
         results = {
-            'status': status,
-            'success': success,
-            'from_voter': from_voter,
-            'to_voter': to_voter,
+            'status':       status,
+            'success':      success,
+            'from_voter':   from_voter,
+            'to_voter':     to_voter,
         }
         return results
 
     if from_voter.we_vote_id == to_voter.we_vote_id:
         status += "MOVE_VOTER_INFO_FROM_AND_TO_VOTER_WE_VOTE_IDS_IDENTICAL "
+        success = False
         results = {
-            'status': status,
-            'success': success,
-            'from_voter': from_voter,
-            'to_voter': to_voter,
+            'status':       status,
+            'success':      success,
+            'from_voter':   from_voter,
+            'to_voter':     to_voter,
         }
         return results
 
@@ -913,29 +916,29 @@ def merge_voter_accounts(from_voter, to_voter):
             to_voter.save()
             status += "TO_VOTER_MERGE_SAVED "
         except Exception as e:
-            # Fail silently
             status += "TO_VOTER_MERGE_SAVE_FAILED: " + str(e) + " "
+            success = False
 
     else:
-        success = True
         status += "FROM_VOTER_DATA_TO_MIGRATE_NOT_FOUND "
 
     results = {
-        'status': status,
-        'success': success,
-        'from_voter': from_voter,
-        'to_voter': to_voter,
+        'status':       status,
+        'success':      success,
+        'from_voter':   from_voter,
+        'to_voter':     to_voter,
     }
     return results
 
 
 def move_facebook_info_to_another_voter(from_voter, to_voter):
     status = "MOVE_FACEBOOK_INFO "  # Deal with situation where destination account already has facebook_id
-    success = False
+    success = True
 
     if not hasattr(from_voter, "we_vote_id") or not positive_value_exists(from_voter.we_vote_id) \
             or not hasattr(to_voter, "we_vote_id") or not positive_value_exists(to_voter.we_vote_id):
         status += "MOVE_FACEBOOK_INFO_MISSING_FROM_OR_TO_VOTER_ID "
+        success = False
         results = {
             'status': status,
             'success': success,
@@ -946,6 +949,7 @@ def move_facebook_info_to_another_voter(from_voter, to_voter):
 
     if from_voter.we_vote_id == to_voter.we_vote_id:
         status += "MOVE_FACEBOOK_INFO_TO_ANOTHER_VOTER-from_voter.we_vote_id and to_voter.we_vote_id identical "
+        success = False
         results = {
             'status': status,
             'success': success,
@@ -957,28 +961,35 @@ def move_facebook_info_to_another_voter(from_voter, to_voter):
     facebook_manager = FacebookManager()
     to_voter_facebook_results = facebook_manager.retrieve_facebook_link_to_voter_from_voter_we_vote_id(
         to_voter.we_vote_id, read_only=False)
+    if not to_voter_facebook_results['success']:
+        status += to_voter_facebook_results['status']
+        success = False
     # if to_voter_facebook_results['facebook_link_to_voter_found']:
     #     to_voter_facebook_link = to_voter_facebook_results['facebook_link_to_voter']
     from_voter_facebook_results = facebook_manager.retrieve_facebook_link_to_voter_from_voter_we_vote_id(
         from_voter.we_vote_id, read_only=False)
+    if not from_voter_facebook_results['success']:
+        status += from_voter_facebook_results['status']
+        success = False
 
     # Move facebook_link_to_voter
     if to_voter_facebook_results['facebook_link_to_voter_found']:
         # Don't try to move from the from_voter
-        success = True
         status += "TO_VOTER_ALREADY_HAS_FACEBOOK_LINK "
     elif from_voter_facebook_results['facebook_link_to_voter_found']:
         from_voter_facebook_link = from_voter_facebook_results['facebook_link_to_voter']
         try:
             from_voter_facebook_link.voter_we_vote_id = to_voter.we_vote_id
             from_voter_facebook_link.save()
-            success = True
             status += "FROM_VOTER_FACEBOOK_LINK_MOVED "
         except Exception as e:
-            status += "FROM_VOTER_FACEBOOK_LINK_COULD_NOT_BE_MOVED "
+            status += "FROM_VOTER_FACEBOOK_LINK_COULD_NOT_BE_MOVED: " + str(e) + " "
+            success = False
     elif positive_value_exists(from_voter.facebook_id):
         create_results = facebook_manager.create_facebook_link_to_voter(from_voter.facebook_id, to_voter.we_vote_id)
         status += " " + create_results['status']
+        if not create_results['success']:
+            success = False
 
     # Transfer data in voter records
     temp_facebook_email = ""
@@ -987,7 +998,6 @@ def move_facebook_info_to_another_voter(from_voter, to_voter):
     temp_fb_username = None
     if positive_value_exists(to_voter.facebook_id):
         # Don't try to move from the from_voter
-        success = True
         status += "TO_VOTER_ALREADY_HAS_FACEBOOK_ID "
     elif positive_value_exists(from_voter.facebook_id):
         # Remove info from the from_voter and then move facebook info to the to_voter
@@ -1005,7 +1015,8 @@ def move_facebook_info_to_another_voter(from_voter, to_voter):
             from_voter.save()
             status += "FROM_VOTER_FACEBOOK_DATA_REMOVED "
         except Exception as e:
-            status += "FROM_VOTER_FACEBOOK_DATA_COULD_NOT_BE_REMOVED "
+            status += "FROM_VOTER_FACEBOOK_DATA_COULD_NOT_BE_REMOVED: " + str(e) + " "
+            success = False
 
         try:
             # Now move values to new entry and save
@@ -1016,10 +1027,10 @@ def move_facebook_info_to_another_voter(from_voter, to_voter):
             to_voter.save()
             status += "TO_VOTER_FACEBOOK_DATA_SAVED "
         except Exception as e:
-            status += "TO_VOTER_FACEBOOK_DATA_COULD_NOT_BE_SAVED "
+            status += "TO_VOTER_FACEBOOK_DATA_COULD_NOT_BE_SAVED: " + str(e) + " "
+            success = False
 
     else:
-        success = True
         status += "NO_FACEBOOK_ID_FOUND "
 
     results = {
@@ -1033,11 +1044,12 @@ def move_facebook_info_to_another_voter(from_voter, to_voter):
 
 def move_twitter_info_to_another_voter(from_voter, to_voter):
     status = "MOVE_TWITTER_INFO "  # Deal with situation where destination account already has facebook_id
-    success = False
+    success = True
 
     if not hasattr(from_voter, "we_vote_id") or not positive_value_exists(from_voter.we_vote_id) \
             or not hasattr(to_voter, "we_vote_id") or not positive_value_exists(to_voter.we_vote_id):
         status += "MOVE_TWITTER_INFO_MISSING_FROM_OR_TO_VOTER_WE_VOTE_ID "
+        success = False
         results = {
             'status': status,
             'success': success,
@@ -1048,6 +1060,7 @@ def move_twitter_info_to_another_voter(from_voter, to_voter):
 
     if from_voter.we_vote_id == to_voter.we_vote_id:
         status += "MOVE_TWITTER_INFO_TO_ANOTHER_VOTER-from_voter.we_vote_id and to_voter.we_vote_id identical "
+        success = False
         results = {
             'status': status,
             'success': success,
@@ -1059,8 +1072,14 @@ def move_twitter_info_to_another_voter(from_voter, to_voter):
     twitter_user_manager = TwitterUserManager()
     to_voter_twitter_results = twitter_user_manager.retrieve_twitter_link_to_voter_from_voter_we_vote_id(
         to_voter.we_vote_id)  # Cannot be read_only
+    if not to_voter_twitter_results['success']:
+        status += to_voter_twitter_results['status']
+        success = False
     from_voter_twitter_results = twitter_user_manager.retrieve_twitter_link_to_voter_from_voter_we_vote_id(
         from_voter.we_vote_id)  # Cannot be read_only
+    if not from_voter_twitter_results['success']:
+        status += from_voter_twitter_results['status']
+        success = False
 
     # Move twitter_link_to_voter
     if to_voter_twitter_results['twitter_link_to_voter_found']:
@@ -1068,28 +1087,32 @@ def move_twitter_info_to_another_voter(from_voter, to_voter):
             success = False
             status += "FROM_AND_TO_VOTER_BOTH_HAVE_TWITTER_LINKS "
         else:
-            success = True
             status += "TO_VOTER_ALREADY_HAS_TWITTER_LINK "
     elif from_voter_twitter_results['twitter_link_to_voter_found']:
         from_voter_twitter_link = from_voter_twitter_results['twitter_link_to_voter']
         try:
             from_voter_twitter_link.voter_we_vote_id = to_voter.we_vote_id
             from_voter_twitter_link.save()
-            success = True
             status += "FROM_VOTER_TWITTER_LINK_MOVED "
         except Exception as e:
-            # Fail silently
-            status += "FROM_VOTER_TWITTER_LINK_NOT_MOVED "
+            status += "FROM_VOTER_TWITTER_LINK_NOT_MOVED: " + str(e) + " "
+            success = False
     elif positive_value_exists(from_voter.twitter_id):
         # If this is the only voter with twitter_id, heal the data and create a TwitterLinkToVoter entry
         voter_manager = VoterManager()
         duplicate_twitter_results = voter_manager.retrieve_voter_by_twitter_id_old(from_voter.twitter_id)
+        if not duplicate_twitter_results['success']:
+            status += duplicate_twitter_results['status']
+            success = False
         if duplicate_twitter_results['voter_found']:
             # If here, we know that this was the only voter with this twitter_id
             test_duplicate_voter = duplicate_twitter_results['voter']
             if test_duplicate_voter.we_vote_id == from_voter.we_vote_id:
                 create_results = twitter_user_manager.create_twitter_link_to_voter(from_voter.twitter_id,
                                                                                    to_voter.we_vote_id)
+                if not create_results['success']:
+                    status += create_results['status']
+                    success = False
                 status += " " + create_results['status']
                 # We remove from_voter.twitter_id value below
 
@@ -1100,7 +1123,6 @@ def move_twitter_info_to_another_voter(from_voter, to_voter):
     temp_twitter_screen_name = ""
     if positive_value_exists(to_voter.twitter_id):
         # Don't try to move from the from_voter
-        success = True
         status += "TO_VOTER_ALREADY_HAS_TWITTER_ID "
     elif positive_value_exists(from_voter.twitter_id):
         # Remove info from the from_voter and then move Twitter info to the to_voter
@@ -1118,8 +1140,8 @@ def move_twitter_info_to_another_voter(from_voter, to_voter):
             from_voter.save()
             status += "FROM_VOTER_TWITTER_DATA_REMOVED "
         except Exception as e:
-            # Fail silently
-            status += "FROM_VOTER_TWITTER_DATA_NOT_REMOVED "
+            status += "FROM_VOTER_TWITTER_DATA_NOT_REMOVED: " + str(e) + " "
+            success = False
 
         try:
             # Now move values to new entry and save
@@ -1148,13 +1170,14 @@ def move_twitter_info_to_another_voter(from_voter, to_voter):
 
 def move_voter_plan_to_another_voter(from_voter, to_voter):
     status = "MOVE_VOTER_PLAN "
-    success = False
+    success = True
     entries_moved = 0
     entries_not_moved = 0
 
     if not hasattr(from_voter, "we_vote_id") or not positive_value_exists(from_voter.we_vote_id) \
             or not hasattr(to_voter, "we_vote_id") or not positive_value_exists(to_voter.we_vote_id):
         status += "MOVE_VOTER_PLAN_MISSING_FROM_OR_TO_VOTER_WE_VOTE_ID "
+        success = False
         results = {
             'status': status,
             'success': success,
@@ -1165,6 +1188,7 @@ def move_voter_plan_to_another_voter(from_voter, to_voter):
 
     if from_voter.we_vote_id == to_voter.we_vote_id:
         status += "MOVE_VOTER_PLAN_TO_ANOTHER_VOTER-from_voter.we_vote_id and to_voter.we_vote_id identical "
+        success = False
         results = {
             'status': status,
             'success': success,
@@ -1175,10 +1199,16 @@ def move_voter_plan_to_another_voter(from_voter, to_voter):
 
     voter_manager = VoterManager()
     results = voter_manager.retrieve_voter_plan_list(voter_we_vote_id=from_voter.we_vote_id, read_only=False)
+    if not results['success']:
+        status += results['status']
+        success = False
     from_voter_plan_list = results['voter_plan_list']
 
     results = voter_manager.retrieve_voter_plan_list(voter_we_vote_id=to_voter.we_vote_id, read_only=False)
     to_voter_plan_list = results['voter_plan_list']
+    if not results['success']:
+        status += results['status']
+        success = False
 
     from_voter_plan_ids_matched_list = []
     for from_voter_plan in from_voter_plan_list:
@@ -1191,6 +1221,7 @@ def move_voter_plan_to_another_voter(from_voter, to_voter):
                 from_voter_plan.delete()
             except Exception as e:
                 status += "FAILED_DELETE_VOTER_PLAN: " + str(e) + " "
+                success = False
         else:
             # Change the from_voter_we_vote_id to to_voter_we_vote_id
             try:
@@ -1200,12 +1231,13 @@ def move_voter_plan_to_another_voter(from_voter, to_voter):
             except Exception as e:
                 entries_not_moved += 1
                 status += "FAILED_MOVE_VOTER_PLAN: " + str(e) + " "
+                success = False
 
     results = {
-        'status': status,
-        'success': success,
-        'entries_moved': entries_moved,
-        'entries_not_moved': entries_not_moved,
+        'status':               status,
+        'success':              success,
+        'entries_moved':        entries_moved,
+        'entries_not_moved':    entries_not_moved,
     }
     return results
 
@@ -2346,10 +2378,25 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         new_owner_voter = invitation_owner_voter
         status += "TO_VOTER-" + str(to_voter_we_vote_id) + " "
 
-    results = voter_merge_two_accounts_action(
-        voter, new_owner_voter, voter_device_link, status,
-        email_owner_voter_found, facebook_owner_voter_found, invitation_owner_voter_found)
-
+    results = voter_merge_two_accounts_action_schedule(
+        from_voter=voter,
+        to_voter=new_owner_voter,
+        voter_device_link=voter_device_link)
+    status += results['status']
+    if not results['success']:
+        success = False
+    merge_from_voter_we_vote_id = ''
+    merge_to_voter_we_vote_id = ''
+    try:
+        merge_from_voter_we_vote_id = voter.we_vote_id
+    except Exception as e:
+        status += "COULD_NOT_RETURN_MERGE_FROM_VOTER_WE_VOTE_ID: " + str(e) + " "
+        success = False
+    try:
+        merge_to_voter_we_vote_id = new_owner_voter.we_vote_id
+    except Exception as e:
+        status += "COULD_NOT_RETURN_MERGE_TO_VOTER_WE_VOTE_ID: " + str(e) + " "
+        success = False
     # Now update the friend invitation entry -- we only want to allow a voter merge once per invitation
     if positive_value_exists(invitation_secret_key):
         status += "INVITATION_SECRET_KEY "
@@ -2361,65 +2408,139 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                     friend_invitation_voter_link = friend_invitation_results['friend_invitation_voter_link']
                     friend_invitation_voter_link.merge_by_secret_key_allowed = False
                     friend_invitation_voter_link.save()
-                    new_status = "VOTER_LINK-MERGE_BY_SECRET_KEY_ALLOWED-SET_TO_FALSE "
-                    results['status'] += new_status
+                    status += "VOTER_LINK-MERGE_BY_SECRET_KEY_ALLOWED-SET_TO_FALSE "
                 elif friend_invitation_results['friend_invitation_email_link_found']:
                     friend_invitation_email_link = friend_invitation_results['friend_invitation_email_link']
                     friend_invitation_email_link.merge_by_secret_key_allowed = False
                     friend_invitation_email_link.save()
-                    new_status = "EMAIL_LINK-MERGE_BY_SECRET_KEY_ALLOWED-SET_TO_FALSE "
-                    results['status'] += new_status
+                    status += "EMAIL_LINK-MERGE_BY_SECRET_KEY_ALLOWED-SET_TO_FALSE "
             except Exception as e:
-                new_status = "COULD_NOT_UPDATE-merge_by_secret_key_allowed " + str(e) + " "
-                results['status'] += new_status
+                status += "COULD_NOT_UPDATE-merge_by_secret_key_allowed " + str(e) + " "
+                success = False
+    results = {
+        'status': status,
+        'success': success,
+        'voter_device_id': voter_device_id,
+        'current_voter_found': current_voter_found,
+        'email_owner_voter_found': email_owner_voter_found,
+        'facebook_owner_voter_found': facebook_owner_voter_found,
+        'invitation_owner_voter_found': invitation_owner_voter_found,
+        'merge_from_voter_we_vote_id':  merge_from_voter_we_vote_id,
+        'merge_to_voter_we_vote_id': merge_to_voter_we_vote_id,
+    }
+    return results
+
+
+def voter_merge_two_accounts_action_schedule(
+        from_voter=None,
+        to_voter=None,
+        voter_device_link=None):
+    voter_device_link_manager = VoterDeviceLinkManager()
+    from voter.models import VoterMergeStatus
+    status = ''
+    success = True
+
+    try:
+        voter_merge_status = VoterMergeStatus.objects.create(
+            from_linked_organization_we_vote_id=from_voter.linked_organization_we_vote_id,
+            from_voter_we_vote_id=from_voter.we_vote_id,
+            to_linked_organization__we_vote_id=to_voter.linked_organization_we_vote_id,
+            to_voter_we_vote_id=to_voter.we_vote_id,
+        )
+    except Exception as e:
+        status += "SAVE_VOTER_MERGE_STATUS_FAILED: " + str(e) + " "
+        results = voter_merge_two_accounts_action(from_voter, to_voter)
+        status += results['status']
+        if not results['success']:
+            success = False
+
+    if success:
+        # And finally, relink the current voter_device_id to email_owner_voter
+        update_link_results = voter_device_link_manager.update_voter_device_link(voter_device_link, to_voter)
+        if update_link_results['voter_device_link_updated']:
+            status += "MERGE_TWO_ACCOUNTS_VOTER_DEVICE_LINK_UPDATED "
+        else:
+            status += update_link_results['status']
+            status += "VOTER_DEVICE_LINK_NOT_UPDATED "
+            success = False
+
+    results = {
+        'status':   status,
+        'success':  success,
+    }
+    return results
+
+
+def voter_merge_tracking(
+        end_time=0.0,
+        from_voter_we_vote_id='',
+        start_time=0.0,
+        status='',
+        step_name='',
+        success=False,
+        to_voter_we_vote_id='',
+        voter_merge_status=None,
+        write_to_log=False,
+):
+    step_duration = 0
+    tracking_success = True
+    if success:
+        try:
+            setattr(voter_merge_status, f"{step_name}_complete", True)
+            delta = end_time - start_time
+            step_duration = int(delta * 1000)
+            setattr(voter_merge_status, f"{step_name}_milliseconds", step_duration)
+            voter_merge_status.save()
+        except Exception as e:
+            status += "FAILED_SAVING_VOTER_MERGE_RESULTS-" + str(step_name) + ": " + str(e) + " "
+            tracking_success = False
+    if write_to_log or not success or not tracking_success:
+        try:
+            success_for_log = success and tracking_success
+            VoterMergeLog.objects.create(
+                from_voter_we_vote_id=from_voter_we_vote_id,
+                status=status,
+                step_duration=step_duration,
+                step_name=step_name,
+                success=success_for_log,
+                to_voter_we_vote_id=to_voter_we_vote_id,
+            )
+        except Exception as e:
+            status += "FAILED_SAVING_VOTER_MERGE_LOG-" + str(step_name) + ": " + str(e) + " "
+            tracking_success = False
+    results = {
+        'success':              tracking_success,
+        'voter_merge_status':   voter_merge_status,
+    }
     return results
 
 
 def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
-        from_voter,
-        new_owner_voter,
-        voter_device_link,
-        status='',
-        email_owner_voter_found=False,
-        facebook_owner_voter_found=False,
-        invitation_owner_voter_found=False):
+        from_voter=None,
+        to_voter=None,
+        voter_merge_status=None):
 
+    status = ""
     success = True
-    current_voter_found = False
     from_voter_id = 0
     from_voter_we_vote_id = ""
     to_voter_id = 0
     to_voter_we_vote_id = ""
-    t0 = time()
-
-    voter_device_id = voter_device_link.voter_device_id
-
-    if not positive_value_exists(voter_device_id):
-        status += "MERGE-MISSING_VOTER_DEVICE_ID "
-        success = False
-        results = {
-            'status': status,
-            'success': success,
-            'voter_device_id': voter_device_id,
-            'current_voter_found': current_voter_found,
-            'email_owner_voter_found': email_owner_voter_found,
-            'facebook_owner_voter_found': facebook_owner_voter_found,
-            'invitation_owner_voter_found': invitation_owner_voter_found,
-        }
-        return results
+    script_start_time = time()
 
     try:
         from_voter_id = from_voter.id
         from_voter_we_vote_id = from_voter.we_vote_id
-        current_voter_found = True
     except Exception as e:
-        pass
+        status += "MISSING_FROM_VOTER: " + str(e) + " "
+        success = False
 
     try:
-        to_voter_id = new_owner_voter.id
-        to_voter_we_vote_id = new_owner_voter.we_vote_id
+        to_voter_id = to_voter.id
+        to_voter_we_vote_id = to_voter.we_vote_id
     except Exception as e:
-        pass
+        status += "MISSING_TO_VOTER: " + str(e) + " "
+        success = False
 
     if not positive_value_exists(from_voter_id) or not positive_value_exists(from_voter_we_vote_id) \
             or not positive_value_exists(to_voter_id) or not positive_value_exists(to_voter_we_vote_id):
@@ -2428,17 +2549,19 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
         results = {
             'status': status,
             'success': success,
-            'voter_device_id': voter_device_id,
-            'current_voter_found': current_voter_found,
-            'email_owner_voter_found': email_owner_voter_found,
-            'facebook_owner_voter_found': facebook_owner_voter_found,
-            'invitation_owner_voter_found': invitation_owner_voter_found,
         }
         return results
 
-    voter_device_link_manager = VoterDeviceLinkManager()
+    if not hasattr(voter_merge_status, 'from_voter_we_vote_id'):
+        status += "VOTER_MERGE_STATUS_NOT_PROVIDED "
+        success = False
+        results = {
+            'status': status,
+            'success': success,
+        }
+        return results
 
-    t1 = time()
+    voter_linked_org_start_time = time()
     # The from_voter and to_voter may both have their own linked_organization_we_vote_id
     organization_manager = OrganizationManager()
     from_voter_linked_organization_we_vote_id = from_voter.linked_organization_we_vote_id
@@ -2446,248 +2569,867 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
     if positive_value_exists(from_voter_linked_organization_we_vote_id):
         from_linked_organization_results = organization_manager.retrieve_organization_from_we_vote_id(
             from_voter_linked_organization_we_vote_id)
+        if not from_linked_organization_results['success']:
+            status += from_linked_organization_results['status']
+            success = False
         if from_linked_organization_results['organization_found']:
             from_linked_organization = from_linked_organization_results['organization']
             from_voter_linked_organization_id = from_linked_organization.id
         else:
-            # Remove the link to the organization, so we don't have a future conflict
-            try:
-                from_voter_linked_organization_we_vote_id = None
-                from_voter.linked_organization_we_vote_id = None
-                from_voter.save()
-                # All positions should have already been moved with move_positions_to_another_voter
-            except Exception as e:
-                status += "FAILED_TO_REMOVE_LINKED_ORGANIZATION_WE_VOTE_ID-FROM_VOTER " + str(e) + " "
+            from_voter_linked_organization_we_vote_id = None
 
-    to_voter_linked_organization_we_vote_id = new_owner_voter.linked_organization_we_vote_id
+    to_voter_linked_organization_we_vote_id = to_voter.linked_organization_we_vote_id
     to_voter_linked_organization_id = 0
     if positive_value_exists(to_voter_linked_organization_we_vote_id):
         to_linked_organization_results = organization_manager.retrieve_organization_from_we_vote_id(
             to_voter_linked_organization_we_vote_id)
+        if not to_linked_organization_results['success']:
+            status += to_linked_organization_results['status']
+            success = False
         if to_linked_organization_results['organization_found']:
             to_linked_organization = to_linked_organization_results['organization']
             to_voter_linked_organization_id = to_linked_organization.id
         else:
-            # Remove the link to the organization, so we don't have a future conflict
-            try:
-                to_voter_linked_organization_we_vote_id = None
-                new_owner_voter.linked_organization_we_vote_id = None
-                new_owner_voter.save()
-                # All positions should have already been moved with move_positions_to_another_voter
-            except Exception as e:
-                status += "FAILED_TO_REMOVE_LINKED_ORGANIZATION_WE_VOTE_ID-TO_VOTER " + str(e) + " "
+            to_voter_linked_organization_we_vote_id = None
 
-    t2 = time()
+    if not positive_value_exists(success):
+        status += "STOP_ENTIRE_PROCESS_IF_RETRIEVE_ORGANIZATION_FAILED "
+        VoterMergeLog.objects.create(
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            status=status,
+            step_duration=None,
+            step_name="retrieve_organization_failed",
+            success=success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+        )
+        results = {
+            'status': status,
+            'success': success,
+        }
+        return results
+
     # If the to_voter does not have a linked_organization_we_vote_id, then we should move the from_voter's
     #  organization_we_vote_id
     if not positive_value_exists(to_voter_linked_organization_we_vote_id):
         # Use the from_voter's linked_organization_we_vote_id
         to_voter_linked_organization_we_vote_id = from_voter_linked_organization_we_vote_id
         to_voter_linked_organization_id = from_voter_linked_organization_id
+    voter_linked_org_end_time = time()
 
-    # Transfer the apple_user entries to the new_owner_voter
-    from apple.controllers import move_apple_user_entries_to_another_voter
-    move_apple_user_results = move_apple_user_entries_to_another_voter(
-        from_voter_we_vote_id, to_voter_we_vote_id)
-    status += move_apple_user_results['status']
-    t3 = time()
+    move_apple_user_start_time = time()
+    if not voter_merge_status.move_apple_user_complete:
+        # Transfer the apple_user entries to the to_voter
+        from apple.controllers import move_apple_user_entries_to_another_voter
+        move_apple_user_results = move_apple_user_entries_to_another_voter(
+            from_voter_we_vote_id, to_voter_we_vote_id)
+        # Log the results
+        move_apple_user_end_time = time()
+        status += move_apple_user_results['status']
+        local_success = move_apple_user_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=move_apple_user_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_apple_user_start_time,
+            status=status,
+            step_name='move_apple_user',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_apple_user_end_time = time()
 
-    # Data healing scripts before we try to move the positions
     position_list_manager = PositionListManager()
-    if positive_value_exists(from_voter_id):
-        repair_results = position_list_manager.repair_all_positions_for_voter(from_voter_id)
-        status += repair_results['status']
-    if positive_value_exists(to_voter_id):
-        repair_results = position_list_manager.repair_all_positions_for_voter(to_voter_id)
-        status += repair_results['status']
+    repair_positions_start_time = time()
+    if not voter_merge_status.repair_positions_complete:
+        # Data healing scripts before we try to move the positions
+        local_success = False
+        if positive_value_exists(from_voter_id):
+            repair_results = position_list_manager.repair_all_positions_for_voter(from_voter_id)
+            status += repair_results['status']
+            local_success = repair_results['success']
+        if success and positive_value_exists(to_voter_id):
+            repair_results = position_list_manager.repair_all_positions_for_voter(to_voter_id)
+            status += repair_results['status']
+            local_success = repair_results['success']
+        if not local_success:
+            success = False
+        # Log the results
+        repair_positions_end_time = time()
+        results = voter_merge_tracking(
+            end_time=repair_positions_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=repair_positions_start_time,
+            status=status,
+            step_name='repair_positions',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        repair_positions_end_time = time()
 
-    t4 = time()
-    # Transfer positions from voter to new_owner_voter
-    move_positions_results = move_positions_to_another_voter(
-        from_voter_id, from_voter_we_vote_id,
-        to_voter_id, to_voter_we_vote_id,
-        to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id)
-    status += " " + move_positions_results['status']
+    move_positions_start_time = time()
+    if success and not voter_merge_status.move_positions_complete:
+        # Transfer positions from voter to to_voter
+        move_positions_results = move_positions_to_another_voter(
+            from_voter_id,
+            from_voter_we_vote_id,
+            to_voter_id,
+            to_voter_we_vote_id,
+            to_voter_linked_organization_id,
+            to_voter_linked_organization_we_vote_id)
+        # Log the results
+        move_positions_end_time = time()
+        status += move_positions_results['status']
+        local_success = move_positions_results['success']
+        if not local_success:
+            success = False
+        write_to_log = move_positions_results['write_to_log']
+        results = voter_merge_tracking(
+            end_time=move_positions_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_positions_start_time,
+            status=status,
+            step_name='move_positions',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status,
+            write_to_log=write_to_log)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_positions_end_time = time()
 
     is_organization = False
     organization_full_name = ''
-    if positive_value_exists(from_voter_linked_organization_we_vote_id) and \
-            positive_value_exists(to_voter_linked_organization_we_vote_id) and \
-            from_voter_linked_organization_we_vote_id != to_voter_linked_organization_we_vote_id:
-        move_organization_to_another_complete_results = move_organization_to_another_complete(
-            from_voter_linked_organization_id, from_voter_linked_organization_we_vote_id,
-            to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id,
-            to_voter_id, to_voter_we_vote_id
-        )
-        if positive_value_exists(move_organization_to_another_complete_results['to_organization_found']):
-            to_organization = move_organization_to_another_complete_results['to_organization']
-            if to_organization.is_organization():
-                is_organization = True
-                organization_full_name = to_organization.organization_name
+    move_organization_start_time = time()
+    if success and not voter_merge_status.move_organization_complete:
+        local_success = False
+        if positive_value_exists(from_voter_linked_organization_we_vote_id) and \
+                positive_value_exists(to_voter_linked_organization_we_vote_id) and \
+                from_voter_linked_organization_we_vote_id != to_voter_linked_organization_we_vote_id:
+            move_organization_to_another_complete_results = move_organization_to_another_complete(
+                from_voter_linked_organization_id,
+                from_voter_linked_organization_we_vote_id,
+                to_voter_linked_organization_id,
+                to_voter_linked_organization_we_vote_id,
+                to_voter_id,
+                to_voter_we_vote_id
+            )
+            if positive_value_exists(move_organization_to_another_complete_results['to_organization_found']):
+                to_organization = move_organization_to_another_complete_results['to_organization']
+                if to_organization.is_organization():
+                    is_organization = True
+                    organization_full_name = to_organization.organization_name
 
-        status += " " + move_organization_to_another_complete_results['status']
-
-    t5 = time()
-    # Transfer friends from voter to new_owner_voter
-    move_friends_results = move_friends_to_another_voter(
-        from_voter_we_vote_id, to_voter_we_vote_id, to_voter_linked_organization_we_vote_id)
-    status += " " + move_friends_results['status']
-
-    # Transfer suggested friends from voter to new_owner_voter
-    move_suggested_friends_results = move_suggested_friends_to_another_voter(
-        from_voter_we_vote_id, to_voter_we_vote_id)
-    status += " " + move_suggested_friends_results['status']
-
-    # Transfer friend invitations from voter to email_owner_voter
-    move_friend_invitations_results = move_friend_invitations_to_another_voter(
-        from_voter_we_vote_id, to_voter_we_vote_id)
-    status += " " + move_friend_invitations_results['status']
-
-    if positive_value_exists(from_voter.linked_organization_we_vote_id):
-        # Remove the link to the organization, so we don't have a future conflict
-        try:
-            from_voter.linked_organization_we_vote_id = None
-            from_voter.save()
-            # All positions should have already been moved with move_positions_to_another_voter
-        except Exception as e:
-            status += "CANNOT_DELETE_LINKED_ORGANIZATION_WE_VOTE_ID: " + str(e) + " "
-
-    # Transfer the organizations the from_voter is following to the new_owner_voter
-    move_follow_results = move_follow_entries_to_another_voter(from_voter_id, to_voter_id, to_voter_we_vote_id)
-    status += move_follow_results['status']
-
-    # Transfer the organizations the from_voter is a member of (with external_voter_id entry) to the new_owner_voter
-    move_membership_link_results = move_membership_link_entries_to_another_voter(
-        from_voter_we_vote_id, to_voter_we_vote_id)
-    status += move_membership_link_results['status']
-
-    t6 = time()
-    # Transfer the OrganizationTeamMember entries to new voter
-    move_organization_team_member_results = move_organization_team_member_entries_to_another_voter(
-        from_voter_we_vote_id, to_voter_we_vote_id,
-        from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id)
-    status += move_organization_team_member_results['status']
-
-    # Transfer the issues that the voter is following
-    move_follow_issue_results = move_follow_issue_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id)
-    status += move_follow_issue_results['status']
-
-    # Make sure we bring over all emails from the from_voter over to the to_voter
-    move_email_addresses_results = move_email_address_entries_to_another_voter(
-        from_voter_we_vote_id, to_voter_we_vote_id, from_voter=from_voter, to_voter=new_owner_voter)
-    status += move_email_addresses_results['status']
-    if move_email_addresses_results['success']:
-        from_voter = move_email_addresses_results['from_voter']
-        new_owner_voter = move_email_addresses_results['to_voter']
-
-    t7 = time()
-    # Bring over all sms phone numbers from the from_voter over to the to_voter
-    move_sms_phone_number_results = move_sms_phone_number_entries_to_another_voter(
-        from_voter_we_vote_id, to_voter_we_vote_id, from_voter=from_voter, to_voter=new_owner_voter)
-    status += " " + move_sms_phone_number_results['status']
-    if move_sms_phone_number_results['success']:
-        from_voter = move_sms_phone_number_results['from_voter']
-        new_owner_voter = move_sms_phone_number_results['to_voter']
-
-    # Bring over Facebook information
-    move_facebook_results = move_facebook_info_to_another_voter(from_voter, new_owner_voter)
-    status += " " + move_facebook_results['status']
-
-    # Bring over Twitter information
-    move_twitter_results = move_twitter_info_to_another_voter(from_voter, new_owner_voter)
-    status += " " + move_twitter_results['status']
-
-    from voter.controllers_contacts import move_voter_contact_email_to_another_voter
-    move_voter_contact_email_results = move_voter_contact_email_to_another_voter(
-        from_voter_we_vote_id, to_voter_we_vote_id)
-    status += " " + move_voter_contact_email_results['status']
-
-    t8 = time()
-    # Bring over the voter's plans to vote
-    move_voter_plan_results = move_voter_plan_to_another_voter(from_voter, new_owner_voter)
-    status += " " + move_voter_plan_results['status']
-
-    # Bring over any donations that have been made in this session by the new_owner_voter to the voter, subscriptions
-    # are complicated.  See the comments in the donate/controllers.py
-    move_donation_results = move_donation_info_to_another_voter(from_voter, new_owner_voter)
-    status += " " + move_donation_results['status']
-
-    # Bring over Voter Guides
-    move_voter_guide_results = move_voter_guides_to_another_voter(
-        from_voter_we_vote_id, to_voter_we_vote_id,
-        from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id)
-    status += " " + move_voter_guide_results['status']
-
-    # Bring over SharedItems
-    move_shared_items_results = move_shared_items_to_another_voter(
-        from_voter_we_vote_id, to_voter_we_vote_id,
-        from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id)
-    status += " " + move_shared_items_results['status']
-
-    t9 = time()
-    # Transfer ActivityNoticeSeed and ActivityNotice entries from voter to new_owner_voter
-    move_activity_results = move_activity_notices_to_another_voter(
-        from_voter_we_vote_id, to_voter_we_vote_id,
-        from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id,
-        to_voter=new_owner_voter)
-    status += " " + move_activity_results['status']
-
-    # Transfer ActivityPost entries from voter to new_owner_voter
-    move_activity_post_results = move_activity_posts_to_another_voter(
-        from_voter_we_vote_id, to_voter_we_vote_id,
-        from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id,
-        to_voter=new_owner_voter)
-    status += " " + move_activity_post_results['status']
-
-    # Transfer ActivityComment entries from voter to new_owner_voter
-    move_activity_comment_results = move_activity_comments_to_another_voter(
-        from_voter_we_vote_id, to_voter_we_vote_id,
-        from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id,
-        to_voter=new_owner_voter)
-    status += " " + move_activity_comment_results['status']
-
-    # t10 = time()
-    # Transfer CampaignX related info from voter to new_owner_voter
-    move_campaignx_results = move_campaignx_to_another_voter(
-        from_voter_we_vote_id, to_voter_we_vote_id,
-        from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id,
-        to_organization_name=organization_full_name)
-    status += " " + move_campaignx_results['status']
-
-    t10 = time()
-    # Bring over Analytics information
-    move_analytics_results = move_analytics_info_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id)
-    status += " " + move_analytics_results['status']
-
-    t11 = time()
-    # Bring over the voter-table data
-    merge_voter_accounts_results = merge_voter_accounts(from_voter, new_owner_voter)
-    new_owner_voter = merge_voter_accounts_results['to_voter']
-    status += " " + merge_voter_accounts_results['status']
-
-    # Make sure the organization has the latest profile image from the voter record
-    transfer_voter_images_results = transfer_voter_images_to_organization(voter=new_owner_voter)
-    status += " " + transfer_voter_images_results['status']
-
-    t12 = time()
-    # Send any friend invitations set up before sign in
-    email_manager = EmailManager()
-    real_name_only = True
-    if is_organization:
-        if positive_value_exists(organization_full_name) and 'Voter-' not in organization_full_name:
-            # Only send if the organization name exists
-            send_results = email_manager.send_scheduled_emails_waiting_for_verification(
-                from_voter_we_vote_id, organization_full_name)
-            status += send_results['status']
+            status += " " + move_organization_to_another_complete_results['status']
+            local_success = move_organization_to_another_complete_results['success']
+        if not local_success:
+            success = False
+        # Log the results
+        move_organization_end_time = time()
+        results = voter_merge_tracking(
+            end_time=move_organization_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_organization_start_time,
+            status=status,
+            step_name='move_organization',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
         else:
-            status += "CANNOT_SEND_SCHEDULED_EMAILS_WITHOUT_ORGANIZATION_NAME-VOTER_CONTROLLER "
-    elif positive_value_exists(from_voter.get_full_name(real_name_only)):
-        # Only send if the sender's full name exists
-        send_results = email_manager.send_scheduled_emails_waiting_for_verification(
-            from_voter_we_vote_id, from_voter.get_full_name(real_name_only))
-        status += send_results['status']
+            success = False
     else:
-        status += "CANNOT_SEND_SCHEDULED_EMAILS_WITHOUT_NAME-VOTER_CONTROLLER "
+        move_organization_end_time = time()
+
+    move_friends_start_time = time()
+    if not voter_merge_status.move_friends_complete:  # Proceed even if process above has failed
+        # Transfer friends from voter to to_voter
+        move_friends_results = move_friends_to_another_voter(
+            from_voter_we_vote_id, to_voter_we_vote_id, to_voter_linked_organization_we_vote_id)
+        status += " " + move_friends_results['status']
+
+        # Transfer suggested friends from voter to to_voter
+        move_suggested_friends_results = move_suggested_friends_to_another_voter(
+            from_voter_we_vote_id, to_voter_we_vote_id)
+        status += " " + move_suggested_friends_results['status']
+
+        # Transfer friend invitations from voter to email_owner_voter
+        move_friend_invitations_results = move_friend_invitations_to_another_voter(
+            from_voter_we_vote_id, to_voter_we_vote_id)
+        status += move_friend_invitations_results['status']
+        # Log the results
+        move_friends_end_time = time()
+        local_success = move_friends_results['success'] and move_suggested_friends_results['success'] and \
+            move_friend_invitations_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=move_friends_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_friends_start_time,
+            status=status,
+            step_name='move_friends',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_friends_end_time = time()
+
+    move_follows_start_time = time()
+    if not voter_merge_status.move_follows_complete:  # Proceed even if process above has failed
+        move_follow_results = move_follow_entries_to_another_voter(from_voter_id, to_voter_id, to_voter_we_vote_id)
+        # Log the results
+        move_follows_end_time = time()
+        status += move_follow_results['status']
+        local_success = move_follow_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=move_follows_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_follows_start_time,
+            status=status,
+            step_name='move_follows',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_follows_end_time = time()
+
+    move_membership_link_start_time = time()
+    if not voter_merge_status.move_membership_link_complete:  # Proceed even if process above has failed
+        move_membership_link_results = move_membership_link_entries_to_another_voter(
+            from_voter_we_vote_id, to_voter_we_vote_id)
+        # Log the results
+        move_membership_link_end_time = time()
+        status += move_membership_link_results['status']
+        local_success = move_membership_link_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=move_membership_link_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_membership_link_start_time,
+            status=status,
+            step_name='move_membership_link',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_membership_link_end_time = time()
+
+    move_org_team_start_time = time()
+    if not voter_merge_status.move_org_team_complete:  # Proceed even if process above has failed
+        # Transfer the OrganizationTeamMember entries to new voter
+        move_organization_team_member_results = move_organization_team_member_entries_to_another_voter(
+            from_voter_we_vote_id, to_voter_we_vote_id,
+            from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id)
+        # Log the results
+        move_org_team_end_time = time()
+        status += move_organization_team_member_results['status']
+        local_success = move_organization_team_member_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=move_org_team_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_org_team_start_time,
+            status=status,
+            step_name='move_org_team',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_org_team_end_time = time()
+
+    move_follow_issues_start_time = time()
+    if not voter_merge_status.move_follow_issues_complete:  # Proceed even if process above has failed
+        # Transfer the issues that the voter is following
+        move_follow_issue_results = move_follow_issue_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id)
+        # Log the results
+        move_follow_issues_end_time = time()
+        status += move_follow_issue_results['status']
+        local_success = move_follow_issue_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=move_follow_issues_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_follow_issues_start_time,
+            status=status,
+            step_name='move_follow_issues',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_follow_issues_end_time = time()
+
+    move_email_start_time = time()
+    if not voter_merge_status.move_email_complete:  # Proceed even if process above has failed
+        # Make sure we bring over all emails from the from_voter over to the to_voter
+        move_email_addresses_results = move_email_address_entries_to_another_voter(
+            from_voter_we_vote_id, to_voter_we_vote_id, from_voter=from_voter, to_voter=to_voter)
+        if move_email_addresses_results['success']:
+            from_voter = move_email_addresses_results['from_voter']
+            to_voter = move_email_addresses_results['to_voter']
+        # Log the results
+        move_email_end_time = time()
+        status += move_email_addresses_results['status']
+        local_success = move_email_addresses_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=move_email_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_email_start_time,
+            status=status,
+            step_name='move_email',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_email_end_time = time()
+
+    move_sms_start_time = time()
+    if not voter_merge_status.move_sms_complete:  # Proceed even if process above has failed
+        # Bring over all sms phone numbers from the from_voter over to the to_voter
+        move_sms_phone_number_results = move_sms_phone_number_entries_to_another_voter(
+            from_voter_we_vote_id, to_voter_we_vote_id, from_voter=from_voter, to_voter=to_voter)
+        if move_sms_phone_number_results['success']:
+            from_voter = move_sms_phone_number_results['from_voter']
+            to_voter = move_sms_phone_number_results['to_voter']
+        # Log the results
+        move_sms_end_time = time()
+        status += move_sms_phone_number_results['status']
+        local_success = move_sms_phone_number_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=move_sms_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_sms_start_time,
+            status=status,
+            step_name='move_sms',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_sms_end_time = time()
+
+    move_facebook_start_time = time()
+    if not voter_merge_status.move_facebook_complete:  # Proceed even if process above has failed
+        # Bring over Facebook information
+        move_facebook_results = move_facebook_info_to_another_voter(from_voter, to_voter)
+        # Log the results
+        move_facebook_end_time = time()
+        status += move_facebook_results['status']
+        local_success = move_facebook_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=move_facebook_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_facebook_start_time,
+            status=status,
+            step_name='move_facebook',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_facebook_end_time = time()
+
+    move_twitter_start_time = time()
+    if not voter_merge_status.move_twitter_complete:  # Proceed even if process above has failed
+        # Bring over Twitter information
+        move_twitter_results = move_twitter_info_to_another_voter(from_voter, to_voter)
+        # Log the results
+        move_twitter_end_time = time()
+        status += move_twitter_results['status']
+        local_success = move_twitter_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=move_twitter_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_twitter_start_time,
+            status=status,
+            step_name='move_twitter',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_twitter_end_time = time()
+
+    move_voter_contact_start_time = time()
+    if not voter_merge_status.move_voter_contact_complete:  # Proceed even if process above has failed
+        from voter.controllers_contacts import move_voter_contact_email_to_another_voter
+        move_voter_contact_email_results = move_voter_contact_email_to_another_voter(
+            from_voter_we_vote_id, to_voter_we_vote_id)
+        # Log the results
+        move_voter_contact_end_time = time()
+        status += move_voter_contact_email_results['status']
+        local_success = move_voter_contact_email_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=move_voter_contact_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_voter_contact_start_time,
+            status=status,
+            step_name='move_voter_contact',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_voter_contact_end_time = time()
+
+    move_voter_plan_start_time = time()
+    if not voter_merge_status.move_voter_plan_complete:  # Proceed even if process above has failed
+        # Bring over the voter's plans to vote
+        move_voter_plan_results = move_voter_plan_to_another_voter(from_voter, to_voter)
+        # Log the results
+        move_voter_plan_end_time = time()
+        status += move_voter_plan_results['status']
+        local_success = move_voter_plan_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=move_voter_plan_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_voter_plan_start_time,
+            status=status,
+            step_name='move_voter_plan',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_voter_plan_end_time = time()
+
+    move_donations_start_time = time()
+    if success and not voter_merge_status.move_donations_complete:
+        # Bring over any donations that have been made in this session by the to_voter to the voter, subscriptions
+        # are complicated.  See the comments in the donate/controllers.py
+        move_donation_results = move_donation_info_to_another_voter(from_voter, to_voter)
+        # Log the results
+        move_donations_end_time = time()
+        status += move_donation_results['status']
+        local_success = move_donation_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=move_donations_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_donations_start_time,
+            status=status,
+            step_name='move_donations',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_donations_end_time = time()
+
+    move_voter_guides_start_time = time()
+    if not voter_merge_status.move_voter_guides_complete:  # Proceed even if process above has failed
+        # Bring over Voter Guides
+        move_voter_guide_results = move_voter_guides_to_another_voter(
+            from_voter_we_vote_id, to_voter_we_vote_id,
+            to_voter_linked_organization_we_vote_id)
+        # Log the results
+        move_voter_guides_end_time = time()
+        status += move_voter_guide_results['status']
+        local_success = move_voter_guide_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=move_voter_guides_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_voter_guides_start_time,
+            status=status,
+            step_name='move_voter_guides',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_voter_guides_end_time = time()
+
+    move_shared_items_start_time = time()
+    if not voter_merge_status.move_shared_items_complete:  # Proceed even if process above has failed
+        # Bring over SharedItems
+        move_shared_items_results = move_shared_items_to_another_voter(
+            from_voter_we_vote_id, to_voter_we_vote_id,
+            from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id)
+        # Log the results
+        move_shared_items_end_time = time()
+        status += move_shared_items_results['status']
+        local_success = move_shared_items_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=move_shared_items_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_shared_items_start_time,
+            status=status,
+            step_name='move_shared_items',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_shared_items_end_time = time()
+
+    move_activity_notices_start_time = time()
+    if not voter_merge_status.move_activity_notices_complete:  # Proceed even if process above has failed
+        # Transfer ActivityNoticeSeed and ActivityNotice entries from voter to to_voter
+        move_activity_results = move_activity_notices_to_another_voter(
+            from_voter_we_vote_id, to_voter_we_vote_id,
+            from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id,
+            to_voter=to_voter)
+        # Log the results
+        move_activity_notices_end_time = time()
+        status += move_activity_results['status']
+        local_success = move_activity_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=move_activity_notices_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_activity_notices_start_time,
+            status=status,
+            step_name='move_activity_notices',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_activity_notices_end_time = time()
+
+    move_activity_posts_start_time = time()
+    if success and not voter_merge_status.move_activity_posts_complete:
+        # Transfer ActivityPost entries from voter to to_voter
+        move_activity_post_results = move_activity_posts_to_another_voter(
+            from_voter_we_vote_id, to_voter_we_vote_id,
+            from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id,
+            to_voter=to_voter)
+        # Log the results
+        move_activity_posts_end_time = time()
+        status += move_activity_post_results['status']
+        local_success = move_activity_post_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=move_activity_posts_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_activity_posts_start_time,
+            status=status,
+            step_name='move_activity_posts',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_activity_posts_end_time = time()
+
+    move_activity_comments_start_time = time()
+    if success and not voter_merge_status.move_activity_comments_complete:
+        # Transfer ActivityComment entries from voter to to_voter
+        move_activity_comment_results = move_activity_comments_to_another_voter(
+            from_voter_we_vote_id, to_voter_we_vote_id,
+            from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id,
+            to_voter=to_voter)
+        # Log the results
+        move_activity_comments_end_time = time()
+        status += move_activity_comment_results['status']
+        local_success = move_activity_comment_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=move_activity_comments_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_activity_comments_start_time,
+            status=status,
+            step_name='move_activity_comments',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_activity_comments_end_time = time()
+
+    move_campaignx_start_time = time()
+    if not voter_merge_status.move_campaignx_complete:  # Proceed even if process above has failed
+        # Transfer CampaignX related info from voter to to_voter
+        move_campaignx_results = move_campaignx_to_another_voter(
+            from_voter_we_vote_id,
+            to_voter_we_vote_id,
+            from_voter_linked_organization_we_vote_id,
+            to_voter_linked_organization_we_vote_id,
+            to_organization_name=organization_full_name)
+        # Log the results
+        move_campaignx_end_time = time()
+        status += move_campaignx_results['status']
+        local_success = move_campaignx_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=move_campaignx_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_campaignx_start_time,
+            status=status,
+            step_name='move_campaignx',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_campaignx_end_time = time()
+
+    move_analytics_start_time = time()
+    if not voter_merge_status.move_analytics_complete:  # Proceed even if process above has failed
+        # Bring over Analytics information
+        move_analytics_results = move_analytics_info_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id)
+        # Log the results
+        move_analytics_end_time = time()
+        status += move_analytics_results['status']
+        local_success = move_analytics_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=move_analytics_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_analytics_start_time,
+            status=status,
+            step_name='move_analytics',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_analytics_end_time = time()
+
+    merge_voter_start_time = time()
+    if success and not voter_merge_status.merge_voter_complete:
+        if not positive_value_exists(from_voter_linked_organization_we_vote_id):
+            # Remove the link to the organization, so we don't have a future conflict
+            try:
+                from_voter.linked_organization_we_vote_id = None
+                from_voter.save()
+                # All positions should have already been moved with move_positions_to_another_voter
+            except Exception as e:
+                status += "FAILED_TO_REMOVE_LINKED_ORGANIZATION_WE_VOTE_ID-FROM_VOTER " + str(e) + " "
+                success = False
+                VoterMergeLog.objects.create(
+                    from_voter_we_vote_id=from_voter_we_vote_id,
+                    status=status,
+                    step_duration=None,
+                    step_name="from_voter_linked_org_clear",
+                    success=success,
+                    to_voter_we_vote_id=to_voter_we_vote_id,
+                )
+        if not positive_value_exists(to_voter_linked_organization_we_vote_id):
+            # Remove the link to the organization, so we don't have a future conflict
+            try:
+                to_voter.linked_organization_we_vote_id = None
+                to_voter.save()
+                # All positions should have already been moved with move_positions_to_another_voter
+            except Exception as e:
+                status += "FAILED_TO_REMOVE_LINKED_ORGANIZATION_WE_VOTE_ID-TO_VOTER " + str(e) + " "
+                success = False
+                VoterMergeLog.objects.create(
+                    from_voter_we_vote_id=from_voter_we_vote_id,
+                    status=status,
+                    step_duration=None,
+                    step_name="to_voter_linked_org_clear",
+                    success=success,
+                    to_voter_we_vote_id=to_voter_we_vote_id,
+                )
+
+        if not success:
+            # We kill the process here because we couldn't save one or both of the voters
+            status += "KILLED_ENTIRE_PROCESS "
+            results = {
+                'status': status,
+                'success': success,
+            }
+            return results
+
+        # Bring over the voter-table data
+        merge_voter_accounts_results = merge_voter_accounts(from_voter, to_voter)
+        to_voter = merge_voter_accounts_results['to_voter']
+        # Log the results
+        merge_voter_end_time = time()
+        status += merge_voter_accounts_results['status']
+        local_success = merge_voter_accounts_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=merge_voter_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=merge_voter_start_time,
+            status=status,
+            step_name='merge_voter',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        merge_voter_end_time = time()
+
+    move_images_start_time = time()
+    if not voter_merge_status.move_images_complete:  # Proceed even if process above has failed
+        # Make sure the organization has the latest profile image from the voter record
+        transfer_voter_images_results = transfer_voter_images_to_organization(voter=to_voter)
+        # Log the results
+        move_images_end_time = time()
+        status += transfer_voter_images_results['status']
+        local_success = transfer_voter_images_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=move_images_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_images_start_time,
+            status=status,
+            step_name='move_images',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_images_end_time = time()
+
+    send_emails_start_time = time()
+    if success and not voter_merge_status.send_emails_complete:
+        # Send any friend invitations set up before sign in
+        email_manager = EmailManager()
+        real_name_only = True
+        local_success = True
+        if is_organization:
+            if positive_value_exists(organization_full_name) and 'Voter-' not in organization_full_name:
+                # Only send if the organization name exists
+                send_results = email_manager.send_scheduled_emails_waiting_for_verification(
+                    from_voter_we_vote_id, organization_full_name)
+                status += send_results['status']
+                local_success = send_results['success']
+            else:
+                status += "CANNOT_SEND_SCHEDULED_EMAILS_WITHOUT_ORGANIZATION_NAME-VOTER_CONTROLLER "
+        elif positive_value_exists(from_voter.get_full_name(real_name_only)):
+            # Only send if the sender's full name exists
+            send_results = email_manager.send_scheduled_emails_waiting_for_verification(
+                from_voter_we_vote_id, from_voter.get_full_name(real_name_only))
+            status += send_results['status']
+            local_success = send_results['success']
+        else:
+            status += "CANNOT_SEND_SCHEDULED_EMAILS_WITHOUT_NAME-VOTER_CONTROLLER "
+        # Log the results
+        if not local_success:
+            success = False
+        send_emails_end_time = time()
+        results = voter_merge_tracking(
+            end_time=send_emails_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=send_emails_start_time,
+            status=status,
+            step_name='send_emails',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        send_emails_end_time = time()
+
     # TODO Do similar send for SMS
 
     # TODO Keep a record of voter_we_vote_id's associated with this voter, so we can find the
@@ -2695,62 +3437,116 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
 
     # TODO If no errors, delete the voter account
 
-    t13 = time()
-    # And finally, relink the current voter_device_id to email_owner_voter
-    update_link_results = voter_device_link_manager.update_voter_device_link(voter_device_link, new_owner_voter)
-    if update_link_results['voter_device_link_updated']:
-        success = True
-        status += "MERGE_TWO_ACCOUNTS_VOTER_DEVICE_LINK_UPDATED "
+    final_position_repair_start_time = time()
+    if not voter_merge_status.final_position_repair_complete:  # Proceed even if process above has failed
+        # Data healing scripts
+        repair_results = position_list_manager.repair_all_positions_for_voter(to_voter.id)
+        # Log the results
+        final_position_repair_end_time = time()
+        status += repair_results['status']
+        local_success = repair_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=final_position_repair_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=final_position_repair_start_time,
+            status=status,
+            step_name='final_position_repair',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
     else:
-        status += update_link_results['status']
-        status += "VOTER_DEVICE_LINK_NOT_UPDATED "
+        final_position_repair_end_time = time()
 
-    # Data healing scripts
-    repair_results = position_list_manager.repair_all_positions_for_voter(new_owner_voter.id)
-    status += repair_results['status']
+    if not voter_merge_status.total_merge_complete:  # Proceed even if process above has failed
+        # Log the results
+        script_end_time = time()
+        results = voter_merge_tracking(
+            end_time=script_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=script_start_time,
+            status=status,
+            step_name='total_merge',
+            success=success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status,
+            write_to_log=True)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        script_end_time = time()
 
-    t14 = time()
-    dt0 = t1 - t0
-    dt1 = t2 - t1
-    dt2 = t3 - t2
-    dt3 = t4 - t3
-    dt4 = t5 - t4
-    dt5 = t6 - t5
-    dt6 = t7 - t6
-    dt7 = t8 - t7
-    dt8 = t9 - t8
-    dt9 = t10 - t9
-    dt10 = t11 - t10
-    dt11 = t12 - t11
-    dt12 = t13 - t12
-    dt13 = t14 - t13
-    dt = t14 - t0
-    logger.error('(Ok) voter_merge_two_accounts_action step 1 took ' + "{:.6f}".format(dt0) +
-                 ' seconds, step 2 took ' + "{:.6f}".format(dt1) +
-                 ' seconds, step 3 took ' + "{:.6f}".format(dt2) +
-                 ' seconds, step 4 took ' + "{:.6f}".format(dt3) +
-                 ' seconds, step 5 took ' + "{:.6f}".format(dt4) +
-                 ' seconds, step 6 took ' + "{:.6f}".format(dt5) +
-                 ' seconds, step 7 took ' + "{:.6f}".format(dt6) +
-                 ' seconds, step 8 took ' + "{:.6f}".format(dt7) +
-                 ' seconds, step 9 took ' + "{:.6f}".format(dt8) +
-                 ' seconds, step 10 took ' + "{:.6f}".format(dt9) +
-                 ' seconds, step 11 took ' + "{:.6f}".format(dt10) +
-                 ' seconds, step 12 took ' + "{:.6f}".format(dt11) +
-                 ' seconds, step 13 took ' + "{:.6f}".format(dt12) +
-                 ' seconds, step 14 took ' + "{:.6f}".format(dt13) +
-                 ' seconds, total took ' + "{:.6f}".format(dt) + ' seconds')
+    voter_linked_org_duration = voter_linked_org_end_time - voter_linked_org_start_time
+    move_apple_duration = move_apple_user_end_time - move_apple_user_start_time
+    repair_positions_duration = repair_positions_end_time - repair_positions_start_time
+    move_positions_duration = move_positions_end_time - move_positions_start_time
+    move_organization_duration = move_organization_end_time - move_organization_start_time
+    move_friends_duration = move_friends_end_time - move_friends_start_time
+    move_follows_duration = move_follows_end_time - move_follows_start_time
+    move_membership_link_duration = move_membership_link_end_time - move_membership_link_start_time
+    move_org_team_duration = move_org_team_end_time - move_org_team_start_time
+    move_follow_issues_duration = move_follow_issues_end_time - move_follow_issues_start_time
+    move_email_duration = move_email_end_time - move_email_start_time
+    move_sms_duration = move_sms_end_time - move_sms_start_time
+    move_facebook_duration = move_facebook_end_time - move_facebook_start_time
+    move_twitter_duration = move_twitter_end_time - move_twitter_start_time
+    move_voter_contact_duration = move_voter_contact_end_time - move_voter_contact_start_time
+    move_voter_plan_duration = move_voter_plan_end_time - move_voter_plan_start_time
+    move_donations_duration = move_donations_end_time - move_donations_start_time
+    move_voter_guides_duration = move_voter_guides_end_time - move_voter_guides_start_time
+    move_shared_items_duration = move_shared_items_end_time - move_shared_items_start_time
+    move_activity_notices_duration = move_activity_notices_end_time - move_activity_notices_start_time
+    move_activity_posts_duration = move_activity_posts_end_time - move_activity_posts_start_time
+    move_activity_comments_duration = move_activity_comments_end_time - move_activity_comments_start_time
+    move_campaignx_duration = move_campaignx_end_time - move_campaignx_start_time
+    move_analytics_duration = move_analytics_end_time - move_analytics_start_time
+    merge_voter_duration = merge_voter_end_time - merge_voter_start_time
+    move_images_duration = move_images_end_time - move_images_start_time
+    send_emails_duration = send_emails_end_time - send_emails_start_time
+    final_position_repair_duration = final_position_repair_end_time - final_position_repair_start_time
+    time_difference = script_end_time - script_start_time
+    logger.error('(Ok) voter_merge_two_accounts_action'
+                 ' voter_linked_org took ' + "{:.6f}".format(voter_linked_org_duration) +
+                 ' seconds, move_apple took ' + "{:.6f}".format(move_apple_duration) +
+                 ' seconds, repair_positions took ' + "{:.6f}".format(repair_positions_duration) +
+                 ' seconds, move_positions took ' + "{:.6f}".format(move_positions_duration) +
+                 ' seconds, move_organization took ' + "{:.6f}".format(move_organization_duration) +
+                 ' seconds, move_friends took ' + "{:.6f}".format(move_friends_duration) +
+                 ' seconds, move_follows ' + "{:.6f}".format(move_follows_duration) +
+                 ' seconds, move_membership_link took ' + "{:.6f}".format(move_membership_link_duration) +
+                 ' seconds, move_org_team took ' + "{:.6f}".format(move_org_team_duration) +
+                 ' seconds, move_follow_issues took ' + "{:.6f}".format(move_follow_issues_duration) +
+                 ' seconds, move_email took ' + "{:.6f}".format(move_email_duration) +
+                 ' seconds, move_sms took ' + "{:.6f}".format(move_sms_duration) +
+                 ' seconds, move_facebook took ' + "{:.6f}".format(move_facebook_duration) +
+                 ' seconds, move_twitter took ' + "{:.6f}".format(move_twitter_duration) +
+                 ' seconds, move_voter_contact took ' + "{:.6f}".format(move_voter_contact_duration) +
+                 ' seconds, move_voter_plan took ' + "{:.6f}".format(move_voter_plan_duration) +
+                 ' seconds, move_donations took ' + "{:.6f}".format(move_donations_duration) +
+                 ' seconds, move_voter_guides took ' + "{:.6f}".format(move_voter_guides_duration) +
+                 ' seconds, move_shared_items took ' + "{:.6f}".format(move_shared_items_duration) +
+                 ' seconds, move_activity_notices took ' + "{:.6f}".format(move_activity_notices_duration) +
+                 ' seconds, move_activity_posts took ' + "{:.6f}".format(move_activity_posts_duration) +
+                 ' seconds, move_activity_comments took ' + "{:.6f}".format(move_activity_comments_duration) +
+                 ' seconds, move_campaignx took ' + "{:.6f}".format(move_campaignx_duration) +
+                 ' seconds, move_analytics took ' + "{:.6f}".format(move_analytics_duration) +
+                 ' seconds, merge_voter took ' + "{:.6f}".format(merge_voter_duration) +
+                 ' seconds, move_images took ' + "{:.6f}".format(move_images_duration) +
+                 ' seconds, send_emails took ' + "{:.6f}".format(send_emails_duration) +
+                 ' seconds, final_position_repair took ' + "{:.6f}".format(final_position_repair_duration) +
+                 ' seconds, total took ' + "{:.6f}".format(time_difference) + ' seconds')
 
     results = {
         'status':                       status,
         'success':                      success,
-        'voter_device_id':              voter_device_id,
-        'current_voter_found':          current_voter_found,
-        'email_owner_voter_found':      email_owner_voter_found,
-        'facebook_owner_voter_found':   facebook_owner_voter_found,
-        'invitation_owner_voter_found': invitation_owner_voter_found,
     }
-
     return results
 
 
@@ -4165,7 +4961,7 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
         split_off_voter_linked_organization_id, split_off_voter_linked_organization_we_vote_id)
     status += " " + move_positions_results['status']
 
-    # We do not transfer friends or friend invitations from voter to new_owner_voter
+    # We do not transfer friends or friend invitations from from_voter to to_voter
 
     # Duplicate and repair both voter guides to have updated names and photos
     voter_guide_results = duplicate_voter_guides(

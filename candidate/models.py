@@ -2355,11 +2355,13 @@ class CandidateCampaign(models.Model):
     # this to be null.
     contest_office_id = models.CharField(
         verbose_name="contest_office_id id", max_length=255, null=True, blank=True, db_index=True)
-    # We want to link the candidate to the contest with permanent ids so we can export and import
+    # We want to link the candidate to the contest with permanent ids, so we can export and import
     contest_office_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the office this candidate is running for", max_length=255, default=None,
         null=True, blank=True, unique=False, db_index=True)
     contest_office_name = models.CharField(verbose_name="name of the office", max_length=255, null=True, blank=True)
+    # Which office held is this candidate running for?
+    office_held_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
     # politician (internal) link to local We Vote Politician entry. During setup we need to allow this to be null.
     politician_id = models.BigIntegerField(verbose_name="politician unique identifier", null=True, blank=True)
     # The persistent We Vote unique ID of the Politician, so we can export and import into other databases.

@@ -2095,7 +2095,7 @@ def update_politicians_from_candidates_view(request):
         six_months = timedelta(weeks=26)
         six_months_ago = today - six_months
         queryset = queryset.exclude(date_last_updated_from_candidate__gt=six_months_ago)
-        politician_list = list(queryset[:1000])
+        politician_list = list(queryset[:3000])
     except Exception as e:
         status += "REPRESENTATIVE_QUERY_FAILED: " + str(e) + " "
 

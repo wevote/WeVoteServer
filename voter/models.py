@@ -4819,6 +4819,85 @@ def voter_setup(request):
     return final_results
 
 
+class VoterMergeLog(models.Model):
+    """
+    To capture status through the process
+    """
+    from_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True, unique=False)
+    log_datetime = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+    status = models.TextField(null=True, blank=True)
+    step_duration = models.PositiveIntegerField(default=None, null=True)
+    step_name = models.CharField(max_length=255, default=None, null=True)
+    success = models.BooleanField(default=False)
+    to_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True, unique=False)
+
+
+class VoterMergeStatus(models.Model):
+    """
+    To keep track of the process of merging voters and their attached organizations
+    """
+    from_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True, unique=False)
+    to_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True, unique=False)
+    from_linked_organization_we_vote_id = models.CharField(max_length=255, default=None, null=True, unique=False)
+    to_linked_organization_we_vote_id = models.CharField(max_length=255, default=None, null=True, unique=False)
+    move_apple_user_complete = models.BooleanField(default=False)
+    move_apple_user_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    repair_positions_complete = models.BooleanField(default=False)
+    repair_positions_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    move_positions_complete = models.BooleanField(default=False)
+    move_positions_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    move_organization_complete = models.BooleanField(default=False)
+    move_organization_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    move_friends_complete = models.BooleanField(default=False)
+    move_friends_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    move_follows_complete = models.BooleanField(default=False)
+    move_follows_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    move_membership_link_complete = models.BooleanField(default=False)
+    move_membership_link_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    move_org_team_complete = models.BooleanField(default=False)
+    move_org_team_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    move_follow_issues_complete = models.BooleanField(default=False)
+    move_follow_issues_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    move_email_complete = models.BooleanField(default=False)
+    move_email_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    move_sms_complete = models.BooleanField(default=False)
+    move_sms_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    move_facebook_complete = models.BooleanField(default=False)
+    move_facebook_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    move_twitter_complete = models.BooleanField(default=False)
+    move_twitter_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    move_voter_contact_complete = models.BooleanField(default=False)
+    move_voter_contact_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    move_voter_plan_complete = models.BooleanField(default=False)
+    move_voter_plan_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    move_donations_complete = models.BooleanField(default=False)
+    move_donations_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    move_voter_guides_complete = models.BooleanField(default=False)
+    move_voter_guides_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    move_shared_items_complete = models.BooleanField(default=False)
+    move_shared_items_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    move_activity_notices_complete = models.BooleanField(default=False)
+    move_activity_notices_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    move_activity_posts_complete = models.BooleanField(default=False)
+    move_activity_posts_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    move_activity_comments_complete = models.BooleanField(default=False)
+    move_activity_comments_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    move_campaignx_complete = models.BooleanField(default=False)
+    move_campaignx_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    move_analytics_complete = models.BooleanField(default=False)
+    move_analytics_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    merge_voter_complete = models.BooleanField(default=False)
+    merge_voter_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    move_images_complete = models.BooleanField(default=False)
+    move_images_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    send_emails_complete = models.BooleanField(default=False)
+    send_emails_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    final_position_repair_complete = models.BooleanField(default=False)
+    final_position_repair_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    total_merge_complete = models.BooleanField(default=False)
+    total_merge_milliseconds = models.PositiveIntegerField(default=None, null=True)
+
+
 class VoterMetricsManager(models.Manager):
     def fetch_voter_count_with_sign_in(self):
         return self.fetch_voter_count(

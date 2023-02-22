@@ -40,7 +40,7 @@ from support_oppose_deciding.controllers import voter_opposing_save, voter_stop_
     voter_stop_supporting_save, voter_supporting_save_for_api
 from voter.controllers import delete_all_voter_information_permanently, \
     voter_address_retrieve_for_api, voter_create_for_api, voter_merge_two_accounts_for_api, \
-    voter_merge_two_accounts_action, voter_photo_save_for_api, voter_retrieve_for_api, \
+    voter_merge_two_accounts_action_schedule, voter_photo_save_for_api, voter_retrieve_for_api, \
     voter_save_photo_from_file_reader, voter_sign_out_for_api, voter_split_into_two_accounts_for_api, \
     voter_merge_two_accounts_for_facebook
 from voter.controllers_contacts import delete_all_voter_contact_emails_for_voter, save_google_contacts, \
@@ -1203,6 +1203,8 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
     :param request:
     :return:
     """
+    status = ''
+    success = True
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     save_auth_data = request.GET.get('save_auth_data', False)
     save_auth_data = positive_value_exists(save_auth_data)
@@ -1244,17 +1246,24 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
         facebook_background_image_offset_x=facebook_background_image_offset_x,
         facebook_background_image_offset_y=facebook_background_image_offset_y,
     )
+    status += results['status']
+    if not results['success']:
+        success = False
 
     t1 = time()
     t2 = time()
 
-    status = results['status']
+    merge_from_voter_we_vote_id = ''
+    merge_to_voter_we_vote_id = ''
     merge_occurred = False
     new_owner_voter = None
     if merge_two_accounts:
         voter_manager = VoterManager()
         # voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
         from_voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+        if not from_voter_results['success']:
+            status += from_voter_results['status']
+            success = False
         if from_voter_results['voter_found']:
             from_voter = from_voter_results['voter']
             merge_status, new_owner_voter, error_results = voter_merge_two_accounts_for_facebook(
@@ -1290,11 +1299,23 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
                     return results
 
                 voter_device_link = voter_device_link_results['voter_device_link']
-                part2_results = voter_merge_two_accounts_action(from_voter, new_owner_voter, voter_device_link,
-                                                                status=status, email_owner_voter_found=False,
-                                                                facebook_owner_voter_found=True,
-                                                                invitation_owner_voter_found=False)
+                part2_results = voter_merge_two_accounts_action_schedule(
+                    from_voter=from_voter,
+                    to_voter=new_owner_voter,
+                    voter_device_link=voter_device_link)
                 status += part2_results['status']
+                if not part2_results['success']:
+                    success = False
+                try:
+                    merge_from_voter_we_vote_id = from_voter.we_vote_id
+                except Exception as e:
+                    status += "COULD_NOT_GET_MERGE_FROM_VOTER_WE_VOTE_ID: " + str(e) + " "
+                    success = False
+                try:
+                    merge_to_voter_we_vote_id = new_owner_voter.we_vote_id
+                except Exception as e:
+                    status += "COULD_NOT_GET_MERGE_TO_VOTER_WE_VOTE_ID: " + str(e) + " "
+                    success = False
         else:
             status += ' NO_EXISTING_FACEBOOK_LOGIN_VOTER_FOUND_TO_MERGE_WITH_CURRENT_VOTER'
     t3 = time()
@@ -1309,11 +1330,13 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
 
 
     json_data = {
-        'status':                   results['status'],
-        'success':                  results['success'],
+        'status':                   status,
+        'success':                  success,
         'voter_device_id':          voter_device_id,
         'facebook_save_attempted':  True,
         'facebook_sign_in_saved':   results['facebook_sign_in_saved'],
+        'merge_from_voter_we_vote_id':  merge_from_voter_we_vote_id,
+        'merge_to_voter_we_vote_id':  merge_to_voter_we_vote_id,
         'save_auth_data':           save_auth_data,
         'save_profile_data':        save_profile_data,
         'save_photo_data':          save_photo_data,
@@ -1840,6 +1863,45 @@ def voter_retrieve_view(request):  # voterRetrieve
     :param request:
     :return:
     """
+    status = ''
+    success = True
+    # If the merge variables come in, trigger a sign in merge before calling voter_retrieve_for_api
+    # From a security point of view, we don't care who triggers this merge request because it will only
+    #  execute if scheduled previously.
+    merge_from_voter_we_vote_id = request.GET.get('merge_from_voter_we_vote_id', '')
+    merge_to_voter_we_vote_id = request.GET.get('merge_to_voter_we_vote_id', '')
+    if positive_value_exists(merge_from_voter_we_vote_id) and positive_value_exists(merge_to_voter_we_vote_id):
+        from_voter = None
+        to_voter = None
+        voter_merge_status = None
+        try:
+            from_voter = Voter.objects.get(we_vote_id=merge_from_voter_we_vote_id)
+            to_voter = Voter.objects.get(we_vote_id=merge_to_voter_we_vote_id)
+        except Exception as e:
+            status += "VOTER_MERGE_STATUS_RETRIEVE_VOTER_PROBLEM: " + str(e) + " "
+            success = False
+
+        if success:
+            try:
+                from voter.models import VoterMergeStatus
+                voter_merge_status = VoterMergeStatus.objects.get(
+                    from_voter_we_vote_id=merge_from_voter_we_vote_id,
+                    to_voter_we_vote_id=merge_to_voter_we_vote_id,
+                )
+            except Exception as e:
+                status += "VOTER_MERGE_STATUS_RETRIEVE_PROBLEM: " + str(e) + " "
+                success = False
+        if success:
+            from voter.controllers import voter_merge_two_accounts_action
+            results = voter_merge_two_accounts_action(
+                from_voter=from_voter,
+                to_voter=to_voter,
+                voter_merge_status=voter_merge_status,
+            )
+            if not results['success']:
+                success = False
+            status += results['status']
+
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     user_agent_string = request.META['HTTP_USER_AGENT']
     user_agent_object = get_user_agent(request)
@@ -1856,6 +1918,12 @@ def voter_retrieve_view(request):  # voterRetrieve
         voter_device_id=voter_device_id,
         voter_location_results=voter_location_results,
     )
+    # Add status from merge voter routine if it happened
+    if positive_value_exists(status):
+        modified_status = status + results['status']
+        results['status'] = modified_status
+    if not success:
+        results['success'] = False
     return HttpResponse(json.dumps(results), content_type='application/json')
 
 
@@ -3060,11 +3128,13 @@ def voter_verify_secret_code_view(request):  # voterVerifySecretCode
     :param request:
     :return:
     """
+    code_sent_to_sms_phone_number = request.GET.get('code_sent_to_sms_phone_number', None)
+    merge_from_voter_we_vote_id = ''
+    merge_to_voter_we_vote_id = ''
+    secret_code = request.GET.get('secret_code', None)
     status = ''
     success = True
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    secret_code = request.GET.get('secret_code', None)
-    code_sent_to_sms_phone_number = request.GET.get('code_sent_to_sms_phone_number', None)
 
     voter_device_link_manager = VoterDeviceLinkManager()
     voter_manager = VoterManager()
@@ -3135,14 +3205,29 @@ def voter_verify_secret_code_view(request):  # voterVerifySecretCode
 
                 if existing_verified_sms_found:
                     # Merge existing account with new account
-                    merge_results = voter_merge_two_accounts_action(
-                        voter, new_owner_voter, voter_device_link, status=status)
+                    merge_results = voter_merge_two_accounts_action_schedule(
+                        from_voter=voter,
+                        to_voter=new_owner_voter,
+                        voter_device_link=voter_device_link)
                     status += merge_results['status']
-                    success = merge_results['success']
+                    if not merge_results['success']:
+                        success = False
+                    try:
+                        merge_from_voter_we_vote_id = voter.we_vote_id
+                    except Exception as e:
+                        status += "COULD_NOT_GET_FROM_VOTER_WE_VOTE_ID: " + str(e) + " "
+                        success = False
+                    try:
+                        merge_to_voter_we_vote_id = new_owner_voter.we_vote_id
+                    except Exception as e:
+                        status += "COULD_NOT_GET_TO_VOTER_WE_VOTE_ID: " + str(e) + " "
+                        success = False
                 else:
                     # Find and verify the unverified email we are verifying
                     sms_results = sms_manager.verify_sms_phone_number_from_secret_key(
                         voter_device_link.sms_secret_key)
+                    if not sms_results['success']:
+                        success = False
                     if sms_results['sms_phone_number_found']:
                         sms_phone_number = sms_results['sms_phone_number']
                         status += "SMS_FOUND_FROM_VERIFY "
@@ -3208,10 +3293,23 @@ def voter_verify_secret_code_view(request):  # voterVerifySecretCode
 
                 if existing_verified_email_address_found:
                     # Merge existing account with new account
-                    merge_results = voter_merge_two_accounts_action(
-                        voter, new_owner_voter, voter_device_link, status=status)
+                    merge_results = voter_merge_two_accounts_action_schedule(
+                        from_voter=voter,
+                        to_voter=new_owner_voter,
+                        voter_device_link=voter_device_link)
                     status += merge_results['status']
-                    success = merge_results['success']
+                    if not merge_results['success']:
+                        success = False
+                    try:
+                        merge_from_voter_we_vote_id = voter.we_vote_id
+                    except Exception as e:
+                        status += "COULD_NOT_GET_FROM_VOTER_WE_VOTE_ID: " + str(e) + " "
+                        success = False
+                    try:
+                        merge_to_voter_we_vote_id = new_owner_voter.we_vote_id
+                    except Exception as e:
+                        status += "COULD_NOT_GET_TO_VOTER_WE_VOTE_ID: " + str(e) + " "
+                        success = False
                 else:
                     # Find and verify the unverified email we are verifying
                     email_results = email_manager.verify_email_address_object_from_secret_key(
@@ -3225,6 +3323,7 @@ def voter_verify_secret_code_view(request):  # voterVerifySecretCode
                                 voter, email_address_object)
                         except Exception as e:
                             status += "UNABLE_TO_CONNECT_VERIFIED_EMAIL_WITH_THIS_ACCOUNT " + str(e) + " "
+                            success = False
                     else:
                         status += email_results['status']
 
@@ -3238,12 +3337,14 @@ def voter_verify_secret_code_view(request):  # voterVerifySecretCode
                     status += clear_results['status']
 
     json_data = {
-        'status':                                   status,
-        'success':                                  success,
         'incorrect_secret_code_entered':            incorrect_secret_code_entered,
+        'merge_from_voter_we_vote_id':              merge_from_voter_we_vote_id,
+        'merge_to_voter_we_vote_id':                merge_to_voter_we_vote_id,
         'number_of_tries_remaining_for_this_code':  number_of_tries_remaining_for_this_code,
         'secret_code_system_locked_for_this_voter_device_id': secret_code_system_locked_for_this_voter_device_id,
         'secret_code_verified':                     secret_code_verified,
+        'status':                                   status,
+        'success':                                  success,
         'voter_must_request_new_code':              voter_must_request_new_code,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')

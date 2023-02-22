@@ -227,9 +227,9 @@ class Representative(models.Model):
     photo_url_from_google_civic = models.TextField(null=True, blank=True)
     # The full name of the party the representative is a member of.
     political_party = models.CharField(verbose_name="political_party", max_length=255, null=True, blank=True)
+    politician_deduplication_attempted = models.BooleanField(default=False)
     # politician (internal) link to local We Vote Politician entry. During setup, we need to allow this to be null.
     politician_id = models.BigIntegerField(verbose_name="politician unique identifier", null=True, blank=True)
-    politician_deduplication_attempted = models.BooleanField(default=False)
     politician_match_attempted = models.BooleanField(default=False)
     # The persistent We Vote unique ID of the Politician, so we can export and import into other databases.
     politician_we_vote_id = models.CharField(max_length=255, null=True, blank=True)
@@ -268,6 +268,9 @@ class Representative(models.Model):
     twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
                                            max_length=255, null=True, blank=True)
     vote_usa_politician_id = models.CharField(max_length=255, null=True, unique=False)
+    is_battleground_race_2022 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2023 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2024 = models.BooleanField(default=False, null=False)
 
     # Which representative image is currently active?
     profile_image_type_currently_active = models.CharField(

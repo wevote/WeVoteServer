@@ -66,7 +66,7 @@ CHOSEN_SOCIAL_SHARE_MASTER_MAX_HEIGHT = 900
 
 def delete_membership_link_entries_for_voter(from_voter_we_vote_id):
     status = ''
-    success = False
+    success = True
     voter_member_entries_deleted = 0
     voter_member_entries_not_deleted = 0
 
@@ -90,6 +90,7 @@ def delete_membership_link_entries_for_voter(from_voter_we_vote_id):
             voter_member_entries_deleted += 1
         except Exception as e:
             status += "COULD_NOT_SAVE_ORGANIZATION_MEMBERSHIP_LINK: " + str(e) + ' '
+            success = False
             voter_member_entries_not_deleted += 1
 
     results = {
@@ -104,7 +105,7 @@ def delete_membership_link_entries_for_voter(from_voter_we_vote_id):
 
 def delete_organization_membership_link_for_organization(from_organization_we_vote_id):
     status = ''
-    success = False
+    success = True
     membership_link_entries_deleted = 0
     membership_link_entries_not_deleted = 0
 
@@ -118,6 +119,8 @@ def delete_organization_membership_link_for_organization(from_organization_we_vo
             membership_link_entries_deleted += 1
         except Exception as e:
             membership_link_entries_not_deleted += 1
+            status += "COULD_NOT_DELETE_MEMBERSHIP_LINK: " + str(e) + " "
+            success = False
 
     results = {
         'status':                               status,
@@ -366,7 +369,7 @@ def organization_analytics_by_voter_for_api(voter_device_id='',
                                             external_voter_id='', voter_we_vote_id='',
                                             google_civic_election_id=0):
     status = ""
-    success = False
+    success = True
     is_signed_into_organization_account = False
     election_list = []
     voter_list = []
@@ -386,6 +389,7 @@ def organization_analytics_by_voter_for_api(voter_device_id='',
 
     if not positive_value_exists(organization_we_vote_id):
         status += "ORGANIZATION_WE_VOTE_ID_MISSING "
+        success = False
         results = {
             'success':                  success,
             'status':                   status,
@@ -398,6 +402,7 @@ def organization_analytics_by_voter_for_api(voter_device_id='',
         or positive_value_exists(organization_api_pass_code)
     if not has_authorization_variables_required:
         status += "ORGANIZATION_PASS_CODE_MISSING "
+        success = False
         results = {
             'success':                  success,
             'status':                   status,
@@ -414,7 +419,6 @@ def organization_analytics_by_voter_for_api(voter_device_id='',
             organization = results['organization']
         else:
             status += "ORGANIZATION_ANALYTICS_BY_VOTER_NOT_FOUND "
-            success = True
             results = {
                 'success':                  success,
                 'status':                   status,
@@ -430,7 +434,6 @@ def organization_analytics_by_voter_for_api(voter_device_id='',
             organization = results['organization']
         else:
             status += "ORGANIZATION_ANALYTICS_BY_VOTER_NOT_FOUND_WITH_PASS_CODE "
-            success = True
             results = {
                 'success':                  success,
                 'status':                   status,
@@ -458,7 +461,6 @@ def organization_analytics_by_voter_for_api(voter_device_id='',
     elections_retrieved_from_database = {}
     analytics_manager = AnalyticsManager()
     election_manager = ElectionManager()
-    success = True
     results = analytics_manager.retrieve_analytics_action_list(
         voter_we_vote_id_list=voter_we_vote_id_list,
         google_civic_election_id=google_civic_election_id,
@@ -585,12 +587,13 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id):
     :return:
     """
     status = ""
-    success = False
+    success = True
     tweets_saved = None
     tweets_not_saved = None
 
     if not positive_value_exists(organization_we_vote_id):
         status = "ORGANIZATION_WE_VOTE_ID_MISSING"
+        success = False
         results = {
             'success':          success,
             'status':           status,
@@ -613,6 +616,7 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id):
         new_tweets = api.user_timeline(screen_name=organization_twitter_id)
     except tweepy.errors.HTTPException as e:
         status = "ORGANIZATION_RETRIEVE_TWEETS_FROM_TWITTER_AUTH_FAIL_HTTPException: " + str(e) + " "
+        success = False
         results = {
             'success': success,
             'status': status,
@@ -621,7 +625,8 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id):
         }
         return results
     except tweepy.TweepyException as e:
-        status = "ORGANIZATION_RETRIEVE_TWEETS_FROM_TWITTER_AUTH_FAIL "
+        status = "ORGANIZATION_RETRIEVE_TWEETS_FROM_TWITTER_AUTH_FAIL: " + str(e) + " "
+        success = False
         results = {
             'success': success,
             'status': status,
@@ -642,6 +647,7 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id):
             tweets_saved += 1
         else:
             tweets_not_saved += 1
+            success = False
 
     results = {
         'success':          success,
@@ -661,13 +667,14 @@ def organization_analyze_tweets(organization_we_vote_id):
     :return:
     """
     status = ""
-    success = False
+    success = True
     hastags_retrieved = None
     cached_tweets = None
     unique_hashtags = None
     organization_link_to_hashtag_results = None
 
     if not positive_value_exists(organization_we_vote_id):
+        success = False
         results = {
             'status': status,
             'success': success,
@@ -681,6 +688,9 @@ def organization_analyze_tweets(organization_we_vote_id):
     twitter_user_manager = TwitterUserManager()
     retrieve_tweets_cached_locally_results = twitter_user_manager.retrieve_tweets_cached_locally(
         organization_we_vote_id)
+    if not retrieve_tweets_cached_locally_results['success']:
+        status += retrieve_tweets_cached_locally_results['status']
+        success = False
     if retrieve_tweets_cached_locally_results['status'] == 'NO_TWEETS_FOUND':
         status = "NO_TWEETS_CACHED_LOCALLY",
         results = {
@@ -879,13 +889,14 @@ def merge_these_two_organizations(organization1_we_vote_id, organization2_we_vot
 
 def move_membership_link_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
     status = ''
-    success = False
+    success = True
     voter_member_entries_moved = 0
     voter_member_entries_not_moved = 0
 
     if not positive_value_exists(from_voter_we_vote_id) or not positive_value_exists(to_voter_we_vote_id):
         status += "MOVE_MEMBERSHIP_LINK_ENTRIES_TO_ANOTHER_VOTER-" \
                   "Missing either from_voter_we_vote_id or to_voter_we_vote_id "
+        success = False
         results = {
             'status':                   status,
             'success':                  success,
@@ -920,6 +931,7 @@ def move_membership_link_entries_to_another_voter(from_voter_we_vote_id, to_vote
             voter_member_entries_moved += 1
         except Exception as e:
             status += "COULD_NOT_SAVE_ORGANIZATION_MEMBERSHIP_LINK: " + str(e) + ' '
+            success = False
             voter_member_entries_not_moved += 1
 
     results = {
@@ -935,7 +947,7 @@ def move_membership_link_entries_to_another_voter(from_voter_we_vote_id, to_vote
 
 def move_organization_data_to_another_organization(from_organization_we_vote_id, to_organization_we_vote_id):
     status = ""
-    success = False
+    success = True
     from_organization = None
     to_organization = None
     to_organization_found = False
@@ -1094,6 +1106,7 @@ def move_organization_data_to_another_organization(from_organization_we_vote_id,
             data_transfer_complete = True
         except Exception as e:
             status += "COULD_NOT_SAVE_TO_ORGANIZATION: " + str(e) + " "
+            success = False
     else:
         data_transfer_complete = True
 
@@ -1240,9 +1253,13 @@ def move_organization_team_member_entries_to_another_voter(
     return results
 
 
-def move_organization_to_another_complete(from_organization_id, from_organization_we_vote_id,
-                                          to_organization_id, to_organization_we_vote_id,
-                                          to_voter_id, to_voter_we_vote_id):
+def move_organization_to_another_complete(
+        from_organization_id,
+        from_organization_we_vote_id,
+        to_organization_id,
+        to_organization_we_vote_id,
+        to_voter_id,
+        to_voter_we_vote_id):
     status = ""
     success = True
     to_organization_found = False
@@ -1291,32 +1308,47 @@ def move_organization_to_another_complete(from_organization_id, from_organizatio
         from_organization_id, from_organization_we_vote_id,
         to_organization_id, to_organization_we_vote_id)
     status += " " + move_organization_followers_results['status']
+    if not move_organization_followers_results['success']:
+        success = False
 
     # If anyone has been linked with external_voter_id as a member of the old voter's organization,
     #  move those followers to the new voter's organization
     move_organization_membership_link_results = move_organization_membership_link_to_another_organization(
         from_organization_we_vote_id, to_organization_we_vote_id)
     status += " " + move_organization_membership_link_results['status']
+    if not move_organization_membership_link_results['success']:
+        success = False
 
     move_organization_team_member_results = move_organization_team_member_entries_to_another_organization(
         from_organization_we_vote_id, to_organization_we_vote_id)
     status += " " + move_organization_team_member_results['status']
+    if not move_organization_team_member_results['success']:
+        success = False
 
     # Transfer positions from "from" organization to the "to" organization
     move_positions_to_another_org_results = move_positions_to_another_organization(
-        from_organization_id, from_organization_we_vote_id,
-        to_organization_id, to_organization_we_vote_id,
-        to_voter_id, to_voter_we_vote_id)
+        from_organization_id,
+        from_organization_we_vote_id,
+        to_organization_id,
+        to_organization_we_vote_id,
+        to_voter_id,
+        to_voter_we_vote_id)
     status += " " + move_positions_to_another_org_results['status']
+    if not move_positions_to_another_org_results['success']:
+        success = False
 
     move_donation_results = move_donation_info_to_another_organization(
         from_organization_we_vote_id, to_organization_we_vote_id)
     status += " " + move_donation_results['status']
+    if not move_donation_results['success']:
+        success = False
 
     # There might be some useful information in the from_voter's organization that needs to be moved
     move_organization_results = move_organization_data_to_another_organization(
         from_organization_we_vote_id, to_organization_we_vote_id)
     status += " " + move_organization_results['status']
+    if not move_organization_results['success']:
+        success = False
     if positive_value_exists(move_organization_results['to_organization_found']):
         to_organization_found = True
         to_organization = move_organization_results['to_organization']
@@ -1325,16 +1357,19 @@ def move_organization_to_another_complete(from_organization_id, from_organizatio
         move_campaignx_results = move_campaignx_to_another_organization(
             from_organization_we_vote_id, to_organization_we_vote_id, to_organization_name)
         status += " " + move_campaignx_results['status']
+        if not move_campaignx_results['success']:
+            success = False
 
     # Finally, delete the from_voter's organization
-    if move_organization_results['data_transfer_complete']:
+    if success and move_organization_results['data_transfer_complete']:
         from_organization = move_organization_results['from_organization']
         try:
             from_organization.delete()
         except Exception as e:
             status += "UNABLE_TO_DELETE_FROM_ORGANIZATION: " + str(e) + " "
+            success = False
 
-    # We need to make sure to update voter.linked_organization_we_vote_id outside of this routine
+    # We need to make sure to update voter.linked_organization_we_vote_id outside this routine
 
     results = {
         'status':                   status,
@@ -1347,7 +1382,7 @@ def move_organization_to_another_complete(from_organization_id, from_organizatio
 
 def move_organization_membership_link_to_another_organization(from_organization_we_vote_id, to_organization_we_vote_id):
     status = ''
-    success = False
+    success = True
     membership_link_entries_moved = 0
     membership_link_entries_not_moved = 0
 
@@ -1362,6 +1397,8 @@ def move_organization_membership_link_to_another_organization(from_organization_
             membership_link_entries_moved += 1
         except Exception as e:
             membership_link_entries_not_moved += 1
+            status += "COULD_NOT_UPDATE_MEMBER_LINK: " + str(e) + " "
+            success = False
 
     results = {
         'status': status,
@@ -1381,6 +1418,9 @@ def transfer_voter_images_to_organization(voter):
         if voter.linked_organization_we_vote_id:
             organization_manager = OrganizationManager()
             results = organization_manager.retrieve_organization_from_we_vote_id(voter.linked_organization_we_vote_id)
+            if not results['success']:
+                status += results['status']
+                success = False
             if results['organization_found']:
                 organization = results['organization']
                 organization.we_vote_hosted_profile_image_url_large = voter.we_vote_hosted_profile_image_url_large
@@ -3040,25 +3080,33 @@ def push_organization_data_to_other_table_caches(organization_we_vote_id):
 def retrieve_organizations_followed(voter_id, auto_followed_from_twitter_suggestion=False):
     organization_list_found = False
     organization_list = []
+    status = ''
+    success = True
 
     follow_organization_list_manager = FollowOrganizationList()
-    organization_ids_followed_by_voter = \
-        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(
-            voter_id, auto_followed_from_twitter_suggestion=auto_followed_from_twitter_suggestion)
+    try:
+        organization_ids_followed_by_voter = \
+            follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(
+                voter_id, auto_followed_from_twitter_suggestion=auto_followed_from_twitter_suggestion)
+    except Exception as e:
+        organization_ids_followed_by_voter = []
+        status += "RETRIEVE_FOLLOW_ORGANIZATION_FAILED: " + str(e) + " "
+        success = False
 
-    organization_list_manager = OrganizationListManager()
-    results = organization_list_manager.retrieve_organizations_by_id_list(organization_ids_followed_by_voter)
-    if results['organization_list_found']:
-        organization_list = results['organization_list']
-        success = True
-        if len(organization_list):
-            organization_list_found = True
-            status = 'SUCCESSFUL_RETRIEVE_OF_ORGANIZATIONS_FOLLOWED'
+    if success:
+        organization_list_manager = OrganizationListManager()
+        results = organization_list_manager.retrieve_organizations_by_id_list(organization_ids_followed_by_voter)
+        if results['organization_list_found']:
+            organization_list = results['organization_list']
+            if len(organization_list):
+                organization_list_found = True
+                status = 'SUCCESSFUL_RETRIEVE_OF_ORGANIZATIONS_FOLLOWED'
+            else:
+                status = 'ORGANIZATIONS_FOLLOWED_NOT_FOUND'
         else:
-            status = 'ORGANIZATIONS_FOLLOWED_NOT_FOUND'
-    else:
-        status = results['status']
-        success = results['success']
+            status = results['status']
+            if not results['success']:
+                success = False
 
     results = {
         'success':                      success,

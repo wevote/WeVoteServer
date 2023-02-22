@@ -108,16 +108,20 @@ def sign_in_with_apple_view(request):  # appleSignInSave appleSignInSaveView
         voter_starting_process=voter_starting_process,
     )
     status += merge_results['status']
+    merge_from_voter_we_vote_id = merge_results['merge_from_voter_we_vote_id']
+    merge_to_voter_we_vote_id = merge_results['merge_to_voter_we_vote_id']
 
     if DEBUG_LOGGING:
         logger.error('awsApple (after apple_sign_in_save_merge_if_needed): ' + status)
 
     json_data = {
-        'status':                                   status,
-        'success':                                  True,
+        'merge_from_voter_we_vote_id':              merge_from_voter_we_vote_id,
+        'merge_to_voter_we_vote_id':                merge_to_voter_we_vote_id,
         'previously_signed_in_voter':               previously_signed_in_voter,
         'previously_signed_in_voter_found':         previously_signed_in_voter_found,
         'previously_signed_in_voter_we_vote_id':    previously_signed_in_voter_we_vote_id,
+        'status':                                   status,
+        'success':                                  True,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -369,6 +373,8 @@ def sign_in_with_apple_oauth_redirect_view(request):  # appleSignInOauthRedirect
         voter_device_link=voter_device_link,
         voter_starting_process=voter_starting_process,
     )
+    # 2023-02-21 Note that this path doesn't trigger 'voter_merge_two_accounts_action',
+    #  using merge_from_voter_we_vote_id and merge_to_voter_we_vote_id
     status += merge_results['status']
     if DEBUG_LOGGING:
         logger.error('awsApple ' + status)

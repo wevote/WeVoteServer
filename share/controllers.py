@@ -73,6 +73,7 @@ def move_shared_items_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_i
                         shared_by_organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-SHARED_ITEM-SHARED_BY_VOTER_WE_VOTE_ID-INCLUDING_ORG: " + str(e) + " "
+            success = False
         try:
             SharedLinkClicked.objects.filter(shared_by_voter_we_vote_id__iexact=from_voter_we_vote_id) \
                 .update(shared_by_voter_we_vote_id=to_voter_we_vote_id,
@@ -82,6 +83,7 @@ def move_shared_items_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_i
                         viewed_by_organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-SHARED_LINK_CLICKED-SHARED_BY_VOTER_WE_VOTE_ID-INCLUDING_ORG: " + str(e) + " "
+            success = False
         try:
             SharedPermissionsGranted.objects.filter(shared_by_voter_we_vote_id__iexact=from_voter_we_vote_id) \
                 .update(shared_by_voter_we_vote_id=to_voter_we_vote_id,
@@ -91,12 +93,14 @@ def move_shared_items_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_i
                         shared_to_organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-SHARED_PERMISSIONS_GRANTED-SHARED_BY_VOTER_WE_VOTE_ID-INCLUDING_ORG: " + str(e) + " "
+            success = False
     else:
         try:
             SharedItem.objects.filter(shared_by_voter_we_vote_id__iexact=from_voter_we_vote_id)\
                 .update(shared_by_voter_we_vote_id=to_voter_we_vote_id)
         except Exception as e:
             status += "FAILED-SHARED_ITEM-SHARED_BY_VOTER_WE_VOTE_ID: " + str(e) + " "
+            success = False
         try:
             SharedLinkClicked.objects.filter(shared_by_voter_we_vote_id__iexact=from_voter_we_vote_id) \
                 .update(shared_by_voter_we_vote_id=to_voter_we_vote_id)
@@ -104,6 +108,7 @@ def move_shared_items_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_i
                 .update(viewed_by_voter_we_vote_id=to_voter_we_vote_id)
         except Exception as e:
             status += "FAILED-SHARED_LINK_CLICKED-SHARED_BY_VOTER_WE_VOTE_ID: " + str(e) + " "
+            success = False
         try:
             SharedPermissionsGranted.objects.filter(shared_by_voter_we_vote_id__iexact=from_voter_we_vote_id) \
                 .update(shared_by_voter_we_vote_id=to_voter_we_vote_id)
@@ -111,6 +116,7 @@ def move_shared_items_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_i
                 .update(shared_to_voter_we_vote_id=to_voter_we_vote_id)
         except Exception as e:
             status += "FAILED-SHARED_PERMISSIONS_GRANTED-SHARED_BY_VOTER_WE_VOTE_ID: " + str(e) + " "
+            success = False
 
     if positive_value_exists(from_organization_we_vote_id) and positive_value_exists(to_organization_we_vote_id):
         try:
@@ -120,6 +126,7 @@ def move_shared_items_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_i
                 .update(shared_by_organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-SHARED_ITEM-SITE_OWNER_ORGANIZATION_WE_VOTE_ID: " + str(e) + " "
+            success = False
         try:
             SharedLinkClicked.objects.filter(shared_by_organization_we_vote_id__iexact=from_organization_we_vote_id) \
                 .update(shared_by_organization_we_vote_id=to_organization_we_vote_id)
@@ -127,6 +134,7 @@ def move_shared_items_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_i
                 .update(viewed_by_organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-SHARED_LINK_CLICKED-SHARED_BY_ORGANIZATION_WE_VOTE_ID: " + str(e) + " "
+            success = False
         try:
             SharedPermissionsGranted.objects\
                 .filter(shared_by_organization_we_vote_id__iexact=from_organization_we_vote_id) \
@@ -136,6 +144,7 @@ def move_shared_items_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_i
                 .update(shared_to_organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-SHARED_PERMISSIONS_GRANTED-SHARED_BY_ORGANIZATION_WE_VOTE_ID: " + str(e) + " "
+            success = False
     else:
         status += "MOVE_SHARED_ITEMS-MISSING_EITHER_FROM_OR_TO_ORGANIZATION_WE_VOTE_ID "
 

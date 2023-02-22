@@ -258,7 +258,7 @@ def issue_list_view(request):
 
                     issue_list_query = issue_list_query.filter(final_filters)
 
-        issue_list_query = issue_list_query.order_by('issue_name')
+        issue_list_query = issue_list_query.order_by('forced_sort_order', 'issue_name')
         issue_list_count = issue_list_query.count()
 
         issue_list = list(issue_list_query)
@@ -470,6 +470,7 @@ def issue_edit_process_view(request):
 
     considered_left = request.POST.get('considered_left', False)
     considered_right = request.POST.get('considered_right', False)
+    forced_sort_order = request.POST.get('forced_sort_order', False)
     hide_issue = request.POST.get('hide_issue', False)
     issue_we_vote_id = request.POST.get('issue_we_vote_id', False)
     issue_name = request.POST.get('issue_name', False)
@@ -557,6 +558,9 @@ def issue_edit_process_view(request):
 
     if issue_on_stage_found:
         # Update
+        if forced_sort_order is not False:
+            forced_sort_order = forced_sort_order if positive_value_exists(forced_sort_order) else None
+            issue_on_stage.forced_sort_order = convert_to_int(forced_sort_order)
         if issue_name is not False:
             issue_on_stage.issue_name = issue_name
         if issue_description is not False:
@@ -584,6 +588,9 @@ def issue_edit_process_view(request):
             issue_on_stage = Issue(
                 issue_name=issue_name,
             )
+            if forced_sort_order is not False:
+                forced_sort_order = forced_sort_order if positive_value_exists(forced_sort_order) else None
+                issue_on_stage.forced_sort_order = convert_to_int(forced_sort_order)
             if issue_description is not False:
                 issue_on_stage.issue_description = issue_description
             if issue_icon_local_path is not None:

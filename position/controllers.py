@@ -5,9 +5,7 @@
 from .models import PositionEntered, PositionForFriends, PositionManager, PositionListManager, ANY_STANCE, \
     FRIENDS_AND_PUBLIC, FRIENDS_ONLY, PUBLIC_ONLY, SHOW_PUBLIC, THIS_ELECTION_ONLY, ALL_OTHER_ELECTIONS, \
     ALL_ELECTIONS, SUPPORT, OPPOSE, INFORMATION_ONLY, NO_STANCE
-from ballot.controllers import figure_out_google_civic_election_id_voter_is_watching, \
-    figure_out_google_civic_election_id_voter_is_watching_by_voter_id
-from ballot.models import BallotItemListManager, OFFICE, CANDIDATE, MEASURE
+from ballot.models import OFFICE, CANDIDATE, MEASURE
 from candidate.models import CandidateCampaign, CandidateManager, CandidateListManager, \
     CandidateToOfficeLink
 from config.base import get_environment_variable
@@ -15,7 +13,7 @@ from django.db.models import Q
 from django.http import HttpResponse
 from election.models import ElectionManager, fetch_election_state
 from exception.models import handle_record_not_saved_exception
-from follow.models import FollowOrganizationManager, FollowOrganizationList
+from follow.models import FollowOrganizationManager
 from friend.models import FriendManager
 from measure.models import ContestMeasure, ContestMeasureManager, ContestMeasureListManager
 from office.models import ContestOfficeManager, ContestOfficeListManager
@@ -24,21 +22,20 @@ from organization.models import Organization, OrganizationManager, PUBLIC_FIGURE
 from share.models import ShareManager
 import json
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager
-from voter_guide.models import ORGANIZATION, VOTER, VoterGuideManager
+from voter_guide.models import ORGANIZATION, VoterGuideManager
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists, process_request_from_master, \
-    convert_to_int, is_link_to_video, is_speaker_type_organization, is_speaker_type_public_figure
+    convert_to_int, is_link_to_video, is_speaker_type_organization
 
 logger = wevote_functions.admin.get_logger(__name__)
 
-UNKNOWN = 'U'
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 POSITIONS_SYNC_URL = get_environment_variable("POSITIONS_SYNC_URL")  # positionsSyncOut
 
 
 def delete_positions_for_organization(from_organization_id, from_organization_we_vote_id):
     status = ''
-    success = False
+    success = True
     position_entries_deleted = 0
     position_entries_not_deleted = 0
     position_list_manager = PositionListManager()
@@ -47,6 +44,7 @@ def delete_positions_for_organization(from_organization_id, from_organization_we
     stance_we_are_looking_for = ANY_STANCE
     friends_vs_public = FRIENDS_ONLY
 
+    # 2023-02-19 TODO: We unfortunately don't have a way of telling if this fails internally
     from_position_private_list = position_list_manager.retrieve_all_positions_for_organization(
         organization_id=from_organization_id,
         organization_we_vote_id=from_organization_we_vote_id,
@@ -59,6 +57,8 @@ def delete_positions_for_organization(from_organization_id, from_organization_we
             position_entries_deleted += 1
         except Exception as e:
             position_entries_not_deleted += 1
+            status += "COULD_NOT_DELETE_FROM_POSITION: " + str(e) + " "
+            success = False
 
     # Find public positions for the "from_voter" that we are moving away from
     stance_we_are_looking_for = ANY_STANCE
@@ -75,6 +75,8 @@ def delete_positions_for_organization(from_organization_id, from_organization_we
             position_entries_deleted += 1
         except Exception as e:
             position_entries_not_deleted += 1
+            status += "COULD_NOT_DELETE_FROM_PUBLIC_POSITION: " + str(e) + " "
+            success = False
 
     results = {
         'status':                       status,
@@ -89,7 +91,7 @@ def delete_positions_for_organization(from_organization_id, from_organization_we
 
 def delete_positions_for_voter(from_voter_id, from_voter_we_vote_id):
     status = ''
-    success = False
+    success = True
     position_entries_deleted = 0
     position_entries_not_deleted = 0
     position_list_manager = PositionListManager()
@@ -110,8 +112,9 @@ def delete_positions_for_voter(from_voter_id, from_voter_we_vote_id):
             from_position_entry.delete()
             position_entries_deleted += 1
         except Exception as e:
-            status += "MOVE_TO_ANOTHER_VOTER-UNABLE_TO_SAVE_FRIENDS_ONLY_ORGANIZATION_UPDATE2: " + str(e) + " "
             position_entries_not_deleted += 1
+            status += "MOVE_TO_ANOTHER_VOTER-UNABLE_TO_SAVE_FRIENDS_ONLY_ORGANIZATION_UPDATE2: " + str(e) + " "
+            success = False
 
     # Find public positions for the "from_voter" that we are moving away from
     stance_we_are_looking_for = ANY_STANCE
@@ -131,6 +134,7 @@ def delete_positions_for_voter(from_voter_id, from_voter_we_vote_id):
         except Exception as e:
             position_entries_not_deleted += 1
             status += "MOVE_TO_ANOTHER_VOTER-UNABLE_TO_SAVE_PUBLIC_ORGANIZATION_UPDATE2: " + str(e) + " "
+            success = False
 
     results = {
         'status':                       status,
@@ -1184,7 +1188,6 @@ def move_positions_to_another_organization(
         organization_we_vote_id=from_organization_we_vote_id,
         stance_we_are_looking_for=stance_we_are_looking_for,
         friends_vs_public=friends_vs_public)
-
     for from_position_entry in from_position_public_list:
         # See if the "to_organization" already has the same entry
         position_we_vote_id = ""
@@ -1203,8 +1206,9 @@ def move_positions_to_another_organization(
             contest_office_we_vote_id=from_position_entry.contest_office_we_vote_id,
             candidate_we_vote_id=from_position_entry.candidate_campaign_we_vote_id,
             contest_measure_we_vote_id=from_position_entry.contest_measure_we_vote_id)
-
-        if results['position_found']:
+        if not results['success']:
+            success = False
+        elif results['position_found']:
             # Look to see if there is a statement that can be preserved
             to_position_entry = results['position']
             if not positive_value_exists(to_position_entry.statement_html):
@@ -1362,7 +1366,7 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
                                     to_voter_id, to_voter_we_vote_id,
                                     to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id):
     status = ''
-    success = False
+    success = True
     position_entries_moved = 0
     position_entries_not_moved = 0
     position_manager = PositionManager()
@@ -1371,9 +1375,11 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
     to_organization_name = ""
     to_organization_type = None
     to_twitter_followers_count = None
+    write_to_log = False
 
     if from_voter_id == to_voter_id:
         status += "MOVE_POSITIONS_TO_ANOTHER_VOTER-from_voter_id and to_voter_id identical "
+        success = False
         results = {
             'status': status,
             'success': success,
@@ -1383,11 +1389,13 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
             'to_voter_we_vote_id': to_voter_we_vote_id,
             'position_entries_moved': position_entries_moved,
             'position_entries_not_moved': position_entries_not_moved,
+            'write_to_log':                 write_to_log,
         }
         return results
 
     if from_voter_we_vote_id == to_voter_we_vote_id:
         status += "MOVE_POSITIONS_TO_ANOTHER_VOTER-from_voter_we_vote_id and to_voter_we_vote_id identical "
+        success = False
         results = {
             'status': status,
             'success': success,
@@ -1397,11 +1405,15 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
             'to_voter_we_vote_id': to_voter_we_vote_id,
             'position_entries_moved': position_entries_moved,
             'position_entries_not_moved': position_entries_not_moved,
+            'write_to_log': write_to_log,
         }
         return results
 
     if positive_value_exists(to_voter_linked_organization_we_vote_id):
         results = organization_manager.retrieve_organization_from_we_vote_id(to_voter_linked_organization_we_vote_id)
+        if not results['success']:
+            status += results['status']
+            success = False
         if results['organization_found']:
             to_voter_organization = results['organization']
             to_organization_name = to_voter_organization.organization_name
@@ -1418,6 +1430,9 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
         friends_vs_public,
         read_only=False)
     from_position_private_list = from_position_private_list_results['position_list']
+    if not from_position_private_list_results['success']:
+        status += from_position_private_list_results['status']
+        success = False
 
     position_we_vote_id = ""
     # We don't want the organization_id to affect the retrieve
@@ -1433,8 +1448,9 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
             to_voter_we_vote_id,
             from_position_entry.contest_office_we_vote_id,
             from_position_entry.candidate_campaign_we_vote_id, from_position_entry.contest_measure_we_vote_id)
-
-        if results['position_found']:
+        if not results['success']:
+            success = False
+        elif results['position_found']:
             # Look to see if there is a statement that can be preserved (i.e., moved from from_position to to_position
             to_position_entry = results['position']
             if not positive_value_exists(to_position_entry.statement_html):
@@ -1461,6 +1477,8 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
                 to_position_entry.save()
             except Exception as e:
                 status += "MOVE_TO_ANOTHER_VOTER-UNABLE_TO_SAVE_FRIENDS_ONLY_ORGANIZATION_UPDATE: " + str(e) + " "
+                success = False
+                write_to_log = True
         else:
             # Change the position values to the new values
             try:
@@ -1480,7 +1498,9 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
                 position_entries_moved += 1
             except Exception as e:
                 status += "MOVE_TO_ANOTHER_VOTER-UNABLE_TO_SAVE_FRIENDS_ONLY_ORGANIZATION_UPDATE2: " + str(e) + " "
+                success = False
                 position_entries_not_moved += 1
+                write_to_log = True
 
     from_position_private_list_remaining_results = position_list_manager.retrieve_all_positions_for_voter(
         from_voter_id,
@@ -1489,12 +1509,19 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
         friends_vs_public,
         read_only=False)
     from_position_private_list_remaining = from_position_private_list_remaining_results['position_list']
-    for from_position_entry in from_position_private_list_remaining:
-        # Delete the remaining position values
-        try:
-            from_position_entry.delete()
-        except Exception as e:
-            pass
+    if not from_position_private_list_remaining_results['success']:
+        status += from_position_private_list_remaining_results['status']
+        success = False
+
+    if success:
+        for from_position_entry in from_position_private_list_remaining:
+            # Delete the remaining position values
+            try:
+                from_position_entry.delete()
+            except Exception as e:
+                status += "DELETE_REMAINING_POSITIONS_FAILED: " + str(e) + " "
+                success = False
+                write_to_log = True
 
     # Find public positions for the "from_voter" that we are moving away from
     stance_we_are_looking_for = ANY_STANCE
@@ -1506,6 +1533,9 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
         friends_vs_public,
         read_only=False)
     from_position_public_list = from_position_public_results['position_list']
+    if not from_position_public_results['success']:
+        status += from_position_public_results['status']
+        success = False
 
     position_we_vote_id = ""
     # We don't want the organization_id to affect the retrieve
@@ -1521,8 +1551,9 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
             to_voter_we_vote_id,
             from_position_entry.contest_office_we_vote_id,
             from_position_entry.candidate_campaign_we_vote_id, from_position_entry.contest_measure_we_vote_id)
-
-        if results['position_found']:
+        if not results['success']:
+            success = False
+        elif results['position_found']:
             # Look to see if there is a statement that can be preserved
             to_position_entry = results['position']
             if not positive_value_exists(to_position_entry.statement_html):
@@ -1541,7 +1572,9 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
             try:
                 to_position_entry.save()
             except Exception as e:
-                status += "MOVE_TO_ANOTHER_VOTER-UNABLE_TO_SAVE_PUBLIC_ORGANIZATION_UPDATE "
+                status += "MOVE_TO_ANOTHER_VOTER-UNABLE_TO_SAVE_PUBLIC_ORGANIZATION_UPDATE: " + str(e) + " "
+                success = False
+                write_to_log = True
         else:
             # Change the position values to the new we_vote_id
             try:
@@ -1561,7 +1594,9 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
                 position_entries_moved += 1
             except Exception as e:
                 position_entries_not_moved += 1
-                status += "MOVE_TO_ANOTHER_VOTER-UNABLE_TO_SAVE_PUBLIC_ORGANIZATION_UPDATE2 "
+                status += "MOVE_TO_ANOTHER_VOTER-UNABLE_TO_SAVE_PUBLIC_ORGANIZATION_UPDATE2: " + str(e) + " "
+                success = False
+                write_to_log = True
 
     from_position_public_results = position_list_manager.retrieve_all_positions_for_voter(
         from_voter_id,
@@ -1570,12 +1605,18 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
         friends_vs_public,
         read_only=False)
     from_position_public_list_remaining = from_position_public_results['position_list']
-    for from_position_entry in from_position_public_list_remaining:
-        # Delete the remaining position values
-        try:
-            from_position_entry.delete()
-        except Exception as e:
-            pass
+    if not from_position_public_results['success']:
+        status += from_position_public_results['status']
+        success = False
+    if success:
+        for from_position_entry in from_position_public_list_remaining:
+            # Delete the remaining position values
+            try:
+                from_position_entry.delete()
+            except Exception as e:
+                status += "COULD_NOT_DELETE_PUBLIC_POSITION: " + str(e) + " "
+                success = False
+                write_to_log = True
 
     results = {
         'status':                       status,
@@ -1586,6 +1627,7 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
         'to_voter_we_vote_id':          to_voter_we_vote_id,
         'position_entries_moved':       position_entries_moved,
         'position_entries_not_moved':   position_entries_not_moved,
+        'write_to_log':                 write_to_log,
     }
     return results
 
@@ -1594,7 +1636,7 @@ def duplicate_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
                                          to_voter_id, to_voter_we_vote_id,
                                          to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id):
     status = ''
-    success = False
+    success = True
     total_position_entries_moved = 0
     total_position_entries_not_moved = 0
     position_list_manager = PositionListManager()
@@ -1644,6 +1686,8 @@ def duplicate_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
                 total_position_entries_moved += 1
             except Exception as e:
                 position_entries_not_moved += 1
+                status += "COULD_NOT_UPDATE_DUPLICATE_POSITION: " + str(e) + " "
+                success = False
                 total_position_entries_not_moved += 1
         status += "DUPLICATE_TO_ANOTHER_VOTER-SAVED_FRIENDS_ONLY_POSITIONS, " \
                   "moved: {moved} " \
@@ -1691,6 +1735,8 @@ def duplicate_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
                 total_position_entries_moved += 1
             except Exception as e:
                 position_entries_not_moved += 1
+                status += "COULD_NOT_UPDATE_DUPLICATE_FROM_POSITION: " + str(e) + " "
+                success = False
                 total_position_entries_not_moved += 1
         status += "DUPLICATE_TO_ANOTHER_VOTER-SAVED_PUBLIC_POSITIONS, " \
                   "moved: {moved} " \

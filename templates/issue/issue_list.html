@@ -81,6 +81,7 @@
             <th>&nbsp;</th>
             <th>&nbsp;</th>
             <th>Issue Name</th>
+            <th>Forced Order</th>
             <th>Linked Org Count</th>
             <th>Followers Count</th>
             <th>Issue Description</th>
@@ -112,6 +113,7 @@
               {% endif %}
               {{ issue.we_vote_id }}
             </td>
+            <td>{{ issue.forced_sort_order|default_if_none:"" }}</td>
             <td>{{ issue.linked_organization_count|intcomma }}</td>
             <td>{{ issue.issue_followers_count|intcomma }}</td>
             <td>{{ issue.issue_description }}</td>

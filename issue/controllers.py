@@ -274,9 +274,11 @@ def issue_descriptions_retrieve_for_api():  # issueDescriptionsRetrieve
         results = retrieve_organization_preview_list(issue.we_vote_id)
         if results['success']:
             linked_organization_preview_list = results['linked_organization_preview_list']
+        forced_sort_order = issue.forced_sort_order if positive_value_exists(issue.forced_sort_order) else 0
         one_issue = {
             'considered_left':                  issue.considered_left,
             'considered_right':                 issue.considered_right,
+            'forced_sort_order':                forced_sort_order,
             'issue_we_vote_id':                 issue.we_vote_id,
             'issue_name':                       issue.issue_name,
             'issue_description':                issue.issue_description,

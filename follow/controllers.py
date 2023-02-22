@@ -21,7 +21,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 def delete_follow_entries_for_voter(voter_to_delete_id):
     status = ''
-    success = False
+    success = True
     follow_entries_deleted = 0
     follow_entries_not_deleted = 0
 
@@ -45,6 +45,8 @@ def delete_follow_entries_for_voter(voter_to_delete_id):
             follow_entries_deleted += 1
         except Exception as e:
             follow_entries_not_deleted += 1
+            status += "FAILED_DELETING_FROM_FOLLOW_ENTRY: " + str(e) + ' '
+            success = False
 
     results = {
         'status':                       status,
@@ -58,7 +60,7 @@ def delete_follow_entries_for_voter(voter_to_delete_id):
 
 def delete_follow_issue_entries_for_voter(voter_to_delete_we_vote_id):
     status = ''
-    success = False
+    success = True
     follow_issue_entries_deleted = 0
     follow_issue_entries_not_deleted = 0
     follow_issue_list = FollowIssueList()
@@ -84,6 +86,7 @@ def delete_follow_issue_entries_for_voter(voter_to_delete_we_vote_id):
         except Exception as e:
             follow_issue_entries_not_deleted += 1
             status += "FAILED_FROM_FOLLOW_ISSUE_DELETE: " + str(e) + " "
+            success = False
 
     results = {
         'status':                           status,
@@ -97,7 +100,7 @@ def delete_follow_issue_entries_for_voter(voter_to_delete_we_vote_id):
 
 def delete_organization_followers_for_organization(from_organization_id, from_organization_we_vote_id):
     status = ''
-    success = False
+    success = True
     follow_entries_deleted = 0
     follow_entries_not_deleted = 0
     follow_organization_list = FollowOrganizationList()
@@ -111,6 +114,8 @@ def delete_organization_followers_for_organization(from_organization_id, from_or
             follow_entries_deleted += 1
         except Exception as e:
             follow_entries_not_deleted += 1
+            status += "FAILED_DELETING_FROM_FOLLOW_ENTRY_BY_ID: " + str(e) + ' '
+            success = False
 
     from_follow_list = follow_organization_list.retrieve_follow_organization_by_organization_we_vote_id(
         from_organization_we_vote_id)
@@ -120,6 +125,8 @@ def delete_organization_followers_for_organization(from_organization_id, from_or
             follow_entries_deleted += 1
         except Exception as e:
             follow_entries_not_deleted += 1
+            status += "FAILED_DELETING_FROM_FOLLOW_ENTRY_BY_WE_VOTE_ID: " + str(e) + ' '
+            success = False
 
     results = {
         'status':                       status,
@@ -134,7 +141,7 @@ def delete_organization_followers_for_organization(from_organization_id, from_or
 
 def duplicate_follow_entries_to_another_voter(from_voter_id, from_voter_we_vote_id, to_voter_id, to_voter_we_vote_id):
     status = ''
-    success = False
+    success = True
     follow_entries_duplicated = 0
     follow_entries_not_duplicated = 0
     organization_manager = OrganizationManager()
@@ -162,7 +169,8 @@ def duplicate_follow_entries_to_another_voter(from_voter_id, from_voter_we_vote_
             try:
                 from_follow_entry.save()
             except Exception as e:
-                pass
+                status += "FAILED_SAVING_FROM_FOLLOW_HEALED_DATA: " + str(e) + ' '
+                success = False
 
         # See if the "to_voter" already has an entry for this organization
         existing_entry_results = follow_organization_manager.retrieve_follow_organization(
@@ -180,6 +188,8 @@ def duplicate_follow_entries_to_another_voter(from_voter_id, from_voter_we_vote_
                 follow_entries_duplicated += 1
             except Exception as e:
                 follow_entries_not_duplicated += 1
+                status += "FAILED_SAVING_FROM_FOLLOW_UPDATED_DATA: " + str(e) + ' '
+                success = False
 
     results = {
         'status':                           status,
@@ -196,7 +206,7 @@ def duplicate_follow_entries_to_another_voter(from_voter_id, from_voter_we_vote_
 
 def duplicate_follow_issue_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
     status = ''
-    success = False
+    success = True
     follow_issue_entries_duplicated = 0
     follow_issue_entries_not_duplicated = 0
     follow_issue_list = FollowIssueList()
@@ -216,6 +226,8 @@ def duplicate_follow_issue_entries_to_another_voter(from_voter_we_vote_id, to_vo
                 follow_issue_entries_duplicated += 1
             except Exception as e:
                 follow_issue_entries_not_duplicated += 1
+                status += "FAILED_SAVING_FROM_FOLLOW_ISSUE: " + str(e) + ' '
+                success = False
     results = {
         'status':                           status,
         'success':                          success,
@@ -229,7 +241,7 @@ def duplicate_follow_issue_entries_to_another_voter(from_voter_we_vote_id, to_vo
 
 def move_follow_entries_to_another_voter(from_voter_id=0, to_voter_id=0, to_voter_we_vote_id=''):
     status = ''
-    success = False
+    success = True
     follow_entries_moved = 0
     follow_entries_not_moved = 0
 
@@ -260,23 +272,35 @@ def move_follow_entries_to_another_voter(from_voter_id=0, to_voter_id=0, to_vote
         return results
 
     follow_organization_list = FollowOrganizationList()
-    organization_we_vote_ids_followed = \
-        follow_organization_list.retrieve_follow_organization_by_voter_id_simple_id_array(
-            voter_id=to_voter_id,
-            return_we_vote_id=True,
+    try:
+        organization_we_vote_ids_followed = \
+            follow_organization_list.retrieve_follow_organization_by_voter_id_simple_id_array(
+                voter_id=to_voter_id,
+                return_we_vote_id=True,
+            )
+    except Exception as e:
+        organization_we_vote_ids_followed = []
+        status += "FOLLOW_ORGANIZATION_RETRIEVE_FAILED: " + str(e) + " "
+        success = False
+
+    if success:
+        move_results = follow_organization_list.move_follow_organization_from_voter_id_to_new_voter_id(
+            from_voter_id=from_voter_id,
+            to_voter_id=to_voter_id,
+            exclude_organization_we_vote_id_list=organization_we_vote_ids_followed,
         )
+        follow_entries_moved = move_results['number_moved']
 
-    move_results = follow_organization_list.move_follow_organization_from_voter_id_to_new_voter_id(
-        from_voter_id=from_voter_id,
-        to_voter_id=to_voter_id,
-        exclude_organization_we_vote_id_list=organization_we_vote_ids_followed,
-    )
-    follow_entries_moved = move_results['number_moved']
-
-    if move_results['success']:
-        # Finally, delete remaining FollowOrganization entries for from_voter_id
-        delete_results = follow_organization_list.delete_follow_organization_list_for_voter_id(voter_id=from_voter_id)
-        follow_entries_not_moved = delete_results['number_deleted']
+        if move_results['success']:
+            # Finally, delete remaining FollowOrganization entries for from_voter_id
+            delete_results = \
+                follow_organization_list.delete_follow_organization_list_for_voter_id(voter_id=from_voter_id)
+            if not delete_results['success']:
+                status += delete_results['status']
+                success = False
+            follow_entries_not_moved = delete_results['number_deleted']
+        else:
+            success = False
 
     results = {
         'status':                   status,
@@ -292,7 +316,7 @@ def move_follow_entries_to_another_voter(from_voter_id=0, to_voter_id=0, to_vote
 
 def move_follow_issue_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
     status = ''
-    success = False
+    success = True
     follow_issue_entries_moved = 0
     follow_issue_entries_not_moved = 0
     follow_issue_list = FollowIssueList()
@@ -348,6 +372,7 @@ def move_follow_issue_entries_to_another_voter(from_voter_we_vote_id, to_voter_w
                         except Exception as e:
                             follow_issue_entries_not_moved += 1
                             status += "FAILED_TO_FOLLOW_ISSUE_SAVE: " + str(e) + " "
+                            success = False
                         continue
 
         else:
@@ -361,6 +386,7 @@ def move_follow_issue_entries_to_another_voter(from_voter_we_vote_id, to_voter_w
             except Exception as e:
                 follow_issue_entries_not_moved += 1
                 status += "FAILED_FROM_FOLLOW_ISSUE_SAVE: " + str(e) + " "
+                success = False
 
     results = {
         'status':                           status,
@@ -376,7 +402,7 @@ def move_follow_issue_entries_to_another_voter(from_voter_we_vote_id, to_voter_w
 def duplicate_organization_followers_to_another_organization(from_organization_id, from_organization_we_vote_id,
                                                              to_organization_id, to_organization_we_vote_id):
     status = ''
-    success = False
+    success = True
     follow_entries_duplicated = 0
     follow_entries_not_duplicated = 0
     voter_manager = VoterManager()
@@ -399,7 +425,8 @@ def duplicate_organization_followers_to_another_organization(from_organization_i
             try:
                 from_follow_entry.save()
             except Exception as e:
-                pass
+                status += "FAILED_DELETING_FOLLOW_ENTRY: " + str(e) + " "
+                success = False
 
         # See if the "to_voter" already has an entry for the to_organization
         existing_entry_results = follow_organization_manager.retrieve_follow_organization(
@@ -414,6 +441,8 @@ def duplicate_organization_followers_to_another_organization(from_organization_i
                 follow_entries_duplicated += 1
             except Exception as e:
                 follow_entries_not_duplicated += 1
+                status += "FAILED_ADJUSTING_FOLLOW_ENTRY: " + str(e) + " "
+                success = False
 
     from_follow_list = follow_organization_list.retrieve_follow_organization_by_organization_we_vote_id(
         from_organization_we_vote_id)
@@ -429,7 +458,8 @@ def duplicate_organization_followers_to_another_organization(from_organization_i
             try:
                 from_follow_entry.save()
             except Exception as e:
-                pass
+                status += "FAILED_SAVING_FROM_FOLLOW_ENTRY: " + str(e) + " "
+                success = False
 
         # See if the "to_voter" already has an entry for the to_organization
         existing_entry_results = follow_organization_manager.retrieve_follow_organization(
@@ -444,6 +474,8 @@ def duplicate_organization_followers_to_another_organization(from_organization_i
                 follow_entries_duplicated += 1
             except Exception as e:
                 follow_entries_not_duplicated += 1
+                status += "FAILED_ADJUSTING_FROM_FOLLOW_ENTRY: " + str(e) + " "
+                success = False
 
     results = {
         'status':                           status,
@@ -611,7 +643,7 @@ def voter_issue_follow_for_api(voter_device_id, issue_we_vote_id, follow_value, 
 def move_organization_followers_to_another_organization(from_organization_id, from_organization_we_vote_id,
                                                         to_organization_id, to_organization_we_vote_id):
     status = ''
-    success = False
+    success = True
     follow_entries_moved = 0
     follow_entries_not_moved = 0
     follow_organization_list = FollowOrganizationList()
@@ -633,7 +665,8 @@ def move_organization_followers_to_another_organization(from_organization_id, fr
                 follow_entries_moved += 1
             except Exception as e:
                 follow_entries_not_moved += 1
-                status += "ERROR: " + str(e) + ' '
+                status += "FAILED_SAVING_FROM_FOLLOW_ENTRY1: " + str(e) + ' '
+                success = False
 
     from_follow_list = follow_organization_list.retrieve_follow_organization_by_organization_we_vote_id(
         from_organization_we_vote_id)
@@ -650,6 +683,8 @@ def move_organization_followers_to_another_organization(from_organization_id, fr
                 follow_entries_moved += 1
             except Exception as e:
                 follow_entries_not_moved += 1
+                status += "FAILED_SAVING_FROM_FOLLOW_ENTRY2: " + str(e) + ' '
+                success = False
 
     results = {
         'status': status,
