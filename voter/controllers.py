@@ -2444,7 +2444,7 @@ def voter_merge_two_accounts_action_schedule(
         voter_merge_status = VoterMergeStatus.objects.create(
             from_linked_organization_we_vote_id=from_voter.linked_organization_we_vote_id,
             from_voter_we_vote_id=from_voter.we_vote_id,
-            to_linked_organization__we_vote_id=to_voter.linked_organization_we_vote_id,
+            to_linked_organization_we_vote_id=to_voter.linked_organization_we_vote_id,
             to_voter_we_vote_id=to_voter.we_vote_id,
         )
     except Exception as e:
