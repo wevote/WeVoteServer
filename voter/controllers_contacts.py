@@ -73,6 +73,7 @@ def move_voter_contact_email_to_another_voter(from_voter_we_vote_id, to_voter_we
         status += "ENTRIES_DELETED: " + str(entries_deleted) + " "
     except Exception as e:
         status += "FAILED-VOTER_CONTACT_EMAIL_UPDATE_IMPORTED_BY: " + str(e) + " "
+        success = False
 
     try:
         voter_contact_email_entries_moved += VoterContactEmail.objects\
@@ -80,6 +81,7 @@ def move_voter_contact_email_to_another_voter(from_voter_we_vote_id, to_voter_we
             .update(voter_we_vote_id=to_voter_we_vote_id)
     except Exception as e:
         status += "FAILED-VOTER_CONTACT_EMAIL_UPDATE: " + str(e) + " "
+        success = False
 
     results = {
         'status':                               status,

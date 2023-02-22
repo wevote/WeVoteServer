@@ -1894,6 +1894,7 @@ def move_campaignx_to_another_voter(
             .update(started_by_voter_we_vote_id=to_voter_we_vote_id)
     except Exception as e:
         status += "FAILED-CAMPAIGNX_UPDATE: " + str(e) + " "
+        success = False
 
     # ######################
     # Move News Item based on voter_we_vote_id
@@ -1903,6 +1904,7 @@ def move_campaignx_to_another_voter(
             .update(voter_we_vote_id=to_voter_we_vote_id)
     except Exception as e:
         status += "FAILED-CAMPAIGNX_NEWS_ITEM_UPDATE-FROM_VOTER_WE_VOTE_ID: " + str(e) + " "
+        success = False
 
     # ######################
     # Move owners based on voter_we_vote_id
@@ -1912,6 +1914,7 @@ def move_campaignx_to_another_voter(
             .update(voter_we_vote_id=to_voter_we_vote_id)
     except Exception as e:
         status += "FAILED-CAMPAIGNX_OWNER_UPDATE-FROM_VOTER_WE_VOTE_ID: " + str(e) + " "
+        success = False
 
     # ######################
     # Move supporters based on voter_we_vote_id
@@ -1921,6 +1924,7 @@ def move_campaignx_to_another_voter(
             .update(voter_we_vote_id=to_voter_we_vote_id)
     except Exception as e:
         status += "FAILED-CAMPAIGNX_SUPPORTER_UPDATE-FROM_VOTER_WE_VOTE_ID: " + str(e) + " "
+        success = False
 
     # #############################################
     # Move based on organization_we_vote_id
@@ -1932,6 +1936,7 @@ def move_campaignx_to_another_voter(
                         organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-CAMPAIGNX_OWNER_UPDATE-FROM_ORG_WE_VOTE_ID-WITH_NAME: " + str(e) + " "
+            success = False
         try:
             campaignx_supporter_entries_moved += CampaignXSupporter.objects \
                 .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
@@ -1939,6 +1944,7 @@ def move_campaignx_to_another_voter(
                         organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-CAMPAIGNX_SUPPORTER_UPDATE-FROM_ORG_WE_VOTE_ID-WITH_NAME: " + str(e) + " "
+            success = False
         try:
             campaignx_news_item_entries_moved += CampaignXNewsItem.objects \
                 .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
@@ -1946,6 +1952,7 @@ def move_campaignx_to_another_voter(
                         organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-CAMPAIGNX_NEWS_ITEM_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+            success = False
     else:
         try:
             campaignx_owner_entries_moved += CampaignXOwner.objects \
@@ -1953,18 +1960,21 @@ def move_campaignx_to_another_voter(
                 .update(organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-CAMPAIGNX_OWNER_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+            success = False
         try:
             campaignx_supporter_entries_moved += CampaignXSupporter.objects \
                 .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
                 .update(organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-CAMPAIGNX_SUPPORTER_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+            success = False
         try:
             campaignx_news_item_entries_moved += CampaignXNewsItem.objects \
                 .filter(organization_we_vote_id__iexact=from_organization_we_vote_id) \
                 .update(organization_we_vote_id=to_organization_we_vote_id)
         except Exception as e:
             status += "FAILED-CAMPAIGNX_NEWS_ITEM_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+            success = False
 
     try:
         campaignx_listed_entries_moved += CampaignXListedByOrganization.objects \
@@ -1972,6 +1982,7 @@ def move_campaignx_to_another_voter(
             .update(site_owner_organization_we_vote_id=to_organization_we_vote_id)
     except Exception as e:
         status += "FAILED-CAMPAIGNX_LISTED_BY_ORG_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+        success = False
 
     results = {
         'status':                           status,

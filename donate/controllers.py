@@ -988,7 +988,7 @@ def donation_subscription_cancellation_for_api(voter_we_vote_id, plan_type_enum=
     :return:
     """
     status = ''
-    success = False
+    success = True
     donation_plan_definition_id = 0
     stripe_customer_id = ''
     canceled_at = ''
@@ -1108,6 +1108,7 @@ def donation_subscription_cancellation_for_api(voter_we_vote_id, plan_type_enum=
                     organization.features_provided_bitmap = feature_package.features_provided_bitmap
         except Exception as e:
             status += "UNABLE_TO_UPDATE_FEATURES_PROVIDED_BITMAP: " + str(e) + " "
+            success = False
         try:
             organization.chosen_feature_package = chosen_feature_package
             organization.save()
@@ -1116,6 +1117,7 @@ def donation_subscription_cancellation_for_api(voter_we_vote_id, plan_type_enum=
         except Exception as e:
             organization_saved = False
             status += "ORGANIZATION_FEATURE_PACKAGE_NOT_SAVED: " + str(e) + " "
+            success = False
 
     json_returned = {
         'status':           status,

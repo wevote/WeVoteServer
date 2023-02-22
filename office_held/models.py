@@ -174,6 +174,10 @@ class OfficeHeld(models.Model):
     primary_party = models.CharField(verbose_name="google civic primary party", max_length=255, null=True, blank=True)
     race_office_level = models.CharField(max_length=255, null=True, blank=True)
     state_code = models.CharField(verbose_name="state this office_held serves", max_length=2, null=True, blank=True)
+    is_battleground_race_2022 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2023 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2024 = models.BooleanField(default=False, null=False)
+
     # Which years do we have representative data? This is cached data built up from master
     #  data in the Representative.years_in_office_flags field
     # As we add more years here, update attach_defaults_values_to_office_held_object

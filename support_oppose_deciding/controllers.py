@@ -81,6 +81,8 @@ def positions_count_for_candidate(voter_id, candidate_id, candidate_we_vote_id, 
     We want to return a JSON file with the number of orgs, friends and public figures the voter follows who support
     this particular candidate's campaign
     """
+    status = ''
+    success = True
     # Since we can take in either candidate_id or candidate_we_vote_id, we need to retrieve the candidate object
     # so we make sure we have both of these values to return
     if positive_value_exists(candidate_id):
@@ -110,8 +112,13 @@ def positions_count_for_candidate(voter_id, candidate_id, candidate_we_vote_id, 
     organizations_followed_by_voter_by_id = []
     if len(public_positions_list_for_candidate):
         follow_organization_list_manager = FollowOrganizationList()
-        organizations_followed_by_voter_by_id = \
-            follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
+        try:
+            organizations_followed_by_voter_by_id = \
+                follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
+        except Exception as e:
+            organizations_followed_by_voter_by_id = []
+            status += "RETRIEVE_FOLLOW_ORGANIZATION_FAILED: " + str(e) + " "
+            success = False
 
     if show_positions_this_voter_follows:
         position_objects = position_list_manager.calculate_positions_followed_by_voter(
@@ -151,7 +158,7 @@ def positions_count_for_candidate(voter_id, candidate_id, candidate_we_vote_id, 
 
         json_data = {
             'status': 'SUCCESSFUL_RETRIEVE_OF_POSITIONS_FOLLOWED_COUNT_FOR_CANDIDATE',
-            'success': True,
+            'success': success,
             'count': positions_followed_count,
             'ballot_item_id': convert_to_int(candidate_id),
             'ballot_item_we_vote_id': candidate_we_vote_id,
@@ -185,6 +192,8 @@ def positions_count_for_contest_measure(voter_id, measure_id, measure_we_vote_id
     We want to return a JSON file with the number of orgs, friends and public figures the voter follows who support
     this particular measure
     """
+    status = ''
+    success = True
     # Since we can take in either measure_id or measure_we_vote_id, we need to retrieve the measure object
     # so we make sure we have both of these values to return
     if positive_value_exists(measure_id):
@@ -213,8 +222,12 @@ def positions_count_for_contest_measure(voter_id, measure_id, measure_we_vote_id
     organizations_followed_by_voter_by_id = []
     if len(public_positions_list_for_contest_measure):
         follow_organization_list_manager = FollowOrganizationList()
-        organizations_followed_by_voter_by_id = \
-            follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
+        try:
+            organizations_followed_by_voter_by_id = \
+                follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
+        except Exception as e:
+            status += "RETRIEVE_FOLLOW_ORGANIZATION_FAILED: " + str(e) + " "
+            success = False
 
     if show_positions_this_voter_follows:
         position_objects = position_list_manager.calculate_positions_followed_by_voter(
@@ -254,7 +267,7 @@ def positions_count_for_contest_measure(voter_id, measure_id, measure_we_vote_id
 
         json_data = {
             'status': 'SUCCESSFUL_RETRIEVE_OF_POSITION_COUNT_FOR_CONTEST_MEASURE',
-            'success': True,
+            'success': success,
             'count': positions_followed_count,
             'ballot_item_id': convert_to_int(measure_id),
             'ballot_item_we_vote_id': measure_we_vote_id,

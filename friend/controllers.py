@@ -115,12 +115,13 @@ def delete_friend_invitations_for_voter(voter_to_delete_we_vote_id):
 
 def delete_friends_for_voter(voter_to_delete_we_vote_id):
     status = ''
-    success = False
+    success = True
     friend_entries_deleted = 0
     friend_entries_not_deleted = 0
 
     if not positive_value_exists(voter_to_delete_we_vote_id):
         status += "DELETE_FRIENDS-MISSING_VOTER_WE_VOTE_ID "
+        success = False
         results = {
             'status': status,
             'success': success,
@@ -132,6 +133,8 @@ def delete_friends_for_voter(voter_to_delete_we_vote_id):
 
     friend_manager = FriendManager()
     from_friend_results = friend_manager.retrieve_current_friend_list(voter_to_delete_we_vote_id, read_only=False)
+    if not from_friend_results['success']:
+        success = False
     from_friend_list = from_friend_results['current_friend_list']
 
     for from_friend_entry in from_friend_list:
@@ -141,6 +144,7 @@ def delete_friends_for_voter(voter_to_delete_we_vote_id):
         except Exception as e:
             friend_entries_not_deleted += 1
             status += "PROBLEM_UPDATING_FRIEND: " + str(e) + ' '
+            success = False
 
     results = {
         'status':                       status,
@@ -154,12 +158,13 @@ def delete_friends_for_voter(voter_to_delete_we_vote_id):
 
 def delete_suggested_friends_for_voter(voter_to_delete_we_vote_id):
     status = ''
-    success = False
+    success = True
     suggested_friend_entries_deleted = 0
     suggested_friend_entries_not_deleted = 0
 
     if not positive_value_exists(voter_to_delete_we_vote_id):
         status += "DELETE_SUGGESTED_FRIENDS-MISSING_VOTER_WE_VOTE_ID "
+        success = False
         results = {
             'status':                               status,
             'success':                              success,
@@ -172,6 +177,8 @@ def delete_suggested_friends_for_voter(voter_to_delete_we_vote_id):
     friend_manager = FriendManager()
     from_friend_results = friend_manager.retrieve_suggested_friend_list(
         voter_to_delete_we_vote_id, hide_deleted=False, read_only=False)
+    if not from_friend_results['success']:
+        success = False
     from_friend_list = from_friend_results['suggested_friend_list']
 
     for from_friend_entry in from_friend_list:
@@ -181,6 +188,7 @@ def delete_suggested_friends_for_voter(voter_to_delete_we_vote_id):
         except Exception as e:
             suggested_friend_entries_not_deleted += 1
             status += "PROBLEM_DELETING_SUGGESTED_FRIEND: " + str(e) + ' '
+            success = False
 
     results = {
         'status':                               status,
@@ -3945,7 +3953,7 @@ def message_to_friend_send_for_api(
 
 def move_friend_invitations_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
     status = "MOVE_FRIEND_INVITATIONS_START "
-    success = False
+    success = True
     friend_invitation_entries_moved = 0
     friend_invitation_entries_not_moved = 0
 
@@ -3981,6 +3989,9 @@ def move_friend_invitations_to_another_voter(from_voter_we_vote_id, to_voter_we_
     # FROM SENDER: Invitations sent BY the from_voter to others
     friend_invitation_email_link_from_sender_results = friend_manager.retrieve_friend_invitation_email_link_list(
         from_voter_we_vote_id)
+    if not friend_invitation_email_link_from_sender_results['success']:
+        status += friend_invitation_email_link_from_sender_results['status']
+        success = False
     if friend_invitation_email_link_from_sender_results['friend_invitation_list_found']:
         friend_invitation_email_link_from_sender_list = \
             friend_invitation_email_link_from_sender_results['friend_invitation_list']
@@ -4008,6 +4019,7 @@ def move_friend_invitations_to_another_voter(from_voter_we_vote_id, to_voter_we_
                     friend_invitation_entries_moved += 1
                 except Exception as e:
                     status += "FriendInvitationEmailLink Sender entries not moved: " + str(e) + ' '
+                    success = False
                     friend_invitation_entries_not_moved += 1
             else:
                 status += "to_sender_invitation_found found, EmailLink Sender entries not moved "
@@ -4020,6 +4032,9 @@ def move_friend_invitations_to_another_voter(from_voter_we_vote_id, to_voter_we_
     # FROM SENDER: Invitations sent BY the from_voter to others
     friend_invitation_voter_link_from_sender_results = friend_manager.retrieve_friend_invitation_voter_link_list(
         from_voter_we_vote_id)
+    if not friend_invitation_voter_link_from_sender_results['success']:
+        status += friend_invitation_voter_link_from_sender_results['status']
+        success = False
     if friend_invitation_voter_link_from_sender_results['friend_invitation_list_found']:
         friend_invitation_voter_link_from_sender_list = \
             friend_invitation_voter_link_from_sender_results['friend_invitation_list']
@@ -4048,6 +4063,7 @@ def move_friend_invitations_to_another_voter(from_voter_we_vote_id, to_voter_we_
                 except Exception as e:
                     status += "FriendInvitationVoterLink Sender entries not moved: " + str(e) + ' '
                     friend_invitation_entries_not_moved += 1
+                    success = False
             else:
                 status += "to_sender_invitation_found found, VoterLink Sender entries not moved "
                 # friend_invitation_entries_not_moved += 1
@@ -4057,6 +4073,9 @@ def move_friend_invitations_to_another_voter(from_voter_we_vote_id, to_voter_we_
     # FROM RECIPIENT: Invitations sent TO the from_voter from others
     friend_invitation_voter_link_from_recipient_results = friend_manager.retrieve_friend_invitation_voter_link_list(
         '', from_voter_we_vote_id)
+    if not friend_invitation_voter_link_from_recipient_results['success']:
+        status += friend_invitation_voter_link_from_recipient_results['status']
+        success = False
     if friend_invitation_voter_link_from_recipient_results['friend_invitation_list_found']:
         friend_invitation_voter_link_from_recipient_list = \
             friend_invitation_voter_link_from_recipient_results['friend_invitation_list']
@@ -4108,7 +4127,7 @@ def move_friends_to_another_voter(
         from_voter_we_vote_id, to_voter_we_vote_id,
         to_voter_linked_organization_we_vote_id):
     status = ''
-    success = False
+    success = True
     friend_entries_moved = 0
     friend_entries_not_moved = 0
 
@@ -4143,8 +4162,14 @@ def move_friends_to_another_voter(
 
     friend_manager = FriendManager()
     from_friend_results = friend_manager.retrieve_current_friend_list(from_voter_we_vote_id, read_only=False)
+    if not from_friend_results['success']:
+        status += from_friend_results['status']
+        success = False
     from_friend_list = from_friend_results['current_friend_list']
     to_friend_results = friend_manager.retrieve_current_friend_list(to_voter_we_vote_id, read_only=False)
+    if not to_friend_results['success']:
+        status += to_friend_results['status']
+        success = False
     to_friend_list = to_friend_results['current_friend_list']
 
     for from_friend_entry in from_friend_list:
@@ -4172,10 +4197,14 @@ def move_friends_to_another_voter(
             except Exception as e:
                 friend_entries_not_moved += 1
                 status += "PROBLEM_UPDATING_FRIEND: " + str(e) + ' '
+                success = False
 
     from_friend_list_remaining_results = friend_manager.retrieve_current_friend_list(
         from_voter_we_vote_id,
         read_only=False)
+    if not from_friend_list_remaining_results['success']:
+        status += from_friend_list_remaining_results['status']
+        success = False
     from_friend_list_remaining = from_friend_list_remaining_results['current_friend_list']
     for from_friend_entry in from_friend_list_remaining:
         # Delete the remaining friendship values
@@ -4183,6 +4212,7 @@ def move_friends_to_another_voter(
             from_friend_entry.delete()
         except Exception as e:
             status += "PROBLEM_DELETING_FRIEND: " + str(e) + ' '
+            success = False
 
     results = {
         'status': status,
@@ -4198,7 +4228,7 @@ def move_friends_to_another_voter(
 def move_suggested_friends_to_another_voter(
         from_voter_we_vote_id, to_voter_we_vote_id):
     status = ''
-    success = False
+    success = True
     suggested_friend_entries_moved = 0
     suggested_friend_entries_not_moved = 0
 
@@ -4229,9 +4259,15 @@ def move_suggested_friends_to_another_voter(
     friend_manager = FriendManager()
     from_friend_results = friend_manager.retrieve_suggested_friend_list(
         from_voter_we_vote_id, hide_deleted=False, read_only=False)
+    if not from_friend_results['success']:
+        status += from_friend_results['status']
+        success = False
     from_friend_list = from_friend_results['suggested_friend_list']
     to_friend_results = friend_manager.retrieve_suggested_friend_list(
         to_voter_we_vote_id, hide_deleted=False, read_only=False)
+    if not to_friend_results['success']:
+        status += to_friend_results['status']
+        success = False
     to_friend_list = to_friend_results['suggested_friend_list']
 
     for from_friend_entry in from_friend_list:
@@ -4257,9 +4293,13 @@ def move_suggested_friends_to_another_voter(
             except Exception as e:
                 suggested_friend_entries_not_moved += 1
                 status += "PROBLEM_UPDATING_SUGGESTED_FRIEND: " + str(e) + ' '
+                success = False
 
     from_friend_list_remaining_results = friend_manager.retrieve_suggested_friend_list(
         from_voter_we_vote_id, hide_deleted=False, read_only=False)
+    if not from_friend_list_remaining_results['success']:
+        status += from_friend_list_remaining_results['status']
+        success = False
     from_friend_list_remaining = from_friend_list_remaining_results['suggested_friend_list']
     for from_friend_entry in from_friend_list_remaining:
         # Delete the remaining friendship values
@@ -4268,6 +4308,7 @@ def move_suggested_friends_to_another_voter(
             from_friend_entry.delete()
         except Exception as e:
             status += "PROBLEM_DELETING_FRIEND: " + str(e) + ' '
+            success = False
 
     results = {
         'status':                               status,

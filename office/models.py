@@ -232,8 +232,10 @@ class ContestOffice(models.Model):
     # "Yes" or "No" depending on whether this a contest being held outside the normal election cycle.
     special = models.CharField(verbose_name="google civic primary party", max_length=255, null=True, blank=True)
     ctcl_uuid = models.CharField(db_index=True, max_length=36, null=True, blank=True)
-    office_held_name = models.CharField(verbose_name="name of the office held", max_length=255, null=True,
-                                           blank=True, default=None)
+    office_held_name = models.CharField(
+        verbose_name="name of the office held", max_length=255, null=True, blank=True, default=None)
+    # Which office held does this contest_office lead to?
+    office_held_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
 
     def get_election_day_text(self):
         if positive_value_exists(self.google_civic_election_id):

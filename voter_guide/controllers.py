@@ -1245,7 +1245,7 @@ def take_in_possible_endorsement_list_from_form(request):
 
 def delete_voter_guides_for_voter(from_voter_we_vote_id, from_organization_we_vote_id):
     status = ''
-    success = False
+    success = True
     voter_guide_entries_deleted = 0
     voter_guide_entries_not_deleted = 0
 
@@ -1266,6 +1266,8 @@ def delete_voter_guides_for_voter(from_voter_we_vote_id, from_organization_we_vo
     voter_guide_list_manager = VoterGuideListManager()
     from_voter_guide_results = voter_guide_list_manager.retrieve_all_voter_guides_by_voter_we_vote_id(
         from_voter_we_vote_id, read_only=False)
+    if not from_voter_guide_results['success']:
+        success = False
     if from_voter_guide_results['voter_guide_list_found']:
         from_voter_guide_list = from_voter_guide_results['voter_guide_list']
     else:
@@ -1276,6 +1278,8 @@ def delete_voter_guides_for_voter(from_voter_we_vote_id, from_organization_we_vo
             from_voter_guide.delete()
             voter_guide_entries_deleted += 1
         except Exception as e:
+            status += "COULD_NOT_DELETE_VOTER_GUIDE: " + str(e) + " "
+            success = False
             voter_guide_entries_not_deleted += 1
 
     results = {
@@ -1291,7 +1295,7 @@ def delete_voter_guides_for_voter(from_voter_we_vote_id, from_organization_we_vo
 def duplicate_voter_guides(from_voter_id, from_voter_we_vote_id, from_organization_we_vote_id,
                            to_voter_id, to_voter_we_vote_id, to_organization_we_vote_id):
     status = ''
-    success = False
+    success = True
     voter_guides_duplicated = 0
     voter_guides_not_duplicated = 0
     organization_manager = OrganizationManager()
@@ -1328,6 +1332,8 @@ def duplicate_voter_guides(from_voter_id, from_voter_we_vote_id, from_organizati
                 from_voter_guide.save()
                 voter_guides_duplicated += 1
             except Exception as e:
+                status += "FAILED_TO_DELETE_VOTER_GUIDE: " + str(e) + " "
+                success = False
                 voter_guides_not_duplicated += 1
 
     # Now retrieve by organization_we_vote_id in case there is damaged data
@@ -1363,6 +1369,8 @@ def duplicate_voter_guides(from_voter_id, from_voter_we_vote_id, from_organizati
                 from_voter_guide.save()
                 voter_guides_duplicated += 1
             except Exception as e:
+                status += "FAILED_TO_UPDATE_VOTER_GUIDE: " + str(e) + " "
+                success = False
                 voter_guides_not_duplicated += 1
 
     results = {
@@ -1379,15 +1387,16 @@ def duplicate_voter_guides(from_voter_id, from_voter_we_vote_id, from_organizati
 
 
 def move_voter_guides_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id,
-                                       from_organization_we_vote_id, to_organization_we_vote_id):
+                                       to_organization_we_vote_id):
     status = ''
-    success = False
+    success = True
     to_voter_id = 0
     voter_guide_entries_moved = 0
     voter_guide_entries_not_moved = 0
 
     if not positive_value_exists(from_voter_we_vote_id) or not positive_value_exists(to_voter_we_vote_id):
         status += "MOVE_VOTER_GUIDES-MISSING_EITHER_FROM_OR_TO_VOTER_WE_VOTE_ID "
+        success = False
         results = {
             'status': status,
             'success': success,
@@ -1400,6 +1409,7 @@ def move_voter_guides_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_i
 
     if from_voter_we_vote_id == to_voter_we_vote_id:
         status += "MOVE_VOTER_GUIDES-FROM_AND_TO_VOTER_WE_VOTE_IDS_IDENTICAL "
+        success = False
         results = {
             'status': status,
             'success': success,
@@ -1410,12 +1420,16 @@ def move_voter_guides_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_i
         }
         return results
 
-    if not positive_value_exists(from_organization_we_vote_id) or not positive_value_exists(to_organization_we_vote_id):
-        status += "MOVE_VOTER_GUIDES-MISSING_EITHER_FROM_OR_TO_ORGANIZATION_WE_VOTE_ID "
+    if not positive_value_exists(to_organization_we_vote_id):
+        status += "MOVE_VOTER_GUIDES-MISSING_TO_ORGANIZATION_WE_VOTE_ID "
+        success = False
 
     voter_guide_list_manager = VoterGuideListManager()
     from_voter_guide_results = voter_guide_list_manager.retrieve_all_voter_guides_by_voter_we_vote_id(
         from_voter_we_vote_id, read_only=False)
+    if not from_voter_guide_results['success']:
+        status += from_voter_guide_results['status']
+        success = False
     if from_voter_guide_results['voter_guide_list_found']:
         from_voter_guide_list = from_voter_guide_results['voter_guide_list']
     else:
@@ -1437,6 +1451,9 @@ def move_voter_guides_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_i
 
     to_voter_guide_results = voter_guide_list_manager.retrieve_all_voter_guides_by_voter_we_vote_id(
         to_voter_we_vote_id, read_only=False)
+    if not to_voter_guide_results['success']:
+        status += to_voter_guide_results['status']
+        success = False
     if to_voter_guide_results['voter_guide_list_found']:
         to_voter_guide_list = to_voter_guide_results['voter_guide_list']
     else:
@@ -1464,15 +1481,21 @@ def move_voter_guides_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_i
             try:
                 from_voter_guide.owner_voter_id = to_voter_id
                 from_voter_guide.owner_voter_we_vote_id = to_voter_we_vote_id
-                from_voter_guide.organization_we_vote_id = to_organization_we_vote_id
+                if positive_value_exists(to_organization_we_vote_id):
+                    from_voter_guide.organization_we_vote_id = to_organization_we_vote_id
                 from_voter_guide.save()
                 voter_guide_entries_moved += 1
             except Exception as e:
+                status += "COULD_NOT_UPDATE_FROM_VOTER_GUIDE: " + str(e) + " "
+                success = False
                 voter_guide_entries_not_moved += 1
 
     # Now remove the voter_guides where there were duplicates
     from_voter_guide_remaining_results = voter_guide_list_manager.retrieve_all_voter_guides_by_voter_we_vote_id(
         from_voter_we_vote_id, read_only=False)
+    if not from_voter_guide_remaining_results['success']:
+        status += from_voter_guide_remaining_results['status']
+        success = False
     if from_voter_guide_remaining_results['voter_guide_list_found']:
         from_voter_guide_list_remaining = to_voter_guide_results['voter_guide_list']
         for from_voter_guide in from_voter_guide_list_remaining:
@@ -1482,7 +1505,8 @@ def move_voter_guides_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_i
                 # from_voter_guide.delete()
                 pass
             except Exception as e:
-                pass
+                status += "COULD_NOT_DELETE_FROM_VOTER_GUIDE: " + str(e) + " "
+                success = False
 
     results = {
         'status': status,
@@ -3143,6 +3167,8 @@ def voter_guides_to_follow_retrieve_for_api(  # voterGuidesToFollowRetrieve
 def retrieve_voter_guides_to_follow_by_ballot_item(voter_id, kind_of_ballot_item, ballot_item_we_vote_id,
                                                    search_string, filter_voter_guides_by_issue=None,
                                                    organization_we_vote_id_list_for_voter_issues=None):
+    status = ''
+    success = True
     if filter_voter_guides_by_issue is None:
         filter_voter_guides_by_issue = False
     voter_guide_list_found = False
@@ -3183,8 +3209,13 @@ def retrieve_voter_guides_to_follow_by_ballot_item(voter_id, kind_of_ballot_item
             all_positions_list, organization_we_vote_id_list_for_voter_issues)
 
     follow_organization_list_manager = FollowOrganizationList()
-    organizations_followed_by_voter = \
-        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
+    try:
+        organizations_followed_by_voter = \
+            follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
+    except Exception as e:
+        organizations_followed_by_voter = []
+        status += "RETRIEVE_FOLLOW_ORGANIZATION_FAILED: " + str(e) + " "
+        success = False
 
     positions_list = position_list_manager.calculate_positions_not_followed_by_voter(
         all_positions_list, organizations_followed_by_voter)
@@ -3278,8 +3309,7 @@ def retrieve_voter_guides_to_follow_by_ballot_item(voter_id, kind_of_ballot_item
             else:
                 voter_guide_list.append(one_voter_guide)
 
-    status = 'SUCCESSFUL_RETRIEVE_OF_VOTER_GUIDES_BY_BALLOT_ITEM'
-    success = True
+    status += 'SUCCESSFUL_RETRIEVE_OF_VOTER_GUIDES_BY_BALLOT_ITEM '
 
     if len(voter_guide_list):
         voter_guide_list_found = True
@@ -3304,16 +3334,23 @@ def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_e
     voter_guide_list_found = False
     status = ""
     status += "voter_id: " + str(voter_id) + " "
+    success = True
 
     # Start with orgs followed and ignored by this voter
     follow_organization_list_manager = FollowOrganizationList()
     return_we_vote_id = True
-    organization_we_vote_ids_followed_by_voter = \
-        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(
-            voter_id, return_we_vote_id)
-    organization_we_vote_ids_ignored_by_voter = \
-        follow_organization_list_manager.retrieve_ignore_organization_by_voter_id_simple_id_array(
-            voter_id, return_we_vote_id)
+    try:
+        organization_we_vote_ids_followed_by_voter = \
+            follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(
+                voter_id, return_we_vote_id)
+        organization_we_vote_ids_ignored_by_voter = \
+            follow_organization_list_manager.retrieve_ignore_organization_by_voter_id_simple_id_array(
+                voter_id, return_we_vote_id)
+    except Exception as e:
+        organization_we_vote_ids_followed_by_voter = []
+        organization_we_vote_ids_ignored_by_voter = []
+        status += "ERROR_RETRIEVING_FOLLOWED_OR_IGNORED: " + str(e) + " "
+        success = False
 
     # position_list_manager = PositionListManager()
     if not positive_value_exists(google_civic_election_id):
@@ -3356,7 +3393,7 @@ def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_e
         # If no positions are found, exit
         voter_guide_list = []
         results = {
-            'success':                      True,
+            'success':                      success,
             'status':                       "NO_VOTER_GUIDES_TO_FOLLOW_FOUND_FOR_THIS_ELECTION-FOR_VOTER",
             'voter_guide_list_found':       False,
             'voter_guide_list':             voter_guide_list,
@@ -3364,7 +3401,6 @@ def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_e
         return results
 
     status += 'SUCCESSFUL_RETRIEVE_OF_VOTER_GUIDES_BY_ELECTION '
-    success = True
 
     if len(voter_guide_list):
         voter_guide_list_found = True
@@ -3662,6 +3698,8 @@ def retrieve_voter_guides_to_follow_generic_for_api(voter_id, search_string, fil
     :param sort_order:
     :return:
     """
+    status = ""
+    success = True
     filter_voter_guides_by_issue = positive_value_exists(filter_voter_guides_by_issue)
     voter_guide_list_found = False
 
@@ -3674,12 +3712,18 @@ def retrieve_voter_guides_to_follow_generic_for_api(voter_id, search_string, fil
         organization_we_vote_ids_ignored_by_voter = []
     else:
         read_only = True
-        organization_we_vote_ids_followed_by_voter = \
-            follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(
-                voter_id, return_we_vote_id)
-        organization_we_vote_ids_ignored_by_voter = \
-            follow_organization_list_manager.retrieve_ignore_organization_by_voter_id_simple_id_array(
-                voter_id, return_we_vote_id)
+        try:
+            organization_we_vote_ids_followed_by_voter = \
+                follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(
+                    voter_id, return_we_vote_id)
+            organization_we_vote_ids_ignored_by_voter = \
+                follow_organization_list_manager.retrieve_ignore_organization_by_voter_id_simple_id_array(
+                    voter_id, return_we_vote_id)
+        except Exception as e:
+            organization_we_vote_ids_followed_by_voter = []
+            organization_we_vote_ids_ignored_by_voter = []
+            status += "ERROR_RETRIEVING_FOLLOWED_OR_IGNORED: " + str(e) + " "
+            success = False
 
     # This is a list of orgs that the voter is already following or ignoring
     organization_we_vote_ids_followed_or_ignored_by_voter = list(chain(organization_we_vote_ids_followed_by_voter,
@@ -3703,7 +3747,6 @@ def retrieve_voter_guides_to_follow_generic_for_api(voter_id, search_string, fil
             voter_guide_list, organization_we_vote_id_list_for_voter_issues)
 
     status = 'SUCCESSFUL_RETRIEVE_OF_VOTER_GUIDES_GENERIC '
-    success = True
 
     if len(voter_guide_list):
         voter_guide_list_found = True
@@ -4631,28 +4674,37 @@ def retrieve_organizations_followed_by_organization_we_vote_id(organization_we_v
 
 
 def retrieve_voter_guides_followed(voter_id):
+    status = ''
+    success = True
+    voter_guide_list = []
     voter_guide_list_found = False
 
     follow_organization_list_manager = FollowOrganizationList()
     return_we_vote_id = True
-    organization_we_vote_ids_followed_by_voter = \
-        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(
-            voter_id, return_we_vote_id)
+    try:
+        organization_we_vote_ids_followed_by_voter = \
+            follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(
+                voter_id, return_we_vote_id)
+    except Exception as e:
+        organization_we_vote_ids_followed_by_voter = []
+        status += "ERROR_RETRIEVING_FOLLOWED_OR_IGNORED: " + str(e) + " "
+        success = False
 
-    voter_guide_list_object = VoterGuideListManager()
-    results = voter_guide_list_object.retrieve_voter_guides_by_organization_list(
-        organization_we_vote_ids_followed_by_voter)
+    if success:
+        voter_guide_list_object = VoterGuideListManager()
+        results = voter_guide_list_object.retrieve_voter_guides_by_organization_list(
+            organization_we_vote_ids_followed_by_voter)
 
-    voter_guide_list = []
-    if results['voter_guide_list_found']:
-        voter_guide_list = results['voter_guide_list']
-        status = 'SUCCESSFUL_RETRIEVE_VOTER_GUIDES_FOLLOWED '
-        success = True
-        if len(voter_guide_list):
-            voter_guide_list_found = True
-    else:
-        status = results['status']
-        success = results['success']
+        voter_guide_list = []
+        if results['voter_guide_list_found']:
+            voter_guide_list = results['voter_guide_list']
+            status = 'SUCCESSFUL_RETRIEVE_VOTER_GUIDES_FOLLOWED '
+            if len(voter_guide_list):
+                voter_guide_list_found = True
+        else:
+            status = results['status']
+            if not results['success']:
+                success = False
 
     results = {
         'success':                      success,

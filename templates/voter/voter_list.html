@@ -134,6 +134,20 @@
                      {% if has_friends %}checked{% endif %} /> Has Friends
             </label>
         </span>
+
+        <span style="padding: 6px">
+            <label for="show_voter_merge_data_id">
+              <input type="checkbox" name="show_voter_merge_data" id="show_voter_merge_data_id" value="1"
+                     {% if show_voter_merge_data %}checked{% endif %} /> Show Voter Merge Data
+            </label>
+        </span>
+
+        <span style="padding: 6px">
+            <label for="has_voter_merge_problem_id">
+              <input type="checkbox" name="has_voter_merge_problem" id="has_voter_merge_problem_id" value="1"
+                     {% if has_voter_merge_problem %}checked{% endif %} /> Has Voter Merge Problem
+            </label>
+        </span>
     </div>
 </form>
 
@@ -239,10 +253,18 @@
             <!-- See images //-->
             <td>
                 <a href="{% url 'image:images_for_one_voter' voter.id %}" target="_blank">See images</a>
-                <br \>
+                <br />
                 <a href="{% url 'import_export_twitter:delete_images_view' %}?voter_id={{voter.id}}">Delete images</a>
             </td>
         </tr>
+    {% if voter.to_voter_merge_status %}
+        <tr>
+            <td colspan="1"></td>
+            <td colspan="12">
+{% include "voter/voter_merge_status_table.html" with for_from_voter=0 for_to_voter=1 voter_merge_status=voter.to_voter_merge_status %}
+            </td>
+        </tr>
+    {% endif %}
     {% endfor %}
     </table>
 {% else %}
@@ -294,6 +316,16 @@
     });
     $(function() {
         $('#has_friends_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#has_voter_merge_problem_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#show_voter_merge_data_id').change(function() {
             this.form.submit();
         });
     });

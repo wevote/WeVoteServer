@@ -266,6 +266,8 @@ class Issue(models.Model):
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id of this issue", max_length=255, default=None, null=True,
         blank=True, unique=True)
+    # Order by 1, 2, 3. Push 0's to the bottom in the same order.
+    forced_sort_order = models.PositiveIntegerField(null=True, default=None)
     issue_name = models.CharField(verbose_name="name of the issue",
                                   max_length=255, null=True, blank=True, db_index=True)
     # The description of the issue.

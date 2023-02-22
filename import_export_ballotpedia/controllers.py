@@ -2832,7 +2832,7 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api_v4(
         return results
 
     status = ''
-    success = False
+    success = True
     election_day_text = ''
     election_description_text = ''
     election_data_retrieved = False
@@ -2981,7 +2981,6 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api_v4(
         success = False
     else:
         status += "RETRIEVE_ONE_BALLOT_FROM_BALLOTPEDIA_API-SUCCESS "
-        success = True
         ballot_returned_found = one_ballot_results['ballot_returned_found']
         if positive_value_exists(ballot_returned_found):
             ballot_returned = one_ballot_results['ballot_returned']
@@ -3001,7 +3000,7 @@ def voter_ballot_items_retrieve_from_ballotpedia_for_api_v4(
             status += "BALLOT_RETURNED_MISSING-BP: "
             status += one_ballot_results['status']
 
-    # VoterBallotSaved gets created outside of this function
+    # VoterBallotSaved gets created outside this function
 
     results = {
         'success':                      success,

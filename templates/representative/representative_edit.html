@@ -6,7 +6,7 @@
 {%  block content %}
 {% load template_filters %}
 {% load humanize %}
-<a href="{% url 'representative:representative_list' %}?state_code={{ state_code }}">
+<a href="{% url 'representative:representative_list' %}?state_code={{ state_code }}&show_this_year={{ show_this_year }}">
     < Back to Representatives</a>
 
 <h1>{% if representative %}Edit Representative "{{ representative.representative_name }}"{% else %}New Representative{% endif %}</h1>

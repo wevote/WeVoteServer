@@ -1,0 +1,188 @@
+{# templates/voter/voter_merge_status_table.html #}
+{% load humanize %}
+
+
+<table class="table">
+  <thead>
+    <tr>
+        <th>
+        {% if for_from_voter %}
+            To:
+        {% elif for_to_voter %}
+            From:
+        {% endif %}
+        </th>
+        <th>Apple</th>
+        <th>Repair Pos</th>
+        <th>Move Pos</th>
+        <th>Move Org</th>
+        <th>Frnds</th>
+        <th>Fllws</th>
+        <th>Membrs</th>
+        <th>Org Team</th>
+        <th>Email</th>
+        <th>SMS</th>
+        <th>FB</th>
+        <th>Twitter</th>
+        <th>VC</th>
+        <th>Plan</th>
+        <th>Donate</th>
+        <th>VG</th>
+        <th>Shrd</th>
+        <th>Act Notice</th>
+        <th>Act Post</th>
+        <th>Act Com</th>
+        <th>CampX</th>
+        <th>Anlytc</th>
+        <th>Merge Voter</th>
+        <th>Move Imgs</th>
+        <th>Send Emails</th>
+        <th>Pos Repair</th>
+    </tr>
+  </thead>
+    <tr>
+        <td>
+        {% if for_from_voter %}
+            {{ voter_merge_status.to_voter_we_vote_id }}
+        {% elif for_to_voter %}
+            {{ voter_merge_status.from_voter_we_vote_id }}
+        {% endif %}
+        {% if voter_merge_status.total_merge_complete %}
+            <strong>Completed</strong>
+        {% else %}
+            <a href="{% url 'voter:finish_voter_merge_process' %}?from_voter_we_vote_id={{ voter_merge_status.from_voter_we_vote_id }}&to_voter_we_vote_id={{ voter_merge_status.to_voter_we_vote_id }}" class="u-no-break">
+                Finish processing</a>
+        {% endif %}
+
+        </td>
+        <td>
+            {% if voter_merge_status.move_apple_user_complete %}{{ voter_merge_status.move_apple_user_milliseconds|intcomma }}
+            {% else %}NO{% endif %}
+        </td>
+        <td>
+            {% if voter_merge_status.repair_positions_complete %}{{ voter_merge_status.repair_positions_milliseconds|intcomma }}
+            {% else %}NO{% endif %}
+        </td>
+        <td>
+            {% if voter_merge_status.move_positions_complete %}{{ voter_merge_status.move_positions_milliseconds|intcomma }}
+            {% else %}NO{% endif %}
+        </td>
+        <td>
+            {% if voter_merge_status.move_organization_complete %}{{ voter_merge_status.move_organization_milliseconds|intcomma }}
+            {% else %}NO{% endif %}
+        </td>
+        <td>
+            {% if voter_merge_status.move_friends_complete %}{{ voter_merge_status.move_friends_milliseconds|intcomma }}
+            {% else %}NO{% endif %}
+        </td>
+        <td>
+            {% if voter_merge_status.move_follows_complete %}{{ voter_merge_status.move_follows_milliseconds|intcomma }}
+            {% else %}NO{% endif %}
+        </td>
+        <td>
+            {% if voter_merge_status.move_membership_link_complete %}{{ voter_merge_status.move_membership_link_milliseconds|intcomma }}
+            {% else %}NO{% endif %}
+        </td>
+        <td>
+            {% if voter_merge_status.move_org_team_complete %}{{ voter_merge_status.move_org_team_milliseconds|intcomma }}
+            {% else %}NO{% endif %}
+        </td>
+        <td>
+            {% if voter_merge_status.move_email_complete %}{{ voter_merge_status.move_email_milliseconds|intcomma }}
+            {% else %}NO{% endif %}
+        </td>
+        <td>
+            {% if voter_merge_status.move_sms_complete %}{{ voter_merge_status.move_sms_milliseconds|intcomma }}
+            {% else %}NO{% endif %}
+        </td>
+        <td>
+            {% if voter_merge_status.move_facebook_complete %}{{ voter_merge_status.move_facebook_milliseconds|intcomma }}
+            {% else %}NO{% endif %}
+        </td>
+        <td>
+            {% if voter_merge_status.move_twitter_complete %}{{ voter_merge_status.move_twitter_milliseconds|intcomma }}
+            {% else %}NO{% endif %}
+        </td>
+        <td>
+            {% if voter_merge_status.move_voter_contact_complete %}{{ voter_merge_status.move_voter_contact_milliseconds|intcomma }}
+            {% else %}NO{% endif %}
+        </td>
+        <td>
+            {% if voter_merge_status.move_voter_plan_complete %}{{ voter_merge_status.move_voter_plan_milliseconds|intcomma }}
+            {% else %}NO{% endif %}
+        </td>
+        <td>
+            {% if voter_merge_status.move_donations_complete %}{{ voter_merge_status.move_donations_milliseconds|intcomma }}
+            {% else %}NO{% endif %}
+        </td>
+        <td>
+            {% if voter_merge_status.move_voter_guides_complete %}{{ voter_merge_status.move_voter_guides_milliseconds|intcomma }}
+            {% else %}NO{% endif %}
+        </td>
+        <td>
+            {% if voter_merge_status.move_shared_items_complete %}{{ voter_merge_status.move_shared_items_milliseconds|intcomma }}
+            {% else %}NO{% endif %}
+        </td>
+        <td>
+            {% if voter_merge_status.move_activity_notices_complete %}{{ voter_merge_status.move_activity_notices_milliseconds|intcomma }}
+            {% else %}NO{% endif %}
+        </td>
+        <td>
+            {% if voter_merge_status.move_activity_posts_complete %}{{ voter_merge_status.move_activity_posts_milliseconds|intcomma }}
+            {% else %}NO{% endif %}
+        </td>
+        <td>
+            {% if voter_merge_status.move_activity_comments_complete %}{{ voter_merge_status.move_activity_comments_milliseconds|intcomma }}
+            {% else %}NO{% endif %}
+        </td>
+        <td>
+            {% if voter_merge_status.move_campaignx_complete %}{{ voter_merge_status.move_campaignx_milliseconds|intcomma }}
+            {% else %}NO{% endif %}
+        </td>
+        <td>
+            {% if voter_merge_status.move_analytics_complete %}{{ voter_merge_status.move_analytics_milliseconds|intcomma }}
+            {% else %}NO{% endif %}
+        </td>
+        <td>
+            {% if voter_merge_status.merge_voter_complete %}{{ voter_merge_status.merge_voter_milliseconds|intcomma }}
+            {% else %}NO{% endif %}
+        </td>
+        <td>
+            {% if voter_merge_status.move_images_complete %}{{ voter_merge_status.move_images_milliseconds|intcomma }}
+            {% else %}NO{% endif %}
+        </td>
+        <td>
+            {% if voter_merge_status.send_emails_complete %}{{ voter_merge_status.send_emails_milliseconds|intcomma }}
+            {% else %}NO{% endif %}
+        </td>
+        <td>
+            {% if voter_merge_status.final_position_repair_complete %}{{ voter_merge_status.final_position_repair_milliseconds|intcomma }}
+            {% else %}NO{% endif %}
+        </td>
+    </tr>
+{% if voter_merge_status.voter_merge_log_list %}
+    <tr>
+        <td colspan="27">
+<table class="table table-striped">
+    <tbody>
+    {% for log_entry in voter_merge_status.voter_merge_log_list %}
+        <tr>
+            <td>
+                <span class="u-no-break">{{ log_entry.log_datetime }}</span><br />
+                {{ log_entry.step_name }}<br />
+                Success: {{ log_entry.success }}<br />
+                <span class="u-no-break">Duration: {{ log_entry.step_duration|intcomma }}</span>
+            </td>
+            <td>
+                <div style="width: 100%;">
+                {{ log_entry.status }}
+                </div>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+        </td>
+    </tr>
+{% endif %}
+</table>

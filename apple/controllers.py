@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 from apple.models import AppleUser
-from voter.controllers import voter_merge_two_accounts_action
+from voter.controllers import voter_merge_two_accounts_action_schedule
 from voter.models import VoterManager
 from wevote_functions.functions import positive_value_exists
 import wevote_functions.admin
@@ -79,24 +79,36 @@ def apple_sign_in_save_merge_if_needed(
     else:
         status += "NO_PRIOR_VOTER_FOUND "
 
+    merge_from_voter_we_vote_id = ''
+    merge_to_voter_we_vote_id = ''
     if previously_signed_in_voter_found:
         status += "PREVIOUSLY_SIGNED_IN_VOTER-" + str(previously_signed_in_voter_we_vote_id) + " "
-        merge_results = voter_merge_two_accounts_action(
-            voter_starting_process,
-            previously_signed_in_voter,
-            voter_device_link,
-            status=status,
-            email_owner_voter_found=False,
-            facebook_owner_voter_found=False,
-            invitation_owner_voter_found=False)
+        merge_results = voter_merge_two_accounts_action_schedule(
+            from_voter=voter_starting_process,
+            to_voter=previously_signed_in_voter,
+            voter_device_link=voter_device_link)
         status += merge_results['status']
+        if not merge_results['success']:
+            success = False
+        try:
+            merge_from_voter_we_vote_id = voter_starting_process.we_vote_id
+        except Exception as e:
+            status += "COULD_NOT_RETURN_MERGE_FROM_VOTER_WE_VOTE_ID: " + str(e) + " "
+            success = False
+        try:
+            merge_to_voter_we_vote_id = previously_signed_in_voter.we_vote_id
+        except Exception as e:
+            status += "COULD_NOT_RETURN_MERGE_TO_VOTER_WE_VOTE_ID: " + str(e) + " "
+            success = False
 
     results = {
-        'status':                                   status,
-        'success':                                  success,
+        'merge_from_voter_we_vote_id':              merge_from_voter_we_vote_id,
+        'merge_to_voter_we_vote_id':                merge_to_voter_we_vote_id,
         'previously_signed_in_voter':               previously_signed_in_voter,
         'previously_signed_in_voter_found':         previously_signed_in_voter_found,
         'previously_signed_in_voter_we_vote_id':    previously_signed_in_voter_we_vote_id,
+        'status':                                   status,
+        'success':                                  success,
     }
     return results
 

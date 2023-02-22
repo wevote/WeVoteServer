@@ -1183,6 +1183,8 @@ class EmailManager(models.Manager):
         scheduled_email_results = self.retrieve_scheduled_email_list_from_send_status(
             sender_we_vote_id, send_status)
         status += scheduled_email_results['status']
+        if not scheduled_email_results['success']:
+            success = False
         if scheduled_email_results['scheduled_email_list_found']:
             scheduled_email_list = scheduled_email_results['scheduled_email_list']
             for scheduled_email in scheduled_email_list:
@@ -1197,6 +1199,7 @@ class EmailManager(models.Manager):
                                 scheduled_email.message_text.replace('Your   friend', sender_name)
                     except Exception as e:
                         status += "COULD_NOT_REPLACE_NAME_IN_MESSAGE_TEXT: " + str(e) + " "
+                        success = False
                     try:
                         if scheduled_email.message_html:
                             save_scheduled_email = True
@@ -1204,14 +1207,18 @@ class EmailManager(models.Manager):
                                 scheduled_email.message_html.replace('Your   friend', sender_name)
                     except Exception as e:
                         status += "COULD_NOT_REPLACE_NAME_IN_HTML: " + str(e) + " "
+                        success = False
                     if save_scheduled_email:
                         try:
                             scheduled_email.save()
                             status += "SCHEDULED_EMAIL_SAVED "
                         except Exception as e:
                             status += "ERROR_COULD_NOT_SAVE_SCHEDULED_EMAIL: " + str(e) + " "
+                            success = False
                             print(status)
                 send_results = self.send_scheduled_email(scheduled_email)
+                if not send_results['success']:
+                    success = False
                 email_scheduled_sent = send_results['email_scheduled_sent']
                 status += send_results['status']
                 if email_scheduled_sent:
@@ -1222,6 +1229,7 @@ class EmailManager(models.Manager):
                         scheduled_email.save()
                     except Exception as e:
                         status += "ERROR_FAILED_TO_UPDATE_SEND_STATUS: " + str(e) + ' '
+                        success = False
                         print(status)
         results = {
             'success':                  success,

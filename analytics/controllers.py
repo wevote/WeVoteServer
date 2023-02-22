@@ -1329,7 +1329,7 @@ def delete_analytics_info_for_voter(voter_to_delete_we_vote_id):
                 status += "UNABLE_TO_SAVE_ANALYTICS_ACTION "
 
         status += " DELETE_ANALYTICS_ACTION, moved: " + str(analytics_action_deleted) + \
-                  ", not moved: " + str(analytics_action_not_deleted)
+                  ", not moved: " + str(analytics_action_not_deleted) + " "
     else:
         status += " " + analytics_action_list_results['status']
 
@@ -1345,12 +1345,13 @@ def delete_analytics_info_for_voter(voter_to_delete_we_vote_id):
 
 def move_analytics_info_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
     status = " MOVE_ANALYTICS_ACTION_DATA"
-    success = False
+    success = True
     analytics_action_moved = 0
     analytics_action_not_moved = 0
 
     if not positive_value_exists(from_voter_we_vote_id) or not positive_value_exists(to_voter_we_vote_id):
         status += "MOVE_ANALYTICS_ACTION-MISSING_FROM_OR_TO_VOTER_ID"
+        success = False
         results = {
             'status':                       status,
             'success':                      success,
@@ -1363,6 +1364,7 @@ def move_analytics_info_to_another_voter(from_voter_we_vote_id, to_voter_we_vote
 
     if from_voter_we_vote_id == to_voter_we_vote_id:
         status += "MOVE_ANALYTICS_ACTION-FROM_AND_TO_VOTER_WE_VOTE_ID_IDENTICAL "
+        success = False
         results = {
             'status':                       status,
             'success':                      success,
@@ -1375,6 +1377,9 @@ def move_analytics_info_to_another_voter(from_voter_we_vote_id, to_voter_we_vote
 
     analytics_manager = AnalyticsManager()
     analytics_action_list_results = analytics_manager.retrieve_analytics_action_list(from_voter_we_vote_id)
+    if not analytics_action_list_results['success']:
+        status += analytics_action_list_results['status']
+        success = False
     if analytics_action_list_results['analytics_action_list_found']:
         analytics_action_list = analytics_action_list_results['analytics_action_list']
 
@@ -1386,10 +1391,11 @@ def move_analytics_info_to_another_voter(from_voter_we_vote_id, to_voter_we_vote
                 analytics_action_moved += 1
             except Exception as e:
                 analytics_action_not_moved += 1
-                status += "UNABLE_TO_SAVE_ANALYTICS_ACTION "
+                status += "UNABLE_TO_SAVE_ANALYTICS_ACTION: " + str(e) + " "
+                success = False
 
         status += " MOVE_ANALYTICS_ACTION, moved: " + str(analytics_action_moved) + \
-                  ", not moved: " + str(analytics_action_not_moved)
+                  ", not moved: " + str(analytics_action_not_moved) + " "
     else:
         status += " " + analytics_action_list_results['status']
 

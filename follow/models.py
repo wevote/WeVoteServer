@@ -1387,20 +1387,17 @@ class FollowOrganizationList(models.Model):
             return_we_vote_id=False,
             auto_followed_from_twitter_suggestion=False):
 
-        try:
-            queryset = FollowOrganization.objects.using('readonly').all()
-            queryset = queryset.filter(voter_id=voter_id)
-            queryset = queryset.filter(following_status=FOLLOWING)
-            if auto_followed_from_twitter_suggestion:
-                queryset = queryset.filter(
-                    auto_followed_from_twitter_suggestion=auto_followed_from_twitter_suggestion)
-            if positive_value_exists(return_we_vote_id):
-                queryset = queryset.values_list('organization_we_vote_id', flat=True).distinct()
-            else:
-                queryset = queryset.values_list('organization_id', flat=True).distinct()
-            follow_organization_list_simple_array = list(queryset)
-        except Exception as e:
-            follow_organization_list_simple_array = []
+        queryset = FollowOrganization.objects.using('readonly').all()
+        queryset = queryset.filter(voter_id=voter_id)
+        queryset = queryset.filter(following_status=FOLLOWING)
+        if auto_followed_from_twitter_suggestion:
+            queryset = queryset.filter(
+                auto_followed_from_twitter_suggestion=auto_followed_from_twitter_suggestion)
+        if positive_value_exists(return_we_vote_id):
+            queryset = queryset.values_list('organization_we_vote_id', flat=True).distinct()
+        else:
+            queryset = queryset.values_list('organization_id', flat=True).distinct()
+        follow_organization_list_simple_array = list(queryset)
 
         return follow_organization_list_simple_array
 

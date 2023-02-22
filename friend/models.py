@@ -861,6 +861,7 @@ class FriendManager(models.Manager):
 
     def retrieve_current_friend_list(self, voter_we_vote_id, read_only=True):
         status = ""
+        success = True
         current_friend_list = []  # The entries from CurrentFriend table
         current_friend_list_found = False
 
@@ -888,16 +889,13 @@ class FriendManager(models.Manager):
             current_friend_list = list(current_friend_queryset)
 
             if len(current_friend_list):
-                success = True
                 current_friend_list_found = True
                 status += 'CURRENT_FRIEND_LIST_RETRIEVED '
             else:
-                success = True
                 current_friend_list_found = False
                 status += 'NO_CURRENT_FRIEND_LIST_RETRIEVED '
         except CurrentFriend.DoesNotExist:
             # No data found. Not a problem.
-            success = True
             current_friend_list_found = False
             status += 'NO_CURRENT_FRIEND_LIST_RETRIEVED_DoesNotExist '
             current_friend_list = []

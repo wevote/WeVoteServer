@@ -643,6 +643,7 @@ class TwitterUserManager(models.Manager):
         :return:
         """
         status = ""
+        success = True
         twitter_link_to_voter = TwitterLinkToVoter()
         twitter_link_to_voter_id = 0
 
@@ -654,7 +655,6 @@ class TwitterUserManager(models.Manager):
                     twitter_link_to_voter = TwitterLinkToVoter.objects.get(twitter_id=twitter_id)
                 twitter_link_to_voter_id = twitter_link_to_voter.id
                 twitter_link_to_voter_found = True
-                success = True
                 status += "RETRIEVE_TWITTER_LINK_TO_VOTER_FOUND_BY_TWITTER_USER_ID "
             elif positive_value_exists(voter_we_vote_id):
                 if read_only:
@@ -664,7 +664,6 @@ class TwitterUserManager(models.Manager):
                     twitter_link_to_voter = TwitterLinkToVoter.objects.get(voter_we_vote_id__iexact=voter_we_vote_id)
                 twitter_link_to_voter_id = twitter_link_to_voter.id
                 twitter_link_to_voter_found = True
-                success = True
                 status += "RETRIEVE_TWITTER_LINK_TO_VOTER_FOUND_BY_VOTER_WE_VOTE_ID "
             elif positive_value_exists(twitter_secret_key):
                 if read_only:
@@ -674,7 +673,6 @@ class TwitterUserManager(models.Manager):
                     twitter_link_to_voter = TwitterLinkToVoter.objects.get(secret_key=twitter_secret_key)
                 twitter_link_to_voter_id = twitter_link_to_voter.id
                 twitter_link_to_voter_found = True
-                success = True
                 status += "RETRIEVE_TWITTER_LINK_TO_VOTER_FOUND_BY_TWITTER_SECRET_KEY "
             else:
                 twitter_link_to_voter_found = False
@@ -682,12 +680,11 @@ class TwitterUserManager(models.Manager):
                 status += "RETRIEVE_TWITTER_LINK_TO_VOTER_VARIABLES_MISSING "
         except TwitterLinkToVoter.DoesNotExist:
             twitter_link_to_voter_found = False
-            success = True
             status += "RETRIEVE_TWITTER_LINK_TO_VOTER_NOT_FOUND "
         except Exception as e:
             twitter_link_to_voter_found = False
             success = False
-            status += 'FAILED retrieve_twitter_link_to_voter '
+            status += 'FAILED retrieve_twitter_link_to_voter: ' + str(e) + ' '
 
         results = {
             'success': success,

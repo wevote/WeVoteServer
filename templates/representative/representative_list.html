@@ -60,7 +60,7 @@
     {% endif %}{# End of if years_available #}
     &nbsp;&nbsp;
     {% if representative_search %}
-    <a href="{% url 'representative:representative_list' %}?state_code={{ state_code }}&show_representatives_with_email={{ show_representatives_with_email }}&show_all={{ show_all }}">
+    <a href="{% url 'representative:representative_list' %}?state_code={{ state_code }}&show_representatives_with_email={{ show_representatives_with_email }}&show_all={{ show_all }}&show_this_year={{ show_this_year }}">
          clear search</a>&nbsp;
     {% endif %}
     <input type="text" name="representative_search" id="representative_search_id" value="{{ representative_search }}" />
@@ -101,13 +101,13 @@
             <td>{{ forloop.counter }}</td>
             <td>
                 {% if representative.we_vote_hosted_profile_image_url_medium %}
-                <a href="{% url 'representative:representative_edit' representative.id %}?google_civic_election_id={{ google_civic_election_id }}">
+                <a href="{% url 'representative:representative_edit' representative.id %}?google_civic_election_id={{ google_civic_election_id }}&show_this_year={{ show_this_year }}">
                     <img src='{{ representative.we_vote_hosted_profile_image_url_medium }}' height="48px" />
                 </a>
                 {% endif %}
             </td>
             <td>
-                <a href="{% url 'representative:representative_edit' representative.id %}?google_civic_election_id={{ google_civic_election_id }}">{{ representative.representative_name }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+                <a href="{% url 'representative:representative_edit' representative.id %}?google_civic_election_id={{ google_civic_election_id }}&show_this_year={{ show_this_year }}" class="u-no-break">{{ representative.representative_name }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
                 <br />
                 <span class="u-no-break">In office:
         {% if representative.year_in_office_2023 %}2023 {% endif %}

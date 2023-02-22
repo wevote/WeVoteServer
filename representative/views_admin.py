@@ -329,7 +329,10 @@ def representative_list_view(request):
     representative_search = request.GET.get('representative_search', '')
     show_all = positive_value_exists(request.GET.get('show_all', False))
     show_representatives_with_email = request.GET.get('show_representatives_with_email', False)
-    show_this_year = convert_to_int(request.GET.get('show_this_year', 0))
+    show_this_year = convert_to_int(request.GET.get('show_this_year', 9999))
+    if show_this_year == 9999:
+        datetime_now = localtime(now()).date()  # We Vote uses Pacific Time for TIME_ZONE
+        show_this_year = datetime_now.year
     state_code = request.GET.get('state_code', '')
 
     representative_count = 0
@@ -679,7 +682,7 @@ def representative_edit_view(request, representative_id):
     representative_twitter_handle = request.GET.get('representative_twitter_handle', False)
     representative_url = request.GET.get('representative_url', False)
     political_party = request.GET.get('political_party', False)
-    vote_smart_id = request.GET.get('vote_smart_id', False)
+    show_this_year = request.GET.get('show_this_year', False)
     maplight_id = request.GET.get('maplight_id', False)
 
     messages_on_stage = get_messages(request)
@@ -888,6 +891,7 @@ def representative_edit_view(request, representative_id):
         'representative_url':               representative_url,
         'political_party':                  political_party,
         'possible_politician_list':         possible_politician_list,
+        'show_this_year':                   show_this_year,
     }
     return render(request, 'representative/representative_edit.html', template_values)
 
@@ -1392,7 +1396,7 @@ def update_representatives_from_politicians_view(request):
         six_months = timedelta(weeks=26)
         six_months_ago = today - six_months
         queryset = queryset.exclude(date_last_updated_from_politician__gt=six_months_ago)
-        representative_list = list(queryset[:1000])
+        representative_list = list(queryset[:3000])
     except Exception as e:
         status += "REPRESENTATIVE_QUERY_FAILED: " + str(e) + " "
 

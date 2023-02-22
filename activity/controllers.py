@@ -224,6 +224,7 @@ def move_activity_comments_to_another_voter(
         commenter_profile_image_url_tiny = to_voter.we_vote_hosted_profile_image_url_tiny
     except Exception as e:
         status += "UNABLE_TO_GET_NAME_OR_PHOTOS: " + str(e) + " "
+        success = False
 
     if positive_value_exists(to_organization_we_vote_id):
         # Move based on commenter_voter_we_vote_id
@@ -237,6 +238,7 @@ def move_activity_comments_to_another_voter(
                         commenter_profile_image_url_tiny=commenter_profile_image_url_tiny)
         except Exception as e:
             status += "FAILED-ACTIVITY_COMMENT_UPDATE-INCLUDING_ORG_UPDATE: " + str(e) + " "
+            success = False
         # #############################################
         # Move based on commenter_organization_we_vote_id
         try:
@@ -249,6 +251,7 @@ def move_activity_comments_to_another_voter(
                         commenter_profile_image_url_tiny=commenter_profile_image_url_tiny)
         except Exception as e:
             status += "FAILED-ACTIVITY_COMMENT_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+            success = False
     else:
         try:
             activity_comment_entries_moved += ActivityComment.objects\
@@ -259,6 +262,7 @@ def move_activity_comments_to_another_voter(
                         commenter_profile_image_url_tiny=commenter_profile_image_url_tiny)
         except Exception as e:
             status += "FAILED-ACTIVITY_COMMENT_UPDATE-MISSING_ORG: " + str(e) + " "
+            success = False
 
     results = {
         'status':                           status,
@@ -315,6 +319,7 @@ def move_activity_notices_to_another_voter(
         speaker_profile_image_url_tiny = to_voter.we_vote_hosted_profile_image_url_tiny
     except Exception as e:
         status += "UNABLE_TO_GET_NAME_OR_PHOTOS: " + str(e) + " "
+        success = False
 
     if positive_value_exists(to_organization_we_vote_id):
         # Move based on speaker_voter_we_vote_id
@@ -328,6 +333,7 @@ def move_activity_notices_to_another_voter(
                         speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
         except Exception as e:
             status += "FAILED-ACTIVITY_NOTICE_SEED_UPDATE_INCLUDING_ORG_UPDATE2: " + str(e) + " "
+            success = False
         try:
             activity_notice_entries_moved += ActivityNotice.objects\
                 .filter(speaker_voter_we_vote_id__iexact=from_voter_we_vote_id) \
@@ -338,6 +344,7 @@ def move_activity_notices_to_another_voter(
                         speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
         except Exception as e:
             status += "FAILED-ACTIVITY_NOTICE_UPDATE-INCLUDING_ORG_UPDATE " + str(e) + " "
+            success = False
         # #############################################
         # Move based on speaker_organization_we_vote_id
         try:
@@ -350,6 +357,7 @@ def move_activity_notices_to_another_voter(
                         speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
         except Exception as e:
             status += "FAILED-ACTIVITY_NOTICE_SEED_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+            success = False
         try:
             activity_notice_entries_moved += ActivityNotice.objects \
                 .filter(speaker_organization_we_vote_id__iexact=from_organization_we_vote_id) \
@@ -360,6 +368,7 @@ def move_activity_notices_to_another_voter(
                         speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
         except Exception as e:
             status += "FAILED-ACTIVITY_NOTICE_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+            success = False
     else:
         try:
             activity_notice_seed_entries_moved += ActivityNoticeSeed.objects\
@@ -370,6 +379,7 @@ def move_activity_notices_to_another_voter(
                         speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
         except Exception as e:
             status += "FAILED-ACTIVITY_NOTICE_SEED_UPDATE-MISSING_ORG: " + str(e) + " "
+            success = False
         try:
             activity_notice_entries_moved += ActivityNotice.objects\
                 .filter(speaker_voter_we_vote_id__iexact=from_voter_we_vote_id) \
@@ -379,6 +389,7 @@ def move_activity_notices_to_another_voter(
                         speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
         except Exception as e:
             status += "FAILED-ACTIVITY_NOTICE_UPDATE-MISSING_ORG: " + str(e) + " "
+            success = False
 
     # Now move ActivityNotice recipient_voter_we_vote_id
     try:
@@ -388,6 +399,7 @@ def move_activity_notices_to_another_voter(
                     recipient_voter_we_vote_id=to_voter_we_vote_id)
     except Exception as e:
         status += "FAILED-ACTIVITY_NOTICE_UPDATE-RECIPIENT: " + str(e) + " "
+        success = False
 
     results = {
         'status':                               status,
@@ -442,6 +454,7 @@ def move_activity_posts_to_another_voter(
         speaker_profile_image_url_tiny = to_voter.we_vote_hosted_profile_image_url_tiny
     except Exception as e:
         status += "UNABLE_TO_GET_NAME_OR_PHOTOS: " + str(e) + " "
+        success = False
 
     if positive_value_exists(to_organization_we_vote_id):
         # Move based on speaker_voter_we_vote_id
@@ -455,6 +468,7 @@ def move_activity_posts_to_another_voter(
                         speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
         except Exception as e:
             status += "FAILED-ACTIVITY_POST_UPDATE-INCLUDING_ORG_UPDATE " + str(e) + " "
+            success = False
         # #############################################
         # Move based on speaker_organization_we_vote_id
         try:
@@ -467,6 +481,7 @@ def move_activity_posts_to_another_voter(
                         speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
         except Exception as e:
             status += "FAILED-ACTIVITY_POST_UPDATE-FROM_ORG_WE_VOTE_ID: " + str(e) + " "
+            success = False
     else:
         try:
             activity_post_entries_moved += ActivityPost.objects\
@@ -477,6 +492,7 @@ def move_activity_posts_to_another_voter(
                         speaker_profile_image_url_tiny=speaker_profile_image_url_tiny)
         except Exception as e:
             status += "FAILED-ACTIVITY_POST_UPDATE-MISSING_ORG: " + str(e) + " "
+            success = False
 
     results = {
         'status': status,

@@ -1381,6 +1381,7 @@ class PositionListManager(models.Manager):
         :return:
         """
         status = ""
+        success = True
         if not positive_value_exists(incoming_voter_id) and not positive_value_exists(incoming_voter_we_vote_id):
             results = {
                 'status':           'REPAIR_ALL_POSITIONS-MISSING_VOTER_ID_OR_WE_VOTE_ID ',
@@ -1393,8 +1394,14 @@ class PositionListManager(models.Manager):
         voter_manager = VoterManager()
         if positive_value_exists(incoming_voter_id):
             results = voter_manager.retrieve_voter_by_id(incoming_voter_id)
+            if not results['success']:
+                status += results['status']
+                success = False
         else:
             results = voter_manager.retrieve_voter_by_we_vote_id(incoming_voter_we_vote_id)
+            if not results['success']:
+                status += results['status']
+                success = False
 
         voter_id = 0
         voter_we_vote_id = ""
@@ -1409,6 +1416,8 @@ class PositionListManager(models.Manager):
                 # Heal the data
                 repair_results = organization_manager.repair_missing_linked_organization_we_vote_id(voter)
                 status += repair_results['status']
+                if not repair_results['success']:
+                    success = False
                 if repair_results['voter_repaired']:
                     voter = repair_results['voter']
 
@@ -1417,6 +1426,9 @@ class PositionListManager(models.Manager):
                 # Look up the organization_id
                 organization_results = organization_manager.retrieve_organization_from_we_vote_id(
                     voter.linked_organization_we_vote_id)
+                if not organization_results['success']:
+                    status += organization_results['status']
+                    success = False
                 if organization_results['organization_found']:
                     organization = organization_results['organization']
                     organization_id = organization.id
@@ -1425,36 +1437,40 @@ class PositionListManager(models.Manager):
 
         if not positive_value_exists(voter_id):
             status += 'REPAIR_ALL_POSITIONS-MISSING_VOTER_ID '
+            success = False
             results = {
                 'status':           status,
-                'success':          False,
+                'success':          success,
                 'repair_complete':  False,
             }
             return results
 
         if not positive_value_exists(voter_we_vote_id):
             status += 'REPAIR_ALL_POSITIONS-MISSING_VOTER_WE_VOTE_ID '
+            success = False
             results = {
                 'status':           status,
-                'success':          False,
+                'success':          success,
                 'repair_complete':  False,
             }
             return results
 
         if not positive_value_exists(organization_id):
             status += 'REPAIR_ALL_POSITIONS-MISSING_ORGANIZATION_ID '
+            success = False
             results = {
                 'status':           status,
-                'success':          False,
+                'success':          success,
                 'repair_complete':  False,
             }
             return results
 
         if not positive_value_exists(organization_we_vote_id):
             status += 'REPAIR_ALL_POSITIONS-MISSING_ORGANIZATION_WE_VOTE_ID '
+            success = False
             results = {
                 'status':           status,
-                'success':          False,
+                'success':          success,
                 'repair_complete':  False,
             }
             return results
@@ -1515,6 +1531,8 @@ class PositionListManager(models.Manager):
             )
         except Exception as e:
             failure_counter += 1
+            status += "POSITION_FAILED_ORGANIZATION_ID_UPDATE: " + str(e) + " "
+            success = False
 
         ############################
         # Repair public positions owned by voter_we_vote_id
@@ -1568,6 +1586,8 @@ class PositionListManager(models.Manager):
             )
         except Exception as e:
             failure_counter += 1
+            status += "POSITION_FAILED_ORGANIZATION_ID_UPDATE2: " + str(e) + " "
+            success = False
 
         ############################
         # Repair public positions owned by organization_id
@@ -1621,6 +1641,8 @@ class PositionListManager(models.Manager):
             )
         except Exception as e:
             failure_counter += 1
+            status += "POSITION_FAILED_ORGANIZATION_ID_UPDATE3: " + str(e) + " "
+            success = False
 
         ############################
         # Repair public positions owned by organization_we_vote_id
@@ -1674,18 +1696,20 @@ class PositionListManager(models.Manager):
             )
         except Exception as e:
             failure_counter += 1
+            status += "POSITION_FAILED_ORGANIZATION_ID_UPDATE4: " + str(e) + " "
+            success = False
 
         if positive_value_exists(failure_counter):
             results = {
                 'status':           'VOTER_POSITION_LIST_PARTIALLY_REPAIRED ({failure_counter} failures) '
                                     ''.format(failure_counter=failure_counter),
-                'success':          True,
+                'success':          success,
                 'repair_complete':  True,
             }
         else:
             results = {
                 'status':           'VOTER_POSITION_LIST_FULLY_REPAIRED ',
-                'success':          True,
+                'success':          success,
                 'repair_complete':  True,
             }
 
