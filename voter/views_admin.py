@@ -1282,8 +1282,14 @@ def voter_list_view(request):
             ).order_by('id')
             voter_merge_log_list = list(log_queryset)
             voter_merge_status.voter_merge_log_list = voter_merge_log_list
-            from_merge_status_dict[voter_merge_status.from_voter_we_vote_id] = voter_merge_status
-            to_merge_status_dict[voter_merge_status.to_voter_we_vote_id] = voter_merge_status
+            if voter_merge_status.from_voter_we_vote_id in from_merge_status_dict:
+                from_merge_status_dict[voter_merge_status.from_voter_we_vote_id].append(voter_merge_status)
+            else:
+                from_merge_status_dict[voter_merge_status.from_voter_we_vote_id] = [voter_merge_status]
+            if voter_merge_status.to_voter_we_vote_id in to_merge_status_dict:
+                to_merge_status_dict[voter_merge_status.to_voter_we_vote_id].append(voter_merge_status)
+            else:
+                to_merge_status_dict[voter_merge_status.to_voter_we_vote_id] = [voter_merge_status]
 
     voter_list_found_count = voter_query.count()
 
@@ -1298,9 +1304,9 @@ def voter_list_view(request):
         spent = StripeManager.retrieve_payments_total(one_voter.we_vote_id)
         one_voter.amount_spent = spent if spent != '$0.00' else ''
         if one_voter.we_vote_id in from_merge_status_dict:
-            one_voter.from_voter_merge_status = from_merge_status_dict[one_voter.we_vote_id]
+            one_voter.from_voter_merge_status_list = from_merge_status_dict[one_voter.we_vote_id]
         if one_voter.we_vote_id in to_merge_status_dict:
-            one_voter.to_voter_merge_status = to_merge_status_dict[one_voter.we_vote_id]
+            one_voter.to_voter_merge_status_list = to_merge_status_dict[one_voter.we_vote_id]
         modified_voter_list.append(one_voter)
 
     # For the create new voter account form, create a proposed default password

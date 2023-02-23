@@ -257,13 +257,15 @@
                 <a href="{% url 'import_export_twitter:delete_images_view' %}?voter_id={{voter.id}}">Delete images</a>
             </td>
         </tr>
-    {% if voter.to_voter_merge_status %}
+    {% if voter.to_voter_merge_status_list %}
+        {% for voter_merge_status in voter.to_voter_merge_status_list %}
         <tr>
             <td colspan="1"></td>
             <td colspan="12">
-{% include "voter/voter_merge_status_table.html" with for_from_voter=0 for_to_voter=1 voter_merge_status=voter.to_voter_merge_status %}
+{% include "voter/voter_merge_status_table.html" with for_from_voter=0 for_to_voter=1 voter_merge_status=voter_merge_status %}
             </td>
         </tr>
+        {% endfor %}
     {% endif %}
     {% endfor %}
     </table>
