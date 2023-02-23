@@ -11,6 +11,7 @@ from apple.controllers import apple_sign_in_save_merge_if_needed, \
     validate_sign_in_with_apple_token_for_api  # apple_sign_in_retrieve_voter_id,
 from apple.models import AppleUser
 from config.base import get_environment_variable, get_environment_variable_default
+from voter.controllers import voter_merge_two_accounts_action_schedule
 from voter.models import VoterDeviceLinkManager, VoterManager  # fetch_voter_we_vote_id_from_voter_device_link,
 from wevote_functions.functions import get_voter_device_id, positive_value_exists
 import wevote_functions.admin
@@ -98,18 +99,31 @@ def sign_in_with_apple_view(request):  # appleSignInSave appleSignInSaveView
         apple_os_version=apple_os_version,
         apple_model=apple_model,
         voter_starting_process_we_vote_id=voter_starting_process_we_vote_id)
+    previously_signed_in_voter_we_vote_id = results['previously_signed_in_voter_we_vote_id']
     status += results['status']
 
     merge_results = apple_sign_in_save_merge_if_needed(
         email_from_apple=email,
         previously_signed_in_apple_voter_found=results['previously_signed_in_voter_found'],
-        previously_signed_in_apple_voter_we_vote_id=results['previously_signed_in_voter_we_vote_id'],
+        previously_signed_in_apple_voter_we_vote_id=previously_signed_in_voter_we_vote_id,
         voter_device_link=voter_device_link,
         voter_starting_process=voter_starting_process,
     )
     status += merge_results['status']
-    merge_from_voter_we_vote_id = merge_results['merge_from_voter_we_vote_id']
-    merge_to_voter_we_vote_id = merge_results['merge_to_voter_we_vote_id']
+
+    merge_from_voter_we_vote_id = voter_starting_process_we_vote_id
+    merge_to_voter_we_vote_id = previously_signed_in_voter_we_vote_id
+    status += "IOS_VOTER_STARTING_PROCESS_WE_VOTE_ID-" + str(voter_starting_process_we_vote_id) + " "
+    status += "IOS_PREVIOUSLY_SIGNED_IN_WE_VOTE_ID-" + str(previously_signed_in_voter_we_vote_id) + " "
+    if positive_value_exists(merge_from_voter_we_vote_id) and positive_value_exists(merge_to_voter_we_vote_id):
+        voter_results = voter_manager.retrieve_voter_by_we_vote_id(merge_to_voter_we_vote_id)
+        if voter_results['success'] and voter_results['voter_found']:
+            to_voter = voter_results['voter']
+            merge_results = voter_merge_two_accounts_action_schedule(
+                from_voter=voter_starting_process,
+                to_voter=to_voter,
+                voter_device_link=voter_device_link)
+            status += merge_results['status']
 
     if DEBUG_LOGGING:
         logger.error('awsApple (after apple_sign_in_save_merge_if_needed): ' + status)
@@ -216,7 +230,7 @@ def sign_in_with_apple_for_api(
         if not positive_value_exists(apple_user.last_name) and positive_value_exists(last_name):
             apple_user.last_name = last_name
         apple_user.date_last_referenced = datetime.today()
-        # We match to existing voter outside of this function
+        # We match to existing voter outside this function
         # if not positive_value_exists(previously_signed_in_voter_we_vote_id):
         #     results_id = apple_sign_in_retrieve_voter_id(email, first_name, last_name)
         #     if positive_value_exists(results_id['voter_we_vote_id']):
@@ -364,17 +378,31 @@ def sign_in_with_apple_oauth_redirect_view(request):  # appleSignInOauthRedirect
         apple_os_version='n/a',
         apple_model='n/a',
         voter_starting_process_we_vote_id=voter_starting_process_we_vote_id)
+    previously_signed_in_voter_we_vote_id = results['previously_signed_in_voter_we_vote_id']
     status += results['status']
 
     merge_results = apple_sign_in_save_merge_if_needed(
         email_from_apple=email,
         previously_signed_in_apple_voter_found=results['previously_signed_in_voter_found'],
-        previously_signed_in_apple_voter_we_vote_id=results['previously_signed_in_voter_we_vote_id'],
+        previously_signed_in_apple_voter_we_vote_id=previously_signed_in_voter_we_vote_id,
         voter_device_link=voter_device_link,
         voter_starting_process=voter_starting_process,
     )
-    # 2023-02-21 Note that this path doesn't trigger 'voter_merge_two_accounts_action',
-    #  using merge_from_voter_we_vote_id and merge_to_voter_we_vote_id
+
+    merge_from_voter_we_vote_id = voter_starting_process_we_vote_id
+    merge_to_voter_we_vote_id = previously_signed_in_voter_we_vote_id
+    status += "VOTER_STARTING_PROCESS_WE_VOTE_ID-" + str(voter_starting_process_we_vote_id) + " "
+    status += "PREVIOUSLY_SIGNED_IN_WE_VOTE_ID-" + str(previously_signed_in_voter_we_vote_id) + " "
+    if positive_value_exists(merge_from_voter_we_vote_id) and positive_value_exists(merge_to_voter_we_vote_id):
+        voter_results = voter_manager.retrieve_voter_by_we_vote_id(merge_to_voter_we_vote_id)
+        if voter_results['success'] and voter_results['voter_found']:
+            to_voter = voter_results['voter']
+            merge_results = voter_merge_two_accounts_action_schedule(
+                from_voter=voter_starting_process,
+                to_voter=to_voter,
+                voter_device_link=voter_device_link)
+            status += merge_results['status']
+
     status += merge_results['status']
     if DEBUG_LOGGING:
         logger.error('awsApple ' + status)
