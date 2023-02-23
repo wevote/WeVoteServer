@@ -1843,6 +1843,8 @@ def voter_merge_two_accounts_for_facebook(facebook_secret_key, facebook_user_id,
     facebook_owner_voter_found = False
     facebook_owner_voter = {'id': 0}
     facebook_manager = FacebookManager()
+    merge_from_voter_we_vote_id = ''
+    merge_to_voter_we_vote_id = ''
 
     if positive_value_exists(facebook_secret_key):
         status += "FACEBOOK_SECRET_KEY "
@@ -1872,6 +1874,8 @@ def voter_merge_two_accounts_for_facebook(facebook_secret_key, facebook_user_id,
             'email_owner_voter_found': False,
             'facebook_owner_voter_found': facebook_owner_voter_found,
             'invitation_owner_voter_found': False,
+            'merge_from_voter_we_vote_id': merge_from_voter_we_vote_id,
+            'merge_to_voter_we_vote_id': merge_to_voter_we_vote_id,
         }
         return None, None, error_results
 
@@ -1899,6 +1903,8 @@ def voter_merge_two_accounts_for_facebook(facebook_secret_key, facebook_user_id,
                 'email_owner_voter_found': False,
                 'facebook_owner_voter_found': facebook_owner_voter_found,
                 'invitation_owner_voter_found': False,
+                'merge_from_voter_we_vote_id':  merge_from_voter_we_vote_id,
+                'merge_to_voter_we_vote_id':    merge_to_voter_we_vote_id,
             }
             return None, None, error_results
 
@@ -1979,6 +1985,8 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     facebook_owner_voter_found = False
     twitter_owner_voter_found = False
     invitation_owner_voter_found = False
+    merge_from_voter_we_vote_id = ''
+    merge_to_voter_we_vote_id = ''
     new_owner_voter = None
     success = False
     status = ""
@@ -1994,6 +2002,8 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
             'email_owner_voter_found':      email_owner_voter_found,
             'facebook_owner_voter_found':   facebook_owner_voter_found,
             'invitation_owner_voter_found': False,
+            'merge_from_voter_we_vote_id':  merge_from_voter_we_vote_id,
+            'merge_to_voter_we_vote_id':    merge_to_voter_we_vote_id,
         }
         return error_results
 
@@ -2012,6 +2022,8 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
             'email_owner_voter_found':      email_owner_voter_found,
             'facebook_owner_voter_found':   facebook_owner_voter_found,
             'invitation_owner_voter_found': False,
+            'merge_from_voter_we_vote_id':  merge_from_voter_we_vote_id,
+            'merge_to_voter_we_vote_id':    merge_to_voter_we_vote_id,
         }
         return error_results
 
@@ -2032,6 +2044,8 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
             'email_owner_voter_found':      email_owner_voter_found,
             'facebook_owner_voter_found':   facebook_owner_voter_found,
             'invitation_owner_voter_found': False,
+            'merge_from_voter_we_vote_id':  merge_from_voter_we_vote_id,
+            'merge_to_voter_we_vote_id':    merge_to_voter_we_vote_id,
         }
         return error_results
 
@@ -2045,6 +2059,8 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
             'email_owner_voter_found': email_owner_voter_found,
             'facebook_owner_voter_found': facebook_owner_voter_found,
             'invitation_owner_voter_found': False,
+            'merge_from_voter_we_vote_id': merge_from_voter_we_vote_id,
+            'merge_to_voter_we_vote_id': merge_to_voter_we_vote_id,
         }
         return error_results
 
@@ -2077,6 +2093,8 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                 'email_owner_voter_found':      email_owner_voter_found,
                 'facebook_owner_voter_found':   False,
                 'invitation_owner_voter_found': False,
+                'merge_from_voter_we_vote_id':  merge_from_voter_we_vote_id,
+                'merge_to_voter_we_vote_id':    merge_to_voter_we_vote_id,
             }
             return error_results
 
@@ -2090,6 +2108,8 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                 'email_owner_voter_found':      email_owner_voter_found,
                 'facebook_owner_voter_found':   False,
                 'invitation_owner_voter_found': False,
+                'merge_from_voter_we_vote_id':  merge_from_voter_we_vote_id,
+                'merge_to_voter_we_vote_id':    merge_to_voter_we_vote_id,
             }
             return error_results
 
@@ -2143,6 +2163,8 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                 'email_owner_voter_found': False,
                 'facebook_owner_voter_found': False,
                 'twitter_owner_voter_found': twitter_owner_voter_found,
+                'merge_from_voter_we_vote_id':  merge_from_voter_we_vote_id,
+                'merge_to_voter_we_vote_id':    merge_to_voter_we_vote_id,
             }
             return error_results
 
@@ -2171,6 +2193,8 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                     'email_owner_voter_found': False,
                     'facebook_owner_voter_found': False,
                     'twitter_owner_voter_found': twitter_owner_voter_found,
+                    'merge_from_voter_we_vote_id': merge_from_voter_we_vote_id,
+                    'merge_to_voter_we_vote_id': merge_to_voter_we_vote_id,
                 }
                 return error_results
 

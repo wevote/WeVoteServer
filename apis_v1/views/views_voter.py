@@ -1427,6 +1427,8 @@ def voter_merge_two_accounts_view(request):  # voterMergeTwoAccounts
         'status':                           results['status'],
         'success':                          results['success'],
         'email_owner_voter_found':          results['email_owner_voter_found'],
+        'merge_from_voter_we_vote_id':      results['merge_from_voter_we_vote_id'],
+        'merge_to_voter_we_vote_id':        results['merge_to_voter_we_vote_id'],
         'voter_device_id':                  voter_device_id,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')

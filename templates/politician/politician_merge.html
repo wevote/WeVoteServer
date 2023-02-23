@@ -267,11 +267,29 @@
 {% include "politician/politician_merge_one_field_decision.html" with field_name="vote_usa_politician_id" field_label="Vote USA Politician" conflict_status=conflict_values.vote_usa_politician_id politician1_field_value=politician_option1.vote_usa_politician_id politician2_field_value=politician_option2.vote_usa_politician_id politician1=politician_option1 politician2=politician_option2 %}
 
 {# Displayed photo #}
+
+    {% if politician_option1.we_vote_hosted_profile_image_url_medium or politician_option2.we_vote_hosted_profile_image_url_medium %}
+    <tr>
+        <td>Image Preview</td>
+        <td>
+        {% if politician_option1.we_vote_hosted_profile_image_url_medium %}
+            <img src="{{ politician_option1.we_vote_hosted_profile_image_url_large }}" width="100px" height="100px" />
+        {% endif %}
+        </td>
+        <td>
+        {% if politician_option2.we_vote_hosted_profile_image_url_medium %}
+            <img src="{{ politician_option2.we_vote_hosted_profile_image_url_large }}" width="100px" height="100px" />
+        {% endif %}
+        </td>
+    </tr>
+    {% endif %}
+
 {% include "politician/politician_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_tiny" field_label="We Vote Image (Tiny)" conflict_status=conflict_values.we_vote_hosted_profile_image_url_tiny politician1_field_value=politician_option1.we_vote_hosted_profile_image_url_tiny politician2_field_value=politician_option2.we_vote_hosted_profile_image_url_tiny politician1=politician_option1 politician2=politician_option2 %}
 
 {% include "politician/politician_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_medium" field_label="We Vote Image (Medium)" conflict_status=conflict_values.we_vote_hosted_profile_image_url_medium politician1_field_value=politician_option1.we_vote_hosted_profile_image_url_medium politician2_field_value=politician_option2.we_vote_hosted_profile_image_url_medium politician1=politician_option1 politician2=politician_option2 %}
 
 {% include "politician/politician_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_large" field_label="We Vote Image (Large)" conflict_status=conflict_values.we_vote_hosted_profile_image_url_large politician1_field_value=politician_option1.we_vote_hosted_profile_image_url_large politician2_field_value=politician_option2.we_vote_hosted_profile_image_url_large politician1=politician_option1 politician2=politician_option2 %}
+
     <tr>
         <td>Linked Candidates</td>
         <td>
