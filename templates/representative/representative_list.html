@@ -107,7 +107,7 @@
                 {% endif %}
             </td>
             <td>
-                <a href="{% url 'representative:representative_edit' representative.id %}?google_civic_election_id={{ google_civic_election_id }}&show_this_year={{ show_this_year }}" class="u-no-break">{{ representative.representative_name }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+                <a href="{% url 'representative:representative_edit' representative.id %}?google_civic_election_id={{ google_civic_election_id }}&show_this_year={{ show_this_year }}" class="u-no-break">{{ representative.representative_name }}</a>
                 <br />
                 <span class="u-no-break">In office:
         {% if representative.year_in_office_2023 %}2023 {% endif %}
