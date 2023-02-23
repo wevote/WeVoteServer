@@ -1103,10 +1103,16 @@ class VoterManager(BaseUserManager):
         return results
 
     def retrieve_voter_from_voter_device_id(self, voter_device_id, read_only=False):
+        success = True
+        status = ''
         voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
 
         if not voter_id:
+            status += "MISSING_VOTER_ID "
+            success = False
             results = {
+                'status':       status,
+                'success':      success,
                 'voter_found':  False,
                 'voter_id':     0,
                 'voter':        Voter(),
@@ -1115,6 +1121,9 @@ class VoterManager(BaseUserManager):
 
         voter_manager = VoterManager()
         results = voter_manager.retrieve_voter_by_id(voter_id, read_only=read_only)
+        status += results['status']
+        if not results['success']:
+            success = False
         if results['voter_found']:
             voter_on_stage = results['voter']
             voter_on_stage_found = True
@@ -1125,6 +1134,8 @@ class VoterManager(BaseUserManager):
             voter_id = 0
 
         results = {
+            'status':       status,
+            'success':      success,
             'voter_found':  voter_on_stage_found,
             'voter_id':     voter_id,
             'voter':        voter_on_stage,
