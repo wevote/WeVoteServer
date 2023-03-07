@@ -32,6 +32,15 @@
       <td>OCD Division ID:</td>
       <td><strong>{{ office_held.ocd_division_id }}</strong></td>
     </tr>
+    {% if office_held.office_held_twitter_handle %}
+    <tr>
+      <td>Twitter Handle:</td>
+      <td>
+          <a href="https://twitter.com/{{ office_held.office_held_twitter_handle|iriencode }}"
+             target="_blank">{{ office_held.office_held_twitter_handle }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+      </td>
+    </tr>
+    {% endif %}
     <tr>
       <td>Years with Data:</td>
       <td>
