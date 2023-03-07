@@ -104,9 +104,13 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle=''):
         status += 'TWITTER_RATE_LIMIT_ERROR: ' + str(rate_limit_error) + " "
         handle_exception(rate_limit_error, logger=logger, exception_message=status)
     except tweepy.errors.HTTPException as error_instance:
-        success = False
-        status += 'TWITTER_HTTP_EXCEPTION '
-        handle_exception(error_instance, logger=logger, exception_message=status)
+        if 'User not found.' in error_instance.api_messages:
+            status += 'TWITTER_USER_NOT_FOUND_ON_TWITTER: ' + str(error_instance) + ' '
+            twitter_user_not_found_in_twitter = True
+        else:
+            success = False
+            status += 'TWITTER_HTTP_EXCEPTION ' + str(error_instance) + ' '
+            handle_exception(error_instance, logger=logger, exception_message=status)
     except tweepy.errors.TweepyException as error_instance:
         success = False
         status += "[TWEEPY_EXCEPTION_ERROR: "

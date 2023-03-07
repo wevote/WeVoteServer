@@ -68,12 +68,17 @@
     &nbsp;&nbsp;
     <label for="show_representatives_with_email_id">
       <input type="checkbox" name="show_representatives_with_email" id="show_representatives_with_email_id" value="1"
-             {% if show_representatives_with_email %}checked{% endif %} /> Has Email
+             {% if show_representatives_with_email %}checked{% endif %} /> Has email
     </label>
     &nbsp;&nbsp;
     <label for="missing_politician_id">
       <input type="checkbox" name="missing_politician" id="missing_politician_id" value="1"
-             {% if missing_politician %}checked{% endif %} /> Missing Politician
+             {% if missing_politician %}checked{% endif %} /> Missing politician
+    </label>
+    &nbsp;&nbsp;
+    <label for="show_battleground_id">
+      <input type="checkbox" name="show_battleground" id="show_battleground_id" value="1"
+             {% if show_battleground %}checked{% endif %} /> Show battleground races
     </label>
     &nbsp;&nbsp;
     <label for="show_all_id">
@@ -165,6 +170,11 @@
         });
         $(function() {
             $('#show_all_id').change(function() {
+                this.form.submit();
+            });
+        });
+        $(function() {
+            $('#show_battleground_id').change(function() {
                 this.form.submit();
             });
         });

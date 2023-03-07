@@ -78,6 +78,25 @@
         {% else %}
             {{ we_vote_id }}
         {% endif %}
+        <br />
+        <span class="u-no-break">In office:&nbsp;
+            <label for="year_in_office_2023_id">
+              <input type="checkbox" name="year_in_office_2023" id="year_in_office_2023_id" value="1"
+                     {% if representative.year_in_office_2023 %}checked{% endif %} /> 2023&nbsp;&nbsp;&nbsp;
+            </label>
+            <label for="year_in_office_2024_id">
+              <input type="checkbox" name="year_in_office_2024" id="year_in_office_2024_id" value="1"
+                     {% if representative.year_in_office_2024 %}checked{% endif %} /> 2024&nbsp;&nbsp;&nbsp;
+            </label>
+            <label for="year_in_office_2025_id">
+              <input type="checkbox" name="year_in_office_2025" id="year_in_office_2025_id" value="1"
+                     {% if representative.year_in_office_2025 %}checked{% endif %} /> 2025&nbsp;&nbsp;&nbsp;
+            </label>
+            <label for="year_in_office_2026_id">
+              <input type="checkbox" name="year_in_office_2026" id="year_in_office_2026_id" value="1"
+                     {% if representative.year_in_office_2026 %}checked{% endif %} /> 2026&nbsp;&nbsp;&nbsp;
+            </label>
+        </span>
     </div>
 </div>
 
@@ -113,24 +132,7 @@
                value="{% if representative %}{{ representative.office_held_name|default_if_none:"" }}{% else %}{{ office_held_name|default_if_none:"" }}{% endif %}" />
         <input type="text" name="office_held_we_vote_id" id="office_held_we_vote_id_id" class="form-control"
                value="{% if representative %}{{ representative.office_held_we_vote_id|default_if_none:"" }}{% else %}{{ office_held_we_vote_id|default_if_none:"" }}{% endif %}" />
-        <span class="u-no-break">In office:
-    <label for="year_in_office_2023_id">
-      <input type="checkbox" name="year_in_office_2023" id="year_in_office_2023_id" value="1"
-             {% if representative.year_in_office_2023 %}checked{% endif %} /> 2023&nbsp;&nbsp;&nbsp;
-    </label>
-    <label for="year_in_office_2024_id">
-      <input type="checkbox" name="year_in_office_2024" id="year_in_office_2024_id" value="1"
-             {% if representative.year_in_office_2024 %}checked{% endif %} /> 2024&nbsp;&nbsp;&nbsp;
-    </label>
-    <label for="year_in_office_2025_id">
-      <input type="checkbox" name="year_in_office_2025" id="year_in_office_2025_id" value="1"
-             {% if representative.year_in_office_2025 %}checked{% endif %} /> 2025&nbsp;&nbsp;&nbsp;
-    </label>
-    <label for="year_in_office_2026_id">
-      <input type="checkbox" name="year_in_office_2026" id="year_in_office_2026_id" value="1"
-             {% if representative.year_in_office_2026 %}checked{% endif %} /> 2026&nbsp;&nbsp;&nbsp;
-    </label>
-        </span>
+    {% include "office_held/is_battleground_race_year_checkboxes.html" with office_held=representative %}
     </div>
 </div>
 

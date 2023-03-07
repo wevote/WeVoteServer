@@ -1,0 +1,17 @@
+{# templates/politician/is_battleground_race_year_display.html #}
+{% if politician.is_battleground_race_2019 or politician.is_battleground_race_2020 or politician.is_battleground_race_2021 or politician.is_battleground_race_2022 or politician.is_battleground_race_2023 or politician.is_battleground_race_2024 or politician.is_battleground_race_2025 or politician.is_battleground_race_2026 %}
+    {% if linebreak_at_start %}
+    <br />
+    {% endif %}
+    Is in battleground race:
+    <strong>
+    {% if politician.is_battleground_race_2019 %}2019 {% endif %}
+    {% if politician.is_battleground_race_2020 %}2020 {% endif %}
+    {% if politician.is_battleground_race_2021 %}2021 {% endif %}
+    {% if politician.is_battleground_race_2022 %}2022 {% endif %}
+    {% if politician.is_battleground_race_2023 %}2023 {% endif %}
+    {% if politician.is_battleground_race_2024 %}2024 {% endif %}
+    {% if politician.is_battleground_race_2025 %}2025 {% endif %}
+    {% if politician.is_battleground_race_2026 %}2026 {% endif %}
+    </strong>
+{% endif %}

@@ -29,6 +29,11 @@
     Show all Offices Held in this state</a>
 {% endif %}
 {% endif %}
+    &nbsp;&nbsp;
+    <label for="show_battleground_id">
+      <input type="checkbox" name="show_battleground" id="show_battleground_id" value="1"
+             {% if show_battleground %}checked{% endif %} /> Show battleground races
+    </label>
 <br/><br/>
 {% if office_held_search %}
     <a href="{% url 'office_held:office_held_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
@@ -66,6 +71,7 @@
             <td>{{ forloop.counter }}</td>
             <td>
                 <a href="{% url 'office_held:office_held_summary' office_held.we_vote_id %}">{{ office_held.office_held_name }}</a>
+                {% include "politician/is_battleground_race_year_display.html" with linebreak_at_start=True politician=office_held %}
             </td>
             <td>{{ office_held.district_name|default_if_none:"" }}</td>
             <td>{{ office_held.state_code|default_if_none:"" }}</td>
@@ -86,12 +92,17 @@
 
 <script>
     $(function() {
-        $('#google_civic_election_id').change(function() {
+        $('#show_all_elections_id').change(function() {
             this.form.submit();
         });
     });
     $(function() {
-        $('#show_all_elections_id').change(function() {
+        $('#show_battleground_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#google_civic_election_id').change(function() {
             this.form.submit();
         });
     });

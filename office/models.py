@@ -167,7 +167,7 @@ class ContestOffice(models.Model):
     ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True, blank=True)
     ballotpedia_is_marquee = models.BooleanField(default=None, null=True)
     is_battleground_race = models.BooleanField(default=None, null=True)
-    is_battleground_race_cached_in_candidates = models.BooleanField(default=None, null=True)
+    # is_battleground_race_spread_to_all_objects = models.BooleanField(default=None, null=True)
 
     # Which kind of ballotpedia election "state" is this office in. Ex/ You can have an office in a primary be labeled
     #  general election if it is to decide on the final outcome, like for a mayor

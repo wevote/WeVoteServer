@@ -43,6 +43,21 @@
           </strong>
       </td>
     </tr>
+    <tr>
+      <td>Is Battleground Race:</td>
+      <td>
+          <strong>
+        {% if office_held.is_battleground_race_2019 %}2019 {% endif %}
+        {% if office_held.is_battleground_race_2020 %}2020 {% endif %}
+        {% if office_held.is_battleground_race_2021 %}2021 {% endif %}
+        {% if office_held.is_battleground_race_2022 %}2022 {% endif %}
+        {% if office_held.is_battleground_race_2023 %}2023 {% endif %}
+        {% if office_held.is_battleground_race_2024 %}2024 {% endif %}
+        {% if office_held.is_battleground_race_2025 %}2025 {% endif %}
+        {% if office_held.is_battleground_race_2026 %}2026 {% endif %}
+          </strong>
+      </td>
+    </tr>
     {% if office_held.office_url %}
     <tr>
       <td>Office Held Website:</td>

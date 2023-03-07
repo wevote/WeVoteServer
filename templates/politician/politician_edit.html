@@ -86,23 +86,22 @@
     <div class="col-sm-8">
         <input type="text" name="politician_name" id="politician_name_id" class="form-control pol_name_text"
                value="{% if politician %}{{ politician.politician_name|default_if_none:"" }}{% else %}{{ politician_name|default_if_none:"" }}{% endif %}" />
-        <div style='position:absolute; width: 100%; height: 30px; margin: 4px 0 0 12px;'>
-            {% if politician %}
-                {% if politician.politician_name_normalized|length|get_digit:"-1" > 0 %}
-                    <span style='display: inline-block; width: 50%; text-align: left; padding-left: 6px'>
-                        <span id='hidden_name' style="display:none;">{{ politician.politician_name_normalized }}</span>
-                        <button type="button" id="update_name_id" name="update_name" style="border-width: 1px">
-                            Change name to <span style='font-weight: 900; margin-left: 1px'>{{ politician.politician_name_normalized }}</span>
-                        </button>
-                    </span>
-                {% endif %}
-                <span style='display: inline-block; width: 44%; text-align: right;'>
-                    {{ politician.we_vote_id }} (politician id: {{ politician.id }})
-                    (<a href="{% url 'politician:politician_delete_process' %}?politician_id={{ politician.id }}">delete politician</a>)
-                    {{ we_vote_id }}
+        {% if politician %}
+            {% if politician.politician_name_normalized|length|get_digit:"-1" > 0 %}
+                <span style='display: inline-block; width: 50%; text-align: left; padding-left: 6px'>
+                    <span id='hidden_name' style="display:none;">{{ politician.politician_name_normalized }}</span>
+                    <button type="button" id="update_name_id" name="update_name" style="border-width: 1px">
+                        Change name to <span style='font-weight: 900; margin-left: 1px'>{{ politician.politician_name_normalized }}</span>
+                    </button>
                 </span>
             {% endif %}
-        </div>
+            <div>
+                {{ politician.we_vote_id }} (politician id: {{ politician.id }})
+                (<a href="{% url 'politician:politician_delete_process' %}?politician_id={{ politician.id }}">delete politician</a>)
+                {{ we_vote_id }}
+            </div>
+            {% include "office_held/is_battleground_race_year_checkboxes.html" with office_held=politician %}
+        {% endif %}
     </div>
 </div>
 

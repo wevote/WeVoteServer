@@ -252,6 +252,7 @@ class CandidateListManager(models.Manager):
             candidate_vote_smart_id_list=None,
             candidate_ctcl_uuid_list=None,
             ballotpedia_candidate_id_list=None,
+            politician_we_vote_id_list=None,
             read_only=False):
         status = ""
         success = True
@@ -316,6 +317,16 @@ class CandidateListManager(models.Manager):
                 candidate_list = list(candidate_query)
                 candidate_list_found = True
                 status += "RETRIEVE_CANDIDATE_LIST_FOUND_BY_BALLOTPEDIA_CANDIDATE_ID_LIST "
+            elif positive_value_exists(politician_we_vote_id_list):
+                if positive_value_exists(read_only):
+                    candidate_query = CandidateCampaign.objects.using('readonly').filter(
+                        politician_we_vote_id__in=politician_we_vote_id_list)
+                else:
+                    candidate_query = CandidateCampaign.objects.filter(
+                        politician_we_vote_id__in=politician_we_vote_id_list)
+                candidate_list = list(candidate_query)
+                candidate_list_found = True
+                status += "RETRIEVE_CANDIDATE_LIST_FOUND_BY_WE_VOTE_ID_LIST "
             else:
                 candidate_list_found = False
                 status += "RETRIEVE_CANDIDATE_SEARCH_LIST_MISSING "
@@ -456,6 +467,7 @@ class CandidateListManager(models.Manager):
             candidates_limit=300,
             is_missing_politician_we_vote_id=False,
             limit_to_this_state_code='',
+            politician_we_vote_id_list=[],
             return_list_of_objects=False,
             read_only=False,
             search_string=False,
@@ -467,6 +479,7 @@ class CandidateListManager(models.Manager):
         :param candidates_limit:
         :param is_missing_politician_we_vote_id:
         :param limit_to_this_state_code:
+        :param politician_we_vote_id_list:
         :param search_string:
         :param return_list_of_objects:
         :param read_only:
@@ -526,6 +539,8 @@ class CandidateListManager(models.Manager):
                     Q(politician_we_vote_id__isnull=True) |
                     Q(politician_we_vote_id='')
                 )
+            if politician_we_vote_id_list and len(politician_we_vote_id_list) > 0:
+                candidate_query = candidate_query.filter(politician_we_vote_id__in=politician_we_vote_id_list)
             if positive_value_exists(limit_to_this_state_code):
                 candidate_query = candidate_query.filter(state_code__iexact=limit_to_this_state_code)
             if positive_value_exists(search_string):

@@ -1264,17 +1264,17 @@ def voter_list_view(request):
         voter_query = voter_query.order_by('-friend_count')
     from_merge_status_dict = {}
     to_merge_status_dict = {}
-    voter_merge_status_list = []
     if positive_value_exists(has_voter_merge_problem) or positive_value_exists(show_voter_merge_data):
-        if positive_value_exists(show_voter_merge_data):
-            queryset = VoterMergeStatus.objects.all().order_by('-id')
-            voter_merge_status_list = list(queryset[:500])
-            queryset_from_ids = queryset.values_list('from_voter_we_vote_id', flat=True).distinct()
-            from_list = list(queryset_from_ids[:500])
-            queryset_to_ids = queryset.values_list('to_voter_we_vote_id', flat=True).distinct()
-            to_list = list(queryset_to_ids[:500])
-            merge_data_we_vote_id_list = list(set(from_list + to_list))
-            voter_query = voter_query.filter(we_vote_id__in=merge_data_we_vote_id_list)
+        queryset = VoterMergeStatus.objects.all().order_by('-id')
+        if positive_value_exists(has_voter_merge_problem):
+            queryset = queryset.filter(total_merge_complete=False)
+        voter_merge_status_list = list(queryset[:500])
+        queryset_from_ids = queryset.values_list('from_voter_we_vote_id', flat=True).distinct()
+        from_list = list(queryset_from_ids[:500])
+        queryset_to_ids = queryset.values_list('to_voter_we_vote_id', flat=True).distinct()
+        to_list = list(queryset_to_ids[:500])
+        merge_data_we_vote_id_list = list(set(from_list + to_list))
+        voter_query = voter_query.filter(we_vote_id__in=merge_data_we_vote_id_list)
         for voter_merge_status in voter_merge_status_list:
             log_queryset = VoterMergeLog.objects.filter(
                 from_voter_we_vote_id__iexact=voter_merge_status.from_voter_we_vote_id,

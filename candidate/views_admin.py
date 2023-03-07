@@ -1787,7 +1787,7 @@ def candidate_edit_process_view(request):
                 latest_election_date = election_day_as_integer
                 latest_office_we_vote_id = candidate_to_office_link.contest_office_we_vote_id
         except Exception as e:
-            pass
+            status += "PROBLEM_GETTING_ELECTION_INFORMATION: " + str(e) + " "
 
     is_battleground_race = False
     if positive_value_exists(latest_office_we_vote_id):
@@ -1796,7 +1796,8 @@ def candidate_edit_process_view(request):
             read_only=True,
         )
         if results['contest_office_found']:
-            is_battleground_race = positive_value_exists(results['contest_office'].is_battleground_race)
+            office = results['contest_office']
+            is_battleground_race = positive_value_exists(office.is_battleground_race)
 
     # ##################################
     # If linked to a Politician, make sure that both politician_id and politician_we_vote_id exist
@@ -2025,11 +2026,6 @@ def candidate_edit_process_view(request):
                 # save google search link
                 save_google_search_link_to_candidate_table(candidate_on_stage, google_search_link)
 
-            # Check to see if this is a We Vote-created election
-            # is_we_vote_google_civic_election_id = True \
-            #     if convert_to_int(candidate_on_stage.google_civic_election_id) >= 1000000 \
-            #     else False
-
             if profile_image_type_currently_active is not False:
                 if profile_image_type_currently_active in [
                         PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN,
@@ -2065,6 +2061,7 @@ def candidate_edit_process_view(request):
                             candidate_on_stage.we_vote_hosted_profile_vote_usa_image_url_tiny
 
             candidate_on_stage.save()
+            candidate_we_vote_id = candidate_on_stage.we_vote_id
 
             ballotpedia_image_id = candidate_on_stage.ballotpedia_image_id
             ballotpedia_profile_image_url_https = candidate_on_stage.ballotpedia_profile_image_url_https
@@ -2089,6 +2086,7 @@ def candidate_edit_process_view(request):
                     candidate_name=candidate_name,
                     state_code=best_state_code,
                 )
+                candidate_on_stage_found = True
                 if ballot_guide_official_statement is not False:
                     candidate_on_stage.ballot_guide_official_statement = ballot_guide_official_statement
                 if ballotpedia_candidate_id is not False:
@@ -2259,6 +2257,13 @@ def candidate_edit_process_view(request):
         messages.add_message(request, messages.INFO,
                              'TwitterLinkPossibility processed successfully: {items_processed_successfully}'
                              ''.format(items_processed_successfully=items_processed_successfully))
+
+    if candidate_on_stage_found and positive_value_exists(candidate_we_vote_id):
+        from politician.controllers import update_parallel_fields_with_years_in_related_objects
+        update_parallel_fields_with_years_in_related_objects(
+            field_key_root='is_battleground_race_',
+            master_we_vote_id_updated=candidate_we_vote_id,
+        )
 
     url_variables = "?null=1"
     if positive_value_exists(show_all_twitter_search_results):

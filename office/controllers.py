@@ -217,11 +217,16 @@ def figure_out_office_conflict_values(contest_office1, contest_office2):
             elif contest_office2_attribute is None or contest_office2_attribute == "":
                 contest_office_merge_conflict_values[attribute] = 'CONTEST_OFFICE1'
             else:
-                if attribute == "office_name" or attribute == "state_code":
-                    if contest_office1_attribute.lower() == contest_office2_attribute.lower():
+                if attribute == "is_battleground_race":
+                    # We always want to default to preserving a true value
+                    if contest_office1_attribute == contest_office2_attribute:
                         contest_office_merge_conflict_values[attribute] = 'MATCHING'
+                    elif positive_value_exists(contest_office1_attribute):
+                        contest_office_merge_conflict_values[attribute] = 'CONTEST_OFFICE1'
+                    elif positive_value_exists(contest_office2_attribute):
+                        contest_office_merge_conflict_values[attribute] = 'CONTEST_OFFICE2'
                     else:
-                        contest_office_merge_conflict_values[attribute] = 'CONFLICT'
+                        contest_office_merge_conflict_values[attribute] = 'CONTEST_OFFICE1'
                 elif attribute == "maplight_id":
                     contest_office1_attribute_empty = False
                     contest_office2_attribute_empty = False
@@ -234,6 +239,11 @@ def figure_out_office_conflict_values(contest_office1, contest_office2):
                     if contest_office1_attribute == contest_office2_attribute:
                         contest_office_merge_conflict_values[attribute] = 'MATCHING'
                     elif contest_office1_attribute_empty and contest_office2_attribute_empty:
+                        contest_office_merge_conflict_values[attribute] = 'MATCHING'
+                    else:
+                        contest_office_merge_conflict_values[attribute] = 'CONFLICT'
+                elif attribute == "office_name" or attribute == "state_code":
+                    if contest_office1_attribute.lower() == contest_office2_attribute.lower():
                         contest_office_merge_conflict_values[attribute] = 'MATCHING'
                     else:
                         contest_office_merge_conflict_values[attribute] = 'CONFLICT'

@@ -1268,23 +1268,12 @@ class OrganizationManager(models.Manager):
     # Pass in the value if we want it saved. Pass in "False" if we want to leave it the same.
     def update_or_create_organization(
             self,
-            organization_id, we_vote_id,
-            organization_website_search,
-            organization_twitter_search,
-            organization_name=False,
-            organization_description=False,
-            organization_website=False,
-            organization_twitter_handle=False,
-            organization_email=False,
-            organization_facebook=False,
-            organization_instagram_handle=False,
-            organization_image=False,
-            organization_type=False,
-            refresh_from_twitter=False,
-            facebook_id=False,
-            facebook_email=False,
-            facebook_profile_image_url_https=False,
-            facebook_background_image_url_https=False,
+            # Values for search
+            organization_id=0,
+            we_vote_id='',
+            organization_website_search='',
+            organization_twitter_search='',
+            # Values to save
             chosen_domain_string=False,
             chosen_domain_string2=False,
             chosen_domain_string3=False,
@@ -1297,6 +1286,21 @@ class OrganizationManager(models.Manager):
             chosen_social_share_description=False,
             chosen_subdomain_string=False,
             chosen_subscription_plan=False,
+            facebook_background_image_url_https=False,
+            facebook_email=False,
+            facebook_id=False,
+            facebook_profile_image_url_https=False,
+            organization_description=False,
+            organization_email=False,
+            organization_facebook=False,
+            organization_image=False,
+            organization_instagram_handle=False,
+            organization_name=False,
+            organization_twitter_handle=False,
+            organization_type=False,
+            organization_website=False,
+            profile_image_type_currently_active=False,
+            refresh_from_twitter=False,
     ):
         """
         Either update or create an organization entry.
@@ -1304,20 +1308,6 @@ class OrganizationManager(models.Manager):
         :param we_vote_id:
         :param organization_website_search:
         :param organization_twitter_search:
-        :param organization_name:
-        :param organization_description:
-        :param organization_website:
-        :param organization_twitter_handle:
-        :param organization_email:
-        :param organization_facebook:
-        :param organization_instagram_handle:
-        :param organization_image:
-        :param organization_type:
-        :param refresh_from_twitter:
-        :param facebook_id:
-        :param facebook_email:
-        :param facebook_profile_image_url_https:
-        :param facebook_background_image_url_https:
         :param chosen_domain_string:
         :param chosen_domain_string2:
         :param chosen_domain_string3:
@@ -1330,6 +1320,21 @@ class OrganizationManager(models.Manager):
         :param chosen_social_share_description:
         :param chosen_subdomain_string:
         :param chosen_subscription_plan:
+        :param facebook_background_image_url_https:
+        :param facebook_email:
+        :param facebook_id:
+        :param facebook_profile_image_url_https:
+        :param organization_description:
+        :param organization_email:
+        :param organization_facebook:
+        :param organization_image:
+        :param organization_instagram_handle:
+        :param organization_name:
+        :param organization_twitter_handle:
+        :param organization_type:
+        :param organization_website:
+        :param profile_image_type_currently_active:
+        :param refresh_from_twitter:
         :return:
         """
         exception_does_not_exist = False
@@ -1434,34 +1439,6 @@ class OrganizationManager(models.Manager):
                         twitter_location = twitter_json['location']
 
                 value_changed = False
-                if organization_name is not False:
-                    organization_on_stage.organization_name = organization_name
-                    organization_on_stage.most_recent_name_update_from_voter_first_and_last = False
-                    value_changed = True
-                if organization_description is not False:
-                    organization_on_stage.organization_description = organization_description
-                    value_changed = True
-                if organization_website is not False:
-                    organization_on_stage.organization_website = organization_website
-                    value_changed = True
-                if organization_twitter_handle is not False:
-                    organization_on_stage.organization_twitter_handle = organization_twitter_handle
-                    value_changed = True
-                if organization_email is not False:
-                    organization_on_stage.organization_email = organization_email
-                    value_changed = True
-                if organization_facebook is not False:
-                    organization_on_stage.organization_facebook = organization_facebook
-                    value_changed = True
-                if organization_image is not False:
-                    organization_on_stage.organization_image = organization_image
-                    value_changed = True
-                if organization_instagram_handle is not False:
-                    value_changed = True
-                    organization_on_stage.organization_instagram_handle = organization_instagram_handle
-                if organization_type is not False:
-                    value_changed = True
-                    organization_on_stage.organization_type = organization_type
                 if chosen_domain_string is not False:
                     value_changed = True
                     organization_on_stage.chosen_domain_string = chosen_domain_string
@@ -1500,6 +1477,37 @@ class OrganizationManager(models.Manager):
                 if chosen_subscription_plan is not False:
                     value_changed = True
                     organization_on_stage.chosen_subscription_plan = chosen_subscription_plan
+                if organization_name is not False:
+                    organization_on_stage.organization_name = organization_name
+                    organization_on_stage.most_recent_name_update_from_voter_first_and_last = False
+                    value_changed = True
+                if organization_description is not False:
+                    organization_on_stage.organization_description = organization_description
+                    value_changed = True
+                if organization_website is not False:
+                    organization_on_stage.organization_website = organization_website
+                    value_changed = True
+                if organization_twitter_handle is not False:
+                    organization_on_stage.organization_twitter_handle = organization_twitter_handle
+                    value_changed = True
+                if organization_email is not False:
+                    organization_on_stage.organization_email = organization_email
+                    value_changed = True
+                if organization_facebook is not False:
+                    organization_on_stage.organization_facebook = organization_facebook
+                    value_changed = True
+                if organization_image is not False:
+                    organization_on_stage.organization_image = organization_image
+                    value_changed = True
+                if organization_instagram_handle is not False:
+                    value_changed = True
+                    organization_on_stage.organization_instagram_handle = organization_instagram_handle
+                if organization_type is not False:
+                    value_changed = True
+                    organization_on_stage.organization_type = organization_type
+                if profile_image_type_currently_active is not False:
+                    value_changed = True
+                    organization_on_stage.profile_image_type_currently_active = profile_image_type_currently_active
 
                 if twitter_user_id or twitter_name or twitter_followers_count or twitter_profile_image_url_https \
                         or twitter_profile_banner_url_https or twitter_profile_background_image_url_https \
@@ -1664,34 +1672,6 @@ class OrganizationManager(models.Manager):
                             twitter_location = twitter_json['location']
 
                     value_changed = False
-                    if organization_name is not False:
-                        organization_on_stage.organization_name = organization_name
-                        organization_on_stage.most_recent_name_update_from_voter_first_and_last = False
-                        value_changed = True
-                    if organization_description is not False:
-                        organization_on_stage.organization_description = organization_description
-                        value_changed = True
-                    if organization_website is not False:
-                        organization_on_stage.organization_website = organization_website
-                        value_changed = True
-                    if organization_twitter_handle is not False:
-                        organization_on_stage.organization_twitter_handle = organization_twitter_handle
-                        value_changed = True
-                    if organization_email is not False:
-                        organization_on_stage.organization_email = organization_email
-                        value_changed = True
-                    if organization_facebook is not False:
-                        organization_on_stage.organization_facebook = organization_facebook
-                        value_changed = True
-                    if organization_image is not False:
-                        organization_on_stage.organization_image = organization_image
-                        value_changed = True
-                    if organization_instagram_handle is not False:
-                        value_changed = True
-                        organization_on_stage.organization_instagram_handle = organization_instagram_handle
-                    if organization_type is not False:
-                        value_changed = True
-                        organization_on_stage.organization_type = organization_type
                     if chosen_domain_string is not False:
                         value_changed = True
                         organization_on_stage.chosen_domain_string = chosen_domain_string
@@ -1730,6 +1710,37 @@ class OrganizationManager(models.Manager):
                     if chosen_subscription_plan is not False:
                         value_changed = True
                         organization_on_stage.chosen_subscription_plan = chosen_subscription_plan
+                    if organization_name is not False:
+                        organization_on_stage.organization_name = organization_name
+                        organization_on_stage.most_recent_name_update_from_voter_first_and_last = False
+                        value_changed = True
+                    if organization_description is not False:
+                        organization_on_stage.organization_description = organization_description
+                        value_changed = True
+                    if organization_website is not False:
+                        organization_on_stage.organization_website = organization_website
+                        value_changed = True
+                    if organization_twitter_handle is not False:
+                        organization_on_stage.organization_twitter_handle = organization_twitter_handle
+                        value_changed = True
+                    if organization_email is not False:
+                        organization_on_stage.organization_email = organization_email
+                        value_changed = True
+                    if organization_facebook is not False:
+                        organization_on_stage.organization_facebook = organization_facebook
+                        value_changed = True
+                    if organization_image is not False:
+                        organization_on_stage.organization_image = organization_image
+                        value_changed = True
+                    if organization_instagram_handle is not False:
+                        value_changed = True
+                        organization_on_stage.organization_instagram_handle = organization_instagram_handle
+                    if organization_type is not False:
+                        value_changed = True
+                        organization_on_stage.organization_type = organization_type
+                    if profile_image_type_currently_active is not False:
+                        value_changed = True
+                        organization_on_stage.profile_image_type_currently_active = profile_image_type_currently_active
 
                     if positive_value_exists(twitter_user_id) or positive_value_exists(twitter_name) \
                             or positive_value_exists(twitter_followers_count) \
@@ -1900,13 +1911,17 @@ class OrganizationManager(models.Manager):
                     if chosen_subscription_plan is not False:
                         value_changed = True
                         organization_on_stage.chosen_subscription_plan = chosen_subscription_plan
+                    if profile_image_type_currently_active is not False:
+                        value_changed = True
+                        organization_on_stage.profile_image_type_currently_active = profile_image_type_currently_active
 
                     if value_changed:
                         try:
                             organization_on_stage.save()
                             status += " EXTRA_VALUES_SAVED "
                         except Exception as e:
-                            logger.error("organization_on_stage.save() failed to save #3")
+                            logger.error("organization_on_stage.save() failed to save #3:" + str(e))
+                            status += "organization_on_stage.save() failed to save #3:" + str(e) + " "
                     else:
                         status += " EXTRA_VALUES_NOT_SAVED "
 
