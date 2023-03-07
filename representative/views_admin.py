@@ -1143,12 +1143,16 @@ def representative_edit_process_view(request):
     if representative_on_stage_found:
         if positive_value_exists(representative_we_vote_id) and len(years_list) > 0:
             from politician.controllers import update_parallel_fields_with_years_in_related_objects
-            update_parallel_fields_with_years_in_related_objects(
+            results = update_parallel_fields_with_years_in_related_objects(
                 field_key_root='is_battleground_race_',
                 master_we_vote_id_updated=representative_we_vote_id,
                 years_false_list=years_false_list,
                 years_true_list=years_true_list,
             )
+            if not results['success']:
+                status += results['status']
+                status += "FAILED_TO_UPDATE_PARALLEL_FIELDS_FROM_REPRESENTATIVE "
+                messages.add_message(request, messages.ERROR, status)
 
     if representative_id:
         return HttpResponseRedirect(reverse('representative:representative_edit', args=(representative_id,)))
