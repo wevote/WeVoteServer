@@ -1281,6 +1281,9 @@ def politician_edit_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    status = ''
+    success = True
+
     ballotpedia_politician_name = request.POST.get('ballotpedia_politician_name', False)
     ballotpedia_politician_url = request.POST.get('ballotpedia_politician_url', False)
     birth_date = request.POST.get('birth_date', False)
@@ -1621,12 +1624,16 @@ def politician_edit_process_view(request):
 
     if positive_value_exists(politician_we_vote_id) and len(years_list) > 0:
         from politician.controllers import update_parallel_fields_with_years_in_related_objects
-        update_parallel_fields_with_years_in_related_objects(
+        results = update_parallel_fields_with_years_in_related_objects(
             field_key_root='is_battleground_race_',
             master_we_vote_id_updated=politician_we_vote_id,
             years_false_list=years_false_list,
             years_true_list=years_true_list,
         )
+        if not results['success']:
+            status += results['status']
+            status += "FAILED_TO_UPDATE_PARALLEL_FIELDS_FROM_POLITICIAN "
+            messages.add_message(request, messages.ERROR, status)
 
     position_list_manager = PositionListManager()
     # ##################################

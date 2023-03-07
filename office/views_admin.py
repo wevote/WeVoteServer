@@ -756,19 +756,19 @@ def office_list_view(request):
     messages_on_stage = get_messages(request)
 
     template_values = {
-        'election_list':            election_list,
-        'google_civic_election_id': google_civic_election_id,
-        'has_ctcl_data':            has_ctcl_data,
-        'has_vote_usa_data':        has_vote_usa_data,
-        'messages_on_stage':        messages_on_stage,
-        'office_list':              updated_office_list,
-        'office_search':            office_search,
-        'race_office_level':        race_office_level,
-        'show_all_elections':       show_all_elections,
-        'show_battleground':        show_battleground,
+        'election_list':                election_list,
+        'google_civic_election_id':     google_civic_election_id,
+        'has_ctcl_data':                has_ctcl_data,
+        'has_vote_usa_data':            has_vote_usa_data,
+        'messages_on_stage':            messages_on_stage,
+        'office_list':                  updated_office_list,
+        'office_search':                office_search,
+        'race_office_level':            race_office_level,
+        'show_all_elections':           show_all_elections,
+        'show_battleground':            show_battleground,
         'show_marquee_or_battleground': show_marquee_or_battleground,
-        'state_code':               state_code,
-        'state_list':               sorted_state_list,
+        'state_code':                   state_code,
+        'state_list':                   sorted_state_list,
     }
     return render(request, 'office/office_list.html', template_values)
 
@@ -1066,12 +1066,16 @@ def office_edit_process_view(request):
                 # results = update_candidates_with_is_battleground_race(office_we_vote_id=office_on_stage.we_vote_id)
                 if positive_value_exists(office_on_stage_we_vote_id) and len(years_list) > 0:
                     from politician.controllers import update_parallel_fields_with_years_in_related_objects
-                    update_parallel_fields_with_years_in_related_objects(
+                    results = update_parallel_fields_with_years_in_related_objects(
                         field_key_root='is_battleground_race_',
                         master_we_vote_id_updated=office_on_stage_we_vote_id,
                         years_false_list=years_false_list,
                         years_true_list=years_true_list,
                     )
+                    if not results['success']:
+                        status += results['status']
+                        status += "FAILED_TO_UPDATE_PARALLEL_FIELDS_FROM_OFFICE "
+                        messages.add_message(request, messages.ERROR, status)
 
             return HttpResponseRedirect(reverse('office:office_summary', args=(office_on_stage_id,)) +
                                         "?google_civic_election_id=" + str(google_civic_election_id) +

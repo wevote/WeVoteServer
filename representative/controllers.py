@@ -866,6 +866,7 @@ def representative_politician_match(representative):
             return results
         elif results['politician_found']:
             politician = results['politician']
+            politician_found = True
             # Save politician_we_vote_id in representative
             representative.politician_we_vote_id = politician.we_vote_id
             representative.politician_id = politician.id
@@ -893,13 +894,13 @@ def representative_politician_match(representative):
                 status += results['status']
 
             results = {
-                'success':                  results['success'],
+                'success':                  success,
                 'status':                   status,
                 'politician_list_found':    False,
                 'politician_list':          [],
-                'politician_found':         results['politician_found'],
+                'politician_found':         politician_found,
                 'politician_created':       False,
-                'politician':               results['politician'],
+                'politician':               politician,
             }
             return results
         else:
@@ -1003,9 +1004,12 @@ def representative_politician_match(representative):
     else:
         # Create new politician for this representative
         create_results = politician_manager.create_politician_from_similar_object(representative)
+        politician = create_results['politician']
+        politician_created = create_results['politician_created']
+        politician_found = create_results['politician_found']
         status += create_results['status']
+        success = create_results['success']
         if create_results['politician_found']:
-            politician = create_results['politician']
             # Save politician_we_vote_id in representative
             representative.politician_we_vote_id = politician.we_vote_id
             representative.politician_id = politician.id
@@ -1033,13 +1037,13 @@ def representative_politician_match(representative):
                 status += results['status']
 
         results = {
-            'success':                      create_results['success'],
+            'success':                      success,
             'status':                       status,
             'politician_list_found':        False,
             'politician_list':              [],
-            'politician_found':             create_results['politician_found'],
-            'politician_created':           create_results['politician_created'],
-            'politician':                   create_results['politician'],
+            'politician_found':             politician_found,
+            'politician_created':           politician_created,
+            'politician':                   politician,
         }
         return results
 

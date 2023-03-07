@@ -1952,6 +1952,7 @@ def candidate_politician_match(candidate):
             return results
         elif results['politician_found']:
             politician = results['politician']
+            politician_found = True
             # Save politician_we_vote_id in candidate
             candidate.politician_we_vote_id = politician.we_vote_id
             candidate.politician_id = politician.id
@@ -1966,13 +1967,13 @@ def candidate_politician_match(candidate):
                 status += results['status']
 
             results = {
-                'success':                  results['success'],
+                'success':                  success,
                 'status':                   status,
                 'politician_list_found':    False,
                 'politician_list':          [],
-                'politician_found':         results['politician_found'],
+                'politician_found':         politician_found,
                 'politician_created':       False,
-                'politician':               results['politician'],
+                'politician':               politician,
             }
             return results
         else:
@@ -2034,6 +2035,7 @@ def candidate_politician_match(candidate):
     elif results['politician_found']:
         # Save this politician_we_vote_id with the candidate
         politician = results['politician']
+        politician_found = True
         # Save politician_we_vote_id in candidate
         candidate.politician_we_vote_id = politician.we_vote_id
         candidate.politician_id = politician.id
@@ -2048,11 +2050,11 @@ def candidate_politician_match(candidate):
             status += results['status']
 
         results = {
-            'success':                  True,
+            'success':                  success,
             'status':                   status,
             'politician_list_found':    False,
             'politician_list':          [],
-            'politician_found':         True,
+            'politician_found':         politician_found,
             'politician_created':       False,
             'politician':               politician,
         }
@@ -2060,9 +2062,11 @@ def candidate_politician_match(candidate):
     else:
         # Create new politician for this candidate
         create_results = politician_manager.create_politician_from_similar_object(candidate)
+        politician = create_results['politician']
+        politician_created = create_results['politician_created']
+        politician_found = create_results['politician_found']
         status += create_results['status']
         if create_results['politician_found']:
-            politician = create_results['politician']
             # Save politician_we_vote_id in candidate
             candidate.politician_we_vote_id = politician.we_vote_id
             candidate.politician_id = politician.id
@@ -2081,9 +2085,9 @@ def candidate_politician_match(candidate):
             'status':                       status,
             'politician_list_found':        False,
             'politician_list':              [],
-            'politician_found':             create_results['politician_found'],
-            'politician_created':           create_results['politician_created'],
-            'politician':                   create_results['politician'],
+            'politician_found':             politician_found,
+            'politician_created':           politician_created,
+            'politician':                   politician,
         }
         return results
 

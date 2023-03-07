@@ -311,6 +311,7 @@ def office_held_edit_process_view(request):
     office_held_found = False
     office_held = None
     office_held_we_vote_id = ''
+    status = ''
     success = True
     years_false_list = []
     years_true_list = []
@@ -372,12 +373,16 @@ def office_held_edit_process_view(request):
             success = False
 
     if success and positive_value_exists(office_held_we_vote_id):
-        update_parallel_fields_with_years_in_related_objects(
+        results = update_parallel_fields_with_years_in_related_objects(
             field_key_root='is_battleground_race_',
             master_we_vote_id_updated=office_held_we_vote_id,
             years_false_list=years_false_list,
             years_true_list=years_true_list,
         )
+        if not results['success']:
+            status += results['status']
+            status += "FAILED_TO_UPDATE_PARALLEL_FIELDS_FROM_OFFICE_HELD "
+            messages.add_message(request, messages.ERROR, status)
 
     if success:
         if office_held_found:

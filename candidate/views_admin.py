@@ -2260,10 +2260,14 @@ def candidate_edit_process_view(request):
 
     if candidate_on_stage_found and positive_value_exists(candidate_we_vote_id):
         from politician.controllers import update_parallel_fields_with_years_in_related_objects
-        update_parallel_fields_with_years_in_related_objects(
+        results = update_parallel_fields_with_years_in_related_objects(
             field_key_root='is_battleground_race_',
             master_we_vote_id_updated=candidate_we_vote_id,
         )
+        if not results['success']:
+            status += results['status']
+            status += "FAILED_TO_UPDATE_PARALLEL_FIELDS_FROM_CANDIDATE "
+            messages.add_message(request, messages.ERROR, status)
 
     url_variables = "?null=1"
     if positive_value_exists(show_all_twitter_search_results):
