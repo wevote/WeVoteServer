@@ -1349,6 +1349,9 @@ def organization_edit_process_view(request):
             elif results['twitter_user_found']:
                 twitter_user = results['twitter_user']
                 twitter_link_to_organization_from_handle_twitter_id = twitter_user.twitter_id
+            else:
+                messages.add_message(request, messages.ERROR, 'Twitter handle you entered not found on Twitter.')
+                twitter_handle_can_be_saved_without_conflict = False
 
     if positive_value_exists(organization_we_vote_id) and twitter_handle_can_be_saved_without_conflict:
         # Check to see if there is a TwitterLinkToOrganization entry tied to this organization_we_vote_id
@@ -1370,36 +1373,42 @@ def organization_edit_process_view(request):
                 if not delete_results['success']:
                     messages.add_message(request, messages.ERROR, 'Could not delete TwitterLinkToOrganization 3.')
 
-    if twitter_handle_can_be_saved_without_conflict and create_twitter_link_to_organization_for_handle \
-            and positive_value_exists(twitter_link_to_organization_from_handle_twitter_id):
-        org_results_organization_we_vote_id = ''
-        if not positive_value_exists(organization_we_vote_id):
-            org_results = Organization.objects.update_or_create_organization(
-                organization_id='',
-                we_vote_id='',
-                organization_website_search='',
-                organization_twitter_search='',
-                organization_name=organization_name,
-                organization_website=organization_website,
-                organization_twitter_handle=organization_twitter_handle,
-                organization_email=organization_email,
-                organization_facebook=organization_facebook,
-                organization_type=organization_type,
-                profile_image_type_currently_active=profile_image_type_currently_active,
-            )
-            org_results_organization_we_vote_id = org_results['organization'].we_vote_id
-        create_results = twitter_user_manager.create_twitter_link_to_organization(
-            twitter_id=twitter_link_to_organization_from_handle_twitter_id,
-            organization_we_vote_id=organization_we_vote_id
-            if positive_value_exists(organization_we_vote_id) else org_results_organization_we_vote_id)
-        if not create_results['success']:
-            messages.add_message(request, messages.ERROR, 'Could not create TwitterLinkToOrganization.')
-            twitter_handle_can_be_saved_without_conflict = False
+    if not positive_value_exists(organization_we_vote_id):
+        organization_manager = OrganizationManager()
+        org_results = organization_manager.update_or_create_organization(
+            organization_id='',
+            we_vote_id='',
+            organization_website_search='',
+            organization_twitter_search='',
+            organization_name=organization_name,
+            organization_website=organization_website,
+            organization_email=organization_email,
+            organization_facebook=organization_facebook,
+            organization_type=organization_type,
+            profile_image_type_currently_active=profile_image_type_currently_active,
+        )
+        if not org_results['success']:
+            status += "CREATE_OR_UPDATE_ORGANIZATION_FAILED: " + str(org_results['status']) + " "
+            success = False
+        else:
+            organization_on_stage_found = True
+            organization_on_stage = org_results['organization']
+            org_results_organization_we_vote_id = organization_on_stage.we_vote_id
+            if twitter_handle_can_be_saved_without_conflict and create_twitter_link_to_organization_for_handle \
+                    and positive_value_exists(twitter_link_to_organization_from_handle_twitter_id):
+                create_results = twitter_user_manager.create_twitter_link_to_organization(
+                    twitter_id=twitter_link_to_organization_from_handle_twitter_id,
+                    organization_we_vote_id=organization_we_vote_id
+                    if positive_value_exists(organization_we_vote_id) else org_results_organization_we_vote_id)
+                if not create_results['success']:
+                    messages.add_message(request, messages.ERROR, 'Could not create TwitterLinkToOrganization.')
+                    twitter_handle_can_be_saved_without_conflict = False
 
     try:
         if organization_on_stage_found:
             # Update
-            organization_on_stage.issue_analysis_admin_notes = issue_analysis_admin_notes.strip()
+            if issue_analysis_admin_notes is not False:
+                organization_on_stage.issue_analysis_admin_notes = issue_analysis_admin_notes.strip()
             organization_on_stage.issue_analysis_done = positive_value_exists(issue_analysis_done)
             if organization_twitter_handle is not False:
                 if twitter_handle_can_be_saved_without_conflict:

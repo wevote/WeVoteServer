@@ -2,13 +2,14 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from datetime import datetime
 from django.db import models
 from django.db.models import Q
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from candidate.models import PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
     PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_VOTE_USA, PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES
 from office_held.models import OfficeHeld, OfficeHeldManager
-from wevote_settings.constants import OFFICE_HELD_YEARS_AVAILABLE
+from wevote_settings.constants import IS_BATTLEGROUND_YEARS_AVAILABLE, OFFICE_HELD_YEARS_AVAILABLE
 from wevote_settings.models import fetch_next_we_vote_id_representative_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
 from wevote_functions.functions import candidate_party_display, convert_to_int, \
@@ -31,6 +32,14 @@ REPRESENTATIVE_UNIQUE_IDENTIFIERS = [
     # 'google_civic_representative_name2',
     # 'google_civic_representative_name3',
     'instagram_handle',
+    'is_battleground_race_2019',
+    'is_battleground_race_2020',
+    'is_battleground_race_2021',
+    'is_battleground_race_2022',
+    'is_battleground_race_2023',
+    'is_battleground_race_2024',
+    'is_battleground_race_2025',
+    'is_battleground_race_2026',
     'linkedin_url',
     'ocd_division_id',
     'office_held_id',
@@ -70,7 +79,10 @@ REPRESENTATIVE_UNIQUE_IDENTIFIERS = [
     'we_vote_hosted_profile_image_url_medium',
     'we_vote_hosted_profile_image_url_tiny',
     'wikipedia_url',
-    'years_in_office_flags',
+    'year_in_office_2023',
+    'year_in_office_2024',
+    'year_in_office_2025',
+    'year_in_office_2026',
     'youtube_url',
 ]
 
@@ -197,9 +209,10 @@ class Representative(models.Model):
         blank=True, unique=True)
     ballotpedia_representative_url = models.TextField(
         verbose_name='url of representative on ballotpedia', max_length=255, blank=True, null=True)
-    date_last_updated_from_politician = models.DateTimeField(null=True, default=None)
     # CTCL representative data fields
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True)
+    date_last_updated = models.DateTimeField(null=True, auto_now=True)
+    date_last_updated_from_politician = models.DateTimeField(null=True, default=None)
     facebook_url = models.TextField(null=True, blank=True, default=None)
     facebook_url_is_broken = models.BooleanField(default=False)
     # This is the master image url cached on We Vote servers. See photo_url_from_google_civic for Original URL.
@@ -212,6 +225,15 @@ class Representative(models.Model):
     google_civic_representative_name3 = models.CharField(max_length=255, null=True)
     instagram_followers_count = models.IntegerField(null=False, blank=True, default=0)
     instagram_handle = models.CharField(max_length=255, null=True, unique=False)
+    # As we add more years here, update /wevote_settings/constants.py IS_BATTLEGROUND_YEARS_AVAILABLE
+    is_battleground_race_2019 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2020 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2021 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2022 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2023 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2024 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2025 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2026 = models.BooleanField(default=False, null=False)
     linkedin_url = models.CharField(max_length=255, null=True, blank=True)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
     # The internal We Vote id for the OfficeHeld that this representative is competing for.
@@ -268,9 +290,6 @@ class Representative(models.Model):
     twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
                                            max_length=255, null=True, blank=True)
     vote_usa_politician_id = models.CharField(max_length=255, null=True, unique=False)
-    is_battleground_race_2022 = models.BooleanField(default=False, null=False)
-    is_battleground_race_2023 = models.BooleanField(default=False, null=False)
-    is_battleground_race_2024 = models.BooleanField(default=False, null=False)
 
     # Which representative image is currently active?
     profile_image_type_currently_active = models.CharField(
@@ -787,6 +806,181 @@ class RepresentativeManager(models.Manager):
     def fetch_representatives_are_not_duplicates_list_we_vote_ids(self, representative_we_vote_id):
         results = self.retrieve_representatives_are_not_duplicates_list(representative_we_vote_id)
         return results['representatives_are_not_duplicates_list_we_vote_ids']
+
+    def retrieve_representatives_list(
+            self,
+            index_start=0,
+            is_missing_politician_we_vote_id=False,
+            limit_to_this_state_code='',
+            office_held_we_vote_id_list=[],
+            politician_we_vote_id_list=[],
+            read_only=False,
+            representatives_limit=300,
+            search_string='',
+            years_list=[],
+    ):
+        """
+
+        :param index_start:
+        :param is_missing_politician_we_vote_id:
+        :param limit_to_this_state_code:
+        :param office_held_we_vote_id_list:
+        :param politician_we_vote_id_list:
+        :param read_only:
+        :param representatives_limit:
+        :param search_string:
+        :param years_list:
+        :return:
+        """
+        index_start = convert_to_int(index_start)
+        representative_list = []
+        representative_list_found = False
+        representatives_limit = convert_to_int(representatives_limit)
+        sort_by_is_battleground = False
+        if not positive_value_exists(len(years_list)):
+            today = datetime.now().date()
+            year = today.year
+            years_list = [year]
+        year_integer_list = []
+        year_furthest_in_future = 0
+        for year in years_list:
+            year_integer = convert_to_int(year)
+            if year_integer in OFFICE_HELD_YEARS_AVAILABLE:
+                year_integer_list.append(year_integer)
+            if year_integer in IS_BATTLEGROUND_YEARS_AVAILABLE:
+                sort_by_is_battleground = True
+                if year_integer > year_furthest_in_future:
+                    year_furthest_in_future = year_integer
+        returned_count = 0
+        total_count = 0
+        status = ""
+        success = True
+
+        if positive_value_exists(search_string):
+            try:
+                search_words = search_string.split()
+            except Exception as e:
+                status += "SEARCH_STRING_INVALID: " + str(e) + ' '
+                search_words = []
+        else:
+            search_words = []
+
+        if len(year_integer_list) == 0:
+            status += "VALID_YEAR_NOT_PROVIDED-EARLIEST_REPRESENTATIVE_DATA_IS_2022 "
+            results = {
+                'success':                      success,
+                'status':                       status,
+                'representative_list_found':    representative_list_found,
+                'representative_list':          representative_list,
+                'returned_count':               returned_count,
+                'total_count':                  total_count,
+            }
+            return results
+
+        try:
+            if positive_value_exists(read_only):
+                queryset = Representative.objects.using('readonly').all()
+            else:
+                queryset = Representative.objects.all()
+            year_filters = []
+            if len(office_held_we_vote_id_list) > 0:
+                queryset = queryset.filter(office_held_we_vote_id__in=office_held_we_vote_id_list)
+            if len(politician_we_vote_id_list) > 0:
+                queryset = queryset.filter(politician_we_vote_id__in=politician_we_vote_id_list)
+            if positive_value_exists(is_missing_politician_we_vote_id):
+                queryset = queryset.filter(
+                    Q(politician_we_vote_id__isnull=True) |
+                    Q(politician_we_vote_id='')
+                )
+            for year_integer in year_integer_list:
+                if positive_value_exists(year_integer):
+                    year_in_office_key = 'year_in_office_' + str(year_integer)
+                    one_year_filter = Q(**{year_in_office_key: True})
+                    year_filters.append(one_year_filter)
+            if len(year_filters) > 0:
+                # Add the first query
+                final_filters = year_filters.pop()
+                # ...and "OR" the remaining items in the list
+                for item in year_filters:
+                    final_filters |= item
+                queryset = queryset.filter(final_filters)
+            if positive_value_exists(limit_to_this_state_code):
+                queryset = queryset.filter(state_code__iexact=limit_to_this_state_code)
+            if positive_value_exists(search_string):
+                # This is an "OR" search for each term, but an "AND" search across all search_words
+                for search_word in search_words:
+                    filters = []
+
+                    # We want to find representatives with *any* of these values
+                    new_filter = Q(google_civic_representative_name__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(google_civic_representative_name2__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(google_civic_representative_name3__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(representative_email__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(representative_email2__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(representative_email3__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(representative_name__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(representative_twitter_handle__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(representative_twitter_handle2__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(representative_twitter_handle3__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(office_held_name__icontains=search_word)
+                    filters.append(new_filter)
+                    new_filter = Q(twitter_name__icontains=search_word)
+                    filters.append(new_filter)
+
+                    # Add the first query
+                    final_filters = filters.pop()
+
+                    # ...and "OR" the remaining items in the list
+                    for item in filters:
+                        final_filters |= item
+
+                    # Add as new filter for "AND"
+                    queryset = queryset.filter(final_filters)
+            if sort_by_is_battleground and positive_value_exists(year_furthest_in_future):
+                is_battleground_race_desc = "-is_battleground_race_{year}".format(year=year_furthest_in_future)
+                queryset = queryset.order_by(is_battleground_race_desc, '-twitter_followers_count')
+            else:
+                queryset = queryset.order_by('-twitter_followers_count')
+            total_count = queryset.count()
+            if representatives_limit > 0:
+                if index_start > 0:
+                    representative_list = queryset[index_start:representatives_limit]
+                else:
+                    representative_list = queryset[:representatives_limit]
+            else:
+                representative_list = list(queryset)
+
+            if len(representative_list):
+                representative_list_found = True
+                status += 'REPRESENTATIVES_RETRIEVED '
+            else:
+                status += 'NO_REPRESENTATIVES_RETRIEVED '
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status += 'FAILED retrieve_representative_list: ' + str(e) + ' '
+            success = False
+
+        returned_count = len(representative_list)
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'representative_list_found':    representative_list_found,
+            'representative_list':          representative_list,
+            'returned_count':               returned_count,
+            'total_count':                  total_count,
+        }
+        return results
 
     def save_fresh_twitter_details_to_representative(
             self,

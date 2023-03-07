@@ -62,6 +62,11 @@
              {% if show_all %}checked{% endif %} /> Show up to 200 politicians
     </label>
     &nbsp;&nbsp;
+    <label for="show_battleground_id">
+      <input type="checkbox" name="show_battleground" id="show_battleground_id" value="1"
+             {% if show_battleground %}checked{% endif %} /> Battleground races
+    </label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
     <label for="show_related_candidates_id">
       <input type="checkbox" name="show_related_candidates" id="show_related_candidates_id" value="1"
              {% if show_related_candidates %}checked{% endif %} /> Show related candidates count
@@ -145,6 +150,7 @@
                 {% if politician.facebook_url %}<a href="{{ politician.facebook_url }}" target="_blank">{{ politician.facebook_url }}</a>{% endif %}
                 {% if politician.facebook_url2 %}<br /><a href="{{ politician.facebook_url2 }}" target="_blank">{{ politician.facebook_url2 }}</a>{% endif %}
                 {% if politician.facebook_url3 %}<br /><a href="{{ politician.facebook_url3 }}" target="_blank">{{ politician.facebook_url3 }}</a>{% endif %}
+            {% include "politician/is_battleground_race_year_display.html" with linebreak_at_start=True politician=politician %}
             </td>
             <td>{% if politician.linked_candidate_list_count > 0 %}{{ politician.linked_candidate_list_count }}{% endif %}</td>
         {% if show_related_candidates %}
@@ -165,6 +171,11 @@
     <script>
         $(function() {
             $('#show_all_id').change(function() {
+                this.form.submit();
+            });
+        });
+        $(function() {
+            $('#show_battleground_id').change(function() {
                 this.form.submit();
             });
         });

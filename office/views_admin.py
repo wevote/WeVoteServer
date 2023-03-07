@@ -26,7 +26,8 @@ from position.controllers import move_positions_to_another_office
 from position.models import OPPOSE, PositionListManager, SUPPORT
 from voter.models import voter_has_authority
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
+from wevote_functions.functions import convert_to_int, convert_we_vote_date_string_to_date_as_integer, \
+    positive_value_exists, STATE_CODE_MAP
 from django.http import HttpResponse
 import json
 
@@ -551,6 +552,7 @@ def office_list_view(request):
     office_search = request.GET.get('office_search', '')
     race_office_level = request.GET.get('race_office_level', '')
     show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
+    show_battleground = positive_value_exists(request.GET.get('show_battleground', False))
     show_marquee_or_battleground = request.GET.get('show_marquee_or_battleground', False)
     state_code = request.GET.get('state_code', '')
 
@@ -718,17 +720,38 @@ def office_list_view(request):
     office_repair_success = True
 
     if len(office_repair_list) > 0:
-        from candidate.controllers import update_candidates_with_is_battleground_race
+        from politician.controllers import update_parallel_fields_with_years_in_related_objects
         for office_on_stage in office_repair_list:
-            if office_repair_success and not office_on_stage.is_battleground_race_cached_in_candidates:
-                results = update_candidates_with_is_battleground_race(office_we_vote_id=office_on_stage.we_vote_id)
-                office_repair_success = results['success']
-                if office_repair_success:
-                    office_on_stage.is_battleground_race_cached_in_candidates = True
-                    office_on_stage.save()
-                else:
-                    status += results['status']
-                    messages.add_message(request, messages.ERROR, status)
+            if office_repair_success and not office_on_stage.is_battleground_race_spread_to_all_objects:
+                election_day_text = office_on_stage.get_election_day_text()
+                year = 0
+                years_false_list = []
+                years_true_list = []
+                if positive_value_exists(election_day_text):
+                    date_as_integer = convert_we_vote_date_string_to_date_as_integer(election_day_text)
+                    year = date_as_integer // 10000
+                if positive_value_exists(year):
+                    if positive_value_exists(office_on_stage.is_battleground_race):
+                        years_true_list = [year]
+                    else:
+                        # For this update script we only want to propagate True values (i.e. years_true_list)
+                        # years_false_list = [year]
+                        pass
+                years_list = list(set(years_false_list + years_true_list))
+                if len(years_list) > 0:
+                    results = update_parallel_fields_with_years_in_related_objects(
+                        field_key_root='is_battleground_race_',
+                        master_we_vote_id_updated=office_on_stage.we_vote_id,
+                        years_false_list=years_false_list,
+                        years_true_list=years_true_list,
+                    )
+                    office_repair_success = results['success']
+                    if office_repair_success:
+                        office_on_stage.is_battleground_race_spread_to_all_objects = True
+                        office_on_stage.save()
+                    else:
+                        status += results['status']
+                        messages.add_message(request, messages.ERROR, status)
 
     messages_on_stage = get_messages(request)
 
@@ -742,6 +765,7 @@ def office_list_view(request):
         'office_search':            office_search,
         'race_office_level':        race_office_level,
         'show_all_elections':       show_all_elections,
+        'show_battleground':        show_battleground,
         'show_marquee_or_battleground': show_marquee_or_battleground,
         'state_code':               state_code,
         'state_list':               sorted_state_list,
@@ -908,6 +932,7 @@ def office_edit_process_view(request):
     :return:
     """
     status = ''
+    success = True
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
@@ -956,114 +981,106 @@ def office_edit_process_view(request):
             office_on_stage_found = True
     except Exception as e:
         handle_record_not_found_exception(e, logger=logger)
+        success = False
 
-    try:
-        if office_on_stage_found:
-            # Update
-            # Removed for now: convert_to_int(office_on_stage.google_civic_election_id) >= 1000000 and
-            office_on_stage.ballotpedia_is_marquee = positive_value_exists(ballotpedia_is_marquee)
-            if ballotpedia_office_id is not False:
-                office_on_stage.ballotpedia_office_id = convert_to_int(ballotpedia_office_id)
-            if ballotpedia_office_name is not False:
-                office_on_stage.ballotpedia_office_name = ballotpedia_office_name
-            if ballotpedia_race_id is not False:
-                office_on_stage.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
-            if ballotpedia_race_office_level is not False:
-                office_on_stage.ballotpedia_race_office_level = ballotpedia_race_office_level
-            if ctcl_uuid is not False:
-                office_on_stage.ctcl_uuid = ctcl_uuid
-            if district_id is not False:
-                office_on_stage.district_id = district_id
-            if positive_value_exists(election_state):
-                office_on_stage.state_code = election_state
-            if google_civic_office_name is not False:
-                office_on_stage.google_civic_office_name = google_civic_office_name
-            if google_civic_office_name2 is not False:
-                office_on_stage.google_civic_office_name2 = google_civic_office_name2
-            if google_civic_office_name3 is not False:
-                office_on_stage.google_civic_office_name3 = google_civic_office_name3
-            if google_civic_office_name4 is not False:
-                office_on_stage.google_civic_office_name4 = google_civic_office_name4
-            if google_civic_office_name5 is not False:
-                office_on_stage.google_civic_office_name5 = google_civic_office_name5
-            office_on_stage.is_battleground_race = positive_value_exists(is_battleground_race)
-            if ocd_division_id is not False:
-                office_on_stage.ocd_division_id = ocd_division_id
-            if office_name is not False:
-                office_on_stage.office_name = office_name
-            if primary_party is not False:
-                office_on_stage.primary_party = primary_party
-            if vote_usa_office_id is not False:
-                office_on_stage.vote_usa_office_id = vote_usa_office_id
-            office_on_stage.save()
-            office_on_stage_id = office_on_stage.id
-            messages.add_message(request, messages.INFO, 'Office updated.')
-            google_civic_election_id = office_on_stage.google_civic_election_id
-        else:
-            # Create new
-            office_on_stage = ContestOffice(
-                office_name=office_name,
-                google_civic_election_id=google_civic_election_id,
-                state_code=election_state,
-            )
-            # Removing this limitation: convert_to_int(office_on_stage.google_civic_election_id) >= 1000000 and
-            office_on_stage.ballotpedia_is_marquee = positive_value_exists(ballotpedia_is_marquee)
-            if ballotpedia_office_id is not False:
-                office_on_stage.ballotpedia_office_id = convert_to_int(ballotpedia_office_id)
-            if ballotpedia_office_name is not False:
-                office_on_stage.ballotpedia_office_name = ballotpedia_office_name
-            if ballotpedia_race_id is not False:
-                office_on_stage.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
-            if ballotpedia_race_office_level is not False:
-                office_on_stage.ballotpedia_race_office_level = ballotpedia_race_office_level
-            if ctcl_uuid is not False:
-                office_on_stage.ctcl_uuid = ctcl_uuid
-            if district_id is not False:
-                office_on_stage.district_id = district_id
-            if positive_value_exists(election_state):
-                office_on_stage.state_code = election_state
-            if google_civic_office_name is not False:
-                office_on_stage.google_civic_office_name = google_civic_office_name
-            if google_civic_office_name2 is not False:
-                office_on_stage.google_civic_office_name2 = google_civic_office_name2
-            if google_civic_office_name3 is not False:
-                office_on_stage.google_civic_office_name3 = google_civic_office_name3
-            if google_civic_office_name4 is not False:
-                office_on_stage.google_civic_office_name4 = google_civic_office_name4
-            if google_civic_office_name5 is not False:
-                office_on_stage.google_civic_office_name5 = google_civic_office_name5
-            office_on_stage.is_battleground_race = positive_value_exists(is_battleground_race)
-            if ocd_division_id is not False:
-                office_on_stage.ocd_division_id = ocd_division_id
-            if office_name is not False:
-                office_on_stage.office_name = office_name
-            if primary_party is not False:
-                office_on_stage.primary_party = primary_party
-            if vote_usa_office_id is not False:
-                office_on_stage.vote_usa_office_id = vote_usa_office_id
+    if success:
+        try:
+            if office_on_stage_found:
+                office_on_stage_id = office_on_stage.id
+                google_civic_election_id = office_on_stage.google_civic_election_id
+            else:
+                # Create new
+                office_on_stage = ContestOffice(
+                    office_name=office_name,
+                    google_civic_election_id=google_civic_election_id,
+                    state_code=election_state,
+                )
+                office_on_stage_id = office_on_stage.id
+                google_civic_election_id = office_on_stage.google_civic_election_id
+                office_on_stage_found = True
+            if office_on_stage_found:
+                # Update
+                # Removing this limitation: convert_to_int(office_on_stage.google_civic_election_id) >= 1000000 and
+                office_on_stage.ballotpedia_is_marquee = positive_value_exists(ballotpedia_is_marquee)
+                if ballotpedia_office_id is not False:
+                    office_on_stage.ballotpedia_office_id = convert_to_int(ballotpedia_office_id)
+                if ballotpedia_office_name is not False:
+                    office_on_stage.ballotpedia_office_name = ballotpedia_office_name
+                if ballotpedia_race_id is not False:
+                    office_on_stage.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
+                if ballotpedia_race_office_level is not False:
+                    office_on_stage.ballotpedia_race_office_level = ballotpedia_race_office_level
+                if ctcl_uuid is not False:
+                    office_on_stage.ctcl_uuid = ctcl_uuid
+                if district_id is not False:
+                    office_on_stage.district_id = district_id
+                if positive_value_exists(election_state):
+                    office_on_stage.state_code = election_state
+                if google_civic_office_name is not False:
+                    office_on_stage.google_civic_office_name = google_civic_office_name
+                if google_civic_office_name2 is not False:
+                    office_on_stage.google_civic_office_name2 = google_civic_office_name2
+                if google_civic_office_name3 is not False:
+                    office_on_stage.google_civic_office_name3 = google_civic_office_name3
+                if google_civic_office_name4 is not False:
+                    office_on_stage.google_civic_office_name4 = google_civic_office_name4
+                if google_civic_office_name5 is not False:
+                    office_on_stage.google_civic_office_name5 = google_civic_office_name5
+                # Save office is_battleground_race for this year, and then prepare to update all related objects
+                office_on_stage.is_battleground_race = positive_value_exists(is_battleground_race)
+                election_day_text = office_on_stage.get_election_day_text()
+                year = 0
+                years_false_list = []
+                years_true_list = []
+                if positive_value_exists(election_day_text):
+                    date_as_integer = convert_we_vote_date_string_to_date_as_integer(election_day_text)
+                    year = date_as_integer // 10000
+                if positive_value_exists(year):
+                    if positive_value_exists(is_battleground_race):
+                        years_false_list = []
+                        years_true_list = [year]
+                    else:
+                        years_false_list = [year]
+                        years_true_list = []
+                years_list = list(set(years_false_list + years_true_list))
+                if ocd_division_id is not False:
+                    office_on_stage.ocd_division_id = ocd_division_id
+                if office_name is not False:
+                    office_on_stage.office_name = office_name
+                if primary_party is not False:
+                    office_on_stage.primary_party = primary_party
+                if vote_usa_office_id is not False:
+                    office_on_stage.vote_usa_office_id = vote_usa_office_id
 
-            office_on_stage.save()
-            office_on_stage_id = office_on_stage.id
-            messages.add_message(request, messages.INFO, 'New office saved.')
-        # ##################################
-        # Update "is_battleground_race" for all candidates under this office through the link CandidateToOfficeLink
-        # We can't automatically update all of these candidates with the office's setting,
-        # because we may be saving a primary election office
-        # which isn't a battleground race, and the candidate may have made it through to the general election which
-        # *is* a battleground.
-        from candidate.controllers import update_candidates_with_is_battleground_race
-        results = update_candidates_with_is_battleground_race(office_we_vote_id=office_on_stage.we_vote_id)
-        status += results['status']
-        status += "CANDIDATES_UPDATED: " + str(results['candidates_updated'])
-        if not positive_value_exists(results['success']):
-            messages.add_message(request, messages.ERROR, status)
+                office_on_stage.save()
+                office_on_stage_id = office_on_stage.id
+                office_on_stage_we_vote_id = office_on_stage.we_vote_id
+                messages.add_message(request, messages.INFO, 'Office updated.')
+                # ##################################
+                # Update "is_battleground_race" for candidates under this office through the link CandidateToOfficeLink
+                # We can't automatically update all of these candidates with the office's setting,
+                # because we may be saving a primary election office which isn't a battleground race,
+                # and the candidate may have made it through to the general election which
+                # *is* a battleground.
+                # from candidate.controllers import update_candidates_with_is_battleground_race
+                # results = update_candidates_with_is_battleground_race(office_we_vote_id=office_on_stage.we_vote_id)
+                if positive_value_exists(office_on_stage_we_vote_id) and len(years_list) > 0:
+                    from politician.controllers import update_parallel_fields_with_years_in_related_objects
+                    update_parallel_fields_with_years_in_related_objects(
+                        field_key_root='is_battleground_race_',
+                        master_we_vote_id_updated=office_on_stage_we_vote_id,
+                        years_false_list=years_false_list,
+                        years_true_list=years_true_list,
+                    )
 
-        return HttpResponseRedirect(reverse('office:office_summary', args=(office_on_stage_id,)) +
-                                    "?google_civic_election_id=" + str(google_civic_election_id) +
-                                    "&state_code=" + str(state_code))
-    except Exception as e:
-        handle_record_not_saved_exception(e, logger=logger)
-        messages.add_message(request, messages.ERROR, 'Could not save office: ' + str(e))
+            return HttpResponseRedirect(reverse('office:office_summary', args=(office_on_stage_id,)) +
+                                        "?google_civic_election_id=" + str(google_civic_election_id) +
+                                        "&state_code=" + str(state_code))
+        except Exception as e:
+            handle_record_not_saved_exception(e, logger=logger)
+            messages.add_message(request, messages.ERROR, 'Could not save office: ' + str(e))
+    else:
+        messages.add_message(request, messages.ERROR, 'Could not save office: ' + status)
 
     if redirect_to_contest_office_list:
         return HttpResponseRedirect(reverse('office:office_list', args=()) +

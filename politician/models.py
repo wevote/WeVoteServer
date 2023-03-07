@@ -49,6 +49,14 @@ POLITICIAN_UNIQUE_IDENTIFIERS = [
     'icpsr_id',
     'instagram_followers_count',
     'instagram_handle',
+    'is_battleground_race_2019',
+    'is_battleground_race_2020',
+    'is_battleground_race_2021',
+    'is_battleground_race_2022',
+    'is_battleground_race_2023',
+    'is_battleground_race_2024',
+    'is_battleground_race_2025',
+    'is_battleground_race_2026',
     'last_name',
     'lis_id',
     'maplight_id',
@@ -212,6 +220,15 @@ class Politician(models.Model):
     instagram_handle = models.TextField(verbose_name="politician's instagram handle", blank=True, null=True)
     instagram_followers_count = models.IntegerField(
         verbose_name="count of candidate's instagram followers", null=True, blank=True)
+    # As we add more years here, update /wevote_settings/constants.py IS_BATTLEGROUND_YEARS_AVAILABLE
+    is_battleground_race_2019 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2020 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2021 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2022 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2023 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2024 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2025 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2026 = models.BooleanField(default=False, null=False)
     linkedin_url = models.TextField(null=True, blank=True)
     politician_facebook_id = models.CharField(
         verbose_name='politician facebook user name', max_length=255, null=True, unique=False)
@@ -1406,14 +1423,16 @@ class PoliticianManager(models.Manager):
 #             politician_entry = Politician.objects.order_by('last_name')[0]
 #             politician_entry.delete()
 
-    def retrieve_politicians(
+    def retrieve_politician_list(
             self,
             limit_to_this_state_code="",
+            politician_we_vote_id_list=[],
             read_only=False,
     ):
         """
 
         :param limit_to_this_state_code:
+        :param politician_we_vote_id_list:
         :param read_only:
         :return:
         """
@@ -1426,6 +1445,8 @@ class PoliticianManager(models.Manager):
                 politician_query = Politician.objects.using('readonly').all()
             else:
                 politician_query = Politician.objects.all()
+            if len(politician_we_vote_id_list):
+                politician_query = politician_query.filter(we_vote_id__in=politician_we_vote_id_list)
             if positive_value_exists(limit_to_this_state_code):
                 politician_query = politician_query.filter(state_code__iexact=limit_to_this_state_code)
             politician_list = list(politician_query)

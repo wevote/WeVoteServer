@@ -323,11 +323,17 @@
     });
     $(function() {
         $('#has_voter_merge_problem_id').change(function() {
+            if(this.form.has_voter_merge_problem_id.checked) {
+                this.form.show_voter_merge_data_id.checked = false;
+            }
             this.form.submit();
         });
     });
     $(function() {
         $('#show_voter_merge_data_id').change(function() {
+            if(this.form.show_voter_merge_data_id.checked) {
+                this.form.has_voter_merge_problem_id.checked = false;
+            }
             this.form.submit();
         });
     });

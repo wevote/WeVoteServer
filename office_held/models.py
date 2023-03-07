@@ -147,6 +147,15 @@ class OfficeHeld(models.Model):
     google_civic_office_held_name = models.CharField(max_length=255, null=True, blank=True)
     google_civic_office_held_name2 = models.CharField(max_length=255, null=True, blank=True)
     google_civic_office_held_name3 = models.CharField(max_length=255, null=True, blank=True)
+    # As we add more years here, update /wevote_settings/constants.py IS_BATTLEGROUND_YEARS_AVAILABLE
+    is_battleground_race_2019 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2020 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2021 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2022 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2023 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2024 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2025 = models.BooleanField(default=False, null=False)
+    is_battleground_race_2026 = models.BooleanField(default=False, null=False)
     # The number of candidates elected to office
     number_elected = models.CharField(max_length=255, null=True, blank=True)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
@@ -170,16 +179,15 @@ class OfficeHeld(models.Model):
     office_held_role0 = models.CharField(max_length=255, null=True, blank=True)
     office_held_role1 = models.CharField(max_length=255, null=True, blank=True)
     office_held_role2 = models.CharField(max_length=255, null=True, blank=True)
+    office_held_twitter_handle = models.CharField(max_length=255, null=True, unique=False)
     # If this is a partisan election, the name of the party it is for.
     primary_party = models.CharField(verbose_name="google civic primary party", max_length=255, null=True, blank=True)
     race_office_level = models.CharField(max_length=255, null=True, blank=True)
     state_code = models.CharField(verbose_name="state this office_held serves", max_length=2, null=True, blank=True)
-    is_battleground_race_2022 = models.BooleanField(default=False, null=False)
-    is_battleground_race_2023 = models.BooleanField(default=False, null=False)
-    is_battleground_race_2024 = models.BooleanField(default=False, null=False)
 
     # Which years do we have representative data? This is cached data built up from master
     #  data in the Representative.years_in_office_flags field
+    # As we add more years here, update /wevote_settings/constants.py OFFICE_HELD_YEARS_AVAILABLE
     # As we add more years here, update attach_defaults_values_to_office_held_object
     year_with_data_2023 = models.BooleanField(default=None, null=True)
     year_with_data_2024 = models.BooleanField(default=None, null=True)
@@ -611,65 +619,46 @@ class OfficeHeldManager(models.Manager):
         }
         return results
 
-    def retrieve_offices_held_by_list(self, office_list, return_list_of_objects=False):
-        state_code = ""
-        return self.retrieve_offices_held(state_code, office_list, return_list_of_objects)
-
-    def retrieve_offices_held(
+    def retrieve_office_held_list(
             self,
             state_code="",
-            office_held_list=[],
-            return_list_of_objects=False):
-        office_held_list_objects = []
-        office_held_list_light = []
+            office_held_we_vote_id_list=[],
+            read_only=False):
+        office_held_list = []
         office_held_list_found = False
         status = ""
 
         try:
-            office_held_queryset = OfficeHeld.objects.all()
+            if positive_value_exists(read_only):
+                queryset = OfficeHeld.objects.using('readonly').all()
+            else:
+                queryset = OfficeHeld.objects.all()
             if positive_value_exists(state_code):
-                office_held_queryset = office_held_queryset.filter(state_code__iexact=state_code)
-            if len(office_held_list):
-                office_held_queryset = office_held_queryset.filter(
-                    we_vote_id__in=office_held_list)
-            office_held_queryset = office_held_queryset.order_by("office_held_name")
-            office_held_list_objects = office_held_queryset
+                queryset = queryset.filter(state_code__iexact=state_code)
+            if len(office_held_we_vote_id_list):
+                queryset = queryset.filter(we_vote_id__in=office_held_we_vote_id_list)
+            queryset = queryset.order_by("office_held_name")
+            office_held_list = list(queryset)
 
-            if len(office_held_list_objects):
+            if len(office_held_list):
                 office_held_list_found = True
                 status += 'OFFICES_HELD_RETRIEVED '
                 success = True
             else:
                 status += 'NO_OFFICES_HELD_RETRIEVED '
                 success = True
-        except OfficeHeld.DoesNotExist:
-            # No entries found. Not a problem.
-            status += 'NO_OFFICES_HELD_FOUND_DoesNotExist '
-            office_held_list_objects = []
-            success = True
         except Exception as e:
             handle_exception(e, logger=logger)
-            status += 'FAILED retrieve_offices_held ' \
-                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            status += 'FAILED retrieve_office_held_list ' \
+                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
 
-        if office_held_list_found:
-            for office_held in office_held_list_objects:
-                one_office_held = {
-                    'ballot_item_display_name':     office_held.office_held_name,
-                    'measure_we_vote_id':           '',
-                    'office_held_we_vote_id':    office_held.we_vote_id,
-                    'candidate_we_vote_id':         '',
-                }
-                office_held_list_light.append(one_office_held.copy())
-
         results = {
-            'success':                      success,
-            'status':                       status,
-            'state_code':                   state_code,
-            'office_held_list_found':    office_held_list_found,
-            'office_held_list_objects':  office_held_list_objects if return_list_of_objects else [],
-            'office_held_list_light':    office_held_list_light,
+            'office_held_list_found':   office_held_list_found,
+            'office_held_list':         office_held_list,
+            'state_code':               state_code,
+            'status':                   status,
+            'success':                  success,
         }
         return results
 
@@ -722,7 +711,7 @@ class OfficeHeldManager(models.Manager):
         }
         return results
 
-    def retrieve_offices_held_by_location(
+    def retrieve_office_held_list_by_location(
             self,
             polling_location_we_vote_id='',
             voter_we_vote_id='',
@@ -749,22 +738,22 @@ class OfficeHeldManager(models.Manager):
         status = ""
 
         try:
-            office_held_queryset = OfficeHeld.objects.all()
-            office_held_queryset = office_held_queryset.filter(google_civic_election_id=google_civic_election_id)
-            office_held_queryset = office_held_queryset.filter(office_held_name__iexact=office_held_name)
+            queryset = OfficeHeld.objects.all()
+            queryset = queryset.filter(google_civic_election_id=google_civic_election_id)
+            queryset = queryset.filter(office_held_name__iexact=office_held_name)
             # Case doesn't matter
             if positive_value_exists(state_code):
-                office_held_queryset = office_held_queryset.filter(state_code__iexact=state_code)
+                queryset = queryset.filter(state_code__iexact=state_code)
             # Case doesn't matter
-            # office_held_queryset = office_held_queryset.filter(district_id__exact=district_id)
-            # office_held_queryset = office_held_queryset.filter(district_name__iexact=district_name)
+            # queryset = queryset.filter(district_id__exact=district_id)
+            # queryset = queryset.filter(district_name__iexact=district_name)
             #  Case doesn't matter
 
             # Ignore we_vote_id coming in from master server
             if positive_value_exists(we_vote_id_from_master):
-                office_held_queryset = office_held_queryset.filter(~Q(we_vote_id__iexact=we_vote_id_from_master))
+                queryset = queryset.filter(~Q(we_vote_id__iexact=we_vote_id_from_master))
 
-            office_held_list_objects = office_held_queryset
+            office_held_list_objects = queryset
 
             if len(office_held_list_objects):
                 office_held_list_found = True
@@ -862,6 +851,7 @@ class OfficesHeldForLocation(models.Model):
     state_code = models.CharField(max_length=2, null=True, db_index=True)
     voter_we_vote_id = models.CharField(default=None, max_length=255, null=True)
     # Which years do we have OfficesHeldForLocation data?
+    # As we add more years here, update /wevote_settings/constants.py OFFICE_HELD_YEARS_AVAILABLE
     # As we add more years here, update attach_defaults_values_to_offices_held_object
     year_with_data_2023 = models.BooleanField(default=None, null=True)
     year_with_data_2024 = models.BooleanField(default=None, null=True)

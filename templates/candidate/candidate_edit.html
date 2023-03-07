@@ -60,7 +60,7 @@ th, td {
     <div class="col-sm-8">
         <input type="text" name="candidate_name" id="candidate_name_id" class="form-control"
                value="{% if candidate %}{{ candidate.candidate_name|default_if_none:"" }}{% else %}{{ candidate_name|default_if_none:"" }}{% endif %}" />
-        <div style='position:absolute; width: 100%; height: 30px; margin: 4px 0 0 12px;'>
+        <div>
             {% if candidate %}
                {% if candidate.candidate_name_normalized|length|get_digit:"-1" > 0 %}
                     <span style='display: inline-block; width: 42%; text-align: left; padding-left: 6px'>
@@ -70,7 +70,7 @@ th, td {
                         </button>
                     </span>
                {% endif %}
-               <span style='display: inline-block;text-align: right;'>
+               <div>
                     {{ candidate.we_vote_id }}
                     (<a href="{% url 'candidate:candidate_delete_process' %}?candidate_id={{ candidate.id }}&google_civic_election_id={{ google_civic_election_id }}">delete candidate</a>)
 
@@ -86,7 +86,7 @@ th, td {
                         &nbsp;&nbsp;&nbsp;&nbsp;(<a href="{% url 'candidate:find_duplicate_candidate' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}"
                             target="_blank">check for duplicate candidates <span class="glyphicon glyphicon-new-window"></span></a>)
                     {% endif %}
-                </span>
+                </div>
             {% else %}
                 {{ we_vote_id }}
                 {% if politician_we_vote_id and politician_we_vote_id != "False" and politician_we_vote_id != False %}

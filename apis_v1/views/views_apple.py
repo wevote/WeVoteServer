@@ -407,6 +407,8 @@ def sign_in_with_apple_oauth_redirect_view(request):  # appleSignInOauthRedirect
     if DEBUG_LOGGING:
         logger.error('awsApple ' + status)
 
+    # TODO: We need to add a URL variable here that asks WebApp to fire off a VoterRetrieve
+    #  with the merge_from... and merge_to... variables
     return HttpResponseRedirect(return_url)
 
 

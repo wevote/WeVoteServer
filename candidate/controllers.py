@@ -1957,6 +1957,14 @@ def candidate_politician_match(candidate):
             candidate.politician_id = politician.id
             candidate.save()
 
+            if positive_value_exists(candidate.we_vote_id):
+                from politician.controllers import update_parallel_fields_with_years_in_related_objects
+                results = update_parallel_fields_with_years_in_related_objects(
+                    field_key_root='is_battleground_race_',
+                    master_we_vote_id_updated=candidate.we_vote_id,
+                )
+                status += results['status']
+
             results = {
                 'success':                  results['success'],
                 'status':                   status,
@@ -2031,6 +2039,14 @@ def candidate_politician_match(candidate):
         candidate.politician_id = politician.id
         candidate.save()
 
+        if positive_value_exists(candidate.we_vote_id):
+            from politician.controllers import update_parallel_fields_with_years_in_related_objects
+            results = update_parallel_fields_with_years_in_related_objects(
+                field_key_root='is_battleground_race_',
+                master_we_vote_id_updated=candidate.we_vote_id,
+            )
+            status += results['status']
+
         results = {
             'success':                  True,
             'status':                   status,
@@ -2051,6 +2067,14 @@ def candidate_politician_match(candidate):
             candidate.politician_we_vote_id = politician.we_vote_id
             candidate.politician_id = politician.id
             candidate.save()
+
+            if positive_value_exists(candidate.we_vote_id):
+                from politician.controllers import update_parallel_fields_with_years_in_related_objects
+                results = update_parallel_fields_with_years_in_related_objects(
+                    field_key_root='is_battleground_race_',
+                    master_we_vote_id_updated=candidate.we_vote_id,
+                )
+                status += results['status']
 
         results = {
             'success':                      create_results['success'],

@@ -14,7 +14,7 @@ from apis_v1.views import views_activity, views_apple, views_docs, views_analyti
     views_campaign, views_candidate, views_donation, \
     views_election, views_extension, views_facebook, views_friend, \
     views_issues, views_measure, views_misc, views_organization, \
-    views_pledge_to_vote, views_position, views_reaction, views_retrieve_tables, \
+    views_pledge_to_vote, views_position, views_reaction, views_representative, views_retrieve_tables, \
     views_task, views_share, views_twitter, views_voter, views_voter_guide
 from analytics.views_admin import analytics_action_sync_out_view, organization_daily_metrics_sync_out_view, \
     organization_election_metrics_sync_out_view, sitewide_daily_metrics_sync_out_view, \
@@ -247,8 +247,9 @@ urlpatterns = [
               views_position.position_support_count_for_ballot_item_view,
               name='positionSupportCountForBallotItemView'),
       re_path(r'^quickInfoRetrieve/', views_misc.quick_info_retrieve_view, name='quickInfoRetrieveView'),
-      re_path(r'^reactionLikeCount/', views_reaction.reaction_like_count_view,
-              name='reactionLikeCountView'),
+      re_path(r'^reactionLikeCount/', views_reaction.reaction_like_count_view, name='reactionLikeCountView'),
+      re_path(r'^representativesQuery/', views_representative.representatives_query_view,
+              name='representativesQueryView'),
       re_path(r'^retrieveIssuesToFollow/', retrieve_issues_to_follow_view,
               name='retrieveIssuesToFollowView'),
       re_path(r'^saveAnalyticsAction/', views_analytics.save_analytics_action_view,
@@ -627,6 +628,8 @@ urlpatterns = [
               name='quickInfoRetrieveDocs'),
       re_path(r'^docs/reactionLikeCount/$', views_docs.reaction_like_count_doc_view,
               name='reactionLikeCountDocs'),
+      re_path(r'^docs/representativesQuery/$', views_docs.representatives_query_doc_view,
+              name='representativesQueryDocs'),
       re_path(r'^docs/retrieveIssuesToFollow/', views_docs.retrieve_issues_to_follow_doc_view,
               name='retrieveIssuesToFollowDocs'),
       re_path(r'^docs/saveAnalyticsAction/$',

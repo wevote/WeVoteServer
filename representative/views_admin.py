@@ -33,7 +33,7 @@ from wevote_functions.functions import convert_to_int, positive_value_exists, ST
     convert_to_political_party_constant, \
     extract_first_name_from_full_name, \
     extract_last_name_from_full_name
-from wevote_settings.constants import ELECTION_YEARS_AVAILABLE, OFFICE_HELD_YEARS_AVAILABLE
+from wevote_settings.constants import IS_BATTLEGROUND_YEARS_AVAILABLE, OFFICE_HELD_YEARS_AVAILABLE
 
 OFFICES_SYNC_URL = get_environment_variable("OFFICES_SYNC_URL")  # officesSyncOut
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
@@ -328,6 +328,7 @@ def representative_list_view(request):
     missing_politician = positive_value_exists(request.GET.get('missing_politician', False))
     representative_search = request.GET.get('representative_search', '')
     show_all = positive_value_exists(request.GET.get('show_all', False))
+    show_battleground = positive_value_exists(request.GET.get('show_battleground', False))
     show_representatives_with_email = request.GET.get('show_representatives_with_email', False)
     show_this_year = convert_to_int(request.GET.get('show_this_year', 9999))
     if show_this_year == 9999:
@@ -342,6 +343,20 @@ def representative_list_view(request):
 
     try:
         queryset = Representative.objects.all()
+        if positive_value_exists(show_battleground):
+            year_filters = []
+            for year_integer in IS_BATTLEGROUND_YEARS_AVAILABLE:
+                if positive_value_exists(year_integer):
+                    is_battleground_race_key = 'is_battleground_race_' + str(year_integer)
+                    one_year_filter = Q(**{is_battleground_race_key: True})
+                    year_filters.append(one_year_filter)
+            if len(year_filters) > 0:
+                # Add the first query
+                final_filters = year_filters.pop()
+                # ...and "OR" the remaining items in the list
+                for item in year_filters:
+                    final_filters |= item
+                queryset = queryset.filter(final_filters)
         if positive_value_exists(state_code):
             if state_code.lower() == 'na':
                 queryset = queryset.filter(
@@ -467,6 +482,7 @@ def representative_list_view(request):
         'representative_list':      representative_list,
         'representative_search':    representative_search,
         'show_all':                 show_all,
+        'show_battleground':        show_battleground,
         'show_representatives_with_email':  show_representatives_with_email,
         'show_this_year':           show_this_year,
         'state_code':               state_code,
@@ -932,6 +948,18 @@ def representative_edit_process_view(request):
         instagram_handle = extract_instagram_handle_from_text_string(instagram_handle)
     if instagram_handle is not False:
         defaults['instagram_handle'] = instagram_handle
+    is_battleground_years_list = IS_BATTLEGROUND_YEARS_AVAILABLE
+    years_false_list = []
+    years_true_list = []
+    for year in is_battleground_years_list:
+        is_battleground_race_key = 'is_battleground_race_' + str(year)
+        incoming_is_battleground_race = positive_value_exists(request.POST.get(is_battleground_race_key, False))
+        if incoming_is_battleground_race:
+            years_true_list.append(year)
+        else:
+            years_false_list.append(year)
+        defaults[is_battleground_race_key] = incoming_is_battleground_race
+    years_list = list(set(years_false_list + years_true_list))
     linkedin_url = request.POST.get('linkedin_url', False)
     if linkedin_url is not False:
         defaults['linkedin_url'] = linkedin_url
@@ -1070,6 +1098,7 @@ def representative_edit_process_view(request):
             representative_on_stage = attach_defaults_values_to_representative_object(representative_on_stage, defaults)
 
             representative_on_stage.save()
+            representative_we_vote_id = representative_on_stage.we_vote_id
             messages.add_message(request, messages.INFO, 'Representative updated.')
         else:
             # Create new
@@ -1078,6 +1107,7 @@ def representative_edit_process_view(request):
                 positive_value_exists(office_held_we_vote_id) and \
                 positive_value_exists(ocd_division_id) \
                 else False
+            representative_on_stage_found = True
             if required_representative_variables:
                 representative_on_stage = Representative(
                     ocd_division_id=ocd_division_id,
@@ -1089,9 +1119,10 @@ def representative_edit_process_view(request):
 
                 representative_on_stage.save()
                 representative_id = representative_on_stage.id
+                representative_we_vote_id = representative_on_stage.we_vote_id
                 messages.add_message(request, messages.INFO, 'New representative saved.')
             else:
-                # messages.add_message(request, messages.INFO, 'Could not save -- missing required variables.')
+                messages.add_message(request, messages.ERROR, 'Could not save -- missing required variables.')
                 url_variables = "?representative_name=" + str(representative_name) + \
                                 "&state_code=" + str(state_code) + \
                                 "&google_civic_representative_name=" + str(google_civic_representative_name) + \
@@ -1104,11 +1135,20 @@ def representative_edit_process_view(request):
                 else:
                     return HttpResponseRedirect(reverse('representative:representative_new', args=()) +
                                                 url_variables)
-
     except Exception as e:
         handle_record_not_saved_exception(e, logger=logger)
         messages.add_message(request, messages.ERROR, 'Could not save representative.')
         return HttpResponseRedirect(reverse('representative:representative_edit', args=(representative_id,)))
+
+    if representative_on_stage_found:
+        if positive_value_exists(representative_we_vote_id) and len(years_list) > 0:
+            from politician.controllers import update_parallel_fields_with_years_in_related_objects
+            update_parallel_fields_with_years_in_related_objects(
+                field_key_root='is_battleground_race_',
+                master_we_vote_id_updated=representative_we_vote_id,
+                years_false_list=years_false_list,
+                years_true_list=years_true_list,
+            )
 
     if representative_id:
         return HttpResponseRedirect(reverse('representative:representative_edit', args=(representative_id,)))

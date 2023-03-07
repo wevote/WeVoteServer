@@ -431,15 +431,25 @@ class TwitterUserManager(models.Manager):
 
     def retrieve_twitter_link_to_organization_from_twitter_handle(self, twitter_handle, read_only=False):
         status = ""
+        success = True
         twitter_user_id = 0
         results = self.retrieve_twitter_user_locally_or_remotely(twitter_user_id, twitter_handle, read_only=read_only)
-        if results['twitter_user_found']:
+        if not results['success']:
+            status += "SUCCESS_FALSE_RETRIEVING_TWITTER_USER: " + results['status'] + " "
+            success = False
+            results = {
+                'success': success,
+                'status': status,
+                'twitter_link_to_organization_found': False,
+            }
+            return results
+        elif results['twitter_user_found']:
             twitter_user = results['twitter_user']
             twitter_user_id = twitter_user.twitter_id
         else:
-            status += "RETRIEVE_TWITTER_ERROR: " + results['status'] + " "
+            status += "TWITTER_USER_NOT_FOUND: " + results['status'] + " "
             results = {
-                'success':  False,
+                'success':  success,
                 'status':   status,
                 'twitter_link_to_organization_found': False,
             }
@@ -706,7 +716,7 @@ class TwitterUserManager(models.Manager):
         """
         twitter_user_found = False
         twitter_user = None
-        success = False
+        success = True
         status = ""
 
         # Strip out the twitter handles "False" or "None"
@@ -731,6 +741,7 @@ class TwitterUserManager(models.Manager):
         twitter_results = retrieve_twitter_user_info(twitter_user_id, twitter_handle)
         if twitter_results['success'] is False:
             status += twitter_results['status']
+            success = False
         if twitter_results['twitter_handle_found']:
             twitter_save_results = self.update_or_create_twitter_user(
                 twitter_json=twitter_results['twitter_json'], twitter_id=twitter_user_id)

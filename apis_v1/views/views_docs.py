@@ -41,7 +41,7 @@ from apis_v1.documentation_source import \
     position_public_oppose_count_for_ballot_item_doc, position_retrieve_doc, position_save_doc, \
     positions_sync_out_doc, \
     position_public_support_count_for_ballot_item_doc, position_support_count_for_ballot_item_doc, \
-    quick_info_retrieve_doc, retrieve_issues_to_follow_doc, \
+    quick_info_retrieve_doc, representatives_query_doc, retrieve_issues_to_follow_doc, \
     save_analytics_action_doc, search_all_doc, shared_item_list_save_doc, shared_item_retrieve_doc, \
     shared_item_save_doc, super_share_item_save_doc, site_configuration_retrieve_doc, \
     sitewide_daily_metrics_sync_out_doc, sitewide_election_metrics_sync_out_doc, sitewide_voter_metrics_sync_out_doc, \
@@ -1025,6 +1025,15 @@ def quick_info_retrieve_doc_view(request):
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = quick_info_retrieve_doc.\
         quick_info_retrieve_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def representatives_query_doc_view(request):
+    """
+    Show documentation about representativesQuery
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = representatives_query_doc.representatives_query_doc_template_values(url_root)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 

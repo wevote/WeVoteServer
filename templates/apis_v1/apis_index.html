@@ -117,12 +117,12 @@
         <tr>
           <td><a href="{% url 'apis_v1:voterEmailAddressSignInDocs' %}">voterEmailAddressSignIn</a></td>
           <td></td>
-          <td>Sign in based on an email_secret_key that get's emailed to voter.</td>
+          <td>Sign in based on an email_secret_key that gets emailed to voter.</td>
         </tr>
         <tr>
           <td><a href="{% url 'apis_v1:voterEmailAddressVerifyDocs' %}">voterEmailAddressVerify</a></td>
           <td></td>
-          <td>Verify an email address using an email_secret_key that get's emailed to voter.</td>
+          <td>Verify an email address using an email_secret_key that gets emailed to voter.</td>
         </tr>
         <tr>
           <td><a href="{% url 'apis_v1:voterPhotoSaveDocs' %}">voterPhotoSave - DEPRECATED, PLEASE USE voterUpdate</a>
@@ -133,7 +133,7 @@
         <tr>
           <td><a href="{% url 'apis_v1:voterPlanListRetrieveDocs' %}">voterPlanListRetrieve</a></td>
           <td></td>
-          <td>Retrieve public voter plans so we can show off examples from other voters.</td>
+          <td>Retrieve public voter plans, so we can show off examples from other voters.</td>
         </tr>
         <tr>
           <td><a href="{% url 'apis_v1:voterPlanSaveDocs' %}">voterPlanSave</a></td>
@@ -168,7 +168,7 @@
         <tr>
           <td><a href="{% url 'apis_v1:voterVerifySecretCodeDocs' %}">voterVerifySecretCode</a></td>
           <td></td>
-          <td>Voter submits this six digit code to verify that they received an SMS message or email.</td>
+          <td>Voter submits this six-digit code to verify that they received an SMS message or email.</td>
         </tr>
 
         {###  ###}
@@ -252,7 +252,7 @@
         <tr>
           <td><a href="{% url 'apis_v1:twitterRetrieveIdsIFollowDocs' %}">twitterRetrieveIdsIFollow</a></td>
           <td></td>
-          <td>Retrieve the Twitter ids i follow.
+          <td>Retrieve the Twitter ids I follow.
           </td>
         </tr>
         <tr>
@@ -284,7 +284,7 @@
         <tr>
           <td><a href="{% url 'apis_v1:voterContactListRetrieveDocs' %}">voterContactListRetrieve</a></td>
           <td></td>
-          <td>Retrieve from the We Vote database all contacts previously uploaded
+          <td>Retrieve from We Vote database all contacts previously uploaded
           </td>
         </tr>
         <tr>
@@ -352,7 +352,7 @@
         <tr>
           <td><a href="{% url 'apis_v1:voterBallotItemsRetrieveDocs' %}">voterBallotItemsRetrieve</a></td>
           <td>c3</td>
-          <td>Retrieve a list of ballot items to display for the current voter from the We Vote database. These entries
+          <td>Retrieve a list of ballot items to display for the current voter from We Vote database. These entries
             would have been previously retrieved from Google Civic with voterBallotItemsRetrieveFromGoogleCivic.
           </td>
         </tr>
@@ -360,16 +360,16 @@
           <td><a href="{% url 'apis_v1:voterBallotItemsRetrieveFromGoogleCivicDocs' %}">
             voterBallotItemsRetrieveFromGoogleCivic</a></td>
           <td>c3</td>
-          <td>Tell the We Vote server to reach out to the Google Civic API and retrieve a list of ballot items
+          <td>Tell We Vote server to reach out to the Google Civic API and retrieve a list of ballot items
             for the current voter (based on the address saved with voterAddressSave), and store them in
-            the We Vote database so we can display them
+            We Vote database, so we can display them
             with voterBallotItemsRetrieve, and other API calls.
           </td>
         </tr>
         <tr>
           <td><a href="{% url 'apis_v1:voterBallotListRetrieveDocs' %}">voterBallotListRetrieve</a></td>
           <td>c3</td>
-          <td>Retrieve a list of users ballots from different elections from the We Vote database.</td>
+          <td>Retrieve a list of users ballots from different elections from We Vote database.</td>
         </tr>
         <tr>
           <td><a href="{% url 'apis_v1:electionsRetrieveDocs' %}">electionsRetrieve</a></td>
@@ -445,7 +445,17 @@
 
         {###  ###}
         <tr>
-          <td colspan="3"><strong>Offices, Candidates &amp; Measures</strong></td>
+          <td colspan="3"><strong>Elected Officials, Offices Held by a Politician &amp; Politicians</strong></td>
+        </tr>
+        <tr>
+          <td><a href="{% url 'apis_v1:representativesQueryDocs' %}">representativesQuery</a></td>
+          <td>static c3</td>
+          <td>Retrieve a list of representatives currently in office, for an entire year.</td>
+        </tr>
+
+        {###  ###}
+        <tr>
+          <td colspan="3"><strong>Offices (i.e. races), Candidates running &amp; Measures</strong></td>
         </tr>
         <tr>
           <td><a href="{% url 'apis_v1:ballotItemRetrieveDocs' %}">ballotItemRetrieve</a></td>
@@ -1071,7 +1081,7 @@
         <tr>
           <td><a href="{% url 'apis_v1:saveAnalyticsActionDocs' %}">saveAnalyticsAction</a></td>
           <td></td>
-          <td>Save an entry in the We Vote Analytics system so we can publish daily, monthly, election and sitewide
+          <td>Save an entry in We Vote Analytics system, so we can publish daily, monthly, election and sitewide
             reports.
           </td>
         </tr>

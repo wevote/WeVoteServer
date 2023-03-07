@@ -4,13 +4,17 @@
 
 from django.db.models import Q
 from candidate.controllers import add_name_to_next_spot, move_candidates_to_another_politician
-from representative.controllers import move_representatives_to_another_politician
+from candidate.models import CandidateListManager, CandidateManager
+from office.models import ContestOfficeManager, ContestOfficeListManager
 from politician.models import Politician, PoliticianManager, POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, \
     POLITICIAN_UNIQUE_IDENTIFIERS, UNKNOWN
 from position.controllers import move_positions_to_another_politician
+from representative.controllers import move_representatives_to_another_politician
+from representative.models import RepresentativeManager
 from config.base import get_environment_variable
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_political_party_constant, positive_value_exists, \
+from wevote_functions.functions import convert_to_political_party_constant, \
+    convert_we_vote_date_string_to_date_as_integer, positive_value_exists, \
     process_request_from_master, remove_middle_initial_from_name
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -384,41 +388,6 @@ def figure_out_politician_conflict_values(politician1, politician2):
                 politician_merge_conflict_values[attribute] = 'POLITICIAN2'
             elif politician2_attribute_value is None or politician2_attribute_value == "":
                 politician_merge_conflict_values[attribute] = 'POLITICIAN1'
-            # We now offer multiple politician facebook_url fields
-            # elif attribute == "facebook_url":
-            #     if politician1_attribute_value_lower_case == politician2_attribute_value_lower_case:
-            #         # Give preference to value with both upper and lower case letters
-            #         if any(char.isupper() for char in politician1_attribute_value) \
-            #                 and any(char.islower() for char in politician1_attribute_value):
-            #             politician_merge_conflict_values[attribute] = 'POLITICIAN1'
-            #         else:
-            #             politician_merge_conflict_values[attribute] = 'POLITICIAN2'
-            #     else:
-            #         politician_merge_conflict_values[attribute] = 'CONFLICT'
-            # elif attribute == "facebook_url_is_broken":
-            #     politician1_facebook_url = getattr(politician1, 'facebook_url', '')
-            #     try:
-            #         politician1_facebook_url_lower_case = politician1_facebook_url.lower()
-            #     except Exception:
-            #         politician1_facebook_url_lower_case = None
-            #     politician2_facebook_url = getattr(politician2, 'facebook_url', '')
-            #     try:
-            #         politician2_facebook_url_lower_case = politician2_facebook_url.lower()
-            #     except Exception:
-            #         politician2_facebook_url_lower_case = None
-            #     if politician1_facebook_url_lower_case == politician2_facebook_url_lower_case:
-            #         # If facebook_url is matching, then automatically honor "True" in facebook_url_is_broken
-            #         if positive_value_exists(politician1_attribute_value):
-            #             politician_merge_conflict_values[attribute] = 'POLITICIAN1'
-            #         elif positive_value_exists(politician2_attribute_value):
-            #             politician_merge_conflict_values[attribute] = 'POLITICIAN2'
-            #         else:
-            #             politician_merge_conflict_values[attribute] = 'MATCHING'
-            #     else:
-            #         if politician1_attribute_value == politician2_attribute_value:
-            #             politician_merge_conflict_values[attribute] = 'MATCHING'
-            #         else:
-            #             politician_merge_conflict_values[attribute] = 'CONFLICT'
             elif attribute == "gender":
                 if politician1_attribute_value == politician2_attribute_value:
                     politician_merge_conflict_values[attribute] = 'MATCHING'
@@ -426,6 +395,22 @@ def figure_out_politician_conflict_values(politician1, politician2):
                     politician_merge_conflict_values[attribute] = 'POLITICIAN2'
                 elif politician2_attribute_value is UNKNOWN and positive_value_exists(politician1_attribute_value):
                     politician_merge_conflict_values[attribute] = 'POLITICIAN1'
+                else:
+                    politician_merge_conflict_values[attribute] = 'CONFLICT'
+            elif attribute.startswith("is_battleground_race_"):
+                # We always want to default to preserving a true value
+                if politician1_attribute_value == politician2_attribute_value:
+                    politician_merge_conflict_values[attribute] = 'MATCHING'
+                elif positive_value_exists(politician1_attribute_value):
+                    politician_merge_conflict_values[attribute] = 'POLITICIAN1'
+                elif positive_value_exists(politician2_attribute_value):
+                    politician_merge_conflict_values[attribute] = 'POLITICIAN2'
+                else:
+                    politician_merge_conflict_values[attribute] = 'POLITICIAN1'
+            elif attribute == "political_party":
+                if convert_to_political_party_constant(politician1_attribute_value) == \
+                        convert_to_political_party_constant(politician2_attribute_value):
+                    politician_merge_conflict_values[attribute] = 'MATCHING'
                 else:
                     politician_merge_conflict_values[attribute] = 'CONFLICT'
             elif attribute == "politician_name":
@@ -459,12 +444,6 @@ def figure_out_politician_conflict_values(politician1, politician2):
                         politician_merge_conflict_values[attribute] = 'CONFLICT'
             elif attribute == "state_code":
                 if politician1_attribute_value_lower_case == politician2_attribute_value_lower_case:
-                    politician_merge_conflict_values[attribute] = 'MATCHING'
-                else:
-                    politician_merge_conflict_values[attribute] = 'CONFLICT'
-            elif attribute == "political_party":
-                if convert_to_political_party_constant(politician1_attribute_value) == \
-                        convert_to_political_party_constant(politician2_attribute_value):
                     politician_merge_conflict_values[attribute] = 'MATCHING'
                 else:
                     politician_merge_conflict_values[attribute] = 'CONFLICT'
@@ -1357,5 +1336,532 @@ def update_politician_from_candidate(politician, candidate):
         'status':       status,
         'politician':   politician,
         'save_changes': save_changes,
+    }
+    return results
+
+
+def update_parallel_fields_with_years_in_related_objects(
+        field_key_root='',
+        master_we_vote_id_updated='',
+        years_false_list=[],
+        years_true_list=[]):
+    status = ''
+    success = True
+    update_candidate = True
+    update_office = True
+    update_office_held = True
+    years_list = list(set(years_false_list + years_true_list))
+
+    if field_key_root not in ['is_battleground_race_']:
+        status += "FIELD_KEY_ROOT_NOT_RECOGNIZED "
+        success = False
+    if not positive_value_exists(master_we_vote_id_updated):
+        status += "MISSING_MASTER_WE_VOTE_ID "
+        success = False
+    if not len(years_list) > 0:
+        if 'cand' in master_we_vote_id_updated:
+            # Calculate below
+            status += "CALCULATE_YEARS_LISTS_FOR_CANDIDATE "
+        else:
+            status += "MISSING_YEARS_LIST "
+            success = False
+    if not success:
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
+    candidate_list_manager = CandidateListManager()
+    candidate_manager = CandidateManager()
+    candidate_we_vote_id_list = []
+    office_list_manager = ContestOfficeListManager()
+    office_manager = ContestOfficeManager()
+    office_we_vote_id_list = []
+    update_candidates_under_these_office_we_vote_ids = []
+    from office_held.models import OfficeHeldManager
+    office_held_manager = OfficeHeldManager()
+    office_held_we_vote_id_list = []
+    politician_manager = PoliticianManager()
+    politician_we_vote_id_list = []
+    representative_manager = RepresentativeManager()
+    if 'cand' in master_we_vote_id_updated:
+        # We never treat candidate battleground data as master data, so we need to look at the ContestOffice
+        #  for is_battleground_race
+        update_office = False
+        year = 0
+        years_false_list = []
+        years_true_list = []
+        link_results = candidate_manager.retrieve_candidate_to_office_link(
+            candidate_we_vote_id=master_we_vote_id_updated)
+        if link_results['only_one_found']:
+            candidate_to_office_link = link_results['candidate_to_office_link']
+            office_we_vote_id_list.append(candidate_to_office_link.contest_office_we_vote_id)
+        elif link_results['list_found']:
+            candidate_to_office_link_list = link_results['candidate_to_office_link_list']
+            for candidate_to_office_link in candidate_to_office_link_list:
+                office_we_vote_id_list.append(candidate_to_office_link.contest_office_we_vote_id)
+        if len(office_we_vote_id_list) > 0:
+            office_results = office_list_manager.retrieve_offices(
+                retrieve_from_this_office_we_vote_id_list=office_we_vote_id_list,
+                return_list_of_objects=True)
+            if office_results['success']:
+                office_list = office_results['office_list_objects']
+                latest_election_day_text_as_integer = 0
+                if len(office_list) > 0:
+                    # Just pick one to start with in case "get_election_day_text()" returns nothing
+                    latest_office_we_vote_id = office_list[0].we_vote_id
+                else:
+                    latest_office_we_vote_id = ''
+                # Filter out primary office races
+                for office in office_list:
+                    election_day_text = office.get_election_day_text()
+                    if positive_value_exists(election_day_text):
+                        date_as_integer = \
+                            convert_we_vote_date_string_to_date_as_integer(election_day_text)
+                        if date_as_integer > latest_election_day_text_as_integer:
+                            latest_election_day_text_as_integer = date_as_integer
+                            latest_office_we_vote_id = office.we_vote_id
+                for office in office_list:
+                    if office.we_vote_id is latest_office_we_vote_id:
+                        election_day_text = office.get_election_day_text()
+                        if positive_value_exists(election_day_text):
+                            date_as_integer = convert_we_vote_date_string_to_date_as_integer(election_day_text)
+                            year = date_as_integer // 10000
+                        if positive_value_exists(year):
+                            if positive_value_exists(office.is_battleground_race):
+                                years_true_list = [year]
+                            else:
+                                # When coming from a candidate, don't update politician+ with false years
+                                # years_false_list = [year]
+                                pass
+        years_list = list(set(years_false_list + years_true_list))
+        if len(years_list) > 0:
+            results = candidate_manager.retrieve_candidate(
+                candidate_we_vote_id=master_we_vote_id_updated,
+                read_only=True)
+            if results['candidate_found']:
+                candidate = results['candidate']
+                if positive_value_exists(candidate.politician_we_vote_id):
+                    if candidate.politician_we_vote_id not in politician_we_vote_id_list:
+                        politician_we_vote_id_list.append(candidate.politician_we_vote_id)
+                        results = politician_manager.retrieve_politician(
+                            we_vote_id=candidate.politician_we_vote_id)
+                        if not results['success']:
+                            success = False
+                        elif results['politician_found']:
+                            politician = results['politician']
+                            results = update_parallel_fields_on_related_object(
+                                field_key_root=field_key_root,
+                                object_to_update=politician,
+                                years_false_list=years_false_list,
+                                years_true_list=years_true_list)
+                            if not results['success']:
+                                status += results['status']
+                    if success and positive_value_exists(politician_we_vote_id_list):
+                        results = representative_manager.retrieve_representatives_list(
+                            politician_we_vote_id_list=politician_we_vote_id_list,
+                            read_only=False,
+                            years_list=years_list,
+                        )
+                        if not results['success']:
+                            success = False
+                        if success:
+                            representative_list = results['representative_list']
+                            for representative in representative_list:
+                                results = update_parallel_fields_on_related_object(
+                                    field_key_root=field_key_root,
+                                    object_to_update=representative,
+                                    years_false_list=years_false_list,
+                                    years_true_list=years_true_list)
+                                if not results['success']:
+                                    status += results['status']
+                                if positive_value_exists(representative.office_held_we_vote_id) and \
+                                        representative.office_held_we_vote_id not in office_held_we_vote_id_list:
+                                    office_held_we_vote_id_list.append(representative.office_held_we_vote_id)
+    elif 'officeheld' in master_we_vote_id_updated:
+        update_office_held = False
+        results = update_representatives_under_this_office_held(
+            field_key_root=field_key_root,
+            office_held_we_vote_id=master_we_vote_id_updated,
+            years_false_list=years_false_list,
+            years_true_list=years_true_list)
+        status += results['status']
+        if results['success']:
+            politician_we_vote_id_list = \
+                list(set(politician_we_vote_id_list +
+                         results['politician_we_vote_id_list']))
+    elif 'off' in master_we_vote_id_updated:
+        update_candidate = False
+        update_office = False
+        results = update_candidates_under_this_office(
+            field_key_root=field_key_root,
+            office_we_vote_id=master_we_vote_id_updated,
+            years_false_list=years_false_list,
+            years_true_list=years_true_list)
+        status += results['status']
+        if results['success']:
+            office_held_we_vote_id_list = \
+                list(set(office_held_we_vote_id_list +
+                         results['office_held_we_vote_id_list']))
+        politician_we_vote_id_list = []  # Reset this so we don't trigger the actions below
+    elif 'pol' in master_we_vote_id_updated:
+        politician_we_vote_id_list = [master_we_vote_id_updated]
+        # Direct update: Representatives (Retrieve representative_list)
+        results = representative_manager.retrieve_representatives_list(
+            politician_we_vote_id_list=[master_we_vote_id_updated],
+            read_only=False,
+            years_list=years_list,
+        )
+        if not results['success']:
+            success = False
+        if success:
+            representative_list = results['representative_list']
+            for representative in representative_list:
+                results = update_parallel_fields_on_related_object(
+                    field_key_root=field_key_root,
+                    object_to_update=representative,
+                    years_false_list=years_false_list,
+                    years_true_list=years_true_list)
+                if not results['success']:
+                    status += results['status']
+                if positive_value_exists(representative.office_held_we_vote_id) and \
+                        representative.office_held_we_vote_id not in office_held_we_vote_id_list:
+                    office_held_we_vote_id_list.append(representative.office_held_we_vote_id)
+        # For each Representative we update, update OfficeHeld below
+        # Update Candidate (for that year) and Office (last for that year) below
+    elif 'rep' in master_we_vote_id_updated:
+        results = representative_manager.retrieve_representative(representative_we_vote_id=master_we_vote_id_updated)
+        if not results['success']:
+            success = False
+        if success:
+            representative = results['representative']
+            if positive_value_exists(representative.office_held_we_vote_id):
+                office_held_we_vote_id_list = [representative.office_held_we_vote_id]
+            if positive_value_exists(representative.politician_we_vote_id):
+                politician_we_vote_id_list = [representative.politician_we_vote_id]
+                # Direct update: Politician
+                results = politician_manager.retrieve_politician(we_vote_id=representative.politician_we_vote_id)
+                if not results['success']:
+                    success = False
+                if results['politician_found']:
+                    politician = results['politician']
+                    results = update_parallel_fields_on_related_object(
+                        field_key_root=field_key_root,
+                        object_to_update=politician,
+                        years_false_list=years_false_list,
+                        years_true_list=years_true_list)
+                    if not results['success']:
+                        status += results['status']
+        # Update OfficeHeld below
+        # Update Candidate (for that year) and Office (last for that year) below
+
+    # For each Politician we worked with, update the candidate(s) for that year:
+    #  I believe from 2020 forward we only had one candidate entry per object.
+    if success and len(politician_we_vote_id_list) > 0:
+        for year in years_list:
+            candidate_results = candidate_list_manager.retrieve_all_candidates_for_one_year(
+                candidate_year=year,
+                politician_we_vote_id_list=politician_we_vote_id_list,
+                return_list_of_objects=True)
+            if not candidate_results['success']:
+                success = False
+            if success:
+                candidate_list = candidate_results['candidate_list_objects']
+                if year in years_false_list:
+                    is_battleground_race = False
+                elif year in years_true_list:
+                    is_battleground_race = True
+                else:
+                    is_battleground_race = None
+                if is_battleground_race is not None:
+                    office_we_vote_id_list = []
+                    for candidate in candidate_list:
+                        if positive_value_exists(update_candidate):
+                            try:
+                                candidate.is_battleground_race = is_battleground_race
+                                candidate.save()
+                            except Exception as e:
+                                status += "COULD_NOT_SAVE_CANDIDATE2: " + str(e) + " "
+                        # For each Candidate we update, update the last ContestOffice for that year
+                        link_results = candidate_manager.retrieve_candidate_to_office_link(
+                            candidate_we_vote_id=candidate.we_vote_id)
+                        if link_results['only_one_found']:
+                            candidate_to_office_link = link_results['candidate_to_office_link']
+                            office_we_vote_id_list.append(candidate_to_office_link.contest_office_we_vote_id)
+                        elif link_results['list_found']:
+                            candidate_to_office_link_list = link_results['candidate_to_office_link_list']
+                            for candidate_to_office_link in candidate_to_office_link_list:
+                                office_we_vote_id_list.append(candidate_to_office_link.contest_office_we_vote_id)
+                    # Now update all related offices for this candidate in this year
+                    if len(office_we_vote_id_list) > 0 and update_office:
+                        office_results = office_list_manager.retrieve_offices(
+                            retrieve_from_this_office_we_vote_id_list=office_we_vote_id_list,
+                            return_list_of_objects=True)
+                        if office_results['success']:
+                            office_list = office_results['office_list_objects']
+                            latest_election_day_text_as_integer = 0
+                            if len(office_list) > 0:
+                                # Just pick one to start with in case "get_election_day_text()" returns nothing
+                                latest_office_we_vote_id = office_list[0].we_vote_id
+                            else:
+                                latest_office_we_vote_id = ''
+                            # Filter out primary office races
+                            for office in office_list:
+                                election_day_text = office.get_election_day_text()
+                                if positive_value_exists(election_day_text):
+                                    date_as_integer = \
+                                        convert_we_vote_date_string_to_date_as_integer(election_day_text)
+                                    if date_as_integer > latest_election_day_text_as_integer:
+                                        latest_election_day_text_as_integer = date_as_integer
+                                        latest_office_we_vote_id = office.we_vote_id
+                            for office in office_list:
+                                if office.we_vote_id is latest_office_we_vote_id:
+                                    if update_office:
+                                        try:
+                                            office.is_battleground_race = is_battleground_race
+                                            office.save()
+                                        except Exception as e:
+                                            status += "COULD_NOT_SAVE_OFFICE: " + str(e) + " "
+                                    if positive_value_exists(office.office_held_we_vote_id) and \
+                                            office.office_held_we_vote_id not in office_held_we_vote_id_list:
+                                        office_held_we_vote_id_list.append(office.office_held_we_vote_id)
+                                    under_results = update_candidates_under_this_office(
+                                        field_key_root=field_key_root,
+                                        office_we_vote_id=office.we_vote_id,
+                                        years_false_list=years_false_list,
+                                        years_true_list=years_true_list)
+                                    if under_results['success']:
+                                        office_held_we_vote_id_list = \
+                                            list(set(office_held_we_vote_id_list +
+                                                     under_results['office_held_we_vote_id_list']))
+
+    # For each Representative we dealt with, update OfficeHeld
+    if success and positive_value_exists(office_held_we_vote_id_list) and update_office_held:
+        results = office_held_manager.retrieve_office_held_list(
+            office_held_we_vote_id_list=office_held_we_vote_id_list
+        )
+        if not results['success']:
+            success = False
+        if success:
+            office_held_list = results['office_held_list']
+            for office_held in office_held_list:
+                results = update_parallel_fields_on_related_object(
+                    field_key_root=field_key_root,
+                    object_to_update=office_held,
+                    years_false_list=years_false_list,
+                    years_true_list=years_true_list)
+                if not results['success']:
+                    status += results['status']
+                under_results = update_representatives_under_this_office_held(
+                    field_key_root=field_key_root,
+                    office_held_we_vote_id=office_held.we_vote_id,
+                    years_false_list=years_false_list,
+                    years_true_list=years_true_list)
+                status += under_results['status']
+                if not under_results['success']:
+                    success = False
+
+    results = {
+        'success':      success,
+        'status':       status,
+    }
+    return results
+
+
+def update_candidates_under_this_office(
+        field_key_root='',
+        office_we_vote_id='',
+        years_false_list=[],
+        years_true_list=[]):
+    candidate_list_manager = CandidateListManager()
+    candidate_manager = CandidateManager()
+    candidate_we_vote_id_list = []
+    office_held_we_vote_id_list = []
+    office_manager = ContestOfficeManager()
+    politician_manager = PoliticianManager()
+    politician_we_vote_id_list = []
+    representative_manager = RepresentativeManager()
+    status = ""
+    success = True
+    years_list = list(set(years_false_list + years_true_list))
+    # Update the candidates underneath this office
+    link_results = candidate_manager.retrieve_candidate_to_office_link(
+        contest_office_we_vote_id=office_we_vote_id)
+    if not link_results['success']:
+        success = False
+    elif link_results['only_one_found']:
+        candidate_to_office_link = link_results['candidate_to_office_link']
+        candidate_we_vote_id_list.append(candidate_to_office_link.candidate_we_vote_id)
+    elif link_results['list_found']:
+        candidate_to_office_link_list = link_results['candidate_to_office_link_list']
+        for candidate_to_office_link in candidate_to_office_link_list:
+            candidate_we_vote_id_list.append(candidate_to_office_link.candidate_we_vote_id)
+    if success and len(candidate_we_vote_id_list) > 0:
+        results = candidate_list_manager.retrieve_candidate_list(
+            candidate_we_vote_id_list=candidate_we_vote_id_list,
+            read_only=False)
+        if not results['success']:
+            success = False
+        if success and results['candidate_list_found']:
+            candidate_list = results['candidate_list']
+            # We need to retrieve office, so we can get year of the election
+            office_results = office_manager.retrieve_contest_office(
+                contest_office_we_vote_id=office_we_vote_id)
+            year = 0
+            if not office_results['success']:
+                success = False
+            if success and office_results['contest_office_found']:
+                office = office_results['contest_office']
+                election_day_text = office.get_election_day_text()
+                if positive_value_exists(election_day_text):
+                    date_as_integer = convert_we_vote_date_string_to_date_as_integer(election_day_text)
+                    year = date_as_integer // 10000
+            if year in years_false_list:
+                is_battleground_race = False
+            elif year in years_true_list:
+                is_battleground_race = True
+            else:
+                is_battleground_race = None
+            if is_battleground_race is not None:
+                for candidate in candidate_list:
+                    try:
+                        candidate.is_battleground_race = is_battleground_race
+                        candidate.save()
+                    except Exception as e:
+                        status += "COULD_NOT_SAVE_CANDIDATE1: " + str(e) + " "
+                    # For each Candidate, update the Politician here
+                    # Direct update: Politician
+                    if positive_value_exists(candidate.politician_we_vote_id):
+                        if candidate.politician_we_vote_id not in politician_we_vote_id_list:
+                            politician_we_vote_id_list.append(candidate.politician_we_vote_id)
+                            results = politician_manager.retrieve_politician(
+                                we_vote_id=candidate.politician_we_vote_id)
+                            if not results['success']:
+                                success = False
+                            if results['politician_found']:
+                                politician = results['politician']
+                                results = update_parallel_fields_on_related_object(
+                                    field_key_root=field_key_root,
+                                    object_to_update=politician,
+                                    years_false_list=years_false_list,
+                                    years_true_list=years_true_list)
+                                if not results['success']:
+                                    status += results['status']
+                if positive_value_exists(politician_we_vote_id_list):
+                    results = representative_manager.retrieve_representatives_list(
+                        politician_we_vote_id_list=politician_we_vote_id_list,
+                        read_only=False,
+                        years_list=years_list,
+                    )
+                    if not results['success']:
+                        success = False
+                    if success:
+                        representative_list = results['representative_list']
+                        for representative in representative_list:
+                            results = update_parallel_fields_on_related_object(
+                                field_key_root=field_key_root,
+                                object_to_update=representative,
+                                years_false_list=years_false_list,
+                                years_true_list=years_true_list)
+                            if not results['success']:
+                                status += results['status']
+                            if positive_value_exists(representative.office_held_we_vote_id) and \
+                                    representative.office_held_we_vote_id not in office_held_we_vote_id_list:
+                                office_held_we_vote_id_list.append(representative.office_held_we_vote_id)
+
+    results = {
+        'office_held_we_vote_id_list':  office_held_we_vote_id_list,
+        'success':      success,
+        'status':       status,
+    }
+    return results
+
+
+def update_representatives_under_this_office_held(
+        field_key_root='',
+        office_held_we_vote_id='',
+        years_false_list=[],
+        years_true_list=[]):
+    politician_manager = PoliticianManager()
+    politician_we_vote_id_list = []
+    representative_manager = RepresentativeManager()
+    status = ""
+    success = True
+    years_list = list(set(years_false_list + years_true_list))
+
+    # Direct update: Representatives (Retrieve representative_list)
+    results = representative_manager.retrieve_representatives_list(
+        office_held_we_vote_id_list=[office_held_we_vote_id],
+        read_only=False,
+        years_list=years_list,
+    )
+    if not results['success']:
+        success = False
+    if success:
+        representative_list = results['representative_list']
+        for representative in representative_list:
+            attach_results = update_parallel_fields_on_related_object(
+                field_key_root=field_key_root,
+                object_to_update=representative,
+                years_false_list=years_false_list,
+                years_true_list=years_true_list)
+            if not attach_results['success']:
+                status += attach_results['status']
+            if positive_value_exists(representative.politician_we_vote_id) and \
+                    representative.politician_we_vote_id not in politician_we_vote_id_list:
+                politician_we_vote_id_list.append(representative.politician_we_vote_id)
+    # For each Representative we updated, update attached Politician
+    if success and len(politician_we_vote_id_list) > 0:
+        politician_results = politician_manager.retrieve_politician_list(
+            politician_we_vote_id_list=politician_we_vote_id_list)
+        if not politician_results['success']:
+            success = False
+        if success:
+            politician_list = politician_results['politician_list']
+            for politician in politician_list:
+                attach_results = update_parallel_fields_on_related_object(
+                    field_key_root=field_key_root,
+                    object_to_update=politician,
+                    years_false_list=years_false_list,
+                    years_true_list=years_true_list)
+                if not attach_results['success']:
+                    status += attach_results['status']
+
+    results = {
+        'politician_we_vote_id_list':  politician_we_vote_id_list,
+        'success':      success,
+        'status':       status,
+    }
+    return results
+
+
+def update_parallel_fields_on_related_object(
+    field_key_root='',
+    object_to_update=None,
+    years_false_list=[],
+    years_true_list=[]
+):
+    status = ''
+    success = True
+    save_changes = False
+    try:
+        for year_integer in years_false_list:
+            field_key = field_key_root + str(year_integer)
+            setattr(object_to_update, field_key, False)
+            save_changes = True
+        for year_integer in years_true_list:
+            field_key = field_key_root + str(year_integer)
+            setattr(object_to_update, field_key, True)
+            save_changes = True
+        if save_changes:
+            object_to_update.save()
+    except Exception as e:
+        status += "FAILURE_TO_UPDATE_RELATED_OBJECT: " + str(e) + " "
+        success = False
+
+    results = {
+        'success':      success,
+        'status':       status,
     }
     return results
