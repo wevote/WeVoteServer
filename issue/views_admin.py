@@ -559,8 +559,10 @@ def issue_edit_process_view(request):
     if issue_on_stage_found:
         # Update
         if forced_sort_order is not False:
-            forced_sort_order = forced_sort_order if positive_value_exists(forced_sort_order) else None
-            issue_on_stage.forced_sort_order = convert_to_int(forced_sort_order)
+            if positive_value_exists(forced_sort_order):
+                issue_on_stage.forced_sort_order = convert_to_int(forced_sort_order)
+            else:
+                issue_on_stage.forced_sort_order = None
         if issue_name is not False:
             issue_on_stage.issue_name = issue_name
         if issue_description is not False:

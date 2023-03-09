@@ -122,7 +122,9 @@
                 </span>
             </td>
             <td>
-                <a href="{% url 'office_held:office_held_summary' representative.office_held_we_vote_id %}" target="_blank">{{ representative.office_held_name }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+                <a href="{% url 'office_held:office_held_summary' representative.office_held_we_vote_id %}"
+                   style="display: block; width: 200px; word-wrap: break-word;"
+                   target="_blank">{{ representative.office_held_name }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
             </td>
             <td>{{ representative.state_code }}</td>
             <td>
@@ -131,24 +133,24 @@
                 ({{ representative.twitter_followers_count|intcomma }} followers){% endif %}
             </td>
             <td>
-                {% if representative.representative_email %}<span class="u-no-break">{{ representative.representative_email }}</span>&nbsp;{% endif %}
-                {% if representative.representative_email2 %}<span class="u-no-break">{{ representative.representative_email2 }}</span>&nbsp;{% endif %}
-                {% if representative.representative_email3 %}<span class="u-no-break">{{ representative.representative_email3 }}</span>&nbsp;{% endif %}
+                {% if representative.representative_email %}<span style="display: block; width: 150px; word-wrap: break-word;">{{ representative.representative_email }}</span>&nbsp;{% endif %}
+                {% if representative.representative_email2 %}<span style="display: block; width: 150px; word-wrap: break-word;">{{ representative.representative_email2 }}</span>&nbsp;{% endif %}
+                {% if representative.representative_email3 %}<span style="display: block; width: 150px; word-wrap: break-word;">{{ representative.representative_email3 }}</span>&nbsp;{% endif %}
             </td>
             <td>
                 {{ representative.we_vote_id }}
                 {% if representative.politician_we_vote_id %}
                     -
-                    <a href="{% url 'politician:politician_we_vote_id_edit' representative.politician_we_vote_id %}?" target="_blank">
+                    <a href="{% url 'politician:politician_we_vote_id_edit' representative.politician_we_vote_id %}?" class="u-no-break" target="_blank">
                     {{ representative.politician_we_vote_id }}&nbsp;<span class="glyphicon glyphicon-new-window"></span>
                     </a>
                 {% endif %}
             </td>
             <td>
-                {% if representative.wikipedia_url %}<span class="u-no-break"><a href="{{ representative.wikipedia_url }}" target="_blank">{{ representative.wikipedia_url }}</a></span>&nbsp;{% endif %}
-                {% if representative.representative_url %}<span class="u-no-break"><a href="{{ representative.representative_url }}" target="_blank">{{ representative.representative_url }}</a></span>&nbsp;{% endif %}
-                {% if representative.representative_url2 %}<span class="u-no-break"><a href="{{ representative.representative_url2 }}" target="_blank">{{ representative.representative_url2 }}</a></span>&nbsp;{% endif %}
-                {% if representative.representative_url3 %}<span class="u-no-break"><a href="{{ representative.representative_url3 }}" target="_blank">{{ representative.representative_url3 }}</a></span>&nbsp;{% endif %}
+                {% if representative.wikipedia_url %}<span style="display: block; width: 200px; word-wrap: break-word;"><a href="{{ representative.wikipedia_url }}" target="_blank">{{ representative.wikipedia_url }}</a></span>&nbsp;{% endif %}
+                {% if representative.representative_url %}<span style="display: block; width: 200px; word-wrap:break-word;"><a href="{{ representative.representative_url }}" target="_blank">{{ representative.representative_url }}</a></span>&nbsp;{% endif %}
+                {% if representative.representative_url2 %}<span style="display: block; width: 200px; word-wrap:break-word;"><a href="{{ representative.representative_url2 }}" target="_blank">{{ representative.representative_url2 }}</a></span>&nbsp;{% endif %}
+                {% if representative.representative_url3 %}<span style="display: block; width: 200px; word-wrap:break-word;"><a href="{{ representative.representative_url3 }}" target="_blank">{{ representative.representative_url3 }}</a></span>&nbsp;{% endif %}
             </td>
         </tr>
     {% endfor %}
