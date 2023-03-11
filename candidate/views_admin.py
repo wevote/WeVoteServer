@@ -2998,7 +2998,7 @@ def remove_duplicate_candidates_view(request):
                         do_not_delete_list.append(candidate.id)
             delete_queryset = delete_queryset.exclude(id__in=do_not_delete_list)
             if confirm_delete:
-                pass
+                delete_queryset.delete()
                 delete_count = delete_queryset.count()
                 messages.add_message(request, messages.INFO,
                                      "{delete_count} candidate entries deleted."
