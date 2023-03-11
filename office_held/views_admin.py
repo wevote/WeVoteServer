@@ -89,6 +89,9 @@ def office_held_list_view(request):
                 new_filter = Q(office_held_name__icontains=one_word)
                 filters.append(new_filter)
 
+                new_filter = Q(office_held_facebook_url__icontains=one_word)
+                filters.append(new_filter)
+
                 new_filter = Q(office_held_twitter_handle__icontains=one_word)
                 filters.append(new_filter)
 
@@ -320,6 +323,7 @@ def office_held_edit_process_view(request):
     remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
     redirect_to_office_held_list = convert_to_int(request.POST['redirect_to_office_held_list'])
     state_code = request.POST.get('state_code', False)
+    office_held_facebook_url = request.POST.get('office_held_facebook_url', False)
     office_held_twitter_handle = request.POST.get('office_held_twitter_handle', False)
     office_held_url = request.POST.get('office_held_url', False)
     # is_battleground_race_ values taken in below
@@ -370,6 +374,8 @@ def office_held_edit_process_view(request):
                 office_held.primary_party = primary_party
             if state_code is not False:
                 office_held.state_code = state_code
+            if office_held_facebook_url is not False:
+                office_held.office_held_facebook_url = office_held_facebook_url
             if office_held_twitter_handle is not False:
                 office_held.office_held_twitter_handle = office_held_twitter_handle
             if office_held_url is not False:

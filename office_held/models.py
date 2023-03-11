@@ -163,6 +163,8 @@ class OfficeHeld(models.Model):
                                                blank=True)
     office_held_description_es = models.CharField(verbose_name="office_held description in Spanish",
                                                   max_length=255, null=True, blank=True)
+    office_held_facebook_url = models.TextField(blank=True, null=True)
+    facebook_url_is_broken = models.BooleanField(default=False)
     # The levels of government of the office for this contest. There may be more than one in cases where a
     # jurisdiction effectively acts at two different levels of government; for example, the mayor of the
     # District of Columbia acts at "locality" level, but also effectively at both
