@@ -92,6 +92,9 @@ def office_held_list_view(request):
                 new_filter = Q(office_held_twitter_handle__icontains=one_word)
                 filters.append(new_filter)
 
+                new_filter = Q(office_held_url__icontains=one_word)
+                filters.append(new_filter)
+
                 new_filter = Q(state_code__iexact=one_word)
                 filters.append(new_filter)
 
@@ -318,6 +321,7 @@ def office_held_edit_process_view(request):
     redirect_to_office_held_list = convert_to_int(request.POST['redirect_to_office_held_list'])
     state_code = request.POST.get('state_code', False)
     office_held_twitter_handle = request.POST.get('office_held_twitter_handle', False)
+    office_held_url = request.POST.get('office_held_url', False)
     # is_battleground_race_ values taken in below
 
     office_held_found = False
@@ -368,6 +372,8 @@ def office_held_edit_process_view(request):
                 office_held.state_code = state_code
             if office_held_twitter_handle is not False:
                 office_held.office_held_twitter_handle = office_held_twitter_handle
+            if office_held_url is not False:
+                office_held.office_held_url = office_held_url
             is_battleground_years_list = IS_BATTLEGROUND_YEARS_AVAILABLE
             for year in is_battleground_years_list:
                 is_battleground_race_key = 'is_battleground_race_' + str(year)
