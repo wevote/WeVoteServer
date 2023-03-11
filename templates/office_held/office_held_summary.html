@@ -41,6 +41,15 @@
       </td>
     </tr>
     {% endif %}
+    {% if office_held.office_held_facebook_url %}
+    <tr>
+      <td>Facebook:</td>
+      <td>
+          <a href="{{ office_held.office_held_facebook_url|iriencode }}"
+             target="_blank">{{ office_held.office_held_facebook_url }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+      </td>
+    </tr>
+    {% endif %}
     {% if office_held.office_held_url %}
     <tr>
       <td>Website:</td>
