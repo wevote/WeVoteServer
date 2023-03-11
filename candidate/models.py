@@ -922,19 +922,6 @@ class CandidateListManager(models.Manager):
         candidates_list_temp = candidates_list_temp.order_by('candidate_name')[:300]
         return candidates_list_temp
 
-    def remove_duplicate_candidate(self, candidate_id, google_civic_election_id):
-        # TODO DALE We need to delete the positions associated with this candidate, and convert them to belong
-        # to candidate we leave in place.
-
-        success = False
-        status = "COULD_NOT_DELETE_DUPLICATE_CANDIDATE"
-
-        results = {
-            'success':                  success,
-            'status':                   status,
-        }
-        return results
-
     def retrieve_possible_duplicate_candidates(
             self,
             candidate_name='',

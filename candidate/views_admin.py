@@ -2937,56 +2937,97 @@ def find_duplicate_candidate_view(request, candidate_id):
 
 
 @login_required
-def remove_duplicate_candidate_view(request):
+def remove_duplicate_candidates_view(request):
     """
-    We use this view to semi-automate the process of finding candidate duplicates. Exact
-    copies can be deleted automatically, and similar entries can be manually reviewed and deleted.
+    For one state, remove candidate entries that are mostly empty, and created accidentally in bulk.
+    Includes default analysis mode, so we can double-check before deleting, and then delete mode.
     :param request:
     :return:
     """
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'political_data_manager'}
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    candidate_year = request.GET.get('candidate_year', 0)
-    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
-    candidate_id = request.GET.get('candidate_id', 0)
-
-    remove_duplicate_process = request.GET.get('remove_duplicate_process', False)
+    candidate_name = request.GET.get('candidate_name', '')
+    confirm_delete = positive_value_exists(request.GET.get('confirm_delete', False))
+    delete_submitted = positive_value_exists(request.GET.get('delete_submitted', False))
+    google_civic_election_id = request.GET.get('google_civic_election_id', '')
+    politician_we_vote_id = request.GET.get('politician_we_vote_id', '')
+    state_code = request.GET.get('state_code', '')
+    related_candidate_list = []
+    status = ''
+    success = True
 
     missing_variables = False
-
-    if not positive_value_exists(google_civic_election_id):
-        messages.add_message(request, messages.ERROR, "Google Civic Election ID required.")
+    if not positive_value_exists(candidate_name):
+        messages.add_message(request, messages.ERROR, "Candidate name required.")
         missing_variables = True
-    if not positive_value_exists(candidate_id):
-        messages.add_message(request, messages.ERROR, "Candidate ID required.")
+    if not positive_value_exists(google_civic_election_id):
+        messages.add_message(request, messages.ERROR, "Election ID required.")
+        missing_variables = True
+    if not positive_value_exists(state_code):
+        messages.add_message(request, messages.ERROR, "State Code required.")
         missing_variables = True
 
     if missing_variables:
-        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) + "?google_civic_election_id={var}"
-                                                                                   "".format(
-            var=google_civic_election_id))
+        return HttpResponseRedirect(
+            reverse('candidate:candidate_list', args=()) + "?google_civic_election_id={var}&state_code={state}"
+                                                           "".format(
+                                                           state=state_code,
+                                                           var=google_civic_election_id))
 
-    candidate_list_manager = CandidateListManager()
-    results = candidate_list_manager.remove_duplicate_candidate(candidate_id, google_civic_election_id)
-    if results['success']:
-        if remove_duplicate_process:
-            # Continue this process
-            return HttpResponseRedirect(reverse('candidate:find_and_merge_duplicate_candidates', args=()) +
-                                        '&candidate_year=' + str(candidate_year) +
-                                        "?google_civic_election_id=" + google_civic_election_id)
-        else:
-            messages.add_message(request, messages.ERROR, results['status'])
-            return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
-    else:
-        messages.add_message(request, messages.ERROR, "Could not remove candidate {candidate_id} '{candidate_name}'."
-                                                      "".format(candidate_id=candidate_id,
-                                                                candidate_name=candidate_id))  # TODO Add candidate_name
-        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) + "?google_civic_election_id={var}"
-                                                                                   "".format(
-            var=google_civic_election_id))
+    from candidate.models import CandidateCampaign
+    try:
+        queryset = CandidateCampaign.objects.all()
+        queryset = queryset.filter(
+            Q(politician_we_vote_id__isnull=True) |
+            Q(politician_we_vote_id=''))
+        queryset = queryset.filter(candidate_name__iexact=candidate_name)
+        queryset = queryset.filter(google_civic_election_id=google_civic_election_id)
+        queryset = queryset.filter(state_code__iexact=state_code)
+        related_candidate_list = list(queryset)
+
+        if delete_submitted:
+            delete_queryset = queryset
+            do_not_delete_list = []
+            for candidate in related_candidate_list:
+                if positive_value_exists(candidate.id):
+                    variable_name = "do_not_delete_candidate_" + str(candidate.id)
+                    if positive_value_exists(request.GET.get(variable_name, False)):
+                        do_not_delete_list.append(candidate.id)
+            delete_queryset = delete_queryset.exclude(id__in=do_not_delete_list)
+            if confirm_delete:
+                pass
+                delete_count = delete_queryset.count()
+                messages.add_message(request, messages.INFO,
+                                     "{delete_count} candidate entries deleted."
+                                     "".format(delete_count=delete_count))
+            else:
+                messages.add_message(request, messages.ERROR,
+                                     "You must confirm that you want to delete these candidates.")
+                delete_count = delete_queryset.count()
+                messages.add_message(request, messages.INFO,
+                                     "{delete_count} candidate entries to be deleted."
+                                     "".format(delete_count=delete_count))
+    except Exception as e:
+        status += "CANDIDATE_CAMPAIGN_RETRIEVE_FAILED: " + str(e) + " "
+
+    modified_related_candidate_list = []
+    for candidate in related_candidate_list:
+        if positive_value_exists(candidate.id):
+            variable_name = "do_not_delete_candidate_" + str(candidate.id)
+            candidate.do_not_delete = positive_value_exists(request.GET.get(variable_name, False))
+            modified_related_candidate_list.append(candidate)
+
+    template_values = {
+        'candidate_name':           candidate_name,
+        'google_civic_election_id': google_civic_election_id,
+        'politician_we_vote_id':    politician_we_vote_id,
+        'related_candidate_list':   modified_related_candidate_list,
+        'state_code':               state_code,
+    }
+    return render(request, 'candidate/remove_duplicate_candidates_preview.html', template_values)
 
 
 @login_required

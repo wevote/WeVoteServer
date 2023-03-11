@@ -674,6 +674,9 @@
             <td>
                 {{ candidate.vote_smart_id|default_if_none:"" }}
                 {{ candidate.vote_usa_politician_id|default_if_none:"" }}
+                <br />
+                <a href="{% url 'candidate:remove_duplicate_candidates' %}?candidate_name={{ candidate.candidate_name }}&google_civic_election_id={{ candidate.google_civic_election_id }}&politician_we_vote_id={{ politician.we_vote_id }}&state_code={{ candidate.state_code }}"
+                   target="_blank">analyze duplicates <span class="glyphicon glyphicon-new-window"></span></a>
             </td>
         </tr>
     {% endfor %}
