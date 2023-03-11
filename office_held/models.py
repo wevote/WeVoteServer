@@ -180,6 +180,7 @@ class OfficeHeld(models.Model):
     office_held_role1 = models.CharField(max_length=255, null=True, blank=True)
     office_held_role2 = models.CharField(max_length=255, null=True, blank=True)
     office_held_twitter_handle = models.CharField(max_length=255, null=True, unique=False)
+    office_held_url = models.TextField(blank=True, null=True)
     # If this is a partisan election, the name of the party it is for.
     primary_party = models.CharField(verbose_name="google civic primary party", max_length=255, null=True, blank=True)
     race_office_level = models.CharField(max_length=255, null=True, blank=True)
