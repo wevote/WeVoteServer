@@ -3430,6 +3430,18 @@ class Organization(models.Model):
             return ''
 
 
+class OrganizationChangeLog(models.Model):
+    """
+    What changes were made, and by whom?
+    """
+    changed_by_name = models.CharField(max_length=255, default=None, null=True)
+    changed_by_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True)
+    change_description = models.TextField(null=True, blank=True)
+    log_datetime = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+    organization_we_vote_id = models.CharField(max_length=255, default=None, null=True)
+    status = models.TextField(null=True, blank=True)
+
+
 class OrganizationReservedDomain(models.Model):
     objects = None
 
