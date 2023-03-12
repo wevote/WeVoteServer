@@ -1453,6 +1453,7 @@ def organization_edit_process_view(request):
             organization_on_stage.save()
             organization_id = organization_on_stage.id
             organization_we_vote_id = organization_on_stage.we_vote_id
+            status += "ORG_UPDATED "
 
             messages.add_message(request, messages.INFO, 'Endorser updated.')
         else:
@@ -1554,6 +1555,7 @@ def organization_edit_process_view(request):
             organization_on_stage.save()
             organization_id = organization_on_stage.id
             organization_we_vote_id = organization_on_stage.we_vote_id
+            status += "ORG_CREATED "
             messages.add_message(request, messages.INFO, 'New organization saved.')
             new_organization_created = True
     except Exception as e:
@@ -1605,19 +1607,18 @@ def organization_edit_process_view(request):
                 # If here, this is a new issue link
                 link_issue_manager.link_organization_to_issue(organization_we_vote_id, issue_id, issue_we_vote_id)
                 link_issue_changed = True
-                change_description = "{issue_we_vote_id} ADD".format(issue_we_vote_id=issue_we_vote_id)
+                change_description += "{issue_we_vote_id} ADD ".format(issue_we_vote_id=issue_we_vote_id)
     # this check necessary when, organization has issues linked previously, but all the
     # issues are unchecked
     if positive_value_exists(organization_follow_issues_we_vote_id_list_prior_to_update):
         # If a previously linked issue was NOT on the complete list of issues taken in above, unlink those issues
         for issue_we_vote_id in organization_follow_issues_we_vote_id_list_prior_to_update:
             link_issue_manager.unlink_organization_to_issue(organization_we_vote_id, issue_id, issue_we_vote_id)
-            change_description = "{issue_we_vote_id} REMOVE".format(issue_we_vote_id=issue_we_vote_id)
+            change_description += "{issue_we_vote_id} REMOVE ".format(issue_we_vote_id=issue_we_vote_id)
 
     position_list_manager = PositionListManager()
     position_list_manager.refresh_cached_position_info_for_organization(organization_we_vote_id)
 
-    status += "ENDORSER_UPDATED "
     OrganizationChangeLog.objects.create(
         change_description=change_description,
         changed_by_name=changed_by_name,
