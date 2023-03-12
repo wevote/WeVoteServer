@@ -8,8 +8,8 @@ from .controllers import full_domain_string_available, merge_these_two_organizat
     organization_politician_match, push_organization_data_to_other_table_caches, subdomain_string_available
 from .controllers_fastly import add_wevote_subdomain_to_fastly, add_subdomain_route53_record, \
     get_wevote_subdomain_status
-from .models import GROUP, INDIVIDUAL, Organization, OrganizationReservedDomain, OrganizationTeamMember, \
-    ORGANIZATION_UNIQUE_IDENTIFIERS
+from .models import GROUP, INDIVIDUAL, Organization, OrganizationChangeLog, OrganizationReservedDomain, \
+    OrganizationTeamMember, ORGANIZATION_UNIQUE_IDENTIFIERS
 from admin_tools.views import redirect_to_sign_in_page
 from campaign.controllers import move_campaignx_to_another_organization
 from campaign.models import CampaignXListedByOrganization, CampaignXManager
@@ -1248,6 +1248,18 @@ def organization_edit_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    from voter.models import fetch_voter_from_voter_device_link
+    from wevote_functions.functions import get_voter_api_device_id
+    voter_device_id = get_voter_api_device_id(request)
+    voter = fetch_voter_from_voter_device_link(voter_device_id)
+    change_description = ''
+    if hasattr(voter, 'last_name'):
+        changed_by_name = voter.get_full_name()
+        changed_by_voter_we_vote_id = voter.we_vote_id
+    else:
+        changed_by_name = ""
+        changed_by_voter_we_vote_id = ''
+
     issue_analysis_admin_notes = request.POST.get('issue_analysis_admin_notes', False)
     issue_analysis_done = request.POST.get('issue_analysis_done', False)
     organization_endorsements_api_url = request.POST.get('organization_endorsements_api_url', False)
@@ -1592,15 +1604,27 @@ def organization_edit_process_view(request):
             else:
                 # If here, this is a new issue link
                 link_issue_manager.link_organization_to_issue(organization_we_vote_id, issue_id, issue_we_vote_id)
+                link_issue_changed = True
+                change_description = "{issue_we_vote_id} ADD".format(issue_we_vote_id=issue_we_vote_id)
     # this check necessary when, organization has issues linked previously, but all the
     # issues are unchecked
     if positive_value_exists(organization_follow_issues_we_vote_id_list_prior_to_update):
         # If a previously linked issue was NOT on the complete list of issues taken in above, unlink those issues
         for issue_we_vote_id in organization_follow_issues_we_vote_id_list_prior_to_update:
             link_issue_manager.unlink_organization_to_issue(organization_we_vote_id, issue_id, issue_we_vote_id)
+            change_description = "{issue_we_vote_id} REMOVE".format(issue_we_vote_id=issue_we_vote_id)
 
     position_list_manager = PositionListManager()
     position_list_manager.refresh_cached_position_info_for_organization(organization_we_vote_id)
+
+    status += "ENDORSER_UPDATED "
+    OrganizationChangeLog.objects.create(
+        change_description=change_description,
+        changed_by_name=changed_by_name,
+        changed_by_voter_we_vote_id=changed_by_voter_we_vote_id,
+        organization_we_vote_id=organization_we_vote_id,
+        status=status,
+    )
 
     return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_id,)) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) + "&state_code=" +

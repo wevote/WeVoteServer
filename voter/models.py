@@ -4227,6 +4227,22 @@ def fetch_api_voter_from_request(request):
     return None
 
 
+def fetch_voter_from_voter_device_link(voter_device_id):
+    voter_device_link_manager = VoterDeviceLinkManager()
+    results = voter_device_link_manager.retrieve_voter_device_link_from_voter_device_id(
+        voter_device_id, read_only=True)
+    if results['voter_device_link_found']:
+        voter_device_link = results['voter_device_link']
+        voter_id = voter_device_link.voter_id
+        voter_manager = VoterManager()
+        results = voter_manager.retrieve_voter_by_id(voter_id, read_only=True)
+        if results['voter_found']:
+            voter = results['voter']
+            return voter
+        return None
+    return None
+
+
 def fetch_voter_we_vote_id_from_voter_device_link(voter_device_id):
     voter_device_link_manager = VoterDeviceLinkManager()
     results = voter_device_link_manager.retrieve_voter_device_link_from_voter_device_id(voter_device_id,
