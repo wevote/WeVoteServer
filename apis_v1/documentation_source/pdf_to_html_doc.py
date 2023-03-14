@@ -20,6 +20,11 @@ def pdf_to_html_retrieve_view(url_root):
         },
     ]
     optional_query_parameter_list = [
+        {
+            'name': 'version',
+            'value': 'boolean',  # boolean, integer, long, string
+            'description': 'report the version of pdf2htmlEX',
+        },
     ]
 
     potential_status_codes_list = [
@@ -31,9 +36,14 @@ def pdf_to_html_retrieve_view(url_root):
             'code':         'PDF_URL_RETURNED',
             'description':  'The API call has returned a URL to a new HTML page in S3',
         },
+        {
+            'code':         'PDF2HTMLEX_VERSION',
+            'description':  'The version of the installed instance of pdf2htmlEX',
+        },
     ]
 
     try_now_link_variables_dict = {
+        'version': False,
     }
 
     api_response = '{\n' \
