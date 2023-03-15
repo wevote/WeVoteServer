@@ -35,6 +35,7 @@ def pdf_to_html_retrieve_view(request):  # pdfToHtmlRetrieve
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     pdf_url = request.GET.get('pdf_url', '')
     return_version = request.GET.get('version', False)
+    json_data = {}
 
     if not positive_value_exists(pdf_url) and not return_version:
         status = 'PDF_URL_MISSING'
@@ -59,7 +60,7 @@ def process_pdf_to_html(pdf_url, return_version):
     logger.error('pdf2htmlEX entry to process_pdf_to_html:' + pdf_url + '   ' + str(return_version))
     if return_version:
         try:
-            process = subprocess.run(['/pdf2htmlEX', '-v', 'True'])
+            process = subprocess.run(['pdf2htmlEX', '-v', 'True'])
             output = process.stdout
             logger.error('pdf2htmlEX version:', output)
         except Exception as e:
@@ -73,10 +74,14 @@ def process_pdf_to_html(pdf_url, return_version):
         }
         return json_data
 
+    logger.error('pdf2htmlEX immediately after return_version: ' + str(return_version))
     file_name, headers = urllib.request.urlretrieve(pdf_url)
+    logger.error('pdf2htmlEX urllib.request.urlretrieve: ' + str(file_name) + '  ' + str(headers))
     pdf_name = os.path.basename(pdf_url)
+    logger.error('pdf2htmlEX os.path.basename(pdf_url) pdf_name: ' + str(pdf_name))
     dirname, basename = os.path.split(file_name)
     temp_file_name = file_name.replace(basename, pdf_name)
+    logger.error('pdf2htmlEX file_name.replace temp_file_name: ' + str(temp_file_name))
     try:
         os.remove(temp_file_name)
         html_name = temp_file_name.replace('.pdf', '.html')
@@ -106,13 +111,13 @@ def process_pdf_to_html(pdf_url, return_version):
         output = process.stdout
         logger.error('pdf2htmlEX output: ' + str(output))
     except Exception as e3:
-        logger.error('pdf2htmlEX subprocess.run exception: ' + str(e3))
+        logger.error('pdf2htmlEX subprocess.run exception e3: ' + str(e3))
     temp_file_name = temp_file_name.replace('.pdf', '.html')
 
     try:
         insert_pdf_filename_in_tmp_file(temp_file_name, pdf_url)
     except Exception as e4:
-        logger.error('pdf2htmlEX insert_pdf_filename_in_tmp_file: ' + str(e4))
+        logger.error('pdf2htmlEX insert_pdf_filename_in_tmp_file e4: ' + str(e4))
 
     s3_url_for_html = store_temporary_html_file_to_aws(temp_file_name)
     logger.error("pdf2htmlEX stored temp html file: ", temp_file_name, s3_url_for_html)
@@ -141,6 +146,7 @@ def store_temporary_html_file_to_aws(temp_file_name):
                                         aws_access_key_id=AWS_ACCESS_KEY_ID,
                                         aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
         s3 = session.resource(AWS_STORAGE_SERVICE)
+        logger.error('store_temporary_html_file_to_aws upload temp_file: ' + temp_file_name)
         s3.Bucket(AWS_STORAGE_BUCKET_NAME).upload_file(
             temp_file_name, tail, ExtraArgs={'Expires': date_in_a_year, 'ContentType': 'text/html'})
         s3_html_url = "https://{bucket_name}.s3.amazonaws.com/{file_location}" \
@@ -148,6 +154,8 @@ def store_temporary_html_file_to_aws(temp_file_name):
                                 file_location=tail)
     except Exception as e:
         print(e)
+        logger.error('store_temporary_html_file_to_aws exception: ' + str(e))
+
         exception_message = "store_temp_html_file_to_aws failed"
         handle_exception(e, logger=logger, exception_message=exception_message)
 
