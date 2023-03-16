@@ -6,7 +6,7 @@
 Pillow==9.3.0
 PyJWT==2.4.0
 boto3==1.26.46
-cryptography==3.4.8
+cryptography==39.0.1
 cloudscraper==1.2.68
 dj-database-url==0.5.0
 dj-static==0.0.6
