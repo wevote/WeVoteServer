@@ -5,9 +5,9 @@ import datetime
 import json
 import os
 import subprocess
-import urllib.request
 
 import boto3
+import cloudscraper
 from django.http import HttpResponse
 
 import wevote_functions.admin
@@ -55,9 +55,26 @@ def pdf_to_html_retrieve_view(request):  # pdfToHtmlRetrieve
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
+# https://github.com/pdf2htmlEX/pdf2htmlEX  !We use a fork of the abandoned coolwanglu original repo.
+# https://github.com/pdf2htmlEX/pdf2htmlEX/wiki/Command-Line-Options
+# In December 2020, we installed a docker image in AWS/EC2: https://hub.docker.com/r/cardboardci/pdf2htmlex
+# pdf2htmlEX -zoom 1.3 Cook-18-Primary-Web.pdf
+# March 2023:
+# docker run -ti --rm --mount src="$(pwd)",target=/pdf,type=bind pdf2htmlex/pdf2htmlex:0.18.8.rc2-master-20200820-
+# ubuntu-20.04-x86_64 --zoom 1.3 .//2022-CADEM-General-Endorsements.pdf
+# Test cases:
+#https://cadem.org/wp-content/uploads/2022/09/2022-CADEM-General-Endorsements.pdf
+# https://www.iuoe399.org/media/filer_public/45/77/457700c9-dd70-4cfc-be49-a81cb3fba0a6/2020_lu399_primary_endorsement.pdf
+# http://www.local150.org/wp-content/uploads/2018/02/Cook-18-Primary-Web.pdf
+# http://www.sddemocrats.org/sites/sdcdp/files/pdf/Endorsements_Flyer_P2020b.pdf
+# https://crpa.org/wp-content/uploads/2020-CA-Primary-Candidate-Final.pdf
+
 def process_pdf_to_html(pdf_url, return_version):
     output = 'exception before output'
+    status = ''
     logger.error('pdf2htmlEX entry to process_pdf_to_html:' + pdf_url + '   ' + str(return_version))
+
+    # Version report, only used to debug the pdf2htmlEX installation in our AWS/EC2 instances
     if return_version:
         try:
             process = subprocess.run(['pdf2htmlEX', '-v', 'True'])
@@ -75,54 +92,55 @@ def process_pdf_to_html(pdf_url, return_version):
         return json_data
 
     logger.error('pdf2htmlEX immediately after return_version: ' + str(return_version))
-    file_name, headers = urllib.request.urlretrieve(pdf_url)
-    logger.error('pdf2htmlEX urllib.request.urlretrieve: ' + str(file_name) + '  ' + str(headers))
-    pdf_name = os.path.basename(pdf_url)
-    logger.error('pdf2htmlEX os.path.basename(pdf_url) pdf_name: ' + str(pdf_name))
-    dirname, basename = os.path.split(file_name)
-    temp_file_name = file_name.replace(basename, pdf_name)
-    logger.error('pdf2htmlEX file_name.replace temp_file_name: ' + str(temp_file_name))
+    temp_pdf_file_name = os.path.basename(pdf_url)
+    temp_html_file_name = temp_pdf_file_name.replace('.pdf', '.html')
     try:
-        os.remove(temp_file_name)
-        html_name = temp_file_name.replace('.pdf', '.html')
-        os.remove(html_name)
-    except Exception as e2:
-        logger.error('pdf2htmlEX version exception e2: ' + str(e2))
+        os.remove(temp_pdf_file_name)    # remove the exact same pdf file if it already exists on disk
+    except Exception:
+        pass
+    try:
+        os.remove(temp_html_file_name)    # remove the exact same html file if it already exists on disk
+    except Exception:
         pass
 
-    os.rename(file_name, temp_file_name)
-    logger.error('pdf2htmlEX temp_file_name: ', temp_file_name)
-    # https://github.com/pdf2htmlEX/pdf2htmlEX  !DO NOT USE the abandoned coolwanglu original branch!
-    # https://github.com/pdf2htmlEX/pdf2htmlEX/wiki/Command-Line-Options
-    # In December 2020, we installed a docker image in AWS/EC2: https://hub.docker.com/r/cardboardci/pdf2htmlex
-    # pdf2htmlEX -zoom 1.3 Cook-18-Primary-Web.pdf
-
-    # March 2023:
-    # docker run -ti --rm --mount src="$(pwd)",target=/pdf,type=bind pdf2htmlex/pdf2htmlex:0.18.8.rc2-master-20200820-ubuntu-20.04-x86_64 --zoom 1.3 .//2022-CADEM-General-Endorsements.pdf
-
-    # Test cases:
-    # https://www.iuoe399.org/media/filer_public/45/77/457700c9-dd70-4cfc-be49-a81cb3fba0a6/2020_lu399_primary_endorsement.pdf
-    # http://www.local150.org/wp-content/uploads/2018/02/Cook-18-Primary-Web.pdf
-    # http://www.sddemocrats.org/sites/sdcdp/files/pdf/Endorsements_Flyer_P2020b.pdf
-    # https://crpa.org/wp-content/uploads/2020-CA-Primary-Candidate-Final.pdf
+    logger.error('pdf2htmlEX after removing temp files: ' + str(temp_pdf_file_name))
 
     try:
-        process = subprocess.run(['pdf2htmlEX', '--dest-dir', dirname, temp_file_name])
+        # use cloudscraper to get past challenges presented by pages hosted at Cloudflare
+        scraper = cloudscraper.create_scraper()  # returns a CloudScraper instance
+        raw = scraper.get(pdf_url)
+        pdf_text = raw.content
+
+        # Save the pdf to a temporary file on disk
+        out_file = open(temp_pdf_file_name, 'wb')
+        out_file.write(pdf_text)
+        logger.error('pdf2htmlEX file stored in local directory as: ' + str(temp_pdf_file_name))
+    except Exception as scraper_or_tempfile_error:
+        status = str(scraper_or_tempfile_error)
+        logger.error('pdf2htmlEX cloudscraper or tempfile write exception: ' + str(scraper_or_tempfile_error))
+
+    try:
+        # Run pdf2html from docker image to convert pdf to html
+        process = subprocess.run(['pdf2htmlEX', '--dest-dir', '.', temp_pdf_file_name])
         output = process.stdout
         logger.error('pdf2htmlEX output: ' + str(output))
-    except Exception as e3:
-        logger.error('pdf2htmlEX subprocess.run exception e3: ' + str(e3))
-    temp_file_name = temp_file_name.replace('.pdf', '.html')
+    except Exception as subprocess_run_error:
+        status += ', ' + str(subprocess_run_error)
+        logger.error('pdf2htmlEX subprocess.run exception: ' + str(subprocess_run_error))
 
     try:
-        insert_pdf_filename_in_tmp_file(temp_file_name, pdf_url)
-    except Exception as e4:
-        logger.error('pdf2htmlEX insert_pdf_filename_in_tmp_file e4: ' + str(e4))
+        insert_pdf_filename_in_tmp_file(temp_html_file_name, pdf_url)
+    except Exception as insert_pdf_error:
+        status += ', ' + str(insert_pdf_error)
+        logger.error('pdf2htmlEX insert_pdf_filename_in_tmp_file e5: ' + str(insert_pdf_error))
 
-    s3_url_for_html = store_temporary_html_file_to_aws(temp_file_name)
-    logger.error("pdf2htmlEX stored temp html file: ", temp_file_name, s3_url_for_html)
+    # create temporary file in s3, so it can be served to the We Vote Chrome Extension
+    s3_url_for_html = store_temporary_html_file_to_aws(temp_html_file_name) or 'NO_TEMPFILE_STORED_IN_S3'
+    if not s3_url_for_html.startswith("http"):
+        status += ', ' + s3_url_for_html
+    logger.error("pdf2htmlEX stored temp html file: " + temp_html_file_name + ', ' + s3_url_for_html)
 
-    status = 'PDF_URL_RETURNED'
+    status = 'PDF_URL_RETURNED' + status
     json_data = {
         'status': status,
         'success': True,
@@ -169,7 +187,7 @@ def insert_pdf_filename_in_tmp_file(temp_file, pdf_url):
 
     value = "<input type=\"hidden\" name=\"pdfFileName\" value=\"{pdf_url}\" />\n".format(pdf_url=pdf_url)
 
-    # insert the hidden input as the first line of the body -- containgingthe original URL for the PDF
+    # insert the hidden input as the first line of the body -- containing the original URL for the PDF
     offset = contents.index("<body>\n") + 1
     contents.insert(offset, value)
 
