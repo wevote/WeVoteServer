@@ -55,6 +55,16 @@ def pdf_to_html_retrieve_view(request):  # pdfToHtmlRetrieve
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
+def build_output_string(process):
+    std_output_raw = process.stdout
+    std_output = '\'' + std_output_raw.decode("utf-8") + '\'' if std_output_raw else '\'\''
+    err_output_raw = process.stderr
+    err_output = '\'' + err_output_raw.decode("utf-8") + '\'' if err_output_raw else '\'\''
+    output_from_subprocess = \
+        ('stdout: ' + std_output + ', stderr: ' + err_output).replace('\n', '')
+    return output_from_subprocess
+
+
 # https://github.com/pdf2htmlEX/pdf2htmlEX  !We use a fork of the abandoned coolwanglu original repo.
 # https://github.com/pdf2htmlEX/pdf2htmlEX/wiki/Command-Line-Options
 # In December 2020, we installed a docker image in AWS/EC2: https://hub.docker.com/r/cardboardci/pdf2htmlex
@@ -71,27 +81,35 @@ def pdf_to_html_retrieve_view(request):  # pdfToHtmlRetrieve
 # https://webcache.googleusercontent.com/search?q=cache:https://cadem.org/wp-content/uploads/2022/09/2022-CADEM-General-Endorsements.pdf
 
 def process_pdf_to_html(pdf_url, return_version):
-    output = 'exception before output'
+    output_from_subprocess = 'exception occurred before output was captured'
     status = ''
+    success = False
     logger.error('pdf2htmlEX entry to process_pdf_to_html:' + pdf_url + '   ' + str(return_version))
 
     # Version report, only used to debug the pdf2htmlEX installation in our AWS/EC2 instances
     if return_version:
         try:
-            process = subprocess.run('pdf2htmlEX -v', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            output_raw = process.stdout
-            output = output_raw.decode("utf-8")
-            logger.error('pdf2htmlEX version:' + output)
-            output_err_raw = process.stderr
-            output_err = output_err_raw.decode("utf-8")
-            logger.error('pdf2htmlEX version err:' + output_err)
+            command = 'pdf2htmlEX -v'
+            logger.error('pdf2htmlEX command: ' + command)
+
+            process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            # std_output_raw = process.stdout
+            # std_output = std_output_raw.decode("utf-8") if std_output_raw else ''
+            # err_output_raw = process.stderr
+            # err_output = err_output_raw.decode("utf-8") if err_output_raw else ''
+            output_from_subprocess = build_output_string(process)
+            # ('stdout: ' + std_output + ', stderr: ' + err_output).replace('/n', '')
+
+            logger.error('pdf2htmlEX version ' + output_from_subprocess)
+            success = True
+
         except Exception as e:
             logger.error('pdf2htmlEX version exception: ' + str(e))
 
         json_data = {
             'status': 'PDF2HTMLEX_VERSION',
-            'success': True,
-            'output_from_subprocess': output,
+            'success': success,
+            'output_from_subprocess': output_from_subprocess,
             's3_url_for_html': '',
         }
         return json_data
@@ -112,7 +130,6 @@ def process_pdf_to_html(pdf_url, return_version):
 
     # use cloudscraper to get past challenges presented by pages hosted at Cloudflare
     scraper = cloudscraper.create_scraper()  # returns a CloudScraper instance
-    success = False
     s3_url_for_html = False
     pdf_text_text = ''
     try:
@@ -149,9 +166,11 @@ def process_pdf_to_html(pdf_url, return_version):
 
         try:
             # Run pdf2html from docker image to convert pdf to html
-            process = subprocess.run(['pdf2htmlEX', '--dest-dir', '.', temp_pdf_file_name])
-            output = process.stdout
-            logger.error('pdf2htmlEX output: ' + str(output))
+            command = 'pdf2htmlEX --dest-dir . ' + temp_pdf_file_name
+            logger.error('pdf2htmlEX command: ' + command)
+            process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            output_from_subprocess = build_output_string(process)
+            logger.error('pdf2htmlEX subprocess.run output: ' + output_from_subprocess)
         except Exception as subprocess_run_error:
             status += ', ' + str(subprocess_run_error)
             logger.error('pdf2htmlEX subprocess.run exception: ' + str(subprocess_run_error))
@@ -172,7 +191,7 @@ def process_pdf_to_html(pdf_url, return_version):
     json_data = {
         'status': status,
         'success': success,
-        'output_from_subprocess': output,
+        'output_from_subprocess': output_from_subprocess,
         's3_url_for_html': s3_url_for_html,
     }
     return json_data
