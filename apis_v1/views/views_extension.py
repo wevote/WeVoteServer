@@ -78,7 +78,7 @@ def process_pdf_to_html(pdf_url, return_version):
     # Version report, only used to debug the pdf2htmlEX installation in our AWS/EC2 instances
     if return_version:
         try:
-            process = subprocess.run(['pdf2htmlEX', '-v'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            process = subprocess.run(['pdf2htmlEX -v'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output_raw = process.stdout
             output = output_raw.decode("utf-8")
             logger.error('pdf2htmlEX version:' + output)
