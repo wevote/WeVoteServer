@@ -162,7 +162,7 @@ def process_pdf_to_html(pdf_url, return_version):
         except Exception as scraper_or_tempfile_error2:      # Out of luck
             status += ", Second pass with google cached PDF url failed with a: " + str(scraper_or_tempfile_error2)
             logger.error('pdf2htmlEX FATAL requests with google cached PDF url or tempfile write exception: ' +
-                         str(scraper_or_tempfile_error))
+                         str(scraper_or_tempfile_error2))
 
     if pdf_text_text and len(pdf_text_text) > 10:
         # Save the pdf to a temporary file on disk
