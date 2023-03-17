@@ -5,6 +5,7 @@ import datetime
 import json
 import os
 import subprocess
+from urllib.parse import urlencode
 
 import boto3
 import cloudscraper
@@ -13,7 +14,7 @@ from django.http import HttpResponse
 import wevote_functions.admin
 from config.base import get_environment_variable
 from exception.models import handle_exception
-from wevote_functions.functions import positive_value_exists, get_voter_device_id
+from wevote_functions.functions import positive_value_exists
 
 AWS_ACCESS_KEY_ID = get_environment_variable("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = get_environment_variable("AWS_SECRET_ACCESS_KEY")
@@ -32,7 +33,7 @@ def pdf_to_html_retrieve_view(request):  # pdfToHtmlRetrieve
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    # voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     pdf_url = request.GET.get('pdf_url', '')
     return_version = request.GET.get('version', False)
     json_data = {}
@@ -51,7 +52,6 @@ def pdf_to_html_retrieve_view(request):  # pdfToHtmlRetrieve
     except Exception as e:
         logger.error('pdf2htmlEX call to process_pdf_to_html from pdf_to_html_retrieve_view e: ' + str(e))
 
-
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
@@ -63,11 +63,12 @@ def pdf_to_html_retrieve_view(request):  # pdfToHtmlRetrieve
 # docker run -ti --rm --mount src="$(pwd)",target=/pdf,type=bind pdf2htmlex/pdf2htmlex:0.18.8.rc2-master-20200820-
 # ubuntu-20.04-x86_64 --zoom 1.3 .//2022-CADEM-General-Endorsements.pdf
 # Test cases:
-#https://cadem.org/wp-content/uploads/2022/09/2022-CADEM-General-Endorsements.pdf
+# https://cadem.org/wp-content/uploads/2022/09/2022-CADEM-General-Endorsements.pdf
 # https://www.iuoe399.org/media/filer_public/45/77/457700c9-dd70-4cfc-be49-a81cb3fba0a6/2020_lu399_primary_endorsement.pdf
 # http://www.local150.org/wp-content/uploads/2018/02/Cook-18-Primary-Web.pdf
 # http://www.sddemocrats.org/sites/sdcdp/files/pdf/Endorsements_Flyer_P2020b.pdf
 # https://crpa.org/wp-content/uploads/2020-CA-Primary-Candidate-Final.pdf
+# https://webcache.googleusercontent.com/search?q=cache:https://cadem.org/wp-content/uploads/2022/09/2022-CADEM-General-Endorsements.pdf
 
 def process_pdf_to_html(pdf_url, return_version):
     output = 'exception before output'
@@ -77,9 +78,10 @@ def process_pdf_to_html(pdf_url, return_version):
     # Version report, only used to debug the pdf2htmlEX installation in our AWS/EC2 instances
     if return_version:
         try:
-            process = subprocess.run(['pdf2htmlEX', '-v', 'True'])
-            output = process.stdout
-            logger.error('pdf2htmlEX version:', output)
+            process = subprocess.run(['pdf2htmlEX -v'], shell=True, stdout=subprocess.PIPE)
+            output_raw = process.stdout
+            output = output_raw.decode("utf-8")
+            logger.error('pdf2htmlEX version:' + output)
         except Exception as e:
             logger.error('pdf2htmlEX version exception: ' + str(e))
 
@@ -105,45 +107,68 @@ def process_pdf_to_html(pdf_url, return_version):
 
     logger.error('pdf2htmlEX after removing temp files: ' + str(temp_pdf_file_name))
 
+    # use cloudscraper to get past challenges presented by pages hosted at Cloudflare
+    scraper = cloudscraper.create_scraper()  # returns a CloudScraper instance
+    success = False
+    s3_url_for_html = False
+    pdf_text_text = ''
     try:
-        # use cloudscraper to get past challenges presented by pages hosted at Cloudflare
-        scraper = cloudscraper.create_scraper()  # returns a CloudScraper instance
         raw = scraper.get(pdf_url)
-        pdf_text = raw.content
+        pdf_text_text = raw.content  # in bytes, not using str(raw.content)
+        logger.error('pdf2htmlEX cloudscraper attempt with base PDF url : ' + pdf_url +
+                     ' returned bytes: ' + str(len(pdf_text_text)))
+        success = True
 
+    # Probably got a http 403 forbidden, due to cloudscraper unsuccessfully handling a Cloudflare challenge
+    # Now try to use Google's (hopefully) cached version of the page
+    except Exception as scraper_or_tempfile_error:
+        status = "First pass with base url failed with a " + str(scraper_or_tempfile_error)
+        logger.error('pdf2htmlEX cloudscraper with base PDF url or tempfile write exception: ' +
+                     str(scraper_or_tempfile_error))
+        try:
+            google_cached_pdf_url = 'https://webcache.googleusercontent.com/search?q=cache:' + urlencode(pdf_url)
+            logger.error('pdf2htmlEX cloudscraper attempt with google cached PDF url: ' + google_cached_pdf_url)
+            raw = scraper.get(google_cached_pdf_url)
+            pdf_text_text = raw.content  # in bytes, not using str(raw.content)
+            logger.error('pdf2htmlEX cloudscraper attempt with google cached PDF url : ' + google_cached_pdf_url +
+                         ' returned bytes: ' + str(len(pdf_text_text)))
+            success = True
+        except Exception as scraper_or_tempfile_error2:      # Out of luck
+            status = "Second pass with base url failed with a " + str(scraper_or_tempfile_error2)
+            logger.error('pdf2htmlEX FATAL cloudscraper with google cached PDF url or tempfile write exception: ' +
+                         str(scraper_or_tempfile_error))
+
+    if positive_value_exists(pdf_text_text):
         # Save the pdf to a temporary file on disk
         out_file = open(temp_pdf_file_name, 'wb')
-        out_file.write(pdf_text)
+        out_file.write(pdf_text_text)
         logger.error('pdf2htmlEX file stored in local directory as: ' + str(temp_pdf_file_name))
-    except Exception as scraper_or_tempfile_error:
-        status = str(scraper_or_tempfile_error)
-        logger.error('pdf2htmlEX cloudscraper or tempfile write exception: ' + str(scraper_or_tempfile_error))
 
-    try:
-        # Run pdf2html from docker image to convert pdf to html
-        process = subprocess.run(['pdf2htmlEX', '--dest-dir', '.', temp_pdf_file_name])
-        output = process.stdout
-        logger.error('pdf2htmlEX output: ' + str(output))
-    except Exception as subprocess_run_error:
-        status += ', ' + str(subprocess_run_error)
-        logger.error('pdf2htmlEX subprocess.run exception: ' + str(subprocess_run_error))
+        try:
+            # Run pdf2html from docker image to convert pdf to html
+            process = subprocess.run(['pdf2htmlEX', '--dest-dir', '.', temp_pdf_file_name])
+            output = process.stdout
+            logger.error('pdf2htmlEX output: ' + str(output))
+        except Exception as subprocess_run_error:
+            status += ', ' + str(subprocess_run_error)
+            logger.error('pdf2htmlEX subprocess.run exception: ' + str(subprocess_run_error))
 
-    try:
-        insert_pdf_filename_in_tmp_file(temp_html_file_name, pdf_url)
-    except Exception as insert_pdf_error:
-        status += ', ' + str(insert_pdf_error)
-        logger.error('pdf2htmlEX insert_pdf_filename_in_tmp_file e5: ' + str(insert_pdf_error))
+        try:
+            insert_pdf_filename_in_tmp_file(temp_html_file_name, pdf_url)
+        except Exception as insert_pdf_error:
+            status += ', ' + str(insert_pdf_error)
+            logger.error('pdf2htmlEX insert_pdf_filename_in_tmp_file e5: ' + str(insert_pdf_error))
 
-    # create temporary file in s3, so it can be served to the We Vote Chrome Extension
-    s3_url_for_html = store_temporary_html_file_to_aws(temp_html_file_name) or 'NO_TEMPFILE_STORED_IN_S3'
-    if not s3_url_for_html.startswith("http"):
-        status += ', ' + s3_url_for_html
-    logger.error("pdf2htmlEX stored temp html file: " + temp_html_file_name + ', ' + s3_url_for_html)
+        # create temporary file in s3, so it can be served to the We Vote Chrome Extension
+        s3_url_for_html = store_temporary_html_file_to_aws(temp_html_file_name) or 'NO_TEMPFILE_STORED_IN_S3'
+        if not s3_url_for_html.startswith("http"):
+            status += ', ' + s3_url_for_html
+        logger.error("pdf2htmlEX stored temp html file: " + temp_html_file_name + ', ' + s3_url_for_html)
 
     status = 'PDF_URL_RETURNED' + status
     json_data = {
         'status': status,
-        'success': True,
+        'success': success,
         'output_from_subprocess': output,
         's3_url_for_html': s3_url_for_html,
     }
