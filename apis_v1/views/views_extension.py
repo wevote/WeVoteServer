@@ -9,6 +9,7 @@ from urllib.parse import urlencode
 
 import boto3
 import cloudscraper
+import requests
 from django.http import HttpResponse
 
 import wevote_functions.admin
@@ -93,12 +94,7 @@ def process_pdf_to_html(pdf_url, return_version):
             logger.error('pdf2htmlEX command: ' + command)
 
             process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            # std_output_raw = process.stdout
-            # std_output = std_output_raw.decode("utf-8") if std_output_raw else ''
-            # err_output_raw = process.stderr
-            # err_output = err_output_raw.decode("utf-8") if err_output_raw else ''
             output_from_subprocess = build_output_string(process)
-            # ('stdout: ' + std_output + ', stderr: ' + err_output).replace('/n', '')
 
             logger.error('pdf2htmlEX version ' + output_from_subprocess)
             success = True
@@ -148,17 +144,27 @@ def process_pdf_to_html(pdf_url, return_version):
         try:
             google_cached_pdf_url = 'https://webcache.googleusercontent.com/search?q=cache:' + urlencode(pdf_url)
             logger.error('pdf2htmlEX cloudscraper attempt with google cached PDF url: ' + google_cached_pdf_url)
-            raw = scraper.get(google_cached_pdf_url)
-            pdf_text_text = raw.content  # in bytes, not using str(raw.content)
-            logger.error('pdf2htmlEX cloudscraper attempt with google cached PDF url : ' + google_cached_pdf_url +
+
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                              'Chrome/36.0.1941.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+                'Accept-Encoding': 'none',
+                'Accept-Language': 'en-US,en;q=0.8',
+                'Connection': 'keep-alive'}
+            r = requests.get(google_cached_pdf_url, headers)
+            logger.error('pdf2htmlEX after requests.get: ' + google_cached_pdf_url)
+            pdf_text_text = r.text
+            logger.error('pdf2htmlEX requests attempt with google cached PDF url : ' + google_cached_pdf_url +
                          ' returned bytes: ' + str(len(pdf_text_text)))
             success = True
         except Exception as scraper_or_tempfile_error2:      # Out of luck
-            status = "Second pass with base url failed with a " + str(scraper_or_tempfile_error2)
-            logger.error('pdf2htmlEX FATAL cloudscraper with google cached PDF url or tempfile write exception: ' +
+            status += ", Second pass with google cached PDF url failed with a: " + str(scraper_or_tempfile_error2)
+            logger.error('pdf2htmlEX FATAL requests with google cached PDF url or tempfile write exception: ' +
                          str(scraper_or_tempfile_error))
 
-    if positive_value_exists(pdf_text_text):
+    if pdf_text_text and len(pdf_text_text) > 10:
         # Save the pdf to a temporary file on disk
         out_file = open(temp_pdf_file_name, 'wb')
         out_file.write(pdf_text_text)
@@ -187,7 +193,7 @@ def process_pdf_to_html(pdf_url, return_version):
             status += ', ' + s3_url_for_html
         logger.error("pdf2htmlEX stored temp html file: " + temp_html_file_name + ', ' + s3_url_for_html)
 
-    status = 'PDF_URL_RETURNED' + status
+    status = 'PDF_URL_RETURNED ' + status
     json_data = {
         'status': status,
         'success': success,
