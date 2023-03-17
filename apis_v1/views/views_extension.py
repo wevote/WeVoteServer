@@ -5,7 +5,7 @@ import datetime
 import json
 import os
 import subprocess
-from urllib.parse import urlencode
+from urllib.parse import quote
 
 import boto3
 import cloudscraper
@@ -141,8 +141,14 @@ def process_pdf_to_html(pdf_url, return_version):
         status = "First pass with base url failed with a " + str(scraper_or_tempfile_error)
         logger.error('pdf2htmlEX cloudscraper with base PDF url or tempfile write exception: ' +
                      str(scraper_or_tempfile_error))
+
+    if not success:
+        logger.error('pdf2htmlEX first pass === not success')
         try:
-            google_cached_pdf_url = 'https://webcache.googleusercontent.com/search?q=cache:' + urlencode(pdf_url)
+            logger.error('pdf2htmlEX first pass === not success, pdf_url:  ' + pdf_url)
+            encoded = quote(pdf_url, safe='')
+            logger.error('pdf2htmlEX encoded success' + encoded)
+            google_cached_pdf_url = 'https://webcache.googleusercontent.com/search?q=cache:' + encoded
             logger.error('pdf2htmlEX cloudscraper attempt with google cached PDF url: ' + google_cached_pdf_url)
 
             headers = {
