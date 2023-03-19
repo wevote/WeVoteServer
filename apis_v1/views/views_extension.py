@@ -13,7 +13,7 @@ import requests
 from django.http import HttpResponse
 
 import wevote_functions.admin
-from config.base import get_environment_variable
+from config.base import get_environment_variable, get_environment_variable_default
 from exception.models import handle_exception
 from wevote_functions.functions import positive_value_exists
 
@@ -66,6 +66,20 @@ def build_output_string(process):
     return output_from_subprocess
 
 
+def build_absolute_path_for_tempfile(tempfile):
+    temp_path = get_environment_variable_default("PATH_FOR_TEMP_FILES", ".")
+    logger.error('pdf2htmlEX build_absolute_path_for_tempfile temp_path 1:' + temp_path)
+
+    # March 2023: the value of PATH_FOR_TEMP_FILES on the production servers is '/tmp' and in
+    # environment_variables-template.json it is '.'
+    if temp_path[-1] is not '/':
+        temp_path += '/'
+    logger.error('pdf2htmlEX build_absolute_path_for_tempfile temp_path 2:' + temp_path)
+    absolute = temp_path + tempfile
+    logger.error('pdf2htmlEX build_absolute_path_for_tempfile absolute: ' + absolute)
+    return absolute
+
+
 # https://github.com/pdf2htmlEX/pdf2htmlEX  !We use a fork of the abandoned coolwanglu original repo.
 # https://github.com/pdf2htmlEX/pdf2htmlEX/wiki/Command-Line-Options
 # In December 2020, we installed a docker image in AWS/EC2: https://hub.docker.com/r/cardboardci/pdf2htmlex
@@ -111,18 +125,19 @@ def process_pdf_to_html(pdf_url, return_version):
         return json_data
 
     logger.error('pdf2htmlEX immediately after return_version: ' + str(return_version))
-    temp_pdf_file_name = os.path.basename(pdf_url)
-    temp_html_file_name = temp_pdf_file_name.replace('.pdf', '.html')
+    pdf_file_name = os.path.basename(pdf_url)
+    absolute_pdf_file = build_absolute_path_for_tempfile(pdf_file_name)
+    absolute_html_file = absolute_pdf_file.replace('.pdf', '.html')
     try:
-        os.remove(temp_pdf_file_name)    # remove the exact same pdf file if it already exists on disk
+        os.remove(absolute_pdf_file)    # remove the exact same pdf file if it already exists on disk
     except Exception:
         pass
     try:
-        os.remove(temp_html_file_name)    # remove the exact same html file if it already exists on disk
+        os.remove(absolute_html_file)    # remove the exact same html file if it already exists on disk
     except Exception:
         pass
 
-    logger.error('pdf2htmlEX after removing temp files: ' + str(temp_pdf_file_name))
+    logger.error('pdf2htmlEX after removing temp files: ' + str(pdf_file_name))
 
     # use cloudscraper to get past challenges presented by pages hosted at Cloudflare
     scraper = cloudscraper.create_scraper()  # returns a CloudScraper instance
@@ -147,7 +162,7 @@ def process_pdf_to_html(pdf_url, return_version):
         try:
             logger.error('pdf2htmlEX first pass === not success, pdf_url:  ' + pdf_url)
             encoded = quote(pdf_url, safe='')
-            logger.error('pdf2htmlEX encoded success' + encoded)
+            logger.error('pdf2htmlEX encoded success: ' + encoded)
             google_cached_pdf_url = 'https://webcache.googleusercontent.com/search?q=cache:' + encoded
             logger.error('pdf2htmlEX cloudscraper attempt with google cached PDF url: ' + google_cached_pdf_url)
 
@@ -172,13 +187,13 @@ def process_pdf_to_html(pdf_url, return_version):
 
     if pdf_text_text and len(pdf_text_text) > 10:
         # Save the pdf to a temporary file on disk
-        out_file = open(temp_pdf_file_name, 'wb')
+        out_file = open(absolute_pdf_file, 'wb')
         out_file.write(pdf_text_text)
-        logger.error('pdf2htmlEX file stored in local directory as: ' + str(temp_pdf_file_name))
+        logger.error('pdf2htmlEX file stored in local directory as: ' + str(pdf_file_name))
 
         try:
             # Run pdf2html from docker image to convert pdf to html
-            command = 'pdf2htmlEX --dest-dir . ' + temp_pdf_file_name
+            command = 'pdf2htmlEX ' + absolute_pdf_file
             logger.error('pdf2htmlEX command: ' + command)
             process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output_from_subprocess = build_output_string(process)
@@ -188,16 +203,16 @@ def process_pdf_to_html(pdf_url, return_version):
             logger.error('pdf2htmlEX subprocess.run exception: ' + str(subprocess_run_error))
 
         try:
-            insert_pdf_filename_in_tmp_file(temp_html_file_name, pdf_url)
+            insert_pdf_filename_in_tmp_file(absolute_html_file, pdf_url)
         except Exception as insert_pdf_error:
             status += ', ' + str(insert_pdf_error)
             logger.error('pdf2htmlEX insert_pdf_filename_in_tmp_file e5: ' + str(insert_pdf_error))
 
         # create temporary file in s3, so it can be served to the We Vote Chrome Extension
-        s3_url_for_html = store_temporary_html_file_to_aws(temp_html_file_name) or 'NO_TEMPFILE_STORED_IN_S3'
+        s3_url_for_html = store_temporary_html_file_to_aws(absolute_html_file) or 'NO_TEMPFILE_STORED_IN_S3'
         if not s3_url_for_html.startswith("http"):
             status += ', ' + s3_url_for_html
-        logger.error("pdf2htmlEX stored temp html file: " + temp_html_file_name + ', ' + s3_url_for_html)
+        logger.error("pdf2htmlEX stored temp html file: " + absolute_html_file + ', ' + s3_url_for_html)
 
     status = 'PDF_URL_RETURNED ' + status
     json_data = {
