@@ -51,7 +51,7 @@ def pdf_to_html_retrieve_view(request):  # pdfToHtmlRetrieve
     try:
         json_data = process_pdf_to_html(pdf_url, return_version)
     except Exception as e:
-        logger.error('pdf2htmlEX call to process_pdf_to_html from pdf_to_html_retrieve_view e: ' + str(e))
+        logger.error('pdf2htmlEX call to process_pdf_to_html from pdf_to_html_retrieve_view (Outermost Exception): ' + str(e))
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -177,7 +177,7 @@ def process_pdf_to_html(pdf_url, return_version):
             r = requests.get(google_cached_pdf_url, headers)
             logger.error('pdf2htmlEX after requests.get: ' + google_cached_pdf_url)
             pdf_text_text = r.text
-            logger.error('pdf2htmlEX requests attempt with google cached PDF url : ' + google_cached_pdf_url +
+            logger.error('pdf2htmlEX requests was successful with google cached PDF url : ' + google_cached_pdf_url +
                          ' returned bytes: ' + str(len(pdf_text_text)))
             success = True
         except Exception as scraper_or_tempfile_error2:      # Out of luck
@@ -187,7 +187,8 @@ def process_pdf_to_html(pdf_url, return_version):
 
     if pdf_text_text and len(pdf_text_text) > 10:
         # Save the pdf to a temporary file on disk
-        out_file = open(absolute_pdf_file, 'wb')
+        logger.error('pdf2htmlEX before storage of pdf file: ' + str(absolute_pdf_file))
+        out_file = open(absolute_pdf_file, 'w')
         out_file.write(pdf_text_text)
         logger.error('pdf2htmlEX file stored in local directory as: ' + str(pdf_file_name))
 
