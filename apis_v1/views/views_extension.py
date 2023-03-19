@@ -70,9 +70,8 @@ def build_absolute_path_for_tempfile(tempfile):
     temp_path = get_environment_variable_default("PATH_FOR_TEMP_FILES", ".")
     logger.error('pdf2htmlEX build_absolute_path_for_tempfile temp_path 1:' + temp_path)
 
-    # March 2023: the value of PATH_FOR_TEMP_FILES on the production servers is '/tmp' and in
-    # environment_variables-template.json it is '.'
-    if temp_path[-1] is not '/':
+    # March 2023: the value of PATH_FOR_TEMP_FILES on the production servers is '/tmp'-
+    if temp_path[-1] != '/':
         temp_path += '/'
     logger.error('pdf2htmlEX build_absolute_path_for_tempfile temp_path 2:' + temp_path)
     absolute = temp_path + tempfile
@@ -221,7 +220,10 @@ def process_pdf_to_html(pdf_url, return_version):
         status += ', ' + s3_url_for_html
     logger.error("pdf2htmlEX stored temp html file: " + absolute_html_file + ', ' + s3_url_for_html)
 
-    status = 'PDF_URL_RETURNED ' + status
+    if positive_value_exists(s3_url_for_html):
+        status = 'PDF_URL_RETURNED successfully with s3_url_for_html, other status = ' + status
+    else:
+        status = 'PDF_URL_RETURNED un-successfully without a returned S3 URL, other status = ' + status
     json_data = {
         'status': status,
         'success': success,
