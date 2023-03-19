@@ -142,6 +142,7 @@ def process_pdf_to_html(pdf_url, return_version):
     # use cloudscraper to get past challenges presented by pages hosted at Cloudflare
     scraper = cloudscraper.create_scraper()  # returns a CloudScraper instance
     s3_url_for_html = False
+    is_pdf = True
     pdf_text_text = ''
     try:
         raw = scraper.get(pdf_url)
@@ -159,6 +160,7 @@ def process_pdf_to_html(pdf_url, return_version):
 
     if not success:
         logger.error('pdf2htmlEX first pass === not success')
+        is_pdf = False
         try:
             logger.error('pdf2htmlEX first pass === not success, pdf_url:  ' + pdf_url)
             encoded = quote(pdf_url, safe='')
@@ -176,7 +178,11 @@ def process_pdf_to_html(pdf_url, return_version):
                 'Connection': 'keep-alive'}
             r = requests.get(google_cached_pdf_url, headers)
             logger.error('pdf2htmlEX after requests.get: ' + google_cached_pdf_url)
-            pdf_text_text = r.text
+            # skip saving the pdf file (since we don't have one), and write the final html file to the temp dir
+            html_text_text = r.text
+            out_file = open(absolute_html_file, 'w')
+            out_file.write(html_text_text)
+
             logger.error('pdf2htmlEX requests was successful with google cached PDF url : ' + google_cached_pdf_url +
                          ' returned bytes: ' + str(len(pdf_text_text)))
             success = True
@@ -185,7 +191,7 @@ def process_pdf_to_html(pdf_url, return_version):
             logger.error('pdf2htmlEX FATAL requests with google cached PDF url or tempfile write exception: ' +
                          str(scraper_or_tempfile_error2))
 
-    if pdf_text_text and len(pdf_text_text) > 10:
+    if pdf_text_text and len(pdf_text_text) > 10 and is_pdf:
         # Save the pdf to a temporary file on disk
         logger.error('pdf2htmlEX before storage of pdf file: ' + str(absolute_pdf_file))
         out_file = open(absolute_pdf_file, 'w')
@@ -209,11 +215,11 @@ def process_pdf_to_html(pdf_url, return_version):
             status += ', ' + str(insert_pdf_error)
             logger.error('pdf2htmlEX insert_pdf_filename_in_tmp_file e5: ' + str(insert_pdf_error))
 
-        # create temporary file in s3, so it can be served to the We Vote Chrome Extension
-        s3_url_for_html = store_temporary_html_file_to_aws(absolute_html_file) or 'NO_TEMPFILE_STORED_IN_S3'
-        if not s3_url_for_html.startswith("http"):
-            status += ', ' + s3_url_for_html
-        logger.error("pdf2htmlEX stored temp html file: " + absolute_html_file + ', ' + s3_url_for_html)
+    # create temporary file in s3, so it can be served to the We Vote Chrome Extension
+    s3_url_for_html = store_temporary_html_file_to_aws(absolute_html_file) or 'NO_TEMPFILE_STORED_IN_S3'
+    if not s3_url_for_html.startswith("http"):
+        status += ', ' + s3_url_for_html
+    logger.error("pdf2htmlEX stored temp html file: " + absolute_html_file + ', ' + s3_url_for_html)
 
     status = 'PDF_URL_RETURNED ' + status
     json_data = {
