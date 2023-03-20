@@ -125,6 +125,9 @@
                 <a href="{% url 'office_held:office_held_summary' representative.office_held_we_vote_id %}"
                    style="display: block; width: 200px; word-wrap: break-word;"
                    target="_blank">{{ representative.office_held_name }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+                {% if representative.ocd_division_id %}
+                    {{ representative.ocd_division_id }}
+                {% endif %}
             </td>
             <td>{{ representative.state_code }}</td>
             <td>

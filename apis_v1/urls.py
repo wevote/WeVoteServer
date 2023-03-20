@@ -14,7 +14,7 @@ from apis_v1.views import views_activity, views_apple, views_docs, views_analyti
     views_campaign, views_candidate, views_donation, \
     views_election, views_extension, views_facebook, views_friend, \
     views_issues, views_measure, views_misc, views_organization, \
-    views_pledge_to_vote, views_position, views_reaction, views_representative, views_retrieve_tables, \
+    views_pledge_to_vote, views_politician, views_position, views_reaction, views_representative, views_retrieve_tables, \
     views_task, views_share, views_twitter, views_voter, views_voter_guide
 from analytics.views_admin import analytics_action_sync_out_view, organization_daily_metrics_sync_out_view, \
     organization_election_metrics_sync_out_view, sitewide_daily_metrics_sync_out_view, \
@@ -219,6 +219,7 @@ urlpatterns = [
       re_path(r'^pledgeToVoteWithVoterGuide/',
               views_pledge_to_vote.pledge_to_vote_with_voter_guide_view,
               name='pledgeToVoteWithVoterGuideView'),
+      re_path(r'^politicianRetrieve/', views_politician.politician_retrieve_view, name='politicianRetrieveView'),
       re_path(r'^politiciansSyncOut/', politicians_sync_out_view, name='politiciansSyncOutView'),
       re_path(r'^pollingLocationsSyncOut/', polling_locations_sync_out_view,
               name='pollingLocationsSyncOutView'),
@@ -594,6 +595,8 @@ urlpatterns = [
               views_docs.organization_suggestion_tasks_doc_view, name='organizationSuggestionTasksDocs'),
       re_path(r'^docs/pledgeToVoteWithVoterGuide/$',
               views_docs.pledge_to_vote_with_voter_guide_doc_view, name='pledgeToVoteWithVoterGuideDocs'),
+      re_path(r'^docs/politicianRetrieve/$',
+              views_docs.politician_retrieve_doc_view, name='politicianRetrieveDocs'),
       re_path(r'^docs/politiciansSyncOut/$', views_docs.politicians_sync_out_doc_view,
               name='politiciansSyncOutDocs'),
       re_path(r'^docs/pollingLocationsSyncOut/$',

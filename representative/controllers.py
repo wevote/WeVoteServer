@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.http import HttpResponse
 from exception.models import handle_exception
 import json
-from office_held.models import OfficeHeldManager
+from office_held.controllers import generate_office_held_dict_list_from_office_held_we_vote_id_list
 from politician.models import PoliticianManager
 from wevote_settings.constants import IS_BATTLEGROUND_YEARS_AVAILABLE
 import wevote_functions.admin
@@ -363,6 +363,94 @@ def find_duplicate_representative(we_vote_representative, ignore_representative_
     return results
 
 
+def generate_representative_dict_list_from_representative_object_list(
+        representative_object_list=[]):
+    representative_dict_list = []
+    status = ""
+    success = True
+
+    for representative_object in representative_object_list:
+        results = generate_representative_dict_from_representative_object(representative=representative_object)
+        status += results['status']
+        if results['success']:
+            representative_dict_list.append(results['representative_dict'])
+
+    results = {
+        'representative_dict_list': representative_dict_list,
+        'status':                   status,
+        'success':                  success,
+    }
+    return results
+
+
+def generate_representative_dict_from_representative_object(
+        representative=None):
+    status = ""
+    success = True
+
+    date_last_updated = ''
+    if positive_value_exists(representative.date_last_updated):
+        date_last_updated = representative.date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
+    representative_dict = {
+        'id':                           representative.id,
+        'we_vote_id':                   representative.we_vote_id,
+        'ballot_item_display_name':     representative.display_representative_name(),
+        'facebook_url':                 representative.facebook_url
+        if not representative.facebook_url_is_broken else '',
+        'instagram_followers_count':    representative.instagram_followers_count,
+        'instagram_handle':             representative.instagram_handle,
+        'is_battleground_race_2019':    positive_value_exists(representative.is_battleground_race_2019),
+        'is_battleground_race_2020':    positive_value_exists(representative.is_battleground_race_2020),
+        'is_battleground_race_2021':    positive_value_exists(representative.is_battleground_race_2021),
+        'is_battleground_race_2022':    positive_value_exists(representative.is_battleground_race_2022),
+        'is_battleground_race_2023':    positive_value_exists(representative.is_battleground_race_2023),
+        'is_battleground_race_2024':    positive_value_exists(representative.is_battleground_race_2024),
+        'is_battleground_race_2025':    positive_value_exists(representative.is_battleground_race_2025),
+        'is_battleground_race_2026':    positive_value_exists(representative.is_battleground_race_2026),
+        'last_updated':                 date_last_updated,
+        'linkedin_url':                 representative.linkedin_url,
+        'ocd_division_id':              representative.ocd_division_id,
+        'office_held_id':               representative.office_held_id,
+        'office_held_name':             representative.office_held_name,
+        'office_held_we_vote_id':       representative.office_held_we_vote_id,
+        'political_party':              representative.political_party_display(),
+        'politician_id':                representative.politician_id,
+        'politician_we_vote_id':        representative.politician_we_vote_id,
+        'representative_contact_form_url': representative.representative_contact_form_url,
+        'representative_email':         representative.representative_email,
+        'representative_email2':        representative.representative_email2,
+        'representative_email3':        representative.representative_email3,
+        'representative_name':          representative.representative_name,
+        'representative_phone':         representative.representative_phone,
+        'representative_phone2':        representative.representative_phone2,
+        'representative_phone3':        representative.representative_phone3,
+        'representative_photo_url_large': representative.we_vote_hosted_profile_image_url_large,
+        'representative_photo_url_medium': representative.we_vote_hosted_profile_image_url_medium,
+        'representative_photo_url_tiny': representative.we_vote_hosted_profile_image_url_tiny,
+        'representative_url':           representative.representative_url,
+        'state_code':                   representative.state_code,
+        'twitter_url':                  representative.twitter_url,
+        'twitter_handle':               representative.fetch_twitter_handle(),
+        'twitter_description':          representative.twitter_description
+        if positive_value_exists(representative.twitter_description) and
+        len(representative.twitter_description) > 1 else '',
+        'twitter_followers_count':      representative.twitter_followers_count,
+        'wikipedia_url':                representative.wikipedia_url,
+        'year_in_office_2023':          representative.year_in_office_2023,
+        'year_in_office_2024':          representative.year_in_office_2024,
+        'year_in_office_2025':          representative.year_in_office_2025,
+        'year_in_office_2026':          representative.year_in_office_2026,
+        'youtube_url':                  representative.youtube_url,
+    }
+
+    results = {
+        'representative_dict':  representative_dict,
+        'status':               status,
+        'success':              success,
+    }
+    return results
+
+
 def match_representatives_to_politicians_first_attempt(state_code=''):
     """
     Find any 50 representatives with politician_match_attempted == False, and attempt to match them to:
@@ -546,7 +634,7 @@ def merge_these_two_representatives(representative1_we_vote_id, representative2_
         try:
             # get the politician_id directly to avoid bad data
             politician_manager = PoliticianManager()
-            results = politician_manager.retrieve_politician(0, politician2_we_vote_id)
+            results = politician_manager.retrieve_politician(politician_we_vote_id=politician2_we_vote_id)
             if results['politician_found']:
                 politician = results['politician']
                 politician2_id = politician.id
@@ -851,7 +939,7 @@ def representative_politician_match(representative):
     # Does this candidate already have a we_vote_id for a politician?
     if positive_value_exists(representative.politician_we_vote_id):
         # Find existing politician. No update here for now.
-        results = politician_manager.retrieve_politician(we_vote_id=representative.politician_we_vote_id)
+        results = politician_manager.retrieve_politician(politician_we_vote_id=representative.politician_we_vote_id)
         status += results['status']
         if not results['success']:
             results = {
@@ -1057,7 +1145,7 @@ def representatives_query_for_api(  # representativesQuery
 
     representative_list = []
     representatives_limit = 300
-    representatives_to_display = []
+    representative_dict_list = []
     required_variables_missing = False
     retrieve_mode = ''
     returned_count = 0
@@ -1097,7 +1185,7 @@ def representatives_query_for_api(  # representativesQuery
     representative_manager = RepresentativeManager()
     if retrieve_mode == 'YEAR':
         try:
-            results = representative_manager.retrieve_representatives_list(
+            results = representative_manager.retrieve_representative_list(
                 index_start=index_start,
                 limit_to_this_state_code=limit_to_this_state_code,
                 read_only=True,
@@ -1116,7 +1204,7 @@ def representatives_query_for_api(  # representativesQuery
             success = False
     elif len(search_text) > 0:
         try:
-            results = representative_manager.retrieve_representatives_list(
+            results = representative_manager.retrieve_representative_list(
                 index_start=index_start,
                 limit_to_this_state_code=limit_to_this_state_code,
                 read_only=True,
@@ -1138,88 +1226,26 @@ def representatives_query_for_api(  # representativesQuery
     # Get all the office_held entries for representatives retrieved
     office_held_dict_list = []
     if success:
-        office_held_manager = OfficeHeldManager()
         office_held_we_vote_id_list = []
         for one_representative in representative_list:
             if positive_value_exists(one_representative.office_held_we_vote_id) \
                     and one_representative.office_held_we_vote_id not in office_held_we_vote_id_list:
                 office_held_we_vote_id_list.append(one_representative.office_held_we_vote_id)
-        if len(office_held_we_vote_id_list):
-            results = office_held_manager.retrieve_office_held_list(
-                office_held_we_vote_id_list=office_held_we_vote_id_list,
-                read_only=True)
-            if results['office_held_list_found']:
-                office_held_list = results['office_held_list']
-                for office_held in office_held_list:
-                    one_office_dict = {
-                        'office_held_id':           office_held.id,
-                        'office_held_description':  office_held.office_held_description,
-                        'office_held_name':         office_held.office_held_name,
-                        'office_held_we_vote_id':   office_held.we_vote_id,
-                        'race_office_level':        office_held.race_office_level,
-                        'state_code':               office_held.state_code,
-                    }
-                    office_held_dict_list.append(one_office_dict)
+        if len(office_held_we_vote_id_list) > 0:
+            results = generate_office_held_dict_list_from_office_held_we_vote_id_list(
+                office_held_we_vote_id_list=office_held_we_vote_id_list)
+            status += results['status']
+            if results['success']:
+                office_held_dict_list.append(results['office_held_dict_list'])
 
     if success:
         for representative in representative_list:
-            date_last_updated = ''
-            if positive_value_exists(representative.date_last_updated):
-                date_last_updated = representative.date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
-            one_representative = {
-                'id':                               representative.id,
-                'we_vote_id':                       representative.we_vote_id,
-                'ballot_item_display_name':         representative.display_representative_name(),
-                'facebook_url':                     representative.facebook_url
-                if not representative.facebook_url_is_broken else '',
-                'instagram_followers_count':        representative.instagram_followers_count,
-                'instagram_handle':                 representative.instagram_handle,
-                'is_battleground_race_2019':        positive_value_exists(representative.is_battleground_race_2019),
-                'is_battleground_race_2020':        positive_value_exists(representative.is_battleground_race_2020),
-                'is_battleground_race_2021':        positive_value_exists(representative.is_battleground_race_2021),
-                'is_battleground_race_2022':        positive_value_exists(representative.is_battleground_race_2022),
-                'is_battleground_race_2023':        positive_value_exists(representative.is_battleground_race_2023),
-                'is_battleground_race_2024':        positive_value_exists(representative.is_battleground_race_2024),
-                'is_battleground_race_2025':        positive_value_exists(representative.is_battleground_race_2025),
-                'is_battleground_race_2026':        positive_value_exists(representative.is_battleground_race_2026),
-                'last_updated':                     date_last_updated,
-                'linkedin_url':                     representative.linkedin_url,
-                'ocd_division_id':                  representative.ocd_division_id,
-                'office_held_id':                   representative.office_held_id,
-                'office_held_name':                 representative.office_held_name,
-                'office_held_we_vote_id':           representative.office_held_we_vote_id,
-                'political_party':                  representative.political_party_display(),
-                'politician_id':                    representative.politician_id,
-                'politician_we_vote_id':            representative.politician_we_vote_id,
-                'representative_contact_form_url':  representative.representative_contact_form_url,
-                'representative_email':             representative.representative_email,
-                'representative_email2':            representative.representative_email2,
-                'representative_email3':            representative.representative_email3,
-                'representative_name':              representative.representative_name,
-                'representative_phone':             representative.representative_phone,
-                'representative_phone2':            representative.representative_phone2,
-                'representative_phone3':            representative.representative_phone3,
-                'representative_photo_url_large':   representative.we_vote_hosted_profile_image_url_large,
-                'representative_photo_url_medium':  representative.we_vote_hosted_profile_image_url_medium,
-                'representative_photo_url_tiny':    representative.we_vote_hosted_profile_image_url_tiny,
-                'representative_url':               representative.representative_url,
-                'state_code':                       representative.state_code,
-                'twitter_url':                      representative.twitter_url,
-                'twitter_handle':                   representative.fetch_twitter_handle(),
-                'twitter_description':              representative.twitter_description
-                if positive_value_exists(representative.twitter_description) and
-                len(representative.twitter_description) > 1 else '',
-                'twitter_followers_count':          representative.twitter_followers_count,
-                'wikipedia_url':                    representative.wikipedia_url,
-                'year_in_office_2023':              representative.year_in_office_2023,
-                'year_in_office_2024':              representative.year_in_office_2024,
-                'year_in_office_2025':              representative.year_in_office_2025,
-                'year_in_office_2026':              representative.year_in_office_2026,
-                'youtube_url':                      representative.youtube_url,
-            }
-            representatives_to_display.append(one_representative.copy())
+            results = generate_representative_dict_from_representative_object(representative=representative)
+            status += results['status']
+            if results['success']:
+                representative_dict_list.append(results['representative_dict'])
 
-        if len(representatives_to_display):
+        if len(representative_dict_list):
             status += 'REPRESENTATIVES_RETRIEVED '
         else:
             status += 'NO_REPRESENTATIVES_RETRIEVED '
@@ -1228,7 +1254,7 @@ def representatives_query_for_api(  # representativesQuery
         'index_start':      index_start,
         'kind':             'wevote#representativesQuery',
         'office_held_list': office_held_dict_list,
-        'representatives':  representatives_to_display,
+        'representatives':  representative_dict_list,
         'returned_count':   returned_count,
         'state':            limit_to_this_state_code,
         'status':           status,

@@ -3305,7 +3305,7 @@ def organization_politician_match(organization):
     # Does this organization already have a we_vote_id for a politician?
     if positive_value_exists(organization.politician_we_vote_id):
         # Find existing politician. No update here for now.
-        results = politician_manager.retrieve_politician(we_vote_id=organization.politician_we_vote_id)
+        results = politician_manager.retrieve_politician(politician_we_vote_id=organization.politician_we_vote_id)
         status += results['status']
         if not results['success']:
             results = {

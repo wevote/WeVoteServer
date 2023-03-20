@@ -807,7 +807,7 @@ class RepresentativeManager(models.Manager):
         results = self.retrieve_representatives_are_not_duplicates_list(representative_we_vote_id)
         return results['representatives_are_not_duplicates_list_we_vote_ids']
 
-    def retrieve_representatives_list(
+    def retrieve_representative_list(
             self,
             index_start=0,
             is_missing_politician_we_vote_id=False,

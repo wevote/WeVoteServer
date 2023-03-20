@@ -65,7 +65,7 @@ def compare_two_politicians_for_merge_view(request):
     state_code = request.GET.get('state_code', '')
 
     politician_manager = PoliticianManager()
-    politician_results = politician_manager.retrieve_politician(we_vote_id=politician1_we_vote_id)
+    politician_results = politician_manager.retrieve_politician(politician_we_vote_id=politician1_we_vote_id)
     if not politician_results['politician_found']:
         messages.add_message(request, messages.ERROR, "Politician1 not found.")
         return HttpResponseRedirect(
@@ -75,7 +75,7 @@ def compare_two_politicians_for_merge_view(request):
 
     politician_option1_for_template = politician_results['politician']
 
-    politician_results = politician_manager.retrieve_politician(we_vote_id=politician2_we_vote_id)
+    politician_results = politician_manager.retrieve_politician(politician_we_vote_id=politician2_we_vote_id)
     if not politician_results['politician_found']:
         messages.add_message(request, messages.ERROR, "Politician2 not found.")
         return HttpResponseRedirect(
@@ -224,7 +224,8 @@ def find_and_merge_duplicate_politicians_view(request):
 
 
 def render_politician_merge_form(
-        request, politician_option1_for_template,
+        request,
+        politician_option1_for_template,
         politician_option2_for_template,
         politician_merge_conflict_values,
         remove_duplicate_process=True):
@@ -389,21 +390,55 @@ def politician_list_view(request):
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
 
-    # Are there any entries where politician_email doesn't match politician_email_address?
-    politician_query = Politician.objects.all()
-    politician_query = politician_query.exclude(
-        Q(politician_email_address__isnull=True) |
-        Q(politician_email_address="")
-    )
-    # Do not return entries where the values already match
-    politician_query = politician_query.exclude(politician_email__iexact=F('politician_email_address'))
-    list_found = list(politician_query[:10])  # Only update 10 at a time
-    if len(list_found) > 0:
-        we_vote_id_string = ''
-        for one_politician in list_found:
-            we_vote_id_string += str(one_politician.we_vote_id) + " "
-        messages.add_message(request, messages.ERROR,
-                             'politician_email mismatch with politician_email_address:' + str(we_vote_id_string))
+    # When we were preparing to remove the field 'politician_email_address', we wanted to make sure
+    # they had all be transferred. This verifies it.
+    # # Are there any entries where politician_email doesn't match politician_email_address?
+    # politician_query = Politician.objects.all()
+    # politician_query = politician_query.exclude(
+    #     Q(politician_email_address__isnull=True) |
+    #     Q(politician_email_address="")
+    # )
+    # # Do not return entries where the values already match
+    # politician_query = politician_query.exclude(politician_email__iexact=F('politician_email_address'))
+    # list_found = list(politician_query[:10])  # Only find the first 10 entries
+    # if len(list_found) > 0:
+    #     we_vote_id_string = ''
+    #     for one_politician in list_found:
+    #         we_vote_id_string += str(one_politician.we_vote_id) + " "
+    #     messages.add_message(request, messages.ERROR,
+    #                          'politician_email mismatch with politician_email_address:' + str(we_vote_id_string))
+
+    # Create seo_friendly_path for all politicians who currently don't have one
+    seo_friendly_path_updates_on = False
+    if seo_friendly_path_updates_on:
+        politician_query = Politician.objects.all()
+        politician_query = politician_query.filter(
+            Q(seo_friendly_path__isnull=True) |
+            Q(seo_friendly_path="")
+        )
+        if positive_value_exists(state_code):
+            politician_query = politician_query.filter(state_code__iexact=state_code)
+        politician_list_to_convert = list(politician_query[:2])
+        politician_manager = PoliticianManager()
+        update_list = []
+        updates_needed = False
+        updates_made = 0
+        for one_politician in politician_list_to_convert:
+            results = politician_manager.generate_seo_friendly_path(
+                politician_name=one_politician.politician_name,
+                politician_we_vote_id=one_politician.we_vote_id,
+                state_code=one_politician.state_code,
+            )
+            if results['seo_friendly_path_found']:
+                one_politician.seo_friendly_path = results['seo_friendly_path']
+                update_list.append(one_politician)
+                updates_needed = True
+                updates_made += 1
+        if updates_needed:
+            Politician.objects.bulk_update(update_list, ['seo_friendly_path'])
+            messages.add_message(request, messages.INFO,
+                                 "{updates_made} politicians updated with new seo_friendly_path."
+                                 "".format(updates_made=updates_made))
 
     politician_list = []
     politician_list_count = 0
@@ -680,7 +715,7 @@ def politician_merge_process_view(request):
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 
-    politician1_results = politician_manager.retrieve_politician(we_vote_id=politician1_we_vote_id)
+    politician1_results = politician_manager.retrieve_politician(politician_we_vote_id=politician1_we_vote_id)
     if politician1_results['politician_found']:
         politician1_on_stage = politician1_results['politician']
     else:
@@ -1301,6 +1336,7 @@ def politician_edit_process_view(request):
     if positive_value_exists(instagram_handle):
         instagram_handle = extract_instagram_handle_from_text_string(instagram_handle)
     linkedin_url = request.POST.get('linkedin_url', False)
+    maplight_id = request.POST.get('maplight_id', False)
     politician_email = request.POST.get('politician_email', False)
     politician_email2 = request.POST.get('politician_email2', False)
     politician_email3 = request.POST.get('politician_email3', False)
@@ -1332,14 +1368,14 @@ def politician_edit_process_view(request):
     politician_url5 = request.POST.get('politician_url5', False)
     political_party = request.POST.get('political_party', False)
     profile_image_type_currently_active = request.POST.get('profile_image_type_currently_active', False)
+    politician_we_vote_id = request.POST.get('politician_we_vote_id', False)
+    seo_friendly_path = request.POST.get('seo_friendly_path', False)
+    state_code = request.POST.get('state_code', False)
     twitter_handle_updates_failing = request.POST.get('twitter_handle_updates_failing', False)
     twitter_handle_updates_failing = positive_value_exists(twitter_handle_updates_failing)
     twitter_handle2_updates_failing = request.POST.get('twitter_handle2_updates_failing', False)
     twitter_handle2_updates_failing = positive_value_exists(twitter_handle2_updates_failing)
     vote_smart_id = request.POST.get('vote_smart_id', False)
-    maplight_id = request.POST.get('maplight_id', False)
-    state_code = request.POST.get('state_code', False)
-    politician_we_vote_id = request.POST.get('politician_we_vote_id', False)
     vote_usa_politician_id = request.POST.get('vote_usa_politician_id', False)
     wikipedia_url = request.POST.get('wikipedia_url', False)
     # is_battleground_race_ values taken in below
@@ -1592,6 +1628,17 @@ def politician_edit_process_view(request):
                 politician_on_stage.profile_image_type_currently_active = profile_image_type_currently_active
             if state_code is not False:
                 politician_on_stage.state_code = state_code
+            if seo_friendly_path is not False:
+                politician_manager = PoliticianManager()
+                # If path isn't passed in, create one. If provided, verify it is unique.
+                seo_results = politician_manager.generate_seo_friendly_path(
+                    base_pathname_string=seo_friendly_path,
+                    politician_name=politician_on_stage.politician_name,
+                    politician_we_vote_id=politician_on_stage.we_vote_id,
+                    state_code=politician_on_stage.state_code)
+                if seo_results['success']:
+                    seo_friendly_path = seo_results['seo_friendly_path']
+                politician_on_stage.seo_friendly_path = seo_friendly_path
             politician_on_stage.twitter_handle_updates_failing = twitter_handle_updates_failing
             politician_on_stage.twitter_handle2_updates_failing = twitter_handle2_updates_failing
             if vote_smart_id is not False:

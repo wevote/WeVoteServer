@@ -223,19 +223,16 @@ class CampaignXManager(models.Manager):
         pathname_modifier = None
         status = ""
 
+        required_variable_missing = False
         if not positive_value_exists(campaignx_we_vote_id):
+            required_variable_missing = True
             status += "MISSING_CAMPAIGNX_WE_VOTE_ID "
-            results = {
-                'seo_friendly_path':            final_pathname_string,
-                'seo_friendly_path_created':    False,
-                'seo_friendly_path_found':      False,
-                'status':                       status,
-                'success':                      False,
-            }
-            return results
 
         if not campaignx_title:
+            required_variable_missing = True
             status += "MISSING_CAMPAIGN_TITLE "
+
+        if required_variable_missing:
             results = {
                 'seo_friendly_path':            final_pathname_string,
                 'seo_friendly_path_created':    False,
@@ -320,7 +317,7 @@ class CampaignXManager(models.Manager):
             return results
 
         if not owned_by_another_campaignx:
-            # Double-check that we don't have a reserved entry already in the OrganizationReservedDomain table
+            # Double-check that we don't have a reserved entry already in the CampaignX table
             try:
                 path_query = CampaignX.objects.using('readonly').all()
                 path_query = path_query.filter(seo_friendly_path__iexact=base_pathname_string)
@@ -1809,7 +1806,7 @@ class CampaignXManager(models.Manager):
             return campaignx.campaign_title
         except CampaignX.DoesNotExist as e:
             # Some test data will throw this, no worries
-            return '';
+            return ''
 
     def retrieve_seo_friendly_path_list(self, campaignx_we_vote_id=''):
         seo_friendly_path_list_found = False
@@ -2687,7 +2684,7 @@ class CampaignXManager(models.Manager):
         for campaignx_politician_we_vote_id in politician_starter_we_vote_id_list:
             if campaignx_politician_we_vote_id not in campaignx_politician_existing_we_vote_id_list:
                 results = politician_manager.retrieve_politician(
-                    we_vote_id=campaignx_politician_we_vote_id,
+                    politician_we_vote_id=campaignx_politician_we_vote_id,
                     read_only=True)
                 if results['politician_found']:
                     # Create campaignx_politician
@@ -2943,7 +2940,7 @@ class CampaignXSEOFriendlyPath(models.Model):
     campaignx_we_vote_id = models.CharField(max_length=255, null=True)
     campaign_title = models.CharField(max_length=255, null=False)
     base_pathname_string = models.CharField(max_length=255, null=True)
-    pathname_modifier = models.CharField(max_length=10, null=True)
+    pathname_modifier = models.CharField(max_length=10, null=True)  # A short random string to make sure path is unique
     final_pathname_string = models.CharField(max_length=255, null=True, unique=True, db_index=True)
 
 

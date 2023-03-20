@@ -61,6 +61,8 @@
         </td>
     </tr>
 
+{% include "politician/politician_merge_one_field_decision.html" with field_name="seo_friendly_path" field_label="SEO Friendly Path" conflict_status=conflict_values.seo_friendly_path politician1_field_value=politician_option1.seo_friendly_path politician2_field_value=politician_option2.seo_friendly_path politician1=politician_option1 politician2=politician_option2 %}
+
     <tr>
         <td>Twitter Handles</td>
         <td>
