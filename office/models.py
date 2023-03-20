@@ -1332,7 +1332,7 @@ class ContestOfficeListManager(models.Manager):
                                                              Q(state_code__iexact=state_code))
                 else:
                     office_queryset = office_queryset.filter(state_code__iexact=state_code)
-            if len(retrieve_from_this_office_we_vote_id_list):
+            if len(retrieve_from_this_office_we_vote_id_list) > 0:
                 office_queryset = office_queryset.filter(
                     we_vote_id__in=retrieve_from_this_office_we_vote_id_list)
             office_queryset = office_queryset.order_by("office_name")

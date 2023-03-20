@@ -4,17 +4,20 @@
 
 import re
 import datetime
+import string
 from django.db import models
 from django.db.models import Q
+from django.utils.text import slugify
 import wevote_functions.admin
 from candidate.models import PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
     PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_VOTE_USA, PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from tag.models import Tag
-from wevote_functions.functions import candidate_party_display, convert_to_political_party_constant, \
-    display_full_name_with_correct_capitalization, \
+from wevote_functions.functions import candidate_party_display, convert_state_code_to_state_text, \
+    convert_to_political_party_constant, display_full_name_with_correct_capitalization, \
     extract_first_name_from_full_name, extract_middle_name_from_full_name, \
-    extract_last_name_from_full_name, extract_twitter_handle_from_text_string, positive_value_exists
+    extract_last_name_from_full_name, extract_twitter_handle_from_text_string, generate_random_string, \
+    positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_politician_integer, fetch_site_unique_id_prefix
 
 FEMALE = 'F'
@@ -71,6 +74,7 @@ POLITICIAN_UNIQUE_IDENTIFIERS = [
     # 'politician_phone_number',  # We now have 3 options and merge them automatically
     # 'politician_url',  # We have 5 options now and merge them automatically
     'politician_youtube_id',
+    'seo_friendly_path',
     'state_code',
     'thomas_id',
     'twitter_handle_updates_failing',
@@ -147,7 +151,7 @@ class Politician(models.Model):
                               max_length=200, null=True, unique=True, blank=True)
     cspan_id = models.CharField(verbose_name="cspan unique identifier",
                                 max_length=200, null=True, blank=True, unique=False)
-    # DEPRECATE THIS
+    # DEPRECATE wikipedia_id
     wikipedia_id = models.CharField(verbose_name="wikipedia url",
                                     max_length=500, default=None, null=True, blank=True)
     wikipedia_url = models.TextField(null=True)
@@ -170,7 +174,6 @@ class Politician(models.Model):
     tag_link = models.ManyToManyField(Tag, through='PoliticianTagLink')
     # The full name of the party the official belongs to.
     political_party = models.CharField(verbose_name="politician political party", max_length=255, null=True)
-    state_code = models.CharField(verbose_name="politician home state", max_length=2, null=True)
     politician_url = models.TextField(blank=True, null=True)
     politician_url2 = models.TextField(blank=True, null=True)
     politician_url3 = models.TextField(blank=True, null=True)
@@ -184,6 +187,8 @@ class Politician(models.Model):
     politician_twitter_handle3 = models.CharField(max_length=255, null=True, unique=False)
     politician_twitter_handle4 = models.CharField(max_length=255, null=True, unique=False)
     politician_twitter_handle5 = models.CharField(max_length=255, null=True, unique=False)
+    seo_friendly_path = models.CharField(max_length=255, null=True, unique=True, db_index=True)
+    state_code = models.CharField(verbose_name="politician home state", max_length=2, null=True)
     twitter_handle_updates_failing = models.BooleanField(default=False)
     twitter_handle2_updates_failing = models.BooleanField(default=False)
     twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)
@@ -622,20 +627,25 @@ class PoliticianManager(models.Manager):
 
     def politician_photo_url(self, politician_id):
         politician_manager = PoliticianManager()
-        results = politician_manager.retrieve_politician(politician_id)
+        results = politician_manager.retrieve_politician(politician_id=politician_id)
 
         if results['success']:
             politician = results['politician']
             return politician.politician_photo_url()
         return ""
 
-    def retrieve_politician(self, politician_id=0, we_vote_id=None, read_only=False):
+    def retrieve_politician(
+            self,
+            politician_id=0,
+            politician_we_vote_id='',
+            read_only=False,
+            seo_friendly_path='',
+            voter_we_vote_id=None):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
         politician = None
         politician_found = False
-        politician_we_vote_id = ""
         success = True
         status = ''
         try:
@@ -647,11 +657,19 @@ class PoliticianManager(models.Manager):
                 politician_id = politician.id
                 politician_we_vote_id = politician.we_vote_id
                 politician_found = True
-            elif positive_value_exists(we_vote_id):
+            elif positive_value_exists(politician_we_vote_id):
                 if positive_value_exists(read_only):
-                    politician = Politician.objects.using('readonly').get(we_vote_id__iexact=we_vote_id)
+                    politician = Politician.objects.using('readonly').get(we_vote_id__iexact=politician_we_vote_id)
                 else:
-                    politician = Politician.objects.get(we_vote_id__iexact=we_vote_id)
+                    politician = Politician.objects.get(we_vote_id__iexact=politician_we_vote_id)
+                politician_id = politician.id
+                politician_we_vote_id = politician.we_vote_id
+                politician_found = True
+            elif positive_value_exists(seo_friendly_path):
+                if positive_value_exists(read_only):
+                    politician = Politician.objects.using('readonly').get(seo_friendly_path__iexact=seo_friendly_path)
+                else:
+                    politician = Politician.objects.get(seo_friendly_path__iexact=seo_friendly_path)
                 politician_id = politician.id
                 politician_we_vote_id = politician.we_vote_id
                 politician_found = True
@@ -669,12 +687,33 @@ class PoliticianManager(models.Manager):
             success = False
             status += "PROBLEM_WITH_RETRIEVE_POLITICIAN: " + str(e) + ' '
 
+        # TODO: Implement this for Politicians
+        # if positive_value_exists(campaignx_found):
+        #     if positive_value_exists(campaignx_we_vote_id) and positive_value_exists(voter_we_vote_id):
+        #         viewer_is_owner = campaignx_manager.is_voter_campaignx_owner(
+        #             campaignx_we_vote_id=campaignx_we_vote_id, voter_we_vote_id=voter_we_vote_id)
+        #
+        #     campaignx_owner_object_list = campaignx_manager.retrieve_campaignx_owner_list(
+        #         campaignx_we_vote_id_list=[campaignx_we_vote_id], viewer_is_owner=False)
+        #     for campaignx_owner in campaignx_owner_object_list:
+        #         campaign_owner_dict = {
+        #             'organization_name':                        campaignx_owner.organization_name,
+        #             'organization_we_vote_id':                  campaignx_owner.organization_we_vote_id,
+        #             'feature_this_profile_image':               campaignx_owner.feature_this_profile_image,
+        #             'visible_to_public':                        campaignx_owner.visible_to_public,
+        #             'we_vote_hosted_profile_image_url_medium':campaignx_owner.we_vote_hosted_profile_image_url_medium,
+        #             'we_vote_hosted_profile_image_url_tiny':    campaignx_owner.we_vote_hosted_profile_image_url_tiny,
+        #         }
+        #         campaignx_owner_list.append(campaign_owner_dict)
+        politician_owner_list = []
+
         results = {
             'success':                      success,
             'status':                       status,
             'politician':                   politician,
             'politician_found':             politician_found,
             'politician_id':                politician_id,
+            'politician_owner_list':        politician_owner_list,
             'politician_we_vote_id':        politician_we_vote_id,
             'error_result':                 error_result,
             'DoesNotExist':                 exception_does_not_exist,
@@ -683,7 +722,7 @@ class PoliticianManager(models.Manager):
         return results
 
     def retrieve_politician_from_we_vote_id(self, politician_we_vote_id):
-        return self.retrieve_politician(0, politician_we_vote_id)
+        return self.retrieve_politician(politician_we_vote_id=politician_we_vote_id)
 
     def create_politician_name_filter(
             self,
@@ -880,7 +919,7 @@ class PoliticianManager(models.Manager):
         :param twitter_profile_banner_url_https:
         :return:
         """
-        politician_details = self.retrieve_politician(0, candidate.politician_we_vote_id)
+        politician_details = self.retrieve_politician(politician_we_vote_id=candidate.politician_we_vote_id)
         politician = politician_details['politician']
         if politician_details['success']:
             politician.we_vote_hosted_profile_image_url_medium = ''
@@ -963,7 +1002,7 @@ class PoliticianManager(models.Manager):
         status = ''
         success = True
         values_changed = False
-        politician_details = self.retrieve_politician(0, candidate.politician_we_vote_id)
+        politician_details = self.retrieve_politician(politician_we_vote_id=candidate.politician_we_vote_id)
         politician = politician_details['politician']
         from politician.controllers import add_twitter_handle_to_next_politician_spot
         if politician_details['success'] and politician:
@@ -1194,17 +1233,15 @@ class PoliticianManager(models.Manager):
         return results
 
     def fetch_politician_id_from_we_vote_id(self, we_vote_id):
-        politician_id = 0
         politician_manager = PoliticianManager()
-        results = politician_manager.retrieve_politician(politician_id, we_vote_id)
+        results = politician_manager.retrieve_politician(politician_we_vote_id=we_vote_id)
         if results['success']:
             return results['politician_id']
         return 0
 
     def fetch_politician_we_vote_id_from_id(self, politician_id):
-        we_vote_id = ''
         politician_manager = PoliticianManager()
-        results = politician_manager.retrieve_politician(politician_id, we_vote_id)
+        results = politician_manager.retrieve_politician(politician_id=politician_id)
         if results['success']:
             return results['politician_we_vote_id']
         return ''
@@ -1773,6 +1810,291 @@ class PoliticianManager(models.Manager):
 
         return 0
 
+    def generate_seo_friendly_path(
+            self,
+            base_pathname_string=None,
+            politician_name=None,
+            politician_we_vote_id='',
+            state_code=None):
+        """
+        Generate SEO friendly path for this politician. Ensure that the SEO friendly path is unique.
+
+        :param base_pathname_string: Pass this in if we want a custom SEO friendly path
+        :param politician_name:
+        :param politician_we_vote_id:
+        :param state_code:
+        :return:
+        """
+        final_pathname_string = ''
+        pathname_modifier = None
+        status = ""
+
+        required_variable_missing = False
+        if not positive_value_exists(politician_we_vote_id):
+            required_variable_missing = True
+            status += "MISSING_POLITICIAN_WE_VOTE_ID "
+
+        if not politician_name:
+            required_variable_missing = True
+            status += "MISSING_POLITICIAN_NAME "
+
+        if required_variable_missing:
+            results = {
+                'seo_friendly_path':            final_pathname_string,
+                'seo_friendly_path_created':    False,
+                'seo_friendly_path_found':      False,
+                'status':                       status,
+                'success':                      False,
+            }
+            return results
+
+        # If one wasn't passed in, generate the ideal path given this name
+        pathname_modifier_length = 3
+        length_to_allow_for_pathname_modifier = pathname_modifier_length + 1  # + 1 for "-"
+        base_pathname_string_max_length = 255 - length_to_allow_for_pathname_modifier
+        try:
+            if positive_value_exists(base_pathname_string):
+                base_pathname_string = slugify(base_pathname_string)
+                if len(base_pathname_string) > base_pathname_string_max_length:
+                    base_pathname_string = base_pathname_string[:base_pathname_string_max_length]
+            else:
+                state_suffix = ''
+                state_suffix_length = 0
+                # Can we create a state_suffix?
+                if positive_value_exists(state_code):
+                    state_suffix = "{state_text}-politician" \
+                                           "".format(state_text=convert_state_code_to_state_text(state_code))
+                    state_suffix = "-" + slugify(state_suffix)
+                    state_suffix_length = len(state_suffix)
+                base_pathname_string = slugify(politician_name)
+                if state_suffix_length > 0 and \
+                        len(base_pathname_string) > (base_pathname_string_max_length - state_suffix_length):
+                    # Make sure there is enough room for the state_suffix
+                    base_pathname_string = base_pathname_string[:base_pathname_string_max_length - state_suffix_length]
+                base_pathname_string += state_suffix
+        except Exception as e:
+            status += 'PROBLEM_WITH_SLUGIFY: ' + str(e) + ' '
+            results = {
+                'seo_friendly_path':            final_pathname_string,
+                'seo_friendly_path_created':    False,
+                'seo_friendly_path_found':      False,
+                'status':                       status,
+                'success':                      False,
+            }
+            return results
+
+        if not base_pathname_string or not positive_value_exists(len(base_pathname_string)):
+            status += "MISSING_BASE_PATHNAME_STRING "
+            results = {
+                'seo_friendly_path':            final_pathname_string,
+                'seo_friendly_path_created':    False,
+                'seo_friendly_path_found':      False,
+                'status':                       status,
+                'success':                      False,
+            }
+            return results
+
+        # Is that path already stored for this campaign?
+        try:
+            path_query = PoliticianSEOFriendlyPath.objects.using('readonly').all()
+            path_query = path_query.filter(politician_we_vote_id=politician_we_vote_id)
+            path_query = path_query.filter(final_pathname_string__iexact=base_pathname_string)
+            match_count = path_query.count()
+            if positive_value_exists(match_count):
+                status += "PATHNAME_FOUND-OWNED_BY_POLITICIAN "
+                results = {
+                    'seo_friendly_path':            base_pathname_string,
+                    'seo_friendly_path_created':    False,
+                    'seo_friendly_path_found':      True,
+                    'status':                       status,
+                    'success':                      True,
+                }
+                return results
+        except Exception as e:
+            status += 'PROBLEM_QUERYING_POLITICIAN_SEO_FRIENDLY_PATH_TABLE1 {error} [type: {error_type}] ' \
+                      ''.format(error=str(e), error_type=type(e))
+            results = {
+                'seo_friendly_path':            final_pathname_string,
+                'seo_friendly_path_created':    False,
+                'seo_friendly_path_found':      False,
+                'status':                       status,
+                'success':                      False,
+            }
+            return results
+
+        # Is it being used by any campaign?
+        owned_by_another_politician = False
+        try:
+            path_query = PoliticianSEOFriendlyPath.objects.using('readonly').all()
+            path_query = path_query.filter(final_pathname_string__iexact=base_pathname_string)
+            match_count = path_query.count()
+            if positive_value_exists(match_count):
+                owned_by_another_politician = True
+                status += "PATHNAME_FOUND-OWNED_BY_ANOTHER_POLITICIAN "
+        except Exception as e:
+            status += 'PROBLEM_QUERYING_POLITICIAN_SEO_FRIENDLY_PATH_TABLE2 {error} [type: {error_type}] ' \
+                      ''.format(error=str(e), error_type=type(e))
+            results = {
+                'seo_friendly_path':            final_pathname_string,
+                'seo_friendly_path_created':    False,
+                'seo_friendly_path_found':      False,
+                'status':                       status,
+                'success':                      False,
+            }
+            return results
+
+        if not owned_by_another_politician:
+            # Double-check that we don't have a reserved entry already in the Politician table
+            try:
+                path_query = Politician.objects.using('readonly').all()
+                path_query = path_query.filter(seo_friendly_path__iexact=base_pathname_string)
+                match_count = path_query.count()
+                if positive_value_exists(match_count):
+                    owned_by_another_politician = True
+                    status += "PATHNAME_FOUND_IN_ANOTHER_POLITICIAN "
+            except Exception as e:
+                status += 'PROBLEM_QUERYING_POLITICIAN_SEO_FRIENDLY_PATH_TABLE3 {error} [type: {error_type}] ' \
+                          ''.format(error=str(e), error_type=type(e))
+                results = {
+                    'seo_friendly_path':            final_pathname_string,
+                    'seo_friendly_path_created':    False,
+                    'seo_friendly_path_found':      False,
+                    'status':                       status,
+                    'success':                      False,
+                }
+                return results
+
+        if not owned_by_another_politician:
+            final_pathname_string = base_pathname_string
+        else:
+            # If already being used, add a random string on the end, verify not in use, and save
+            continue_retrieving = True
+            pathname_modifiers_already_reviewed_list = []  # Reset
+            safety_valve_count = 0
+            while continue_retrieving and safety_valve_count < 100:
+                safety_valve_count += 1
+                modifier_safety_valve_count = 0
+                pathname_modifier = generate_random_string(
+                    string_length=pathname_modifier_length,
+                    chars=string.ascii_lowercase + string.digits,
+                    remove_confusing_digits=True,
+                )
+                if pathname_modifier in pathname_modifiers_already_reviewed_list:
+                    # Already owned by another politician. Restart the while loop and try a different random string.
+                    pass
+                else:
+                    if modifier_safety_valve_count > 50:
+                        status += 'POLITICIAN_MODIFIER_SAFETY_VALVE_EXCEEDED '
+                        results = {
+                            'seo_friendly_path':            final_pathname_string,
+                            'seo_friendly_path_created':    False,
+                            'seo_friendly_path_found':      False,
+                            'status':                       status,
+                            'success':                      False,
+                        }
+                        return results
+                    modifier_safety_valve_count += 1
+                    try:
+                        pathname_modifiers_already_reviewed_list.append(pathname_modifier)
+                        path_query = PoliticianSEOFriendlyPath.objects.using('readonly').all()
+                        final_pathname_string_to_test = "{base_pathname_string}-{pathname_modifier}".format(
+                            base_pathname_string=base_pathname_string,
+                            pathname_modifier=pathname_modifier)
+                        path_query = path_query.filter(final_pathname_string__iexact=final_pathname_string_to_test)
+                        match_count = path_query.count()
+                        if not positive_value_exists(match_count):
+                            try:
+                                path_query = Politician.objects.using('readonly').all()
+                                path_query = path_query.filter(seo_friendly_path__iexact=final_pathname_string_to_test)
+                                match_count = path_query.count()
+                                if positive_value_exists(match_count):
+                                    status += "FOUND_IN_ANOTHER_POLITICIAN2 "
+                                else:
+                                    continue_retrieving = False
+                                    final_pathname_string = final_pathname_string_to_test
+                                    owned_by_another_politician = False
+                                    status += "NO_PATHNAME_COLLISION "
+                            except Exception as e:
+                                status += 'PROBLEM_QUERYING_POLITICIAN_TABLE {error} [type: {error_type}] ' \
+                                          ''.format(error=str(e), error_type=type(e))
+                                results = {
+                                    'seo_friendly_path':            final_pathname_string,
+                                    'seo_friendly_path_created':    False,
+                                    'seo_friendly_path_found':      False,
+                                    'status':                       status,
+                                    'success':                      False,
+                                }
+                                return results
+                    except Exception as e:
+                        status += 'PROBLEM_QUERYING_POLITICIAN_SEO_FRIENDLY_PATH_TABLE4 {error} [type: {error_type}] ' \
+                                  ''.format(error=str(e), error_type=type(e))
+                        results = {
+                            'seo_friendly_path':            final_pathname_string,
+                            'seo_friendly_path_created':    False,
+                            'seo_friendly_path_found':      False,
+                            'status':                       status,
+                            'success':                      False,
+                        }
+                        return results
+
+        if owned_by_another_politician:
+            # We have failed to find a unique URL
+            status += 'FAILED_TO_FIND_UNIQUE_URL '
+            results = {
+                'seo_friendly_path':            final_pathname_string,
+                'seo_friendly_path_created':    False,
+                'seo_friendly_path_found':      False,
+                'status':                       status,
+                'success':                      False,
+            }
+            return results
+
+        if not positive_value_exists(final_pathname_string) or not positive_value_exists(politician_we_vote_id):
+            # We have failed to generate a unique URL
+            status += 'MISSING_REQUIRED_VARIABLE '
+            results = {
+                'seo_friendly_path':            final_pathname_string,
+                'seo_friendly_path_created':    False,
+                'seo_friendly_path_found':      False,
+                'status':                       status,
+                'success':                      False,
+            }
+            return results
+
+        # Create a new entry
+        try:
+            politician_seo_friendly_path = PoliticianSEOFriendlyPath.objects.create(
+                base_pathname_string=base_pathname_string,
+                politician_name=politician_name,
+                politician_we_vote_id=politician_we_vote_id,
+                final_pathname_string=final_pathname_string,
+                pathname_modifier=pathname_modifier,
+            )
+            seo_friendly_path_created = True
+            seo_friendly_path_found = True
+            success = True
+            status += "POLITICIAN_SEO_FRIENDLY_PATH_CREATED "
+        except Exception as e:
+            status += "POLITICIAN_SEO_FRIENDLY_PATH_NOT_CREATED: " + str(e) + " "
+            results = {
+                'seo_friendly_path':            final_pathname_string,
+                'seo_friendly_path_created':    False,
+                'seo_friendly_path_found':      False,
+                'status':                       status,
+                'success':                      False,
+            }
+            return results
+
+        status += "FINAL_PATHNAME_STRING_GENERATED "
+        results = {
+            'seo_friendly_path':            final_pathname_string,
+            'seo_friendly_path_created':    seo_friendly_path_created,
+            'seo_friendly_path_found':      seo_friendly_path_found,
+            'status':                       status,
+            'success':                      success,
+        }
+        return results
+
     def retrieve_politicians_are_not_duplicates_list(self, politician_we_vote_id, read_only=True):
         """
         Get a list of other politician_we_vote_id's that are not duplicates
@@ -2075,6 +2397,19 @@ class PoliticianManager(models.Manager):
             'politicians_are_not_duplicates':               politicians_are_not_duplicates,
         }
         return results
+
+
+class PoliticianSEOFriendlyPath(models.Model):
+    objects = None
+
+    def __unicode__(self):
+        return "PoliticianSEOFriendlyPath"
+
+    politician_we_vote_id = models.CharField(max_length=255, null=True)
+    politician_name = models.CharField(max_length=255, null=False)
+    base_pathname_string = models.CharField(max_length=255, null=True)
+    pathname_modifier = models.CharField(max_length=10, null=True)
+    final_pathname_string = models.CharField(max_length=255, null=True, unique=True, db_index=True)
 
 
 class PoliticianTagLink(models.Model):

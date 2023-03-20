@@ -3,14 +3,18 @@
 # -*- coding: UTF-8 -*-
 
 from django.db.models import Q
-from candidate.controllers import add_name_to_next_spot, move_candidates_to_another_politician
+from candidate.controllers import add_name_to_next_spot, generate_candidate_dict_list_from_candidate_object_list, \
+    move_candidates_to_another_politician
 from candidate.models import CandidateListManager, CandidateManager
 from office.models import ContestOfficeManager, ContestOfficeListManager
-from politician.models import Politician, PoliticianManager, POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, \
-    POLITICIAN_UNIQUE_IDENTIFIERS, UNKNOWN
+from office_held.controllers import generate_office_held_dict_list_from_office_held_we_vote_id_list
+from politician.models import Politician, PoliticianManager, PoliticianSEOFriendlyPath, \
+    POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, POLITICIAN_UNIQUE_IDENTIFIERS, UNKNOWN
 from position.controllers import move_positions_to_another_politician
-from representative.controllers import move_representatives_to_another_politician
+from representative.controllers import generate_representative_dict_list_from_representative_object_list, \
+    move_representatives_to_another_politician
 from representative.models import RepresentativeManager
+from voter.models import VoterManager
 from config.base import get_environment_variable
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_political_party_constant, \
@@ -484,14 +488,15 @@ def merge_if_duplicate_politicians(politician1, politician2, conflict_values):
     for attribute in POLITICIAN_UNIQUE_IDENTIFIERS:
         if attribute == "ballotpedia_id" \
                 or attribute == "other_source_photo_url" \
+                or attribute == "seo_friendly_path" \
                 or attribute == "we_vote_hosted_profile_image_url_large" \
                 or attribute == "we_vote_hosted_profile_image_url_medium" \
                 or attribute == "we_vote_hosted_profile_image_url_tiny":
             if positive_value_exists(getattr(politician1, attribute)):
-                # We can proceed because politician1 has a valid image, so we can default to choosing that one
+                # We can proceed because politician1 has a valid attribute, so we can default to choosing that one
                 pass
             elif positive_value_exists(getattr(politician2, attribute)):
-                # If we are here, politician1 does NOT have an image, but politician2 does
+                # If we are here, politician1 does NOT have a valid attribute, but politician2 does
                 merge_choices[attribute] = getattr(politician2, attribute)
         else:
             conflict_value = conflict_values.get(attribute, None)
@@ -575,7 +580,7 @@ def merge_these_two_politicians(
     politician_manager = PoliticianManager()
 
     # Politician 1 is the one we keep, and Politician 2 is the one we will merge into Politician 1
-    politician1_results = politician_manager.retrieve_politician(we_vote_id=politician1_we_vote_id)
+    politician1_results = politician_manager.retrieve_politician(politician_we_vote_id=politician1_we_vote_id)
     if politician1_results['politician_found']:
         politician1 = politician1_results['politician']
         politician1_id = politician1.id
@@ -588,7 +593,7 @@ def merge_these_two_politicians(
         }
         return results
 
-    politician2_results = politician_manager.retrieve_politician(we_vote_id=politician2_we_vote_id)
+    politician2_results = politician_manager.retrieve_politician(politician_we_vote_id=politician2_we_vote_id)
     if politician2_results['politician_found']:
         politician2 = politician2_results['politician']
         politician2_id = politician2.id
@@ -654,7 +659,7 @@ def merge_these_two_politicians(
         politician1 = add_name_to_next_spot(politician1, politician2.google_civic_candidate_name3)
 
     # Preserve unique politician_email -> politician_email3
-    # TEMP UNTIL WE DEPRECATE THIS FIELD
+    # TEMP UNTIL WE DEPRECATE politician_email_address
     if positive_value_exists(politician2.politician_email_address):
         results = add_value_to_next_representative_spot(
             field_name_base='politician_email',
@@ -807,6 +812,15 @@ def merge_these_two_politicians(
         if not results['success']:
             status += results['status']
 
+    # Preserve the shortcuts used by politician2
+    try:
+        shortcuts_moved = PoliticianSEOFriendlyPath.objects \
+            .filter(politician_we_vote_id__iexact=politician2_we_vote_id) \
+            .update(politician_we_vote_id=politician1_we_vote_id)
+        status += "SHORTCUTS_MOVED: " + str(shortcuts_moved) + " "
+    except Exception as e:
+        status += "MERGE_TWO_POLITICIANS-COULD_NOT_MOVE_SHORTCUTS: " + str(e) + " "
+
     # Update candidates to new politician ids
     candidate_results = move_candidates_to_another_politician(
         from_politician_id=politician2_id,
@@ -896,6 +910,355 @@ def merge_these_two_politicians(
         'status': status,
         'politicians_merged': True,
         'politician': politician1,
+    }
+    return results
+
+
+def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwner (No CDN)
+        request=None,
+        voter_device_id='',
+        politician_we_vote_id='',
+        seo_friendly_path='',
+        as_owner=False,
+        hostname=''):
+    status = ''
+    success = True
+
+    politician_found = False
+    politician_owner_list = []
+    seo_friendly_path_list = []
+    voter_is_politician_owner = False
+    voter_signed_in_with_email = False
+    voter_we_vote_id = ''
+
+    politician_manager = PoliticianManager()
+    politician = None
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if voter_results['voter_found']:
+        voter = voter_results['voter']
+        voter_signed_in_with_email = voter.signed_in_with_email()
+        voter_we_vote_id = voter.we_vote_id
+    if positive_value_exists(as_owner):
+        if not positive_value_exists(voter_we_vote_id):
+            status += "VALID_VOTER_ID_MISSING "
+            success = False
+        if success:
+            results = politician_manager.retrieve_politician_as_owner(
+                politician_we_vote_id=politician_we_vote_id,
+                seo_friendly_path=seo_friendly_path,
+                voter_we_vote_id=voter_we_vote_id,
+                read_only=True,
+            )
+            if not results['success']:
+                status += "POLITICIAN_RETRIEVE_ERROR1: "
+                success = False
+            politician_found = results['politician_found']
+            status += results['status']
+            voter_is_politician_owner = results['viewer_is_owner']
+            politician = results['politician']
+            # politician_owner_list = results['politician_owner_list']
+    else:
+        results = politician_manager.retrieve_politician(
+            politician_we_vote_id=politician_we_vote_id,
+            seo_friendly_path=seo_friendly_path,
+            read_only=True,
+        )
+        politician_found = results['politician_found']
+        politician = results['politician']
+        # politician_owner_list = results['politician_owner_list']
+        voter_is_politician_owner = False
+        if not results['success']:
+            status += "POLITICIAN_RETRIEVE_ERROR2: "
+            success = False
+        status += results['status']
+    if not success or not politician_found:
+        results = {
+            'status':                           status,
+            'success':                          False,
+            'politician_description':             '',
+            'politician_name':                   '',
+            'politician_owner_list':             politician_owner_list,
+            'politician_candidate_list':        [],
+            'politician_candidate_list_exists': False,
+            'politician_we_vote_id':             '',
+            'in_draft_mode':                    True,
+            'is_supporters_count_minimum_exceeded': False,
+            'seo_friendly_path':                '',
+            'seo_friendly_path_list':           seo_friendly_path_list,
+            'supporters_count':                 0,
+            'supporters_count_next_goal':       0,
+            'supporters_count_victory_goal':    0,
+            'visible_on_this_site':             False,
+            'voter_politician_supporter':        {},
+            'voter_can_send_updates_to_politician': False,
+            'voter_is_politician_owner':         False,
+            'voter_signed_in_with_email':       voter_signed_in_with_email,
+            'we_vote_hosted_profile_image_url_large': '',
+            'we_vote_hosted_profile_image_url_medium': '',
+            'we_vote_hosted_profile_image_url_tiny': '',
+        }
+        return results
+
+    # Get politician news items / updates
+    politician_news_item_list = []
+    # news_item_list_results = politician_manager.retrieve_politician_news_item_list(
+    #     politician_we_vote_id=politician.we_vote_id,
+    #     read_only=True,
+    #     voter_is_politician_owner=voter_is_politician_owner)
+    # if news_item_list_results['politician_news_item_list_found']:
+    #     news_item_list = news_item_list_results['politician_news_item_list']
+    #     for news_item in news_item_list:
+    #         date_last_changed_string = ''
+    #         date_posted_string = ''
+    #         date_sent_to_email_string = ''
+    #         try:
+    #             date_last_changed_string = news_item.date_last_changed.strftime('%Y-%m-%d %H:%M:%S')
+    #             date_posted_string = news_item.date_posted.strftime('%Y-%m-%d %H:%M:%S')
+    #             if positive_value_exists(news_item.date_sent_to_email):
+    #                 date_sent_to_email_string = news_item.date_sent_to_email.strftime('%Y-%m-%d %H:%M:%S')
+    #         except Exception as e:
+    #             status += "DATE_CONVERSION_ERROR: " + str(e) + " "
+    #         one_news_item_dict = {
+    #             'politician_news_subject': news_item.politician_news_subject,
+    #             'politician_news_text': news_item.politician_news_text,
+    #             'politician_news_item_we_vote_id': news_item.we_vote_id,
+    #             'politician_we_vote_id': news_item.politician_we_vote_id,
+    #             'date_last_changed': date_last_changed_string,
+    #             'date_posted': date_posted_string,
+    #             'date_sent_to_email': date_sent_to_email_string,
+    #             'in_draft_mode': news_item.in_draft_mode,
+    #             'organization_we_vote_id': news_item.organization_we_vote_id,
+    #             'speaker_name': news_item.speaker_name,
+    #             'visible_to_public': news_item.visible_to_public,
+    #             'voter_we_vote_id': news_item.voter_we_vote_id,
+    #             'we_vote_hosted_profile_image_url_medium': news_item.we_vote_hosted_profile_image_url_medium,
+    #             'we_vote_hosted_profile_image_url_tiny': news_item.we_vote_hosted_profile_image_url_tiny,
+    #         }
+    #         politician_news_item_list.append(one_news_item_dict)
+
+    # from organization.controllers import site_configuration_retrieve_for_api
+    # site_results = site_configuration_retrieve_for_api(hostname)
+    # site_owner_organization_we_vote_id = site_results['organization_we_vote_id']
+    #
+    # if positive_value_exists(site_owner_organization_we_vote_id):
+    #     try:
+    #         visible_on_this_site_politician_we_vote_id_list = \
+    #             politician_manager.retrieve_visible_on_this_site_politician_simple_list(
+    #                 site_owner_organization_we_vote_id=site_owner_organization_we_vote_id)
+    #         if politician.we_vote_id in visible_on_this_site_politician_we_vote_id_list:
+    #             politician.visible_on_this_site = True
+    #         else:
+    #             politician.visible_on_this_site = False
+    #     except Exception as e:
+    #         success = False
+    #         status += "RETRIEVE_POLITICIAN_LIST_FOR_PRIVATE_LABEL_FAILED: " + str(e) + " "
+    # else:
+    #     politician.visible_on_this_site = True
+
+    voter_can_send_updates_politician_we_vote_ids = []
+    # voter_can_send_updates_politician_we_vote_ids = \
+    #     politician_manager.retrieve_voter_can_send_updates_politician_we_vote_ids(
+    #         voter_we_vote_id=voter_we_vote_id,
+    #     )
+
+    candidate_list_manager = CandidateListManager()
+    results = candidate_list_manager.retrieve_candidate_list(
+        politician_we_vote_id_list=[politician.we_vote_id],
+    )
+    status += results['status']
+    politician_candidate_list = results['candidate_list']
+    politician_candidate_list_exists = results['candidate_list_found']
+
+    # We match the output from candidatesRetrieve & candidateRetrieve API
+    results = generate_candidate_dict_list_from_candidate_object_list(candidate_object_list=politician_candidate_list)
+    politician_candidate_dict_list = results['candidate_dict_list']
+
+    representative_manager = RepresentativeManager()
+    results = representative_manager.retrieve_representative_list(
+        politician_we_vote_id_list=[politician.we_vote_id],
+    )
+    status += results['status']
+    politician_representative_list = results['representative_list']
+    politician_representative_list_exists = results['representative_list_found']
+    # We match the output from representativesRetrieve & representativeRetrieve API
+    results = generate_representative_dict_list_from_representative_object_list(
+        representative_object_list=politician_representative_list)
+    politician_representative_dict_list = results['representative_dict_list']
+
+    office_held_dict_list = []
+    office_held_dict_list_found = False
+    office_held_we_vote_id_list = []
+    for one_representative in politician_representative_list:
+        if positive_value_exists(one_representative.office_held_we_vote_id) \
+                and one_representative.office_held_we_vote_id not in office_held_we_vote_id_list:
+            office_held_we_vote_id_list.append(one_representative.office_held_we_vote_id)
+    if len(office_held_we_vote_id_list) > 0:
+        results = generate_office_held_dict_list_from_office_held_we_vote_id_list(
+            office_held_we_vote_id_list=office_held_we_vote_id_list)
+        status += results['status']
+        office_held_dict_list = results['office_held_dict_list']
+        if results['success'] and len(office_held_dict_list) > 0:
+            office_held_dict_list_found = True
+
+    # We need to know all the politicians this voter can vote for, so we can figure out
+    #  if the voter can vote for any politicians in the election
+    if positive_value_exists(as_owner):
+        from ballot.controllers import what_voter_can_vote_for
+        results = what_voter_can_vote_for(request=request, voter_device_id=voter_device_id)
+        voter_can_vote_for_politician_we_vote_ids = results['voter_can_vote_for_politician_we_vote_ids']
+    else:
+        voter_can_vote_for_politician_we_vote_ids = []
+
+    # supporter_results = politician_manager.retrieve_politician_supporter(
+    #     politician_we_vote_id=politician.we_vote_id,
+    #     voter_we_vote_id=voter_we_vote_id,
+    #     read_only=True)
+    # if supporter_results['success'] and supporter_results['politician_supporter_found']:
+    #     politician_supporter = supporter_results['politician_supporter']
+    #     chip_in_total = 'none'
+    #     date_last_changed_string = ''
+    #     date_supported_string = ''
+    #     try:
+    #         date_last_changed_string = politician_supporter.date_last_changed.strftime('%Y-%m-%d %H:%M:%S')
+    #         date_supported_string = politician_supporter.date_supported.strftime('%Y-%m-%d %H:%M:%S')
+    #     except Exception as e:
+    #         status += "DATE_CONVERSION_ERROR: " + str(e) + " "
+    #     try:
+    #         from stripe_donations.models import StripeManager
+    #         chip_in_total = StripeManager.retrieve_chip_in_total(voter_we_vote_id, politician.we_vote_id)
+    #     except Exception as e:
+    #         status += "RETRIEVE_CHIP_IN_TOTAL_ERROR: " + str(e) + " "
+    #
+    #     voter_politician_supporter_dict = {
+    #         'politician_supported':           politician_supporter.politician_supported,
+    #         'politician_we_vote_id':         politician_supporter.politician_we_vote_id,
+    #         'chip_in_total':                chip_in_total,
+    #         'date_last_changed':            date_last_changed_string,
+    #         'date_supported':               date_supported_string,
+    #         'id':                           politician_supporter.id,
+    #         'organization_we_vote_id':      politician_supporter.organization_we_vote_id,
+    #         'supporter_endorsement':        politician_supporter.supporter_endorsement,
+    #         'supporter_name':               politician_supporter.supporter_name,
+    #         'visible_to_public':            politician_supporter.visible_to_public,
+    #         'voter_we_vote_id':             politician_supporter.voter_we_vote_id,
+    #         'voter_signed_in_with_email':   voter_signed_in_with_email,
+    #         'we_vote_hosted_profile_image_url_medium': politician_supporter.we_vote_hosted_profile_image_url_medium,
+    #         'we_vote_hosted_profile_image_url_tiny': politician_supporter.we_vote_hosted_profile_image_url_tiny,
+    #     }
+    # else:
+    #     voter_politician_supporter_dict = {}
+
+    # Get most recent supporters
+    latest_politician_supporter_list = []
+    # supporter_list_results = politician_manager.retrieve_politician_supporter_list(
+    #     politician_we_vote_id=politician.we_vote_id,
+    #     limit=7,
+    #     read_only=True,
+    #     require_visible_to_public=True)
+    # if supporter_list_results['supporter_list_found']:
+    #     supporter_list = supporter_list_results['supporter_list']
+    #     for politician_supporter in supporter_list:
+    #         date_supported_string = ''
+    #         try:
+    #             date_supported_string = politician_supporter.date_supported.strftime('%Y-%m-%d %H:%M:%S')
+    #         except Exception as e:
+    #             status += "DATE_CONVERSION_ERROR: " + str(e) + " "
+    #         one_supporter_dict = {
+    #             'id': politician_supporter.id,
+    #             'politician_supported': politician_supporter.politician_supported,
+    #             'politician_we_vote_id': politician_supporter.politician_we_vote_id,
+    #             'date_supported': date_supported_string,
+    #             'organization_we_vote_id': politician_supporter.organization_we_vote_id,
+    #             'supporter_endorsement': politician_supporter.supporter_endorsement,
+    #             'supporter_name': politician_supporter.supporter_name,
+    #             'voter_we_vote_id': politician_supporter.voter_we_vote_id,
+    #           'we_vote_hosted_profile_image_url_medium': politician_supporter.we_vote_hosted_profile_image_url_medium,
+    #             'we_vote_hosted_profile_image_url_tiny': politician_supporter.we_vote_hosted_profile_image_url_tiny,
+    #         }
+    #         latest_politician_supporter_list.append(one_supporter_dict)
+
+    # Get most recent supporter_endorsements
+    latest_politician_supporter_endorsement_list = []
+    # supporter_list_results = politician_manager.retrieve_politician_supporter_list(
+    #     politician_we_vote_id=politician.we_vote_id,
+    #     limit=10,
+    #     require_supporter_endorsement=True,
+    #     read_only=True)
+    # if supporter_list_results['supporter_list_found']:
+    #     supporter_list = supporter_list_results['supporter_list']
+    #     for politician_supporter in supporter_list:
+    #         date_supported_string = ''
+    #         try:
+    #             date_supported_string = politician_supporter.date_supported.strftime('%Y-%m-%d %H:%M:%S')
+    #         except Exception as e:
+    #             status += "DATE_CONVERSION_ERROR: " + str(e) + " "
+    #         one_supporter_dict = {
+    #             'id': politician_supporter.id,
+    #             'politician_supported': politician_supporter.politician_supported,
+    #             'politician_we_vote_id': politician_supporter.politician_we_vote_id,
+    #             'date_supported': date_supported_string,
+    #             'organization_we_vote_id': politician_supporter.organization_we_vote_id,
+    #             'supporter_endorsement': politician_supporter.supporter_endorsement,
+    #             'supporter_name': politician_supporter.supporter_name,
+    #             'voter_we_vote_id': politician_supporter.voter_we_vote_id,
+    #           'we_vote_hosted_profile_image_url_medium': politician_supporter.we_vote_hosted_profile_image_url_medium,
+    #             'we_vote_hosted_profile_image_url_tiny': politician_supporter.we_vote_hosted_profile_image_url_tiny,
+    #         }
+    #         latest_politician_supporter_endorsement_list.append(one_supporter_dict)
+
+    # If smaller sizes weren't stored, use large image
+    if politician.we_vote_hosted_profile_image_url_medium:
+        we_vote_hosted_profile_image_url_medium = politician.we_vote_hosted_profile_image_url_medium
+    else:
+        we_vote_hosted_profile_image_url_medium = politician.we_vote_hosted_profile_image_url_large
+    if politician.we_vote_hosted_profile_image_url_tiny:
+        we_vote_hosted_profile_image_url_tiny = politician.we_vote_hosted_profile_image_url_tiny
+    else:
+        we_vote_hosted_profile_image_url_tiny = politician.we_vote_hosted_profile_image_url_large
+    # supporters_count_next_goal = politician_manager.fetch_supporters_count_next_goal(
+    #     supporters_count=politician.supporters_count,
+    #     supporters_count_victory_goal=politician.supporters_count_victory_goal)
+    # final_election_date_plus_cool_down = generate_date_as_integer() + FINAL_ELECTION_DATE_COOL_DOWN
+    # final_election_date_in_past = \
+    #     final_election_date_plus_cool_down >= politician.final_election_date_as_integer \
+    #     if positive_value_exists(politician.final_election_date_as_integer) else False
+    results = {
+        'candidate_list':                   politician_candidate_dict_list,
+        'candidate_list_exists':            politician_candidate_list_exists,
+        'office_held_list':                 office_held_dict_list,
+        'office_held_list_exists':          office_held_dict_list_found,
+        'politician_description':           politician.twitter_description,
+        'politician_name':                  politician.politician_name,
+        'politician_news_item_list':        politician_news_item_list,
+        'politician_owner_list':            politician_owner_list,
+        'politician_we_vote_id':            politician.we_vote_id,
+        # 'final_election_date_as_integer':   politician.final_election_date_as_integer,
+        # 'final_election_date_in_past':      final_election_date_in_past,
+        # 'in_draft_mode':                    politician.in_draft_mode,
+        # 'is_blocked_by_we_vote':            politician.is_blocked_by_we_vote,
+        # 'is_blocked_by_we_vote_reason':     politician.is_blocked_by_we_vote_reason,
+        # 'is_supporters_count_minimum_exceeded': politician.is_supporters_count_minimum_exceeded(),
+        # 'latest_politician_supporter_endorsement_list':  latest_politician_supporter_endorsement_list,
+        # 'latest_politician_supporter_list':  latest_politician_supporter_list,
+        'representative_list':              politician_representative_dict_list,
+        'representative_list_exists':       politician_representative_list_exists,
+        'seo_friendly_path':                politician.seo_friendly_path,
+        'status':                           status,
+        'success':                          success,
+        # 'supporters_count':                 politician.supporters_count,
+        # 'supporters_count_next_goal':       supporters_count_next_goal,
+        # 'supporters_count_victory_goal':    politician.supporters_count_victory_goal,
+        # 'visible_on_this_site':             politician.visible_on_this_site,
+        # 'voter_politician_supporter':        voter_politician_supporter_dict,
+        'voter_can_send_updates_to_politician':
+            politician.we_vote_id in voter_can_send_updates_politician_we_vote_ids,
+        'voter_can_vote_for_politician_we_vote_ids': voter_can_vote_for_politician_we_vote_ids,
+        'voter_is_politician_owner':        voter_is_politician_owner,
+        'voter_signed_in_with_email':       voter_signed_in_with_email,
+        'we_vote_hosted_profile_image_url_large':   politician.we_vote_hosted_profile_image_url_large,
+        'we_vote_hosted_profile_image_url_medium':  we_vote_hosted_profile_image_url_medium,
+        'we_vote_hosted_profile_image_url_tiny':    we_vote_hosted_profile_image_url_tiny,
     }
     return results
 
@@ -1446,7 +1809,7 @@ def update_parallel_fields_with_years_in_related_objects(
                     if candidate.politician_we_vote_id not in politician_we_vote_id_list:
                         politician_we_vote_id_list.append(candidate.politician_we_vote_id)
                         results = politician_manager.retrieve_politician(
-                            we_vote_id=candidate.politician_we_vote_id)
+                            politician_we_vote_id=candidate.politician_we_vote_id)
                         if not results['success']:
                             success = False
                         elif results['politician_found']:
@@ -1459,7 +1822,7 @@ def update_parallel_fields_with_years_in_related_objects(
                             if not results['success']:
                                 status += results['status']
                     if success and positive_value_exists(politician_we_vote_id_list):
-                        results = representative_manager.retrieve_representatives_list(
+                        results = representative_manager.retrieve_representative_list(
                             politician_we_vote_id_list=politician_we_vote_id_list,
                             read_only=False,
                             years_list=years_list,
@@ -1508,7 +1871,7 @@ def update_parallel_fields_with_years_in_related_objects(
     elif 'pol' in master_we_vote_id_updated:
         politician_we_vote_id_list = [master_we_vote_id_updated]
         # Direct update: Representatives (Retrieve representative_list)
-        results = representative_manager.retrieve_representatives_list(
+        results = representative_manager.retrieve_representative_list(
             politician_we_vote_id_list=[master_we_vote_id_updated],
             read_only=False,
             years_list=years_list,
@@ -1541,7 +1904,8 @@ def update_parallel_fields_with_years_in_related_objects(
             if positive_value_exists(representative.politician_we_vote_id):
                 politician_we_vote_id_list = [representative.politician_we_vote_id]
                 # Direct update: Politician
-                results = politician_manager.retrieve_politician(we_vote_id=representative.politician_we_vote_id)
+                results = politician_manager.retrieve_politician(
+                    politician_we_vote_id=representative.politician_we_vote_id)
                 if not results['success']:
                     success = False
                 if results['politician_found']:
@@ -1736,7 +2100,7 @@ def update_candidates_under_this_office(
                         if candidate.politician_we_vote_id not in politician_we_vote_id_list:
                             politician_we_vote_id_list.append(candidate.politician_we_vote_id)
                             results = politician_manager.retrieve_politician(
-                                we_vote_id=candidate.politician_we_vote_id)
+                                politician_we_vote_id=candidate.politician_we_vote_id)
                             if not results['success']:
                                 success = False
                             if results['politician_found']:
@@ -1749,7 +2113,7 @@ def update_candidates_under_this_office(
                                 if not results['success']:
                                     status += results['status']
                 if positive_value_exists(politician_we_vote_id_list):
-                    results = representative_manager.retrieve_representatives_list(
+                    results = representative_manager.retrieve_representative_list(
                         politician_we_vote_id_list=politician_we_vote_id_list,
                         read_only=False,
                         years_list=years_list,
@@ -1791,7 +2155,7 @@ def update_representatives_under_this_office_held(
     years_list = list(set(years_false_list + years_true_list))
 
     # Direct update: Representatives (Retrieve representative_list)
-    results = representative_manager.retrieve_representatives_list(
+    results = representative_manager.retrieve_representative_list(
         office_held_we_vote_id_list=[office_held_we_vote_id],
         read_only=False,
         years_list=years_list,

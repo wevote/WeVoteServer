@@ -1084,7 +1084,7 @@ def representative_edit_process_view(request):
     if positive_value_exists(politician_we_vote_id):
         politician_manager = PoliticianManager()
         results = politician_manager.retrieve_politician(
-            we_vote_id=politician_we_vote_id,
+            politician_we_vote_id=politician_we_vote_id,
             read_only=True,
         )
         if results['politician_found']:
