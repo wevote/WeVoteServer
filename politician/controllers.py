@@ -1232,6 +1232,9 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
         'politician_name':                  politician.politician_name,
         'politician_news_item_list':        politician_news_item_list,
         'politician_owner_list':            politician_owner_list,
+        'politician_twitter_handle':        politician.politician_twitter_handle,
+        'politician_twitter_handle2':       politician.politician_twitter_handle2,
+        'politician_url':                   politician.politician_url,
         'politician_we_vote_id':            politician.we_vote_id,
         # 'final_election_date_as_integer':   politician.final_election_date_as_integer,
         # 'final_election_date_in_past':      final_election_date_in_past,
@@ -1249,6 +1252,7 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
         # 'supporters_count':                 politician.supporters_count,
         # 'supporters_count_next_goal':       supporters_count_next_goal,
         # 'supporters_count_victory_goal':    politician.supporters_count_victory_goal,
+        'twitter_followers_count':          politician.twitter_followers_count,
         # 'visible_on_this_site':             politician.visible_on_this_site,
         # 'voter_politician_supporter':        voter_politician_supporter_dict,
         'voter_can_send_updates_to_politician':
