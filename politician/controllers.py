@@ -1071,8 +1071,12 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
     politician_candidate_list_exists = results['candidate_list_found']
 
     # We match the output from candidatesRetrieve & candidateRetrieve API
-    results = generate_candidate_dict_list_from_candidate_object_list(candidate_object_list=politician_candidate_list)
-    politician_candidate_dict_list = results['candidate_dict_list']
+    if len(politician_candidate_list) > 0:
+        results = generate_candidate_dict_list_from_candidate_object_list(
+            candidate_object_list=politician_candidate_list)
+        politician_candidate_dict_list = results['candidate_dict_list']
+    else:
+        politician_candidate_dict_list = []
 
     representative_manager = RepresentativeManager()
     results = representative_manager.retrieve_representative_list(
@@ -1081,11 +1085,13 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
     status += results['status']
     politician_representative_list = results['representative_list']
     politician_representative_list_exists = results['representative_list_found']
-    # We match the output from representativesRetrieve & representativeRetrieve API
-    results = generate_representative_dict_list_from_representative_object_list(
-        representative_object_list=politician_representative_list)
-    politician_representative_dict_list = results['representative_dict_list']
-
+    if len(politician_representative_list) > 0:
+        # We match the output from representativesRetrieve & representativeRetrieve API
+        results = generate_representative_dict_list_from_representative_object_list(
+            representative_object_list=politician_representative_list)
+        politician_representative_dict_list = results['representative_dict_list']
+    else:
+        politician_representative_dict_list = []
     office_held_dict_list = []
     office_held_dict_list_found = False
     office_held_we_vote_id_list = []

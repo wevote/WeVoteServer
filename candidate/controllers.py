@@ -1276,16 +1276,11 @@ def candidates_query_for_api(  # candidatesQuery
         race_office_level_list=[],
         search_text='',
         use_we_vote_format=False):
-    # candidate_list_manager.retrieve_all_candidates_for_one_year
-    # candidate_list_manager.retrieve_all_candidates_for_upcoming_election
-
     candidate_list = []
     candidates_limit = 300
     candidates_returned_count = 0
     candidates_total_count = 0
-    candidates_to_display = []
-    election_list = []
-    google_civic_election_id = 0
+    candidate_dict_list = []
     required_variables_missing = False
     retrieve_mode = ''
     status = ''
@@ -1367,122 +1362,18 @@ def candidates_query_for_api(  # candidatesQuery
     #  (like candidate_to_office_link_list), then do it here before generating dicts from candidate_list
 
     if success:
+        candidate_manager = CandidateManager()
+        candidate_object_list_modified = []
         for candidate in candidate_list:
-            # if not positive_value_exists(candidate.contest_office_name):
-            #     candidate = candidate_manager.refresh_cached_candidate_office_info(candidate)
-            wdate = ''
-            if isinstance(candidate.withdrawal_date, the_other_datetime.date):
-                wdate = candidate.withdrawal_date.strftime("%Y-%m-%d")
+            if not positive_value_exists(candidate.contest_office_name):
+                candidate = candidate_manager.refresh_cached_candidate_office_info(candidate)
+            candidate_object_list_modified.append(candidate)
+        # Eventually we need to deal with "use_we_vote_format"
+        results = generate_candidate_dict_list_from_candidate_object_list(
+            candidate_object_list=candidate_object_list_modified)
+        candidate_dict_list = results['candidate_dict_list']
 
-            # This should match voter_ballot_items_retrieve_for_one_election_for_api (voterBallotItemsRetrieve)
-            date_last_updated = ''
-            if positive_value_exists(candidate.date_last_updated):
-                date_last_updated = candidate.date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
-            if positive_value_exists(use_we_vote_format):
-                one_candidate = {
-                    'status':                       status,
-                    'success':                      True,
-                    'id':                           candidate.id,
-                    'we_vote_id':                   candidate.we_vote_id,
-                    'ballot_item_display_name':     candidate.display_candidate_name(),
-                    'ballotpedia_candidate_id':     candidate.ballotpedia_candidate_id,
-                    'ballotpedia_candidate_summary': candidate.ballotpedia_candidate_summary,
-                    'ballotpedia_candidate_url':    candidate.ballotpedia_candidate_url,
-                    'ballotpedia_person_id':        candidate.ballotpedia_person_id,
-                    'candidate_email':              candidate.candidate_email,
-                    'candidate_phone':              candidate.candidate_phone,
-                    'candidate_photo_url_large':    candidate.we_vote_hosted_profile_image_url_large
-                    if positive_value_exists(candidate.we_vote_hosted_profile_image_url_large)
-                    else candidate.candidate_photo_url(),
-                    'candidate_photo_url_medium':   candidate.we_vote_hosted_profile_image_url_medium,
-                    'candidate_photo_url_tiny':     candidate.we_vote_hosted_profile_image_url_tiny,
-                    'candidate_url':                candidate.candidate_url,
-                    'candidate_contact_form_url':   candidate.candidate_contact_form_url,
-                    'candidate_ultimate_election_date':   candidate.candidate_ultimate_election_date,
-                    # 'contest_office_list':          office_list_for_candidate,
-                    'contest_office_id':            candidate.contest_office_id,  # Deprecate
-                    'contest_office_name':          candidate.contest_office_name,  # Deprecate
-                    # 'contest_office_we_vote_id':    office_we_vote_id,
-                    'facebook_url':                 candidate.facebook_url,
-                    'instagram_followers_count':    candidate.instagram_followers_count,
-                    'instagram_handle':             candidate.instagram_handle,
-                    'google_civic_election_id':     candidate.google_civic_election_id,  # Deprecate
-                    'kind_of_ballot_item':          CANDIDATE,
-                    'last_updated':                 date_last_updated,
-                    'maplight_id':                  candidate.maplight_id,
-                    'ocd_division_id':              candidate.ocd_division_id,
-                    'order_on_ballot':              candidate.order_on_ballot,
-                    'party':                        candidate.political_party_display(),
-                    'politician_id':                candidate.politician_id,
-                    'politician_we_vote_id':        candidate.politician_we_vote_id,
-                    'state_code':                   candidate.state_code,
-                    'twitter_url':                  candidate.twitter_url,
-                    'twitter_handle':               candidate.fetch_twitter_handle(),
-                    'twitter_description':          candidate.twitter_description
-                    if positive_value_exists(candidate.twitter_description) and
-                    len(candidate.twitter_description) > 1 else '',
-                    'twitter_followers_count':      candidate.twitter_followers_count,
-                    'youtube_url':                  candidate.youtube_url,
-                    'is_battleground_race':         candidate.is_battleground_race
-                    if positive_value_exists(candidate.is_battleground_race) else False,
-                    'withdrawn_from_election':      candidate.withdrawn_from_election,
-                    'withdrawal_date':              wdate,
-                }
-            else:
-                # TODO: Convert to candidatesQuery camelCase format
-                one_candidate = {
-                    'status':                       status,
-                    'success':                      True,
-                    'id': candidate.id,
-                    'we_vote_id': candidate.we_vote_id,
-                    'ballot_item_display_name': candidate.display_candidate_name(),
-                    'ballotpedia_candidate_id': candidate.ballotpedia_candidate_id,
-                    'ballotpedia_candidate_summary': candidate.ballotpedia_candidate_summary,
-                    'ballotpedia_candidate_url': candidate.ballotpedia_candidate_url,
-                    'ballotpedia_person_id': candidate.ballotpedia_person_id,
-                    'candidate_email': candidate.candidate_email,
-                    'candidate_phone': candidate.candidate_phone,
-                    'candidate_photo_url_large': candidate.we_vote_hosted_profile_image_url_large
-                    if positive_value_exists(candidate.we_vote_hosted_profile_image_url_large)
-                    else candidate.candidate_photo_url(),
-                    'candidate_photo_url_medium': candidate.we_vote_hosted_profile_image_url_medium,
-                    'candidate_photo_url_tiny': candidate.we_vote_hosted_profile_image_url_tiny,
-                    'candidate_url': candidate.candidate_url,
-                    'candidate_contact_form_url': candidate.candidate_contact_form_url,
-                    # 'contest_office_list': office_list_for_candidate,
-                    'contest_office_id': candidate.contest_office_id,  # Deprecate
-                    'contest_office_name': candidate.contest_office_name,  # Deprecate
-                    # 'contest_office_we_vote_id': office_we_vote_id,
-                    'facebook_url': candidate.facebook_url,
-                    'instagram_followers_count': candidate.instagram_followers_count,
-                    'instagram_handle': candidate.instagram_handle,
-                    'google_civic_election_id': candidate.google_civic_election_id,  # Deprecate
-                    'kind_of_ballot_item': CANDIDATE,
-                    'last_updated': date_last_updated,
-                    'maplight_id': candidate.maplight_id,
-                    'ocd_division_id': candidate.ocd_division_id,
-                    'order_on_ballot': candidate.order_on_ballot,
-                    'party': candidate.political_party_display(),
-                    'politician_id': candidate.politician_id,
-                    'politician_we_vote_id': candidate.politician_we_vote_id,
-                    'state_code': candidate.state_code,
-                    'twitter_url': candidate.twitter_url,
-                    'twitter_handle': candidate.fetch_twitter_handle(),
-                    'twitter_description': candidate.twitter_description
-                    if positive_value_exists(candidate.twitter_description) and
-                       len(candidate.twitter_description) > 1 else '',
-                    'twitter_followers_count': candidate.twitter_followers_count,
-                    'youtube_url': candidate.youtube_url,
-                    'is_battleground_race': candidate.is_battleground_race
-                    if positive_value_exists(candidate.is_battleground_race) else False,
-                    'withdrawn_from_election': candidate.withdrawn_from_election,
-                    'withdrawal_date': wdate,
-                }
-            candidates_to_display.append(one_candidate.copy())
-            if not positive_value_exists(google_civic_election_id) and candidate.google_civic_election_id:
-                google_civic_election_id = candidate.google_civic_election_id
-
-        if len(candidates_to_display):
+        if len(candidate_dict_list):
             status += 'CANDIDATES_RETRIEVED '
         else:
             status += 'NO_CANDIDATES_RETRIEVED '
@@ -1493,12 +1384,12 @@ def candidates_query_for_api(  # candidatesQuery
         'candidatesIndexStart':     candidates_index_start,
         'candidatesReturnedCount':  candidates_returned_count,
         'candidatesTotalCount':     candidates_total_count,
-        'election': {},
-        'electionDay': election_day,
-        'kind': 'wevote#candidatesQuery',
-        'state': limit_to_this_state_code,
-        'candidates': candidates_to_display,
-        'elections': [],
+        'election':                 {},
+        'electionDay':              election_day,
+        'kind':                     'wevote#candidatesQuery',
+        'state':                    limit_to_this_state_code,
+        'candidates':               candidate_dict_list,
+        'elections':                [],
     }
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -1762,6 +1653,7 @@ def generate_candidate_dict_from_candidate_object(
             'party':                            candidate.political_party_display(),
             'politician_id':                    candidate.politician_id,
             'politician_we_vote_id':            candidate.politician_we_vote_id,
+            'seo_friendly_path':                candidate.seo_friendly_path,
             'state_code':                       candidate.state_code,
             'twitter_url':                      candidate.twitter_url,
             'twitter_handle':                   candidate.fetch_twitter_handle(),

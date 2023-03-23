@@ -1799,23 +1799,6 @@ def candidate_edit_process_view(request):
             office = results['contest_office']
             is_battleground_race = positive_value_exists(office.is_battleground_race)
 
-    # ##################################
-    # If linked to a Politician, make sure that both politician_id and politician_we_vote_id exist
-    if candidate_on_stage_found:
-        if positive_value_exists(candidate_on_stage.politician_we_vote_id) \
-                and not positive_value_exists(candidate_on_stage.politician_id):
-            try:
-                politician_manager = PoliticianManager()
-                results = politician_manager.retrieve_politician(politician_we_vote_id=candidate_on_stage.politician_we_vote_id)
-                if results['politician_found']:
-                    politician = results['politician']
-                    candidate_on_stage.politician_id = politician.id
-                    candidate_on_stage.save()
-                pass
-            except Exception as e:
-                print('Could not save candidate.', e)
-                messages.add_message(request, messages.ERROR, 'Could not save candidate.')
-
     contest_office_we_vote_id = ''
     state_code_from_office = ''
     if positive_value_exists(contest_office_id):
@@ -2268,6 +2251,24 @@ def candidate_edit_process_view(request):
             status += results['status']
             status += "FAILED_TO_UPDATE_PARALLEL_FIELDS_FROM_CANDIDATE "
             messages.add_message(request, messages.ERROR, status)
+
+    # ##################################
+    # If linked to a Politician, bring over some data from Politician
+    if candidate_on_stage_found and positive_value_exists(candidate_on_stage.politician_we_vote_id):
+        try:
+            politician_manager = PoliticianManager()
+            results = politician_manager.retrieve_politician(
+                politician_we_vote_id=candidate_on_stage.politician_we_vote_id)
+            if results['politician_found']:
+                politician = results['politician']
+                if positive_value_exists(politician.id) and candidate_on_stage.politician_id != politician.id:
+                    # make sure that both politician_id exists
+                    candidate_on_stage.politician_id = politician.id
+                candidate_on_stage.seo_friendly_path = politician.seo_friendly_path
+                candidate_on_stage.save()
+        except Exception as e:
+            messages.add_message(request, messages.ERROR,
+                                 'Could not save candidate with refreshed politician data:' + str(e))
 
     url_variables = "?null=1"
     if positive_value_exists(show_all_twitter_search_results):
