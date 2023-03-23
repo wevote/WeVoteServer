@@ -2422,6 +2422,8 @@ class CandidateCampaign(models.Model):
     # Should be the master image url cached on We Vote servers.
     facebook_profile_image_url_https = models.TextField(
         verbose_name='url of profile image from facebook', blank=True, null=True)
+    # seo_friendly_path data is copied from the Politician object, and isn't edited directly on this object
+    seo_friendly_path = models.CharField(max_length=255, null=True, unique=False)
 
     twitter_url = models.URLField(verbose_name='twitter url of candidate', blank=True, null=True)
     twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)

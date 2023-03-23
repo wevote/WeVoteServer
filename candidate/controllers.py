@@ -1955,6 +1955,7 @@ def candidate_politician_match(candidate):
             # Save politician_we_vote_id in candidate
             candidate.politician_we_vote_id = politician.we_vote_id
             candidate.politician_id = politician.id
+            candidate.seo_friendly_path = politician.seo_friendly_path
             candidate.save()
 
             if positive_value_exists(candidate.we_vote_id):
@@ -1979,6 +1980,7 @@ def candidate_politician_match(candidate):
             # Politician wasn't found, so clear out politician_we_vote_id and politician_id
             candidate.politician_we_vote_id = None
             candidate.politician_id = None
+            candidate.seo_friendly_path = None
             candidate.save()
 
     # Search the politician table for a stricter match (don't match on "dan" if "dan smith" passed in)
@@ -2038,6 +2040,7 @@ def candidate_politician_match(candidate):
         # Save politician_we_vote_id in candidate
         candidate.politician_we_vote_id = politician.we_vote_id
         candidate.politician_id = politician.id
+        candidate.seo_friendly_path = politician.seo_friendly_path
         candidate.save()
 
         if positive_value_exists(candidate.we_vote_id):
@@ -2069,6 +2072,7 @@ def candidate_politician_match(candidate):
             # Save politician_we_vote_id in candidate
             candidate.politician_we_vote_id = politician.we_vote_id
             candidate.politician_id = politician.id
+            candidate.seo_friendly_path = politician.seo_friendly_path
             candidate.save()
 
             if positive_value_exists(candidate.we_vote_id):

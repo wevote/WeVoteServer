@@ -1,0 +1,13 @@
+{# templates/office_held/office_held_name_and_we_vote_id_pair.html #}
+
+<div>
+    <div>
+        <a href="{% url 'office_held:office_held_summary' office_held_we_vote_id_value %}" target="_blank" class="u-no-break">link <span class="glyphicon glyphicon-new-window"></span></a>
+    </div>
+    <div>
+        <input type="text" name="{{ office_held_name_name }}" value="{{ office_held_name_value }}" />
+    </div>
+    <div>
+        <input type="text" name="{{ office_held_we_vote_id_name }}" value="{{ office_held_we_vote_id_value }}" />
+    </div>
+</div>

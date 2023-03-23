@@ -614,6 +614,20 @@ class PoliticianManager(models.Manager):
             except Exception as e:
                 status += "FAILED_TO_ADD_OTHER_FIELDS: " + str(e) + " "
                 success = False
+
+        # Generate seo_friendly_path
+        results = self.generate_seo_friendly_path(
+            politician_name=politician.politician_name,
+            politician_we_vote_id=politician.we_vote_id,
+            state_code=politician.state_code,
+        )
+        if results['seo_friendly_path_found']:
+            politician.seo_friendly_path = results['seo_friendly_path']
+            try:
+                politician.save()
+            except Exception as e:
+                status += "FAILED_TO_GENERATE_SEO_FRIENDLY_PATH: " + str(e) + " "
+                success = False
         results = {
             'success':                      success,
             'status':                       status,
@@ -1862,7 +1876,7 @@ class PoliticianManager(models.Manager):
                 state_suffix_length = 0
                 # Can we create a state_suffix?
                 if positive_value_exists(state_code):
-                    state_suffix = "{state_text}-politician" \
+                    state_suffix = "politician-from-{state_text}" \
                                            "".format(state_text=convert_state_code_to_state_text(state_code))
                     state_suffix = "-" + slugify(state_suffix)
                     state_suffix_length = len(state_suffix)

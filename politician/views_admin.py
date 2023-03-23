@@ -30,7 +30,7 @@ from import_export_vote_smart.votesmart_local import VotesmartApiError
 from office.models import ContestOffice
 from politician.controllers import update_politician_from_candidate
 from position.models import PositionEntered, PositionListManager
-from representative.models import Representative
+from representative.models import Representative, RepresentativeManager
 from voter.models import voter_has_authority
 from wevote_functions.functions import convert_to_int, convert_to_political_party_constant, \
     extract_first_name_from_full_name, extract_instagram_handle_from_text_string, \
@@ -409,8 +409,8 @@ def politician_list_view(request):
     #                          'politician_email mismatch with politician_email_address:' + str(we_vote_id_string))
 
     # Create seo_friendly_path for all politicians who currently don't have one
-    seo_friendly_path_updates_on = False
-    if seo_friendly_path_updates_on:
+    generate_seo_friendly_path_updates = True
+    if generate_seo_friendly_path_updates:
         politician_query = Politician.objects.all()
         politician_query = politician_query.filter(
             Q(seo_friendly_path__isnull=True) |
@@ -418,7 +418,7 @@ def politician_list_view(request):
         )
         if positive_value_exists(state_code):
             politician_query = politician_query.filter(state_code__iexact=state_code)
-        politician_list_to_convert = list(politician_query[:2])
+        politician_list_to_convert = list(politician_query[:1000])
         politician_manager = PoliticianManager()
         update_list = []
         updates_needed = False
@@ -1491,6 +1491,7 @@ def politician_edit_process_view(request):
                     "&vote_smart_id=" + str(vote_smart_id) + \
                     "&maplight_id=" + str(maplight_id)
 
+    push_seo_friendly_path_changes = False
     try:
         if existing_politician_found:
             messages.add_message(request, messages.ERROR, 'This politician is already saved for this election.')
@@ -1638,6 +1639,9 @@ def politician_edit_process_view(request):
                     state_code=politician_on_stage.state_code)
                 if seo_results['success']:
                     seo_friendly_path = seo_results['seo_friendly_path']
+                if seo_friendly_path and seo_friendly_path != politician_on_stage.seo_friendly_path:
+                    # Update linked candidate & representative entries to use this latest seo_friendly_path
+                    push_seo_friendly_path_changes = True
                 politician_on_stage.seo_friendly_path = seo_friendly_path
             politician_on_stage.twitter_handle_updates_failing = twitter_handle_updates_failing
             politician_on_stage.twitter_handle2_updates_failing = twitter_handle2_updates_failing
@@ -1702,9 +1706,9 @@ def politician_edit_process_view(request):
             if positive_value_exists(unlink_candidate) and positive_value_exists(politician_we_vote_id):
                 candidate.politician_we_vote_id = None
                 candidate.politician_id = None
+                candidate.seo_friendly_path = None
                 candidate.save()
                 # Now update positions
-                from candidate.models import CandidateListManager
                 results = position_list_manager.update_politician_we_vote_id_in_all_positions(
                     candidate_we_vote_id=candidate.we_vote_id,
                     new_politician_id=None,
@@ -1735,6 +1739,7 @@ def politician_edit_process_view(request):
             if positive_value_exists(unlink_representative) and positive_value_exists(politician_we_vote_id):
                 representative.politician_we_vote_id = None
                 representative.politician_id = None
+                representative.seo_friendly_path = None
                 representative.save()
 
                 messages.add_message(request, messages.INFO, 'Representative unlinked.')
@@ -1757,12 +1762,12 @@ def politician_edit_process_view(request):
             if positive_value_exists(link_candidate) and positive_value_exists(politician_we_vote_id):
                 candidate.politician_id = politician_id
                 candidate.politician_we_vote_id = politician_we_vote_id
+                candidate.seo_friendly_path = politician_on_stage.seo_friendly_path
                 if not positive_value_exists(candidate.vote_usa_politician_id) and \
                         positive_value_exists(vote_usa_politician_id):
                     candidate.vote_usa_politician_id = vote_usa_politician_id
                 candidate.save()
                 # Now update positions
-                from candidate.models import CandidateListManager
                 results = position_list_manager.update_politician_we_vote_id_in_all_positions(
                     candidate_we_vote_id=candidate.we_vote_id,
                     new_politician_id=politician_id,
@@ -1789,10 +1794,65 @@ def politician_edit_process_view(request):
             if positive_value_exists(link_representative) and positive_value_exists(politician_we_vote_id):
                 representative.politician_id = politician_id
                 representative.politician_we_vote_id = politician_we_vote_id
+                representative.seo_friendly_path = politician_on_stage.seo_friendly_path
                 if not positive_value_exists(representative.vote_usa_politician_id) and \
                         positive_value_exists(vote_usa_politician_id):
                     representative.vote_usa_politician_id = vote_usa_politician_id
                 representative.save()
+
+    # Update Linked Candidates with seo_friendly_path
+    if success and positive_value_exists(seo_friendly_path) and push_seo_friendly_path_changes:
+        candidate_list_manager = CandidateListManager()
+        politician_we_vote_id_list = [politician_we_vote_id]
+        candidate_results = candidate_list_manager.retrieve_candidate_list(
+            politician_we_vote_id_list=politician_we_vote_id_list,
+        )
+        if not candidate_results['success']:
+            status += candidate_results['status']
+            status += "FAILED_TO_RETRIEVE_CANDIDATES_LINKED_TO_POLITICIAN "
+            messages.add_message(request, messages.ERROR, status)
+        update_list = []
+        updates_needed = False
+        updates_made = 0
+        if candidate_results['candidate_list_found']:
+            candidate_list = candidate_results['candidate_list']
+            for candidate in candidate_list:
+                candidate.seo_friendly_path = seo_friendly_path
+                update_list.append(candidate)
+                updates_needed = True
+                updates_made += 1
+        if updates_needed:
+            CandidateCampaign.objects.bulk_update(update_list, ['seo_friendly_path'])
+            messages.add_message(request, messages.INFO,
+                                 "{updates_made} candidates updated with new seo_friendly_path."
+                                 "".format(updates_made=updates_made))
+
+    # Update Linked Representatives with seo_friendly_path
+    if success and positive_value_exists(seo_friendly_path) and push_seo_friendly_path_changes:
+        representative_manager = RepresentativeManager()
+        politician_we_vote_id_list = [politician_we_vote_id]
+        representative_results = representative_manager.retrieve_representative_list(
+            politician_we_vote_id_list=politician_we_vote_id_list,
+        )
+        if not representative_results['success']:
+            status += representative_results['status']
+            status += "FAILED_TO_RETRIEVE_REPRESENTATIVES_LINKED_TO_POLITICIAN "
+            messages.add_message(request, messages.ERROR, status)
+        update_list = []
+        updates_needed = False
+        updates_made = 0
+        if representative_results['representative_list_found']:
+            representative_list = representative_results['representative_list']
+            for representative in representative_list:
+                representative.seo_friendly_path = seo_friendly_path
+                update_list.append(representative)
+                updates_needed = True
+                updates_made += 1
+        if updates_needed:
+            Representative.objects.bulk_update(update_list, ['seo_friendly_path'])
+            messages.add_message(request, messages.INFO,
+                                 "{updates_made} representatives updated with new seo_friendly_path."
+                                 "".format(updates_made=updates_made))
 
     if politician_id:
         return HttpResponseRedirect(reverse('politician:politician_edit', args=(politician_id,)))
@@ -1863,7 +1923,6 @@ def politician_delete_process_view(request):
     # Are there any positions attached to this politician that should be moved to another instance of this politician?
     if positive_value_exists(politician_id) or positive_value_exists(politician_we_vote_id):
         position_list_manager = PositionListManager()
-        from candidate.models import CandidateListManager
         candidate_list_manager = CandidateListManager()
         # By not passing in new values, we remove politician_id and politician_we_vote_id
         results = position_list_manager.update_politician_we_vote_id_in_all_positions(
