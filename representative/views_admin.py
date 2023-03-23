@@ -1027,6 +1027,10 @@ def representative_edit_process_view(request):
     state_code = request.POST.get('state_code', False)
     if state_code is not False:
         defaults['state_code'] = state_code
+    # We don't allow editing from the representative -- master date for seo_friendly_path lives in Politician.
+    # seo_friendly_path = request.POST.get('seo_friendly_path', False)
+    # if seo_friendly_path is not False:
+    #     defaults['seo_friendly_path'] = seo_friendly_path
     twitter_handle_updates_failing = request.POST.get('twitter_handle_updates_failing', None)
     if twitter_handle_updates_failing is not None:
         defaults['twitter_handle_updates_failing'] = positive_value_exists(twitter_handle_updates_failing)

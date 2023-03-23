@@ -15,7 +15,7 @@ from django.db.models import Q
 from election.models import Election, ElectionManager
 import exception.models
 import json
-from office_held.models import OfficeHeld, OfficeHeldManager
+from office_held.models import OfficeHeld, OfficeHeldManager, OfficesHeldForLocation
 from politician.controllers import update_parallel_fields_with_years_in_related_objects
 from representative.models import Representative, RepresentativeManager
 from voter.models import voter_has_authority
@@ -114,6 +114,7 @@ def office_held_list_view(request):
 
                     office_held_queryset = office_held_queryset.filter(final_filters)
 
+        office_held_list_count = office_held_queryset.count()
         office_held_list = list(office_held_queryset)
 
         if len(office_held_list):
@@ -139,8 +140,8 @@ def office_held_list_view(request):
             # office_held.candidate_count = fetch_candidate_count_for_office(office_held.id)
             updated_office_held_list.append(office_held)
 
-            office_held_list_count = len(updated_office_held_list)
-            if office_held_list_count >= 500:
+            display_count = len(updated_office_held_list)
+            if display_count >= 500:
                 # Limit to showing only 500
                 break
 
@@ -500,3 +501,123 @@ def office_held_update_status(request):
     }
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+@login_required
+def offices_held_for_location_list_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'partner_organization', 'political_data_viewer', 'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
+    show_all = request.GET.get('show_all', False)
+    show_battleground = positive_value_exists(request.GET.get('show_battleground', False))
+    show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
+    location_search = request.GET.get('location_search', '')
+
+    location_list_found = False
+    location_list = []
+    updated_location_list = []
+    location_list_count = 0
+    try:
+        queryset = OfficesHeldForLocation.objects.all()
+        if positive_value_exists(state_code):
+            queryset = queryset.filter(state_code__iexact=state_code)
+
+        if positive_value_exists(location_search):
+            search_words = location_search.split()
+            filters = []  # Reset for each search word
+            for one_word in search_words:
+                new_filter = Q(polling_location_we_vote_id__iexact=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(voter_we_vote_id__iexact=one_word)
+                filters.append(new_filter)
+
+                count = 1
+                while count <= 30:
+                    office_held_we_vote_id_key = 'office_held_we_vote_id_' + str(f"{count:02}") + '__icontains'
+                    new_filter = Q(**{office_held_we_vote_id_key: one_word})
+                    filters.append(new_filter)
+
+                    office_held_name_key = 'office_held_name_' + str(f"{count:02}") + '__icontains'
+                    new_filter = Q(**{office_held_name_key: one_word})
+                    filters.append(new_filter)
+
+                    count += 1
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                queryset = queryset.filter(final_filters)
+
+        location_list_count = queryset.count()
+        location_list = list(queryset[:20])
+
+        if len(location_list):
+            location_list_found = True
+            status = 'OFFICES_HELD_FOR_LOCATION_RETRIEVED'
+            success = True
+        else:
+            status = 'NO_OFFICES_HELD_FOR_LOCATION_RETRIEVED'
+            success = True
+    except OfficeHeld.DoesNotExist:
+        # No offices_held found. Not a problem.
+        status = 'NO_OFFICES_HELD_FOR_LOCATION_FOUND_DoesNotExist'
+        location_list = []
+        success = True
+    except Exception as e:
+        status = 'FAILED retrieve_all_offices_held_for_upcoming_election ' \
+                 '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        success = False
+
+    offices_held_for_location_list_modified = []
+    for offices_held_for_location in location_list:
+        # Generate a list of office_held_name/office_held_we_vote_id pairs for easier display in the template
+        office_held_pair_list = []
+        count = 1
+        while count <= 30:
+            office_held_name_name = 'office_held_name_' + str(f"{count:02}")
+            office_held_we_vote_id_name = 'office_held_we_vote_id_' + str(f"{count:02}")
+            office_held_pair = {
+                'office_held_name_name': office_held_name_name,
+                'office_held_name_value': getattr(offices_held_for_location, office_held_name_name),
+                'office_held_we_vote_id_name': office_held_we_vote_id_name,
+                'office_held_we_vote_id_value': getattr(offices_held_for_location, office_held_we_vote_id_name),
+            }
+            office_held_pair_list.append(office_held_pair)
+            count += 1
+        offices_held_for_location.office_held_pair_list = office_held_pair_list
+        offices_held_for_location_list_modified.append(offices_held_for_location)
+
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
+
+    location_list_count_str = f'{location_list_count:,}'
+
+    status_print_list = ""
+    status_print_list += "offices_held_for_location_list_count: " + location_list_count_str + " "
+
+    messages.add_message(request, messages.INFO, status_print_list)
+    messages_on_stage = get_messages(request)
+
+    template_values = {
+        'messages_on_stage':        messages_on_stage,
+        'location_list':            offices_held_for_location_list_modified,
+        'location_search':          location_search,
+        'state_code':               state_code,
+        'show_all_elections':       show_all_elections,
+        'show_battleground':        show_battleground,
+        'state_list':               sorted_state_list,
+        'google_civic_election_id': google_civic_election_id,
+        'status':                   status,
+        'success':                  success
+    }
+    return render(request, 'office_held/offices_held_for_location_list.html', template_values)

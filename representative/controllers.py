@@ -958,6 +958,7 @@ def representative_politician_match(representative):
             # Save politician_we_vote_id in representative
             representative.politician_we_vote_id = politician.we_vote_id
             representative.politician_id = politician.id
+            representative.seo_friendly_path = politician.seo_friendly_path
             representative.save()
 
             if positive_value_exists(representative.we_vote_id):
@@ -995,6 +996,7 @@ def representative_politician_match(representative):
             # Politician wasn't found, so clear out politician_we_vote_id and politician_id
             representative.politician_we_vote_id = None
             representative.politician_id = None
+            representative.seo_friendly_path = None
             representative.save()
 
     # Search the politician table for a stricter match (don't match on "dan" if "dan smith" passed in)
@@ -1056,6 +1058,7 @@ def representative_politician_match(representative):
         # Save politician_we_vote_id in representative
         representative.politician_we_vote_id = politician.we_vote_id
         representative.politician_id = politician.id
+        representative.seo_friendly_path = politician.seo_friendly_path
         representative.save()
 
         if positive_value_exists(representative.we_vote_id):
@@ -1101,6 +1104,7 @@ def representative_politician_match(representative):
             # Save politician_we_vote_id in representative
             representative.politician_we_vote_id = politician.we_vote_id
             representative.politician_id = politician.id
+            representative.seo_friendly_path = politician.seo_friendly_path
             representative.save()
 
             if positive_value_exists(representative.we_vote_id):

@@ -734,7 +734,8 @@
             <td class="padded">{{ representative.state_code }}</td>
             <td class="padded">
                 {% if representative.office_held_name %}
-                    <a href="{% url 'office_held:office_held_summary' representative.office_held_we_vote_id %}" target="_blank">{{ representative.office_held_name }} <span class="glyphicon glyphicon-new-window"></span></a>
+                    <a href="{% url 'office_held:office_held_summary' representative.office_held_we_vote_id %}" target="_blank">{{ representative.office_held_name }}
+                        {% if representative.office_held and representative.office_held.district_name %} for {{ representative.office_held.district_name }}{% endif %}<span class="glyphicon glyphicon-new-window"></span></a>
                 {% else %}
                     (office missing)
                 {% endif %}
@@ -820,7 +821,8 @@
             </td>
             <td>
                 {% if representative.office_held_name %}
-                    <a href="{% url 'office_held:office_held_summary' representative.office_held_we_vote_id %}" target="_blank">{{ representative.office_held_name }} <span class="glyphicon glyphicon-new-window"></span></a>
+                    <a href="{% url 'office_held:office_held_summary' representative.office_held_we_vote_id %}" target="_blank">{{ representative.office_held_name }}
+                        {% if representative.office_held and representative.office_held.district_name %} for {{ representative.office_held.district_name }}{% endif %}<span class="glyphicon glyphicon-new-window"></span></a>
                 {% else %}
                     (office missing)
                 {% endif %}

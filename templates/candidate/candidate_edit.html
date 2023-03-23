@@ -51,11 +51,20 @@ th, td {
       Candidate Name
       {% if candidate %}
         <br />
-        <a href="https://quality.wevote.us/candidate/{{ candidate.we_vote_id }}" target="_blank">
-        View on WeVote.US <span class="glyphicon glyphicon-new-window"></span>
-        </a>
+          {% if candidate.seo_friendly_path %}
+            <a href="https://quality.wevote.us/{{ candidate.seo_friendly_path }}/-/" target="_blank">
+            View on WeVote.US <span class="glyphicon glyphicon-new-window"></span>
+            </a>
+          {% elif candidate.politician_we_vote_id %}
+            <a href="https://quality.wevote.us/{{ candidate.politician_we_vote_id }}/p/" target="_blank">
+            View on WeVote.US <span class="glyphicon glyphicon-new-window"></span>
+            </a>
+          {% else %}
+            <a href="https://quality.wevote.us/candidate/{{ candidate.we_vote_id }}" target="_blank">
+            View on WeVote.US <span class="glyphicon glyphicon-new-window"></span>
+            </a>
+          {% endif %}
       {% endif %}
-
     </label>
     <div class="col-sm-8">
         <input type="text" name="candidate_name" id="candidate_name_id" class="form-control"

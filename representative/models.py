@@ -148,6 +148,8 @@ def attach_defaults_values_to_representative_object(representative, defaults):
         representative.representative_url2 = defaults['representative_url2']
     if 'representative_url3' in defaults:
         representative.representative_url3 = defaults['representative_url3']
+    if 'seo_friendly_path' in defaults:
+        representative.seo_friendly_path = defaults['seo_friendly_path']
     if 'state_code' in defaults:
         representative.state_code = defaults['state_code']
     if 'twitter_description' in defaults:
@@ -269,6 +271,8 @@ class Representative(models.Model):
     representative_url = models.TextField(max_length=255, blank=True, null=True)
     representative_url2 = models.TextField(max_length=255, blank=True, null=True)
     representative_url3 = models.TextField(max_length=255, blank=True, null=True)
+    # seo_friendly_path data is copied from the Politician object, and isn't edited directly on this object
+    seo_friendly_path = models.CharField(max_length=255, null=True, unique=False)
     state_code = models.CharField(verbose_name="state this representative serves", max_length=2, null=True)
     twitter_handle_updates_failing = models.BooleanField(default=False)
     twitter_handle2_updates_failing = models.BooleanField(default=False)
@@ -1435,7 +1439,8 @@ class RepresentativeManager(models.Manager):
 
         if representative_created:
             try:
-                representative = attach_defaults_values_to_representative_object(representative=representative, defaults=update_values)
+                representative = attach_defaults_values_to_representative_object(
+                    representative=representative, defaults=update_values)
                 representative.save()
                 representative_updated = True
 
@@ -1516,7 +1521,8 @@ class RepresentativeManager(models.Manager):
 
         try:
             if representative_found:
-                representative = attach_defaults_values_to_representative_object(representative=representative, defaults=update_values)
+                representative = attach_defaults_values_to_representative_object(
+                    representative=representative, defaults=update_values)
                 representative.save()
                 representative_updated = True
                 success = True

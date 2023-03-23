@@ -1,0 +1,97 @@
+{# templates/office/offices_held_for_location_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Offices Held For Each Location{% endblock %}
+
+{%  block content %}
+
+<h1>Offices Held For Each Location</h1>
+
+<form name="offices_held_for_location_list" method="get" action="{% url 'office_held:offices_held_location_list' %}">
+{% csrf_token %}
+
+{% if state_list %}
+<select id="state_code_id" name="state_code">
+    <option value="">
+        -- Filter by State Served --</option>
+{% for key, state in state_list %}
+    <option value="{{ key }}"
+            {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
+        {{ state }}</option>
+{% endfor %}
+</select>
+{% if state_code != "" %}
+<a href="{% url 'office_held:offices_held_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}&show_all=1">
+    Show all Offices Held in this state</a>
+{% endif %}
+{% endif %}
+
+<br/><br/>
+{% if location_search %}
+    <a href="{% url 'office_held:offices_held_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+         clear search</a>&nbsp;
+{% endif %}
+<input type="text" name="location_search" id="location_search_id" value="{{ location_search }}" style="width: 450px" />
+<input type="submit" value="Search for Offices Held For Location" />
+{# End of if state_list #}
+
+{% if location_list %}
+    {% if google_civic_election_id %}
+    <ul>
+        <li>Prepare: <a href="{% url 'office:find_and_merge_duplicate_offices' %}?google_civic_election_id={{ google_civic_election_id }}"
+                        target="_blank" >
+        Find and Merge Duplicate Offices Held for this Election</a> (in new window - about 1 minute)</li>
+    </ul>
+
+    {% endif %}
+{% endif %}
+
+{% if location_list %}
+    <br/>
+    <table class="table">
+      <thead>
+        <tr>
+            <th>&nbsp;</th>
+            <th>Location</th>
+            <th>Offices Held</th>
+        </tr>
+      </thead>
+    {% for offices_held_for_location in location_list %}
+        <tr>
+            <td>
+                {{ forloop.counter }}
+            </td>
+            <td>
+                {{ offices_held_for_location.polling_location_we_vote_id|default_if_none:"" }}
+                {{ offices_held_for_location.voter_we_vote_id|default_if_none:"" }}<br />
+                {{ offices_held_for_location.state_code|default_if_none:"" }}
+            </td>
+            <td>
+                <div style="display: flex; justify-content: start;">
+            {% for office_held_pair in offices_held_for_location.office_held_pair_list %}
+                {% if office_held_pair.office_held_we_vote_id_value %}
+                {% include "office_held/office_held_name_and_we_vote_id_pair.html" with office_held_name_name=office_held_pair.office_held_name_name office_held_name_value=office_held_pair.office_held_name_value office_held_we_vote_id_name=office_held_pair.office_held_we_vote_id_name  office_held_we_vote_id_value=office_held_pair.office_held_we_vote_id_value %}
+                {% endif %}
+            {% endfor %}
+                </div>
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+
+    <p></p>
+    {# <p><a href="{% url 'office:offices_export' %}?format=json" target="_blank" >Export Offices Held</a></p> #}
+{% else %}
+    <p>(no locations found from OfficesHeldForLocation table)</p>
+{% endif %}
+</form>
+
+<script>
+    $(function() {
+        $('#state_code_id').change(function() {
+            this.form.submit();
+        });
+    });
+</script>
+
+{% endblock %}
