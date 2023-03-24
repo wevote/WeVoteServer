@@ -1485,6 +1485,18 @@ def generate_candidate_dict_list_from_candidate_object_list(
         if hasattr(candidate_object, 'we_vote_id'):
             candidate_we_vote_id_list.append(candidate_object.we_vote_id)
 
+    if len(candidate_we_vote_id_list) == 0:
+        status += 'NO_CANDIDATES_PROVIDED_TO_GENERATE_CANDIDATE_DICT_LIST '
+        success = False
+        results = {
+            'candidate_dict_list': candidate_dict_list,
+            'google_civic_election_id': google_civic_election_id,
+            'office_id': office_id,
+            'status': status,
+            'success': success,
+        }
+        return results
+
     # Get all the objects we need for generate_candidate_dict_from_candidate_object with two db queries
     #  instead of multiple queries
     list_results = candidate_list_manager.retrieve_candidate_to_office_link_list(

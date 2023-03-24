@@ -1791,6 +1791,21 @@ class CandidateListManager(models.Manager):
         link_list = []
         status = ""
         success = True
+
+        at_least_one_filter_exists = len(candidate_we_vote_id_list) > 0 or \
+            len(contest_office_we_vote_id_list) > 0 or \
+            len(google_civic_election_id_list) > 0 or \
+            positive_value_exists(state_code)
+        if not at_least_one_filter_exists:
+            status += "RETRIEVE_CANDIDATE_TO_OFFICE_LINK_LIST-MISSING_FILTERS "
+            success = False
+            results = {
+                'success':                          success,
+                'status':                           status,
+                'candidate_to_office_link_list':    link_list,
+            }
+            return results
+
         google_civic_election_id_integer_list = []
         for google_civic_election_id in google_civic_election_id_list:
             google_civic_election_id_integer_list.append(convert_to_int(google_civic_election_id))
