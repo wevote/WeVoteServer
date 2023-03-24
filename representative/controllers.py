@@ -428,6 +428,7 @@ def generate_representative_dict_from_representative_object(
         'representative_photo_url_medium': representative.we_vote_hosted_profile_image_url_medium,
         'representative_photo_url_tiny': representative.we_vote_hosted_profile_image_url_tiny,
         'representative_url':           representative.representative_url,
+        'seo_friendly_path':            representative.seo_friendly_path,
         'state_code':                   representative.state_code,
         'twitter_url':                  representative.twitter_url,
         'twitter_handle':               representative.fetch_twitter_handle(),
