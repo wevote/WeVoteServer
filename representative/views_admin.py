@@ -12,6 +12,7 @@ from exception.models import handle_record_not_found_exception, handle_record_fo
 from admin_tools.views import redirect_to_sign_in_page
 from config.base import get_environment_variable
 from datetime import datetime, timedelta
+import pytz
 from django.http import HttpResponseRedirect
 from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
@@ -335,6 +336,60 @@ def representative_list_view(request):
         datetime_now = localtime(now()).date()  # We Vote uses Pacific Time for TIME_ZONE
         show_this_year = datetime_now.year
     state_code = request.GET.get('state_code', '')
+
+    # Update representatives who currently don't have seo_friendly_path, with value from linked politician
+    number_to_update = 1000
+    seo_friendly_path_updates = True
+    if seo_friendly_path_updates:
+        seo_update_query = Representative.objects.all()
+        seo_update_query = seo_update_query.exclude(
+            Q(politician_we_vote_id__isnull=True) |
+            Q(politician_we_vote_id="")
+        )
+        seo_update_query = seo_update_query.filter(
+            Q(seo_friendly_path__isnull=True) |
+            Q(seo_friendly_path="")
+        )
+        # After initial updates to all representatives, include in the search logic to find representatives with
+        # seo_friendly_path_date_last_updated older than Politician.seo_friendly_path_date_last_updated
+        if positive_value_exists(state_code):
+            seo_update_query = seo_update_query.filter(state_code__iexact=state_code)
+        total_to_convert = seo_update_query.count()
+        total_to_convert_after = total_to_convert - number_to_update if total_to_convert > number_to_update else 0
+        representative_list = list(seo_update_query[:number_to_update])
+        update_list = []
+        updates_needed = False
+        updates_made = 0
+        politician_we_vote_id_list = []
+        # Retrieve all relevant politicians in a single query
+        for one_representative in representative_list:
+            politician_we_vote_id_list.append(one_representative.politician_we_vote_id)
+        politician_manager = PoliticianManager()
+        politician_list = []
+        if len(politician_we_vote_id_list) > 0:
+            politician_results = politician_manager.retrieve_politician_list(
+                politician_we_vote_id_list=politician_we_vote_id_list)
+            politician_list = politician_results['politician_list']
+        politician_dict_list = {}
+        for one_politician in politician_list:
+            politician_dict_list[one_politician.we_vote_id] = one_politician
+        timezone = pytz.timezone("America/Los_Angeles")
+        datetime_now = timezone.localize(datetime.now())
+        for one_representative in representative_list:
+            one_politician = politician_dict_list.get(one_representative.politician_we_vote_id)
+            if positive_value_exists(one_politician.seo_friendly_path):
+                one_representative.seo_friendly_path = one_politician.seo_friendly_path
+                one_representative.seo_friendly_path_date_last_updated = datetime_now
+                update_list.append(one_representative)
+                updates_needed = True
+                updates_made += 1
+        if updates_needed:
+            Representative.objects.bulk_update(
+                update_list, ['seo_friendly_path', 'seo_friendly_path_date_last_updated'])
+            messages.add_message(request, messages.INFO,
+                                 "{updates_made:,} representatives updated with new seo_friendly_path. "
+                                 "{total_to_convert_after:,} remaining."
+                                 "".format(total_to_convert_after=total_to_convert_after, updates_made=updates_made))
 
     representative_count = 0
     representative_list = []

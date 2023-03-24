@@ -188,6 +188,7 @@ class Politician(models.Model):
     politician_twitter_handle4 = models.CharField(max_length=255, null=True, unique=False)
     politician_twitter_handle5 = models.CharField(max_length=255, null=True, unique=False)
     seo_friendly_path = models.CharField(max_length=255, null=True, unique=True, db_index=True)
+    seo_friendly_path_date_last_updated = models.DateTimeField(null=True)
     state_code = models.CharField(verbose_name="politician home state", max_length=2, null=True)
     twitter_handle_updates_failing = models.BooleanField(default=False)
     twitter_handle2_updates_failing = models.BooleanField(default=False)

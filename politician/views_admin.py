@@ -410,6 +410,7 @@ def politician_list_view(request):
 
     # Create seo_friendly_path for all politicians who currently don't have one
     generate_seo_friendly_path_updates = True
+    number_to_create = 1000
     if generate_seo_friendly_path_updates:
         politician_query = Politician.objects.all()
         politician_query = politician_query.filter(
@@ -418,11 +419,15 @@ def politician_list_view(request):
         )
         if positive_value_exists(state_code):
             politician_query = politician_query.filter(state_code__iexact=state_code)
-        politician_list_to_convert = list(politician_query[:1000])
+        total_to_convert = politician_query.count()
+        total_to_convert_after = total_to_convert - number_to_create if total_to_convert > number_to_create else 0
+        politician_list_to_convert = list(politician_query[:number_to_create])
         politician_manager = PoliticianManager()
         update_list = []
         updates_needed = False
         updates_made = 0
+        timezone = pytz.timezone("America/Los_Angeles")
+        datetime_now = timezone.localize(datetime.now())
         for one_politician in politician_list_to_convert:
             results = politician_manager.generate_seo_friendly_path(
                 politician_name=one_politician.politician_name,
@@ -431,14 +436,16 @@ def politician_list_view(request):
             )
             if results['seo_friendly_path_found']:
                 one_politician.seo_friendly_path = results['seo_friendly_path']
+                one_politician.seo_friendly_path_date_last_updated = datetime_now
                 update_list.append(one_politician)
                 updates_needed = True
                 updates_made += 1
         if updates_needed:
-            Politician.objects.bulk_update(update_list, ['seo_friendly_path'])
+            Politician.objects.bulk_update(update_list, ['seo_friendly_path', 'seo_friendly_path_date_last_updated'])
             messages.add_message(request, messages.INFO,
-                                 "{updates_made} politicians updated with new seo_friendly_path."
-                                 "".format(updates_made=updates_made))
+                                 "{updates_made:,} politicians updated with new seo_friendly_path. "
+                                 "{total_to_convert_after:,} remaining."
+                                 "".format(total_to_convert_after=total_to_convert_after, updates_made=updates_made))
 
     politician_list = []
     politician_list_count = 0
@@ -1824,7 +1831,7 @@ def politician_edit_process_view(request):
         if updates_needed:
             CandidateCampaign.objects.bulk_update(update_list, ['seo_friendly_path'])
             messages.add_message(request, messages.INFO,
-                                 "{updates_made} candidates updated with new seo_friendly_path."
+                                 "{updates_made:,} candidates updated with new seo_friendly_path."
                                  "".format(updates_made=updates_made))
 
     # Update Linked Representatives with seo_friendly_path
@@ -1851,7 +1858,7 @@ def politician_edit_process_view(request):
         if updates_needed:
             Representative.objects.bulk_update(update_list, ['seo_friendly_path'])
             messages.add_message(request, messages.INFO,
-                                 "{updates_made} representatives updated with new seo_friendly_path."
+                                 "{updates_made:,} representatives updated with new seo_friendly_path."
                                  "".format(updates_made=updates_made))
 
     if politician_id:

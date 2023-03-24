@@ -15,6 +15,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils.timezone import localtime
 import wevote_functions.admin
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.models import BallotReturnedListManager
@@ -414,6 +415,60 @@ def candidate_list_view(request):
     # if positive_value_exists(candidates_not_updated):
     #     messages.add_message(request, messages.ERROR, "candidate_ultimate_election_date candidates_not_updated: "
     #                                                   "" + str(candidates_not_updated))
+
+    # Update candidates who currently don't have seo_friendly_path, with value from linked politician
+    number_to_update = 1000
+    seo_friendly_path_updates = True
+    if seo_friendly_path_updates:
+        seo_update_query = CandidateCampaign.objects.all()
+        seo_update_query = seo_update_query.exclude(
+            Q(politician_we_vote_id__isnull=True) |
+            Q(politician_we_vote_id="")
+        )
+        seo_update_query = seo_update_query.filter(
+            Q(seo_friendly_path__isnull=True) |
+            Q(seo_friendly_path="")
+        )
+        # After initial updates to all candidates, include in the search logic to find candidates with
+        # seo_friendly_path_date_last_updated older than Politician.seo_friendly_path_date_last_updated
+        if positive_value_exists(state_code):
+            seo_update_query = seo_update_query.filter(state_code__iexact=state_code)
+        total_to_convert = seo_update_query.count()
+        total_to_convert_after = total_to_convert - number_to_update if total_to_convert > number_to_update else 0
+        candidate_list = list(seo_update_query[:number_to_update])
+        update_list = []
+        updates_needed = False
+        updates_made = 0
+        politician_we_vote_id_list = []
+        # Retrieve all relevant politicians in a single query
+        for one_candidate in candidate_list:
+            politician_we_vote_id_list.append(one_candidate.politician_we_vote_id)
+        politician_manager = PoliticianManager()
+        politician_list = []
+        if len(politician_we_vote_id_list) > 0:
+            politician_results = politician_manager.retrieve_politician_list(
+                politician_we_vote_id_list=politician_we_vote_id_list)
+            politician_list = politician_results['politician_list']
+        politician_dict_list = {}
+        for one_politician in politician_list:
+            politician_dict_list[one_politician.we_vote_id] = one_politician
+        timezone = pytz.timezone("America/Los_Angeles")
+        datetime_now = timezone.localize(datetime.now())
+        for one_candidate in candidate_list:
+            one_politician = politician_dict_list.get(one_candidate.politician_we_vote_id)
+            if positive_value_exists(one_politician.seo_friendly_path):
+                one_candidate.seo_friendly_path = one_politician.seo_friendly_path
+                one_candidate.seo_friendly_path_date_last_updated = datetime_now
+                update_list.append(one_candidate)
+                updates_needed = True
+                updates_made += 1
+        if updates_needed:
+            CandidateCampaign.objects.bulk_update(
+                update_list, ['seo_friendly_path', 'seo_friendly_path_date_last_updated'])
+            messages.add_message(request, messages.INFO,
+                                 "{updates_made:,} candidates updated with new seo_friendly_path. "
+                                 "{total_to_convert_after:,} remaining."
+                                 "".format(total_to_convert_after=total_to_convert_after, updates_made=updates_made))
 
     google_civic_election_id_list_generated = False
     show_this_year_of_candidates_restriction = False
