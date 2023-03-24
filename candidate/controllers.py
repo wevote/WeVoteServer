@@ -1374,9 +1374,9 @@ def candidates_query_for_api(  # candidatesQuery
         candidate_dict_list = results['candidate_dict_list']
 
         if len(candidate_dict_list):
-            status += 'CANDIDATES_RETRIEVED '
+            status += 'CANDIDATES_RETRIEVED_CANDIDATES_QUERY '
         else:
-            status += 'NO_CANDIDATES_RETRIEVED '
+            status += 'NO_CANDIDATES_RETRIEVED_CANDIDATES_QUERY '
 
     json_data = {
         'status':                   status,
@@ -2022,9 +2022,9 @@ def retrieve_candidate_in_upcoming_election_list_by_twitter_handle(
         candidate_list = list(candidate_query)
         if len(candidate_list):
             candidate_list_found = True
-            status += 'CANDIDATES_RETRIEVED '
+            status += 'CANDIDATES_RETRIEVED_IN_UPCOMING_ELECTION '
         else:
-            status += 'NO_CANDIDATES_RETRIEVED '
+            status += 'NO_CANDIDATES_RETRIEVED_IN_UPCOMING_ELECTION '
     except Exception as e:
         handle_exception(e, logger=logger)
         status += 'FAILED retrieve_candidate_in_upcoming_election_list_by_twitter_handle: ' + str(e) + ' '

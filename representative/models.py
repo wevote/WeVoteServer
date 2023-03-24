@@ -273,6 +273,7 @@ class Representative(models.Model):
     representative_url3 = models.TextField(max_length=255, blank=True, null=True)
     # seo_friendly_path data is copied from the Politician object, and isn't edited directly on this object
     seo_friendly_path = models.CharField(max_length=255, null=True, unique=False)
+    seo_friendly_path_date_last_updated = models.DateTimeField(null=True)
     state_code = models.CharField(verbose_name="state this representative serves", max_length=2, null=True)
     twitter_handle_updates_failing = models.BooleanField(default=False)
     twitter_handle2_updates_failing = models.BooleanField(default=False)

@@ -421,10 +421,10 @@ class CandidateListManager(models.Manager):
 
             if len(candidate_list_objects):
                 candidate_list_found = True
-                status += 'CANDIDATES_RETRIEVED '
+                status += 'CANDIDATES_RETRIEVED_ALL_CANDIDATES_FOR_UPCOMING_ELECTION '
                 success = True
             else:
-                status += 'NO_CANDIDATES_RETRIEVED '
+                status += 'NO_CANDIDATES_RETRIEVED_ALL_CANDIDATES_FOR_UPCOMING_ELECTION '
                 success = True
         except CandidateCampaign.DoesNotExist:
             # No candidates found. Not a problem.
@@ -587,10 +587,10 @@ class CandidateListManager(models.Manager):
 
             if len(candidate_list_objects):
                 candidate_list_found = True
-                status += 'CANDIDATES_RETRIEVED '
+                status += 'CANDIDATES_RETRIEVED_ONE_YEAR '
                 success = True
             else:
-                status += 'NO_CANDIDATES_RETRIEVED '
+                status += 'NO_CANDIDATES_RETRIEVED_ONE_YEAR '
                 success = True
         except CandidateCampaign.DoesNotExist:
             # No candidates found. Not a problem.
@@ -761,10 +761,10 @@ class CandidateListManager(models.Manager):
 
                 if len(candidate_list_objects):
                     candidate_list_found = True
-                    status += 'CANDIDATES_RETRIEVED '
+                    status += 'CANDIDATES_RETRIEVED_SPECIFIC_ELECTIONS '
                     success = True
                 else:
-                    status += 'NO_CANDIDATES_RETRIEVED '
+                    status += 'NO_CANDIDATES_RETRIEVED_SPECIFIC_ELECTIONS '
                     success = True
         except CandidateCampaign.DoesNotExist:
             # No candidates found. Not a problem.
@@ -2439,6 +2439,7 @@ class CandidateCampaign(models.Model):
         verbose_name='url of profile image from facebook', blank=True, null=True)
     # seo_friendly_path data is copied from the Politician object, and isn't edited directly on this object
     seo_friendly_path = models.CharField(max_length=255, null=True, unique=False)
+    seo_friendly_path_date_last_updated = models.DateTimeField(null=True)
 
     twitter_url = models.URLField(verbose_name='twitter url of candidate', blank=True, null=True)
     twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)
