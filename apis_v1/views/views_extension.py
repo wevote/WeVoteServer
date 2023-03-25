@@ -193,10 +193,13 @@ def process_pdf_to_html(pdf_url, return_version):
     if pdf_text_text and len(pdf_text_text) > 10 and is_pdf:
         # Save the pdf to a temporary file on disk
         logger.error('pdf2htmlEX before storage of pdf file: ' + str(absolute_pdf_file))
-        out_file = open(absolute_pdf_file, 'w')
+        mode = 'w' if type(pdf_text_text) == str else 'wb'
+        logger.error('pdf2htmlEX write_tags: ' + mode)
+        out_file = open(absolute_pdf_file, mode)
         out_file.write(pdf_text_text)
         logger.error('pdf2htmlEX file stored in local directory as: ' + str(pdf_file_name))
-
+        out_file.write(pdf_text_text)
+        logger.error('pdf2htmlEX file stored in local directory as: ' + str(pdf_file_name))
         try:
             # Run pdf2html from docker image to convert pdf to html
             command = 'pdf2htmlEX ' + absolute_pdf_file
