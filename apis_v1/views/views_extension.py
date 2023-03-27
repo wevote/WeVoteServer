@@ -67,7 +67,7 @@ def build_output_string(process):
 
 
 def build_absolute_path_for_tempfile(tempfile):
-    temp_path = get_environment_variable_default("PATH_FOR_TEMP_FILES", ".")
+    temp_path = get_environment_variable_default("PATH_FOR_TEMP_FILES", "/tmp")
     logger.error('pdf2htmlEX build_absolute_path_for_tempfile temp_path 1:' + temp_path)
 
     # March 2023: the value of PATH_FOR_TEMP_FILES on the production servers is '/tmp'-
@@ -202,7 +202,8 @@ def process_pdf_to_html(pdf_url, return_version):
         logger.error('pdf2htmlEX file stored in local directory as: ' + str(pdf_file_name))
         try:
             # Run pdf2html from docker image to convert pdf to html
-            command = 'pdf2htmlEX ' + absolute_pdf_file
+            temp_path = get_environment_variable_default("PATH_FOR_TEMP_FILES", "/tmp")
+            command = 'pdf2htmlEX --dest-dir ' + temp_path + ' ' + absolute_pdf_file
             logger.error('pdf2htmlEX command: ' + command)
             process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output_from_subprocess = build_output_string(process)
