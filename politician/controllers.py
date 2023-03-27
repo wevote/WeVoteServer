@@ -1230,10 +1230,12 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
     #     final_election_date_plus_cool_down >= politician.final_election_date_as_integer \
     #     if positive_value_exists(politician.final_election_date_as_integer) else False
     results = {
+        'ballotpedia_politician_url':       politician.ballotpedia_politician_url,
         'candidate_list':                   politician_candidate_dict_list,
         'candidate_list_exists':            politician_candidate_list_exists,
         'office_held_list':                 office_held_dict_list,
         'office_held_list_exists':          office_held_dict_list_found,
+        'political_party':                  politician.political_party,
         'politician_description':           politician.twitter_description,
         'politician_name':                  politician.politician_name,
         'politician_news_item_list':        politician_news_item_list,
@@ -1253,6 +1255,7 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
         'representative_list':              politician_representative_dict_list,
         'representative_list_exists':       politician_representative_list_exists,
         'seo_friendly_path':                politician.seo_friendly_path,
+        'state_code':                       politician.state_code,
         'status':                           status,
         'success':                          success,
         # 'supporters_count':                 politician.supporters_count,
@@ -1269,6 +1272,8 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
         'we_vote_hosted_profile_image_url_large':   politician.we_vote_hosted_profile_image_url_large,
         'we_vote_hosted_profile_image_url_medium':  we_vote_hosted_profile_image_url_medium,
         'we_vote_hosted_profile_image_url_tiny':    we_vote_hosted_profile_image_url_tiny,
+        'wikipedia_url':                    politician.wikipedia_url,
+        'youtube_url':                      politician.youtube_url,
     }
     return results
 

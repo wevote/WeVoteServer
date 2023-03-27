@@ -436,9 +436,6 @@ def candidate_list_view(request):
         total_to_convert = seo_update_query.count()
         total_to_convert_after = total_to_convert - number_to_update if total_to_convert > number_to_update else 0
         candidate_list = list(seo_update_query[:number_to_update])
-        update_list = []
-        updates_needed = False
-        updates_made = 0
         politician_we_vote_id_list = []
         # Retrieve all relevant politicians in a single query
         for one_candidate in candidate_list:
@@ -454,6 +451,10 @@ def candidate_list_view(request):
             politician_dict_list[one_politician.we_vote_id] = one_politician
         timezone = pytz.timezone("America/Los_Angeles")
         datetime_now = timezone.localize(datetime.now())
+        seo_friendly_path_missing = 0
+        update_list = []
+        updates_needed = False
+        updates_made = 0
         for one_candidate in candidate_list:
             one_politician = politician_dict_list.get(one_candidate.politician_we_vote_id)
             if positive_value_exists(one_politician.seo_friendly_path):
@@ -462,6 +463,12 @@ def candidate_list_view(request):
                 update_list.append(one_candidate)
                 updates_needed = True
                 updates_made += 1
+            else:
+                seo_friendly_path_missing += 1
+        if positive_value_exists(seo_friendly_path_missing):
+            messages.add_message(request, messages.ERROR,
+                                 "{seo_friendly_path_missing:,} missing seo_friendly_path."
+                                 "".format(seo_friendly_path_missing=seo_friendly_path_missing))
         if updates_needed:
             CandidateCampaign.objects.bulk_update(
                 update_list, ['seo_friendly_path', 'seo_friendly_path_date_last_updated'])
