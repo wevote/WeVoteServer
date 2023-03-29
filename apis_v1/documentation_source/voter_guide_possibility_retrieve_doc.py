@@ -34,7 +34,7 @@ def voter_guide_possibility_retrieve_doc_template_values(url_root):
         {
             'name':         'limit_to_this_year',
             'value':        'boolean',  # boolean, integer, long, string
-            'description':  'Limit results to possibilities created this year',
+            'description':  'Limit results to possibilities created this year, defaults to True',
         },
     ]
 
