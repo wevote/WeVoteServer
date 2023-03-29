@@ -31,6 +31,11 @@ def voter_guide_possibility_retrieve_doc_template_values(url_root):
             'value':        'integer',  # boolean, integer, long, string
             'description':  'Either this id or a url_to_scan is required.',
         },
+        {
+            'name':         'limit_to_this_year',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'Limit results to possibilities created this year',
+        },
     ]
 
     potential_status_codes_list = [

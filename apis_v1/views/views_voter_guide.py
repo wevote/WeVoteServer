@@ -33,9 +33,11 @@ def voter_guide_possibility_retrieve_view(request):  # voterGuidePossibilityRetr
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     url_to_scan = request.GET.get('url_to_scan', '')
     voter_guide_possibility_id = request.GET.get('voter_guide_possibility_id', 0)
+    limit_to_this_year = request.GET.get('limit_to_this_year', True)
     return voter_guide_possibility_retrieve_for_api(voter_device_id=voter_device_id,
                                                     voter_guide_possibility_id=voter_guide_possibility_id,
-                                                    url_to_scan=url_to_scan)
+                                                    url_to_scan=url_to_scan,
+                                                    limit_to_this_year=limit_to_this_year)
 
 
 def voter_guide_possibility_position_save_view(request):  # voterGuidePossibilityPositionSave
