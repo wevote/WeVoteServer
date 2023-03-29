@@ -1703,13 +1703,15 @@ def voter_guides_import_from_structured_json(structured_json):
     return voter_guides_results
 
 
-def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possibility_id=0, url_to_scan='', pdf_url=''):
+def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possibility_id=0, url_to_scan='', pdf_url='',
+                                             limit_to_this_year=True):
     """
     voterGuidePossibilityRetrieve
     :param voter_device_id:
     :param voter_guide_possibility_id:
     :param url_to_scan:
     :param pdf_url: The url of the PDF that was used to generate the url_to_scan in S3
+    :param limit_to_this_year
     :return:
     """
     status = ""
@@ -1750,7 +1752,7 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
     voter_guide_possibility = VoterGuidePossibility()
     if positive_value_exists(voter_guide_possibility_id):
         results = voter_guide_possibility_manager.retrieve_voter_guide_possibility(
-            voter_guide_possibility_id=voter_guide_possibility_id)
+            voter_guide_possibility_id=voter_guide_possibility_id, limit_to_this_year=limit_to_this_year)
     else:
         if not positive_value_exists(url_to_scan):
             status += "VOTER_GUIDE_POSSIBILITY_RETRIEVE-URL_TO_SCAN_MISSING "
@@ -1767,7 +1769,8 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
         results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_from_url(
             voter_guide_possibility_url=url_to_scan,
             pdf_url=pdf_url,
-            voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id)
+            voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id,
+            limit_to_this_year=limit_to_this_year)
 
     if not positive_value_exists(results['success']):
         status += results['status']
@@ -2113,7 +2116,7 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
 
 
 def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibilityPositionsRetrieve
-        voter_device_id, voter_guide_possibility_id, voter_guide_possibility_position_id=0):
+        voter_device_id, voter_guide_possibility_id, voter_guide_possibility_position_id=0, limit_to_this_year=True):
     status = "VOTER_GUIDE_POSSIBILITY_POSITIONS_RETRIEVE "
     voter_guide_possibility_id = convert_to_int(voter_guide_possibility_id)
 
@@ -2144,7 +2147,7 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
 
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
     results = voter_guide_possibility_manager.retrieve_voter_guide_possibility(
-        voter_guide_possibility_id=voter_guide_possibility_id)
+        voter_guide_possibility_id=voter_guide_possibility_id, limit_to_this_year=limit_to_this_year)
 
     move_voter_guide_possibility_positions_to_requested_voter_guide_possibility(results['voter_guide_possibility'])
 

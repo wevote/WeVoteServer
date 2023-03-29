@@ -2119,14 +2119,16 @@ class VoterGuidePossibilityManager(models.Manager):
             voter_guide_possibility_url="",
             pdf_url="",
             voter_who_submitted_we_vote_id="",
-            google_civic_election_id=0):
+            google_civic_election_id=0,
+            limit_to_this_year=True):
         voter_guide_possibility_id = 0
         return self.retrieve_voter_guide_possibility(
             voter_guide_possibility_id=voter_guide_possibility_id,
             google_civic_election_id=google_civic_election_id,
             voter_guide_possibility_url=voter_guide_possibility_url,
             pdf_url=pdf_url,
-            voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id)
+            voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id,
+            limit_to_this_year=limit_to_this_year)
 
     def retrieve_voter_guide_possibility(
             self,
@@ -2135,7 +2137,8 @@ class VoterGuidePossibilityManager(models.Manager):
             voter_guide_possibility_url='',
             pdf_url='',
             organization_we_vote_id=None,
-            voter_who_submitted_we_vote_id=None):
+            voter_who_submitted_we_vote_id=None,
+            limit_to_this_year=True):
         status = ""
         voter_guide_possibility_id = convert_to_int(voter_guide_possibility_id)
         google_civic_election_id = convert_to_int(google_civic_election_id)
@@ -2173,10 +2176,11 @@ class VoterGuidePossibilityManager(models.Manager):
                 # DALE 2020-06-08 After working with this, it is better to include entries hidden from active review
                 # voter_guide_possibility_query = voter_guide_possibility_query.exclude(hide_from_active_review=True)
 
-                # Only retrieve by URL if it was created this year
-                now = datetime.now()
-                status += "LIMITING_TO_THIS_YEAR: " + str(now.year) + " "
-                voter_guide_possibility_query = voter_guide_possibility_query.filter(date_last_changed__year=now.year)
+                if positive_value_exists(limit_to_this_year):
+                    # Only retrieve by URL if it was created this year
+                    now = datetime.now()
+                    status += "LIMITING_TO_THIS_YEAR: " + str(now.year) + " "
+                    voter_guide_possibility_query = voter_guide_possibility_query.filter(date_last_changed__year=now.year)
 
                 voter_guide_possibility_on_stage = voter_guide_possibility_query.last()
                 if voter_guide_possibility_on_stage is not None:
@@ -2194,10 +2198,11 @@ class VoterGuidePossibilityManager(models.Manager):
                 # DALE 2020-06-08 After working with this, it is better to include entries hidden from active review
                 # voter_guide_possibility_query = voter_guide_possibility_query.exclude(hide_from_active_review=True)
 
-                # Only retrieve by URL if it was created this year
-                now = datetime.now()
-                status += "LIMITING_TO_THIS_YEAR: " + str(now.year) + " "
-                voter_guide_possibility_query = voter_guide_possibility_query.filter(date_last_changed__year=now.year)
+                if positive_value_exists(limit_to_this_year):
+                    # Only retrieve by URL if it was created this year
+                    now = datetime.now()
+                    status += "LIMITING_TO_THIS_YEAR: " + str(now.year) + " "
+                    voter_guide_possibility_query = voter_guide_possibility_query.filter(date_last_changed__year=now.year)
 
                 voter_guide_possibility_on_stage = voter_guide_possibility_query.last()
                 if voter_guide_possibility_on_stage is not None:
