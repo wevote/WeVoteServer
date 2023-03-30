@@ -1824,7 +1824,8 @@ def update_parallel_fields_with_years_in_related_objects(
                     if candidate.politician_we_vote_id not in politician_we_vote_id_list:
                         politician_we_vote_id_list.append(candidate.politician_we_vote_id)
                         results = politician_manager.retrieve_politician(
-                            politician_we_vote_id=candidate.politician_we_vote_id)
+                            politician_we_vote_id=candidate.politician_we_vote_id,
+                            read_only=False)
                         if not results['success']:
                             success = False
                         elif results['politician_found']:
@@ -1920,7 +1921,8 @@ def update_parallel_fields_with_years_in_related_objects(
                 politician_we_vote_id_list = [representative.politician_we_vote_id]
                 # Direct update: Politician
                 results = politician_manager.retrieve_politician(
-                    politician_we_vote_id=representative.politician_we_vote_id)
+                    politician_we_vote_id=representative.politician_we_vote_id,
+                    read_only=False)
                 if not results['success']:
                     success = False
                 if results['politician_found']:
@@ -2115,7 +2117,8 @@ def update_candidates_under_this_office(
                         if candidate.politician_we_vote_id not in politician_we_vote_id_list:
                             politician_we_vote_id_list.append(candidate.politician_we_vote_id)
                             results = politician_manager.retrieve_politician(
-                                politician_we_vote_id=candidate.politician_we_vote_id)
+                                politician_we_vote_id=candidate.politician_we_vote_id,
+                                read_only=False)
                             if not results['success']:
                                 success = False
                             if results['politician_found']:

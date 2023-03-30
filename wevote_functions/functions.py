@@ -1562,7 +1562,7 @@ def is_voter_device_id_valid(voter_device_id):
             or len(voter_device_id) <= 70 \
             or len(voter_device_id) >= 90:
         success = False
-        status = "VALID_VOTER_DEVICE_ID_MISSING"
+        status = "VALID_VOTER_DEVICE_ID_MISSING "
         json_data = {
             'status': status,
             'success': False,
@@ -1570,7 +1570,7 @@ def is_voter_device_id_valid(voter_device_id):
         }
     else:
         success = True
-        status = "VALID_VOTER_DEVICE_ID_FOUND"
+        status = "VALID_VOTER_DEVICE_ID_FOUND "
         json_data = {
             'status': status,
             'success': True,

@@ -543,7 +543,9 @@ def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, adm
         try:
             # get the politician_id directly to avoid bad data
             politician_manager = PoliticianManager()
-            results = politician_manager.retrieve_politician(politician_we_vote_id=politician2_we_vote_id)
+            results = politician_manager.retrieve_politician(
+                politician_we_vote_id=politician2_we_vote_id,
+                read_only=True)
             if results['politician_found']:
                 politician = results['politician']
                 politician2_id = politician.id
@@ -1840,7 +1842,9 @@ def candidate_politician_match(candidate):
     # Does this candidate already have a we_vote_id for a politician?
     if positive_value_exists(candidate.politician_we_vote_id):
         # Find existing politician. No update here for now.
-        results = politician_manager.retrieve_politician(politician_we_vote_id=candidate.politician_we_vote_id)
+        results = politician_manager.retrieve_politician(
+            politician_we_vote_id=candidate.politician_we_vote_id,
+            read_only=True)
         status += results['status']
         if not results['success']:
             results = {
