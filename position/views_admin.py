@@ -221,7 +221,9 @@ def update_position_list_with_contest_office_info(position_list):
                 one_position.politician_id = politician.id
                 position_change = True
             else:
-                results = politician_manager.retrieve_politician(politician_we_vote_id=politician_we_vote_id)
+                results = politician_manager.retrieve_politician(
+                    politician_we_vote_id=politician_we_vote_id,
+                    read_only=True)
                 if results['politician_found']:
                     politician = results['politician']
                     politician_dict[politician_we_vote_id] = politician

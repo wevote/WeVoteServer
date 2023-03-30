@@ -240,7 +240,7 @@ def refresh_twitter_politician_details_view(request, politician_id):
     twitter_handle_to_make_primary = request.GET.get('twitter_handle', '')
 
     politician_manager = PoliticianManager()
-    results = politician_manager.retrieve_politician(politician_id=politician_id)
+    results = politician_manager.retrieve_politician(politician_id=politician_id, read_only=False)
 
     if not results['politician_found']:
         messages.add_message(request, messages.INFO, results['status'])

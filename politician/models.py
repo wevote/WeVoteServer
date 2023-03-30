@@ -92,6 +92,7 @@ POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED = [
     'fec_id',
     'govtrack_id',
     'maplight_id',
+    'seo_friendly_path',
     'thomas_id',
 ]
 
@@ -642,7 +643,7 @@ class PoliticianManager(models.Manager):
 
     def politician_photo_url(self, politician_id):
         politician_manager = PoliticianManager()
-        results = politician_manager.retrieve_politician(politician_id=politician_id)
+        results = politician_manager.retrieve_politician(politician_id=politician_id, read_only=True)
 
         if results['success']:
             politician = results['politician']
@@ -934,7 +935,9 @@ class PoliticianManager(models.Manager):
         :param twitter_profile_banner_url_https:
         :return:
         """
-        politician_details = self.retrieve_politician(politician_we_vote_id=candidate.politician_we_vote_id)
+        politician_details = self.retrieve_politician(
+            politician_we_vote_id=candidate.politician_we_vote_id,
+            read_only=False)
         politician = politician_details['politician']
         if politician_details['success']:
             politician.we_vote_hosted_profile_image_url_medium = ''
@@ -1017,7 +1020,9 @@ class PoliticianManager(models.Manager):
         status = ''
         success = True
         values_changed = False
-        politician_details = self.retrieve_politician(politician_we_vote_id=candidate.politician_we_vote_id)
+        politician_details = self.retrieve_politician(
+            politician_we_vote_id=candidate.politician_we_vote_id,
+            read_only=False)
         politician = politician_details['politician']
         from politician.controllers import add_twitter_handle_to_next_politician_spot
         if politician_details['success'] and politician:
@@ -1249,14 +1254,14 @@ class PoliticianManager(models.Manager):
 
     def fetch_politician_id_from_we_vote_id(self, we_vote_id):
         politician_manager = PoliticianManager()
-        results = politician_manager.retrieve_politician(politician_we_vote_id=we_vote_id)
+        results = politician_manager.retrieve_politician(politician_we_vote_id=we_vote_id, read_only=True)
         if results['success']:
             return results['politician_id']
         return 0
 
     def fetch_politician_we_vote_id_from_id(self, politician_id):
         politician_manager = PoliticianManager()
-        results = politician_manager.retrieve_politician(politician_id=politician_id)
+        results = politician_manager.retrieve_politician(politician_id=politician_id, read_only=True)
         if results['success']:
             return results['politician_we_vote_id']
         return ''
