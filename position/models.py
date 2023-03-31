@@ -21,6 +21,7 @@ from measure.models import ContestMeasure, ContestMeasureManager
 from office.models import ContestOffice, ContestOfficeManager
 from organization.models import Organization, OrganizationManager, \
     INDIVIDUAL, PUBLIC_FIGURE, UNKNOWN, ORGANIZATION_TYPE_CHOICES
+from politician.models import PoliticianManager
 import robot_detection
 from share.models import ShareManager
 from twitter.models import TwitterUser
@@ -157,6 +158,8 @@ class PositionEntered(models.Model):
                                                 max_length=255, null=True, blank=False, default=0, db_index=True)
     # The date of the last election this position relates to, converted to integer, ex/ 20201103
     position_ultimate_election_date = models.PositiveIntegerField(default=None, null=True)
+    # If set to True, we know this position was created for a politician, and we don't know when their next election is
+    position_ultimate_election_not_linked = models.BooleanField(default=None, null=True)
     # The year this endorsement was made
     position_year = models.PositiveIntegerField(default=None, null=True)
     state_code = models.CharField(verbose_name="us state of the ballot item position is for",
@@ -571,6 +574,8 @@ class PositionForFriends(models.Model):
         verbose_name="google civic election id", default=0, null=True, blank=True, db_index=True)
     # The date of the last election this position relates to, converted to integer, ex/ 20201103
     position_ultimate_election_date = models.PositiveIntegerField(default=None, null=True)
+    # If set to True, we know this position was created for a politician, and we don't know when their next election is
+    position_ultimate_election_not_linked = models.BooleanField(default=None, null=True)
     # The year this endorsement was made
     position_year = models.PositiveIntegerField(default=None, null=True)
     state_code = models.CharField(verbose_name="us state of the ballot item position is for", max_length=2,
@@ -3322,7 +3327,8 @@ class PositionListManager(models.Manager):
             if positive_value_exists(google_civic_election_id):
                 public_positions_list_query = public_positions_list_query.filter(
                     Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list) |
-                    Q(google_civic_election_id=google_civic_election_id))
+                    Q(google_civic_election_id=google_civic_election_id) |
+                    Q(position_ultimate_election_not_linked=True))
             if count_only:
                 public_position_count = public_positions_list_query.count()
             else:
@@ -3360,7 +3366,8 @@ class PositionListManager(models.Manager):
             if positive_value_exists(google_civic_election_id):
                 friends_positions_list_query = friends_positions_list_query.filter(
                     Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list) |
-                    Q(google_civic_election_id=google_civic_election_id))
+                    Q(google_civic_election_id=google_civic_election_id) |
+                    Q(position_ultimate_election_not_linked=True))
             if count_only:
                 friend_position_count = friends_positions_list_query.count()
             else:
@@ -3418,6 +3425,8 @@ class PositionListManager(models.Manager):
                     ballot_item_we_vote_id = position.candidate_campaign_we_vote_id
                 elif positive_value_exists(position.contest_measure_we_vote_id):
                     ballot_item_we_vote_id = position.contest_measure_we_vote_id
+                elif positive_value_exists(position.politician_we_vote_id):
+                    ballot_item_we_vote_id = position.politician_we_vote_id
                 else:
                     continue
 
@@ -3435,6 +3444,8 @@ class PositionListManager(models.Manager):
                     if positive_value_exists(position.contest_office_name) else ''
                 political_party = position.political_party \
                     if positive_value_exists(position.political_party) else ''
+                politician_we_vote_id = position.politician_we_vote_id \
+                    if positive_value_exists(position.politician_we_vote_id) else ''
                 one_position = {
                     'ballot_item_display_name':             ballot_item_display_name,
                     'ballot_item_image_url_https_large':    ballot_item_image_url_https_large,
@@ -3448,6 +3459,7 @@ class PositionListManager(models.Manager):
                     'statement_text':                       position.statement_text,
                     'is_public_position':                   position.is_public_position(),
                     'political_party':                      political_party,
+                    'politician_we_vote_id':                politician_we_vote_id,
                 }
                 simple_position_list.append(one_position)
 
@@ -4303,8 +4315,14 @@ class PositionManager(models.Manager):
     def __unicode__(self):
         return "PositionManager"
 
-    def create_position_for_visibility_change(self, voter_id, contest_office_we_vote_id, candidate_we_vote_id,
-                                              measure_we_vote_id, visibility_setting):
+    def create_position_for_visibility_change(
+            self,
+            voter_id=0,
+            contest_office_we_vote_id='',
+            candidate_we_vote_id='',
+            measure_we_vote_id='',
+            politician_we_vote_id='',
+            visibility_setting=''):
         position_we_vote_id = ""
         position_found = False
         google_civic_election_id = 0
@@ -4312,7 +4330,8 @@ class PositionManager(models.Manager):
         status = ''
         one_unique_ballot_item_variable_received = positive_value_exists(contest_office_we_vote_id) or \
             positive_value_exists(candidate_we_vote_id) or \
-            positive_value_exists(measure_we_vote_id)
+            positive_value_exists(measure_we_vote_id) or \
+            positive_value_exists(politician_we_vote_id)
         if visibility_setting in FRIENDS_ONLY:
             position_on_stage_starter = PositionForFriends
             position_on_stage = PositionForFriends()
@@ -4342,21 +4361,14 @@ class PositionManager(models.Manager):
         status += "CREATE_POSITION_FOR_VISIBILITY_CHANGE "
         try:
             # Check for duplicate in other table
-            position_we_vote_id = ""
-            organization_id = 0
-            organization_we_vote_id = ""
-            contest_office_id = 0
-            candidate_id = 0
-            contest_measure_id = 0
             retrieve_position_for_friends = not is_public_position
-            voter_we_vote_id = ""
             duplicate_results = self.retrieve_position(
-                position_we_vote_id,
-                organization_id, organization_we_vote_id, voter_id,
-                contest_office_id, candidate_id, contest_measure_id,
-                retrieve_position_for_friends,
-                voter_we_vote_id,
-                contest_office_we_vote_id, candidate_we_vote_id, measure_we_vote_id)
+                voter_id=voter_id,
+                retrieve_position_for_friends=retrieve_position_for_friends,
+                contest_office_we_vote_id=contest_office_we_vote_id,
+                candidate_we_vote_id=candidate_we_vote_id,
+                contest_measure_we_vote_id=measure_we_vote_id,
+                politician_we_vote_id=politician_we_vote_id)
             if duplicate_results['position_found']:
                 problem_with_duplicate = True
                 success = False
@@ -4365,7 +4377,7 @@ class PositionManager(models.Manager):
         except Exception as e:
             problem_with_duplicate = True
             success = False
-            status += 'CREATE_POSITION_FOR_VISIBILITY_CHANGE-EXISTING_POSITION_CHECK_FAILED ' + str(e) + ' '
+            status += 'CREATE_POSITION_FOR_VISIBILITY_CHANGE-EXISTING_POSITION_CHECK_FAILED: ' + str(e) + ' '
 
         if problem_with_duplicate:
             results = {
@@ -4387,6 +4399,7 @@ class PositionManager(models.Manager):
             contest_office_id = 0
             politician_id = 0
             politician_we_vote_id = ''
+            position_ultimate_election_not_linked = None
             race_office_level = ""
             speaker_display_name = ""
 
@@ -4422,6 +4435,17 @@ class PositionManager(models.Manager):
                     state_code = contest_office.state_code
                     ballot_item_display_name = contest_office.office_name
                     race_office_level = contest_office.ballotpedia_race_office_level
+            elif politician_we_vote_id:
+                politician_manager = PoliticianManager()
+                results = politician_manager.retrieve_politician(
+                    politician_we_vote_id=politician_we_vote_id,
+                    read_only=True)
+                if results['politician_found']:
+                    politician = results['politician']
+                    politician_id = politician.id
+                    state_code = politician.state_code
+                    ballot_item_display_name = politician.politician_name
+                    position_ultimate_election_not_linked = True
 
             # In order to show a position publicly we need to tie the position to either organization_we_vote_id,
             # public_figure_we_vote_id or candidate_we_vote_id. For now (2016-8-17) we assume organization
@@ -4465,8 +4489,8 @@ class PositionManager(models.Manager):
                 politician_we_vote_id=politician_we_vote_id,
                 ballot_item_display_name=ballot_item_display_name,
                 speaker_display_name=speaker_display_name,
+                position_ultimate_election_not_linked=position_ultimate_election_not_linked,
             )
-
             position_on_stage.save()
             position_we_vote_id = position_on_stage.we_vote_id
             position_found = True
@@ -4484,7 +4508,7 @@ class PositionManager(models.Manager):
 
         except Exception as e:
             success = False
-            status += 'CREATE_POSITION_FOR_VISIBILITY_CHANGE-NEW_POSITION_COULD_NOT_BE_SAVED '
+            status += 'CREATE_POSITION_FOR_VISIBILITY_CHANGE-NEW_POSITION_COULD_NOT_BE_SAVED: ' + str(e) + ' '
 
         results = {
             'success':              success,
@@ -4497,300 +4521,244 @@ class PositionManager(models.Manager):
         return results
 
     def retrieve_organization_candidate_position(self, organization_id, candidate_id,
-                                                 google_civic_election_id=False, state_code=False):
+                                                 google_civic_election_id=False):
         """
         Find a position based on the organization_id & candidate_id
         :param organization_id:
         :param candidate_id:
         :param google_civic_election_id:
-        :param state_code:
         :return:
         """
-        organization_we_vote_id = ''
-        position_we_vote_id = ''
-        voter_id = 0
-        office_id = 0
-        contest_measure_id = 0
-        voter_we_vote_id = ''
-        contest_office_we_vote_id = ''
-        candidate_we_vote_id = ''
-        contest_measure_we_vote_id = ''
         position_manager = PositionManager()
         return position_manager.retrieve_position_table_unknown(
-            position_we_vote_id, organization_id, organization_we_vote_id, voter_id,
-            office_id, candidate_id, contest_measure_id,
-            voter_we_vote_id, contest_office_we_vote_id, candidate_we_vote_id, contest_measure_we_vote_id,
-            google_civic_election_id)
+            organization_id=organization_id,
+            candidate_id=candidate_id,
+            google_civic_election_id=google_civic_election_id)
 
     def retrieve_organization_candidate_position_with_we_vote_id(self, organization_id,
                                                                  candidate_we_vote_id,
-                                                                 google_civic_election_id=False,
-                                                                 state_code=False):
+                                                                 google_civic_election_id=False):
         """
         Find a position based on the organization_id & candidate_we_vote_id
         :param organization_id:
         :param candidate_we_vote_id:
         :param google_civic_election_id:
-        :param state_code:
         :return:
         """
-        organization_we_vote_id = ''
-        position_we_vote_id = ''
-        voter_id = 0
-        office_id = 0
-        contest_measure_id = 0
-        voter_we_vote_id = ''
-        contest_office_we_vote_id = ''
-        candidate_id = 0
-        contest_measure_we_vote_id = ''
         position_manager = PositionManager()
         return position_manager.retrieve_position_table_unknown(
-            position_we_vote_id, organization_id, organization_we_vote_id, voter_id,
-            office_id, candidate_id, contest_measure_id,
-            voter_we_vote_id, contest_office_we_vote_id, candidate_we_vote_id, contest_measure_we_vote_id,
-            google_civic_election_id)
+            organization_id=organization_id,
+            candidate_we_vote_id=candidate_we_vote_id,
+            google_civic_election_id=google_civic_election_id)
 
     def retrieve_organization_contest_measure_position(self, organization_id, contest_measure_id,
-                                                       google_civic_election_id=False, state_code=False):
+                                                       google_civic_election_id=False):
         """
         Find a position based on the organization_id & contest_measure_id
         :param organization_id:
         :param contest_measure_id:
         :param google_civic_election_id:
-        :param state_code:
         :return:
         """
-        organization_we_vote_id = ''
-        position_we_vote_id = ''
-        voter_id = 0
-        office_id = 0
-        candidate_id = 0
-        voter_we_vote_id = ''
-        contest_office_we_vote_id = ''
-        candidate_we_vote_id = ''
-        contest_measure_we_vote_id = ''
         position_manager = PositionManager()
         return position_manager.retrieve_position_table_unknown(
-            position_we_vote_id, organization_id, organization_we_vote_id, voter_id,
-            office_id, candidate_id, contest_measure_id,
-            voter_we_vote_id, contest_office_we_vote_id, candidate_we_vote_id, contest_measure_we_vote_id,
-            google_civic_election_id)
+            organization_id=organization_id,
+            contest_measure_id=contest_measure_id,
+            google_civic_election_id=google_civic_election_id)
 
     def retrieve_organization_contest_measure_position_with_we_vote_id(self, organization_id,
                                                                        contest_measure_we_vote_id,
-                                                                       google_civic_election_id=False,
-                                                                       state_code=False):
+                                                                       google_civic_election_id=False):
         """
         Find a position based on the organization_id & contest_measure_we_vote_id
         :param organization_id:
         :param contest_measure_we_vote_id:
         :param google_civic_election_id:
-        :param state_code:
         :return:
         """
-        organization_we_vote_id = ''
-        position_we_vote_id = ''
-        voter_id = 0
-        office_id = 0
-        contest_measure_id = 0
-        voter_we_vote_id = ''
-        contest_office_we_vote_id = ''
-        candidate_id = 0
-        candidate_we_vote_id = ''
         position_manager = PositionManager()
         return position_manager.retrieve_position_table_unknown(
-            position_we_vote_id, organization_id, organization_we_vote_id, voter_id,
-            office_id, candidate_id, contest_measure_id,
-            voter_we_vote_id, contest_office_we_vote_id, candidate_we_vote_id, contest_measure_we_vote_id,
-            google_civic_election_id)
+            organization_id=organization_id,
+            contest_measure_we_vote_id=contest_measure_we_vote_id,
+            google_civic_election_id=google_civic_election_id)
 
     def retrieve_voter_contest_office_position(self, voter_id, office_id):
-        organization_id = 0
-        organization_we_vote_id = ''
-        position_we_vote_id = ''
-        candidate_id = 0
-        contest_measure_id = 0
         position_manager = PositionManager()
         return position_manager.retrieve_position_table_unknown(
-            position_we_vote_id, organization_id, organization_we_vote_id, voter_id,
-            office_id, candidate_id, contest_measure_id)
+            voter_id=voter_id,
+            contest_office_id=office_id)
 
     def retrieve_voter_contest_office_position_with_we_vote_id(self, voter_id, contest_office_we_vote_id):
-        organization_id = 0
-        organization_we_vote_id = ''
-        position_we_vote_id = ''
-        office_id = 0
-        candidate_id = 0
-        contest_measure_id = 0
-        voter_we_vote_id = ""
-        candidate_we_vote_id = ''
-        contest_measure_we_vote_id = ''
         position_manager = PositionManager()
         return position_manager.retrieve_position_table_unknown(
-            position_we_vote_id, organization_id, organization_we_vote_id, voter_id,
-            office_id, candidate_id, contest_measure_id,
-            voter_we_vote_id, contest_office_we_vote_id, candidate_we_vote_id, contest_measure_we_vote_id
-        )
+            voter_id=voter_id,
+            contest_office_we_vote_id=contest_office_we_vote_id)
 
     def retrieve_voter_candidate_position(self, voter_id, candidate_id):
-        organization_id = 0
-        organization_we_vote_id = ''
-        position_we_vote_id = ''
-        office_id = 0
-        contest_measure_id = 0
         position_manager = PositionManager()
         return position_manager.retrieve_position_table_unknown(
-            position_we_vote_id, organization_id, organization_we_vote_id, voter_id,
-            office_id, candidate_id, contest_measure_id)
+            voter_id=voter_id,
+            candidate_id=candidate_id)
 
     def retrieve_voter_candidate_position_with_we_vote_id(self, voter_id, candidate_we_vote_id):
-        organization_id = 0
-        organization_we_vote_id = ''
-        position_we_vote_id = ''
-        office_id = 0
-        candidate_id = 0
-        contest_measure_id = 0
-        voter_we_vote_id = ''
-        contest_office_we_vote_id = ''
-        contest_measure_we_vote_id = ''
         position_manager = PositionManager()
         return position_manager.retrieve_position_table_unknown(
-            position_we_vote_id, organization_id, organization_we_vote_id, voter_id,
-            office_id, candidate_id, contest_measure_id,
-            voter_we_vote_id, contest_office_we_vote_id, candidate_we_vote_id, contest_measure_we_vote_id
-        )
+            voter_id=voter_id,
+            candidate_we_vote_id=candidate_we_vote_id)
 
     def retrieve_voter_contest_measure_position(self, voter_id, contest_measure_id):
-        organization_id = 0
-        organization_we_vote_id = ''
-        position_we_vote_id = ''
-        office_id = 0
-        candidate_id = 0
         position_manager = PositionManager()
         return position_manager.retrieve_position_table_unknown(
-            position_we_vote_id, organization_id, organization_we_vote_id, voter_id,
-            office_id, candidate_id, contest_measure_id)
+            voter_id=voter_id,
+            contest_measure_id=contest_measure_id)
 
     def retrieve_voter_contest_measure_position_with_we_vote_id(self, voter_id, contest_measure_we_vote_id):
-        organization_id = 0
-        organization_we_vote_id = ''
-        position_we_vote_id = ''
-        office_id = 0
-        candidate_id = 0
-        contest_measure_id = 0
-        voter_we_vote_id = ''
-        contest_office_we_vote_id = ''
-        candidate_we_vote_id = ''
         position_manager = PositionManager()
         return position_manager.retrieve_position_table_unknown(
-            position_we_vote_id, organization_id, organization_we_vote_id, voter_id,
-            office_id, candidate_id, contest_measure_id,
-            voter_we_vote_id, contest_office_we_vote_id, candidate_we_vote_id, contest_measure_we_vote_id
-        )
+            voter_id=voter_id,
+            contest_measure_we_vote_id=contest_measure_we_vote_id)
 
     def retrieve_position_from_we_vote_id(self, position_we_vote_id):
-        organization_id = 0
-        organization_we_vote_id = ''
-        voter_id = 0
-        office_id = 0
-        candidate_id = 0
-        contest_measure_id = 0
         position_manager = PositionManager()
         return position_manager.retrieve_position_table_unknown(
-            position_we_vote_id, organization_id, organization_we_vote_id, voter_id,
-            office_id, candidate_id, contest_measure_id)
+            position_we_vote_id=position_we_vote_id)
 
-    def retrieve_position_table_unknown(self, position_we_vote_id, organization_id, organization_we_vote_id, voter_id,
-                                        contest_office_id, candidate_id, contest_measure_id,
-                                        voter_we_vote_id='', contest_office_we_vote_id='',
-                                        candidate_we_vote_id='', contest_measure_we_vote_id='',
-                                        google_civic_election_id=False, vote_smart_time_span=False):
+    def retrieve_position_table_unknown(
+            self,
+            position_we_vote_id='',
+            organization_id=0,
+            organization_we_vote_id='',
+            voter_id=0,
+            contest_office_id=0,
+            candidate_id=0,
+            contest_measure_id=0,
+            voter_we_vote_id='',
+            contest_office_we_vote_id='',
+            candidate_we_vote_id='',
+            contest_measure_we_vote_id='',
+            google_civic_election_id=False,
+            politician_id=0,
+            politician_we_vote_id='',
+            vote_smart_time_span=False):
         # Check public positions first
         retrieve_position_for_friends = False
-        results = self.retrieve_position(position_we_vote_id, organization_id, organization_we_vote_id, voter_id,
-                                         contest_office_id, candidate_id, contest_measure_id,
-                                         retrieve_position_for_friends,
-                                         voter_we_vote_id, contest_office_we_vote_id, candidate_we_vote_id,
-                                         contest_measure_we_vote_id,
-                                         google_civic_election_id, vote_smart_time_span)
+        results = self.retrieve_position(
+            position_we_vote_id=position_we_vote_id,
+            organization_id=organization_id,
+            organization_we_vote_id=organization_we_vote_id,
+            voter_id=voter_id,
+            contest_office_id=contest_office_id,
+            candidate_id=candidate_id,
+            contest_measure_id=contest_measure_id,
+            retrieve_position_for_friends=retrieve_position_for_friends,
+            voter_we_vote_id=voter_we_vote_id,
+            contest_office_we_vote_id=contest_office_we_vote_id,
+            candidate_we_vote_id=candidate_we_vote_id,
+            contest_measure_we_vote_id=contest_measure_we_vote_id,
+            google_civic_election_id=google_civic_election_id,
+            politician_id=politician_id,
+            politician_we_vote_id=politician_we_vote_id,
+            vote_smart_time_span=vote_smart_time_span)
         if results['position_found']:
             return results
 
         # If a public position wasn't found, now check for private position
         retrieve_position_for_friends = True
-        return self.retrieve_position(position_we_vote_id, organization_id, organization_we_vote_id, voter_id,
-                                      contest_office_id, candidate_id, contest_measure_id,
-                                      retrieve_position_for_friends,
-                                      voter_we_vote_id, contest_office_we_vote_id, candidate_we_vote_id,
-                                      contest_measure_we_vote_id,
-                                      google_civic_election_id, vote_smart_time_span)
+        return self.retrieve_position(
+            position_we_vote_id=position_we_vote_id,
+            organization_id=organization_id,
+            organization_we_vote_id=organization_we_vote_id,
+            voter_id=voter_id,
+            contest_office_id=contest_office_id,
+            candidate_id=candidate_id,
+            contest_measure_id=contest_measure_id,
+            retrieve_position_for_friends=retrieve_position_for_friends,
+            voter_we_vote_id=voter_we_vote_id,
+            contest_office_we_vote_id=contest_office_we_vote_id,
+            candidate_we_vote_id=candidate_we_vote_id,
+            contest_measure_we_vote_id=contest_measure_we_vote_id,
+            google_civic_election_id=google_civic_election_id,
+            politician_id=politician_id,
+            politician_we_vote_id=politician_we_vote_id,
+            vote_smart_time_span=vote_smart_time_span)
 
-    def merge_position_duplicates_voter_candidate_position(self, voter_id, candidate_id,
-                                                                    retrieve_position_for_friends):
-        organization_id = 0
-        organization_we_vote_id = ''
-        position_we_vote_id = ''
-        office_id = 0
-        contest_measure_id = 0
+    def merge_position_duplicates_voter_candidate_position(
+            self,
+            voter_id,
+            candidate_id,
+            retrieve_position_for_friends):
         position_manager = PositionManager()
         return position_manager.merge_position_duplicates(
-            position_we_vote_id, organization_id, organization_we_vote_id, voter_id,
-            office_id, candidate_id, contest_measure_id, retrieve_position_for_friends)
+            voter_id=voter_id,
+            candidate_id=candidate_id,
+            retrieve_position_for_friends=retrieve_position_for_friends)
 
     def merge_position_duplicates_voter_candidate_position_with_we_vote_id(
             self, voter_id, candidate_we_vote_id, retrieve_position_for_friends):
-        organization_id = 0
-        organization_we_vote_id = ''
-        position_we_vote_id = ''
-        office_id = 0
-        candidate_id = 0
-        contest_measure_id = 0
-        voter_we_vote_id = ''
-        contest_office_we_vote_id = ''
-        contest_measure_we_vote_id = ''
         position_manager = PositionManager()
         return position_manager.merge_position_duplicates(
-            position_we_vote_id, organization_id, organization_we_vote_id, voter_id,
-            office_id, candidate_id, contest_measure_id, retrieve_position_for_friends,
-            voter_we_vote_id, contest_office_we_vote_id, candidate_we_vote_id, contest_measure_we_vote_id
-        )
+            voter_id=voter_id,
+            retrieve_position_for_friends=retrieve_position_for_friends,
+            candidate_we_vote_id=candidate_we_vote_id)
 
-    def merge_position_duplicates_voter_contest_measure_position(self, voter_id, contest_measure_id,
-                                                                 retrieve_position_for_friends):
-        organization_id = 0
-        organization_we_vote_id = ''
-        position_we_vote_id = ''
-        office_id = 0
-        candidate_id = 0
+    def merge_position_duplicates_voter_contest_measure_position(
+            self,
+            voter_id,
+            contest_measure_id,
+            retrieve_position_for_friends):
         position_manager = PositionManager()
         return position_manager.merge_position_duplicates(
-            position_we_vote_id, organization_id, organization_we_vote_id, voter_id,
-            office_id, candidate_id, contest_measure_id, retrieve_position_for_friends)
+            voter_id=voter_id,
+            contest_measure_id=contest_measure_id,
+            retrieve_position_for_friends=retrieve_position_for_friends)
 
     def merge_position_duplicates_voter_contest_measure_position_with_we_vote_id(
             self, voter_id, contest_measure_we_vote_id, retrieve_position_for_friends):
-        organization_id = 0
-        organization_we_vote_id = ''
-        position_we_vote_id = ''
-        office_id = 0
-        candidate_id = 0
-        contest_measure_id = 0
-        voter_we_vote_id = ''
-        contest_office_we_vote_id = ''
-        candidate_we_vote_id = ''
         position_manager = PositionManager()
         return position_manager.merge_position_duplicates(
-            position_we_vote_id, organization_id, organization_we_vote_id, voter_id,
-            office_id, candidate_id, contest_measure_id, retrieve_position_for_friends,
-            voter_we_vote_id, contest_office_we_vote_id, candidate_we_vote_id, contest_measure_we_vote_id
+            voter_id=voter_id,
+            retrieve_position_for_friends=retrieve_position_for_friends,
+            contest_measure_we_vote_id=contest_measure_we_vote_id
         )
 
-    def merge_position_duplicates(self, position_we_vote_id, organization_id, organization_we_vote_id, voter_id,
-                                  contest_office_id, candidate_id, contest_measure_id,
-                                  retrieve_position_for_friends=False,
-                                  voter_we_vote_id='', contest_office_we_vote_id='', candidate_we_vote_id='',
-                                  contest_measure_we_vote_id='',
-                                  google_civic_election_id=False, state_code=False, vote_smart_time_span=False):
+    def merge_position_duplicates_voter_politician_position(
+            self,
+            voter_id,
+            politician_id,
+            retrieve_position_for_friends):
+        position_manager = PositionManager()
+        return position_manager.merge_position_duplicates(
+            voter_id=voter_id,
+            politician_id=politician_id,
+            retrieve_position_for_friends=retrieve_position_for_friends)
+
+    def merge_position_duplicates_voter_politician_position_with_we_vote_id(
+            self, voter_id, politician_we_vote_id, retrieve_position_for_friends):
+        position_manager = PositionManager()
+        return position_manager.merge_position_duplicates(
+            voter_id=voter_id,
+            retrieve_position_for_friends=retrieve_position_for_friends,
+            politician_we_vote_id=politician_we_vote_id)
+
+    def merge_position_duplicates(
+            self,
+            candidate_id=0,
+            candidate_we_vote_id='',
+            contest_measure_id='',
+            contest_measure_we_vote_id='',
+            contest_office_id=0,
+            contest_office_we_vote_id='',
+            google_civic_election_id=False,
+            organization_id=0,
+            organization_we_vote_id='',
+            politician_id=0,
+            politician_we_vote_id='',
+            position_we_vote_id='',
+            retrieve_position_for_friends=False,
+            state_code=False,
+            vote_smart_time_span=False,
+            voter_id=0,
+            voter_we_vote_id=''):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -4975,6 +4943,42 @@ class PositionManager(models.Manager):
                     duplicates_count = len(duplicates_list)
                     duplicates_found = True if duplicates_count > 1 else False
                     success = True
+            elif positive_value_exists(organization_id) and positive_value_exists(politician_id):
+                if positive_value_exists(vote_smart_time_span):
+                    status += "MERGE_POSITION_DUPLICATES_WITH_ORG_POLITICIAN_ID_AND_VOTE_SMART_TIME_SPAN "
+                    duplicates_list = duplicates_list_starter.objects.filter(
+                        organization_id=organization_id,
+                        politician_id=politician_id,
+                        vote_smart_time_span__iexact=vote_smart_time_span)
+                    # If still here, we found an existing position
+                    duplicates_count = len(duplicates_list)
+                    duplicates_found = True if duplicates_count > 1 else False
+                    success = True
+                else:
+                    status += "MERGE_POSITION_DUPLICATES_WITH_ORG_AND_POLITICIAN_ID "
+                    duplicates_list = duplicates_list_starter.objects.filter(
+                        organization_id=organization_id, politician_id=politician_id)
+                    duplicates_count = len(duplicates_list)
+                    duplicates_found = True if duplicates_count > 1 else False
+                    success = True
+            elif positive_value_exists(organization_id) and positive_value_exists(politician_we_vote_id):
+                if positive_value_exists(vote_smart_time_span):
+                    status += "MERGE_POSITION_DUPLICATES_WITH_ORG_POLITICIAN_WE_VOTE_ID_AND_VOTE_SMART_TIME_SPAN "
+                    duplicates_list = duplicates_list_starter.objects.filter(
+                        organization_id=organization_id,
+                        politician_we_vote_id__iexact=politician_we_vote_id,
+                        vote_smart_time_span__iexact=vote_smart_time_span)
+                    # If still here, we found an existing position
+                    duplicates_count = len(duplicates_list)
+                    duplicates_found = True if duplicates_count > 1 else False
+                    success = True
+                else:
+                    status += "MERGE_POSITION_DUPLICATES_WITH_ORG_AND_POLITICIAN_WE_VOTE_ID "
+                    duplicates_list = duplicates_list_starter.objects.filter(
+                        organization_id=organization_id, politician_we_vote_id__iexact=politician_we_vote_id)
+                    duplicates_count = len(duplicates_list)
+                    duplicates_found = True if duplicates_count > 1 else False
+                    success = True
             # ###############################
             # Voter
             elif positive_value_exists(voter_id) and positive_value_exists(contest_office_id):
@@ -5019,6 +5023,20 @@ class PositionManager(models.Manager):
                 duplicates_count = len(duplicates_list)
                 duplicates_found = True if duplicates_count > 1 else False
                 success = True
+            elif positive_value_exists(voter_id) and positive_value_exists(politician_id):
+                status += "MERGE_POSITION_DUPLICATES_WITH_VOTER_AND_POLITICIAN "
+                duplicates_list = duplicates_list_starter.objects.filter(
+                    voter_id=voter_id, politician_id=politician_id)
+                duplicates_count = len(duplicates_list)
+                duplicates_found = True if duplicates_count > 1 else False
+                success = True
+            elif positive_value_exists(voter_id) and positive_value_exists(politician_we_vote_id):
+                status += "MERGE_POSITION_DUPLICATES_WITH_VOTER_AND_POLITICIAN_WE_VOTE_ID "
+                duplicates_list = duplicates_list_starter.objects.filter(
+                    voter_id=voter_id, politician_we_vote_id__iexact=politician_we_vote_id)
+                duplicates_count = len(duplicates_list)
+                duplicates_found = True if duplicates_count > 1 else False
+                success = True
             else:
                 status += "MERGE_POSITION_DUPLICATES_INSUFFICIENT_VARIABLES "
         except ObjectDoesNotExist:
@@ -5037,6 +5055,7 @@ class PositionManager(models.Manager):
         if duplicates_found:
             first_position = True
             duplicates_repaired = True
+            position_to_keep = None
             for position in duplicates_list:
                 if first_position:
                     position_to_keep = position
@@ -5068,12 +5087,24 @@ class PositionManager(models.Manager):
         }
         return results
 
-    def retrieve_position(self, position_we_vote_id, organization_id, organization_we_vote_id, voter_id,
-                          contest_office_id, candidate_id, contest_measure_id,
-                          retrieve_position_for_friends=False,
-                          voter_we_vote_id='', contest_office_we_vote_id='', candidate_we_vote_id='',
-                          contest_measure_we_vote_id='',
-                          google_civic_election_id=False, vote_smart_time_span=False):
+    def retrieve_position(
+            self,
+            position_we_vote_id='',
+            organization_id=0,
+            organization_we_vote_id='',
+            voter_id=0,
+            contest_office_id=0,
+            candidate_id=0,
+            contest_measure_id=0,
+            retrieve_position_for_friends=False,
+            voter_we_vote_id='',
+            contest_office_we_vote_id='',
+            candidate_we_vote_id='',
+            contest_measure_we_vote_id='',
+            google_civic_election_id=False,
+            politician_id=0,
+            politician_we_vote_id='',
+            vote_smart_time_span=False):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -5239,6 +5270,25 @@ class PositionManager(models.Manager):
                         organization_id=organization_id, contest_measure_we_vote_id__iexact=contest_measure_we_vote_id)
                     position_found = True
                     success = True
+            elif positive_value_exists(organization_id) and (
+                    positive_value_exists(politician_we_vote_id) or positive_value_exists(politician_id)
+            ):
+                if positive_value_exists(politician_we_vote_id):
+                    status += "RETRIEVE_POSITION_FOUND_WITH_ORG_AND_POLITICIAN_WE_VOTE_ID "
+                    position_on_stage = position_on_stage_starter.objects.get(
+                        organization_id=organization_id,
+                        politician_we_vote_id__iexact=politician_we_vote_id,
+                        position_ultimate_election_not_linked=True)
+                    position_found = True
+                    success = True
+                else:
+                    status += "RETRIEVE_POSITION_FOUND_WITH_ORG_AND_POLITICIAN_ID "
+                    position_on_stage = position_on_stage_starter.objects.get(
+                        organization_id=organization_id,
+                        politician_id=politician_id,
+                        position_ultimate_election_not_linked=True)
+                    position_found = True
+                    success = True
             # ###############################
             # Voter
             elif positive_value_exists(voter_id) and positive_value_exists(contest_office_id):
@@ -5277,6 +5327,25 @@ class PositionManager(models.Manager):
                     voter_id=voter_id, contest_measure_we_vote_id__iexact=contest_measure_we_vote_id)
                 position_found = True
                 success = True
+            elif positive_value_exists(voter_id) and (
+                    positive_value_exists(politician_we_vote_id) or positive_value_exists(politician_id)
+            ):
+                if positive_value_exists(politician_we_vote_id):
+                    status += "RETRIEVE_POSITION_FOUND_WITH_VOTER_AND_POLITICIAN_WE_VOTE_ID "
+                    position_on_stage = position_on_stage_starter.objects.get(
+                        voter_id=voter_id,
+                        politician_we_vote_id__iexact=politician_we_vote_id,
+                        position_ultimate_election_not_linked=True)
+                    position_found = True
+                    success = True
+                else:
+                    status += "RETRIEVE_POSITION_FOUND_WITH_VOTER_AND_POLITICIAN_ID "
+                    position_on_stage = position_on_stage_starter.objects.get(
+                        voter_id=voter_id,
+                        politician_id=politician_id,
+                        position_ultimate_election_not_linked=True)
+                    position_found = True
+                    success = True
             else:
                 status += "RETRIEVE_POSITION_INSUFFICIENT_VARIABLES "
         except MultipleObjectsReturned as e:
@@ -5614,22 +5683,29 @@ class PositionManager(models.Manager):
             or positive_value_exists(position_to_keep.contest_measure_id) \
             or positive_value_exists(position_to_keep.contest_office_we_vote_id) \
             or positive_value_exists(position_to_keep.candidate_campaign_we_vote_id) \
-            or positive_value_exists(position_to_keep.contest_measure_we_vote_id)
+            or positive_value_exists(position_to_keep.contest_measure_we_vote_id) \
+            or positive_value_exists(position_to_keep.politician_we_vote_id)
         if ballot_item_identifier_found:
             google_civic_election_id = 0  # Not necessary if there is ballot_item
         else:
             google_civic_election_id = position_to_keep.google_civic_election_id
-        results = self.retrieve_position(position_we_vote_id,
-                                         position_to_keep.organization_id, position_to_keep.organization_we_vote_id,
-                                         position_to_keep.voter_id,
-                                         position_to_keep.contest_office_id, position_to_keep.candidate_campaign_id,
-                                         position_to_keep.contest_measure_id,
-                                         retrieve_position_for_friends,
-                                         position_to_keep.voter_we_vote_id, position_to_keep.contest_office_we_vote_id,
-                                         position_to_keep.candidate_campaign_we_vote_id,
-                                         position_to_keep.contest_measure_we_vote_id,
-                                         google_civic_election_id,
-                                         position_to_keep.vote_smart_time_span)
+        results = self.retrieve_position(
+            position_we_vote_id=position_we_vote_id,
+            organization_id=position_to_keep.organization_id,
+            organization_we_vote_id=position_to_keep.organization_we_vote_id,
+            voter_id=position_to_keep.voter_id,
+            contest_office_id=position_to_keep.contest_office_id,
+            candidate_id=position_to_keep.candidate_campaign_id,
+            contest_measure_id=position_to_keep.contest_measure_id,
+            retrieve_position_for_friends=retrieve_position_for_friends,
+            voter_we_vote_id=position_to_keep.voter_we_vote_id,
+            contest_office_we_vote_id=position_to_keep.contest_office_we_vote_id,
+            candidate_we_vote_id=position_to_keep.candidate_campaign_we_vote_id,
+            contest_measure_we_vote_id=position_to_keep.contest_measure_we_vote_id,
+            politician_id=position_to_keep.politician_id,
+            politician_we_vote_id=position_to_keep.politician_we_vote_id,
+            google_civic_election_id=google_civic_election_id,
+            vote_smart_time_span=position_to_keep.vote_smart_time_span)
         if results['position_found']:
             dead_position = results['position']
         else:
@@ -5665,22 +5741,29 @@ class PositionManager(models.Manager):
             or positive_value_exists(position_to_keep.contest_measure_id) \
             or positive_value_exists(position_to_keep.contest_office_we_vote_id) \
             or positive_value_exists(position_to_keep.candidate_campaign_we_vote_id) \
-            or positive_value_exists(position_to_keep.contest_measure_we_vote_id)
+            or positive_value_exists(position_to_keep.contest_measure_we_vote_id) \
+            or positive_value_exists(position_to_keep.politician_we_vote_id)
         if ballot_item_identifier_found:
             google_civic_election_id = 0  # Not necessary if there is ballot_item
         else:
             google_civic_election_id = position_to_keep.google_civic_election_id
-        results = self.retrieve_position(position_we_vote_id,
-                                         position_to_keep.organization_id, position_to_keep.organization_we_vote_id,
-                                         position_to_keep.voter_id,
-                                         position_to_keep.contest_office_id, position_to_keep.candidate_campaign_id,
-                                         position_to_keep.contest_measure_id,
-                                         retrieve_position_for_friends,
-                                         position_to_keep.voter_we_vote_id, position_to_keep.contest_office_we_vote_id,
-                                         position_to_keep.candidate_campaign_we_vote_id,
-                                         position_to_keep.contest_measure_we_vote_id,
-                                         google_civic_election_id,
-                                         position_to_keep.vote_smart_time_span)
+        results = self.retrieve_position(
+            position_we_vote_id=position_we_vote_id,
+            organization_id=position_to_keep.organization_id,
+            organization_we_vote_id=position_to_keep.organization_we_vote_id,
+            voter_id=position_to_keep.voter_id,
+            contest_office_id=position_to_keep.contest_office_id,
+            candidate_id=position_to_keep.candidate_campaign_id,
+            contest_measure_id=position_to_keep.contest_measure_id,
+            retrieve_position_for_friends=retrieve_position_for_friends,
+            voter_we_vote_id=position_to_keep.voter_we_vote_id,
+            contest_office_we_vote_id=position_to_keep.contest_office_we_vote_id,
+            candidate_we_vote_id=position_to_keep.candidate_campaign_we_vote_id,
+            contest_measure_we_vote_id=position_to_keep.contest_measure_we_vote_id,
+            google_civic_election_id=google_civic_election_id,
+            politician_id=position_to_keep.politician_id,
+            politician_we_vote_id=position_to_keep.politician_we_vote_id,
+            vote_smart_time_span=position_to_keep.vote_smart_time_span)
         if results['position_found']:
             dead_position = results['position']
         else:
@@ -5793,11 +5876,23 @@ class PositionManager(models.Manager):
         return position_manager.toggle_on_voter_position_for_candidate(
             voter_id, candidate_id, stance, user_agent_string, user_agent_object)
 
+    def toggle_off_voter_support_for_politician(self, voter_id, politician_id, user_agent_string, user_agent_object):
+        stance = NO_STANCE
+        position_manager = PositionManager()
+        return position_manager.toggle_on_voter_position_for_candidate(
+            voter_id, politician_id, stance, user_agent_string, user_agent_object)
+
     def toggle_on_voter_oppose_for_candidate(self, voter_id, candidate_id, user_agent_string, user_agent_object):
         stance = OPPOSE
         position_manager = PositionManager()
         return position_manager.toggle_on_voter_position_for_candidate(
             voter_id, candidate_id, stance, user_agent_string, user_agent_object)
+
+    def toggle_on_voter_oppose_for_politician(self, voter_id, politician_id, user_agent_string, user_agent_object):
+        stance = OPPOSE
+        position_manager = PositionManager()
+        return position_manager.toggle_on_voter_position_for_politician(
+            voter_id, politician_id, stance, user_agent_string, user_agent_object)
 
     def toggle_off_voter_oppose_for_candidate(self, voter_id, candidate_id, user_agent_string, user_agent_object):
         stance = NO_STANCE
@@ -5805,11 +5900,18 @@ class PositionManager(models.Manager):
         return position_manager.toggle_on_voter_position_for_candidate(
             voter_id, candidate_id, stance, user_agent_string, user_agent_object)
 
+    def toggle_off_voter_oppose_for_politician(self, voter_id, politician_id, user_agent_string, user_agent_object):
+        stance = NO_STANCE
+        position_manager = PositionManager()
+        return position_manager.toggle_on_voter_position_for_politician(
+            voter_id, politician_id, stance, user_agent_string, user_agent_object)
+
     def toggle_on_voter_position_for_candidate(
             self, voter_id, candidate_id, stance, user_agent_string, user_agent_object):
         # Does a position from this voter already exist?
         position_manager = PositionManager()
         contest_measure_id = 0
+        politician_id = 0
         status = ""
 
         results = position_manager.retrieve_voter_candidate_position(voter_id, candidate_id)
@@ -5865,9 +5967,16 @@ class PositionManager(models.Manager):
             voter_position_on_stage = results['position']
 
         toggle_results = position_manager.toggle_voter_position(
-            voter_id, voter_position_found, voter_position_on_stage,
-            stance, candidate_id, contest_measure_id,
-            is_public_position, user_agent_string, user_agent_object)
+            voter_id=voter_id,
+            voter_position_found=voter_position_found,
+            voter_position_on_stage=voter_position_on_stage,
+            stance=stance,
+            candidate_id=candidate_id,
+            contest_measure_id=contest_measure_id,
+            politician_id=politician_id,
+            is_public_position=is_public_position,
+            user_agent_string=user_agent_string,
+            user_agent_object=user_agent_object)
 
         status += toggle_results['status']
         success = toggle_results['success']
@@ -5894,9 +6003,119 @@ class PositionManager(models.Manager):
         }
         return results
 
-    def toggle_voter_position(self, voter_id, voter_position_found, voter_position_on_stage, stance,
-                              candidate_id, contest_measure_id, is_public_position, user_agent_string,
-                              user_agent_object):
+    def toggle_on_voter_position_for_politician(
+            self,
+            voter_id=0,
+            politician_id=0,
+            stance='',
+            user_agent_string='',
+            user_agent_object=None):
+        # Does a position from this voter already exist?
+        position_manager = PositionManager()
+        status = ""
+
+        results = position_manager.retrieve_position_table_unknown(
+            voter_id=voter_id,
+            politician_id=politician_id)
+        is_public_position = results['is_public_position']
+        status += results['status']
+
+        if results['MultipleObjectsReturned']:
+            status += results['status']
+            status += 'MultipleObjectsReturned '
+
+            retrieve_position_for_friends = not is_public_position
+            merge_results = position_manager.merge_position_duplicates_voter_politician_position(
+                voter_id, politician_id, retrieve_position_for_friends)
+            status += merge_results['status']
+
+            if not positive_value_exists(merge_results['duplicates_repaired']):
+                if is_public_position:
+                    voter_position_on_stage = PositionEntered()
+                else:
+                    voter_position_on_stage = PositionForFriends()
+                results = {
+                    'status': status,
+                    'success': False,
+                    'position_we_vote_id': '',
+                    'position': voter_position_on_stage,
+                }
+                return results
+
+            status += 'POLITICIAN_DUPLICATES_REPAIRED '
+            results_after_repair = position_manager.retrieve_position_table_unknown(
+                voter_id=voter_id,
+                politician_id=politician_id)
+            status += results_after_repair['status']
+            is_public_position = results_after_repair['is_public_position']
+
+            if results_after_repair['MultipleObjectsReturned']:
+                status += 'MultipleObjectsReturned-WORK_NEEDED2 '
+
+                if is_public_position:
+                    voter_position_on_stage = PositionEntered()
+                else:
+                    voter_position_on_stage = PositionForFriends()
+                results = {
+                    'status':               status,
+                    'success':              False,
+                    'position_we_vote_id':  '',
+                    'position':             voter_position_on_stage,
+                }
+                return results
+            voter_position_found = results_after_repair['position_found']
+            voter_position_on_stage = results_after_repair['position']
+        else:
+            voter_position_found = results['position_found']
+            voter_position_on_stage = results['position']
+
+        toggle_results = position_manager.toggle_voter_position(
+            voter_id=voter_id,
+            voter_position_found=voter_position_found,
+            voter_position_on_stage=voter_position_on_stage,
+            stance=stance,
+            politician_id=politician_id,
+            is_public_position=is_public_position,
+            user_agent_string=user_agent_string,
+            user_agent_object=user_agent_object)
+
+        status += toggle_results['status']
+        success = toggle_results['success']
+        voter_position_on_stage = toggle_results['position']
+        position_we_vote_id = toggle_results['position_we_vote_id']
+
+        if positive_value_exists(success):
+            activity_results = update_or_create_activity_notice_seed_for_voter_position(
+                position_ballot_item_display_name=voter_position_on_stage.ballot_item_display_name,
+                position_we_vote_id=voter_position_on_stage.we_vote_id,
+                is_public_position=is_public_position,
+                speaker_name=voter_position_on_stage.speaker_display_name,
+                speaker_organization_we_vote_id=voter_position_on_stage.organization_we_vote_id,
+                speaker_voter_we_vote_id=voter_position_on_stage.voter_we_vote_id,
+                speaker_profile_image_url_medium=voter_position_on_stage.speaker_image_url_https_medium,
+                speaker_profile_image_url_tiny=voter_position_on_stage.speaker_image_url_https_tiny)
+            status += activity_results['status']
+
+        results = {
+            'status':               status,
+            'success':              success,
+            'position_we_vote_id':  position_we_vote_id,
+            'position':             voter_position_on_stage,
+        }
+        return results
+
+    def toggle_voter_position(
+            self,
+            voter_id=0,
+            voter_position_found=False,
+            voter_position_on_stage=None,
+            stance='',
+            candidate_id=0,
+            contest_measure_id=0,
+            politician_id=0,
+            is_public_position=False,
+            user_agent_string='',
+            user_agent_object=None):
         status = ""
         voter_position_on_stage_found = False
         position_we_vote_id = ''
@@ -5908,7 +6127,8 @@ class PositionManager(models.Manager):
         contest_measure_we_vote_id = ""
         candidate_manager = CandidateManager()
         contest_measure_manager = ContestMeasureManager()
-        position_list_manager = PositionListManager()
+        politician_manager = PoliticianManager()
+        politician_we_vote_id = ""
         voter_manager = VoterManager()
 
         # In order to show a position publicly we need to tie the position to either organization_we_vote_id,
@@ -6021,6 +6241,23 @@ class PositionManager(models.Manager):
                 status += 'STANCE_COULD_NOT_BE_UPDATED2 '
 
             try:
+                if voter_position_on_stage.politician_id:
+                    if not positive_value_exists(voter_position_on_stage.politician_we_vote_id):
+                        # Heal the data, and fill in the politician_we_vote_id
+                        results = politician_manager.retrieve_politician(politician_id=politician_id, read_only=True)
+                        if results['politician_found']:
+                            politician = results['politician']
+                            politician_we_vote_id = politician.we_vote_id
+                            voter_position_on_stage.politician_we_vote_id = politician.we_vote_id
+                            voter_position_on_stage.state_code = politician.state_code
+                            voter_position_on_stage.ballot_item_display_name = politician.politician_name
+                    else:
+                        politician_we_vote_id = voter_position_on_stage.politician_we_vote_id
+            except Exception as e:
+                handle_record_not_saved_exception(e, logger=logger)
+                status += 'STANCE_COULD_NOT_BE_UPDATED3 '
+
+            try:
                 # Heal the data
                 if not voter_position_on_stage.date_entered:
                     voter_position_on_stage.date_entered = now()
@@ -6043,14 +6280,14 @@ class PositionManager(models.Manager):
         else:
             try:
                 # Create new
+                ballot_item_display_name = ""
                 candidate_we_vote_id = ""
+                contest_measure_we_vote_id = ""
                 contest_office_id = 0
                 contest_office_we_vote_id = ''
                 google_civic_election_id = 0
-                politician_id = 0
-                politician_we_vote_id = ''
+                politician_we_vote_id = ""
                 state_code = ''
-                ballot_item_display_name = ""
                 if candidate_id:
                     results = candidate_manager.retrieve_candidate_from_id(candidate_id)
                     if results['candidate_found']:
@@ -6063,9 +6300,7 @@ class PositionManager(models.Manager):
                         politician_we_vote_id = candidate.politician_we_vote_id
                         state_code = candidate.state_code
                         ballot_item_display_name = candidate.candidate_name
-
-                contest_measure_we_vote_id = ""
-                if contest_measure_id:
+                elif contest_measure_id:
                     results = contest_measure_manager.retrieve_contest_measure_from_id(contest_measure_id)
                     if results['contest_measure_found']:
                         contest_measure = results['contest_measure']
@@ -6073,6 +6308,14 @@ class PositionManager(models.Manager):
                         google_civic_election_id = contest_measure.google_civic_election_id
                         state_code = contest_measure.state_code
                         ballot_item_display_name = contest_measure.measure_title
+                elif politician_id:
+                    results = politician_manager.retrieve_politician(
+                        politician_id=politician_id, read_only=True)
+                    if results['politician_found']:
+                        politician = results['politician']
+                        politician_we_vote_id = politician.we_vote_id
+                        state_code = politician.state_code
+                        ballot_item_display_name = politician.politician_name
 
                 if is_public_position:
                     voter_position_on_stage = PositionEntered(
@@ -6143,7 +6386,6 @@ class PositionManager(models.Manager):
                     handle_record_not_saved_exception(e, logger=logger)
                     status += 'STANCE_COULD_NOT_BE_UPDATED4 ' + str(e) + ' '
 
-                voter_position_on_stage.save()
                 position_we_vote_id = voter_position_on_stage.we_vote_id
                 voter_position_on_stage_found = True
                 status += 'NEW_STANCE_SAVED '
@@ -6170,6 +6412,8 @@ class PositionManager(models.Manager):
                 ballot_item_we_vote_id = candidate_we_vote_id
             elif positive_value_exists(contest_measure_we_vote_id):
                 ballot_item_we_vote_id = contest_measure_we_vote_id
+            elif positive_value_exists(politician_we_vote_id):
+                ballot_item_we_vote_id = politician_we_vote_id
             else:
                 ballot_item_we_vote_id = ""
             is_bot = user_agent_object.is_bot or robot_detection.is_robot(user_agent_string)
@@ -6262,11 +6506,19 @@ class PositionManager(models.Manager):
         voter_position_found = results['position_found']
         voter_position_on_stage = results['position']
         candidate_id = 0
+        politician_id = 0
 
         toggle_results = position_manager.toggle_voter_position(
-            voter_id, voter_position_found, voter_position_on_stage,
-            stance, candidate_id, contest_measure_id,
-            is_public_position, user_agent_string, user_agent_object)
+            voter_id=voter_id,
+            voter_position_found=voter_position_found,
+            voter_position_on_stage=voter_position_on_stage,
+            stance=stance,
+            candidate_id=candidate_id,
+            contest_measure_id=contest_measure_id,
+            politician_id=politician_id,
+            is_public_position=is_public_position,
+            user_agent_string=user_agent_string,
+            user_agent_object=user_agent_object)
 
         status += toggle_results['status']
         success = toggle_results['success']
@@ -6293,9 +6545,17 @@ class PositionManager(models.Manager):
         }
         return results
 
-    def update_or_create_position_comment(self, position_we_vote_id, voter_id, voter_we_vote_id,
-                                          office_we_vote_id, candidate_we_vote_id, measure_we_vote_id,
-                                          statement_text, statement_html):
+    def update_or_create_position_comment(
+            self,
+            position_we_vote_id='',
+            voter_id=0,
+            voter_we_vote_id='',
+            office_we_vote_id='',
+            candidate_we_vote_id='',
+            measure_we_vote_id='',
+            politician_we_vote_id='',
+            statement_text='',
+            statement_html=''):
         voter_position_found = False
         is_public_position = False
         problem_with_duplicate_in_same_table = False
@@ -6304,7 +6564,7 @@ class PositionManager(models.Manager):
         candidate_manager = CandidateManager()
         contest_measure = None
         contest_measure_manager = ContestMeasureManager()
-        position_list_manager = PositionListManager()
+        politician_manager = PoliticianManager()
 
         # Set this in case of error
         voter_position_on_stage = PositionForFriends()
@@ -6371,6 +6631,37 @@ class PositionManager(models.Manager):
                         if results['MultipleObjectsReturned']:
                             problem_with_duplicate_in_same_table = True
                             status += 'MultipleObjectsReturned-WORK_NEEDED3 '
+            elif positive_value_exists(politician_we_vote_id):
+                results = self.retrieve_position_table_unknown(
+                    voter_id=voter_id,
+                    politician_we_vote_id=politician_we_vote_id)
+                is_public_position = results['is_public_position']
+                if results['position_found']:
+                    voter_position_found = True
+                    voter_position_on_stage = results['position']
+                elif results['MultipleObjectsReturned']:
+                    problem_with_duplicate_in_same_table = True
+                    status += "UPDATE_OR_CREATE_POSITION_COMMENT-MultipleObjectsReturned-POLITICIAN "
+
+                    retrieve_position_for_friends = not is_public_position
+                    merge_results = self.merge_position_duplicates(
+                        voter_id=voter_id,
+                        retrieve_position_for_friends=retrieve_position_for_friends,
+                        politician_we_vote_id=politician_we_vote_id
+                    )
+                    status += merge_results['status']
+
+                    if merge_results['duplicates_repaired']:
+                        problem_with_duplicate_in_same_table = False
+                        results = self.retrieve_position_table_unknown(
+                            voter_id=voter_id,
+                            politician_we_vote_id=politician_we_vote_id)
+                        status += results['status']
+                        is_public_position = results['is_public_position']
+
+                        if results['MultipleObjectsReturned']:
+                            problem_with_duplicate_in_same_table = True
+                            status += 'MultipleObjectsReturned-WORK_NEEDED3 '
 
         voter_position_on_stage_found = False
         position_we_vote_id = ''
@@ -6391,19 +6682,14 @@ class PositionManager(models.Manager):
             try:
                 # Check for duplicate in other table
                 position_we_vote_id = ""
-                organization_id = 0
-                organization_we_vote_id = ""
-                contest_office_id = 0
-                candidate_id = 0
-                contest_measure_id = 0
                 retrieve_position_for_friends = True if is_public_position else False  # Get the opposite
-                voter_we_vote_id = ""
-                duplicate_results = self.retrieve_position(position_we_vote_id,
-                                                           organization_id, organization_we_vote_id, voter_id,
-                                                           contest_office_id, candidate_id, contest_measure_id,
-                                                           retrieve_position_for_friends,
-                                                           voter_we_vote_id,
-                                                           office_we_vote_id, candidate_we_vote_id, measure_we_vote_id)
+                duplicate_results = self.retrieve_position(
+                    voter_id=voter_id,
+                    retrieve_position_for_friends=retrieve_position_for_friends,
+                    contest_office_we_vote_id=office_we_vote_id,
+                    candidate_we_vote_id=candidate_we_vote_id,
+                    contest_measure_we_vote_id=measure_we_vote_id,
+                    politician_we_vote_id=politician_we_vote_id)
                 if duplicate_results['position_found']:
                     problem_with_duplicate = True
                     success = False
@@ -6412,7 +6698,7 @@ class PositionManager(models.Manager):
             except Exception as e:
                 problem_with_duplicate = True
                 success = False
-                status += 'UPDATE_OR_CREATE_POSITION_COMMENT-EXISTING_POSITION_CHECK_FAILED-EXCEPTION ' + str(e) + ' '
+                status += 'UPDATE_OR_CREATE_POSITION_COMMENT-EXISTING_POSITION_CHECK_FAILED-EXCEPTION: ' + str(e) + ' '
 
             if problem_with_duplicate:
                 results = {
@@ -6484,6 +6770,17 @@ class PositionManager(models.Manager):
                 #         if positive_value_exists(contest_office.state_code):
                 #             voter_position_on_stage.state_code = contest_office.state_code
                 #         voter_position_on_stage.race_office_level = contest_office.ballotpedia_race_office_level
+                elif positive_value_exists(voter_position_on_stage.politician_we_vote_id):
+                    results = politician_manager.retrieve_politician(
+                        politician_we_vote_id=voter_position_on_stage.politician_we_vote_id, read_only=True)
+                    if results['politician_found']:
+                        politician = results['politician']
+                        voter_position_on_stage.position_ultimate_election_not_linked = True
+                        if not positive_value_exists(voter_position_on_stage.politician_id):
+                            # Heal the data, and fill in the politician_id
+                            voter_position_on_stage.ballot_item_display_name = politician.politician_name
+                            voter_position_on_stage.politician_id = politician.id
+                            voter_position_on_stage.state_code = politician.state_code
 
                 if not positive_value_exists(voter_position_on_stage.voter_we_vote_id):
                     # Heal the data: Make sure we have a voter_we_vote_id
@@ -6496,17 +6793,19 @@ class PositionManager(models.Manager):
                 voter_position_on_stage_found = True
                 status += 'POSITION_COMMENT_UPDATED '
             except Exception as e:
-                status += 'POSITION_COMMENT_COULD_NOT_BE_UPDATED ' + str(e) + ' '
+                status += 'POSITION_COMMENT_COULD_NOT_BE_UPDATED: ' + str(e) + ' '
         else:
             try:
                 # Create new
                 ballot_item_display_name = ""
                 candidate_id = None
+                contest_measure_id = None
                 contest_office_id = 0
                 contest_office_we_vote_id = ''
                 google_civic_election_id = 0
                 politician_id = 0
                 politician_we_vote_id = ''
+                position_ultimate_election_not_linked = None
                 state_code = ''
                 speaker_display_name = ""
                 speaker_image_url_https_medium = '',
@@ -6523,8 +6822,7 @@ class PositionManager(models.Manager):
                         politician_we_vote_id = candidate.politician_we_vote_id
                         state_code = candidate.state_code
                         ballot_item_display_name = candidate.candidate_name
-                contest_measure_id = None
-                if measure_we_vote_id:
+                elif measure_we_vote_id:
                     results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(measure_we_vote_id)
                     if results['contest_measure_found']:
                         contest_measure = results['contest_measure']
@@ -6532,6 +6830,15 @@ class PositionManager(models.Manager):
                         google_civic_election_id = contest_measure.google_civic_election_id
                         state_code = contest_measure.state_code
                         ballot_item_display_name = contest_measure.measure_title
+                elif positive_value_exists(politician_we_vote_id):
+                    results = politician_manager.retrieve_politician(
+                        politician_we_vote_id=voter_position_on_stage.politician_we_vote_id, read_only=True)
+                    if results['politician_found']:
+                        politician = results['politician']
+                        position_ultimate_election_not_linked = True
+                        ballot_item_display_name = politician.politician_name
+                        politician_id = politician.id
+                        state_code = politician.state_code
 
                 # In order to show a position publicly we need to tie the position to either organization_we_vote_id,
                 # public_figure_we_vote_id or candidate_we_vote_id. For now (2016-8-17) we assume organization
@@ -6574,6 +6881,7 @@ class PositionManager(models.Manager):
                     organization_we_vote_id=organization_we_vote_id,
                     politician_id=politician_id,
                     politician_we_vote_id=politician_we_vote_id,
+                    position_ultimate_election_not_linked=position_ultimate_election_not_linked,
                     speaker_display_name=speaker_display_name,
                     speaker_image_url_https_medium=speaker_image_url_https_medium,
                     speaker_image_url_https_tiny=speaker_image_url_https_tiny,
@@ -6608,7 +6916,7 @@ class PositionManager(models.Manager):
                 is_public_position = False
                 status += 'NEW_POSITION_COMMENT_SAVED '
             except Exception as e:
-                status += 'NEW_POSITION_COMMENT_COULD_NOT_BE_SAVED' + str(e) + ' '
+                status += 'NEW_POSITION_COMMENT_COULD_NOT_BE_SAVED: ' + str(e) + ' '
 
         if voter_position_on_stage_found:
             activity_results = update_or_create_activity_notice_seed_for_voter_position(
@@ -6976,7 +7284,6 @@ class PositionManager(models.Manager):
         :param organization:
         :return:
         """
-        position_list_manager = PositionListManager()
         position_change = False
         status = ""
         if positive_value_exists(organization.organization_name) and \
@@ -7016,7 +7323,8 @@ class PositionManager(models.Manager):
     # We rely on this unique identifier: position_we_vote_id
     # Pass in a value if we want it saved. Pass in "False" if we want to leave it the same.
     def update_or_create_position(
-            self, position_we_vote_id,
+            self,
+            position_we_vote_id='',
             organization_we_vote_id=False,
             public_figure_we_vote_id=False,
             voter_we_vote_id=False,
@@ -7026,6 +7334,7 @@ class PositionManager(models.Manager):
             office_we_vote_id=False,
             candidate_we_vote_id=False,
             measure_we_vote_id=False,
+            politician_we_vote_id=False,
             stance=False,
             set_as_public_position=False,
             statement_text=False,
@@ -7060,8 +7369,8 @@ class PositionManager(models.Manager):
         candidate_manager = CandidateManager()
         contest_measure = None
         contest_measure_manager = ContestMeasureManager()
+        politician_manager = PoliticianManager()
         position_manager = PositionManager()
-        position_list_manager = PositionListManager()
 
         # In order of authority
         # 1) position_id exists? Find it with position_id or fail (REMOVED)
@@ -7147,6 +7456,16 @@ class PositionManager(models.Manager):
                             if date_results['position_object_updated']:
                                 position_on_stage = date_results['position_object']
                             status += date_results['status']
+                if politician_we_vote_id:
+                    position_on_stage.politician_we_vote_id = politician_we_vote_id
+                    # Lookup politician_id based on politician_we_vote_id and update
+                    politician_results = \
+                        politician_manager.retrieve_politician(
+                            politician_we_vote_id=politician_we_vote_id,
+                            read_only=True)
+                    if politician_results['politician_found']:
+                        politician = politician_results['politician']
+                        position_on_stage.politician_id = politician.id
                 # if positive_value_exists(stance):
                 if stance:
                     # TODO Verify that "stance" contains a legal value
@@ -7167,8 +7486,9 @@ class PositionManager(models.Manager):
                     position_on_stage.vote_smart_rating_name = vote_smart_rating_name
 
                 # As long as at least one of the above variables has changed, then save
-                if organization_we_vote_id or google_civic_election_id or state_code or ballot_item_display_name or \
-                        office_we_vote_id or candidate_we_vote_id or measure_we_vote_id or stance or statement_text \
+                if organization_we_vote_id or google_civic_election_id or state_code or ballot_item_display_name \
+                        or office_we_vote_id or candidate_we_vote_id or measure_we_vote_id or politician_we_vote_id \
+                        or stance or statement_text \
                         or statement_html or more_info_url \
                         or vote_smart_time_span or vote_smart_rating_id or vote_smart_rating or vote_smart_rating_name:
                     position_on_stage.save()
@@ -7208,6 +7528,8 @@ class PositionManager(models.Manager):
                 number_of_unique_ballot_item_identifiers += 1
             if positive_value_exists(office_we_vote_id):
                 number_of_unique_ballot_item_identifiers += 1
+            if positive_value_exists(politician_we_vote_id):
+                number_of_unique_ballot_item_identifiers += 1
 
             if number_of_unique_ballot_item_identifiers > 1:
                 too_many_unique_ballot_item_variables_received = True
@@ -7243,74 +7565,19 @@ class PositionManager(models.Manager):
                     not no_unique_ballot_item_variables_received:
                 # 3-5: Organization-related cases
                 # 3) candidate_we_vote_id + organization_we_vote_id exists? Try to find it. If not, go to step 4
-                # if positive_value_exists(candidate_we_vote_id) and \
-                #         positive_value_exists(organization_we_vote_id) and \
-                #         positive_value_exists(google_civic_election_id):
-                #     try:
-                #         organization_id = 0
-                #         # organization_we_vote_id = ""
-                #         voter_id = 0
-                #         office_id = 0
-                #         voter_we_vote_id = ""
-                #         office_we_vote_id = ""
-                #         candidate_id = 0
-                #         # candidate_we_vote_id = ""
-                #         measure_id = 0
-                #         measure_we_vote_id = ""
-                #         # google_civic_election_id = 0
-                #
-                #         results = position_manager.retrieve_position_table_unknown(
-                #             position_we_vote_id, organization_id, organization_we_vote_id,
-                #             voter_id,
-                #             office_id, candidate_id,
-                #             measure_id,
-                #             voter_we_vote_id,
-                #             office_we_vote_id,
-                #             candidate_we_vote_id,
-                #             measure_we_vote_id,
-                #             google_civic_election_id)
-                #         if results['position_found']:
-                #             position_on_stage = results['position']
-                #             position_on_stage_found = True
-                #             found_with_status = "FOUND_WITH_CANDIDATE_AND_ORGANIZATION_WE_VOTE_ID "
-                #     except MultipleObjectsReturned as e:
-                #         handle_record_found_more_than_one_exception(e, logger)
-                #         exception_multiple_object_returned = True
-                #         status += "FAILED-MULTIPLE_FOUND_WITH_CANDIDATE_AND_ORGANIZATION_WE_VOTE_ID "
-                #     except ObjectDoesNotExist as e:
-                #         # Not a problem -- a position matching this candidate_we_vote_id wasn't found
-                #         pass
-                # # If there wasn't a google_civic_election_id, look for vote_smart_time_span
-                # el
                 if positive_value_exists(candidate_we_vote_id) and \
-                        positive_value_exists(organization_we_vote_id) and \
-                        positive_value_exists(vote_smart_time_span):
+                        positive_value_exists(organization_we_vote_id):
                     try:
                         organization_id = 0
-                        # organization_we_vote_id = ""
-                        voter_id = 0
-                        office_id = 0
                         voter_we_vote_id = ""
                         office_we_vote_id = ""
-                        candidate_id = 0
-                        # candidate_we_vote_id = ""
-                        measure_id = 0
                         measure_we_vote_id = ""
                         google_civic_election_id = 0
-                        # vote_smart_time_span = ""
 
                         results = position_manager.retrieve_position_table_unknown(
-                            position_we_vote_id, organization_id, organization_we_vote_id,
-                            voter_id,
-                            office_id, candidate_id,
-                            measure_id,
-                            voter_we_vote_id,
-                            office_we_vote_id,
-                            candidate_we_vote_id,
-                            measure_we_vote_id,
-                            google_civic_election_id,
-                            vote_smart_time_span,
-                        )
+                            candidate_we_vote_id=candidate_we_vote_id,
+                            organization_we_vote_id=organization_we_vote_id,
+                            vote_smart_time_span=vote_smart_time_span)
                         if results['position_found']:
                             position_on_stage = results['position']
                             position_on_stage_found = True
@@ -7328,31 +7595,18 @@ class PositionManager(models.Manager):
                         positive_value_exists(organization_we_vote_id):
                     try:
                         organization_id = 0
-                        # organization_we_vote_id = ""
-                        voter_id = 0
-                        office_id = 0
                         voter_we_vote_id = ""
                         office_we_vote_id = ""
-                        candidate_id = 0
                         candidate_we_vote_id = ""
-                        measure_id = 0
-                        # measure_we_vote_id = ""
-                        # google_civic_election_id = 0
                         vote_smart_time_span = ""
 
                         results = position_manager.retrieve_position_table_unknown(
-                            position_we_vote_id, organization_id, organization_we_vote_id,
-                            voter_id,
-                            office_id, candidate_id,
-                            measure_id,
-                            voter_we_vote_id,
-                            office_we_vote_id,
-                            candidate_we_vote_id,
-                            measure_we_vote_id)
+                            organization_we_vote_id=organization_we_vote_id,
+                            contest_measure_we_vote_id=measure_we_vote_id)
                         if results['position_found']:
                             position_on_stage = results['position']
                             position_on_stage_found = True
-                            found_with_status = "FOUND_WITH_MEASURE_AND_ORGANIZATION_WE_VOTE_ID"
+                            found_with_status = "FOUND_WITH_MEASURE_AND_ORGANIZATION_WE_VOTE_ID "
                     except MultipleObjectsReturned as e:
                         handle_record_found_more_than_one_exception(e, logger)
                         exception_multiple_object_returned = True
@@ -7379,14 +7633,17 @@ class PositionManager(models.Manager):
                         vote_smart_time_span = ""
 
                         results = position_manager.retrieve_position_table_unknown(
-                            position_we_vote_id, organization_id, organization_we_vote_id,
-                            voter_id,
-                            office_id, candidate_id,
-                            measure_id,
-                            voter_we_vote_id,
-                            office_we_vote_id,
-                            candidate_we_vote_id,
-                            measure_we_vote_id)
+                            position_we_vote_id=position_we_vote_id,
+                            organization_id=organization_id,
+                            organization_we_vote_id=organization_we_vote_id,
+                            voter_id=voter_id,
+                            contest_office_id=office_id,
+                            candidate_id=candidate_id,
+                            contest_measure_id=measure_id,
+                            voter_we_vote_id=voter_we_vote_id,
+                            contest_office_we_vote_id=office_we_vote_id,
+                            candidate_we_vote_id=candidate_we_vote_id,
+                            contest_measure_we_vote_id=measure_we_vote_id)
                         if results['position_found']:
                             position_on_stage = results['position']
                             position_on_stage_found = True
@@ -7397,6 +7654,33 @@ class PositionManager(models.Manager):
                         status += "FAILED-MULTIPLE_FOUND_WITH_OFFICE_AND_ORGANIZATION_WE_VOTE_ID "
                     except ObjectDoesNotExist as e:
                         # Not a problem -- a position matching this office_we_vote_id wasn't found
+                        pass
+
+                # 5b) politician_we_vote_id + organization_we_vote_id exists? Try to find it. If not, go to step 5
+                if positive_value_exists(politician_we_vote_id) and \
+                        positive_value_exists(organization_we_vote_id):
+                    try:
+                        organization_id = 0
+                        voter_we_vote_id = ""
+                        office_we_vote_id = ""
+                        candidate_we_vote_id = ""
+                        vote_smart_time_span = ""
+
+                        # We don't want to retrieve entries with politician_we_vote_id if they are in the past
+                        #  since you could have one position per politician_we_vote_id per election in the past.
+                        results = position_manager.retrieve_position_table_unknown(
+                            organization_we_vote_id=organization_we_vote_id,
+                            politician_we_vote_id=politician_we_vote_id)
+                        if results['position_found']:
+                            position_on_stage = results['position']
+                            position_on_stage_found = True
+                            found_with_status = "FOUND_WITH_MEASURE_AND_ORGANIZATION_WE_VOTE_ID"
+                    except MultipleObjectsReturned as e:
+                        handle_record_found_more_than_one_exception(e, logger)
+                        exception_multiple_object_returned = True
+                        status += "FAILED-MULTIPLE_FOUND_WITH_MEASURE_AND_ORGANIZATION_WE_VOTE_ID "
+                    except ObjectDoesNotExist as e:
+                        # Not a problem -- a position matching this candidate_we_vote_id wasn't found
                         pass
 
                 # TODO Test public_figure (6-8) and voter (9-11) related cases
@@ -7420,14 +7704,17 @@ class PositionManager(models.Manager):
 
                         # TODO public_figure code needs to be added for this to work
                         results = position_manager.retrieve_position_table_unknown(
-                            position_we_vote_id, organization_id, organization_we_vote_id,
-                            voter_id,
-                            office_id, candidate_id,
-                            measure_id,
-                            voter_we_vote_id,
-                            office_we_vote_id,
-                            candidate_we_vote_id,
-                            measure_we_vote_id)
+                            position_we_vote_id=position_we_vote_id,
+                            organization_id=organization_id,
+                            organization_we_vote_id=organization_we_vote_id,
+                            voter_id=voter_id,
+                            contest_office_id=office_id,
+                            candidate_id=candidate_id,
+                            contest_measure_id=measure_id,
+                            voter_we_vote_id=voter_we_vote_id,
+                            contest_office_we_vote_id=office_we_vote_id,
+                            candidate_we_vote_id=candidate_we_vote_id,
+                            contest_measure_we_vote_id=measure_we_vote_id)
                         if results['position_found']:
                             position_on_stage = results['position']
                             position_on_stage_found = False  # TODO Update when working
@@ -7498,14 +7785,17 @@ class PositionManager(models.Manager):
                         vote_smart_time_span = ""
 
                         results = position_manager.retrieve_position_table_unknown(
-                            position_we_vote_id, organization_id, organization_we_vote_id,
-                            voter_id,
-                            office_id, candidate_id,
-                            measure_id,
-                            voter_we_vote_id,
-                            office_we_vote_id,
-                            candidate_we_vote_id,
-                            measure_we_vote_id)
+                            position_we_vote_id=position_we_vote_id,
+                            organization_id=organization_id,
+                            organization_we_vote_id=organization_we_vote_id,
+                            voter_id=voter_id,
+                            contest_office_id=office_id,
+                            candidate_id=candidate_id,
+                            contest_measure_id=measure_id,
+                            voter_we_vote_id=voter_we_vote_id,
+                            contest_office_we_vote_id=office_we_vote_id,
+                            candidate_we_vote_id=candidate_we_vote_id,
+                            contest_measure_we_vote_id=measure_we_vote_id)
                         if results['position_found']:
                             position_on_stage = results['position']
                             position_on_stage_found = True
@@ -7536,14 +7826,17 @@ class PositionManager(models.Manager):
                         vote_smart_time_span = ""
 
                         results = position_manager.retrieve_position_table_unknown(
-                            position_we_vote_id, organization_id, organization_we_vote_id,
-                            voter_id,
-                            office_id, candidate_id,
-                            measure_id,
-                            voter_we_vote_id,
-                            office_we_vote_id,
-                            candidate_we_vote_id,
-                            measure_we_vote_id)
+                            position_we_vote_id=position_we_vote_id,
+                            organization_id=organization_id,
+                            organization_we_vote_id=organization_we_vote_id,
+                            voter_id=voter_id,
+                            contest_office_id=office_id,
+                            candidate_id=candidate_id,
+                            contest_measure_id=measure_id,
+                            voter_we_vote_id=voter_we_vote_id,
+                            contest_office_we_vote_id=office_we_vote_id,
+                            candidate_we_vote_id=candidate_we_vote_id,
+                            contest_measure_we_vote_id=measure_we_vote_id)
                         if results['position_found']:
                             position_on_stage = results['position']
                             position_on_stage_found = True
@@ -7573,15 +7866,17 @@ class PositionManager(models.Manager):
                         vote_smart_time_span = ""
 
                         results = position_manager.retrieve_position_table_unknown(
-                            position_we_vote_id, organization_id, organization_we_vote_id,
-                            voter_id,
-                            office_id, candidate_id,
-                            measure_id,
-                            voter_we_vote_id,
-                            office_we_vote_id,
-                            candidate_we_vote_id,
-                            measure_we_vote_id,
-                        )
+                            position_we_vote_id=position_we_vote_id,
+                            organization_id=organization_id,
+                            organization_we_vote_id=organization_we_vote_id,
+                            voter_id=voter_id,
+                            contest_office_id=office_id,
+                            candidate_id=candidate_id,
+                            contest_measure_id=measure_id,
+                            voter_we_vote_id=voter_we_vote_id,
+                            contest_office_we_vote_id=office_we_vote_id,
+                            candidate_we_vote_id=candidate_we_vote_id,
+                            contest_measure_we_vote_id=measure_we_vote_id)
                         if results['position_found']:
                             position_on_stage = results['position']
                             position_on_stage_found = True

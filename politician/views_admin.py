@@ -65,7 +65,9 @@ def compare_two_politicians_for_merge_view(request):
     state_code = request.GET.get('state_code', '')
 
     politician_manager = PoliticianManager()
-    politician_results = politician_manager.retrieve_politician(politician_we_vote_id=politician1_we_vote_id)
+    politician_results = politician_manager.retrieve_politician(
+        politician_we_vote_id=politician1_we_vote_id,
+        read_only=True)
     if not politician_results['politician_found']:
         messages.add_message(request, messages.ERROR, "Politician1 not found.")
         return HttpResponseRedirect(
@@ -75,7 +77,9 @@ def compare_two_politicians_for_merge_view(request):
 
     politician_option1_for_template = politician_results['politician']
 
-    politician_results = politician_manager.retrieve_politician(politician_we_vote_id=politician2_we_vote_id)
+    politician_results = politician_manager.retrieve_politician(
+        politician_we_vote_id=politician2_we_vote_id,
+        read_only=True)
     if not politician_results['politician_found']:
         messages.add_message(request, messages.ERROR, "Politician2 not found.")
         return HttpResponseRedirect(
@@ -406,7 +410,7 @@ def politician_list_view(request):
     #     for one_politician in list_found:
     #         we_vote_id_string += str(one_politician.we_vote_id) + " "
     #     messages.add_message(request, messages.ERROR,
-    #                          'politician_email mismatch with politician_email_address:' + str(we_vote_id_string))
+    #                          'politician_email mismatch with politician_email_address: ' + str(we_vote_id_string))
 
     # Create seo_friendly_path for all politicians who currently don't have one
     generate_seo_friendly_path_updates = True
@@ -722,7 +726,9 @@ def politician_merge_process_view(request):
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 
-    politician1_results = politician_manager.retrieve_politician(politician_we_vote_id=politician1_we_vote_id)
+    politician1_results = politician_manager.retrieve_politician(
+        politician_we_vote_id=politician1_we_vote_id,
+        read_only=True)
     if politician1_results['politician_found']:
         politician1_on_stage = politician1_results['politician']
     else:

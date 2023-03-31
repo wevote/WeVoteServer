@@ -250,6 +250,7 @@ def position_save_view(request):  # positionSave
     office_we_vote_id = request.GET.get('office_we_vote_id', False)
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', False)
     measure_we_vote_id = request.GET.get('measure_we_vote_id', False)
+    politician_we_vote_id = request.GET.get('politician_we_vote_id', False)
     stance = request.GET.get('stance', False)
     set_as_public_position = request.GET.get('set_as_public_position', True)
     statement_text = request.GET.get('statement_text', False)
@@ -267,6 +268,7 @@ def position_save_view(request):  # positionSave
         office_we_vote_id=office_we_vote_id,
         candidate_we_vote_id=candidate_we_vote_id,
         measure_we_vote_id=measure_we_vote_id,
+        politician_we_vote_id=politician_we_vote_id,
         stance=stance,
         set_as_public_position=set_as_public_position,
         statement_text=statement_text,
