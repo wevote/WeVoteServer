@@ -725,6 +725,7 @@ def transfer_vote_smart_ratings_to_positions(candidate_id, politician_id):  # TO
                     office_we_vote_id=False,
                     candidate_we_vote_id=candidate.we_vote_id,
                     measure_we_vote_id=False,
+                    # politician_we_vote_id=one_batch_row_action.politician_we_vote_id,  # To be added: batch_row_action
                     stance=PERCENT_RATING,
                     set_as_public_position=True,
                     statement_text=one_candidate_rating.ratingText,

@@ -5136,13 +5136,14 @@ def import_position_data_from_batch_row_actions(
             position_we_vote_id = ""
             # DALE 2019-08-05 Refactoring this function to use update_values will take some time
             results = position_manager.update_or_create_position(
-                position_we_vote_id,
+                position_we_vote_id=position_we_vote_id,
                 organization_we_vote_id=one_batch_row_action.organization_we_vote_id,
                 google_civic_election_id=one_batch_row_action.google_civic_election_id,
                 state_code=one_batch_row_action.state_code,
                 ballot_item_display_name=one_batch_row_action.ballot_item_display_name,
                 candidate_we_vote_id=one_batch_row_action.candidate_campaign_we_vote_id,
                 measure_we_vote_id=one_batch_row_action.contest_measure_we_vote_id,
+                # politician_we_vote_id=one_batch_row_action.politician_we_vote_id,  # Not added to batch_row_action yet
                 stance=one_batch_row_action.stance,
                 set_as_public_position=True,
                 statement_text=one_batch_row_action.statement_text,

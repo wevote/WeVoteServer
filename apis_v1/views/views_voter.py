@@ -15,7 +15,7 @@ from apis_v1.views import views_voter_utils
 from ballot.controllers import choose_election_and_prepare_ballot_data, voter_ballot_items_retrieve_for_api, \
     voter_ballot_list_retrieve_for_api
 from ballot.models import BallotItemListManager, BallotReturnedManager, find_best_previously_stored_ballot_returned, \
-    OFFICE, CANDIDATE, MEASURE, VoterBallotSavedManager
+    OFFICE, CANDIDATE, MEASURE, POLITICIAN, VoterBallotSavedManager
 from bookmark.controllers import voter_all_bookmarks_status_retrieve_for_api, voter_bookmark_off_save_for_api, \
     voter_bookmark_on_save_for_api, voter_bookmark_status_retrieve_for_api
 from config.base import get_environment_variable
@@ -1328,7 +1328,6 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
                  ' seconds, step 3 (merge) took ' + "{:.6f}".format(dt2) +
                  ' seconds, total took ' + "{:.6f}".format(dt) + ' seconds')
 
-
     json_data = {
         'status':                   status,
         'success':                  success,
@@ -1671,9 +1670,9 @@ def voter_plan_save_view(request):  # voterPlanSave
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_position_retrieve_view(request):
+def voter_position_retrieve_view(request):  # voterPositionRetrieve
     """
-    Retrieve all the details about a single position based on unique identifier. voterPositionRetrieve
+    Retrieve all the details about a single position based on unique identifier.
     :param request:
     :return:
     """
@@ -1711,35 +1710,30 @@ def voter_position_visibility_save_view(request):  # voterPositionVisibilitySave
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-
-    visibility_setting = request.GET.get('visibility_setting', False)
-
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    visibility_setting = request.GET.get('visibility_setting', False)
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
 
+    candidate_we_vote_id = None
+    measure_we_vote_id = None
+    office_we_vote_id = None
+    politician_we_vote_id = None
     if kind_of_ballot_item == CANDIDATE:
         candidate_we_vote_id = ballot_item_we_vote_id
-        measure_we_vote_id = None
-        office_we_vote_id = None
     elif kind_of_ballot_item == MEASURE:
-        candidate_we_vote_id = None
         measure_we_vote_id = ballot_item_we_vote_id
-        office_we_vote_id = None
     elif kind_of_ballot_item == OFFICE:
-        candidate_we_vote_id = None
-        measure_we_vote_id = None
         office_we_vote_id = ballot_item_we_vote_id
-    else:
-        candidate_we_vote_id = None
-        measure_we_vote_id = None
-        office_we_vote_id = None
+    elif kind_of_ballot_item == POLITICIAN:
+        politician_we_vote_id = ballot_item_we_vote_id
 
     results = voter_position_visibility_save_for_api(
         voter_device_id=voter_device_id,
         office_we_vote_id=office_we_vote_id,
         candidate_we_vote_id=candidate_we_vote_id,
         measure_we_vote_id=measure_we_vote_id,
+        politician_we_vote_id=politician_we_vote_id,
         visibility_setting=visibility_setting,
     )
 
@@ -1764,7 +1758,7 @@ def voter_all_positions_retrieve_view(request):  # voterAllPositionsRetrieve
 
 def voter_position_comment_save_view(request):  # voterPositionCommentSave
     """
-    Save comment for a single measure or candidate for one voter
+    Save comment for a single candidate, measure or politician for one voter
     :param request:
     :return:
     """
@@ -1777,22 +1771,18 @@ def voter_position_comment_save_view(request):  # voterPositionCommentSave
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
 
+    candidate_we_vote_id = None
+    measure_we_vote_id = None
+    office_we_vote_id = None
+    politician_we_vote_id = None
     if kind_of_ballot_item == CANDIDATE:
         candidate_we_vote_id = ballot_item_we_vote_id
-        measure_we_vote_id = None
-        office_we_vote_id = None
     elif kind_of_ballot_item == MEASURE:
-        candidate_we_vote_id = None
         measure_we_vote_id = ballot_item_we_vote_id
-        office_we_vote_id = None
     elif kind_of_ballot_item == OFFICE:
-        candidate_we_vote_id = None
-        measure_we_vote_id = None
         office_we_vote_id = ballot_item_we_vote_id
-    else:
-        candidate_we_vote_id = None
-        measure_we_vote_id = None
-        office_we_vote_id = None
+    elif kind_of_ballot_item == POLITICIAN:
+        politician_we_vote_id = ballot_item_we_vote_id
 
     results = voter_position_comment_save_for_api(
         voter_device_id=voter_device_id,
@@ -1800,6 +1790,7 @@ def voter_position_comment_save_view(request):  # voterPositionCommentSave
         office_we_vote_id=office_we_vote_id,
         candidate_we_vote_id=candidate_we_vote_id,
         measure_we_vote_id=measure_we_vote_id,
+        politician_we_vote_id=politician_we_vote_id,
         statement_text=statement_text,
         statement_html=statement_html,
     )
@@ -1807,9 +1798,9 @@ def voter_position_comment_save_view(request):  # voterPositionCommentSave
     return HttpResponse(json.dumps(results), content_type='application/json')
 
 
-def voter_opposing_save_view(request):
+def voter_opposing_save_view(request):  # voterOpposingSave
     """
-    Save support for a single measure or candidate for one voter (voterOpposingSave)
+    Save support for a single candidate, measure or politician for one voter
     :param request:
     :return:
     """
@@ -1819,25 +1810,31 @@ def voter_opposing_save_view(request):
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
     user_agent_string = request.META['HTTP_USER_AGENT']
     user_agent_object = get_user_agent(request)
+    candidate_id = 0
+    candidate_we_vote_id = None
+    measure_id = 0
+    measure_we_vote_id = None
+    politician_id = 0
+    politician_we_vote_id = None
     if kind_of_ballot_item == CANDIDATE:
         candidate_id = ballot_item_id
         candidate_we_vote_id = ballot_item_we_vote_id
-        measure_id = 0
-        measure_we_vote_id = None
     elif kind_of_ballot_item == MEASURE:
-        candidate_id = 0
-        candidate_we_vote_id = None
         measure_id = ballot_item_id
         measure_we_vote_id = ballot_item_we_vote_id
-    else:
-        candidate_id = 0
-        candidate_we_vote_id = None
-        measure_id = 0
-        measure_we_vote_id = None
-    return voter_opposing_save(voter_device_id=voter_device_id,
-                               candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
-                               measure_id=measure_id, measure_we_vote_id=measure_we_vote_id,
-                               user_agent_string=user_agent_string, user_agent_object=user_agent_object)
+    elif kind_of_ballot_item == POLITICIAN:
+        politician_id = ballot_item_id
+        politician_we_vote_id = ballot_item_we_vote_id
+    return voter_opposing_save(
+        voter_device_id=voter_device_id,
+        candidate_id=candidate_id,
+        candidate_we_vote_id=candidate_we_vote_id,
+        measure_id=measure_id,
+        measure_we_vote_id=measure_we_vote_id,
+        politician_id=politician_id,
+        politician_we_vote_id=politician_we_vote_id,
+        user_agent_string=user_agent_string,
+        user_agent_object=user_agent_object)
 
 
 def voter_split_into_two_accounts_view(request):  # voterSplitIntoTwoAccounts
@@ -2039,25 +2036,31 @@ def voter_stop_opposing_save_view(request):  # voterStopOpposingSave
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
     user_agent_string = request.META['HTTP_USER_AGENT']
     user_agent_object = get_user_agent(request)
+    candidate_id = 0
+    candidate_we_vote_id = None
+    measure_id = 0
+    measure_we_vote_id = None
+    politician_id = 0
+    politician_we_vote_id = None
     if kind_of_ballot_item == CANDIDATE:
         candidate_id = ballot_item_id
         candidate_we_vote_id = ballot_item_we_vote_id
-        measure_id = 0
-        measure_we_vote_id = None
     elif kind_of_ballot_item == MEASURE:
-        candidate_id = 0
-        candidate_we_vote_id = None
         measure_id = ballot_item_id
         measure_we_vote_id = ballot_item_we_vote_id
-    else:
-        candidate_id = 0
-        candidate_we_vote_id = None
-        measure_id = 0
-        measure_we_vote_id = None
-    return voter_stop_opposing_save(voter_device_id=voter_device_id,
-                                    candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
-                                    measure_id=measure_id, measure_we_vote_id=measure_we_vote_id,
-                                    user_agent_string=user_agent_string, user_agent_object=user_agent_object)
+    elif kind_of_ballot_item == POLITICIAN:
+        politician_id = ballot_item_id
+        politician_we_vote_id = ballot_item_we_vote_id
+    return voter_stop_opposing_save(
+        voter_device_id=voter_device_id,
+        candidate_id=candidate_id,
+        candidate_we_vote_id=candidate_we_vote_id,
+        measure_id=measure_id,
+        measure_we_vote_id=measure_we_vote_id,
+        politician_id=politician_id,
+        politician_we_vote_id=politician_we_vote_id,
+        user_agent_string=user_agent_string,
+        user_agent_object=user_agent_object)
 
 
 def voter_stop_supporting_save_view(request):  # voterStopSupportingSave
@@ -2073,30 +2076,36 @@ def voter_stop_supporting_save_view(request):  # voterStopSupportingSave
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
     user_agent_string = request.META['HTTP_USER_AGENT']
     user_agent_object = get_user_agent(request)
+    candidate_id = 0
+    candidate_we_vote_id = None
+    measure_id = 0
+    measure_we_vote_id = None
+    politician_id = 0
+    politician_we_vote_id = None
     if kind_of_ballot_item == CANDIDATE:
         candidate_id = ballot_item_id
         candidate_we_vote_id = ballot_item_we_vote_id
-        measure_id = 0
-        measure_we_vote_id = None
     elif kind_of_ballot_item == MEASURE:
-        candidate_id = 0
-        candidate_we_vote_id = None
         measure_id = ballot_item_id
         measure_we_vote_id = ballot_item_we_vote_id
-    else:
-        candidate_id = 0
-        candidate_we_vote_id = None
-        measure_id = 0
-        measure_we_vote_id = None
-    return voter_stop_supporting_save(voter_device_id=voter_device_id,
-                                      candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
-                                      measure_id=measure_id, measure_we_vote_id=measure_we_vote_id,
-                                      user_agent_string=user_agent_string, user_agent_object=user_agent_object)
+    elif kind_of_ballot_item == POLITICIAN:
+        politician_id = ballot_item_id
+        politician_we_vote_id = ballot_item_we_vote_id
+    return voter_stop_supporting_save(
+        voter_device_id=voter_device_id,
+        candidate_id=candidate_id,
+        candidate_we_vote_id=candidate_we_vote_id,
+        measure_id=measure_id,
+        measure_we_vote_id=measure_we_vote_id,
+        politician_id=politician_id,
+        politician_we_vote_id=politician_we_vote_id,
+        user_agent_string=user_agent_string,
+        user_agent_object=user_agent_object)
 
 
 def voter_supporting_save_view(request):  # voterSupportingSave
     """
-    Save support for a single measure or candidate for one voter (voterSupportingSave)
+    Save support for a single candidate, measure, or politician for one voter
     Default to set this as a position for your friends only.
     :param request:
     :return:
@@ -2107,25 +2116,31 @@ def voter_supporting_save_view(request):  # voterSupportingSave
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
     user_agent_string = request.META['HTTP_USER_AGENT']
     user_agent_object = get_user_agent(request)
+    candidate_id = 0
+    candidate_we_vote_id = None
+    measure_id = 0
+    measure_we_vote_id = None
+    politician_id = 0
+    politician_we_vote_id = None
     if kind_of_ballot_item == CANDIDATE:
         candidate_id = ballot_item_id
         candidate_we_vote_id = ballot_item_we_vote_id
-        measure_id = 0
-        measure_we_vote_id = None
     elif kind_of_ballot_item == MEASURE:
-        candidate_id = 0
-        candidate_we_vote_id = None
         measure_id = ballot_item_id
         measure_we_vote_id = ballot_item_we_vote_id
-    else:
-        candidate_id = 0
-        candidate_we_vote_id = None
-        measure_id = 0
-        measure_we_vote_id = None
-    return voter_supporting_save_for_api(voter_device_id=voter_device_id,
-                                         candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
-                                         measure_id=measure_id, measure_we_vote_id=measure_we_vote_id,
-                                         user_agent_string=user_agent_string, user_agent_object=user_agent_object)
+    elif kind_of_ballot_item == POLITICIAN:
+        politician_id = ballot_item_id
+        politician_we_vote_id = ballot_item_we_vote_id
+    return voter_supporting_save_for_api(
+        voter_device_id=voter_device_id,
+        candidate_id=candidate_id,
+        candidate_we_vote_id=candidate_we_vote_id,
+        measure_id=measure_id,
+        measure_we_vote_id=measure_we_vote_id,
+        politician_id=politician_id,
+        politician_we_vote_id=politician_we_vote_id,
+        user_agent_string=user_agent_string,
+        user_agent_object=user_agent_object)
 
 
 def voter_bookmark_off_save_view(request):
@@ -2582,9 +2597,11 @@ def voter_update_view(request):  # voterUpdate
                 'we_vote_hosted_profile_image_url_large':   voter.we_vote_hosted_profile_image_url_large,
                 'we_vote_hosted_profile_image_url_medium':  voter.we_vote_hosted_profile_image_url_medium,
                 'we_vote_hosted_profile_image_url_tiny':    voter.we_vote_hosted_profile_image_url_tiny,
-                'we_vote_hosted_profile_facebook_image_url_large': voter.we_vote_hosted_profile_facebook_image_url_large,
+                'we_vote_hosted_profile_facebook_image_url_large':
+                voter.we_vote_hosted_profile_facebook_image_url_large,
                 'we_vote_hosted_profile_twitter_image_url_large': voter.we_vote_hosted_profile_twitter_image_url_large,
-                'we_vote_hosted_profile_uploaded_image_url_large': voter.we_vote_hosted_profile_uploaded_image_url_large,
+                'we_vote_hosted_profile_uploaded_image_url_large':
+                voter.we_vote_hosted_profile_uploaded_image_url_large,
             }
         response = HttpResponse(json.dumps(json_data), content_type='application/json')
         return response

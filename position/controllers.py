@@ -5,7 +5,7 @@
 from .models import PositionEntered, PositionForFriends, PositionManager, PositionListManager, ANY_STANCE, \
     FRIENDS_AND_PUBLIC, FRIENDS_ONLY, PUBLIC_ONLY, SHOW_PUBLIC, THIS_ELECTION_ONLY, ALL_OTHER_ELECTIONS, \
     ALL_ELECTIONS, SUPPORT, OPPOSE, INFORMATION_ONLY, NO_STANCE
-from ballot.models import OFFICE, CANDIDATE, MEASURE
+from ballot.models import OFFICE, CANDIDATE, MEASURE, POLITICIAN
 from candidate.models import CandidateCampaign, CandidateManager, CandidateListManager, \
     CandidateToOfficeLink
 from config.base import get_environment_variable
@@ -1112,7 +1112,9 @@ def move_positions_to_another_organization(
             voter_we_vote_id=empty_voter_we_vote_id,
             contest_office_we_vote_id=from_position_entry.contest_office_we_vote_id,
             candidate_we_vote_id=from_position_entry.candidate_campaign_we_vote_id,
-            contest_measure_we_vote_id=from_position_entry.contest_measure_we_vote_id)
+            contest_measure_we_vote_id=from_position_entry.contest_measure_we_vote_id,
+            politician_id=from_position_entry.politician_id,
+            politician_we_vote_id=from_position_entry.politician_we_vote_id)
 
         if results['position_found']:
             # Look to see if there is a statement that can be preserved (i.e., moved from from_position to to_position
@@ -1205,7 +1207,9 @@ def move_positions_to_another_organization(
             voter_we_vote_id=empty_voter_we_vote_id,
             contest_office_we_vote_id=from_position_entry.contest_office_we_vote_id,
             candidate_we_vote_id=from_position_entry.candidate_campaign_we_vote_id,
-            contest_measure_we_vote_id=from_position_entry.contest_measure_we_vote_id)
+            contest_measure_we_vote_id=from_position_entry.contest_measure_we_vote_id,
+            politician_id=from_position_entry.politician_id,
+            politician_we_vote_id=from_position_entry.politician_we_vote_id)
         if not results['success']:
             success = False
         elif results['position_found']:
@@ -1441,13 +1445,19 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
     for from_position_entry in from_position_private_list:
         # See if the "to_voter" already has the same entry
         results = position_manager.retrieve_position_table_unknown(
-            position_we_vote_id, empty_organization_id, empty_organization_we_vote_id,
-            to_voter_id,
-            from_position_entry.contest_office_id, from_position_entry.candidate_campaign_id,
-            from_position_entry.contest_measure_id,
-            to_voter_we_vote_id,
-            from_position_entry.contest_office_we_vote_id,
-            from_position_entry.candidate_campaign_we_vote_id, from_position_entry.contest_measure_we_vote_id)
+            position_we_vote_id=position_we_vote_id,
+            organization_id=empty_organization_id,
+            organization_we_vote_id=empty_organization_we_vote_id,
+            voter_id=to_voter_id,
+            contest_office_id=from_position_entry.contest_office_id,
+            candidate_id=from_position_entry.candidate_campaign_id,
+            contest_measure_id=from_position_entry.contest_measure_id,
+            voter_we_vote_id=to_voter_we_vote_id,
+            contest_office_we_vote_id=from_position_entry.contest_office_we_vote_id,
+            candidate_we_vote_id=from_position_entry.candidate_campaign_we_vote_id,
+            contest_measure_we_vote_id=from_position_entry.contest_measure_we_vote_id,
+            politician_id=from_position_entry.politician_id,
+            politician_we_vote_id=from_position_entry.politician_we_vote_id)
         if not results['success']:
             success = False
         elif results['position_found']:
@@ -1544,13 +1554,19 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
     for from_position_entry in from_position_public_list:
         # See if the "to_voter" already has the same entry
         results = position_manager.retrieve_position_table_unknown(
-            position_we_vote_id, empty_organization_id, empty_organization_we_vote_id,
-            to_voter_id,
-            from_position_entry.contest_office_id, from_position_entry.candidate_campaign_id,
-            from_position_entry.contest_measure_id,
-            to_voter_we_vote_id,
-            from_position_entry.contest_office_we_vote_id,
-            from_position_entry.candidate_campaign_we_vote_id, from_position_entry.contest_measure_we_vote_id)
+            position_we_vote_id=position_we_vote_id,
+            organization_id=empty_organization_id,
+            organization_we_vote_id=empty_organization_we_vote_id,
+            voter_id=to_voter_id,
+            contest_office_id=from_position_entry.contest_office_id,
+            candidate_id=from_position_entry.candidate_campaign_id,
+            contest_measure_id=from_position_entry.contest_measure_id,
+            voter_we_vote_id=to_voter_we_vote_id,
+            contest_office_we_vote_id=from_position_entry.contest_office_we_vote_id,
+            candidate_we_vote_id=from_position_entry.candidate_campaign_we_vote_id,
+            contest_measure_we_vote_id=from_position_entry.contest_measure_we_vote_id,
+            politician_id=from_position_entry.politician_id,
+            politician_we_vote_id=from_position_entry.politician_we_vote_id)
         if not results['success']:
             success = False
         elif results['position_found']:
@@ -1812,8 +1828,13 @@ def position_retrieve_for_api(position_we_vote_id, voter_device_id):  # position
     contest_measure_id = 0
     position_voter_id = 0
     results = position_manager.retrieve_position_table_unknown(
-        position_we_vote_id, organization_id, organization_we_vote_id, position_voter_id,
-        contest_office_id, candidate_id, contest_measure_id)
+        position_we_vote_id=position_we_vote_id,
+        organization_id=organization_id,
+        organization_we_vote_id=organization_we_vote_id,
+        voter_id=position_voter_id,
+        contest_office_id=contest_office_id,
+        candidate_id=candidate_id,
+        contest_measure_id=contest_measure_id)
 
     if results['position_found']:
         position = results['position']
@@ -1897,21 +1918,23 @@ def position_retrieve_for_api(position_we_vote_id, voter_device_id):  # position
 
 
 def position_save_for_api(  # positionSave
-        voter_device_id, position_we_vote_id,
-        organization_we_vote_id,
-        public_figure_we_vote_id,
-        voter_we_vote_id,
-        google_civic_election_id,
-        state_code,
-        ballot_item_display_name,
-        office_we_vote_id,
-        candidate_we_vote_id,
-        measure_we_vote_id,
-        stance,
-        set_as_public_position,
-        statement_text,
-        statement_html,
-        more_info_url):
+        voter_device_id='',
+        position_we_vote_id='',
+        organization_we_vote_id='',
+        public_figure_we_vote_id='',
+        voter_we_vote_id='',
+        google_civic_election_id=0,
+        state_code='',
+        ballot_item_display_name='',
+        office_we_vote_id='',
+        candidate_we_vote_id='',
+        measure_we_vote_id='',
+        politician_we_vote_id='',
+        stance='',
+        set_as_public_position=False,
+        statement_text='',
+        statement_html='',
+        more_info_url=''):
     position_we_vote_id = position_we_vote_id.strip().lower()
 
     existing_unique_identifier_found = positive_value_exists(position_we_vote_id)
@@ -1919,7 +1942,8 @@ def position_save_for_api(  # positionSave
         and positive_value_exists(google_civic_election_id) and (
         positive_value_exists(office_we_vote_id) or
         positive_value_exists(candidate_we_vote_id) or
-        positive_value_exists(measure_we_vote_id)
+        positive_value_exists(measure_we_vote_id) or
+        positive_value_exists(politician_we_vote_id)
     )
     unique_identifier_found = existing_unique_identifier_found or new_unique_identifier_found
     # We must have these variables in order to create a new entry
@@ -1927,7 +1951,8 @@ def position_save_for_api(  # positionSave
         and positive_value_exists(google_civic_election_id) and (
         positive_value_exists(office_we_vote_id) or
         positive_value_exists(candidate_we_vote_id) or
-        positive_value_exists(measure_we_vote_id)
+        positive_value_exists(measure_we_vote_id) or
+        positive_value_exists(politician_we_vote_id)
     )
     if not unique_identifier_found:
         results = {
@@ -1959,6 +1984,7 @@ def position_save_for_api(  # positionSave
             'office_we_vote_id':        office_we_vote_id,
             'candidate_we_vote_id':     candidate_we_vote_id,
             'measure_we_vote_id':       measure_we_vote_id,
+            'politician_we_vote_id':    politician_we_vote_id,
             'stance':                   stance,
             'statement_text':           statement_text,
             'statement_html':           statement_html,
@@ -1996,6 +2022,7 @@ def position_save_for_api(  # positionSave
             'office_we_vote_id':        office_we_vote_id,
             'candidate_we_vote_id':     candidate_we_vote_id,
             'measure_we_vote_id':       measure_we_vote_id,
+            'politician_we_vote_id':    politician_we_vote_id,
             'stance':                   stance,
             'statement_text':           statement_text,
             'statement_html':           statement_html,
@@ -2020,6 +2047,7 @@ def position_save_for_api(  # positionSave
         office_we_vote_id=office_we_vote_id,
         candidate_we_vote_id=candidate_we_vote_id,
         measure_we_vote_id=measure_we_vote_id,
+        politician_we_vote_id=politician_we_vote_id,
         stance=stance,
         set_as_public_position=set_as_public_position,
         statement_text=statement_text,
@@ -2058,6 +2086,7 @@ def position_save_for_api(  # positionSave
             'office_we_vote_id':        '',  # position.office_we_vote_id,
             'candidate_we_vote_id':     position.candidate_campaign_we_vote_id,
             'measure_we_vote_id':       position.contest_measure_we_vote_id,
+            'politician_we_vote_id':    position.politician_we_vote_id,
             'stance':                   position.stance,
             'statement_text':           position.statement_text,
             'statement_html':           position.statement_html,
@@ -2095,6 +2124,7 @@ def position_save_for_api(  # positionSave
             'office_we_vote_id':        office_we_vote_id,
             'candidate_we_vote_id':     candidate_we_vote_id,
             'measure_we_vote_id':       measure_we_vote_id,
+            'politician_we_vote_id':    politician_we_vote_id,
             'stance':                   stance,
             'statement_text':           statement_text,
             'statement_html':           statement_html,
@@ -3417,13 +3447,13 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
     return json_data
 
 
-def position_list_for_voter_for_api(voter_device_id,
+def position_list_for_voter_for_api(voter_device_id,  # positionListForVoter
                                     friends_vs_public=FRIENDS_AND_PUBLIC,
                                     stance_we_are_looking_for=ANY_STANCE,
                                     show_only_this_election=False,
                                     show_all_other_elections=False,
                                     google_civic_election_id=0,
-                                    state_code=''):  # positionListForVoter
+                                    state_code=''):
     """
     We want to return a JSON file with a list of positions held by this voter.
     We can limit the positions to friend's only if needed.
@@ -4089,10 +4119,12 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
 # We retrieve the position for this voter for all ballot items. Could just be the stance, but for now we are
 # retrieving the entire position
 def voter_all_positions_retrieve_for_api(voter_device_id, google_civic_election_id):  # voterAllPositionsRetrieve
+    status = ''
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
+        status += "VOTER_DEVICE_ID_NOT_VALID-VOTER_ALL_POSITIONS "
         json_data = {
-            'status':                   "VOTER_DEVICE_ID_NOT_VALID-VOTER_ALL_POSITIONS",
+            'status':                   status,
             'success':                  False,
             'position_list_found':      False,
             'position_list':            [],
@@ -4101,8 +4133,9 @@ def voter_all_positions_retrieve_for_api(voter_device_id, google_civic_election_
 
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
+        status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID-VOTER_ALL_POSITIONS "
         json_data = {
-            'status':                   "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID-VOTER_ALL_POSITIONS",
+            'status':                   status,
             'success':                  False,
             'position_list_found':      False,
             'position_list':            [],
@@ -4112,21 +4145,26 @@ def voter_all_positions_retrieve_for_api(voter_device_id, google_civic_election_
     position_list_manager = PositionListManager()
     voter_we_vote_id = ''
 
-    results = position_list_manager.retrieve_all_positions_for_voter_simple(voter_id, voter_we_vote_id,
-                                                                            google_civic_election_id)
+    results = position_list_manager.retrieve_all_positions_for_voter_simple(
+        voter_id=voter_id,
+        voter_we_vote_id=voter_we_vote_id,
+        google_civic_election_id=google_civic_election_id)
 
     if results['position_list_found']:
         position_list = results['position_list']
+        status += results['status']
         json_data = {
-            'status':                   results['status'],
+            'status':                   status,
             'success':                  True,
             'position_list_found':      True,
             'position_list':            position_list,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     else:
+        status += results['status']
+        status += "VOTER_POSITIONS_NOT_FOUND-NONE_EXIST "
         json_data = {
-            'status':                   "VOTER_POSITIONS_NOT_FOUND-NONE_EXIST",
+            'status':                   status,
             'success':                  True,
             'position_list_found':      False,
             'position_list':            [],
@@ -4135,12 +4173,14 @@ def voter_all_positions_retrieve_for_api(voter_device_id, google_civic_election_
 
 
 def voter_position_comment_save_for_api(  # voterPositionCommentSave
-        voter_device_id, position_we_vote_id,
-        office_we_vote_id,
-        candidate_we_vote_id,
-        measure_we_vote_id,
-        statement_text,
-        statement_html,
+        voter_device_id='',
+        position_we_vote_id='',
+        office_we_vote_id='',
+        candidate_we_vote_id='',
+        measure_we_vote_id='',
+        politician_we_vote_id='',
+        statement_text='',
+        statement_html='',
         ):
     status = ""
     results = is_voter_device_id_valid(voter_device_id)
@@ -4184,7 +4224,8 @@ def voter_position_comment_save_for_api(  # voterPositionCommentSave
         and (
         positive_value_exists(office_we_vote_id) or
         positive_value_exists(candidate_we_vote_id) or
-        positive_value_exists(measure_we_vote_id)
+        positive_value_exists(measure_we_vote_id) or
+        positive_value_exists(politician_we_vote_id)
         )
     unique_identifier_found = existing_unique_identifier_found or new_unique_identifier_found
     # We must have these variables in order to create a new entry
@@ -4192,7 +4233,8 @@ def voter_position_comment_save_for_api(  # voterPositionCommentSave
         and (
         positive_value_exists(office_we_vote_id) or
         positive_value_exists(candidate_we_vote_id) or
-        positive_value_exists(measure_we_vote_id)
+        positive_value_exists(measure_we_vote_id) or
+        positive_value_exists(politician_we_vote_id)
         )
     if not unique_identifier_found:
         status += "POSITION_REQUIRED_UNIQUE_IDENTIFIER_VARIABLES_MISSING "
@@ -4233,6 +4275,7 @@ def voter_position_comment_save_for_api(  # voterPositionCommentSave
         office_we_vote_id=office_we_vote_id,
         candidate_we_vote_id=candidate_we_vote_id,
         measure_we_vote_id=measure_we_vote_id,
+        politician_we_vote_id=politician_we_vote_id,
         statement_text=statement_text,
         statement_html=statement_html
     )
@@ -4254,6 +4297,10 @@ def voter_position_comment_save_for_api(  # voterPositionCommentSave
             kind_of_ballot_item = OFFICE
             ballot_item_id = position.contest_office_id
             ballot_item_we_vote_id = position.contest_office_we_vote_id
+        elif positive_value_exists(position.politician_we_vote_id):
+            kind_of_ballot_item = POLITICIAN
+            ballot_item_id = position.politician_id
+            ballot_item_we_vote_id = position.politician_we_vote_id
         else:
             kind_of_ballot_item = "UNKNOWN_BALLOT_ITEM"
             ballot_item_id = None
@@ -4291,11 +4338,12 @@ def voter_position_comment_save_for_api(  # voterPositionCommentSave
 
 
 def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
-        voter_device_id,
-        office_we_vote_id,
-        candidate_we_vote_id,
-        measure_we_vote_id,
-        visibility_setting
+        voter_device_id='',
+        office_we_vote_id='',
+        candidate_we_vote_id='',
+        measure_we_vote_id='',
+        politician_we_vote_id='',
+        visibility_setting=''
         ):
     status = ''
     status += "ENTERING_VOTER_POSITION_VISIBILITY "
@@ -4336,7 +4384,8 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
         and (
         positive_value_exists(office_we_vote_id) or
         positive_value_exists(candidate_we_vote_id) or
-        positive_value_exists(measure_we_vote_id)
+        positive_value_exists(measure_we_vote_id) or
+        positive_value_exists(politician_we_vote_id)
         )
     if not unique_identifier_found:
         status += "VOTER_POSITION_VISIBILITY-REQUIRED_UNIQUE_IDENTIFIER_VARIABLES_MISSING "
@@ -4395,22 +4444,42 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
             return json_data
 
     # Make sure we can lay our hands on the existing position entry
-    success = False
+    success = True
     position_manager = PositionManager()
     if positive_value_exists(candidate_we_vote_id):
         results = position_manager.retrieve_voter_candidate_position_with_we_vote_id(
             voter_id, candidate_we_vote_id)
+        if not results['success']:
+            success = False
     elif positive_value_exists(measure_we_vote_id):
         results = position_manager.retrieve_voter_contest_measure_position_with_we_vote_id(
             voter_id, measure_we_vote_id)
+        if not results['success']:
+            success = False
     elif positive_value_exists(office_we_vote_id):
         results = position_manager.retrieve_voter_contest_office_position_with_we_vote_id(
             voter_id, office_we_vote_id)
+        if not results['success']:
+            success = False
+    elif positive_value_exists(politician_we_vote_id):
+        results = position_manager.position_manager.retrieve_position_table_unknown(
+            politician_we_vote_id=politician_we_vote_id,
+            voter_id=voter_id)
+        if not results['success']:
+            success = False
+    else:
+        status += "VOTER_POSITION_VISIBILITY-MISSING_VARIABLES "
+        success = False
 
-    if not results['position_found']:
+    if success and not results['position_found']:
         # If here, an existing position does not exist and a new position needs to be created
         results = position_manager.create_position_for_visibility_change(
-            voter_id, office_we_vote_id, candidate_we_vote_id, measure_we_vote_id, visibility_setting)
+            voter_id=voter_id,
+            contest_office_we_vote_id=office_we_vote_id,
+            candidate_we_vote_id=candidate_we_vote_id,
+            measure_we_vote_id=measure_we_vote_id,
+            politician_we_vote_id=politician_we_vote_id,
+            visibility_setting=visibility_setting)
         if results['position_found']:
             is_public_position = results['is_public_position']
             position = results['position']
@@ -4453,9 +4522,9 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
                 success = merge_results['success']
                 status += " " + merge_results['status']
     else:
-        status += "VOTER_POSITION_VISIBILITY-POSITION_NOT_FOUND-COULD_NOT_BE_CREATED"
         # If here, an existing position could not be created
-        position_manager.create_position_for_visibility_change()
+        status += "VOTER_POSITION_VISIBILITY-POSITION_NOT_FOUND-COULD_NOT_BE_CREATED "
+        success = False
 
     if success:
         # Prepare return values
@@ -4471,6 +4540,10 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
             kind_of_ballot_item = OFFICE
             ballot_item_id = position.contest_office_id
             ballot_item_we_vote_id = position.contest_office_we_vote_id
+        elif positive_value_exists(politician_we_vote_id):
+            kind_of_ballot_item = POLITICIAN
+            ballot_item_id = position.politician_id
+            ballot_item_we_vote_id = position.politician_we_vote_id
         else:
             kind_of_ballot_item = "UNKNOWN_BALLOT_ITEM"
             ballot_item_id = None
@@ -4501,6 +4574,10 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
             kind_of_ballot_item = OFFICE
             ballot_item_id = 0
             ballot_item_we_vote_id = office_we_vote_id
+        elif positive_value_exists(politician_we_vote_id):
+            kind_of_ballot_item = POLITICIAN
+            ballot_item_id = 0
+            ballot_item_we_vote_id = politician_we_vote_id
         else:
             kind_of_ballot_item = "UNKNOWN_BALLOT_ITEM"
             ballot_item_id = None
