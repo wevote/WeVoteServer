@@ -411,6 +411,7 @@ def generate_representative_dict_from_representative_object(
         'linkedin_url':                 representative.linkedin_url,
         'ocd_division_id':              representative.ocd_division_id,
         'office_held_id':               representative.office_held_id,
+        'office_held_district_name':    representative.office_held_district_name,
         'office_held_name':             representative.office_held_name,
         'office_held_we_vote_id':       representative.office_held_we_vote_id,
         'political_party':              representative.political_party_display(),
@@ -1149,11 +1150,11 @@ def representatives_query_for_api(  # representativesQuery
         index_start=0,  # We limit each return to 300, so this is how we page forward
         year=0,
         limit_to_this_state_code='',
+        number_requested=300,
         race_office_level_list=[],
         search_text=''):
 
     representative_list = []
-    representatives_limit = 300
     representative_dict_list = []
     required_variables_missing = False
     retrieve_mode = ''
@@ -1198,7 +1199,7 @@ def representatives_query_for_api(  # representativesQuery
                 index_start=index_start,
                 limit_to_this_state_code=limit_to_this_state_code,
                 read_only=True,
-                representatives_limit=representatives_limit,
+                representatives_limit=number_requested,
                 years_list=[year],
             )
             success = results['success']
@@ -1217,7 +1218,7 @@ def representatives_query_for_api(  # representativesQuery
                 index_start=index_start,
                 limit_to_this_state_code=limit_to_this_state_code,
                 read_only=True,
-                representatives_limit=representatives_limit,
+                representatives_limit=number_requested,
                 search_string=search_text,
                 years_list=[year],
             )

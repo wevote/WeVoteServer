@@ -1272,14 +1272,14 @@ def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):  # candidate
 
 
 def candidates_query_for_api(  # candidatesQuery
-        candidates_index_start=0,  # We limit each return to 300, so this is how we page forward
+        index_start=0,  # We limit each return to 300, so this is how we page forward
+        number_requested=300,  # We default each return to 300
         election_day='',
         limit_to_this_state_code='',
         race_office_level_list=[],
         search_text='',
         use_we_vote_format=False):
     candidate_list = []
-    candidates_limit = 300
     candidates_returned_count = 0
     candidates_total_count = 0
     candidate_dict_list = []
@@ -1325,8 +1325,8 @@ def candidates_query_for_api(  # candidatesQuery
         try:
             results = candidate_list_manager.retrieve_all_candidates_for_one_year(
                 candidate_year=election_day,
-                candidates_index_start=candidates_index_start,
-                candidates_limit=candidates_limit,
+                index_start=index_start,
+                candidates_limit=number_requested,
                 limit_to_this_state_code=limit_to_this_state_code,
                 search_string=False,
                 return_list_of_objects=True,
@@ -1383,7 +1383,7 @@ def candidates_query_for_api(  # candidatesQuery
     json_data = {
         'status':                   status,
         'success':                  success,
-        'candidatesIndexStart':     candidates_index_start,
+        'indexStart':               index_start,
         'candidatesReturnedCount':  candidates_returned_count,
         'candidatesTotalCount':     candidates_total_count,
         'election':                 {},
@@ -1590,12 +1590,14 @@ def generate_candidate_dict_from_candidate_object(
             office_manager = ContestOfficeManager()
             election_manager = ElectionManager()
             for candidate_to_office_link in candidate_to_office_link_list:
+                contest_office_district_name = ''
                 contest_office_name = ''
                 office_found = False
                 if candidate_to_office_link.contest_office_we_vote_id in office_dict:
                     office_found = True
                     contest_office = office_dict[candidate_to_office_link.contest_office_we_vote_id]
                     if contest_office:
+                        contest_office_district_name = contest_office.district_name
                         contest_office_name = contest_office.office_name
                 if not office_found:
                     results = office_manager.retrieve_contest_office_from_we_vote_id(
@@ -1603,6 +1605,7 @@ def generate_candidate_dict_from_candidate_object(
                     if results['contest_office_found']:
                         contest_office = results['contest_office']
                         if contest_office:
+                            contest_office_district_name = contest_office.district_name
                             contest_office_name = contest_office.office_name
                 election_day_text = ''
                 if positive_value_exists(candidate_to_office_link.google_civic_election_id):
@@ -1622,6 +1625,7 @@ def generate_candidate_dict_from_candidate_object(
                 one_office_dict = {
                     'contest_office_name':      contest_office_name,
                     'contest_office_we_vote_id': candidate_to_office_link.contest_office_we_vote_id,
+                    'district_name':            contest_office_district_name,
                     'election_day_text':        election_day_text,
                     'google_civic_election_id': candidate_to_office_link.google_civic_election_id,
                     'state_code':               candidate_to_office_link.state_code,

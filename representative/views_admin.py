@@ -391,6 +391,57 @@ def representative_list_view(request):
                                  "{total_to_convert_after:,} remaining."
                                  "".format(total_to_convert_after=total_to_convert_after, updates_made=updates_made))
 
+    # Update representatives who don't have representative.office_held_district_name
+    number_to_update = 1000
+    populate_once_with_cached_data = True
+    if populate_once_with_cached_data:
+        cache_query = Representative.objects.all()
+        cache_query = cache_query.exclude(
+            Q(office_held_we_vote_id__isnull=True) |
+            Q(office_held_we_vote_id="")
+        )
+        cache_query = cache_query.filter(
+            Q(office_held_district_name__isnull=True) |
+            Q(office_held_district_name="")
+        )
+        cache_query = cache_query.values_list('office_held_we_vote_id', flat=True).distinct()
+        total_to_convert = cache_query.count()
+        total_to_convert_after = total_to_convert - number_to_update if total_to_convert > number_to_update else 0
+        office_held_we_vote_id_list = cache_query[:number_to_update]
+
+        office_held_dict_list = {}
+        if len(office_held_we_vote_id_list) > 0:
+            office_held_queryset = OfficeHeld.objects.all()
+            office_held_queryset = office_held_queryset.filter(we_vote_id__in=office_held_we_vote_id_list)
+            office_held_list = list(office_held_queryset)
+            for office_held in office_held_list:
+                if office_held.we_vote_id not in office_held_dict_list:
+                    office_held_dict_list[office_held.we_vote_id] = office_held
+
+        cache_query2 = Representative.objects.all()
+        cache_query2 = cache_query2.filter(office_held_we_vote_id__in=office_held_we_vote_id_list)
+        cache_query2 = cache_query2.filter(
+            Q(office_held_district_name__isnull=True) |
+            Q(office_held_district_name="")
+        )
+        representative_list_to_update = list(cache_query2)
+        update_list = []
+        updates_made = 0
+        updates_needed = False
+        for representative in representative_list_to_update:
+            one_office_held = office_held_dict_list.get(representative.office_held_we_vote_id)
+            if positive_value_exists(one_office_held.district_name):
+                representative.office_held_district_name = one_office_held.district_name
+                update_list.append(representative)
+                updates_needed = True
+                updates_made += 1
+        if updates_needed:
+            Representative.objects.bulk_update(update_list, ['office_held_district_name'])
+            messages.add_message(request, messages.INFO,
+                                 "{updates_made:,} representatives updated with new district_name. "
+                                 "{total_to_convert_after:,} remaining."
+                                 "".format(total_to_convert_after=total_to_convert_after, updates_made=updates_made))
+
     representative_count = 0
     representative_list = []
     state_list = STATE_CODE_MAP

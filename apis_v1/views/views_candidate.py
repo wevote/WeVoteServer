@@ -10,7 +10,7 @@ from config.base import get_environment_variable
 from django.http import HttpResponse
 import json
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -24,14 +24,16 @@ def candidate_retrieve_view(request):  # candidateRetrieve
 
 
 def candidates_query_view(request):  # candidatesQuery
-    candidates_index_start = request.GET.get('candidatesIndexStart', 0)
+    index_start = convert_to_int(request.GET.get('indexStart', 0))
+    number_requested = convert_to_int(request.GET.get('numberRequested', 300))
     election_day = request.GET.get('electionDay', '')
     race_office_level_list = request.GET.getlist('raceOfficeLevel[]', False)
     search_text = request.GET.get('searchText', '')
     use_we_vote_format = positive_value_exists(request.GET.get('useWeVoteFormat', False))
     limit_to_this_state_code = request.GET.get('state', '')
     return candidates_query_for_api(
-        candidates_index_start=candidates_index_start,
+        index_start=index_start,
+        number_requested=number_requested,
         election_day=election_day,
         limit_to_this_state_code=limit_to_this_state_code,
         race_office_level_list=race_office_level_list,

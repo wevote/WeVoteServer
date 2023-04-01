@@ -464,7 +464,7 @@ class CandidateListManager(models.Manager):
     def retrieve_all_candidates_for_one_year(
             self,
             candidate_year=0,
-            candidates_index_start=0,
+            index_start=0,
             candidates_limit=300,
             is_missing_politician_we_vote_id=False,
             limit_to_this_state_code='',
@@ -476,7 +476,7 @@ class CandidateListManager(models.Manager):
         """
         This might generate different results than retrieve_candidate_we_vote_id_list_from_year_list.
         :param candidate_year:
-        :param candidates_index_start:
+        :param index_start:
         :param candidates_limit:
         :param is_missing_politician_we_vote_id:
         :param limit_to_this_state_code:
@@ -579,8 +579,8 @@ class CandidateListManager(models.Manager):
             candidate_query = candidate_query.order_by('-is_battleground_race', '-twitter_followers_count')
             candidates_total_count = candidate_query.count()
             if candidates_limit > 0:
-                if candidates_index_start > 0:
-                    candidate_list_objects = candidate_query[candidates_index_start:candidates_limit]
+                if index_start > 0:
+                    candidate_list_objects = candidate_query[index_start:candidates_limit]
                 else:
                     candidate_list_objects = candidate_query[:candidates_limit]
             else:
