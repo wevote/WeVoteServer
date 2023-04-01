@@ -4,7 +4,7 @@
 from representative.controllers import representatives_query_for_api
 from config.base import get_environment_variable
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -12,14 +12,16 @@ WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 
 def representatives_query_view(request):  # representativesQuery
-    index_start = request.GET.get('index_start', 0)
+    index_start = convert_to_int(request.GET.get('index_start', 0))
     limit_to_this_state_code = request.GET.get('state', '')
+    number_requested = convert_to_int(request.GET.get('number_requested', 300))
     race_office_level_list = request.GET.getlist('race_office_level[]', False)
     search_text = request.GET.get('search_text', '')
     year = request.GET.get('year', '')
     return representatives_query_for_api(
         index_start=index_start,
         limit_to_this_state_code=limit_to_this_state_code,
+        number_requested=number_requested,
         race_office_level_list=race_office_level_list,
         search_text=search_text,
         year=year)

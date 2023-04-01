@@ -238,14 +238,14 @@ class Representative(models.Model):
     is_battleground_race_2026 = models.BooleanField(default=False, null=False)
     linkedin_url = models.CharField(max_length=255, null=True, blank=True)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
-    # The internal We Vote id for the OfficeHeld that this representative is competing for.
+    office_held_district_name = models.CharField(max_length=255, null=True, blank=True)
     office_held_id = models.CharField(
         verbose_name="office_held_id id", max_length=255, null=True, blank=True)
+    office_held_name = models.CharField(verbose_name="name of the office", max_length=255, null=True, blank=True)
     # We want to link the representative to the office held with permanent ids, so we can export and import
     office_held_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the office this representative is running for", max_length=255,
         default=None, null=True, blank=True, unique=False)
-    office_held_name = models.CharField(verbose_name="name of the office", max_length=255, null=True, blank=True)
     # Image URL on Google Civic's servers.
     # See google_civic_profile_image_url_https, the master image cached on We Vote servers.
     photo_url_from_google_civic = models.TextField(null=True, blank=True)
