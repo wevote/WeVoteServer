@@ -17,7 +17,7 @@ from representative.models import RepresentativeManager
 from voter.models import VoterManager
 from config.base import get_environment_variable
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_political_party_constant, \
+from wevote_functions.functions import candidate_party_display, convert_to_political_party_constant, \
     convert_we_vote_date_string_to_date_as_integer, positive_value_exists, \
     process_request_from_master, remove_middle_initial_from_name
 
@@ -1235,7 +1235,7 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
         'candidate_list_exists':            politician_candidate_list_exists,
         'office_held_list':                 office_held_dict_list,
         'office_held_list_exists':          office_held_dict_list_found,
-        'political_party':                  politician.political_party,
+        'political_party':                  candidate_party_display(politician.political_party),
         'politician_description':           politician.twitter_description,
         'politician_name':                  politician.politician_name,
         'politician_news_item_list':        politician_news_item_list,
