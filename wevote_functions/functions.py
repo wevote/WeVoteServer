@@ -593,6 +593,8 @@ def candidate_party_display(raw_party_incoming):
         return 'Democrat'
     if raw_party == 'Democratic'.lower():
         return 'Democrat'
+    if raw_party == 'Democratic Party'.lower():
+        return 'Democrat'
     if raw_party == D_R.lower():
         return 'D-R Party'
     if raw_party == ECONOMIC_GROWTH.lower():
@@ -633,10 +635,14 @@ def candidate_party_display(raw_party_incoming):
         return 'Republican'
     if raw_party == 'Republican'.lower():
         return 'Republican'
+    if raw_party == 'Republican Party'.lower():
+        return 'Republican'
     if raw_party == 'REP'.lower():
         return 'Republican'
     if raw_party == 'Party Preference: Republican'.lower():
         return 'Republican'
+    if raw_party == 'Unknown National Party'.lower():
+        return 'Party Unknown'
     if raw_party == 'none':
         return ''
     if raw_party == WORKING_FAMILIES.lower():
