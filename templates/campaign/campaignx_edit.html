@@ -44,6 +44,15 @@
                value="{% if campaignx %}{{ campaignx.campaign_title }}{% else %}{{ campaign_title }}{% endif %}" />
         {% if campaignx %}
             {{ campaignx.we_vote_id }}
+            {% if campaignx.linked_politician_we_vote_id %}
+                <br />
+                <span style="color: darkgray;">This campaign ('{{ campaignx.campaign_title }}') was generated for this politician:</span>
+                <a href="{% url 'politician:politician_we_vote_id_edit' campaignx.linked_politician_we_vote_id %}"
+                   target="_blank">
+                    {{ campaignx.linked_politician_we_vote_id }}
+                    <span class="glyphicon glyphicon-new-window"></span>
+                </a>
+            {% endif %}
         {% endif %}
     </div>
 </div>

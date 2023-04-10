@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.db.models import Q
+from django.utils.text import slugify
 from candidate.controllers import add_name_to_next_spot, generate_candidate_dict_list_from_candidate_object_list, \
     move_candidates_to_another_politician
 from candidate.models import CandidateListManager, CandidateManager
@@ -16,9 +17,11 @@ from representative.controllers import generate_representative_dict_list_from_re
 from representative.models import RepresentativeManager
 from voter.models import VoterManager
 from config.base import get_environment_variable
+import string
 import wevote_functions.admin
-from wevote_functions.functions import candidate_party_display, convert_to_political_party_constant, \
-    convert_we_vote_date_string_to_date_as_integer, positive_value_exists, \
+from wevote_functions.functions import candidate_party_display, convert_state_code_to_state_text, \
+    convert_to_political_party_constant, \
+    convert_we_vote_date_string_to_date_as_integer, generate_random_string, positive_value_exists, \
     process_request_from_master, remove_middle_initial_from_name
 
 logger = wevote_functions.admin.get_logger(__name__)

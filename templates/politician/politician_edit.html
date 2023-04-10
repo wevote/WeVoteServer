@@ -99,6 +99,16 @@
                 {{ politician.we_vote_id }} (politician id: {{ politician.id }})
                 (<a href="{% url 'politician:politician_delete_process' %}?politician_id={{ politician.id }}">delete politician</a>)
                 {{ we_vote_id }}
+                {% if politician.linked_campaignx_we_vote_id %}
+                    &nbsp;&nbsp;&nbsp;
+                    <span style="color: darkgray;">We generated this campaign:</span>
+                    <a href="{% url 'campaign:campaignx_summary' politician.linked_campaignx_we_vote_id %}"
+                       target="_blank">
+                        {{ politician.linked_campaignx_we_vote_id }}
+                        <span class="glyphicon glyphicon-new-window"></span>
+                    </a>
+                    <span style="color: darkgray;">for {{ politician.politician_name|default_if_none:"" }}.</span>
+                {% endif %}
             </div>
             {% include "office_held/is_battleground_race_year_checkboxes.html" with office_held=politician %}
         {% endif %}
