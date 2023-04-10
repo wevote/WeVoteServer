@@ -19,6 +19,7 @@ from django.utils.timezone import localtime, now
 from django.urls import reverse
 import wevote_functions.admin
 from admin_tools.views import redirect_to_sign_in_page
+from campaign.models import CampaignXManager
 from candidate.controllers import retrieve_candidate_photos
 from candidate.models import CandidateCampaign, CandidateListManager, CandidateManager
 from config.base import get_environment_variable
@@ -413,8 +414,8 @@ def politician_list_view(request):
     #                          'politician_email mismatch with politician_email_address: ' + str(we_vote_id_string))
 
     # Create seo_friendly_path for all politicians who currently don't have one
-    generate_seo_friendly_path_updates = True
-    number_to_create = 1000
+    generate_seo_friendly_path_updates = False
+    number_to_create = 1
     if generate_seo_friendly_path_updates:
         politician_query = Politician.objects.all()
         politician_query = politician_query.filter(
@@ -448,6 +449,74 @@ def politician_list_view(request):
             Politician.objects.bulk_update(update_list, ['seo_friendly_path', 'seo_friendly_path_date_last_updated'])
             messages.add_message(request, messages.INFO,
                                  "{updates_made:,} politicians updated with new seo_friendly_path. "
+                                 "{total_to_convert_after:,} remaining."
+                                 "".format(total_to_convert_after=total_to_convert_after, updates_made=updates_made))
+
+    # Create default CampaignX for all politicians who currently don't have one
+    generate_campaignx_for_every_politician = False
+    number_to_create = 1
+    if generate_campaignx_for_every_politician:
+        politician_query = Politician.objects.all()
+        politician_query = politician_query.filter(
+            Q(linked_campaignx_we_vote_id__isnull=True) |
+            Q(linked_campaignx_we_vote_id="")
+        )
+        politician_query = politician_query.exclude(
+            Q(seo_friendly_path__isnull=True) |
+            Q(seo_friendly_path="")
+        )
+        if positive_value_exists(state_code):
+            politician_query = politician_query.filter(state_code__iexact=state_code)
+        total_to_convert = politician_query.count()
+        total_to_convert_after = total_to_convert - number_to_create if total_to_convert > number_to_create else 0
+        politician_list_to_convert = list(politician_query[:number_to_create])
+        campaignx_manager = CampaignXManager()
+        update_list = []
+        updates_needed = False
+        updates_made = 0
+        timezone = pytz.timezone("America/Los_Angeles")
+        datetime_now = timezone.localize(datetime.now())
+        from politician.controllers_generate_seo_friendly_path import generate_campaign_title_from_politician
+        for one_politician in politician_list_to_convert:
+            update_values = {}
+            update_values['linked_politician_we_vote_id'] = one_politician.we_vote_id
+            campaign_title = generate_campaign_title_from_politician(
+                politician_name=one_politician.politician_name,
+                state_code=one_politician.state_code)
+            if positive_value_exists(campaign_title):
+                update_values['campaign_title'] = campaign_title
+                update_values['campaign_title_changed'] = True
+            if positive_value_exists(one_politician.twitter_description):
+                update_values['campaign_description'] = one_politician.twitter_description
+                update_values['campaign_description_changed'] = True
+                update_values['campaign_description_linked_to_twitter'] = True
+            if positive_value_exists(one_politician.we_vote_hosted_profile_image_url_large):
+                update_values['we_vote_hosted_campaign_photo_large_url'] = \
+                    one_politician.we_vote_hosted_profile_image_url_large
+                update_values['campaign_photo_changed'] = True
+            if positive_value_exists(one_politician.we_vote_hosted_profile_image_url_medium):
+                update_values['we_vote_hosted_campaign_photo_medium_url'] = \
+                    one_politician.we_vote_hosted_profile_image_url_medium
+                update_values['we_vote_hosted_campaign_photo_small_url'] = \
+                    one_politician.we_vote_hosted_profile_image_url_medium
+                update_values['campaign_photo_changed'] = True
+            update_values['in_draft_mode'] = False
+            update_values['in_draft_mode_changed'] = True
+
+            results = campaignx_manager.update_or_create_campaignx(
+                politician_we_vote_id=one_politician.we_vote_id,
+                update_values=update_values,
+            )
+            if results['campaignx_found']:
+                one_politician.linked_campaignx_we_vote_id = results['campaignx'].we_vote_id
+                update_list.append(one_politician)
+                updates_needed = True
+                updates_made += 1
+
+        if updates_needed:
+            Politician.objects.bulk_update(update_list, ['linked_campaignx_we_vote_id'])
+            messages.add_message(request, messages.INFO,
+                                 "{updates_made:,} politicians updated with new linked_campaignx_we_vote_id. "
                                  "{total_to_convert_after:,} remaining."
                                  "".format(total_to_convert_after=total_to_convert_after, updates_made=updates_made))
 
