@@ -3,12 +3,13 @@
 # -*- coding: UTF-8 -*-
 
 from django.db.models import Q
-from django.utils.text import slugify
+from campaign.models import CampaignXManager
 from candidate.controllers import add_name_to_next_spot, generate_candidate_dict_list_from_candidate_object_list, \
     move_candidates_to_another_politician
 from candidate.models import CandidateListManager, CandidateManager
 from office.models import ContestOfficeManager, ContestOfficeListManager
 from office_held.controllers import generate_office_held_dict_list_from_office_held_we_vote_id_list
+from politician.controllers_generate_seo_friendly_path import generate_campaign_title_from_politician
 from politician.models import Politician, PoliticianManager, PoliticianSEOFriendlyPath, \
     POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, POLITICIAN_UNIQUE_IDENTIFIERS, UNKNOWN
 from position.controllers import move_positions_to_another_politician
@@ -17,7 +18,6 @@ from representative.controllers import generate_representative_dict_list_from_re
 from representative.models import RepresentativeManager
 from voter.models import VoterManager
 from config.base import get_environment_variable
-import string
 import wevote_functions.admin
 from wevote_functions.functions import candidate_party_display, convert_state_code_to_state_text, \
     convert_to_political_party_constant, \
@@ -468,6 +468,59 @@ def figure_out_politician_conflict_values(politician1, politician2):
         'success': success,
         'politician_merge_conflict_values': politician_merge_conflict_values,
     }
+
+
+def generate_campaignx_for_politician(politician=None, save_individual_politician=False):
+    status = ""
+    success = True
+    update_values = {}
+    update_values['linked_politician_we_vote_id'] = politician.we_vote_id
+    campaign_title = generate_campaign_title_from_politician(
+        politician_name=politician.politician_name,
+        state_code=politician.state_code)
+    if positive_value_exists(campaign_title):
+        update_values['campaign_title'] = campaign_title
+        update_values['campaign_title_changed'] = True
+    if positive_value_exists(politician.twitter_description):
+        update_values['campaign_description'] = politician.twitter_description
+        update_values['campaign_description_changed'] = True
+        update_values['campaign_description_linked_to_twitter'] = True
+    if positive_value_exists(politician.we_vote_hosted_profile_image_url_large):
+        update_values['we_vote_hosted_campaign_photo_large_url'] = \
+            politician.we_vote_hosted_profile_image_url_large
+        update_values['campaign_photo_changed'] = True
+    if positive_value_exists(politician.we_vote_hosted_profile_image_url_medium):
+        update_values['we_vote_hosted_campaign_photo_medium_url'] = \
+            politician.we_vote_hosted_profile_image_url_medium
+        update_values['we_vote_hosted_campaign_photo_small_url'] = \
+            politician.we_vote_hosted_profile_image_url_medium
+        update_values['campaign_photo_changed'] = True
+    update_values['in_draft_mode'] = False
+    update_values['in_draft_mode_changed'] = True
+
+    campaignx_manager = CampaignXManager()
+    results = campaignx_manager.update_or_create_campaignx(
+        politician_we_vote_id=politician.we_vote_id,
+        update_values=update_values,
+    )
+    campaignx_created = False
+    if results['campaignx_found']:
+        campaignx_created = True
+        politician.linked_campaignx_we_vote_id = results['campaignx'].we_vote_id
+        if positive_value_exists(save_individual_politician):
+            try:
+                politician.save()
+            except Exception as e:
+                status += "COULD_NOT_SAVE_INDIVIDUAL_POLITICIAN: " + str(e) + " "
+                success = False
+
+    results = {
+        'campaignx_created':    campaignx_created,
+        'status':               status,
+        'success':              success,
+        'politician':           politician,
+    }
+    return results
 
 
 def merge_if_duplicate_politicians(politician1, politician2, conflict_values):
@@ -987,6 +1040,7 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
             'politician_we_vote_id':             '',
             'in_draft_mode':                    True,
             'is_supporters_count_minimum_exceeded': False,
+            'linked_campaignx_we_vote_id':      '',
             'seo_friendly_path':                '',
             'seo_friendly_path_list':           seo_friendly_path_list,
             'supporters_count':                 0,
@@ -1002,6 +1056,11 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
             'we_vote_hosted_profile_image_url_tiny': '',
         }
         return results
+
+    if not positive_value_exists(politician.linked_campaignx_we_vote_id):
+        results = generate_campaignx_for_politician(politician=politician, save_individual_politician=True)
+        if results['success'] and results['campaignx_created']:
+            politician = results['politician']
 
     # Get politician news items / updates
     politician_news_item_list = []
@@ -1236,6 +1295,7 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
         'ballotpedia_politician_url':       politician.ballotpedia_politician_url,
         'candidate_list':                   politician_candidate_dict_list,
         'candidate_list_exists':            politician_candidate_list_exists,
+        'linked_campaignx_we_vote_id':      politician.linked_campaignx_we_vote_id,
         'office_held_list':                 office_held_dict_list,
         'office_held_list_exists':          office_held_dict_list_found,
         'political_party':                  candidate_party_display(politician.political_party),
