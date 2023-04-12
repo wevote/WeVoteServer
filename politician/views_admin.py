@@ -29,7 +29,7 @@ from exception.models import handle_record_found_more_than_one_exception, \
 from import_export_vote_smart.models import VoteSmartRatingOneCandidate
 from import_export_vote_smart.votesmart_local import VotesmartApiError
 from office.models import ContestOffice
-from politician.controllers import update_politician_from_candidate
+from politician.controllers import generate_campaignx_for_politician, update_politician_from_candidate
 from position.models import PositionEntered, PositionListManager
 from representative.models import Representative, RepresentativeManager
 from voter.models import voter_has_authority
@@ -476,39 +476,13 @@ def politician_list_view(request):
         updates_made = 0
         timezone = pytz.timezone("America/Los_Angeles")
         datetime_now = timezone.localize(datetime.now())
-        from politician.controllers_generate_seo_friendly_path import generate_campaign_title_from_politician
         for one_politician in politician_list_to_convert:
-            update_values = {}
-            update_values['linked_politician_we_vote_id'] = one_politician.we_vote_id
-            campaign_title = generate_campaign_title_from_politician(
-                politician_name=one_politician.politician_name,
-                state_code=one_politician.state_code)
-            if positive_value_exists(campaign_title):
-                update_values['campaign_title'] = campaign_title
-                update_values['campaign_title_changed'] = True
-            if positive_value_exists(one_politician.twitter_description):
-                update_values['campaign_description'] = one_politician.twitter_description
-                update_values['campaign_description_changed'] = True
-                update_values['campaign_description_linked_to_twitter'] = True
-            if positive_value_exists(one_politician.we_vote_hosted_profile_image_url_large):
-                update_values['we_vote_hosted_campaign_photo_large_url'] = \
-                    one_politician.we_vote_hosted_profile_image_url_large
-                update_values['campaign_photo_changed'] = True
-            if positive_value_exists(one_politician.we_vote_hosted_profile_image_url_medium):
-                update_values['we_vote_hosted_campaign_photo_medium_url'] = \
-                    one_politician.we_vote_hosted_profile_image_url_medium
-                update_values['we_vote_hosted_campaign_photo_small_url'] = \
-                    one_politician.we_vote_hosted_profile_image_url_medium
-                update_values['campaign_photo_changed'] = True
-            update_values['in_draft_mode'] = False
-            update_values['in_draft_mode_changed'] = True
-
-            results = campaignx_manager.update_or_create_campaignx(
-                politician_we_vote_id=one_politician.we_vote_id,
-                update_values=update_values,
+            results = generate_campaignx_for_politician(
+                politician=one_politician,
+                save_individual_politician=False,
             )
-            if results['campaignx_found']:
-                one_politician.linked_campaignx_we_vote_id = results['campaignx'].we_vote_id
+            if results['success'] and results['campaignx_created']:
+                one_politician = results['politician']
                 update_list.append(one_politician)
                 updates_needed = True
                 updates_made += 1
@@ -1136,6 +1110,14 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
         pass
 
     if politician_on_stage_found:
+        # Generate a CampaignX entry for this politician if one does not exist
+        if not positive_value_exists(politician_on_stage.linked_campaignx_we_vote_id):
+            results = generate_campaignx_for_politician(
+                politician=politician_on_stage,
+                save_individual_politician=True,
+            )
+            politician_on_stage = results['politician']
+
         # Working with Vote Smart data
         try:
             vote_smart_politician_id = politician_on_stage.vote_smart_id
