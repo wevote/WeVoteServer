@@ -62,7 +62,13 @@
                     <br />VS: {{ politician.vote_smart_id|default_if_none:"" }}
                 {% endif %}
             </td>
-            <td>{% if politician.linked_candidate_list_count > 0 %}{{ politician.linked_candidate_list_count }}{% endif %}</td>
+            <td>
+                {% if politician.linked_candidate_list_count > 0 %}{{ politician.linked_candidate_list_count }}{% endif %}
+                <a href="{% url 'candidate:candidate_create_process' %}?google_civic_election_id={{ google_civic_election_id }}&politician_we_vote_id={{ politician.we_vote_id }}"
+                   target="_blank">
+                    Create Candidate for Upcoming Election
+                </a>
+            </td>
         </tr>
     {% endfor %}
     </table>

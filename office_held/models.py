@@ -268,63 +268,6 @@ class OfficeHeldManager(models.Manager):
             return results['office_held_we_vote_id']
         return 0
 
-    def update_or_create_office_held( self, google_civic_office_held_name, ocd_division_id, office_held_name,
-                                         number_elected, state_code, district_name, contest_level0,
-                                         office_held_description):
-        """
-        Either update or create an office_held entry.
-        """
-        exception_multiple_object_returned = False
-        new_office_held_created = False
-        office_held = None
-        success = False
-        status = ""
-        office_held_updated = False
-
-        if not google_civic_office_held_name:
-            success = False
-            status += 'MISSING_OFFICE_NAME '
-        elif not ocd_division_id:
-            success = False
-            status += 'MISSING_OCD_DIVISION_ID '
-        else:
-            try:
-                office_held, new_office_held_created = OfficeHeld.objects.update_or_create(
-                    google_civic_office_held_name=google_civic_office_held_name,
-                    ocd_division_id=ocd_division_id,
-                    office_held_name=office_held_name,
-                    number_elected=number_elected,
-                    state_code=state_code,
-                    district_name=district_name,
-                    contest_level0=contest_level0,
-                    office_held_description=office_held_description)
-                office_held_updated = not new_office_held_created
-                success = True
-                status += 'OFFICE_HELD_SAVED '
-            except OfficeHeld.MultipleObjectsReturned as e:
-                success = False
-                status += 'MULTIPLE_MATCHING_OFFICES_HELD_FOUND '
-                exception_multiple_object_returned = True
-            except OfficeHeld.DoesNotExist:
-                exception_does_not_exist = True
-                status += "RETRIEVE_OFFICE_HELD_NOT_FOUND "
-            except Exception as e:
-                status += 'FAILED_TO_RETRIEVE_OFFICE_HELD_BY_WE_VOTE_ID ' \
-                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
-                success = False
-
-        results = {
-            'success':                  success,
-            'status':                   status,
-            'MultipleObjectsReturned':  exception_multiple_object_returned,
-            'new_office_created':       new_office_held_created,
-            'contest_office':           office_held,
-            'saved':                    new_office_held_created or office_held_updated,
-            'updated':                  office_held_updated,
-            'not_processed':            True if not success else False,
-        }
-        return results
-
     def retrieve_office_held(
             self,
             google_civic_office_held_name='',
@@ -409,6 +352,9 @@ class OfficeHeldManager(models.Manager):
             else:
                 status += "RETRIEVE_OFFICE_HELD_SEARCH_INDEX_MISSING "
                 success = False
+        except OfficeHeld.DoesNotExist as e:
+            status += "OFFICE_HELD_ROW_NOT_FOUND: " + str(e) + " "
+            success = True
         except Exception as e:
             status += "FAILED_OFFICE_HELD_RETRIEVE: " + str(e) + " "
             success = False
@@ -782,6 +728,97 @@ class OfficeHeldManager(models.Manager):
             'google_civic_election_id': google_civic_election_id,
             'office_list_found':        office_held_list_found,
             'office_list':              office_held_list_objects,
+        }
+        return results
+
+    def update_or_create_office_held(
+            self,
+            office_held_we_vote_id,
+            updated_values={}):
+        """
+        Either update or create an office_held entry.
+        """
+        exception_multiple_object_returned = False
+        new_office_held_created = False
+        office_held = None
+        status = ""
+        office_held_updated = False
+
+        if not office_held_we_vote_id:
+            success = False
+            status += 'MISSING_OFFICE_HELD_WE_VOTE_ID '
+        else:
+            try:
+                office_held, new_office_held_created = OfficeHeld.objects.update_or_create(
+                    we_vote_id=office_held_we_vote_id,
+                    defaults=updated_values)
+                office_held_updated = not new_office_held_created
+                success = True
+                status += 'OFFICE_HELD_SAVED '
+            except OfficeHeld.MultipleObjectsReturned as e:
+                success = False
+                status += 'MULTIPLE_MATCHING_OFFICES_HELD_FOUND: ' + str(e) + ' '
+                exception_multiple_object_returned = True
+            except Exception as e:
+                status += 'FAILED_TO_RETRIEVE_OFFICE_HELD_BY_WE_VOTE_ID ' \
+                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                success = False
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'MultipleObjectsReturned':  exception_multiple_object_returned,
+            'created':                  new_office_held_created,
+            'office_held':              office_held,
+            'saved':                    new_office_held_created or office_held_updated,
+            'updated':                  office_held_updated,
+            'not_processed':            True if not success else False,
+        }
+        return results
+
+    def update_or_create_offices_held_for_location(
+            self,
+            polling_location_we_vote_id='',
+            updated_values={}):
+        """
+        Either update or create an OfficesHeldForLocation entry.
+        """
+        exception_multiple_object_returned = False
+        new_offices_held_for_location_created = False
+        offices_held_for_location = None
+        status = ""
+        offices_held_for_location_updated = False
+
+        if not polling_location_we_vote_id:
+            success = False
+            status += 'MISSING_POLLING_LOCATION_WE_VOTE_ID '
+        else:
+            try:
+                offices_held_for_location, new_offices_held_for_location_created = \
+                    OfficesHeldForLocation.objects.update_or_create(
+                        polling_location_we_vote_id=polling_location_we_vote_id,
+                        defaults=updated_values)
+                offices_held_for_location_updated = not new_offices_held_for_location_created
+                success = True
+                status += 'OFFICES_HELD_FOR_LOCATION_SAVED '
+            except OfficesHeldForLocation.MultipleObjectsReturned as e:
+                success = False
+                status += 'MULTIPLE_MATCHING_OFFICES_HELD_FOUND: ' + str(e) + ' '
+                exception_multiple_object_returned = True
+            except Exception as e:
+                status += 'FAILED_TO_CREATE_OFFICES_HELD_FOR_LOCATION_BY_WE_VOTE_ID ' \
+                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                success = False
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'MultipleObjectsReturned':  exception_multiple_object_returned,
+            'created':                  new_offices_held_for_location_created,
+            'offices_held_for_location':    offices_held_for_location,
+            'saved':                    new_offices_held_for_location_created or offices_held_for_location_updated,
+            'updated':                  offices_held_for_location_updated,
+            'not_processed':            True if not success else False,
         }
         return results
 

@@ -938,9 +938,13 @@ def office_edit_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    ballotpedia_office_id = request.POST.get('ballotpedia_office_id', False)  # Related to office_held
+    ballotpedia_race_id = request.POST.get('ballotpedia_race_id', False)  # Related to contest_office
+    ballotpedia_race_office_level = request.POST.get('ballotpedia_race_office_level', False)
+    ballotpedia_office_name = request.POST.get('ballotpedia_office_name', False)
+    ballotpedia_is_marquee = request.POST.get('ballotpedia_is_marquee', False)
     ctcl_uuid = request.POST.get('ctcl_uuid', False)
-    office_id = convert_to_int(request.POST.get('office_id', 0))
-    office_name = request.POST.get('office_name', False)
+    district_id = request.POST.get('district_id', False)
     google_civic_office_name = request.POST.get('google_civic_office_name', False)
     google_civic_office_name2 = request.POST.get('google_civic_office_name2', False)
     google_civic_office_name3 = request.POST.get('google_civic_office_name3', False)
@@ -948,14 +952,11 @@ def office_edit_process_view(request):
     google_civic_office_name5 = request.POST.get('google_civic_office_name5', False)
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     ocd_division_id = request.POST.get('ocd_division_id', False)
-    district_id = request.POST.get('district_id', False)
+    office_held_we_vote_id = request.POST.get('office_held_we_vote_id', False)
+    office_id = convert_to_int(request.POST.get('office_id', 0))
+    office_name = request.POST.get('office_name', False)
     primary_party = request.POST.get('primary_party', False)
     state_code = request.POST.get('state_code', False)
-    ballotpedia_office_id = request.POST.get('ballotpedia_office_id', False)  # Related to office_held
-    ballotpedia_race_id = request.POST.get('ballotpedia_race_id', False)  # Related to contest_office
-    ballotpedia_race_office_level = request.POST.get('ballotpedia_race_office_level', False)
-    ballotpedia_office_name = request.POST.get('ballotpedia_office_name', False)
-    ballotpedia_is_marquee = request.POST.get('ballotpedia_is_marquee', False)
     vote_usa_office_id = request.POST.get('vote_usa_office_id', False)
     is_battleground_race = request.POST.get('is_battleground_race', False)
     remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
@@ -1045,6 +1046,16 @@ def office_edit_process_view(request):
                 years_list = list(set(years_false_list + years_true_list))
                 if ocd_division_id is not False:
                     office_on_stage.ocd_division_id = ocd_division_id
+                if office_held_we_vote_id is not False:
+                    office_on_stage.office_held_we_vote_id = office_held_we_vote_id
+                    from office_held.models import OfficeHeldManager
+                    office_held_manager = OfficeHeldManager()
+                    office_held_results = office_held_manager.retrieve_office_held(
+                        office_held_we_vote_id=office_held_we_vote_id,
+                        read_only=True)
+                    if office_held_results['office_held_found']:
+                        office_held = office_held_results['office_held']
+                        office_on_stage.office_held_name = office_held.office_name
                 if office_name is not False:
                     office_on_stage.office_name = office_name
                 if primary_party is not False:

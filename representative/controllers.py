@@ -2,6 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from config.base import get_environment_variable
 from datetime import datetime
 from django.db.models import Q
 from django.http import HttpResponse
@@ -12,11 +13,15 @@ from politician.models import PoliticianManager
 from wevote_settings.constants import IS_BATTLEGROUND_YEARS_AVAILABLE
 import wevote_functions.admin
 from wevote_functions.functions import add_period_to_middle_name_initial, add_period_to_name_prefix_and_suffix, \
-    convert_to_int, convert_to_political_party_constant, positive_value_exists, \
+    convert_to_int, convert_to_political_party_constant, positive_value_exists, process_request_from_master, \
     remove_period_from_middle_name_initial, remove_period_from_name_prefix_and_suffix
 from .models import Representative, RepresentativeManager, REPRESENTATIVE_UNIQUE_IDENTIFIERS
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+REPRESENTATIVE_SYNC_URL = "https://api.wevoteusa.org/apis/v1/representativesSyncOut/"
+# REPRESENTATIVE_SYNC_URL = "http://localhost:8001/apis/v1/representativesSyncOut/"
+WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 
 
 def add_value_to_next_representative_spot(
@@ -931,6 +936,172 @@ def deduplicate_politicians_first_attempt(state_code=''):
         'politicians_not_merged':               politicians_not_merged,
         'success':                              success,
         'status':                               status,
+    }
+    return results
+
+
+def representatives_import_from_master_server(request, state_code=''):  # representativesSyncOut
+    """
+    Get the json data, and either create new entries or update existing
+    :return:
+    """
+    # Request json file from We Vote servers
+    import_results, structured_json = process_request_from_master(
+        request, "Loading Representative entries from We Vote Master servers",
+        REPRESENTATIVE_SYNC_URL, {
+            "key": WE_VOTE_API_KEY,
+            "state_code": state_code,
+        }
+    )
+
+    if import_results['success']:
+        # We shouldn't need to check for duplicates any more
+        # results = filter_offices_structured_json_for_local_duplicates(structured_json)
+        # filtered_structured_json = results['structured_json']
+        # duplicates_removed = results['duplicates_removed']
+        duplicates_removed = 0
+
+        import_results = representatives_import_from_structured_json(structured_json)
+        import_results['duplicates_removed'] = duplicates_removed
+
+    return import_results
+
+
+def representatives_import_from_structured_json(structured_json):  # representativesSyncOut
+    representative_manager = RepresentativeManager()
+    representatives_saved = 0
+    representatives_updated = 0
+    representatives_not_processed = 0
+    boolean_fields = [
+        'facebook_url_is_broken',
+        'is_battleground_race_2019',
+        'is_battleground_race_2020',
+        'is_battleground_race_2021',
+        'is_battleground_race_2022',
+        'is_battleground_race_2023',
+        'is_battleground_race_2024',
+        'is_battleground_race_2025',
+        'is_battleground_race_2026',
+        'politician_deduplication_attempted',
+        'politician_match_attempted',
+        'twitter_handle_updates_failing',
+        'twitter_handle2_updates_failing',
+        'year_in_office_2023',
+        'year_in_office_2024',
+        'year_in_office_2025',
+        'year_in_office_2026',
+    ]
+    character_fields = [
+        'ballotpedia_representative_url',
+        'ctcl_uuid',
+        'date_last_updated',
+        'date_last_updated_from_politician',
+        'facebook_url',
+        'google_civic_profile_image_url_https',
+        'google_civic_representative_name',
+        'google_civic_representative_name2',
+        'google_civic_representative_name3',
+        'instagram_handle',
+        'linkedin_url',
+        'ocd_division_id',
+        'office_held_district_name',
+        'office_held_name',
+        'office_held_we_vote_id',
+        'photo_url_from_google_civic',
+        'political_party',
+        'politician_we_vote_id',
+        'profile_image_type_currently_active',
+        'representative_contact_form_url',
+        'representative_email',
+        'representative_email2',
+        'representative_email3',
+        'representative_phone',
+        'representative_phone2',
+        'representative_phone3',
+        'representative_twitter_handle',
+        'representative_twitter_handle2',
+        'representative_twitter_handle3',
+        'representative_url',
+        'representative_url2',
+        'representative_url3',
+        'seo_friendly_path',
+        'seo_friendly_path_date_last_updated',
+        'state_code',
+        'twitter_description',
+        'twitter_name',
+        'twitter_location',
+        'twitter_followers_count',
+        'twitter_profile_image_url_https',
+        'twitter_profile_background_image_url_https',
+        'twitter_profile_banner_url_https',
+        'twitter_url',
+        'vote_usa_politician_id',
+        'we_vote_hosted_profile_facebook_image_url_large',
+        'we_vote_hosted_profile_facebook_image_url_medium',
+        'we_vote_hosted_profile_facebook_image_url_tiny',
+        'we_vote_hosted_profile_image_url_large',
+        'we_vote_hosted_profile_image_url_medium',
+        'we_vote_hosted_profile_image_url_tiny',
+        'we_vote_hosted_profile_twitter_image_url_large',
+        'we_vote_hosted_profile_twitter_image_url_medium',
+        'we_vote_hosted_profile_twitter_image_url_tiny',
+        'we_vote_hosted_profile_uploaded_image_url_large',
+        'we_vote_hosted_profile_uploaded_image_url_medium',
+        'we_vote_hosted_profile_uploaded_image_url_tiny',
+        'we_vote_hosted_profile_vote_usa_image_url_large',
+        'we_vote_hosted_profile_vote_usa_image_url_medium',
+        'we_vote_hosted_profile_vote_usa_image_url_tiny',
+        'we_vote_id',
+        'wikipedia_url',
+        'youtube_url',
+    ]
+    character_null_false_fields = [
+        'representative_name',
+    ]
+    integer_fields = [
+        'instagram_followers_count',
+        'office_held_id',
+        'politician_id',
+        'twitter_user_id',
+        'twitter_followers_count',
+    ]
+    for one_representative in structured_json:
+        updated_representative_values = {}
+        representatives_we_vote_id = one_representative.get('we_vote_id', '')
+        for one_field in boolean_fields:
+            if one_field in one_representative:
+                updated_representative_values[one_field] = positive_value_exists(one_representative[one_field])
+            else:
+                updated_representative_values[one_field] = None
+        for one_field in character_fields:
+            updated_representative_values[one_field] = one_representative[one_field] \
+                if one_field in one_representative \
+                else None
+        for one_field in character_null_false_fields:
+            updated_representative_values[one_field] = one_representative[one_field] \
+                if one_field in one_representative \
+                else ''
+        for one_field in integer_fields:
+            if one_field in one_representative:
+                updated_representative_values[one_field] = convert_to_int(one_representative[one_field])
+            else:
+                updated_representative_values[one_field] = 0
+        results = representative_manager.update_or_create_representative(
+            representative_we_vote_id=representatives_we_vote_id,
+            updated_values=updated_representative_values)
+
+        if results['success']:
+            if results['new_representative_created']:
+                representatives_saved += 1
+            else:
+                representatives_updated += 1
+
+    results = {
+        'success':          True,
+        'status':           "REPRESENTATIVE_IMPORT_PROCESS_COMPLETE ",
+        'saved':            representatives_saved,
+        'updated':          representatives_updated,
+        'not_processed':    representatives_not_processed,
     }
     return results
 
