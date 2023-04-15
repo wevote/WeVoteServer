@@ -78,6 +78,39 @@
 </form>
 
 <table>
+    <tr><td><h4>Offices Held</h4></td></tr>
+    <tr>
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="{% url 'office_held:office_held_import_from_master_server' %}?state_code={{ state_code }}">
+                Retrieve Office Held Entries</a>
+            {% if state_code %} for the state {{ state_code }}{% else %} for ALL states{% endif %}
+            &nbsp;&nbsp;
+        </td>
+        <td>The list of offices currently held by a representative, like &#34;Governor State of Virginia&#34;.</td>
+    </tr>
+
+    <tr><td><h4>Offices Held for Location</h4></td></tr>
+    <tr>
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="{% url 'office_held:offices_held_for_location_import_from_master_server' %}?state_code={{ state_code }}">
+                Retrieve Offices Held for Location</a>
+            {% if state_code %} for the state {{ state_code }}{% else %} for ALL states{% endif %}
+            &nbsp;&nbsp;
+        </td>
+        <td>All of the offices held for each polling location.</td>
+    </tr>
+
+    <tr><td><h4>Representatives</h4></td></tr>
+    <tr>
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="{% url 'representative:representatives_import_from_master_server' %}?state_code={{ state_code }}">
+                Retrieve Representatives</a>
+            {% if state_code %} for the state {{ state_code }}{% else %} for ALL states{% endif %}
+            &nbsp;&nbsp;
+        </td>
+        <td>The list of representatives elected for Offices Held, like &#34;Governor State of Virginia&#34;.</td>
+    </tr>
+
     <tr><td><h4>Offices</h4></td></tr>
     <tr>
         <td>&nbsp;&nbsp;&nbsp;&nbsp;
@@ -87,7 +120,7 @@
             {% if state_code %} for the state {{ state_code }}{% else %} for ALL states{% endif %}
             &nbsp;&nbsp;
         </td>
-        <td>The list of offices, like &#34;Governor State of Virginia&#34;, one entry for each map point</td>
+        <td>The list of offices on a ballot, like &#34;Governor State of Virginia&#34;.</td>
     </tr>
 
     <tr><td><h4>Politicians</h4></td></tr>

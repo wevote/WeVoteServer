@@ -27,10 +27,12 @@ from issue.views_admin import issue_descriptions_retrieve_view, issues_followed_
     retrieve_issues_to_follow_view, organization_link_to_issue_sync_out_view, test_real_time_update
 from measure.views_admin import measures_sync_out_view
 from office.views_admin import offices_sync_out_view
+from office_held.views_admin import office_held_sync_out_view, offices_held_for_location_sync_out_view
 from organization.views_admin import organizations_sync_out_view
 from politician.views_admin import politicians_sync_out_view
 from polling_location.views_admin import polling_locations_sync_out_view
 from position.views_admin import positions_sync_out_view
+from representative.views_admin import representatives_sync_out_view
 from stripe_ip_history.views_admin import stripe_ip_history_clear_for_one_ip
 from voter_guide.views_admin import voter_guides_sync_out_view
 
@@ -168,6 +170,9 @@ urlpatterns = [
               views_measure.measure_list_for_upcoming_elections_retrieve_api_view,
               name='measureListForUpcomingElectionsRetrieveView'),
       re_path(r'^messageToFriendSend/', views_friend.message_to_friend_send_view, name='messageToFriendSendView'),
+      re_path(r'^officeHeldSyncOut/', office_held_sync_out_view, name='officeHeldSyncOutView'),
+      re_path(r'^officesHeldForLocationSyncOut/',
+              offices_held_for_location_sync_out_view, name='officesHeldForLocationSyncOutView'),
       re_path(r'^officeRetrieve/', views_misc.office_retrieve_view, name='officeRetrieveView'),
       re_path(r'^officesSyncOut/', offices_sync_out_view, name='officesSyncOutView'),
       re_path(r'^organizationAnalyticsByVoter/',
@@ -251,6 +256,7 @@ urlpatterns = [
       re_path(r'^reactionLikeCount/', views_reaction.reaction_like_count_view, name='reactionLikeCountView'),
       re_path(r'^representativesQuery/', views_representative.representatives_query_view,
               name='representativesQueryView'),
+      re_path(r'^representativesSyncOut/', representatives_sync_out_view, name='representativesSyncOutView'),
       re_path(r'^retrieveIssuesToFollow/', retrieve_issues_to_follow_view,
               name='retrieveIssuesToFollowView'),
       re_path(r'^saveAnalyticsAction/', views_analytics.save_analytics_action_view,

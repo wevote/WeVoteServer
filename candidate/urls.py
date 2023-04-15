@@ -9,6 +9,7 @@ from django.conf.urls import re_path
 urlpatterns = [
     # views_admin
     re_path(r'^$', views_admin.candidate_list_view, name='candidate_list',),
+    re_path(r'^create/$', views_admin.candidate_create_process_view, name='candidate_create_process'),
     re_path(r'^politician_match_this_election/', views_admin.candidate_politician_match_this_election_view,
             name='candidate_politician_match_for_this_election'),
     re_path(r'^politician_match_this_year/', views_admin.candidate_politician_match_this_year_view,

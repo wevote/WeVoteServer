@@ -1160,6 +1160,14 @@ def candidate_new_search_process_view(request):
     state_code = request.POST.get('state_code', False)
     vote_usa_politician_id = request.POST.get('vote_usa_politician_id', False)
 
+    # For starting "Create new candidate" process
+    candidate_name_search = request.GET.get('candidate_name_search', False)
+    if not positive_value_exists(candidate_name):
+        candidate_name = candidate_name_search
+    politician_we_vote_id_for_start = request.GET.get('politician_we_vote_id_for_start', False)
+    if not positive_value_exists(politician_we_vote_id):
+        politician_we_vote_id = politician_we_vote_id_for_start
+
     politician_list = []
     # If here, we specifically want to see if a politician exists, given the information submitted
     from wevote_functions.functions import add_to_list_if_positive_value_exists
@@ -1203,6 +1211,16 @@ def candidate_new_search_process_view(request):
                                                      '2) Twitter Handle, or '
                                                      '3) TBD')
 
+    # Return all existing related candidates. Make sure the candidate we want to create doesn't already exist.
+    candidate_list = []
+    if positive_value_exists(candidate_name_search) or positive_value_exists(politician_we_vote_id):
+        if positive_value_exists(politician_we_vote_id):
+            politician_we_vote_id_list = [politician_we_vote_id]
+            candidate_results = candidate_list_manager.retrieve_candidate_list(
+                politician_we_vote_id_list=politician_we_vote_id_list)
+            if candidate_results['candidate_list_found']:
+                candidate_list = candidate_results['candidate_list']
+
     # If ready to start full process
     ready = False
     if ready:
@@ -1244,6 +1262,8 @@ def candidate_new_search_process_view(request):
         'contest_office_id':            contest_office_id,  # Pass in separately for the template to work
         'google_civic_election_id':     google_civic_election_id,
         # Incoming variables, not saved yet
+        'candidate_count_start':        0,
+        'candidate_list':               candidate_list,
         'candidate_name':               candidate_name,
         'candidate_twitter_handle':     candidate_twitter_handle,
         'candidate_url':                candidate_url,
@@ -3323,6 +3343,31 @@ def candidate_summary_view(request, candidate_id):
         'candidate_position_list':          candidate_position_list,
     }
     return render(request, 'candidate/candidate_summary.html', template_values)
+
+
+@login_required
+def candidate_create_process_view(request):
+    """
+    Delete this candidate
+    :param request:
+    :return:
+    """
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    politician_we_vote_id = request.GET.get('politician_we_vote_id', '')
+
+    from candidate.controllers import candidate_create_from_politician
+    results = candidate_create_from_politician(politician_we_vote_id=politician_we_vote_id)
+    candidate_id = 0
+    if results['candidate_found']:
+        candidate = results['candidate']
+        candidate_id = candidate.id
+    return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) +
+                                "?google_civic_election_id=" + str(google_civic_election_id))
 
 
 @login_required

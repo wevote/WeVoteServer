@@ -23,7 +23,8 @@ import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
 from wevote_settings.constants import IS_BATTLEGROUND_YEARS_AVAILABLE
 
-OFFICES_SYNC_URL = get_environment_variable("OFFICES_SYNC_URL")  # officesSyncOut
+OFFICE_HELD_SYNC_URL = "https://api.wevoteusa.org/apis/v1/officeHeldSyncOut/"
+OFFICES_HELD_FOR_LOCATION_SYNC_URL = "https://api.wevoteusa.org/apis/v1/officesHeldForLocationSyncOut/"
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 office_held_status_string = ""
 
@@ -490,6 +491,70 @@ def office_held_delete_process_view(request):
                                 "?google_civic_election_id=" + str(google_civic_election_id))
 
 
+@login_required
+def office_held_import_from_master_server_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
+    status = ""
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    if WE_VOTE_SERVER_ROOT_URL in OFFICE_HELD_SYNC_URL:
+        messages.add_message(request, messages.ERROR, "Cannot sync with Master We Vote Server -- "
+                                                      "this is the Master We Vote Server.")
+        return HttpResponseRedirect(reverse('admin_tools:admin_home', args=()))
+    state_code = request.GET.get('state_code', '')
+
+    from office_held.controllers import office_held_import_from_master_server
+    results = office_held_import_from_master_server(request, state_code)
+    if results['success']:
+        messages.add_message(request, messages.INFO, 'Offices Held import completed. '
+                                                     'Saved: {saved}, Updated: {updated}, '
+                                                     'Duplicates skipped: '
+                                                     '{duplicates_removed}, '
+                                                     'Not processed: {not_processed}'
+                                                     ''.format(saved=results['saved'],
+                                                               updated=results['updated'],
+                                                               duplicates_removed=results['duplicates_removed'],
+                                                               not_processed=results['not_processed']))
+    else:
+        messages.add_message(request, messages.ERROR, results['status'])
+
+    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "&state_code=" + str(state_code))
+
+
+@login_required
+def offices_held_for_location_import_from_master_server_view(request):  # officesHeldForLocationSyncOut
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
+    status = ""
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    if WE_VOTE_SERVER_ROOT_URL in OFFICES_HELD_FOR_LOCATION_SYNC_URL:
+        messages.add_message(request, messages.ERROR, "Cannot sync with Master We Vote Server -- "
+                                                      "this is the Master We Vote Server.")
+        return HttpResponseRedirect(reverse('admin_tools:admin_home', args=()))
+    state_code = request.GET.get('state_code', '')
+
+    from office_held.controllers import offices_held_for_location_import_from_master_server
+    results = offices_held_for_location_import_from_master_server(request, state_code)
+    if results['success']:
+        messages.add_message(request, messages.INFO, 'Offices Held for Location import completed. '
+                                                     'Saved: {saved}, Updated: {updated}, '
+                                                     'Duplicates skipped: '
+                                                     '{duplicates_removed}, '
+                                                     'Not processed: {not_processed}'
+                                                     ''.format(saved=results['saved'],
+                                                               updated=results['updated'],
+                                                               duplicates_removed=results['duplicates_removed'],
+                                                               not_processed=results['not_processed']))
+    else:
+        messages.add_message(request, messages.ERROR, results['status'])
+
+    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "&state_code=" + str(state_code))
+
+
 def office_held_update_status(request):
     global office_held_status_string
 
@@ -621,3 +686,166 @@ def offices_held_for_location_list_view(request):
         'success':                  success
     }
     return render(request, 'office_held/offices_held_for_location_list.html', template_values)
+
+
+# This page does not need to be protected.
+# NOTE: @login_required() throws an error. Needs to be figured out if we ever want to secure this page.
+def office_held_sync_out_view(request):  # officeHeldSyncOut
+    state_code = request.GET.get('state_code', '')
+
+    try:
+        office_held_list = OfficeHeld.objects.using('readonly').all()
+        office_held_list = office_held_list.filter(state_code__iexact=state_code)
+        office_held_list_dict = office_held_list.values(
+            'district_id',
+            'district_name',
+            'district_scope',
+            'facebook_url_is_broken',
+            'google_civic_office_held_name',
+            'google_civic_office_held_name2',
+            'google_civic_office_held_name3',
+            'is_battleground_race_2019',
+            'is_battleground_race_2020',
+            'is_battleground_race_2021',
+            'is_battleground_race_2022',
+            'is_battleground_race_2023',
+            'is_battleground_race_2024',
+            'is_battleground_race_2025',
+            'is_battleground_race_2026',
+            'number_elected',
+            'ocd_division_id',
+            'office_held_description',
+            'office_held_description_es',
+            'office_held_facebook_url',
+            'office_held_is_partisan',
+            'office_held_level0',
+            'office_held_level1',
+            'office_held_level2',
+            'office_held_name',
+            'office_held_name_es',
+            'office_held_role0',
+            'office_held_role1',
+            'office_held_role2',
+            'office_held_twitter_handle',
+            'office_held_url',
+            'primary_party',
+            'race_office_level',
+            'state_code',
+            'we_vote_id',
+            'year_with_data_2023',
+            'year_with_data_2024',
+            'year_with_data_2025',
+            'year_with_data_2026',
+        )
+        if office_held_list_dict:
+            office_held_list_json = list(office_held_list_dict)
+            return HttpResponse(json.dumps(office_held_list_json), content_type='application/json')
+    except OfficeHeld.DoesNotExist:
+        pass
+
+    json_data = {
+        'success': False,
+        'status': 'OFFICE_HELD_SYNC_OUT_VIEW-LIST_MISSING '
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+# This page does not need to be protected.
+# NOTE: @login_required() throws an error. Needs to be figured out if we ever want to secure this page.
+def offices_held_for_location_sync_out_view(request):  # officesHeldForLocationSyncOut
+    state_code = request.GET.get('state_code', '')
+
+    try:
+        queryset = OfficesHeldForLocation.objects.using('readonly').all()
+        queryset = queryset.filter(state_code__iexact=state_code)
+        offices_held_for_location_list_dict = queryset.values(
+            'date_last_retrieved',
+            'date_last_updated',
+            'office_held_name_01',
+            'office_held_name_02',
+            'office_held_name_03',
+            'office_held_name_04',
+            'office_held_name_05',
+            'office_held_name_06',
+            'office_held_name_07',
+            'office_held_name_08',
+            'office_held_name_09',
+            'office_held_name_10',
+            'office_held_name_11',
+            'office_held_name_12',
+            'office_held_name_13',
+            'office_held_name_14',
+            'office_held_name_15',
+            'office_held_name_16',
+            'office_held_name_17',
+            'office_held_name_18',
+            'office_held_name_19',
+            'office_held_name_20',
+            'office_held_name_21',
+            'office_held_name_22',
+            'office_held_name_23',
+            'office_held_name_24',
+            'office_held_name_25',
+            'office_held_name_26',
+            'office_held_name_27',
+            'office_held_name_28',
+            'office_held_name_29',
+            'office_held_name_30',
+            'office_held_we_vote_id_01',
+            'office_held_we_vote_id_02',
+            'office_held_we_vote_id_03',
+            'office_held_we_vote_id_04',
+            'office_held_we_vote_id_05',
+            'office_held_we_vote_id_06',
+            'office_held_we_vote_id_07',
+            'office_held_we_vote_id_08',
+            'office_held_we_vote_id_09',
+            'office_held_we_vote_id_10',
+            'office_held_we_vote_id_11',
+            'office_held_we_vote_id_12',
+            'office_held_we_vote_id_13',
+            'office_held_we_vote_id_14',
+            'office_held_we_vote_id_15',
+            'office_held_we_vote_id_16',
+            'office_held_we_vote_id_17',
+            'office_held_we_vote_id_18',
+            'office_held_we_vote_id_19',
+            'office_held_we_vote_id_20',
+            'office_held_we_vote_id_21',
+            'office_held_we_vote_id_22',
+            'office_held_we_vote_id_23',
+            'office_held_we_vote_id_24',
+            'office_held_we_vote_id_25',
+            'office_held_we_vote_id_26',
+            'office_held_we_vote_id_27',
+            'office_held_we_vote_id_28',
+            'office_held_we_vote_id_29',
+            'office_held_we_vote_id_30',
+            'polling_location_we_vote_id',
+            'state_code',
+            'voter_we_vote_id',
+            'year_with_data_2023',
+            'year_with_data_2024',
+            'year_with_data_2025',
+            'year_with_data_2026',
+        )
+        if offices_held_for_location_list_dict:
+            modified_list_dict = []
+            for one_dict in offices_held_for_location_list_dict:
+                date_last_retrieved = one_dict.get('date_last_retrieved', '')
+                if positive_value_exists(date_last_retrieved):
+                    one_dict['date_last_retrieved'] = date_last_retrieved.strftime('%Y-%m-%d %H:%M:%S')
+                date_last_updated = one_dict.get('date_last_updated', '')
+                if positive_value_exists(date_last_updated):
+                    one_dict['date_last_updated'] = date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
+                modified_list_dict.append(one_dict)
+            list_json = list(modified_list_dict)
+            return HttpResponse(json.dumps(list_json), content_type='application/json')
+    except OfficesHeldForLocation.DoesNotExist:
+        pass
+
+    json_data = {
+        'success': False,
+        'status': 'OFFICES_HELD_FOR_LOCATION_SYNC_OUT_VIEW-LIST_MISSING '
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')

@@ -13,7 +13,7 @@ from admin_tools.views import redirect_to_sign_in_page
 from config.base import get_environment_variable
 from datetime import datetime, timedelta
 import pytz
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
 from django.utils.timezone import localtime, now
@@ -23,6 +23,7 @@ from django.contrib.messages import get_messages
 from django.shortcuts import render
 from django.db.models import Q
 from django.db.models.functions import Length
+import json
 from office_held.models import OfficeHeld, OfficeHeldManager
 from election.models import Election
 from politician.models import Politician, PoliticianManager
@@ -37,6 +38,7 @@ from wevote_functions.functions import convert_to_int, positive_value_exists, ST
 from wevote_settings.constants import IS_BATTLEGROUND_YEARS_AVAILABLE, OFFICE_HELD_YEARS_AVAILABLE
 
 OFFICES_SYNC_URL = get_environment_variable("OFFICES_SYNC_URL")  # officesSyncOut
+REPRESENTATIVES_SYNC_URL = "https://api.wevoteusa.org/apis/v1/representativesSyncOut/"
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -315,6 +317,38 @@ def render_representative_merge_form(
         'state_code':               state_code,
     }
     return render(request, 'representative/representative_merge.html', template_values)
+
+
+@login_required
+def representatives_import_from_master_server_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
+    status = ""
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    if WE_VOTE_SERVER_ROOT_URL in REPRESENTATIVES_SYNC_URL:
+        messages.add_message(request, messages.ERROR, "Cannot sync with Master We Vote Server -- "
+                                                      "this is the Master We Vote Server.")
+        return HttpResponseRedirect(reverse('admin_tools:admin_home', args=()))
+    state_code = request.GET.get('state_code', '')
+
+    from representative.controllers import representatives_import_from_master_server
+    results = representatives_import_from_master_server(request, state_code)
+    if results['success']:
+        messages.add_message(request, messages.INFO, 'Representatives import completed. '
+                                                     'Saved: {saved}, Updated: {updated}, '
+                                                     'Duplicates skipped: '
+                                                     '{duplicates_removed}, '
+                                                     'Not processed: {not_processed}'
+                                                     ''.format(saved=results['saved'],
+                                                               updated=results['updated'],
+                                                               duplicates_removed=results['duplicates_removed'],
+                                                               not_processed=results['not_processed']))
+    else:
+        messages.add_message(request, messages.ERROR, results['status'])
+
+    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "&state_code=" + str(state_code))
 
 
 @login_required
@@ -1473,6 +1507,127 @@ def representative_delete_process_view(request):  # TODO DALE Transition fully t
     except Exception as e:
         messages.add_message(request, messages.ERROR, 'Could not delete representative -- exception.')
         return HttpResponseRedirect(reverse('representative:representative_edit', args=(representative_id,)))
+
+
+# This page does not need to be protected.
+# NOTE: @login_required() throws an error. Needs to be figured out if we ever want to secure this page.
+def representatives_sync_out_view(request):  # representativesSyncOut
+    state_code = request.GET.get('state_code', '')
+
+    try:
+        representative_list = Representative.objects.using('readonly').all()
+        representative_list = representative_list.filter(state_code__iexact=state_code)
+        # get the data using values_list
+        representative_list_dict = representative_list.values(
+            'ballotpedia_representative_url',
+            'ctcl_uuid',
+            'date_last_updated',
+            'date_last_updated_from_politician',
+            'facebook_url',
+            'facebook_url_is_broken',
+            'google_civic_profile_image_url_https',
+            'google_civic_representative_name',
+            'google_civic_representative_name2',
+            'google_civic_representative_name3',
+            'instagram_followers_count',
+            'instagram_handle',
+            'is_battleground_race_2019',
+            'is_battleground_race_2020',
+            'is_battleground_race_2021',
+            'is_battleground_race_2022',
+            'is_battleground_race_2023',
+            'is_battleground_race_2024',
+            'is_battleground_race_2025',
+            'is_battleground_race_2026',
+            'linkedin_url',
+            'ocd_division_id',
+            'office_held_district_name',
+            'office_held_id',
+            'office_held_name',
+            'office_held_we_vote_id',
+            'photo_url_from_google_civic',
+            'political_party',
+            'politician_deduplication_attempted',
+            'politician_id',
+            'politician_match_attempted',
+            'politician_we_vote_id',
+            'profile_image_type_currently_active',
+            'representative_contact_form_url',
+            'representative_email',
+            'representative_email2',
+            'representative_email3',
+            'representative_phone',
+            'representative_phone2',
+            'representative_phone3',
+            'representative_twitter_handle',
+            'representative_twitter_handle2',
+            'representative_twitter_handle3',
+            'representative_url',
+            'representative_url2',
+            'representative_url3',
+            'seo_friendly_path',
+            'seo_friendly_path_date_last_updated',
+            'state_code',
+            'twitter_description',
+            'twitter_handle_updates_failing',
+            'twitter_handle2_updates_failing',
+            'twitter_name',
+            'twitter_location',
+            'twitter_followers_count',
+            'twitter_profile_image_url_https',
+            'twitter_profile_background_image_url_https',
+            'twitter_profile_banner_url_https',
+            'twitter_url',
+            'twitter_user_id',
+            'vote_usa_politician_id',
+            'we_vote_hosted_profile_facebook_image_url_large',
+            'we_vote_hosted_profile_facebook_image_url_medium',
+            'we_vote_hosted_profile_facebook_image_url_tiny',
+            'we_vote_hosted_profile_image_url_large',
+            'we_vote_hosted_profile_image_url_medium',
+            'we_vote_hosted_profile_image_url_tiny',
+            'we_vote_hosted_profile_twitter_image_url_large',
+            'we_vote_hosted_profile_twitter_image_url_medium',
+            'we_vote_hosted_profile_twitter_image_url_tiny',
+            'we_vote_hosted_profile_uploaded_image_url_large',
+            'we_vote_hosted_profile_uploaded_image_url_medium',
+            'we_vote_hosted_profile_uploaded_image_url_tiny',
+            'we_vote_hosted_profile_vote_usa_image_url_large',
+            'we_vote_hosted_profile_vote_usa_image_url_medium',
+            'we_vote_hosted_profile_vote_usa_image_url_tiny',
+            'we_vote_id',
+            'wikipedia_url',
+            'year_in_office_2023',
+            'year_in_office_2024',
+            'year_in_office_2025',
+            'year_in_office_2026',
+            'youtube_url',
+        )
+        if representative_list_dict:
+            modified_representative_list_dict = []
+            for one_dict in representative_list_dict:
+                date_last_updated = one_dict.get('date_last_updated', '')
+                if positive_value_exists(date_last_updated):
+                    one_dict['date_last_updated'] = date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
+                date_last_updated_from_politician = one_dict.get('date_last_updated_from_politician', '')
+                if positive_value_exists(date_last_updated_from_politician):
+                    one_dict['date_last_updated_from_politician'] = \
+                        date_last_updated_from_politician.strftime('%Y-%m-%d %H:%M:%S')
+                seo_friendly_path_date_last_updated = one_dict.get('seo_friendly_path_date_last_updated', '')
+                if positive_value_exists(seo_friendly_path_date_last_updated):
+                    one_dict['seo_friendly_path_date_last_updated'] = \
+                        seo_friendly_path_date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
+                modified_representative_list_dict.append(one_dict)
+            representative_list_json = list(modified_representative_list_dict)
+            return HttpResponse(json.dumps(representative_list_json), content_type='application/json')
+    except Representative.DoesNotExist:
+        pass
+
+    json_data = {
+        'success': False,
+        'status': 'OFFICE_HELD_SYNC_OUT_VIEW-LIST_MISSING '
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 @login_required

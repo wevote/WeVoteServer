@@ -1838,6 +1838,85 @@ def retrieve_candidate_photos(we_vote_candidate, force_retrieve=False):
     return results
 
 
+def candidate_create_from_politician(politician_we_vote_id=''):
+    status = ''
+    success = True
+    candidate = None
+    candidate_found = False
+
+    politician_manager = PoliticianManager()
+    results = politician_manager.retrieve_politician(politician_we_vote_id=politician_we_vote_id)
+    politician = None
+    politician_found = False
+    if results['politician_found']:
+        politician = results['politician']
+        politician_found = True
+    if not politician_found or not hasattr(politician, 'politician_name'):
+        status += "VALID_POLITICIAN_NOT_FOUND "
+        results = {
+            'success':          False,
+            'status':           status,
+            'candidate':        candidate,
+            'candidate_found':  candidate_found,
+        }
+        return results
+
+    try:
+        new_candidate_created = False
+        candidate = CandidateCampaign.objects.create(
+            candidate_name=politician.politician_name,
+            politician_we_vote_id=politician.we_vote_id,
+            state_code=politician.state_code,
+            party=politician.political_party,
+            candidate_gender=politician.gender,
+            candidate_twitter_handle=politician.politician_twitter_handle,
+            candidate_twitter_handle2=politician.politician_twitter_handle2,
+            candidate_twitter_handle3=politician.politician_twitter_handle3,
+            profile_image_type_currently_active=politician.profile_image_type_currently_active,
+            twitter_description=politician.twitter_description,
+            twitter_followers_count=politician.twitter_followers_count,
+            we_vote_hosted_profile_facebook_image_url_large=politician.we_vote_hosted_profile_facebook_image_url_large,
+            we_vote_hosted_profile_facebook_image_url_medium=politician.we_vote_hosted_profile_facebook_image_url_medium,
+            we_vote_hosted_profile_facebook_image_url_tiny=politician.we_vote_hosted_profile_facebook_image_url_tiny,
+            we_vote_hosted_profile_twitter_image_url_large=politician.we_vote_hosted_profile_twitter_image_url_large,
+            we_vote_hosted_profile_twitter_image_url_medium=politician.we_vote_hosted_profile_twitter_image_url_medium,
+            we_vote_hosted_profile_twitter_image_url_tiny=politician.we_vote_hosted_profile_twitter_image_url_tiny,
+            we_vote_hosted_profile_uploaded_image_url_large=politician.we_vote_hosted_profile_uploaded_image_url_large,
+            we_vote_hosted_profile_uploaded_image_url_medium=politician.we_vote_hosted_profile_uploaded_image_url_medium,
+            we_vote_hosted_profile_uploaded_image_url_tiny=politician.we_vote_hosted_profile_uploaded_image_url_tiny,
+            we_vote_hosted_profile_vote_usa_image_url_large=politician.we_vote_hosted_profile_vote_usa_image_url_large,
+            we_vote_hosted_profile_vote_usa_image_url_medium=politician.we_vote_hosted_profile_vote_usa_image_url_medium,
+            we_vote_hosted_profile_vote_usa_image_url_tiny=politician.we_vote_hosted_profile_vote_usa_image_url_tiny,
+            we_vote_hosted_profile_image_url_large=politician.we_vote_hosted_profile_image_url_large,
+            we_vote_hosted_profile_image_url_medium=politician.we_vote_hosted_profile_image_url_medium,
+            we_vote_hosted_profile_image_url_tiny=politician.we_vote_hosted_profile_image_url_tiny,
+        )
+        candidate_found = True
+        if positive_value_exists(candidate.id):
+
+            candidate.save()
+            new_candidate_created = True
+        if new_candidate_created:
+            success = True
+            status += "CANDIDATE_CREATED "
+        else:
+            success = False
+            status += "CANDIDATE_NOT_CREATED "
+
+    except Exception as e:
+        status += 'FAILED_TO_CREATE_CANDIDATE ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        success = False
+
+    results = {
+        'success':            success,
+        'status':             status,
+        'candidate_found':    candidate_found,
+        'candidate':          candidate,
+    }
+    return results
+
+
 def candidate_politician_match(candidate):
     politician_manager = PoliticianManager()
     status = ''

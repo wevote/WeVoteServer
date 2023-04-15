@@ -1145,6 +1145,52 @@ class RepresentativeManager(models.Manager):
         }
         return results
 
+    def update_or_create_representative(
+            self,
+            representative_we_vote_id,
+            updated_values={}):
+        """
+        Either update or create a representative entry.
+        """
+        exception_multiple_object_returned = False
+        new_representative_created = False
+        representative = None
+        success = False
+        status = ""
+        representative_updated = False
+
+        if not representative_we_vote_id:
+            success = False
+            status += 'MISSING_REPRESENTATIVE_WE_VOTE_ID '
+        else:
+            try:
+                representative, new_representative_created = Representative.objects.update_or_create(
+                    we_vote_id=representative_we_vote_id,
+                    defaults=updated_values)
+                representative_updated = not new_representative_created
+                success = True
+                status += 'REPRESENTATIVE_SAVED '
+            except Representative.MultipleObjectsReturned as e:
+                success = False
+                status += 'MULTIPLE_MATCHING_OFFICES_HELD_FOUND: ' + str() + ' '
+                exception_multiple_object_returned = True
+            except Exception as e:
+                status += 'FAILED_TO_RETRIEVE_REPRESENTATIVE_BY_WE_VOTE_ID ' \
+                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                success = False
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'MultipleObjectsReturned':      exception_multiple_object_returned,
+            'new_representative_created':   new_representative_created,
+            'representative':               representative,
+            'saved':                        new_representative_created or representative_updated,
+            'updated':                      representative_updated,
+            'not_processed':                True if not success else False,
+        }
+        return results
+
     def update_or_create_representatives_are_not_duplicates(
             self,
             representative1_we_vote_id,
@@ -1839,32 +1885,33 @@ class RepresentativesMissingFromPollingLocation(models.Model):
     state_code = models.CharField(max_length=2, null=True, db_index=True)
 
 
-class RepresentativeToOfficeHeldLink(models.Model):
-    """
-    With this table, we can store which OfficeHeld a Representative is connected to.
-    """
-    representative_we_vote_id = models.CharField(db_index=True, max_length=255, null=False, unique=False)
-    office_held_we_vote_id = models.CharField(db_index=True, max_length=255, null=False, unique=False)
-    politician_we_vote_id = models.CharField(db_index=True, max_length=255, null=True, unique=False)
-    state_code = models.CharField(db_index=True, max_length=2, null=True)
-    # Which years did this representative serve. This is cached data -- the master data is in the Representative table
-    years_in_office_flags = models.PositiveIntegerField(default=0)
-
-    def office_held(self):
-        try:
-            office = OfficeHeld.objects.get(we_vote_id=self.office_held_we_vote_id)
-        except OfficeHeld.MultipleObjectsReturned as e:
-            handle_record_found_more_than_one_exception(e, logger=logger)
-            logger.error("RepresentativeToOfficeHeldLink.office_held Found multiple")
-            return
-        except OfficeHeld.DoesNotExist:
-            logger.error("RepresentativeToOfficeHeldLink.office_held not attached to object, id: "
-                         "" + str(self.office_held_we_vote_id))
-            return
-        return office
-
-    def set_years_in_office_flags(self, years_in_office_flag_integer_to_set):
-        self.years_in_office_flags |= years_in_office_flag_integer_to_set
-
-    def unset_years_in_office_flags(self, years_in_office_flag_integer_to_unset):
-        self.years_in_office_flags = ~years_in_office_flag_integer_to_unset & self.years_in_office_flags
+# Instead of using this model currently, we simply store the office_held_we_vote_id in the Representative table.
+# class RepresentativeToOfficeHeldLink(models.Model):
+#     """
+#     With this table, we can store which OfficeHeld a Representative is connected to.
+#     """
+#     representative_we_vote_id = models.CharField(db_index=True, max_length=255, null=False, unique=False)
+#     office_held_we_vote_id = models.CharField(db_index=True, max_length=255, null=False, unique=False)
+#     politician_we_vote_id = models.CharField(db_index=True, max_length=255, null=True, unique=False)
+#     state_code = models.CharField(db_index=True, max_length=2, null=True)
+#     # Which years did this representative serve. This is cached data -- the master data is in the Representative table
+#     years_in_office_flags = models.PositiveIntegerField(default=0)
+#
+#     def office_held(self):
+#         try:
+#             office = OfficeHeld.objects.get(we_vote_id=self.office_held_we_vote_id)
+#         except OfficeHeld.MultipleObjectsReturned as e:
+#             handle_record_found_more_than_one_exception(e, logger=logger)
+#             logger.error("RepresentativeToOfficeHeldLink.office_held Found multiple")
+#             return
+#         except OfficeHeld.DoesNotExist:
+#             logger.error("RepresentativeToOfficeHeldLink.office_held not attached to object, id: "
+#                          "" + str(self.office_held_we_vote_id))
+#             return
+#         return office
+#
+#     def set_years_in_office_flags(self, years_in_office_flag_integer_to_set):
+#         self.years_in_office_flags |= years_in_office_flag_integer_to_set
+#
+#     def unset_years_in_office_flags(self, years_in_office_flag_integer_to_unset):
+#         self.years_in_office_flags = ~years_in_office_flag_integer_to_unset & self.years_in_office_flags

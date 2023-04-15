@@ -48,6 +48,10 @@
                           <strong>{{ candidate.candidate_name }}</strong> <span class="glyphicon glyphicon-new-window"></span>
                       </a>
                     </span>
+                    {% if candidate.candidate_year %}
+                        <br />
+                        <span><strong>{{ candidate.candidate_year }}</strong></span>
+                    {% endif %}
                     {% if candidate.withdrawn_from_election %}
                         <br />
                         <span><strong>Withdrew {% if candidate.withdrawal_date %}({{ candidate.withdrawal_date }}){% endif %}</strong></span>
