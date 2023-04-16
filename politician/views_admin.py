@@ -2009,6 +2009,7 @@ def politician_delete_process_view(request):
 
 # This page does not need to be protected.
 def politicians_sync_out_view(request):  # politiciansSyncOut
+    status = ""
     state_code = request.GET.get('state_code', '')
     politician_search = request.GET.get('politician_search', '')
 
@@ -2076,6 +2077,8 @@ def politicians_sync_out_view(request):  # politiciansSyncOut
             'birth_date',
             'cspan_id',
             'ctcl_uuid',
+            'date_last_updated',
+            'date_last_updated_from_candidate',
             'facebook_url',
             'facebook_url2',
             'facebook_url3',
@@ -2094,13 +2097,24 @@ def politicians_sync_out_view(request):  # politiciansSyncOut
             'icpsr_id',
             'instagram_followers_count',
             'instagram_handle',
+            'is_battleground_race_2019',
+            'is_battleground_race_2020',
+            'is_battleground_race_2021',
+            'is_battleground_race_2022',
+            'is_battleground_race_2023',
+            'is_battleground_race_2024',
+            'is_battleground_race_2025',
+            'is_battleground_race_2026',
             'last_name',
+            'linked_campaignx_we_vote_id',
+            'linkedin_url',
             'lis_id',
             'maplight_id',
             'middle_name',
             'opensecrets_id',
             'political_party',
             'politician_contact_form_url',
+            'politician_email_address',
             'politician_email',
             'politician_email2',
             'politician_email3',
@@ -2121,24 +2135,70 @@ def politicians_sync_out_view(request):  # politiciansSyncOut
             'politician_url4',
             'politician_url5',
             'politician_youtube_id',
+            'profile_image_type_currently_active',
+            'seo_friendly_path',
+            'seo_friendly_path_date_last_updated',
             'state_code',
             'thomas_id',
+            'twitter_description',
+            'twitter_followers_count',
+            'twitter_handle_updates_failing',
+            'twitter_handle2_updates_failing',
+            'twitter_location',
+            'twitter_name',
+            'twitter_profile_image_url_https',
+            'twitter_profile_background_image_url_https',
+            'twitter_profile_banner_url_https',
+            'twitter_user_id',
             'vote_smart_id',
             'vote_usa_politician_id',
+            'vote_usa_profile_image_url_https',
             'washington_post_id',
+            'we_vote_hosted_profile_facebook_image_url_large',
+            'we_vote_hosted_profile_facebook_image_url_medium',
+            'we_vote_hosted_profile_facebook_image_url_tiny',
             'we_vote_hosted_profile_image_url_large',
             'we_vote_hosted_profile_image_url_medium',
             'we_vote_hosted_profile_image_url_tiny',
-            'wikipedia_id')
+            'we_vote_hosted_profile_twitter_image_url_large',
+            'we_vote_hosted_profile_twitter_image_url_medium',
+            'we_vote_hosted_profile_twitter_image_url_tiny',
+            'we_vote_hosted_profile_uploaded_image_url_large',
+            'we_vote_hosted_profile_uploaded_image_url_medium',
+            'we_vote_hosted_profile_uploaded_image_url_tiny',
+            'we_vote_hosted_profile_vote_usa_image_url_large',
+            'we_vote_hosted_profile_vote_usa_image_url_medium',
+            'we_vote_hosted_profile_vote_usa_image_url_tiny',
+            'wikipedia_id',
+            'wikipedia_url',
+            'youtube_url')
         if politician_query:
-            politician_list_json = list(politician_query)
+            modified_politician_dict_list = []
+            politician_dict_list = list(politician_query)
+            for one_dict in politician_dict_list:
+                birth_date = one_dict.get('birth_date', '')
+                if positive_value_exists(birth_date):
+                    one_dict['birth_date'] = birth_date.strftime('%Y-%m-%d')
+                date_last_updated = one_dict.get('date_last_updated', '')
+                if positive_value_exists(date_last_updated):
+                    one_dict['date_last_updated'] = date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
+                date_last_updated_from_candidate = one_dict.get('date_last_updated_from_candidate', '')
+                if positive_value_exists(date_last_updated_from_candidate):
+                    one_dict['date_last_updated_from_candidate'] = \
+                        date_last_updated_from_candidate.strftime('%Y-%m-%d %H:%M:%S')
+                seo_friendly_path_date_last_updated = one_dict.get('seo_friendly_path_date_last_updated', '')
+                if positive_value_exists(seo_friendly_path_date_last_updated):
+                    one_dict['seo_friendly_path_date_last_updated'] = \
+                        seo_friendly_path_date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
+                modified_politician_dict_list.append(one_dict)
+            politician_list_json = list(modified_politician_dict_list)
             return HttpResponse(json.dumps(politician_list_json), content_type='application/json')
     except Exception as e:
-        pass
+        status += "POLITICIAN_LIST_MISSING: " + str(e) + " "
 
     json_data = {
         'success': False,
-        'status': 'POLITICIAN_LIST_MISSING'
+        'status': status
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

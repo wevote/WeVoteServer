@@ -994,8 +994,6 @@ def representatives_import_from_structured_json(structured_json):  # representat
     character_fields = [
         'ballotpedia_representative_url',
         'ctcl_uuid',
-        'date_last_updated',
-        'date_last_updated_from_politician',
         'facebook_url',
         'google_civic_profile_image_url_https',
         'google_civic_representative_name',
@@ -1025,7 +1023,6 @@ def representatives_import_from_structured_json(structured_json):  # representat
         'representative_url2',
         'representative_url3',
         'seo_friendly_path',
-        'seo_friendly_path_date_last_updated',
         'state_code',
         'twitter_description',
         'twitter_name',
@@ -1058,6 +1055,11 @@ def representatives_import_from_structured_json(structured_json):  # representat
     character_null_false_fields = [
         'representative_name',
     ]
+    character_to_datetime_fields = [
+        'date_last_updated',
+        'date_last_updated_from_politician',
+        'seo_friendly_path_date_last_updated',
+    ]
     integer_fields = [
         'instagram_followers_count',
         'office_held_id',
@@ -1081,6 +1083,12 @@ def representatives_import_from_structured_json(structured_json):  # representat
             updated_representative_values[one_field] = one_representative[one_field] \
                 if one_field in one_representative \
                 else ''
+        for one_field in character_to_datetime_fields:
+            if one_field in one_representative and positive_value_exists(one_representative[one_field]):
+                updated_representative_values[one_field] = \
+                    datetime.strptime(one_representative[one_field], '%Y-%m-%d %H:%M:%S')
+            else:
+                updated_representative_values[one_field] = None
         for one_field in integer_fields:
             if one_field in one_representative:
                 updated_representative_values[one_field] = convert_to_int(one_representative[one_field])

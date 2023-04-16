@@ -520,7 +520,7 @@ def office_held_import_from_master_server_view(request):
     else:
         messages.add_message(request, messages.ERROR, results['status'])
 
-    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "&state_code=" + str(state_code))
+    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?state_code=" + str(state_code))
 
 
 @login_required
@@ -552,7 +552,7 @@ def offices_held_for_location_import_from_master_server_view(request):  # office
     else:
         messages.add_message(request, messages.ERROR, results['status'])
 
-    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "&state_code=" + str(state_code))
+    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?state_code=" + str(state_code))
 
 
 def office_held_update_status(request):
@@ -834,10 +834,10 @@ def offices_held_for_location_sync_out_view(request):  # officesHeldForLocationS
             for one_dict in offices_held_for_location_list_dict:
                 date_last_retrieved = one_dict.get('date_last_retrieved', '')
                 if positive_value_exists(date_last_retrieved):
-                    one_dict['date_last_retrieved'] = date_last_retrieved.strftime('%Y-%m-%d %H:%M:%S')
+                    one_dict['date_last_retrieved'] = date_last_retrieved.strftime('%Y-%m-%d')
                 date_last_updated = one_dict.get('date_last_updated', '')
                 if positive_value_exists(date_last_updated):
-                    one_dict['date_last_updated'] = date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
+                    one_dict['date_last_updated'] = date_last_updated.strftime('%Y-%m-%d')
                 modified_list_dict.append(one_dict)
             list_json = list(modified_list_dict)
             return HttpResponse(json.dumps(list_json), content_type='application/json')

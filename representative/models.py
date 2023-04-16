@@ -1155,7 +1155,6 @@ class RepresentativeManager(models.Manager):
         exception_multiple_object_returned = False
         new_representative_created = False
         representative = None
-        success = False
         status = ""
         representative_updated = False
 
