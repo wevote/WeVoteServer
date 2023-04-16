@@ -7,6 +7,7 @@ from campaign.models import CampaignXManager
 from candidate.controllers import add_name_to_next_spot, generate_candidate_dict_list_from_candidate_object_list, \
     move_candidates_to_another_politician
 from candidate.models import CandidateListManager, CandidateManager
+from datetime import datetime
 from office.models import ContestOfficeManager, ContestOfficeListManager
 from office_held.controllers import generate_office_held_dict_list_from_office_held_we_vote_id_list
 from politician.controllers_generate_seo_friendly_path import generate_campaign_title_from_politician
@@ -19,7 +20,7 @@ from representative.models import RepresentativeManager
 from voter.models import VoterManager
 from config.base import get_environment_variable
 import wevote_functions.admin
-from wevote_functions.functions import candidate_party_display, convert_state_code_to_state_text, \
+from wevote_functions.functions import candidate_party_display, convert_to_int, \
     convert_to_political_party_constant, \
     convert_we_vote_date_string_to_date_as_integer, generate_random_string, positive_value_exists, \
     process_request_from_master, remove_middle_initial_from_name
@@ -1341,7 +1342,7 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
     return results
 
 
-def politicians_import_from_master_server(request, state_code=''):
+def politicians_import_from_master_server(request, state_code=''):  # politiciansSyncOut
     """
     Get the json data, and either create new entries or update existing
     :param request:
@@ -1365,14 +1366,14 @@ def politicians_import_from_master_server(request, state_code=''):
     return import_results
 
 
-def politicians_import_from_structured_json(structured_json):
+def politicians_import_from_structured_json(structured_json):  # politiciansSyncOut
     politician_manager = PoliticianManager()
     politicians_saved = 0
     politicians_updated = 0
     politicians_not_processed = 0
     status = ''
 
-    importing_turned_off = True
+    importing_turned_off = False
     # We need to deal with merging incoming politicians with records created on the developer's machine
     if importing_turned_off:
         status += "POLITICIANS_IMPORT_PROCESS_TURNED_OFF "
@@ -1385,6 +1386,119 @@ def politicians_import_from_structured_json(structured_json):
         }
         return politicians_results
 
+    boolean_fields = [
+        'facebook_url_is_broken',
+        'facebook_url2_is_broken',
+        'facebook_url3_is_broken',
+        'is_battleground_race_2019',
+        'is_battleground_race_2020',
+        'is_battleground_race_2021',
+        'is_battleground_race_2022',
+        'is_battleground_race_2023',
+        'is_battleground_race_2024',
+        'is_battleground_race_2025',
+        'is_battleground_race_2026',
+        'twitter_handle_updates_failing',
+        'twitter_handle2_updates_failing',
+    ]
+    character_fields = [
+        'ballotpedia_id',
+        'ballotpedia_politician_name',
+        'ballotpedia_politician_url',
+        'bioguide_id',
+        'cspan_id',
+        'ctcl_uuid',
+        'facebook_url',
+        'facebook_url2',
+        'facebook_url3',
+        'fec_id',
+        'first_name',
+        'full_name_assembled',
+        'gender',
+        'google_civic_candidate_name',
+        'google_civic_candidate_name2',
+        'google_civic_candidate_name3',
+        'govtrack_id',
+        'house_history_id',
+        'icpsr_id',
+        'instagram_handle',
+        'last_name',
+        'linked_campaignx_we_vote_id',
+        'linkedin_url',
+        'lis_id',
+        'maplight_id',
+        'middle_name',
+        'opensecrets_id',
+        'political_party',
+        'politician_contact_form_url',
+        'politician_email_address',
+        'politician_email',
+        'politician_email2',
+        'politician_email3',
+        'politician_facebook_id',
+        'politician_googleplus_id',
+        'politician_name',
+        'politician_phone_number',
+        'politician_phone_number2',
+        'politician_phone_number3',
+        'politician_twitter_handle',
+        'politician_twitter_handle2',
+        'politician_twitter_handle3',
+        'politician_twitter_handle4',
+        'politician_twitter_handle5',
+        'politician_url',
+        'politician_url2',
+        'politician_url3',
+        'politician_url4',
+        'politician_url5',
+        'politician_youtube_id',
+        'profile_image_type_currently_active',
+        'seo_friendly_path',
+        'state_code',
+        'thomas_id',
+        'twitter_description',
+        'twitter_location',
+        'twitter_name',
+        'twitter_profile_image_url_https',
+        'twitter_profile_background_image_url_https',
+        'twitter_profile_banner_url_https',
+        'vote_smart_id',
+        'vote_usa_politician_id',
+        'vote_usa_profile_image_url_https',
+        'washington_post_id',
+        'we_vote_hosted_profile_facebook_image_url_large',
+        'we_vote_hosted_profile_facebook_image_url_medium',
+        'we_vote_hosted_profile_facebook_image_url_tiny',
+        'we_vote_hosted_profile_image_url_large',
+        'we_vote_hosted_profile_image_url_medium',
+        'we_vote_hosted_profile_image_url_tiny',
+        'we_vote_hosted_profile_twitter_image_url_large',
+        'we_vote_hosted_profile_twitter_image_url_medium',
+        'we_vote_hosted_profile_twitter_image_url_tiny',
+        'we_vote_hosted_profile_uploaded_image_url_large',
+        'we_vote_hosted_profile_uploaded_image_url_medium',
+        'we_vote_hosted_profile_uploaded_image_url_tiny',
+        'we_vote_hosted_profile_vote_usa_image_url_large',
+        'we_vote_hosted_profile_vote_usa_image_url_medium',
+        'we_vote_hosted_profile_vote_usa_image_url_tiny',
+        'we_vote_id',
+        'wikipedia_id',
+        'wikipedia_url',
+        'youtube_url',
+    ]
+    character_null_false_fields = [
+    ]
+    character_to_datetime_fields = [
+        'birth_date',
+        'date_last_updated',
+        'date_last_updated_from_candidate',
+        'seo_friendly_path_date_last_updated',
+    ]
+    integer_fields = [
+        'instagram_followers_count',
+        'twitter_followers_count',
+        'twitter_user_id',
+    ]
     for one_politician in structured_json:
         politician_name = one_politician['politician_name'] if 'politician_name' in one_politician else ''
         politician_we_vote_id = one_politician['we_vote_id'] if 'we_vote_id' in one_politician else ''
@@ -1393,212 +1507,100 @@ def politicians_import_from_structured_json(structured_json):
             proceed_to_update_or_create = True
         else:
             proceed_to_update_or_create = False
-        if proceed_to_update_or_create:
-            updated_politician_values = {
-                'politician_name': politician_name,
-                # 'we_vote_id': politician_we_vote_id,  # Trying to keep politician
-            }
-            if 'ballotpedia_id' in one_politician:
-                updated_politician_values['ballotpedia_id'] = one_politician['ballotpedia_id']
-            if 'ballotpedia_politician_name' in one_politician:
-                updated_politician_values['ballotpedia_politician_name'] = one_politician['ballotpedia_politician_name']
-            if 'ballotpedia_politician_url' in one_politician:
-                updated_politician_values['ballotpedia_politician_url'] = one_politician['ballotpedia_politician_url']
-            if 'bioguide_id' in one_politician:
-                updated_politician_values['bioguide_id'] = one_politician['bioguide_id']
-            if 'birth_date' in one_politician:
-                updated_politician_values['birth_date'] = one_politician['birth_date']
-            if 'cspan_id' in one_politician:
-                updated_politician_values['cspan_id'] = one_politician['cspan_id']
-            if 'ctcl_uuid' in one_politician:
-                updated_politician_values['ctcl_uuid'] = one_politician['ctcl_uuid']
-            if 'facebook_url' in one_politician:
-                updated_politician_values['facebook_url'] = one_politician['facebook_url']
-            if 'facebook_url2' in one_politician:
-                updated_politician_values['facebook_url2'] = one_politician['facebook_url2']
-            if 'facebook_url' in one_politician:
-                updated_politician_values['facebook_url3'] = one_politician['facebook_url3']
-            if 'facebook_url_is_broken' in one_politician:
-                updated_politician_values['facebook_url_is_broken'] = one_politician['facebook_url_is_broken']
-            if 'facebook_url2_is_broken' in one_politician:
-                updated_politician_values['facebook_url2_is_broken'] = one_politician['facebook_url2_is_broken']
-            if 'facebook_url3_is_broken' in one_politician:
-                updated_politician_values['facebook_url3_is_broken'] = one_politician['facebook_url3_is_broken']
-            if 'fec_id' in one_politician:
-                updated_politician_values['fec_id'] = one_politician['fec_id']
-            if 'first_name' in one_politician:
-                updated_politician_values['first_name'] = one_politician['first_name']
-            if 'full_name_assembled' in one_politician:
-                updated_politician_values['full_name_assembled'] = one_politician['full_name_assembled']
-            if 'gender' in one_politician:
-                updated_politician_values['gender'] = one_politician['gender']
-            if 'google_civic_candidate_name' in one_politician:
-                updated_politician_values['google_civic_candidate_name'] = \
-                    one_politician['google_civic_candidate_name']
-            if 'google_civic_candidate_name2' in one_politician:
-                updated_politician_values['google_civic_candidate_name2'] = \
-                    one_politician['google_civic_candidate_name2']
-            if 'google_civic_candidate_name3' in one_politician:
-                updated_politician_values['google_civic_candidate_name3'] = \
-                    one_politician['google_civic_candidate_name3']
-            if 'govtrack_id' in one_politician:
-                updated_politician_values['govtrack_id'] = one_politician['govtrack_id']
-            if 'house_history_id' in one_politician:
-                updated_politician_values['house_history_id'] = one_politician['house_history_id']
-            if 'icpsr_id' in one_politician:
-                updated_politician_values['icpsr_id'] = one_politician['icpsr_id']
-            if 'instagram_followers_count' in one_politician:
-                updated_politician_values['instagram_followers_count'] = one_politician['instagram_followers_count']
-            if 'instagram_handle' in one_politician:
-                updated_politician_values['instagram_handle'] = one_politician['instagram_handle']
-            if 'last_name' in one_politician:
-                updated_politician_values['last_name'] = one_politician['last_name']
-            if 'linkedin_url' in one_politician:
-                updated_politician_values['linkedin_url'] = one_politician['linkedin_url']
-            if 'lis_id' in one_politician:
-                updated_politician_values['lis_id'] = one_politician['lis_id']
-            if 'maplight_id' in one_politician:
-                updated_politician_values['maplight_id'] = one_politician['maplight_id']
-            if 'middle_name' in one_politician:
-                updated_politician_values['middle_name'] = one_politician['middle_name']
-            if 'opensecrets_id' in one_politician:
-                updated_politician_values['opensecrets_id'] = one_politician['opensecrets_id']
-            if 'political_party' in one_politician:
-                updated_politician_values['political_party'] = one_politician['political_party']
-            if 'politician_contact_form_url' in one_politician:
-                updated_politician_values['politician_contact_form_url'] = one_politician['politician_contact_form_url']
-            if 'politician_email' in one_politician:
-                updated_politician_values['politician_email'] = one_politician['politician_email']
-            if 'politician_email2' in one_politician:
-                updated_politician_values['politician_email2'] = one_politician['politician_email2']
-            if 'politician_email3' in one_politician:
-                updated_politician_values['politician_email3'] = one_politician['politician_email3']
-            if 'politician_facebook_id' in one_politician:
-                updated_politician_values['politician_facebook_id'] = one_politician['politician_facebook_id']
-            if 'politician_googleplus_id' in one_politician:
-                updated_politician_values['politician_googleplus_id'] = one_politician['politician_googleplus_id']
-            if 'politician_name' in one_politician:
-                updated_politician_values['politician_name'] = one_politician['politician_name']
-            if 'politician_phone_number' in one_politician:
-                updated_politician_values['politician_phone_number'] = one_politician['politician_phone_number']
-            if 'politician_phone_number2' in one_politician:
-                updated_politician_values['politician_phone_number2'] = one_politician['politician_phone_number2']
-            if 'politician_phone_number3' in one_politician:
-                updated_politician_values['politician_phone_number3'] = one_politician['politician_phone_number3']
-            if 'politician_twitter_handle' in one_politician:
-                updated_politician_values['politician_twitter_handle'] = one_politician['politician_twitter_handle']
-            if 'politician_twitter_handle2' in one_politician:
-                updated_politician_values['politician_twitter_handle2'] = one_politician['politician_twitter_handle2']
-            if 'politician_twitter_handle3' in one_politician:
-                updated_politician_values['politician_twitter_handle3'] = one_politician['politician_twitter_handle3']
-            if 'politician_twitter_handle4' in one_politician:
-                updated_politician_values['politician_twitter_handle4'] = one_politician['politician_twitter_handle4']
-            if 'politician_twitter_handle5' in one_politician:
-                updated_politician_values['politician_twitter_handle5'] = one_politician['politician_twitter_handle5']
-            if 'politician_url' in one_politician:
-                updated_politician_values['politician_url'] = one_politician['politician_url']
-            if 'politician_url2' in one_politician:
-                updated_politician_values['politician_url2'] = one_politician['politician_url2']
-            if 'politician_url3' in one_politician:
-                updated_politician_values['politician_url3'] = one_politician['politician_url3']
-            if 'politician_url4' in one_politician:
-                updated_politician_values['politician_url4'] = one_politician['politician_url4']
-            if 'politician_url5' in one_politician:
-                updated_politician_values['politician_url5'] = one_politician['politician_url5']
-            if 'politician_youtube_id' in one_politician:
-                updated_politician_values['politician_youtube_id'] = one_politician['politician_youtube_id']
-            if 'state_code' in one_politician:
-                updated_politician_values['state_code'] = one_politician['state_code']
-            if 'thomas_id' in one_politician:
-                updated_politician_values['thomas_id'] = one_politician['thomas_id']
-            if 'vote_smart_id' in one_politician:
-                updated_politician_values['vote_smart_id'] = one_politician['vote_smart_id']
-            if 'vote_usa_politician_id' in one_politician:
-                updated_politician_values['vote_usa_politician_id'] = one_politician['vote_usa_politician_id']
-            if 'washington_post_id' in one_politician:
-                updated_politician_values['washington_post_id'] = one_politician['washington_post_id']
-            if 'we_vote_hosted_profile_image_url_large' in one_politician:
-                updated_politician_values['we_vote_hosted_profile_image_url_large'] = \
-                    one_politician['we_vote_hosted_profile_image_url_large']
-            if 'we_vote_hosted_profile_image_url_medium' in one_politician:
-                updated_politician_values['we_vote_hosted_profile_image_url_medium'] = \
-                    one_politician['we_vote_hosted_profile_image_url_medium']
-            if 'we_vote_hosted_profile_image_url_tiny' in one_politician:
-                updated_politician_values['we_vote_hosted_profile_image_url_tiny'] = \
-                    one_politician['we_vote_hosted_profile_image_url_tiny']
-            if 'wikipedia_id' in one_politician:
-                updated_politician_values['wikipedia_id'] = one_politician['wikipedia_id']
-            if 'wikipedia_url' in one_politician:
-                updated_politician_values['wikipedia_url'] = one_politician['wikipedia_url']
+        if not proceed_to_update_or_create:
+            continue
 
-            results = politician_manager.update_or_create_politician(
-                updated_politician_values=updated_politician_values,
-                politician_we_vote_id=politician_we_vote_id)
-            if results['success']:
-                values_changed = False
-                politician = results['politician']
-                if 'politician_twitter_handle' in one_politician:
-                    twitter_results = add_twitter_handle_to_next_politician_spot(
-                        politician, one_politician['politician_twitter_handle'])
-                    if twitter_results['success']:
-                        politician = twitter_results['politician']
-                        if twitter_results['values_changed']:
-                            values_changed = True
-                    else:
-                        results['status'] += twitter_results['status']
-                if 'politician_twitter_handle2' in one_politician:
-                    twitter_results = add_twitter_handle_to_next_politician_spot(
-                        politician, one_politician['politician_twitter_handle2'])
-                    if twitter_results['success']:
-                        politician = twitter_results['politician']
-                        if twitter_results['values_changed']:
-                            values_changed = True
-                    else:
-                        results['status'] += twitter_results['status']
-                if 'politician_twitter_handle3' in one_politician:
-                    twitter_results = add_twitter_handle_to_next_politician_spot(
-                        politician, one_politician['politician_twitter_handle3'])
-                    if twitter_results['success']:
-                        politician = twitter_results['politician']
-                        if twitter_results['values_changed']:
-                            values_changed = True
-                    else:
-                        results['status'] += twitter_results['status']
-                if 'politician_twitter_handle4' in one_politician:
-                    twitter_results = add_twitter_handle_to_next_politician_spot(
-                        politician, one_politician['politician_twitter_handle4'])
-                    if twitter_results['success']:
-                        politician = twitter_results['politician']
-                        if twitter_results['values_changed']:
-                            values_changed = True
-                    else:
-                        results['status'] += twitter_results['status']
-                if 'politician_twitter_handle5' in one_politician:
-                    twitter_results = add_twitter_handle_to_next_politician_spot(
-                        politician, one_politician['politician_twitter_handle5'])
-                    if twitter_results['success']:
-                        politician = twitter_results['politician']
-                        if twitter_results['values_changed']:
-                            values_changed = True
-                    else:
-                        results['status'] += twitter_results['status']
-                if values_changed:
-                    politician.save()
-        else:
-            politicians_not_processed += 1
-            results = {
-                'success': False,
-                'status': 'Required value missing, cannot update or create',
-                'politician_created':   False,
-                'politician_found':     False,
-                'politician':           Politician(),
-            }
+        updated_politician_values = {}
+        for one_field in boolean_fields:
+            if one_field in one_politician:
+                updated_politician_values[one_field] = positive_value_exists(one_politician[one_field])
+            else:
+                updated_politician_values[one_field] = None
+        for one_field in character_fields:
+            updated_politician_values[one_field] = one_politician[one_field] \
+                if one_field in one_politician \
+                else None
+        for one_field in character_null_false_fields:
+            updated_politician_values[one_field] = one_politician[one_field] \
+                if one_field in one_politician \
+                else ''
+        for one_field in character_to_datetime_fields:
+            if one_field in one_politician and positive_value_exists(one_politician[one_field]):
+                updated_politician_values[one_field] = \
+                    datetime.strptime(one_politician[one_field], '%Y-%m-%d %H:%M:%S')
+            else:
+                updated_politician_values[one_field] = None
+        for one_field in integer_fields:
+            if one_field in one_politician:
+                updated_politician_values[one_field] = convert_to_int(one_politician[one_field])
+            else:
+                updated_politician_values[one_field] = 0
 
+        results = politician_manager.update_or_create_politician(
+            updated_politician_values=updated_politician_values,
+            politician_we_vote_id=politician_we_vote_id)
         if results['success']:
             if results['politician_created']:
                 politicians_saved += 1
             else:
                 politicians_updated += 1
+            # values_changed = False
+            # politician = results['politician']
+            # if 'politician_twitter_handle' in one_politician:
+            #     twitter_results = add_twitter_handle_to_next_politician_spot(
+            #         politician, one_politician['politician_twitter_handle'])
+            #     if twitter_results['success']:
+            #         politician = twitter_results['politician']
+            #         if twitter_results['values_changed']:
+            #             values_changed = True
+            #     else:
+            #         results['status'] += twitter_results['status']
+            # if 'politician_twitter_handle2' in one_politician:
+            #     twitter_results = add_twitter_handle_to_next_politician_spot(
+            #         politician, one_politician['politician_twitter_handle2'])
+            #     if twitter_results['success']:
+            #         politician = twitter_results['politician']
+            #         if twitter_results['values_changed']:
+            #             values_changed = True
+            #     else:
+            #         results['status'] += twitter_results['status']
+            # if 'politician_twitter_handle3' in one_politician:
+            #     twitter_results = add_twitter_handle_to_next_politician_spot(
+            #         politician, one_politician['politician_twitter_handle3'])
+            #     if twitter_results['success']:
+            #         politician = twitter_results['politician']
+            #         if twitter_results['values_changed']:
+            #             values_changed = True
+            #     else:
+            #         results['status'] += twitter_results['status']
+            # if 'politician_twitter_handle4' in one_politician:
+            #     twitter_results = add_twitter_handle_to_next_politician_spot(
+            #         politician, one_politician['politician_twitter_handle4'])
+            #     if twitter_results['success']:
+            #         politician = twitter_results['politician']
+            #         if twitter_results['values_changed']:
+            #             values_changed = True
+            #     else:
+            #         results['status'] += twitter_results['status']
+            # if 'politician_twitter_handle5' in one_politician:
+            #     twitter_results = add_twitter_handle_to_next_politician_spot(
+            #         politician, one_politician['politician_twitter_handle5'])
+            #     if twitter_results['success']:
+            #         politician = twitter_results['politician']
+            #         if twitter_results['values_changed']:
+            #             values_changed = True
+            #     else:
+            #         results['status'] += twitter_results['status']
+            # if values_changed:
+            #     politician.save()
+        else:
+            politicians_not_processed += 1
+
+        # if results['success']:
+        #     if results['politician_created']:
+        #         politicians_saved += 1
+        #     else:
+        #         politicians_updated += 1
 
         processed = politicians_not_processed + politicians_saved + politicians_updated
         if not processed % 10000:

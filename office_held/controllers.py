@@ -2,6 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from datetime import datetime
 from config.base import get_environment_variable
 from office_held.models import OfficeHeldManager
 from wevote_functions.functions import positive_value_exists, process_request_from_master
@@ -72,6 +73,8 @@ def office_held_import_from_structured_json(structured_json):
     offices_saved = 0
     offices_updated = 0
     offices_not_processed = 0
+    status = ""
+    status_passed_through_count = 0
     boolean_fields = [
         'facebook_url_is_broken',
         'is_battleground_race_2019',
@@ -138,10 +141,16 @@ def office_held_import_from_structured_json(structured_json):
                 offices_saved += 1
             else:
                 offices_updated += 1
+        else:
+            offices_not_processed += 1
+            if status_passed_through_count < 10:
+                status += results['status']
+                status_passed_through_count += 1
 
+    status += "OFFICE_HELD_IMPORT_PROCESS_COMPLETE "
     results = {
         'success':          True,
-        'status':           "OFFICE_HELD_IMPORT_PROCESS_COMPLETE ",
+        'status':           status,
         'saved':            offices_saved,
         'updated':          offices_updated,
         'not_processed':    offices_not_processed,
@@ -181,6 +190,8 @@ def offices_held_for_location_import_from_structured_json(structured_json):  # o
     offices_saved = 0
     offices_updated = 0
     offices_not_processed = 0
+    status = ""
+    status_passed_through_count = 0
     boolean_fields = [
         'year_with_data_2023',
         'year_with_data_2024',
@@ -188,8 +199,6 @@ def offices_held_for_location_import_from_structured_json(structured_json):  # o
         'year_with_data_2026',
     ]
     character_fields = [
-        'date_last_retrieved',
-        'date_last_updated',
         'office_held_name_01',
         'office_held_name_02',
         'office_held_name_03',
@@ -254,6 +263,10 @@ def offices_held_for_location_import_from_structured_json(structured_json):  # o
         'state_code',
         'voter_we_vote_id',
     ]
+    character_to_date_fields = [
+        'date_last_retrieved',
+        'date_last_updated',
+    ]
     for offices_held_for_location in structured_json:
         offices_held_for_location_values = {}
         polling_location_we_vote_id = offices_held_for_location.get('polling_location_we_vote_id', '')
@@ -266,6 +279,12 @@ def offices_held_for_location_import_from_structured_json(structured_json):  # o
         for one_field in character_fields:
             offices_held_for_location_values[one_field] = offices_held_for_location[one_field] \
                 if one_field in offices_held_for_location else None
+        for one_field in character_to_date_fields:
+            if one_field in offices_held_for_location and positive_value_exists(offices_held_for_location[one_field]):
+                date_field_trimmed = offices_held_for_location[one_field].replace(" 00:00:00", "")
+                offices_held_for_location_values[one_field] = datetime.strptime(date_field_trimmed, '%Y-%m-%d').date()
+            else:
+                offices_held_for_location_values[one_field] = None
         results = office_held_manager.update_or_create_offices_held_for_location(
             polling_location_we_vote_id=polling_location_we_vote_id,
             updated_values=offices_held_for_location_values)
@@ -275,10 +294,16 @@ def offices_held_for_location_import_from_structured_json(structured_json):  # o
                 offices_saved += 1
             else:
                 offices_updated += 1
+        else:
+            offices_not_processed += 1
+            if status_passed_through_count < 10:
+                status += results['status']
+                status_passed_through_count += 1
 
+    status += "OFFICE_HELD_FOR_LOCATION_IMPORT_PROCESS_COMPLETE "
     results = {
         'success':          True,
-        'status':           "OFFICES_HELD_FOR_LOCATION_IMPORT_PROCESS_COMPLETE ",
+        'status':           status,
         'saved':            offices_saved,
         'updated':          offices_updated,
         'not_processed':    offices_not_processed,

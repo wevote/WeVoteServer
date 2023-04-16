@@ -348,7 +348,7 @@ def representatives_import_from_master_server_view(request):
     else:
         messages.add_message(request, messages.ERROR, results['status'])
 
-    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "&state_code=" + str(state_code))
+    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?state_code=" + str(state_code))
 
 
 @login_required
