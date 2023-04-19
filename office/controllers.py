@@ -14,7 +14,7 @@ import json
 from position.controllers import move_positions_to_another_office, update_all_position_details_from_contest_office
 import requests
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists, process_request_from_master
+from wevote_functions.functions import convert_to_int, positive_value_exists, process_request_from_master
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -651,6 +651,115 @@ def offices_import_from_structured_json(structured_json):
         'not_processed':    offices_not_processed,
     }
     return offices_results
+
+
+def office_create_from_office_held(office_held_we_vote_id='', google_civic_election_id=''):
+    status = ''
+    success = True
+    contest_office = None
+    contest_office_found = False
+    election_day_text = ''
+    election_year = 0
+    office_we_vote_id = ''
+
+    from office_held.models import OfficeHeldManager
+    office_held_manager = OfficeHeldManager()
+    results = office_held_manager.retrieve_office_held(office_held_we_vote_id=office_held_we_vote_id)
+    office_held = None
+    office_held_found = False
+    if not results['success']:
+        status += results['status']
+    elif results['office_held_found']:
+        office_held = results['office_held']
+        office_held_found = True
+
+    if not office_held_found or not hasattr(office_held, 'office_held_name'):
+        status += "VALID_OFFICE_HELD_NOT_FOUND "
+        results = {
+            'election_day_text':    election_day_text,
+            'election_year':        election_year,
+            'office':               contest_office,
+            'office_found':         contest_office_found,
+            'office_we_vote_id':    '',
+            'status':               status,
+            'success':              False,
+        }
+        return results
+
+    try:
+        new_contest_office_created = False
+        contest_office = ContestOffice.objects.create(
+            ballotpedia_race_office_level=office_held.race_office_level,
+            district_id=office_held.district_id,
+            district_name=office_held.district_name,
+            district_scope=office_held.district_scope,
+            google_civic_election_id=google_civic_election_id,
+            google_civic_office_name=office_held.google_civic_office_held_name,
+            google_civic_office_name2=office_held.google_civic_office_held_name2,
+            google_civic_office_name3=office_held.google_civic_office_held_name3,
+            number_elected=office_held.number_elected,
+            ocd_division_id=office_held.ocd_division_id,
+            office_held_description=office_held.office_held_description,
+            office_held_description_es=office_held.office_held_description_es,
+            office_held_name=office_held.office_held_name,
+            office_held_name_es=office_held.office_held_name_es,
+            office_held_we_vote_id=office_held.we_vote_id,
+            office_name=office_held.office_held_name,
+            office_twitter_handle=office_held.office_held_twitter_handle,
+            office_url=office_held.office_held_url,
+            primary_party=office_held.primary_party,
+            state_code=office_held.state_code,
+        )
+        contest_office_found = True
+        election_day_text = ''
+
+        if positive_value_exists(contest_office.id):
+            office_we_vote_id = contest_office.we_vote_id
+            if positive_value_exists(google_civic_election_id):
+                from election.models import ElectionManager
+                election_manager = ElectionManager()
+                results = election_manager.retrieve_election(
+                    google_civic_election_id=google_civic_election_id)
+                if results['election_found']:
+                    election = results['election']
+                    if positive_value_exists(election.election_day_text):
+                        election_day_text = election.election_day_text
+                        year = election.election_day_text[:4]
+                        if year:
+                            election_year = convert_to_int(year)
+                # Set is_battleground_race
+                if positive_value_exists(election_year):
+                    is_battleground_race_key = 'is_battleground_race_' + str(election_year)
+                    if hasattr(office_held, is_battleground_race_key):
+                        is_battleground_race = getattr(office_held, is_battleground_race_key)
+                        if positive_value_exists(is_battleground_race):
+                            contest_office.is_battleground_race = is_battleground_race
+            if positive_value_exists(office_held.office_held_facebook_url) and not office_held.facebook_url_is_broken:
+                contest_office.office_facebook_url = office_held.office_held_facebook_url
+            contest_office.save()
+            new_contest_office_created = True
+        if new_contest_office_created:
+            success = True
+            status += "OFFICE_CREATED "
+        else:
+            success = False
+            status += "OFFICE_NOT_CREATED "
+
+    except Exception as e:
+        status += 'FAILED_TO_CREATE_OFFICE ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        success = False
+
+    results = {
+        'election_day_text':    election_day_text,
+        'election_year':        election_year,
+        'office':               contest_office,
+        'office_found':         contest_office_found,
+        'office_we_vote_id':    office_we_vote_id,
+        'status':               status,
+        'success':              success,
+    }
+    return results
 
 
 def office_retrieve_for_api(office_id, office_we_vote_id):

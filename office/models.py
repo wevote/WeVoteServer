@@ -200,6 +200,10 @@ class ContestOffice(models.Model):
     number_elected = models.CharField(verbose_name="google civic number of candidates who will be elected",
                                       max_length=255, null=True, blank=True)
 
+    office_facebook_url = models.TextField(blank=True, null=True)
+    facebook_url_is_broken = models.BooleanField(default=False)
+    office_twitter_handle = models.CharField(max_length=255, null=True, unique=False)
+    office_url = models.TextField(blank=True, null=True)
     # If this is a partisan election, the name of the party it is for.
     primary_party = models.CharField(verbose_name="google civic primary party", max_length=255, null=True, blank=True)
     # The name of the district.
@@ -232,8 +236,14 @@ class ContestOffice(models.Model):
     # "Yes" or "No" depending on whether this a contest being held outside the normal election cycle.
     special = models.CharField(verbose_name="google civic primary party", max_length=255, null=True, blank=True)
     ctcl_uuid = models.CharField(db_index=True, max_length=36, null=True, blank=True)
+    office_held_description = models.CharField(verbose_name="office_held description", max_length=255, null=True,
+                                               blank=True)
+    office_held_description_es = models.CharField(verbose_name="office_held description in Spanish",
+                                                  max_length=255, null=True, blank=True)
     office_held_name = models.CharField(
         verbose_name="name of the office held", max_length=255, null=True, blank=True, default=None)
+    office_held_name_es = models.CharField(
+        verbose_name="name of the office held in Spanish", max_length=255, null=True, blank=True, default=None)
     # Which office held does this contest_office lead to?
     office_held_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
 
@@ -798,6 +808,7 @@ class ContestOfficeManager(models.Manager):
             ballotpedia_race_id=None,
             google_civic_election_id=None,
             ballotpedia_office_id=None,
+            office_held_we_vote_id=None,
             vote_usa_office_id=None,
             read_only=False):
         contest_office_found = False
@@ -876,6 +887,19 @@ class ContestOfficeManager(models.Manager):
                 contest_office_we_vote_id = contest_office_on_stage.we_vote_id
                 contest_office_found = True
                 status += "RETRIEVE_OFFICE_FOUND_BY_BALLOTPEDIA_OFFICE_ID "
+            elif positive_value_exists(office_held_we_vote_id) and positive_value_exists(google_civic_election_id):
+                if positive_value_exists(read_only):
+                    contest_office_on_stage = ContestOffice.objects.using('readonly').get(
+                        office_held_we_vote_id=office_held_we_vote_id,
+                        google_civic_election_id=google_civic_election_id)
+                else:
+                    contest_office_on_stage = ContestOffice.objects.get(
+                        office_held_we_vote_id=office_held_we_vote_id,
+                        google_civic_election_id=google_civic_election_id)
+                contest_office_id = contest_office_on_stage.id
+                contest_office_we_vote_id = contest_office_on_stage.we_vote_id
+                contest_office_found = True
+                status += "RETRIEVE_OFFICE_FOUND_BY_OFFICE_HELD_WE_VOTE_ID "
             elif positive_value_exists(vote_usa_office_id) and positive_value_exists(google_civic_election_id):
                 if positive_value_exists(read_only):
                     contest_office_on_stage = ContestOffice.objects.using('readonly').get(

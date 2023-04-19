@@ -972,6 +972,9 @@ def representatives_import_from_structured_json(structured_json):  # representat
     representatives_saved = 0
     representatives_updated = 0
     representatives_not_processed = 0
+    status = ""
+    status_passed_through_count = 0
+
     boolean_fields = [
         'facebook_url_is_broken',
         'is_battleground_race_2019',
@@ -1103,6 +1106,11 @@ def representatives_import_from_structured_json(structured_json):  # representat
                 representatives_saved += 1
             else:
                 representatives_updated += 1
+        else:
+            representatives_not_processed += 1
+            if status_passed_through_count < 10:
+                status += results['status']
+                status_passed_through_count += 1
 
     results = {
         'success':          True,

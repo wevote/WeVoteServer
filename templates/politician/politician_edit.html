@@ -729,7 +729,7 @@
             <td>&nbsp;</td>
             <td class="padded">Representative Name</td>
             <td class="padded">State</td>
-            <td class="padded">Office</td>
+            <td class="padded">Office Held</td>
             <td class="padded">Twitter Handle</td>
             <td class="padded">Websites</td>
             <td class="padded">Ids</td>
@@ -771,6 +771,9 @@
         {% if representative.year_in_office_2025 %}2025 {% endif %}
         {% if representative.year_in_office_2026 %}2026 {% endif %}
                 </span>
+                {% if representative.office_held_we_vote_id %}
+                    &nbsp;&nbsp;&nbsp;{{ representative.office_held_we_vote_id }}
+                {% endif %}
             </td>
             <td class="padded">{% if representative.representative_twitter_handle %}<a href="https://twitter.com/{{ representative.representative_twitter_handle }}"
                     target="_blank">{{ representative.representative_twitter_handle }}&nbsp;<span class="glyphicon glyphicon-new-window"></span></a><br />

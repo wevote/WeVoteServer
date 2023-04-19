@@ -292,6 +292,7 @@ class OfficeHeldManager(models.Manager):
                 else:
                     office_held = OfficeHeld.objects.get(id=office_held_id)
                 office_held_id = office_held.id
+                office_held_found = True
                 office_held_we_vote_id = office_held.we_vote_id
                 status += "RETRIEVE_OFFICE_HELD_FOUND_BY_ID "
             elif positive_value_exists(office_held_we_vote_id):
@@ -300,6 +301,7 @@ class OfficeHeldManager(models.Manager):
                 else:
                     office_held = OfficeHeld.objects.get(we_vote_id=office_held_we_vote_id)
                 office_held_id = office_held.id
+                office_held_found = True
                 office_held_we_vote_id = office_held.we_vote_id
                 status += "RETRIEVE_OFFICE_HELD_FOUND_BY_WE_VOTE_ID "
             elif positive_value_exists(maplight_id):
@@ -308,6 +310,7 @@ class OfficeHeldManager(models.Manager):
                 else:
                     office_held = OfficeHeld.objects.get(maplight_id=maplight_id)
                 office_held_id = office_held.id
+                office_held_found = True
                 office_held_we_vote_id = office_held.we_vote_id
                 status += "RETRIEVE_OFFICE_HELD_FOUND_BY_MAPLIGHT_ID "
             elif positive_value_exists(ocd_division_id) and (

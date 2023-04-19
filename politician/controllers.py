@@ -1372,6 +1372,7 @@ def politicians_import_from_structured_json(structured_json):  # politiciansSync
     politicians_updated = 0
     politicians_not_processed = 0
     status = ''
+    status_passed_through_count = 0
 
     importing_turned_off = False
     # We need to deal with merging incoming politicians with records created on the developer's machine
@@ -1488,8 +1489,10 @@ def politicians_import_from_structured_json(structured_json):  # politiciansSync
     ]
     character_null_false_fields = [
     ]
-    character_to_datetime_fields = [
+    character_to_date_fields = [
         'birth_date',
+    ]
+    character_to_datetime_fields = [
         'date_last_updated',
         'date_last_updated_from_candidate',
         'seo_friendly_path_date_last_updated',
@@ -1524,6 +1527,12 @@ def politicians_import_from_structured_json(structured_json):  # politiciansSync
             updated_politician_values[one_field] = one_politician[one_field] \
                 if one_field in one_politician \
                 else ''
+        for one_field in character_to_date_fields:
+            if one_field in one_politician and positive_value_exists(one_politician[one_field]):
+                date_field_trimmed = one_politician[one_field].replace(" 00:00:00", "")
+                updated_politician_values[one_field] = datetime.strptime(date_field_trimmed, '%Y-%m-%d').date()
+            else:
+                updated_politician_values[one_field] = None
         for one_field in character_to_datetime_fields:
             if one_field in one_politician and positive_value_exists(one_politician[one_field]):
                 updated_politician_values[one_field] = \
@@ -1595,6 +1604,9 @@ def politicians_import_from_structured_json(structured_json):  # politiciansSync
             #     politician.save()
         else:
             politicians_not_processed += 1
+            if status_passed_through_count < 10:
+                status += results['status']
+                status_passed_through_count += 1
 
         # if results['success']:
         #     if results['politician_created']:
