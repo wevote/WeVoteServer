@@ -2427,7 +2427,7 @@ class CandidateCampaign(models.Model):
     state_code = models.CharField(
         verbose_name="state this candidate serves", max_length=2, null=True, blank=True, db_index=True)
     date_last_updated = models.DateTimeField(null=True, auto_now=True)
-    # The URL for the candidate's campaign web site.
+    # The URL for the candidate's campaign website.
     candidate_url = models.URLField(
         verbose_name='website url of candidate', max_length=255, blank=True, null=True)
     candidate_contact_form_url = models.URLField(

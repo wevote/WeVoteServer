@@ -1148,7 +1148,7 @@ def candidate_new_search_process_view(request):
     candidate_twitter_handle = request.POST.get('candidate_twitter_handle', False)
     if positive_value_exists(candidate_twitter_handle):
         candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle)
-    candidate_url = request.POST.get('candidate_url', False)
+    candidate_url = request.POST.get('candidate_url', '')
     candidate_contact_form_url = request.POST.get('candidate_contact_form_url', False)
     facebook_url = request.POST.get('facebook_url', False)
     instagram_handle = request.POST.get('instagram_handle', False)
@@ -1157,7 +1157,7 @@ def candidate_new_search_process_view(request):
     candidate_email = request.POST.get('candidate_email', False)
     contest_office_id = request.POST.get('contest_office_id', False)
     politician_we_vote_id = request.POST.get('politician_we_vote_id', False)
-    state_code = request.POST.get('state_code', False)
+    state_code = request.POST.get('state_code', '')
     vote_usa_politician_id = request.POST.get('vote_usa_politician_id', False)
 
     # For starting "Create new candidate" process
@@ -1220,6 +1220,52 @@ def candidate_new_search_process_view(request):
                 politician_we_vote_id_list=politician_we_vote_id_list)
             if candidate_results['candidate_list_found']:
                 candidate_list = candidate_results['candidate_list']
+
+    # ##################################
+    # Find Candidates that *might* be "children" of this politician
+    candidate_we_vote_id_list = []
+    if positive_value_exists(politician_list) and len(politician_list) > 0:
+        from politician.controllers import find_candidates_to_link_to_this_politician
+        related_candidate_list = find_candidates_to_link_to_this_politician(politician=politician_list[0])
+        for candidate in candidate_list:
+            candidate_we_vote_id_list.append(candidate.we_vote_id)
+        for candidate in related_candidate_list:
+            if candidate.we_vote_id not in candidate_we_vote_id_list:
+                candidate_we_vote_id_list.append(candidate.we_vote_id)
+                candidate_list.append(candidate)
+
+    # Make sure candidate_list entries have office and election information
+    candidate_list_modified = []
+    for candidate in candidate_list:
+        retrieve_candidate_to_office_link = False
+        if not positive_value_exists(candidate.contest_office_we_vote_id):
+            retrieve_candidate_to_office_link = True
+        if not positive_value_exists(candidate.google_civic_election_id):
+            retrieve_candidate_to_office_link = True
+        if retrieve_candidate_to_office_link:
+            results = candidate_list_manager.retrieve_candidate_to_office_link_list(
+                    candidate_we_vote_id_list=[candidate.we_vote_id])
+            if results['candidate_to_office_link_list'] and len(results['candidate_to_office_link_list']) > 0:
+                candidate_to_office_link = results['candidate_to_office_link_list'][0]
+                if positive_value_exists(candidate_to_office_link.contest_office_we_vote_id) and \
+                        positive_value_exists(candidate_to_office_link.google_civic_election_id):
+                    candidate.contest_office_we_vote_id = candidate_to_office_link.contest_office_we_vote_id
+                    candidate.google_civic_election_id = candidate_to_office_link.google_civic_election_id
+        candidate_list_modified.append(candidate)
+
+    candidate_list = candidate_list_modified
+
+    def sort_by_election_year(candidate):
+        if candidate and hasattr(candidate, 'candidate_year'):
+            if candidate.candidate_year:
+                return convert_to_int(candidate.candidate_year)
+            else:
+                return 0
+        else:
+            return 0
+
+    if len(candidate_list) > 0:
+        candidate_list.sort(key=sort_by_election_year, reverse=True)
 
     # If ready to start full process
     ready = False
@@ -1683,7 +1729,8 @@ def candidate_edit_process_view(request):
 
     candidate_manager = CandidateManager()
     candidate_list_manager = CandidateListManager()
-    candidate_year = 0
+    candidate_ultimate_election_date = False
+    candidate_year = False
 
     status = ""
 
@@ -1828,14 +1875,64 @@ def candidate_edit_process_view(request):
     if not positive_value_exists(candidate_to_office_link_add_office_we_vote_id):
         candidate_to_office_link_add_office_we_vote_id = \
             request.GET.get('candidate_to_office_link_add_office_we_vote_id', False)
+    candidate_to_office_link_add_office_held_we_vote_id = \
+        request.POST.get('candidate_to_office_link_add_office_held_we_vote_id', False)
+    if not positive_value_exists(candidate_to_office_link_add_office_held_we_vote_id):
+        candidate_to_office_link_add_office_held_we_vote_id = \
+            request.GET.get('candidate_to_office_link_add_office_held_we_vote_id', False)
 
     if positive_value_exists(candidate_to_office_link_add_election) and \
             positive_value_exists(candidate_to_office_link_add_state_code) and \
-            positive_value_exists(candidate_to_office_link_add_office_we_vote_id):
+            (positive_value_exists(candidate_to_office_link_add_office_we_vote_id) or
+             positive_value_exists(candidate_to_office_link_add_office_held_we_vote_id)):
         candidate_to_office_link_add_election = candidate_to_office_link_add_election.strip()
-        candidate_to_office_link_add_office_we_vote_id = candidate_to_office_link_add_office_we_vote_id.strip()
-        candidate_to_office_link_add_state_code = candidate_to_office_link_add_state_code.strip()
-        if positive_value_exists(candidate_we_vote_id):
+        if positive_value_exists(candidate_to_office_link_add_office_we_vote_id):
+            candidate_to_office_link_add_office_we_vote_id = candidate_to_office_link_add_office_we_vote_id.strip()
+        if positive_value_exists(candidate_to_office_link_add_state_code):
+            candidate_to_office_link_add_state_code = candidate_to_office_link_add_state_code.strip()
+        if positive_value_exists(candidate_to_office_link_add_election) and \
+                positive_value_exists(candidate_to_office_link_add_office_held_we_vote_id):
+            # Does a ContestOffice for this upcoming election + OfficeHeld exist?
+            results = office_manager.retrieve_contest_office(
+                google_civic_election_id=candidate_to_office_link_add_election,
+                office_held_we_vote_id=candidate_to_office_link_add_office_held_we_vote_id)
+            if not results['success']:
+                messages.add_message(request, messages.ERROR,
+                                     'Cannot add Candidate-to-Office Link: office_we_vote_id missing.')
+            elif results['contest_office_found']:
+                contest_office = results['contest_office']
+                contest_office_id = contest_office.id
+                candidate_to_office_link_add_office_we_vote_id = contest_office.we_vote_id
+                if positive_value_exists(candidate_to_office_link_add_election):
+                    election_manager = ElectionManager()
+                    results = election_manager.retrieve_election(
+                        google_civic_election_id=candidate_to_office_link_add_election)
+                    if results['election_found']:
+                        election = results['election']
+                        if positive_value_exists(election.election_day_text):
+                            candidate_ultimate_election_date = \
+                                convert_we_vote_date_string_to_date_as_integer(election.election_day_text)
+                            year = election.election_day_text[:4]
+                            if year:
+                                candidate_year = convert_to_int(year)
+            else:
+                # If not, create a new ContestOffice for this election
+                from office.controllers import office_create_from_office_held
+                create_results = office_create_from_office_held(
+                    office_held_we_vote_id=candidate_to_office_link_add_office_held_we_vote_id,
+                    google_civic_election_id=candidate_to_office_link_add_election)
+                if create_results['success']:
+                    if create_results['election_year']:
+                        candidate_year = create_results['election_year']
+                    if positive_value_exists(create_results['office_we_vote_id']):
+                        candidate_to_office_link_add_office_we_vote_id = create_results['office_we_vote_id']
+                    if positive_value_exists(create_results['election_day_text']):
+                        candidate_ultimate_election_date = \
+                            convert_we_vote_date_string_to_date_as_integer(create_results['election_day_text'])
+        # ...and finally drop into the code below so a candidate_to_office_link is created
+        if positive_value_exists(candidate_we_vote_id) and \
+                positive_value_exists(candidate_to_office_link_add_office_we_vote_id) and \
+                positive_value_exists(candidate_to_office_link_add_election):
             results = candidate_manager.get_or_create_candidate_to_office_link(
                 candidate_we_vote_id=candidate_we_vote_id,
                 contest_office_we_vote_id=candidate_to_office_link_add_office_we_vote_id,
@@ -1849,8 +1946,8 @@ def candidate_edit_process_view(request):
             messages.add_message(request, messages.ERROR,
                                  'Cannot add Candidate-to-Office Link: candidate_we_vote_id missing.')
     elif positive_value_exists(candidate_to_office_link_add_election) or \
-            positive_value_exists(candidate_to_office_link_add_state_code) or \
-            positive_value_exists(candidate_to_office_link_add_office_we_vote_id):
+            positive_value_exists(candidate_to_office_link_add_office_we_vote_id) or \
+            positive_value_exists(candidate_to_office_link_add_office_held_we_vote_id):
         messages.add_message(request, messages.ERROR, 'To add Candidate-to-Office Link, all three variables required.')
 
     # ##################################
@@ -1997,78 +2094,6 @@ def candidate_edit_process_view(request):
             return HttpResponseRedirect(reverse('candidate:candidate_new', args=()) + url_variables)
         elif candidate_on_stage_found:
             # Update
-            if party is not False:
-                candidate_on_stage.party = party
-            if ballot_guide_official_statement is not False:
-                candidate_on_stage.ballot_guide_official_statement = ballot_guide_official_statement
-            if ballotpedia_candidate_id is not False:
-                candidate_on_stage.ballotpedia_candidate_id = convert_to_int(ballotpedia_candidate_id)
-            if ballotpedia_candidate_name is not False:
-                candidate_on_stage.ballotpedia_candidate_name = ballotpedia_candidate_name
-            if ballotpedia_candidate_url is not False:
-                candidate_on_stage.ballotpedia_candidate_url = ballotpedia_candidate_url
-            if ballotpedia_candidate_summary is not False:
-                candidate_on_stage.ballotpedia_candidate_summary = ballotpedia_candidate_summary
-            if ballotpedia_office_id is not False:
-                candidate_on_stage.ballotpedia_office_id = convert_to_int(ballotpedia_office_id)
-            if ballotpedia_person_id is not False:
-                candidate_on_stage.ballotpedia_person_id = convert_to_int(ballotpedia_person_id)
-            if ballotpedia_race_id is not False:
-                candidate_on_stage.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
-            if candidate_name is not False:
-                candidate_on_stage.candidate_name = candidate_name
-            if candidate_twitter_handle is not False:
-                candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
-            if candidate_twitter_handle2 is not False:
-                candidate_on_stage.candidate_twitter_handle2 = candidate_twitter_handle2
-            if candidate_twitter_handle3 is not False:
-                candidate_on_stage.candidate_twitter_handle3 = candidate_twitter_handle3
-            if candidate_url is not False:
-                candidate_on_stage.candidate_url = candidate_url
-            if candidate_contact_form_url is not False:
-                candidate_on_stage.candidate_contact_form_url = candidate_contact_form_url
-            if candidate_email is not False:
-                candidate_on_stage.candidate_email = candidate_email
-            if candidate_phone is not False:
-                candidate_on_stage.candidate_phone = candidate_phone
-            candidate_on_stage.do_not_display_on_ballot = do_not_display_on_ballot
-            if facebook_url is not False:
-                candidate_on_stage.facebook_url = facebook_url
-            if google_civic_candidate_name is not False:
-                candidate_on_stage.google_civic_candidate_name = google_civic_candidate_name
-            if google_civic_candidate_name2 is not False:
-                candidate_on_stage.google_civic_candidate_name2 = google_civic_candidate_name2
-            if google_civic_candidate_name3 is not False:
-                candidate_on_stage.google_civic_candidate_name3 = google_civic_candidate_name3
-            if instagram_handle is not False:
-                candidate_on_stage.instagram_handle = instagram_handle
-            candidate_on_stage.is_battleground_race = is_battleground_race
-            if linkedin_url is not False:
-                candidate_on_stage.linkedin_url = linkedin_url
-            if maplight_id is not False:
-                candidate_on_stage.maplight_id = maplight_id
-            if photo_url_from_vote_usa is not False:
-                candidate_on_stage.photo_url_from_vote_usa = photo_url_from_vote_usa
-            if state_code is not False:
-                candidate_on_stage.state_code = state_code
-            candidate_on_stage.twitter_handle_updates_failing = twitter_handle_updates_failing
-            candidate_on_stage.twitter_handle2_updates_failing = twitter_handle2_updates_failing
-            if twitter_url is not False:
-                candidate_on_stage.twitter_url = twitter_url
-            if vote_smart_id is not False:
-                candidate_on_stage.vote_smart_id = vote_smart_id
-            if vote_usa_politician_id is not False:
-                candidate_on_stage.vote_usa_politician_id = vote_usa_politician_id
-            if vote_usa_office_id is not False:
-                candidate_on_stage.vote_usa_office_id = vote_usa_office_id
-            if wikipedia_url is not False:
-                candidate_on_stage.wikipedia_url = wikipedia_url
-            candidate_on_stage.withdrawn_from_election = withdrawn_from_election
-            if withdrawn_from_election:
-                if positive_value_exists(withdrawal_date):
-                    candidate_on_stage.withdrawal_date = withdrawal_date
-                else:
-                    candidate_on_stage.withdrawal_date = None
 
             if google_search_image_file:
                 # If google search image exist then cache master and resized images and save them to candidate table
@@ -2090,6 +2115,123 @@ def candidate_edit_process_view(request):
             elif google_search_link:
                 # save google search link
                 save_google_search_link_to_candidate_table(candidate_on_stage, google_search_link)
+
+            messages.add_message(request, messages.INFO, 'CandidateCampaign updated.')
+        else:
+            # Create new
+            # election must be found
+            if not election_found or not positive_value_exists(contest_office_we_vote_id):
+                messages.add_message(request, messages.ERROR,
+                                     'Could not find election or office -- required to save candidate.')
+                url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
+                                "&state_code=" + str(state_code)
+                return HttpResponseRedirect(reverse('office:office_list', args=()) + url_variables)
+
+            required_candidate_variables = True \
+                if positive_value_exists(candidate_name) and positive_value_exists(contest_office_id) \
+                else False
+            if required_candidate_variables:
+                candidate_on_stage = CandidateCampaign(
+                    candidate_name=candidate_name,
+                    state_code=best_state_code,
+                )
+                candidate_on_stage_found = True
+            # else:
+            #     # messages.add_message(request, messages.INFO, 'Could not save -- missing required variables.')
+            #     if positive_value_exists(candidate_id):
+            #         return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) +
+            #                                     url_variables)
+            #     else:
+            #         return HttpResponseRedirect(reverse('candidate:candidate_new', args=()) +
+            #                                     url_variables)
+
+        if positive_value_exists(candidate_on_stage_found):
+            if ballot_guide_official_statement is not False:
+                candidate_on_stage.ballot_guide_official_statement = ballot_guide_official_statement
+            if ballotpedia_candidate_id is not False:
+                candidate_on_stage.ballotpedia_candidate_id = convert_to_int(ballotpedia_candidate_id)
+            if ballotpedia_candidate_name is not False:
+                candidate_on_stage.ballotpedia_candidate_name = ballotpedia_candidate_name
+            if ballotpedia_candidate_url is not False:
+                candidate_on_stage.ballotpedia_candidate_url = ballotpedia_candidate_url
+            if ballotpedia_candidate_summary is not False:
+                candidate_on_stage.ballotpedia_candidate_summary = ballotpedia_candidate_summary
+            if ballotpedia_office_id is not False:
+                candidate_on_stage.ballotpedia_office_id = convert_to_int(ballotpedia_office_id)
+            if ballotpedia_person_id is not False:
+                candidate_on_stage.ballotpedia_person_id = convert_to_int(ballotpedia_person_id)
+            if ballotpedia_race_id is not False:
+                candidate_on_stage.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
+            if candidate_contact_form_url is not False:
+                candidate_on_stage.candidate_contact_form_url = candidate_contact_form_url
+            if candidate_email is not False:
+                candidate_on_stage.candidate_email = candidate_email
+            if candidate_name is not False:
+                candidate_on_stage.candidate_name = candidate_name
+            if candidate_phone is not False:
+                candidate_on_stage.candidate_phone = candidate_phone
+            if candidate_twitter_handle is not False:
+                candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
+            if candidate_twitter_handle2 is not False:
+                candidate_on_stage.candidate_twitter_handle2 = candidate_twitter_handle2
+            if candidate_twitter_handle3 is not False:
+                candidate_on_stage.candidate_twitter_handle3 = candidate_twitter_handle3
+            if candidate_url is not False:
+                candidate_on_stage.candidate_url = candidate_url
+            if candidate_year is not False:
+                candidate_on_stage.candidate_year = candidate_year
+            if candidate_ultimate_election_date is not False:
+                if positive_value_exists(candidate_on_stage.candidate_ultimate_election_date):
+                    if positive_value_exists(candidate_ultimate_election_date):
+                        if candidate_ultimate_election_date > candidate_on_stage.candidate_ultimate_election_date:
+                            candidate_on_stage.candidate_ultimate_election_date = candidate_ultimate_election_date
+                    # Turn this on if we want to be able to wipe out candidate_on_stage.candidate_ultimate_election_date
+                    # else:
+                    #     candidate_on_stage.candidate_ultimate_election_date = candidate_ultimate_election_date
+                else:
+                    candidate_on_stage.candidate_ultimate_election_date = candidate_ultimate_election_date
+            candidate_on_stage.do_not_display_on_ballot = do_not_display_on_ballot
+            if facebook_url is not False:
+                candidate_on_stage.facebook_url = facebook_url
+            if google_civic_candidate_name is not False:
+                candidate_on_stage.google_civic_candidate_name = google_civic_candidate_name
+            if google_civic_candidate_name2 is not False:
+                candidate_on_stage.google_civic_candidate_name2 = google_civic_candidate_name2
+            if google_civic_candidate_name3 is not False:
+                candidate_on_stage.google_civic_candidate_name3 = google_civic_candidate_name3
+            if instagram_handle is not False:
+                candidate_on_stage.instagram_handle = instagram_handle
+            candidate_on_stage.is_battleground_race = is_battleground_race
+            if linkedin_url is not False:
+                candidate_on_stage.linkedin_url = linkedin_url
+            if maplight_id is not False:
+                candidate_on_stage.maplight_id = maplight_id
+            if party is not False:
+                candidate_on_stage.party = party
+            if photo_url_from_vote_usa is not False:
+                candidate_on_stage.photo_url_from_vote_usa = photo_url_from_vote_usa
+            if politician_we_vote_id is not False:
+                candidate_on_stage.politician_we_vote_id = politician_we_vote_id
+            if state_code is not False:
+                candidate_on_stage.state_code = state_code
+            if twitter_url is not False:
+                candidate_on_stage.twitter_url = twitter_url
+            candidate_on_stage.twitter_handle_updates_failing = twitter_handle_updates_failing
+            candidate_on_stage.twitter_handle2_updates_failing = twitter_handle2_updates_failing
+            if vote_smart_id is not False:
+                candidate_on_stage.vote_smart_id = vote_smart_id
+            if vote_usa_politician_id is not False:
+                candidate_on_stage.vote_usa_politician_id = vote_usa_politician_id
+            if vote_usa_office_id is not False:
+                candidate_on_stage.vote_usa_office_id = vote_usa_office_id
+            if wikipedia_url is not False:
+                candidate_on_stage.wikipedia_url = wikipedia_url
+            if withdrawn_from_election:
+                candidate_on_stage.withdrawn_from_election = withdrawn_from_election
+                if positive_value_exists(withdrawal_date):
+                    candidate_on_stage.withdrawal_date = withdrawal_date
+                else:
+                    candidate_on_stage.withdrawal_date = None
 
             if profile_image_type_currently_active is not False:
                 if profile_image_type_currently_active in [
@@ -2126,122 +2268,20 @@ def candidate_edit_process_view(request):
                             candidate_on_stage.we_vote_hosted_profile_vote_usa_image_url_tiny
 
             candidate_on_stage.save()
+            candidate_id = candidate_on_stage.id
             candidate_we_vote_id = candidate_on_stage.we_vote_id
-
             ballotpedia_image_id = candidate_on_stage.ballotpedia_image_id
             ballotpedia_profile_image_url_https = candidate_on_stage.ballotpedia_profile_image_url_https
-            # Now refresh the cache entries for this candidate
+            messages.add_message(request, messages.INFO, 'New candidate saved.')
 
-            messages.add_message(request, messages.INFO, 'CandidateCampaign updated.')
-        else:
-            # Create new
-            # election must be found
-            if not election_found or not positive_value_exists(contest_office_we_vote_id):
-                messages.add_message(request, messages.ERROR,
-                                     'Could not find election or office -- required to save candidate.')
-                url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
-                                "&state_code=" + str(state_code)
-                return HttpResponseRedirect(reverse('office:office_list', args=()) + url_variables)
-
-            required_candidate_variables = True \
-                if positive_value_exists(candidate_name) and positive_value_exists(contest_office_id) \
-                else False
-            if required_candidate_variables:
-                candidate_on_stage = CandidateCampaign(
-                    candidate_name=candidate_name,
-                    state_code=best_state_code,
-                )
-                candidate_on_stage_found = True
-                if ballot_guide_official_statement is not False:
-                    candidate_on_stage.ballot_guide_official_statement = ballot_guide_official_statement
-                if ballotpedia_candidate_id is not False:
-                    candidate_on_stage.ballotpedia_candidate_id = convert_to_int(ballotpedia_candidate_id)
-                if ballotpedia_candidate_name is not False:
-                    candidate_on_stage.ballotpedia_candidate_name = ballotpedia_candidate_name
-                if ballotpedia_candidate_url is not False:
-                    candidate_on_stage.ballotpedia_candidate_url = ballotpedia_candidate_url
-                if ballotpedia_candidate_summary is not False:
-                    candidate_on_stage.ballotpedia_candidate_summary = ballotpedia_candidate_summary
-                if ballotpedia_office_id is not False:
-                    candidate_on_stage.ballotpedia_office_id = convert_to_int(ballotpedia_office_id)
-                if ballotpedia_person_id is not False:
-                    candidate_on_stage.ballotpedia_person_id = convert_to_int(ballotpedia_person_id)
-                if ballotpedia_race_id is not False:
-                    candidate_on_stage.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
-                if candidate_email is not False:
-                    candidate_on_stage.candidate_email = candidate_email
-                if candidate_phone is not False:
-                    candidate_on_stage.candidate_phone = candidate_phone
-                if candidate_twitter_handle is not False:
-                    candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
-                if candidate_twitter_handle2 is not False:
-                    candidate_on_stage.candidate_twitter_handle2 = candidate_twitter_handle2
-                if candidate_twitter_handle3 is not False:
-                    candidate_on_stage.candidate_twitter_handle3 = candidate_twitter_handle3
-                if candidate_url is not False:
-                    candidate_on_stage.candidate_url = candidate_url
-                if candidate_contact_form_url is not False:
-                    candidate_on_stage.candidate_contact_form_url = candidate_contact_form_url
-                if do_not_display_on_ballot:
-                    candidate_on_stage.do_not_display_on_ballot = do_not_display_on_ballot
-                if facebook_url is not False:
-                    candidate_on_stage.facebook_url = facebook_url
-                if google_civic_candidate_name is not False:
-                    candidate_on_stage.google_civic_candidate_name = google_civic_candidate_name
-                if google_civic_candidate_name2 is not False:
-                    candidate_on_stage.google_civic_candidate_name2 = google_civic_candidate_name2
-                if google_civic_candidate_name3 is not False:
-                    candidate_on_stage.google_civic_candidate_name3 = google_civic_candidate_name3
-                if instagram_handle is not False:
-                    candidate_on_stage.instagram_handle = instagram_handle
-                candidate_on_stage.is_battleground_race = is_battleground_race
-                if linkedin_url is not False:
-                    candidate_on_stage.linkedin_url = linkedin_url
-                if maplight_id is not False:
-                    candidate_on_stage.maplight_id = maplight_id
-                if party is not False:
-                    candidate_on_stage.party = party
-                if photo_url_from_vote_usa is not False:
-                    candidate_on_stage.photo_url_from_vote_usa = photo_url_from_vote_usa
-                if politician_we_vote_id is not False:
-                    candidate_on_stage.politician_we_vote_id = politician_we_vote_id
-                if twitter_url is not False:
-                    candidate_on_stage.twitter_url = twitter_url
-                candidate_on_stage.twitter_handle_updates_failing = twitter_handle_updates_failing
-                candidate_on_stage.twitter_handle2_updates_failing = twitter_handle2_updates_failing
-                if vote_smart_id is not False:
-                    candidate_on_stage.vote_smart_id = vote_smart_id
-                if vote_usa_politician_id is not False:
-                    candidate_on_stage.vote_usa_politician_id = vote_usa_politician_id
-                if vote_usa_office_id is not False:
-                    candidate_on_stage.vote_usa_office_id = vote_usa_office_id
-                if wikipedia_url is not False:
-                    candidate_on_stage.wikipedia_url = wikipedia_url
-                if withdrawn_from_election:
-                    candidate_on_stage.withdrawn_from_election = withdrawn_from_election
-                    candidate_on_stage.withdrawal_date = withdrawal_date
-
-                candidate_on_stage.save()
-                candidate_id = candidate_on_stage.id
-                candidate_we_vote_id = candidate_on_stage.we_vote_id
-                ballotpedia_image_id = candidate_on_stage.ballotpedia_image_id
-                ballotpedia_profile_image_url_https = candidate_on_stage.ballotpedia_profile_image_url_https
-                messages.add_message(request, messages.INFO, 'New candidate saved.')
-
-                # Now add Candidate to Office Link
-                candidate_manager.get_or_create_candidate_to_office_link(
-                    candidate_we_vote_id=candidate_we_vote_id,
-                    contest_office_we_vote_id=contest_office_we_vote_id,
-                    google_civic_election_id=google_civic_election_id,
-                    state_code=best_state_code)
-            else:
-                # messages.add_message(request, messages.INFO, 'Could not save -- missing required variables.')
-                if positive_value_exists(candidate_id):
-                    return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) +
-                                                url_variables)
-                else:
-                    return HttpResponseRedirect(reverse('candidate:candidate_new', args=()) +
-                                                url_variables)
+            # # Now add Candidate to Office Link
+            # if positive_value_exists(candidate_we_vote_id) and positive_value_exists(contest_office_we_vote_id) and \
+            #         positive_value_exists(google_civic_election_id):
+            #     candidate_manager.get_or_create_candidate_to_office_link(
+            #         candidate_we_vote_id=candidate_we_vote_id,
+            #         contest_office_we_vote_id=contest_office_we_vote_id,
+            #         google_civic_election_id=google_civic_election_id,
+            #         state_code=best_state_code)
 
     except Exception as e:
         print('Could not save candidate (2).', e)

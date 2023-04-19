@@ -1864,17 +1864,27 @@ def candidate_create_from_politician(politician_we_vote_id=''):
     try:
         new_candidate_created = False
         candidate = CandidateCampaign.objects.create(
+            ballotpedia_candidate_url=politician.ballotpedia_politician_url,
+            candidate_contact_form_url=politician.politician_contact_form_url,
             candidate_name=politician.politician_name,
-            politician_we_vote_id=politician.we_vote_id,
-            state_code=politician.state_code,
-            party=politician.political_party,
             candidate_gender=politician.gender,
             candidate_twitter_handle=politician.politician_twitter_handle,
             candidate_twitter_handle2=politician.politician_twitter_handle2,
             candidate_twitter_handle3=politician.politician_twitter_handle3,
+            instagram_followers_count=politician.instagram_followers_count,
+            instagram_handle=politician.instagram_handle,
+            linkedin_url=politician.linkedin_url,
+            google_civic_candidate_name=politician.google_civic_candidate_name,
+            google_civic_candidate_name2=politician.google_civic_candidate_name2,
+            google_civic_candidate_name3=politician.google_civic_candidate_name3,
+            party=politician.political_party,
+            politician_we_vote_id=politician.we_vote_id,
             profile_image_type_currently_active=politician.profile_image_type_currently_active,
+            seo_friendly_path=politician.seo_friendly_path,
+            state_code=politician.state_code,
             twitter_description=politician.twitter_description,
             twitter_followers_count=politician.twitter_followers_count,
+            vote_usa_politician_id=politician.vote_usa_politician_id,
             we_vote_hosted_profile_facebook_image_url_large=politician.we_vote_hosted_profile_facebook_image_url_large,
             we_vote_hosted_profile_facebook_image_url_medium=politician.we_vote_hosted_profile_facebook_image_url_medium,
             we_vote_hosted_profile_facebook_image_url_tiny=politician.we_vote_hosted_profile_facebook_image_url_tiny,
@@ -1890,10 +1900,68 @@ def candidate_create_from_politician(politician_we_vote_id=''):
             we_vote_hosted_profile_image_url_large=politician.we_vote_hosted_profile_image_url_large,
             we_vote_hosted_profile_image_url_medium=politician.we_vote_hosted_profile_image_url_medium,
             we_vote_hosted_profile_image_url_tiny=politician.we_vote_hosted_profile_image_url_tiny,
+            wikipedia_url=politician.wikipedia_url,
         )
         candidate_found = True
         if positive_value_exists(candidate.id):
-
+            # Facebook
+            if positive_value_exists(politician.facebook_url) and not politician.facebook_url_is_broken:
+                candidate.facebook_url = politician.facebook_url
+            elif positive_value_exists(politician.facebook_url2) and not politician.facebook_url2_is_broken:
+                candidate.facebook_url = politician.facebook_url2
+            elif positive_value_exists(politician.facebook_url3) and not politician.facebook_url3_is_broken:
+                candidate.facebook_url = politician.facebook_url3
+            # Email
+            if positive_value_exists(politician.politician_email):
+                candidate.candidate_email = politician.politician_email
+            elif positive_value_exists(politician.politician_email2):
+                candidate.candidate_email = politician.politician_email2
+            elif positive_value_exists(politician.politician_email3):
+                candidate.candidate_email = politician.politician_email3
+            # Phone
+            if positive_value_exists(politician.politician_phone_number):
+                candidate.candidate_phone = politician.politician_phone_number
+            elif positive_value_exists(politician.politician_phone_number2):
+                candidate.candidate_phone = politician.politician_phone_number2
+            elif positive_value_exists(politician.politician_phone_number3):
+                candidate.candidate_phone = politician.politician_phone_number3
+            # Twitter Handle
+            if positive_value_exists(politician.politician_twitter_handle):
+                results = add_twitter_handle_to_next_candidate_spot(
+                    candidate, politician.politician_twitter_handle)
+                if results['success'] and results['values_changed']:
+                    candidate = results['candidate']
+            if positive_value_exists(politician.politician_twitter_handle2):
+                results = add_twitter_handle_to_next_candidate_spot(
+                    candidate, politician.politician_twitter_handle2)
+                if results['success'] and results['values_changed']:
+                    candidate = results['candidate']
+            if positive_value_exists(politician.politician_twitter_handle3):
+                results = add_twitter_handle_to_next_candidate_spot(
+                    candidate, politician.politician_twitter_handle3)
+                if results['success'] and results['values_changed']:
+                    candidate = results['candidate']
+            if positive_value_exists(politician.politician_twitter_handle4):
+                results = add_twitter_handle_to_next_candidate_spot(
+                    candidate, politician.politician_twitter_handle4)
+                if results['success'] and results['values_changed']:
+                    candidate = results['candidate']
+            if positive_value_exists(politician.politician_twitter_handle5):
+                results = add_twitter_handle_to_next_candidate_spot(
+                    candidate, politician.politician_twitter_handle5)
+                if results['success'] and results['values_changed']:
+                    candidate = results['candidate']
+            # URL
+            if positive_value_exists(politician.politician_url):
+                candidate.candidate_url = politician.politician_url
+            elif positive_value_exists(politician.politician_url2):
+                candidate.candidate_url = politician.politician_url2
+            elif positive_value_exists(politician.politician_url3):
+                candidate.candidate_url = politician.politician_url3
+            elif positive_value_exists(politician.politician_url4):
+                candidate.candidate_url = politician.politician_url4
+            elif positive_value_exists(politician.politician_url5):
+                candidate.candidate_url = politician.politician_url5
             candidate.save()
             new_candidate_created = True
         if new_candidate_created:
