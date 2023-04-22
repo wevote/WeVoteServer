@@ -575,6 +575,8 @@ def offices_import_from_structured_json(structured_json):
                 if 'district_scope' in one_office else ''
             updated_contest_office_values['electorate_specifications'] = one_office['electorate_specifications'] \
                 if 'electorate_specifications' in one_office else ''
+            updated_contest_office_values['facebook_url_is_broken'] = one_office['facebook_url_is_broken'] \
+                if 'facebook_url_is_broken' in one_office else ''
             updated_contest_office_values['google_ballot_placement'] = one_office['google_ballot_placement'] \
                 if 'google_ballot_placement' in one_office else ''
             updated_contest_office_values['google_civic_election_id'] = one_office['google_civic_election_id'] \
@@ -593,12 +595,12 @@ def offices_import_from_structured_json(structured_json):
                 one_office['is_ballotpedia_general_election'] if 'is_ballotpedia_general_election' in one_office else ''
             updated_contest_office_values['is_ballotpedia_general_runoff_election'] = \
                 one_office['is_ballotpedia_general_runoff_election'] \
-                    if 'is_ballotpedia_general_runoff_election' in one_office else ''
+                if 'is_ballotpedia_general_runoff_election' in one_office else ''
             updated_contest_office_values['is_ballotpedia_primary_election'] = \
                 one_office['is_ballotpedia_primary_election'] if 'is_ballotpedia_primary_election' in one_office else ''
             updated_contest_office_values['is_ballotpedia_primary_runoff_election'] = \
                 one_office['is_ballotpedia_primary_runoff_election'] \
-                    if 'is_ballotpedia_primary_runoff_election' in one_office else ''
+                if 'is_ballotpedia_primary_runoff_election' in one_office else ''
             updated_contest_office_values['is_battleground_race'] = one_office['is_battleground_race'] \
                 if 'is_battleground_race' in one_office else ''
             updated_contest_office_values['maplight_id'] = one_office['maplight_id'] \
@@ -609,8 +611,22 @@ def offices_import_from_structured_json(structured_json):
                 if 'number_voting_for' in one_office else ''
             updated_contest_office_values['ocd_division_id'] = one_office['ocd_division_id'] \
                 if 'ocd_division_id' in one_office else ''
+            updated_contest_office_values['office_facebook_url'] = one_office['office_facebook_url'] \
+                if 'office_facebook_url' in one_office else ''
+            updated_contest_office_values['office_held_description'] = one_office['office_held_description'] \
+                if 'office_held_description' in one_office else ''
+            updated_contest_office_values['office_held_description_es'] = one_office['office_held_description_es'] \
+                if 'office_held_description_es' in one_office else ''
+            updated_contest_office_values['office_held_name'] = one_office['office_held_name'] \
+                if 'office_held_name' in one_office else ''
+            updated_contest_office_values['office_held_we_vote_id'] = one_office['office_held_we_vote_id'] \
+                if 'office_held_we_vote_id' in one_office else ''
             updated_contest_office_values['office_name'] = one_office['office_name'] \
                 if 'office_name' in one_office else ''
+            updated_contest_office_values['office_twitter_handle'] = one_office['office_twitter_handle'] \
+                if 'office_twitter_handle' in one_office else ''
+            updated_contest_office_values['office_url'] = one_office['office_url'] \
+                if 'office_url' in one_office else ''
             updated_contest_office_values['primary_party'] = one_office['primary_party'] \
                 if 'primary_party' in one_office else ''
             updated_contest_office_values['special'] = one_office['special'] if 'special' in one_office else ''
