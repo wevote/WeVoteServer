@@ -173,6 +173,9 @@
             <td>
                 {{ office.we_vote_id }}
                 <a href="{% url 'office:office_edit' office.id %}" target="_blank">edit&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+                {% if office.office_held_we_vote_id %}
+                    <br /><span style="color: darkgray">{{ office.office_held_we_vote_id|default_if_none:"" }}</span>
+                {% endif %}
             </td>
             <td>
                 <a href="{% url 'office:office_summary' office.id %}">{{ office.office_name }}</a>

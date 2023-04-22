@@ -62,7 +62,13 @@
                 {{ forloop.counter }}
             </td>
             <td>
-                {{ offices_held_for_location.polling_location_we_vote_id|default_if_none:"" }}
+            {% if offices_held_for_location.polling_location_we_vote_id %}
+                <a href="{% url 'polling_location:polling_location_summary_by_we_vote_id' offices_held_for_location.polling_location_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   class="u-no-break"
+                   target="_blank">
+                {{ offices_held_for_location.polling_location_we_vote_id|default_if_none:"" }} <span class="glyphicon glyphicon-new-window"></span>
+                </a>
+            {% endif %}
                 {{ offices_held_for_location.voter_we_vote_id|default_if_none:"" }}<br />
                 {{ offices_held_for_location.state_code|default_if_none:"" }}
             </td>

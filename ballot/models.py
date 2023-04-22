@@ -4397,7 +4397,7 @@ def find_best_previously_stored_ballot_returned(
     #         }
     #         return error_results
 
-    # VoterBallotSaved is updated outside of this function
+    # VoterBallotSaved is updated, outside this function
 
     if closest_ballot_returned:
         results = {
