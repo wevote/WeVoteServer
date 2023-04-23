@@ -1307,7 +1307,7 @@ def retrieve_google_civic_representatives_from_polling_location_api(
                 # create/update an OfficesHeldForLocation entry
                 if office_held_dict_list_for_location and len(office_held_dict_list_for_location) > 0:
                     office_held_manager = OfficeHeldManager()
-                    results = office_held_manager.retrieve_latest_offices_held_for_location(
+                    results = office_held_manager.retrieve_offices_held_for_location(
                         polling_location_we_vote_id=polling_location_we_vote_id,
                     )
                     if results['success']:
@@ -1344,7 +1344,7 @@ def retrieve_google_civic_representatives_from_polling_location_api(
                                 status += "COULD_NOT_CREATE_DEFAULT_VALUES_FOR_OFFICES_HELD_FOR_LOCATION "
                     else:
                         status += results['status']
-                        status += "FAILED-retrieve_latest_offices_held_for_location "
+                        status += "FAILED-retrieve_offices_held_for_location "
                     # Store that we have reviewed this polling_location, so we don't retrieve it again in the next chunk
                     results = polling_location_manager.create_polling_location_log_entry(
                         batch_process_id=batch_process_id,

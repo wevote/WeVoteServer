@@ -51,11 +51,6 @@ def office_held_list_view(request):
     office_held_list_count = 0
     try:
         office_held_queryset = OfficeHeld.objects.all()
-        if positive_value_exists(google_civic_election_id):
-            office_held_queryset = office_held_queryset.filter(google_civic_election_id=google_civic_election_id)
-        else:
-            # TODO Limit this search to upcoming_elections only
-            pass
         if positive_value_exists(show_battleground):
             year_filters = []
             for year_integer in IS_BATTLEGROUND_YEARS_AVAILABLE:
@@ -581,13 +576,71 @@ def offices_held_for_location_list_view(request):
     show_battleground = positive_value_exists(request.GET.get('show_battleground', False))
     show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
     location_search = request.GET.get('location_search', '')
+    status = ""
+
+    copy_polling_location_lat_long_to_offices_held_for_location = True
+    total_to_convert_after = 0
+    if copy_polling_location_lat_long_to_offices_held_for_location:
+        location_list = []
+        number_to_update = 10000
+        polling_location_we_vote_id_list = []
+        try:
+            queryset = OfficesHeldForLocation.objects.all()
+            queryset = queryset.filter(latitude__isnull=True)
+            if positive_value_exists(state_code):
+                queryset = queryset.filter(state_code__iexact=state_code)
+            total_to_convert = queryset.count()
+            total_to_convert_after = total_to_convert - number_to_update if total_to_convert > number_to_update else 0
+            # Pull all OfficesHeldForLocation objects into a list we can update below
+            location_list = list(queryset[:number_to_update])
+            for one_location in location_list:
+                if one_location.polling_location_we_vote_id not in polling_location_we_vote_id_list:
+                    polling_location_we_vote_id_list.append(one_location.polling_location_we_vote_id)
+        except Exception as e:
+            status += 'FAILED copy_polling_location_lat_long_to_offices_held_for_location ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            messages.add_message(request, messages.ERROR, status)
+
+        # Get all polling locations for the OfficesHeldForLocation objects we want to update
+        polling_location_dict = {}
+        try:
+            from polling_location.models import PollingLocation
+            queryset = PollingLocation.objects.using('readonly').all()
+            queryset = queryset.filter(we_vote_id__in=polling_location_we_vote_id_list)
+            polling_location_list = list(queryset)
+
+            for one_polling_location in polling_location_list:
+                polling_location_dict[one_polling_location.we_vote_id] = one_polling_location
+        except Exception as e:
+            status += 'FAILED_POLLING_LOCATION_RETRIEVE ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            messages.add_message(request, messages.ERROR, status)
+
+        # Now loop through the OfficesHeldForLocation objects and update lat/long to match the polling location
+        number_of_locations_updated = 0
+        for one_location in location_list:
+            if one_location.polling_location_we_vote_id in polling_location_dict:
+                one_location.latitude = polling_location_dict[one_location.polling_location_we_vote_id].latitude
+                one_location.longitude = polling_location_dict[one_location.polling_location_we_vote_id].longitude
+                one_location.save()
+                number_of_locations_updated += 1
+            else:
+                pass
+
+        if number_of_locations_updated > 0:
+            messages.add_message(request, messages.INFO,
+                                 "{number_of_locations_updated:,} OfficesHeldForLocation entries updated. "
+                                 "{total_to_convert_after:,} left to update."
+                                 "".format(
+                                     total_to_convert_after=total_to_convert_after,
+                                     number_of_locations_updated=number_of_locations_updated))
 
     location_list_found = False
     location_list = []
     updated_location_list = []
     location_list_count = 0
     try:
-        queryset = OfficesHeldForLocation.objects.all()
+        queryset = OfficesHeldForLocation.objects.using('readonly').all()
         if positive_value_exists(state_code):
             queryset = queryset.filter(state_code__iexact=state_code)
 
