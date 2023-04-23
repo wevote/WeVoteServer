@@ -658,7 +658,7 @@ def shared_item_retrieve_for_api(  # sharedItemRetrieve
             count_only=True)
         status += results['status']
         if results['position_count'] < BALLOT_SHARED_ITEM_CUTOFF:
-            from ballot.ballot_shared_controllers import shared_item_ballot_retrieve_for_api
+            from ballot.controllers_ballot_shared import shared_item_ballot_retrieve_for_api
             ballot_results = shared_item_ballot_retrieve_for_api(  # sharedItemBallotRetrieve
                 shared_by_voter_we_vote_id=shared_item.shared_by_voter_we_vote_id)
             ballot_item_list = ballot_results['ballot_item_list']

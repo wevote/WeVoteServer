@@ -1,4 +1,4 @@
-# ballot/ballot_shared_controllers.py
+# ballot/controllers_ballot_shared.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
