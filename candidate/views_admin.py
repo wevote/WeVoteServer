@@ -2128,7 +2128,7 @@ def candidate_edit_process_view(request):
                 return HttpResponseRedirect(reverse('office:office_list', args=()) + url_variables)
 
             required_candidate_variables = True \
-                if positive_value_exists(candidate_name) and positive_value_exists(contest_office_id) \
+                if positive_value_exists(candidate_name) and positive_value_exists(best_state_code) \
                 else False
             if required_candidate_variables:
                 candidate_on_stage = CandidateCampaign(
@@ -2292,13 +2292,21 @@ def candidate_edit_process_view(request):
     # if positive_value_exists(ballotpedia_image_id) and not positive_value_exists(ballotpedia_profile_image_url_https):
     #     results = retrieve_and_save_ballotpedia_candidate_images(candidate_on_stage)
 
+    retrieve_candidate_from_database = False
     if positive_value_exists(refresh_from_twitter):
         results = refresh_twitter_candidate_details(candidate_on_stage)
+        retrieve_candidate_from_database = True
     # elif profile_image_type_currently_active == 'UNKNOWN':
     #     # Prevent Twitter from updating
     #     pass
     elif positive_value_exists(candidate_twitter_handle):
         results = refresh_twitter_candidate_details(candidate_on_stage)
+        retrieve_candidate_from_database = True
+
+    if retrieve_candidate_from_database:
+        # Because we updated the candidate, through the refresh_twitter_candidate_details process,
+        #  we want to retrieve the latest from database because we need to save the candidate below.
+        candidate_on_stage = CandidateCampaign.objects.get(id=candidate_id)
 
     # Make sure 'which_marking' is one of the allowed Filter fields
     if positive_value_exists(which_marking) \
