@@ -3463,6 +3463,7 @@ def cache_master_and_resized_image(
     # print('---------------- cache_master_and_resized_image ------------------')
     time0 = log_and_time_cache_action(True, 0, 'cache_master_and_resized_image')
     status = ''
+    success = True
     cached_ballotpedia_image_url_https = None
     cached_ctcl_profile_image_url_https = None
     cached_facebook_profile_image_url_https = None
@@ -3522,6 +3523,7 @@ def cache_master_and_resized_image(
         status += "ERROR_IN-cache_master_images: " + str(e) + " "
         print(" ------- --------- ERROR_IN-cache_master_images: " + str(e))
         cache_master_images_results['cached_ballotpedia_image'] = False
+        success = False
 
     if cache_master_images_results['cached_ballotpedia_image'] is True or \
             cache_master_images_results['cached_ballotpedia_image'] == IMAGE_ALREADY_CACHED:
@@ -3539,6 +3541,7 @@ def cache_master_and_resized_image(
             we_vote_hosted_profile_image_url_tiny = create_resized_image_results['cached_resized_image_url_tiny']
         except Exception as e:
             status += "ERROR_IN_BALLOTPEDIA-create_resized_images: " + str(e) + " "
+            success = False
 
     if cache_master_images_results['cached_ctcl_profile_image'] is True or \
             cache_master_images_results['cached_ctcl_profile_image'] == IMAGE_ALREADY_CACHED:
@@ -3556,6 +3559,7 @@ def cache_master_and_resized_image(
             we_vote_hosted_profile_image_url_tiny = create_resized_image_results['cached_resized_image_url_tiny']
         except Exception as e:
             status += "ERROR_IN_CTCL-create_resized_images: " + str(e) + " "
+            success = False
 
     if cache_master_images_results['cached_facebook_profile_image'] is True or \
             cache_master_images_results['cached_facebook_profile_image'] == IMAGE_ALREADY_CACHED:
@@ -3577,6 +3581,7 @@ def cache_master_and_resized_image(
             we_vote_hosted_profile_image_url_tiny = create_resized_image_results['cached_resized_image_url_tiny']
         except Exception as e:
             status += "ERROR_IN_FACEBOOK_PROFILE-create_resized_images: " + str(e) + " "
+            success = False
 
     if cache_master_images_results['cached_facebook_background_image'] is True or \
             cache_master_images_results['cached_facebook_background_image'] == IMAGE_ALREADY_CACHED:
@@ -3592,6 +3597,7 @@ def cache_master_and_resized_image(
             cached_facebook_background_image_url_large = create_resized_image_results['cached_resized_image_url_large']
         except Exception as e:
             status += "ERROR_IN_FACEBOOK_BACKGROUND-create_resized_images: " + str(e) + " "
+            success = False
 
     if cache_master_images_results['cached_linkedin_image'] is True or \
             cache_master_images_results['cached_linkedin_image'] == IMAGE_ALREADY_CACHED:
@@ -3609,6 +3615,7 @@ def cache_master_and_resized_image(
             we_vote_hosted_profile_image_url_tiny = create_resized_image_results['cached_resized_image_url_tiny']
         except Exception as e:
             status += "ERROR_IN_LINKEDIN-create_resized_images: " + str(e) + " "
+            success = False
 
     if cache_master_images_results['cached_maplight_image'] is True or \
             cache_master_images_results['cached_maplight_image'] == IMAGE_ALREADY_CACHED:
@@ -3626,6 +3633,7 @@ def cache_master_and_resized_image(
             we_vote_hosted_profile_image_url_tiny = create_resized_image_results['cached_resized_image_url_tiny']
         except Exception as e:
             status += "ERROR_IN_MAPLIGHT-create_resized_images: " + str(e) + " "
+            success = False
 
     if cache_master_images_results['cached_other_source_image'] is True or \
             cache_master_images_results['cached_other_source_image'] == IMAGE_ALREADY_CACHED:
@@ -3643,6 +3651,7 @@ def cache_master_and_resized_image(
             we_vote_hosted_profile_image_url_tiny = create_resized_image_results['cached_resized_image_url_tiny']
         except Exception as e:
             status += "ERROR_IN_OTHER-create_resized_images: " + str(e) + " "
+            success = False
 
     if cache_master_images_results['cached_twitter_background_image'] is True or \
             cache_master_images_results['cached_twitter_background_image'] == IMAGE_ALREADY_CACHED:
@@ -3659,6 +3668,7 @@ def cache_master_and_resized_image(
                 create_resized_image_results['cached_resized_image_url_large']
         except Exception as e:
             status += "ERROR_IN_TWITTER_BACKGROUND-create_resized_images: " + str(e) + " "
+            success = False
 
     if cache_master_images_results['cached_twitter_banner_image'] is True or \
             cache_master_images_results['cached_twitter_banner_image'] == IMAGE_ALREADY_CACHED:
@@ -3674,6 +3684,7 @@ def cache_master_and_resized_image(
             cached_twitter_profile_banner_url_large = create_resized_image_results['cached_resized_image_url_large']
         except Exception as e:
             status += "ERROR_IN_TWITTER_BANNER-create_resized_images: " + str(e) + " "
+            success = False
 
     # If cached master image or image is already cached then create all resized images for master image
     if cache_master_images_results['cached_twitter_profile_image'] is True or \
@@ -3692,6 +3703,7 @@ def cache_master_and_resized_image(
             we_vote_hosted_profile_image_url_tiny = create_resized_image_results['cached_resized_image_url_tiny']
         except Exception as e:
             status += "ERROR_IN_TWITTER_PROFILE-create_resized_images: " + str(e) + " "
+            success = False
 
     if cache_master_images_results['cached_vote_smart_image'] is True or \
             cache_master_images_results['cached_vote_smart_image'] == IMAGE_ALREADY_CACHED:
@@ -3709,6 +3721,7 @@ def cache_master_and_resized_image(
             we_vote_hosted_profile_image_url_tiny = create_resized_image_results['cached_resized_image_url_tiny']
         except Exception as e:
             status += "ERROR_IN_VOTE_SMART-create_resized_images: " + str(e) + " "
+            success = False
 
     if cache_master_images_results['cached_vote_usa_profile_image'] is True or \
             cache_master_images_results['cached_vote_usa_profile_image'] == IMAGE_ALREADY_CACHED:
@@ -3726,6 +3739,7 @@ def cache_master_and_resized_image(
             we_vote_hosted_profile_image_url_tiny = create_resized_image_results['cached_resized_image_url_tiny']
         except Exception as e:
             status += "ERROR_IN_VOTE_USA-create_resized_images: " + str(e) + " "
+            success = False
 
     if cache_master_images_results['cached_wikipedia_image'] is True or \
             cache_master_images_results['cached_wikipedia_image'] == IMAGE_ALREADY_CACHED:
@@ -3743,6 +3757,7 @@ def cache_master_and_resized_image(
             we_vote_hosted_profile_image_url_tiny = create_resized_image_results['cached_resized_image_url_tiny']
         except Exception as e:
             status += "ERROR_IN_WIKIPEDIA-create_resized_images: " + str(e) + " "
+            success = False
 
     results = {
         'cached_ballotpedia_image_url_https':                   cached_ballotpedia_image_url_https,
@@ -3762,6 +3777,7 @@ def cache_master_and_resized_image(
         'cached_vote_usa_profile_image_url_https':              cached_vote_usa_profile_image_url_https,
         'cached_wikipedia_image_url_https':                     cached_wikipedia_image_url_https,
         'status':                                               status,
+        'success':                                              success,
         'we_vote_hosted_profile_image_url_large':               we_vote_hosted_profile_image_url_large,
         'we_vote_hosted_profile_image_url_medium':              we_vote_hosted_profile_image_url_medium,
         'we_vote_hosted_profile_image_url_tiny':                we_vote_hosted_profile_image_url_tiny

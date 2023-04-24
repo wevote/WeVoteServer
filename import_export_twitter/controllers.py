@@ -721,12 +721,17 @@ def refresh_twitter_candidate_details(candidate, use_cached_data_if_within_x_day
         # Now update all places where we use this twitter_handle
         twitter_user = results['twitter_user']
         refresh_results = save_fresh_twitter_details(twitter_user=twitter_user, update_all=True)
+        status += refresh_results['status']
         # 'candidates_updated_count': candidates_updated_count,
         # 'organizations_updated_count': organizations_updated_count,
         # 'politicians_updated_count': politicians_updated_count,
         # 'representatives_updated_count': representatives_updated_count,
         # 'total_updated_count': total_updated_count,
         candidates_updated_count = refresh_results['candidates_updated_count']
+    else:
+        status += results['status']
+        success = False
+
     results = {
         'candidates_updated_count': candidates_updated_count,
         'success':                  success,
@@ -862,6 +867,7 @@ def retrieve_fresh_enough_twitter_user_for_handle(
     if not positive_value_exists(representative_we_vote_id):
         representative_we_vote_id = None
     status = ""
+    success = True
     use_cached_data_if_within_x_days = convert_to_int(use_cached_data_if_within_x_days)
     twitter_handle_update_failed = False
     twitter_user = None
@@ -873,36 +879,30 @@ def retrieve_fresh_enough_twitter_user_for_handle(
     twitter_json_dict = {}
 
     if not positive_value_exists(twitter_handle):
-        status += "TWITTER_HANDLE_MISSING "
+        status += "TWITTER_HANDLE_MISSING_RETRIEVE_NOT_STARTED, " + str(twitter_handle) + " "
         results = {
             'success': False,
             'status': status,
         }
         return results
 
-    retrieve_latest_data_from_twitter = False
-    if not twitter_handle:
-        status += "TWITTER_HANDLE_MISSING_RETRIEVE_NOT_STARTED "
-        # status += "TWITTER_CANDIDATE_DETAILS_CLEARING "
-        # save_candidate_results = candidate_manager.clear_candidate_twitter_details(candidate)
-    else:
-        # Check the Twitter data we have cached locally
-        results = twitter_user_manager.retrieve_twitter_user(twitter_handle=twitter_handle, read_only=False)
-        if results['twitter_user_found']:
-            twitter_user = results['twitter_user']
-            twitter_user_found = results['twitter_user_found']
-            if positive_value_exists(use_cached_data_if_within_x_days):
-                earliest_date_considered_fresh = now() - timedelta(days=use_cached_data_if_within_x_days)
-                if positive_value_exists(twitter_user.date_last_updated_from_twitter) \
-                        and twitter_user.date_last_updated_from_twitter > earliest_date_considered_fresh:
-                    # Use the data cached within We Vote and do not reach out to Twitter
-                    retrieve_latest_data_from_twitter = False
-                else:
-                    retrieve_latest_data_from_twitter = True
+    # Check the Twitter data we have cached locally
+    results = twitter_user_manager.retrieve_twitter_user(twitter_handle=twitter_handle, read_only=False)
+    if results['twitter_user_found']:
+        twitter_user = results['twitter_user']
+        twitter_user_found = results['twitter_user_found']
+        if positive_value_exists(use_cached_data_if_within_x_days):
+            earliest_date_considered_fresh = now() - timedelta(days=use_cached_data_if_within_x_days)
+            if positive_value_exists(twitter_user.date_last_updated_from_twitter) \
+                    and twitter_user.date_last_updated_from_twitter > earliest_date_considered_fresh:
+                # Use the data cached within We Vote and do not reach out to Twitter
+                retrieve_latest_data_from_twitter = False
             else:
                 retrieve_latest_data_from_twitter = True
         else:
             retrieve_latest_data_from_twitter = True
+    else:
+        retrieve_latest_data_from_twitter = True
 
     if retrieve_latest_data_from_twitter:
         status += "REACHING_OUT_TO_TWITTER: " + str(twitter_handle) + " "
@@ -910,6 +910,7 @@ def retrieve_fresh_enough_twitter_user_for_handle(
         if results['twitter_user_not_found_in_twitter'] or results['twitter_user_suspended_by_twitter']:
             twitter_handle_update_failed = True
             status += "HANDLE_NOT_FOUND_OR_SUSPENDED "
+            success = False
             # This is updating the twitter_user above, if it exists
             if hasattr(twitter_user, 'twitter_handle_updates_failing'):
                 try:
@@ -917,6 +918,7 @@ def retrieve_fresh_enough_twitter_user_for_handle(
                     twitter_user.save()
                 except Exception as e:
                     status += "COULD_NOT_MARK_TWITTER_UPDATES_FAILING: " + str(e) + " "
+                    success = False
         elif results['success']:
             status += "DETAILS_RETRIEVED_FROM_TWITTER "
             twitter_json_dict = results['twitter_json']
@@ -951,6 +953,9 @@ def retrieve_fresh_enough_twitter_user_for_handle(
             we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
             we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
             we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+            if not positive_value_exists(cache_results['success']):
+                success = False
+                status += cache_results['status']
 
             save_twitter_user_results = twitter_user_manager.update_or_create_twitter_user(
                 twitter_json=twitter_json_dict,
@@ -965,10 +970,13 @@ def retrieve_fresh_enough_twitter_user_for_handle(
                 twitter_user = save_twitter_user_results['twitter_user']
                 twitter_user_found = save_twitter_user_results['twitter_user_found']
                 twitter_user_updated = True
+            else:
+                status += save_twitter_user_results['status']
+                success = False
 
     results = {
         'cached_image_dict':            cached_image_dict,
-        'success':                      True,
+        'success':                      success,
         'status':                       status,
         'twitter_handle_update_failed': twitter_handle_update_failed,
         'twitter_json_dict':            twitter_json_dict,
@@ -2145,6 +2153,7 @@ def save_fresh_twitter_details(
         results = retrieve_candidate_in_upcoming_election_list_by_twitter_handle(
             read_only=False,
             twitter_handle=twitter_user.twitter_handle)
+        status += results['status']
         if results['candidate_list_found']:
             candidate_list = results['candidate_list']
             candidate_manager = CandidateManager()
@@ -2153,6 +2162,7 @@ def save_fresh_twitter_details(
                     candidate=candidate,
                     twitter_user=twitter_user)
                 if save_candidate_results['candidate_updated']:
+                    candidate = save_candidate_results['candidate']
                     candidates_updated_count += 1
                     # Need to update voter twitter details for the candidate in future
                     # save_politician_details_results = politician_manager.update_politician_details_from_candidate(
@@ -2162,8 +2172,11 @@ def save_fresh_twitter_details(
                         status += save_position_results['status']
                 elif not save_candidate_results['success']:
                     status += save_candidate_results['status']
+                    success = False
         elif not results['success']:
-            status += results['status']
+            # Uncomment this after testing
+            # status += results['status']
+            success = False
 
     if update_all or update_organizations:
         # Find any organizations using this Twitter handle
@@ -2179,13 +2192,16 @@ def save_fresh_twitter_details(
             organization_list.append(results['organization'])
         elif not results['success']:
             status += results['status']
+            success = False
         for organization in organization_list:
             save_organization_results = organization_manager.save_fresh_twitter_details_to_organization(
                 organization=organization, twitter_user=twitter_user)
             if save_organization_results['organization_updated']:
+                # organization = save_organization_results['organization']  # Uncomment this if we need new organization
                 organizations_updated_count += 1
             elif not save_organization_results['success']:
                 status += save_organization_results['status']
+                success = False
 
     if update_all or update_politicians:
         # Find any politicians using this Twitter handle
@@ -2200,13 +2216,16 @@ def save_fresh_twitter_details(
             politician_list.append(results['politician'])
         elif not results['success']:
             status += results['status']
+            success = False
         for politician in politician_list:
             save_politician_results = politician_manager.save_fresh_twitter_details_to_politician(
                 politician=politician, twitter_user=twitter_user)
             if save_politician_results['politician_updated']:
+                # politician = save_politician_results['politician']  # Uncomment this if we need new politician
                 politicians_updated_count += 1
             elif not save_politician_results['success']:
                 status += save_politician_results['status']
+                success = False
 
     if update_all or update_representatives:
         # Find any representatives using this Twitter handle
@@ -2221,13 +2240,16 @@ def save_fresh_twitter_details(
             representative_list.append(results['representative'])
         elif not results['success']:
             status += results['status']
+            success = False
         for representative in representative_list:
             save_representative_results = representative_manager.save_fresh_twitter_details_to_representative(
                 representative=representative, twitter_user=twitter_user)
             if save_representative_results['representative_updated']:
+                # representative = save_representative_results['representative']  # Uncomment this if we need new rep
                 representatives_updated_count += 1
             elif not save_representative_results['success']:
                 status += save_representative_results['status']
+                success = False
 
     total_updated_count = candidates_updated_count + organizations_updated_count + politicians_updated_count + \
         representatives_updated_count

@@ -2085,7 +2085,7 @@ def candidate_edit_process_view(request):
                 if len(candidate_duplicates_query):
                     existing_candidate_found = True
         except Exception as e:
-            pass
+            status += "PROBLEM_RETRIEVING_CANDIDATE_DUPLICATES: " + str(e) + " "
 
     try:
         if existing_candidate_found:
@@ -2115,8 +2115,6 @@ def candidate_edit_process_view(request):
             elif google_search_link:
                 # save google search link
                 save_google_search_link_to_candidate_table(candidate_on_stage, google_search_link)
-
-            messages.add_message(request, messages.INFO, 'CandidateCampaign updated.')
         else:
             # Create new
             # election must be found
@@ -2136,8 +2134,9 @@ def candidate_edit_process_view(request):
                     state_code=best_state_code,
                 )
                 candidate_on_stage_found = True
-            # else:
-            #     # messages.add_message(request, messages.INFO, 'Could not save -- missing required variables.')
+                messages.add_message(request, messages.INFO, 'New candidate created.')
+            else:
+                messages.add_message(request, messages.ERROR, 'Could not create new -- missing required variables.')
             #     if positive_value_exists(candidate_id):
             #         return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) +
             #                                     url_variables)
@@ -2272,7 +2271,8 @@ def candidate_edit_process_view(request):
             candidate_we_vote_id = candidate_on_stage.we_vote_id
             ballotpedia_image_id = candidate_on_stage.ballotpedia_image_id
             ballotpedia_profile_image_url_https = candidate_on_stage.ballotpedia_profile_image_url_https
-            messages.add_message(request, messages.INFO, 'New candidate saved.')
+
+            messages.add_message(request, messages.INFO, 'CandidateCampaign updated.')
 
             # # Now add Candidate to Office Link
             # if positive_value_exists(candidate_we_vote_id) and positive_value_exists(contest_office_we_vote_id) and \
@@ -2294,19 +2294,32 @@ def candidate_edit_process_view(request):
 
     retrieve_candidate_from_database = False
     if positive_value_exists(refresh_from_twitter):
+        status += "REFRESH_FROM_TWITTER "
         results = refresh_twitter_candidate_details(candidate_on_stage)
+        if not results['success']:
+            status += results['status']
+        else:
+            status += results['status']
         retrieve_candidate_from_database = True
     # elif profile_image_type_currently_active == 'UNKNOWN':
     #     # Prevent Twitter from updating
     #     pass
-    elif positive_value_exists(candidate_twitter_handle):
+    elif positive_value_exists(candidate_twitter_handle) and not positive_value_exists(twitter_handle_updates_failing):
+        status += "REFRESH_FROM_CANDIDATE_TWITTER_HANDLE "
         results = refresh_twitter_candidate_details(candidate_on_stage)
+        if not results['success']:
+            status += results['status']
+        else:
+            status += results['status']
         retrieve_candidate_from_database = True
+    else:
+        status += "DID_NOT_START_REFRESH_TWITTER "
 
     if retrieve_candidate_from_database:
         # Because we updated the candidate, through the refresh_twitter_candidate_details process,
         #  we want to retrieve the latest from database because we need to save the candidate below.
         candidate_on_stage = CandidateCampaign.objects.get(id=candidate_id)
+        messages.add_message(request, messages.INFO, 'Twitter refreshed: ' + status)
 
     # Make sure 'which_marking' is one of the allowed Filter fields
     if positive_value_exists(which_marking) \

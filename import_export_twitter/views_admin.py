@@ -202,6 +202,7 @@ def refresh_twitter_candidate_details_view(request, candidate_id):
             candidate.save()
 
     results = refresh_twitter_candidate_details(candidate, use_cached_data_if_within_x_days=1)
+    messages.add_message(request, messages.INFO, "REFRESH_TWITTER_CANDIDATE_DETAILS: " + results['status'])
 
     return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 
@@ -226,6 +227,7 @@ def refresh_twitter_organization_details_view(request, organization_id):
     organization = results['organization']
 
     results = refresh_twitter_organization_details(organization, use_cached_data_if_within_x_days=0)
+    messages.add_message(request, messages.INFO, "REFRESH_TWITTER_ORGANIZATION_DETAILS: " + results['status'])
 
     return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_id,)) +
                                 '?google_civic_election_id=' + str(google_civic_election_id))
@@ -258,6 +260,7 @@ def refresh_twitter_politician_details_view(request, politician_id):
             politician.save()
 
     results = refresh_twitter_politician_details(politician, use_cached_data_if_within_x_days=0)
+    messages.add_message(request, messages.INFO, "REFRESH_TWITTER_POLITICIAN_DETAILS: " + results['status'])
 
     return HttpResponseRedirect(reverse('politician:politician_edit', args=(politician_id,)))
 
@@ -289,6 +292,7 @@ def refresh_twitter_representative_details_view(request, representative_id):
             representative.save()
 
     results = refresh_twitter_representative_details(representative, use_cached_data_if_within_x_days=0)
+    messages.add_message(request, messages.INFO, "REFRESH_TWITTER_REPRESENTATIVE_DETAILS: " + results['status'])
 
     return HttpResponseRedirect(reverse('representative:representative_edit', args=(representative_id,)))
 
