@@ -1442,6 +1442,7 @@ def politician_edit_process_view(request):
     vote_smart_id = request.POST.get('vote_smart_id', False)
     vote_usa_politician_id = request.POST.get('vote_usa_politician_id', False)
     wikipedia_url = request.POST.get('wikipedia_url', False)
+    youtube_url = request.POST.get('youtube_url', False)
     # is_battleground_race_ values taken in below
 
     # Check to see if this politician is already being used anywhere
@@ -1717,6 +1718,8 @@ def politician_edit_process_view(request):
                 politician_on_stage.vote_usa_politician_id = vote_usa_politician_id
             if wikipedia_url is not False:
                 politician_on_stage.wikipedia_url = wikipedia_url
+            if youtube_url is not False:
+                politician_on_stage.youtube_url = youtube_url
 
             politician_on_stage.save()
             politician_we_vote_id = politician_on_stage.we_vote_id

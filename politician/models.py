@@ -1993,14 +1993,16 @@ class PoliticianManager(models.Manager):
             status += "VALID_POLITICIAN_NOT_PROVIDED_TO_UPDATE_TWITTER_DETAILS "
             success = False
 
-        if not positive_value_exists(politician.politician_twitter_handle):
+        if not positive_value_exists(politician.politician_twitter_handle) \
+                and not positive_value_exists(twitter_user.twitter_handle):
             status += "POLITICIAN_TWITTER_HANDLE_MISSING "
             success = False
 
-        if success:
-            if politician.politician_twitter_handle.lower() != twitter_user.twitter_handle.lower():
-                status += "POLITICIAN_TWITTER_HANDLE_MISMATCH "
-                success = False
+        # I don't think this is a problem
+        # if success:
+        #     if politician.politician_twitter_handle.lower() != twitter_user.twitter_handle.lower():
+        #         status += "POLITICIAN_TWITTER_HANDLE_MISMATCH "
+        #         success = False
 
         if not success:
             results = {

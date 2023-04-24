@@ -522,6 +522,14 @@
 </div>
 
 <div class="form-group">
+    <label for="youtube_url_id" class="col-sm-3 control-label">YouTube URL</label>
+    <div class="col-sm-8">
+        <input type="text" name="youtube_url" id="youtube_url_id" class="form-control"
+               value="{% if politician %}{{ politician.youtube_url|default_if_none:"" }}{% else %}{{ youtube_url|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
     <label for="gender_id" class="col-sm-3 control-label">Gender</label>
     <div class="col-sm-8">
         <input type="radio" name="gender" id="gender_unknown_id" value="U"

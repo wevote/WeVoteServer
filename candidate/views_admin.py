@@ -1798,6 +1798,7 @@ def candidate_edit_process_view(request):
     wikipedia_url = request.POST.get('wikipedia_url', False)
     withdrawal_date = request.POST.get('withdrawal_date', False)
     withdrawn_from_election = positive_value_exists(request.POST.get('withdrawn_from_election', False))
+    youtube_url = request.POST.get('youtube_url', False)
 
     url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
                     "&ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
@@ -1838,6 +1839,7 @@ def candidate_edit_process_view(request):
     # Check to see if this candidate is already being used anywhere
     candidate_on_stage_found = False
     candidate_on_stage = CandidateCampaign()
+    election_manager = ElectionManager()
     office_manager = ContestOfficeManager()
     state_code_from_candidate = ''
     candidate_we_vote_id = ''
@@ -1903,18 +1905,18 @@ def candidate_edit_process_view(request):
                 contest_office = results['contest_office']
                 contest_office_id = contest_office.id
                 candidate_to_office_link_add_office_we_vote_id = contest_office.we_vote_id
-                if positive_value_exists(candidate_to_office_link_add_election):
-                    election_manager = ElectionManager()
-                    results = election_manager.retrieve_election(
-                        google_civic_election_id=candidate_to_office_link_add_election)
-                    if results['election_found']:
-                        election = results['election']
-                        if positive_value_exists(election.election_day_text):
-                            candidate_ultimate_election_date = \
-                                convert_we_vote_date_string_to_date_as_integer(election.election_day_text)
-                            year = election.election_day_text[:4]
-                            if year:
-                                candidate_year = convert_to_int(year)
+                # Moved this to the candidate_to_office_link_list loop below
+                # if positive_value_exists(candidate_to_office_link_add_election):
+                #     results = election_manager.retrieve_election(
+                #         google_civic_election_id=candidate_to_office_link_add_election)
+                #     if results['election_found']:
+                #         election = results['election']
+                #         if positive_value_exists(election.election_day_text):
+                #             candidate_ultimate_election_date = \
+                #                 convert_we_vote_date_string_to_date_as_integer(election.election_day_text)
+                #             year = election.election_day_text[:4]
+                #             if year:
+                #                 candidate_year = convert_to_int(year)
             else:
                 # If not, create a new ContestOffice for this election
                 from office.controllers import office_create_from_office_held
@@ -1922,13 +1924,14 @@ def candidate_edit_process_view(request):
                     office_held_we_vote_id=candidate_to_office_link_add_office_held_we_vote_id,
                     google_civic_election_id=candidate_to_office_link_add_election)
                 if create_results['success']:
-                    if create_results['election_year']:
-                        candidate_year = create_results['election_year']
                     if positive_value_exists(create_results['office_we_vote_id']):
                         candidate_to_office_link_add_office_we_vote_id = create_results['office_we_vote_id']
-                    if positive_value_exists(create_results['election_day_text']):
-                        candidate_ultimate_election_date = \
-                            convert_we_vote_date_string_to_date_as_integer(create_results['election_day_text'])
+                    # Moved this to the candidate_to_office_link_list loop below
+                    # if positive_value_exists(create_results['election_day_text']):
+                    #     candidate_ultimate_election_date = \
+                    #         convert_we_vote_date_string_to_date_as_integer(create_results['election_day_text'])
+                    # if create_results['election_year']:
+                    #     candidate_year = create_results['election_year']
         # ...and finally drop into the code below so a candidate_to_office_link is created
         if positive_value_exists(candidate_we_vote_id) and \
                 positive_value_exists(candidate_to_office_link_add_office_we_vote_id) and \
@@ -1952,6 +1955,7 @@ def candidate_edit_process_view(request):
 
     # ##################################
     # Update "is_battleground_race" based on office data found through the link CandidateToOfficeLink
+    # Also update "candidate_ultimate_election_date" and "candidate_year" if either is missing
     results = candidate_list_manager.retrieve_candidate_to_office_link_list(
         candidate_we_vote_id_list=[candidate_we_vote_id],
         read_only=True)
@@ -1963,7 +1967,11 @@ def candidate_edit_process_view(request):
             this_election = candidate_to_office_link.election()
             election_day_as_integer = convert_we_vote_date_string_to_date_as_integer(this_election.election_day_text)
             if election_day_as_integer > latest_election_date:
-                latest_election_date = election_day_as_integer
+                candidate_ultimate_election_date = election_day_as_integer
+                election_day_as_string = str(election_day_as_integer)
+                year = election_day_as_string[:4]
+                if year:
+                    candidate_year = convert_to_int(year)
                 latest_office_we_vote_id = candidate_to_office_link.contest_office_we_vote_id
         except Exception as e:
             status += "PROBLEM_GETTING_ELECTION_INFORMATION: " + str(e) + " "
@@ -1987,7 +1995,6 @@ def candidate_edit_process_view(request):
             contest_office_we_vote_id = contest_office.we_vote_id
             state_code_from_office = contest_office.state_code
 
-    election_manager = ElectionManager()
     # Needed for new candidates
     election_results = election_manager.retrieve_election(google_civic_election_id)
     state_code_from_election = ""
@@ -2178,17 +2185,17 @@ def candidate_edit_process_view(request):
             if candidate_url is not False:
                 candidate_on_stage.candidate_url = candidate_url
             if candidate_year is not False:
-                candidate_on_stage.candidate_year = candidate_year
+                if positive_value_exists(candidate_year):
+                    candidate_on_stage.candidate_year = candidate_year
+                # Turn this on if we want to be able to wipe out candidate_on_stage.candidate_year
+                # else:
+                #     candidate_on_stage.candidate_year = candidate_year
             if candidate_ultimate_election_date is not False:
-                if positive_value_exists(candidate_on_stage.candidate_ultimate_election_date):
-                    if positive_value_exists(candidate_ultimate_election_date):
-                        if candidate_ultimate_election_date > candidate_on_stage.candidate_ultimate_election_date:
-                            candidate_on_stage.candidate_ultimate_election_date = candidate_ultimate_election_date
-                    # Turn this on if we want to be able to wipe out candidate_on_stage.candidate_ultimate_election_date
-                    # else:
-                    #     candidate_on_stage.candidate_ultimate_election_date = candidate_ultimate_election_date
-                else:
+                if positive_value_exists(candidate_ultimate_election_date):
                     candidate_on_stage.candidate_ultimate_election_date = candidate_ultimate_election_date
+                # Turn this on if we want to be able to wipe out candidate_on_stage.candidate_ultimate_election_date
+                # else:
+                #     candidate_on_stage.candidate_ultimate_election_date = candidate_ultimate_election_date
             candidate_on_stage.do_not_display_on_ballot = do_not_display_on_ballot
             if facebook_url is not False:
                 candidate_on_stage.facebook_url = facebook_url
@@ -2225,6 +2232,8 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.vote_usa_office_id = vote_usa_office_id
             if wikipedia_url is not False:
                 candidate_on_stage.wikipedia_url = wikipedia_url
+            if youtube_url is not False:
+                candidate_on_stage.youtube_url = youtube_url
             if withdrawn_from_election:
                 candidate_on_stage.withdrawn_from_election = withdrawn_from_election
                 if positive_value_exists(withdrawal_date):
