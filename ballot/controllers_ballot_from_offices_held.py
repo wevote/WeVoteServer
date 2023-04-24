@@ -219,7 +219,8 @@ def voter_ballot_items_retrieve_for_one_election_by_offices_held_for_api(  # vot
         # for office_held in office_held_list:
         #     office_held_dict[office_held.we_vote_id] = office_held
 
-        # Sort contest_office_list first?
+        # Sort contest_office_list first, at least by race level (Federal, State, etc.)
+
         # Here we need to create mock-ballot_item objects, generated from ContestOffice objects
         ballot_item_object_list = []
         possible_google_civic_election_id_list = []
@@ -229,6 +230,7 @@ def voter_ballot_items_retrieve_for_one_election_by_offices_held_for_api(  # vot
             ballot_item_object.ballot_item_display_name = contest_office.office_name
             ballot_item_object.contest_office_id = contest_office.id
             ballot_item_object.contest_office_we_vote_id = contest_office.we_vote_id
+            ballot_item_object.local_ballot_order = 0
             ballot_item_object.polling_location_we_vote_id = polling_location_we_vote_id
             # Now add to object list
             ballot_item_object_list.append(ballot_item_object)

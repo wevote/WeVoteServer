@@ -1014,14 +1014,16 @@ class RepresentativeManager(models.Manager):
             status += "VALID_REPRESENTATIVE_NOT_PROVIDED_TO_UPDATE_TWITTER_DETAILS "
             success = False
 
-        if not positive_value_exists(representative.representative_twitter_handle):
+        if not positive_value_exists(representative.representative_twitter_handle) \
+                and not positive_value_exists(twitter_user.twitter_handle):
             status += "REPRESENTATIVE_TWITTER_HANDLE_MISSING "
             success = False
 
-        if success:
-            if representative.representative_twitter_handle.lower() != twitter_user.twitter_handle.lower():
-                status += "REPRESENTATIVE_TWITTER_HANDLE_MISMATCH "
-                success = False
+        # I don't think this is a problem
+        # if success:
+        #     if representative.representative_twitter_handle.lower() != twitter_user.twitter_handle.lower():
+        #         status += "REPRESENTATIVE_TWITTER_HANDLE_MISMATCH "
+        #         success = False
 
         if not success:
             results = {

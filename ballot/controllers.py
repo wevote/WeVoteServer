@@ -2970,7 +2970,11 @@ def generate_ballot_item_list_from_object_list(
             ballot_items_to_display.append(one_ballot_item.copy())
 
     from operator import itemgetter
-    ballot_item_list_ordered = sorted(ballot_items_to_display, key=itemgetter('local_ballot_order'), reverse=False)
+    try:
+        ballot_item_list_ordered = sorted(ballot_items_to_display, key=itemgetter('local_ballot_order'), reverse=False)
+    except Exception as e:
+        ballot_item_list_ordered = ballot_items_to_display
+        status += "BALLOT_ITEM_LIST_ORDERING_FAILED: " + str(e) + " "
 
     results = {
         'status':                   status,
