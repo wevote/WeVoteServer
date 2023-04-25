@@ -1901,6 +1901,7 @@ def candidate_create_from_politician(politician_we_vote_id=''):
             we_vote_hosted_profile_image_url_medium=politician.we_vote_hosted_profile_image_url_medium,
             we_vote_hosted_profile_image_url_tiny=politician.we_vote_hosted_profile_image_url_tiny,
             wikipedia_url=politician.wikipedia_url,
+            youtube_url=politician.youtube_url,
         )
         candidate_found = True
         if positive_value_exists(candidate.id):

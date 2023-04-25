@@ -1946,8 +1946,17 @@ def candidate_edit_process_view(request):
             else:
                 messages.add_message(request, messages.ERROR, 'Candidate-to-Office Link already exists.')
         else:
-            messages.add_message(request, messages.ERROR,
-                                 'Cannot add Candidate-to-Office Link: candidate_we_vote_id missing.')
+            messages.add_message(
+                request, messages.ERROR,
+                "Cannot add Candidate-to-Office Link, missing one of these variables: "
+                "candidate_we_vote_id: {candidate_we_vote_id}, "
+                "candidate_to_office_link_add_election: {candidate_to_office_link_add_election}, "
+                "candidate_to_office_link_add_office_we_vote_id: {candidate_to_office_link_add_office_we_vote_id}, "
+                "".format(
+                    candidate_to_office_link_add_election=candidate_to_office_link_add_election,
+                    candidate_to_office_link_add_office_we_vote_id=candidate_to_office_link_add_office_we_vote_id,
+                    candidate_we_vote_id=candidate_we_vote_id,
+                ))
     elif positive_value_exists(candidate_to_office_link_add_election) or \
             positive_value_exists(candidate_to_office_link_add_office_we_vote_id) or \
             positive_value_exists(candidate_to_office_link_add_office_held_we_vote_id):
