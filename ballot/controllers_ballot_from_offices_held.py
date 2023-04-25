@@ -128,8 +128,7 @@ def generate_ballot_data_from_offices_held(
 def find_closest_ballot_from_offices_held_data(
         google_civic_election_id=0,
         read_only=True,
-        text_for_map_search='',
-    ):
+        text_for_map_search=''):
     offices_held_for_location = None
     offices_held_for_location_found = False
     offices_held_for_location_id = ''

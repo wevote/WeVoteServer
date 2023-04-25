@@ -1132,6 +1132,7 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
             google_civic_election_id=google_civic_election_id,
             ballot_returned_we_vote_id=ballot_returned_we_vote_id)
 
+        election_manager = ElectionManager()
         election_day_text = voter_ballot_saved.election_day_text()
         if not results['success']:
             status += "FAILED_VOTER_BALLOT_ITEMS_RETRIEVE: "
@@ -1149,7 +1150,6 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
                 or not positive_value_exists(election_day_text):
             try:
                 voter_ballot_saved_changed = False
-                election_manager = ElectionManager()
                 election_results = election_manager.retrieve_election(google_civic_election_id)
                 if election_results['election_found']:
                     election = election_results['election']
@@ -1221,8 +1221,17 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
             offices_held_for_location_id=offices_held_for_location_id)
         ballot_item_list_found = results['ballot_item_list_found']
         if positive_value_exists(ballot_item_list_found):
+            election_day_text = ''
+            election_description_text = ''
             if positive_value_exists(results['google_civic_election_id']):
                 google_civic_election_id = results['google_civic_election_id']
+            if positive_value_exists(google_civic_election_id):
+                election_results = election_manager.retrieve_election(google_civic_election_id)
+                if election_results['election_found']:
+                    election = election_results['election']
+                    election_description_text = election.election_name
+                    election_day_text = election.election_day_text
+
             json_data = {
                 'status':                               status,
                 'success':                              True,
@@ -1232,8 +1241,8 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
                 'ballot_location_display_name':         '',  # voter_ballot_saved.ballot_location_display_name,
                 'ballot_location_shortcut':             '',  # voter_ballot_saved.ballot_location_shortcut,
                 'ballot_returned_we_vote_id':           '',  #
-                'election_name':                        '',  # voter_ballot_saved.election_description_text,
-                'election_day_text':                    '',  # voter_ballot_saved.election_day_text(),
+                'election_name':                        election_description_text,
+                'election_day_text':                    election_day_text,
                 'google_civic_election_id':             google_civic_election_id,
                 'is_from_substituted_address':          '',  # voter_ballot_saved.is_from_substituted_address,
                 'is_from_test_ballot':                  '',  # voter_ballot_saved.is_from_test_ballot,
