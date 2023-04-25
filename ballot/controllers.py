@@ -1124,6 +1124,7 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
                 voter_address.google_civic_election_id = google_civic_election_id
                 voter_address_manager.update_existing_voter_address_object(voter_address)
 
+    election_manager = ElectionManager()
     if use_voter_ballot_saved and positive_value_exists(google_civic_election_id):
         # Get and return the ballot_item_list
         results = voter_ballot_items_retrieve_for_one_election_for_api(
@@ -1132,7 +1133,6 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
             google_civic_election_id=google_civic_election_id,
             ballot_returned_we_vote_id=ballot_returned_we_vote_id)
 
-        election_manager = ElectionManager()
         election_day_text = voter_ballot_saved.election_day_text()
         if not results['success']:
             status += "FAILED_VOTER_BALLOT_ITEMS_RETRIEVE: "
