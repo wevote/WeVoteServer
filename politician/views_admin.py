@@ -1448,6 +1448,7 @@ def politician_edit_process_view(request):
     # Check to see if this politician is already being used anywhere
     politician_on_stage_found = False
     politician_on_stage = Politician()
+    politician_manager = PoliticianManager()
     if positive_value_exists(politician_id):
         try:
             politician_query = Politician.objects.filter(id=politician_id)
@@ -1695,7 +1696,6 @@ def politician_edit_process_view(request):
             if state_code is not False:
                 politician_on_stage.state_code = state_code
             if seo_friendly_path is not False:
-                politician_manager = PoliticianManager()
                 # If path isn't passed in, create one. If provided, verify it is unique.
                 seo_results = politician_manager.generate_seo_friendly_path(
                     base_pathname_string=seo_friendly_path,
@@ -1704,7 +1704,9 @@ def politician_edit_process_view(request):
                     state_code=politician_on_stage.state_code)
                 if seo_results['success']:
                     seo_friendly_path = seo_results['seo_friendly_path']
-                if seo_friendly_path and seo_friendly_path != politician_on_stage.seo_friendly_path:
+                if not positive_value_exists(seo_friendly_path):
+                    seo_friendly_path = None
+                if seo_friendly_path != politician_on_stage.seo_friendly_path:
                     # Update linked candidate & representative entries to use this latest seo_friendly_path
                     push_seo_friendly_path_changes = True
                 politician_on_stage.seo_friendly_path = seo_friendly_path
@@ -1725,6 +1727,18 @@ def politician_edit_process_view(request):
             politician_we_vote_id = politician_on_stage.we_vote_id
             vote_usa_politician_id = politician_on_stage.vote_usa_politician_id
             politician_id = politician_on_stage.id
+
+            # Now generate_seo_friendly_path if there isn't one
+            seo_results = politician_manager.generate_seo_friendly_path(
+                base_pathname_string=seo_friendly_path,
+                politician_name=politician_on_stage.politician_name,
+                politician_we_vote_id=politician_on_stage.we_vote_id,
+                state_code=politician_on_stage.state_code)
+            if seo_results['success']:
+                seo_friendly_path = seo_results['seo_friendly_path']
+                if positive_value_exists(seo_friendly_path):
+                    politician_on_stage.seo_friendly_path = seo_friendly_path
+                    politician_on_stage.save()
             messages.add_message(request, messages.INFO, 'Politician saved.')
         else:
             # messages.add_message(request, messages.INFO, 'Could not save -- missing required variables.')
@@ -1737,7 +1751,7 @@ def politician_edit_process_view(request):
 
     except Exception as e:
         handle_record_not_saved_exception(e, logger=logger)
-        messages.add_message(request, messages.ERROR, 'Could not save politician.')
+        messages.add_message(request, messages.ERROR, "Could not save politician. Error:" + str(e))
         return HttpResponseRedirect(reverse('politician:politician_edit', args=(politician_id,)))
 
     if positive_value_exists(politician_we_vote_id) and len(years_list) > 0:
