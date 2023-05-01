@@ -3,7 +3,7 @@
 # Unipath==1.1s
 # python-votesmart=0.3.3  # Using local version instead since 0.3.3 not Py 3 compatible
 # sendgrid-django==4.2.0
-Pillow==9.3.0
+Pillow==9.4.0
 PyJWT==2.4.0
 boto3==1.26.46
 cryptography==3.4.8
