@@ -14,6 +14,7 @@ from politician.controllers_generate_seo_friendly_path import generate_campaign_
 from politician.models import Politician, PoliticianManager, PoliticianSEOFriendlyPath, \
     POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, POLITICIAN_UNIQUE_IDENTIFIERS, UNKNOWN
 from position.controllers import move_positions_to_another_politician
+import pytz
 from representative.controllers import generate_representative_dict_list_from_representative_object_list, \
     move_representatives_to_another_politician
 from representative.models import RepresentativeManager
@@ -471,7 +472,10 @@ def figure_out_politician_conflict_values(politician1, politician2):
     }
 
 
-def generate_campaignx_for_politician(politician=None, save_individual_politician=False):
+def generate_campaignx_for_politician(
+        datetime_now=None,
+        politician=None,
+        save_individual_politician=False):
     status = ""
     success = True
     update_values = {}
@@ -507,7 +511,11 @@ def generate_campaignx_for_politician(politician=None, save_individual_politicia
     campaignx_created = False
     if results['campaignx_found']:
         campaignx_created = True
+        if datetime_now is None:
+            timezone = pytz.timezone("America/Los_Angeles")
+            datetime_now = timezone.localize(datetime.now())
         politician.linked_campaignx_we_vote_id = results['campaignx'].we_vote_id
+        politician.linked_campaignx_we_vote_id_date_last_updated = datetime_now
         if positive_value_exists(save_individual_politician):
             try:
                 politician.save()

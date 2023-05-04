@@ -3283,9 +3283,12 @@ class PositionListManager(models.Manager):
         status = ''
         count_only = positive_value_exists(count_only)
         friend_position_count = 0
+        friends_positions_list = []
         position_count = 0
+        position_list = []
         position_list_found = False
         public_position_count = 0
+        public_positions_list = []
         if not positive_value_exists(voter_id) and not positive_value_exists(voter_we_vote_id):
             position_list = []
             status += 'MISSING_VOTER_ID '
@@ -3418,8 +3421,29 @@ class PositionListManager(models.Manager):
             }
             return results
         elif position_list_found:
+            # Filter out duplicate politician positions, and always rely on the latest entry
+            position_about_this_politician_already_seen = {}
+            position_list_sorted_newest_to_oldest = \
+                sorted(position_list, key=lambda x: x.date_last_changed, reverse=True)
+            position_list_filtered = []
+            # If we have an entry that is for politician only (no candidate_campaign_we_vote_id),
+            #  then only allow the first position to be returned
+            for position in position_list_sorted_newest_to_oldest:
+                add_position_to_list = True
+                if position.politician_we_vote_id in position_about_this_politician_already_seen:
+                    # Did we see this position for this politician previously?
+                    if positive_value_exists(
+                            position_about_this_politician_already_seen[position.politician_we_vote_id]):
+                        add_position_to_list = False
+                if add_position_to_list:
+                    position_list_filtered.append(position)
+                if positive_value_exists(position.politician_we_vote_id) \
+                        and not positive_value_exists(position.candidate_campaign_we_vote_id):
+                    # Keep track of which positions we've seen this for this politician
+                    position_about_this_politician_already_seen[position.politician_we_vote_id] = True
+
             simple_position_list = []
-            for position in position_list:
+            for position in position_list_filtered:
                 # Make sure we have a ballot_item_we_vote_id
                 if positive_value_exists(position.candidate_campaign_we_vote_id):
                     ballot_item_we_vote_id = position.candidate_campaign_we_vote_id
@@ -3446,18 +3470,24 @@ class PositionListManager(models.Manager):
                     if positive_value_exists(position.political_party) else ''
                 politician_we_vote_id = position.politician_we_vote_id \
                     if positive_value_exists(position.politician_we_vote_id) else ''
+                try:
+                    date_last_changed = position.date_last_changed.strftime('%Y-%m-%d %H:%M:%S')
+                except Exception as e:
+                    status += 'VOTER_POSITION_DATE_LAST_CHANGED_FAILED: ' + str(e) + ' '
+                    date_last_changed = ''
                 one_position = {
                     'ballot_item_display_name':             ballot_item_display_name,
                     'ballot_item_image_url_https_large':    ballot_item_image_url_https_large,
                     'ballot_item_image_url_https_medium':   ballot_item_image_url_https_medium,
                     'ballot_item_image_url_https_tiny':     ballot_item_image_url_https_tiny,
                     'ballot_item_we_vote_id':               ballot_item_we_vote_id,
-                    "candidate_campaign_we_vote_id":        candidate_campaign_we_vote_id,
+                    'candidate_campaign_we_vote_id':        candidate_campaign_we_vote_id,
                     'contest_office_name':                  contest_office_name,
-                    'is_support':                           position.is_support(),
+                    'date_last_changed':                    date_last_changed,
                     'is_oppose':                            position.is_oppose(),
-                    'statement_text':                       position.statement_text,
                     'is_public_position':                   position.is_public_position(),
+                    'is_support':                           position.is_support(),
+                    'statement_text':                       position.statement_text,
                     'political_party':                      political_party,
                     'politician_we_vote_id':                politician_we_vote_id,
                 }
@@ -5879,7 +5909,7 @@ class PositionManager(models.Manager):
     def toggle_off_voter_support_for_politician(self, voter_id, politician_id, user_agent_string, user_agent_object):
         stance = NO_STANCE
         position_manager = PositionManager()
-        return position_manager.toggle_on_voter_position_for_candidate(
+        return position_manager.toggle_on_voter_position_for_politician(
             voter_id, politician_id, stance, user_agent_string, user_agent_object)
 
     def toggle_on_voter_oppose_for_candidate(self, voter_id, candidate_id, user_agent_string, user_agent_object):
@@ -6360,21 +6390,6 @@ class PositionManager(models.Manager):
                         speaker_display_name=speaker_display_name,
                     )
 
-                if positive_value_exists(candidate_we_vote_id):
-                    date_results = candidate_manager.add_candidate_position_sorting_dates_if_needed(
-                        position_object=voter_position_on_stage,
-                        candidate=candidate)
-                    if date_results['position_object_updated']:
-                        voter_position_on_stage = date_results['position_object']
-                    status += date_results['status']
-                elif positive_value_exists(contest_measure_we_vote_id):
-                    date_results = contest_measure_manager.add_measure_position_sorting_dates_if_needed(
-                        position_object=voter_position_on_stage,
-                        contest_measure=contest_measure)
-                    if date_results['position_object_updated']:
-                        voter_position_on_stage = date_results['position_object']
-                    status += date_results['status']
-
                 try:
                     # Heal the data
                     voter_position_on_stage.speaker_image_url_https_large = we_vote_hosted_profile_image_url_large
@@ -6384,7 +6399,7 @@ class PositionManager(models.Manager):
                     voter_position_on_stage.save()
                 except Exception as e:
                     handle_record_not_saved_exception(e, logger=logger)
-                    status += 'STANCE_COULD_NOT_BE_UPDATED4 ' + str(e) + ' '
+                    status += 'STANCE_COULD_NOT_BE_UPDATED4: ' + str(e) + ' '
 
                 position_we_vote_id = voter_position_on_stage.we_vote_id
                 voter_position_on_stage_found = True
@@ -6392,6 +6407,39 @@ class PositionManager(models.Manager):
             except Exception as e:
                 handle_record_not_saved_exception(e, logger=logger)
                 status += 'NEW_STANCE_COULD_NOT_BE_SAVED '
+
+        save_position_object = False
+        if voter_position_on_stage_found:
+            if positive_value_exists(candidate_we_vote_id):
+                date_results = candidate_manager.add_candidate_position_sorting_dates_if_needed(
+                    position_object=voter_position_on_stage,
+                    candidate=candidate)
+                if date_results['position_object_updated']:
+                    voter_position_on_stage = date_results['position_object']
+                    save_position_object = True
+                status += date_results['status']
+            elif positive_value_exists(contest_measure_we_vote_id):
+                date_results = contest_measure_manager.add_measure_position_sorting_dates_if_needed(
+                    position_object=voter_position_on_stage,
+                    contest_measure=contest_measure)
+                if date_results['position_object_updated']:
+                    voter_position_on_stage = date_results['position_object']
+                    save_position_object = True
+                status += date_results['status']
+            elif positive_value_exists(politician_we_vote_id):
+                date_results = politician_manager.add_politician_position_sorting_dates_if_needed(
+                    position_object=voter_position_on_stage,
+                    politician_we_vote_id=politician_we_vote_id)
+                if date_results['position_object_updated']:
+                    voter_position_on_stage = date_results['position_object']
+                    save_position_object = True
+                status += date_results['status']
+
+        if save_position_object:
+            try:
+                voter_position_on_stage.save()
+            except Exception as e:
+                status += 'POSITION_COULD_NOT_BE_SAVED: ' + str(e) + ' '
 
         if voter_position_on_stage_found:
             # If here we need to make sure a voter guide exists

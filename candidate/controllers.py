@@ -1665,6 +1665,7 @@ def generate_candidate_dict_from_candidate_object(
             if positive_value_exists(candidate.is_battleground_race) else False,
             'kind_of_ballot_item':              CANDIDATE,
             'last_updated':                     date_last_updated,
+            'linked_campaignx_we_vote_id':      candidate.linked_campaignx_we_vote_id,
             'maplight_id':                      candidate.maplight_id,
             'ocd_division_id':                  candidate.ocd_division_id,
             'order_on_ballot':                  candidate.order_on_ballot,

@@ -413,6 +413,7 @@ def generate_representative_dict_from_representative_object(
         'is_battleground_race_2025':    positive_value_exists(representative.is_battleground_race_2025),
         'is_battleground_race_2026':    positive_value_exists(representative.is_battleground_race_2026),
         'last_updated':                 date_last_updated,
+        'linked_campaignx_we_vote_id':  representative.linked_campaignx_we_vote_id,
         'linkedin_url':                 representative.linkedin_url,
         'ocd_division_id':              representative.ocd_division_id,
         'office_held_id':               representative.office_held_id,

@@ -476,6 +476,72 @@ def representative_list_view(request):
                                  "{total_to_convert_after:,} remaining."
                                  "".format(total_to_convert_after=total_to_convert_after, updates_made=updates_made))
 
+    # Update candidates who currently don't have linked_campaignx_we_vote_id, with value from linked politician
+    number_to_update = 1000
+    campaignx_we_vote_id_updates = True
+    if campaignx_we_vote_id_updates:
+        campaignx_update_query = Representative.objects.all()
+        campaignx_update_query = campaignx_update_query.exclude(
+            Q(politician_we_vote_id__isnull=True) |
+            Q(politician_we_vote_id="")
+        )
+        campaignx_update_query = campaignx_update_query.filter(
+            Q(linked_campaignx_we_vote_id__isnull=True) |
+            Q(linked_campaignx_we_vote_id="")
+        )
+        # After initial updates to all representatives, include in the search logic to find representatives with
+        # linked_campaignx_we_vote_id_date_last_updated older than
+        # Politician.linked_campaignx_we_vote_id_date_last_updated
+        if positive_value_exists(state_code):
+            campaignx_update_query = campaignx_update_query.filter(state_code__iexact=state_code)
+        total_to_convert = campaignx_update_query.count()
+        total_to_convert_after = total_to_convert - number_to_update if total_to_convert > number_to_update else 0
+        campaignx_update_query = campaignx_update_query.order_by('-id')
+        representative_list = list(campaignx_update_query[:number_to_update])
+        politician_we_vote_id_list = []
+        # Retrieve all relevant politicians in a single query
+        for one_representative in representative_list:
+            if positive_value_exists(one_representative.politician_we_vote_id):
+                politician_we_vote_id_list.append(one_representative.politician_we_vote_id)
+        politician_manager = PoliticianManager()
+        politician_list = []
+        if len(politician_we_vote_id_list) > 0:
+            politician_results = politician_manager.retrieve_politician_list(
+                politician_we_vote_id_list=politician_we_vote_id_list)
+            politician_list = politician_results['politician_list']
+        politician_dict_list = {}
+        for one_politician in politician_list:
+            politician_dict_list[one_politician.we_vote_id] = one_politician
+        timezone = pytz.timezone("America/Los_Angeles")
+        datetime_now = timezone.localize(datetime.now())
+        linked_campaignx_we_vote_id_missing = 0
+        update_list = []
+        updates_needed = False
+        updates_made = 0
+        for one_representative in representative_list:
+            one_politician = politician_dict_list.get(one_representative.politician_we_vote_id)
+            if not hasattr(one_politician, 'linked_campaignx_we_vote_id'):
+                continue
+            if positive_value_exists(one_politician.linked_campaignx_we_vote_id):
+                one_representative.linked_campaignx_we_vote_id = one_politician.linked_campaignx_we_vote_id
+                one_representative.linked_campaignx_we_vote_id_date_last_updated = datetime_now
+                update_list.append(one_representative)
+                updates_needed = True
+                updates_made += 1
+            else:
+                linked_campaignx_we_vote_id_missing += 1
+        if positive_value_exists(linked_campaignx_we_vote_id_missing):
+            messages.add_message(request, messages.ERROR,
+                                 "{linked_campaignx_we_vote_id_missing:,} missing linked_campaignx_we_vote_id."
+                                 "".format(linked_campaignx_we_vote_id_missing=linked_campaignx_we_vote_id_missing))
+        if updates_needed:
+            Representative.objects.bulk_update(
+                update_list, ['linked_campaignx_we_vote_id', 'linked_campaignx_we_vote_id_date_last_updated'])
+            messages.add_message(request, messages.INFO,
+                                 "{updates_made:,} representatives updated with new linked_campaignx_we_vote_id. "
+                                 "{total_to_convert_after:,} remaining."
+                                 "".format(total_to_convert_after=total_to_convert_after, updates_made=updates_made))
+
     representative_count = 0
     representative_list = []
     state_list = STATE_CODE_MAP
