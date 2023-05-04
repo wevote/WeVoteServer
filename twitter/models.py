@@ -807,6 +807,9 @@ class TwitterUserManager(models.Manager):
         except TwitterUser.DoesNotExist:
             success = True
             status += "RETRIEVE_TWITTER_USER_NONE_FOUND "
+        except Exception as e:
+            success = False
+            status += "RETRIEVE_TWITTER_UNTRAPPED_EXCEPTION: " + str(e) + " "
 
         results = {
             'success':                  success,
@@ -933,6 +936,9 @@ class TwitterUserManager(models.Manager):
             twitter_next_cursor_state = TwitterCursorState()
             success = True
             status += "RETRIEVE_TWITTER_NEXT_CURSOR_NONE_FOUND "
+        except Exception as e:
+            success = False
+            status += "RETRIEVE_TWITTER_NEXT_CURSOR_EXCEPTION: " + str(e) + " "
 
         results = {
             'success':              success,

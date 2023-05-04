@@ -1258,9 +1258,10 @@ class CampaignXManager(models.Manager):
                     campaignx_politician_query = campaignx_politician_query.filter(final_filters)
             searching_for_specific_campaigns = \
                 positive_value_exists(campaignx_we_vote_id) or positive_value_exists(search_text)
-            if not searching_for_specific_campaigns:
-                # Do not include campaigns in general lists with the following conditions
-                campaignx_politician_query = campaignx_politician_query.exclude(supporters_count__lte=5)
+            # NOTE: CampaignXPolitician does not have 'supporters_count' field currently
+            # if not searching_for_specific_campaigns:
+            #     # Do not include campaigns in general lists with the following conditions
+            #     campaignx_politician_query = campaignx_politician_query.exclude(supporters_count__lte=5)
             campaignx_politician_list = list(campaignx_politician_query)
             if len(campaignx_politician_list):
                 campaignx_politician_list_found = True
