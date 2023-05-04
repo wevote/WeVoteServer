@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 import re
-import datetime
+from datetime import datetime
 from django.db import models
 from django.db.models import Q
 import wevote_functions.admin
@@ -11,7 +11,7 @@ from candidate.models import PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWI
     PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_VOTE_USA, PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from tag.models import Tag
-from wevote_functions.functions import candidate_party_display, convert_state_code_to_state_text, \
+from wevote_functions.functions import candidate_party_display, convert_to_int, convert_date_to_date_as_integer, \
     convert_to_political_party_constant, display_full_name_with_correct_capitalization, \
     extract_first_name_from_full_name, extract_middle_name_from_full_name, \
     extract_last_name_from_full_name, extract_twitter_handle_from_text_string, generate_random_string, \
@@ -239,6 +239,7 @@ class Politician(models.Model):
     # This is not the same as saying that a CampaignX is supporting or opposing this politician -- we use
     #  the CampaignXPolitician table to store links to politicians.
     linked_campaignx_we_vote_id = models.CharField(max_length=255, null=True, unique=True)
+    linked_campaignx_we_vote_id_date_last_updated = models.DateTimeField(null=True)
     linkedin_url = models.TextField(null=True, blank=True)
     politician_facebook_id = models.CharField(
         verbose_name='politician facebook user name', max_length=255, null=True, unique=False)
@@ -376,6 +377,91 @@ class PoliticianManager(models.Manager):
     def __init__(self):
         pass
 
+    def add_politician_position_sorting_dates_if_needed(self, position_object=None, politician_we_vote_id=''):
+        """
+        Search for any CandidateCampaign objects for this politician in the future
+         Then find the latest election that candidate is running for, so we can get
+         candidate_year and candidate_ultimate_election_date.
+        If no future candidate entries for this politician, set position_ultimate_election_not_linked to True
+        :param position_object:
+        :param politician_we_vote_id:
+        :return:
+        """
+        candidate_list = []
+        candidate_list_found = False
+        position_object_updated = False
+        status = ""
+        success = True
+        from candidate.models import CandidateManager
+        candidate_manager = CandidateManager()
+
+        if positive_value_exists(politician_we_vote_id):
+            from candidate.models import CandidateListManager
+            candidate_list_manager = CandidateListManager()
+            results = candidate_list_manager.retrieve_candidates_from_politician(
+                politician_we_vote_id=politician_we_vote_id,
+                read_only=True)
+            if results['candidate_list_found']:
+                candidate_list = results['candidate_list']
+                candidate_list_found = True
+            elif not results['success']:
+                status += results['status']
+                success = False
+
+        candidate_we_vote_id_list = []
+        if candidate_list_found:
+            for candidate in candidate_list:
+                if candidate.we_vote_id not in candidate_we_vote_id_list:
+                    candidate_we_vote_id_list.append(candidate.we_vote_id)
+
+        ultimate_election_date_found = False
+        if candidate_list_found and len(candidate_we_vote_id_list) > 0:
+            today = datetime.now().date()
+            this_year = 0
+            if today and today.year:
+                this_year = convert_to_int(today.year)
+            date_now_as_integer = convert_date_to_date_as_integer(today)
+            date_results = candidate_manager.generate_candidate_position_sorting_dates(
+                candidate_we_vote_id_list=candidate_we_vote_id_list)
+            if not positive_value_exists(date_results['success']):
+                success = False
+            if success:
+                largest_year_integer = date_results['largest_year_integer']
+                if largest_year_integer < this_year:
+                    largest_year_integer = 0
+                if positive_value_exists(largest_year_integer):
+                    if not position_object.position_year:
+                        position_object.position_year = largest_year_integer
+                        position_object_updated = True
+                    elif largest_year_integer > position_object.position_year:
+                        position_object.position_year = largest_year_integer
+                        position_object_updated = True
+
+                largest_election_date_integer = date_results['largest_election_date_integer']
+                if largest_election_date_integer < date_now_as_integer:
+                    largest_election_date_integer = 0
+                if positive_value_exists(largest_election_date_integer):
+                    if not position_object.position_ultimate_election_date:
+                        position_object.position_ultimate_election_date = largest_election_date_integer
+                        position_object_updated = True
+                        ultimate_election_date_found = True
+                    elif largest_election_date_integer > position_object.position_ultimate_election_date:
+                        position_object.position_ultimate_election_date = largest_election_date_integer
+                        position_object_updated = True
+                        ultimate_election_date_found = True
+        if success and not ultimate_election_date_found:
+            # If here, mark position_ultimate_election_not_linked as True and then exit
+            status += "ULTIMATE_ELECTION_DATE_NOT_FOUND "
+            position_object.position_ultimate_election_not_linked = True
+            position_object_updated = True
+
+        return {
+            'position_object_updated':  position_object_updated,
+            'position_object':          position_object,
+            'status':                   status,
+            'success':                  success,
+        }
+
     def create_politician_from_similar_object(self, similar_object):
         """
         Take We Vote candidate, organization or representative object, and create a new politician entry
@@ -416,7 +502,7 @@ class PoliticianManager(models.Manager):
             political_party = candidate_party_display(political_party_constant)
             if positive_value_exists(similar_object.birth_day_text):
                 try:
-                    birth_date = datetime.datetime.strptime(similar_object.birth_day_text, '%Y-%m-%d')
+                    birth_date = datetime.strptime(similar_object.birth_day_text, '%Y-%m-%d')
                 except Exception as e:
                     birth_date = None
                     status += "FAILED_CONVERTING_BIRTH_DAY_TEXT: " + str(e) + " " + str(similar_object.birth_day_text) + " "

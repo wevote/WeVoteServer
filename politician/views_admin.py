@@ -478,6 +478,7 @@ def politician_list_view(request):
         datetime_now = timezone.localize(datetime.now())
         for one_politician in politician_list_to_convert:
             results = generate_campaignx_for_politician(
+                datetime_now=datetime_now,
                 politician=one_politician,
                 save_individual_politician=False,
             )
@@ -488,7 +489,8 @@ def politician_list_view(request):
                 updates_made += 1
 
         if updates_needed:
-            Politician.objects.bulk_update(update_list, ['linked_campaignx_we_vote_id'])
+            Politician.objects.bulk_update(
+                update_list, ['linked_campaignx_we_vote_id', 'linked_campaignx_we_vote_id_date_last_updated'])
             messages.add_message(request, messages.INFO,
                                  "{updates_made:,} politicians updated with new linked_campaignx_we_vote_id. "
                                  "{total_to_convert_after:,} remaining."

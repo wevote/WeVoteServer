@@ -306,7 +306,7 @@ class OfficeHeldManager(models.Manager):
         offices_held_for_location_found = False
         offices_held_for_location = None
         location = None
-        try_without_maps_key = False
+        # try_without_maps_key = False
         status = ""
         state_code = ""
 
@@ -328,7 +328,7 @@ class OfficeHeldManager(models.Manager):
         try:
             location = self.google_client.geocode(text_for_map_search, sensor=False, timeout=GEOCODE_TIMEOUT)
         except GeocoderQuotaExceeded:
-            try_without_maps_key = True
+            # try_without_maps_key = True
             status += "GEOCODER_QUOTA_EXCEEDED "
         except Exception as e:
             try_without_maps_key = True
@@ -336,23 +336,26 @@ class OfficeHeldManager(models.Manager):
             # logger.info(status + " @ " + text_for_map_search + "  google_civic_election_id=" +
             #             str(google_civic_election_id))
 
-        if try_without_maps_key:
-            # If we have exceeded our account, try without a maps key
-            try:
-                temp_google_client = get_geocoder_for_service('google')()
-                location = temp_google_client.geocode(text_for_map_search, sensor=False, timeout=GEOCODE_TIMEOUT)
-            except GeocoderQuotaExceeded:
-                status += "GEOCODER_QUOTA_EXCEEDED "
-                results = {
-                    'status':                   status,
-                    'geocoder_quota_exceeded':  True,
-                    'offices_held_for_location_found':    offices_held_for_location_found,
-                    'offices_held_for_location':          offices_held_for_location,
-                }
-                return results
-            except Exception as e:
-                status += "GEOCODER_ERROR: " + str(e) + ' '
-                location = None
+        # Since July 2018 Google requires each request to have an API key.
+        # Pass a valid `api_key` to GoogleV3 geocoder to fix this error.
+        # See https://developers.google.com/maps/documentation/geocoding/usage-and-billing
+        # if try_without_maps_key:
+        #     # If we have exceeded our account, try without a maps key
+        #     try:
+        #         temp_google_client = get_geocoder_for_service('google')()
+        #         location = temp_google_client.geocode(text_for_map_search, sensor=False, timeout=GEOCODE_TIMEOUT)
+        #     except GeocoderQuotaExceeded:
+        #         status += "GEOCODER_QUOTA_EXCEEDED "
+        #         results = {
+        #             'status':                   status,
+        #             'geocoder_quota_exceeded':  True,
+        #             'offices_held_for_location_found':    offices_held_for_location_found,
+        #             'offices_held_for_location':          offices_held_for_location,
+        #         }
+        #         return results
+        #     except Exception as e:
+        #         status += "GEOCODER_ERROR: " + str(e) + ' '
+        #         location = None
 
         offices_held_for_location = None
         if location is None:
