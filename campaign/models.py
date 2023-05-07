@@ -212,8 +212,10 @@ class CampaignXManager(models.Manager):
                 return self.fetch_next_goal_level(supporters_count=supporters_count, tier_size=125)
             elif supporters_count >= 50:
                 return self.fetch_next_goal_level(supporters_count=supporters_count, tier_size=50)
+            elif supporters_count >= 10:
+                return self.fetch_next_goal_level(supporters_count=supporters_count, tier_size=10)
             else:
-                return 50
+                return 10
         except Exception as e:
             return 0
 
@@ -1993,6 +1995,10 @@ class CampaignXManager(models.Manager):
                         campaignx.politician_starter_list_serialized = \
                             update_values['politician_starter_list_serialized']
                         campaignx_changed = True
+                if 'linked_politician_we_vote_id' in update_values \
+                        and positive_value_exists(update_values['linked_politician_we_vote_id']):
+                    campaignx.linked_politician_we_vote_id = update_values['linked_politician_we_vote_id']
+                    campaignx_changed = True
                 if 'supporters_count' in update_values \
                         and positive_value_exists(update_values['supporters_count']):
                     campaignx.supporters_count = update_values['supporters_count']

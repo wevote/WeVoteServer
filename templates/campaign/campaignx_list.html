@@ -54,6 +54,13 @@
 
     {#  #}
     &nbsp;&nbsp;&nbsp;
+    <label for="show_campaigns_linked_to_politicians_id">
+      <input type="checkbox" name="show_campaigns_linked_to_politicians" id="show_campaigns_linked_to_politicians_id" value="1"
+             {% if show_campaigns_linked_to_politicians %}checked{% endif %} /> Only Show Campaigns Linked to Politician
+    </label>
+
+    {#  #}
+    &nbsp;&nbsp;&nbsp;
     <label for="include_campaigns_from_prior_elections_id">
       <input type="checkbox" name="include_campaigns_from_prior_elections" id="include_campaigns_from_prior_elections_id" value="1"
              {% if include_campaigns_from_prior_elections %}checked{% endif %} /> Include Prior Elections
@@ -133,7 +140,7 @@
                     </a>
                 </span><br />
                 <span style="color: darkgray">
-                   {{ campaignx.we_vote_id }}&nbsp;
+                   {{ campaignx.we_vote_id }}&nbsp;&nbsp;{{ campaignx.linked_politician_we_vote_id|default_if_none:"" }}
                 </span>
                 <span style="font-size: .95rem; color: gray">
                 {% if campaignx.is_in_team_review_mode %}
@@ -269,6 +276,9 @@
                 this.form.submit();
             });
             $('#show_campaigns_in_draft_id').change(function() {
+                this.form.submit();
+            });
+            $('#show_campaigns_linked_to_politicians_id').change(function() {
                 this.form.submit();
             });
             $('#state_code_id').change(function() {

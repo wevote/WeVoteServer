@@ -559,10 +559,13 @@ def merge_if_duplicate_politicians(politician1, politician2, conflict_values):
                 or attribute == "we_vote_hosted_profile_image_url_tiny":
             if positive_value_exists(getattr(politician1, attribute)):
                 # We can proceed because politician1 has a valid attribute, so we can default to choosing that one
-                pass
+                if attribute in POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED:
+                    clear_these_attributes_from_politician2.append(attribute)
             elif positive_value_exists(getattr(politician2, attribute)):
                 # If we are here, politician1 does NOT have a valid attribute, but politician2 does
                 merge_choices[attribute] = getattr(politician2, attribute)
+                if attribute in POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED:
+                    clear_these_attributes_from_politician2.append(attribute)
         else:
             conflict_value = conflict_values.get(attribute, None)
             if conflict_value == "CONFLICT":

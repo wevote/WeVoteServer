@@ -129,6 +129,7 @@ def campaignx_save_view(request):  # campaignSave & campaignStartSave
     campaign_title = request.POST.get('campaign_title', '')
     campaign_title_changed = positive_value_exists(request.POST.get('campaign_title_changed', False))
     campaignx_we_vote_id = request.POST.get('campaignx_we_vote_id', '')
+    hostname = request.POST.get('hostname', '')
     politician_delete_list_serialized = request.POST.get('politician_delete_list', '')
     politician_starter_list_serialized = request.POST.get('politician_starter_list', '')
     politician_starter_list_changed = positive_value_exists(request.POST.get('politician_starter_list_changed', False))
@@ -144,9 +145,11 @@ def campaignx_save_view(request):  # campaignSave & campaignStartSave
         campaign_title=campaign_title,
         campaign_title_changed=campaign_title_changed,
         campaignx_we_vote_id=campaignx_we_vote_id,
+        hostname=hostname,
         politician_delete_list_serialized=politician_delete_list_serialized,
         politician_starter_list_serialized=politician_starter_list_serialized,
         politician_starter_list_changed=politician_starter_list_changed,
+        request=request,
         voter_device_id=voter_device_id,
     )
     return HttpResponse(json.dumps(json_data), content_type='application/json')

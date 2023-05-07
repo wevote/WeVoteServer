@@ -2259,6 +2259,8 @@ def voter_email_address_send_sign_in_code_email_for_api(  # voterEmailAddressSav
     email_address_already_owned_by_this_voter = False
     email_address_already_owned_by_other_voter = False
     email_address_found = False
+    make_sure_email_has_secret_key = False
+    voter_email_address_object = None
 
     # Independent of email verification, we need a consistent recipient_email_subscription_secret_key
     #  If there is an email_with_ownership_verified, we need to use that above all others,
@@ -2307,6 +2309,11 @@ def voter_email_address_send_sign_in_code_email_for_api(  # voterEmailAddressSav
             email_address_we_vote_id = voter_email_address_object.we_vote_id
             if not recipient_email_subscription_secret_key:
                 recipient_email_subscription_secret_key = voter_email_address_object.subscription_secret_key
+            if not positive_value_exists(recipient_email_subscription_secret_key):
+                make_sure_email_has_secret_key = True
+            recipient_email_address_secret_key = voter_email_address_object.secret_key
+            if not positive_value_exists(recipient_email_address_secret_key):
+                make_sure_email_has_secret_key = True
             email_address_created = False
             email_address_found = True
         elif email_results['email_address_list_found']:
@@ -2390,25 +2397,9 @@ def voter_email_address_send_sign_in_code_email_for_api(  # voterEmailAddressSav
             email_ownership_is_verified=email_ownership_is_verified)
         status += email_save_results['status']
         if email_save_results['email_address_object_saved']:
-            new_email_address_object = email_save_results['email_address_object']
-            email_address_we_vote_id = new_email_address_object.we_vote_id
-            if positive_value_exists(new_email_address_object.subscription_secret_key):
-                recipient_email_subscription_secret_key = new_email_address_object.subscription_secret_key
-            else:
-                recipient_email_subscription_secret_key = \
-                    email_manager.update_email_address_with_new_subscription_secret_key(
-                        email_we_vote_id=email_address_we_vote_id)
-            # The email.secret_key isn't shown to voter
-            if positive_value_exists(new_email_address_object.secret_key):
-                recipient_email_address_secret_key = new_email_address_object.secret_key
-                status += "EXISTING_SECRET_KEY_FOUND4 "
-            else:
-                recipient_email_address_secret_key = \
-                    email_manager.update_email_address_with_new_secret_key(email_address_we_vote_id)
-                if positive_value_exists(recipient_email_address_secret_key):
-                    status += "NEW_SECRET_KEY_GENERATED4 "
-                else:
-                    status += "NEW_SECRET_KEY_COULD_NOT_BE_GENERATED4 "
+            voter_email_address_object = email_save_results['email_address_object']
+            email_address_we_vote_id = voter_email_address_object.we_vote_id
+            make_sure_email_has_secret_key = True
             email_address_created = True
             email_address_found = True
             status += email_save_results['status']
@@ -2417,10 +2408,29 @@ def voter_email_address_send_sign_in_code_email_for_api(  # voterEmailAddressSav
             error_results['status'] = status
             return error_results
 
+    if make_sure_email_has_secret_key:
+        if positive_value_exists(voter_email_address_object.subscription_secret_key):
+            recipient_email_subscription_secret_key = voter_email_address_object.subscription_secret_key
+        else:
+            recipient_email_subscription_secret_key = \
+                email_manager.update_email_address_with_new_subscription_secret_key(
+                    email_we_vote_id=email_address_we_vote_id)
+        # The email.secret_key isn't shown to voter
+        if positive_value_exists(voter_email_address_object.secret_key):
+            recipient_email_address_secret_key = voter_email_address_object.secret_key
+            status += "EXISTING_SECRET_KEY_FOUND4 "
+        else:
+            recipient_email_address_secret_key = \
+                email_manager.update_email_address_with_new_secret_key(email_address_we_vote_id)
+            if positive_value_exists(recipient_email_address_secret_key):
+                status += "NEW_SECRET_KEY_GENERATED4 "
+            else:
+                status += "NEW_SECRET_KEY_COULD_NOT_BE_GENERATED4 "
+
     voter_device_link_manager = VoterDeviceLinkManager()
     # Run the code to send email with sign in verification code (6 digit)
     status += "ABOUT_TO_SEND_SIGN_IN_CODE_EMAIL: " + str(email_address_we_vote_id) + " "
-    # We need to link a randomly generated 6 digit code to this voter_device_id
+    # We need to link a randomly generated 6-digit code to this voter_device_id
     results = voter_device_link_manager.retrieve_voter_secret_code_up_to_date(voter_device_id)
     secret_code = results['secret_code']
     secret_code_system_locked_for_this_voter_device_id = \

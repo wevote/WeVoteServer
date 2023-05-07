@@ -670,7 +670,7 @@ class EmailManager(models.Manager):
             else:
                 email_address_object_found = False
                 success = False
-                status += "VERIFY_EMAIL_ADDRESS_VARIABLES_MISSING "
+                status += "VERIFY_EMAIL_SECRET_KEY_VARIABLE_MISSING "
         except EmailAddress.DoesNotExist:
             success = True
             status += "VERIFY_EMAIL_ADDRESS_NOT_FOUND "

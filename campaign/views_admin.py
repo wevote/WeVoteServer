@@ -546,6 +546,8 @@ def campaign_list_view(request):
         positive_value_exists(request.GET.get('show_blocked_campaigns', False))
     show_campaigns_in_draft = \
         positive_value_exists(request.GET.get('show_campaigns_in_draft', False))
+    show_campaigns_linked_to_politicians = \
+        positive_value_exists(request.GET.get('show_campaigns_linked_to_politicians', False))
     show_more = request.GET.get('show_more', False)  # Show up to 1,000 organizations
     show_issues = request.GET.get('show_issues', '')
     show_organizations_without_email = positive_value_exists(request.GET.get('show_organizations_without_email', False))
@@ -628,6 +630,12 @@ def campaign_list_view(request):
     else:
         campaignx_list_query = campaignx_list_query.filter(in_draft_mode=False)
 
+    if positive_value_exists(show_campaigns_linked_to_politicians):
+        campaignx_list_query = campaignx_list_query.filter(linked_politician_we_vote_id__isnull=False)
+    else:
+        campaignx_list_query = campaignx_list_query.filter(
+            Q(linked_politician_we_vote_id__isnull=True) | Q(linked_politician_we_vote_id__exact=''))
+
     if positive_value_exists(campaignx_owner_organization_we_vote_id):
         campaignx_we_vote_id_list_from_owner_organization_we_vote_id = \
             campaignx_manager.fetch_campaignx_we_vote_id_list_from_owner_organization_we_vote_id(
@@ -656,6 +664,9 @@ def campaign_list_view(request):
             filters.append(new_filter)
 
             new_filter = Q(campaign_description__icontains=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(linked_politician_we_vote_id__iexact=one_word)
             filters.append(new_filter)
 
             new_filter = Q(started_by_voter_we_vote_id__iexact=one_word)
@@ -733,6 +744,7 @@ def campaign_list_view(request):
         'show_organizations_without_email':         show_organizations_without_email,
         'show_blocked_campaigns':                   show_blocked_campaigns,
         'show_campaigns_in_draft':                  show_campaigns_in_draft,
+        'show_campaigns_linked_to_politicians':     show_campaigns_linked_to_politicians,
         'sort_by':                                  sort_by,
         'state_code':                               state_code,
         'state_list':                               sorted_state_list,
