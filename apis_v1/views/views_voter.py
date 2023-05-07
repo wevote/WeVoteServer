@@ -3329,7 +3329,7 @@ def voter_verify_secret_code_view(request):  # voterVerifySecretCode
                     except Exception as e:
                         status += "COULD_NOT_GET_TO_VOTER_WE_VOTE_ID: " + str(e) + " "
                         success = False
-                else:
+                elif positive_value_exists(voter_device_link.email_secret_key):
                     # Find and verify the unverified email we are verifying
                     email_results = email_manager.verify_email_address_object_from_secret_key(
                         email_secret_key=voter_device_link.email_secret_key)
@@ -3341,12 +3341,14 @@ def voter_verify_secret_code_view(request):  # voterVerifySecretCode
                             voter_manager.update_voter_email_ownership_verified(
                                 voter, email_address_object)
                         except Exception as e:
-                            status += "UNABLE_TO_CONNECT_VERIFIED_EMAIL_WITH_THIS_ACCOUNT " + str(e) + " "
+                            status += "UNABLE_TO_CONNECT_VERIFIED_EMAIL_WITH_THIS_ACCOUNT: " + str(e) + " "
                             success = False
                     else:
                         status += email_results['status']
+                else:
+                    status += "NO_VALUE_IN-voter_device_link.email_secret_key "
 
-                if positive_value_exists(voter_device_link.email_secret_key):
+                if success and positive_value_exists(voter_device_link.email_secret_key):
                     # We remove secret_key's to avoid future collisions in the voter_device_link
                     clear_results = email_manager.clear_secret_key_from_email_address(
                         voter_device_link.email_secret_key)

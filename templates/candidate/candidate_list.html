@@ -403,6 +403,10 @@
                         <br />
                         <span style="color: #999;">(no&nbsp;politician&nbsp;link)</span>
                     {% endif %}
+                    {% if candidate.linked_campaignx_we_vote_id %}
+                        <br />
+                        {{ candidate.linked_campaignx_we_vote_id }}
+                    {% endif %}
                     {% if candidate.ballotpedia_candidate_summary %}
                     <br /><span style="color: darkgray">{{ candidate.ballotpedia_candidate_summary|default_if_none:""|truncatechars:50 }}</span>
                     {% endif %}

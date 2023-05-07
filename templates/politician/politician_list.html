@@ -102,8 +102,15 @@
                 </a>
                 {% endif %}
             </td>
-            <td><a href="{% url 'politician:politician_edit' politician.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                   target="_blank">{{ politician.politician_name }} <span class="glyphicon glyphicon-new-window"></span></a></td>
+            <td>
+                <a href="{% url 'politician:politician_edit' politician.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">{{ politician.politician_name }} <span class="glyphicon glyphicon-new-window"></span></a>
+                {% if politician.seo_friendly_path %}
+                    <br />
+                    <a href="https://quality.wevote.us/{{ politician.seo_friendly_path }}/-"
+                       target="_blank">/{{ politician.seo_friendly_path }} <span class="glyphicon glyphicon-new-window"></span></a>
+                {% endif %}
+            </td>
             <td>{{ politician.state_code|default_if_none:"" }}</td>
             <td>
                 {{ politician.id }} - {{ politician.we_vote_id }}
@@ -112,6 +119,9 @@
                     {% for representative_we_vote_id in politician.linked_representative_we_vote_id_list %}
                         <span style="color: #999">{{ representative_we_vote_id }}&nbsp;</span>
                     {% endfor %}
+                {% endif %}
+                {% if politician.linked_campaignx_we_vote_id %}
+                    <br />{{ politician.linked_campaignx_we_vote_id|default_if_none:"" }}
                 {% endif %}
                 {% if politician.vote_usa_politician_id %}
                     <br />{{ politician.vote_usa_politician_id|default_if_none:"" }}

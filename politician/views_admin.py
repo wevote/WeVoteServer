@@ -387,10 +387,11 @@ def politician_list_view(request):
     state_code = request.GET.get('state_code', '')
     politician_search = request.GET.get('politician_search', '')
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    run_scripts = positive_value_exists(request.GET.get('run_scripts', False))
     show_all = positive_value_exists(request.GET.get('show_all', False))
     show_battleground = positive_value_exists(request.GET.get('show_battleground', False))
     show_related_candidates = positive_value_exists(request.GET.get('show_related_candidates', False))
-    show_politicians_with_email = request.GET.get('show_politicians_with_email', False)
+    show_politicians_with_email = positive_value_exists(request.GET.get('show_politicians_with_email', False))
 
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
@@ -414,9 +415,9 @@ def politician_list_view(request):
     #                          'politician_email mismatch with politician_email_address: ' + str(we_vote_id_string))
 
     # Create seo_friendly_path for all politicians who currently don't have one
-    generate_seo_friendly_path_updates = False
-    number_to_create = 1
-    if generate_seo_friendly_path_updates:
+    generate_seo_friendly_path_updates = True
+    number_to_create = 1000
+    if generate_seo_friendly_path_updates and run_scripts:
         politician_query = Politician.objects.all()
         politician_query = politician_query.filter(
             Q(seo_friendly_path__isnull=True) |
@@ -446,16 +447,22 @@ def politician_list_view(request):
                 updates_needed = True
                 updates_made += 1
         if updates_needed:
-            Politician.objects.bulk_update(update_list, ['seo_friendly_path', 'seo_friendly_path_date_last_updated'])
-            messages.add_message(request, messages.INFO,
-                                 "{updates_made:,} politicians updated with new seo_friendly_path. "
-                                 "{total_to_convert_after:,} remaining."
-                                 "".format(total_to_convert_after=total_to_convert_after, updates_made=updates_made))
+            try:
+                Politician.objects.bulk_update(update_list, ['seo_friendly_path', 'seo_friendly_path_date_last_updated'])
+                messages.add_message(request, messages.INFO,
+                                     "{updates_made:,} politicians updated with new seo_friendly_path. "
+                                     "{total_to_convert_after:,} remaining."
+                                     "".format(total_to_convert_after=total_to_convert_after,
+                                               updates_made=updates_made))
+            except Exception as e:
+                messages.add_message(request, messages.ERROR,
+                                     "ERROR with generate_seo_friendly_path_updates: {e} "
+                                     "".format(e=e))
 
     # Create default CampaignX for all politicians who currently don't have one
-    generate_campaignx_for_every_politician = False
-    number_to_create = 1
-    if generate_campaignx_for_every_politician:
+    generate_campaignx_for_every_politician = True
+    number_to_create = 1000
+    if generate_campaignx_for_every_politician and run_scripts:
         politician_query = Politician.objects.all()
         politician_query = politician_query.filter(
             Q(linked_campaignx_we_vote_id__isnull=True) |
@@ -470,7 +477,6 @@ def politician_list_view(request):
         total_to_convert = politician_query.count()
         total_to_convert_after = total_to_convert - number_to_create if total_to_convert > number_to_create else 0
         politician_list_to_convert = list(politician_query[:number_to_create])
-        campaignx_manager = CampaignXManager()
         update_list = []
         updates_needed = False
         updates_made = 0
@@ -489,12 +495,69 @@ def politician_list_view(request):
                 updates_made += 1
 
         if updates_needed:
-            Politician.objects.bulk_update(
-                update_list, ['linked_campaignx_we_vote_id', 'linked_campaignx_we_vote_id_date_last_updated'])
-            messages.add_message(request, messages.INFO,
-                                 "{updates_made:,} politicians updated with new linked_campaignx_we_vote_id. "
-                                 "{total_to_convert_after:,} remaining."
-                                 "".format(total_to_convert_after=total_to_convert_after, updates_made=updates_made))
+            try:
+                Politician.objects.bulk_update(
+                    update_list, ['linked_campaignx_we_vote_id', 'linked_campaignx_we_vote_id_date_last_updated'])
+                messages.add_message(request, messages.INFO,
+                                     "Generated CampaignX for {updates_made:,} politicians. "
+                                     "{total_to_convert_after:,} remaining."
+                                     "".format(total_to_convert_after=total_to_convert_after,
+                                               updates_made=updates_made))
+            except Exception as e:
+                messages.add_message(request, messages.ERROR,
+                                     "ERROR with generate_campaignx_for_every_politician: {e} "
+                                     "".format(e=e))
+
+    # Find all politicians with linked_campaignx_we_vote_id and make sure Campaignx
+    # entry includes linked_politician_we_vote_id
+    update_campaignx_with_linked_politician_we_vote_id = True
+    number_to_update = 7000  # We have to run this routine on the entire state
+    if update_campaignx_with_linked_politician_we_vote_id and positive_value_exists(state_code) and run_scripts:
+        politician_query = Politician.objects.all()
+        politician_query = politician_query.filter(linked_campaignx_we_vote_id__isnull=False)
+        politician_query = politician_query.filter(state_code__iexact=state_code)
+        total_to_convert = politician_query.count()
+        total_to_convert_after = total_to_convert - number_to_update if total_to_convert > number_to_update else 0
+        politician_list_to_convert = list(politician_query[:number_to_update])
+        campaignx_we_vote_id_list = []
+        politician_dict_by_campaign_we_vote_id = {}
+        for one_politician in politician_list_to_convert:
+            if positive_value_exists(one_politician.linked_campaignx_we_vote_id) and \
+                    one_politician.linked_campaignx_we_vote_id not in campaignx_we_vote_id_list:
+                campaignx_we_vote_id_list.append(one_politician.linked_campaignx_we_vote_id)
+                politician_dict_by_campaign_we_vote_id[one_politician.linked_campaignx_we_vote_id] = one_politician
+
+        update_list = []
+        updates_needed = False
+        updates_made = 0
+
+        from campaign.models import CampaignX
+        campaignx_query = CampaignX.objects.all()
+        campaignx_query = campaignx_query.filter(we_vote_id__in=campaignx_we_vote_id_list)
+        campaignx_list = list(campaignx_query)
+        for one_campaignx in campaignx_list:
+            if one_campaignx.we_vote_id in politician_dict_by_campaign_we_vote_id:
+                one_politician = politician_dict_by_campaign_we_vote_id[one_campaignx.we_vote_id]
+                if hasattr(one_politician, 'we_vote_id'):
+                    one_campaignx.linked_politician_we_vote_id = one_politician.we_vote_id
+                    update_list.append(one_campaignx)
+                    updates_made += 1
+                    if not updates_needed:
+                        updates_needed = True
+
+        if updates_needed:
+            try:
+                CampaignX.objects.bulk_update(
+                    update_list, ['linked_politician_we_vote_id'])
+                messages.add_message(request, messages.INFO,
+                                     "{updates_made:,} politicians updated with new linked_campaignx_we_vote_id. "
+                                     "{total_to_convert_after:,} remaining."
+                                     "".format(total_to_convert_after=total_to_convert_after,
+                                               updates_made=updates_made))
+            except Exception as e:
+                messages.add_message(request, messages.ERROR,
+                                     "ERROR with update_campaignx_with_linked_politician_we_vote_id: {e} "
+                                     "".format(e=e))
 
     politician_list = []
     politician_list_count = 0
@@ -545,6 +608,9 @@ def politician_list_view(request):
                 filters.append(new_filter)
 
                 new_filter = Q(last_name__iexact=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(linked_campaignx_we_vote_id__iexact=one_word)
                 filters.append(new_filter)
 
                 new_filter = (

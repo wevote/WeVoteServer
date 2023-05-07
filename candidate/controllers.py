@@ -1568,123 +1568,130 @@ def generate_candidate_dict_from_candidate_object(
     candidate_manager = CandidateManager()
     status = ""
     success = True
-    if hasattr(candidate, 'politician_we_vote_id'):
-        withdrawal_date_string = ''
-        if isinstance(candidate.withdrawal_date, the_other_datetime.date):
-            withdrawal_date_string = candidate.withdrawal_date.strftime("%Y-%m-%d")
-        list_found = False
-        office_list_for_candidate = []
-        if len(candidate_to_office_link_list_from_multiple_candidates) > 0:
-            candidate_to_office_link_list = []
-            for candidate_to_office_link in candidate_to_office_link_list_from_multiple_candidates:
-                if candidate_to_office_link.candidate_we_vote_id == candidate.we_vote_id:
-                    candidate_to_office_link_list.append(candidate_to_office_link)
-                    list_found = True
-        else:
-            office_link_results = candidate_manager.retrieve_candidate_to_office_link(
-                candidate_we_vote_id=candidate.we_vote_id,
-                read_only=True)
-            list_found = office_link_results['list_found']
-            candidate_to_office_link_list = office_link_results['candidate_to_office_link_list']
-        if list_found:
-            office_manager = ContestOfficeManager()
-            election_manager = ElectionManager()
-            for candidate_to_office_link in candidate_to_office_link_list:
-                contest_office_district_name = ''
-                contest_office_name = ''
-                office_found = False
-                if candidate_to_office_link.contest_office_we_vote_id in office_dict:
-                    office_found = True
-                    contest_office = office_dict[candidate_to_office_link.contest_office_we_vote_id]
+    if not hasattr(candidate, 'politician_we_vote_id'):
+        results = {
+            'candidate_dict':   candidate_dict,
+            'status':           status,
+            'success':          success,
+        }
+        return results
+
+    withdrawal_date_string = ''
+    if isinstance(candidate.withdrawal_date, the_other_datetime.date):
+        withdrawal_date_string = candidate.withdrawal_date.strftime("%Y-%m-%d")
+    list_found = False
+    office_list_for_candidate = []
+    if len(candidate_to_office_link_list_from_multiple_candidates) > 0:
+        candidate_to_office_link_list = []
+        for candidate_to_office_link in candidate_to_office_link_list_from_multiple_candidates:
+            if candidate_to_office_link.candidate_we_vote_id == candidate.we_vote_id:
+                candidate_to_office_link_list.append(candidate_to_office_link)
+                list_found = True
+    else:
+        office_link_results = candidate_manager.retrieve_candidate_to_office_link(
+            candidate_we_vote_id=candidate.we_vote_id,
+            read_only=True)
+        list_found = office_link_results['list_found']
+        candidate_to_office_link_list = office_link_results['candidate_to_office_link_list']
+    if list_found:
+        office_manager = ContestOfficeManager()
+        election_manager = ElectionManager()
+        for candidate_to_office_link in candidate_to_office_link_list:
+            contest_office_district_name = ''
+            contest_office_name = ''
+            office_found = False
+            if candidate_to_office_link.contest_office_we_vote_id in office_dict:
+                office_found = True
+                contest_office = office_dict[candidate_to_office_link.contest_office_we_vote_id]
+                if contest_office:
+                    contest_office_district_name = contest_office.district_name
+                    contest_office_name = contest_office.office_name
+            if not office_found:
+                results = office_manager.retrieve_contest_office_from_we_vote_id(
+                    candidate_to_office_link.contest_office_we_vote_id)
+                if results['contest_office_found']:
+                    contest_office = results['contest_office']
                     if contest_office:
                         contest_office_district_name = contest_office.district_name
                         contest_office_name = contest_office.office_name
-                if not office_found:
-                    results = office_manager.retrieve_contest_office_from_we_vote_id(
-                        candidate_to_office_link.contest_office_we_vote_id)
-                    if results['contest_office_found']:
-                        contest_office = results['contest_office']
-                        if contest_office:
-                            contest_office_district_name = contest_office.district_name
-                            contest_office_name = contest_office.office_name
-                election_day_text = ''
-                if positive_value_exists(candidate_to_office_link.google_civic_election_id):
-                    election_found = False
-                    election_id_integer = convert_to_int(candidate_to_office_link.google_civic_election_id)
-                    if election_id_integer in election_dict:
-                        election_found = True
-                        election = election_dict[election_id_integer]
+            election_day_text = ''
+            if positive_value_exists(candidate_to_office_link.google_civic_election_id):
+                election_found = False
+                election_id_integer = convert_to_int(candidate_to_office_link.google_civic_election_id)
+                if election_id_integer in election_dict:
+                    election_found = True
+                    election = election_dict[election_id_integer]
+                    election_day_text = election.election_day_text
+                if not election_found:
+                    results = election_manager.retrieve_election(
+                        google_civic_election_id=candidate_to_office_link.google_civic_election_id,
+                        read_only=True)
+                    if results['election_found']:
+                        election = results['election']
                         election_day_text = election.election_day_text
-                    if not election_found:
-                        results = election_manager.retrieve_election(
-                            google_civic_election_id=candidate_to_office_link.google_civic_election_id,
-                            read_only=True)
-                        if results['election_found']:
-                            election = results['election']
-                            election_day_text = election.election_day_text
-                one_office_dict = {
-                    'contest_office_name':      contest_office_name,
-                    'contest_office_we_vote_id': candidate_to_office_link.contest_office_we_vote_id,
-                    'district_name':            contest_office_district_name,
-                    'election_day_text':        election_day_text,
-                    'google_civic_election_id': candidate_to_office_link.google_civic_election_id,
-                    'state_code':               candidate_to_office_link.state_code,
-                }
-                office_list_for_candidate.append(one_office_dict)
+            one_office_dict = {
+                'contest_office_name':      contest_office_name,
+                'contest_office_we_vote_id': candidate_to_office_link.contest_office_we_vote_id,
+                'district_name':            contest_office_district_name,
+                'election_day_text':        election_day_text,
+                'google_civic_election_id': candidate_to_office_link.google_civic_election_id,
+                'state_code':               candidate_to_office_link.state_code,
+            }
+            office_list_for_candidate.append(one_office_dict)
 
-        # This should match voter_ballot_items_retrieve_for_one_election_for_api (voterBallotItemsRetrieve)
-        date_last_updated = ''
-        if positive_value_exists(candidate.date_last_updated):
-            date_last_updated = candidate.date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
-        candidate_dict = {
-            'ballot_item_display_name':         candidate.display_candidate_name(),
-            'ballotpedia_candidate_id':         candidate.ballotpedia_candidate_id,
-            'ballotpedia_candidate_summary':    candidate.ballotpedia_candidate_summary,
-            'ballotpedia_candidate_url':        candidate.ballotpedia_candidate_url,
-            'ballotpedia_person_id':            candidate.ballotpedia_person_id,
-            'candidate_email':                  candidate.candidate_email,
-            'candidate_phone':                  candidate.candidate_phone,
-            'candidate_photo_url_large':        candidate.we_vote_hosted_profile_image_url_large
-            if positive_value_exists(candidate.we_vote_hosted_profile_image_url_large)
-            else candidate.candidate_photo_url(),
-            'candidate_photo_url_medium':       candidate.we_vote_hosted_profile_image_url_medium,
-            'candidate_photo_url_tiny':         candidate.we_vote_hosted_profile_image_url_tiny,
-            'candidate_url':                    candidate.candidate_url,
-            'candidate_contact_form_url':       candidate.candidate_contact_form_url,
-            'candidate_ultimate_election_date': candidate.candidate_ultimate_election_date,
-            'contest_office_id':                candidate.contest_office_id,  # Deprecate
-            'contest_office_list':              office_list_for_candidate,
-            'contest_office_name':              candidate.contest_office_name,  # Deprecate
-            'contest_office_we_vote_id':        office_we_vote_id,
-            'facebook_url':                     candidate.facebook_url,
-            'google_civic_election_id':         candidate.google_civic_election_id,  # Deprecate
-            'id':                               candidate.id,
-            'instagram_followers_count':        candidate.instagram_followers_count,
-            'instagram_handle':                 candidate.instagram_handle,
-            'is_battleground_race':             candidate.is_battleground_race
-            if positive_value_exists(candidate.is_battleground_race) else False,
-            'kind_of_ballot_item':              CANDIDATE,
-            'last_updated':                     date_last_updated,
-            'linked_campaignx_we_vote_id':      candidate.linked_campaignx_we_vote_id,
-            'maplight_id':                      candidate.maplight_id,
-            'ocd_division_id':                  candidate.ocd_division_id,
-            'order_on_ballot':                  candidate.order_on_ballot,
-            'party':                            candidate.political_party_display(),
-            'politician_id':                    candidate.politician_id,
-            'politician_we_vote_id':            candidate.politician_we_vote_id,
-            'seo_friendly_path':                candidate.seo_friendly_path,
-            'state_code':                       candidate.state_code,
-            'twitter_url':                      candidate.twitter_url,
-            'twitter_handle':                   candidate.fetch_twitter_handle(),
-            'twitter_description':              candidate.twitter_description
-            if positive_value_exists(candidate.twitter_description) and
-            len(candidate.twitter_description) > 1 else '',
-            'twitter_followers_count':          candidate.twitter_followers_count,
-            'youtube_url':                      candidate.youtube_url,
-            'we_vote_id':                       candidate.we_vote_id,
-            'withdrawn_from_election':          candidate.withdrawn_from_election,
-            'withdrawal_date':                  withdrawal_date_string,
-        }
+    # This should match voter_ballot_items_retrieve_for_one_election_for_api (voterBallotItemsRetrieve)
+    date_last_updated = ''
+    if positive_value_exists(candidate.date_last_updated):
+        date_last_updated = candidate.date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
+    candidate_dict = {
+        'ballot_item_display_name':         candidate.display_candidate_name(),
+        'ballotpedia_candidate_id':         candidate.ballotpedia_candidate_id,
+        'ballotpedia_candidate_summary':    candidate.ballotpedia_candidate_summary,
+        'ballotpedia_candidate_url':        candidate.ballotpedia_candidate_url,
+        'ballotpedia_person_id':            candidate.ballotpedia_person_id,
+        'candidate_email':                  candidate.candidate_email,
+        'candidate_phone':                  candidate.candidate_phone,
+        'candidate_photo_url_large':        candidate.we_vote_hosted_profile_image_url_large
+        if positive_value_exists(candidate.we_vote_hosted_profile_image_url_large)
+        else candidate.candidate_photo_url(),
+        'candidate_photo_url_medium':       candidate.we_vote_hosted_profile_image_url_medium,
+        'candidate_photo_url_tiny':         candidate.we_vote_hosted_profile_image_url_tiny,
+        'candidate_url':                    candidate.candidate_url,
+        'candidate_contact_form_url':       candidate.candidate_contact_form_url,
+        'candidate_ultimate_election_date': candidate.candidate_ultimate_election_date,
+        'contest_office_id':                candidate.contest_office_id,  # Deprecate
+        'contest_office_list':              office_list_for_candidate,
+        'contest_office_name':              candidate.contest_office_name,  # Deprecate
+        'contest_office_we_vote_id':        office_we_vote_id,
+        'facebook_url':                     candidate.facebook_url,
+        'google_civic_election_id':         candidate.google_civic_election_id,  # Deprecate
+        'id':                               candidate.id,
+        'instagram_followers_count':        candidate.instagram_followers_count,
+        'instagram_handle':                 candidate.instagram_handle,
+        'is_battleground_race':             candidate.is_battleground_race
+        if positive_value_exists(candidate.is_battleground_race) else False,
+        'kind_of_ballot_item':              CANDIDATE,
+        'last_updated':                     date_last_updated,
+        'linked_campaignx_we_vote_id':      candidate.linked_campaignx_we_vote_id,
+        'maplight_id':                      candidate.maplight_id,
+        'ocd_division_id':                  candidate.ocd_division_id,
+        'order_on_ballot':                  candidate.order_on_ballot,
+        'party':                            candidate.political_party_display(),
+        'politician_id':                    candidate.politician_id,
+        'politician_we_vote_id':            candidate.politician_we_vote_id,
+        'seo_friendly_path':                candidate.seo_friendly_path,
+        'state_code':                       candidate.state_code,
+        'twitter_url':                      candidate.twitter_url,
+        'twitter_handle':                   candidate.fetch_twitter_handle(),
+        'twitter_description':              candidate.twitter_description
+        if positive_value_exists(candidate.twitter_description) and
+        len(candidate.twitter_description) > 1 else '',
+        'twitter_followers_count':          candidate.twitter_followers_count,
+        'youtube_url':                      candidate.youtube_url,
+        'we_vote_id':                       candidate.we_vote_id,
+        'withdrawn_from_election':          candidate.withdrawn_from_election,
+        'withdrawal_date':                  withdrawal_date_string,
+    }
 
     results = {
         'candidate_dict':   candidate_dict,
