@@ -1563,6 +1563,7 @@ def generate_candidate_dict_from_candidate_object(
         election_dict={},
         office_dict={},
         office_id=0,
+        office_name='',
         office_we_vote_id=''):
     candidate_dict = {}
     candidate_manager = CandidateManager()
@@ -1649,6 +1650,7 @@ def generate_candidate_dict_from_candidate_object(
         'ballotpedia_candidate_summary':    candidate.ballotpedia_candidate_summary,
         'ballotpedia_candidate_url':        candidate.ballotpedia_candidate_url,
         'ballotpedia_person_id':            candidate.ballotpedia_person_id,
+        'candidate_contact_form_url':       candidate.candidate_contact_form_url,
         'candidate_email':                  candidate.candidate_email,
         'candidate_phone':                  candidate.candidate_phone,
         'candidate_photo_url_large':        candidate.we_vote_hosted_profile_image_url_large
@@ -1657,12 +1659,14 @@ def generate_candidate_dict_from_candidate_object(
         'candidate_photo_url_medium':       candidate.we_vote_hosted_profile_image_url_medium,
         'candidate_photo_url_tiny':         candidate.we_vote_hosted_profile_image_url_tiny,
         'candidate_url':                    candidate.candidate_url,
-        'candidate_contact_form_url':       candidate.candidate_contact_form_url,
         'candidate_ultimate_election_date': candidate.candidate_ultimate_election_date,
-        'contest_office_id':                candidate.contest_office_id,  # Deprecate
+        'contest_office_id':                office_id if positive_value_exists(office_id)
+        else candidate.contest_office_id,  # Deprecate
         'contest_office_list':              office_list_for_candidate,
-        'contest_office_name':              candidate.contest_office_name,  # Deprecate
-        'contest_office_we_vote_id':        office_we_vote_id,
+        'contest_office_name':              office_name if positive_value_exists(office_name)
+        else candidate.contest_office_name,
+        'contest_office_we_vote_id':        office_we_vote_id if positive_value_exists(office_we_vote_id)
+        else candidate.contest_office_we_vote_id,
         'facebook_url':                     candidate.facebook_url,
         'google_civic_election_id':         candidate.google_civic_election_id,  # Deprecate
         'id':                               candidate.id,

@@ -2833,6 +2833,7 @@ def generate_ballot_item_list_from_object_list(
     # Now prepare the full list for json result
     status += "BALLOT_ITEM_LIST_FOUND "
     ballot_item_list_found = len(ballot_item_object_list) > 0
+    from candidate.controllers import generate_candidate_dict_from_candidate_object
     for ballot_item in ballot_item_object_list:
         if ballot_item.contest_office_we_vote_id:
             office_name = ""
@@ -2856,59 +2857,15 @@ def generate_ballot_item_list_from_object_list(
                 if results['candidate_list_found']:
                     candidate_list = results['candidate_list']
                     for candidate in candidate_list:
-                        withdrawal_date = ''
-                        if isinstance(candidate.withdrawal_date, the_other_datetime.date):
-                            withdrawal_date = candidate.withdrawal_date.strftime("%Y-%m-%d")
-
-                        # This should match values returned in candidates_retrieve_for_api (candidatesRetrieve)
-                        one_candidate = {
-                            'id':                           candidate.id,
-                            'we_vote_id':                   candidate.we_vote_id,
-                            'ballot_item_display_name':     candidate.display_candidate_name(),
-                            'ballotpedia_candidate_id':     candidate.ballotpedia_candidate_id,
-                            'ballotpedia_candidate_summary': candidate.ballotpedia_candidate_summary,
-                            'ballotpedia_candidate_url':    candidate.ballotpedia_candidate_url,
-                            'ballotpedia_person_id':        candidate.ballotpedia_person_id,
-                            'candidate_email':              candidate.candidate_email,
-                            'candidate_phone':              candidate.candidate_phone,
-                            'candidate_photo_url_large':
-                                candidate.we_vote_hosted_profile_image_url_large
-                                if positive_value_exists(candidate.we_vote_hosted_profile_image_url_large)
-                                else candidate.candidate_photo_url(),
-                            'candidate_photo_url_medium':
-                                candidate.we_vote_hosted_profile_image_url_medium,
-                            'candidate_photo_url_tiny': candidate.we_vote_hosted_profile_image_url_tiny,
-                            'candidate_ultimate_election_date': candidate.candidate_ultimate_election_date,
-                            'candidate_url':                candidate.candidate_url,
-                            'candidate_contact_form_url':   candidate.candidate_contact_form_url,
-                            'contest_office_id':            office_id,
-                            'contest_office_name':          office_name,
-                            'contest_office_we_vote_id':    office_we_vote_id,
-                            'facebook_url':                 candidate.facebook_url,
-                            'google_civic_election_id':     google_civic_election_id,
-                            'instagram_handle':             candidate.instagram_handle,
-                            'instagram_followers_count':    candidate.instagram_followers_count,
-                            'kind_of_ballot_item':          CANDIDATE,
-                            'maplight_id':                  candidate.maplight_id,
-                            'ocd_division_id':              candidate.ocd_division_id,
-                            'order_on_ballot':              candidate.order_on_ballot,
-                            'party':                        candidate.political_party_display(),
-                            'politician_id':                candidate.politician_id,
-                            'politician_we_vote_id':        candidate.politician_we_vote_id,
-                            'state_code':                   candidate.state_code,
-                            'twitter_url':                  candidate.twitter_url,
-                            'twitter_handle':               candidate.fetch_twitter_handle(),
-                            'twitter_description':          candidate.twitter_description
-                            if positive_value_exists(candidate.twitter_description) and
-                            len(candidate.twitter_description) > 1 else '',
-                            'twitter_followers_count':      candidate.twitter_followers_count,
-                            'youtube_url':                  candidate.youtube_url,
-                            'is_battleground_race':         candidate.is_battleground_race
-                            if positive_value_exists(candidate.is_battleground_race) else False,
-                            'withdrawn_from_election':      candidate.withdrawn_from_election,
-                            'withdrawal_date':              withdrawal_date,
-                        }
-                        candidates_to_display.append(one_candidate.copy())
+                        candidate_dict_results = generate_candidate_dict_from_candidate_object(
+                            candidate=candidate,
+                            office_id=office_id,
+                            office_name=office_name,
+                            office_we_vote_id=office_we_vote_id,
+                        )
+                        if candidate_dict_results['success']:
+                            candidate_dict = candidate_dict_results['candidate_dict']
+                            candidates_to_display.append(candidate_dict)
             except Exception as e:
                 status += 'FAILED retrieve_all_candidates_for_office. ' + str(e) + " "
                 candidates_to_display = []
