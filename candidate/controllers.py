@@ -1561,6 +1561,7 @@ def generate_candidate_dict_from_candidate_object(
         candidate=None,
         candidate_to_office_link_list_from_multiple_candidates=[],
         election_dict={},
+        google_civic_election_id='',
         office_dict={},
         office_id=0,
         office_name='',
@@ -1668,7 +1669,8 @@ def generate_candidate_dict_from_candidate_object(
         'contest_office_we_vote_id':        office_we_vote_id if positive_value_exists(office_we_vote_id)
         else candidate.contest_office_we_vote_id,
         'facebook_url':                     candidate.facebook_url,
-        'google_civic_election_id':         candidate.google_civic_election_id,  # Deprecate
+        'google_civic_election_id':         google_civic_election_id
+        if positive_value_exists(google_civic_election_id) else candidate.google_civic_election_id,
         'id':                               candidate.id,
         'instagram_followers_count':        candidate.instagram_followers_count,
         'instagram_handle':                 candidate.instagram_handle,

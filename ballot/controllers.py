@@ -2859,6 +2859,7 @@ def generate_ballot_item_list_from_object_list(
                     for candidate in candidate_list:
                         candidate_dict_results = generate_candidate_dict_from_candidate_object(
                             candidate=candidate,
+                            google_civic_election_id=google_civic_election_id,
                             office_id=office_id,
                             office_name=office_name,
                             office_we_vote_id=office_we_vote_id,
