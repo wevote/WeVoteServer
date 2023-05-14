@@ -166,6 +166,82 @@ def add_twitter_handle_to_next_candidate_spot(candidate, twitter_handle):
     }
 
 
+def augment_candidate_with_ultimate_election_date(candidate, elections_dict={}):
+    """
+    Update the values in the candidate object with new "candidate_ultimate_election_date" and "candidate_year"
+    but don't save. (Saving happens outside of this function.)
+    NOTE: Similar to generate_candidate_position_sorting_dates - perhaps refactor both?
+    :param candidate:
+    :param elections_dict:
+    :return:
+    """
+    candidate_ultimate_election_date = None
+    candidate_year = None
+    status = ''
+    success = True
+    values_changed = False
+
+    if not candidate or not hasattr(candidate, 'candidate_ultimate_election_date'):
+        status += "CANDIDATE_MISSING "
+        success = False
+        return {
+            'candidate':        candidate,
+            'elections_dict':   elections_dict,
+            # 'latest_office_we_vote_id': latest_office_we_vote_id,
+            'success':          success,
+            'status':           status,
+            'values_changed':   values_changed,
+        }
+    candidate_list_manager = CandidateListManager()
+    results = candidate_list_manager.retrieve_candidate_to_office_link_list(
+        candidate_we_vote_id_list=[candidate.we_vote_id],
+        read_only=True)
+    candidate_to_office_link_list = results['candidate_to_office_link_list']
+    latest_election_date = 0
+    # latest_office_we_vote_id = ''
+    for candidate_to_office_link in candidate_to_office_link_list:
+        try:
+            if candidate_to_office_link.google_civic_election_id in elections_dict:
+                this_election = elections_dict[candidate_to_office_link.google_civic_election_id]
+            else:
+                this_election = candidate_to_office_link.election()
+                try:
+                    if positive_value_exists(this_election.google_civic_election_id) \
+                            and this_election.google_civic_election_id not in elections_dict:
+                        elections_dict[this_election.google_civic_election_id] = this_election
+                except Exception as e:
+                    status += "COULD_NOT_ADD_ELECTION_TO_DICT: " + str(e) + " "
+            election_day_as_integer = convert_we_vote_date_string_to_date_as_integer(this_election.election_day_text)
+            if election_day_as_integer > latest_election_date:
+                candidate_ultimate_election_date = election_day_as_integer
+                election_day_as_string = str(election_day_as_integer)
+                year = election_day_as_string[:4]
+                if year:
+                    candidate_year = convert_to_int(year)
+                latest_election_date = election_day_as_integer
+                # latest_office_we_vote_id = candidate_to_office_link.contest_office_we_vote_id
+        except Exception as e:
+            status += "PROBLEM_GETTING_ELECTION_INFORMATION: " + str(e) + " "
+
+    # Now that we have cycled through all the candidate_to_office_link_list, augment the candidate
+    if positive_value_exists(candidate_ultimate_election_date) \
+            and candidate_ultimate_election_date != candidate.candidate_ultimate_election_date:
+        candidate.candidate_ultimate_election_date = candidate_ultimate_election_date
+        values_changed = True
+    if positive_value_exists(candidate_year) \
+            and candidate_year != candidate.candidate_year:
+        candidate.candidate_year = candidate_year
+        values_changed = True
+    return {
+        'candidate':                candidate,
+        'elections_dict':           elections_dict,
+        # 'latest_office_we_vote_id': latest_office_we_vote_id,
+        'success':                  success,
+        'status':                   status,
+        'values_changed':           values_changed,
+    }
+
+
 def candidates_import_from_sample_file():
     """
     Get the json data, and either create new entries or update existing

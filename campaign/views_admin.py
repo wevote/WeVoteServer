@@ -24,10 +24,10 @@ from .models import CampaignX, CampaignXManager, CampaignXOwner, CampaignXPoliti
     FINAL_ELECTION_DATE_COOL_DOWN, SUPPORTERS_COUNT_MINIMUM_FOR_LISTING
 
 logger = wevote_functions.admin.get_logger(__name__)
-WEB_APP_ROOT_URL = get_environment_variable("WEB_APP_ROOT_URL")
 CAMPAIGNS_ROOT_URL = get_environment_variable("CAMPAIGNS_ROOT_URL", no_exception=True)
 if not positive_value_exists(CAMPAIGNS_ROOT_URL):
     CAMPAIGNS_ROOT_URL = "https://campaigns.wevote.us"
+WEB_APP_ROOT_URL = get_environment_variable("WEB_APP_ROOT_URL")
 
 
 @login_required
@@ -414,12 +414,14 @@ def campaign_edit_process_view(request):
     is_not_promoted_by_we_vote_reason = request.POST.get('is_not_promoted_by_we_vote_reason', None)
     is_ok_to_promote_on_we_vote = request.POST.get('is_ok_to_promote_on_we_vote', False)
     politician_starter_list_serialized = request.POST.get('politician_starter_list_serialized', None)
+    seo_friendly_path = request.POST.get('seo_friendly_path', None)
     state_code = request.POST.get('state_code', None)
     supporters_count_minimum_ignored = request.POST.get('supporters_count_minimum_ignored', False)
 
     # Check to see if this campaign is already being used anywhere
     campaignx = None
     campaignx_found = False
+    campaignx_manager = CampaignXManager()
     status = ""
     try:
         if positive_value_exists(campaignx_id):
@@ -432,6 +434,7 @@ def campaign_edit_process_view(request):
         messages.add_message(request, messages.ERROR, 'CampaignX can only be edited for existing organization.')
         status += "EDIT_CAMPAIGN_PROCESS_NOT_FOUND " + str(e) + " "
 
+    push_seo_friendly_path_changes = False
     try:
         if campaignx_found:
             # Update
@@ -453,6 +456,17 @@ def campaign_edit_process_view(request):
             campaignx.is_ok_to_promote_on_we_vote = positive_value_exists(is_ok_to_promote_on_we_vote)
             if politician_starter_list_serialized is not None:
                 campaignx.politician_starter_list_serialized = politician_starter_list_serialized.strip()
+            if seo_friendly_path is not None:
+                # If path isn't passed in, create one. If provided, verify it is unique.
+                seo_results = campaignx_manager.generate_seo_friendly_path(
+                    base_pathname_string=seo_friendly_path,
+                    campaignx_title=campaignx.campaign_title,
+                    campaignx_we_vote_id=campaignx.we_vote_id)
+                if seo_results['success']:
+                    seo_friendly_path = seo_results['seo_friendly_path']
+                if not positive_value_exists(seo_friendly_path):
+                    seo_friendly_path = None
+                campaignx.seo_friendly_path = seo_friendly_path
             if supporters_count_minimum_ignored is not None:
                 campaignx.supporters_count_minimum_ignored = positive_value_exists(supporters_count_minimum_ignored)
             campaignx.save()
@@ -508,6 +522,10 @@ def campaign_edit_view(request, campaignx_we_vote_id=""):
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
 
+    if 'localhost' in WEB_APP_ROOT_URL:
+        web_app_root_url = 'https://localhost:3000'
+    else:
+        web_app_root_url = 'https://quality.WeVote.US'
     template_values = {
         'campaignx':                                campaignx,
         'campaignx_owner_organization_we_vote_id':  campaignx_owner_organization_we_vote_id,
@@ -516,6 +534,7 @@ def campaign_edit_view(request, campaignx_we_vote_id=""):
         'messages_on_stage':                        messages_on_stage,
         'state_list':                               sorted_state_list,
         'upcoming_election_list':                   upcoming_election_list,
+        'web_app_root_url':                         web_app_root_url,
     }
     return render(request, 'campaign/campaignx_edit.html', template_values)
 
@@ -724,6 +743,10 @@ def campaign_list_view(request):
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
 
+    if 'localhost' in WEB_APP_ROOT_URL:
+        web_app_root_url = 'https://localhost:3000'
+    else:
+        web_app_root_url = 'https://quality.WeVote.US'
     template_values = {
         'campaignx_list':                           modified_campaignx_list,
         'campaignx_owner_organization_we_vote_id':  campaignx_owner_organization_we_vote_id,
@@ -748,6 +771,7 @@ def campaign_list_view(request):
         'sort_by':                                  sort_by,
         'state_code':                               state_code,
         'state_list':                               sorted_state_list,
+        'web_app_root_url':                         web_app_root_url,
     }
     return render(request, 'campaign/campaignx_list.html', template_values)
 

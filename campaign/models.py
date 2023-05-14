@@ -219,16 +219,18 @@ class CampaignXManager(models.Manager):
         except Exception as e:
             return 0
 
-    def generate_seo_friendly_path(self, campaignx_we_vote_id='', campaignx_title=None):
+    def generate_seo_friendly_path(self, base_pathname_string='', campaignx_we_vote_id='', campaignx_title=None):
         """
         Generate the closest possible SEO friendly path for this campaign. Note that these paths
         are only generated for campaigns which are already published.
+        :param base_pathname_string:
         :param campaignx_we_vote_id:
         :param campaignx_title:
         :return:
         """
         from politician.controllers_generate_seo_friendly_path import generate_seo_friendly_path_generic
         return generate_seo_friendly_path_generic(
+            base_pathname_string=base_pathname_string,
             for_campaign=True,
             for_politician=False,
             campaignx_title=campaignx_title,

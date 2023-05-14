@@ -73,11 +73,11 @@
       {% if representative %}
         <br />
           {% if representative.seo_friendly_path %}
-            <a href="https://quality.wevote.us/{{ representative.seo_friendly_path }}/-/" target="_blank">
+            <a href="{{ web_app_root_url }}/{{ representative.seo_friendly_path }}/-/" target="_blank">
             View on WeVote.US <span class="glyphicon glyphicon-new-window"></span>
             </a>
           {% elif representative.politician_we_vote_id %}
-            <a href="https://quality.wevote.us/{{ representative.politician_we_vote_id }}/p/" target="_blank">
+            <a href="{{ web_app_root_url }}/{{ representative.politician_we_vote_id }}/p/" target="_blank">
             View on WeVote.US <span class="glyphicon glyphicon-new-window"></span>
             </a>
           {% endif %}
