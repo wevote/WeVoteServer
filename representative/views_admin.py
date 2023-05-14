@@ -40,6 +40,7 @@ from wevote_settings.constants import IS_BATTLEGROUND_YEARS_AVAILABLE, OFFICE_HE
 OFFICES_SYNC_URL = get_environment_variable("OFFICES_SYNC_URL")  # officesSyncOut
 REPRESENTATIVES_SYNC_URL = "https://api.wevoteusa.org/apis/v1/representativesSyncOut/"
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
+WEB_APP_ROOT_URL = get_environment_variable("WEB_APP_ROOT_URL")
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -364,7 +365,7 @@ def representative_list_view(request):
     representative_search = request.GET.get('representative_search', '')
     show_all = positive_value_exists(request.GET.get('show_all', False))
     show_battleground = positive_value_exists(request.GET.get('show_battleground', False))
-    show_representatives_with_email = request.GET.get('show_representatives_with_email', False)
+    show_representatives_with_email = positive_value_exists(request.GET.get('show_representatives_with_email', False))
     show_this_year = convert_to_int(request.GET.get('show_this_year', 9999))
     if show_this_year == 9999:
         datetime_now = localtime(now()).date()  # We Vote uses Pacific Time for TIME_ZONE
@@ -1101,6 +1102,10 @@ def representative_edit_view(request, representative_id):
             # This is fine, create new
             pass
 
+    if 'localhost' in WEB_APP_ROOT_URL:
+        web_app_root_url = 'https://localhost:3000'
+    else:
+        web_app_root_url = 'https://quality.WeVote.US'
     template_values = {
         'messages_on_stage':                messages_on_stage,
         'representative':                   representative_on_stage,
@@ -1114,6 +1119,7 @@ def representative_edit_view(request, representative_id):
         'political_party':                  political_party,
         'possible_politician_list':         possible_politician_list,
         'show_this_year':                   show_this_year,
+        'web_app_root_url':                 web_app_root_url,
     }
     return render(request, 'representative/representative_edit.html', template_values)
 

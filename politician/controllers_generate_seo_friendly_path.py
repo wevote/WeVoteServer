@@ -80,7 +80,7 @@ def generate_seo_friendly_path_generic(
         return results
 
     pathname_modifier_length = 3
-    length_to_allow_for_pathname_modifier = pathname_modifier_length + 1  # + 1 for "-"
+    length_to_allow_for_pathname_modifier = pathname_modifier_length + 1  # + 1 for "-" or "c"
     base_pathname_string_max_length = 255 - length_to_allow_for_pathname_modifier
     try:
         if positive_value_exists(base_pathname_string):
@@ -198,7 +198,7 @@ def generate_seo_friendly_path_generic(
         return results
 
     if not owned_by_another:
-        # Double-check that we don't have a reserved entry already in the Politician table
+        # Double-check that we don't have a reserved entry already in the CampaignX or Politician tables
         match_count = 0
         try:
             if for_campaign:

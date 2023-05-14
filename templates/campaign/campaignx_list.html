@@ -138,6 +138,11 @@
                     <a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">
                         <strong>{{ campaignx.campaign_title }}</strong>&nbsp;
                     </a>
+                {% if campaignx.seo_friendly_path %}
+                    <br />
+                    <a href="{{ web_app_root_url }}/c/{{ campaignx.seo_friendly_path }}"
+                       target="_blank">/{{ campaignx.seo_friendly_path }} <span class="glyphicon glyphicon-new-window"></span></a>
+                {% endif %}
                 </span><br />
                 <span style="color: darkgray">
                    {{ campaignx.we_vote_id }}&nbsp;&nbsp;{{ campaignx.linked_politician_we_vote_id|default_if_none:"" }}

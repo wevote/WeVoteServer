@@ -48,7 +48,7 @@ th, td {
       Candidate Name
       {% if candidate %}
         <br />
-        <a href="https://quality.wevote.us/candidate/{{ candidate.we_vote_id }}" target="_blank">
+        <a href="{{ web_app_root_url }}/candidate/{{ candidate.we_vote_id }}" target="_blank">
         View on WeVote.US <span class="glyphicon glyphicon-new-window"></span>
         </a>
       {% endif %}

@@ -107,7 +107,7 @@
                    target="_blank">{{ politician.politician_name }} <span class="glyphicon glyphicon-new-window"></span></a>
                 {% if politician.seo_friendly_path %}
                     <br />
-                    <a href="https://quality.wevote.us/{{ politician.seo_friendly_path }}/-"
+                    <a href="{{ web_app_root_url }}/{{ politician.seo_friendly_path }}/-"
                        target="_blank">/{{ politician.seo_friendly_path }} <span class="glyphicon glyphicon-new-window"></span></a>
                 {% endif %}
             </td>
