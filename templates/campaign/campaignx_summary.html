@@ -15,7 +15,7 @@
 
 <a href="{% url 'campaign:campaignx_list' %}?campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">< Back to List</a>
 
-<h1>{% if campaignx %}{{ campaignx.campaign_title }}{% else %}New Campaign{% endif %}</h1>
+<h1>{% if campaignx %}Campaign: {{ campaignx.campaign_title }}{% else %}New Campaign{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
 <table>{# Two column master table #}
@@ -23,6 +23,8 @@
     <td style="vertical-align:top; width: 50%;">
         {% if campaignx.we_vote_hosted_campaign_photo_large_url %}
             <img src="{{ campaignx.we_vote_hosted_campaign_photo_large_url }}" />
+        {% elif campaignx.we_vote_hosted_profile_image_url_large %}
+            <img src="{{ campaignx.we_vote_hosted_profile_image_url_large }}" />
         {% endif %}
         <table>
             <tr>
@@ -31,6 +33,16 @@
                     (<a href="{% url 'campaign:campaignx_edit' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">edit</a>)
                 </td>
             </tr>
+        {% if campaignx.linked_politician_we_vote_id %}
+            <tr>
+                <th>Politician We Vote ID:&nbsp;</th>
+                <td> {{ campaignx.linked_politician_we_vote_id }}
+                    <a href="{% url 'politician:politician_we_vote_id_edit' campaignx.linked_politician_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                       target="_blank">edit&nbsp;<span class="glyphicon glyphicon-new-window"></span>
+                    </a>
+                </td>
+            </tr>
+        {% endif %}
         {% if campaignx.in_draft_mode %}
             <tr>
                 <th>IN DRAFT MODE</th>

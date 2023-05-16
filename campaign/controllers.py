@@ -1504,6 +1504,9 @@ def generate_campaignx_dict_from_campaignx_object(
         'we_vote_hosted_campaign_photo_large_url':  campaignx.we_vote_hosted_campaign_photo_large_url,
         'we_vote_hosted_campaign_photo_medium_url': we_vote_hosted_campaign_photo_medium_url,
         'we_vote_hosted_campaign_photo_small_url': we_vote_hosted_campaign_photo_small_url,
+        'we_vote_hosted_profile_image_url_large': campaignx.we_vote_hosted_profile_image_url_large,
+        'we_vote_hosted_profile_image_url_medium': campaignx.we_vote_hosted_profile_image_url_medium,
+        'we_vote_hosted_profile_image_url_tiny': campaignx.we_vote_hosted_profile_image_url_tiny,
     }
 
     results = {
@@ -1896,5 +1899,34 @@ def retrieve_recommended_campaignx_list_for_campaignx_we_vote_id(
         'status': status,
         'campaignx_list_found': campaignx_list_found,
         'campaignx_list': campaignx_list,
+    }
+    return results
+
+
+def update_campaignx_from_politician(campaignx, politician):
+    status = ''
+    success = True
+    save_changes = True
+    # We want to match the campaignx profile images to whatever is in the politician (even None)
+    campaignx.we_vote_hosted_profile_image_url_large = politician.we_vote_hosted_profile_image_url_large
+    campaignx.we_vote_hosted_profile_image_url_medium = politician.we_vote_hosted_profile_image_url_medium
+    campaignx.we_vote_hosted_profile_image_url_tiny = politician.we_vote_hosted_profile_image_url_tiny
+    # TEMPORARY - Clear out we_vote_hosted_campaign_photo_large_url photos for campaigns hard-linked to politicians
+    #  because all of these images were copied from the politician, and we now have a new location for them
+    if positive_value_exists(campaignx.linked_politician_we_vote_id):
+        campaignx.we_vote_hosted_campaign_photo_large_url = None
+        campaignx.we_vote_hosted_campaign_photo_medium_url = None
+        campaignx.we_vote_hosted_campaign_photo_small_url = None
+
+    # if not positive_value_exists(campaignx.wikipedia_url) and \
+    #         positive_value_exists(politician.wikipedia_url):
+    #     campaignx.wikipedia_url = politician.wikipedia_url
+    #     save_changes = True
+
+    results = {
+        'success':      success,
+        'status':       status,
+        'campaignx':    campaignx,
+        'save_changes': save_changes,
     }
     return results

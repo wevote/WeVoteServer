@@ -491,15 +491,14 @@ def generate_campaignx_for_politician(
         update_values['campaign_description_changed'] = True
         update_values['campaign_description_linked_to_twitter'] = True
     if positive_value_exists(politician.we_vote_hosted_profile_image_url_large):
-        update_values['we_vote_hosted_campaign_photo_large_url'] = \
-            politician.we_vote_hosted_profile_image_url_large
-        update_values['campaign_photo_changed'] = True
+        update_values['we_vote_hosted_profile_image_url_large'] = politician.we_vote_hosted_profile_image_url_large
+        update_values['politician_photo_changed'] = True
     if positive_value_exists(politician.we_vote_hosted_profile_image_url_medium):
-        update_values['we_vote_hosted_campaign_photo_medium_url'] = \
-            politician.we_vote_hosted_profile_image_url_medium
-        update_values['we_vote_hosted_campaign_photo_small_url'] = \
-            politician.we_vote_hosted_profile_image_url_medium
-        update_values['campaign_photo_changed'] = True
+        update_values['we_vote_hosted_profile_image_url_medium'] = politician.we_vote_hosted_profile_image_url_medium
+        update_values['politician_photo_changed'] = True
+    if positive_value_exists(politician.we_vote_hosted_profile_image_url_tiny):
+        update_values['we_vote_hosted_profile_image_url_tiny'] = politician.we_vote_hosted_profile_image_url_tiny
+        update_values['politician_photo_changed'] = True
     update_values['in_draft_mode'] = False
     update_values['in_draft_mode_changed'] = True
 
