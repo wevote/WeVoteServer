@@ -130,9 +130,17 @@
     {% endif %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{% if campaignx.we_vote_hosted_campaign_photo_large_url %}
+            <td>
+                {% if campaignx.we_vote_hosted_campaign_photo_large_url or campaignx.we_vote_hosted_profile_image_url_large %}
                 <a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">
-                    <img src="{{ campaignx.we_vote_hosted_campaign_photo_large_url }}" width="128px" /></a>{% endif %}</td>
+                {% if campaignx.we_vote_hosted_campaign_photo_large_url %}
+                    <img src="{{ campaignx.we_vote_hosted_campaign_photo_large_url }}" width="128px" />
+                {% elif campaignx.we_vote_hosted_profile_image_url_large %}
+                    <img src="{{ campaignx.we_vote_hosted_profile_image_url_large }}" width="128px" />
+                {% endif %}
+                </a>
+                {% endif %}
+            </td>
             <td>
                 <span class="u-no-break">
                     <a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">

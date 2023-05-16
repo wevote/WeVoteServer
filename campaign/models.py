@@ -44,6 +44,7 @@ class CampaignX(models.Model):
     campaign_description = models.TextField(null=True, blank=True)
     campaign_description_linked_to_twitter = models.BooleanField(default=False, db_index=True)
     campaign_title = models.CharField(verbose_name="title of campaign", max_length=255, null=False, blank=False)
+    date_last_updated_from_politician = models.DateTimeField(null=True, default=None)
     # We store YYYYMMDD as an integer for very fast lookup (ex/ "20240901" for September, 1, 2024)
     final_election_date_as_integer = models.PositiveIntegerField(null=True, unique=False, db_index=True)
     # Has not been released for view
@@ -77,6 +78,10 @@ class CampaignX(models.Model):
     we_vote_hosted_campaign_photo_medium_url = models.TextField(blank=True, null=True)
     # Maximum size needed for image grids - Stored as "tiny" image
     we_vote_hosted_campaign_photo_small_url = models.TextField(blank=True, null=True)
+    # Image we are using as the profile photo for politician (copied over and cached here)
+    we_vote_hosted_profile_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
     date_campaign_started = models.DateTimeField(null=True, auto_now_add=True, db_index=True)
 
     def is_supporters_count_minimum_exceeded(self):
@@ -1909,6 +1914,7 @@ class CampaignXManager(models.Manager):
                         and positive_value_exists(update_values['campaign_description_changed']):
                     campaignx.campaign_description = update_values['campaign_description']
                     campaignx_changed = True
+                # This is for the actual CampaignX photo (profile image copied from Politician below)
                 if 'campaign_photo_changed' in update_values \
                         and positive_value_exists(update_values['campaign_photo_changed']):
                     if 'we_vote_hosted_campaign_photo_original_url' in update_values \
@@ -1977,6 +1983,30 @@ class CampaignXManager(models.Manager):
                         politician_delete_list=politician_delete_list,
                     )
                     status += results['status']
+                # This is for the profile image copied from Politician (actual CampaignX photo above)
+                if 'politician_photo_changed' in update_values \
+                        and positive_value_exists(update_values['politician_photo_changed']):
+                    if 'we_vote_hosted_profile_image_url_large' in update_values:
+                        campaignx.we_vote_hosted_profile_image_url_large = \
+                            update_values['we_vote_hosted_profile_image_url_large']
+                        campaignx_changed = True
+                    if 'we_vote_hosted_profile_image_url_medium' in update_values:
+                        campaignx.we_vote_hosted_profile_image_url_medium = \
+                            update_values['we_vote_hosted_profile_image_url_medium']
+                        campaignx_changed = True
+                    if 'we_vote_hosted_profile_image_url_tiny' in update_values:
+                        campaignx.we_vote_hosted_profile_image_url_tiny = \
+                            update_values['we_vote_hosted_profile_image_url_tiny']
+                        campaignx_changed = True
+                elif 'politician_photo_delete_changed' in update_values \
+                        and positive_value_exists(update_values['politician_photo_delete_changed']) \
+                        and 'politician_photo_delete' in update_values \
+                        and positive_value_exists(update_values['politician_photo_delete']):
+                    # Only delete if another photo was not provided
+                    campaignx.we_vote_hosted_profile_image_url_large = None
+                    campaignx.we_vote_hosted_profile_image_url_medium = None
+                    campaignx.we_vote_hosted_profile_image_url_tiny = None
+                    campaignx_changed = True
                 if 'politician_starter_list_changed' in update_values \
                         and positive_value_exists(update_values['politician_starter_list_changed']):
                     # Save to politician list
