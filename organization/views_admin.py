@@ -2332,7 +2332,7 @@ def organization_position_new_view(request, organization_id):
     else:
         google_civic_election_id_list = []
 
-    # Prepare a drop down of candidates competing in this election
+    # Prepare a dropdown of candidates competing in this election
     candidate_list = CandidateListManager()
     candidates_for_this_election_list = []
     results = candidate_list.retrieve_all_candidates_for_upcoming_election(
@@ -2789,9 +2789,7 @@ def organization_position_edit_process_view(request):
                     measure_search=measure_search
                 ))
         if not positive_value_exists(candidate_search) and not positive_value_exists(measure_search):
-            messages.add_message(
-                request, messages.ERROR,
-                "Unable to find either Candidate or Measure.")
+            messages.add_message(request, messages.INFO, "Please select a Candidate or a Measure.")
         url_variables = "?google_civic_election_id=" + str(google_civic_election_id)
         url_variables += "&state_code=" + str(state_code)
         if positive_value_exists(show_all_elections):

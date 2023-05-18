@@ -56,7 +56,7 @@
                 <img src="{{ organization.we_vote_hosted_profile_image_url_tiny }}" width="32px" />
             {% endif %}
                 <span class="h3">{{ organization.organization_name }}</span>
-            {% if has_suggested_voter_guide_rights and organization.organization_name and organization.we_vote_id %}
+            {% if has_suggested_voter_guide_rights and organization.we_vote_id %}
                 &nbsp;
                 <a href="{% url "organization:organization_position_list" organization.id %}"
                    target="_blank"
@@ -172,7 +172,7 @@
             </label>
             <label for="candidate_website_id">
                 <input type="radio" name="type_of_website" value="CandidateWebsite"{% if type_of_website == "CandidateWebsite" %} checked{% endif %} id="candidate_website_id" >
-                Candidate listing who is endorsing them
+                Candidate website, showing who is endorsing them
             </label>
         </div>
     </div>

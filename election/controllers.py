@@ -315,11 +315,12 @@ def elections_sync_out_list_for_api(voter_device_id):
     return results
 
 
-def retrieve_this_years_election_id_list(require_include_in_list_for_voters=False):
+def retrieve_this_and_next_years_election_id_list(require_include_in_list_for_voters=False):
     today = datetime.now().date()
-    candidate_year = today.year
+    this_year = today.year
+    next_year = this_year + 1
     google_civic_election_id_list = retrieve_election_id_list_by_year_list(
-        election_year_list_to_show=[candidate_year],
+        election_year_list_to_show=[this_year, next_year],
         restrict_to_elections_visible_to_voters=require_include_in_list_for_voters)
 
     return google_civic_election_id_list
