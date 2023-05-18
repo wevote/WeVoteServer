@@ -17,7 +17,7 @@ from candidate.controllers import retrieve_candidate_list_for_all_prior_election
     retrieve_candidate_list_for_all_upcoming_elections
 from candidate.models import CandidateManager, CandidateListManager
 from config.base import get_environment_variable
-from election.controllers import retrieve_this_years_election_id_list, retrieve_upcoming_election_id_list
+from election.controllers import retrieve_this_and_next_years_election_id_list, retrieve_upcoming_election_id_list
 from election.models import ElectionManager
 from exception.models import handle_record_not_found_exception
 from follow.models import FollowOrganizationList, FollowIssueList, FOLLOWING
@@ -180,7 +180,7 @@ def augment_with_voter_guide_possibility_position_data(voter_guide_possibility_l
     # Identify how many endorsements already have positions stored
     voter_guide_possibility_list_modified = []
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
-    google_civic_election_id_list_this_year = retrieve_this_years_election_id_list()
+    google_civic_election_id_list_this_year = retrieve_this_and_next_years_election_id_list()
     for one_voter_guide_possibility in voter_guide_possibility_list:
         one_voter_guide_possibility.number_of_endorsements_with_position = 0
         possible_endorsement_list = []
@@ -2162,7 +2162,7 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
         if results['possible_endorsement_list_found']:
             possible_endorsement_list = results['possible_endorsement_list']
 
-            google_civic_election_id_list_this_year = retrieve_this_years_election_id_list()
+            google_civic_election_id_list_this_year = retrieve_this_and_next_years_election_id_list()
 
             if voter_guide_possibility_type == ORGANIZATION_ENDORSING_CANDIDATES \
                     or voter_guide_possibility_type == UNKNOWN_TYPE:

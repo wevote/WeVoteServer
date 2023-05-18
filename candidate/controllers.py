@@ -2316,10 +2316,11 @@ def retrieve_candidate_list_for_entire_year(
     return results
 
 
-def retrieve_candidate_list_for_all_upcoming_elections(upcoming_google_civic_election_id_list=[],
-                                                       limit_to_this_state_code="",
-                                                       return_list_of_objects=False,
-                                                       super_light_candidate_list=False):
+def retrieve_candidate_list_for_all_upcoming_elections(
+        upcoming_google_civic_election_id_list=[],
+        limit_to_this_state_code="",
+        return_list_of_objects=False,
+        super_light_candidate_list=False):
 
     status = ""
     success = True

@@ -18,7 +18,8 @@ from .models import INDIVIDUAL, VoterGuide, VoterGuideListManager, VoterGuideMan
     ORGANIZATION_ENDORSING_CANDIDATES, ENDORSEMENTS_FOR_CANDIDATE, UNKNOWN_TYPE
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.controllers import find_candidate_endorsements_on_one_candidate_web_page, \
-    find_organization_endorsements_of_candidates_on_one_web_page, retrieve_candidate_list_for_entire_year
+    find_organization_endorsements_of_candidates_on_one_web_page, \
+    retrieve_candidate_list_for_all_upcoming_elections
 from candidate.models import CandidateManager, CandidateListManager
 from config.base import get_environment_variable
 from datetime import date, datetime, timedelta, time
@@ -29,7 +30,7 @@ from django.contrib.messages import get_messages
 from django.http import HttpResponseRedirect
 from django.db.models import Q
 from django.shortcuts import render
-from election.controllers import retrieve_this_years_election_id_list
+from election.controllers import retrieve_this_and_next_years_election_id_list
 from election.models import Election, ElectionManager, TIME_SPAN_LIST
 from import_export_batches.models import BATCH_HEADER_MAP_FOR_POSITIONS, BatchManager, POSITION
 from import_export_twitter.controllers import refresh_twitter_organization_details, scrape_social_media_from_one_site
@@ -327,7 +328,7 @@ def voter_guide_create_view(request):
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
 
     # Figure out the elections we care about
-    google_civic_election_id_list_this_year = retrieve_this_years_election_id_list()
+    google_civic_election_id_list_this_year = retrieve_this_and_next_years_election_id_list()
 
     if positive_value_exists(voter_guide_possibility_id):
         try:
@@ -795,7 +796,7 @@ def voter_guide_create_process_view(request):
         is_list_of_endorsements_for_candidate = False
 
     # Figure out the elections we care about
-    google_civic_election_id_list_this_year = retrieve_this_years_election_id_list()
+    google_civic_election_id_list_this_year = retrieve_this_and_next_years_election_id_list()
 
     # #########################################
     # Figure out the Organization making the endorsements or Candidate listing their endorsements
@@ -877,16 +878,20 @@ def voter_guide_create_process_view(request):
         if results['possible_endorsement_list_found']:
             possible_endorsement_list = results['possible_endorsement_list']
 
-        # We will need all candidates for all upcoming elections so we can search the HTML of
+        # We will need all candidates for all upcoming elections, so we can search the HTML of
         #  the possible voter guide for these names
         all_possible_candidates_list_light_found = False
         all_possible_candidates_list_light = []
-        today = datetime.now().date()
-        candidate_year = today.year
-        results = retrieve_candidate_list_for_entire_year(
-            candidate_year=candidate_year,
-            limit_to_this_state_code=state_code,
-        )
+        # today = datetime.now().date()
+        # candidate_year = today.year
+        # results = retrieve_candidate_list_for_entire_year(
+        #     candidate_year=candidate_year,
+        #     limit_to_this_state_code=state_code,
+        # )
+        # if results['candidate_list_found']:
+        #     all_possible_candidates_list_light_found = True
+        #     all_possible_candidates_list_light = results['candidate_list_light']
+        results = retrieve_candidate_list_for_all_upcoming_elections()
         if results['candidate_list_found']:
             all_possible_candidates_list_light_found = True
             all_possible_candidates_list_light = results['candidate_list_light']
