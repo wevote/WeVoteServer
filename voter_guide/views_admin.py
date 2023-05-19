@@ -837,6 +837,7 @@ def voter_guide_create_process_view(request):
                         if organization_results['organization_found']:
                             one_organization_found = True
                             organization = organization_results['organization']
+                            organization_name = organization.organization_name
                             organization_twitter_followers_count = organization.twitter_followers_count
                             organization_we_vote_id = organization.we_vote_id
                     twitter_user_id = 0
@@ -844,9 +845,11 @@ def voter_guide_create_process_view(request):
                         twitter_user_id, organization_twitter_handle)
                     if twitter_results['twitter_user_found']:
                         twitter_user = twitter_results['twitter_user']
+                        if positive_value_exists(twitter_user.twitter_name):
+                            organization_name = twitter_user.twitter_name
                         twitter_user_id = twitter_user.twitter_id
                     if not one_organization_found and positive_value_exists(twitter_user_id):
-                        organization_name = ""
+                        # organization_name = ""
                         if not positive_value_exists(state_code):
                             state_code = None
                         create_results = organization_manager.create_organization(
@@ -857,6 +860,7 @@ def voter_guide_create_process_view(request):
                         if create_results['organization_created']:
                             one_organization_found = True
                             organization = create_results['organization']
+                            organization_name = organization.organization_name
                             organization_we_vote_id = organization.we_vote_id
 
                             # Create TwitterLinkToOrganization
