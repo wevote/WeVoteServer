@@ -2014,7 +2014,7 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
             possible_position_list = results['possible_position_list']
             dt = time.time() - t0
             logger.info(
-                'voterGuidePossibilityHighlightsRetrieve voter_guitrieve voter_guide_possibility_positions_retrieve_for_api  elapsde_possibility_positions_retrieve_for_api  elapsed ' +
+                'voterGuidePossibilityHighlightsRetrieve voter_guide_possibility_positions_retrieve_for_api elapsed ' +
                 "{:.3f}".format(dt) + ' seconds, and returned ' + str(len(possible_position_list)))
             for one_possible_position in possible_position_list:
                 if one_possible_position['position_we_vote_id']:
