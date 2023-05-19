@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 import copy
 import json
+import time
 from datetime import datetime, timedelta
 from itertools import chain
 from urllib.parse import urlparse
@@ -1989,7 +1990,9 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
     voter_we_vote_id = ''
     names_already_included_list = []
     candidate_manager = CandidateManager()
+    t0 = time.time()
 
+    logger.info('voterGuidePossibilityHighlightsRetrieve url:' + url_to_scan)
     # Once we know we have a voter_device_id to work with, get this working
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
     results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_from_url(
@@ -1998,6 +2001,10 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
         # voter_who_submitted_we_vote_id=voter_we_vote_id,
         # google_civic_election_id=google_civic_election_id
     )
+    dt = time.time() - t0
+    logger.info('voterGuidePossibilityHighlightsRetrieve retrieve_voter_guide_possibility_from_url  took ' +
+                 "{:.3f}".format(dt) + ' seconds')
+
     status += results['status']
     if results['voter_guide_possibility_found']:
         voter_guide_possibility_id = results['voter_guide_possibility_id']
@@ -2005,6 +2012,10 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
             voter_device_id, voter_guide_possibility_id)
         if results['possible_position_list']:
             possible_position_list = results['possible_position_list']
+            dt = time.time() - t0
+            logger.info(
+                'voterGuidePossibilityHighlightsRetrieve voter_guide_possibility_positions_retrieve_for_api elapsed ' +
+                "{:.3f}".format(dt) + ' seconds, and returned ' + str(len(possible_position_list)))
             for one_possible_position in possible_position_list:
                 if one_possible_position['position_we_vote_id']:
                     display = 'STORED'
@@ -2049,6 +2060,10 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
                                 }
                                 highlight_list.append(one_highlight)
 
+    dt = time.time() - t0
+    logger.info(
+        'voterGuidePossibilityHighlightsRetrieve voter_guide_possibility_positions_retrieve_for_api itterated at ' +
+        "{:.3f}".format(dt) + ' seconds')
     if not positive_value_exists(limit_to_existing):
         super_light_candidate_list = True
         results = retrieve_candidate_list_for_all_upcoming_elections(
@@ -2105,6 +2120,10 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
                             }
                             highlight_list.append(one_highlight)
 
+    dt = time.time() - t0
+    logger.info(
+        'voterGuidePossibilityHighlightsRetrieve after limiting to existing (and completing) at ' +
+        "{:.3f}".format(dt) + ' seconds')
     json_data = {
         'status':               status,
         'success':              success,
@@ -2119,6 +2138,8 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
         voter_device_id, voter_guide_possibility_id, voter_guide_possibility_position_id=0, limit_to_this_year=True):
     status = "VOTER_GUIDE_POSSIBILITY_POSITIONS_RETRIEVE "
     voter_guide_possibility_id = convert_to_int(voter_guide_possibility_id)
+    t0 = time.time()
+
 
     # Do not require voter_device_id yet
     # results = is_voter_device_id_valid(voter_device_id)
@@ -2148,8 +2169,15 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
     results = voter_guide_possibility_manager.retrieve_voter_guide_possibility(
         voter_guide_possibility_id=voter_guide_possibility_id, limit_to_this_year=limit_to_this_year)
+    dt = time.time() - t0
+    logger.info('voter_guide_possibility_positions_retrieve_for_api after retrieve_voter_guide_possibility took ' +
+                 "{:.3f}".format(dt) + ' seconds elapsed')
 
     move_voter_guide_possibility_positions_to_requested_voter_guide_possibility(results['voter_guide_possibility'])
+    dt = time.time() - t0
+    logger.info('voter_guide_possibility_positions_retrieve_for_api after '
+                'move_voter_guide_possibility_positions_to_requested_voter_guide_possibility took ' +
+                 "{:.3f}".format(dt) + ' seconds elapsed')
 
     possible_endorsement_list = []
     if results['voter_guide_possibility_found']:
@@ -2159,6 +2187,10 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
 
         results = extract_voter_guide_possibility_position_list_from_database(
             voter_guide_possibility, voter_guide_possibility_position_id)
+        dt = time.time() - t0
+        logger.info('voter_guide_possibility_positions_retrieve_for_api after '
+                    'extract_voter_guide_possibility_position_list_from_database took ' +
+                    "{:.3f}".format(dt) + ' seconds elapsed')
         if results['possible_endorsement_list_found']:
             possible_endorsement_list = results['possible_endorsement_list']
 
@@ -2184,6 +2216,10 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
                     attach_objects=False)
                 if results['possible_endorsement_list_found']:
                     possible_endorsement_list = results['possible_endorsement_list']
+                dt = time.time() - t0
+                logger.info('voter_guide_possibility_positions_retrieve_for_api after '
+                            'match_endorsement_list_with_measures_in_database took ' +
+                            "{:.3f}".format(dt) + ' seconds elapsed')
 
                 # Add on existing position information
                 for one_possible_endorsement in possible_endorsement_list:
@@ -2220,6 +2256,10 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
                     possible_endorsement_list = results['possible_endorsement_list']
 
                 # Add on existing position information
+                dt = time.time() - t0
+                logger.info('voter_guide_possibility_positions_retrieve_for_api before '
+                            'Add on existing position information took ' +
+                            "{:.3f}".format(dt) + ' seconds elapsed')
                 for one_possible_endorsement in possible_endorsement_list:
                     if 'organization_we_vote_id' in one_possible_endorsement \
                             and positive_value_exists(one_possible_endorsement['organization_we_vote_id']):
@@ -2235,6 +2275,8 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
             else:
                 pass
 
+    logger.info('voter_guide_possibility_positions_retrieve_for_api at completion took ' + "{:.3f}".format(dt) +
+                ' seconds elapsed')
     status += results['status']
     json_data = {
         'status':                       status,
@@ -2251,7 +2293,7 @@ def move_voter_guide_possibility_positions_to_requested_voter_guide_possibility(
     voter_guide_possibility_url = voter_guide_possibility.voter_guide_possibility_url
     parts = urlparse(voter_guide_possibility_url)
     net_location = parts.netloc
-    print(net_location)
+    # print(net_location)
 
     enddate = datetime.now(pytz.UTC)
     startdate = enddate - timedelta(days=186)    # 6 months
@@ -2270,8 +2312,8 @@ def move_voter_guide_possibility_positions_to_requested_voter_guide_possibility(
         Q(voter_guide_possibility_parent_id__in=ids_list)).order_by(
             'ballot_item_name', '-voter_guide_possibility_parent_id')
     possibility_position_query_list = list(possibility_position_query)
-    for blip in possibility_position_query_list:
-        print(str(blip.ballot_item_name) + "    " + str(blip.voter_guide_possibility_parent_id))
+    # for blip in possibility_position_query_list:
+    #     print(str(blip.ballot_item_name) + "    " + str(blip.voter_guide_possibility_parent_id))
 
     # Remove duplicates, for now if the voter_guide_possibility_parent_id numer is higher, that is the one we keep
     seen_candidates = set()
