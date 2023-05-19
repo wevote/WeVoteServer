@@ -68,14 +68,14 @@ def build_output_string(process):
 
 def build_absolute_path_for_tempfile(tempfile):
     temp_path = get_environment_variable_default("PATH_FOR_TEMP_FILES", "/tmp")
-    logger.error('pdf2htmlEX build_absolute_path_for_tempfile temp_path 1:' + temp_path)
+    # logger.error('pdf2htmlEX build_absolute_path_for_tempfile temp_path 1:' + temp_path)
 
     # March 2023: the value of PATH_FOR_TEMP_FILES on the production servers is '/tmp'-
     if temp_path[-1] != '/':
         temp_path += '/'
-    logger.error('pdf2htmlEX build_absolute_path_for_tempfile temp_path 2:' + temp_path)
+    # logger.error('pdf2htmlEX build_absolute_path_for_tempfile temp_path 2:' + temp_path)
     absolute = temp_path + tempfile
-    logger.error('pdf2htmlEX build_absolute_path_for_tempfile absolute: ' + absolute)
+    # logger.error('pdf2htmlEX build_absolute_path_for_tempfile absolute: ' + absolute)
     return absolute
 
 
@@ -98,18 +98,18 @@ def process_pdf_to_html(pdf_url, return_version):
     output_from_subprocess = 'exception occurred before output was captured'
     status = ''
     success = False
-    logger.error('pdf2htmlEX entry to process_pdf_to_html:' + pdf_url + '   ' + str(return_version))
+    # logger.error('pdf2htmlEX entry to process_pdf_to_html:' + pdf_url + '   ' + str(return_version))
 
     # Version report, only used to debug the pdf2htmlEX installation in our AWS/EC2 instances
     if return_version:
         try:
             command = 'pdf2htmlEX -v'
-            logger.error('pdf2htmlEX command: ' + command)
+            # logger.error('pdf2htmlEX command: ' + command)
 
             process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             output_from_subprocess = build_output_string(process)
 
-            logger.error('pdf2htmlEX version ' + output_from_subprocess)
+            # logger.error('pdf2htmlEX version ' + output_from_subprocess)
             success = True
 
         except Exception as e:
@@ -123,7 +123,7 @@ def process_pdf_to_html(pdf_url, return_version):
         }
         return json_data
 
-    logger.error('pdf2htmlEX immediately after return_version: ' + str(return_version))
+    # logger.error('pdf2htmlEX immediately after return_version: ' + str(return_version))
     pdf_file_name = os.path.basename(pdf_url)
     absolute_pdf_file = build_absolute_path_for_tempfile(pdf_file_name)
     absolute_html_file = absolute_pdf_file.replace('.pdf', '.html')
@@ -136,7 +136,7 @@ def process_pdf_to_html(pdf_url, return_version):
     except Exception:
         pass
 
-    logger.error('pdf2htmlEX after removing temp files: ' + str(pdf_file_name))
+    # logger.error('pdf2htmlEX after removing temp files: ' + str(pdf_file_name))
 
     # use cloudscraper to get past challenges presented by pages hosted at Cloudflare
     scraper = cloudscraper.create_scraper()  # returns a CloudScraper instance
@@ -146,26 +146,26 @@ def process_pdf_to_html(pdf_url, return_version):
     try:
         raw = scraper.get(pdf_url)
         pdf_text_text = raw.content  # in bytes, not using str(raw.content)
-        logger.error('pdf2htmlEX cloudscraper attempt with base PDF url : ' + pdf_url +
-                     ' returned bytes: ' + str(len(pdf_text_text)))
+        # logger.error('pdf2htmlEX cloudscraper attempt with base PDF url : ' + pdf_url +
+        #              ' returned bytes: ' + str(len(pdf_text_text)))
         success = True
 
     # Probably got a http 403 forbidden, due to cloudscraper unsuccessfully handling a Cloudflare challenge
     # Now try to use Google's (hopefully) cached version of the page
     except Exception as scraper_or_tempfile_error:
         status = "First pass with base url failed with a " + str(scraper_or_tempfile_error)
-        logger.error('pdf2htmlEX cloudscraper with base PDF url or tempfile write exception: ' +
-                     str(scraper_or_tempfile_error))
+        # logger.error('pdf2htmlEX cloudscraper with base PDF url or tempfile write exception: ' +
+        #              str(scraper_or_tempfile_error))
 
     if not success:
         logger.error('pdf2htmlEX first pass === not success')
         is_pdf = False
         try:
-            logger.error('pdf2htmlEX first pass === not success, pdf_url:  ' + pdf_url)
+            # logger.error('pdf2htmlEX first pass === not success, pdf_url:  ' + pdf_url)
             encoded = quote(pdf_url, safe='')
-            logger.error('pdf2htmlEX encoded success: ' + encoded)
+            # logger.error('pdf2htmlEX encoded success: ' + encoded)
             google_cached_pdf_url = 'https://webcache.googleusercontent.com/search?q=cache:' + encoded
-            logger.error('pdf2htmlEX cloudscraper attempt with google cached PDF url: ' + google_cached_pdf_url)
+            # logger.error('pdf2htmlEX cloudscraper attempt with google cached PDF url: ' + google_cached_pdf_url)
 
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -176,14 +176,14 @@ def process_pdf_to_html(pdf_url, return_version):
                 'Accept-Language': 'en-US,en;q=0.8',
                 'Connection': 'keep-alive'}
             r = requests.get(google_cached_pdf_url, headers)
-            logger.error('pdf2htmlEX after requests.get: ' + google_cached_pdf_url)
+            # logger.error('pdf2htmlEX after requests.get: ' + google_cached_pdf_url)
             # skip saving the pdf file (since we don't have one), and write the final html file to the temp dir
             html_text_text = r.text
             out_file = open(absolute_html_file, 'w')
             out_file.write(html_text_text)
 
-            logger.error('pdf2htmlEX requests was successful with google cached PDF url : ' + google_cached_pdf_url +
-                         ' returned bytes: ' + str(len(pdf_text_text)))
+            # logger.error('pdf2htmlEX requests was successful with google cached PDF url : ' + google_cached_pdf_url +
+            #              ' returned bytes: ' + str(len(pdf_text_text)))
             success = True
         except Exception as scraper_or_tempfile_error2:      # Out of luck
             status += ", Second pass with google cached PDF url failed with a: " + str(scraper_or_tempfile_error2)
@@ -192,22 +192,22 @@ def process_pdf_to_html(pdf_url, return_version):
 
     if pdf_text_text and len(pdf_text_text) > 10 and is_pdf:
         # Save the pdf to a temporary file on disk
-        logger.error('pdf2htmlEX before storage of pdf file: ' + str(absolute_pdf_file))
+        # logger.error('pdf2htmlEX before storage of pdf file: ' + str(absolute_pdf_file))
         mode = 'w' if type(pdf_text_text) == str else 'wb'
-        logger.error('pdf2htmlEX write_tags: ' + mode)
+        # logger.error('pdf2htmlEX write_tags: ' + mode)
         out_file = open(absolute_pdf_file, mode)
         out_file.write(pdf_text_text)
-        logger.error('pdf2htmlEX file stored in local directory as: ' + str(pdf_file_name))
+        # logger.error('pdf2htmlEX file stored in local directory as: ' + str(pdf_file_name))
         out_file.write(pdf_text_text)
-        logger.error('pdf2htmlEX file stored in local directory as: ' + str(pdf_file_name))
+        # logger.error('pdf2htmlEX file stored in local directory as: ' + str(pdf_file_name))
         try:
             # Run pdf2html from docker image to convert pdf to html
             temp_path = get_environment_variable_default("PATH_FOR_TEMP_FILES", "/tmp")
             command = 'pdf2htmlEX --dest-dir ' + temp_path + ' ' + absolute_pdf_file
-            logger.error('pdf2htmlEX command: ' + command)
+            # logger.error('pdf2htmlEX command: ' + command)
             process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output_from_subprocess = build_output_string(process)
-            logger.error('pdf2htmlEX subprocess.run output: ' + output_from_subprocess)
+            # logger.error('pdf2htmlEX subprocess.run output: ' + output_from_subprocess)
         except Exception as subprocess_run_error:
             status += ', ' + str(subprocess_run_error)
             logger.error('pdf2htmlEX subprocess.run exception: ' + str(subprocess_run_error))
@@ -222,7 +222,7 @@ def process_pdf_to_html(pdf_url, return_version):
     s3_url_for_html = store_temporary_html_file_to_aws(absolute_html_file) or 'NO_TEMPFILE_STORED_IN_S3'
     if not s3_url_for_html.startswith("http"):
         status += ', ' + s3_url_for_html
-    logger.error("pdf2htmlEX stored temp html file: " + absolute_html_file + ', ' + s3_url_for_html)
+    # logger.error("pdf2htmlEX stored temp html file: " + absolute_html_file + ', ' + s3_url_for_html)
 
     if positive_value_exists(s3_url_for_html):
         status = 'PDF_URL_RETURNED successfully with s3_url_for_html, other status = ' + status
@@ -251,7 +251,7 @@ def store_temporary_html_file_to_aws(temp_file_name):
                                         aws_access_key_id=AWS_ACCESS_KEY_ID,
                                         aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
         s3 = session.resource(AWS_STORAGE_SERVICE)
-        logger.error('store_temporary_html_file_to_aws upload temp_file: ' + temp_file_name)
+        logger.info('store_temporary_html_file_to_aws upload temp_file: ' + temp_file_name)
         s3.Bucket(AWS_STORAGE_BUCKET_NAME).upload_file(
             temp_file_name, tail, ExtraArgs={'Expires': date_in_a_year, 'ContentType': 'text/html'})
         s3_html_url = "https://{bucket_name}.s3.amazonaws.com/{file_location}" \

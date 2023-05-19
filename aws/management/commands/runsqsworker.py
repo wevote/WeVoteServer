@@ -48,7 +48,7 @@ MAX_JOB_PROCESSING_TIME = 60
 MAX_JOB_RETRY_ATTEMPTS = 5
 
 def process_request(function, body, message):
-    logger.error('(Ok) SQS job execute process_request ' + function + '  ' + str(body))
+    logger.info('(Ok) SQS job execute process_request ' + function + '  ' + str(body))
 
     if function == 'caching_facebook_images_for_retrieve_process':
         from import_export_facebook.controllers import caching_facebook_images_for_retrieve_process
@@ -106,7 +106,7 @@ def worker_run(queue_url):
 
             if 'Function' in message['MessageAttributes'].keys():
                 function = message['MessageAttributes']['Function']['StringValue']
-                logger.error("(Ok) SQS -- Got message for function: %s in pid %d" % (function, os.getpid()))
+                # logger.error("(Ok) SQS -- Got message for function: %s in pid %d" % (function, os.getpid()))
                 print(f"Calling function [{function}]")
                 body = json.loads(message['Body'])
                 try:
