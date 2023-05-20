@@ -968,7 +968,7 @@ def match_endorsement_list_with_measures_in_database(
     pass_count = 0
     logger.info(
         'match_endorsement_list_with_measures_in_database entry ' +
-        "{:.3f}".format(dt) + ' seconds, and returned ' + str(len(possible_endorsement_list)))
+        "{:.3f}".format(dt) + ' seconds, and received ' + str(len(possible_endorsement_list)))
 
     for possible_endorsement in possible_endorsement_list:
         possible_endorsement_matched = False
@@ -2239,6 +2239,8 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
             possible_endorsement_list = results['possible_endorsement_list']
 
             google_civic_election_id_list_this_year = retrieve_this_and_next_years_election_id_list()
+            logger.error('voter_guide_possibility_positions_retrieve_for_api after retrieve_this_and_next_years_election_id_list took ' +
+                         "{:.3f}".format(time.time() - t0) + ' seconds elapsed')
 
             if voter_guide_possibility_type == ORGANIZATION_ENDORSING_CANDIDATES \
                     or voter_guide_possibility_type == UNKNOWN_TYPE:
@@ -2251,6 +2253,9 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
                     attach_objects=False)
                 if results['possible_endorsement_list_found']:
                     possible_endorsement_list = results['possible_endorsement_list']
+                logger.error(
+                    'voter_guide_possibility_positions_retrieve_for_api after  match_endorsement_list_with_candidates_in_database took ' +
+                    "{:.3f}".format(time.time() - t0) + ' seconds elapsed')
 
                 # Match incoming endorsements to measures already in the database
                 results = match_endorsement_list_with_measures_in_database(
@@ -2260,10 +2265,9 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
                     attach_objects=False)
                 if results['possible_endorsement_list_found']:
                     possible_endorsement_list = results['possible_endorsement_list']
-                dt = time.time() - t0
                 logger.error('voter_guide_possibility_positions_retrieve_for_api after '
                             'match_endorsement_list_with_measures_in_database took ' +
-                            "{:.3f}".format(dt) + ' seconds elapsed')
+                            "{:.3f}".format(time.time() - t0) + ' seconds elapsed')      # 25 to 40 seconds
 
                 # Add on existing position information
                 for one_possible_endorsement in possible_endorsement_list:
