@@ -959,10 +959,17 @@ def match_endorsement_list_with_measures_in_database(
     status = ""
     success = True
     possible_endorsement_list_found = False
-
+    t0 = time.time()
+    
     possible_endorsement_list_modified = []
     measure_manager = ContestMeasureManager()
     measure_list_manager = ContestMeasureListManager()
+    dt = time.time() - t0
+    pass_count = 0
+    logger.info(
+        'match_endorsement_list_with_measures_in_database entry ' +
+        "{:.3f}".format(dt) + ' seconds, and returned ' + str(len(possible_endorsement_list)))
+
     for possible_endorsement in possible_endorsement_list:
         possible_endorsement_matched = False
         if 'measure_we_vote_id' in possible_endorsement \
@@ -977,11 +984,22 @@ def match_endorsement_list_with_measures_in_database(
                 possible_endorsement['google_civic_election_id'] = measure.google_civic_election_id
             possible_endorsement_matched = True
             possible_endorsement_list_modified.append(possible_endorsement)
+            if pass_count < 20:
+                dt = time.time() - t0
+                logger.info(
+                    'match_endorsement_list_with_measures_in_database ' + str(pass_count) +
+                    ' through loop possible_endorsement ' +
+                    "{:.3f}".format(dt) + ' seconds')
         elif 'candidate_we_vote_id' in possible_endorsement \
                 and positive_value_exists(possible_endorsement['candidate_we_vote_id']):
             possible_endorsement_matched = True
             possible_endorsement_list_modified.append(possible_endorsement)
             # Go to the next entry in this possible_endorsement_list loop
+            if pass_count < 20:
+                dt = time.time() - t0
+                logger.info(
+                    'match_endorsement_list_with_measures_in_database ' + str(pass_count) + ' through loop candidate_we_vote_id ' +
+                    "{:.3f}".format(dt) + ' seconds')
             continue
         elif 'ballot_item_name' in possible_endorsement and \
                 positive_value_exists(possible_endorsement['ballot_item_name']):
@@ -1034,6 +1052,17 @@ def match_endorsement_list_with_measures_in_database(
                         possible_endorsement_matched = True
                         possible_endorsement_list_modified.append(possible_endorsement)
                         break
+                if pass_count < 20:
+                    dt = time.time() - t0
+                    logger.info('match_endorsement_list_with_measures_in_database for one_possible_measure in '
+                                 'all_possible_measures_list_light ' +  "{:.3f}".format(dt) + ' seconds')
+
+            if pass_count < 20:
+                dt = time.time() - t0
+                logger.info('match_endorsement_list_with_measures_in_database ' + str(pass_count) +
+                            ' through loop ballot_item_name ' +
+                            "{:.3f}".format(dt) + ' seconds')
+
 
         if not possible_endorsement_matched:
             # We want to check the synonyms for each measure in upcoming elections
@@ -1076,9 +1105,24 @@ def match_endorsement_list_with_measures_in_database(
             if not synonym_found:
                 # If an entry based on a synonym wasn't found, then store the orginal possibility
                 possible_endorsement_list_modified.append(possible_endorsement)
+            if pass_count < 20:
+               dt = time.time() - t0
+               logger.info(
+                  'match_endorsement_list_with_measures_in_database one_possible_measure in all_possible_measures_list_light ' + str(pass_count) + ' pass through loop ' +
+                  "{:.3f}".format(dt) + ' seconds')
+        if pass_count < 20:
+            dt = time.time() - t0
+            logger.info(
+                'match_endorsement_list_with_measures_in_database ' + str(pass_count) + ' pass through loop in ' +
+                "{:.3f}".format(dt) + ' seconds')
+        pass_count += 1
 
     if len(possible_endorsement_list_modified):
         possible_endorsement_list_found = True
+    dt = time.time() - t0
+    logger.info(
+        'match_endorsement_list_with_measures_in_database ' + str(pass_count) + ' pass before return ' +
+        "{:.3f}".format(dt) + ' seconds, and returned ' + str(len(possible_endorsement_list_modified)))
 
     results = {
         'status':                           status,
