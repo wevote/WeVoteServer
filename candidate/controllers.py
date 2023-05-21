@@ -1763,6 +1763,7 @@ def generate_candidate_dict_from_candidate_object(
         'politician_we_vote_id':            candidate.politician_we_vote_id,
         'seo_friendly_path':                candidate.seo_friendly_path,
         'state_code':                       candidate.state_code,
+        'supporters_count':                 candidate.supporters_count,
         'twitter_url':                      candidate.twitter_url,
         'twitter_handle':                   candidate.fetch_twitter_handle(),
         'twitter_description':              candidate.twitter_description
