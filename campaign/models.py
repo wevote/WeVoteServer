@@ -2745,7 +2745,7 @@ class CampaignXSupporter(models.Model):
     supporter_endorsement = models.TextField(null=True)
     visibility_blocked_by_we_vote = models.BooleanField(default=False)
     visible_to_public = models.BooleanField(default=False)
-    voter_we_vote_id = models.CharField(max_length=255, db_index=True)
+    voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True)
     we_vote_hosted_profile_image_url_medium = models.TextField(null=True)
     we_vote_hosted_profile_image_url_tiny = models.TextField(null=True)
 
