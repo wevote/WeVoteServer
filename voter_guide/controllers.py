@@ -601,6 +601,11 @@ def augment_candidate_possible_position_data(
     possible_endorsement['withdrawn_from_election'] = False
     possible_endorsement['withdrawal_date'] = ''
 
+    t0 = time.time()
+    logger.error(
+        'augment_candidate_possible_position_data ENTRY ' +
+        "{:.3f}".format(time.time() - t0) + ' seconds')
+
     if 'candidate_we_vote_id' in possible_endorsement \
             and positive_value_exists(possible_endorsement['candidate_we_vote_id']):
         possible_endorsement_matched = True
@@ -672,6 +677,9 @@ def augment_candidate_possible_position_data(
             # ...and add entries for other possible matches
             status += "MULTIPLE_CANDIDATES_FOUND "
             candidate_list = matching_results['candidate_list']
+            logger.error(
+                'augment_candidate_possible_position_data before candidate in candidate_list' +
+                "{:.3f}".format(time.time() - t0) + ' seconds')
             for candidate in candidate_list:
                 possible_endorsement_copy = copy.deepcopy(possible_endorsement)
                 # Reset the possibility position id
@@ -698,6 +706,8 @@ def augment_candidate_possible_position_data(
                 possible_endorsement_copy['withdrawal_date'] = candidate.withdrawal_date
                 possible_endorsement_count += 1
                 possible_endorsement_return_list.append(possible_endorsement_copy)
+            logger.error('augment_candidate_possible_position_data after candidate in candidate_list' +
+                    "{:.3f}".format(time.time() - t0) + ' seconds')
         elif not positive_value_exists(matching_results['success']):
             possible_endorsement_matched = True
             status += "RETRIEVE_CANDIDATE_FROM_NON_UNIQUE-NO_SUCCESS "
@@ -748,7 +758,8 @@ def augment_candidate_possible_position_data(
                     possible_endorsement_count += 1
                     possible_endorsement_return_list.append(possible_endorsement)
                     break
-
+            logger.error('augment_candidate_possible_position_data after one_endorsement_light in all_possible_candidates' +
+                    "{:.3f}".format(time.time() - t0) + ' seconds')
     if not possible_endorsement_matched:
         # We want to check 'alternate_names' candidate names in upcoming elections
         # (ex/ Candidate name with middle initial in alternate_names)
@@ -757,7 +768,7 @@ def augment_candidate_possible_position_data(
         # NOTE: possible endorsement is one of the incoming new endorsements we are trying to match
         synonym_found = False
         for one_endorsement_light in all_possible_candidates:
-            # Hanging off each ballot_item_dict is a alternate_names that includes
+            # Hanging off each ballot_item_dict is an alternate_names that includes
             #  shortened alternative names that we should check against decide_line_lower_case
             if 'alternate_names' in one_endorsement_light and \
                     positive_value_exists(one_endorsement_light['alternate_names']):
@@ -802,6 +813,9 @@ def augment_candidate_possible_position_data(
                         possible_endorsement_count += 1
                         possible_endorsement_return_list.append(possible_endorsement_copy)
                         break
+        logger.error('augment_candidate_possible_position_data after one_endorsement_light in all_possible_candidates' +
+                            "{:.3f}".format(time.time() - t0) + ' seconds')
+
         if not synonym_found:
             # If an entry based on a synonym wasn't found, then store the original possibility
             possible_endorsement_count += 1
@@ -813,6 +827,10 @@ def augment_candidate_possible_position_data(
         'possible_endorsement_return_list': possible_endorsement_return_list,
         'possible_endorsement_count':       possible_endorsement_count,
     }
+    logger.error(
+        'augment_candidate_possible_position_data EXIT ' +
+        "{:.3f}".format(time.time() - t0) + ' seconds')
+
     return results
 
 
@@ -966,7 +984,7 @@ def match_endorsement_list_with_measures_in_database(
     measure_list_manager = ContestMeasureListManager()
     dt = time.time() - t0
     pass_count = 0
-    logger.info(
+    logger.error(
         'match_endorsement_list_with_measures_in_database entry ' +
         "{:.3f}".format(dt) + ' seconds, and received ' + str(len(possible_endorsement_list)))
 
@@ -986,7 +1004,7 @@ def match_endorsement_list_with_measures_in_database(
             possible_endorsement_list_modified.append(possible_endorsement)
             if pass_count < 20:
                 dt = time.time() - t0
-                logger.info(
+                logger.error(
                     'match_endorsement_list_with_measures_in_database ' + str(pass_count) +
                     ' through loop possible_endorsement ' +
                     "{:.3f}".format(dt) + ' seconds')
@@ -997,7 +1015,7 @@ def match_endorsement_list_with_measures_in_database(
             # Go to the next entry in this possible_endorsement_list loop
             if pass_count < 20:
                 dt = time.time() - t0
-                logger.info(
+                logger.error(
                     'match_endorsement_list_with_measures_in_database ' + str(pass_count) + ' through loop candidate_we_vote_id ' +
                     "{:.3f}".format(dt) + ' seconds')
             continue
@@ -1054,12 +1072,12 @@ def match_endorsement_list_with_measures_in_database(
                         break
                 if pass_count < 20:
                     dt = time.time() - t0
-                    logger.info('match_endorsement_list_with_measures_in_database for one_possible_measure in '
+                    logger.error('match_endorsement_list_with_measures_in_database for one_possible_measure in '
                                  'all_possible_measures_list_light ' +  "{:.3f}".format(dt) + ' seconds')
 
             if pass_count < 20:
                 dt = time.time() - t0
-                logger.info('match_endorsement_list_with_measures_in_database ' + str(pass_count) +
+                logger.error('match_endorsement_list_with_measures_in_database ' + str(pass_count) +
                             ' through loop ballot_item_name ' +
                             "{:.3f}".format(dt) + ' seconds')
 
@@ -1107,12 +1125,12 @@ def match_endorsement_list_with_measures_in_database(
                 possible_endorsement_list_modified.append(possible_endorsement)
             if pass_count < 20:
                dt = time.time() - t0
-               logger.info(
+               logger.error(
                   'match_endorsement_list_with_measures_in_database one_possible_measure in all_possible_measures_list_light ' + str(pass_count) + ' pass through loop ' +
                   "{:.3f}".format(dt) + ' seconds')
         if pass_count < 20:
             dt = time.time() - t0
-            logger.info(
+            logger.error(
                 'match_endorsement_list_with_measures_in_database ' + str(pass_count) + ' pass through loop in ' +
                 "{:.3f}".format(dt) + ' seconds')
         pass_count += 1
@@ -1120,7 +1138,7 @@ def match_endorsement_list_with_measures_in_database(
     if len(possible_endorsement_list_modified):
         possible_endorsement_list_found = True
     dt = time.time() - t0
-    logger.info(
+    logger.error(
         'match_endorsement_list_with_measures_in_database ' + str(pass_count) + ' pass before return ' +
         "{:.3f}".format(dt) + ' seconds, and returned ' + str(len(possible_endorsement_list_modified)))
 
@@ -2240,7 +2258,7 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
 
             google_civic_election_id_list_this_year = retrieve_this_and_next_years_election_id_list()
             logger.error('voter_guide_possibility_positions_retrieve_for_api after retrieve_this_and_next_years_election_id_list took ' +
-                         "{:.3f}".format(time.time() - t0) + ' seconds elapsed')
+                         "{:.3f}".format(time.time() - t0) + ' seconds elapsed')        # 0.106 seconds elapsed
 
             if voter_guide_possibility_type == ORGANIZATION_ENDORSING_CANDIDATES \
                     or voter_guide_possibility_type == UNKNOWN_TYPE:
@@ -2255,7 +2273,7 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
                     possible_endorsement_list = results['possible_endorsement_list']
                 logger.error(
                     'voter_guide_possibility_positions_retrieve_for_api after  match_endorsement_list_with_candidates_in_database took ' +
-                    "{:.3f}".format(time.time() - t0) + ' seconds elapsed')
+                    "{:.3f}".format(time.time() - t0) + ' seconds elapsed')  # 33.583 seconds elapsed
 
                 # Match incoming endorsements to measures already in the database
                 results = match_endorsement_list_with_measures_in_database(
