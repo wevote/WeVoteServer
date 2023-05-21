@@ -1223,9 +1223,10 @@ def create_campaignx_supporters_from_positions(
     campaignx_supporter_entries_created = 0
     campaignx_supporter_entries_not_created = 0
     campaignx_we_vote_id_list = []  # Entries that require supporters_count update at end of process
+    campaignx_we_vote_id_refresh_supporters_count_list = []
     # key: politician_we_vote_id, value: linked_campaignx_we_vote_id
     linked_campaignx_we_vote_id_by_politician_we_vote_id_dict = {}
-    number_to_create = 10  # 1000
+    number_to_create = 20  # 1000
     from politician.models import Politician
     politician_we_vote_id_list = []
     from position.models import PositionEntered, PositionForFriends
@@ -1298,6 +1299,8 @@ def create_campaignx_supporters_from_positions(
         if positive_value_exists(one_politician.linked_campaignx_we_vote_id):
             linked_campaignx_we_vote_id_by_politician_we_vote_id_dict[one_politician.we_vote_id] = \
                 one_politician.linked_campaignx_we_vote_id
+            if one_politician.linked_campaignx_we_vote_id not in campaignx_we_vote_id_refresh_supporters_count_list:
+                campaignx_we_vote_id_refresh_supporters_count_list.append(one_politician.linked_campaignx_we_vote_id)
 
     # Retrieve existing CampaignXSupporter entries that are related to positions we are trying to copy from,
     #  so we can mark them as already processed in the PositionEntered table.
@@ -1383,7 +1386,6 @@ def create_campaignx_supporters_from_positions(
     campaignx_manager = CampaignXManager()
     campaignx_bulk_update_list = []
     campaignx_updates_made = 0
-    campaignx_we_vote_id_updated_list = []
     if len(campaignx_we_vote_id_list) > 0:
         queryset = CampaignX.objects.all()  # Cannot be readonly because of bulk_update below
         queryset = queryset.filter(we_vote_id__in=campaignx_we_vote_id_list)
@@ -1397,8 +1399,8 @@ def create_campaignx_supporters_from_positions(
                 campaignx_entries_need_to_be_updated = True
                 campaignx_updates_made += 1
                 if positive_value_exists(one_campaignx.we_vote_id) \
-                        and one_campaignx.we_vote_id not in campaignx_we_vote_id_updated_list:
-                    campaignx_we_vote_id_updated_list.append(one_campaignx.we_vote_id)
+                        and one_campaignx.we_vote_id not in campaignx_we_vote_id_refresh_supporters_count_list:
+                    campaignx_we_vote_id_refresh_supporters_count_list.append(one_campaignx.we_vote_id)
     if campaignx_entries_need_to_be_updated:
         try:
             CampaignX.objects.bulk_update(campaignx_bulk_update_list, ['supporters_count'])
@@ -1411,17 +1413,17 @@ def create_campaignx_supporters_from_positions(
                                  "".format(e=e))
 
     # Now push updates to campaignx entries out to candidates and politicians linked to the campaignx entries
-    if len(campaignx_we_vote_id_updated_list) > 0:
+    if len(campaignx_we_vote_id_refresh_supporters_count_list) > 0:
         from candidate.controllers import update_candidate_details_from_campaignx
         from politician.controllers import update_politician_details_from_campaignx
         from representative.controllers import update_representative_details_from_campaignx
         queryset = CampaignX.objects.using('readonly').all()
-        queryset = queryset.filter(we_vote_id__in=campaignx_we_vote_id_updated_list)
+        queryset = queryset.filter(we_vote_id__in=campaignx_we_vote_id_refresh_supporters_count_list)
         campaignx_list = list(queryset)
         # ##############################################################################
         # Update all upcoming candidates linked to CampaignX entries which were updated
         queryset = CandidateCampaign.objects.all()  # Cannot be readonly because of bulk_update below
-        queryset = queryset.filter(linked_campaignx_we_vote_id__in=campaignx_we_vote_id_updated_list)
+        queryset = queryset.filter(linked_campaignx_we_vote_id__in=campaignx_we_vote_id_refresh_supporters_count_list)
         queryset = queryset.filter(candidate_ultimate_election_date__gte=date_today_as_integer)
         candidate_bulk_update_list = []
         candidate_bulk_updates_made = 0
@@ -1451,7 +1453,7 @@ def create_campaignx_supporters_from_positions(
         # ##############################################################################
         # Update all politicians linked to CampaignX entries which were updated
         queryset = Politician.objects.all()  # Cannot be readonly because of bulk_update below
-        queryset = queryset.filter(linked_campaignx_we_vote_id__in=campaignx_we_vote_id_updated_list)
+        queryset = queryset.filter(linked_campaignx_we_vote_id__in=campaignx_we_vote_id_refresh_supporters_count_list)
         politician_bulk_update_list = []
         politician_bulk_updates_made = 0
         politician_list = list(queryset)
@@ -1480,7 +1482,7 @@ def create_campaignx_supporters_from_positions(
         # ##############################################################################
         # Update all representatives linked to CampaignX entries which were updated
         queryset = Representative.objects.all()  # Cannot be readonly because of bulk_update below
-        queryset = queryset.filter(linked_campaignx_we_vote_id__in=campaignx_we_vote_id_updated_list)
+        queryset = queryset.filter(linked_campaignx_we_vote_id__in=campaignx_we_vote_id_refresh_supporters_count_list)
         representative_bulk_update_list = []
         representative_bulk_updates_made = 0
         representative_list = list(queryset)
