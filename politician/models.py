@@ -189,6 +189,7 @@ class Politician(models.Model):
     seo_friendly_path = models.CharField(max_length=255, null=True, unique=True, db_index=True)
     seo_friendly_path_date_last_updated = models.DateTimeField(null=True)
     state_code = models.CharField(verbose_name="politician home state", max_length=2, null=True)
+    supporters_count = models.PositiveIntegerField(default=0)  # From linked_campaignx_we_vote_id CampaignX entry
     twitter_handle_updates_failing = models.BooleanField(default=False)
     twitter_handle2_updates_failing = models.BooleanField(default=False)
     twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)
@@ -1100,6 +1101,7 @@ class PoliticianManager(models.Manager):
         }
         return results
 
+    # TODO: Get rid of this function and replace with update_politician_details_from_candidate in politician/controllers.py
     def update_politician_details_from_candidate(self, candidate):
         """
         Update a politician entry with details retrieved from candidate

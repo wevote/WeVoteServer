@@ -4,7 +4,7 @@
 
 from .controllers import fetch_duplicate_representative_count, figure_out_representative_conflict_values, \
     find_duplicate_representative, merge_if_duplicate_representatives, merge_these_two_representatives, \
-    representative_politician_match, update_representative_from_politician
+    representative_politician_match, update_representative_details_from_politician
 from .models import attach_defaults_values_to_representative_object, Representative, RepresentativeManager, \
     REPRESENTATIVE_UNIQUE_IDENTIFIERS
 from exception.models import handle_record_not_found_exception, handle_record_found_more_than_one_exception, \
@@ -1724,7 +1724,7 @@ def update_representative_from_politician_view(request):
 
     if len(politician_list) > 0:
         politician = politician_list[0]
-        results = update_representative_from_politician(representative=representative, politician=politician)
+        results = update_representative_details_from_politician(representative=representative, politician=politician)
         if results['success']:
             save_changes = results['save_changes']
             representative = results['representative']
@@ -1807,7 +1807,7 @@ def update_representatives_from_politicians_view(request):
             we_vote_representative.save()
         if not politician or not hasattr(politician, 'we_vote_id'):
             continue
-        results = update_representative_from_politician(representative=we_vote_representative, politician=politician)
+        results = update_representative_details_from_politician(representative=we_vote_representative, politician=politician)
         if results['success']:
             save_changes = results['save_changes']
             we_vote_representative = results['representative']

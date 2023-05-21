@@ -6,15 +6,21 @@ from .models import CampaignX, CampaignXListedByOrganization, CampaignXManager, 
     CampaignXPolitician, CampaignXSupporter, FINAL_ELECTION_DATE_COOL_DOWN
 import base64
 import copy
+from datetime import datetime, timedelta
+from django.contrib import messages
+from django.db.models import Q
 from image.controllers import cache_campaignx_image, create_resized_images
 import json
 from io import BytesIO
 from PIL import Image, ImageOps
 import re
 from activity.controllers import update_or_create_activity_notice_seed_for_campaignx_supporter_initial_response
-from voter.models import VoterManager
+from candidate.models import CandidateCampaign
+from position.models import SUPPORT
+import pytz
+from voter.models import Voter, VoterManager
 import wevote_functions.admin
-from wevote_functions.functions import generate_date_as_integer, positive_value_exists
+from wevote_functions.functions import convert_date_to_date_as_integer, generate_date_as_integer, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -1103,6 +1109,420 @@ def campaignx_supporter_save_for_api(  # campaignSupporterSave
             'we_vote_hosted_profile_photo_image_url_tiny': '',
         }
         return results
+
+
+def create_campaignx_supporter_from_position(
+        campaignx_we_vote_id='',
+        create_object_in_database=False,
+        position=None,
+        position_we_vote_id='',
+        show_to_public=True,
+):
+    status = ''
+    campaignx_supporter = None
+    campaignx_supporter_found = False
+
+    if not positive_value_exists(campaignx_we_vote_id):
+        status += "VALID_CAMPAIGNX_WE_VOTE_ID_NOT_FOUND "
+        results = {
+            'success':                      False,
+            'status':                       status,
+            'campaignx_supporter':          campaignx_supporter,
+            'campaignx_supporter_found':    campaignx_supporter_found,
+        }
+        return results
+
+    if hasattr(position, 'ballot_item_display_name'):
+        pass
+    else:
+        from position.models import PositionManager
+        position_manager = PositionManager()
+        results = position_manager.retrieve_position(position_we_vote_id=position_we_vote_id)
+        position = None
+        position_found = False
+        if results['position_found']:
+            position = results['position']
+            position_found = True
+        if not position_found or not hasattr(position, 'ballot_item_display_name'):
+            status += "VALID_POSITION_NOT_FOUND "
+            results = {
+                'campaignx_supporter':        campaignx_supporter,
+                'campaignx_supporter_found':  campaignx_supporter_found,
+                'status':                       status,
+                'success': False,
+            }
+            return results
+
+    # Make sure that the position.stance shows support
+    from position.models import SUPPORT
+    if position.stance != SUPPORT:
+        status += "VALID_POSITION_NOT_FOUND "
+        results = {
+            'success': False,
+            'status': status,
+            'campaignx_supporter': campaignx_supporter,
+            'campaignx_supporter_found': campaignx_supporter_found,
+        }
+        return results
+
+    campaignx_supporter_created = False
+    try:
+        campaignx_supporter = CampaignXSupporter(
+            campaign_supported=True,
+            campaignx_we_vote_id=campaignx_we_vote_id,
+            date_supported=position.date_entered,
+            linked_position_we_vote_id=position.we_vote_id,
+            organization_we_vote_id=position.organization_we_vote_id,
+            supporter_name=position.speaker_display_name,
+            supporter_endorsement=position.statement_text,
+            # visibility_blocked_by_we_vote=False,
+            visible_to_public=show_to_public,
+            voter_we_vote_id=position.voter_we_vote_id,
+            we_vote_hosted_profile_image_url_medium=position.speaker_image_url_https_medium,
+            we_vote_hosted_profile_image_url_tiny=position.speaker_image_url_https_tiny,
+        )
+        # Phone
+        # if positive_value_exists(position.politician_phone_number):
+        #     campaignx_supporter.campaignx_supporter_phone = position.politician_phone_number
+        if positive_value_exists(create_object_in_database):
+            campaignx_supporter.save()
+            campaignx_supporter_created = True
+        else:
+            campaignx_supporter_found = True
+        if campaignx_supporter_created:
+            success = True
+            status += "CAMPAIGNX_SUPPORTER_CREATED "
+        elif campaignx_supporter_found:
+            success = True
+            status += "CAMPAIGNX_SUPPORTER_BUILT_BUT_NOT_SAVED "
+        else:
+            success = False
+            status += "CAMPAIGNX_SUPPORTER_NOT_CREATED "
+    except Exception as e:
+        status += 'FAILED_TO_CREATE_CAMPAIGNX_SUPPORTER ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        success = False
+
+    results = {
+        'campaignx_supporter_created':  campaignx_supporter_created,
+        'campaignx_supporter_found':    campaignx_supporter_found,
+        'campaignx_supporter':          campaignx_supporter,
+        'status':                       status,
+        'success':                      success,
+    }
+    return results
+
+
+def create_campaignx_supporters_from_positions(
+        request,
+        friends_only_positions=False,
+        state_code=''):
+    # Create default variables needed below
+    campaignx_supporter_bulk_create_list = []
+    campaignx_supporter_entry_create_needed = False
+    campaignx_supporter_entries_created = 0
+    campaignx_supporter_entries_not_created = 0
+    campaignx_we_vote_id_list = []  # Entries that require supporters_count update at end of process
+    # key: politician_we_vote_id, value: linked_campaignx_we_vote_id
+    linked_campaignx_we_vote_id_by_politician_we_vote_id_dict = {}
+    number_to_create = 10  # 1000
+    from politician.models import Politician
+    politician_we_vote_id_list = []
+    from position.models import PositionEntered, PositionForFriends
+    position_objects_to_mark_as_having_campaignx_supporter_created = []
+    position_updates_made = 0
+    position_updates_needed = False
+    position_we_vote_id_list = []
+    from representative.models import Representative
+    status = ''
+    success = True
+    timezone = pytz.timezone("America/Los_Angeles")
+    datetime_now = timezone.localize(datetime.now())
+    date_today_as_integer = convert_date_to_date_as_integer(datetime_now)
+    voter_we_vote_id_list = []  # Must be signed in to create a campaignx_supporter entry from friends_only_positions
+
+    if positive_value_exists(friends_only_positions):
+        position_query = PositionForFriends.objects.all()  # Cannot be readonly, since we bulk_update at the end
+    else:
+        position_query = PositionEntered.objects.all()  # Cannot be readonly, since we bulk_update at the end
+    position_query = position_query.exclude(campaignx_supporter_created=True)
+    position_query = position_query.filter(stance=SUPPORT)
+    position_query = position_query.filter(
+        Q(position_ultimate_election_not_linked=True) |
+        Q(position_ultimate_election_date__gte=date_today_as_integer)
+    )
+    if positive_value_exists(state_code):
+        position_query = position_query.filter(state_code__iexact=state_code)
+    total_to_convert = position_query.count()
+    position_list_to_copy = list(position_query[:number_to_create])
+
+    # Check CampaignXSupporter table to see if any of these positions already have a CampaignXSupporter entry
+    #  if so, don't try to add a duplicate.
+    for one_position in position_list_to_copy:
+        voter_we_vote_id_list.append(one_position.voter_we_vote_id)
+
+    # Retrieve all relevant voters associated with positions in a single query, so we can access voter.is_signed_in
+    #  for friends_only_positions, we want to only create a campaignx_supporter entry if the voter is signed in
+    voter_is_signed_in_by_voter_we_vote_id_dict = {}
+    if positive_value_exists(friends_only_positions) and len(voter_we_vote_id_list) > 0:
+        # from voter.models import Voter
+        voter_query = Voter.objects.using('readonly').all()
+        voter_query = voter_query.filter(we_vote_id__in=voter_we_vote_id_list)
+        voter_list = list(voter_query)
+        for one_voter in voter_list:
+            voter_is_signed_in_by_voter_we_vote_id_dict[one_voter.we_vote_id] = one_voter.is_signed_in()
+        position_list_modified = []
+        for one_position in position_list_to_copy:
+            if positive_value_exists(one_position.voter_we_vote_id) and \
+                    one_position.voter_we_vote_id in voter_is_signed_in_by_voter_we_vote_id_dict:
+                if voter_is_signed_in_by_voter_we_vote_id_dict[one_position.voter_we_vote_id]:
+                    position_list_modified.append(one_position)
+                else:
+                    total_to_convert -= 1
+            else:
+                total_to_convert -= 1
+        position_list_to_copy = position_list_modified
+
+    for one_position in position_list_to_copy:
+        politician_we_vote_id_list.append(one_position.politician_we_vote_id)  # Needed to get campaignx_we_vote_id
+        position_we_vote_id_list.append(one_position.we_vote_id)
+
+    # Retrieve all the related politicians in a single query, so we can access the linked_campaignx_we_vote_id
+    #  when we are cycling through the positions
+    politician_list = []
+    if len(politician_we_vote_id_list) > 0:
+        politician_query = Politician.objects.using('readonly').all()
+        politician_query = politician_query.filter(we_vote_id__in=politician_we_vote_id_list)
+        politician_list = list(politician_query)
+    for one_politician in politician_list:
+        if positive_value_exists(one_politician.linked_campaignx_we_vote_id):
+            linked_campaignx_we_vote_id_by_politician_we_vote_id_dict[one_politician.we_vote_id] = \
+                one_politician.linked_campaignx_we_vote_id
+
+    # Retrieve existing CampaignXSupporter entries that are related to positions we are trying to copy from,
+    #  so we can mark them as already processed in the PositionEntered table.
+    if len(position_we_vote_id_list) > 0:
+        queryset = CampaignXSupporter.objects.using('readonly').all()
+        queryset = queryset.filter(linked_position_we_vote_id__in=position_we_vote_id_list)
+        campaignx_supporters_already_exist_count = queryset.count()
+        if positive_value_exists(campaignx_supporters_already_exist_count):
+            queryset = queryset.values_list('linked_position_we_vote_id', flat=True).distinct()
+            position_we_vote_ids_to_mark_as_having_campaignx_supporter_created = list(queryset)
+            position_list_to_copy_modified = []
+            for one_position in position_list_to_copy:
+                if one_position.we_vote_id not in position_we_vote_ids_to_mark_as_having_campaignx_supporter_created:
+                    position_list_to_copy_modified.append(one_position)
+                else:
+                    one_position.campaignx_supporter_created = True
+                    position_objects_to_mark_as_having_campaignx_supporter_created.append(one_position)
+                    position_updates_made += 1
+                    position_updates_needed = True
+            position_list_to_copy = position_list_to_copy_modified
+
+    for one_position in position_list_to_copy:
+        if one_position.stance == SUPPORT:
+            if one_position.politician_we_vote_id in linked_campaignx_we_vote_id_by_politician_we_vote_id_dict:
+                linked_campaignx_we_vote_id = \
+                    linked_campaignx_we_vote_id_by_politician_we_vote_id_dict[one_position.politician_we_vote_id]
+                if not positive_value_exists(linked_campaignx_we_vote_id):
+                    campaignx_supporter_entries_not_created += 1
+                    continue
+                else:
+                    if linked_campaignx_we_vote_id not in campaignx_we_vote_id_list:
+                        campaignx_we_vote_id_list.append(linked_campaignx_we_vote_id)
+            else:
+                campaignx_supporter_entries_not_created += 1
+                continue
+            show_to_public = not positive_value_exists(friends_only_positions)
+            results = create_campaignx_supporter_from_position(
+                campaignx_we_vote_id=linked_campaignx_we_vote_id,
+                create_object_in_database=False,  # We create in bulk below
+                position=one_position,
+                show_to_public=show_to_public,
+            )
+            if results['campaignx_supporter_found']:
+                campaignx_supporter = results['campaignx_supporter']
+                campaignx_supporter_bulk_create_list.append(campaignx_supporter)
+                campaignx_supporter_entry_create_needed = True
+                campaignx_supporter_entries_created += 1  # campaignx_supporter_entries_created
+                one_position.campaignx_supporter_created = True
+                position_objects_to_mark_as_having_campaignx_supporter_created.append(one_position)
+                position_updates_made += 1
+                position_updates_needed = True
+            else:
+                campaignx_supporter_entries_not_created += 1
+    campaignx_supporter_bulk_update_success = True
+    update_message = ''
+    if campaignx_supporter_entry_create_needed:
+        try:
+            CampaignXSupporter.objects.bulk_create(campaignx_supporter_bulk_create_list)
+            update_message += "{campaignx_supporter_entries_created:,} CampaignXSupporter entries created, " \
+                              "".format(campaignx_supporter_entries_created=campaignx_supporter_entries_created)
+        except Exception as e:
+            campaignx_supporter_bulk_update_success = False
+            messages.add_message(request, messages.ERROR,
+                                 "ERROR with CampaignXSupporter.objects.bulk_create: {e}, "
+                                 "".format(e=e))
+    if position_updates_needed and campaignx_supporter_bulk_update_success:
+        try:
+            if friends_only_positions:
+                PositionForFriends.objects.bulk_update(
+                    position_objects_to_mark_as_having_campaignx_supporter_created, ['campaignx_supporter_created'])
+            else:
+                PositionEntered.objects.bulk_update(
+                    position_objects_to_mark_as_having_campaignx_supporter_created, ['campaignx_supporter_created'])
+            update_message += \
+                "{position_updates_made:,} positions updated with campaignx_supporter_created=True, " \
+                "".format(position_updates_made=position_updates_made)
+        except Exception as e:
+            messages.add_message(request, messages.ERROR,
+                                 "ERROR with PositionEntered.objects.bulk_update: {e}, "
+                                 "".format(e=e))
+
+    campaignx_entries_need_to_be_updated = False
+    campaignx_manager = CampaignXManager()
+    campaignx_bulk_update_list = []
+    campaignx_updates_made = 0
+    campaignx_we_vote_id_updated_list = []
+    if len(campaignx_we_vote_id_list) > 0:
+        queryset = CampaignX.objects.all()  # Cannot be readonly because of bulk_update below
+        queryset = queryset.filter(we_vote_id__in=campaignx_we_vote_id_list)
+        campaignx_list = list(queryset)
+        for one_campaignx in campaignx_list:
+            supporters_count = campaignx_manager.fetch_campaignx_supporter_count(
+                campaignx_we_vote_id=one_campaignx.we_vote_id)
+            if supporters_count != one_campaignx.supporters_count:
+                one_campaignx.supporters_count = supporters_count
+                campaignx_bulk_update_list.append(one_campaignx)
+                campaignx_entries_need_to_be_updated = True
+                campaignx_updates_made += 1
+                if positive_value_exists(one_campaignx.we_vote_id) \
+                        and one_campaignx.we_vote_id not in campaignx_we_vote_id_updated_list:
+                    campaignx_we_vote_id_updated_list.append(one_campaignx.we_vote_id)
+    if campaignx_entries_need_to_be_updated:
+        try:
+            CampaignX.objects.bulk_update(campaignx_bulk_update_list, ['supporters_count'])
+            update_message += \
+                "{campaignx_updates_made:,} CampaignX entries updated with fresh supporters_count, " \
+                "".format(campaignx_updates_made=campaignx_updates_made)
+        except Exception as e:
+            messages.add_message(request, messages.ERROR,
+                                 "ERROR with CampaignX.objects.bulk_update: {e}, "
+                                 "".format(e=e))
+
+    # Now push updates to campaignx entries out to candidates and politicians linked to the campaignx entries
+    if len(campaignx_we_vote_id_updated_list) > 0:
+        from candidate.controllers import update_candidate_details_from_campaignx
+        from politician.controllers import update_politician_details_from_campaignx
+        from representative.controllers import update_representative_details_from_campaignx
+        queryset = CampaignX.objects.using('readonly').all()
+        queryset = queryset.filter(we_vote_id__in=campaignx_we_vote_id_updated_list)
+        campaignx_list = list(queryset)
+        # ##############################################################################
+        # Update all upcoming candidates linked to CampaignX entries which were updated
+        queryset = CandidateCampaign.objects.all()  # Cannot be readonly because of bulk_update below
+        queryset = queryset.filter(linked_campaignx_we_vote_id__in=campaignx_we_vote_id_updated_list)
+        queryset = queryset.filter(candidate_ultimate_election_date__gte=date_today_as_integer)
+        candidate_bulk_update_list = []
+        candidate_bulk_updates_made = 0
+        candidate_list = list(queryset)
+        candidate_dict_by_campaignx_we_vote_id = {}
+        for one_candidate in candidate_list:
+            if one_candidate.linked_campaignx_we_vote_id not in candidate_dict_by_campaignx_we_vote_id:
+                candidate_dict_by_campaignx_we_vote_id[one_candidate.linked_campaignx_we_vote_id] = one_candidate
+        for one_campaignx in campaignx_list:
+            if one_campaignx.we_vote_id in candidate_dict_by_campaignx_we_vote_id:
+                candidate_update_results = update_candidate_details_from_campaignx(
+                    candidate=candidate_dict_by_campaignx_we_vote_id[one_campaignx.we_vote_id],
+                    campaignx=one_campaignx)
+                if candidate_update_results['save_changes']:
+                    candidate_bulk_update_list.append(candidate_update_results['candidate'])
+                    candidate_bulk_updates_made += 1
+        if len(candidate_bulk_update_list) > 0:
+            try:
+                CandidateCampaign.objects.bulk_update(candidate_bulk_update_list, ['supporters_count'])
+                update_message += \
+                    "{candidate_bulk_updates_made:,} Candidate entries updated with fresh supporters_count, " \
+                    "".format(candidate_bulk_updates_made=candidate_bulk_updates_made)
+            except Exception as e:
+                messages.add_message(request, messages.ERROR,
+                                     "ERROR with CandidateCampaign.objects.bulk_update: {e}, "
+                                     "".format(e=e))
+        # ##############################################################################
+        # Update all politicians linked to CampaignX entries which were updated
+        queryset = Politician.objects.all()  # Cannot be readonly because of bulk_update below
+        queryset = queryset.filter(linked_campaignx_we_vote_id__in=campaignx_we_vote_id_updated_list)
+        politician_bulk_update_list = []
+        politician_bulk_updates_made = 0
+        politician_list = list(queryset)
+        politician_dict_by_campaignx_we_vote_id = {}
+        for one_politician in politician_list:
+            if one_politician.linked_campaignx_we_vote_id not in politician_dict_by_campaignx_we_vote_id:
+                politician_dict_by_campaignx_we_vote_id[one_politician.linked_campaignx_we_vote_id] = one_politician
+        for one_campaignx in campaignx_list:
+            if one_campaignx.we_vote_id in politician_dict_by_campaignx_we_vote_id:
+                politician_update_results = update_politician_details_from_campaignx(
+                    politician=politician_dict_by_campaignx_we_vote_id[one_campaignx.we_vote_id],
+                    campaignx=one_campaignx)
+                if politician_update_results['save_changes']:
+                    politician_bulk_update_list.append(politician_update_results['politician'])
+                    politician_bulk_updates_made += 1
+        if len(politician_bulk_update_list) > 0:
+            try:
+                Politician.objects.bulk_update(politician_bulk_update_list, ['supporters_count'])
+                update_message += \
+                    "{politician_bulk_updates_made:,} Politician entries updated with fresh supporters_count, " \
+                    "".format(politician_bulk_updates_made=politician_bulk_updates_made)
+            except Exception as e:
+                messages.add_message(request, messages.ERROR,
+                                     "ERROR with Politician.objects.bulk_update: {e}, "
+                                     "".format(e=e))
+        # ##############################################################################
+        # Update all representatives linked to CampaignX entries which were updated
+        queryset = Representative.objects.all()  # Cannot be readonly because of bulk_update below
+        queryset = queryset.filter(linked_campaignx_we_vote_id__in=campaignx_we_vote_id_updated_list)
+        representative_bulk_update_list = []
+        representative_bulk_updates_made = 0
+        representative_list = list(queryset)
+        representative_dict_by_campaignx_we_vote_id = {}
+        for one_representative in representative_list:
+            if one_representative.linked_campaignx_we_vote_id not in representative_dict_by_campaignx_we_vote_id:
+                representative_dict_by_campaignx_we_vote_id[one_representative.linked_campaignx_we_vote_id] = \
+                    one_representative
+        for one_campaignx in campaignx_list:
+            if one_campaignx.we_vote_id in representative_dict_by_campaignx_we_vote_id:
+                representative_update_results = update_representative_details_from_campaignx(
+                    representative=representative_dict_by_campaignx_we_vote_id[one_campaignx.we_vote_id],
+                    campaignx=one_campaignx)
+                if representative_update_results['save_changes']:
+                    representative_bulk_update_list.append(representative_update_results['representative'])
+                    representative_bulk_updates_made += 1
+        if len(representative_bulk_update_list) > 0:
+            try:
+                Representative.objects.bulk_update(representative_bulk_update_list, ['supporters_count'])
+                update_message += \
+                    "{representative_bulk_updates_made:,} Representative entries updated with fresh supporters_count, " \
+                    "".format(representative_bulk_updates_made=representative_bulk_updates_made)
+            except Exception as e:
+                messages.add_message(request, messages.ERROR,
+                                     "ERROR with Representative.objects.bulk_update: {e}, "
+                                     "".format(e=e))
+
+    total_to_convert_after = total_to_convert - number_to_create if total_to_convert > number_to_create else 0
+    if positive_value_exists(total_to_convert_after):
+        update_message += \
+            "{total_to_convert_after:,} positions remaining in 'create CampaignXSupporter' process. " \
+            "".format(total_to_convert_after=total_to_convert_after)
+
+    if positive_value_exists(update_message):
+        messages.add_message(request, messages.INFO, update_message)
+
+    results = {
+        'campaignx_supporter_entries_created': campaignx_supporter_entries_created,
+        'status':   status,
+        'success':  success,
+    }
+    return results
 
 
 def fetch_sentence_string_from_politician_list(politician_list, max_number_of_list_items=200):

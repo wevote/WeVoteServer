@@ -281,6 +281,7 @@ class Representative(models.Model):
     seo_friendly_path = models.CharField(max_length=255, null=True, unique=False)
     seo_friendly_path_date_last_updated = models.DateTimeField(null=True)
     state_code = models.CharField(verbose_name="state this representative serves", max_length=2, null=True)
+    supporters_count = models.PositiveIntegerField(default=0)  # From linked_campaignx_we_vote_id CampaignX entry
     twitter_handle_updates_failing = models.BooleanField(default=False)
     twitter_handle2_updates_failing = models.BooleanField(default=False)
     twitter_url = models.TextField(verbose_name='twitter url of representative', blank=True, null=True)

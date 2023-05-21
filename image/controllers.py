@@ -1135,6 +1135,7 @@ def retrieve_and_save_ballotpedia_candidate_images(candidate):
                 we_vote_hosted_profile_image_url_tiny)
             candidate = save_candidate_results['candidate']
             # Need to update voter ballotpedia details for the candidate in future
+            # TODO: Replace with update_politician_details_from_candidate in politician/controllers.py
             save_politician_details_results = politician_manager.update_politician_details_from_candidate(
                 candidate)
             save_position_from_candidate_results = update_all_position_details_from_candidate(candidate)
