@@ -1332,7 +1332,7 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
         'state_code':                       politician.state_code,
         'status':                           status,
         'success':                          success,
-        # 'supporters_count':                 politician.supporters_count,
+        'supporters_count':                 politician.supporters_count,
         # 'supporters_count_next_goal':       supporters_count_next_goal,
         # 'supporters_count_victory_goal':    politician.supporters_count_victory_goal,
         'twitter_followers_count':          politician.twitter_followers_count,
@@ -1639,7 +1639,36 @@ def politicians_import_from_structured_json(structured_json):  # politiciansSync
     return politicians_results
 
 
-def update_politician_from_candidate(politician, candidate):
+def update_politician_details_from_campaignx(politician, campaignx):
+    status = ''
+    success = True
+    save_changes = False
+
+    if not hasattr(politician, 'supporters_count') or not hasattr(campaignx, 'supporters_count'):
+        success = False
+        status += 'UPDATE_POLITICIAN_FROM_CAMPAIGNX_MISSING_REQUIRED_ATTRIBUTES '
+        results = {
+            'success': success,
+            'status': status,
+            'politician': politician,
+            'save_changes': save_changes,
+        }
+        return results
+
+    if politician.supporters_count != campaignx.supporters_count:
+        politician.supporters_count = campaignx.supporters_count
+        save_changes = True
+
+    results = {
+        'success':      success,
+        'status':       status,
+        'politician':   politician,
+        'save_changes': save_changes,
+    }
+    return results
+
+
+def update_politician_details_from_candidate(politician, candidate):
     status = ''
     success = True
     save_changes = False

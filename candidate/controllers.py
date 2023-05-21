@@ -1928,7 +1928,7 @@ def retrieve_candidate_photos(we_vote_candidate, force_retrieve=False):
     return results
 
 
-def candidate_create_from_politician(politician_we_vote_id=''):
+def create_candidate_from_politician(politician_we_vote_id=''):
     status = ''
     success = True
     candidate = None
@@ -3065,6 +3065,34 @@ def reorder_endorsement_list_to_match_candidates_on_one_web_page(site_url, endor
         'at_least_one_endorsement_found':   at_least_one_endorsement_found,
         'page_redirected':                  False,
         'endorsement_list_light':           endorsement_list_light_modified,
+    }
+    return results
+
+
+def update_candidate_details_from_campaignx(candidate, campaignx):
+    status = ''
+    success = True
+    save_changes = False
+
+    if not hasattr(candidate, 'supporters_count') or not hasattr(campaignx, 'supporters_count'):
+        success = False
+        status += 'UPDATE_CANDIDATE_FROM_CAMPAIGNX_MISSING_REQUIRED_ATTRIBUTES '
+        results = {
+            'success': success,
+            'status': status,
+            'candidate': candidate,
+            'save_changes': save_changes,
+        }
+        return results
+    if candidate.supporters_count != campaignx.supporters_count:
+        candidate.supporters_count = campaignx.supporters_count
+        save_changes = True
+
+    results = {
+        'success': success,
+        'status': status,
+        'candidate': candidate,
+        'save_changes': save_changes,
     }
     return results
 

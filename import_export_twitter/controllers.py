@@ -2165,6 +2165,7 @@ def save_fresh_twitter_details(
                     candidate = save_candidate_results['candidate']
                     candidates_updated_count += 1
                     # Need to update voter twitter details for the candidate in future
+                    # TODO: Replace with update_politician_details_from_candidate in politician/controllers.py
                     # save_politician_details_results = politician_manager.update_politician_details_from_candidate(
                     #     candidate)
                     save_position_results = update_all_position_details_from_candidate(candidate)

@@ -3592,8 +3592,8 @@ def candidate_create_process_view(request):
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     politician_we_vote_id = request.GET.get('politician_we_vote_id', '')
 
-    from candidate.controllers import candidate_create_from_politician
-    results = candidate_create_from_politician(politician_we_vote_id=politician_we_vote_id)
+    from candidate.controllers import create_candidate_from_politician
+    results = create_candidate_from_politician(politician_we_vote_id=politician_we_vote_id)
     candidate_id = 0
     if results['candidate_found']:
         candidate = results['candidate']

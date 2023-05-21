@@ -29,7 +29,7 @@ from exception.models import handle_record_found_more_than_one_exception, \
 from import_export_vote_smart.models import VoteSmartRatingOneCandidate
 from import_export_vote_smart.votesmart_local import VotesmartApiError
 from office.models import ContestOffice
-from politician.controllers import generate_campaignx_for_politician, update_politician_from_candidate
+from politician.controllers import generate_campaignx_for_politician, update_politician_details_from_candidate
 from position.models import PositionEntered, PositionListManager
 from representative.models import Representative, RepresentativeManager
 from voter.models import voter_has_authority
@@ -2398,7 +2398,7 @@ def update_politician_from_candidate_view(request):
 
     if politician.we_vote_id in candidate_list_by_politician_we_vote_id:
         candidate = candidate_list_by_politician_we_vote_id[politician.we_vote_id]
-        results = update_politician_from_candidate(politician=politician, candidate=candidate)
+        results = update_politician_details_from_candidate(politician=politician, candidate=candidate)
         if results['success']:
             save_changes = results['save_changes']
             politician = results['politician']
@@ -2476,7 +2476,7 @@ def update_politicians_from_candidates_view(request):
             we_vote_politician.save()
         if not candidate or not hasattr(candidate, 'we_vote_id'):
             continue
-        results = update_politician_from_candidate(politician=we_vote_politician, candidate=candidate)
+        results = update_politician_details_from_candidate(politician=we_vote_politician, candidate=candidate)
         if results['success']:
             save_changes = results['save_changes']
             we_vote_politician = results['politician']

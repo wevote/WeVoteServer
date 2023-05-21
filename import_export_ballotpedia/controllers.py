@@ -2280,6 +2280,7 @@ def groom_and_store_sample_ballot_results_api_v4(
                                         existing_candidate_objects_dict[ballotpedia_candidate_id] = candidate
                                     # if new_candidate_created:
                                     #     # Need to update voter ballotpedia details for the candidate in future
+                                    #     # TODO: Replace with update_politician_details_from_candidate in politician/controllers.py
                                     #     save_politician_details_results = \
                                     #         politician_manager.update_politician_details_from_candidate(candidate)
 

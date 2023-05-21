@@ -24,12 +24,12 @@ from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
 from measure.controllers import push_contest_measure_data_to_other_table_caches
 from office.controllers import push_contest_office_data_to_other_table_caches
-from office.models import ContestOfficeManager
 from organization.models import OrganizationManager
 from politician.models import PoliticianManager
 from voter.models import voter_has_authority
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, convert_integer_to_string_with_comma_for_thousands_separator, \
+from wevote_functions.functions import convert_to_int, \
+    convert_integer_to_string_with_comma_for_thousands_separator, \
     positive_value_exists, STATE_CODE_MAP
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from django.http import HttpResponse
@@ -248,6 +248,7 @@ def position_list_view(request):
 
     messages_on_stage = get_messages(request)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    position_search = request.GET.get('position_search', '')
     show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
     show_statistics = positive_value_exists(request.GET.get('show_statistics', False))
     show_this_year_of_elections = convert_to_int(request.GET.get('show_this_year_of_elections', 0))
@@ -255,7 +256,21 @@ def position_list_view(request):
     state_list = STATE_CODE_MAP
     state_list_modified = {}
 
-    position_search = request.GET.get('position_search', '')
+    create_campaignx_supporter_from_positions_on = True
+    if create_campaignx_supporter_from_positions_on:
+        from campaign.controllers import create_campaignx_supporters_from_positions
+        update_friends_only_positions = False
+        results = create_campaignx_supporters_from_positions(
+            request,
+            friends_only_positions=False,
+            state_code=state_code)
+        if not positive_value_exists(results['campaignx_supporter_entries_created']):
+            update_friends_only_positions = True
+        if update_friends_only_positions:
+            create_campaignx_supporters_from_positions(
+                request,
+                friends_only_positions=True,
+                state_code=state_code)
 
     candidate_list_manager = CandidateListManager()
     election_manager = ElectionManager()

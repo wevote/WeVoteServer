@@ -3302,10 +3302,12 @@ class Voter(AbstractBaseUser):
 
     def is_signed_in(self):
         # Can't include signed_in_with_apple here since, the iOS version should be specific to one device
-        if self.signed_in_with_apple() or \
-                self.signed_in_with_email() or \
-                self.signed_in_facebook() or \
+        # We start with signed_in_with_email and signed_in_with_sms_phone_number since they don't require another
+        # database call
+        if self.signed_in_with_email() or \
                 self.signed_in_with_sms_phone_number() or \
+                self.signed_in_with_apple() or \
+                self.signed_in_facebook() or \
                 self.signed_in_twitter():
             return True
         return False

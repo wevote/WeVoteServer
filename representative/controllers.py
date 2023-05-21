@@ -437,6 +437,7 @@ def generate_representative_dict_from_representative_object(
         'representative_url':           representative.representative_url,
         'seo_friendly_path':            representative.seo_friendly_path,
         'state_code':                   representative.state_code,
+        'supporters_count':             representative.supporters_count,
         'twitter_url':                  representative.twitter_url,
         'twitter_handle':               representative.fetch_twitter_handle(),
         'twitter_description':          representative.twitter_description
@@ -1464,7 +1465,36 @@ def representatives_query_for_api(  # representativesQuery
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def update_representative_from_politician(representative=None, politician=None):
+def update_representative_details_from_campaignx(representative=None, campaignx=None):
+    status = ''
+    success = True
+    save_changes = False
+
+    if not hasattr(representative, 'supporters_count') or not hasattr(campaignx, 'supporters_count'):
+        success = False
+        status += 'UPDATE_REPRESENTATIVE_FROM_CAMPAIGNX_MISSING_REQUIRED_ATTRIBUTES '
+        results = {
+            'success':          success,
+            'status':           status,
+            'representative':   representative,
+            'save_changes':     save_changes,
+        }
+        return results
+
+    if representative.supporters_count != campaignx.supporters_count:
+        representative.supporters_count = campaignx.supporters_count
+        save_changes = True
+
+    results = {
+        'success':          success,
+        'status':           status,
+        'representative':   representative,
+        'save_changes':     save_changes,
+    }
+    return results
+
+
+def update_representative_details_from_politician(representative=None, politician=None):
     status = ''
     success = True
     save_changes = False

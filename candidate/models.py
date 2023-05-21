@@ -2447,6 +2447,7 @@ class CandidateCampaign(models.Model):
     # seo_friendly_path data is copied from the Politician object, and isn't edited directly on this object
     seo_friendly_path = models.CharField(max_length=255, null=True, unique=False)
     seo_friendly_path_date_last_updated = models.DateTimeField(null=True)
+    supporters_count = models.PositiveIntegerField(default=0)  # From linked_campaignx_we_vote_id CampaignX entry
 
     twitter_url = models.URLField(verbose_name='twitter url of candidate', blank=True, null=True)
     twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)

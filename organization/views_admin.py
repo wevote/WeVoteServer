@@ -15,6 +15,7 @@ from campaign.controllers import move_campaignx_to_another_organization
 from campaign.models import CampaignXListedByOrganization, CampaignXManager
 from candidate.models import CandidateCampaign, CandidateListManager, CandidateManager
 from config.base import get_environment_variable
+from datetime import datetime
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
@@ -45,7 +46,8 @@ from twitter.models import TwitterLinkToOrganization, TwitterUserManager
 from voter.models import retrieve_voter_authority, voter_has_authority, VoterManager
 from voter_guide.models import VoterGuideManager
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, extract_instagram_handle_from_text_string, \
+from wevote_functions.functions import convert_date_to_date_as_integer, convert_to_int, \
+    extract_instagram_handle_from_text_string, \
     extract_twitter_handle_from_text_string, positive_value_exists, \
     STATE_CODE_MAP
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
@@ -2059,33 +2061,39 @@ def organization_position_list_view(request, organization_id=0, organization_we_
                 if twitter_link_to_organization_handle.lower() != organization_twitter_handle.lower():
                     twitter_handle_mismatch = True
 
-    candidate_list_manager = CandidateListManager()
     if not organization_on_stage_found:
         messages.add_message(request, messages.ERROR,
                              'Could not find organization when trying to retrieve positions.')
         return HttpResponseRedirect(reverse('organization:organization_list', args=()))
 
-    results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
-        google_civic_election_id_list)
-    if not positive_value_exists(results['success']):
-        status += results['status']
-    candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+    # candidate_list_manager = CandidateListManager()
+    # results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+    #     google_civic_election_id_list)
+    # if not positive_value_exists(results['success']):
+    #     status += results['status']
+    # candidate_we_vote_id_list = results['candidate_we_vote_id_list']
 
     friends_only_position_count = 0
     public_position_count = 0
+    today = datetime.now().date()
+    today_date_as_integer = convert_date_to_date_as_integer(today)
+
     try:
         public_position_query = PositionEntered.objects.all()
         # As of Aug 2018 we are no longer using PERCENT_RATING
         public_position_query = public_position_query.exclude(stance__iexact='PERCENT_RATING')
         public_position_query = public_position_query.filter(organization_id=organization_id)
-        if positive_value_exists(google_civic_election_id):
-            public_position_query = public_position_query\
-                .filter(Q(google_civic_election_id=google_civic_election_id) |
-                        Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
-        elif len(google_civic_election_id_list):
-            public_position_query = public_position_query\
-                .filter(Q(google_civic_election_id__in=google_civic_election_id_list) |
-                        Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
+        public_position_query = public_position_query \
+            .filter(Q(position_ultimate_election_not_linked=True) |
+                    Q(position_ultimate_election_date__gte=today_date_as_integer))
+        # if positive_value_exists(google_civic_election_id):
+        #     public_position_query = public_position_query\
+        #         .filter(Q(google_civic_election_id=google_civic_election_id) |
+        #                 Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
+        # elif len(google_civic_election_id_list):
+        #     public_position_query = public_position_query\
+        #         .filter(Q(google_civic_election_id__in=google_civic_election_id_list) |
+        #                 Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
         public_position_query = public_position_query.order_by('-id')
         public_position_count = public_position_query.count()
         public_position_list = public_position_query[:50]
@@ -2095,14 +2103,17 @@ def organization_position_list_view(request, organization_id=0, organization_we_
         # As of Aug 2018 we are no longer using PERCENT_RATING
         friends_only_position_query = friends_only_position_query.exclude(stance__iexact='PERCENT_RATING')
         friends_only_position_query = friends_only_position_query.filter(organization_id=organization_id)
-        if positive_value_exists(google_civic_election_id):
-            friends_only_position_query = friends_only_position_query\
-                .filter(Q(google_civic_election_id=google_civic_election_id) |
-                        Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
-        elif len(google_civic_election_id_list):
-            friends_only_position_query = friends_only_position_query\
-                .filter(Q(google_civic_election_id__in=google_civic_election_id_list) |
-                        Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
+        friends_only_position_query = friends_only_position_query \
+            .filter(Q(position_ultimate_election_not_linked=True) |
+                    Q(position_ultimate_election_date__gte=today_date_as_integer))
+        # if positive_value_exists(google_civic_election_id):
+        #     friends_only_position_query = friends_only_position_query\
+        #         .filter(Q(google_civic_election_id=google_civic_election_id) |
+        #                 Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
+        # elif len(google_civic_election_id_list):
+        #     friends_only_position_query = friends_only_position_query\
+        #         .filter(Q(google_civic_election_id__in=google_civic_election_id_list) |
+        #                 Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
         friends_only_position_query = friends_only_position_query.order_by('-id')
         friends_only_position_count = friends_only_position_query.count()
         friends_only_position_list = friends_only_position_query[:50]

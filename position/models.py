@@ -103,6 +103,7 @@ class PositionEntered(models.Model):
         blank=True, null=True)
     ballot_item_twitter_handle = models.CharField(
         verbose_name='twitter screen_name for candidate, measure, or office', max_length=255, null=True, unique=False)
+    campaignx_supporter_created = models.BooleanField(default=None, null=True)
 
     # What is the organization name, voter name, or public figure name? We cache this here for rapid display
     speaker_display_name = models.CharField(
@@ -520,6 +521,7 @@ class PositionForFriends(models.Model):
     ballot_item_twitter_handle = models.CharField(
         verbose_name='twitter screen_name for candidate, measure, or office',
         max_length=255, null=True, unique=False)
+    campaignx_supporter_created = models.BooleanField(default=None, null=True)
 
     # What is the organization name, voter name, or public figure name? We cache this here for rapid display
     speaker_display_name = models.CharField(
@@ -6298,6 +6300,7 @@ class PositionManager(models.Manager):
                 voter_position_on_stage.speaker_image_url_https_large = we_vote_hosted_profile_image_url_large
                 voter_position_on_stage.speaker_image_url_https_medium = we_vote_hosted_profile_image_url_medium
                 voter_position_on_stage.speaker_image_url_https_tiny = we_vote_hosted_profile_image_url_tiny
+                voter_position_on_stage.campaignx_supporter_created = False  # Reset so update scripts can work
 
                 voter_position_on_stage.save()
             except Exception as e:

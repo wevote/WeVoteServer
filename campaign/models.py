@@ -2736,17 +2736,18 @@ class CampaignXSupporter(models.Model):
 
     campaign_supported = models.BooleanField(default=True, db_index=True)
     campaignx_we_vote_id = models.CharField(max_length=255, db_index=True)
-    is_subscribed_by_email = models.BooleanField(default=True)
-    voter_we_vote_id = models.CharField(max_length=255, db_index=True)
+    date_last_changed = models.DateTimeField(null=True, auto_now=True, db_index=True)
+    date_supported = models.DateTimeField(null=True, auto_now_add=True, db_index=True)
+    is_subscribed_by_email = models.BooleanField(default=None, null=True)
+    linked_position_we_vote_id = models.CharField(max_length=255, null=True)
     organization_we_vote_id = models.CharField(max_length=255, null=True)
     supporter_name = models.CharField(max_length=255, null=True)
     supporter_endorsement = models.TextField(null=True)
-    we_vote_hosted_profile_image_url_medium = models.TextField(null=True)
-    we_vote_hosted_profile_image_url_tiny = models.TextField(null=True)
     visibility_blocked_by_we_vote = models.BooleanField(default=False)
     visible_to_public = models.BooleanField(default=False)
-    date_last_changed = models.DateTimeField(null=True, auto_now=True, db_index=True)
-    date_supported = models.DateTimeField(null=True, auto_now_add=True, db_index=True)
+    voter_we_vote_id = models.CharField(max_length=255, db_index=True)
+    we_vote_hosted_profile_image_url_medium = models.TextField(null=True)
+    we_vote_hosted_profile_image_url_tiny = models.TextField(null=True)
 
 
 class CampaignXNewsItem(models.Model):
