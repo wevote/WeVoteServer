@@ -634,15 +634,25 @@ def augment_candidate_possible_position_data(
 
         possible_endorsement_count += 1
         possible_endorsement_return_list.append(possible_endorsement)
+        logger.error(
+            'augment_candidate_possible_position_data  after candidate_we_vote_id in possible_endorsement ' +
+            "{:.3f}".format(time.time() - t0) + ' seconds')
     elif 'ballot_item_name' in possible_endorsement and \
             positive_value_exists(possible_endorsement['ballot_item_name']):
         possible_endorsement_matched = True
         # If here search for possible candidate matches
+        logger.error(
+            'augment_candidate_possible_position_data before retrieve_candidates_from_non_unique_identifiers ' +
+            "{:.3f}".format(time.time() - t0) + ' seconds')
+
         matching_results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
             google_civic_election_id_list=google_civic_election_id_list,
             state_code=limit_to_this_state_code,
             candidate_name=possible_endorsement['ballot_item_name'],
             read_only=True)
+        logger.error(
+            'augment_candidate_possible_position_data after retrieve_candidates_from_non_unique_identifiers ' +
+            "{:.3f}".format(time.time() - t0) + ' seconds')
 
         if matching_results['candidate_found']:
             candidate = matching_results['candidate']
@@ -707,7 +717,7 @@ def augment_candidate_possible_position_data(
                 possible_endorsement_count += 1
                 possible_endorsement_return_list.append(possible_endorsement_copy)
             logger.error('augment_candidate_possible_position_data after candidate in candidate_list' +
-                    "{:.3f}".format(time.time() - t0) + ' seconds')
+                    "{:.3f}".format(time.time() - t0) + ' seconds')   # no hits
         elif not positive_value_exists(matching_results['success']):
             possible_endorsement_matched = True
             status += "RETRIEVE_CANDIDATE_FROM_NON_UNIQUE-NO_SUCCESS "
@@ -719,6 +729,9 @@ def augment_candidate_possible_position_data(
 
             # Now we want to do a reverse search, where we cycle through all upcoming candidates and search
             # within the incoming text for a known candidate name
+            logger.error(
+                'augment_candidate_possible_position_data before reverse search ' +
+                "{:.3f}".format(time.time() - t0) + ' seconds')
             for one_endorsement_light in all_possible_candidates:
                 if one_endorsement_light['ballot_item_display_name'] in possible_endorsement['ballot_item_name']:
                     possible_endorsement['candidate_we_vote_id'] = one_endorsement_light['candidate_we_vote_id']
@@ -758,7 +771,7 @@ def augment_candidate_possible_position_data(
                     possible_endorsement_count += 1
                     possible_endorsement_return_list.append(possible_endorsement)
                     break
-            logger.error('augment_candidate_possible_position_data after one_endorsement_light in all_possible_candidates' +
+            logger.error('augment_candidate_possible_position_data after one_endorsement_light in all_possible_candidates ' +
                     "{:.3f}".format(time.time() - t0) + ' seconds')
     if not possible_endorsement_matched:
         # We want to check 'alternate_names' candidate names in upcoming elections
@@ -767,6 +780,9 @@ def augment_candidate_possible_position_data(
         # NOTE: one_endorsement_light is a candidate or measure for an upcoming election
         # NOTE: possible endorsement is one of the incoming new endorsements we are trying to match
         synonym_found = False
+        logger.error(
+            'augment_candidate_possible_position_data before Hanging off each ballot_item_dict is an alternate_names ' +
+            "{:.3f}".format(time.time() - t0) + ' seconds')
         for one_endorsement_light in all_possible_candidates:
             # Hanging off each ballot_item_dict is an alternate_names that includes
             #  shortened alternative names that we should check against decide_line_lower_case
@@ -813,7 +829,7 @@ def augment_candidate_possible_position_data(
                         possible_endorsement_count += 1
                         possible_endorsement_return_list.append(possible_endorsement_copy)
                         break
-        logger.error('augment_candidate_possible_position_data after one_endorsement_light in all_possible_candidates' +
+        logger.error('augment_candidate_possible_position_data after one_endorsement_light in all_possible_candidates ' +
                             "{:.3f}".format(time.time() - t0) + ' seconds')
 
         if not synonym_found:
@@ -2273,7 +2289,7 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
                     possible_endorsement_list = results['possible_endorsement_list']
                 logger.error(
                     'voter_guide_possibility_positions_retrieve_for_api after  match_endorsement_list_with_candidates_in_database took ' +
-                    "{:.3f}".format(time.time() - t0) + ' seconds elapsed')  # 33.583 seconds elapsed
+                    "{:.3f}".format(time.time() - t0) + ' seconds elapsed')  # 33.583 seconds elapsed, one match_endorsement_list_with_candidates_in_database took 0.071 seconds
 
                 # Match incoming endorsements to measures already in the database
                 results = match_endorsement_list_with_measures_in_database(
