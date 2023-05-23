@@ -46,7 +46,7 @@ python-magic==0.4.24  # Requires "brew install libmagic" or "brew upgrade libmag
 python3-openid -e git+git://github.com/wevote/python3-openid.git@master#egg=python3-openid
 pytz==2021.1
 requests-oauthlib==1.3.0
-requests==2.25.1
+requests==2.31.0
 robot-detection==0.4
 rsa==4.7.2
 selenium==3.141.0
