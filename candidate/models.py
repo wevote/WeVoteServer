@@ -1,7 +1,7 @@
 # candidate/models.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-
+import time
 from datetime import datetime
 import re
 
@@ -1294,9 +1294,18 @@ class CandidateListManager(models.Manager):
         success = True
         status = ""
 
+        t0 = time.time()
+        logger.error(
+            'retrieve_candidates_from_non_unique_identifiers ENTRY ' +
+            "{:.3f}".format(time.time() - t0) + ' seconds')
+
         results = self.retrieve_candidate_we_vote_id_list_from_election_list(
             google_civic_election_id_list=google_civic_election_id_list,
             limit_to_this_state_code=state_code)
+        logger.error(
+            'retrieve_candidates_from_non_unique_identifiers after retrieve_candidate_we_vote_id_list_from_election_list ' +
+            "{:.3f}".format(time.time() - t0) + ' seconds')
+
         if not positive_value_exists(results['success']):
             status += results['status']
             success = False
@@ -1308,6 +1317,8 @@ class CandidateListManager(models.Manager):
             google_civic_election_id_list=google_civic_election_id_list)
         if results['success']:
             year_list = results['year_list']
+        logger.error('retrieve_candidates_from_non_unique_identifiers after retrieve_year_list_by_election_list ' +
+            "{:.3f}".format(time.time() - t0) + ' seconds')
 
         # We want to let candidate_twitter_handle be the dominant search factor if it exists
         one_twitter_handle_exists = \
@@ -1350,6 +1361,8 @@ class CandidateListManager(models.Manager):
 
                 if positive_value_exists(state_code):
                     candidate_query = candidate_query.filter(state_code__iexact=state_code)
+                logger.error('retrieve_candidates_from_non_unique_identifiers after state_code in complex-query 1364 ' +
+                    "{:.3f}".format(time.time() - t0) + ' seconds')
 
                 if positive_value_exists(ignore_candidate_id_list):
                     candidate_query = candidate_query.exclude(we_vote_id__in=ignore_candidate_id_list)
@@ -1365,6 +1378,8 @@ class CandidateListManager(models.Manager):
                     )
 
                 candidate_list = list(candidate_query)
+                logger.error('retrieve_candidates_from_non_unique_identifiers after candidate_list creation 1381 in complex-query ' +
+                    "{:.3f}".format(time.time() - t0) + ' seconds')
                 if len(candidate_list):
                     # At least one entry exists
                     status += 'RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_LIST_RETRIEVED '
@@ -1391,6 +1406,8 @@ class CandidateListManager(models.Manager):
                 keep_looking_for_duplicates = False
 
         # Since candidate wasn't found with Twitter, instagram_handle can be next dominant search criteria
+        logger.error('retrieve_candidates_from_non_unique_identifiers before keep_looking_for_duplicates and positive_value_exists  1409  ' +
+                     "{:.3f}".format(time.time() - t0) + ' seconds')
         if keep_looking_for_duplicates and positive_value_exists(instagram_handle):
             try:
                 if positive_value_exists(read_only):
@@ -1422,6 +1439,8 @@ class CandidateListManager(models.Manager):
                     )
 
                 candidate_list = list(candidate_query)
+                logger.error('retrieve_candidates_from_non_unique_identifiers after 1442 candidate list in second complex-query ' +
+                    "{:.3f}".format(time.time() - t0) + ' seconds')
                 if len(candidate_list):
                     # At least one entry exists
                     status += 'RETRIEVE_CANDIDATES_FROM_INSTAGRAM-CANDIDATE_LIST_RETRIEVED '
@@ -1457,6 +1476,8 @@ class CandidateListManager(models.Manager):
                     candidate_query = CandidateCampaign.objects.all()
 
                 # Only look for matches in candidates in the specified elections, or in the year(s) the elections are in
+                logger.error('retrieve_candidates_from_non_unique_identifiers before candidate_query = candidate_query.filter 1479 in third complex-query ' +
+                    "{:.3f}".format(time.time() - t0) + ' seconds')
                 candidate_query = candidate_query.filter(
                     Q(we_vote_id__in=candidate_we_vote_id_list) |
                     Q(candidate_year__in=year_list)
@@ -1486,6 +1507,8 @@ class CandidateListManager(models.Manager):
                     )
 
                 candidate_list = list(candidate_query)
+                logger.error('retrieve_candidates_from_non_unique_identifiers after candidate_list = list(candidate_query) 1510 in third complex-query ' +
+                    "{:.3f}".format(time.time() - t0) + ' seconds')
                 if len(candidate_list):
                     # entry exists
                     status += 'CANDIDATE_ENTRY_EXISTS1 '
@@ -1525,6 +1548,8 @@ class CandidateListManager(models.Manager):
                 # candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
 
                 # Only look for matches in candidates in the specified elections, or in the year(s) the elections are in
+                logger.error('retrieve_candidates_from_non_unique_identifiers before candidate_query 1551 in fourth complex-query ' +
+                    "{:.3f}".format(time.time() - t0) + ' seconds')
                 candidate_query = candidate_query.filter(
                     Q(we_vote_id__in=candidate_we_vote_id_list) |
                     Q(candidate_year__in=year_list)
@@ -1556,6 +1581,8 @@ class CandidateListManager(models.Manager):
                     )
 
                 candidate_list = list(candidate_query)
+                logger.error('retrieve_candidates_from_non_unique_identifiers candidate_list = list(candidate_query) 1584 in fourth complex-query ' +
+                    "{:.3f}".format(time.time() - t0) + ' seconds')
                 if len(candidate_list):
                     # entry exists
                     status += 'CANDIDATE_ENTRY_EXISTS2 '
@@ -1591,6 +1618,9 @@ class CandidateListManager(models.Manager):
             'candidate_list':                   candidate_list,
             'multiple_entries_found':           multiple_entries_found,
         }
+        logger.error(
+            'retrieve_candidates_from_non_unique_identifiers 1662 EXIT ' +
+            "{:.3f}".format(time.time() - t0) + ' seconds')
         return results
 
     @staticmethod
