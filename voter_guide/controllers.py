@@ -643,7 +643,7 @@ def augment_candidate_possible_position_data(
         # If here search for possible candidate matches
         logger.error(
             'augment_candidate_possible_position_data before retrieve_candidates_from_non_unique_identifiers ' +
-            "{:.3f}".format(time.time() - t0) + ' seconds')
+            "{:.3f}".format(time.time() - t0) + ' seconds')   # 0.000 seconds
 
         matching_results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
             google_civic_election_id_list=google_civic_election_id_list,
@@ -652,7 +652,7 @@ def augment_candidate_possible_position_data(
             read_only=True)
         logger.error(
             'augment_candidate_possible_position_data after retrieve_candidates_from_non_unique_identifiers ' +
-            "{:.3f}".format(time.time() - t0) + ' seconds')
+            "{:.3f}".format(time.time() - t0) + ' seconds')   # 1.989 seconds
 
         if matching_results['candidate_found']:
             candidate = matching_results['candidate']
@@ -731,7 +731,7 @@ def augment_candidate_possible_position_data(
             # within the incoming text for a known candidate name
             logger.error(
                 'augment_candidate_possible_position_data before reverse search ' +
-                "{:.3f}".format(time.time() - t0) + ' seconds')
+                "{:.3f}".format(time.time() - t0) + ' seconds')  # 1.989 seconds
             for one_endorsement_light in all_possible_candidates:
                 if one_endorsement_light['ballot_item_display_name'] in possible_endorsement['ballot_item_name']:
                     possible_endorsement['candidate_we_vote_id'] = one_endorsement_light['candidate_we_vote_id']
@@ -772,7 +772,7 @@ def augment_candidate_possible_position_data(
                     possible_endorsement_return_list.append(possible_endorsement)
                     break
             logger.error('augment_candidate_possible_position_data after one_endorsement_light in all_possible_candidates ' +
-                    "{:.3f}".format(time.time() - t0) + ' seconds')
+                    "{:.3f}".format(time.time() - t0) + ' seconds')  # 1.989 seconds
     if not possible_endorsement_matched:
         # We want to check 'alternate_names' candidate names in upcoming elections
         # (ex/ Candidate name with middle initial in alternate_names)
