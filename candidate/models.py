@@ -1,6 +1,7 @@
 # candidate/models.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
+import json
 import time
 from datetime import datetime
 import re
@@ -1510,7 +1511,7 @@ class CandidateListManager(models.Manager):
                 candidate_list = list(candidate_query)
                 logger.error('retrieve_candidates_from_non_unique_identifiers after candidate_list = list(candidate_query) 1512 in third complex-query ' +
                     "{:.3f}".format(time.time() - t0) + ' seconds')      # 0.951 to 1.214 seconds
-                logger.error('retrieve_candidates_from_non_unique_identifiers 1513 explain: ' + candidate_query.explain())
+                logger.error('retrieve_candidates_from_non_unique_identifiers 1513 explain: ' + candidate_query.explain())  # Gather  (cost=1000.00..352051.88 rows=10 width=5203)
                 if len(candidate_list):
                     # entry exists
                     status += 'CANDIDATE_ENTRY_EXISTS1 '
@@ -1621,8 +1622,11 @@ class CandidateListManager(models.Manager):
             'multiple_entries_found':           multiple_entries_found,
         }
         logger.error(
-            'retrieve_candidates_from_non_unique_identifiers 1662 EXIT ' +
+            'retrieve_candidates_from_non_unique_identifiers 1624 EXIT ' +
             "{:.3f}".format(time.time() - t0) + ' seconds')
+        logger.error('retrieve_candidates_from_non_unique_identifiers 1626 candidate: ' + candidate)
+        logger.error('retrieve_candidates_from_non_unique_identifiers 1627 multiple_entries_found: ' + str(multiple_entries_found))
+        logger.error('retrieve_candidates_from_non_unique_identifiers 1628 candidate_list: ' + json.dumps(candidate_list))
         return results
 
     @staticmethod
@@ -2432,15 +2436,16 @@ class CandidateCampaign(models.Model):
     politician_we_vote_id = models.CharField(
         verbose_name="we vote politician id", max_length=255, null=True, blank=True)
     # The candidate's name.
-    candidate_name = models.CharField(verbose_name="candidate name", max_length=255, null=False, blank=False)
+    candidate_name = models.CharField(verbose_name="candidate name", max_length=255, null=False, blank=False,
+                                      db_index=True)
     # The candidate's name as passed over by Google Civic. We save this so we can match to this candidate even
     # if we edit the candidate's name locally.  Sometimes Google isn't consistent with office names.
     google_civic_candidate_name = models.CharField(verbose_name="candidate name exactly as received from google civic",
-                                                   max_length=255, null=True)
+                                                   max_length=255, null=True, db_index=True)
     google_civic_candidate_name2 = models.CharField(verbose_name="candidate name exactly as received from google civic",
-                                                    max_length=255, null=True)
+                                                    max_length=255, null=True, db_index=True)
     google_civic_candidate_name3 = models.CharField(verbose_name="candidate name exactly as received from google civic",
-                                                    max_length=255, null=True)
+                                                    max_length=255, null=True, db_index=True)
     candidate_gender = models.CharField(verbose_name="candidate gender", max_length=255, null=True, blank=True)
     # Birthday in YYYY-MM-DD format.
     birth_day_text = models.CharField(verbose_name="birth day", max_length=10, null=True, blank=True)
@@ -2469,12 +2474,13 @@ class CandidateCampaign(models.Model):
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=True, blank=True)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
-    instagram_handle = models.TextField(verbose_name="candidate's instagram handle", blank=True, null=True)
+    instagram_handle = models.TextField(verbose_name="candidate's instagram handle", blank=True, null=True,
+                                        db_index=True)
     instagram_followers_count = models.IntegerField(null=True, blank=True)
     # The date of the last election this candidate relates to, converted to integer, ex/ 20201103
     candidate_ultimate_election_date = models.PositiveIntegerField(default=None, null=True)
     # The year this candidate is running for office
-    candidate_year = models.PositiveIntegerField(default=None, null=True)
+    candidate_year = models.PositiveIntegerField(default=None, null=True, db_index=True)
     # State code
     state_code = models.CharField(
         verbose_name="state this candidate serves", max_length=2, null=True, blank=True, db_index=True)
@@ -2498,9 +2504,9 @@ class CandidateCampaign(models.Model):
     twitter_url = models.URLField(verbose_name='twitter url of candidate', blank=True, null=True)
     twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)
     # TODO Update whole system to handle candidate_twitter_handle2 and 3
-    candidate_twitter_handle = models.CharField(max_length=255, null=True, unique=False)
-    candidate_twitter_handle2 = models.CharField(max_length=255, null=True, unique=False)
-    candidate_twitter_handle3 = models.CharField(max_length=255, null=True, unique=False)
+    candidate_twitter_handle = models.CharField(max_length=255, null=True, unique=False, db_index=True)
+    candidate_twitter_handle2 = models.CharField(max_length=255, null=True, unique=False, db_index=True)
+    candidate_twitter_handle3 = models.CharField(max_length=255, null=True, unique=False, db_index=True)
     # DEPRECATED, but saved, so we can move data to twitter_handle_updates_failing
     candidate_twitter_updates_failing = models.BooleanField(default=False)  # twitter_handle_updates_failing
     twitter_handle_updates_failing = models.BooleanField(default=False)
@@ -2523,7 +2529,8 @@ class CandidateCampaign(models.Model):
     vote_usa_office_id = models.CharField(
         verbose_name="Vote USA permanent id for the office", max_length=64, default=None, null=True, blank=True)
     vote_usa_politician_id = models.CharField(
-        verbose_name="Vote USA permanent id for this candidate", max_length=64, default=None, null=True, blank=True)
+        verbose_name="Vote USA permanent id for this candidate", max_length=64, default=None, null=True, blank=True,
+        db_index=True)
     # This is the master image url cached on We Vote servers. See photo_url_from_vote_usa for Vote USA URL.
     vote_usa_profile_image_url_https = models.TextField(null=True, blank=True, default=None)
 
