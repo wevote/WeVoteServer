@@ -635,7 +635,7 @@ def augment_candidate_possible_position_data(
         possible_endorsement_count += 1
         possible_endorsement_return_list.append(possible_endorsement)
         logger.error(
-            'augment_candidate_possible_position_data  after candidate_we_vote_id in possible_endorsement ' +
+            'augment_candidate_possible_position_data after candidate_we_vote_id in possible_endorsement ' +
             "{:.3f}".format(time.time() - t0) + ' seconds')
     elif 'ballot_item_name' in possible_endorsement and \
             positive_value_exists(possible_endorsement['ballot_item_name']):
@@ -2070,7 +2070,7 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
     candidate_manager = CandidateManager()
     t0 = time.time()
 
-    logger.error('voterGuidePossibilityHighlightsRetrieve url:' + url_to_scan)
+    logger.error('voterGuidePossibilityHighlightsRetrieve url: ' + url_to_scan)
     # Once we know we have a voter_device_id to work with, get this working
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
     results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_from_url(
@@ -2080,7 +2080,7 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
         # google_civic_election_id=google_civic_election_id
     )
     dt = time.time() - t0
-    logger.error('voterGuidePossibilityHighlightsRetrieve retrieve_voter_guide_possibility_from_url  took ' +
+    logger.error('voterGuidePossibilityHighlightsRetrieve retrieve_voter_guide_possibility_from_url took ' +
                  "{:.3f}".format(dt) + ' seconds')
 
     status += results['status']
