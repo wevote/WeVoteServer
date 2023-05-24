@@ -1269,6 +1269,7 @@ class CandidateListManager(models.Manager):
         with stricter parameters.
         This is a different approach from search_candidates_in_specific_elections, which casts a wider net.
         Another related function, retrieve_possible_duplicate_candidates, is used to avoid duplicate candidate imports.
+        ** In May 2023, this function takes about 2 seconds to execute, since it searches a lot of unindexed fields **
         :param google_civic_election_id_list:
         :param state_code:
         :param candidate_twitter_handle:
@@ -1304,7 +1305,7 @@ class CandidateListManager(models.Manager):
             limit_to_this_state_code=state_code)
         logger.error(
             'retrieve_candidates_from_non_unique_identifiers after retrieve_candidate_we_vote_id_list_from_election_list ' +
-            "{:.3f}".format(time.time() - t0) + ' seconds')
+            "{:.3f}".format(time.time() - t0) + ' seconds')   #1.964 seconds, this is it
 
         if not positive_value_exists(results['success']):
             status += results['status']
@@ -1476,8 +1477,8 @@ class CandidateListManager(models.Manager):
                     candidate_query = CandidateCampaign.objects.all()
 
                 # Only look for matches in candidates in the specified elections, or in the year(s) the elections are in
-                logger.error('retrieve_candidates_from_non_unique_identifiers before candidate_query = candidate_query.filter 1479 in third complex-query ' +
-                    "{:.3f}".format(time.time() - t0) + ' seconds')
+                logger.error('retrieve_candidates_from_non_unique_identifiers before candidate_query = candidate_query.filter 1481 in third complex-query ' +
+                    "{:.3f}".format(time.time() - t0) + ' seconds')     # 0.006 seconds
                 candidate_query = candidate_query.filter(
                     Q(we_vote_id__in=candidate_we_vote_id_list) |
                     Q(candidate_year__in=year_list)
@@ -1507,8 +1508,9 @@ class CandidateListManager(models.Manager):
                     )
 
                 candidate_list = list(candidate_query)
-                logger.error('retrieve_candidates_from_non_unique_identifiers after candidate_list = list(candidate_query) 1510 in third complex-query ' +
-                    "{:.3f}".format(time.time() - t0) + ' seconds')
+                logger.error('retrieve_candidates_from_non_unique_identifiers after candidate_list = list(candidate_query) 1512 in third complex-query ' +
+                    "{:.3f}".format(time.time() - t0) + ' seconds')      # 0.951 to 1.214 seconds
+                logger.error('retrieve_candidates_from_non_unique_identifiers 1513 explain: ' + candidate_query.explain())
                 if len(candidate_list):
                     # entry exists
                     status += 'CANDIDATE_ENTRY_EXISTS1 '
@@ -1548,8 +1550,8 @@ class CandidateListManager(models.Manager):
                 # candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
 
                 # Only look for matches in candidates in the specified elections, or in the year(s) the elections are in
-                logger.error('retrieve_candidates_from_non_unique_identifiers before candidate_query 1551 in fourth complex-query ' +
-                    "{:.3f}".format(time.time() - t0) + ' seconds')
+                logger.error('retrieve_candidates_from_non_unique_identifiers before candidate_query 1553 in fourth complex-query ' +
+                    "{:.3f}".format(time.time() - t0) + ' seconds')     # 1.214 seconds
                 candidate_query = candidate_query.filter(
                     Q(we_vote_id__in=candidate_we_vote_id_list) |
                     Q(candidate_year__in=year_list)
@@ -1581,8 +1583,8 @@ class CandidateListManager(models.Manager):
                     )
 
                 candidate_list = list(candidate_query)
-                logger.error('retrieve_candidates_from_non_unique_identifiers candidate_list = list(candidate_query) 1584 in fourth complex-query ' +
-                    "{:.3f}".format(time.time() - t0) + ' seconds')
+                logger.error('retrieve_candidates_from_non_unique_identifiers candidate_list = list(candidate_query) 1587 in fourth complex-query ' +
+                    "{:.3f}".format(time.time() - t0) + ' seconds')  # 2.229 seconds
                 if len(candidate_list):
                     # entry exists
                     status += 'CANDIDATE_ENTRY_EXISTS2 '
@@ -1823,6 +1825,11 @@ class CandidateListManager(models.Manager):
         status = ""
         success = True
 
+        t0 = time.time()
+        logger.error(
+            'retrieve_candidate_to_office_link_list ENTRY ' +
+            "{:.3f}".format(time.time() - t0) + ' seconds')
+
         at_least_one_filter_exists = len(candidate_we_vote_id_list) > 0 or \
             len(contest_office_we_vote_id_list) > 0 or \
             len(google_civic_election_id_list) > 0 or \
@@ -1840,6 +1847,8 @@ class CandidateListManager(models.Manager):
         google_civic_election_id_integer_list = []
         for google_civic_election_id in google_civic_election_id_list:
             google_civic_election_id_integer_list.append(convert_to_int(google_civic_election_id))
+        logger.error('retrieve_candidate_to_office_link_list after google_civic_election_id_integer_list.append loop ' +
+            "{:.3f}".format(time.time() - t0) + ' seconds')
 
         try:
             if positive_value_exists(read_only):
@@ -1855,7 +1864,14 @@ class CandidateListManager(models.Manager):
             if positive_value_exists(state_code):
                 query = query.filter(state_code__iexact=state_code)
 
+            logger.error(
+                'retrieve_candidate_to_office_link_list before link_list = list(query) 1868 ' +
+                "{:.3f}".format(time.time() - t0) + ' seconds')
             link_list = list(query)
+            logger.error(
+                'retrieve_candidate_to_office_link_list after link_list = list(query) 1872 ' +
+                "{:.3f}".format(time.time() - t0) + ' seconds')
+            logger.error('retrieve_candidate_to_office_link_list 1874 explain: ' + query.explain())
         except Exception as e:
             status += "RETRIEVE_CANDIDATE_TO_OFFICE_LINK_LIST-ERROR: " + str(e) + " "
             success = False
