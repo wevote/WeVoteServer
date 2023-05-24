@@ -1624,7 +1624,7 @@ class CandidateListManager(models.Manager):
         logger.error(
             'retrieve_candidates_from_non_unique_identifiers 1624 EXIT ' +
             "{:.3f}".format(time.time() - t0) + ' seconds')
-        logger.error('retrieve_candidates_from_non_unique_identifiers 1626 candidate: ' + candidate)
+        logger.error('retrieve_candidates_from_non_unique_identifiers 1626 candidate: ' + json.dumps(candidate))
         logger.error('retrieve_candidates_from_non_unique_identifiers 1627 multiple_entries_found: ' + str(multiple_entries_found))
         logger.error('retrieve_candidates_from_non_unique_identifiers 1628 candidate_list: ' + json.dumps(candidate_list))
         return results
