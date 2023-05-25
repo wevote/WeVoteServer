@@ -1,8 +1,6 @@
 # candidate/models.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-import json
-import time
 from datetime import datetime
 import re
 
@@ -1296,17 +1294,14 @@ class CandidateListManager(models.Manager):
         success = True
         status = ""
 
-        t0 = time.time()
-        logger.error(
-            'retrieve_candidates_from_non_unique_identifiers ENTRY ' +
-            "{:.3f}".format(time.time() - t0) + ' seconds')
+        # t0 = time.time()
+        # logger.error(
+        #     'retrieve_candidates_from_non_unique_identifiers ENTRY ' +
+        #     "{:.3f}".format(time.time() - t0) + ' seconds')
 
         results = self.retrieve_candidate_we_vote_id_list_from_election_list(
             google_civic_election_id_list=google_civic_election_id_list,
             limit_to_this_state_code=state_code)
-        logger.error(
-            'retrieve_candidates_from_non_unique_identifiers after retrieve_candidate_we_vote_id_list_from_election_list ' +
-            "{:.3f}".format(time.time() - t0) + ' seconds')   #1.964 seconds, this is it
 
         if not positive_value_exists(results['success']):
             status += results['status']
@@ -1319,8 +1314,6 @@ class CandidateListManager(models.Manager):
             google_civic_election_id_list=google_civic_election_id_list)
         if results['success']:
             year_list = results['year_list']
-        logger.error('retrieve_candidates_from_non_unique_identifiers after retrieve_year_list_by_election_list ' +
-            "{:.3f}".format(time.time() - t0) + ' seconds')
 
         # We want to let candidate_twitter_handle be the dominant search factor if it exists
         one_twitter_handle_exists = \
@@ -1363,8 +1356,6 @@ class CandidateListManager(models.Manager):
 
                 if positive_value_exists(state_code):
                     candidate_query = candidate_query.filter(state_code__iexact=state_code)
-                logger.error('retrieve_candidates_from_non_unique_identifiers after state_code in complex-query 1364 ' +
-                    "{:.3f}".format(time.time() - t0) + ' seconds')
 
                 if positive_value_exists(ignore_candidate_id_list):
                     candidate_query = candidate_query.exclude(we_vote_id__in=ignore_candidate_id_list)
@@ -1380,8 +1371,6 @@ class CandidateListManager(models.Manager):
                     )
 
                 candidate_list = list(candidate_query)
-                logger.error('retrieve_candidates_from_non_unique_identifiers after candidate_list creation 1381 in complex-query ' +
-                    "{:.3f}".format(time.time() - t0) + ' seconds')
                 if len(candidate_list):
                     # At least one entry exists
                     status += 'RETRIEVE_CANDIDATES_FROM_NON_UNIQUE-CANDIDATE_LIST_RETRIEVED '
@@ -1408,8 +1397,6 @@ class CandidateListManager(models.Manager):
                 keep_looking_for_duplicates = False
 
         # Since candidate wasn't found with Twitter, instagram_handle can be next dominant search criteria
-        logger.error('retrieve_candidates_from_non_unique_identifiers before keep_looking_for_duplicates and positive_value_exists  1409  ' +
-                     "{:.3f}".format(time.time() - t0) + ' seconds')
         if keep_looking_for_duplicates and positive_value_exists(instagram_handle):
             try:
                 if positive_value_exists(read_only):
@@ -1441,8 +1428,6 @@ class CandidateListManager(models.Manager):
                     )
 
                 candidate_list = list(candidate_query)
-                logger.error('retrieve_candidates_from_non_unique_identifiers after 1442 candidate list in second complex-query ' +
-                    "{:.3f}".format(time.time() - t0) + ' seconds')
                 if len(candidate_list):
                     # At least one entry exists
                     status += 'RETRIEVE_CANDIDATES_FROM_INSTAGRAM-CANDIDATE_LIST_RETRIEVED '
@@ -1478,8 +1463,6 @@ class CandidateListManager(models.Manager):
                     candidate_query = CandidateCampaign.objects.all()
 
                 # Only look for matches in candidates in the specified elections, or in the year(s) the elections are in
-                logger.error('retrieve_candidates_from_non_unique_identifiers before candidate_query = candidate_query.filter 1481 in third complex-query ' +
-                    "{:.3f}".format(time.time() - t0) + ' seconds')     # 0.006 seconds
                 candidate_query = candidate_query.filter(
                     Q(we_vote_id__in=candidate_we_vote_id_list) |
                     Q(candidate_year__in=year_list)
@@ -1509,9 +1492,12 @@ class CandidateListManager(models.Manager):
                     )
 
                 candidate_list = list(candidate_query)
-                logger.error('retrieve_candidates_from_non_unique_identifiers after candidate_list = list(candidate_query) 1512 in third complex-query ' +
-                    "{:.3f}".format(time.time() - t0) + ' seconds')      # 0.951 to 1.214 seconds
-                logger.error('retrieve_candidates_from_non_unique_identifiers 1513 explain: ' + candidate_query.explain())  # Gather  (cost=1000.00..352051.88 rows=10 width=5203)
+                # May 2023, added indexes to 10 more fields in CandidateCampaign, the fields searched in this function
+                # Explain before: Gather  (cost=1000.00..352051.88 rows=10 width=5203)
+                # Explain after: Bitmap Heap Scan on candidate_candidatecampaign  (cost=918.57..3845.34 rows=15 width=5203)
+                # Went from 2 seconds to execute this function, to 27ms, roughly 100x faster.
+                # voterGuidePossibilityHighlightsRetrieve went from 28 seconds for a site with 14 matches, to 0.5 seconds
+                # logger.error('retrieve_candidates_from_non_unique_identifiers 1513 explain: ' + candidate_query.explain())
                 if len(candidate_list):
                     # entry exists
                     status += 'CANDIDATE_ENTRY_EXISTS1 '
@@ -1551,8 +1537,6 @@ class CandidateListManager(models.Manager):
                 # candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
 
                 # Only look for matches in candidates in the specified elections, or in the year(s) the elections are in
-                logger.error('retrieve_candidates_from_non_unique_identifiers before candidate_query 1553 in fourth complex-query ' +
-                    "{:.3f}".format(time.time() - t0) + ' seconds')     # 1.214 seconds
                 candidate_query = candidate_query.filter(
                     Q(we_vote_id__in=candidate_we_vote_id_list) |
                     Q(candidate_year__in=year_list)
@@ -1584,8 +1568,6 @@ class CandidateListManager(models.Manager):
                     )
 
                 candidate_list = list(candidate_query)
-                logger.error('retrieve_candidates_from_non_unique_identifiers candidate_list = list(candidate_query) 1587 in fourth complex-query ' +
-                    "{:.3f}".format(time.time() - t0) + ' seconds')  # 2.229 seconds
                 if len(candidate_list):
                     # entry exists
                     status += 'CANDIDATE_ENTRY_EXISTS2 '
@@ -1621,15 +1603,6 @@ class CandidateListManager(models.Manager):
             'candidate_list':                   candidate_list,
             'multiple_entries_found':           multiple_entries_found,
         }
-        logger.error(
-            'retrieve_candidates_from_non_unique_identifiers 1624 EXIT ' +
-            "{:.3f}".format(time.time() - t0) + ' seconds')
-        try:
-            logger.error('retrieve_candidates_from_non_unique_identifiers 1626 candidate: ' + json.dumps(candidate))
-        except Exception as e:
-            logger.error('retrieve_candidates_from_non_unique_identifiers 1626 candidate dump failed e: ' + str(e))
-        logger.error('retrieve_candidates_from_non_unique_identifiers 1627 multiple_entries_found: ' + str(multiple_entries_found))
-        logger.error('retrieve_candidates_from_non_unique_identifiers 1628 candidate_list: ' + json.dumps(candidate_list))
         return results
 
     @staticmethod
@@ -1832,10 +1805,10 @@ class CandidateListManager(models.Manager):
         status = ""
         success = True
 
-        t0 = time.time()
-        logger.error(
-            'retrieve_candidate_to_office_link_list ENTRY ' +
-            "{:.3f}".format(time.time() - t0) + ' seconds')
+        # t0 = time.time()
+        # logger.error(
+        #     'retrieve_candidate_to_office_link_list ENTRY ' +
+        #     "{:.3f}".format(time.time() - t0) + ' seconds')
 
         at_least_one_filter_exists = len(candidate_we_vote_id_list) > 0 or \
             len(contest_office_we_vote_id_list) > 0 or \
@@ -1854,8 +1827,6 @@ class CandidateListManager(models.Manager):
         google_civic_election_id_integer_list = []
         for google_civic_election_id in google_civic_election_id_list:
             google_civic_election_id_integer_list.append(convert_to_int(google_civic_election_id))
-        logger.error('retrieve_candidate_to_office_link_list after google_civic_election_id_integer_list.append loop ' +
-            "{:.3f}".format(time.time() - t0) + ' seconds')
 
         try:
             if positive_value_exists(read_only):
@@ -1871,14 +1842,7 @@ class CandidateListManager(models.Manager):
             if positive_value_exists(state_code):
                 query = query.filter(state_code__iexact=state_code)
 
-            logger.error(
-                'retrieve_candidate_to_office_link_list before link_list = list(query) 1868 ' +
-                "{:.3f}".format(time.time() - t0) + ' seconds')
             link_list = list(query)
-            logger.error(
-                'retrieve_candidate_to_office_link_list after link_list = list(query) 1872 ' +
-                "{:.3f}".format(time.time() - t0) + ' seconds')
-            logger.error('retrieve_candidate_to_office_link_list 1874 explain: ' + query.explain())
         except Exception as e:
             status += "RETRIEVE_CANDIDATE_TO_OFFICE_LINK_LIST-ERROR: " + str(e) + " "
             success = False
@@ -2415,6 +2379,8 @@ class CandidateCampaign(models.Model):
     # It starts with "wv" then we add on a database specific identifier like "3v" (WeVoteSetting.site_unique_id_prefix)
     # then the string "cand", and then a sequential integer like "123".
     # We keep the last value in WeVoteSetting.we_vote_id_last_candidate_campaign_integer
+    DoesNotExist = None
+    objects = None
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id of this candidate", max_length=255, default=None, null=True,
         blank=True, unique=True, db_index=True)
