@@ -132,6 +132,9 @@ class ContestOffice(models.Model):
     # It starts with "wv" then we add on a database specific identifier like "3v" (WeVoteSetting.site_unique_id_prefix)
     # then the string "off", and then a sequential integer like "123".
     # We keep the last value in WeVoteSetting.we_vote_id_last_contest_office_integer
+    DoesNotExist = None
+    MultipleObjectsReturned = None
+    objects = None
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id for this contest office", max_length=255, default=None, null=True,
         blank=True, unique=True, db_index=True)
@@ -1843,6 +1846,9 @@ class ContestOfficesAreNotDuplicates(models.Model):
     """
     When checking for duplicates, there are times when we want to explicitly mark two contest offices as NOT duplicates
     """
+    MultipleObjectsReturned = None
+    DoesNotExist = None
+    objects = None
     contest_office1_we_vote_id = models.CharField(
         verbose_name="first contest office we are tracking", max_length=255, null=True, unique=False)
     contest_office2_we_vote_id = models.CharField(

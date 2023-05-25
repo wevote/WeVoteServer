@@ -2,14 +2,15 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from datetime import date, datetime, time
+from datetime import datetime
+
 from django.db import models
-from django.db.models import Max, Q
+from django.db.models import Q
+
 import wevote_functions.admin
 from wevote_functions.functions import convert_date_as_integer_to_date, convert_date_to_date_as_integer, \
     convert_date_to_we_vote_date_string, \
     convert_to_int, extract_state_from_ocd_division_id, positive_value_exists
-
 
 TIME_SPAN_LIST = [
     '2016',
@@ -79,6 +80,7 @@ class BallotpediaElection(models.Model):
 
 class Election(models.Model):
     # The unique ID of this election. (Provided by Google Civic)
+    objects = None
     google_civic_election_id = models.CharField(verbose_name="google civic election id",
                                                 max_length=20, null=True, unique=True, db_index=True)
     google_civic_election_id_new = models.PositiveIntegerField(

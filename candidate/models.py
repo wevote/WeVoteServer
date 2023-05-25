@@ -1,8 +1,6 @@
 # candidate/models.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-import json
-import time
 from datetime import datetime
 import re
 
@@ -2381,6 +2379,8 @@ class CandidateCampaign(models.Model):
     # It starts with "wv" then we add on a database specific identifier like "3v" (WeVoteSetting.site_unique_id_prefix)
     # then the string "cand", and then a sequential integer like "123".
     # We keep the last value in WeVoteSetting.we_vote_id_last_candidate_campaign_integer
+    DoesNotExist = None
+    objects = None
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id of this candidate", max_length=255, default=None, null=True,
         blank=True, unique=True, db_index=True)
