@@ -5,6 +5,7 @@
 
 {%  block content %}
 {% load template_filters %}
+{% load humanize %}
 <style>
     span.nobr { white-space: nowrap; }
     select.form-control {
@@ -211,14 +212,18 @@
 
 <div class="form-group">
     <label for="organization_twitter_handle_id" class="col-sm-3 control-label">
-    <span {% if twitter_handle_mismatch %} style="color: red;" {% endif %}>
-        Twitter Handle
-        {% if twitter_handle_mismatch %} MISMATCH WITH TWITTER LINK ('{{ twitter_link_to_organization_handle }}' expected){% endif %}
-    </span>
+        <span {% if twitter_handle_mismatch %} style="color: red;" {% endif %}>
+            Twitter Handle
+            {% if twitter_handle_mismatch %} MISMATCH WITH TWITTER LINK ('{{ twitter_link_to_organization_handle }}' expected){% endif %}
+        </span>
         {% if organization.organization_twitter_handle %}
         <a href="https://twitter.com/{{ organization.organization_twitter_handle }}"
                    target="_blank"
                    class="u-no-break"><span class="glyphicon glyphicon-new-window"></span></a>
+        {% endif %}
+        {% if organization.organization_twitter_handle %}
+            <br />
+            {{ organization.twitter_followers_count|intcomma }} Followers
         {% endif %}
     </label>
     <div class="col-sm-8">
