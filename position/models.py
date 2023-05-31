@@ -6154,11 +6154,14 @@ class PositionManager(models.Manager):
         is_signed_in = False
         google_civic_election_id = 0
         candidate = None
+        candidate_found = False
         candidate_we_vote_id = ""
         contest_measure = None
         contest_measure_we_vote_id = ""
         candidate_manager = CandidateManager()
         contest_measure_manager = ContestMeasureManager()
+        linked_campaignx_we_vote_id = ''
+        politician_found = False
         politician_manager = PoliticianManager()
         politician_we_vote_id = ""
         voter_manager = VoterManager()
@@ -6213,7 +6216,9 @@ class PositionManager(models.Manager):
                         candidate_id, read_only=True)
                     if results['candidate_found']:
                         candidate = results['candidate']
+                        candidate_found = True
                         candidate_we_vote_id = candidate.we_vote_id
+                        linked_campaignx_we_vote_id = candidate.linked_campaignx_we_vote_id
                         voter_position_on_stage.candidate_campaign_we_vote_id = candidate.we_vote_id
                         voter_position_on_stage.politician_id = candidate.politician_id
                         voter_position_on_stage.politician_we_vote_id = candidate.politician_we_vote_id
@@ -6279,7 +6284,9 @@ class PositionManager(models.Manager):
                         results = politician_manager.retrieve_politician(politician_id=politician_id, read_only=True)
                         if results['politician_found']:
                             politician = results['politician']
+                            politician_found = True
                             politician_we_vote_id = politician.we_vote_id
+                            linked_campaignx_we_vote_id = politician.linked_campaignx_we_vote_id
                             voter_position_on_stage.politician_we_vote_id = politician.we_vote_id
                             voter_position_on_stage.state_code = politician.state_code
                             voter_position_on_stage.ballot_item_display_name = politician.politician_name
@@ -6290,7 +6297,7 @@ class PositionManager(models.Manager):
                 status += 'STANCE_COULD_NOT_BE_UPDATED3 '
 
             try:
-                # Heal the data
+                # Heal the data - see identical block below if you make any changes here
                 if not voter_position_on_stage.date_entered:
                     voter_position_on_stage.date_entered = now()
                 voter_position_on_stage.voter_we_vote_id = voter_we_vote_id
@@ -6325,6 +6332,7 @@ class PositionManager(models.Manager):
                     results = candidate_manager.retrieve_candidate_from_id(candidate_id)
                     if results['candidate_found']:
                         candidate = results['candidate']
+                        candidate_found = True
                         candidate_we_vote_id = candidate.we_vote_id
                         contest_office_id = candidate.contest_office_id
                         contest_office_we_vote_id = candidate.contest_office_we_vote_id
@@ -6346,6 +6354,7 @@ class PositionManager(models.Manager):
                         politician_id=politician_id, read_only=True)
                     if results['politician_found']:
                         politician = results['politician']
+                        politician_found = True
                         politician_we_vote_id = politician.we_vote_id
                         state_code = politician.state_code
                         ballot_item_display_name = politician.politician_name
@@ -6394,10 +6403,17 @@ class PositionManager(models.Manager):
                     )
 
                 try:
-                    # Heal the data
+                    # Heal the data - see identical block above if you make any changes here
+                    if not voter_position_on_stage.date_entered:
+                        voter_position_on_stage.date_entered = now()
+                    voter_position_on_stage.voter_we_vote_id = voter_we_vote_id
+                    voter_position_on_stage.organization_we_vote_id = linked_organization_we_vote_id
+                    voter_position_on_stage.speaker_display_name = speaker_display_name
+                    voter_position_on_stage.organization_id = organization_id
                     voter_position_on_stage.speaker_image_url_https_large = we_vote_hosted_profile_image_url_large
                     voter_position_on_stage.speaker_image_url_https_medium = we_vote_hosted_profile_image_url_medium
                     voter_position_on_stage.speaker_image_url_https_tiny = we_vote_hosted_profile_image_url_tiny
+                    voter_position_on_stage.campaignx_supporter_created = False  # Reset so update scripts can work
 
                     voter_position_on_stage.save()
                 except Exception as e:
@@ -6443,6 +6459,78 @@ class PositionManager(models.Manager):
                 voter_position_on_stage.save()
             except Exception as e:
                 status += 'POSITION_COULD_NOT_BE_SAVED: ' + str(e) + ' '
+
+        if voter_position_on_stage_found:
+            # Update campaignx_supporter data for the campaignx hard linked to this candidate/politician
+            if positive_value_exists(candidate_we_vote_id):
+                if not positive_value_exists(candidate_found):
+                    results = candidate_manager.retrieve_candidate(
+                        candidate_we_vote_id=candidate_we_vote_id, read_only=True)
+                    if results['candidate_found']:
+                        candidate = results['candidate']
+                        linked_campaignx_we_vote_id = candidate.linked_campaignx_we_vote_id
+            elif positive_value_exists(politician_we_vote_id):
+                if not positive_value_exists(politician_found):
+                    results = politician_manager.retrieve_politician(
+                        politician_we_vote_id=politician_we_vote_id, read_only=True)
+                    if results['politician_found']:
+                        politician = results['politician']
+                        linked_campaignx_we_vote_id = politician.linked_campaignx_we_vote_id
+            else:
+                status += "NOT_LOOKING_AT_CANDIDATE_OR_POLITICIAN "
+            if positive_value_exists(linked_campaignx_we_vote_id):
+                campaign_supported = None
+                campaign_supported_changed = False
+                delete_campaignx_supporter = False
+                supporter_endorsement = ''
+                supporter_endorsement_changed = False
+                if positive_value_exists(voter_position_on_stage.is_support_or_positive_rating()):
+                    campaign_supported = True
+                    campaign_supported_changed = True
+                else:
+                    delete_campaignx_supporter = True
+                if positive_value_exists(voter_position_on_stage.statement_text):
+                    supporter_endorsement = voter_position_on_stage.statement_text
+                    supporter_endorsement_changed = True
+                if positive_value_exists(delete_campaignx_supporter):
+                    if positive_value_exists(position_we_vote_id):
+                        try:
+                            from campaign.models import CampaignXSupporter
+                            queryset = CampaignXSupporter.objects.all()
+                            queryset = queryset.filter(
+                                voter_we_vote_id=voter_we_vote_id,
+                                campaignx_we_vote_id=linked_campaignx_we_vote_id,
+                            )
+                            campaignx_supporter_entries_deleted_count, campaigns_dict = queryset.delete()
+                            status += \
+                                "{campaignx_supporter_entries_deleted_count:,} CampaignXSupporter entries deleted, " \
+                                "".format(
+                                    campaignx_supporter_entries_deleted_count=campaignx_supporter_entries_deleted_count)
+                        except Exception as e:
+                            status += "CAMPAIGNX_SUPPORTER_DELETE-FAILED: " + str(e) + " "
+                    else:
+                        status += "COULD_NOT_DELETE_CAMPAIGNX_SUPPORTER-MISSING_POSITION_WE_VOTE_ID "
+                else:
+                    # Now that we have all required variables, we can update the campaignx_supporter table
+                    from campaign.models import CampaignXManager
+                    campaignx_manager = CampaignXManager()
+                    update_values = {
+                        'campaign_supported': campaign_supported,
+                        'campaign_supported_changed': campaign_supported_changed,
+                        'linked_position_we_vote_id': position_we_vote_id,
+                        'linked_position_we_vote_id_changed': positive_value_exists(position_we_vote_id),
+                        'supporter_endorsement': supporter_endorsement,
+                        'supporter_endorsement_changed': supporter_endorsement_changed,
+                        'visible_to_public': is_public_position,
+                        'visible_to_public_changed': True,
+                    }
+                    create_results = campaignx_manager.update_or_create_campaignx_supporter(
+                        campaignx_we_vote_id=linked_campaignx_we_vote_id,
+                        voter_we_vote_id=voter_we_vote_id,
+                        organization_we_vote_id=linked_organization_we_vote_id,
+                        update_values=update_values,
+                    )
+                    status += create_results['status']
 
         if voter_position_on_stage_found:
             # If here we need to make sure a voter guide exists

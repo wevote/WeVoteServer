@@ -2571,6 +2571,25 @@ class CampaignXManager(models.Manager):
 
         organization_manager = OrganizationManager()
         campaignx_supporter_changed = False
+        if not campaignx_supporter_found:
+            try:
+                campaignx_supporter = CampaignXSupporter.objects.create(
+                    campaign_supported=True,
+                    campaignx_we_vote_id=campaignx_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id,
+                    voter_we_vote_id=voter_we_vote_id,
+                )
+                status += "CAMPAIGNX_SUPPORTER_CREATED "
+                campaignx_supporter_created = True
+                campaignx_supporter_found = True
+                success = True
+            except Exception as e:
+                campaignx_supporter_changed = False
+                campaignx_supporter_created = False
+                campaignx_supporter = None
+                success = False
+                status += "CAMPAIGNX_SUPPORTER_NOT_CREATED: " + str(e) + " "
+
         if campaignx_supporter_found:
             # Update existing campaignx_supporter with changes
             try:
@@ -2595,6 +2614,10 @@ class CampaignXManager(models.Manager):
                         and positive_value_exists(update_values['campaign_supported_changed']):
                     campaignx_supporter.campaign_supported = update_values['campaign_supported']
                     campaignx_supporter_changed = True
+                if 'linked_position_we_vote_id_changed' in update_values \
+                        and positive_value_exists(update_values['linked_position_we_vote_id_changed']):
+                    campaignx_supporter.linked_position_we_vote_id = update_values['linked_position_we_vote_id']
+                    campaignx_supporter_changed = True
                 if 'supporter_endorsement_changed' in update_values \
                         and positive_value_exists(update_values['supporter_endorsement_changed']):
                     campaignx_supporter.supporter_endorsement = \
@@ -2615,52 +2638,6 @@ class CampaignXManager(models.Manager):
                 campaignx_supporter_changed = False
                 success = False
                 status += "CAMPAIGNX_SUPPORTER_NOT_UPDATED: " + str(e) + " "
-        else:
-            try:
-                campaignx_supporter = CampaignXSupporter.objects.create(
-                    campaign_supported=True,
-                    campaignx_we_vote_id=campaignx_we_vote_id,
-                    organization_we_vote_id=organization_we_vote_id,
-                    voter_we_vote_id=voter_we_vote_id,
-                )
-                status += "CAMPAIGNX_SUPPORTER_CREATED "
-                # Retrieve the supporter_name and we_vote_hosted_profile_image_url_tiny from the organization entry
-                organization_results = \
-                    organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
-                if organization_results['organization_found']:
-                    organization = organization_results['organization']
-                    if positive_value_exists(organization.organization_name):
-                        campaignx_supporter.supporter_name = organization.organization_name
-                        campaignx_supporter_changed = True
-                    if positive_value_exists(organization.we_vote_hosted_profile_image_url_medium):
-                        campaignx_supporter.we_vote_hosted_profile_image_url_medium = \
-                            organization.we_vote_hosted_profile_image_url_medium
-                        campaignx_supporter_changed = True
-                    if positive_value_exists(organization.we_vote_hosted_profile_image_url_tiny):
-                        campaignx_supporter.we_vote_hosted_profile_image_url_tiny = \
-                            organization.we_vote_hosted_profile_image_url_tiny
-                        campaignx_supporter_changed = True
-
-                if 'supporter_endorsement_changed' in update_values \
-                        and positive_value_exists(update_values['supporter_endorsement_changed']):
-                    campaignx_supporter.supporter_endorsement = update_values['supporter_endorsement']
-                    campaignx_supporter_changed = True
-                if 'visible_to_public_changed' in update_values \
-                        and positive_value_exists(update_values['visible_to_public_changed']):
-                    campaignx_supporter.visible_to_public = update_values['visible_to_public']
-                    campaignx_supporter_changed = True
-                if campaignx_supporter_changed:
-                    campaignx_supporter.save()
-                    status += "CAMPAIGNX_SUPPORTER_SAVED "
-                campaignx_supporter_created = True
-                campaignx_supporter_found = True
-                success = True
-            except Exception as e:
-                campaignx_supporter_changed = False
-                campaignx_supporter_created = False
-                campaignx_supporter = None
-                success = False
-                status += "CAMPAIGNX_SUPPORTER_NOT_CREATED: " + str(e) + " "
 
         results = {
             'success':                      success,
