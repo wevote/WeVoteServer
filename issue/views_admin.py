@@ -842,8 +842,11 @@ def issue_partisan_analysis_view(request):
     state_list = STATE_CODE_MAP
     if positive_value_exists(state_code):
         try:
-            state_code_name = state_list[state_code]
+            state_code_uppercase = state_code.upper()
+            state_code_name = state_list[state_code_uppercase]
         except TypeError:
+            pass
+        except Exception as e:
             pass
     sorted_state_list = sorted(state_list.items())
 

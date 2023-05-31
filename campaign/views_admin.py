@@ -893,6 +893,7 @@ def campaign_summary_view(request, campaignx_we_vote_id=""):
     campaignx_search = request.GET.get('campaignx_search', '')
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     state_code = request.GET.get('state_code', '')
+    status = ''
 
     messages_on_stage = get_messages(request)
     campaignx_manager = CampaignXManager()
@@ -902,6 +903,16 @@ def campaign_summary_view(request, campaignx_we_vote_id=""):
 
     if results['campaignx_found']:
         campaignx = results['campaignx']
+    else:
+        status += results['status']
+        messages.add_message(request, messages.ERROR,
+                             'CampaignX \'{campaignx_we_vote_id}\' not found: {status}.'
+                             ''.format(
+                                 campaignx_we_vote_id=campaignx_we_vote_id,
+                                 status=status))
+        return HttpResponseRedirect(reverse('campaign:campaignx_list', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
 
     campaignx_owner_list_modified = []
     campaignx_owner_list = campaignx_manager.retrieve_campaignx_owner_list(
