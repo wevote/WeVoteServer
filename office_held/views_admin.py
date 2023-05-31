@@ -310,6 +310,7 @@ def office_held_edit_process_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     district_id = request.POST.get('district_id', False)
+    district_name = request.POST.get('district_name', False)
     google_civic_office_held_name = request.POST.get('google_civic_office_held_name', False)
     google_civic_office_held_name2 = request.POST.get('google_civic_office_held_name2', False)
     google_civic_office_held_name3 = request.POST.get('google_civic_office_held_name3', False)
@@ -361,6 +362,8 @@ def office_held_edit_process_view(request):
             # Update
             if district_id is not False:
                 office_held.district_id = district_id
+            if district_name is not False:
+                office_held.district_name = district_name
             if office_held_name is not False:
                 office_held.office_held_name = office_held_name
             if google_civic_office_held_name is not False:
