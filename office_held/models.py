@@ -182,10 +182,9 @@ class OfficeHeld(models.Model):
     # The number of candidates elected to office
     number_elected = models.CharField(max_length=255, null=True, blank=True)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
-    office_held_description = models.CharField(verbose_name="office_held description", max_length=255, null=True,
-                                               blank=True)
-    office_held_description_es = models.CharField(verbose_name="office_held description in Spanish",
-                                                  max_length=255, null=True, blank=True)
+    office_held_description = models.TextField(verbose_name="office_held description", null=True, blank=True)
+    office_held_description_es = models.TextField(
+        verbose_name="office_held description in Spanish", null=True, blank=True)
     office_held_facebook_url = models.TextField(blank=True, null=True)
     facebook_url_is_broken = models.BooleanField(default=False)
     # The levels of government of the office for this contest. There may be more than one in cases where a

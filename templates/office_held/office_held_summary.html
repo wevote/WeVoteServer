@@ -28,10 +28,17 @@
         (<a href="{% url 'office_held:office_held_delete_process' %}?office_held_id={{ office_held.id }}&google_civic_election_id={{ google_civic_election_id }}">delete office</a>)
       </td>
     </tr>
+
     <tr>
       <td>OCD Division ID:</td>
       <td><strong>{{ office_held.ocd_division_id }}</strong></td>
     </tr>
+
+    <tr>
+      <td>District ID:</td>
+      <td><strong>{{ office_held.district_id }}</strong></td>
+    </tr>
+
     {% if office_held.office_held_twitter_handle %}
     <tr>
       <td>Twitter Handle:</td>
@@ -85,10 +92,18 @@
           </strong>
       </td>
     </tr>
+
     {% if office_held.office_url %}
     <tr>
       <td>Office Held Website:</td>
       <td><strong>{{ office_held.office_url }}</strong></td>
+    </tr>
+    {% endif %}
+
+    {% if office_held.office_held_description %}
+    <tr>
+      <td>Office Held Description:</td>
+      <td>{{ office_held.office_held_description }}</td>
     </tr>
     {% endif %}
     </table>

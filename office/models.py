@@ -239,10 +239,9 @@ class ContestOffice(models.Model):
     # "Yes" or "No" depending on whether this a contest being held outside the normal election cycle.
     special = models.CharField(verbose_name="google civic primary party", max_length=255, null=True, blank=True)
     ctcl_uuid = models.CharField(db_index=True, max_length=36, null=True, blank=True)
-    office_held_description = models.CharField(verbose_name="office_held description", max_length=255, null=True,
-                                               blank=True)
-    office_held_description_es = models.CharField(verbose_name="office_held description in Spanish",
-                                                  max_length=255, null=True, blank=True)
+    office_held_description = models.TextField(verbose_name="office_held description", null=True, blank=True)
+    office_held_description_es = models.TextField(
+        verbose_name="office_held description in Spanish", null=True, blank=True)
     office_held_name = models.CharField(
         verbose_name="name of the office held", max_length=255, null=True, blank=True, default=None)
     office_held_name_es = models.CharField(
