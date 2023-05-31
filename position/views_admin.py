@@ -255,22 +255,77 @@ def position_list_view(request):
     state_code = request.GET.get('state_code', '')
     state_list = STATE_CODE_MAP
     state_list_modified = {}
+    status = ''
+    update_message = ''
 
     create_campaignx_supporter_from_positions_on = True
     if create_campaignx_supporter_from_positions_on:
-        from campaign.controllers import create_campaignx_supporters_from_positions
-        update_friends_only_positions = False
+        from campaign.controllers import create_campaignx_supporters_from_positions, \
+            delete_campaignx_supporters_after_positions_removed, refresh_campaignx_supporters_count_in_all_children, \
+            refresh_campaignx_supporters_count_for_campaignx_we_vote_id_list
+        campaignx_we_vote_id_list_to_refresh = []
+        # #############################
+        # Create campaignx_supporters
+        create_from_friends_only_positions = False
         results = create_campaignx_supporters_from_positions(
             request,
             friends_only_positions=False,
             state_code=state_code)
+        campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
+        if len(campaignx_we_vote_id_list_changed) > 0:
+            campaignx_we_vote_id_list_to_refresh = \
+                list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
         if not positive_value_exists(results['campaignx_supporter_entries_created']):
-            update_friends_only_positions = True
-        if update_friends_only_positions:
-            create_campaignx_supporters_from_positions(
+            create_from_friends_only_positions = True
+        if create_from_friends_only_positions:
+            results = create_campaignx_supporters_from_positions(
                 request,
                 friends_only_positions=True,
                 state_code=state_code)
+            campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
+            if len(campaignx_we_vote_id_list_changed) > 0:
+                campaignx_we_vote_id_list_to_refresh = \
+                    list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
+        # #############################
+        # Delete campaignx_supporters
+        delete_from_friends_only_positions = False
+        results = delete_campaignx_supporters_after_positions_removed(
+            request,
+            friends_only_positions=False,
+            state_code=state_code)
+        campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
+        if len(campaignx_we_vote_id_list_changed) > 0:
+            campaignx_we_vote_id_list_to_refresh = \
+                list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
+        if not positive_value_exists(results['campaignx_supporter_entries_deleted']):
+            delete_from_friends_only_positions = True
+        if delete_from_friends_only_positions:
+            results = delete_campaignx_supporters_after_positions_removed(
+                request,
+                friends_only_positions=True,
+                state_code=state_code)
+            campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
+            if len(campaignx_we_vote_id_list_changed) > 0:
+                campaignx_we_vote_id_list_to_refresh = \
+                    list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
+        # #############################
+        # Now refresh the campaignx.supporters count and in all the objects that cache this count
+        if len(campaignx_we_vote_id_list_to_refresh) > 0:
+            results = refresh_campaignx_supporters_count_for_campaignx_we_vote_id_list(
+                request,
+                campaignx_we_vote_id_list=campaignx_we_vote_id_list_to_refresh)
+            status += results['status']
+            if positive_value_exists(results['update_message']):
+                update_message += results['update_message']
+
+        # Now push updates to campaignx entries out to candidates and politicians linked to the campaignx entries
+        if len(campaignx_we_vote_id_list_to_refresh) > 0:
+            results = refresh_campaignx_supporters_count_in_all_children(
+                request,
+                campaignx_we_vote_id_list=campaignx_we_vote_id_list_to_refresh)
+            status += results['status']
+            if positive_value_exists(results['update_message']):
+                update_message += results['update_message']
 
     candidate_list_manager = CandidateListManager()
     election_manager = ElectionManager()
