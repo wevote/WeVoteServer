@@ -309,13 +309,15 @@ def office_held_edit_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    office_held_id = convert_to_int(request.POST.get('office_held_id', 0))
-    office_held_name = request.POST.get('office_held_name', False)
+    district_id = request.POST.get('district_id', False)
     google_civic_office_held_name = request.POST.get('google_civic_office_held_name', False)
     google_civic_office_held_name2 = request.POST.get('google_civic_office_held_name2', False)
     google_civic_office_held_name3 = request.POST.get('google_civic_office_held_name3', False)
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     ocd_division_id = request.POST.get('ocd_division_id', False)
+    office_held_description = request.POST.get('office_held_description', False)
+    office_held_id = convert_to_int(request.POST.get('office_held_id', 0))
+    office_held_name = request.POST.get('office_held_name', False)
     primary_party = request.POST.get('primary_party', False)
     remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
     redirect_to_office_held_list = convert_to_int(request.POST['redirect_to_office_held_list'])
@@ -357,6 +359,8 @@ def office_held_edit_process_view(request):
                 office_held_id = office_held.id
                 office_held_we_vote_id = office_held.we_vote_id
             # Update
+            if district_id is not False:
+                office_held.district_id = district_id
             if office_held_name is not False:
                 office_held.office_held_name = office_held_name
             if google_civic_office_held_name is not False:
@@ -367,6 +371,8 @@ def office_held_edit_process_view(request):
                 office_held.google_civic_office_held_name3 = google_civic_office_held_name3
             if ocd_division_id is not False:
                 office_held.ocd_division_id = ocd_division_id
+            if office_held_description is not False:
+                office_held.office_held_description = office_held_description
             if primary_party is not False:
                 office_held.primary_party = primary_party
             if state_code is not False:
