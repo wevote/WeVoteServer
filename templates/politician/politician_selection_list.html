@@ -65,6 +65,7 @@
             <td>
                 {% if politician.linked_candidate_list_count > 0 %}{{ politician.linked_candidate_list_count }}{% endif %}
                 <a href="{% url 'candidate:candidate_create_process' %}?google_civic_election_id={{ google_civic_election_id }}&politician_we_vote_id={{ politician.we_vote_id }}"
+                   class="button"
                    target="_blank">
                     Create Candidate for Upcoming Election
                 </a>
@@ -73,5 +74,19 @@
     {% endfor %}
     </table>
 {% endif %}
+
+    <style>
+.button {
+    font-size: 16px;
+    text-decoration: none;
+    background-color: #0834cd;
+    color: #fff;
+    padding: 8px;
+    border-radius: 5px;
+}
+.button:hover {
+    color: #fff;
+}
+    </style>
 
 {% endblock %}
