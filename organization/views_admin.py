@@ -43,11 +43,11 @@ from organization.controllers import figure_out_organization_conflict_values, \
 from position.models import PositionEntered, PositionForFriends, PositionListManager, PositionManager, \
     INFORMATION_ONLY, OPPOSE, STILL_DECIDING, SUPPORT
 from twitter.models import TwitterLinkToOrganization, TwitterUserManager
-from voter.models import retrieve_voter_authority, voter_has_authority, VoterManager
+from voter.models import fetch_voter_from_voter_device_link, retrieve_voter_authority, voter_has_authority, VoterManager
 from voter_guide.models import VoterGuideManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_date_to_date_as_integer, convert_to_int, \
-    extract_instagram_handle_from_text_string, \
+    get_voter_api_device_id, extract_instagram_handle_from_text_string, \
     extract_twitter_handle_from_text_string, positive_value_exists, \
     STATE_CODE_MAP
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
@@ -1250,8 +1250,6 @@ def organization_edit_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    from voter.models import fetch_voter_from_voter_device_link
-    from wevote_functions.functions import get_voter_api_device_id
     voter_device_id = get_voter_api_device_id(request)
     voter = fetch_voter_from_voter_device_link(voter_device_id)
     change_description = ''
@@ -2144,9 +2142,9 @@ def organization_position_list_view(request, organization_id=0, organization_we_
     voter_manager = VoterManager()
     voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(organization_we_vote_id)
     if voter_results['voter_found']:
-        voter = voter_results['voter']
+        organization_voter = voter_results['voter']
     else:
-        voter = None
+        organization_voter = None
 
     offices_dict = {}
     candidates_dict = {}
@@ -2247,11 +2245,22 @@ def organization_position_list_view(request, organization_id=0, organization_we_
                 campaignx_owner.campaign_title = results['campaignx'].campaign_title
         campaignx_owner_list_modified.append(campaignx_owner)
 
+    voter_device_id = get_voter_api_device_id(request)
+    voter = fetch_voter_from_voter_device_link(voter_device_id)
+
+    if hasattr(voter, 'is_admin') and voter.is_admin:
+        queryset = OrganizationChangeLog.objects.using('readonly').all()
+        queryset = queryset.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+        change_log_list = list(queryset)
+    else:
+        change_log_list = []
+
     template_values = {
         'campaignx_listed_by_organization_list':    campaignx_listed_by_organization_list_modified,
         'campaignx_owner_list':             campaignx_owner_list_modified,
         'candidate_id':                     candidate_id,
         'candidate_we_vote_id':             candidate_we_vote_id,
+        'change_log_list':                  change_log_list,
         'election_list':                    election_list,
         'friends_only_position_count':      friends_only_position_count,
         'google_civic_election_id':         google_civic_election_id,
@@ -2265,6 +2274,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
         'organization_search_results_list': organization_search_results_list,
         'organization_team_member_list':    organization_team_member_list,
         'organization_type_display_text':   organization_type_display_text,
+        'organization_voter':               organization_voter,
         'public_position_count':            public_position_count,
         'show_all_elections':               show_all_elections,
         'twitter_handle_mismatch':          twitter_handle_mismatch,

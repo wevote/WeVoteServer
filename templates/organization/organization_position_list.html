@@ -66,13 +66,13 @@
                     </td>
                 </tr>
             {% endif %}
-                {% if voter %}
+                {% if organization_voter %}
                 <tr>
                     <th>Voter:</th>
                     <td>
-                        <a href="{% url 'voter:voter_summary' voter.id %}?google_civic_election_id={{ google_civic_election_id }}"
-                           target="_blank">{% if voter.get_full_name %}{{ voter.get_full_name }}{% else %}{{ voter.we_vote_id }}{% endif %} <span class="glyphicon glyphicon-new-window"></span></a>
-                        (<a href="{% url 'image:images_for_one_voter' voter.id %}" target="_blank">See voter images <span class="glyphicon glyphicon-new-window"></span></a>)
+                        <a href="{% url 'voter:voter_summary' organization_voter.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                           target="_blank">{% if organization_voter.get_full_name %}{{ organization_voter.get_full_name }}{% else %}{{ organization_voter.we_vote_id }}{% endif %} <span class="glyphicon glyphicon-new-window"></span></a>
+                        (<a href="{% url 'image:images_for_one_voter' organization_voter.id %}" target="_blank">See voter images <span class="glyphicon glyphicon-new-window"></span></a>)
                     </td>
                 </tr>
                 {% endif %}
@@ -437,8 +437,34 @@
                                        class="btn btn-primary">Add or Edit Listed Campaigns</a></td>
                 </tr>
             </table>
-
-
+        {% if voter.is_admin and change_log_list %}
+            <br />
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Endorser Change Log</th>
+                        <th>Who Made Change</th>
+                    </tr>
+                </thead>
+            {% for change_log_entry in change_log_list %}
+                <tr>
+                    <td>
+                        {{ change_log_entry.change_description_augmented|safe }}<br />
+                        <span style="color: #ccc; font-size: 12px;">
+                            {{ change_log_entry.log_datetime }} * {{ change_log_entry.status }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if change_log_entry.changed_by_name %}
+                            {{ change_log_entry.changed_by_name }}
+                        {% else %}
+                            {{ change_log_entry.changed_by_voter_we_vote_id }}
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </table>
+        {% endif %}
 
         </td>
     </tr>
