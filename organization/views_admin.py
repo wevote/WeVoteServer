@@ -2249,7 +2249,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
     voter = fetch_voter_from_voter_device_link(voter_device_id)
 
     if hasattr(voter, 'is_admin') and voter.is_admin:
-        queryset = OrganizationChangeLog.objects.all()
+        queryset = OrganizationChangeLog.objects.using('readonly').all()
         queryset = queryset.filter(organization_we_vote_id__iexact=organization_we_vote_id)
         change_log_list = list(queryset)
     else:
