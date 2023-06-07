@@ -2397,6 +2397,7 @@ class CandidateCampaign(models.Model):
         verbose_name="we vote permanent id for the office this candidate is running for", max_length=255, default=None,
         null=True, blank=True, unique=False, db_index=True)
     contest_office_name = models.CharField(verbose_name="name of the office", max_length=255, null=True, blank=True)
+    district_name = models.CharField(verbose_name="district name", max_length=255, null=True, blank=True)
     # Which office held is this candidate running for?
     office_held_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
     # politician (internal) link to local We Vote Politician entry. During setup we need to allow this to be null.
@@ -4262,6 +4263,7 @@ class CandidateManager(models.Manager):
         """
         The candidate tables cache information from other tables. This function reaches out to the source tables
         and copies over the latest information to the candidate table.
+        TODO: DEPRECATE and switch to more modern refresh function
         :param candidate_object:
         :param office_object: Save the time retrieving office by using existing object
         :return:

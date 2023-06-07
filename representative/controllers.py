@@ -2,6 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from candidate.models import PROFILE_IMAGE_TYPE_UNKNOWN, PROFILE_IMAGE_TYPE_UPLOADED
 from config.base import get_environment_variable
 from datetime import datetime
 from django.db.models import Q
@@ -1694,6 +1695,24 @@ def update_representative_details_from_politician(representative=None, politicia
             representative.we_vote_hosted_profile_image_url_tiny = \
                 politician.we_vote_hosted_profile_image_url_tiny
             save_changes = True
+    # Uploaded photo
+    representative.we_vote_hosted_profile_uploaded_image_url_large = \
+        politician.we_vote_hosted_profile_uploaded_image_url_large
+    representative.we_vote_hosted_profile_uploaded_image_url_medium = \
+        politician.we_vote_hosted_profile_uploaded_image_url_medium
+    representative.we_vote_hosted_profile_uploaded_image_url_tiny = \
+        politician.we_vote_hosted_profile_uploaded_image_url_tiny
+    if representative.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
+        if positive_value_exists(politician.we_vote_hosted_profile_uploaded_image_url_large) \
+                or positive_value_exists(politician.we_vote_hosted_profile_uploaded_image_url_medium) \
+                or positive_value_exists(politician.we_vote_hosted_profile_uploaded_image_url_tiny):
+            representative.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UPLOADED
+            representative.we_vote_hosted_profile_image_url_large = \
+                politician.we_vote_hosted_profile_uploaded_image_url_large
+            representative.we_vote_hosted_profile_image_url_medium = \
+                politician.we_vote_hosted_profile_uploaded_image_url_medium
+            representative.we_vote_hosted_profile_image_url_tiny = \
+                politician.we_vote_hosted_profile_uploaded_image_url_tiny
     if not positive_value_exists(representative.wikipedia_url) and \
             positive_value_exists(politician.wikipedia_url):
         representative.wikipedia_url = politician.wikipedia_url

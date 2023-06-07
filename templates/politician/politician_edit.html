@@ -25,7 +25,7 @@
   }
 </style>
 
-<form action="{% url "politician:politician_edit_process" %}" method="post" class="form-horizontal">
+<form action="{% url "politician:politician_edit_process" %}" method="post" class="form-horizontal" enctype="multipart/form-data">
 {% csrf_token %}
 
 <input type="hidden" name="politician_id" value="{% if politician %}{{ politician.id }}{% else %}0{% endif %}">
@@ -49,6 +49,21 @@
             <span style="text-decoration: line-through">Unknown</span>
         {% else %}
             Unknown
+        {% endif %}
+        </span>
+        <span style="float: left; padding: 8px 20px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="UPLOADED"
+                {% if politician.profile_image_type_currently_active == 'UPLOADED' %} checked {% endif %}
+                />
+            Uploaded
+        {% if politician.we_vote_hosted_profile_uploaded_image_url_tiny %}
+            <img src='{{ politician.we_vote_hosted_profile_uploaded_image_url_tiny }}' />
+            <label for="politician_photo_file_delete_id">
+              <input type="checkbox" name="politician_photo_file_delete" id="politician_photo_file_delete_id" value="1" />
+                delete&nbsp;&nbsp;&nbsp;
+            </label>
+        {% else %}
+            <input type="file" name="politician_photo_file" accept="image/*">
         {% endif %}
         </span>
         {% if politician.we_vote_hosted_profile_facebook_image_url_tiny %}
@@ -101,7 +116,7 @@
                 {{ we_vote_id }}
                 {% if politician.linked_campaignx_we_vote_id %}
                     &nbsp;&nbsp;&nbsp;
-                    <span style="color: darkgray;">We generated this campaign:</span>
+                    <span style="color: darkgray;">We generated a campaign:</span>
                     <a href="{% url 'campaign:campaignx_summary' politician.linked_campaignx_we_vote_id %}"
                        target="_blank">
                         {{ politician.linked_campaignx_we_vote_id }}
@@ -627,8 +642,11 @@
             </td>
             <td class="padded">
                 {% if candidate.vote_smart_id %}VS: {{ candidate.vote_smart_id|default_if_none:"" }}<br />{% endif %}
-                {% if candidate.vote_usa_politician_id %}{{ candidate.vote_usa_politician_id|default_if_none:"" }}{% endif %}
-                <a href="{% url 'politician:update_politician_from_candidate' %}?politician_we_vote_id={{ candidate.politician_we_vote_id }}&candidate_we_vote_id={{ candidate.we_vote_id }}">update politician from this candidate</a>
+                {% if candidate.vote_usa_politician_id %}{{ candidate.vote_usa_politician_id|default_if_none:"" }}<br />{% endif %}
+                <a href="{% url 'politician:update_politician_from_candidate' %}?politician_we_vote_id={{ candidate.politician_we_vote_id }}&candidate_we_vote_id={{ candidate.we_vote_id }}">
+                    update politician from this candidate</a><br />
+                <a href="{% url 'candidate:update_candidate_from_politician' %}?politician_we_vote_id={{ candidate.politician_we_vote_id }}&candidate_we_vote_id={{ candidate.we_vote_id }}">
+                    update this candidate from politician</a>
             </td>
         </tr>
     {% endfor %}

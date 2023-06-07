@@ -31,7 +31,7 @@ from wevote_functions.functions import add_period_to_middle_name_initial, add_pe
     remove_period_from_middle_name_initial, remove_period_from_name_prefix_and_suffix
 from .models import CandidateListManager, CandidateCampaign, CandidateManager, \
     CANDIDATE_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, CANDIDATE_UNIQUE_IDENTIFIERS, PROFILE_IMAGE_TYPE_FACEBOOK, \
-    PROFILE_IMAGE_TYPE_UNKNOWN
+    PROFILE_IMAGE_TYPE_UNKNOWN, PROFILE_IMAGE_TYPE_UPLOADED
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -163,6 +163,82 @@ def add_twitter_handle_to_next_candidate_spot(candidate, twitter_handle):
         'status':           status,
         'candidate':        candidate,
         'values_changed':   values_changed,
+    }
+
+
+def augment_candidate_with_contest_office_data(candidate, elections_dict={}):
+    """
+    Update the values in the candidate object with new "candidate_ultimate_election_date" and "candidate_year"
+    but don't save. (Saving happens outside this function.)
+    NOTE: Similar to generate_candidate_position_sorting_dates - perhaps refactor both?
+    :param candidate:
+    :param elections_dict:
+    :return:
+    """
+    candidate_ultimate_election_date = None
+    candidate_year = None
+    status = ''
+    success = True
+    values_changed = False
+
+    if not candidate or not hasattr(candidate, 'candidate_ultimate_election_date'):
+        status += "CANDIDATE_MISSING "
+        success = False
+        return {
+            'candidate':        candidate,
+            'elections_dict':   elections_dict,
+            # 'latest_office_we_vote_id': latest_office_we_vote_id,
+            'success':          success,
+            'status':           status,
+            'values_changed':   values_changed,
+        }
+    candidate_list_manager = CandidateListManager()
+    results = candidate_list_manager.retrieve_candidate_to_office_link_list(
+        candidate_we_vote_id_list=[candidate.we_vote_id],
+        read_only=True)
+    candidate_to_office_link_list = results['candidate_to_office_link_list']
+    latest_election_date = 0
+    # latest_office_we_vote_id = ''
+    for candidate_to_office_link in candidate_to_office_link_list:
+        try:
+            if candidate_to_office_link.google_civic_election_id in elections_dict:
+                this_election = elections_dict[candidate_to_office_link.google_civic_election_id]
+            else:
+                this_election = candidate_to_office_link.election()
+                try:
+                    if positive_value_exists(this_election.google_civic_election_id) \
+                            and this_election.google_civic_election_id not in elections_dict:
+                        elections_dict[this_election.google_civic_election_id] = this_election
+                except Exception as e:
+                    status += "COULD_NOT_ADD_ELECTION_TO_DICT: " + str(e) + " "
+            election_day_as_integer = convert_we_vote_date_string_to_date_as_integer(this_election.election_day_text)
+            if election_day_as_integer > latest_election_date:
+                candidate_ultimate_election_date = election_day_as_integer
+                election_day_as_string = str(election_day_as_integer)
+                year = election_day_as_string[:4]
+                if year:
+                    candidate_year = convert_to_int(year)
+                latest_election_date = election_day_as_integer
+                # latest_office_we_vote_id = candidate_to_office_link.contest_office_we_vote_id
+        except Exception as e:
+            status += "PROBLEM_GETTING_ELECTION_INFORMATION: " + str(e) + " "
+
+    # Now that we have cycled through all the candidate_to_office_link_list, augment the candidate
+    if positive_value_exists(candidate_ultimate_election_date) \
+            and candidate_ultimate_election_date != candidate.candidate_ultimate_election_date:
+        candidate.candidate_ultimate_election_date = candidate_ultimate_election_date
+        values_changed = True
+    if positive_value_exists(candidate_year) \
+            and candidate_year != candidate.candidate_year:
+        candidate.candidate_year = candidate_year
+        values_changed = True
+    return {
+        'candidate':                candidate,
+        'elections_dict':           elections_dict,
+        # 'latest_office_we_vote_id': latest_office_we_vote_id,
+        'success':                  success,
+        'status':                   status,
+        'values_changed':           values_changed,
     }
 
 
@@ -1440,15 +1516,18 @@ def candidates_query_for_api(  # candidatesQuery
     #  (like candidate_to_office_link_list), then do it here before generating dicts from candidate_list
 
     if success:
-        candidate_manager = CandidateManager()
-        candidate_object_list_modified = []
-        for candidate in candidate_list:
-            if not positive_value_exists(candidate.contest_office_name):
-                candidate = candidate_manager.refresh_cached_candidate_office_info(candidate)
-            candidate_object_list_modified.append(candidate)
-        # Eventually we need to deal with "use_we_vote_format"
+        # Moved to an update script on the WeVoteServer Candidates admin listing page
+        # candidate_manager = CandidateManager()
+        # candidate_object_list_modified = []
+        # for candidate in candidate_list:
+        #     if not positive_value_exists(candidate.contest_office_name):
+        #         candidate = candidate_manager.refresh_cached_candidate_office_info(candidate)
+        #     candidate_object_list_modified.append(candidate)
+        # # Eventually we need to deal with "use_we_vote_format"
+        # results = generate_candidate_dict_list_from_candidate_object_list(
+        #     candidate_object_list=candidate_object_list_modified)
         results = generate_candidate_dict_list_from_candidate_object_list(
-            candidate_object_list=candidate_object_list_modified)
+            candidate_object_list=candidate_list)
         candidate_dict_list = results['candidate_dict_list']
 
         if len(candidate_dict_list):
@@ -1996,66 +2075,11 @@ def create_candidate_from_politician(politician_we_vote_id=''):
         )
         candidate_found = True
         if positive_value_exists(candidate.id):
-            # Facebook
-            if positive_value_exists(politician.facebook_url) and not politician.facebook_url_is_broken:
-                candidate.facebook_url = politician.facebook_url
-            elif positive_value_exists(politician.facebook_url2) and not politician.facebook_url2_is_broken:
-                candidate.facebook_url = politician.facebook_url2
-            elif positive_value_exists(politician.facebook_url3) and not politician.facebook_url3_is_broken:
-                candidate.facebook_url = politician.facebook_url3
-            # Email
-            if positive_value_exists(politician.politician_email):
-                candidate.candidate_email = politician.politician_email
-            elif positive_value_exists(politician.politician_email2):
-                candidate.candidate_email = politician.politician_email2
-            elif positive_value_exists(politician.politician_email3):
-                candidate.candidate_email = politician.politician_email3
-            # Phone
-            if positive_value_exists(politician.politician_phone_number):
-                candidate.candidate_phone = politician.politician_phone_number
-            elif positive_value_exists(politician.politician_phone_number2):
-                candidate.candidate_phone = politician.politician_phone_number2
-            elif positive_value_exists(politician.politician_phone_number3):
-                candidate.candidate_phone = politician.politician_phone_number3
-            # Twitter Handle
-            if positive_value_exists(politician.politician_twitter_handle):
-                results = add_twitter_handle_to_next_candidate_spot(
-                    candidate, politician.politician_twitter_handle)
-                if results['success'] and results['values_changed']:
-                    candidate = results['candidate']
-            if positive_value_exists(politician.politician_twitter_handle2):
-                results = add_twitter_handle_to_next_candidate_spot(
-                    candidate, politician.politician_twitter_handle2)
-                if results['success'] and results['values_changed']:
-                    candidate = results['candidate']
-            if positive_value_exists(politician.politician_twitter_handle3):
-                results = add_twitter_handle_to_next_candidate_spot(
-                    candidate, politician.politician_twitter_handle3)
-                if results['success'] and results['values_changed']:
-                    candidate = results['candidate']
-            if positive_value_exists(politician.politician_twitter_handle4):
-                results = add_twitter_handle_to_next_candidate_spot(
-                    candidate, politician.politician_twitter_handle4)
-                if results['success'] and results['values_changed']:
-                    candidate = results['candidate']
-            if positive_value_exists(politician.politician_twitter_handle5):
-                results = add_twitter_handle_to_next_candidate_spot(
-                    candidate, politician.politician_twitter_handle5)
-                if results['success'] and results['values_changed']:
-                    candidate = results['candidate']
-            # URL
-            if positive_value_exists(politician.politician_url):
-                candidate.candidate_url = politician.politician_url
-            elif positive_value_exists(politician.politician_url2):
-                candidate.candidate_url = politician.politician_url2
-            elif positive_value_exists(politician.politician_url3):
-                candidate.candidate_url = politician.politician_url3
-            elif positive_value_exists(politician.politician_url4):
-                candidate.candidate_url = politician.politician_url4
-            elif positive_value_exists(politician.politician_url5):
-                candidate.candidate_url = politician.politician_url5
-            candidate.save()
-            new_candidate_created = True
+            results = update_candidate_details_from_politician(candidate, politician)
+            if results['save_changes']:
+                candidate = results['candidate']
+                candidate.save()
+                new_candidate_created = True
         if new_candidate_created:
             success = True
             status += "CANDIDATE_CREATED "
@@ -3094,6 +3118,123 @@ def update_candidate_details_from_campaignx(candidate, campaignx):
         'status': status,
         'candidate': candidate,
         'save_changes': save_changes,
+    }
+    return results
+
+
+def update_candidate_details_from_politician(candidate, politician):
+    """
+    This function can replace some existing fields in the candidate object with the latest data from politician.
+    It is recommended to use this function after running "update_politician_details_from_candidate", which is more
+    additive and not destructive.
+    :param candidate:
+    :param politician:
+    :return:
+    """
+    status = ''
+    success = True
+    save_changes = True
+
+    if not hasattr(candidate, 'supporters_count') or not hasattr(politician, 'supporters_count'):
+        save_changes = False
+        success = False
+        status += 'UPDATE_CANDIDATE_FROM_POLITICIAN_MISSING_REQUIRED_ATTRIBUTES '
+        results = {
+            'success': success,
+            'status': status,
+            'candidate': candidate,
+            'save_changes': save_changes,
+        }
+        return results
+
+    try:
+        if positive_value_exists(candidate.id):
+            # Facebook
+            if positive_value_exists(politician.facebook_url) and not politician.facebook_url_is_broken:
+                candidate.facebook_url = politician.facebook_url
+            elif positive_value_exists(politician.facebook_url2) and not politician.facebook_url2_is_broken:
+                candidate.facebook_url = politician.facebook_url2
+            elif positive_value_exists(politician.facebook_url3) and not politician.facebook_url3_is_broken:
+                candidate.facebook_url = politician.facebook_url3
+            # Email
+            if positive_value_exists(politician.politician_email):
+                candidate.candidate_email = politician.politician_email
+            elif positive_value_exists(politician.politician_email2):
+                candidate.candidate_email = politician.politician_email2
+            elif positive_value_exists(politician.politician_email3):
+                candidate.candidate_email = politician.politician_email3
+            # Phone
+            if positive_value_exists(politician.politician_phone_number):
+                candidate.candidate_phone = politician.politician_phone_number
+            elif positive_value_exists(politician.politician_phone_number2):
+                candidate.candidate_phone = politician.politician_phone_number2
+            elif positive_value_exists(politician.politician_phone_number3):
+                candidate.candidate_phone = politician.politician_phone_number3
+            # Twitter Handle
+            if positive_value_exists(politician.politician_twitter_handle):
+                results = add_twitter_handle_to_next_candidate_spot(
+                    candidate, politician.politician_twitter_handle)
+                if results['success'] and results['values_changed']:
+                    candidate = results['candidate']
+            if positive_value_exists(politician.politician_twitter_handle2):
+                results = add_twitter_handle_to_next_candidate_spot(
+                    candidate, politician.politician_twitter_handle2)
+                if results['success'] and results['values_changed']:
+                    candidate = results['candidate']
+            if positive_value_exists(politician.politician_twitter_handle3):
+                results = add_twitter_handle_to_next_candidate_spot(
+                    candidate, politician.politician_twitter_handle3)
+                if results['success'] and results['values_changed']:
+                    candidate = results['candidate']
+            if positive_value_exists(politician.politician_twitter_handle4):
+                results = add_twitter_handle_to_next_candidate_spot(
+                    candidate, politician.politician_twitter_handle4)
+                if results['success'] and results['values_changed']:
+                    candidate = results['candidate']
+            if positive_value_exists(politician.politician_twitter_handle5):
+                results = add_twitter_handle_to_next_candidate_spot(
+                    candidate, politician.politician_twitter_handle5)
+                if results['success'] and results['values_changed']:
+                    candidate = results['candidate']
+            # URL
+            if positive_value_exists(politician.politician_url):
+                candidate.candidate_url = politician.politician_url
+            elif positive_value_exists(politician.politician_url2):
+                candidate.candidate_url = politician.politician_url2
+            elif positive_value_exists(politician.politician_url3):
+                candidate.candidate_url = politician.politician_url3
+            elif positive_value_exists(politician.politician_url4):
+                candidate.candidate_url = politician.politician_url4
+            elif positive_value_exists(politician.politician_url5):
+                candidate.candidate_url = politician.politician_url5
+            # Uploaded photo
+            candidate.we_vote_hosted_profile_uploaded_image_url_large = \
+                politician.we_vote_hosted_profile_uploaded_image_url_large
+            candidate.we_vote_hosted_profile_uploaded_image_url_medium = \
+                politician.we_vote_hosted_profile_uploaded_image_url_medium
+            candidate.we_vote_hosted_profile_uploaded_image_url_tiny = \
+                politician.we_vote_hosted_profile_uploaded_image_url_tiny
+            if candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
+                if positive_value_exists(politician.we_vote_hosted_profile_uploaded_image_url_large) \
+                        or positive_value_exists(politician.we_vote_hosted_profile_uploaded_image_url_medium) \
+                        or positive_value_exists(politician.we_vote_hosted_profile_uploaded_image_url_tiny):
+                    candidate.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UPLOADED
+                    candidate.we_vote_hosted_profile_image_url_large = \
+                        politician.we_vote_hosted_profile_uploaded_image_url_large
+                    candidate.we_vote_hosted_profile_image_url_medium = \
+                        politician.we_vote_hosted_profile_uploaded_image_url_medium
+                    candidate.we_vote_hosted_profile_image_url_tiny = \
+                        politician.we_vote_hosted_profile_uploaded_image_url_tiny
+    except Exception as e:
+        status += 'FAILED_TO_UPDATE_CANDIDATE: ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        success = False
+
+    results = {
+        'candidate':        candidate,
+        'save_changes':     save_changes,
+        'status':           status,
+        'success':          success,
     }
     return results
 

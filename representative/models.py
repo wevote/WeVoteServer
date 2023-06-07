@@ -580,6 +580,7 @@ class RepresentativeManager(models.Manager):
             google_civic_representative_name='',
             ocd_division_id='',
             office_held_we_vote_id='',
+            politician_we_vote_id='',
             read_only=False,
             representative_id=0,
             representative_we_vote_id=None,
@@ -651,6 +652,41 @@ class RepresentativeManager(models.Manager):
                     representative_found = False
                     representative_list_found = False
                     status += "REPRESENTATIVE_NOT_FOUND "
+            elif positive_value_exists(politician_we_vote_id):
+                if read_only:
+                    queryset = Representative.objects.using('readonly').all()
+                else:
+                    queryset = Representative.objects.all()
+                queryset = queryset.filter(politician_we_vote_id=politician_we_vote_id)
+                today = datetime.now().date()
+                year = today.year
+                year_filters = []
+                years_list = [year]
+                year_integer_list = []
+                for year in years_list:
+                    year_integer = convert_to_int(year)
+                    if year_integer in OFFICE_HELD_YEARS_AVAILABLE:
+                        year_integer_list.append(year_integer)
+                for year_integer in year_integer_list:
+                    if positive_value_exists(year_integer):
+                        year_in_office_key = 'year_in_office_' + str(year_integer)
+                        one_year_filter = Q(**{year_in_office_key: True})
+                        year_filters.append(one_year_filter)
+                if len(year_filters) > 0:
+                    # Add the first query
+                    final_filters = year_filters.pop()
+                    # ...and "OR" the remaining items in the list
+                    for item in year_filters:
+                        final_filters |= item
+                    queryset = queryset.filter(final_filters)
+                representative_list = list(queryset)
+                if len(representative_list) > 0:
+                    representative_on_stage = representative_list[0]
+                    representative_id = representative_on_stage.id
+                    representative_found = True
+                    representative_list_found = False
+                    representative_we_vote_id = representative_on_stage.we_vote_id
+                    status += "REPRESENTATIVE_FOUND "
             else:
                 representative_found = False
                 status += "RETRIEVE_REPRESENTATIVE_SEARCH_INDEX_MISSING "

@@ -15,7 +15,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-from django.utils.timezone import localtime
+from django.utils.timezone import localtime, now
 import wevote_functions.admin
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.models import BallotReturnedListManager
@@ -325,6 +325,7 @@ def candidate_list_view(request):
 
     hide_pagination = False
 
+    candidate_manager = CandidateManager()
     candidate_search = request.GET.get('candidate_search', '')
     current_page_url = request.get_full_path()
     find_candidates_linked_to_multiple_offices = \
@@ -449,6 +450,71 @@ def candidate_list_view(request):
                 "candidates_not_updated: " + str(candidates_updated) + " "
         if positive_value_exists(populate_candidate_ultimate_election_date_status):
             messages.add_message(request, messages.INFO, populate_candidate_ultimate_election_date_status)
+
+    # We use the contest_office_name and/or district_name some places on WebApp. Update candidates missing this data.
+    populate_contest_office_data = False
+    number_to_populate = 10  # Normally we can process 1000 at a time
+    if populate_contest_office_data and run_scripts:
+        populate_contest_office_data_status = ''
+        candidate_query = CandidateCampaign.objects.all()
+        # Restrict to candidates who don't have contest_office_name and who are in the future
+        year_list = [2023, 2024]
+        candidate_query = candidate_query.filter(
+            Q(candidate_ultimate_election_date__gt=20230601) |
+            Q(candidate_year__in=year_list)
+        )
+        candidate_ultimate_count = candidate_query.count()
+        # if positive_value_exists(candidate_ultimate_count):
+        #     populate_candidate_ultimate_election_date_status += \
+        #         "SCRIPT: {entries_to_process} entries to process (populate_candidate_ultimate_election_date) " \
+        #         "".format(entries_to_process=candidate_ultimate_count) + " "
+        # Now process
+        candidate_bulk_update_list = []
+        candidate_list = candidate_query[:number_to_populate]
+        candidates_updated = 0
+        candidates_not_updated = 0
+        elections_dict = {}
+        most_likely_contest_office_dict = {}
+        from candidate.controllers import augment_candidate_with_contest_office_data
+        # Get all
+        for candidate in candidate_list:
+            # Collect candidate_we_vote_id_list, so we can retrieve linked offices first
+            # CandidateToOfficeLink
+            pass
+
+        for candidate in candidate_list:
+            if not positive_value_exists(candidate.contest_office_name):
+                if candidate.we_vote_id in most_likely_contest_office_dict:
+                    contest_office = most_likely_contest_office_dict[candidate.we_vote_id]
+                    candidate = augment_candidate_with_contest_office_data(candidate)
+                    candidate_bulk_update_list.append(candidate)
+            # results = augment_candidate_with_ultimate_election_date(
+            #     candidate=one_candidate,
+            #     elections_dict=elections_dict)
+            # if results['success']:
+            #     elections_dict = results['elections_dict']
+            # if results['values_changed']:
+            #     candidate_bulk_update_list.append(results['candidate'])
+            #     candidates_updated += 1
+            # else:
+            #     candidates_not_updated += 1
+        if len(candidate_bulk_update_list) > 0:
+            try:
+                CandidateCampaign.objects.bulk_update(
+                    candidate_bulk_update_list,
+                    ['contest_office_name',
+                     'district_name'])
+            except Exception as e:
+                messages.add_message(request, messages.ERROR, "FAILED_BULK_UPDATE: " + str(e))
+
+        if positive_value_exists(candidates_updated):
+            populate_contest_office_data_status += \
+                "candidates_updated: " + str(candidates_updated) + " "
+        if positive_value_exists(candidates_not_updated):
+            populate_contest_office_data_status += \
+                "candidates_not_updated: " + str(candidates_updated) + " "
+        if positive_value_exists(populate_contest_office_data_status):
+            messages.add_message(request, messages.INFO, populate_contest_office_data_status)
 
     # Update candidates who currently don't have seo_friendly_path, if there is seo_friendly_path
     #  in linked politician
@@ -3704,3 +3770,77 @@ def compare_two_candidates_for_merge_view(request):
         candidate_merge_conflict_values,
         candidate_year=candidate_year,
         remove_duplicate_process=remove_duplicate_process)
+
+
+@login_required
+def update_candidate_from_politician_view(request):
+    candidate = None
+    candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
+    politician_id = request.GET.get('politician_id', 0)
+    politician_we_vote_id = request.GET.get('politician_we_vote_id', '')
+    if not positive_value_exists(politician_id) and not positive_value_exists(politician_we_vote_id):
+        message = "Unable to update candidate from politician. Missing politician_id and candidate_we_vote_id."
+        messages.add_message(request, messages.INFO, message)
+        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()))
+
+    from politician.models import Politician
+    if positive_value_exists(politician_we_vote_id):
+        politician = Politician.objects.get(we_vote_id=politician_we_vote_id)
+    else:
+        politician = Politician.objects.get(id=politician_id)
+    politician_id = politician.id
+    politician_we_vote_id = politician.we_vote_id
+
+    queryset = CandidateCampaign.objects.using('readonly').all()
+    queryset = queryset.filter(politician_we_vote_id__iexact=politician_we_vote_id)
+    queryset = queryset.filter(we_vote_id__iexact=candidate_we_vote_id)
+    queryset = queryset.order_by('-candidate_year', '-candidate_ultimate_election_date')
+    candidate_list = list(queryset)
+    candidate_list_by_politician_we_vote_id = {}
+    for one_candidate in candidate_list:
+        # Only put the first one in
+        if one_candidate.politician_we_vote_id not in candidate_list_by_politician_we_vote_id:
+            candidate_list_by_politician_we_vote_id[one_candidate.politician_we_vote_id] = one_candidate
+
+    # We start by updating the politician (non-destructively) with information from the candidate
+    if politician.we_vote_id in candidate_list_by_politician_we_vote_id:
+        candidate = candidate_list_by_politician_we_vote_id[politician.we_vote_id]
+        from politician.controllers import update_politician_details_from_candidate
+        results = update_politician_details_from_candidate(politician=politician, candidate=candidate)
+        if results['success']:
+            save_changes = results['save_changes']
+            politician = results['politician']
+            if save_changes:
+                politician.date_last_updated_from_candidate = localtime(now()).date()
+                politician.save()
+                message = "Politician updated."
+                messages.add_message(request, messages.INFO, message)
+            else:
+                message = "Politician not updated. No changes found."
+                messages.add_message(request, messages.INFO, message)
+        else:
+            message = "Politician not updated. Error: " + str(results['status'])
+            messages.add_message(request, messages.ERROR, message)
+    else:
+        message = "Politician not updated. No candidates found to update politician from."
+        messages.add_message(request, messages.ERROR, message)
+
+    # And now, we update the politician (potentially destructive in a few ways) with information from the candidate
+    from candidate.controllers import update_candidate_details_from_politician
+    results = update_candidate_details_from_politician(candidate=candidate, politician=politician)
+    if results['success']:
+        candidate = results['candidate']
+        save_changes = results['save_changes']
+        if save_changes:
+            candidate.save()
+            message = "Candidate updated."
+            messages.add_message(request, messages.INFO, message)
+        else:
+            message = "Candidate not updated. No changes found."
+            messages.add_message(request, messages.INFO, message)
+    else:
+        message = "Candidate not updated. Failure in update_candidate_details_from_politician: " \
+                  "" + str(results['status'])
+        messages.add_message(request, messages.ERROR, message)
+
+    return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id', args=(candidate_we_vote_id,)))

@@ -5,6 +5,7 @@
 import json
 from time import time
 
+from django.core.exceptions import RequestDataTooBig
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django_user_agents.utils import get_user_agent
@@ -2338,7 +2339,6 @@ def voter_update_view(request):  # voterUpdate
     :param request:
     :return:
     """
-    from django.core.exceptions import RequestDataTooBig
 
     status = ""
     voter_updated = False
