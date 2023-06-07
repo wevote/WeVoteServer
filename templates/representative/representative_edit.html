@@ -37,6 +37,18 @@
             Unknown
         {% endif %}
         </span>
+        <span style="float: left; padding: 8px 20px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="UPLOADED"
+                {% if representative.profile_image_type_currently_active == 'UPLOADED' %} checked {% endif %}
+                />
+            Uploaded
+        {% if representative.we_vote_hosted_profile_uploaded_image_url_tiny %}
+            <img src='{{ representative.we_vote_hosted_profile_uploaded_image_url_tiny }}' />
+            (delete on politician)&nbsp;&nbsp;&nbsp;
+        {% else %}
+            (add on politician)
+        {% endif %}
+        </span>
         {% if representative.we_vote_hosted_profile_facebook_image_url_tiny %}
         <span style="float: left; padding: 8px 20px 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="FACEBOOK"

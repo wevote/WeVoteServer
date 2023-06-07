@@ -449,10 +449,7 @@
             {% for change_log_entry in change_log_list %}
                 <tr>
                     <td>
-                        {{ change_log_entry.change_description_augmented|safe }}<br />
-                        <span style="color: #ccc; font-size: 12px;">
-                            {{ change_log_entry.log_datetime }} * {{ change_log_entry.status }}
-                        </span>
+                        {{ change_log_entry.change_description_augmented|safe }}
                     </td>
                     <td>
                         {% if change_log_entry.changed_by_name %}
@@ -460,6 +457,10 @@
                         {% else %}
                             {{ change_log_entry.changed_by_voter_we_vote_id }}
                         {% endif %}
+                        <span style="color: #ccc; font-size: 12px;">
+                            {{ change_log_entry.log_datetime }}
+{#                             * {{ change_log_entry.status }}#}
+                        </span>
                     </td>
                 </tr>
             {% endfor %}

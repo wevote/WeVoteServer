@@ -2,6 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from base64 import b64encode
 import json
 import string
 from datetime import datetime, timedelta
@@ -21,15 +22,18 @@ import wevote_functions.admin
 from admin_tools.views import redirect_to_sign_in_page
 from campaign.models import CampaignXManager
 from candidate.controllers import retrieve_candidate_photos
-from candidate.models import CandidateCampaign, CandidateListManager, CandidateManager
+from candidate.models import CandidateCampaign, CandidateListManager, CandidateManager, PROFILE_IMAGE_TYPE_UNKNOWN, \
+    PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_VOTE_USA
 from config.base import get_environment_variable
 from election.models import Election
 from exception.models import handle_record_found_more_than_one_exception, \
     handle_record_not_found_exception, handle_record_not_saved_exception, print_to_log
+from image.controllers import create_resized_images
 from import_export_vote_smart.models import VoteSmartRatingOneCandidate
 from import_export_vote_smart.votesmart_local import VotesmartApiError
 from office.models import ContestOffice
-from politician.controllers import generate_campaignx_for_politician, update_politician_details_from_candidate
+from politician.controllers import generate_campaignx_for_politician, politician_save_photo_from_file_reader, \
+    update_politician_details_from_candidate
 from position.models import PositionEntered, PositionListManager
 from representative.models import Representative, RepresentativeManager
 from voter.models import voter_has_authority
@@ -1512,6 +1516,13 @@ def politician_edit_process_view(request):
     politician_phone_number = request.POST.get('politician_phone_number', False)
     politician_phone_number2 = request.POST.get('politician_phone_number2', False)
     politician_phone_number3 = request.POST.get('politician_phone_number3', False)
+    try:
+        politician_photo_file = request.FILES['politician_photo_file']
+        politician_photo_file_found = True
+    except Exception as e:
+        politician_photo_file = None
+        politician_photo_file_found = False
+    politician_photo_file_delete = positive_value_exists(request.POST.get('politician_photo_file_delete', False))
     politician_twitter_handle = request.POST.get('politician_twitter_handle', False)
     if positive_value_exists(politician_twitter_handle):
         politician_twitter_handle = extract_twitter_handle_from_text_string(politician_twitter_handle)
@@ -1683,6 +1694,51 @@ def politician_edit_process_view(request):
                 )
                 politician_on_stage_found = True
         if politician_on_stage_found:
+            # Process incoming uploaded photo if there is one
+            politician_photo_in_binary_format = None
+            politician_photo_converted_to_binary = False
+            if politician_photo_file_found:
+                try:
+                    politician_photo_in_binary_format = b64encode(politician_photo_file.read()).decode('utf-8')
+                    politician_photo_converted_to_binary = True
+                except Exception as e:
+                    messages.add_message(request, messages.ERROR,
+                                         "Error converting politician photo to binary: {error}".format(error=e))
+            if politician_photo_file_found and politician_photo_converted_to_binary:
+                photo_results = politician_save_photo_from_file_reader(
+                    politician_we_vote_id=politician_we_vote_id,
+                    politician_photo_binary_file=politician_photo_in_binary_format)
+                if photo_results['we_vote_hosted_politician_photo_original_url']:
+                    we_vote_hosted_politician_photo_original_url = \
+                        photo_results['we_vote_hosted_politician_photo_original_url']
+                    # Now we want to resize to a large version
+                    create_resized_image_results = create_resized_images(
+                        politician_we_vote_id=politician_we_vote_id,
+                        politician_uploaded_profile_image_url_https=we_vote_hosted_politician_photo_original_url)
+                    politician_on_stage.we_vote_hosted_profile_uploaded_image_url_large = \
+                        create_resized_image_results['cached_resized_image_url_large']
+                    politician_on_stage.we_vote_hosted_profile_uploaded_image_url_medium = \
+                        create_resized_image_results['cached_resized_image_url_medium']
+                    politician_on_stage.we_vote_hosted_profile_uploaded_image_url_tiny = \
+                        create_resized_image_results['cached_resized_image_url_tiny']
+                    if profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
+                        profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UPLOADED
+                        politician_on_stage.we_vote_hosted_profile_image_url_large = \
+                            politician_on_stage.we_vote_hosted_profile_uploaded_image_url_large
+                        politician_on_stage.we_vote_hosted_profile_image_url_medium = \
+                            politician_on_stage.we_vote_hosted_profile_uploaded_image_url_medium
+                        politician_on_stage.we_vote_hosted_profile_image_url_tiny = \
+                            politician_on_stage.we_vote_hosted_profile_uploaded_image_url_tiny
+            elif politician_photo_file_delete:
+                politician_on_stage.we_vote_hosted_profile_uploaded_image_url_large = None
+                politician_on_stage.we_vote_hosted_profile_uploaded_image_url_medium = None
+                politician_on_stage.we_vote_hosted_profile_uploaded_image_url_tiny = None
+                if profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UPLOADED:
+                    profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UNKNOWN
+                    politician_on_stage.we_vote_hosted_profile_image_url_large = None
+                    politician_on_stage.we_vote_hosted_profile_image_url_medium = None
+                    politician_on_stage.we_vote_hosted_profile_image_url_tiny = None
+
             if ballotpedia_politician_name is not False:
                 politician_on_stage.ballotpedia_politician_name = ballotpedia_politician_name
             if ballotpedia_politician_url is not False:
@@ -1843,6 +1899,34 @@ def politician_edit_process_view(request):
                     politician_on_stage.seo_friendly_path = seo_friendly_path
                     politician_on_stage.save()
             messages.add_message(request, messages.INFO, 'Politician saved.')
+
+            if positive_value_exists(politician_on_stage.linked_campaignx_we_vote_id):
+                from campaign.controllers import update_campaignx_from_politician
+                campaignx_manager = CampaignXManager()
+                campaignx_results = campaignx_manager.retrieve_campaignx(
+                    campaignx_we_vote_id=politician_on_stage.linked_campaignx_we_vote_id)
+                if campaignx_results['campaignx_found']:
+                    campaignx = campaignx_results['campaignx']
+                    results = update_campaignx_from_politician(campaignx=campaignx, politician=politician_on_stage)
+                    if results['success']:
+                        campaignx = results['campaignx']
+                        campaignx.date_last_updated_from_politician = localtime(now()).date()
+                        campaignx.save()
+            # Find current representative for this politician
+            representative_manager = RepresentativeManager()
+            rep_results = representative_manager.retrieve_representative(
+                politician_we_vote_id=politician_on_stage.we_vote_id)
+            if rep_results['representative_found']:
+                from representative.controllers import update_representative_details_from_politician
+                representative = rep_results['representative']
+                results = update_representative_details_from_politician(
+                    representative=representative,
+                    politician=politician_on_stage)
+                if results['success']:
+                    if results['save_changes']:
+                        representative = results['representative']
+                        representative.date_last_updated_from_politician = localtime(now()).date()
+                        representative.save()
         else:
             # messages.add_message(request, messages.INFO, 'Could not save -- missing required variables.')
             if positive_value_exists(politician_id):

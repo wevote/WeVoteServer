@@ -9,7 +9,7 @@
     <a href="{% url 'voter:voter_list' %}">< Back to Voters</a><br />
 
 <h1>{% if voter %}Voter Edit: {{ voter.first_name|default_if_none:"" }} {{ voter.last_name|default_if_none:"" }}{% else %}Create New Voter Account{% endif %}</h1>
-<form action="{% url "voter:voter_edit_process" %}" method="post" class="form-horizontal">
+<form action="{% url "voter:voter_edit_process" %}" method="post" class="form-horizontal" enctype="multipart/form-data">
 {% csrf_token %}
 
 <input type="hidden" name="voter_id" value="{% if voter %}{{ voter.id }}{% else %}0{% endif %}">
@@ -58,6 +58,21 @@
 
 
 <div class="form-group">
+    <label class="col-sm-3 control-label">
+        &nbsp;</label>
+    <div class="col-sm-9">
+        {% if voter %}
+        <a href="{% url 'voter:voter_summary' voter.id %}">cancel</a>
+        {% else %}
+        <a href="{% url 'voter:voter_list' %}">cancel</a>
+        {% endif %}
+        &nbsp;
+        <input type="submit" value="{% if voter %}Update Voter Account{% else %}Create New Voter Account{% endif %}" />
+    </div>
+</div>
+
+
+<div class="form-group">
     <label for="profile_image_type_currently_active_id" class="col-sm-3 control-label">
         Voter Photo Choice<br />
         <span style="color: darkgray">{{ voter.profile_image_type_currently_active }}</span>
@@ -73,15 +88,17 @@
             Unknown
         {% endif %}
         </span>
-        {% if voter.we_vote_hosted_profile_uploaded_image_url_tiny %}
         <span style="float: left; padding: 8px 20px 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="UPLOADED"
                 {% if voter.profile_image_type_currently_active == 'UPLOADED' %} checked {% endif %}
                 />
-            <img src='{{ voter.we_vote_hosted_profile_uploaded_image_url_tiny }}' />
             Uploaded
-        </span>
+        {% if voter.we_vote_hosted_profile_uploaded_image_url_tiny %}
+            <img src='{{ voter.we_vote_hosted_profile_uploaded_image_url_tiny }}' />
+        {% else %}
+            <input type="file" name="voter_photo_file" accept="image/*">
         {% endif %}
+        </span>
         {% if voter.we_vote_hosted_profile_facebook_image_url_tiny %}
         <span style="float: left; padding: 8px 20px 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="FACEBOOK"
@@ -276,6 +293,7 @@
         {% else %}
         <a href="{% url 'voter:voter_list' %}">cancel</a>
         {% endif %}
+        &nbsp;
         <input type="submit" value="{% if voter %}Update Voter Account{% else %}Create New Voter Account{% endif %}" />
     </div>
 </div>

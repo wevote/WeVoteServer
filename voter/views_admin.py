@@ -2,12 +2,14 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 import string
+from base64 import b64encode
 from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
+from django.core.exceptions import RequestDataTooBig
 from django.db.models import Q, Subquery
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -19,6 +21,7 @@ from admin_tools.views import redirect_to_sign_in_page
 from email_outbound.models import EmailAddress, EmailManager
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
     handle_record_not_saved_exception, handle_exception
+from image.controllers import TWITTER, FACEBOOK, cache_master_and_resized_image, create_resized_images
 from import_export_facebook.models import FacebookLinkToVoter, FacebookManager
 from organization.models import Organization, OrganizationManager, INDIVIDUAL
 from position.controllers import merge_duplicate_positions_for_voter
@@ -29,10 +32,10 @@ from sms.models import SMSManager, SMSPhoneNumber
 from stripe_donations.models import StripeManager, StripePayments
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
 from wevote_functions.functions import convert_to_int, generate_random_string, get_voter_api_device_id, \
-    set_voter_api_device_id, positive_value_exists
+    get_voter_device_id, set_voter_api_device_id, positive_value_exists
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from .controllers import delete_all_voter_information_permanently, process_maintenance_status_flags, \
-    voter_merge_two_accounts_action
+    voter_merge_two_accounts_action, voter_save_photo_from_file_reader
 from .models import fetch_voter_id_from_voter_device_link, \
     PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
     PROFILE_IMAGE_TYPE_UPLOADED, \
@@ -127,8 +130,8 @@ def login_complete_view(request):
             messages.add_message(request, messages.INFO, 'Voter updated.')
         else:
             messages.add_message(request, messages.INFO, 'Voter could not be relinked.')
-    except:
-        messages.add_message(request, messages.INFO, 'Voter not updated.')
+    except Exception as e:
+        messages.add_message(request, messages.INFO, 'Voter not updated:' + str(e))
 
     return HttpResponseRedirect(reverse('login_we_vote', args=()))
 
@@ -298,8 +301,8 @@ def voter_delete_process_view(request):
         if len(voter_query):
             voter_on_stage = voter_query[0]
             voter_on_stage_found = True
-            results = delete_all_voter_information_permanently(voter_to_delete=voter_on_stage,
-                                                               user = request.user)
+            results = delete_all_voter_information_permanently(
+                voter_to_delete=voter_on_stage, user=request.user)
             status += results['status']
     except Exception as e:
         handle_record_not_found_exception(e, logger=logger)
@@ -320,6 +323,17 @@ def voter_edit_process_view(request):
     :param request:
     :return:
     """
+    status = ''
+    voter_id = request.POST.get('voter_id', 0)
+    voter_id = convert_to_int(voter_id)
+
+    # We need to react if the photo is too big to upload
+    try:
+        voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    except RequestDataTooBig:
+        messages.add_message(request, messages.ERROR, "Voter photo too big to upload.")
+
+        return HttpResponseRedirect(reverse('voter:voter_edit', args=(voter_id,)))
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'admin'}  # We may want to add a "voter_admin"
     if not voter_has_authority(request, authority_required):
@@ -330,8 +344,6 @@ def voter_edit_process_view(request):
     voter_on_stage = Voter()
     at_least_one_value_changed = False
 
-    voter_id = request.POST.get('voter_id', 0)
-    voter_id = convert_to_int(voter_id)
     first_name = request.POST.get('first_name', False)
     last_name = request.POST.get('last_name', False)
     twitter_handle = request.POST.get('twitter_handle', False)
@@ -339,6 +351,12 @@ def voter_edit_process_view(request):
     password_text = request.POST.get('password_text', False)
     profile_image_type_currently_active = request.POST.get('profile_image_type_currently_active', False)
     sms_phone_number = request.POST.get('sms_phone_number', False)
+    try:
+        voter_photo_file = request.FILES['voter_photo_file']
+        voter_photo_file_found = True
+    except Exception as e:
+        voter_photo_file = None
+        voter_photo_file_found = False
     voter_we_vote_id = None
 
     # Check to see if this voter is already being used anywhere
@@ -488,6 +506,34 @@ def voter_edit_process_view(request):
             voter_on_stage.sms_ownership_is_verified = False
             at_least_one_value_changed = True
 
+        # Process incoming photo if there is one
+        voter_photo_in_binary_format = None
+        voter_photo_converted_to_binary = False
+        if voter_photo_file_found:
+            try:
+                voter_photo_in_binary_format = b64encode(voter_photo_file.read()).decode('utf-8')
+                voter_photo_converted_to_binary = True
+            except Exception as e:
+                messages.add_message(request, messages.ERROR,
+                                     "Error converting voter photo to binary: {error}".format(error=e))
+        if voter_photo_file_found and voter_photo_converted_to_binary:
+            photo_results = voter_save_photo_from_file_reader(
+                voter_we_vote_id=voter_we_vote_id,
+                voter_photo_binary_file=voter_photo_in_binary_format)
+            if photo_results['we_vote_hosted_voter_photo_original_url']:
+                we_vote_hosted_voter_photo_original_url = photo_results['we_vote_hosted_voter_photo_original_url']
+                # Now we want to resize to a large version
+                create_resized_image_results = create_resized_images(
+                    voter_we_vote_id=voter_we_vote_id,
+                    voter_uploaded_profile_image_url_https=we_vote_hosted_voter_photo_original_url)
+                voter_on_stage.we_vote_hosted_profile_uploaded_image_url_large = \
+                    create_resized_image_results['cached_resized_image_url_large']
+                voter_on_stage.we_vote_hosted_profile_uploaded_image_url_medium = \
+                    create_resized_image_results['cached_resized_image_url_medium']
+                voter_on_stage.we_vote_hosted_profile_uploaded_image_url_tiny = \
+                    create_resized_image_results['cached_resized_image_url_tiny']
+                at_least_one_value_changed = True
+
         if profile_image_type_currently_active is not False:
             if profile_image_type_currently_active in [
                     PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN,
@@ -570,7 +616,7 @@ def voter_edit_process_view(request):
 
             messages.add_message(request, messages.INFO, 'Added new Voter.')
         except Exception as e:
-            messages.add_message(request, messages.ERROR, 'Could not save voter.')
+            messages.add_message(request, messages.ERROR, 'Could not save voter:' + str(e))
 
     return HttpResponseRedirect(reverse('voter:voter_edit', args=(voter_id,)))
 
@@ -1012,7 +1058,7 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
             'voter':                                    voter_on_stage,
             'voter_list_duplicate_facebook':            voter_list_duplicate_facebook_updated,
             'voter_list_duplicate_twitter':             voter_list_duplicate_twitter_updated,
-            'stripe_payments':                          StripeManager.retrieve_payments_total(voter_on_stage.we_vote_id),
+            'stripe_payments':                         StripeManager.retrieve_payments_total(voter_on_stage.we_vote_id),
         }
     else:
         messages_on_stage = get_messages(request)
@@ -1105,6 +1151,7 @@ def voter_change_authority_process_view(request):
 
     return HttpResponseRedirect(reverse('voter:voter_edit', args=(voter_id,)))
 
+
 @login_required
 def voter_remove_facebook_auth_process_view(request, voter_id=0, voter_we_vote_id=""):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
@@ -1140,7 +1187,7 @@ def voter_remove_facebook_auth_process_view(request, voter_id=0, voter_we_vote_i
 
     except Exception as e:
         handle_exception(e, logger=logger,
-                         exception_message="voter_remove_facebook_auth_process_viewexception threw ")
+                         exception_message="voter_remove_facebook_auth_process_view exception threw ")
         pass
 
     messages.add_message(request, messages.INFO, return_auth_status)

@@ -2,12 +2,18 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+import base64
+from io import BytesIO
+from PIL import Image, ImageOps
+import re
+
 from django.db.models import Q
 from campaign.models import CampaignXManager
 from candidate.controllers import add_name_to_next_spot, generate_candidate_dict_list_from_candidate_object_list, \
     move_candidates_to_another_politician
 from candidate.models import CandidateListManager, CandidateManager
 from datetime import datetime
+from image.controllers import cache_image_object_to_aws, create_resized_images
 from office.models import ContestOfficeManager, ContestOfficeListManager
 from office_held.controllers import generate_office_held_dict_list_from_office_held_we_vote_id_list
 from politician.controllers_generate_seo_friendly_path import generate_campaign_title_from_politician
@@ -30,6 +36,9 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 POLITICIANS_SYNC_URL = get_environment_variable("POLITICIANS_SYNC_URL")  # politiciansSyncOut
+# Also search image/controllers.py for these constants
+PROFILE_IMAGE_ORIGINAL_MAX_WIDTH = 2048
+PROFILE_IMAGE_ORIGINAL_MAX_HEIGHT = 2048
 
 
 def add_twitter_handle_to_next_politician_spot(politician, twitter_handle):
@@ -981,6 +990,86 @@ def merge_these_two_politicians(
     return results
 
 
+def politician_save_photo_from_file_reader(
+        politician_we_vote_id='',
+        politician_photo_binary_file=None,
+        politician_photo_from_file_reader=None):
+    image_data_found = False
+    python_image_library_image = None
+    status = ""
+    success = True
+    we_vote_hosted_politician_photo_original_url = ''
+
+    if not positive_value_exists(politician_we_vote_id):
+        status += "MISSING_POLITICIAN_WE_VOTE_ID "
+        results = {
+            'status': status,
+            'success': success,
+            'we_vote_hosted_politician_photo_original_url': we_vote_hosted_politician_photo_original_url,
+        }
+        return results
+
+    if not positive_value_exists(politician_photo_from_file_reader) \
+            and not positive_value_exists(politician_photo_binary_file):
+        status += "MISSING_POLITICIAN_PHOTO_FROM_FILE_READER "
+        results = {
+            'status': status,
+            'success': success,
+            'we_vote_hosted_politician_photo_original_url': we_vote_hosted_politician_photo_original_url,
+        }
+        return results
+
+    if not politician_photo_binary_file:
+        try:
+            img_dict = re.match("data:(?P<type>.*?);(?P<encoding>.*?),(?P<data>.*)",
+                                politician_photo_from_file_reader).groupdict()
+            if img_dict['encoding'] == 'base64':
+                politician_photo_binary_file = img_dict['data']
+            else:
+                status += "INCOMING_POLITICIAN_UPLOADED_PHOTO-BASE64_NOT_FOUND "
+        except Exception as e:
+            status += 'PROBLEM_EXTRACTING_BINARY_DATA_FROM_INCOMING_POLITICIAN_DATA: {error} [type: {error_type}] ' \
+                      ''.format(error=e, error_type=type(e))
+
+    if politician_photo_binary_file:
+        try:
+            byte_data = base64.b64decode(politician_photo_binary_file)
+            image_data = BytesIO(byte_data)
+            original_image = Image.open(image_data)
+            format_to_cache = original_image.format
+            python_image_library_image = ImageOps.exif_transpose(original_image)
+            python_image_library_image.thumbnail(
+                (PROFILE_IMAGE_ORIGINAL_MAX_WIDTH, PROFILE_IMAGE_ORIGINAL_MAX_HEIGHT), Image.Resampling.LANCZOS)
+            python_image_library_image.format = format_to_cache
+            image_data_found = True
+        except Exception as e:
+            status += 'PROBLEM_EXTRACTING_POLITICIAN_PHOTO_FROM_BINARY_DATA: {error} [type: {error_type}] ' \
+                      ''.format(error=e, error_type=type(e))
+
+    if image_data_found:
+        cache_results = cache_image_object_to_aws(
+            python_image_library_image=python_image_library_image,
+            politician_we_vote_id=politician_we_vote_id,
+            kind_of_image_politician_uploaded_profile=True,
+            kind_of_image_original=True)
+        status += cache_results['status']
+        if cache_results['success']:
+            cached_master_we_vote_image = cache_results['we_vote_image']
+            try:
+                we_vote_hosted_politician_photo_original_url = cached_master_we_vote_image.we_vote_image_url
+            except Exception as e:
+                status += "FAILED_TO_CACHE_POLITICIAN_IMAGE: " + str(e) + ' '
+                success = False
+        else:
+            success = False
+    results = {
+        'status':                   status,
+        'success':                  success,
+        'we_vote_hosted_politician_photo_original_url': we_vote_hosted_politician_photo_original_url,
+    }
+    return results
+
+
 def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwner (No CDN)
         request=None,
         voter_device_id='',
@@ -1669,6 +1758,13 @@ def update_politician_details_from_campaignx(politician, campaignx):
 
 
 def update_politician_details_from_candidate(politician, candidate):
+    """
+    Meant to add on new information to a politician. Not meant to destroy existing information in the politician
+    with data from the candidate.
+    :param politician:
+    :param candidate:
+    :return:
+    """
     status = ''
     success = True
     save_changes = False

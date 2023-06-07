@@ -9,7 +9,7 @@ import copy
 from datetime import datetime, timedelta
 from django.contrib import messages
 from django.db.models import Q
-from image.controllers import cache_campaignx_image, create_resized_images
+from image.controllers import cache_image_object_to_aws, create_resized_images
 import json
 from io import BytesIO
 from PIL import Image, ImageOps
@@ -781,6 +781,7 @@ def campaignx_save_for_api(  # campaignSave & campaignStartSave
 
 def campaignx_save_photo_from_file_reader(
         campaignx_we_vote_id='',
+        campaignx_photo_binary_file=None,
         campaign_photo_from_file_reader=None):
     image_data_found = False
     python_image_library_image = None
@@ -797,7 +798,8 @@ def campaignx_save_photo_from_file_reader(
         }
         return results
 
-    if not positive_value_exists(campaign_photo_from_file_reader):
+    if not positive_value_exists(campaign_photo_from_file_reader) \
+            and not positive_value_exists(campaignx_photo_binary_file):
         status += "MISSING_CAMPAIGNX_PHOTO_FROM_FILE_READER "
         results = {
             'status': status,
@@ -806,12 +808,21 @@ def campaignx_save_photo_from_file_reader(
         }
         return results
 
-    img_dict = re.match("data:(?P<type>.*?);(?P<encoding>.*?),(?P<data>.*)",
-                        campaign_photo_from_file_reader).groupdict()
-    if img_dict['encoding'] == 'base64':
+    if not campaignx_photo_binary_file:
         try:
-            base64_data = img_dict['data']
-            byte_data = base64.b64decode(base64_data)
+            img_dict = re.match("data:(?P<type>.*?);(?P<encoding>.*?),(?P<data>.*)",
+                                campaign_photo_from_file_reader).groupdict()
+            if img_dict['encoding'] == 'base64':
+                campaignx_photo_binary_file = img_dict['data']
+            else:
+                status += "INCOMING_CAMPAIGN_PHOTO_LARGE-BASE64_NOT_FOUND "
+        except Exception as e:
+            status += 'PROBLEM_EXTRACTING_BINARY_DATA_FROM_INCOMING_CAMPAIGNX_DATA: {error} [type: {error_type}] ' \
+                      ''.format(error=e, error_type=type(e))
+
+    if campaignx_photo_binary_file:
+        try:
+            byte_data = base64.b64decode(campaignx_photo_binary_file)
             image_data = BytesIO(byte_data)
             original_image = Image.open(image_data)
             format_to_cache = original_image.format
@@ -821,13 +832,11 @@ def campaignx_save_photo_from_file_reader(
             python_image_library_image.format = format_to_cache
             image_data_found = True
         except Exception as e:
-            status += 'PROBLEM_DECODING_CAMPAIGN_PHOTO_LARGE: {error} [type: {error_type}] ' \
+            status += 'PROBLEM_EXTRACTING_CAMPAIGN_PHOTO_FROM_BINARY_DATA: {error} [type: {error_type}] ' \
                       ''.format(error=e, error_type=type(e))
-    else:
-        status += "INCOMING_CAMPAIGN_PHOTO_LARGE-BASE64_NOT_FOUND "
 
     if image_data_found:
-        cache_results = cache_campaignx_image(
+        cache_results = cache_image_object_to_aws(
             python_image_library_image=python_image_library_image,
             campaignx_we_vote_id=campaignx_we_vote_id,
             kind_of_image_campaignx_photo=True,

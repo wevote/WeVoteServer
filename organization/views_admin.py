@@ -2251,6 +2251,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
     if hasattr(voter, 'is_admin') and voter.is_admin:
         queryset = OrganizationChangeLog.objects.using('readonly').all()
         queryset = queryset.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+        queryset = queryset.order_by('-log_datetime')
         change_log_list = list(queryset)
     else:
         change_log_list = []

@@ -1807,7 +1807,9 @@ def update_representatives_from_politicians_view(request):
             we_vote_representative.save()
         if not politician or not hasattr(politician, 'we_vote_id'):
             continue
-        results = update_representative_details_from_politician(representative=we_vote_representative, politician=politician)
+        results = update_representative_details_from_politician(
+            representative=we_vote_representative,
+            politician=politician)
         if results['success']:
             save_changes = results['save_changes']
             we_vote_representative = results['representative']

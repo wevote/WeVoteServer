@@ -3486,9 +3486,11 @@ class OrganizationChangeLog(models.Model):
                 for we_vote_id, issue_name in issue_we_vote_id_to_name_dictionary.items():
                     change_description_augmented = change_description_augmented.replace(
                         we_vote_id,
-                        "<strong>{issue_name}</strong>".format(issue_name=issue_name))
-            change_description_augmented = change_description_augmented.replace("ADD", "ADDED,")
-            change_description_augmented = change_description_augmented.replace("REMOVE", "REMOVED,")
+                        "{issue_name}".format(issue_name=issue_name))
+            change_description_augmented = change_description_augmented\
+                .replace("ADD", "<span style=\'color: #A9A9A9;\'>ADDED</span><br />")
+            change_description_augmented = change_description_augmented\
+                .replace("REMOVE", "<span style=\'color: #A9A9A9;\'>REMOVED</span><br />")
             return change_description_augmented
         else:
             return ''

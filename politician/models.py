@@ -194,26 +194,27 @@ class Politician(models.Model):
     twitter_handle2_updates_failing = models.BooleanField(default=False)
     twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)
     vote_usa_politician_id = models.CharField(
-        verbose_name="Vote USA permanent id for this candidate", max_length=64, default=None, null=True, blank=True)
+        verbose_name="Vote USA permanent id for this politician", max_length=64, default=None, null=True, blank=True)
     # This is the master image url cached on We Vote servers. See photo_url_from_vote_usa for Vote USA URL.
     vote_usa_profile_image_url_https = models.TextField(null=True, blank=True, default=None)
 
-    # Which candidate image is currently active?
+    # Which politician image is currently active?
     profile_image_type_currently_active = models.CharField(
         max_length=10, choices=PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES, default=PROFILE_IMAGE_TYPE_UNKNOWN)
-    # Image for candidate from Facebook, cached on We Vote's servers. See also facebook_profile_image_url_https.
+    we_vote_hosted_politician_photo_original_url = models.TextField(blank=True, null=True)
+    # Image for politician from Facebook, cached on We Vote's servers. See also facebook_profile_image_url_https.
     we_vote_hosted_profile_facebook_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_facebook_image_url_medium = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_facebook_image_url_tiny = models.TextField(blank=True, null=True)
-    # Image for candidate from Twitter, cached on We Vote's servers. See local master twitter_profile_image_url_https.
+    # Image for politician from Twitter, cached on We Vote's servers. See local master twitter_profile_image_url_https.
     we_vote_hosted_profile_twitter_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_twitter_image_url_medium = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_twitter_image_url_tiny = models.TextField(blank=True, null=True)
-    # Image for candidate uploaded to We Vote's servers.
+    # Image for politician uploaded to We Vote's servers.
     we_vote_hosted_profile_uploaded_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_uploaded_image_url_medium = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_uploaded_image_url_tiny = models.TextField(blank=True, null=True)
-    # Image for candidate from Vote USA, cached on We Vote's servers. See local master vote_usa_profile_image_url_https.
+    # Image for politician from Vote USA, cached on We Vote's servers. See local master vote_usa_profile_image_url_https.
     we_vote_hosted_profile_vote_usa_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_vote_usa_image_url_medium = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_vote_usa_image_url_tiny = models.TextField(blank=True, null=True)
@@ -225,7 +226,7 @@ class Politician(models.Model):
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True)
     instagram_handle = models.TextField(verbose_name="politician's instagram handle", blank=True, null=True)
     instagram_followers_count = models.IntegerField(
-        verbose_name="count of candidate's instagram followers", null=True, blank=True)
+        verbose_name="count of politician's instagram followers", null=True, blank=True)
     # As we add more years here, update /wevote_settings/constants.py IS_BATTLEGROUND_YEARS_AVAILABLE
     is_battleground_race_2019 = models.BooleanField(default=False, null=False)
     is_battleground_race_2020 = models.BooleanField(default=False, null=False)
@@ -257,14 +258,14 @@ class Politician(models.Model):
     politician_email2 = models.CharField(max_length=255, null=True, unique=False)
     politician_email3 = models.CharField(max_length=255, null=True, unique=False)
     twitter_name = models.CharField(
-        verbose_name="candidate plain text name from twitter", max_length=255, null=True, blank=True)
+        verbose_name="politician plain text name from twitter", max_length=255, null=True, blank=True)
     twitter_location = models.CharField(
-        verbose_name="candidate location from twitter", max_length=255, null=True, blank=True)
+        verbose_name="politician location from twitter", max_length=255, null=True, blank=True)
     twitter_followers_count = models.IntegerField(
         verbose_name="number of twitter followers", null=False, blank=True, default=0)
     # This is the master image cached on We Vote servers. Note that we do not keep the original image URL from Twitter.
     twitter_profile_image_url_https = models.TextField(
-        verbose_name='locally cached url of candidate profile image from twitter', blank=True, null=True)
+        verbose_name='locally cached url of politician profile image from twitter', blank=True, null=True)
     twitter_profile_background_image_url_https = models.TextField(
         verbose_name='tile-able background from twitter', blank=True, null=True)
     twitter_profile_banner_url_https = models.TextField(

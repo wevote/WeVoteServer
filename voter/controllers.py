@@ -4492,6 +4492,7 @@ def refresh_voter_primary_email_cached_information_by_voter_we_vote_id(voter_we_
 
 def voter_save_photo_from_file_reader(
         voter_we_vote_id='',
+        voter_photo_binary_file=None,
         voter_photo_from_file_reader=None):
     image_data_found = False
     python_image_library_image = None
@@ -4508,7 +4509,7 @@ def voter_save_photo_from_file_reader(
         }
         return results
 
-    if not positive_value_exists(voter_photo_from_file_reader):
+    if not positive_value_exists(voter_photo_from_file_reader) and not positive_value_exists(voter_photo_binary_file):
         status += "MISSING_VOTER_PHOTO_FROM_FILE_READER "
         results = {
             'status': status,
@@ -4517,12 +4518,20 @@ def voter_save_photo_from_file_reader(
         }
         return results
 
-    img_dict = re.match("data:(?P<type>.*?);(?P<encoding>.*?),(?P<data>.*)",
-                        voter_photo_from_file_reader).groupdict()
-    if img_dict['encoding'] == 'base64':
+    if not voter_photo_binary_file:
         try:
-            base64_data = img_dict['data']
-            byte_data = base64.b64decode(base64_data)
+            img_dict = re.match("data:(?P<type>.*?);(?P<encoding>.*?),(?P<data>.*)",
+                                voter_photo_from_file_reader).groupdict()
+            if img_dict['encoding'] == 'base64':
+                voter_photo_binary_file = img_dict['data']
+            else:
+                status += "INCOMING_VOTER_PHOTO_LARGE-BASE64_NOT_FOUND "
+        except Exception as e:
+            status += "PROBLEM_EXTRACTING_BINARY_DATA_FROM_INCOMING_VOTER_DATA: {error}".format(error=e)
+
+    if voter_photo_binary_file:
+        try:
+            byte_data = base64.b64decode(voter_photo_binary_file)
             image_data = BytesIO(byte_data)
             original_image = Image.open(image_data)
             format_to_cache = original_image.format
@@ -4532,10 +4541,7 @@ def voter_save_photo_from_file_reader(
             python_image_library_image.format = format_to_cache
             image_data_found = True
         except Exception as e:
-            status += 'PROBLEM_DECODING_CAMPAIGN_PHOTO_LARGE: {error} [type: {error_type}] ' \
-                      ''.format(error=e, error_type=type(e))
-    else:
-        status += "INCOMING_VOTER_PHOTO_LARGE-BASE64_NOT_FOUND "
+            status += "PROBLEM_EXTRACTING_PHOTO_FROM_BINARY_DATA: {error}".format(error=e)
 
     if image_data_found:
         cache_results = cache_voter_master_uploaded_image(
@@ -4557,6 +4563,7 @@ def voter_save_photo_from_file_reader(
         'we_vote_hosted_voter_photo_original_url': we_vote_hosted_voter_photo_original_url,
     }
     return results
+
 
 def voter_sign_out_for_api(voter_device_id, sign_out_all_devices=False):  # voterSignOut
     """

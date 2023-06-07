@@ -29,6 +29,7 @@ LINKEDIN_IMAGE_NAME = "linkedin_image"
 MAPLIGHT_IMAGE_NAME = "maplight_image"
 MASTER_IMAGE = "master"
 ORGANIZATION_ENDORSEMENTS_IMAGE_NAME = "organization_endorsements_image"
+POLITICIAN_UPLOADED_PROFILE_IMAGE_NAME = "politician_uploaded_profile_image"
 TWITTER_PROFILE_IMAGE_NAME = "twitter_profile_image"
 TWITTER_BACKGROUND_IMAGE_NAME = "twitter_background_image"
 TWITTER_BANNER_IMAGE_NAME = "twitter_banner_image"
@@ -97,6 +98,7 @@ class WeVoteImage(models.Model):
         verbose_name='profile image from linkedin', blank=True, null=True)
     photo_url_from_ctcl = models.TextField(blank=True, null=True)  # URL provided by CTCL stored on other server
     photo_url_from_vote_usa = models.TextField(blank=True, null=True)  # URL from Vote USA: stored on other server
+    politician_uploaded_profile_image_url_https = models.TextField(blank=True, null=True)
     voter_uploaded_profile_image_url_https = models.TextField(blank=True, null=True)
     wikipedia_profile_image_url = models.TextField(
         verbose_name='profile image from wikipedia', blank=True, null=True)
@@ -124,6 +126,7 @@ class WeVoteImage(models.Model):
     kind_of_image_linkedin_profile = models.BooleanField(verbose_name="image is linkedin", default=False)
     kind_of_image_maplight = models.BooleanField(verbose_name="image is maplight", default=False)
     kind_of_image_other_source = models.BooleanField(verbose_name="image is from other sources", default=False)
+    kind_of_image_politician_uploaded_profile = models.BooleanField(default=False)
     kind_of_image_twitter_background = models.BooleanField(verbose_name="image is twitter background", default=False)
     kind_of_image_twitter_banner = models.BooleanField(verbose_name="image is twitter banner", default=False)
     kind_of_image_twitter_profile = models.BooleanField(verbose_name="image is twitter profile", default=False)
@@ -142,20 +145,22 @@ class WeVoteImage(models.Model):
     def display_kind_of_image(self):
         if self.kind_of_image_campaignx_photo:
             return "campaignx_photo"
-        if self.kind_of_image_chosen_favicon:
+        elif self.kind_of_image_chosen_favicon:
             return "chosen_favicon"
-        if self.kind_of_image_chosen_logo:
+        elif self.kind_of_image_chosen_logo:
             return "chosen_logo"
-        if self.kind_of_image_chosen_social_share_master:
+        elif self.kind_of_image_chosen_social_share_master:
             return "chosen_social_share_master"
+        elif self.kind_of_image_ctcl_profile:
+            return "ctcl_profile"
         elif self.kind_of_image_facebook_profile:
             return "facebook_profile"
         elif self.kind_of_image_facebook_background:
             return "facebook_background"
         elif self.kind_of_image_original:
             return "original"
-        if self.kind_of_image_ctcl_profile:
-            return "ctcl_profile"
+        elif self.kind_of_image_politician_uploaded_profile:
+            return "politician_uploaded_profile"
         elif self.kind_of_image_twitter_profile:
             return "twitter_profile"
         elif self.kind_of_image_twitter_background:
@@ -164,7 +169,7 @@ class WeVoteImage(models.Model):
             return "twitter_banner"
         elif self.kind_of_image_vote_usa_profile:
             return "vote_usa_profile"
-        if self.kind_of_image_voter_uploaded_profile:
+        elif self.kind_of_image_voter_uploaded_profile:
             return "voter_uploaded_profile"
         return ""
 
@@ -208,6 +213,7 @@ class WeVoteImageManager(models.Manager):
             kind_of_image_medium=False,
             kind_of_image_original=False,
             kind_of_image_other_source=False,
+            kind_of_image_politician_uploaded_profile=False,
             kind_of_image_tiny=False,
             kind_of_image_twitter_background=False,
             kind_of_image_twitter_banner=False,
@@ -244,6 +250,7 @@ class WeVoteImageManager(models.Manager):
         :param kind_of_image_medium:
         :param kind_of_image_original:
         :param kind_of_image_other_source:
+        :param kind_of_image_politician_uploaded_profile:
         :param kind_of_image_tiny:
         :param kind_of_image_twitter_background:
         :param kind_of_image_twitter_banner:
@@ -283,6 +290,7 @@ class WeVoteImageManager(models.Manager):
                 kind_of_image_medium=kind_of_image_medium,
                 kind_of_image_original=kind_of_image_original,
                 kind_of_image_other_source=kind_of_image_other_source,
+                kind_of_image_politician_uploaded_profile=kind_of_image_politician_uploaded_profile,
                 kind_of_image_tiny=kind_of_image_tiny,
                 kind_of_image_twitter_background=kind_of_image_twitter_background,
                 kind_of_image_twitter_banner=kind_of_image_twitter_banner,
@@ -852,6 +860,45 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
+    def save_we_vote_image_politician_uploaded_profile_info(
+            self,
+            we_vote_image=None,
+            image_width='',
+            image_height='',
+            image_url_https='',
+            same_day_image_version=0,
+            image_url_valid=False):
+        """
+        Save politician_uploaded_profile information to WeVoteImage
+        :param we_vote_image:
+        :param image_width:
+        :param image_height:
+        :param image_url_https:
+        :param same_day_image_version:
+        :param image_url_valid:
+        :return:
+        """
+        try:
+            we_vote_image.image_width = image_width
+            we_vote_image.image_height = image_height
+            we_vote_image.source_image_still_valid = image_url_valid
+            we_vote_image.same_day_image_version = same_day_image_version
+            we_vote_image.politician_uploaded_profile_image_url_https = image_url_https
+            we_vote_image.save()
+            success = True
+            status = "SAVED_WE_VOTE_IMAGE_POLITICIAN_UPLOADED_PROFILE_INFO "
+        except Exception as e:
+            status = "UNABLE_TO_SAVE_WE_VOTE_IMAGE_POLITICIAN_UPLOADED_PROFILE_INFO " + str(e) + ' '
+            success = False
+            handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
+
+        results = {
+            'status':           status,
+            'success':          success,
+            'we_vote_image':    we_vote_image,
+        }
+        return results
+
     def save_we_vote_image_twitter_info(self, we_vote_image, twitter_id, image_width, image_height,
                                         twitter_image_url_https, same_day_image_version, kind_of_image_twitter_profile,
                                         kind_of_image_twitter_background, kind_of_image_twitter_banner,
@@ -952,6 +999,7 @@ class WeVoteImageManager(models.Manager):
             kind_of_image_linkedin_profile=False,
             kind_of_image_maplight=False,
             kind_of_image_other_source=False,
+            kind_of_image_politician_uploaded_profile=False,
             kind_of_image_twitter_background=False,
             kind_of_image_twitter_banner=False,
             kind_of_image_twitter_profile=False,
@@ -985,6 +1033,7 @@ class WeVoteImageManager(models.Manager):
         :param kind_of_image_twitter_background:
         :param kind_of_image_twitter_banner:
         :param kind_of_image_twitter_profile:
+        :param kind_of_image_politician_uploaded_profile:
         :param kind_of_image_vote_smart:
         :param kind_of_image_vote_usa_profile:
         :param kind_of_image_voter_uploaded_profile:
@@ -1015,6 +1064,7 @@ class WeVoteImageManager(models.Manager):
                 kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
                 kind_of_image_maplight=kind_of_image_maplight,
                 kind_of_image_other_source=kind_of_image_other_source,
+                kind_of_image_politician_uploaded_profile=kind_of_image_politician_uploaded_profile,
                 kind_of_image_twitter_profile=kind_of_image_twitter_profile,
                 kind_of_image_twitter_background=kind_of_image_twitter_background,
                 kind_of_image_twitter_banner=kind_of_image_twitter_banner,
@@ -1054,6 +1104,9 @@ class WeVoteImageManager(models.Manager):
                 we_vote_image_list = we_vote_image_list.exclude(maplight_image_url_https=image_url_https)
             if kind_of_image_other_source:
                 we_vote_image_list = we_vote_image_list.exclude(other_source_image_url=image_url_https)
+            if kind_of_image_politician_uploaded_profile:
+                we_vote_image_list = we_vote_image_list.exclude(
+                    politician_uploaded_profile_image_url_https=image_url_https)
             if kind_of_image_twitter_profile:
                 we_vote_image_list = we_vote_image_list.exclude(twitter_profile_image_url_https=image_url_https)
             if kind_of_image_twitter_background:
@@ -1315,6 +1368,7 @@ class WeVoteImageManager(models.Manager):
             other_source_image_url=None,
             photo_url_from_ctcl=None,
             photo_url_from_vote_usa=None,
+            politician_uploaded_profile_image_url_https=None,
             politician_we_vote_id=None,
             representative_we_vote_id=None,
             twitter_profile_background_image_url_https=None,
@@ -1346,6 +1400,7 @@ class WeVoteImageManager(models.Manager):
         :param other_source_image_url:
         :param photo_url_from_ctcl:
         :param photo_url_from_vote_usa:
+        :param politician_uploaded_profile_image_url_https:
         :param politician_we_vote_id:
         :param representative_we_vote_id:
         :param twitter_profile_background_image_url_https:
@@ -1394,6 +1449,7 @@ class WeVoteImageManager(models.Manager):
                 other_source_image_url__iexact=other_source_image_url,
                 photo_url_from_ctcl=photo_url_from_ctcl,
                 photo_url_from_vote_usa=photo_url_from_vote_usa,
+                politician_uploaded_profile_image_url_https=politician_uploaded_profile_image_url_https,
                 politician_we_vote_id__iexact=politician_we_vote_id,
                 representative_we_vote_id__iexact=representative_we_vote_id,
                 twitter_profile_background_image_url_https__iexact=twitter_profile_background_image_url_https,
@@ -1482,6 +1538,7 @@ class WeVoteImageManager(models.Manager):
             other_source_image_url=None,
             photo_url_from_ctcl=None,
             photo_url_from_vote_usa=None,
+            politician_uploaded_profile_image_url_https=None,
             politician_we_vote_id=None,
             representative_we_vote_id=None,
             twitter_profile_background_image_url_https=None,
@@ -1508,6 +1565,7 @@ class WeVoteImageManager(models.Manager):
         :param other_source_image_url:
         :param photo_url_from_ctcl:
         :param photo_url_from_vote_usa:
+        :param politician_uploaded_profile_image_url_https:
         :param politician_we_vote_id:
         :param representative_we_vote_id:
         :param twitter_profile_background_image_url_https:
@@ -1538,6 +1596,7 @@ class WeVoteImageManager(models.Manager):
                 other_source_image_url__iexact=other_source_image_url,
                 photo_url_from_ctcl__iexact=photo_url_from_ctcl,
                 photo_url_from_vote_usa__iexact=photo_url_from_vote_usa,
+                politician_uploaded_profile_image_url_https=politician_uploaded_profile_image_url_https,
                 politician_we_vote_id__iexact=politician_we_vote_id,
                 representative_we_vote_id__iexact=representative_we_vote_id,
                 twitter_profile_background_image_url_https__iexact=twitter_profile_background_image_url_https,
@@ -1579,10 +1638,12 @@ class WeVoteImageManager(models.Manager):
 
     def retrieve_recent_cached_we_vote_image(
             self,
+            campaignx_we_vote_id=None,
             candidate_we_vote_id=None,
             issue_we_vote_id=None,
             is_active_version=True,
             kind_of_image_ballotpedia_profile=False,
+            kind_of_image_campaignx_photo=False,
             kind_of_image_ctcl_profile=False,
             kind_of_image_facebook_profile=False,
             kind_of_image_facebook_background=False,
@@ -1593,6 +1654,7 @@ class WeVoteImageManager(models.Manager):
             kind_of_image_medium=False,
             kind_of_image_original=False,
             kind_of_image_other_source=False,
+            kind_of_image_politician_uploaded_profile=False,
             kind_of_image_tiny=False,
             kind_of_image_twitter_background=False,
             kind_of_image_twitter_banner=False,
@@ -1608,10 +1670,12 @@ class WeVoteImageManager(models.Manager):
     ):
         """
         Retrieve cached we vote image list as per kind of image
+        :param campaignx_we_vote_id:
         :param candidate_we_vote_id:
         :param issue_we_vote_id:
         :param is_active_version:
         :param kind_of_image_ballotpedia_profile:
+        :param kind_of_image_campaignx_photo:
         :param kind_of_image_ctcl_profile:
         :param kind_of_image_facebook_profile:
         :param kind_of_image_facebook_background:
@@ -1622,6 +1686,7 @@ class WeVoteImageManager(models.Manager):
         :param kind_of_image_medium:
         :param kind_of_image_original:
         :param kind_of_image_other_source:
+        :param kind_of_image_politician_uploaded_profile:
         :param kind_of_image_tiny:
         :param kind_of_image_twitter_background:
         :param kind_of_image_twitter_banner:
@@ -1656,10 +1721,12 @@ class WeVoteImageManager(models.Manager):
                     we_vote_image_on_stage = image_query_list[0]
             else:
                 we_vote_image_on_stage = WeVoteImage.objects.get(
+                    campaignx_we_vote_id__iexact=campaignx_we_vote_id,
                     candidate_we_vote_id__iexact=candidate_we_vote_id,
                     is_active_version=is_active_version,
                     issue_we_vote_id__iexact=issue_we_vote_id,
                     kind_of_image_ballotpedia_profile=kind_of_image_ballotpedia_profile,
+                    kind_of_image_campaignx_photo=kind_of_image_campaignx_photo,
                     kind_of_image_ctcl_profile=kind_of_image_ctcl_profile,
                     kind_of_image_facebook_background=kind_of_image_facebook_background,
                     kind_of_image_facebook_profile=kind_of_image_facebook_profile,
@@ -1670,6 +1737,7 @@ class WeVoteImageManager(models.Manager):
                     kind_of_image_medium=kind_of_image_medium,
                     kind_of_image_original=kind_of_image_original,
                     kind_of_image_other_source=kind_of_image_other_source,
+                    kind_of_image_politician_uploaded_profile=kind_of_image_politician_uploaded_profile,
                     kind_of_image_tiny=kind_of_image_tiny,
                     kind_of_image_twitter_background=kind_of_image_twitter_background,
                     kind_of_image_twitter_banner=kind_of_image_twitter_banner,
@@ -1728,6 +1796,7 @@ class WeVoteImageManager(models.Manager):
             kind_of_image_medium=False,
             kind_of_image_original=False,
             kind_of_image_other_source=False,
+            kind_of_image_politician_uploaded_profile=False,
             kind_of_image_tiny=False,
             kind_of_image_twitter_profile=False,
             kind_of_image_twitter_background=False,
@@ -1761,6 +1830,7 @@ class WeVoteImageManager(models.Manager):
         :param kind_of_image_medium:
         :param kind_of_image_original:
         :param kind_of_image_other_source:
+        :param kind_of_image_politician_uploaded_profile:
         :param kind_of_image_tiny:
         :param kind_of_image_twitter_profile:
         :param kind_of_image_twitter_background:
@@ -1798,6 +1868,7 @@ class WeVoteImageManager(models.Manager):
                 kind_of_image_maplight=kind_of_image_maplight,
                 kind_of_image_original=kind_of_image_original,
                 kind_of_image_other_source=kind_of_image_other_source,
+                kind_of_image_politician_uploaded_profile=kind_of_image_politician_uploaded_profile,
                 kind_of_image_twitter_profile=kind_of_image_twitter_profile,
                 kind_of_image_twitter_background=kind_of_image_twitter_background,
                 kind_of_image_twitter_banner=kind_of_image_twitter_banner,
