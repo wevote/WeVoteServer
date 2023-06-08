@@ -1,7 +1,43 @@
 # voter_guide/views_admin.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
+import json
+from datetime import datetime, timedelta
 
+import pytz
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.messages import get_messages
+from django.db.models import Q
+from django.http import HttpResponse
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from django.urls import reverse
+
+from admin_tools.views import redirect_to_sign_in_page
+from candidate.controllers import find_candidate_endorsements_on_one_candidate_web_page, \
+    find_organization_endorsements_of_candidates_on_one_web_page, \
+    retrieve_candidate_list_for_all_upcoming_elections
+from candidate.models import CandidateManager, CandidateListManager
+from config.base import get_environment_variable
+from election.controllers import retrieve_this_and_next_years_election_id_list
+from election.models import ElectionManager
+from import_export_batches.models import BATCH_HEADER_MAP_FOR_POSITIONS, BatchManager, POSITION
+from import_export_twitter.controllers import refresh_twitter_organization_details
+from issue.models import IssueListManager
+from measure.controllers import add_measure_name_alternatives_to_measure_list_light, \
+    retrieve_measure_list_for_all_upcoming_elections
+from office.models import ContestOfficeManager
+from organization.controllers import retrieve_organization_list_for_all_upcoming_elections
+from organization.models import GROUP, OrganizationListManager, OrganizationManager, ORGANIZATION_TYPE_MAP
+from organization.views_admin import organization_edit_process_view
+from position.models import PositionEntered, PositionListManager
+from twitter.models import TwitterUserManager
+from voter.models import voter_has_authority, VoterManager
+from wevote_functions.functions import convert_to_int, convert_date_to_we_vote_date_string, \
+    extract_twitter_handle_from_text_string, positive_value_exists, \
+    STATE_CODE_MAP, get_voter_device_id, get_voter_api_device_id
+from wevote_settings.models import RemoteRequestHistoryManager, SUGGESTED_VOTER_GUIDE_FROM_PRIOR
 from .controllers import augment_with_voter_guide_possibility_position_data, \
     convert_candidate_endorsement_list_light_to_possible_endorsement_list, \
     convert_organization_endorsement_list_light_to_possible_endorsement_list, \
@@ -13,44 +49,9 @@ from .controllers import augment_with_voter_guide_possibility_position_data, \
     match_endorsement_list_with_organizations_in_database, modify_one_row_in_possible_endorsement_list, \
     refresh_existing_voter_guides, take_in_possible_endorsement_list_from_form, voter_guides_import_from_master_server
 from .controllers_possibility import candidates_found_on_url, organizations_found_on_url
-from .models import INDIVIDUAL, VoterGuide, VoterGuideListManager, VoterGuideManager, VoterGuidePossibility, \
+from .models import INDIVIDUAL, VoterGuide, VoterGuideManager, VoterGuidePossibility, \
     VoterGuidePossibilityManager, VoterGuidePossibilityPosition, \
     ORGANIZATION_ENDORSING_CANDIDATES, ENDORSEMENTS_FOR_CANDIDATE, UNKNOWN_TYPE
-from admin_tools.views import redirect_to_sign_in_page
-from candidate.controllers import find_candidate_endorsements_on_one_candidate_web_page, \
-    find_organization_endorsements_of_candidates_on_one_web_page, \
-    retrieve_candidate_list_for_all_upcoming_elections
-from candidate.models import CandidateManager, CandidateListManager
-from config.base import get_environment_variable
-from datetime import date, datetime, timedelta, time
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.urls import reverse
-from django.contrib.messages import get_messages
-from django.http import HttpResponseRedirect
-from django.db.models import Q
-from django.shortcuts import render
-from election.controllers import retrieve_this_and_next_years_election_id_list
-from election.models import Election, ElectionManager, TIME_SPAN_LIST
-from import_export_batches.models import BATCH_HEADER_MAP_FOR_POSITIONS, BatchManager, POSITION
-from import_export_twitter.controllers import refresh_twitter_organization_details, scrape_social_media_from_one_site
-from issue.models import IssueListManager
-from measure.controllers import add_measure_name_alternatives_to_measure_list_light, \
-    retrieve_measure_list_for_all_upcoming_elections
-from office.models import ContestOfficeManager
-from organization.controllers import retrieve_organization_list_for_all_upcoming_elections
-from organization.models import GROUP, Organization, OrganizationListManager, OrganizationManager, ORGANIZATION_TYPE_MAP
-from organization.views_admin import organization_edit_process_view
-from position.models import PositionEntered, PositionForFriends, PositionListManager
-from twitter.models import TwitterUserManager
-from voter.models import voter_has_authority, VoterManager, fetch_voter_we_vote_id_from_voter_device_link
-from wevote_functions.functions import convert_to_int, convert_date_to_we_vote_date_string, \
-    extract_facebook_username_from_text_string, \
-    extract_twitter_handle_from_text_string, extract_website_from_url, positive_value_exists, \
-    STATE_CODE_MAP, get_voter_device_id, get_voter_api_device_id
-from wevote_settings.models import RemoteRequestHistoryManager, SUGGESTED_VOTER_GUIDE_FROM_PRIOR
-from django.http import HttpResponse
-import json
 
 VOTER_GUIDES_SYNC_URL = get_environment_variable("VOTER_GUIDES_SYNC_URL")  # voterGuidesSyncOut
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
@@ -1351,6 +1352,8 @@ def voter_guide_create_process_view(request):
                         voter_guide_possibility_position_has_changes = True
                         setattr(voter_guide_possibility_position, key, value)
                 if voter_guide_possibility_position_has_changes:
+                    timezone = pytz.timezone("America/Los_Angeles")
+                    voter_guide_possibility_position.date_updated = timezone.localize(datetime.now())
                     voter_guide_possibility_position.save()
                     voter_guide_possibility_position_id = voter_guide_possibility_position.id
                     voter_guide_possibility_position_updated = True

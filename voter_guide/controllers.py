@@ -3,7 +3,6 @@
 # -*- coding: UTF-8 -*-
 import copy
 import json
-import time
 from datetime import datetime, timedelta
 from itertools import chain
 from urllib.parse import urlparse
@@ -2119,6 +2118,22 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
     return json_data
 
 
+def clean_up_possible_endorsement_list(possible_endorsement_list):
+    #  remove null value ballot_item_name entries
+    endorse_no_nulls = filter(lambda item: positive_value_exists(item['ballot_item_name']) , possible_endorsement_list)
+    # Sort the list by id in place
+    endorse_no_nulls_sorted = sorted(endorse_no_nulls, key=lambda item: item['possibility_position_id'], reverse=True)
+    # Dedupe, excluding older dupe endorsements
+    prior_names = []
+    results = []
+    for endorse in endorse_no_nulls_sorted:
+        name = endorse['ballot_item_name']
+        if name not in prior_names:
+            results.append(endorse)
+            prior_names.append(name)
+    return results
+
+
 def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibilityPositionsRetrieve
         voter_device_id, voter_guide_possibility_id, voter_guide_possibility_position_id=0, limit_to_this_year=True):
     status = "VOTER_GUIDE_POSSIBILITY_POSITIONS_RETRIEVE "
@@ -2238,6 +2253,9 @@ def voter_guide_possibility_positions_retrieve_for_api(  # voterGuidePossibility
                             one_possible_endorsement['more_info_url_stored'] = position_list[0].more_info_url
             else:
                 pass
+
+    # June 2023, remove older dupe entries and entries with null names -- shouldn't need to do this, but ...
+    possible_endorsement_list = clean_up_possible_endorsement_list(possible_endorsement_list)
 
     status += results['status']
     json_data = {
@@ -2629,6 +2647,8 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
             at_least_one_change = True
 
         if at_least_one_change:
+            timezone = pytz.timezone("America/Los_Angeles")
+            voter_guide_possibility_position.date_updated = timezone.localize(datetime.now())
             voter_guide_possibility_position.save()
     except Exception as e:
         status += 'FAILED_TO_UPDATE_VOTER_GUIDE_POSSIBILITY1 ' \
@@ -2741,6 +2761,8 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
                     at_least_one_change = True
 
                 if at_least_one_change:
+                    timezone = pytz.timezone("America/Los_Angeles")
+                    voter_guide_possibility_position.date_updated = timezone.localize(datetime.now())
                     voter_guide_possibility_position.save()
             except Exception as e:
                 status += 'FAILED_TO_UPDATE_VOTER_GUIDE_POSSIBILITY2 ' \

@@ -2051,6 +2051,8 @@ class VoterGuidePossibilityManager(models.Manager):
                         setattr(voter_guide_possibility_position, key, value)
                 if voter_guide_possibility_position_has_changes and \
                         positive_value_exists(voter_guide_possibility_position.id):
+                    timezone = pytz.timezone("America/Los_Angeles")
+                    voter_guide_possibility_position.date_updated = timezone.localize(datetime.now())
                     voter_guide_possibility_position.save()
                     voter_guide_possibility_position_id = voter_guide_possibility_position.id
                     voter_guide_possibility_position_updated = True
@@ -2089,6 +2091,8 @@ class VoterGuidePossibilityManager(models.Manager):
                     for key, value in updated_values.items():
                         if hasattr(voter_guide_possibility_position, key):
                             setattr(voter_guide_possibility_position, key, value)
+                    timezone = pytz.timezone("America/Los_Angeles")
+                    voter_guide_possibility_position.date_updated = timezone.localize(datetime.now())
                     voter_guide_possibility_position.save()
                     voter_guide_possibility_position_id = voter_guide_possibility_position.id
                     new_voter_guide_possibility_position_created = True
@@ -2650,6 +2654,8 @@ class VoterGuidePossibilityManager(models.Manager):
         for voter_guide_possibility_position in voter_guide_possibility_position_list:
             reset_possibility_position_number += 1
             voter_guide_possibility_position.possibility_position_number = reset_possibility_position_number
+            timezone = pytz.timezone("America/Los_Angeles")
+            voter_guide_possibility_position.date_updated = timezone.localize(datetime.now())
             voter_guide_possibility_position.save()
             must_reset_position_json_position_numbers = True
 
@@ -2945,13 +2951,14 @@ class VoterGuidePossibilityPosition(models.Model):
     # A link to any location with more information about this position
     more_info_url = models.TextField(
         verbose_name='url with more info about this position', blank=True, null=True)
-    # We don't want to work with this possibility any more
+    # We don't want to work with this possibility anymore
     possibility_should_be_ignored = models.BooleanField(default=False,
                                                         verbose_name='Soft delete. Stop analyzing this entry.')
     # Delete existing PositionEntered from database
     position_should_be_removed = models.BooleanField(default=False,
                                                      verbose_name='Delete saved position from PositionEntered.')
-
+    date_created = models.DateTimeField(verbose_name='date created', null=True, auto_now_add=True)
+    date_updated = models.DateTimeField(null=True)
 
 class VoterGuidesGenerated(models.Model):
     google_civic_election_id = models.PositiveIntegerField(null=True, db_index=True)
