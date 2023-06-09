@@ -1300,12 +1300,13 @@ def calculate_sitewide_voter_metrics_for_one_voter(voter_we_vote_id):
 
 def delete_analytics_info_for_voter(voter_to_delete_we_vote_id):
     status = "DELETE_ANALYTICS_ACTION_DATA"
-    success = False
+    success = True
     analytics_action_deleted = 0
     analytics_action_not_deleted = 0
 
     if not positive_value_exists(voter_to_delete_we_vote_id):
         status += "DELETE_ANALYTICS_ACTION-MISSING_FROM_OR_TO_VOTER_ID"
+        success = False
         results = {
             'status':                       status,
             'success':                      success,
@@ -1326,7 +1327,8 @@ def delete_analytics_info_for_voter(voter_to_delete_we_vote_id):
                 analytics_action_deleted += 1
             except Exception as e:
                 analytics_action_not_deleted += 1
-                status += "UNABLE_TO_SAVE_ANALYTICS_ACTION "
+                status += "UNABLE_TO_SAVE_ANALYTICS_ACTION " + str(e) + " "
+                success = False
 
         status += " DELETE_ANALYTICS_ACTION, moved: " + str(analytics_action_deleted) + \
                   ", not moved: " + str(analytics_action_not_deleted) + " "

@@ -2560,12 +2560,13 @@ def voter_update_view(request):  # voterUpdate
                 'voter_deleted':    True,
             }
         else:
-            status += "VOTER_NOT_DELETED: " + results['status'] + " "
+            status += "VOTER_NOT_FULLY_DELETED: " + results['status'] + " "
             json_data = {
                 'status':               status,
                 'success':              True,
                 'voter_not_deleted':    True,
             }
+
         response = HttpResponse(json.dumps(json_data), content_type='application/json')
         return response
 
