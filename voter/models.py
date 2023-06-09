@@ -3753,6 +3753,7 @@ class VoterDeviceLinkManager(models.Manager):
         exception_does_not_exist = False
         exception_multiple_object_returned = False
         status = ""
+        success = True
         voter_device_link_on_stage = VoterDeviceLink()
 
         try:
@@ -3799,9 +3800,12 @@ class VoterDeviceLinkManager(models.Manager):
             error_result = True
             exception_does_not_exist = True
             status += " RETRIEVE_VOTER_DEVICE_LINK-DOES_NOT_EXIST "
+        except Exception as e:
+            status += " RETRIEVE_VOTER_DEVICE_LINK-EXCEPTION: " + str(e) + " "
+            success = False
 
         results = {
-            'success':                      True if not error_result else False,
+            'success':                      success,
             'status':                       status,
             'error_result':                 error_result,
             'DoesNotExist':                 exception_does_not_exist,

@@ -324,12 +324,13 @@ def augment_emails_for_voter_with_we_vote_data(voter_we_vote_id=''):
 
 def delete_email_address_entries_for_voter(voter_to_delete_we_vote_id, voter_to_delete):
     status = "DELETE_EMAIL_ADDRESSES "
-    success = False
+    success = True
     email_addresses_deleted = 0
     email_addresses_not_deleted = 0
 
     if not positive_value_exists(voter_to_delete_we_vote_id):
         status += "DELETE_EMAIL_ADDRESS_ENTRIES_MISSING_FROM_VOTER_WE_VOTE_ID "
+        success = False
         results = {
             'status':                       status,
             'success':                      success,
@@ -352,6 +353,7 @@ def delete_email_address_entries_for_voter(voter_to_delete_we_vote_id, voter_to_
             except Exception as e:
                 email_addresses_not_deleted += 1
                 status += "UNABLE_TO_DELETE_EMAIL_ADDRESS " + str(e) + " "
+                success = False
 
         status += "EMAIL_ADDRESSES-DELETED: " + str(email_addresses_deleted) + \
                   ", NOT_DELETED: " + str(email_addresses_not_deleted) + " "
@@ -367,6 +369,7 @@ def delete_email_address_entries_for_voter(voter_to_delete_we_vote_id, voter_to_
             voter_to_delete.save()
         except Exception as e:
             status += "CANNOT_CLEAR_OUT_VOTER_EMAIL_INFO: " + str(e) + " "
+            success = False
 
     results = {
         'status':                       status,

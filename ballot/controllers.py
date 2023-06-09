@@ -979,6 +979,10 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
     voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
     if not voter_device_link_results['voter_device_link_found']:
         status += "VALID_VOTER_DEVICE_ID_MISSING "
+        # If the retrieve had no errors, a voter_device_id was passed in, but voter_device_link_found is False,
+        # tell the WebApp the voter_device_id might need to be replaced.
+        voter_device_id_not_valid = \
+            positive_value_exists(voter_device_id) and positive_value_exists(voter_device_link_results['success'])
         error_json_data = {
             'status':                               status,
             'success':                              False,
@@ -1002,6 +1006,7 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
             'substituted_address_zip':              '',
             'text_for_map_search':                  '',
             'voter_device_id':                      voter_device_id,
+            'voter_device_id_not_valid':            voter_device_id_not_valid,
         }
         return error_json_data
 

@@ -25,12 +25,13 @@ def validate_sms_phone_number(sms_phone_number, region="US"):
 
 def delete_sms_phone_number_entries_for_voter(voter_to_delete_we_vote_id, voter_to_delete):
     status = "DELETE_SMS_PHONE_NUMBERS "
-    success = False
+    success = True
     sms_phone_numbers_deleted = 0
     sms_phone_numbers_not_deleted = 0
 
     if not positive_value_exists(voter_to_delete_we_vote_id):
         status += "DELETE_SMS_PHONE_NUMBER_ENTRIES_MISSING_FROM_VOTER_WE_VOTE_ID "
+        success = False
         results = {
             'status':                           status,
             'success':                          success,
@@ -53,6 +54,7 @@ def delete_sms_phone_number_entries_for_voter(voter_to_delete_we_vote_id, voter_
             except Exception as e:
                 sms_phone_numbers_not_deleted += 1
                 status += "UNABLE_TO_DELETE_SMS_PHONE_NUMBER " + str(e) + ' '
+                success = False
 
         status += " MOVE_SMS_PHONE_NUMBERS, moved: " + str(sms_phone_numbers_deleted) + \
                   ", not moved: " + str(sms_phone_numbers_not_deleted) + " "
@@ -68,6 +70,7 @@ def delete_sms_phone_number_entries_for_voter(voter_to_delete_we_vote_id, voter_
             voter_to_delete.save()
         except Exception as e:
             status += "CANNOT_CLEAR_OUT_VOTER_SMS_INFO: " + str(e) + " "
+            success = False
 
     results = {
         'status':                           status,

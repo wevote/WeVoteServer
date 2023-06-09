@@ -145,21 +145,20 @@ def add_state_code_for_display_to_voter_list(voter_we_vote_id_list=None):
 def delete_all_voter_information_permanently(voter_to_delete=None, user=None):  # voterDeleteAccount
     success = True
     status = ""
-    voter_to_delete_id = 0
-    voter_to_delete_we_vote_id = ''
+
+    error_results = {
+        'status':   status,
+        'success':  success,
+    }
 
     try:
         voter_to_delete_id = voter_to_delete.id
         voter_to_delete_we_vote_id = voter_to_delete.we_vote_id
     except Exception as e:
-        status += "PROBLEM_WITH_INCOMING_VOTER: " + str(e) + " "
-
-    log = "VOTER PERMANENTLY DELETED: " + str(voter_to_delete_id) + " " + voter_to_delete_we_vote_id + " " + \
-          voter_to_delete.first_name + " " + voter_to_delete.last_name + " " + voter_to_delete.email + \
-          " " + str(voter_to_delete.date_joined)[:16]
-    if user:
-        log += ', deleted by ' + user.first_name + " " + user.last_name + " " + user.we_vote_id
-    logger.info(log)
+        status += "PROBLEM_WITH_INCOMING_VOTER_CANNOT_PROCEED_WITH_DELETE: " + str(e) + " "
+        error_results['status'] = status
+        error_results['success'] = False
+        return error_results
 
     voter_device_link_manager = VoterDeviceLinkManager()
 
@@ -181,7 +180,7 @@ def delete_all_voter_information_permanently(voter_to_delete=None, user=None):  
                 voter_to_delete.save()
                 # All positions should have already been moved with move_positions_to_another_voter
             except Exception as e:
-                status += "FAILED_TO_REMOVE_LINKED_ORGANIZATION_WE_VOTE_ID-VOTER_TO_DELETE " + str(e) + " "
+                status += "FAILED_TO_REMOVE_LINKED_ORGANIZATION_WE_VOTE_ID-VOTER_TO_DELETE: " + str(e) + " "
 
     # Delete the apple_user entries
     from apple.controllers import delete_apple_user_entries_for_voter
@@ -315,6 +314,18 @@ def delete_all_voter_information_permanently(voter_to_delete=None, user=None):  
         status += update_link_results['status']
         status += "VOTER_DEVICE_LINK_NOT_UPDATED "
 
+    log = ''
+    try:
+        log += "VOTER_PERMANENTLY_DELETED: " + str(voter_to_delete_id) + " " + voter_to_delete_we_vote_id + " " + \
+              voter_to_delete.first_name + " " + voter_to_delete.last_name + " " + voter_to_delete.email + \
+              " " + str(voter_to_delete.date_joined)[:16]
+        if user:
+            log += ', deleted by ' + user.first_name + " " + user.last_name + " " + user.we_vote_id + " "
+    except Exception as e:
+        log += 'LOGGING_PROBLEM ' + str(e) + " "
+    log += 'STATUS: ' + status + ' '
+    logger.info(log)
+
     results = {
         'status':                       status,
         'success':                      success,
@@ -383,7 +394,7 @@ def voter_delete_account_for_api(  # voterDeleteAccount
     #     }
     #     return error_results
 
-    results = delete_all_voter_information_permanently(voter_to_delete=voter, user=voter)
+    results = delete_all_voter_information_permanently(voter_to_delete=voter)
 
     return results
 
@@ -444,10 +455,11 @@ def delete_facebook_info_for_voter(voter_to_delete):
 
 def delete_twitter_info_for_voter(voter_to_delete):
     status = "DELETE_TWITTER_INFO "
-    success = False
+    success = True
 
     if not hasattr(voter_to_delete, "we_vote_id") or not positive_value_exists(voter_to_delete.we_vote_id):
         status += "DELETE_TWITTER_INFO_MISSING_VOTER_WE_VOTE_ID "
+        success = False
         results = {
             'status': status,
             'success': success,
@@ -468,6 +480,7 @@ def delete_twitter_info_for_voter(voter_to_delete):
         except Exception as e:
             # Fail silently
             status += "FROM_VOTER_TWITTER_LINK_NOT_DELETED: " + str(e) + " "
+            success = False
 
     try:
         voter_to_delete.twitter_id = None
@@ -478,6 +491,7 @@ def delete_twitter_info_for_voter(voter_to_delete):
         status += "FROM_VOTER_TWITTER_DATA_REMOVED "
     except Exception as e:
         status += "FROM_VOTER_TWITTER_DATA_NOT_REMOVED: " + str(e) + " "
+        success = False
 
     results = {
         'status': status,
@@ -489,12 +503,13 @@ def delete_twitter_info_for_voter(voter_to_delete):
 
 def delete_voter_plan_for_voter(voter_to_delete):
     status = "DELETE_VOTER_PLAN "
-    success = False
+    success = True
     entries_deleted = 0
     entries_not_deleted = 0
 
     if not hasattr(voter_to_delete, "we_vote_id") or not positive_value_exists(voter_to_delete.we_vote_id):
         status += "DELETE_VOTER_PLAN_MISSING_VOTER_WE_VOTE_ID "
+        success = False
         results = {
             'status':               status,
             'success':              success,
@@ -512,6 +527,7 @@ def delete_voter_plan_for_voter(voter_to_delete):
             voter_to_delete_plan.delete()
         except Exception as e:
             status += "FAILED_DELETE_VOTER_PLAN: " + str(e) + " "
+            success = False
 
     results = {
         'status':               status,
@@ -524,10 +540,11 @@ def delete_voter_plan_for_voter(voter_to_delete):
 
 def delete_voter_table_information(voter_to_delete):
     status = "DELETE_VOTER_TABLE_INFO "
-    success = False
+    success = True
 
     if not hasattr(voter_to_delete, "we_vote_id") or not positive_value_exists(voter_to_delete.we_vote_id):
         status += "DELETE_VOTER_INFO_MISSING_VOTER_WE_VOTE_ID "
+        success = False
         results = {
             'status':           status,
             'success':          success,
@@ -540,6 +557,7 @@ def delete_voter_table_information(voter_to_delete):
         status += "VOTER_DELETED "
     except Exception as e:
         status += "VOTER_MERGE_SAVE_FAILED " + str(e) + " "
+        success = False
 
     results = {
         'status':           status,
