@@ -413,7 +413,7 @@ def candidate_list_view(request):
         candidate_ultimate_count = candidate_query.count()
         if positive_value_exists(candidate_ultimate_count):
             populate_candidate_ultimate_election_date_status += \
-                "SCRIPT: {entries_to_process} entries to process (populate_candidate_ultimate_election_date) " \
+                "SCRIPT: {entries_to_process:,} entries to process (populate_candidate_ultimate_election_date) " \
                 "".format(entries_to_process=candidate_ultimate_count) + " "
         # Now process
         candidate_bulk_update_list = []
@@ -452,58 +452,104 @@ def candidate_list_view(request):
             messages.add_message(request, messages.INFO, populate_candidate_ultimate_election_date_status)
 
     # We use the contest_office_name and/or district_name some places on WebApp. Update candidates missing this data.
-    populate_contest_office_data = False
+    populate_contest_office_data = True
     number_to_populate = 10  # Normally we can process 1000 at a time
     if populate_contest_office_data and run_scripts:
         populate_contest_office_data_status = ''
         candidate_query = CandidateCampaign.objects.all()
-        # Restrict to candidates who don't have contest_office_name and who are in the future
+        # Restrict to candidates who are in the future
         year_list = [2023, 2024]
         candidate_query = candidate_query.filter(
             Q(candidate_ultimate_election_date__gt=20230601) |
             Q(candidate_year__in=year_list)
         )
+        # Restrict to entries with BOTH contest_office_name and district_name empty
+        candidate_query = candidate_query.filter(
+            Q(contest_office_name__isnull=True) |
+            Q(contest_office_name='')
+        )
+        candidate_query = candidate_query.filter(
+            Q(district_name__isnull=True) |
+            Q(district_name='')
+        )
         candidate_ultimate_count = candidate_query.count()
-        # if positive_value_exists(candidate_ultimate_count):
-        #     populate_candidate_ultimate_election_date_status += \
-        #         "SCRIPT: {entries_to_process} entries to process (populate_candidate_ultimate_election_date) " \
-        #         "".format(entries_to_process=candidate_ultimate_count) + " "
+        if positive_value_exists(candidate_ultimate_count):
+            populate_contest_office_data_status += \
+                "SCRIPT: {entries_to_process:,} entries to process (populate_contest_office_data). " \
+                "".format(entries_to_process=candidate_ultimate_count) + " "
         # Now process
         candidate_bulk_update_list = []
         candidate_list = candidate_query[:number_to_populate]
         candidates_updated = 0
         candidates_not_updated = 0
-        elections_dict = {}
-        most_likely_contest_office_dict = {}
+        candidate_to_office_link_list = []
+        candidate_we_vote_id_list = []
+        contest_office_by_we_vote_id_dict = {}
+        contest_office_list = []
+        contest_office_we_vote_id_list = []
+        office_by_candidate_we_vote_id_dict = {}
         from candidate.controllers import augment_candidate_with_contest_office_data
-        # Get all
         for candidate in candidate_list:
             # Collect candidate_we_vote_id_list, so we can retrieve linked offices first
-            # CandidateToOfficeLink
-            pass
+            if candidate.we_vote_id not in candidate_we_vote_id_list:
+                candidate_we_vote_id_list.append(candidate.we_vote_id)
+
+        # Retrieve all CandidateToOfficeLink objects for these candidates
+        results = candidate_list_manager.retrieve_candidate_to_office_link_list(
+            candidate_we_vote_id_list=candidate_we_vote_id_list,
+            read_only=True
+        )
+        if results['candidate_to_office_link_list_found']:
+            candidate_to_office_link_list = results['candidate_to_office_link_list']
+
+        for one_link in candidate_to_office_link_list:
+            if positive_value_exists(one_link.contest_office_we_vote_id) \
+                    and one_link.contest_office_we_vote_id not in contest_office_we_vote_id_list:
+                contest_office_we_vote_id_list.append(one_link.contest_office_we_vote_id)
+
+        # Retrieve all the offices for these candidates
+        from office.models import ContestOfficeListManager
+        contest_office_list_manager = ContestOfficeListManager()
+        results = contest_office_list_manager.retrieve_offices(
+            retrieve_from_this_office_we_vote_id_list=contest_office_we_vote_id_list,
+            return_list_of_objects=True,
+            read_only=True)
+        if results['office_list_found']:
+            contest_office_list = results['office_list_objects']
+            for one_office in contest_office_list:
+                if hasattr(one_office, 'district_name'):  # Make sure legit office object
+                    contest_office_by_we_vote_id_dict[one_office.we_vote_id] = one_office
+
+        # Take CandidateToOfficeLink entries for each candidate, and figure out the contest_office object
+        #  furthest in the future. We will use this to find the district_name and contest_office_name
+        for office in contest_office_list:
+            for candidate in candidate_list:
+                for one_link in candidate_to_office_link_list:
+                    if candidate.we_vote_id == one_link.candidate_we_vote_id:
+                        if candidate.we_vote_id in office_by_candidate_we_vote_id_dict:
+                            # If this office is further in the future, replace the earlier version
+                            if office.election_date_as_integer > \
+                                    office_by_candidate_we_vote_id_dict[candidate.we_vote_id].election_date_as_integer:
+                                office_by_candidate_we_vote_id_dict[candidate.we_vote_id] = office
+                        else:
+                            office_by_candidate_we_vote_id_dict[candidate.we_vote_id] = office
 
         for candidate in candidate_list:
-            if not positive_value_exists(candidate.contest_office_name):
-                if candidate.we_vote_id in most_likely_contest_office_dict:
-                    contest_office = most_likely_contest_office_dict[candidate.we_vote_id]
-                    candidate = augment_candidate_with_contest_office_data(candidate)
-                    candidate_bulk_update_list.append(candidate)
-            # results = augment_candidate_with_ultimate_election_date(
-            #     candidate=one_candidate,
-            #     elections_dict=elections_dict)
-            # if results['success']:
-            #     elections_dict = results['elections_dict']
-            # if results['values_changed']:
-            #     candidate_bulk_update_list.append(results['candidate'])
-            #     candidates_updated += 1
-            # else:
-            #     candidates_not_updated += 1
+            if candidate.we_vote_id in office_by_candidate_we_vote_id_dict:
+                contest_office = office_by_candidate_we_vote_id_dict[candidate.we_vote_id]
+                if hasattr(contest_office, 'district_name'):  # Make sure legit office object
+                    results = augment_candidate_with_contest_office_data(
+                        candidate=candidate,
+                        office=contest_office)
+                    if results['values_changed']:
+                        candidate_bulk_update_list.append(results['candidate'])
+                        candidates_updated += 1
+                    else:
+                        candidates_not_updated += 1
         if len(candidate_bulk_update_list) > 0:
             try:
                 CandidateCampaign.objects.bulk_update(
-                    candidate_bulk_update_list,
-                    ['contest_office_name',
-                     'district_name'])
+                    candidate_bulk_update_list, ['contest_office_name', 'district_name'])
             except Exception as e:
                 messages.add_message(request, messages.ERROR, "FAILED_BULK_UPDATE: " + str(e))
 
