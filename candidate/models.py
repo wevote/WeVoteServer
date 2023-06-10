@@ -1821,6 +1821,7 @@ class CandidateListManager(models.Manager):
                 'success':                          success,
                 'status':                           status,
                 'candidate_to_office_link_list':    link_list,
+                'candidate_to_office_link_list_found': False,
             }
             return results
 
@@ -1851,6 +1852,7 @@ class CandidateListManager(models.Manager):
             'success':                          success,
             'status':                           status,
             'candidate_to_office_link_list':    link_list,
+            'candidate_to_office_link_list_found': len(link_list) > 0,
         }
         return results
 

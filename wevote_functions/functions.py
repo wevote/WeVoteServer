@@ -828,10 +828,16 @@ def convert_we_vote_date_string_to_date(we_vote_date_string):
 
 
 def convert_we_vote_date_string_to_date_as_integer(we_vote_date_string):
-    date_as_string = convert_to_str(we_vote_date_string)
-    date_as_string = date_as_string.replace("-", "")
-    date_as_integer = convert_to_int(date_as_string)
-    return date_as_integer
+    if positive_value_exists(we_vote_date_string):
+        try:
+            date_as_string = convert_to_str(we_vote_date_string)
+            date_as_string = date_as_string.replace("-", "")
+            date_as_integer = convert_to_int(date_as_string)
+            return date_as_integer
+        except Exception as e:
+            return 0
+    else:
+        return 0
 
 
 def digit_count(number):

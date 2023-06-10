@@ -577,10 +577,75 @@ def office_list_view(request):
         results = election_manager.retrieve_upcoming_elections()
         election_list = results['election_list']
 
+    add_election_date_as_integer_to_all_offices = True
+    number_to_update = 10000
+    if add_election_date_as_integer_to_all_offices:
+        add_election_date_as_integer_to_all_offices_status = ''
+        # We need all the elections in the election_list
+        google_civic_election_id_list = []
+        election_day_text_by_election_id_dict = {}
+        for one_election in election_list:
+            google_civic_election_id_list.append(one_election.google_civic_election_id)
+            if positive_value_exists(one_election.election_day_text) \
+                    and positive_value_exists(one_election.google_civic_election_id):
+                election_day_text_by_election_id_dict[one_election.google_civic_election_id] = \
+                    convert_we_vote_date_string_to_date_as_integer(one_election.election_day_text)
+        # Now get ContestOffice objects we want to update
+        office_queryset = ContestOffice.objects.all()
+        office_queryset = office_queryset.filter(
+            Q(election_date_as_integer__isnull=True) |
+            Q(election_date_as_integer=0)
+        )
+        if positive_value_exists(google_civic_election_id):
+            office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
+        elif positive_value_exists(show_all_elections):
+            # Exclude offices without a google_civic_election_id
+            office_queryset = office_queryset.exclude(google_civic_election_id='')
+        else:
+            # Limit this search to upcoming_elections only
+            office_queryset = office_queryset.filter(google_civic_election_id__in=google_civic_election_id_list)
+        total_to_update = office_queryset.count()
+        total_to_update_after = total_to_update - number_to_update if total_to_update > number_to_update else 0
+        if positive_value_exists(total_to_update):
+            add_election_date_as_integer_to_all_offices_status += \
+                "SCRIPT: {entries_to_process:,} entries to process (add_election_date_as_integer_to_all_offices) " \
+                "".format(entries_to_process=total_to_update) + " "
+        # Now process
+        bulk_update_list = []
+        office_list = office_queryset[:number_to_update]
+        offices_updated = 0
+        offices_not_updated = 0
+        updates_needed = False
+        for one_office in office_list:
+            if one_office.google_civic_election_id in election_day_text_by_election_id_dict:
+                election_date_as_integer = election_day_text_by_election_id_dict[one_office.google_civic_election_id]
+                if positive_value_exists(election_date_as_integer):
+                    one_office.election_date_as_integer = election_date_as_integer
+                    bulk_update_list.append(one_office)
+                    offices_updated += 1
+                    updates_needed = True
+                else:
+                    offices_not_updated += 1
+            else:
+                offices_not_updated += 1
+        if updates_needed:
+            ContestOffice.objects.bulk_update(bulk_update_list, ['election_date_as_integer'])
+            add_election_date_as_integer_to_all_offices_status += \
+                "{updates_made:,} offices updated with new election_date_as_integer. " \
+                "{total_to_update_after:,} remaining." \
+                "".format(
+                    total_to_update_after=total_to_update_after,
+                    updates_made=offices_updated)
+        if positive_value_exists(offices_not_updated):
+            add_election_date_as_integer_to_all_offices_status += \
+                "{offices_not_updated:,} offices not updated." \
+                "".format(offices_not_updated=offices_not_updated)
+        if positive_value_exists(add_election_date_as_integer_to_all_offices_status):
+            messages.add_message(request, messages.INFO, add_election_date_as_integer_to_all_offices_status)
+
     office_repair_list = []
     try:
         office_queryset = ContestOffice.objects.all()
-
         if positive_value_exists(google_civic_election_id):
             office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
         elif positive_value_exists(show_all_elections):

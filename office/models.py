@@ -233,6 +233,8 @@ class ContestOffice(models.Model):
 
     # ballot_placement: We store ballot_placement in the BallotItem table instead because it is different for each voter
 
+    # We store YYYYMMDD as an integer for very fast lookup (ex/ "20240901" for September, 1, 2024)
+    election_date_as_integer = models.PositiveIntegerField(null=True, unique=False, db_index=True)
     # A description of any additional eligibility requirements for voting in this contest.
     electorate_specifications = models.CharField(verbose_name="google civic primary party",
                                                  max_length=255, null=True, blank=True)
@@ -1326,7 +1328,6 @@ class ContestOfficeListManager(models.Manager):
         office_list_objects = []
         office_list_light = []
         office_list_found = False
-        office_manager = ContestOfficeManager()
         status = ""
 
         try:
