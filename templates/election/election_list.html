@@ -333,10 +333,15 @@
 {% endif %}
 {# ############## List of many election dates ############## #}
     <p>
-        Preview: <a href="{{ vote_usa_elections_api_url }}" target="_blank">Vote USA upcoming elections API response</a>
+        Preview 'upcoming elections API' response from:
+        <a href="{{ ctcl_elections_api_url }}" target="_blank">CTCL</a>,
+        <a href="{{ vote_usa_elections_api_url }}" target="_blank">Vote USA</a>
     </p>
     <p>
-        <a href="{% url 'election:election_remote_retrieve' %}">Retrieve upcoming elections from Vote USA</a>
+        Retrieve upcoming elections from:
+        <a href="{% url 'election:election_remote_retrieve' %}?use_ctcl=1">CTCL</a>,
+        <a href="{% url 'election:election_remote_retrieve' %}?use_google_civic=1">Google Civic</a>, or
+        <a href="{% url 'election:election_remote_retrieve' %}?use_vote_usa=1">Vote USA</a>
     </p>
     <p>
         <a href="{% url 'election:election_edit' 0 %}" target="_blank" >Add Upcoming Election Manually <span class="glyphicon glyphicon-new-window"></span></a>

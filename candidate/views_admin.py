@@ -325,7 +325,6 @@ def candidate_list_view(request):
 
     hide_pagination = False
 
-    candidate_manager = CandidateManager()
     candidate_search = request.GET.get('candidate_search', '')
     current_page_url = request.get_full_path()
     find_candidates_linked_to_multiple_offices = \
@@ -389,7 +388,7 @@ def candidate_list_view(request):
     #  who have the general election as their ultimate_election_date, if they lost in the primary. That will require
     #  an update to this script.
     populate_candidate_ultimate_election_date = True
-    number_to_populate = 10  # Normally we can process 10000 at a time
+    number_to_populate = 1000  # Normally we can process 10000 at a time
     if populate_candidate_ultimate_election_date and positive_value_exists(google_civic_election_id) and run_scripts:
         # We require google_civic_election_id just so we can limit the scope of this update
         populate_candidate_ultimate_election_date_status = ''
@@ -453,7 +452,7 @@ def candidate_list_view(request):
 
     # We use the contest_office_name and/or district_name some places on WebApp. Update candidates missing this data.
     populate_contest_office_data = True
-    number_to_populate = 10  # Normally we can process 1000 at a time
+    number_to_populate = 1000  # Normally we can process 1000 at a time
     if populate_contest_office_data and run_scripts:
         populate_contest_office_data_status = ''
         candidate_query = CandidateCampaign.objects.all()
@@ -528,8 +527,16 @@ def candidate_list_view(request):
                     if candidate.we_vote_id == one_link.candidate_we_vote_id:
                         if candidate.we_vote_id in office_by_candidate_we_vote_id_dict:
                             # If this office is further in the future, replace the earlier version
-                            if office.election_date_as_integer > \
-                                    office_by_candidate_we_vote_id_dict[candidate.we_vote_id].election_date_as_integer:
+                            try:
+                                office_election_date_as_integer = office.election_date_as_integer
+                            except Exception as e:
+                                office_election_date_as_integer = 0
+                            try:
+                                office_election_date_from_dict_as_integer = \
+                                    office_by_candidate_we_vote_id_dict[candidate.we_vote_id].election_date_as_integer
+                            except Exception as e:
+                                office_election_date_from_dict_as_integer = 0
+                            if office_election_date_as_integer > office_election_date_from_dict_as_integer:
                                 office_by_candidate_we_vote_id_dict[candidate.we_vote_id] = office
                         else:
                             office_by_candidate_we_vote_id_dict[candidate.we_vote_id] = office
@@ -1389,7 +1396,6 @@ def candidate_new_search_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    candidate_manager = CandidateManager()
     candidate_list_manager = CandidateListManager()
     politician_manager = PoliticianManager()
 
@@ -2778,7 +2784,6 @@ def candidate_politician_match_this_election_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    candidate_list = []
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     google_civic_election_id_list = [google_civic_election_id]
     google_civic_election_id = convert_to_int(google_civic_election_id)
@@ -2806,9 +2811,10 @@ def candidate_politician_match_this_election_view(request):
     except CandidateCampaign.DoesNotExist:
         messages.add_message(request, messages.INFO, "No candidates found for this election: {id}.".format(
             id=google_civic_election_id))
-        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) + "?google_civic_election_id={var}"
-                                                                                   "".format(
-                                                                                   var=google_civic_election_id))
+        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
+                                    "?google_civic_election_id={var}"
+                                    "".format(
+                                    var=google_civic_election_id))
 
     num_candidates_reviewed = 0
     num_that_already_have_politician_we_vote_id = 0
@@ -3871,7 +3877,7 @@ def update_candidate_from_politician_view(request):
         message = "Politician not updated. No candidates found to update politician from."
         messages.add_message(request, messages.ERROR, message)
 
-    # And now, we update the politician (potentially destructive in a few ways) with information from the candidate
+    # And now, we update the candidate (potentially destructive in a few ways) with information from the politician
     from candidate.controllers import update_candidate_details_from_politician
     results = update_candidate_details_from_politician(candidate=candidate, politician=politician)
     if results['success']:
@@ -3890,3 +3896,106 @@ def update_candidate_from_politician_view(request):
         messages.add_message(request, messages.ERROR, message)
 
     return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id', args=(candidate_we_vote_id,)))
+
+
+@login_required
+def update_candidates_from_politicians_view(request):
+    status = ''
+
+    show_this_year_of_candidates = request.GET.get('show_this_year_of_candidates', 0)
+    google_civic_election_id = request.GET.get('google_civic_election_id', '')
+    state_code = request.GET.get('state_code', '')
+
+    google_civic_election_id_list_generated = False
+    show_this_year_of_candidates_restriction = False
+    if positive_value_exists(google_civic_election_id):
+        google_civic_election_id_list = [convert_to_int(google_civic_election_id)]
+        google_civic_election_id_list_generated = True
+    elif positive_value_exists(show_this_year_of_candidates):
+        google_civic_election_id_list = retrieve_election_id_list_by_year_list([show_this_year_of_candidates])
+        show_this_year_of_candidates_restriction = True
+    else:
+        # Limit to just upcoming elections
+        google_civic_election_id_list_generated = True
+        google_civic_election_id_list = retrieve_upcoming_election_id_list()
+
+    candidate_list_manager = CandidateListManager()
+    candidate_we_vote_id_list = []
+    if show_this_year_of_candidates_restriction:
+        results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_year_list(
+            year_list=[show_this_year_of_candidates],
+            limit_to_this_state_code=state_code)
+        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+    elif google_civic_election_id_list_generated:
+        results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_election_list(
+            google_civic_election_id_list=google_civic_election_id_list,
+            limit_to_this_state_code=state_code)
+        candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+
+    try:
+        candidate_query = CandidateCampaign.objects.all()
+        candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+        if positive_value_exists(state_code):
+            candidate_query = candidate_query.filter(state_code__iexact=state_code)
+        candidate_list = list(candidate_query)
+    except Exception as e:
+        candidate_list = []
+        status += "CANDIDATE_LIST_RETRIEVE_ERROR: " + str(e) + " "
+
+    candidate_we_vote_id_by_politician_we_vote_id = {}
+    politician_we_vote_id_list = []
+    for candidate in candidate_list:
+        if positive_value_exists(candidate.politician_we_vote_id) \
+                and candidate.politician_we_vote_id not in politician_we_vote_id_list:
+            politician_we_vote_id_list.append(candidate.politician_we_vote_id)
+            candidate_we_vote_id_by_politician_we_vote_id[candidate.politician_we_vote_id] = candidate.we_vote_id
+
+    # Retrieve politicians in single query
+    from politician.models import Politician
+    politician_list_by_candidate_we_vote_id = {}
+    politician_query = Politician.objects.all()
+    politician_query = politician_query.filter(we_vote_id__in=politician_we_vote_id_list)
+    politician_list = list(politician_query)
+    for politician in politician_list:
+        candidate_we_vote_id = candidate_we_vote_id_by_politician_we_vote_id[politician.we_vote_id]
+        if positive_value_exists(candidate_we_vote_id):
+            politician_list_by_candidate_we_vote_id[candidate_we_vote_id] = politician
+
+    politician_bulk_update_list = []
+    politicians_updated_count = 0
+    politicians_not_updated_count = 0
+    from politician.controllers import update_politician_details_from_candidate
+    politician_update_problem_count = 0
+    for candidate in candidate_list:
+        # We start by updating the politician (non-destructively) with information from the candidate
+        if candidate.we_vote_id in politician_list_by_candidate_we_vote_id:
+            politician = politician_list_by_candidate_we_vote_id[candidate.we_vote_id]
+            if not hasattr(politician, 'date_last_updated_from_candidate'):
+                politicians_not_updated_count += 1
+                status += "POLITICIAN_NOT_FOUND "
+                continue
+            results = update_politician_details_from_candidate(politician=politician, candidate=candidate)
+            if results['success']:
+                save_changes = results['save_changes']
+                politician = results['politician']
+                if save_changes:
+                    politician.date_last_updated_from_candidate = localtime(now()).date()
+                    politician_bulk_update_list.append(politician)
+                    politicians_updated_count += 1
+                else:
+                    politicians_not_updated_count += 1
+            else:
+                politicians_not_updated_count += 1
+                if politician_update_problem_count <= 5:
+                    status += results['status']
+        else:
+            politicians_not_updated_count += 1
+
+    return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
+                                "?google_civic_election_id={google_civic_election_id}"
+                                "&state_code={state_code}"
+                                "&show_this_year_of_candidates={show_this_year_of_candidates}"
+                                "".format(
+                                show_this_year_of_candidates=show_this_year_of_candidates,
+                                state_code=state_code,
+                                google_civic_election_id=google_civic_election_id))

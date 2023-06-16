@@ -630,6 +630,8 @@ def election_edit_process_view(request):
     ballotpedia_kind_of_election = request.POST.get('ballotpedia_kind_of_election', False)
     candidate_photos_finished = request.POST.get('candidate_photos_finished', False)
     ctcl_uuid = request.POST.get('ctcl_uuid', False)
+    ctcl_uuid2 = request.POST.get('ctcl_uuid2', False)
+    ctcl_uuid3 = request.POST.get('ctcl_uuid3', False)
     election_day_text = request.POST.get('election_day_text', False)
     election_local_id = convert_to_int(request.POST.get('election_id', 0))
     election_name = request.POST.get('election_name', False)
@@ -705,7 +707,7 @@ def election_edit_process_view(request):
         status += "UPDATING_EXISTING_ELECTION "
         # if convert_to_int(election_on_stage.google_civic_election_id) < 1000000:  # Not supported currently
         # If here, this is an election created by Google Civic and we limit what fields to update
-        # If here, this is a We Vote created election
+        # If here, this is a We-Vote-created election
 
         # We do not have a try/except block here because as an admin tool we want to see any errors on-screen
         if election_name is False:
@@ -737,6 +739,16 @@ def election_edit_process_view(request):
             if not positive_value_exists(ctcl_uuid):
                 ctcl_uuid = None
             election_on_stage.ctcl_uuid = ctcl_uuid
+
+        if ctcl_uuid2 is not False:
+            if not positive_value_exists(ctcl_uuid2):
+                ctcl_uuid2 = None
+            election_on_stage.ctcl_uuid2 = ctcl_uuid2
+
+        if ctcl_uuid3 is not False:
+            if not positive_value_exists(ctcl_uuid3):
+                ctcl_uuid3 = None
+            election_on_stage.ctcl_uuid3 = ctcl_uuid3
 
         if internal_notes is not False:
             election_on_stage.internal_notes = internal_notes
@@ -1140,6 +1152,17 @@ def election_list_view(request):
         election_list_modified.append(election)
 
     try:
+        from import_export_ctcl.controllers import CTCL_API_KEY, CTCL_ELECTION_QUERY_URL
+        ctcl_elections_api_url = \
+            "{url}?key={accessKey}" \
+            "".format(
+                url=CTCL_ELECTION_QUERY_URL,
+                accessKey=CTCL_API_KEY,
+            )
+    except Exception as e:
+        ctcl_elections_api_url = "FAILED: " + str(e) + " "
+
+    try:
         from import_export_vote_usa.controllers import VOTE_USA_ELECTION_QUERY_URL
         VOTE_USA_API_KEY = get_environment_variable("VOTE_USA_API_KEY", no_exception=True)
         vote_usa_elections_api_url = \
@@ -1152,10 +1175,11 @@ def election_list_view(request):
         vote_usa_elections_api_url = "FAILED: " + str(e) + " "
 
     template_values = {
-        'messages_on_stage':            messages_on_stage,
+        'ctcl_elections_api_url':       ctcl_elections_api_url,
         'election_list':                election_list_modified,
         'election_search':              election_search,
         'google_civic_election_id':     google_civic_election_id,
+        'messages_on_stage':            messages_on_stage,
         'show_all_elections':           show_all_elections,
         'show_all_elections_this_year': show_all_elections_this_year,
         'show_election_statistics':     show_election_statistics,
@@ -1527,17 +1551,36 @@ def election_remote_retrieve_view(request):
     :param request:
     :return:
     """
+    success = True
+    status = ""
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager', 'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    results = election_remote_retrieve(use_vote_usa=True)
+    use_ctcl = positive_value_exists(request.GET.get('use_ctcl', False))
+    use_google_civic = positive_value_exists(request.GET.get('use_google_civic', False))
+    use_vote_usa = positive_value_exists(request.GET.get('use_vote_usa', False))
 
-    if not results['success']:
-        messages.add_message(request, messages.INFO, results['status'])
+    if use_ctcl:
+        results = election_remote_retrieve(use_ctcl=True)
+        status += results['status']
+        success = results['success']
+    elif use_google_civic:
+        results = election_remote_retrieve(use_google_civic=True)
+        status += results['status']
+        success = results['success']
+    elif use_vote_usa:
+        results = election_remote_retrieve(use_vote_usa=True)
+        status += results['status']
+        success = results['success']
     else:
-        messages.add_message(request, messages.INFO, 'Upcoming elections retrieved from Vote USA.')
+        status += "One parameter is required: use_ctcl, use_google_civic, or use_vote_usa. "
+
+    if success:
+        messages.add_message(request, messages.INFO, status)
+    else:
+        messages.add_message(request, messages.ERROR, status)
     return HttpResponseRedirect(reverse('election:election_list', args=()))
 
 

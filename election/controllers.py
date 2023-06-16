@@ -18,26 +18,59 @@ WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 ELECTIONS_SYNC_URL = get_environment_variable("ELECTIONS_SYNC_URL")  # electionsSyncOut
 
 
-def election_remote_retrieve(use_vote_usa=True):
-    # retrieve_results = retrieve_from_google_civic_api_election_query()
-    from import_export_vote_usa.controllers import retrieve_from_vote_usa_api_election_query, \
-        store_results_from_vote_usa_api_election_query
-    retrieve_results = retrieve_from_vote_usa_api_election_query()
-    structured_json = retrieve_results.get('structured_json', {})
-    error = structured_json.get('error', {})
-    errors = error.get('errors', {})
-    if not retrieve_results['success'] or len(errors):  # Success refers to http success, not an error free response
-        logger.error("Loading Election from Vote USA failed: " + str(json.dumps(errors)) +
-                     ", structured_json:" + str(structured_json) +
-                     ", retrieve_results['status']:" + str(retrieve_results['status']))
-        results = {
-            'success':  False,
-            'status':   retrieve_results['status']
-        }
-        return results
-    else:
+def election_remote_retrieve(
+        use_ctcl=False,
+        use_google_civic=False,
+        use_vote_usa=False):
+    status = ""
+    success = True
+    if positive_value_exists(use_ctcl):
+        from import_export_ctcl.controllers import retrieve_from_ctcl_api_election_query, \
+            store_results_from_ctcl_api_election_query
+        retrieve_results = retrieve_from_ctcl_api_election_query()
+        structured_json = retrieve_results.get('structured_json', {})
+        error = structured_json.get('error', {})
+        errors = error.get('errors', {})
+        if not retrieve_results['success'] or len(errors):  # Success refers to http success, not an error-free response
+            logger.error("Loading Election from CTCL failed: " + str(json.dumps(errors)) +
+                         ", structured_json:" + str(structured_json) +
+                         ", retrieve_results['status']:" + str(retrieve_results['status']))
+            results = {
+                'success': False,
+                'status': retrieve_results['status']
+            }
+            return results
+        results = store_results_from_ctcl_api_election_query(structured_json)
+        status += retrieve_results['status']
+        success = results['success']
+    elif positive_value_exists(use_google_civic):
+        # retrieve_results = retrieve_from_google_civic_api_election_query()
+        pass
+    elif positive_value_exists(use_vote_usa):
+        from import_export_vote_usa.controllers import retrieve_from_vote_usa_api_election_query, \
+            store_results_from_vote_usa_api_election_query
+        retrieve_results = retrieve_from_vote_usa_api_election_query()
+        structured_json = retrieve_results.get('structured_json', {})
+        error = structured_json.get('error', {})
+        errors = error.get('errors', {})
+        if not retrieve_results['success'] or len(errors):  # Success refers to http success, not an error-free response
+            logger.error("Loading Election from Vote USA failed: " + str(json.dumps(errors)) +
+                         ", structured_json:" + str(structured_json) +
+                         ", retrieve_results['status']:" + str(retrieve_results['status']))
+            results = {
+                'success':  False,
+                'status':   retrieve_results['status']
+            }
+            return results
         results = store_results_from_vote_usa_api_election_query(structured_json)
-        return results
+        status += retrieve_results['status']
+        success = results['success']
+
+    results = {
+        'success': success,
+        'status': status
+    }
+    return results
 
 
 def elections_import_from_sample_file():

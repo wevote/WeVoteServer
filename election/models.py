@@ -88,6 +88,8 @@ class Election(models.Model):
     ballotpedia_election_id = models.PositiveIntegerField(
         verbose_name="ballotpedia election id", null=True, unique=True)
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=36, null=True, blank=True)
+    ctcl_uuid2 = models.CharField(max_length=36, null=True, blank=True)
+    ctcl_uuid3 = models.CharField(max_length=36, null=True, blank=True)
     # A displayable name for the election.
     election_name = models.CharField(verbose_name="election name", max_length=255, null=False, blank=False)
     # Day of the election in YYYY-MM-DD format.
@@ -197,7 +199,8 @@ class ElectionManager(models.Manager):
         return 0
 
     def update_or_create_election(
-            self, google_civic_election_id=None,
+            self,
+            google_civic_election_id=None,
             election_name='',
             election_day_text='',
             ocd_division_id=None,
@@ -222,118 +225,132 @@ class ElectionManager(models.Manager):
         """
         Either update or create an election entry.
         """
+        election_found = False
+        election_on_same_day_found = False
+        election_on_stage = None
+        election_to_be_created = False  # Default to False
         exception_multiple_object_returned = False
         new_election_created = False
         status = ""
         success = True
 
-        if not election_name:
+        error_results = {
+            'election':                 election_on_stage,
+            'election_found':           election_found,
+            'MultipleObjectsReturned':  exception_multiple_object_returned,
+            'new_election_created':     new_election_created,
+            'status':                   status,
+            'success':                  success,
+        }
+
+        if not positive_value_exists(election_day_text):
+            success = False
+            status += 'MISSING_ELECTION_DAY_TEXT '
+
+        if not positive_value_exists(election_name):
             success = False
             status += 'MISSING_ELECTION_NAME '
-        else:
-            if not positive_value_exists(state_code) and positive_value_exists(ocd_division_id):
-                state_code = extract_state_from_ocd_division_id(ocd_division_id)
 
+        if not success:
+            error_results['success'] = False
+            error_results['status'] = status
+            return error_results
+
+        if not positive_value_exists(state_code) and positive_value_exists(ocd_division_id):
+            state_code = extract_state_from_ocd_division_id(ocd_division_id)
+        state_code_lower_case = state_code.lower() if state_code else ''
+
+        try:
+            # See if there is an election on this date already
+            queryset = Election.objects.all()
+            queryset = queryset.filter(election_day_text=election_day_text)
+            election_possibility_list = list(queryset)
+            if len(election_possibility_list) == 1:
+                election_on_same_day_found = True
+                one_election = election_possibility_list[0]
+                one_election_state_code_lower_case = one_election.state_code.lower() \
+                    if one_election.state_code else ''
+                if positive_value_exists(state_code_lower_case):
+                    # We are looking for state-specific election
+                    if state_code_lower_case == one_election_state_code_lower_case:
+                        election_found = True
+                        election_on_stage = one_election
+                        status += "ELECTION_ON_SAME_DAY_FOUND "
+                else:
+                    if not positive_value_exists(one_election.state_code) or one_election_state_code_lower_case == 'na':
+                        # We know this existing election is a national election, and we are looking for a
+                        #  national election, so we can update it
+                        election_found = True
+                        election_on_stage = one_election
+            elif len(election_possibility_list) > 0:
+                election_on_same_day_found = True
+                # Start by going through the list of elections and see any match an incoming variable without any doubt
+                for one_election in election_possibility_list:
+                    if election_found:
+                        # Skip the rest
+                        pass
+                    elif one_election.ballotpedia_election_id == ballotpedia_election_id:
+                        election_found = True
+                        election_on_stage = one_election
+                    elif one_election.google_civic_election_id == google_civic_election_id:
+                        election_found = True
+                        election_on_stage = one_election
+                    elif one_election.ctcl_uuid == google_civic_election_id:
+                        election_found = True
+                        election_on_stage = one_election
+                # Then see if we can find a state-specific match
+                if not election_found and positive_value_exists(state_code_lower_case):
+                    for one_election in election_possibility_list:
+                        one_election_state_code_lower_case = one_election.state_code.lower() \
+                            if one_election.state_code else ''
+                        if election_found:
+                            # Skip the rest
+                            pass
+                        elif one_election_state_code_lower_case == state_code_lower_case:
+                            election_found = True
+                            election_on_stage = one_election
+                    if not election_found:
+                        existing_state_specific_election_not_found_for_this_state = True  # So we want to create new
+                # At this point there might be a national election, or elections on same day for other states
+                # TODO: What to do here?
+            else:
+                election_to_be_created = True
+                pass
+        except Exception as e:
+            status += "ELECTION_RETRIEVE_FAILURE: " + str(e) + " "
+            success = False
+
+        if success and not election_found:
             try:
                 updated_values = {
                     'election_day_text':        election_day_text,
-                    'state_code':               state_code,
                 }
-                if positive_value_exists(vote_usa_election_id):
+                if positive_value_exists(state_code):
+                    updated_values['state_code'] = state_code
+                if positive_value_exists(ctcl_uuid):
+                    election_on_stage, new_election_created = Election.objects.update_or_create(
+                        ctcl_uuid=ctcl_uuid,
+                        defaults=updated_values)
+                    election_found = True
+                    success = True
+                    status += 'CTCL_ELECTION_SAVED '
+                elif positive_value_exists(vote_usa_election_id):
                     election_on_stage, new_election_created = Election.objects.update_or_create(
                         vote_usa_election_id=vote_usa_election_id,
                         defaults=updated_values)
+                    election_found = True
                     success = True
                     status += 'VOTE_USA_ELECTION_SAVED '
                 elif positive_value_exists(google_civic_election_id):
                     election_on_stage, new_election_created = Election.objects.update_or_create(
                         google_civic_election_id=google_civic_election_id,
                         defaults=updated_values)
+                    election_found = True
                     success = True
                     status += 'GOOGLE_ELECTION_SAVED '
                 else:
                     success = False
                     status += 'ELECTION_NOT_SAVED '
-
-                election_changed = False
-                if success:
-                    if ballotpedia_election_id is not None:
-                        election_on_stage.ballotpedia_election_id = ballotpedia_election_id
-                        election_changed = True
-                    if ballotpedia_kind_of_election is not None:
-                        election_on_stage.ballotpedia_kind_of_election = ballotpedia_kind_of_election
-                        election_changed = True
-                    if candidate_photos_finished is not None:
-                        election_on_stage.candidate_photos_finished = candidate_photos_finished
-                        election_changed = True
-                    if ctcl_uuid is not None:
-                        election_on_stage.ctcl_uuid = ctcl_uuid
-                        election_changed = True
-                    if new_election_created:
-                        election_on_stage.election_name = election_name
-                        election_changed = True
-                    elif election_name_do_not_override:
-                        # Do not replace existing election_name with new name
-                        pass
-                    else:
-                        election_on_stage.election_name = election_name
-                        election_changed = True
-                    if election_preparation_finished is not None:
-                        election_on_stage.election_preparation_finished = election_preparation_finished
-                        election_changed = True
-                    if google_civic_election_id is not None:
-                        election_on_stage.google_civic_election_id = google_civic_election_id
-                        election_changed = True
-                    if not positive_value_exists(election_on_stage.google_civic_election_id):
-                        google_civic_election_id = self.fetch_next_local_google_civic_election_id_integer()
-                        google_civic_election_id = convert_to_int(google_civic_election_id)
-                        if positive_value_exists(google_civic_election_id):
-                            election_on_stage.google_civic_election_id = google_civic_election_id
-                            election_changed = True
-                    if ignore_this_election is not None:
-                        election_on_stage.ignore_this_election = ignore_this_election
-                        election_changed = True
-                    if include_in_list_for_voters is not None:
-                        election_on_stage.include_in_list_for_voters = include_in_list_for_voters
-                        election_changed = True
-                    if internal_notes is not None:
-                        election_on_stage.internal_notes = internal_notes
-                        election_changed = True
-                    if is_national_election is not None:
-                        election_on_stage.is_national_election = is_national_election
-                        election_changed = True
-                    if ocd_division_id is not None:
-                        election_on_stage.ocd_division_id = ocd_division_id
-                        election_changed = True
-                    if use_ballotpedia_as_data_source is not None:
-                        election_on_stage.use_ballotpedia_as_data_source = \
-                            positive_value_exists(use_ballotpedia_as_data_source)
-                        election_changed = True
-                    if use_ctcl_as_data_source is not None:
-                        election_on_stage.use_ctcl_as_data_source = \
-                            positive_value_exists(use_ctcl_as_data_source)
-                        election_changed = True
-                    if use_ctcl_as_data_source_by_state_code is not None:
-                        election_on_stage.use_ctcl_as_data_source_by_state_code = use_ctcl_as_data_source_by_state_code
-                        election_changed = True
-                    if use_google_civic_as_data_source is not None:
-                        election_on_stage.use_google_civic_as_data_source = \
-                            positive_value_exists(use_google_civic_as_data_source)
-                        election_changed = True
-                    if use_vote_usa_as_data_source is not None:
-                        election_on_stage.use_vote_usa_as_data_source = \
-                            positive_value_exists(use_vote_usa_as_data_source)
-                        election_changed = True
-                    if vote_usa_election_id is not None:
-                        election_on_stage.vote_usa_election_id = vote_usa_election_id
-                        election_changed = True
-                    if vote_usa_same_day_election_suffix_list is not None:
-                        election_on_stage.vote_usa_same_day_election_suffix_list = \
-                            vote_usa_same_day_election_suffix_list
-                        election_changed = True
-                    if election_changed:
-                        election_on_stage.save()
-
             except Election.MultipleObjectsReturned as e:
                 success = False
                 status += 'MULTIPLE_MATCHING_ELECTIONS_FOUND '
@@ -342,11 +359,117 @@ class ElectionManager(models.Manager):
                 success = False
                 status += "ELECTION_SAVE_FAILURE: " + str(e) + " "
 
+        if success and election_found:
+            try:
+                election_changed = False
+                if ballotpedia_election_id is not None:
+                    election_on_stage.ballotpedia_election_id = ballotpedia_election_id
+                    election_changed = True
+                if ballotpedia_kind_of_election is not None:
+                    election_on_stage.ballotpedia_kind_of_election = ballotpedia_kind_of_election
+                    election_changed = True
+                if candidate_photos_finished is not None:
+                    election_on_stage.candidate_photos_finished = candidate_photos_finished
+                    election_changed = True
+                if ctcl_uuid is not None:
+                    if positive_value_exists(election_on_stage.ctcl_uuid):
+                        # CTCL is now returning Runoffs, Primaries, General
+                        # We Vote only wants one election per day. To deal with this discrepancy, we have multiple
+                        #  ctcl_uuid fields
+                        if ctcl_uuid == election_on_stage.ctcl_uuid:
+                            pass
+                        elif positive_value_exists(election_on_stage.ctcl_uuid2):
+                            if ctcl_uuid == election_on_stage.ctcl_uuid2:
+                                pass
+                            elif positive_value_exists(election_on_stage.ctcl_uuid3):
+                                if ctcl_uuid == election_on_stage.ctcl_uuid3:
+                                    pass
+                                else:
+                                    status += "ALL_CTCL_UUIDS_FIELDS_FILLED "
+                            else:
+                                election_on_stage.ctcl_uuid3 = ctcl_uuid
+                                election_changed = True
+                        else:
+                            election_on_stage.ctcl_uuid2 = ctcl_uuid
+                            election_changed = True
+                    else:
+                        election_on_stage.ctcl_uuid = ctcl_uuid
+                        election_changed = True
+                if new_election_created:
+                    election_on_stage.election_name = election_name
+                    election_changed = True
+                elif election_name_do_not_override:
+                    # Do not replace existing election_name with new name
+                    pass
+                else:
+                    election_on_stage.election_name = election_name
+                    election_changed = True
+                if election_preparation_finished is not None:
+                    election_on_stage.election_preparation_finished = election_preparation_finished
+                    election_changed = True
+                if google_civic_election_id is not None:
+                    election_on_stage.google_civic_election_id = google_civic_election_id
+                    election_changed = True
+                if not positive_value_exists(election_on_stage.google_civic_election_id):
+                    google_civic_election_id = self.fetch_next_local_google_civic_election_id_integer()
+                    google_civic_election_id = convert_to_int(google_civic_election_id)
+                    if positive_value_exists(google_civic_election_id):
+                        election_on_stage.google_civic_election_id = google_civic_election_id
+                        election_changed = True
+                if ignore_this_election is not None:
+                    election_on_stage.ignore_this_election = ignore_this_election
+                    election_changed = True
+                if include_in_list_for_voters is not None:
+                    election_on_stage.include_in_list_for_voters = include_in_list_for_voters
+                    election_changed = True
+                if internal_notes is not None:
+                    election_on_stage.internal_notes = internal_notes
+                    election_changed = True
+                if is_national_election is not None:
+                    election_on_stage.is_national_election = is_national_election
+                    election_changed = True
+                if ocd_division_id is not None:
+                    election_on_stage.ocd_division_id = ocd_division_id
+                    election_changed = True
+                if use_ballotpedia_as_data_source is not None:
+                    election_on_stage.use_ballotpedia_as_data_source = \
+                        positive_value_exists(use_ballotpedia_as_data_source)
+                    election_changed = True
+                if use_ctcl_as_data_source is not None:
+                    election_on_stage.use_ctcl_as_data_source = \
+                        positive_value_exists(use_ctcl_as_data_source)
+                    election_changed = True
+                if use_ctcl_as_data_source_by_state_code is not None:
+                    election_on_stage.use_ctcl_as_data_source_by_state_code = use_ctcl_as_data_source_by_state_code
+                    election_changed = True
+                if use_google_civic_as_data_source is not None:
+                    election_on_stage.use_google_civic_as_data_source = \
+                        positive_value_exists(use_google_civic_as_data_source)
+                    election_changed = True
+                if use_vote_usa_as_data_source is not None:
+                    election_on_stage.use_vote_usa_as_data_source = \
+                        positive_value_exists(use_vote_usa_as_data_source)
+                    election_changed = True
+                if vote_usa_election_id is not None:
+                    election_on_stage.vote_usa_election_id = vote_usa_election_id
+                    election_changed = True
+                if vote_usa_same_day_election_suffix_list is not None:
+                    election_on_stage.vote_usa_same_day_election_suffix_list = \
+                        vote_usa_same_day_election_suffix_list
+                    election_changed = True
+                if election_changed:
+                    election_on_stage.save()
+            except Exception as e:
+                success = False
+                status += "ELECTION_SAVE_FAILURE: " + str(e) + " "
+
         results = {
-            'success':                  success,
-            'status':                   status,
+            'election':                 election_on_stage,
+            'election_found':           election_found,
             'MultipleObjectsReturned':  exception_multiple_object_returned,
             'new_election_created':     new_election_created,
+            'status':                   status,
+            'success':                  success,
         }
         return results
 
@@ -459,6 +582,7 @@ class ElectionManager(models.Manager):
             google_civic_election_id=0,
             election_id=0,
             read_only=True,
+            ctcl_uuid='',
             vote_usa_election_id=''):
         google_civic_election_id = convert_to_int(google_civic_election_id)
 

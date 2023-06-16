@@ -44,4 +44,6 @@ urlpatterns = [
             name='candidate_summary'),
     re_path(r'^update_candidate_from_politician/', views_admin.update_candidate_from_politician_view,
             name='update_candidate_from_politician'),
+    re_path(r'^update_candidates_from_politicians/', views_admin.update_candidates_from_politicians_view,
+            name='update_candidates_from_politicians'),
 ]

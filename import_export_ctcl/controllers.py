@@ -6,6 +6,7 @@ import xml.etree.ElementTree as ElementTree
 from .models import CandidateSelection, CTCLApiCounterManager
 from ballot.models import BallotReturnedManager
 from config.base import get_environment_variable
+from datetime import datetime
 from electoral_district.controllers import electoral_district_import_from_xml_data
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from import_export_batches.controllers_ctcl import store_ctcl_json_response_to_import_batch_system
@@ -17,11 +18,13 @@ from polling_location.models import KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR, \
     KIND_OF_LOG_ENTRY_NO_BALLOT_JSON, PollingLocationManager
 import requests
 import wevote_functions.admin
-from wevote_functions.functions import extract_state_code_from_address_string, positive_value_exists
+from wevote_functions.functions import convert_we_vote_date_string_to_date, extract_state_code_from_address_string, \
+    positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 CTCL_API_KEY = get_environment_variable("CTCL_API_KEY")
+CTCL_ELECTION_QUERY_URL = "https://api.ballotinfo.org/elections"
 CTCL_SAMPLE_XML_FILE = "import_export_ctcl/import_data/GoogleCivic.Sample.xml"
 CTCL_VOTER_INFO_URL = "http://api.ballotinfo.org/voterinfo"
 CTCL_API_VOTER_INFO_QUERY_TYPE = "voterinfo"
@@ -32,7 +35,7 @@ HEADERS_FOR_CTCL_API_CALL = {
     'Accept-Encoding': 'gzip, deflate, br',
     'Accept-Language': 'en-US,en;q=0.5',
     'Connection': 'keep-alive',
-    'Host': 'api4.ballotpedia.org',
+    'Host': 'api.ballotinfo.org',
     'Upgrade-Insecure-Requests': '1',
     'User-Agent':
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:72.0) Gecko/20100101 Firefox/72.0',
@@ -778,7 +781,7 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
                     )
                     status += results['status']
                 else:
-                    # Create BallotReturnedEmpty entry so we don't keep retrieving this map point
+                    # Create BallotReturnedEmpty entry, so we don't keep retrieving this map point
                     status += "NO_INCOMING_BALLOT_ITEMS_FOUND_CTCL_CREATE_EMPTY "
                     results = ballot_returned_manager.create_ballot_returned_empty(
                         google_civic_election_id=google_civic_election_id,
@@ -882,4 +885,87 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
         'new_candidate_we_vote_ids_list':           new_candidate_we_vote_ids_list,
         'new_measure_we_vote_ids_list':             new_measure_we_vote_ids_list,
     }
+    return results
+
+
+def retrieve_from_ctcl_api_election_query():
+    status = "Loading json data from CTCL servers, API call electionQuery. "
+    logger.info(status)
+    print(status)
+
+    if not positive_value_exists(CTCL_ELECTION_QUERY_URL):
+        results = {
+            'success':  False,
+            'status':   'CTCL_ELECTION_QUERY_URL missing ',
+        }
+        return results
+
+    if not positive_value_exists(CTCL_API_KEY):
+        results = {
+            'success':  False,
+            'status':   'CTCL_API_KEY missing ',
+        }
+        return results
+
+    response = requests.get(
+        CTCL_ELECTION_QUERY_URL,
+        headers=HEADERS_FOR_CTCL_API_CALL,
+        params={
+            "key": CTCL_API_KEY,
+        })
+
+    # Use API call counter to track the number of queries we are doing each day
+    api_counter_manager = CTCLApiCounterManager()
+    api_counter_manager.create_counter_entry('election')
+
+    structured_json = json.loads(response.text)
+    if 'success' in structured_json and structured_json['success'] is False:
+        logger.error("CTCL_ELECTION_QUERY_URL: " + str(CTCL_ELECTION_QUERY_URL) +
+                     ", CTCL_API_KEY:" + str(CTCL_API_KEY))
+        results = {
+            'status': "Error from CTCL: " + structured_json['status'],
+            'structured_json':  structured_json,
+            'success': False,
+        }
+    else:
+        results = {
+            'status':           'structured_json retrieved',
+            'structured_json':  structured_json,
+            'success':          True,
+        }
+    return results
+
+
+def store_results_from_ctcl_api_election_query(structured_json):
+    if 'elections' in structured_json:
+        elections_list_json = structured_json['elections']
+    else:
+        elections_list_json = {}
+    results = {}
+    from election.models import ElectionManager
+    election_manager = ElectionManager()
+    for one_election_dict in elections_list_json:
+        # If there is an existing election, leave it as-is
+        one_result = election_manager.retrieve_election(ctcl_uuid=one_election_dict['id'], read_only=True)
+        if one_result['election_found']:
+            continue
+
+        election_is_in_future = False
+        # We only want to store results for future elections. Analyze to see if this election is in the future.
+        if 'electionDay' in one_election_dict:
+            election_day_text = one_election_dict['electionDay']
+            election_date = convert_we_vote_date_string_to_date(election_day_text)
+            datetime_now = datetime.now()
+            if election_date > datetime_now:
+                election_is_in_future = True
+
+        if election_is_in_future:
+            results = election_manager.update_or_create_election(
+                ctcl_uuid=one_election_dict['id'],
+                election_day_text=one_election_dict['electionDay'],
+                election_name=one_election_dict['name'],
+                election_name_do_not_override=True,
+                ocd_division_id=one_election_dict['ocdDivisionId'],
+                use_ctcl_as_data_source=True)
+
     return results

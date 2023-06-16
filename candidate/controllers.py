@@ -3093,6 +3093,49 @@ def update_candidate_details_from_campaignx(candidate, campaignx):
     return results
 
 
+def copy_field_value_from_object1_to_object2(
+        object1=None,
+        object2=None,
+        object1_field_name_list=[],
+        only_change_object2_field_if_no_existing_value=True):
+    status = ''
+    success = True
+    values_changed = False
+
+    error_results = {
+        'success':          success,
+        'status':           status,
+        'object2':          object2,
+        'values_changed':   values_changed,
+    }
+    if not object1:
+        success = False
+        status += 'MISSING_OBJECT1 '
+    if not object2:
+        success = False
+        status += 'MISSING_OBJECT2 '
+    if not (object1 and all(hasattr(object1, field_name) for field_name in object1_field_name_list)):
+        success = False
+        status += 'MISSING_OBJECT1_FIELD_VALUE '
+    if not (object2 and all(hasattr(object2, field_name) for field_name in object1_field_name_list)):
+        success = False
+        status += 'MISSING_OBJECT2_FIELD_VALUE '
+    if not success:
+        error_results['status'] = status
+        error_results['success'] = False
+        return error_results
+
+    for field_name in object1_field_name_list:
+        setattr(object2, field_name, getattr(object1, field_name))
+
+    results = {
+        'object2':          object2,
+        'status':           status,
+        'success':          success,
+        'values_changed':   values_changed,
+    }
+    return results
+
 def update_candidate_details_from_politician(candidate, politician):
     """
     This function can replace some existing fields in the candidate object with the latest data from politician.
@@ -3178,13 +3221,33 @@ def update_candidate_details_from_politician(candidate, politician):
                 candidate.candidate_url = politician.politician_url4
             elif positive_value_exists(politician.politician_url5):
                 candidate.candidate_url = politician.politician_url5
-            # Uploaded photo
-            candidate.we_vote_hosted_profile_uploaded_image_url_large = \
-                politician.we_vote_hosted_profile_uploaded_image_url_large
-            candidate.we_vote_hosted_profile_uploaded_image_url_medium = \
-                politician.we_vote_hosted_profile_uploaded_image_url_medium
-            candidate.we_vote_hosted_profile_uploaded_image_url_tiny = \
-                politician.we_vote_hosted_profile_uploaded_image_url_tiny
+            if positive_value_exists(politician.vote_usa_politician_id):
+                candidate.vote_usa_politician_id = politician.vote_usa_politician_id
+            # Photos
+            if candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
+                if positive_value_exists(politician.profile_image_type_currently_active) \
+                        and candidate.profile_image_type_currently_active != PROFILE_IMAGE_TYPE_UNKNOWN:
+                    candidate.profile_image_type_currently_active = politician.profile_image_type_currently_active
+            results = copy_field_value_from_object1_to_object2(
+                object1=politician,
+                object2=candidate,
+                object1_field_name_list=[
+                    'we_vote_hosted_profile_facebook_image_url_large',
+                    'we_vote_hosted_profile_facebook_image_url_medium',
+                    'we_vote_hosted_profile_facebook_image_url_tiny',
+                    'we_vote_hosted_profile_twitter_image_url_large',
+                    'we_vote_hosted_profile_twitter_image_url_medium',
+                    'we_vote_hosted_profile_twitter_image_url_tiny',
+                    'we_vote_hosted_profile_uploaded_image_url_large',
+                    'we_vote_hosted_profile_uploaded_image_url_medium',
+                    'we_vote_hosted_profile_uploaded_image_url_tiny',
+                    'we_vote_hosted_profile_vote_usa_image_url_large',
+                    'we_vote_hosted_profile_vote_usa_image_url_medium',
+                    'we_vote_hosted_profile_vote_usa_image_url_tiny',
+                ],
+                only_change_object2_field_if_no_existing_value=True)
+            candidate = results['object2'] if results['success'] and results['values_changed'] else candidate
+
             if candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
                 if positive_value_exists(politician.we_vote_hosted_profile_uploaded_image_url_large) \
                         or positive_value_exists(politician.we_vote_hosted_profile_uploaded_image_url_medium) \

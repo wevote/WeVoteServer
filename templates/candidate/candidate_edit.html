@@ -174,41 +174,49 @@ th, td {
         Candidate to Office Link
         (<span onclick="showElement('candidate_to_office_link_table_add');" style="color: royalblue" >add</span>)
         <span style="color: slategray; font-weight: 400;">
-            {% if candidate.candidate_ultimate_election_date or candidate.candidate_year %}
+        {% if candidate.candidate_ultimate_election_date or candidate.candidate_year %}
             <br />
-            {% endif %}
-            {% if candidate.candidate_year %}
+        {% endif %}
+        {% if candidate.candidate_year %}
             {{ candidate.candidate_year }}
             &nbsp;&nbsp;&nbsp;
-            {% endif %}
-            {% if candidate.candidate_ultimate_election_date %}
+        {% endif %}
+        {% if candidate.candidate_ultimate_election_date %}
             {{ candidate.candidate_ultimate_election_date }}
-            {% endif %}
-            {% if candidate_to_office_link_list|length == 2 %}
+        {% endif %}
+        {% if candidate.contest_office_name %}
+            <br />
+            {{ candidate.contest_office_name }}
+        {% endif %}
+        {% if candidate.district_name %}
+            <br />
+            {{ candidate.district_name }}
+        {% endif %}
+        {% if candidate_to_office_link_list|length == 2 %}
+            <br />
+            {% if candidate_to_office_link_list.0.google_civic_election_id == candidate_to_office_link_list.1.google_civic_election_id %}
                 <br />
-                {% if candidate_to_office_link_list.0.google_civic_election_id == candidate_to_office_link_list.1.google_civic_election_id %}
-                    <br />
-                    <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_to_office_link_list.0.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_to_office_link_list.1.contest_office_we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-                       target="_blank">Compare Offices <span class="glyphicon glyphicon-new-window"></span></a><br />
-                {% endif %}
-            {% elif candidate_to_office_link_list|length == 3 %}
-                <br />
-                {% if candidate_to_office_link_list.0.google_civic_election_id == candidate_to_office_link_list.1.google_civic_election_id %}
-                    <br />
-                    <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_to_office_link_list.0.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_to_office_link_list.1.contest_office_we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-                       target="_blank">Compare Offices 1 &amp; 2 <span class="glyphicon glyphicon-new-window"></span></a><br />
-                {% endif %}
-                {% if candidate_to_office_link_list.0.google_civic_election_id == candidate_to_office_link_list.2.google_civic_election_id %}
-                    <br />
-                    <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_to_office_link_list.0.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_to_office_link_list.2.contest_office_we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-                       target="_blank">Compare Offices 1 &amp; 3 <span class="glyphicon glyphicon-new-window"></span></a><br />
-                {% endif %}
-                {% if candidate_to_office_link_list.1.google_civic_election_id == candidate_to_office_link_list.2.google_civic_election_id %}
-                    <br />
-                    <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_to_office_link_list.1.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_to_office_link_list.2.contest_office_we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-                       target="_blank">Compare Offices 2 &amp; 3 <span class="glyphicon glyphicon-new-window"></span></a><br />
-                {% endif %}
+                <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_to_office_link_list.0.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_to_office_link_list.1.contest_office_we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                   target="_blank">Compare Offices <span class="glyphicon glyphicon-new-window"></span></a><br />
             {% endif %}
+        {% elif candidate_to_office_link_list|length == 3 %}
+            <br />
+            {% if candidate_to_office_link_list.0.google_civic_election_id == candidate_to_office_link_list.1.google_civic_election_id %}
+                <br />
+                <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_to_office_link_list.0.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_to_office_link_list.1.contest_office_we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                   target="_blank">Compare Offices 1 &amp; 2 <span class="glyphicon glyphicon-new-window"></span></a><br />
+            {% endif %}
+            {% if candidate_to_office_link_list.0.google_civic_election_id == candidate_to_office_link_list.2.google_civic_election_id %}
+                <br />
+                <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_to_office_link_list.0.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_to_office_link_list.2.contest_office_we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                   target="_blank">Compare Offices 1 &amp; 3 <span class="glyphicon glyphicon-new-window"></span></a><br />
+            {% endif %}
+            {% if candidate_to_office_link_list.1.google_civic_election_id == candidate_to_office_link_list.2.google_civic_election_id %}
+                <br />
+                <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ candidate_to_office_link_list.1.contest_office_we_vote_id }}&contest_office2_we_vote_id={{ candidate_to_office_link_list.2.contest_office_we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+                   target="_blank">Compare Offices 2 &amp; 3 <span class="glyphicon glyphicon-new-window"></span></a><br />
+            {% endif %}
+        {% endif %}
         {% if candidate.is_battleground_race %}
             <br /><strong>Competitive Race</strong>
         {% endif %}
