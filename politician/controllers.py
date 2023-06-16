@@ -1845,6 +1845,9 @@ def update_politician_details_from_candidate(politician, candidate):
         if name_results['success']:
             politician = name_results['representative']
             save_changes = save_changes or name_results['values_changed']
+    if not positive_value_exists(politician.political_party) and positive_value_exists(candidate.party):
+        politician.political_party = candidate.party
+        save_changes = True
     if not positive_value_exists(politician.politician_phone_number) and \
             positive_value_exists(candidate.candidate_phone):
         politician.politician_phone_number = candidate.candidate_phone

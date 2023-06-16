@@ -632,7 +632,7 @@ def office_list_view(request):
             ContestOffice.objects.bulk_update(bulk_update_list, ['election_date_as_integer'])
             add_election_date_as_integer_to_all_offices_status += \
                 "{updates_made:,} offices updated with new election_date_as_integer. " \
-                "{total_to_update_after:,} remaining." \
+                "{total_to_update_after:,} remaining. " \
                 "".format(
                     total_to_update_after=total_to_update_after,
                     updates_made=offices_updated)
