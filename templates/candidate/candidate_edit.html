@@ -241,7 +241,7 @@ th, td {
                 {{ candidate_to_office_link.state_code }}
             </td>
             <td>
-            {% if candidate_to_office_link.contest_office_we_vote_id %}
+            {% if candidate_to_office_link.office and candidate_to_office_link.contest_office_we_vote_id %}
                 <a href="{% url 'office:office_summary_we_vote_id' candidate_to_office_link.contest_office_we_vote_id %}"
                    target="_blank">{% if candidate_to_office_link.office.office_name %}{{ candidate_to_office_link.office.office_name }}{% else %}MISSING OFFICE OBJECT{% endif %} ({{ candidate_to_office_link.contest_office_we_vote_id }}) <span class="glyphicon glyphicon-new-window"></span></a>
             {% else %}

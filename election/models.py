@@ -586,10 +586,22 @@ class ElectionManager(models.Manager):
             vote_usa_election_id=''):
         google_civic_election_id = convert_to_int(google_civic_election_id)
 
-        ctcl_uuid = ''
         election = Election()
         try:
-            if positive_value_exists(google_civic_election_id):
+            if positive_value_exists(ctcl_uuid):
+                if positive_value_exists(read_only):
+                    election = Election.objects.using('readonly').get(Q(ctcl_uuid=ctcl_uuid) | Q(ctcl_uuid2=ctcl_uuid))
+                else:
+                    election = Election.objects.get(Q(ctcl_uuid=ctcl_uuid) | Q(ctcl_uuid2=ctcl_uuid))
+                if election.id:
+                    ctcl_uuid = election.ctcl_uuid
+                    election_found = True
+                    status = "ELECTION_FOUND_WITH_CTCL_UUID "
+                else:
+                    election_found = False
+                    status = "ELECTION_NOT_FOUND_WITH_CTCL_UUID "
+                success = True
+            elif positive_value_exists(google_civic_election_id):
                 if positive_value_exists(read_only):
                     election = Election.objects.using('readonly').get(google_civic_election_id=google_civic_election_id)
                 else:

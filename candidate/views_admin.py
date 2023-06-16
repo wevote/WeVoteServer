@@ -3906,6 +3906,7 @@ def update_candidate_from_politician_view(request):
 @login_required
 def update_candidates_from_politicians_view(request):
     status = ''
+    success = True
 
     show_this_year_of_candidates = request.GET.get('show_this_year_of_candidates', 0)
     google_civic_election_id = request.GET.get('google_civic_election_id', '')
@@ -3968,14 +3969,16 @@ def update_candidates_from_politicians_view(request):
         if positive_value_exists(candidate_we_vote_id):
             politician_list_by_candidate_we_vote_id[candidate_we_vote_id] = politician
 
+    all_politician_fields_updated = []
     politician_bulk_update_list = []
     politicians_updated_count = 0
     politicians_not_updated_count = 0
-    from politician.controllers import update_politician_details_from_candidate
     politician_update_problem_count = 0
+    # We start by updating the politician (non-destructively) with information from the candidate
+    from politician.controllers import update_politician_details_from_candidate
     for candidate in candidate_list:
-        # We start by updating the politician (non-destructively) with information from the candidate
-        if candidate.we_vote_id in politician_list_by_candidate_we_vote_id:
+        if positive_value_exists(candidate.we_vote_id) \
+                and candidate.we_vote_id in politician_list_by_candidate_we_vote_id:
             politician = politician_list_by_candidate_we_vote_id[candidate.we_vote_id]
             if not hasattr(politician, 'date_last_updated_from_candidate'):
                 politicians_not_updated_count += 1
@@ -3987,25 +3990,95 @@ def update_candidates_from_politicians_view(request):
                 politician = results['politician']
                 if save_changes:
                     politician.date_last_updated_from_candidate = localtime(now()).date()
+                    politician_list_by_candidate_we_vote_id[candidate.we_vote_id] = politician
                     politician_bulk_update_list.append(politician)
                     politicians_updated_count += 1
+                    fields_updated = results['fields_updated']
+                    for field in fields_updated:
+                        if field not in all_politician_fields_updated:
+                            all_politician_fields_updated.append(field)
                 else:
                     politicians_not_updated_count += 1
             else:
+                politician_update_problem_count += 1
                 politicians_not_updated_count += 1
                 if politician_update_problem_count <= 5:
                     status += results['status']
         else:
             politicians_not_updated_count += 1
 
+    if len(politician_bulk_update_list) > 0:
+        try:
+            Politician.objects.bulk_update(politician_bulk_update_list, all_politician_fields_updated)
+        except Exception as e:
+            messages.add_message(request, messages.ERROR, "FAILED_BULK_UPDATE_OF_POLITICIANS: " + str(e))
 
-    messages.add_message(request, messages.INFO, status)
+    all_candidate_fields_updated = []
+    candidate_bulk_update_list = []
+    candidates_updated_count = 0
+    candidates_not_updated_count = 0
+    candidate_update_problem_count = 0
+    # We update the candidate from the politician. Could overwrite some candidate information.
+    from candidate.controllers import update_candidate_details_from_politician
+    for candidate in candidate_list:
+        if candidate.we_vote_id in politician_list_by_candidate_we_vote_id:
+            politician = politician_list_by_candidate_we_vote_id[candidate.we_vote_id]
+            if not hasattr(politician, 'date_last_updated_from_candidate'):
+                candidates_not_updated_count += 1
+                status += "POLITICIAN_NOT_FOUND "
+                continue
+            results = update_candidate_details_from_politician(politician=politician, candidate=candidate)
+            if results['success']:
+                save_changes = results['save_changes']
+                changed_candidate = results['candidate']
+                if save_changes:
+                    changed_candidate.date_last_updated_from_candidate = localtime(now()).date()
+                    candidate_bulk_update_list.append(changed_candidate)
+                    candidates_updated_count += 1
+                    fields_updated = results['fields_updated']
+                    for field in fields_updated:
+                        if field not in all_candidate_fields_updated:
+                            all_candidate_fields_updated.append(field)
+                else:
+                    candidates_not_updated_count += 1
+            else:
+                candidate_update_problem_count += 1
+                candidates_not_updated_count += 1
+                if candidate_update_problem_count <= 5:
+                    status += results['status']
+        else:
+            candidates_not_updated_count += 1
 
-    return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
-                                "?google_civic_election_id={google_civic_election_id}"
-                                "&state_code={state_code}"
-                                "&show_this_year_of_candidates={show_this_year_of_candidates}"
-                                "".format(
-                                show_this_year_of_candidates=show_this_year_of_candidates,
-                                state_code=state_code,
-                                google_civic_election_id=google_civic_election_id))
+    if len(candidate_bulk_update_list) > 0:
+        try:
+            CandidateCampaign.objects.bulk_update(candidate_bulk_update_list, all_candidate_fields_updated)
+        except Exception as e:
+            messages.add_message(request, messages.ERROR, "FAILED_BULK_UPDATE_OF_CANDIDATES: " + str(e))
+
+    progress_status = \
+        "POLITICIANS_UPDATED: {politicians_updated_count:,} " \
+        "NOT_UPDATED: {politicians_not_updated_count:,} \n" \
+        "CANDIDATES_UPDATED: {candidates_updated_count:,} " \
+        "NOT_UPDATED: {candidates_not_updated_count:,} \n" \
+        "".format(
+            candidates_not_updated_count=candidates_not_updated_count,
+            candidates_updated_count=candidates_updated_count,
+            politicians_not_updated_count=politicians_not_updated_count,
+            politicians_updated_count=politicians_updated_count,
+        )
+    messages.add_message(request, messages.INFO, progress_status)
+
+    if success:
+        messages.add_message(request, messages.INFO, status)
+    else:
+        messages.add_message(request, messages.ERROR, status)
+
+    return HttpResponseRedirect(
+        reverse('candidate:candidate_list', args=()) +
+        "?google_civic_election_id={google_civic_election_id}"
+        "&state_code={state_code}"
+        "&show_this_year_of_candidates={show_this_year_of_candidates}"
+        "".format(
+            show_this_year_of_candidates=show_this_year_of_candidates,
+            state_code=state_code,
+            google_civic_election_id=google_civic_election_id))

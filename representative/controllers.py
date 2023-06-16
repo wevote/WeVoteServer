@@ -38,15 +38,17 @@ def add_value_to_next_representative_spot(
     :param new_value_to_add:
     :return:
     """
+    field_updated = ''
     status = ''
     success = True
     values_changed = False
     if not positive_value_exists(new_value_to_add):
         status += 'NEW_VALUE_OR_FIELD_NAME_MISSING-(' + str(new_value_to_add) + "/" + str(field_name_base) + ')'
         return {
-            'success':          False,
-            'status':           status,
+            'field_updated':    field_updated,
             'representative':   representative,
+            'status':           status,
+            'success':          False,
             'values_changed':   values_changed,
         }
 
@@ -89,6 +91,7 @@ def add_value_to_next_representative_spot(
     current_value5 = getattr(representative, field_name_base + '5', '')
     if not positive_value_exists(current_value1):
         setattr(representative, field_name_base, new_value_to_add)
+        field_updated = field_name_base
         if field_name_base in \
                 ['candidate_twitter_handle', 'politician_twitter_handle', 'representative_twitter_handle']:
             representative.twitter_handle_updates_failing = False
@@ -103,6 +106,7 @@ def add_value_to_next_representative_spot(
         pass
     elif not positive_value_exists(current_value2):
         setattr(representative, field_name_base + '2', new_value_to_add)
+        field_updated = field_name_base + '2'
         if field_name_base in \
                 ['candidate_twitter_handle2', 'politician_twitter_handle2', 'representative_twitter_handle2']:
             representative.twitter_handle2_updates_failing = False
@@ -117,6 +121,7 @@ def add_value_to_next_representative_spot(
         pass
     elif not positive_value_exists(current_value3):
         setattr(representative, field_name_base + '3', new_value_to_add)
+        field_updated = field_name_base + '3'
         values_changed = True
     elif new_value_to_add.lower() == current_value3.lower():
         # The value is already stored in representative.google_civic_candidate_name2 so doesn't need
@@ -128,6 +133,7 @@ def add_value_to_next_representative_spot(
         pass
     elif not positive_value_exists(current_value4):
         setattr(representative, field_name_base + '4', new_value_to_add)
+        field_updated = field_name_base + '4'
         values_changed = True
     elif new_value_to_add.lower() == current_value4.lower():
         # The value is already stored in representative.google_civic_candidate_name2 so doesn't need
@@ -140,13 +146,15 @@ def add_value_to_next_representative_spot(
     #     pass
     elif not positive_value_exists(current_value5):
         setattr(representative, field_name_base + '5', new_value_to_add)
+        field_updated = field_name_base + '5'
         values_changed = True
     else:
         status += "{field_name_base}5 FULL-COULD_NOT_STORE_VALUE ".format(field_name_base=field_name_base)
     return {
+        'field_updated':    field_updated,
+        'representative':   representative,
         'success':          success,
         'status':           status,
-        'representative':   representative,
         'values_changed':   values_changed,
     }
 
