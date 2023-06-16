@@ -528,12 +528,13 @@ def candidate_list_view(request):
                         if candidate.we_vote_id in office_by_candidate_we_vote_id_dict:
                             # If this office is further in the future, replace the earlier version
                             try:
-                                office_election_date_as_integer = office.election_date_as_integer
+                                office_election_date_as_integer = convert_to_int(office.election_date_as_integer)
                             except Exception as e:
                                 office_election_date_as_integer = 0
                             try:
                                 office_election_date_from_dict_as_integer = \
                                     office_by_candidate_we_vote_id_dict[candidate.we_vote_id].election_date_as_integer
+                                convert_to_int(office_election_date_from_dict_as_integer)
                             except Exception as e:
                                 office_election_date_from_dict_as_integer = 0
                             if office_election_date_as_integer > office_election_date_from_dict_as_integer:
