@@ -534,11 +534,15 @@ def candidate_list_view(request):
                             try:
                                 office_election_date_from_dict_as_integer = \
                                     office_by_candidate_we_vote_id_dict[candidate.we_vote_id].election_date_as_integer
-                                convert_to_int(office_election_date_from_dict_as_integer)
+                                office_election_date_from_dict_as_integer = \
+                                    convert_to_int(office_election_date_from_dict_as_integer)
                             except Exception as e:
                                 office_election_date_from_dict_as_integer = 0
-                            if office_election_date_as_integer > office_election_date_from_dict_as_integer:
-                                office_by_candidate_we_vote_id_dict[candidate.we_vote_id] = office
+                            try:
+                                if office_election_date_as_integer > office_election_date_from_dict_as_integer:
+                                    office_by_candidate_we_vote_id_dict[candidate.we_vote_id] = office
+                            except Exception as e:
+                                pass
                         else:
                             office_by_candidate_we_vote_id_dict[candidate.we_vote_id] = office
 
@@ -3932,6 +3936,8 @@ def update_candidates_from_politicians_view(request):
             google_civic_election_id_list=google_civic_election_id_list,
             limit_to_this_state_code=state_code)
         candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+    else:
+        status += "WILL_NOT_UPDATE_ANY_CANDIDATES "
 
     try:
         candidate_query = CandidateCampaign.objects.all()
@@ -3991,6 +3997,9 @@ def update_candidates_from_politicians_view(request):
                     status += results['status']
         else:
             politicians_not_updated_count += 1
+
+
+    messages.add_message(request, messages.INFO, status)
 
     return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
                                 "?google_civic_election_id={google_civic_election_id}"
