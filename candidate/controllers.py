@@ -31,7 +31,7 @@ from wevote_functions.functions import add_period_to_middle_name_initial, add_pe
     remove_period_from_middle_name_initial, remove_period_from_name_prefix_and_suffix
 from .models import CandidateListManager, CandidateCampaign, CandidateManager, \
     CANDIDATE_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, CANDIDATE_UNIQUE_IDENTIFIERS, PROFILE_IMAGE_TYPE_FACEBOOK, \
-    PROFILE_IMAGE_TYPE_UNKNOWN, PROFILE_IMAGE_TYPE_UPLOADED
+    PROFILE_IMAGE_TYPE_UNKNOWN, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_VOTE_USA
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -128,20 +128,23 @@ def add_name_to_next_spot(candidate_or_politician, google_civic_candidate_name_t
 
 
 def add_twitter_handle_to_next_candidate_spot(candidate, twitter_handle):
+    field_updated = ''
     status = ''
     success = True
     values_changed = False
     if not positive_value_exists(twitter_handle):
         status += 'TWITTER_HANDLE_MISSING '
         return {
-            'success':          False,
-            'status':           status,
             'candidate':        candidate,
+            'field_updated':    field_updated,
+            'status':           status,
+            'success':          False,
             'values_changed':   values_changed,
         }
 
     if not positive_value_exists(candidate.candidate_twitter_handle):
         candidate.candidate_twitter_handle = twitter_handle
+        field_updated = 'candidate_twitter_handle'
         values_changed = True
     elif twitter_handle.lower() == candidate.candidate_twitter_handle.lower():
         # The value is already stored in candidate.candidate_twitter_handle so doesn't need
@@ -149,6 +152,7 @@ def add_twitter_handle_to_next_candidate_spot(candidate, twitter_handle):
         pass
     elif not positive_value_exists(candidate.candidate_twitter_handle2):
         candidate.candidate_twitter_handle2 = twitter_handle
+        field_updated = 'candidate_twitter_handle2'
         values_changed = True
     elif twitter_handle.lower() == candidate.candidate_twitter_handle2.lower():
         # The value is already stored in candidate.candidate_twitter_handle2 so doesn't need
@@ -156,12 +160,14 @@ def add_twitter_handle_to_next_candidate_spot(candidate, twitter_handle):
         pass
     elif not positive_value_exists(candidate.candidate_twitter_handle3):
         candidate.candidate_twitter_handle3 = twitter_handle
+        field_updated = 'candidate_twitter_handle3'
         values_changed = True
     # We currently only support 3 twitter handles
     return {
+        'candidate':        candidate,
+        'field_updated':    field_updated,
         'success':          success,
         'status':           status,
-        'candidate':        candidate,
         'values_changed':   values_changed,
     }
 
@@ -3097,15 +3103,18 @@ def copy_field_value_from_object1_to_object2(
         object1=None,
         object2=None,
         object1_field_name_list=[],
+        only_change_object2_field_if_incoming_value=True,
         only_change_object2_field_if_no_existing_value=True):
+    fields_updated = []
     status = ''
     success = True
     values_changed = False
 
     error_results = {
+        'fields_updated':   fields_updated,
+        'object2':          object2,
         'success':          success,
         'status':           status,
-        'object2':          object2,
         'values_changed':   values_changed,
     }
     if not object1:
@@ -3126,9 +3135,26 @@ def copy_field_value_from_object1_to_object2(
         return error_results
 
     for field_name in object1_field_name_list:
-        setattr(object2, field_name, getattr(object1, field_name))
+        change_this_field = False
+        if positive_value_exists(only_change_object2_field_if_no_existing_value):
+            if not positive_value_exists(getattr(object2, field_name)):
+                change_this_field = True
+        else:
+            change_this_field = True
+        if change_this_field:
+            if positive_value_exists(only_change_object2_field_if_incoming_value):
+                if positive_value_exists(getattr(object1, field_name)):
+                    change_this_field = True
+                else:
+                    change_this_field = False
+        if change_this_field:
+            setattr(object2, field_name, getattr(object1, field_name))
+            if field_name not in fields_updated:
+                fields_updated.append(field_name)
+            values_changed = True
 
     results = {
+        'fields_updated':   fields_updated,
         'object2':          object2,
         'status':           status,
         'success':          success,
@@ -3136,7 +3162,8 @@ def copy_field_value_from_object1_to_object2(
     }
     return results
 
-def update_candidate_details_from_politician(candidate, politician):
+
+def update_candidate_details_from_politician(candidate=None, politician=None):
     """
     This function can replace some existing fields in the candidate object with the latest data from politician.
     It is recommended to use this function after running "update_politician_details_from_candidate", which is more
@@ -3145,19 +3172,21 @@ def update_candidate_details_from_politician(candidate, politician):
     :param politician:
     :return:
     """
+    fields_updated = []
     status = ''
     success = True
-    save_changes = True
+    save_changes = False
 
     if not hasattr(candidate, 'supporters_count') or not hasattr(politician, 'supporters_count'):
         save_changes = False
         success = False
         status += 'UPDATE_CANDIDATE_FROM_POLITICIAN_MISSING_REQUIRED_ATTRIBUTES '
         results = {
-            'success': success,
-            'status': status,
-            'candidate': candidate,
-            'save_changes': save_changes,
+            'candidate':        candidate,
+            'fields_updated':   fields_updated,
+            'save_changes':     save_changes,
+            'status':           status,
+            'success':          success,
         }
         return results
 
@@ -3166,68 +3195,125 @@ def update_candidate_details_from_politician(candidate, politician):
             # Facebook
             if positive_value_exists(politician.facebook_url) and not politician.facebook_url_is_broken:
                 candidate.facebook_url = politician.facebook_url
+                save_changes = True
+                if 'facebook_url' not in fields_updated:
+                    fields_updated.append('facebook_url')
             elif positive_value_exists(politician.facebook_url2) and not politician.facebook_url2_is_broken:
                 candidate.facebook_url = politician.facebook_url2
+                save_changes = True
+                if 'facebook_url' not in fields_updated:
+                    fields_updated.append('facebook_url')
             elif positive_value_exists(politician.facebook_url3) and not politician.facebook_url3_is_broken:
                 candidate.facebook_url = politician.facebook_url3
+                save_changes = True
+                if 'facebook_url' not in fields_updated:
+                    fields_updated.append('facebook_url')
             # Email
             if positive_value_exists(politician.politician_email):
                 candidate.candidate_email = politician.politician_email
+                save_changes = True
+                if 'candidate_email' not in fields_updated:
+                    fields_updated.append('candidate_email')
             elif positive_value_exists(politician.politician_email2):
                 candidate.candidate_email = politician.politician_email2
+                save_changes = True
+                if 'candidate_email' not in fields_updated:
+                    fields_updated.append('candidate_email')
             elif positive_value_exists(politician.politician_email3):
                 candidate.candidate_email = politician.politician_email3
+                save_changes = True
+                if 'candidate_email' not in fields_updated:
+                    fields_updated.append('candidate_email')
             # Phone
             if positive_value_exists(politician.politician_phone_number):
                 candidate.candidate_phone = politician.politician_phone_number
+                save_changes = True
+                if 'candidate_phone' not in fields_updated:
+                    fields_updated.append('candidate_phone')
             elif positive_value_exists(politician.politician_phone_number2):
                 candidate.candidate_phone = politician.politician_phone_number2
+                save_changes = True
+                if 'candidate_phone' not in fields_updated:
+                    fields_updated.append('candidate_phone')
             elif positive_value_exists(politician.politician_phone_number3):
                 candidate.candidate_phone = politician.politician_phone_number3
+                save_changes = True
+                if 'candidate_phone' not in fields_updated:
+                    fields_updated.append('candidate_phone')
             # Twitter Handle
             if positive_value_exists(politician.politician_twitter_handle):
                 results = add_twitter_handle_to_next_candidate_spot(
                     candidate, politician.politician_twitter_handle)
                 if results['success'] and results['values_changed']:
                     candidate = results['candidate']
+                    save_changes = True
+                    if positive_value_exists(results['field_updated']):
+                        fields_updated.append(results['field_updated'])
             if positive_value_exists(politician.politician_twitter_handle2):
                 results = add_twitter_handle_to_next_candidate_spot(
                     candidate, politician.politician_twitter_handle2)
                 if results['success'] and results['values_changed']:
                     candidate = results['candidate']
+                    save_changes = True
+                    if positive_value_exists(results['field_updated']):
+                        fields_updated.append(results['field_updated'])
             if positive_value_exists(politician.politician_twitter_handle3):
                 results = add_twitter_handle_to_next_candidate_spot(
                     candidate, politician.politician_twitter_handle3)
                 if results['success'] and results['values_changed']:
                     candidate = results['candidate']
+                    save_changes = True
+                    if positive_value_exists(results['field_updated']):
+                        fields_updated.append(results['field_updated'])
             if positive_value_exists(politician.politician_twitter_handle4):
                 results = add_twitter_handle_to_next_candidate_spot(
                     candidate, politician.politician_twitter_handle4)
                 if results['success'] and results['values_changed']:
                     candidate = results['candidate']
+                    save_changes = True
+                    if positive_value_exists(results['field_updated']):
+                        fields_updated.append(results['field_updated'])
             if positive_value_exists(politician.politician_twitter_handle5):
                 results = add_twitter_handle_to_next_candidate_spot(
                     candidate, politician.politician_twitter_handle5)
                 if results['success'] and results['values_changed']:
                     candidate = results['candidate']
+                    save_changes = True
+                    if positive_value_exists(results['field_updated']):
+                        fields_updated.append(results['field_updated'])
             # URL
             if positive_value_exists(politician.politician_url):
                 candidate.candidate_url = politician.politician_url
+                fields_updated.append('candidate_url')
+                save_changes = True
             elif positive_value_exists(politician.politician_url2):
                 candidate.candidate_url = politician.politician_url2
+                fields_updated.append('candidate_url')
+                save_changes = True
             elif positive_value_exists(politician.politician_url3):
                 candidate.candidate_url = politician.politician_url3
+                fields_updated.append('candidate_url')
+                save_changes = True
             elif positive_value_exists(politician.politician_url4):
                 candidate.candidate_url = politician.politician_url4
+                fields_updated.append('candidate_url')
+                save_changes = True
             elif positive_value_exists(politician.politician_url5):
                 candidate.candidate_url = politician.politician_url5
+                fields_updated.append('candidate_url')
+                save_changes = True
             if positive_value_exists(politician.vote_usa_politician_id):
                 candidate.vote_usa_politician_id = politician.vote_usa_politician_id
+                fields_updated.append('vote_usa_politician_id')
+                save_changes = True
             # Photos
             if candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
                 if positive_value_exists(politician.profile_image_type_currently_active) \
                         and candidate.profile_image_type_currently_active != PROFILE_IMAGE_TYPE_UNKNOWN:
                     candidate.profile_image_type_currently_active = politician.profile_image_type_currently_active
+                    save_changes = True
+                    if 'profile_image_type_currently_active' not in fields_updated:
+                        fields_updated.append('profile_image_type_currently_active')
             results = copy_field_value_from_object1_to_object2(
                 object1=politician,
                 object2=candidate,
@@ -3245,9 +3331,15 @@ def update_candidate_details_from_politician(candidate, politician):
                     'we_vote_hosted_profile_vote_usa_image_url_medium',
                     'we_vote_hosted_profile_vote_usa_image_url_tiny',
                 ],
+                only_change_object2_field_if_incoming_value=True,
                 only_change_object2_field_if_no_existing_value=True)
             candidate = results['object2'] if results['success'] and results['values_changed'] else candidate
-
+            save_changes = save_changes or results['values_changed']
+            fields_updated_append = results['fields_updated']
+            for new_field in fields_updated_append:
+                if new_field not in fields_updated:
+                    fields_updated.append(new_field)
+            profile_image_default_updated = False
             if candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
                 if positive_value_exists(politician.we_vote_hosted_profile_uploaded_image_url_large) \
                         or positive_value_exists(politician.we_vote_hosted_profile_uploaded_image_url_medium) \
@@ -3259,6 +3351,42 @@ def update_candidate_details_from_politician(candidate, politician):
                         politician.we_vote_hosted_profile_uploaded_image_url_medium
                     candidate.we_vote_hosted_profile_image_url_tiny = \
                         politician.we_vote_hosted_profile_uploaded_image_url_tiny
+                    profile_image_default_updated = True
+                    save_changes = True
+                elif positive_value_exists(politician.we_vote_hosted_profile_twitter_image_url_large) \
+                        or positive_value_exists(politician.we_vote_hosted_profile_twitter_image_url_medium) \
+                        or positive_value_exists(politician.we_vote_hosted_profile_twitter_image_url_tiny):
+                    candidate.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_TWITTER
+                    candidate.we_vote_hosted_profile_image_url_large = \
+                        politician.we_vote_hosted_profile_twitter_image_url_large
+                    candidate.we_vote_hosted_profile_image_url_medium = \
+                        politician.we_vote_hosted_profile_twitter_image_url_medium
+                    candidate.we_vote_hosted_profile_image_url_tiny = \
+                        politician.we_vote_hosted_profile_twitter_image_url_tiny
+                    profile_image_default_updated = True
+                    save_changes = True
+                elif positive_value_exists(politician.we_vote_hosted_profile_vote_usa_image_url_large) \
+                        or positive_value_exists(politician.we_vote_hosted_profile_vote_usa_image_url_medium) \
+                        or positive_value_exists(politician.we_vote_hosted_profile_vote_usa_image_url_tiny):
+                    candidate.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_VOTE_USA
+                    candidate.we_vote_hosted_profile_image_url_large = \
+                        politician.we_vote_hosted_profile_vote_usa_image_url_large
+                    candidate.we_vote_hosted_profile_image_url_medium = \
+                        politician.we_vote_hosted_profile_vote_usa_image_url_medium
+                    candidate.we_vote_hosted_profile_image_url_tiny = \
+                        politician.we_vote_hosted_profile_vote_usa_image_url_tiny
+                    profile_image_default_updated = True
+                    save_changes = True
+            if profile_image_default_updated:
+                if 'profile_image_type_currently_active' not in fields_updated:
+                    fields_updated.append('profile_image_type_currently_active')
+                if 'we_vote_hosted_profile_image_url_large' not in fields_updated:
+                    fields_updated.append('we_vote_hosted_profile_image_url_large')
+                if 'we_vote_hosted_profile_image_url_medium' not in fields_updated:
+                    fields_updated.append('we_vote_hosted_profile_image_url_medium')
+                if 'we_vote_hosted_profile_image_url_tiny' not in fields_updated:
+                    fields_updated.append('we_vote_hosted_profile_image_url_tiny')
+
     except Exception as e:
         status += 'FAILED_TO_UPDATE_CANDIDATE: ' \
                   '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
@@ -3266,6 +3394,7 @@ def update_candidate_details_from_politician(candidate, politician):
 
     results = {
         'candidate':        candidate,
+        'fields_updated':   fields_updated,
         'save_changes':     save_changes,
         'status':           status,
         'success':          success,

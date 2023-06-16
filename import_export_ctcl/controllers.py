@@ -937,11 +937,16 @@ def retrieve_from_ctcl_api_election_query():
 
 
 def store_results_from_ctcl_api_election_query(structured_json):
+    status = ''
+    success = True
     if 'elections' in structured_json:
         elections_list_json = structured_json['elections']
     else:
         elections_list_json = {}
-    results = {}
+    results = {
+        'status': status,
+        'success': success,
+    }
     from election.models import ElectionManager
     election_manager = ElectionManager()
     for one_election_dict in elections_list_json:

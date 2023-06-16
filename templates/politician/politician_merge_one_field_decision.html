@@ -21,7 +21,8 @@
     {% if 'http' in politician1_field_value %}
         <a href="{{ politician1_field_value }}" target="_blank">
         {% if conflict_status == "POLITICIAN1" %}<strong>{{ politician1_field_value|default_if_none:"" }}</strong>{% else %}{{ politician1_field_value|default_if_none:"" }}{% endif %}
-        <span class="glyphicon glyphicon-new-window"></span>
+            &nbsp;
+            <span class="glyphicon glyphicon-new-window"></span>
         </a>
     {% else %}
         {% if conflict_status == "POLITICIAN1" %}<strong>{{ politician1_field_value|default_if_none:"" }}</strong>{% else %}{{ politician1_field_value|default_if_none:"" }}{% endif %}
@@ -32,7 +33,8 @@
     {% if 'http' in politician2_field_value %}
         <a href="{{ politician2_field_value }}" target="_blank">
         {% if conflict_status == "POLITICIAN2" %}<strong>{{ politician2_field_value|default_if_none:"" }}</strong>{% else %}{{ politician2_field_value|default_if_none:"" }}{% endif %}
-        <span class="glyphicon glyphicon-new-window"></span>
+            &nbsp;
+            <span class="glyphicon glyphicon-new-window"></span>
         </a>
     {% else %}
         {% if conflict_status == "POLITICIAN2" %}<strong>{{ politician2_field_value|default_if_none:"" }}</strong>{% else %}{{ politician2_field_value|default_if_none:"" }}{% endif %}
