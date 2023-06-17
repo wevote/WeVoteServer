@@ -1002,7 +1002,7 @@ def representative_edit_view(request, representative_id):
         pass
     elif positive_value_exists(representative_on_stage.representative_name) or \
             positive_value_exists(representative_on_stage.facebook_url) or \
-            positive_value_exists(representative_on_stage.google_civic_reprentative_name) or \
+            positive_value_exists(representative_on_stage.google_civic_representative_name) or \
             positive_value_exists(representative_on_stage.representative_twitter_handle) or \
             positive_value_exists(representative_on_stage.representative_email):
         try:

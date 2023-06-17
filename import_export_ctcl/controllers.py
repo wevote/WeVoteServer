@@ -782,7 +782,8 @@ def retrieve_ctcl_ballot_items_from_polling_location_api(
                     status += results['status']
                 else:
                     # Create BallotReturnedEmpty entry, so we don't keep retrieving this map point
-                    status += "NO_INCOMING_BALLOT_ITEMS_FOUND_CTCL_CREATE_EMPTY "
+                    status += "NO_INCOMING_BALLOT_ITEMS_CTCL_CREATE_EMPTY: " \
+                              "" + str(polling_location_we_vote_id) + ' '
                     results = ballot_returned_manager.create_ballot_returned_empty(
                         google_civic_election_id=google_civic_election_id,
                         is_from_ctcl=True,
@@ -928,8 +929,13 @@ def retrieve_from_ctcl_api_election_query():
             'success': False,
         }
     else:
+        try:
+            status += "CTCL_ELECTION_QUERY_ERROR: " + str(response.text) + " "
+            status += "RESPONSE.URL: " + response.url + " "
+        except Exception as e:
+            status += "CTCL_ELECTION_QUERY_ERROR_RESPONSE_TEXT_MISSING: " + str(e) + " "
         results = {
-            'status':           'structured_json retrieved',
+            'status':           status,
             'structured_json':  structured_json,
             'success':          True,
         }
