@@ -699,6 +699,7 @@ def groom_and_store_officials_list_from_json(
     if today and today.year:
         this_year = convert_to_int(today.year)
 
+    ignore_representatives_with_any_of_these_names = ['VACANT']
     for one_official in officials_list:
         create_representative = False
         representative_object = None
@@ -708,6 +709,9 @@ def groom_and_store_officials_list_from_json(
         # For some reason Google Civic API violates the JSON standard and uses a / in front of '
         representative_name = representative_name.replace("/'", "'")
         representative_name = representative_name.strip()
+        if representative_name in ignore_representatives_with_any_of_these_names:
+            # Do not proceed with this representative data
+            continue
         # We want to save the name exactly as it comes from the Google Civic API
         google_civic_representative_name = one_official['name'] if 'name' in one_official else ''
         google_civic_representative_name = google_civic_representative_name.strip()
