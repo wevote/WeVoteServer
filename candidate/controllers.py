@@ -3226,6 +3226,11 @@ def update_candidate_details_from_politician(candidate=None, politician=None):
                     results = add_name_to_next_spot(candidate, candidate.candidate_name)
                     if results['success'] and results['values_changed']:
                         candidate = results['candidate_or_politician']
+                        save_changes = True
+                        if positive_value_exists(results['field_updated']):
+                            fields_updated.append(results['field_updated'])
+                    elif not results['success']:
+                        status += "FAILED_TO_ADD_CANDIDATE_NAME: " + results['status']
                 if candidate.candidate_name != politician.politician_name:
                     candidate.candidate_name = politician.politician_name
                     save_changes = True
@@ -3238,6 +3243,8 @@ def update_candidate_details_from_politician(candidate=None, politician=None):
                     if positive_value_exists(results['field_updated']) \
                             and results['field_updated'] not in fields_updated:
                         fields_updated.append(results['field_updated'])
+                elif not results['success']:
+                    status += "FAILED_TO_ADD_GOOGLE_CIVIC_CANDIDATE_NAME: " + results['status']
             if positive_value_exists(politician.google_civic_candidate_name2):
                 results = add_name_to_next_spot(candidate, politician.google_civic_candidate_name2)
                 if results['success'] and results['values_changed']:
@@ -3246,6 +3253,8 @@ def update_candidate_details_from_politician(candidate=None, politician=None):
                     if positive_value_exists(results['field_updated']) \
                             and results['field_updated'] not in fields_updated:
                         fields_updated.append(results['field_updated'])
+                elif not results['success']:
+                    status += "FAILED_TO_ADD_GOOGLE_CIVIC_CANDIDATE_NAME2: " + results['status']
             if positive_value_exists(politician.google_civic_candidate_name3):
                 results = add_name_to_next_spot(candidate, politician.google_civic_candidate_name3)
                 if results['success'] and results['values_changed']:
@@ -3254,6 +3263,8 @@ def update_candidate_details_from_politician(candidate=None, politician=None):
                     if positive_value_exists(results['field_updated']) \
                             and results['field_updated'] not in fields_updated:
                         fields_updated.append(results['field_updated'])
+                elif not results['success']:
+                    status += "FAILED_TO_ADD_GOOGLE_CIVIC_CANDIDATE_NAME3: " + results['status']
             # Facebook
             if positive_value_exists(politician.facebook_url) and not politician.facebook_url_is_broken:
                 candidate.facebook_url = politician.facebook_url
