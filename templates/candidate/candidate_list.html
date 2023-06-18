@@ -261,6 +261,13 @@
 {% elif hide_candidate_tools %}
     <br />
     <a href="{{ current_page_minus_candidate_tools_url }}&hide_candidate_tools=0">(Show Candidate Tools)</a><br />
+{% elif candidate_list %}
+    <ul>
+        <li>
+            Prepare: <a href="{% url 'candidate:update_candidates_from_politicians' %}?google_civic_election_id={{ google_civic_election_id }}&show_this_year_of_candidates={{ show_this_year_of_candidates }}&state_code={{ state_code }}">
+            Update Candidates from Politician Data
+        </li>
+    </ul>
 {% endif %}
 
 {% if show_this_year_of_candidates %}
