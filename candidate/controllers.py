@@ -45,9 +45,19 @@ class FakeFirefoxURLopener(urllib.request.FancyURLopener):
 
 
 def add_name_to_next_spot(candidate_or_politician, google_civic_candidate_name_to_add):
-
+    field_updated = ''
+    status = ""
+    success = True
+    values_changed = False
     if not positive_value_exists(google_civic_candidate_name_to_add):
-        return candidate_or_politician
+        status += 'CANDIDATE_OR_POLITICIAN_NAME_MISSING '
+        return {
+            'candidate_or_politician': candidate_or_politician,
+            'field_updated':    field_updated,
+            'status':           status,
+            'success':          False,
+            'values_changed':   values_changed,
+        }
 
     # If an initial exists in the name (ex/ " A "), then search for the name
     # with a period added (ex/ " A. ") We check for an exact match AND a match with/without initial + period
@@ -82,6 +92,8 @@ def add_name_to_next_spot(candidate_or_politician, google_civic_candidate_name_t
 
     if not positive_value_exists(candidate_or_politician.google_civic_candidate_name):
         candidate_or_politician.google_civic_candidate_name = google_civic_candidate_name_to_add
+        field_updated = 'google_civic_candidate_name'
+        values_changed = True
     elif google_civic_candidate_name_to_add == candidate_or_politician.google_civic_candidate_name:
         # The value is already stored in candidate_or_politician.google_civic_candidate_name so doesn't need
         # to be added anywhere below
@@ -92,6 +104,8 @@ def add_name_to_next_spot(candidate_or_politician, google_civic_candidate_name_t
         pass
     elif not positive_value_exists(candidate_or_politician.google_civic_candidate_name2):
         candidate_or_politician.google_civic_candidate_name2 = google_civic_candidate_name_to_add
+        field_updated = 'google_civic_candidate_name2'
+        values_changed = True
     elif google_civic_candidate_name_to_add == candidate_or_politician.google_civic_candidate_name2:
         # The value is already stored in candidate_or_politician.google_civic_candidate_name2 so doesn't need
         # to be added to candidate_or_politician.google_civic_candidate_name3
@@ -102,6 +116,8 @@ def add_name_to_next_spot(candidate_or_politician, google_civic_candidate_name_t
         pass
     elif not positive_value_exists(candidate_or_politician.google_civic_candidate_name3):
         candidate_or_politician.google_civic_candidate_name3 = google_civic_candidate_name_to_add
+        field_updated = 'google_civic_candidate_name3'
+        values_changed = True
     elif google_civic_candidate_name_to_add == candidate_or_politician.google_civic_candidate_name3:
         # The value is already stored in candidate_or_politician.google_civic_candidate_name2 so doesn't need
         # to be added to candidate_or_politician.google_civic_candidate_name3
@@ -123,8 +139,13 @@ def add_name_to_next_spot(candidate_or_politician, google_civic_candidate_name_t
     #     pass
     # elif not positive_value_exists(candidate_or_politician.google_civic_candidate_name5):
     #     candidate_or_politician.google_civic_candidate_name5 = google_civic_candidate_name_to_add
-    # # We currently only support 5 alternate names
-    return candidate_or_politician
+    return {
+        'candidate_or_politician':  candidate_or_politician,
+        'field_updated':            field_updated,
+        'status':                   status,
+        'success':                  success,
+        'values_changed':           values_changed,
+    }
 
 
 def add_twitter_handle_to_next_candidate_spot(candidate, twitter_handle):
@@ -695,14 +716,20 @@ def merge_these_two_candidates(candidate1_we_vote_id, candidate2_we_vote_id, adm
 
     # Preserve unique google_civic_candidate_name, _name2, _name3, _name4, and _name5
     if positive_value_exists(candidate2_on_stage.google_civic_candidate_name):
-        candidate1_on_stage = add_name_to_next_spot(
+        results = add_name_to_next_spot(
             candidate1_on_stage, candidate2_on_stage.google_civic_candidate_name)
+        if results['success'] and results['values_changed']:
+            candidate1_on_stage = results['candidate_or_politician']
     if positive_value_exists(candidate2_on_stage.google_civic_candidate_name2):
-        candidate1_on_stage = add_name_to_next_spot(
+        results = add_name_to_next_spot(
             candidate1_on_stage, candidate2_on_stage.google_civic_candidate_name2)
+        if results['success'] and results['values_changed']:
+            candidate1_on_stage = results['candidate_or_politician']
     if positive_value_exists(candidate2_on_stage.google_civic_candidate_name3):
-        candidate1_on_stage = add_name_to_next_spot(
+        results = add_name_to_next_spot(
             candidate1_on_stage, candidate2_on_stage.google_civic_candidate_name3)
+        if results['success'] and results['values_changed']:
+            candidate1_on_stage = results['candidate_or_politician']
 
     # Preserve unique candidate_twitter_handle, candidate_twitter_handle2, and candidate_twitter_handle3
     if positive_value_exists(candidate2_on_stage.candidate_twitter_handle):
@@ -3192,6 +3219,41 @@ def update_candidate_details_from_politician(candidate=None, politician=None):
 
     try:
         if positive_value_exists(candidate.id):
+            if positive_value_exists(politician.politician_name):
+                if positive_value_exists(candidate.candidate_name) \
+                        and candidate.candidate_name != politician.politician_name:
+                    # Make sure current candidate_name is in the google_civic_candidate_name fields
+                    results = add_name_to_next_spot(candidate, candidate.candidate_name)
+                    if results['success'] and results['values_changed']:
+                        candidate = results['candidate_or_politician']
+                if candidate.candidate_name != politician.politician_name:
+                    candidate.candidate_name = politician.politician_name
+                    save_changes = True
+                    fields_updated.append('candidate_name')
+            if positive_value_exists(politician.google_civic_candidate_name):
+                results = add_name_to_next_spot(candidate, politician.google_civic_candidate_name)
+                if results['success'] and results['values_changed']:
+                    candidate = results['candidate_or_politician']
+                    save_changes = True
+                    if positive_value_exists(results['field_updated']) \
+                            and results['field_updated'] not in fields_updated:
+                        fields_updated.append(results['field_updated'])
+            if positive_value_exists(politician.google_civic_candidate_name2):
+                results = add_name_to_next_spot(candidate, politician.google_civic_candidate_name2)
+                if results['success'] and results['values_changed']:
+                    candidate = results['candidate_or_politician']
+                    save_changes = True
+                    if positive_value_exists(results['field_updated']) \
+                            and results['field_updated'] not in fields_updated:
+                        fields_updated.append(results['field_updated'])
+            if positive_value_exists(politician.google_civic_candidate_name3):
+                results = add_name_to_next_spot(candidate, politician.google_civic_candidate_name3)
+                if results['success'] and results['values_changed']:
+                    candidate = results['candidate_or_politician']
+                    save_changes = True
+                    if positive_value_exists(results['field_updated']) \
+                            and results['field_updated'] not in fields_updated:
+                        fields_updated.append(results['field_updated'])
             # Facebook
             if positive_value_exists(politician.facebook_url) and not politician.facebook_url_is_broken:
                 candidate.facebook_url = politician.facebook_url

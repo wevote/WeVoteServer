@@ -449,6 +449,14 @@ DISTRICT_PAIR_PATTERNS_XTH = [
     ['{district_number}th congressional district', 'district {district_number}'],
 ]
 
+MIDDLE_INITIAL_SUBSTRINGS = []
+LETTER_LIST = string.ascii_uppercase
+for letter in LETTER_LIST:
+    letter_substring = " {letter} ".format(letter=letter)
+    MIDDLE_INITIAL_SUBSTRINGS.append(letter_substring)
+    letter_substring = " {letter}. ".format(letter=letter)
+    MIDDLE_INITIAL_SUBSTRINGS.append(letter_substring)
+
 
 def add_to_list_if_positive_value_exists(value=None, incoming_list=[]):
     if not incoming_list or not positive_value_exists(incoming_list):

@@ -121,6 +121,7 @@ class Politician(models.Model):
     facebook_url2_is_broken = models.BooleanField(default=False)
     facebook_url3_is_broken = models.BooleanField(default=False)
     # This is the politician's name from GoogleCivicCandidateCampaign
+    google_civic_name_alternates_generated = models.BooleanField(default=False)
     google_civic_candidate_name = models.CharField(
         verbose_name="full name from google civic", max_length=255, default=None, null=True, blank=True)
     google_civic_candidate_name2 = models.CharField(max_length=255, null=True)
