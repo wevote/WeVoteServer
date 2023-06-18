@@ -41,6 +41,53 @@ PROFILE_IMAGE_ORIGINAL_MAX_WIDTH = 2048
 PROFILE_IMAGE_ORIGINAL_MAX_HEIGHT = 2048
 
 
+def add_alternate_names_to_next_spot(politician):
+    status = ''
+    success = True
+    values_changed = False
+    if not hasattr(politician, 'politician_name') or not positive_value_exists(politician.politician_name):
+        status += 'POLITICIAN_MISSING '
+        return {
+            'success':          False,
+            'status':           status,
+            'politician':       politician,
+            'values_changed':   values_changed,
+        }
+
+    from wevote_functions.functions import MIDDLE_INITIAL_SUBSTRINGS
+    # Does the politician.politician_name contain a single middle initial?
+
+    middle_initial_found = False
+    name_without_middle_initial = ''
+    politician_name_has_middle_initial = False
+    for middle_initial_substring in MIDDLE_INITIAL_SUBSTRINGS:
+        if not middle_initial_found and middle_initial_substring in politician.politician_name:
+            middle_initial_found = True
+            politician_name_has_middle_initial = True
+            name_without_middle_initial = politician.politician_name.replace(middle_initial_substring, ' ')
+            status += "MIDDLE_INITIAL_FOUND "
+    if politician_name_has_middle_initial and positive_value_exists(name_without_middle_initial):
+        if name_without_middle_initial != politician.google_civic_candidate_name and \
+                name_without_middle_initial != politician.google_civic_candidate_name2 and \
+                name_without_middle_initial != politician.google_civic_candidate_name3:
+            # We do not have an alternate name WITHOUT the middle initial. Save it.
+            results = add_name_to_next_spot(politician, name_without_middle_initial)
+            if results['success'] and results['values_changed']:
+                status += "POLITICIAN_CHANGED "
+                politician = results['candidate_or_politician']
+                values_changed = True
+            elif not results['success']:
+                status += results['status']
+                success = False
+    # We currently only support 3 alternate names
+    return {
+        'success':          success,
+        'status':           status,
+        'politician':       politician,
+        'values_changed':   values_changed,
+    }
+
+
 def add_twitter_handle_to_next_politician_spot(politician, twitter_handle):
     status = ''
     success = True
@@ -726,13 +773,21 @@ def merge_these_two_politicians(
 
     # Preserve unique politician_name & google_civic_candidate_name, _name2, _name3
     if politician2.politician_name != politician1.politician_name:
-        politician1 = add_name_to_next_spot(politician1, politician2.politician_name)
+        results = add_name_to_next_spot(politician1, politician2.politician_name)
+        if results['success'] and results['values_changed']:
+            politician1 = results['candidate_or_politician']
     if positive_value_exists(politician2.google_civic_candidate_name):
-        politician1 = add_name_to_next_spot(politician1, politician2.google_civic_candidate_name)
+        results = add_name_to_next_spot(politician1, politician2.google_civic_candidate_name)
+        if results['success'] and results['values_changed']:
+            politician1 = results['candidate_or_politician']
     if positive_value_exists(politician2.google_civic_candidate_name2):
-        politician1 = add_name_to_next_spot(politician1, politician2.google_civic_candidate_name2)
+        results = add_name_to_next_spot(politician1, politician2.google_civic_candidate_name2)
+        if results['success'] and results['values_changed']:
+            politician1 = results['candidate_or_politician']
     if positive_value_exists(politician2.google_civic_candidate_name3):
-        politician1 = add_name_to_next_spot(politician1, politician2.google_civic_candidate_name3)
+        results = add_name_to_next_spot(politician1, politician2.google_civic_candidate_name3)
+        if results['success'] and results['values_changed']:
+            politician1 = results['candidate_or_politician']
 
     # Preserve unique politician_email -> politician_email3
     # TEMP UNTIL WE DEPRECATE politician_email_address

@@ -43,8 +43,8 @@ from wevote_functions.functions import convert_to_int, convert_to_political_part
     extract_last_name_from_full_name, extract_twitter_handle_from_text_string, \
     positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization
 from wevote_settings.constants import IS_BATTLEGROUND_YEARS_AVAILABLE
-from .controllers import add_twitter_handle_to_next_politician_spot, fetch_duplicate_politician_count, \
-    figure_out_politician_conflict_values, find_duplicate_politician, \
+from .controllers import add_alternate_names_to_next_spot, add_twitter_handle_to_next_politician_spot, \
+    fetch_duplicate_politician_count, figure_out_politician_conflict_values, find_duplicate_politician, \
     merge_if_duplicate_politicians, merge_these_two_politicians, politicians_import_from_master_server
 from .models import Politician, PoliticianManager, POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, \
     POLITICIAN_UNIQUE_IDENTIFIERS, PoliticiansArePossibleDuplicates
@@ -419,6 +419,51 @@ def politician_list_view(request):
     #         we_vote_id_string += str(one_politician.we_vote_id) + " "
     #     messages.add_message(request, messages.ERROR,
     #                          'politician_email mismatch with politician_email_address: ' + str(we_vote_id_string))
+
+    # Make sure we have a version of the politician's name without a middle initial (for matching endorsements)
+    generate_google_civic_name_alternates = True
+    number_to_generate = 1000
+    if generate_google_civic_name_alternates and positive_value_exists(state_code) and run_scripts:
+        politician_query = Politician.objects.all()
+        politician_query = politician_query.filter(google_civic_name_alternates_generated=False)
+        politician_query = politician_query.filter(state_code__iexact=state_code)
+        total_to_convert = politician_query.count()
+        total_to_convert_after = total_to_convert - number_to_generate if total_to_convert > number_to_generate else 0
+        politician_list_to_convert = list(politician_query[:number_to_generate])
+        update_list = []
+        updates_needed = False
+        updates_made = 0
+        for one_politician in politician_list_to_convert:
+            results = add_alternate_names_to_next_spot(
+                politician=one_politician,
+            )
+            if results['values_changed']:
+                politician = results['politician']
+                politician.google_civic_name_alternates_generated = True
+                update_list.append(politician)
+                updates_needed = True
+                updates_made += 1
+            elif results['success']:
+                one_politician.google_civic_name_alternates_generated = True
+                update_list.append(one_politician)
+                updates_needed = True
+        if updates_needed:
+            try:
+                Politician.objects.bulk_update(update_list, [
+                    'google_civic_name_alternates_generated',
+                    'google_civic_candidate_name',
+                    'google_civic_candidate_name2',
+                    'google_civic_candidate_name3',
+                ])
+                messages.add_message(request, messages.INFO,
+                                     "{updates_made:,} google_civic_name_alternates_generated. "
+                                     "{total_to_convert_after:,} remaining."
+                                     "".format(total_to_convert_after=total_to_convert_after,
+                                               updates_made=updates_made))
+            except Exception as e:
+                messages.add_message(request, messages.ERROR,
+                                     "ERROR with google_civic_name_alternates_generated: {e} "
+                                     "".format(e=e))
 
     # Create seo_friendly_path for all politicians who currently don't have one
     generate_seo_friendly_path_updates = True  # Set False on local machine for now
