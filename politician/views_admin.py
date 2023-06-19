@@ -37,7 +37,8 @@ from politician.controllers import generate_campaignx_for_politician, politician
 from position.models import PositionEntered, PositionListManager
 from representative.models import Representative, RepresentativeManager
 from voter.models import voter_has_authority
-from wevote_functions.functions import convert_to_int, convert_to_political_party_constant, \
+from wevote_functions.functions import convert_date_to_we_vote_date_string, convert_to_int, \
+    convert_to_political_party_constant, convert_we_vote_date_string_to_date_as_integer, \
     extract_first_name_from_full_name, extract_instagram_handle_from_text_string, \
     extract_middle_name_from_full_name, \
     extract_last_name_from_full_name, extract_twitter_handle_from_text_string, \
@@ -2152,8 +2153,8 @@ def politician_edit_process_view(request):
             if value_changed:
                 campaignx.save()
 
-    # Update Linked Candidates with seo_friendly_path
-    if success and positive_value_exists(politician_on_stage.seo_friendly_path) and push_seo_friendly_path_changes:
+    # Update Linked Candidates with seo_friendly_path, and
+    if success and positive_value_exists(politician_we_vote_id):
         candidate_list_manager = CandidateListManager()
         politician_we_vote_id_list = [politician_we_vote_id]
         candidate_results = candidate_list_manager.retrieve_candidate_list(
@@ -2166,18 +2167,33 @@ def politician_edit_process_view(request):
         update_list = []
         updates_needed = False
         updates_made = 0
+        candidates_to_update_from_politician = []
         if candidate_results['candidate_list_found']:
+            now_as_we_vote_date_string = convert_date_to_we_vote_date_string(now())
+            now_as_integer = convert_we_vote_date_string_to_date_as_integer(now_as_we_vote_date_string)
             candidate_list = candidate_results['candidate_list']
             for candidate in candidate_list:
-                candidate.seo_friendly_path = politician_on_stage.seo_friendly_path
-                update_list.append(candidate)
-                updates_needed = True
-                updates_made += 1
+                if candidate.candidate_ultimate_election_date > now_as_integer:
+                    candidates_to_update_from_politician.append(candidate)
+                elif positive_value_exists(politician_on_stage.seo_friendly_path) and push_seo_friendly_path_changes:
+                    candidate.seo_friendly_path = politician_on_stage.seo_friendly_path
+                    update_list.append(candidate)
+                    updates_needed = True
+                    updates_made += 1
         if updates_needed:
             CandidateCampaign.objects.bulk_update(update_list, ['seo_friendly_path'])
             messages.add_message(request, messages.INFO,
                                  "{updates_made:,} candidates updated with new seo_friendly_path."
                                  "".format(updates_made=updates_made))
+        if len(candidates_to_update_from_politician) > 0:
+            from candidate.controllers import update_candidate_details_from_politician
+            for candidate in candidates_to_update_from_politician:
+                results = update_candidate_details_from_politician(candidate=candidate, politician=politician_on_stage)
+                if results['success'] and results['save_changes']:
+                    candidate_to_update = results['candidate']
+                    candidate_to_update.save()
+                else:
+                    status += results['status']
 
     # Update Linked Representatives with seo_friendly_path
     if success and positive_value_exists(politician_on_stage.seo_friendly_path) and push_seo_friendly_path_changes:
