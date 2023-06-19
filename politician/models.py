@@ -196,6 +196,8 @@ class Politician(models.Model):
     twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)
     vote_usa_politician_id = models.CharField(
         verbose_name="Vote USA permanent id for this politician", max_length=64, default=None, null=True, blank=True)
+    # Image URL on Vote USA's servers. See vote_usa_profile_image_url_https, the master image cached on We Vote servers.
+    photo_url_from_vote_usa = models.TextField(null=True, blank=True)
     # This is the master image url cached on We Vote servers. See photo_url_from_vote_usa for Vote USA URL.
     vote_usa_profile_image_url_https = models.TextField(null=True, blank=True, default=None)
 
