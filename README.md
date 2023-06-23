@@ -17,7 +17,9 @@ To install and develop the WeVote API server, follow the instructions below base
 
 1. Use these [Simplified Instructions for Mac](docs/README_MAC_SIMPLIFIED_INSTALL.md) leveraging the free (and powerful) PyCharm IDE and debugger (**recommended!**) 
 
-2. For advanced users, use the [Docker Based Development](docs/README_API_INSTALL_DOCKER.md) for OSX and Linux users.
+2. [Install directly](docs/README_API_INSTALL.md) on your Linux machine (or use WSL on Windows)
+
+3. For advanced users, use the [Docker Based Development](docs/README_API_INSTALL_DOCKER.md) for OSX and Linux users.
 
 ## Installing We Vote Mobile Web Application (React/Flux)
 
