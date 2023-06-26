@@ -1010,7 +1010,18 @@ def organization_edit_view(request, organization_id=0, organization_we_vote_id="
     # Sort by organization_type value (instead of key)
     organization_types_list = sorted(organization_types_map.items(), key=operator.itemgetter(1))
 
+    voter_device_id = get_voter_api_device_id(request)
+    voter = fetch_voter_from_voter_device_link(voter_device_id)
+    if hasattr(voter, 'is_admin') and voter.is_admin:
+        queryset = OrganizationChangeLog.objects.using('readonly').all()
+        queryset = queryset.filter(organization_we_vote_id__iexact=organization_we_vote_id)
+        queryset = queryset.order_by('-log_datetime')
+        change_log_list = list(queryset)
+    else:
+        change_log_list = []
+
     template_values = {
+        'change_log_list':                      change_log_list,
         'google_civic_election_id':             google_civic_election_id,
         'issue_list':                           new_issue_list,
         'messages_on_stage':                    messages_on_stage,
@@ -1022,6 +1033,7 @@ def organization_edit_view(request, organization_id=0, organization_we_vote_id="
         'twitter_link_to_organization':         twitter_link_to_organization,
         'twitter_link_to_organization_handle':  twitter_link_to_organization_handle,
         'upcoming_election_list':               upcoming_election_list,
+        'voter':                                voter,
     }
     return render(request, 'organization/organization_edit.html', template_values)
 
@@ -1416,11 +1428,15 @@ def organization_edit_process_view(request):
                     messages.add_message(request, messages.ERROR, 'Could not create TwitterLinkToOrganization.')
                     twitter_handle_can_be_saved_without_conflict = False
 
+    issue_analysis_done_changed = False
     try:
         if organization_on_stage_found:
             # Update
             if issue_analysis_admin_notes is not False:
                 organization_on_stage.issue_analysis_admin_notes = issue_analysis_admin_notes.strip()
+            issue_analysis_done_before = positive_value_exists(organization_on_stage.issue_analysis_done)
+            if issue_analysis_done_before is not positive_value_exists(issue_analysis_done):
+                issue_analysis_done_changed = True
             organization_on_stage.issue_analysis_done = positive_value_exists(issue_analysis_done)
             if organization_twitter_handle is not False:
                 if twitter_handle_can_be_saved_without_conflict:
@@ -1615,17 +1631,23 @@ def organization_edit_process_view(request):
         for issue_we_vote_id in organization_follow_issues_we_vote_id_list_prior_to_update:
             link_issue_manager.unlink_organization_to_issue(organization_we_vote_id, issue_id, issue_we_vote_id)
             change_description += "{issue_we_vote_id} REMOVE ".format(issue_we_vote_id=issue_we_vote_id)
+    if issue_analysis_done_changed:
+        if issue_analysis_done:
+            change_description += "CHANGED: ANALYSIS_DONE "
+        else:
+            change_description += "CHANGED: ANALYSIS_NOT_DONE "
 
     position_list_manager = PositionListManager()
     position_list_manager.refresh_cached_position_info_for_organization(organization_we_vote_id)
 
-    OrganizationChangeLog.objects.create(
-        change_description=change_description,
-        changed_by_name=changed_by_name,
-        changed_by_voter_we_vote_id=changed_by_voter_we_vote_id,
-        organization_we_vote_id=organization_we_vote_id,
-        status=status,
-    )
+    if positive_value_exists(change_description):
+        OrganizationChangeLog.objects.create(
+            change_description=change_description,
+            changed_by_name=changed_by_name,
+            changed_by_voter_we_vote_id=changed_by_voter_we_vote_id,
+            organization_we_vote_id=organization_we_vote_id,
+            status=status,
+        )
 
     return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_id,)) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) + "&state_code=" +
@@ -2247,7 +2269,6 @@ def organization_position_list_view(request, organization_id=0, organization_we_
 
     voter_device_id = get_voter_api_device_id(request)
     voter = fetch_voter_from_voter_device_link(voter_device_id)
-
     if hasattr(voter, 'is_admin') and voter.is_admin:
         queryset = OrganizationChangeLog.objects.using('readonly').all()
         queryset = queryset.filter(organization_we_vote_id__iexact=organization_we_vote_id)
