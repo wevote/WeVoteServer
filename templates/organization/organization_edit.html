@@ -344,6 +344,10 @@
                   class="form-control animated"
                   id="issue_analysis_admin_notes_id"
                   placeholder="Status of issue analysis?">{{ organization.issue_analysis_admin_notes|default_if_none:"" }}</textarea>
+        {% if voter.is_admin and change_log_list %}
+            <br />
+{% include "organization/change_log_list.html" with change_log_list=change_log_list %}
+        {% endif %}
     </div>
 </div>
 
