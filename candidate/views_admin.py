@@ -3904,7 +3904,7 @@ def update_candidate_from_politician_view(request):
 
 
 @login_required
-def update_candidates_from_politicians_view(request):
+def update_candidates_from_politicians_view(request):  # This is related to google_civic_name_alternates_generated
     status = ''
     success = True
 
