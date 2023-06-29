@@ -34,7 +34,7 @@ from wevote_functions.functions import convert_to_int, positive_value_exists, ST
     extract_instagram_handle_from_text_string, extract_twitter_handle_from_text_string, \
     convert_to_political_party_constant, \
     extract_first_name_from_full_name, \
-    extract_last_name_from_full_name
+    extract_last_name_from_full_name, extract_state_from_ocd_division_id
 from wevote_settings.constants import IS_BATTLEGROUND_YEARS_AVAILABLE, OFFICE_HELD_YEARS_AVAILABLE
 
 OFFICES_SYNC_URL = get_environment_variable("OFFICES_SYNC_URL")  # officesSyncOut
@@ -370,6 +370,7 @@ def representative_list_view(request):
     if show_this_year == 9999:
         datetime_now = localtime(now()).date()  # We Vote uses Pacific Time for TIME_ZONE
         show_this_year = datetime_now.year
+    show_ocd_id_state_mismatch = positive_value_exists(request.GET.get('show_ocd_id_state_mismatch', False))
     state_code = request.GET.get('state_code', '')
 
     # Update representatives who currently don't have seo_friendly_path, with value from linked politician
@@ -594,6 +595,11 @@ def representative_list_view(request):
                 year_field_name = 'year_in_office_' + str(show_this_year)
                 queryset = queryset.filter(**{year_field_name: True})
 
+        if positive_value_exists(show_ocd_id_state_mismatch):
+            queryset = queryset.filter(
+                Q(ocd_id_state_mismatch_found=True)
+            )
+
         if positive_value_exists(representative_search):
             search_words = representative_search.split()
             for one_word in search_words:
@@ -692,6 +698,7 @@ def representative_list_view(request):
         'show_battleground':        show_battleground,
         'show_representatives_with_email':  show_representatives_with_email,
         'show_this_year':           show_this_year,
+        'show_ocd_id_state_mismatch':    show_ocd_id_state_mismatch,
         'state_code':               state_code,
         'state_list':               sorted_state_list,
         'years_available':          OFFICE_HELD_YEARS_AVAILABLE,
@@ -1835,3 +1842,37 @@ def update_representatives_from_politicians_view(request):
                                 "".format(
                                     show_this_year=show_this_year,
                                     state_code=state_code))
+
+@login_required
+def update_ocd_id_state_mismatch_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    queryset = Representative.objects.all()
+    representative_list = list(queryset)
+
+    representatives_updated = 0
+    representatives_without_changes = 0
+    for representative in representative_list:
+        mismatch_found = (
+                positive_value_exists(representative.state_code) and
+                positive_value_exists(representative.ocd_division_id) and
+                representative.state_code != extract_state_from_ocd_division_id(representative.ocd_division_id))
+        if representative.ocd_id_state_mismatch_found != mismatch_found:
+            representative.ocd_id_state_mismatch_found = mismatch_found
+            representative.save()
+            representatives_updated += 1
+        else:
+            representatives_without_changes += 1
+
+    message = \
+        "Representatives updated: {representatives_updated:,}. " \
+        "Representatives without changes: {representatives_without_changes:,}. " \
+        "".format(
+            representatives_updated=representatives_updated,
+            representatives_without_changes=representatives_without_changes)
+    messages.add_message(request, messages.INFO, message)
+
+    return HttpResponseRedirect(reverse('representative:representative_list', args=()))
