@@ -692,7 +692,8 @@ def candidate_list_view(request):
         updates_made = 0
         for one_candidate in candidate_list:
             one_politician = politician_dict_list.get(one_candidate.politician_we_vote_id)
-            if positive_value_exists(one_politician.linked_campaignx_we_vote_id):
+            if one_politician and hasattr(one_politician, 'linked_campaignx_we_vote_id') \
+                    and positive_value_exists(one_politician.linked_campaignx_we_vote_id):
                 one_candidate.linked_campaignx_we_vote_id = one_politician.linked_campaignx_we_vote_id
                 one_candidate.linked_campaignx_we_vote_id_date_last_updated = datetime_now
                 update_list.append(one_candidate)

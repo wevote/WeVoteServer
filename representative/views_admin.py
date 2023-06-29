@@ -1843,36 +1843,62 @@ def update_representatives_from_politicians_view(request):
                                     show_this_year=show_this_year,
                                     state_code=state_code))
 
+
 @login_required
 def update_ocd_id_state_mismatch_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'verified_volunteer'}
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
     queryset = Representative.objects.all()
-    representative_list = list(queryset)
+    queryset = queryset.exclude(ocd_id_state_mismatch_checked=True)
+    representative_list = list(queryset[:10000])
 
+    bulk_update_list = []
+    politician_we_vote_id_with_mismatch_list = []
     representatives_updated = 0
-    representatives_without_changes = 0
+    representatives_without_mismatches = 0
     for representative in representative_list:
+        representative.ocd_id_state_mismatch_checked = True
+        state_code_lower_case = representative.state_code.lower() \
+            if positive_value_exists(representative.state_code) else ''
         mismatch_found = (
-                positive_value_exists(representative.state_code) and
+                positive_value_exists(state_code_lower_case) and
                 positive_value_exists(representative.ocd_division_id) and
-                representative.state_code != extract_state_from_ocd_division_id(representative.ocd_division_id))
+                state_code_lower_case != extract_state_from_ocd_division_id(representative.ocd_division_id))
         if representative.ocd_id_state_mismatch_found != mismatch_found:
             representative.ocd_id_state_mismatch_found = mismatch_found
-            representative.save()
             representatives_updated += 1
+            if mismatch_found:
+                # We don't want to unset 'ocd_id_state_mismatch_found' in the Politician table here,
+                #  since there may be repairs we need to complete on the Politician data.
+                if positive_value_exists(representative.politician_we_vote_id):
+                    if representative.politician_we_vote_id not in politician_we_vote_id_with_mismatch_list:
+                        politician_we_vote_id_with_mismatch_list.append(representative.politician_we_vote_id)
         else:
-            representatives_without_changes += 1
+            representatives_without_mismatches += 1
+        bulk_update_list.append(representative)
+    try:
+        Representative.objects.bulk_update(bulk_update_list, [
+            'ocd_id_state_mismatch_checked',
+            'ocd_id_state_mismatch_found',
+        ])
+        message = \
+            "Representatives updated: {representatives_updated:,}. " \
+            "Representatives without mismatches: {representatives_without_mismatches:,}. " \
+            "".format(
+                representatives_updated=representatives_updated,
+                representatives_without_mismatches=representatives_without_mismatches)
+        messages.add_message(request, messages.INFO, message)
+    except Exception as e:
+        messages.add_message(request, messages.ERROR,
+                             "ERROR with update_ocd_id_state_mismatch_view: {e} "
+                             "".format(e=e))
 
-    message = \
-        "Representatives updated: {representatives_updated:,}. " \
-        "Representatives without changes: {representatives_without_changes:,}. " \
-        "".format(
-            representatives_updated=representatives_updated,
-            representatives_without_changes=representatives_without_changes)
-    messages.add_message(request, messages.INFO, message)
+    # Now transfer ocd_id_state_mismatch_found to all linked Politician records
+    #  using politician_we_vote_id_with_mismatch_list. We have to do it here, because the ocd_division_id
+    #  data does not exist in the Politician table.
+    # TODO
 
     return HttpResponseRedirect(reverse('representative:representative_list', args=()))

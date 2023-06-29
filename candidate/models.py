@@ -2446,6 +2446,8 @@ class CandidateCampaign(models.Model):
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=True, blank=True)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
+    ocd_id_state_mismatch_checked = models.BooleanField(default=False, null=False)
+    ocd_id_state_mismatch_found = models.BooleanField(default=False, null=False)
     instagram_handle = models.TextField(verbose_name="candidate's instagram handle", blank=True, null=True,
                                         db_index=True)
     instagram_followers_count = models.IntegerField(null=True, blank=True)

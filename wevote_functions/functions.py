@@ -876,6 +876,10 @@ def extract_state_from_ocd_division_id(ocd_division_id):
     if len(pieces) < 2:
         return ''
 
+    if pieces[1][0] == 'district' and pieces[1][1] == 'dc':
+        # Special case for District of Columbia. No Taxation without Representation!
+        return 'dc'
+
     if pieces[1][0] != 'state':
         # raise ValueError('Expecting state from OCD, and state not found')
         return ''

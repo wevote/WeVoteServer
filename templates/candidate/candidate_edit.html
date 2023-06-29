@@ -91,6 +91,10 @@ th, td {
                     {% else %}
                         &nbsp;&nbsp;&nbsp;&nbsp;(<a href="{% url 'candidate:candidate_politician_match' %}?candidate_id={{ candidate.id }}&google_civic_election_id={{ google_civic_election_id }}">match to politician</a>)
                     {% endif %}
+                    {% if candidate.ocd_division_id %}
+                        &nbsp;&nbsp;&nbsp;
+                        <span class="u-no-break" style="color: darkgray; font-size: 10px;">{{ candidate.ocd_division_id }}</span>
+                    {% endif %}
                     {% if candidate.candidate_merge_possibility_found %}
                         &nbsp;&nbsp;&nbsp;&nbsp;(<a href="{% url 'candidate:find_duplicate_candidate' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}"
                             target="_blank">check for duplicate candidates <span class="glyphicon glyphicon-new-window"></span></a>)

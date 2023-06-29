@@ -246,6 +246,7 @@ class Politician(models.Model):
     linked_campaignx_we_vote_id = models.CharField(max_length=255, null=True, unique=True)
     linked_campaignx_we_vote_id_date_last_updated = models.DateTimeField(null=True)
     linkedin_url = models.TextField(null=True, blank=True)
+    ocd_id_state_mismatch_found = models.BooleanField(default=False, null=False)
     politician_facebook_id = models.CharField(
         verbose_name='politician facebook user name', max_length=255, null=True, unique=False)
     politician_phone_number = models.CharField(max_length=255, null=True, unique=False)
