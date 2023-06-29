@@ -244,6 +244,7 @@ class Representative(models.Model):
     linked_campaignx_we_vote_id_date_last_updated = models.DateTimeField(null=True)
     linkedin_url = models.CharField(max_length=255, null=True, blank=True)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
+    ocd_id_state_mismatch_checked = models.BooleanField(default=False, null=False)
     ocd_id_state_mismatch_found = models.BooleanField(default=False, null=False)
     office_held_district_name = models.CharField(max_length=255, null=True, blank=True)
     office_held_id = models.CharField(

@@ -425,7 +425,13 @@
                 </td>
                 <td>{{ candidate.get_candidate_state }}</td>
                 {% if not google_civic_election_id %}
-                <td>{{ candidate.election.election_name }} - {{ candidate.election.google_civic_election_id }}, <span class="u-no-break">{{ candidate.election.election_day_text }}</span></td>
+                <td>
+                    {{ candidate.election.election_name }} - {{ candidate.election.google_civic_election_id }}, <span class="u-no-break">{{ candidate.election.election_day_text }}</span>
+                    {% if candidate.ocd_division_id %}
+                        <br />
+                        <span class="u-no-break" style="color: darkgray; font-size: 10px;">{{ candidate.ocd_division_id }}</span>
+                    {% endif %}
+                </td>
                 {% endif %}
                 <td>
                 <span class="u-no-break">
