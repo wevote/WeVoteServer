@@ -26,6 +26,8 @@
         <li>Prepare: <a href="{% url 'representative:update_representatives_from_politicians' %}?show_this_year={{ show_this_year }}&state_code={{ state_code }}"
         target="_blank">
         Update Representatives from Politicians for this Year <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
+        <li>Prepare: <a href="{% url 'representative:update_ocd_id_state_mismatch' %}" target="_blank">
+            Update Representatives with OCD ID/State mismatch <span class="glyphicon glyphicon-new-window"></span></a></li>
     </ul>
 {% endif %}
 
@@ -79,6 +81,11 @@
     <label for="show_battleground_id">
       <input type="checkbox" name="show_battleground" id="show_battleground_id" value="1"
              {% if show_battleground %}checked{% endif %} /> Show battleground races
+    </label>
+   &nbsp;&nbsp;
+    <label for="show_ocd_id_state_mismatch_id">
+      <input type="checkbox" name="show_ocd_id_state_mismatch" id="show_ocd_id_state_mismatch_id" value="1"
+             {% if show_ocd_id_state_mismatch %}checked{% endif %} /> Show OCD ID/State mismatch
     </label>
     &nbsp;&nbsp;
     <label for="show_all_id">
@@ -190,6 +197,11 @@
         });
         $(function() {
             $('#show_this_year_id').change(function() {
+                this.form.submit();
+            });
+        });
+        $(function() {
+            $('#show_ocd_id_state_mismatch_id').change(function() {
                 this.form.submit();
             });
         });

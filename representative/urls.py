@@ -28,6 +28,8 @@ urlpatterns = [
             name='update_representative_from_politician'),
     re_path(r'^update_from_politicians/', views_admin.update_representatives_from_politicians_view,
             name='update_representatives_from_politicians'),
+    re_path(r'^update_ocd_id_state_mismatch/', views_admin.update_ocd_id_state_mismatch_view,
+            name='update_ocd_id_state_mismatch'),
     re_path(r'^merge/$', views_admin.representative_merge_process_view, name='representative_merge_process'),
     re_path(r'^new/$', views_admin.representative_new_view, name='representative_new'),
     re_path(r'^(?P<representative_id>[0-9]+)/edit/$', views_admin.representative_edit_view, name='representative_edit'),
