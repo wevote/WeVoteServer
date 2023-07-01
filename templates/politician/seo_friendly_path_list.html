@@ -1,0 +1,9 @@
+{# templates/politician/seo_friendly_path_list.html #}
+
+{% for seo_friendly_path in path_list %}
+    {% if seo_friendly_path.final_pathname_string %}
+        <div style="color: darkgray">
+        {{ seo_friendly_path.final_pathname_string }}
+        </div>
+    {% endif %}
+{% endfor %}
