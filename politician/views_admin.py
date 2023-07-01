@@ -1235,6 +1235,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
     politician_url5 = request.GET.get('politician_url5', False)
     political_party = request.GET.get('political_party', False)
     state_code = request.GET.get('state_code', False)
+    status = ''
     vote_smart_id = request.GET.get('vote_smart_id', False)
     maplight_id = request.GET.get('maplight_id', False)
 
@@ -1267,16 +1268,41 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             politician_on_stage = results['politician']
 
         # Working with Vote Smart data
-        try:
-            vote_smart_politician_id = politician_on_stage.vote_smart_id
-            rating_list_query = VoteSmartRatingOneCandidate.objects.order_by('-timeSpan')  # Desc order
-            rating_list = rating_list_query.filter(candidateId=vote_smart_politician_id)
-        except VotesmartApiError as error_instance:
-            # Catch the error message coming back from Vote Smart and pass it in the status
-            error_message = error_instance.args
-            status = "EXCEPTION_RAISED: {error_message}".format(error_message=error_message)
-            print_to_log(logger=logger, exception_message_optional=status)
-            rating_list = []
+        rating_list = []
+        vote_smart_turned_on = False
+        if vote_smart_turned_on:
+            try:
+                vote_smart_politician_id = politician_on_stage.vote_smart_id
+                rating_list_query = VoteSmartRatingOneCandidate.objects.order_by('-timeSpan')  # Desc order
+                rating_list = rating_list_query.filter(candidateId=vote_smart_politician_id)
+            except VotesmartApiError as error_instance:
+                # Catch the error message coming back from Vote Smart and pass it in the status
+                error_message = error_instance.args
+                status = "EXCEPTION_RAISED: {error_message}".format(error_message=error_message)
+                print_to_log(logger=logger, exception_message_optional=status)
+                rating_list = []
+
+        # ##################################
+        # Show the seo friendly paths for this politician
+        path_count = 0
+        path_list = []
+        if positive_value_exists(politician_we_vote_id):
+            from politician.models import PoliticianSEOFriendlyPath
+            try:
+                path_query = PoliticianSEOFriendlyPath.objects.all()
+                path_query = path_query.filter(politician_we_vote_id__iexact=politician_we_vote_id)
+                path_count = path_query.count()
+                path_list = list(path_query[:4])
+            except Exception as e:
+                status += 'ERROR_RETRIEVING_FROM_PoliticianSEOFriendlyPath: ' + str(e) + ' '
+
+            if positive_value_exists(politician_on_stage.seo_friendly_path):
+                path_list_modified = []
+                for one_path in path_list:
+                    if politician_on_stage.seo_friendly_path != one_path.final_pathname_string:
+                        path_list_modified.append(one_path)
+                path_list = path_list_modified
+            path_list = path_list[:3]
 
         # Working with We Vote Positions
         try:
@@ -1434,6 +1460,8 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             'linked_representative_list':   linked_representative_list,
             'maplight_id':                  maplight_id,
             'messages_on_stage':            messages_on_stage,
+            'path_count':                   path_count,
+            'path_list':                    path_list,
             'politician':                   politician_on_stage,
             'politician_email':             politician_email,
             'politician_email2':            politician_email2,

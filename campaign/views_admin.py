@@ -914,6 +914,28 @@ def campaign_summary_view(request, campaignx_we_vote_id=""):
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
                                     "&state_code=" + str(state_code))
 
+    # ##################################
+    # Show the seo friendly paths for this campaignx
+    path_count = 0
+    path_list = []
+    if positive_value_exists(campaignx_we_vote_id):
+        from campaign.models import CampaignXSEOFriendlyPath
+        try:
+            path_query = CampaignXSEOFriendlyPath.objects.all()
+            path_query = path_query.filter(campaignx_we_vote_id__iexact=campaignx_we_vote_id)
+            path_count = path_query.count()
+            path_list = list(path_query[:4])
+        except Exception as e:
+            status += 'ERROR_RETRIEVING_FROM_CampaignXSEOFriendlyPath: ' + str(e) + ' '
+
+        if positive_value_exists(campaignx.seo_friendly_path):
+            path_list_modified = []
+            for one_path in path_list:
+                if campaignx.seo_friendly_path != one_path.final_pathname_string:
+                    path_list_modified.append(one_path)
+            path_list = path_list_modified
+        path_list = path_list[:3]
+
     campaignx_owner_list_modified = []
     campaignx_owner_list = campaignx_manager.retrieve_campaignx_owner_list(
         campaignx_we_vote_id_list=[campaignx_we_vote_id],
@@ -955,6 +977,8 @@ def campaign_summary_view(request, campaignx_we_vote_id=""):
         'campaignx_supporter_list':                 campaignx_supporter_list,
         'google_civic_election_id':                 google_civic_election_id,
         'messages_on_stage':                        messages_on_stage,
+        'path_count':                               path_count,
+        'path_list':                                path_list,
         'state_code':                               state_code,
     }
     return render(request, 'campaign/campaignx_summary.html', template_values)
