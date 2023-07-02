@@ -22,6 +22,7 @@ from stripe_donations.models import StripeManager
 from voter.models import voter_has_authority, VoterManager
 from wevote_functions.functions import convert_to_int, \
     generate_date_as_integer, positive_value_exists, STATE_CODE_MAP
+from .controllers import create_campaignx_supporters_from_positions, refresh_campaignx_supporters_count_in_all_children
 from .models import CampaignX, CampaignXManager, CampaignXOwner, CampaignXPolitician, CampaignXSupporter, \
     FINAL_ELECTION_DATE_COOL_DOWN, SUPPORTERS_COUNT_MINIMUM_FOR_LISTING
 
@@ -1002,8 +1003,8 @@ def campaign_supporters_list_view(request, campaignx_we_vote_id=""):
     show_all = request.GET.get('show_all', False)
     show_more = request.GET.get('show_more', False)  # Show up to 1,000 organizations
     show_issues = request.GET.get('show_issues', '')
-    show_supporters_without_endorsements = \
-        positive_value_exists(request.GET.get('show_supporters_without_endorsements', False))
+    only_show_supporters_with_endorsements = \
+        positive_value_exists(request.GET.get('only_show_supporters_with_endorsements', False))
     show_supporters_not_visible_to_public = \
         positive_value_exists(request.GET.get('show_supporters_not_visible_to_public', False))
 
@@ -1015,9 +1016,7 @@ def campaign_supporters_list_view(request, campaignx_we_vote_id=""):
     supporters_query = CampaignXSupporter.objects.all()
     supporters_query = supporters_query.filter(campaignx_we_vote_id__iexact=campaignx_we_vote_id)
 
-    if positive_value_exists(show_supporters_without_endorsements):
-        pass
-    else:
+    if positive_value_exists(only_show_supporters_with_endorsements):
         supporters_query = supporters_query.exclude(
             Q(supporter_endorsement__isnull=True) |
             Q(supporter_endorsement__exact='')
@@ -1110,7 +1109,7 @@ def campaign_supporters_list_view(request, campaignx_we_vote_id=""):
         'show_issues':                              show_issues,
         'show_more':                                show_more,
         'show_supporters_not_visible_to_public':    show_supporters_not_visible_to_public,
-        'show_supporters_without_endorsements':     show_supporters_without_endorsements,
+        'only_show_supporters_with_endorsements':     only_show_supporters_with_endorsements,
         'sort_by':                                  sort_by,
         'state_code':                               state_code,
         'state_list':                               sorted_state_list,
@@ -1136,11 +1135,12 @@ def campaign_supporters_list_process_view(request):
     state_code = request.POST.get('state_code', '')
     show_all = request.POST.get('show_all', False)
     show_more = request.POST.get('show_more', False)  # Show up to 1,000 organizations
-    show_supporters_without_endorsements = \
-        positive_value_exists(request.POST.get('show_supporters_without_endorsements', False))
+    only_show_supporters_with_endorsements = \
+        positive_value_exists(request.POST.get('only_show_supporters_with_endorsements', False))
     show_supporters_not_visible_to_public = \
         positive_value_exists(request.POST.get('show_supporters_not_visible_to_public', False))
 
+    update_message = ''
     voter_manager = VoterManager()
     organization_manager = OrganizationManager()
 
@@ -1159,14 +1159,21 @@ def campaign_supporters_list_process_view(request):
                 voter_manager.fetch_linked_organization_we_vote_id_by_voter_we_vote_id(
                     incoming_campaignx_supporter_we_vote_id)
 
-    messages_on_stage = get_messages(request)
+    politician_we_vote_id = ''
+    if positive_value_exists(campaignx_we_vote_id):
+        try:
+            campaignx_on_stage = CampaignX.objects.get(we_vote_id=campaignx_we_vote_id)
+            politician_we_vote_id = campaignx_on_stage.linked_politician_we_vote_id
+        except Exception as e:
+            politician_we_vote_id = ''
+    politician_we_vote_id_list = []
+    if positive_value_exists(politician_we_vote_id):
+        politician_we_vote_id_list.append(politician_we_vote_id)
 
     supporters_query = CampaignXSupporter.objects.all()
     supporters_query = supporters_query.filter(campaignx_we_vote_id__iexact=campaignx_we_vote_id)
 
-    if positive_value_exists(show_supporters_without_endorsements):
-        pass
-    else:
+    if positive_value_exists(only_show_supporters_with_endorsements):
         supporters_query = supporters_query.exclude(
             Q(supporter_endorsement__isnull=True) |
             Q(supporter_endorsement__exact='')
@@ -1277,6 +1284,76 @@ def campaign_supporters_list_process_view(request):
     # ##################################
     # Deleting or editing a CampaignXSupporter
     update_campaignx_supporter_count = False
+    results = deleting_or_editing_campaignx_supporter_list(
+        request=request,
+        supporters_list=supporters_list,
+    )
+    update_campaignx_supporter_count = update_campaignx_supporter_count or results['update_campaignx_supporter_count']
+    update_message = results['update_message']
+    if positive_value_exists(update_message):
+        messages.add_message(request, messages.INFO, update_message)
+
+    campaignx_we_vote_id_list_to_refresh = [campaignx_we_vote_id]
+    if len(politician_we_vote_id_list) > 0:
+        # #############################
+        # Create campaignx_supporters
+        create_from_friends_only_positions = False
+        results = create_campaignx_supporters_from_positions(
+            request,
+            friends_only_positions=False,
+            politician_we_vote_id_list=politician_we_vote_id_list)
+        campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
+        if len(campaignx_we_vote_id_list_changed) > 0:
+            campaignx_we_vote_id_list_to_refresh = \
+                list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
+        if not positive_value_exists(results['campaignx_supporter_entries_created']):
+            create_from_friends_only_positions = True
+        if create_from_friends_only_positions:
+            results = create_campaignx_supporters_from_positions(
+                request,
+                friends_only_positions=True,
+                politician_we_vote_id_list=politician_we_vote_id_list)
+            campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
+            if len(campaignx_we_vote_id_list_changed) > 0:
+                campaignx_we_vote_id_list_to_refresh = \
+                    list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
+
+    # We update here only if we didn't save above
+    if update_campaignx_supporter_count and positive_value_exists(campaignx_we_vote_id):
+        campaignx_manager = CampaignXManager()
+        supporter_count = campaignx_manager.fetch_campaignx_supporter_count(campaignx_we_vote_id)
+        results = campaignx_manager.retrieve_campaignx(campaignx_we_vote_id=campaignx_we_vote_id)
+        if results['campaignx_found']:
+            campaignx = results['campaignx']
+            campaignx.supporters_count = supporter_count
+            campaignx.save()
+
+    results = refresh_campaignx_supporters_count_in_all_children(
+        request,
+        campaignx_we_vote_id_list=campaignx_we_vote_id_list_to_refresh)
+    if positive_value_exists(results['update_message']):
+        update_message += results['update_message']
+
+    return HttpResponseRedirect(reverse('campaign:supporters_list', args=(campaignx_we_vote_id,)) +
+                                "?google_civic_election_id=" + str(google_civic_election_id) +
+                                "&campaignx_owner_organization_we_vote_id=" +
+                                str(campaignx_owner_organization_we_vote_id) +
+                                "&campaignx_search=" + str(campaignx_search) +
+                                "&state_code=" + str(state_code) +
+                                "&only_show_supporters_with_endorsements=" + str(only_show_supporters_with_endorsements) +
+                                "&show_supporters_not_visible_to_public=" + str(show_supporters_not_visible_to_public)
+                                )
+
+
+def deleting_or_editing_campaignx_supporter_list(
+        request=None,
+        supporters_list=[],
+):
+    organization_dict_by_we_vote_id = {}
+    organization_manager = OrganizationManager()
+    update_campaignx_supporter_count = False
+    update_message = ''
+    voter_manager = VoterManager()
     for campaignx_supporter in supporters_list:
         if positive_value_exists(campaignx_supporter.campaignx_we_vote_id):
             delete_variable_name = "delete_campaignx_supporter_" + str(campaignx_supporter.id)
@@ -1284,7 +1361,7 @@ def campaign_supporters_list_process_view(request):
             if positive_value_exists(delete_campaignx_supporter):
                 campaignx_supporter.delete()
                 update_campaignx_supporter_count = True
-                messages.add_message(request, messages.INFO, 'Deleted CampaignXSupporter.')
+                update_message += 'Deleted CampaignXSupporter.'
             else:
                 supporter_changed = False
                 data_exists_variable_name = \
@@ -1306,25 +1383,35 @@ def campaign_supporters_list_process_view(request):
                     supporter_changed = True
 
                 # Now refresh organization cached data
-                organization_results = \
-                    organization_manager.retrieve_organization_from_we_vote_id(
-                        campaignx_supporter.organization_we_vote_id)
-                if organization_results['organization_found']:
-                    supporter_name = organization_results['organization'].organization_name
+                organization = None
+                organization_found = False
+                if campaignx_supporter.organization_we_vote_id in organization_dict_by_we_vote_id:
+                    organization = organization_dict_by_we_vote_id[campaignx_supporter.organization_we_vote_id]
+                    if hasattr(organization, 'we_vote_hosted_profile_image_url_medium'):
+                        organization_found = True
+                else:
+                    organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+                        campaignx_supporter.organization_we_vote_id,
+                        read_only=True)
+                    if organization_results['organization_found']:
+                        organization = organization_results['organization']
+                        organization_dict_by_we_vote_id[campaignx_supporter.organization_we_vote_id] = organization
+                        organization_found = True
+                if organization_found:
+                    supporter_name = organization.organization_name
                     if positive_value_exists(supporter_name) and \
                             campaignx_supporter.supporter_name != supporter_name:
                         campaignx_supporter.supporter_name = supporter_name
                         supporter_changed = True
                     we_vote_hosted_profile_image_url_medium = \
-                        organization_results['organization'].we_vote_hosted_profile_image_url_medium
+                        organization.we_vote_hosted_profile_image_url_medium
                     if positive_value_exists(we_vote_hosted_profile_image_url_medium) and \
                             campaignx_supporter.we_vote_hosted_profile_image_url_medium != \
                             we_vote_hosted_profile_image_url_medium:
                         campaignx_supporter.we_vote_hosted_profile_image_url_medium = \
                             we_vote_hosted_profile_image_url_medium
                         supporter_changed = True
-                    we_vote_hosted_profile_image_url_tiny = \
-                        organization_results['organization'].we_vote_hosted_profile_image_url_tiny
+                    we_vote_hosted_profile_image_url_tiny = organization.we_vote_hosted_profile_image_url_tiny
                     if positive_value_exists(we_vote_hosted_profile_image_url_tiny) and \
                             campaignx_supporter.we_vote_hosted_profile_image_url_tiny != \
                             we_vote_hosted_profile_image_url_tiny:
@@ -1339,23 +1426,9 @@ def campaign_supporters_list_process_view(request):
                         supporter_changed = True
                 if supporter_changed:
                     campaignx_supporter.save()
-
-    if update_campaignx_supporter_count:
-        campaignx_manager = CampaignXManager()
-        supporter_count = campaignx_manager.fetch_campaignx_supporter_count(campaignx_we_vote_id)
-        if positive_value_exists(supporter_count):
-            results = campaignx_manager.retrieve_campaignx(campaignx_we_vote_id=campaignx_we_vote_id)
-            if results['campaignx_found']:
-                campaignx = results['campaignx']
-                campaignx.supporters_count = supporter_count
-                campaignx.save()
-
-    return HttpResponseRedirect(reverse('campaign:supporters_list', args=(campaignx_we_vote_id,)) +
-                                "?google_civic_election_id=" + str(google_civic_election_id) +
-                                "&campaignx_owner_organization_we_vote_id=" +
-                                str(campaignx_owner_organization_we_vote_id) +
-                                "&campaignx_search=" + str(campaignx_search) +
-                                "&state_code=" + str(state_code) +
-                                "&show_supporters_without_endorsements=" + str(show_supporters_without_endorsements) +
-                                "&show_supporters_not_visible_to_public=" + str(show_supporters_not_visible_to_public)
-                                )
+                    update_message += 'Updated CampaignXSupporter. '
+    results = {
+        'update_campaignx_supporter_count': update_campaignx_supporter_count,
+        'update_message': update_message,
+    }
+    return results

@@ -299,7 +299,6 @@
 </div>
 
 
-</form>
 {% if voter %}
 
     {% if voter.is_admin %}
@@ -736,9 +735,20 @@
     <p>(no public positions found)</p>
 {% endif %}
 
+{% if supporters_list %}
+    <h2>Campaigns this voter supports</h2>
+{% include "campaign/campaignx_supporters_list_table.html" with hide_supporter_column=True show_campaignx_column=True supporters_list=supporters_list %}
+
+<div>
+    <input type="submit" value="{% if voter %}Update Campaign Supporter Settings{% endif %}" />
+</div>
+{% endif %}
+
+</form>
+
 
 {% if positions_for_friends_owned_by_this_voter %}
-    <h2>Positions For Friends Owned By This Voter</h2>
+    <h2>Positions for friends</h2>
      <a href="{% url 'voter:voter_edit' voter.id %}?merge_duplicate_positions=1">
          Merge Duplicate Positions</a>
     <table class="table">
