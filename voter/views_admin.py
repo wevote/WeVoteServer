@@ -592,6 +592,26 @@ def voter_edit_process_view(request):
         except Exception as e:
             handle_record_not_saved_exception(e, logger=logger)
             messages.add_message(request, messages.ERROR, 'Could not save voter: {error}'.format(error=e))
+
+        # ##################################
+        # Deleting or editing a CampaignXSupporter
+        if positive_value_exists(voter_we_vote_id):
+            from campaign.models import CampaignXSupporter
+            supporters_query = CampaignXSupporter.objects.all()
+            supporters_query = supporters_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            supporters_list = list(supporters_query)
+            update_campaignx_supporter_count = False
+            from campaign.views_admin import deleting_or_editing_campaignx_supporter_list
+            results = deleting_or_editing_campaignx_supporter_list(
+                request=request,
+                supporters_list=supporters_list,
+            )
+            # TODO: Update campaignx_supporter_count
+            update_campaignx_supporter_count = update_campaignx_supporter_count or \
+                results['update_campaignx_supporter_count']
+            update_message = results['update_message']
+            if positive_value_exists(update_message):
+                messages.add_message(request, messages.INFO, update_message)
     else:
         try:
             # Create new
@@ -1042,6 +1062,49 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
         if positive_value_exists(positions_not_cross_linked):
             status_print_list += "positions_not_cross_linked: " + str(positions_not_cross_linked) + "<br />"
 
+        # ##########################################################################
+        # Show all of the campaigns which this voter supports
+        supporters_list = []
+        if positive_value_exists(voter_we_vote_id):
+            from campaign.models import CampaignXSupporter
+            supporters_query = CampaignXSupporter.objects.all()
+            supporters_query = supporters_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            # if positive_value_exists(only_show_supporters_with_endorsements):
+            #     supporters_query = supporters_query.exclude(
+            #         Q(supporter_endorsement__isnull=True) |
+            #         Q(supporter_endorsement__exact='')
+            #     )
+            supporters_query = supporters_query.order_by('-date_supported')
+            # Limit to only showing 200 on screen
+            show_all = request.GET.get('show_all', False)
+            show_more = request.GET.get('show_more', False)
+            if positive_value_exists(show_more):
+                supporters_list = supporters_query[:1000]
+            elif positive_value_exists(show_all):
+                supporters_list = supporters_query
+            else:
+                supporters_list = supporters_query[:200]
+            # Now augment with campaign data
+            campaignx_we_vote_id_list = []
+            campaigns_by_we_vote_id_dict = {}
+            for supporter in supporters_list:
+                if supporter.campaignx_we_vote_id not in campaignx_we_vote_id_list:
+                    campaignx_we_vote_id_list.append(supporter.campaignx_we_vote_id)
+            if len(campaignx_we_vote_id_list) > 0:
+                # Augment with
+                from campaign.models import CampaignX
+                queryset = CampaignX.objects.filter(we_vote_id__in=campaignx_we_vote_id_list)
+                campaign_list = list(queryset)
+                for campaign in campaign_list:
+                    campaigns_by_we_vote_id_dict[campaign.we_vote_id] = campaign
+                modified_supporters_list = []
+                for supporter in supporters_list:
+                    one_campaign = campaigns_by_we_vote_id_dict[supporter.campaignx_we_vote_id]
+                    if hasattr(one_campaign, 'campaign_title'):
+                        supporter.campaignx = campaigns_by_we_vote_id_dict.get(supporter.campaignx_we_vote_id)
+                    modified_supporters_list.append(supporter)
+                supporters_list = modified_supporters_list
+
         messages.add_message(request, messages.INFO, status_print_list)
 
         messages_on_stage = get_messages(request)
@@ -1054,11 +1117,12 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
             'public_positions_owned_by_this_voter':     public_positions_owned_by_this_voter,
             'positions_for_friends_owned_by_this_voter':    positions_for_friends_owned_by_this_voter,
             'sms_phone_numbers_list':                   sms_phone_numbers_list,
+            'stripe_payments':                         StripeManager.retrieve_payments_total(voter_on_stage.we_vote_id),
+            'supporters_list':                          supporters_list,
             'voter_id':                                 voter_on_stage.id,
             'voter':                                    voter_on_stage,
             'voter_list_duplicate_facebook':            voter_list_duplicate_facebook_updated,
             'voter_list_duplicate_twitter':             voter_list_duplicate_twitter_updated,
-            'stripe_payments':                         StripeManager.retrieve_payments_total(voter_on_stage.we_vote_id),
         }
     else:
         messages_on_stage = get_messages(request)

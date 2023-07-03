@@ -427,9 +427,11 @@
                 {% if not google_civic_election_id %}
                 <td>
                     {{ candidate.election.election_name }} - {{ candidate.election.google_civic_election_id }}, <span class="u-no-break">{{ candidate.election.election_day_text }}</span>
+                    {% if candidate.supporters_count %}
+                        <div class="u-no-break" style="color: darkgray; font-size: 10px;">supporters_count: {{ candidate.supporters_count }}</div>
+                    {% endif %}
                     {% if candidate.ocd_division_id %}
-                        <br />
-                        <span class="u-no-break" style="color: darkgray; font-size: 10px;">{{ candidate.ocd_division_id }}</span>
+                        <div class="u-no-break" style="color: darkgray; font-size: 10px;">{{ candidate.ocd_division_id }}</div>
                     {% endif %}
                 </td>
                 {% endif %}

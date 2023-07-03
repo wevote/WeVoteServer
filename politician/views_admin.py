@@ -1563,6 +1563,7 @@ def politician_edit_process_view(request):
 
     status = ''
     success = True
+    update_message = ''
 
     ballotpedia_politician_name = request.POST.get('ballotpedia_politician_name', False)
     ballotpedia_politician_url = request.POST.get('ballotpedia_politician_url', False)
@@ -2009,6 +2010,7 @@ def politician_edit_process_view(request):
                     # Update linked candidate & representative entries to use this latest seo_friendly_path
                     push_seo_friendly_path_changes = True
                 politician_on_stage.seo_friendly_path = seo_friendly_path
+
             politician_on_stage.twitter_handle_updates_failing = twitter_handle_updates_failing
             politician_on_stage.twitter_handle2_updates_failing = twitter_handle2_updates_failing
             if vote_smart_id is not False:
@@ -2321,6 +2323,55 @@ def politician_edit_process_view(request):
             and positive_value_exists(politician_on_stage.seo_friendly_path) and push_seo_friendly_path_changes:
         # TODO Implement this
         pass
+
+    # ####################################################################
+    # To make sure we have the freshest data, update supporters_count on all objects
+    if positive_value_exists(politician_on_stage.linked_campaignx_we_vote_id):
+        from campaign.controllers import create_campaignx_supporters_from_positions, \
+            refresh_campaignx_supporters_count_in_all_children
+        campaignx_we_vote_id_list_to_refresh = [politician_on_stage.linked_campaignx_we_vote_id]
+        politician_we_vote_id_list = [politician_on_stage.we_vote_id]
+        # #############################
+        # Create campaignx_supporters
+        create_from_friends_only_positions = False
+        results = create_campaignx_supporters_from_positions(
+            request,
+            friends_only_positions=False,
+            politician_we_vote_id_list=politician_we_vote_id_list)
+        campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
+        if len(campaignx_we_vote_id_list_changed) > 0:
+            campaignx_we_vote_id_list_to_refresh = \
+                list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
+        if not positive_value_exists(results['campaignx_supporter_entries_created']):
+            create_from_friends_only_positions = True
+        if create_from_friends_only_positions:
+            results = create_campaignx_supporters_from_positions(
+                request,
+                friends_only_positions=True,
+                politician_we_vote_id_list=politician_we_vote_id_list)
+            campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
+            if len(campaignx_we_vote_id_list_changed) > 0:
+                campaignx_we_vote_id_list_to_refresh = \
+                    list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
+
+        campaignx_manager = CampaignXManager()
+        supporter_count = campaignx_manager.fetch_campaignx_supporter_count(
+            politician_on_stage.linked_campaignx_we_vote_id)
+        results = campaignx_manager.retrieve_campaignx(
+            campaignx_we_vote_id=politician_on_stage.linked_campaignx_we_vote_id)
+        if results['campaignx_found']:
+            campaignx = results['campaignx']
+            campaignx.supporters_count = supporter_count
+            campaignx.save()
+
+        results = refresh_campaignx_supporters_count_in_all_children(
+            request,
+            campaignx_we_vote_id_list=campaignx_we_vote_id_list_to_refresh)
+        if positive_value_exists(results['update_message']):
+            update_message += results['update_message']
+
+    if positive_value_exists(update_message):
+        messages.add_message(request, messages.INFO, update_message)
 
     if politician_id:
         return HttpResponseRedirect(reverse('politician:politician_edit', args=(politician_id,)))

@@ -221,7 +221,7 @@
             {% endif %}</td>
             <td style="text-align: right">
             {% if campaignx.chip_in_total != 'none' %}
-                <a href="{% url 'campaign:supporters_list' campaignx.we_vote_id %}?show_supporters_without_endorsements=1&show_supporters_not_visible_to_public=1" target="_blank">
+                <a href="{% url 'campaign:supporters_list' campaignx.we_vote_id %}?only_show_supporters_with_endorsements=0&show_supporters_not_visible_to_public=1" target="_blank">
                     {{ campaignx.chip_in_total }}
                     <!--<pre> {% filter force_escape %} {% debug %} {% endfilter %} </pre>-->
                 </a>

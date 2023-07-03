@@ -71,14 +71,18 @@
             {% endif %}
             </td>
         </tr>
-        {% if path_list %}
         <tr>
-            <th>Former links:</th>
+            <th>Alternate URL Paths:</th>
             <td>
+            {% if path_list %}
                 {% include "politician/seo_friendly_path_list.html" with path_list=path_list %}
+            {% else %}
+                <div style="color: darkgray">
+                No alternate URL paths found.
+                </div>
+            {% endif %}
             </td>
         </tr>
-        {% endif %}
         {% if campaignx.campaign_description %}
             <tr>
                 <td colspan="2" style="vertical-align:top">

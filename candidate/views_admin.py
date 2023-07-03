@@ -1749,6 +1749,9 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
     candidate_on_stage = CandidateCampaign()
     candidate_list_manager = CandidateListManager()
     google_civic_election_id = 0
+    politician_we_vote_id = ''
+    seo_friendly_path = ''
+    status = ''
 
     try:
         if positive_value_exists(candidate_id):
@@ -1759,6 +1762,8 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
         candidate_id = candidate_on_stage.id
         candidate_we_vote_id = candidate_on_stage.we_vote_id
         google_civic_election_id = candidate_on_stage.google_civic_election_id
+        politician_we_vote_id = candidate_on_stage.politician_we_vote_id
+        seo_friendly_path = candidate_on_stage.seo_friendly_path
     except CandidateCampaign.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
     except CandidateCampaign.DoesNotExist:
@@ -1771,16 +1776,41 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
         web_app_root_url = 'https://quality.WeVote.US'
     if candidate_on_stage_found:
         # Working with Vote Smart data
-        try:
-            vote_smart_candidate_id = candidate_on_stage.vote_smart_id
-            rating_list_query = VoteSmartRatingOneCandidate.objects.order_by('-timeSpan')  # Desc order
-            rating_list = rating_list_query.filter(candidateId=vote_smart_candidate_id)
-        except VotesmartApiError as error_instance:
-            # Catch the error message coming back from Vote Smart and pass it in the status
-            error_message = error_instance.args
-            status = "EXCEPTION_RAISED: {error_message}".format(error_message=error_message)
-            print_to_log(logger=logger, exception_message_optional=status)
-            rating_list = []
+        rating_list = []
+        vote_smart_turned_on = False
+        if vote_smart_turned_on:
+            try:
+                vote_smart_candidate_id = candidate_on_stage.vote_smart_id
+                rating_list_query = VoteSmartRatingOneCandidate.objects.order_by('-timeSpan')  # Desc order
+                rating_list = rating_list_query.filter(candidateId=vote_smart_candidate_id)
+            except VotesmartApiError as error_instance:
+                # Catch the error message coming back from Vote Smart and pass it in the status
+                error_message = error_instance.args
+                status = "EXCEPTION_RAISED: {error_message}".format(error_message=error_message)
+                print_to_log(logger=logger, exception_message_optional=status)
+                rating_list = []
+
+        # ##################################
+        # Show the seo friendly paths for this politician/candidate
+        path_count = 0
+        path_list = []
+        if positive_value_exists(politician_we_vote_id):
+            from politician.models import PoliticianSEOFriendlyPath
+            try:
+                path_query = PoliticianSEOFriendlyPath.objects.all()
+                path_query = path_query.filter(politician_we_vote_id__iexact=politician_we_vote_id)
+                path_count = path_query.count()
+                path_list = list(path_query[:4])
+            except Exception as e:
+                status += 'ERROR_RETRIEVING_FROM_PoliticianSEOFriendlyPath: ' + str(e) + ' '
+
+            if positive_value_exists(seo_friendly_path):
+                path_list_modified = []
+                for one_path in path_list:
+                    if seo_friendly_path != one_path.final_pathname_string:
+                        path_list_modified.append(one_path)
+                path_list = path_list_modified
+            path_list = path_list[:3]
 
         # Working with We Vote Positions
         try:
@@ -1849,33 +1879,6 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
                 candidate_on_stage.candidate_name_normalized = string.capwords(humanized_cleaned)
 
         template_values = {
-            'messages_on_stage':                messages_on_stage,
-            'candidate':                        candidate_on_stage,
-            'rating_list':                      rating_list,
-            'candidate_position_list':          candidate_position_list,
-            'candidate_to_office_link_list':    candidate_to_office_link_list,
-            # 'office_list':                      contest_office_list,
-            # 'contest_office_we_vote_id':        contest_office_we_vote_id,
-            # 'google_civic_election_id':         google_civic_election_id,
-            'state_code':                       state_code,
-            'twitter_link_possibility_list':    twitter_link_possibility_list,
-            'google_search_possibility_list':   google_search_possibility_list,
-            'google_search_possibility_total_count':    google_search_possibility_total_count,
-            # Incoming variables, not saved yet
-            'candidate_name':                   candidate_name,
-            'google_civic_candidate_name':      google_civic_candidate_name,
-            'google_civic_candidate_name2':     google_civic_candidate_name2,
-            'google_civic_candidate_name3':     google_civic_candidate_name3,
-            'candidate_twitter_handle':         candidate_twitter_handle,
-            'candidate_twitter_handle2':        candidate_twitter_handle2,
-            'candidate_twitter_handle3':        candidate_twitter_handle3,
-            'candidate_url':                    candidate_url,
-            'candidate_contact_form_url':       candidate_contact_form_url,
-            'facebook_url':                     facebook_url,
-            'instagram_handle':                 instagram_handle,
-            'candidate_email':                  candidate_email,
-            'candidate_phone':                  candidate_phone,
-            'party':                            party,
             'ballot_guide_official_statement':  ballot_guide_official_statement,
             'ballotpedia_candidate_id':         ballotpedia_candidate_id,
             'ballotpedia_candidate_name':       ballotpedia_candidate_name,
@@ -1883,14 +1886,42 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
             'ballotpedia_office_id':            ballotpedia_office_id,
             'ballotpedia_person_id':            ballotpedia_person_id,
             'ballotpedia_race_id':              ballotpedia_race_id,
-            'vote_smart_id':                    vote_smart_id,
+            'candidate':                        candidate_on_stage,
+            'candidate_email':                  candidate_email,
+            'candidate_phone':                  candidate_phone,
+            'candidate_name':                   candidate_name,
+            'candidate_position_list':          candidate_position_list,
+            'candidate_to_office_link_list':    candidate_to_office_link_list,
+            'candidate_twitter_handle':         candidate_twitter_handle,
+            'candidate_twitter_handle2':        candidate_twitter_handle2,
+            'candidate_twitter_handle3':        candidate_twitter_handle3,
+            'candidate_url':                    candidate_url,
+            'candidate_contact_form_url':       candidate_contact_form_url,
+            # 'contest_office_we_vote_id':        contest_office_we_vote_id,
+            'do_not_display_on_ballot':         do_not_display_on_ballot,
+            'facebook_url':                     facebook_url,
+            # 'google_civic_election_id':         google_civic_election_id,
+            'google_search_possibility_list':   google_search_possibility_list,
+            'google_search_possibility_total_count':    google_search_possibility_total_count,
+            'google_civic_candidate_name':      google_civic_candidate_name,
+            'google_civic_candidate_name2':     google_civic_candidate_name2,
+            'google_civic_candidate_name3':     google_civic_candidate_name3,
+            'instagram_handle':                 instagram_handle,
             'maplight_id':                      maplight_id,
+            'messages_on_stage':                messages_on_stage,
+            # 'office_list':                      contest_office_list,
             'page':                             page,
+            'party':                            party,
+            'path_count':                       path_count,
+            'path_list':                        path_list,
+            'rating_list':                      rating_list,
+            'state_code':                       state_code,
+            'twitter_link_possibility_list':    twitter_link_possibility_list,
+            'vote_smart_id':                    vote_smart_id,
             # 'vote_usa_profile_image_url_https': vote_usa_profile_image_url_https,
+            'web_app_root_url':                 web_app_root_url,
             'withdrawal_date':                  withdrawal_date,
             'withdrawn_from_election':          withdrawn_from_election,
-            'do_not_display_on_ballot':         do_not_display_on_ballot,
-            'web_app_root_url':                 web_app_root_url,
         }
     else:
         template_values = {
