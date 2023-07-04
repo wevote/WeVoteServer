@@ -1361,7 +1361,7 @@ def deleting_or_editing_campaignx_supporter_list(
             if positive_value_exists(delete_campaignx_supporter):
                 campaignx_supporter.delete()
                 update_campaignx_supporter_count = True
-                update_message += 'Deleted CampaignXSupporter.'
+                update_message += 'Deleted CampaignXSupporter. '
             else:
                 supporter_changed = False
                 data_exists_variable_name = \

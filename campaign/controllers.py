@@ -1893,12 +1893,13 @@ def generate_campaignx_dict_from_campaignx_object(
     else:
         voter_campaignx_supporter_dict = {}
 
-    # Get most recent supporters
+    # Get most recent supporters, regardless of whether there is a written endorsement.
     latest_campaignx_supporter_list = []
     supporter_list_results = campaignx_manager.retrieve_campaignx_supporter_list(
         campaignx_we_vote_id=campaignx.we_vote_id,
         limit=7,
         read_only=True,
+        require_supporter_endorsement=False,
         require_visible_to_public=True)
     if supporter_list_results['supporter_list_found']:
         supporter_list = supporter_list_results['supporter_list']
@@ -1922,13 +1923,13 @@ def generate_campaignx_dict_from_campaignx_object(
             }
             latest_campaignx_supporter_list.append(one_supporter_dict)
 
-    # Get most recent supporter_endorsements (require_supporter_endorsement == True)
+    # Get most recent supporter_endorsements which include written endorsement (require_supporter_endorsement == True)
     latest_campaignx_supporter_endorsement_list = []
     supporter_list_results = campaignx_manager.retrieve_campaignx_supporter_list(
         campaignx_we_vote_id=campaignx.we_vote_id,
         limit=10,
-        require_supporter_endorsement=True,
-        read_only=True)
+        read_only=True,
+        require_supporter_endorsement=True)
     if supporter_list_results['supporter_list_found']:
         supporter_list = supporter_list_results['supporter_list']
         for campaignx_supporter in supporter_list:
