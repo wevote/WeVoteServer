@@ -5,7 +5,7 @@
 # See also WeVoteServer/import_export_twitter/controllers.py for routines that manage incoming twitter data
 from image.functions import analyze_remote_url
 from .models import GoogleSearchUserManager, GOOGLE_SEARCH_API_NAME, GOOGLE_SEARCH_API_VERSION, GOOGLE_SEARCH_API_KEY, \
-    GOOGLE_SEARCH_ENGINE_ID, BALLOTPEDIA_LOGO_URL, MAXIMUM_CHARACTERS_LENGTH, MAXIMUM_GOOGLE_SEARCH_USERS
+    GOOGLE_SEARCH_ENGINE_ID, BALLOTPEDIA_LOGO_URL, MAXIMUM_CHARACTERS_LENGTH, MAXIMUM_GOOGLE_SEARCH_USERS, URL_PATTERNS_TO_IGNORE
 from googleapiclient.discovery import build
 from image.controllers import IMAGE_SOURCE_BALLOTPEDIA, LINKEDIN, FACEBOOK, TWITTER, WIKIPEDIA
 from import_export_facebook.models import FacebookManager
@@ -230,6 +230,12 @@ def retrieve_possible_google_search_users(candidate, voter_device_id):
 
     return results
 
+def should_ignore_google_json(google_json):
+    '''
+    Tests if the google_json object should have a likelihood score of 0 and therefore be ignored
+    based on the list of url patterns
+    '''
+    return any((pattern.match(google_json['item_link']) for pattern in URL_PATTERNS_TO_IGNORE))
 
 def analyze_google_search_results(search_results, search_term, candidate_name,
                                   candidate, voter_device_id):
@@ -253,6 +259,9 @@ def analyze_google_search_results(search_results, search_term, candidate_name,
             from_twitter = False
             from_wikipedia = False
             google_json = parse_google_search_results(search_term, one_result)
+
+            if should_ignore_google_json(google_json):
+                continue
 
             if FACEBOOK in google_json['item_link']:
                 current_candidate_facebook_search_info = analyze_facebook_search_results(
