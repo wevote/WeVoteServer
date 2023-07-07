@@ -3090,6 +3090,16 @@ class Voter(AbstractBaseUser):
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
     # friend_count helps us quickly identify voters who have friends
     friend_count = models.PositiveIntegerField(default=None, null=True)
+    # The Federal Information Processing Standard (FIPS) code is a five-digit code that
+    # uniquely identifies counties and county equivalents in the United States.
+    # The first two digits of the code identify the state,
+    # and the last three digits identify the county or county equivalent.
+    county_fips_code = models.PositiveIntegerField(default=None, null=True)
+    county_id = models.PositiveIntegerField(default=None, null=True)  # id internal to We Vote
+    county_name = models.CharField(max_length=255, null=True)
+    # Lat/Long is used for statistics. For returning ballot data, use VoterAddress Lat/Long
+    latitude = models.FloatField(default=None, null=True)
+    longitude = models.FloatField(default=None, null=True)
     state_code_for_display = models.CharField(max_length=2, null=True, blank=True)
     state_code_for_display_hidden = models.BooleanField(default=False)
     state_code_for_display_updated = models.BooleanField(default=False)  # Meant to be a transitory field during update

@@ -132,7 +132,13 @@
 {# ################## #}
 <h2>Analytics</h2>
 
-<p><a href="{% url 'analytics:analytics_index' %}">Analytics</a></p>
+<p><a href="{% url 'analytics:analytics_index' %}">Voter, Daily &amp; Election Metrics</a></p>
+
+<p>
+    <a href="{% url 'analytics:query_builder' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+        target="_blank">Voter Statistics: Query Builder <span class="glyphicon glyphicon-new-window"></span></a>
+    (aggregate voter usage)
+</p>
 
 <p>
     <a href="{% url 'issue:issue_partisan_analysis' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"

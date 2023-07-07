@@ -1,0 +1,91 @@
+{# templates/analytics/analytics_action_query_builder.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Voter Statistics: Query Builder{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+<h1>Voter Statistics: Query Builder</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form
+  action="{% url "analytics:query_builder_process" %}"
+  class="form-horizontal"
+  method="get"
+  target="_blank"
+>
+{% csrf_token %}
+
+{% if election_years_available %}
+<div class="form-group">
+    <label for="show_this_year_of_elections_id" class="col-sm-3 control-label">Year of Activity (default: all)</label>
+    <div class="col-sm-8">
+        <select id="show_this_year_of_elections_id" name="show_this_year_of_elections">
+            <option value="0" {% if 0 == show_this_year_of_elections|convert_to_int %} selected="selected"{% endif %}>
+                -- Choose Year --</option>
+            {% for year in election_years_available %}
+            <option value="{{ year }}"
+                    {% if show_this_year_of_elections|slugify == year|slugify %} selected="selected"{% endif %}>
+                {% if show_this_year_of_elections|slugify == year|slugify %}Limited To {% endif %}
+                {{ year }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+{% endif %}{# End of if election_years_available #}
+
+
+{% if election_list %}
+<div class="form-group">
+    <label for="google_civic_election_id" class="col-sm-3 control-label">Election (default: all)</label>
+    <div class="col-sm-8">
+        <select id="google_civic_election_id" name="google_civic_election_id" class="form-control"  style="height: auto !important">
+            <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
+                -- Choose election --</option>
+        {% for election in election_list %}
+            <option value="{{ election.google_civic_election_id }}"
+                    {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+                {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
+        {% endfor %}
+        </select>
+    </div>
+</div>
+{% endif %}
+
+{% if state_list and pigs_fly %}
+<div class="form-group">
+    <label for="state_code_id" class="col-sm-3 control-label">State (default: all)</label>
+    <div class="col-sm-8">
+        {% for key, state in state_list %}
+            <span class="u-no-break">
+                <input
+                  id="state_code_{{ key }}"
+                  type="checkbox"
+                  value="{{ key }}"
+                  {% if key|lower == state_code|lower %} checked="checked"{% endif %}
+                />&nbsp;{{ state }}&nbsp;&nbsp;
+            </span>
+
+        {% endfor %}
+    </div>
+</div>
+{% endif %}{# End of if state_list #}
+
+<div class="form-group">
+    <label for="find_voter_guide_button_id" class="col-sm-3 control-label"><a href="{% url 'admin_tools:admin_home' %}">cancel</a></label>
+    <div class="col-sm-8">
+        <button type="submit" class="btn btn-default btn-success" name="run_query">Submit</button>
+    </div>
+</div>
+</form>
+
+<script>
+    $(function() {
+        $('#show_this_year_of_elections_id').change(function() {
+            this.form.action = "{% url "analytics:query_builder" %}"
+            this.form.target = ""
+            this.form.submit();
+        });
+    });
+</script>
+{% endblock %}
