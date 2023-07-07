@@ -6,7 +6,8 @@ from .controllers import augment_one_voter_analytics_action_entries_without_elec
     augment_voter_analytics_action_entries_without_election_id, \
     save_organization_daily_metrics, save_organization_election_metrics, \
     save_sitewide_daily_metrics, save_sitewide_election_metrics, save_sitewide_voter_metrics
-from .models import ACTION_WELCOME_VISIT, AnalyticsAction, AnalyticsManager, display_action_constant_human_readable, \
+from .models import ACTION_BALLOT_VISIT, \
+    AnalyticsAction, AnalyticsManager, display_action_constant_human_readable, \
     fetch_action_constant_number_from_constant_string, OrganizationDailyMetrics, OrganizationElectionMetrics, \
     SitewideDailyMetrics, SitewideElectionMetrics, SitewideVoterMetrics
 from admin_tools.views import redirect_to_sign_in_page
@@ -26,8 +27,9 @@ from exception.models import print_to_log
 import json
 from voter.models import voter_has_authority
 import wevote_functions.admin
+from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from wevote_functions.functions import convert_date_as_integer_to_date, convert_date_to_date_as_integer, \
-    convert_date_to_we_vote_date_string, convert_to_int, positive_value_exists
+    convert_date_to_we_vote_date_string, convert_to_int, positive_value_exists, STATE_CODE_MAP
 from wevote_settings.models import WeVoteSetting, WeVoteSettingsManager
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -38,6 +40,95 @@ SITEWIDE_DAILY_METRICS_SYNC_URL = "https://api.wevoteusa.org/apis/v1/sitewideDai
 SITEWIDE_ELECTION_METRICS_SYNC_URL = "https://api.wevoteusa.org/apis/v1/sitewideElectionMetricsSyncOut/"
 SITEWIDE_VOTER_METRICS_SYNC_URL = "https://api.wevoteusa.org/apis/v1/sitewideVoterMetricsSyncOut/"
 WEB_APP_ROOT_URL = get_environment_variable("WEB_APP_ROOT_URL")
+
+
+def analytics_action_query_builder_view(request):
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    show_this_year_of_elections = convert_to_int(request.GET.get('show_this_year_of_elections', 0))
+    state_code = request.GET.get('state_code', '')
+
+    analytics_action_code_list = []
+    analytics_action_code_list.append(ACTION_BALLOT_VISIT)
+
+    queryset = AnalyticsAction.objects.using('readonly').all()
+    queryset = queryset.filter(action_constant__in=analytics_action_code_list)
+    if positive_value_exists(show_this_year_of_elections):
+        first_day_of_year = convert_to_int("{year}0101".format(year=show_this_year_of_elections))
+        last_day_of_year = convert_to_int("{year}1231".format(year=show_this_year_of_elections))
+        queryset = queryset.filter(date_as_integer__gte=first_day_of_year)
+        queryset = queryset.filter(date_as_integer__lte=last_day_of_year)
+    queryset = queryset.values_list('google_civic_election_id', flat=True).distinct()
+    google_civic_election_id_list = list(queryset)
+
+    queryset = Election.objects.using('readonly').all()
+    queryset = queryset.filter(google_civic_election_id__in=google_civic_election_id_list)
+    queryset = queryset.order_by('-election_day_text')
+    election_list = list(queryset)
+
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
+
+    current_year = date.today().year
+    election_years_without_future_years = [i for i in ELECTION_YEARS_AVAILABLE if i <= current_year]
+    election_years_available_sorted = sorted(election_years_without_future_years, reverse=True)
+
+    messages_on_stage = get_messages(request)
+
+    template_values = {
+        'election_list':                election_list,
+        'election_years_available':     election_years_available_sorted,
+        'google_civic_election_id':     google_civic_election_id,
+        'messages_on_stage':            messages_on_stage,
+        "show_this_year_of_elections":  show_this_year_of_elections,
+        'state_code':                   state_code,
+        'state_list':                   sorted_state_list,
+    }
+    return render(request, 'analytics/analytics_action_query_builder.html', template_values)
+
+
+def analytics_action_query_builder_process_view(request):
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    show_this_year_of_elections = convert_to_int(request.GET.get('show_this_year_of_elections', 0))
+    status = ''
+    success = True
+    analytics_action_code_list = []
+    analytics_action_code_list.append(ACTION_BALLOT_VISIT)
+
+    queryset = AnalyticsAction.objects.using('readonly').all()
+    queryset = queryset.filter(action_constant__in=analytics_action_code_list)
+    if positive_value_exists(google_civic_election_id):
+        queryset = queryset.filter(google_civic_election_id=google_civic_election_id)
+    if positive_value_exists(show_this_year_of_elections):
+        first_day_of_year = convert_to_int("{year}0101".format(year=show_this_year_of_elections))
+        last_day_of_year = convert_to_int("{year}1231".format(year=show_this_year_of_elections))
+        queryset = queryset.filter(date_as_integer__gte=first_day_of_year)
+        queryset = queryset.filter(date_as_integer__lte=last_day_of_year)
+    queryset = queryset.values_list('voter_we_vote_id', flat=True).distinct()
+    voter_count = queryset.count()
+
+    all_states_dict = {}
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
+
+    for state_code, state_name in sorted_state_list:
+        queryset_state = queryset.filter(state_code__iexact=state_code)
+        state_voter_count = queryset_state.count()
+        if state_voter_count > 0:
+            one_state_dict = {
+                'state_name': state_name,
+                'voter_count': state_voter_count,
+                'counties': [],
+            }
+            all_states_dict[state_code] = one_state_dict
+
+    json_data = {
+        'status':                   status,
+        'success':                  success,
+        'google_civic_election_id': google_civic_election_id,
+        'voter_count':              voter_count,
+        'states':                   all_states_dict,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def analytics_action_sync_out_view(request):  # analyticsActionSyncOut
