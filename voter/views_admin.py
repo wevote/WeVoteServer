@@ -1290,6 +1290,18 @@ def voter_list_view(request):
         voter_id = voter.id
         voter_id = convert_to_int(voter_id)
 
+    # If there is an entry in the VoterIssuesLookup table for a voter_we_vote_id, mark the voter table
+    voter_issues_lookup_repair = True
+    if voter_issues_lookup_repair and run_scripts:
+        voter_issues_query = VoterIssuesLookup.objects.using('readonly').all()
+        voter_issues_list = list(voter_issues_query)
+        voter_we_vote_id_list_to_update = []
+        for one_voter_issue in voter_issues_list:
+            voter_we_vote_id_list_to_update.append(one_voter_issue.voter_we_vote_id)
+        voter_update_query = Voter.objects.all()
+        voter_update_query = voter_update_query.filter(we_vote_id__in=voter_we_vote_id_list_to_update)
+        voter_update_query.update(voter_issues_lookup_updated=True)
+
     # Populate the VoterIssuesLookup table
     number_to_update = 100000
     voter_issues_lookup_updates = True
@@ -1299,16 +1311,16 @@ def voter_list_view(request):
         voter_query = voter_query.exclude(voter_issues_lookup_updated=True)
         total_to_convert = voter_query.count()
         total_to_convert_after = total_to_convert - number_to_update if total_to_convert > number_to_update else 0
-        voter_list = list(voter_query[:number_to_update])
-        voter_we_vote_id_list = []
-        for one_voter in voter_list:
-            voter_we_vote_id_list.append(one_voter.we_vote_id)
+        voter_list_one_batch = list(voter_query[:number_to_update])
+        voter_we_vote_id_list_one_batch = []
+        for one_voter in voter_list_one_batch:
+            voter_we_vote_id_list_one_batch.append(one_voter.we_vote_id)
 
         # Retrieve all relevant FollowIssue entries in a single query
-        from follow.models import FollowIssue
-        follow_issue_query = FollowIssue.objects.all()
-        follow_issue_query = follow_issue_query.filter(voter_we_vote_id__in=voter_we_vote_id_list)
-        follow_issue_query = follow_issue_query.filter(following_status='FOLLOWING')
+        from follow.models import FOLLOWING, FollowIssue
+        follow_issue_query = FollowIssue.objects.using('readonly').all()
+        follow_issue_query = follow_issue_query.filter(voter_we_vote_id__in=voter_we_vote_id_list_one_batch)
+        follow_issue_query = follow_issue_query.filter(following_status=FOLLOWING)
         follow_issue_list = list(follow_issue_query)
 
         dict_of_voter_issue_defaults = {}  # voter_we_vote_id as key, value is list of defaults
@@ -1330,38 +1342,38 @@ def voter_list_view(request):
                 deprecated_issues_count += 1
         if deprecated_issues_count > 0:
             voter_issues_lookup_updates_status += "DEPRECATED_ISSUES: " + str(deprecated_issues_count) + " "
-        update_list = []
-        updates_needed = False
+
+        voter_issues_create_list = []
+        voter_issues_creates_made = 0
+        voter_issues_creates_needed = False
         updates_made = 0
+        voter_update_list = []
         voter_updates_made = 0
-        for voter_we_vote_id in voter_we_vote_id_list:
+        for voter_we_vote_id in voter_we_vote_id_list_one_batch:
             if voter_we_vote_id not in dict_of_voter_issue_defaults:
                 continue
             defaults = dict_of_voter_issue_defaults[voter_we_vote_id]
             if voter_we_vote_id and len(defaults) > 0:
-                update_list.append(
+                voter_issues_create_list.append(
                     VoterIssuesLookup(
                         voter_we_vote_id=voter_we_vote_id,
                         **defaults,
                     )
                 )
-                updates_made += 1
-                updates_needed = True
-        voter_update_list = []
-        if updates_needed:
+                voter_issues_creates_made += 1
+                voter_issues_creates_needed = True
+        voter_issues_create_failed = False
+        if voter_issues_creates_needed:
             try:
-                VoterIssuesLookup.objects.bulk_create(update_list)
+                VoterIssuesLookup.objects.bulk_create(voter_issues_create_list)
                 voter_issues_lookup_updates_status += \
                     "{updates_made:,} VoterIssuesLookup entries created. " \
                     "{total_to_convert_after:,} remaining." \
                     "".format(
                         total_to_convert_after=total_to_convert_after,
-                        updates_made=updates_made)
-                for one_voter in voter_list:
-                    one_voter.voter_issues_lookup_updated = True
-                    voter_update_list.append(one_voter)
-                    voter_updates_made += 1
+                        updates_made=voter_issues_creates_made)
             except Exception as e:
+                voter_issues_create_failed = True
                 voter_issues_lookup_updates_status += \
                     "{updates_made:,} VoterIssuesLookup entries NOT created. " \
                     "{total_to_convert_after:,} remaining. ERROR: {error}" \
@@ -1369,6 +1381,13 @@ def voter_list_view(request):
                          error=str(e),
                          total_to_convert_after=total_to_convert_after,
                          updates_made=updates_made)
+        if not voter_issues_create_failed:
+            for one_voter in voter_list_one_batch:
+                one_voter.voter_issues_lookup_updated = True
+                voter_update_list.append(one_voter)
+                voter_updates_made += 1
+
+        if voter_updates_made > 0:
             try:
                 Voter.objects.bulk_update(
                     voter_update_list, ['voter_issues_lookup_updated'])
@@ -1378,12 +1397,10 @@ def voter_list_view(request):
                 voter_issues_lookup_updates_status += "Voter entries (" + str(voter_updates_made) + ") " \
                     "NOT updated: " + str(e) + " "
         if positive_value_exists(voter_issues_lookup_updates_status):
-            # voter_issues_lookup_updates_status = \
-            #     "SCRIPT voter_issues_lookup_updates, status: " + voter_issues_lookup_updates_status + " "
             messages.add_message(request, messages.INFO, voter_issues_lookup_updates_status)
 
     likely_political_party_analysis = True
-    number_to_update = 1000
+    number_to_update = 10000
     updates_made = 0
     if likely_political_party_analysis and run_scripts:
         voter_issues_lookup_updates_status = ''
@@ -1424,8 +1441,6 @@ def voter_list_view(request):
                 voter_issues_lookup_updates_status += "VoterIssuesLookup entries (" + str(updates_made) + ") " \
                                                       "NOT updated: " + str(e) + " "
         if positive_value_exists(voter_issues_lookup_updates_status):
-            # voter_issues_lookup_updates_status = \
-            #     "SCRIPT voter_issues_lookup_updates, status: " + voter_issues_lookup_updates_status + " "
             messages.add_message(request, messages.INFO, voter_issues_lookup_updates_status)
 
     messages_on_stage = get_messages(request)

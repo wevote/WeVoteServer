@@ -213,14 +213,14 @@ def voter_aggregate_analytics_view(request):  # voterAggregateAnalytics
     json_data = {
         'status':                   status,
         'success':                  success,
+        'documentation_url':        "https://api.wevoteusa.org/apis/v1/docs/voterAggregateAnalytics/",
+        'query_builder_url':        "https://api.wevoteusa.org/a/query_builder/",
         'google_civic_election_id': google_civic_election_id,
         'voters':                   voter_count,
     }
-    if positive_value_exists(show_state_topics):
-        json_data['voters_following_topics'] = country_voters_following_topics
-        percent_voters_following_topics_float = round((float(country_voters_following_topics / voter_count) * 100), 2)
-        json_data['percent_voters_following_topics'] = \
-            "{percent}%".format(percent=percent_voters_following_topics_float)
+    json_data['voters_following_topics'] = country_voters_following_topics
+    percent_voters_following_topics_float = round((float(country_voters_following_topics / voter_count) * 100), 2)
+    json_data['percent_voters_following_topics'] = "{percent}%".format(percent=percent_voters_following_topics_float)
     json_data['year'] = show_this_year_of_analytics
     json_data['likely_left_from_issues'] = likely_left_from_issues
     json_data['likely_right_from_issues'] = likely_right_from_issues
