@@ -1,0 +1,134 @@
+{# templates/analytics/voter_aggregate_analytics_query_builder.html #}
+{% extends "template_base.html" %}
+
+{% block title %}voterAggregateAnalytics: Query Builder{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+<h1>voterAggregateAnalytics: Query Builder</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form
+  action="{% url "apis_v1:voterAggregateAnalyticsView" %}"
+{#  action="https://cdn.wevoteusa.org/apis/v1/voterAggregateAnalytics"#}
+  class="form-horizontal"
+  method="get"
+  target="_blank"
+>
+
+{% if election_years_available %}
+<div class="form-group">
+    <label for="show_this_year_of_analytics_id" class="col-sm-3 control-label">Year of Activity (default: all)</label>
+    <div class="col-sm-8">
+        <select id="show_this_year_of_analytics_id" name="show_this_year_of_analytics">
+            <option value="0" {% if 0 == show_this_year_of_analytics|convert_to_int %} selected="selected"{% endif %}>
+                -- Show all years --</option>
+            {% for year in election_years_available %}
+            <option value="{{ year }}"
+                    {% if show_this_year_of_analytics|slugify == year|slugify %} selected="selected"{% endif %}>
+                {% if show_this_year_of_analytics|slugify == year|slugify %}Limited to {% endif %}
+                {{ year }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+{% endif %}{# End of if election_years_available #}
+
+
+{% if election_list %}
+<div class="form-group">
+    <label for="google_civic_election_id" class="col-sm-3 control-label">Election (default: all)</label>
+    <div class="col-sm-8">
+        <select id="google_civic_election_id" name="google_civic_election_id" class="form-control"  style="height: auto !important">
+            <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
+                -- Show all elections --</option>
+        {% for election in election_list %}
+            <option value="{{ election.google_civic_election_id }}"
+                    {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+                {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
+        {% endfor %}
+        </select>
+    </div>
+</div>
+{% endif %}
+
+{% if state_list and pigs_fly %}
+<div class="form-group">
+    <label for="state_code_id" class="col-sm-3 control-label">State (default: all)</label>
+    <div class="col-sm-8">
+        {% for key, state in state_list %}
+            <span class="u-no-break">
+                <input
+                  id="state_code_{{ key }}"
+                  type="checkbox"
+                  value="{{ key }}"
+                  {% if key|lower == state_code|lower %} checked="checked"{% endif %}
+                />&nbsp;{{ state }}&nbsp;&nbsp;
+            </span>
+
+        {% endfor %}
+    </div>
+</div>
+{% endif %}{# End of if state_list #}
+
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">State settings</label>
+    <div class="col-sm-8 ">
+        <input type="checkbox" name="show_state_topics" id="show_state_topics_id" value="1"
+                {% if show_state_topics %}checked{% endif %} />
+        <label for="show_state_topics_id" style="font-weight: normal !important;"><span style="color: darkgray">
+            Show topics followed by voters under each state.</span></label>
+        <div>
+            <input type="checkbox" name="show_states_without_activity" id="show_states_without_activity_id" value="1"
+                    {% if show_states_without_activity %}checked{% endif %} />
+            <label for="show_states_without_activity_id" style="font-weight: normal !important;"><span style="color: darkgray">
+                Include states without voter activity.</span></label>
+        </div>
+    </div>
+</div>
+
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">County settings</label>
+    <div class="col-sm-8 ">
+        <input type="checkbox" name="show_counties" id="show_counties_id" value="1"
+                {% if show_counties %}checked{% endif %} />
+        <label for="show_counties_id" style="font-weight: normal !important;"><span style="color: darkgray">
+            Return analytics for counties.</span></label>
+
+        <div>
+            <input type="checkbox" name="show_county_topics" id="show_county_topics_id" value="1"
+                    {% if show_county_topics %}checked{% endif %} />
+            <label for="show_county_topics_id" style="font-weight: normal !important;"><span style="color: darkgray">
+                Show topics followed by voters under each county.</span></label>
+        </div>
+
+        <div>
+            <input type="checkbox" name="show_counties_without_activity" id="show_counties_without_activity_id" value="1"
+                    {% if show_counties_without_activity %}checked{% endif %} />
+            <label for="show_counties_without_activity_id" style="font-weight: normal !important;"><span style="color: darkgray">
+                Include counties without voter activity.</span></label>
+        </div>
+    </div>
+</div>
+
+
+<div class="form-group">
+    <label for="find_voter_guide_button_id" class="col-sm-3 control-label"><a href="{% url 'admin_tools:admin_home' %}">cancel</a></label>
+    <div class="col-sm-8">
+        <button type="submit" class="btn btn-default btn-success" name="run_query">Submit</button>
+    </div>
+</div>
+</form>
+
+<script>
+    $(function() {
+        $('#show_this_year_of_analytics_id').change(function() {
+            this.form.action = "{% url "analytics:query_builder" %}"
+            this.form.target = ""
+            this.form.submit();
+        });
+    });
+</script>
+{% endblock %}

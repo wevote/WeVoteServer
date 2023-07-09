@@ -3094,8 +3094,7 @@ class Voter(AbstractBaseUser):
     # uniquely identifies counties and county equivalents in the United States.
     # The first two digits of the code identify the state,
     # and the last three digits identify the county or county equivalent.
-    county_fips_code = models.PositiveIntegerField(default=None, null=True)
-    county_id = models.PositiveIntegerField(default=None, null=True)  # id internal to We Vote
+    county_fips_code = models.CharField(max_length=5, null=True)
     county_name = models.CharField(max_length=255, null=True)
     # Lat/Long is used for statistics. For returning ballot data, use VoterAddress Lat/Long
     latitude = models.FloatField(default=None, null=True)
@@ -3182,6 +3181,7 @@ class Voter(AbstractBaseUser):
     # storing in cookie
     # current_google_civic_election_id = models.PositiveIntegerField(
     #     verbose_name="google civic election id", null=True, unique=False)
+    voter_issues_lookup_updated = models.BooleanField(default=False)
 
     objects = VoterManager()
 
@@ -4177,6 +4177,57 @@ class VoterDeviceLinkManager(models.Manager):
             'voter_must_request_new_code':              voter_must_request_new_code,
         }
         return results
+
+
+class VoterIssuesLookup(models.Model):
+    """
+    A table for rapid lookup (analytics) of how many voters follow each Issue / Value / Topic.
+    """
+    #
+    # We are relying on built-in Python id field
+
+    objects = None
+    voter_we_vote_id = models.CharField(max_length=255, null=True, unique=True, db_index=True)
+    likely_democrat_from_issues = models.BooleanField(default=None, null=True)
+    likely_republican_from_issues = models.BooleanField(default=None, null=True)
+    likely_party_from_issues_analyzed = models.BooleanField(default=False)
+
+    affordable_housing = models.BooleanField(default=None, null=True)
+    animals = models.BooleanField(default=None, null=True)
+    bicycling = models.BooleanField(default=None, null=True)
+    borders = models.BooleanField(default=None, null=True)
+    climate_change = models.BooleanField(default=None, null=True)
+    color = models.BooleanField(default=None, null=True)
+    conservative = models.BooleanField(default=None, null=True)
+    democratic_clubs = models.BooleanField(default=None, null=True)
+    democratic_politicians = models.BooleanField(default=None, null=True)
+    green_clubs = models.BooleanField(default=None, null=True)
+    green_politicians = models.BooleanField(default=None, null=True)
+    gun_reform = models.BooleanField(default=None, null=True)
+    homeless = models.BooleanField(default=None, null=True)
+    immigration = models.BooleanField(default=None, null=True)
+    independent_politicians = models.BooleanField(default=None, null=True)
+    justice_reform = models.BooleanField(default=None, null=True)
+    lgbtq = models.BooleanField(default=None, null=True)
+    libertarian_clubs = models.BooleanField(default=None, null=True)
+    libertarian_politicians = models.BooleanField(default=None, null=True)
+    low_income = models.BooleanField(default=None, null=True)
+    maga = models.BooleanField(default=None, null=True)
+    marijuana = models.BooleanField(default=None, null=True)
+    money_in_politics = models.BooleanField(default=None, null=True)
+    pro_choice = models.BooleanField(default=None, null=True)
+    pro_life = models.BooleanField(default=None, null=True)
+    pro_public_schools = models.BooleanField(default=None, null=True)
+    pro_school_choice = models.BooleanField(default=None, null=True)
+    progressive = models.BooleanField(default=None, null=True)
+    public_healthcare = models.BooleanField(default=None, null=True)
+    republican_clubs = models.BooleanField(default=None, null=True)
+    republican_politicians = models.BooleanField(default=None, null=True)
+    second_amendment = models.BooleanField(default=None, null=True)
+    social_security = models.BooleanField(default=None, null=True)
+    student_debt = models.BooleanField(default=None, null=True)
+    voting_rights = models.BooleanField(default=None, null=True)
+    womens_equality = models.BooleanField(default=None, null=True)
 
 
 # This method *just* returns the voter_id or 0

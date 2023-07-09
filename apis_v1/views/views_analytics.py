@@ -3,21 +3,209 @@
 # -*- coding: UTF-8 -*-
 
 from analytics.controllers import save_analytics_action_for_api
-from analytics.models import ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS
+from analytics.models import ACTION_BALLOT_VISIT, ACTIONS_THAT_REQUIRE_ORGANIZATION_IDS, AnalyticsAction
 from config.base import get_environment_variable
 from django.http import HttpResponse
 import json
 from organization.models import OrganizationManager
 import robot_detection
 from django_user_agents.utils import get_user_agent
-from voter.models import VoterDeviceLinkManager, VoterManager
+from voter.models import Voter, VoterDeviceLinkManager, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_voter_device_id, is_voter_device_id_valid, \
-    positive_value_exists
+    positive_value_exists, STATE_CODE_MAP
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
+
+
+def voter_aggregate_analytics_view(request):  # voterAggregateAnalytics
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    show_county_topics = positive_value_exists(request.GET.get('show_county_topics', 0))
+    show_counties = show_county_topics or positive_value_exists(request.GET.get('show_county_topics', 0))
+    show_counties_without_activity = positive_value_exists(request.GET.get('show_counties_without_activity', 0))
+    show_state_topics = positive_value_exists(request.GET.get('show_state_topics', 0))
+    show_states_without_activity = positive_value_exists(request.GET.get('show_states_without_activity', 0))
+    show_this_year_of_analytics = convert_to_int(request.GET.get('show_this_year_of_analytics', 0))
+    status = ''
+    success = True
+    analytics_action_code_list = [ACTION_BALLOT_VISIT]
+
+    analytics_queryset = AnalyticsAction.objects.using('readonly').all()
+    analytics_queryset = analytics_queryset.filter(action_constant__in=analytics_action_code_list)
+    if positive_value_exists(google_civic_election_id):
+        analytics_queryset = analytics_queryset.filter(google_civic_election_id=google_civic_election_id)
+    if positive_value_exists(show_this_year_of_analytics):
+        first_day_of_year = convert_to_int("{year}0101".format(year=show_this_year_of_analytics))
+        last_day_of_year = convert_to_int("{year}1231".format(year=show_this_year_of_analytics))
+        analytics_queryset = analytics_queryset.filter(date_as_integer__gte=first_day_of_year)
+        analytics_queryset = analytics_queryset.filter(date_as_integer__lte=last_day_of_year)
+    analytics_queryset = analytics_queryset.values_list('voter_we_vote_id', flat=True).distinct()
+    voter_count = analytics_queryset.count()
+    voter_we_vote_id_list_for_country = list(analytics_queryset)
+
+    from voter.models import VoterIssuesLookup
+    issues_queryset = VoterIssuesLookup.objects.using('readonly').all()
+    issues_queryset = issues_queryset.filter(voter_we_vote_id__in=voter_we_vote_id_list_for_country)
+    country_voters_following_topics = issues_queryset.count()
+
+    all_states_dict = {}
+    if show_county_topics or show_state_topics:
+        from issue.models import ACTIVE_ISSUES_DICTIONARY, VOTER_ISSUES_LOOKUP_DICT
+        issues_dictionary = ACTIVE_ISSUES_DICTIONARY
+        voter_issues_lookup_dict = VOTER_ISSUES_LOOKUP_DICT
+    else:
+        issues_dictionary = {}
+        voter_issues_lookup_dict = {}
+    if positive_value_exists(show_counties) or show_counties_without_activity:
+        from analytics.constants_fips_codes import COUNTIES_BY_STATE
+        counties_by_state_dict = COUNTIES_BY_STATE
+    else:
+        counties_by_state_dict = {}
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
+    voter_queryset = Voter.objects.using('readonly').all()
+    for state_code, state_name in sorted_state_list:
+        analytics_queryset_state = analytics_queryset.filter(state_code__iexact=state_code)
+        voters_in_state_count = analytics_queryset_state.count()
+        voter_we_vote_id_list_for_state = list(analytics_queryset_state)
+        voters_in_state_following_topics = 0
+        topics_by_state = []
+        topics_by_state_ordered = []
+        if positive_value_exists(show_state_topics) and positive_value_exists(voters_in_state_count):
+            issues_queryset = VoterIssuesLookup.objects.using('readonly').all()
+            issues_queryset = issues_queryset.filter(voter_we_vote_id__in=voter_we_vote_id_list_for_state)
+            voters_in_state_following_topics = issues_queryset.count()
+
+            # Statewide topics loop here
+            for key, item in issues_dictionary.items():
+                issue_we_vote_id = key
+                topic_name = item
+                voter_issues_lookup_name = voter_issues_lookup_dict.get(issue_we_vote_id)
+                issues_queryset_one_topic = issues_queryset.filter(**{voter_issues_lookup_name: True})
+                voters_in_state_following_this_topic = issues_queryset_one_topic.count()
+                if positive_value_exists(voters_in_state_following_this_topic):
+                    percent_voters_in_state_following = \
+                        round((float(voters_in_state_following_this_topic / voters_in_state_count) * 100), 2)
+                    percent_voters_in_state_following_active_only_float = \
+                        round((float(voters_in_state_following_this_topic / voters_in_state_following_topics) * 100), 2)
+                    state_topic_dict = {
+                        'topic_name': topic_name,
+                        'issue_we_vote_id': issue_we_vote_id,
+                        'voters_in_state_following': voters_in_state_following_this_topic,
+                        'percent_voters_in_state_following': "{percent}%".format(
+                            percent=percent_voters_in_state_following),
+                        'percent_voters_in_state_following_active_only': "{percent}%".format(
+                            percent=percent_voters_in_state_following_active_only_float),
+                    }
+                    topics_by_state.append(state_topic_dict)
+            for state_topic_dict in (sorted(topics_by_state, key=lambda x: x['voters_in_state_following'], reverse=True)):
+                topics_by_state_ordered.append(state_topic_dict)
+        counties_list = []
+        if positive_value_exists(show_counties) and positive_value_exists(voters_in_state_count) \
+                or show_counties_without_activity:
+            # We do not search directly in the Voter table for state, because the voter may have moved
+            #  since the analytics entry was created.
+            voter_queryset_this_state = voter_queryset.filter(we_vote_id__in=voter_we_vote_id_list_for_state)
+            # Counties loop here
+            if state_code not in counties_by_state_dict:
+                # This can happen with state_code == 'NA'
+                continue
+            for county in counties_by_state_dict[state_code]:
+                if 'county_fips_code' not in county:
+                    continue
+                county_fips_code = county['county_fips_code']
+                if not positive_value_exists(county_fips_code):
+                    continue
+                voter_queryset_this_county = voter_queryset_this_state.filter(county_fips_code=county_fips_code)
+                voters_in_county = voter_queryset_this_county.count()
+                voter_queryset_this_county = voter_queryset_this_county.values_list('we_vote_id', flat=True).distinct()
+                voter_we_vote_id_list_this_county = list(voter_queryset_this_county)
+                county_dict = {
+                    'county_name': county['county_name'],
+                    'county_short_name': county['county_short_name'],
+                    'county_fips_code': county_fips_code,
+                    'voters_in_county': voters_in_county,
+                }
+                if positive_value_exists(show_county_topics) and positive_value_exists(voters_in_county):
+                    topics_for_one_county = []
+                    topics_for_one_county_ordered = []
+                    county_issues_queryset = VoterIssuesLookup.objects.using('readonly').all()
+                    county_issues_queryset = county_issues_queryset.filter(
+                        voter_we_vote_id__in=voter_we_vote_id_list_this_county)
+                    voters_in_county_following = county_issues_queryset.count()
+                    county_dict['voters_in_county_following'] = voters_in_county_following
+                    percent_voters_in_county_following_float = \
+                        round(
+                            (float(voters_in_county_following /
+                                   voters_in_county) * 100), 2)
+                    county_dict['percent_voters_in_county_following'] = "{percent}%".format(
+                                        percent=percent_voters_in_county_following_float)
+
+                    if positive_value_exists(voters_in_county_following):
+                        # County topics loop here
+                        for key, item in issues_dictionary.items():
+                            issue_we_vote_id = key
+                            topic_name = item
+                            voter_issues_lookup_name = voter_issues_lookup_dict.get(issue_we_vote_id)
+                            issues_queryset_one_topic = county_issues_queryset.filter(**{voter_issues_lookup_name: True})
+                            voters_in_county_following_this_topic = issues_queryset_one_topic.count()
+                            if positive_value_exists(voters_in_county_following_this_topic):
+                                percent_voters_in_county_following = \
+                                    round((float(voters_in_county_following_this_topic / voters_in_county) * 100), 2)
+                                percent_voters_in_county_following_active_only_float = \
+                                    round(
+                                        (float(voters_in_county_following_this_topic /
+                                               voters_in_county_following) * 100), 2)
+                                county_topic_dict = {
+                                    'topic_name': topic_name,
+                                    'issue_we_vote_id': issue_we_vote_id,
+                                    'voters_in_county_following': voters_in_county_following_this_topic,
+                                    'percent_voters_in_county_following': "{percent}%".format(
+                                        percent=percent_voters_in_county_following),
+                                    'percent_voters_in_county_following_active_only': "{percent}%".format(
+                                        percent=percent_voters_in_county_following_active_only_float),
+                                }
+                                topics_for_one_county.append(county_topic_dict)
+
+                    for county_topic_dict in (sorted(topics_for_one_county,
+                                                     key=lambda x: x['voters_in_county_following'],
+                                                     reverse=True)):
+                        topics_for_one_county_ordered.append(county_topic_dict)
+                    county_dict['topics_for_one_county'] = topics_for_one_county_ordered
+                if positive_value_exists(voters_in_county) or show_counties_without_activity:
+                    # Only add to list if there are voters in this county
+                    counties_list.append(county_dict)
+
+        one_state_dict = {
+            'state_name': state_name,
+            'voters_in_state': voters_in_state_count,
+        }
+        if positive_value_exists(show_state_topics):
+            one_state_dict['voters_in_state_following_topics'] = voters_in_state_following_topics
+            one_state_dict['topics_by_state'] = topics_by_state_ordered
+        if positive_value_exists(show_counties) or show_counties_without_activity:
+            one_state_dict['counties'] = counties_list
+        if positive_value_exists(voters_in_state_count) or show_states_without_activity:
+            all_states_dict[state_code] = one_state_dict
+
+    json_data = {
+        'status':                   status,
+        'success':                  success,
+        'google_civic_election_id': google_civic_election_id,
+        'voters':                   voter_count,
+    }
+    if positive_value_exists(show_state_topics):
+        json_data['voters_following_topics'] = country_voters_following_topics
+        percent_voters_following_topics_float = round((float(country_voters_following_topics / voter_count) * 100), 2)
+        json_data['percent_voters_following_topics'] = \
+            "{percent}%".format(percent=percent_voters_following_topics_float)
+    json_data['year'] = show_this_year_of_analytics
+    json_data['show_states_without_activity'] = show_states_without_activity
+    json_data['show_counties_without_activity'] = show_counties_without_activity
+    json_data['states'] = all_states_dict
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def save_analytics_action_view(request):  # saveAnalyticsAction
