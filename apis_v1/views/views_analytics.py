@@ -50,6 +50,19 @@ def voter_aggregate_analytics_view(request):  # voterAggregateAnalytics
     issues_queryset = issues_queryset.filter(voter_we_vote_id__in=voter_we_vote_id_list_for_country)
     country_voters_following_topics = issues_queryset.count()
 
+    likely_democrat_query = issues_queryset.filter(likely_democrat_from_issues=True)
+    likely_democrat_from_issues = likely_democrat_query.count()
+    likely_green_query = issues_queryset.filter(likely_green_from_issues=True)
+    likely_green_from_issues = likely_green_query.count()
+    likely_left_query = issues_queryset.filter(likely_left_from_issues=True)
+    likely_left_from_issues = likely_left_query.count()
+    likely_libertarian_query = issues_queryset.filter(likely_libertarian_from_issues=True)
+    likely_libertarian_from_issues = likely_libertarian_query.count()
+    likely_republican_query = issues_queryset.filter(likely_republican_from_issues=True)
+    likely_republican_from_issues = likely_republican_query.count()
+    likely_right_query = issues_queryset.filter(likely_right_from_issues=True)
+    likely_right_from_issues = likely_right_query.count()
+
     all_states_dict = {}
     if show_county_topics or show_state_topics:
         from issue.models import ACTIVE_ISSUES_DICTIONARY, VOTER_ISSUES_LOOKUP_DICT
@@ -134,16 +147,16 @@ def voter_aggregate_analytics_view(request):  # voterAggregateAnalytics
                     county_issues_queryset = VoterIssuesLookup.objects.using('readonly').all()
                     county_issues_queryset = county_issues_queryset.filter(
                         voter_we_vote_id__in=voter_we_vote_id_list_this_county)
-                    voters_in_county_following = county_issues_queryset.count()
-                    county_dict['voters_in_county_following'] = voters_in_county_following
-                    percent_voters_in_county_following_float = \
+                    voters_in_county_following_topics = county_issues_queryset.count()
+                    county_dict['voters_in_county_following_topics'] = voters_in_county_following_topics
+                    percent_voters_in_county_following_topics_float = \
                         round(
-                            (float(voters_in_county_following /
+                            (float(voters_in_county_following_topics /
                                    voters_in_county) * 100), 2)
-                    county_dict['percent_voters_in_county_following'] = "{percent}%".format(
-                                        percent=percent_voters_in_county_following_float)
+                    county_dict['percent_voters_in_county_following_topics'] = "{percent}%".format(
+                                        percent=percent_voters_in_county_following_topics_float)
 
-                    if positive_value_exists(voters_in_county_following):
+                    if positive_value_exists(voters_in_county_following_topics):
                         # County topics loop here
                         for key, item in issues_dictionary.items():
                             issue_we_vote_id = key
@@ -152,25 +165,25 @@ def voter_aggregate_analytics_view(request):  # voterAggregateAnalytics
                             issues_queryset_one_topic = county_issues_queryset.filter(**{voter_issues_lookup_name: True})
                             voters_in_county_following_this_topic = issues_queryset_one_topic.count()
                             if positive_value_exists(voters_in_county_following_this_topic):
-                                percent_voters_in_county_following = \
+                                percent_voters_in_county_following_this_topic = \
                                     round((float(voters_in_county_following_this_topic / voters_in_county) * 100), 2)
-                                percent_voters_in_county_following_active_only_float = \
+                                percent_voters_in_county_following_this_topic_active_only_float = \
                                     round(
                                         (float(voters_in_county_following_this_topic /
-                                               voters_in_county_following) * 100), 2)
+                                               voters_in_county_following_topics) * 100), 2)
                                 county_topic_dict = {
                                     'topic_name': topic_name,
                                     'issue_we_vote_id': issue_we_vote_id,
-                                    'voters_in_county_following': voters_in_county_following_this_topic,
+                                    'voters_in_county_following_this_topic': voters_in_county_following_this_topic,
                                     'percent_voters_in_county_following': "{percent}%".format(
-                                        percent=percent_voters_in_county_following),
+                                        percent=percent_voters_in_county_following_this_topic),
                                     'percent_voters_in_county_following_active_only': "{percent}%".format(
-                                        percent=percent_voters_in_county_following_active_only_float),
+                                        percent=percent_voters_in_county_following_this_topic_active_only_float),
                                 }
                                 topics_for_one_county.append(county_topic_dict)
 
                     for county_topic_dict in (sorted(topics_for_one_county,
-                                                     key=lambda x: x['voters_in_county_following'],
+                                                     key=lambda x: x['voters_in_county_following_this_topic'],
                                                      reverse=True)):
                         topics_for_one_county_ordered.append(county_topic_dict)
                     county_dict['topics_for_one_county'] = topics_for_one_county_ordered
@@ -184,6 +197,13 @@ def voter_aggregate_analytics_view(request):  # voterAggregateAnalytics
         }
         if positive_value_exists(show_state_topics):
             one_state_dict['voters_in_state_following_topics'] = voters_in_state_following_topics
+            if voters_in_state_count:
+                percent_voters_in_state_following_topics_float = \
+                    round((float(voters_in_state_following_topics / voters_in_state_count) * 100), 2)
+            else:
+                percent_voters_in_state_following_topics_float = 0.0
+            one_state_dict['percent_voters_in_state_following_topics'] = \
+                "{percent}%".format(percent=percent_voters_in_state_following_topics_float)
             one_state_dict['topics_by_state'] = topics_by_state_ordered
         if positive_value_exists(show_counties) or show_counties_without_activity:
             one_state_dict['counties'] = counties_list
@@ -202,6 +222,12 @@ def voter_aggregate_analytics_view(request):  # voterAggregateAnalytics
         json_data['percent_voters_following_topics'] = \
             "{percent}%".format(percent=percent_voters_following_topics_float)
     json_data['year'] = show_this_year_of_analytics
+    json_data['likely_left_from_issues'] = likely_left_from_issues
+    json_data['likely_right_from_issues'] = likely_right_from_issues
+    json_data['likely_democrat_from_issues'] = likely_democrat_from_issues
+    json_data['likely_green_from_issues'] = likely_green_from_issues
+    json_data['likely_libertarian_from_issues'] = likely_libertarian_from_issues
+    json_data['likely_republican_from_issues'] = likely_republican_from_issues
     json_data['show_states_without_activity'] = show_states_without_activity
     json_data['show_state_topics'] = show_state_topics
     json_data['show_counties'] = show_counties

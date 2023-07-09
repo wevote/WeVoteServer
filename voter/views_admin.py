@@ -31,6 +31,7 @@ from share.models import SharedItem, VoterWhoSharesSummaryAllTime, VoterWhoShare
 from sms.models import SMSManager, SMSPhoneNumber
 from stripe_donations.models import StripeManager, StripePayments
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
+from voter.models import VoterIssuesLookup
 from wevote_functions.functions import convert_to_int, generate_random_string, get_voter_api_device_id, \
     get_voter_device_id, set_voter_api_device_id, positive_value_exists
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
@@ -1333,7 +1334,6 @@ def voter_list_view(request):
         updates_needed = False
         updates_made = 0
         voter_updates_made = 0
-        from voter.models import VoterIssuesLookup
         for voter_we_vote_id in voter_we_vote_id_list:
             if voter_we_vote_id not in dict_of_voter_issue_defaults:
                 continue
@@ -1377,6 +1377,52 @@ def voter_list_view(request):
             except Exception as e:
                 voter_issues_lookup_updates_status += "Voter entries (" + str(voter_updates_made) + ") " \
                     "NOT updated: " + str(e) + " "
+        if positive_value_exists(voter_issues_lookup_updates_status):
+            # voter_issues_lookup_updates_status = \
+            #     "SCRIPT voter_issues_lookup_updates, status: " + voter_issues_lookup_updates_status + " "
+            messages.add_message(request, messages.INFO, voter_issues_lookup_updates_status)
+
+    likely_political_party_analysis = True
+    number_to_update = 1000
+    updates_made = 0
+    if likely_political_party_analysis and run_scripts:
+        voter_issues_lookup_updates_status = ''
+        voter_issues_update_list = []
+        voter_issues_query = VoterIssuesLookup.objects.all()
+        voter_issues_query = voter_issues_query.exclude(likely_party_from_issues_analyzed=True)
+        voter_issues_list = list(voter_issues_query[:number_to_update])
+        from issue.controllers import calculate_likely_political_party_from_issues
+        for voter_issues_lookup in voter_issues_list:
+            results = calculate_likely_political_party_from_issues(voter_issues_lookup=voter_issues_lookup)
+            if results['success']:
+                # Left/Right
+                voter_issues_lookup.likely_left_from_issues = results['likely_left_from_issues']
+                voter_issues_lookup.likely_right_from_issues = results['likely_right_from_issues']
+                # We are only setting one party per person
+                voter_issues_lookup.likely_democrat_from_issues = results['likely_democrat_from_issues']
+                voter_issues_lookup.likely_green_from_issues = results['likely_green_from_issues']
+                voter_issues_lookup.likely_libertarian_from_issues = results['likely_libertarian_from_issues']
+                voter_issues_lookup.likely_republican_from_issues = results['likely_republican_from_issues']
+                voter_issues_lookup.likely_party_from_issues_analyzed = True
+                updates_made += 1
+                voter_issues_update_list.append(voter_issues_lookup)
+        if positive_value_exists(updates_made):
+            try:
+                VoterIssuesLookup.objects.bulk_update(
+                    voter_issues_update_list, [
+                        'likely_left_from_issues',
+                        'likely_right_from_issues',
+                        'likely_democrat_from_issues',
+                        'likely_green_from_issues',
+                        'likely_libertarian_from_issues',
+                        'likely_republican_from_issues',
+                        'likely_party_from_issues_analyzed',
+                    ])
+                voter_issues_lookup_updates_status += "VoterIssuesLookup entries updated: {updates_made:,}" \
+                                                      "".format(updates_made=updates_made)
+            except Exception as e:
+                voter_issues_lookup_updates_status += "VoterIssuesLookup entries (" + str(updates_made) + ") " \
+                                                      "NOT updated: " + str(e) + " "
         if positive_value_exists(voter_issues_lookup_updates_status):
             # voter_issues_lookup_updates_status = \
             #     "SCRIPT voter_issues_lookup_updates, status: " + voter_issues_lookup_updates_status + " "

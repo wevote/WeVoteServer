@@ -4189,8 +4189,12 @@ class VoterIssuesLookup(models.Model):
     objects = None
     voter_we_vote_id = models.CharField(max_length=255, null=True, unique=True, db_index=True)
     likely_democrat_from_issues = models.BooleanField(default=None, null=True)
-    likely_republican_from_issues = models.BooleanField(default=None, null=True)
+    likely_green_from_issues = models.BooleanField(default=None, null=True)
+    likely_left_from_issues = models.BooleanField(default=None, null=True)
+    likely_libertarian_from_issues = models.BooleanField(default=None, null=True)
     likely_party_from_issues_analyzed = models.BooleanField(default=False)
+    likely_republican_from_issues = models.BooleanField(default=None, null=True)
+    likely_right_from_issues = models.BooleanField(default=None, null=True)
 
     affordable_housing = models.BooleanField(default=None, null=True)
     animals = models.BooleanField(default=None, null=True)
