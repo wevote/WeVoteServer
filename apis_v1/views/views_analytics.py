@@ -203,7 +203,10 @@ def voter_aggregate_analytics_view(request):  # voterAggregateAnalytics
             "{percent}%".format(percent=percent_voters_following_topics_float)
     json_data['year'] = show_this_year_of_analytics
     json_data['show_states_without_activity'] = show_states_without_activity
+    json_data['show_state_topics'] = show_state_topics
+    json_data['show_counties'] = show_counties
     json_data['show_counties_without_activity'] = show_counties_without_activity
+    json_data['show_county_topics'] = show_county_topics
     json_data['states'] = all_states_dict
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

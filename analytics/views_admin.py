@@ -46,8 +46,8 @@ WEB_APP_ROOT_URL = get_environment_variable("WEB_APP_ROOT_URL")
 
 def voter_aggregate_analytics_query_builder_view(request):  # voterAggregateAnalytics Builder
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-    show_county_topics = positive_value_exists(request.GET.get('show_county_topics', 1))
-    show_counties = show_county_topics or positive_value_exists(request.GET.get('show_county_topics', 1))
+    show_county_topics = positive_value_exists(request.GET.get('show_county_topics', 0))
+    show_counties = show_county_topics or positive_value_exists(request.GET.get('show_county_topics', 0))
     show_counties_without_activity = positive_value_exists(request.GET.get('show_counties_without_activity', 0))
     show_state_topics = positive_value_exists(request.GET.get('show_state_topics', 1))
     show_states_without_activity = positive_value_exists(request.GET.get('show_states_without_activity', 0))

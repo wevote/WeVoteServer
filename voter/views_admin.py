@@ -1290,7 +1290,7 @@ def voter_list_view(request):
         voter_id = convert_to_int(voter_id)
 
     # Populate the VoterIssuesLookup table
-    number_to_update = 10000
+    number_to_update = 100000
     voter_issues_lookup_updates = True
     if voter_issues_lookup_updates and run_scripts:
         voter_issues_lookup_updates_status = ""
@@ -1313,16 +1313,22 @@ def voter_list_view(request):
         dict_of_voter_issue_defaults = {}  # voter_we_vote_id as key, value is list of defaults
 
         from issue.models import VOTER_ISSUES_LOOKUP_DICT
+        deprecated_issues_count = 0
         for one_follow in follow_issue_list:
             voter_we_vote_id = one_follow.voter_we_vote_id
             issue_we_vote_id = one_follow.issue_we_vote_id
             if voter_we_vote_id not in dict_of_voter_issue_defaults:
                 dict_of_voter_issue_defaults[voter_we_vote_id] = {}
-            issue_key = VOTER_ISSUES_LOOKUP_DICT[issue_we_vote_id]
-            if positive_value_exists(issue_key):
-                dict_of_voter_issue_defaults[voter_we_vote_id][issue_key] = True
-            else:
-                voter_issues_lookup_updates_status += "MISSING ISSUE_KEY: " + issue_we_vote_id + " "
+            try:
+                issue_key = VOTER_ISSUES_LOOKUP_DICT[issue_we_vote_id]
+                if positive_value_exists(issue_key):
+                    dict_of_voter_issue_defaults[voter_we_vote_id][issue_key] = True
+                else:
+                    voter_issues_lookup_updates_status += "MISSING_ISSUE_KEY: " + issue_we_vote_id + " "
+            except Exception as e:
+                deprecated_issues_count += 1
+        if deprecated_issues_count > 0:
+            voter_issues_lookup_updates_status += "DEPRECATED_ISSUES: " + str(deprecated_issues_count) + " "
         update_list = []
         updates_needed = False
         updates_made = 0
@@ -1366,7 +1372,8 @@ def voter_list_view(request):
             try:
                 Voter.objects.bulk_update(
                     voter_update_list, ['voter_issues_lookup_updated'])
-                voter_issues_lookup_updates_status += "Voter entries updated: " + str(voter_updates_made) + " "
+                voter_issues_lookup_updates_status += "Voter entries updated: {voter_updates_made:,}" \
+                                                      "".format(voter_updates_made=voter_updates_made)
             except Exception as e:
                 voter_issues_lookup_updates_status += "Voter entries (" + str(voter_updates_made) + ") " \
                     "NOT updated: " + str(e) + " "
