@@ -3444,44 +3444,8 @@ class OrganizationChangeLog(models.Model):
     def change_description_augmented(self):
         # Issues with smaller integers need to be listed last.
         # If not, 'wv02issue76' gets found when replacing 'wv02issue7' with the name of the issue.
-        issue_we_vote_id_to_name_dictionary = {
-            "wv87issue100": "Make America Great Again (MAGA)",
-            "wv02issue63": "Pro-choice",
-            "wv02issue64": "Pro-life",
-            "wv02issue25": "Democratic Clubs",
-            "wv02issue68": "Republican Clubs",
-            "wv02issue51": "LGBTQ",
-            "wv02issue94": "Democratic Party Politicians",
-            "wv02issue95": "Republican Party Politicians",
-            "wv02issue65": "Progressive Values",
-            "wv02issue18": "Conservative Values",
-            "wv02issue37": "Common Sense Gun Reform",
-            "wv02issue36": "Gun / 2nd Amendment Rights",
-            "wv02issue91": "Affordable Housing",
-            "wv02issue16": "Communities of Color",
-            "wv02issue20": "Criminal Justice Reform",
-            "wv02issue35": "Green Party Clubs",
-            "wv02issue97": "Green Party Politicians",
-            "wv02issue42": "Homeless Well-Being",
-            "wv02issue46": "Immigration Rights",
-            "wv02issue98": "Independent Politicians",
-            "wv02issue53": "Libertarian Clubs",
-            "wv02issue96": "Libertarian Party Politicians",
-            "wv02issue82": "Low Income & Unemployment",
-            "wv02issue56": "Marijuana Legalization",
-            "wv02issue27": "Pro Public Schools",
-            "wv02issue10": "Pro School Choice",
-            "wv02issue99": "Publicly Funded Healthcare",
-            "wv02issue76": "Reducing Student Debt",
-            "wv02issue45": "Securing Our Borders",
-            "wv02issue66": "Social Security & Medicare",
-            "wv02issue84": "Voting Rights & Education",
-            "wv02issue86": "Women's Equality",
-            "wv02issue1": "Animals & Wildlife",
-            "wv02issue2": "Reducing Money in Politics",
-            "wv02issue4": "Climate Change",
-            "wv02issue7": "Bicycling",
-        }
+        from issue.models import ACTIVE_ISSUES_DICTIONARY
+        issue_we_vote_id_to_name_dictionary = ACTIVE_ISSUES_DICTIONARY
         if self.change_description:
             change_description_augmented = self.change_description
             if 'issue' in change_description_augmented:
