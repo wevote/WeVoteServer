@@ -1198,7 +1198,7 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
             'in_draft_mode':                    True,
             'is_supporters_count_minimum_exceeded': False,
             'linked_campaignx_we_vote_id':      '',
-            'seo_friendly_path':                '',
+            'seo_friendly_path':                seo_friendly_path,
             'seo_friendly_path_list':           seo_friendly_path_list,
             'supporters_count':                 0,
             'supporters_count_next_goal':       0,
