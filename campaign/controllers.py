@@ -432,6 +432,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
     success = True
     campaignx_dict = {}
     campaignx_error_dict = copy.deepcopy(CAMPAIGNX_ERROR_DICT)
+    campaignx_error_dict['seo_friendly_path'] = seo_friendly_path
     voter_signed_in_with_email = False
     voter_we_vote_id = ''
 
