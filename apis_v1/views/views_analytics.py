@@ -106,14 +106,16 @@ def voter_aggregate_analytics_view(request):  # voterAggregateAnalytics
                     state_topic_dict = {
                         'topic_name': topic_name,
                         'issue_we_vote_id': issue_we_vote_id,
-                        'voters_in_state_following': voters_in_state_following_this_topic,
+                        'voters_in_state_following_this_topic': voters_in_state_following_this_topic,
                         'percent_voters_in_state_following': "{percent}%".format(
                             percent=percent_voters_in_state_following),
                         'percent_voters_in_state_following_active_only': "{percent}%".format(
                             percent=percent_voters_in_state_following_active_only_float),
                     }
                     topics_by_state.append(state_topic_dict)
-            for state_topic_dict in (sorted(topics_by_state, key=lambda x: x['voters_in_state_following'], reverse=True)):
+            for state_topic_dict in (sorted(topics_by_state,
+                                            key=lambda x: x['voters_in_state_following_this_topic'],
+                                            reverse=True)):
                 topics_by_state_ordered.append(state_topic_dict)
         counties_list = []
         if positive_value_exists(show_counties) and positive_value_exists(voters_in_state_count) \
