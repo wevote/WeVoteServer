@@ -62,12 +62,19 @@ def calculate_likely_political_party_from_issues(voter_issues_lookup=None):
         # DEMOCRAT
         if positive_value_exists(getattr(voter_issues_lookup, 'democratic_clubs')):
             likely_democrat_score += 1
+            likely_left_score += 1
         if positive_value_exists(getattr(voter_issues_lookup, 'democratic_politicians')):
             likely_democrat_score += 1
+            likely_left_score += 1
         if positive_value_exists(getattr(voter_issues_lookup, 'immigration')):
             likely_democrat_score += 1
+            likely_left_score += 1
+        if positive_value_exists(getattr(voter_issues_lookup, 'pro_choice')):
+            likely_democrat_score += 1
+            likely_left_score += 1
         if positive_value_exists(getattr(voter_issues_lookup, 'progressive')):
             likely_democrat_score += 1
+            likely_left_score += 1
 
         # GREEN
         if positive_value_exists(getattr(voter_issues_lookup, 'green_clubs')):
@@ -115,6 +122,7 @@ def calculate_likely_political_party_from_issues(voter_issues_lookup=None):
             likely_right_score += 1
         if positive_value_exists(getattr(voter_issues_lookup, 'maga')):
             likely_republican_score += 3
+            likely_right_score += 1
         if positive_value_exists(getattr(voter_issues_lookup, 'pro_life')):
             likely_republican_score += 1
             likely_right_score += 1
@@ -148,6 +156,8 @@ def calculate_likely_political_party_from_issues(voter_issues_lookup=None):
         likely_left_from_issues = True
     elif likely_right_score > likely_left_score:
         likely_right_from_issues = True
+    # If both scores are 0, we don't want to choose one
+    # If both scores are 1+, we also don't want to choose one
 
     # POLITICAL PARTY: ONLY CHOOSE ONE
     if likely_left_from_issues:
@@ -164,6 +174,15 @@ def calculate_likely_political_party_from_issues(voter_issues_lookup=None):
             likely_libertarian_from_issues = True
         elif likely_republican_score > 0:
             likely_republican_from_issues = True
+    else:
+        if likely_democrat_score > likely_republican_score:
+            likely_democrat_from_issues = True
+        elif likely_republican_score > likely_democrat_score:
+            likely_republican_from_issues = True
+        elif likely_republican_score > 0:
+            likely_republican_from_issues = True
+        elif likely_democrat_score > 0:
+            likely_democrat_from_issues = True
     issues_results = {
         'status':                           status,
         'success':                          success,
