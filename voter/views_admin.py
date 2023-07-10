@@ -1368,7 +1368,7 @@ def voter_list_view(request):
                 VoterIssuesLookup.objects.bulk_create(voter_issues_create_list)
                 voter_issues_lookup_updates_status += \
                     "{updates_made:,} VoterIssuesLookup entries created. " \
-                    "{total_to_convert_after:,} remaining." \
+                    "{total_to_convert_after:,} remaining. " \
                     "".format(
                         total_to_convert_after=total_to_convert_after,
                         updates_made=voter_issues_creates_made)
@@ -1396,7 +1396,11 @@ def voter_list_view(request):
             except Exception as e:
                 voter_issues_lookup_updates_status += "Voter entries (" + str(voter_updates_made) + ") " \
                     "NOT updated: " + str(e) + " "
-        if positive_value_exists(voter_issues_lookup_updates_status):
+        if positive_value_exists(voter_issues_lookup_updates_status) or positive_value_exists(total_to_convert_after):
+            voter_issues_lookup_updates_status += \
+                "{total_to_convert_after:,} remaining. " \
+                "".format(
+                    total_to_convert_after=total_to_convert_after)
             messages.add_message(request, messages.INFO, voter_issues_lookup_updates_status)
 
     likely_political_party_analysis = True

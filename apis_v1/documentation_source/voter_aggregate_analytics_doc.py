@@ -79,6 +79,18 @@ def voter_aggregate_analytics_doc_template_values(url_root):
                    '(# of voters in this state who chose 1+ topics),\n' \
                    '         "percent_voters_in_state_following_topics": string ' \
                    '(Percent of voters_in_state_following_topics divided by voters_in_state),\n' \
+                   '         "topics_by_state": list ' \
+                   '(all topics followed by people in this state, that included activity)\n' \
+                   '         [{\n' \
+                   '           "topic_name": string,\n' \
+                   '           "issue_we_vote_id": string,\n' \
+                   '           "voters_in_state_following_this_topic": integer ' \
+                   '(# of voters in this state who followed this topic),\n' \
+                   '           "percent_voters_in_state_following": string ' \
+                   '(voters_in_state_following_this_topic / voters_in_state),\n' \
+                   '           "percent_voters_in_state_following_active_only": ' \
+                   '(voters_in_state_following_this_topic / voters_in_state_following),\n' \
+                   '         }],\n' \
                    '         "counties": list of dicts (all counties that included activity)\n' \
                    '         [{\n' \
                    '           "county_name": string, (display name)\n' \
