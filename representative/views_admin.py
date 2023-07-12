@@ -1908,7 +1908,7 @@ def update_ocd_id_state_mismatch_view(request):
         bulk_update_list.append(politician)
     Politician.objects.bulk_update(bulk_update_list, ['ocd_id_state_mismatch_found'])
     message = "Politicians updated: {politicians_updated:,}.".format(
-        politicians_updated=len(politician_we_vote_id_with_mismatch_list)
+        politicians_updated=len(politician_list)
     )
     messages.add_message(request, messages.INFO, message)
 
