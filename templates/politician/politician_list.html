@@ -71,6 +71,11 @@
       <input type="checkbox" name="show_related_candidates" id="show_related_candidates_id" value="1"
              {% if show_related_candidates %}checked{% endif %} /> Show related candidates count
     </label>
+
+   <label for="show_ocd_id_state_mismatch_id">
+      <input type="checkbox" name="show_ocd_id_state_mismatch" id="show_ocd_id_state_mismatch_id" value="1"
+             {% if show_ocd_id_state_mismatch %}checked{% endif %} /> Show OCD ID/State mismatch
+    </label>
 </form>
 
 {% if politician_list %}
@@ -196,6 +201,11 @@
         });
         $(function() {
             $('#show_related_candidates_id').change(function() {
+                this.form.submit();
+            });
+        });
+       $(function() {
+            $('#show_ocd_id_state_mismatch_id').change(function() {
                 this.form.submit();
             });
         });

@@ -399,6 +399,7 @@ def politician_list_view(request):
     show_all = positive_value_exists(request.GET.get('show_all', False))
     show_battleground = positive_value_exists(request.GET.get('show_battleground', False))
     show_related_candidates = positive_value_exists(request.GET.get('show_related_candidates', False))
+    show_ocd_id_state_mismatch = positive_value_exists(request.GET.get('show_ocd_id_state_mismatch', False))
     show_politicians_with_email = positive_value_exists(request.GET.get('show_politicians_with_email', False))
 
     state_list = STATE_CODE_MAP
@@ -666,6 +667,8 @@ def politician_list_view(request):
                 Q(politician_email2_length__gt=2) |
                 Q(politician_email3_length__gt=2)
             )
+        if positive_value_exists(show_ocd_id_state_mismatch):
+            politician_query = politician_query.filter(ocd_id_state_mismatch_found=True)
 
         if positive_value_exists(politician_search):
             search_words = politician_search.split()
@@ -867,6 +870,7 @@ def politician_list_view(request):
         'show_battleground':            show_battleground,
         'show_politicians_with_email':  show_politicians_with_email,
         'show_related_candidates':      show_related_candidates,
+        'show_ocd_id_state_mismatch':   show_ocd_id_state_mismatch,
         'state_code':                   state_code,
         'state_list':                   sorted_state_list,
         'web_app_root_url':             web_app_root_url,
