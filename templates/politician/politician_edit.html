@@ -379,6 +379,16 @@
 </div>
 
 <div class="form-group">
+    <label for="ballot_guide_official_statement_id" class="col-sm-3 control-label">Official Candidate Statement</label>
+    <div class="col-sm-8">
+        <textarea name="ballot_guide_official_statement"
+                  class="form-control animated"
+                  id="ballot_guide_official_statement_id"
+                  placeholder="Enter official statement from politician">{% if politician %}{{ politician.ballot_guide_official_statement|default_if_none:"" }}{% else %}{{ ballot_guide_official_statement|default_if_none:"" }}{% endif %}</textarea>
+    </div>
+</div>
+
+<div class="form-group">
     <label for="politician_contact_form_url_id" class="col-sm-3 control-label">
         Politician Contact Form
         {% if politician.politician_contact_form_url %}

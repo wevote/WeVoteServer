@@ -1565,6 +1565,7 @@ def politician_edit_process_view(request):
     success = True
     update_message = ''
 
+    ballot_guide_official_statement = request.POST.get('ballot_guide_official_statement', False)
     ballotpedia_politician_name = request.POST.get('ballotpedia_politician_name', False)
     ballotpedia_politician_url = request.POST.get('ballotpedia_politician_url', False)
     birth_date = request.POST.get('birth_date', False)
@@ -1717,7 +1718,8 @@ def politician_edit_process_view(request):
             messages.add_message(request, messages.ERROR, 'Could not find politician: ' + str(e))
 
     # We can use the same url_variables with any processing failures below
-    url_variables = "?ballotpedia_politician_name=" + str(ballotpedia_politician_name) + \
+    url_variables = "?ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
+                    "&ballotpedia_politician_name=" + str(ballotpedia_politician_name) + \
                     "&ballotpedia_politician_url=" + str(ballotpedia_politician_url) + \
                     "&state_code=" + str(state_code) + \
                     "&google_civic_candidate_name=" + str(google_civic_candidate_name) + \
@@ -1882,6 +1884,8 @@ def politician_edit_process_view(request):
                     politician_on_stage.we_vote_hosted_profile_image_url_tiny = \
                         politician_on_stage.we_vote_hosted_profile_vote_usa_image_url_tiny
 
+            if ballot_guide_official_statement is not False:
+                politician_on_stage.ballot_guide_official_statement = ballot_guide_official_statement
             if ballotpedia_politician_name is not False:
                 politician_on_stage.ballotpedia_politician_name = ballotpedia_politician_name
             if ballotpedia_politician_url is not False:

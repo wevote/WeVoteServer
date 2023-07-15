@@ -2585,7 +2585,7 @@ class CandidateCampaign(models.Model):
 
     # Official Statement from Candidate in Ballot Guide
     ballot_guide_official_statement = models.TextField(verbose_name="official candidate statement from ballot guide",
-                                                       null=True, blank=True, default="")
+                                                       null=True, blank=True, default=None)
     crowdpac_candidate_id = models.PositiveIntegerField(
         verbose_name="crowdpac integer id", null=True, blank=True)
     # CTCL candidate data fields
