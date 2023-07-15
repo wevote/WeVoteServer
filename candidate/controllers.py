@@ -1805,6 +1805,7 @@ def generate_candidate_dict_from_candidate_object(
     if positive_value_exists(candidate.date_last_updated):
         date_last_updated = candidate.date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
     candidate_dict = {
+        'ballot_guide_official_statement':  candidate.ballot_guide_official_statement,
         'ballot_item_display_name':         candidate.display_candidate_name(),
         'ballotpedia_candidate_id':         candidate.ballotpedia_candidate_id,
         'ballotpedia_candidate_summary':    candidate.ballotpedia_candidate_summary,
@@ -2038,6 +2039,7 @@ def create_candidate_from_politician(politician_we_vote_id=''):
     try:
         new_candidate_created = False
         candidate = CandidateCampaign.objects.create(
+            ballot_guide_official_statement=politician.ballot_guide_official_statement,
             ballotpedia_candidate_url=politician.ballotpedia_politician_url,
             candidate_contact_form_url=politician.politician_contact_form_url,
             candidate_name=politician.politician_name,
@@ -3229,7 +3231,7 @@ def update_candidate_details_from_politician(candidate=None, politician=None):
                 candidate.ballotpedia_candidate_url = politician.ballotpedia_politician_url
                 fields_updated.append('ballotpedia_candidate_url')
                 save_changes = True
-            # For identically named fields
+            # For identically named fields - no existing value
             results = copy_field_value_from_object1_to_object2(
                 object1=politician,
                 object2=candidate,
@@ -3250,6 +3252,22 @@ def update_candidate_details_from_politician(candidate=None, politician=None):
             for new_field in fields_updated_append:
                 if new_field not in fields_updated:
                     fields_updated.append(new_field)
+            # For identically named fields - lock together existing values
+            results = copy_field_value_from_object1_to_object2(
+                object1=politician,
+                object2=candidate,
+                object1_field_name_list=[
+                    'ballot_guide_official_statement',
+                ],
+                only_change_object2_field_if_incoming_value=False,
+                only_change_object2_field_if_no_existing_value=False)
+            candidate = results['object2'] if results['success'] and results['values_changed'] else candidate
+            save_changes = save_changes or results['values_changed']
+            fields_updated_append = results['fields_updated']
+            for new_field in fields_updated_append:
+                if new_field not in fields_updated:
+                    fields_updated.append(new_field)
+
             if positive_value_exists(politician.politician_name):
                 if positive_value_exists(candidate.candidate_name) \
                         and candidate.candidate_name != politician.politician_name:

@@ -2736,6 +2736,15 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.seo_friendly_path = politician.seo_friendly_path
                 candidate_on_stage.seo_friendly_path_date_last_updated = politician.seo_friendly_path_date_last_updated
                 candidate_on_stage.save()
+
+                from politician.controllers import update_politician_details_from_candidate
+                results = update_politician_details_from_candidate(politician=politician, candidate=candidate_on_stage)
+                if results['success']:
+                    save_changes = results['save_changes']
+                    if positive_value_exists(save_changes):
+                        politician = results['politician']
+                        politician.save()
+
         except Exception as e:
             messages.add_message(request, messages.ERROR,
                                  'Could not save candidate with refreshed politician data:' + str(e))

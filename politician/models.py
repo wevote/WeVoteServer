@@ -105,6 +105,9 @@ class Politician(models.Model):
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id of this politician", max_length=255, default=None, null=True,
         blank=True, unique=True)
+    # Official Statement from Candidate in Ballot Guide
+    ballot_guide_official_statement = models.TextField(verbose_name="official candidate statement from ballot guide",
+                                                       null=True, blank=True, default=None)
     # See this url for properties: https://docs.python.org/2/library/functions.html#property
     first_name = models.CharField(verbose_name="first name",
                                   max_length=255, default=None, null=True, blank=True)

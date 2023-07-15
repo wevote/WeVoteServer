@@ -1448,6 +1448,12 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
     # final_election_date_in_past = \
     #     final_election_date_plus_cool_down >= politician.final_election_date_as_integer \
     #     if positive_value_exists(politician.final_election_date_as_integer) else False
+    if positive_value_exists(politician.ballot_guide_official_statement):
+        politician_description = politician.ballot_guide_official_statement
+    elif positive_value_exists(politician.twitter_description):
+        politician_description = politician.twitter_description
+    else:
+        politician_description = ''
     results = {
         'ballotpedia_politician_url':       politician.ballotpedia_politician_url,
         'candidate_list':                   politician_candidate_dict_list,
@@ -1456,7 +1462,7 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
         'office_held_list':                 office_held_dict_list,
         'office_held_list_exists':          office_held_dict_list_found,
         'political_party':                  candidate_party_display(politician.political_party),
-        'politician_description':           politician.twitter_description,
+        'politician_description':           politician_description,
         'politician_name':                  politician.politician_name,
         'politician_news_item_list':        politician_news_item_list,
         'politician_owner_list':            politician_owner_list,
@@ -1850,7 +1856,7 @@ def update_politician_details_from_candidate(politician=None, candidate=None):
         politician.ballotpedia_politician_url = candidate.ballotpedia_candidate_url
         fields_updated.append('ballotpedia_politician_url')
         save_changes = True
-    # For identically named fields
+    # For identically named fields - no existing value
     results = copy_field_value_from_object1_to_object2(
         object1=candidate,
         object2=politician,
@@ -1865,6 +1871,21 @@ def update_politician_details_from_candidate(politician=None, candidate=None):
         ],
         only_change_object2_field_if_incoming_value=True,
         only_change_object2_field_if_no_existing_value=True)
+    politician = results['object2'] if results['success'] and results['values_changed'] else politician
+    save_changes = save_changes or results['values_changed']
+    fields_updated_append = results['fields_updated']
+    for new_field in fields_updated_append:
+        if new_field not in fields_updated:
+            fields_updated.append(new_field)
+    # For identically named fields - lock existing values
+    results = copy_field_value_from_object1_to_object2(
+        object1=candidate,
+        object2=politician,
+        object1_field_name_list=[
+            'ballot_guide_official_statement',
+        ],
+        only_change_object2_field_if_incoming_value=False,
+        only_change_object2_field_if_no_existing_value=False)
     politician = results['object2'] if results['success'] and results['values_changed'] else politician
     save_changes = save_changes or results['values_changed']
     fields_updated_append = results['fields_updated']
