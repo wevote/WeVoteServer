@@ -1870,14 +1870,14 @@ def update_ocd_id_state_mismatch_view(request):
         if representative.ocd_id_state_mismatch_found != mismatch_found:
             representative.ocd_id_state_mismatch_found = mismatch_found
             representatives_updated += 1
-            if mismatch_found:
-                # We don't want to unset 'ocd_id_state_mismatch_found' in the Politician table here,
-                #  since there may be repairs we need to complete on the Politician data.
-                if positive_value_exists(representative.politician_we_vote_id):
-                    if representative.politician_we_vote_id not in politician_we_vote_id_with_mismatch_list:
-                        politician_we_vote_id_with_mismatch_list.append(representative.politician_we_vote_id)
         else:
             representatives_without_mismatches += 1
+        if mismatch_found:
+            # We don't want to unset 'ocd_id_state_mismatch_found' in the Politician table here,
+            #  since there may be repairs we need to complete on the Politician data.
+            if positive_value_exists(representative.politician_we_vote_id):
+                if representative.politician_we_vote_id not in politician_we_vote_id_with_mismatch_list:
+                    politician_we_vote_id_with_mismatch_list.append(representative.politician_we_vote_id)
         bulk_update_list.append(representative)
     try:
         Representative.objects.bulk_update(bulk_update_list, [
@@ -1899,6 +1899,17 @@ def update_ocd_id_state_mismatch_view(request):
     # Now transfer ocd_id_state_mismatch_found to all linked Politician records
     #  using politician_we_vote_id_with_mismatch_list. We have to do it here, because the ocd_division_id
     #  data does not exist in the Politician table.
-    # TODO
+    queryset = Politician.objects.all()
+    queryset = queryset.filter(we_vote_id__in=politician_we_vote_id_with_mismatch_list)
+    politician_list = list(queryset)
+    bulk_update_list = []
+    for politician in politician_list:
+        politician.ocd_id_state_mismatch_found = True
+        bulk_update_list.append(politician)
+    Politician.objects.bulk_update(bulk_update_list, ['ocd_id_state_mismatch_found'])
+    message = "Politicians updated: {politicians_updated:,}.".format(
+        politicians_updated=len(politician_list)
+    )
+    messages.add_message(request, messages.INFO, message)
 
     return HttpResponseRedirect(reverse('representative:representative_list', args=()))
