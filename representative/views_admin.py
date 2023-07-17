@@ -1867,12 +1867,23 @@ def update_ocd_id_state_mismatch_view(request):
                 positive_value_exists(state_code_lower_case) and
                 positive_value_exists(representative.ocd_division_id) and
                 state_code_lower_case != extract_state_from_ocd_division_id(representative.ocd_division_id))
-        if representative.ocd_id_state_mismatch_found != mismatch_found:
-            representative.ocd_id_state_mismatch_found = mismatch_found
-            representatives_updated += 1
-        else:
-            representatives_without_mismatches += 1
+        mismatch_update_needed_on_politician = False
         if mismatch_found:
+            if not representative.ocd_id_state_mismatch_found:
+                representative.ocd_id_state_mismatch_found = True
+                representatives_updated += 1
+                # Only update the Politician table if there is a positive mismatch found,
+                #  and we have not previously found a mismatch
+                mismatch_update_needed_on_politician = True
+            else:
+                representatives_without_mismatches += 1
+        else:
+            if representative.ocd_id_state_mismatch_found:
+                representative.ocd_id_state_mismatch_found = False
+                representatives_updated += 1
+            else:
+                representatives_without_mismatches += 1
+        if mismatch_update_needed_on_politician:
             # We don't want to unset 'ocd_id_state_mismatch_found' in the Politician table here,
             #  since there may be repairs we need to complete on the Politician data.
             if positive_value_exists(representative.politician_we_vote_id):
