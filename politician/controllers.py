@@ -1289,6 +1289,66 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
     politician_candidate_list = results['candidate_list']
     politician_candidate_list_exists = results['candidate_list_found']
 
+    # Retrieve most recent opponents of this candidate (showing this on politician page helps with SEO)
+    candidate_ultimate_election_date = 0
+    most_recent_candidate_we_vote_id = None
+    opponent_candidate_list = []
+    for one_candidate in politician_candidate_list:
+        if one_candidate.candidate_ultimate_election_date > candidate_ultimate_election_date:
+            candidate_ultimate_election_date = one_candidate.candidate_ultimate_election_date
+            most_recent_candidate_we_vote_id = one_candidate.we_vote_id
+    if positive_value_exists(most_recent_candidate_we_vote_id):
+        opponent_candidate_we_vote_id_list = []
+        from candidate.models import CandidateToOfficeLink
+        try:
+            link_queryset = CandidateToOfficeLink.objects.all()
+            link_queryset = link_queryset.filter(candidate_we_vote_id=most_recent_candidate_we_vote_id)
+            link_queryset = link_queryset.values_list('contest_office_we_vote_id', flat=True).distinct()
+            contest_office_we_vote_id_list = list(link_queryset)
+        except Exception as e:
+            contest_office_we_vote_id_list = []
+            status += "PROBLEM_RETRIEVING_OPPONENT_OFFICE_LIST: " + str(e) + " "
+        if len(contest_office_we_vote_id_list) > 0:
+            try:
+                link_queryset = CandidateToOfficeLink.objects.all()
+                link_queryset = link_queryset.filter(contest_office_we_vote_id__in=contest_office_we_vote_id_list)
+                link_queryset = link_queryset.values_list('candidate_we_vote_id', flat=True).distinct()
+                opponent_candidate_we_vote_id_list = list(link_queryset)
+            except Exception as e:
+                status += "PROBLEM_RETRIEVING_OPPONENT_CANDIDATE_LIST: " + str(e) + " "
+        if len(opponent_candidate_we_vote_id_list) > 0:
+            candidate_list_manager = CandidateListManager()
+            results = candidate_list_manager.retrieve_candidate_list(
+                candidate_we_vote_id_list=opponent_candidate_we_vote_id_list,
+                read_only=True)
+            if results['candidate_list_found']:
+                opponent_candidate_list_unfiltered = results['candidate_list']
+                latest_year = 0
+                candidates_by_year_dict = {}
+                for one_candidate in opponent_candidate_list_unfiltered:
+                    if not positive_value_exists(one_candidate.candidate_year):
+                        # Skip candidate if it doesn't have a year'
+                        continue
+                    if politician.we_vote_id == one_candidate.politician_we_vote_id:
+                        # Do not include this politician's candidate entries
+                        continue
+                    if one_candidate.candidate_year > latest_year:
+                        latest_year = one_candidate.candidate_year
+                    if one_candidate.candidate_year not in candidates_by_year_dict:
+                        candidates_by_year_dict[one_candidate.candidate_year] = []
+                    candidates_by_year_dict[one_candidate.candidate_year].append(one_candidate)
+                if positive_value_exists(latest_year) and latest_year in candidates_by_year_dict:
+                    opponent_candidate_list = candidates_by_year_dict[latest_year]
+    opponent_candidate_list_exists = False
+    if len(opponent_candidate_list) > 0:
+        # We match the output from candidatesRetrieve & candidateRetrieve API
+        results = generate_candidate_dict_list_from_candidate_object_list(
+            candidate_object_list=opponent_candidate_list)
+        opponent_candidate_dict_list = results['candidate_dict_list']
+        opponent_candidate_list_exists = len(opponent_candidate_dict_list) > 0
+    else:
+        opponent_candidate_dict_list = []
+
     # We match the output from candidatesRetrieve & candidateRetrieve API
     if len(politician_candidate_list) > 0:
         results = generate_candidate_dict_list_from_candidate_object_list(
@@ -1461,6 +1521,8 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
         'linked_campaignx_we_vote_id':      politician.linked_campaignx_we_vote_id,
         'office_held_list':                 office_held_dict_list,
         'office_held_list_exists':          office_held_dict_list_found,
+        'opponent_candidate_list':          opponent_candidate_dict_list,
+        'opponent_candidate_list_exists':   opponent_candidate_list_exists,
         'political_party':                  candidate_party_display(politician.political_party),
         'politician_description':           politician_description,
         'politician_name':                  politician.politician_name,
