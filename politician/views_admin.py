@@ -1030,6 +1030,8 @@ def politician_new_view(request):
     vote_smart_id = request.GET.get('vote_smart_id', "")
     maplight_id = request.GET.get('maplight_id', "")
     politician_we_vote_id = request.GET.get('politician_we_vote_id', "")
+    gender = request.GET.get('gender', "U")
+    gender_likelihood = request.GET.get('gender_likelihood', "")
 
     # These are the Offices already entered for this election
     try:
@@ -1039,7 +1041,7 @@ def politician_new_view(request):
         handle_record_not_found_exception(e, logger=logger)
         contest_office_list = []
 
-    # Its helpful to see existing politicians when entering a new politician
+    # It's helpful to see existing politicians when entering a new politician
     politician_list = []
     try:
         politician_list = Politician.objects.all()
@@ -1057,6 +1059,8 @@ def politician_new_view(request):
         'messages_on_stage':                messages_on_stage,
         'office_list':                      contest_office_list,
         'contest_office_id':                contest_office_id,  # Pass in separately for the template to work
+        'gender':                           gender,
+        'gender_likelihood':                gender_likelihood,
         'google_civic_election_id':         google_civic_election_id,
         'politician_list':                  politician_list,
         # Incoming variables, not saved yet
@@ -1644,7 +1648,7 @@ def politician_edit_process_view(request):
     ballotpedia_politician_url = request.POST.get('ballotpedia_politician_url', False)
     birth_date = request.POST.get('birth_date', False)
     first_name = request.POST.get('first_name', False)
-    gender = request.POST.get('gender', False)
+    gender = request.POST.get('gender', 'False')
     middle_name = request.POST.get('middle_name', False)
     last_name = request.POST.get('last_name', False)
     facebook_url = request.POST.get('facebook_url', False)
@@ -1985,6 +1989,7 @@ def politician_edit_process_view(request):
             if last_name is not False:
                 politician_on_stage.last_name = last_name
             if gender is not False:
+                gender = gender[0]
                 if politician_on_stage.gender != gender:
                     politician_on_stage.gender_likelihood = POLITICAL_DATA_MANAGER
                 if gender == 'U':

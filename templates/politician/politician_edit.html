@@ -165,19 +165,19 @@
         <span style="border: 1px solid #ccc; border-radius: 4px; padding: 10px 6px 10px 10px">
             <input type="radio" name="gender" id="gender_unknown_id" value="U"
                 {% if politician %}{% if politician.gender == 'U' %}checked{% endif %}{% else %}{% if gender == 'U' %}checked{% endif %}{% endif %} />
-            <label for="gender_unknown_id">Unknown</label>
+            <label for="gender_unknown_id" style="padding-right: 8px;">Unknown</label>
             <input type="radio" name="gender" id="gender_female_id" value="F"
                 {% if politician %}{% if politician.gender == 'F' %}checked{% endif %}{% else %}{% if gender == 'F' %}checked{% endif %}{% endif %} />
-            <label for="gender_female_id">Female</label>
+            <label for="gender_female_id" style="padding-right: 8px;">Female</label>
             <input type="radio" name="gender" id="gender_male_id" value="M"
                 {% if politician %}{% if politician.gender == 'M' %}checked{% endif %}{% else %}{% if gender == 'M' %}checked{% endif %}{% endif %} />
-            <label for="gender_male_id">Male</label>
+            <label for="gender_male_id" style="padding-right: 8px;">Male</label>
             <input type="radio" name="gender" id="gender_neutral_id" value="N"
                 {% if politician %}{% if politician.gender == 'N' %}checked{% endif %}{% else %}{% if gender == 'N' %}checked{% endif %}{% endif %} />
             <label for="gender_neutral_id">Nonbinary</label>
         </span>
         <label for="gender_source_label" style="padding-left: 20%; padding-right: 10px">Source of Gender Identification</label>
-        <span id="sourceString" style="color: darkgrey">{% if politician.gender_likelihood == '' %}None{% else %}{{ politician.gender_likelihood }}{% endif %}</span>
+        <span id="sourceString" style="color: darkgrey">{% if politician %}{% if politician.gender_likelihood == '' %}None{% else %}{{ politician.gender_likelihood }}{% endif %}{% endif %}</span>
     </div>
 </div>
 
@@ -1193,18 +1193,7 @@
     }
 </style>
 <script>
-    $(function(){
-        const { autosize } = window;
-        autosize($('.normal'));
-        autosize($('.animated'));
-        $('#update_name_id').click(function(evt) {
-          name = $('#hidden_name').text();
-          $("input[name='politician_name']").val(name);
-          $('#update_name_id').prop('disabled', true).css('opacity',0.5);
-        });
-    }(window.$, window.autosize));
-
-    $(() => {       // on page load translate the database token for politician.gender_likelihood to the text version
+    function setSourceOfGenderId () {
         const source = $('#sourceString');
         if (source.length > 0) {
             switch (source.text()) {
@@ -1225,6 +1214,26 @@
                     break;
             }
         }
+    }
+
+    $(() => {
+        const { autosize } = window;
+        autosize($('.normal'));
+        autosize($('.animated'));
+        $('#update_name_id').click(function(evt) {
+          name = $('#hidden_name').text();
+          $("input[name='politician_name']").val(name);
+          $('#update_name_id').prop('disabled', true).css('opacity',0.5);
+        });
+
+        // On click for gender buttons
+        $("input[id^=gender_]").on('click', (event) => {
+          const id = event.currentTarget.id;
+          const source = $('#sourceString');
+          source.text('gender_female_id,gender_male_id,gender_neutral_id'.indexOf(id) > -1 ? 'Political Data Mgr' : 'None');
+        });
+        // on page load translate the database token for politician.gender_likelihood to the text version
+        setSourceOfGenderId();
     });
 
 </script>
