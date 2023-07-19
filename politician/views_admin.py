@@ -1555,7 +1555,7 @@ def politician_change_gender_id_view(changes):
 
 
 @login_required
-def repair_gender_ids_view(request):
+def set_missing_gender_ids_view(request):
     """
     Process repair imported names form
     http://localhost:8000/c/politicianRepairGenderId/?start=0&count=25
