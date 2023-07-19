@@ -1,0 +1,172 @@
+{# templates/politician/politician_gender_id_fix_list.html #}
+{% extends "template_base.html" %}
+
+{%  block content %}
+
+<h1>Repair imported Politician gender identification</h1>
+<p>There are <b>{{ number_of_rows }}</b> names that need repair.</p>
+<p>Gender guesses are made by comparing the Politician's first name with a database of names and likely genders</p>
+<style>
+ input[type=button] { margin: 10px 8px 16px 8px; }
+</style>
+<input type="button" id="button_save_and_load" value="Save any changes, then load the next 15" />
+<input type="button" id="button_load_no_save_prev" value="< Load the previous 15 without saving" onClick="goToPrevPage(0)" />
+<input type="button" id="button_load_no_save" value="Load the next 15 without saving >" onClick="goToNextPage(0, true)" />
+<input type="button" value="Return to {{ person_text }} page" onclick="window.location.href='{{ return_link }}'" />
+
+{% csrf_token %}
+  <table class="table">
+    <thead>
+      <tr>
+        <th style="width: 40px;">#</th>
+        <th style="width: 250px;">Name in DB</th>
+        <th>Gender Guess</th>
+        <th>Gender To Save</th>
+        <th>Needs Saving?</th>
+        <th>Party</th>
+        <th>State</th>
+        <th>We Vote ID</th>
+        <th>Date last updated</th>
+      </tr>
+    </thead>
+    {% for person in people_list %}
+      <tr class="person_row">
+        <td>{{ forloop.counter|add:index_offset }}</td>
+        <td>
+          <a href="{{person.search_url}}" target="_blank">{{ person.person_name }}</a>
+        </td>
+        <td id="hiddenName" style="display: none">{{ person.person_name }}</td>
+        <td>{{ person.displayable_guess }}</td>
+        <td class="from_db" style="display: none">{{ person.gender_guess }}</td>
+        <td>
+                <label>
+                    <select name="gender_choices" id="gender_choices" class="filter-selectbox" onChange="selectOnClick('{{ person.we_vote_id }}')">
+                      <option value="MALE" {% if person.gender_guess == 'male' or  person.gender_guess == 'male' %}selected="selected"{% endif %}>Male</option>
+                      <option value="FEMALE" {% if person.gender_guess == 'female' or  person.gender_guess == 'mostly_female' %}selected="selected"{% endif %}>Female</option>
+                      <option value="GENDER_NEUTRAL">Nonbinary</option>
+                      <option value="UNKNOWN" {% if person.gender_guess == 'unknown' %}selected="selected"{% endif %}>Unknown</option>
+                    </select>
+                </label>
+            </td>
+        <td>
+              <span id="{{ person.we_vote_id }}"
+                style="{% if person.gender_guess != 'unknown' %}padding: 4px; background: #ffff00{% endif %}">
+                {% if person.gender_guess != 'unknown' %}Needs saving{% endif %}
+              </span>
+            </td>
+        <td>{{ person.party }}</td>
+        <td>{{ person.state_code }}</td>
+        <td class="we_vote_id">{{ person.we_vote_id }}</td>
+        <td>{{ person.date_last_updated }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+
+
+<script>
+  function selectOnClick(clicked) {
+    console.log(clicked)
+    let saveTextEl = $('#' + clicked);
+    saveTextEl.css({padding: '4px', background: '#ffff00'});
+    saveTextEl.text('Needs saving');
+  }
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = $.trim(cookies[i]);
+        // Does this cookie string begin with the name we want?
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    function goToNextPage(delay, increment) {
+      const is_candidate = window.location.href.includes('is_candidate=true');
+      const matched = window.location.href.match(/(?:start=)(\d+)/);
+      let newStart = 0;
+      if (increment) {
+        newStart = matched ? parseInt(matched[1]) + 15 : 15;
+      } else {
+        newStart = matched ? parseInt(matched[1]) : 0;
+      }
+      const newHref = window.location.origin + window.location.pathname + '?is_candidate=' + is_candidate + '&start=' + newStart + '&count=15';
+      setTimeout(() => {
+        window.location = newHref;
+      }, delay);
+    }
+
+  function goToPrevPage(delay) {
+    const is_candidate = window.location.href.includes('is_candidate=true');
+    const matched = window.location.href.match(/(?:start=)(\d+)/);
+    const newStart = matched && parseInt(matched[1]) - 15 > 0 ? parseInt(matched[1]) - 15 : 0;
+    const newHref = window.location.origin + window.location.pathname + '?is_candidate=' + is_candidate + '&start=' + newStart + '&count=15';
+
+    setTimeout(() => {
+      window.location = newHref;
+    }, delay);
+  }
+
+  $(function() {
+    $('#button_save_and_load').click(function(evt) {
+      console.log('button_save_and_load');
+      let changes = []
+      $("tr.person_row").each(function(i, tr) {
+        $this = $(this);
+        let guess = $this.children('.from_db').text();
+        let name = $this.children('#hiddenName').text();
+        let selected = $(tr).find('#gender_choices').find(":selected").text();
+        let we_vote_id = $this.children('.we_vote_id').text();
+        if (selected !== 'Unknown') {   // If nothing selected skip this row, user will revisit some other time
+          let gender_likelihood;
+          let gender = selected.charAt(0);
+
+          if (selected === 'Male') {
+            if (!(guess === 'male' || guess === 'mostly_male')) {
+              gender_likelihood = 'PolDataMgr';
+            } else {
+              gender_likelihood = guess.includes('mostly') ? 'GuessLow' : 'GuessHigh';
+            }
+          } else if (selected === 'Female') {
+            if (!guess.includes('female')) {
+              gender_likelihood = 'PolDataMgr';
+            } else {
+              gender_likelihood = guess.includes('mostly') ? 'GuessLow' : 'GuessHigh';
+            }
+          } else if (selected === 'Nonbinary') {
+            gender_likelihood = 'PolDataMgr';
+          }
+          // Add to save object
+          const one_change = {name, gender, gender_likelihood, we_vote_id};
+          changes.push(one_change);
+        }
+      });  // end of .each loop
+
+      if (changes.length > 0) {
+        // Save changes
+        const csrftoken = getCookie('csrftoken');
+        $.ajax({
+          type: "PUT",
+          url: window.location.origin + "/apis/v1/politicianSaveRepairedGenderIds/",
+          contentType: 'application/json',
+          data: JSON.stringify(changes),
+          beforeSend: function(xhr, settings) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+          },
+          success: function (response) {
+            goToNextPage(0, false);             // get the first 15 that are not gender 'U'
+          },
+        });
+        console.log(changes)
+      }
+    });
+  });
+</script>
+
+{% endblock %}
