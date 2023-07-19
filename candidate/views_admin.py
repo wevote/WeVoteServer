@@ -2064,6 +2064,8 @@ def candidate_edit_process_view(request):
     if positive_value_exists(candidate_twitter_handle3):
         candidate_twitter_handle3 = extract_twitter_handle_from_text_string(candidate_twitter_handle3)
     contest_office_id = request.POST.get('contest_office_id', False)
+    contest_office_name = request.POST.get('contest_office_name', False)
+    district_name = request.POST.get('district_name', False)
     do_not_display_on_ballot = positive_value_exists(request.POST.get('do_not_display_on_ballot', False))
     facebook_url = request.POST.get('facebook_url', False)
     google_civic_candidate_name = request.POST.get('google_civic_candidate_name', False)
@@ -2510,6 +2512,10 @@ def candidate_edit_process_view(request):
                 # else:
                 #     candidate_on_stage.candidate_ultimate_election_date = candidate_ultimate_election_date
             candidate_on_stage.do_not_display_on_ballot = do_not_display_on_ballot
+            if contest_office_name is not False:
+                candidate_on_stage.contest_office_name = contest_office_name
+            if district_name is not False:
+                candidate_on_stage.district_name = district_name
             if facebook_url is not False:
                 candidate_on_stage.facebook_url = facebook_url
             if google_civic_candidate_name is not False:

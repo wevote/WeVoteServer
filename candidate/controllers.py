@@ -1761,13 +1761,14 @@ def generate_candidate_dict_from_candidate_object(
             contest_office_district_name = ''
             contest_office_name = ''
             office_found = False
-            if candidate_to_office_link.contest_office_we_vote_id in office_dict:
+            if positive_value_exists(candidate_to_office_link.contest_office_we_vote_id) and \
+                    candidate_to_office_link.contest_office_we_vote_id in office_dict:
                 office_found = True
                 contest_office = office_dict[candidate_to_office_link.contest_office_we_vote_id]
                 if contest_office:
                     contest_office_district_name = contest_office.district_name
                     contest_office_name = contest_office.office_name
-            if not office_found:
+            if not office_found and positive_value_exists(candidate_to_office_link.contest_office_we_vote_id):
                 results = office_manager.retrieve_contest_office_from_we_vote_id(
                     candidate_to_office_link.contest_office_we_vote_id)
                 if results['contest_office_found']:
