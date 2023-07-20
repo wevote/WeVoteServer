@@ -16,6 +16,7 @@ import json
 import magic
 from organization.models import ORGANIZATION_TYPE_CHOICES, UNKNOWN, alphanumeric
 from party.controllers import retrieve_all_party_names_and_ids_api, party_import_from_xml_data
+
 from politician.models import GENDER_CHOICES, UNKNOWN
 import urllib
 from urllib.request import Request, urlopen

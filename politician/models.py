@@ -4,18 +4,20 @@
 
 import re
 from datetime import datetime
+
+import gender_guesser.detector as gender
 from django.db import models
 from django.db.models import Q
+
 import wevote_functions.admin
-from candidate.models import PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
-    PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_VOTE_USA, PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES
+from candidate.models import PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
+    PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from tag.models import Tag
 from wevote_functions.functions import candidate_party_display, convert_to_int, convert_date_to_date_as_integer, \
     convert_to_political_party_constant, display_full_name_with_correct_capitalization, \
     extract_first_name_from_full_name, extract_middle_name_from_full_name, \
-    extract_last_name_from_full_name, extract_twitter_handle_from_text_string, generate_random_string, \
-    positive_value_exists
+    extract_last_name_from_full_name, extract_twitter_handle_from_text_string, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_politician_integer, fetch_site_unique_id_prefix
 
 FEMALE = 'F'
@@ -23,13 +25,35 @@ GENDER_NEUTRAL = 'N'
 MALE = 'M'
 UNKNOWN = 'U'
 GENDER_CHOICES = (
+    (MALE, 'Male'),
     (FEMALE, 'Female'),
     (GENDER_NEUTRAL, 'Nonbinary'),
-    (MALE, 'Male'),
     (UNKNOWN, 'Unknown'),
 )
 
+DISPLAYABLE_GUESS = {
+    'male': 'Male',
+    'mostly_male': 'Likely Male',
+    'female': 'Female',
+    'mostly_female': 'Likely Female',
+    'unknown': '...?...',
+}
+
+
+POLITICAL_DATA_MANAGER =         'PolDataMgr'
+PROVIDED_BY_POLITICIAN =         'Politician'
+GENDER_GUESSER_HIGH_LIKELIHOOD = 'GuessHigh'
+GENDER_GUESSER_LOW_LIKELIHOOOD = 'GuessLow'
+NOT_ANALYZED =                   ''
+GENDER_LIKELIHOOD = (
+    (POLITICAL_DATA_MANAGER, 'Political Data Mgr'),
+    (PROVIDED_BY_POLITICIAN, 'Politician Provided'),
+    (GENDER_GUESSER_HIGH_LIKELIHOOD, 'Gender Guesser High Likelihood'),
+    (GENDER_GUESSER_LOW_LIKELIHOOOD, 'Gender Guesser Low Likelihood'),
+    (NOT_ANALYZED, ''),
+)
 logger = wevote_functions.admin.get_logger(__name__)
+detector = gender.Detector()
 
 # When merging candidates, these are the fields we check for figure_out_politician_conflict_values
 POLITICIAN_UNIQUE_IDENTIFIERS = [
@@ -102,6 +126,9 @@ class Politician(models.Model):
     # It starts with "wv" then we add on a database specific identifier like "3v" (WeVoteSetting.site_unique_id_prefix)
     # then the string "pol", and then a sequential integer like "123".
     # We keep the last value in WeVoteSetting.we_vote_id_last_politician_integer
+    DoesNotExist = None
+    MultipleObjectsReturned = None
+    objects = None
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id of this politician", max_length=255, default=None, null=True,
         blank=True, unique=True)
@@ -133,6 +160,8 @@ class Politician(models.Model):
     full_name_assembled = models.CharField(verbose_name="full name assembled from first_name + last_name",
                                            max_length=255, default=None, null=True, blank=True)
     gender = models.CharField("gender", max_length=1, choices=GENDER_CHOICES, default=UNKNOWN)
+    gender_likelihood = models.CharField("gender guess likelihood", max_length=11, choices=GENDER_LIKELIHOOD,
+                                         default='')
 
     birth_date = models.DateField("birth date", default=None, null=True, blank=True)
     # race = enum?
@@ -349,6 +378,7 @@ class PoliticiansAreNotDuplicates(models.Model):
     """
     When checking for duplicates, there are times when we want to explicitly mark two politicians as NOT duplicates
     """
+    objects = None
     politician1_we_vote_id = models.CharField(
         verbose_name="first politician we are tracking", max_length=255, null=True, unique=False)
     politician2_we_vote_id = models.CharField(
@@ -515,7 +545,8 @@ class PoliticianManager(models.Manager):
                     birth_date = datetime.strptime(similar_object.birth_day_text, '%Y-%m-%d')
                 except Exception as e:
                     birth_date = None
-                    status += "FAILED_CONVERTING_BIRTH_DAY_TEXT: " + str(e) + " " + str(similar_object.birth_day_text) + " "
+                    status += "FAILED_CONVERTING_BIRTH_DAY_TEXT: " + str(e) + " " + \
+                              str(similar_object.birth_day_text) + " "
             else:
                 birth_date = None
             if positive_value_exists(similar_object.candidate_gender):
@@ -705,7 +736,6 @@ class PoliticianManager(models.Manager):
                     twitter_results = add_twitter_handle_to_next_politician_spot(
                         politician, one_twitter_handle)
                     if twitter_results['success']:
-                        changes_found = True
                         if twitter_results['values_changed']:
                             politician = twitter_results['politician']
                     else:
@@ -2027,6 +2057,34 @@ class PoliticianManager(models.Manager):
         }
         return results
 
+    def retrieve_politicians_with_no_gender_id(self, start=0, count=15):
+        """
+        Get the first 15 records that have gender 'U' undefined
+          use gender_guesser to set the gender if male or female or androgynous (can't guess other human gender states)
+          set gender_likelihood to gender
+        :param start:
+        :param count:
+        :return:
+        """
+        politician_query = Politician.objects.all()
+        # Get all politicians who do not have gender specified
+        politician_query = politician_query.filter(gender='U').order_by('politician_name')
+        number_of_rows = politician_query.count()
+        politician_query = politician_query[start:(start+count)]
+        politician_list_objects = list(politician_query)
+        results_list = []
+        for pol in politician_list_objects:
+            first = pol.first_name.lower().capitalize()
+
+            if len(first) == 1 or (len(first) == 2 and pol.first_name[1] == '.'):
+                # G. Burt Lancaster
+                first = pol.middle_name.lower().capitalize()
+            pol.guess = detector.get_gender(first)
+            pol.displayable_guess = DISPLAYABLE_GUESS[pol.guess]
+            results_list.append(pol)
+
+        return results_list, number_of_rows
+
     def retrieve_politicians_with_misformatted_names(self, start=0, count=15, read_only=False):
         """
         Get the first 15 records that have 3 capitalized letters in a row, as long as those letters
@@ -2060,7 +2118,6 @@ class PoliticianManager(models.Manager):
             x.person_name_normalized = display_full_name_with_correct_capitalization(name)
             x.party = x.political_party
             results_list.append(x)
-            # out += name + ' = > ' + x.person_name_normalized + ', '
 
         return results_list, number_of_rows
 

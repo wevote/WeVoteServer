@@ -1,7 +1,7 @@
 # politician/views_admin.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-
+import re
 from base64 import b64encode
 import json
 import string
@@ -49,7 +49,7 @@ from .controllers import add_alternate_names_to_next_spot, add_twitter_handle_to
     fetch_duplicate_politician_count, figure_out_politician_conflict_values, find_duplicate_politician, \
     merge_if_duplicate_politicians, merge_these_two_politicians, politicians_import_from_master_server
 from .models import Politician, PoliticianManager, POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, \
-    POLITICIAN_UNIQUE_IDENTIFIERS, PoliticiansArePossibleDuplicates
+    POLITICIAN_UNIQUE_IDENTIFIERS, PoliticiansArePossibleDuplicates, POLITICAL_DATA_MANAGER
 
 POLITICIANS_SYNC_URL = get_environment_variable("POLITICIANS_SYNC_URL")  # politiciansSyncOut
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
@@ -1030,6 +1030,8 @@ def politician_new_view(request):
     vote_smart_id = request.GET.get('vote_smart_id', "")
     maplight_id = request.GET.get('maplight_id', "")
     politician_we_vote_id = request.GET.get('politician_we_vote_id', "")
+    gender = request.GET.get('gender', "U")
+    gender_likelihood = request.GET.get('gender_likelihood', "")
 
     # These are the Offices already entered for this election
     try:
@@ -1039,7 +1041,7 @@ def politician_new_view(request):
         handle_record_not_found_exception(e, logger=logger)
         contest_office_list = []
 
-    # Its helpful to see existing politicians when entering a new politician
+    # It's helpful to see existing politicians when entering a new politician
     politician_list = []
     try:
         politician_list = Politician.objects.all()
@@ -1057,6 +1059,8 @@ def politician_new_view(request):
         'messages_on_stage':                messages_on_stage,
         'office_list':                      contest_office_list,
         'contest_office_id':                contest_office_id,  # Pass in separately for the template to work
+        'gender':                           gender,
+        'gender_likelihood':                gender_likelihood,
         'google_civic_election_id':         google_civic_election_id,
         'politician_list':                  politician_list,
         # Incoming variables, not saved yet
@@ -1532,6 +1536,76 @@ def politician_not_duplicates_view(request):
                                 "?state_code=" + str(state_code))
 
 
+def politician_change_gender_id_view(changes):
+    count = 0
+    for change in changes:
+        try:
+            politician_query = Politician.objects.filter(we_vote_id=change['we_vote_id'])
+            politician_query = politician_query
+            politician_list = list(politician_query)
+            politician = politician_list[0]
+            setattr(politician, 'gender', change['gender'])
+            setattr(politician, 'gender_likelihood', change['gender_likelihood'])
+            timezone = pytz.timezone("America/Los_Angeles")
+            datetime_now = timezone.localize(datetime.now())
+            setattr(politician, 'date_last_changed', datetime_now)
+            politician.save()
+            count += 1
+        except Exception as err:
+            logger.error('politician_change_gender_id caught: ', err)
+            count = -1
+
+    return count
+
+
+@login_required
+def set_missing_gender_ids_view(request):
+    """
+    Process repair imported names form
+    http://localhost:8000/c/politicianRepairGenderId/?start=0&count=25
+    :param request:
+    :return:
+    """
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    start = int(request.GET.get('start', 0))
+    count = int(request.GET.get('count', 15))
+    politician_manager = PoliticianManager()
+    list_of_people_from_db, number_of_rows = politician_manager.retrieve_politicians_with_no_gender_id(
+        start, count)
+    people_list = []
+    for person in list_of_people_from_db:
+        name = person.politician_name
+        cleaned = re.sub("\(|\)|\"|\'", " ", name)
+        cleaned = re.sub("\s+", "+", cleaned)
+        search = 'https://www.google.com/search?q=' + cleaned
+
+        person_item = {
+            'person_name':                  name,
+            'search_url':                   search,
+            'gender':                       person.gender,
+            'gender_guess':                 person.guess,
+            'displayable_guess':            person.displayable_guess,
+            'google_civic_candidate_name':  person.google_civic_candidate_name,
+            'date_last_updated':            person.date_last_updated,
+            'state_code':                   person.state_code.upper(),
+            'we_vote_id':                   person.we_vote_id,
+            'party':                        person.political_party.lower().capitalize(),
+        }
+        people_list.append(person_item)
+
+    template_values = {
+        'number_of_rows':                   number_of_rows,
+        'people_list':                      people_list,
+        'index_offset':                     start,
+        'return_link':                      '/politician/',
+    }
+    return render(request, 'politician/politician_gender_id_fix_list.html', template_values)
+
+
 def politician_change_names(changes):
     count = 0
     for change in changes:
@@ -1574,7 +1648,7 @@ def politician_edit_process_view(request):
     ballotpedia_politician_url = request.POST.get('ballotpedia_politician_url', False)
     birth_date = request.POST.get('birth_date', False)
     first_name = request.POST.get('first_name', False)
-    gender = request.POST.get('gender', False)
+    gender = request.POST.get('gender', 'False')
     middle_name = request.POST.get('middle_name', False)
     last_name = request.POST.get('last_name', False)
     facebook_url = request.POST.get('facebook_url', False)
@@ -1915,6 +1989,11 @@ def politician_edit_process_view(request):
             if last_name is not False:
                 politician_on_stage.last_name = last_name
             if gender is not False:
+                gender = gender[0]
+                if politician_on_stage.gender != gender:
+                    politician_on_stage.gender_likelihood = POLITICAL_DATA_MANAGER
+                if gender == 'U':
+                    politician_on_stage.gender_likelihood = ''
                 politician_on_stage.gender = gender
             if google_civic_candidate_name is not False:
                 politician_on_stage.google_civic_candidate_name = google_civic_candidate_name

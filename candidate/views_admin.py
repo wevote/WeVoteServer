@@ -6,6 +6,7 @@ import json
 import re
 import string
 from datetime import datetime
+
 import pytz
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -16,6 +17,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.timezone import localtime, now
+
 import wevote_functions.admin
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.models import BallotReturnedListManager
@@ -37,7 +39,7 @@ from position.models import PositionEntered, PositionListManager
 from twitter.models import TwitterLinkPossibility, TwitterUserManager
 from voter.models import voter_has_authority
 from voter_guide.models import VoterGuide
-from wevote_functions.functions import convert_date_to_date_as_integer, convert_to_int, \
+from wevote_functions.functions import convert_to_int, \
     convert_we_vote_date_string_to_date_as_integer, \
     extract_instagram_handle_from_text_string, \
     extract_twitter_handle_from_text_string, list_intersection, \
@@ -54,7 +56,6 @@ from .controllers import candidates_import_from_master_server, candidates_import
 from .models import CandidateCampaign, CandidateListManager, CandidateManager, CandidateToOfficeLink, \
     CANDIDATE_UNIQUE_IDENTIFIERS, PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
     PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_VOTE_USA
-
 
 CANDIDATES_SYNC_URL = get_environment_variable("CANDIDATES_SYNC_URL")  # candidatesSyncOut
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")

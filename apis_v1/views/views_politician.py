@@ -1,19 +1,16 @@
 # apis_v1/views/views_politician.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-from politician.controllers import politician_retrieve_for_api
-# from politician.controllers import politician_list_retrieve_for_api, politician_news_item_save_for_api, \
-#     politician_save_for_api, \
-#     politician_supporter_retrieve_for_api, politician_supporter_save_for_api
-from config.base import get_environment_variable
-from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
-from django_user_agents.utils import get_user_agent
-from exception.models import handle_exception
-# from follow.controllers import voter_politician_follow_for_api
+
 import json
+
+from django.http import HttpResponse
+
 import wevote_functions.admin
-from wevote_functions.functions import get_voter_device_id, positive_value_exists
+from config.base import get_environment_variable
+from politician.controllers import politician_retrieve_for_api
+from politician.views_admin import politician_change_gender_id_view
+from wevote_functions.functions import get_voter_device_id
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -89,6 +86,25 @@ def politician_retrieve_as_owner_view(request):  # politicianRetrieveAsOwner (No
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
+def save_repaired_gender_ids_view(request):  # politicianSaveRepairedGenderIds
+    """
+    After using the gender_guesser library, with manual overrides by political data manager, save the changes
+    :param request:
+    :return:
+    """
+
+    body = request.body.decode('utf-8')
+    changes = json.loads(body)
+
+    return_count = politician_change_gender_id_view(changes)
+
+    json_data = {
+        'count':                            return_count,
+        'success':                          return_count > 0,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
 # @csrf_exempt
 # def politician_save_view(request):  # politicianSave & politicianStartSave
 #     # This is set in /config/base.py: DATA_UPLOAD_MAX_MEMORY_SIZE = 6000000
@@ -100,13 +116,15 @@ def politician_retrieve_as_owner_view(request):  # politicianRetrieveAsOwner (No
 #     politician_photo_from_file_reader = request.POST.get('politician_photo_from_file_reader', '')
 #     politician_photo_changed = positive_value_exists(request.POST.get('politician_photo_changed', False))
 #     politician_photo_delete = request.POST.get('politician_photo_delete', '')
-#     politician_photo_delete_changed = positive_value_exists(request.POST.get('politician_photo_delete_changed', False))
+#     politician_photo_delete_changed =
+#       positive_value_exists(request.POST.get('politician_photo_delete_changed', False))
 #     politician_title = request.POST.get('politician_title', '')
 #     politician_title_changed = positive_value_exists(request.POST.get('politician_title_changed', False))
 #     politician_we_vote_id = request.POST.get('politician_we_vote_id', '')
 #     politician_delete_list_serialized = request.POST.get('politician_delete_list', '')
 #     politician_starter_list_serialized = request.POST.get('politician_starter_list', '')
-#     politician_starter_list_changed = positive_value_exists(request.POST.get('politician_starter_list_changed', False))
+#     politician_starter_list_changed =
+#       positive_value_exists(request.POST.get('politician_starter_list_changed', False))
 #     json_data = politician_save_for_api(
 #         politician_description=politician_description,
 #         politician_description_changed=politician_description_changed,
@@ -166,4 +184,3 @@ def politician_retrieve_as_owner_view(request):  # politicianRetrieveAsOwner (No
 #         user_agent_object=user_agent_object)
 #     result['google_civic_election_id'] = google_civic_election_id
 #     return HttpResponse(json.dumps(result), content_type='application/json')
-
