@@ -3,9 +3,11 @@
 
 {%  block content %}
 
+{% block title %}Gender Identification{% endblock %}
+
 <h1>Set politician gender identification </h1>
-<p>There are <b>{{ number_of_rows }}</b> politicians without a gender specified in our database.</p>
-<p>Gender guesses are made by comparing the politician's first name with a database of names and likely genders.  You can override incorrect or indeterminate (...?...) guesses before saving.</p>
+<p>There are <b>{{ number_of_rows }}</b> politicians without a gender specified in our database.
+    Gender guesses are made by comparing the politician's first name with a database of names and likely genders.  You can override incorrect or indeterminate (...?...) guesses before saving.</p>
 <style>
  input[type=button] { margin: 10px 8px 16px 8px; }
 </style>
@@ -19,6 +21,7 @@
     <thead>
       <tr>
         <th style="width: 40px;">#</th>
+        <th style="width: 48px;"></th>
         <th style="width: 250px;">Name in DB</th>
         <th>Gender Guess</th>
         <th>Gender To Save</th>
@@ -33,7 +36,15 @@
       <tr class="person_row">
         <td>{{ forloop.counter|add:index_offset }}</td>
         <td>
-          <a href="{{person.search_url}}" target="_blank">{{ person.person_name }}</a>
+            {% if person.we_vote_hosted_profile_image_url_medium %}
+            <a href="{{person.politician_url}}" target="_blank">
+              <img src="{{ person.we_vote_hosted_profile_image_url_medium }}" width="48px" height="48px" />
+            </a>
+            {% endif %}
+        </td>
+        <td>
+          <a href="{{person.politician_url}}" target="_blank">{{ person.person_name }}</a>
+          <a href="{{person.search_url}}" target="_blank">(search)</a>
         </td>
         <td id="hiddenName" style="display: none">{{ person.person_name }}</td>
         <td>{{ person.displayable_guess }}</td>
@@ -45,6 +56,7 @@
                       <option value="FEMALE" {% if person.gender_guess == 'female' or  person.gender_guess == 'mostly_female' %}selected="selected"{% endif %}>Female</option>
                       <option value="GENDER_NEUTRAL">Nonbinary</option>
                       <option value="UNKNOWN" {% if person.gender_guess == 'unknown' %}selected="selected"{% endif %}>Unknown</option>
+                      <option value="UNKNOWN">Save Unknown</option>
                     </select>
                 </label>
             </td>

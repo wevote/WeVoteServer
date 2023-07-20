@@ -49,7 +49,7 @@ from .controllers import add_alternate_names_to_next_spot, add_twitter_handle_to
     fetch_duplicate_politician_count, figure_out_politician_conflict_values, find_duplicate_politician, \
     merge_if_duplicate_politicians, merge_these_two_politicians, politicians_import_from_master_server
 from .models import Politician, PoliticianManager, POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, \
-    POLITICIAN_UNIQUE_IDENTIFIERS, PoliticiansArePossibleDuplicates, POLITICAL_DATA_MANAGER
+    POLITICIAN_UNIQUE_IDENTIFIERS, PoliticiansArePossibleDuplicates, POLITICAL_DATA_MANAGER, UNKNOWN
 
 POLITICIANS_SYNC_URL = get_environment_variable("POLITICIANS_SYNC_URL")  # politiciansSyncOut
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
@@ -1544,8 +1544,16 @@ def politician_change_gender_id_view(changes):
             politician_query = politician_query
             politician_list = list(politician_query)
             politician = politician_list[0]
-            setattr(politician, 'gender', change['gender'])
-            setattr(politician, 'gender_likelihood', change['gender_likelihood'])
+            if change['gender'] == 'S':  # If set to "Save Unknown", then save as "Unknown"
+                setattr(politician, 'gender', UNKNOWN)
+                setattr(politician, 'gender_likelihood', POLITICAL_DATA_MANAGER)
+            else:
+                setattr(politician, 'gender', change['gender'])
+                if 'gender_likelihood' in change:
+                    try:
+                        setattr(politician, 'gender_likelihood', change['gender_likelihood'])
+                    except Exception as err:
+                        logger.error('politician_change_gender_id gender_likelihood caught: ', err)
             timezone = pytz.timezone("America/Los_Angeles")
             datetime_now = timezone.localize(datetime.now())
             setattr(politician, 'date_last_changed', datetime_now)
@@ -1582,9 +1590,11 @@ def set_missing_gender_ids_view(request):
         cleaned = re.sub("\(|\)|\"|\'", " ", name)
         cleaned = re.sub("\s+", "+", cleaned)
         search = 'https://www.google.com/search?q=' + cleaned
+        politician_url = "/politician/{politician_id}/edit".format(politician_id=person.id)
 
         person_item = {
             'person_name':                  name,
+            'politician_url':               politician_url,
             'search_url':                   search,
             'gender':                       person.gender,
             'gender_guess':                 person.guess,
@@ -1593,6 +1603,7 @@ def set_missing_gender_ids_view(request):
             'date_last_updated':            person.date_last_updated,
             'state_code':                   person.state_code.upper(),
             'we_vote_id':                   person.we_vote_id,
+            'we_vote_hosted_profile_image_url_medium':  person.we_vote_hosted_profile_image_url_medium,
             'party':                        person.political_party.lower().capitalize(),
         }
         people_list.append(person_item)
