@@ -2068,7 +2068,8 @@ class PoliticianManager(models.Manager):
         """
         politician_query = Politician.objects.all()
         # Get all politicians who do not have gender specified
-        politician_query = politician_query.filter(gender='U').order_by('politician_name')
+        politician_query = politician_query.filter(gender=UNKNOWN).order_by('politician_name')
+        politician_query = politician_query.exclude(gender_likelihood=POLITICAL_DATA_MANAGER)
         number_of_rows = politician_query.count()
         politician_query = politician_query[start:(start+count)]
         politician_list_objects = list(politician_query)
@@ -2080,7 +2081,11 @@ class PoliticianManager(models.Manager):
                 # G. Burt Lancaster
                 first = pol.middle_name.lower().capitalize()
             pol.guess = detector.get_gender(first)
-            pol.displayable_guess = DISPLAYABLE_GUESS[pol.guess]
+            try:
+                pol.displayable_guess = DISPLAYABLE_GUESS[pol.guess]
+            except KeyError:
+                pol.displayable_guess = DISPLAYABLE_GUESS['unknown']
+                pol.guess = 'unknown'
             results_list.append(pol)
 
         return results_list, number_of_rows

@@ -161,7 +161,8 @@
 
 <div class="form-group">
     <label for="gender_id" class="col-sm-3 control-label">Gender</label>
-    <div class="col-sm-8">
+    <div class="col-sm-8 u-no-break">
+        <div>
         <span style="border: 1px solid #ccc; border-radius: 4px; padding: 10px 6px 10px 10px">
             <input type="radio" name="gender" id="gender_unknown_id" value="U"
                 {% if politician %}{% if politician.gender == 'U' %}checked{% endif %}{% else %}{% if gender == 'U' %}checked{% endif %}{% endif %} />
@@ -176,8 +177,11 @@
                 {% if politician %}{% if politician.gender == 'N' %}checked{% endif %}{% else %}{% if gender == 'N' %}checked{% endif %}{% endif %} />
             <label for="gender_neutral_id">Nonbinary</label>
         </span>
-        <label for="gender_source_label" style="padding-left: 20%; padding-right: 10px">Source of Gender Identification</label>
-        <span id="sourceString" style="color: darkgrey">{% if politician %}{% if politician.gender_likelihood == '' %}None{% else %}{{ politician.gender_likelihood }}{% endif %}{% endif %}</span>
+        <span class="u-no-break">
+            <label for="gender_source_label" style="padding-left: 5%; padding-right: 10px">Source of Gender Identification</label>
+            <span id="sourceString" style="color: darkgrey">{% if politician %}{% if politician.gender_likelihood == '' %}None{% else %}{{ politician.gender_likelihood }}{% endif %}{% endif %}</span>
+        </span>
+        </div>
     </div>
 </div>
 
