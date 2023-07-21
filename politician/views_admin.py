@@ -1586,11 +1586,15 @@ def set_missing_gender_ids_view(request):
         start, count)
     people_list = []
     for person in list_of_people_from_db:
+        if not hasattr(person, 'politician_name'):
+            continue
         name = person.politician_name
         cleaned = re.sub("\(|\)|\"|\'", " ", name)
         cleaned = re.sub("\s+", "+", cleaned)
         search = 'https://www.google.com/search?q=' + cleaned
         politician_url = "/politician/{politician_id}/edit".format(politician_id=person.id)
+        politician_state_code = person.state_code.upper() if person.state_code else ''
+        politician_political_party = person.political_party.lower().capitalize() if person.political_party else ''
 
         person_item = {
             'person_name':                  name,
@@ -1601,10 +1605,10 @@ def set_missing_gender_ids_view(request):
             'displayable_guess':            person.displayable_guess,
             'google_civic_candidate_name':  person.google_civic_candidate_name,
             'date_last_updated':            person.date_last_updated,
-            'state_code':                   person.state_code.upper(),
+            'state_code':                   politician_state_code,
             'we_vote_id':                   person.we_vote_id,
             'we_vote_hosted_profile_image_url_medium':  person.we_vote_hosted_profile_image_url_medium,
-            'party':                        person.political_party.lower().capitalize(),
+            'party':                        politician_political_party,
         }
         people_list.append(person_item)
 
