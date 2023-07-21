@@ -2066,11 +2066,12 @@ class PoliticianManager(models.Manager):
         :param count:
         :return:
         """
-        politician_query = Politician.objects.all()
+        politician_query = Politician.objects.using('readonly').all()
         # Get all politicians who do not have gender specified
-        politician_query = politician_query.filter(gender=UNKNOWN).order_by('politician_name')
+        politician_query = politician_query.filter(gender=UNKNOWN)
         politician_query = politician_query.exclude(gender_likelihood=POLITICAL_DATA_MANAGER)
         number_of_rows = politician_query.count()
+        politician_query = politician_query.order_by('politician_name')
         politician_query = politician_query[start:(start+count)]
         politician_list_objects = list(politician_query)
         results_list = []

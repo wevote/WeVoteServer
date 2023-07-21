@@ -495,12 +495,13 @@ def candidate_list_view(request):
                 candidate_we_vote_id_list.append(candidate.we_vote_id)
 
         # Retrieve all CandidateToOfficeLink objects for these candidates
-        results = candidate_list_manager.retrieve_candidate_to_office_link_list(
-            candidate_we_vote_id_list=candidate_we_vote_id_list,
-            read_only=True
-        )
-        if results['candidate_to_office_link_list_found']:
-            candidate_to_office_link_list = results['candidate_to_office_link_list']
+        if len(candidate_we_vote_id_list) > 0:
+            results = candidate_list_manager.retrieve_candidate_to_office_link_list(
+                candidate_we_vote_id_list=candidate_we_vote_id_list,
+                read_only=True
+            )
+            if results['candidate_to_office_link_list_found']:
+                candidate_to_office_link_list = results['candidate_to_office_link_list']
 
         for one_link in candidate_to_office_link_list:
             if positive_value_exists(one_link.contest_office_we_vote_id) \
@@ -510,22 +511,25 @@ def candidate_list_view(request):
         # Retrieve all the offices for these candidates
         from office.models import ContestOfficeListManager
         contest_office_list_manager = ContestOfficeListManager()
-        results = contest_office_list_manager.retrieve_offices(
-            retrieve_from_this_office_we_vote_id_list=contest_office_we_vote_id_list,
-            return_list_of_objects=True,
-            read_only=True)
-        if results['office_list_found']:
-            contest_office_list = results['office_list_objects']
-            for one_office in contest_office_list:
-                if hasattr(one_office, 'district_name'):  # Make sure legit office object
-                    contest_office_by_we_vote_id_dict[one_office.we_vote_id] = one_office
+        if len(contest_office_we_vote_id_list) > 0:
+            results = contest_office_list_manager.retrieve_offices(
+                retrieve_from_this_office_we_vote_id_list=contest_office_we_vote_id_list,
+                return_list_of_objects=True,
+                read_only=True)
+            if results['office_list_found']:
+                contest_office_list = results['office_list_objects']
+                for one_office in contest_office_list:
+                    if hasattr(one_office, 'district_name'):  # Make sure legit office object
+                        contest_office_by_we_vote_id_dict[one_office.we_vote_id] = one_office
 
         # Take CandidateToOfficeLink entries for each candidate, and figure out the contest_office object
         #  furthest in the future. We will use this to find the district_name and contest_office_name
         for office in contest_office_list:
             for candidate in candidate_list:
                 for one_link in candidate_to_office_link_list:
-                    if candidate.we_vote_id == one_link.candidate_we_vote_id:
+                    # If the candidate and office match this candidate_to_office_link, proceed
+                    if candidate.we_vote_id == one_link.candidate_we_vote_id \
+                            and office.we_vote_id == one_link.contest_office_we_vote_id:
                         if candidate.we_vote_id in office_by_candidate_we_vote_id_dict:
                             # If this office is further in the future, replace the earlier version
                             try:
@@ -533,10 +537,15 @@ def candidate_list_view(request):
                             except Exception as e:
                                 office_election_date_as_integer = 0
                             try:
-                                office_election_date_from_dict_as_integer = \
-                                    office_by_candidate_we_vote_id_dict[candidate.we_vote_id].election_date_as_integer
-                                office_election_date_from_dict_as_integer = \
-                                    convert_to_int(office_election_date_from_dict_as_integer)
+                                office_by_candidate_we_vote_id = \
+                                    office_by_candidate_we_vote_id_dict[candidate.we_vote_id]
+                                if hasattr(office_by_candidate_we_vote_id, 'office_name'):
+                                    office_election_date_from_dict_as_integer = \
+                                        office_by_candidate_we_vote_id.election_date_as_integer
+                                    office_election_date_from_dict_as_integer = \
+                                        convert_to_int(office_election_date_from_dict_as_integer)
+                                else:
+                                    office_election_date_from_dict_as_integer = 0
                             except Exception as e:
                                 office_election_date_from_dict_as_integer = 0
                             try:
@@ -548,7 +557,8 @@ def candidate_list_view(request):
                             office_by_candidate_we_vote_id_dict[candidate.we_vote_id] = office
 
         for candidate in candidate_list:
-            if candidate.we_vote_id in office_by_candidate_we_vote_id_dict:
+            if positive_value_exists(candidate.we_vote_id) and \
+                    candidate.we_vote_id in office_by_candidate_we_vote_id_dict:
                 contest_office = office_by_candidate_we_vote_id_dict[candidate.we_vote_id]
                 if hasattr(contest_office, 'district_name'):  # Make sure legit office object
                     results = augment_candidate_with_contest_office_data(
@@ -898,6 +908,9 @@ def candidate_list_view(request):
                 filters.append(new_filter)
 
                 new_filter = Q(contest_office_name__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(district_name__icontains=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(google_civic_candidate_name__icontains=one_word)
