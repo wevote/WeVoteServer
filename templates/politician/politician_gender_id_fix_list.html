@@ -1,9 +1,9 @@
 {# templates/politician/politician_gender_id_fix_list.html #}
 {% extends "template_base.html" %}
 
-{%  block content %}
-
 {% block title %}Gender Identification{% endblock %}
+
+{%  block content %}
 
 <h1>Set politician gender identification </h1>
 <p>There are <b>{{ number_of_rows }}</b> politicians without a gender specified in our database.
@@ -11,7 +11,7 @@
 <style>
  input[type=button] { margin: 10px 8px 16px 8px; }
 </style>
-<input type="button" id="button_save_and_load" value="Save any changes, then load the next 15" />
+<input class="btn-success" type="button" id="button_save_and_load" value="Save any changes, then load the next 15" />
 <input type="button" id="button_load_no_save_prev" value="< Load the previous 15 without saving" onClick="goToPrevPage(0)" />
 <input type="button" id="button_load_no_save" value="Load the next 15 without saving >" onClick="goToNextPage(0, true)" />
 <input type="button" value="Return to {{ person_text }} page" onclick="window.location.href='{{ return_link }}'" />
