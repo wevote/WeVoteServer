@@ -1294,7 +1294,8 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
     most_recent_candidate_we_vote_id = None
     opponent_candidate_list = []
     for one_candidate in politician_candidate_list:
-        if one_candidate.candidate_ultimate_election_date > candidate_ultimate_election_date:
+        if one_candidate and one_candidate.candidate_ultimate_election_date \
+                and one_candidate.candidate_ultimate_election_date > candidate_ultimate_election_date:
             candidate_ultimate_election_date = one_candidate.candidate_ultimate_election_date
             most_recent_candidate_we_vote_id = one_candidate.we_vote_id
     if positive_value_exists(most_recent_candidate_we_vote_id):
