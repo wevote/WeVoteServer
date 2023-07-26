@@ -421,6 +421,8 @@ urlpatterns = [
               name='voterContactListSaveView'),
       re_path(r'^voterContactSave/', views_voter.voter_contact_save_view,
               name='voterContactSaveView'),
+      re_path(r'^voterUpdateFips/', views_voter.voter_update_fips_view,
+              name='voterUpdateFipsView'),
       re_path(r'^voterSMSPhoneNumberRetrieve/', views_voter.voter_sms_phone_number_retrieve_view,
               name='voterSMSPhoneNumberRetrieveView'),
       re_path(r'^voterSMSPhoneNumberSave/', views_voter.voter_sms_phone_number_save_view,

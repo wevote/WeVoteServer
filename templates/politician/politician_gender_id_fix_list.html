@@ -77,7 +77,6 @@
 
 <script>
   function selectOnClick(clicked) {
-    console.log(clicked)
     let saveTextEl = $('#' + clicked);
     saveTextEl.css({padding: '4px', background: '#ffff00'});
     saveTextEl.text('Needs saving');
@@ -127,7 +126,6 @@
 
   $(function() {
     $('#button_save_and_load').click(function(evt) {
-      console.log('button_save_and_load');
       let changes = []
       $("tr.person_row").each(function(i, tr) {
         $this = $(this);
@@ -175,7 +173,6 @@
             goToNextPage(0, false);             // get the first 15 that are not gender 'U'
           },
         });
-        console.log(changes)
       }
     });
   });

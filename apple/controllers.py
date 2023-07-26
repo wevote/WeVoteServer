@@ -2,7 +2,6 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 from apple.models import AppleUser
-from voter.controllers import voter_merge_two_accounts_action_schedule
 from voter.models import VoterManager
 from wevote_functions.functions import positive_value_exists
 import wevote_functions.admin
