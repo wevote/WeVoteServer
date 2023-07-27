@@ -4,7 +4,7 @@
 from dateutil import parser
 from email_outbound.models import EmailManager
 from wevote_functions.functions import positive_value_exists
-from .models import VoterContactEmail, VoterManager
+from voter.models import VoterContactEmail, VoterManager
 
 
 def assemble_contact_display_name(

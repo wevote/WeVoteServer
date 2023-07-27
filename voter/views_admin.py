@@ -21,7 +21,7 @@ from admin_tools.views import redirect_to_sign_in_page
 from email_outbound.models import EmailAddress, EmailManager
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
     handle_record_not_saved_exception, handle_exception
-from image.controllers import TWITTER, FACEBOOK, cache_master_and_resized_image, create_resized_images
+from image.controllers import create_resized_images
 from import_export_facebook.models import FacebookLinkToVoter, FacebookManager
 from organization.models import Organization, OrganizationManager, INDIVIDUAL
 from position.controllers import merge_duplicate_positions_for_voter
@@ -35,7 +35,7 @@ from voter.models import VoterIssuesLookup
 from wevote_functions.functions import convert_to_int, generate_random_string, get_voter_api_device_id, \
     get_voter_device_id, set_voter_api_device_id, positive_value_exists
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
-from .controllers import delete_all_voter_information_permanently, process_maintenance_status_flags, \
+from voter.controllers import delete_all_voter_information_permanently, process_maintenance_status_flags, \
     voter_merge_two_accounts_action, voter_save_photo_from_file_reader
 from .models import fetch_voter_id_from_voter_device_link, \
     PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \

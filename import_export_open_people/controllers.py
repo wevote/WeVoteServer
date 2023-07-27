@@ -5,7 +5,7 @@
 from .models import OpenPeopleApiCounterManager
 from config.base import get_environment_variable
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from exception.models import handle_exception, handle_record_found_more_than_one_exception
+from exception.models import handle_exception
 import json
 import requests
 from requests.structures import CaseInsensitiveDict

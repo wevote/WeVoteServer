@@ -1,13 +1,15 @@
 # voter/models.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-
+import csv
+import json
 import string
 import sys
 import time
 from datetime import datetime, timedelta
 
 import pytz
+import usaddress
 from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser)  # PermissionsMixin
 from django.core.validators import RegexValidator
 from django.db import (models, IntegrityError)
@@ -3477,6 +3479,7 @@ class VoterContactEmail(models.Model):
     """
     One contact imported from third-party voter address book. Voter may delete at any time.
     """
+    objects = None
     city = models.CharField(max_length=255, default=None, null=True)
     date_last_changed = models.DateTimeField(null=True, auto_now=True, db_index=True)
     display_name = models.CharField(max_length=255, default=None, null=True)
@@ -4443,6 +4446,8 @@ class VoterAddress(models.Model):
                                         verbose_name='normalized state returned from Google')
     normalized_zip = models.CharField(max_length=255, blank=True, null=True,
                                       verbose_name='normalized zip returned from Google')
+    county_fips_code = models.CharField(max_length=5, null=True, verbose_name="FIPS code for this county")
+    county_name = models.CharField(max_length=255, null=True)
     # This is the election_id last found for this address
     google_civic_election_id = models.PositiveIntegerField(
         verbose_name="google civic election id for this address", null=True, unique=False)
@@ -4861,6 +4866,132 @@ class VoterAddressManager(models.Manager):
             'status':                   status,
             'voter_address_duplicated': voter_address_duplicated,
             'voter_address':            voter_address,
+        }
+        return results
+
+    @staticmethod
+    def city_key_cleaner(raw):
+        clean = raw.replace(',', '').replace('.', '').replace('Twp', '').replace('Township', '').\
+            replace('St ', 'Saint ').replace('Ft ', 'Fort ').strip()
+        return clean
+
+    def update_fips_codes_for_all_voteraddresses(self, limit):  # /apis/v1/voterUpdateFips/?limit=10000
+        status = ''
+        success = True
+        valid_states = ['AL', 'AK', 'AZ', 'AR', 'AS', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA', 'GU', 'HI', 'ID', 'IL',
+                        'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH',
+                        'NJ', 'NM', 'NY', 'NC', 'ND', 'NP', 'OH', 'OK', 'OR', 'PA', 'PR', 'RI', 'SC', 'SD', 'TN', 'TX',
+                        'TT', 'UT', 'VT', 'VA', 'VI', 'WA', 'WV', 'WI', 'WY']
+
+        misses = []
+        total_addresses = 0
+        garbled = 0
+        saved = 0
+        failed = 0
+        try:
+            logic = Q(county_fips_code__isnull=True, county_fips_code__exact='', latitude__isnull=True, _connector=Q.OR)
+            addresses_to_fix = VoterAddress.objects.filter(logic)
+            total_addresses = len(addresses_to_fix)
+            lookup = {}
+
+            with open('voter/fipsCodesWithPosition.json') as file:
+                lookup = json.load(file)
+                print('voter/fipsCodesWithPosition.json opened')
+
+                for voter_address in addresses_to_fix.iterator():
+                    if saved > int(limit):
+                        break
+                    parsed = usaddress.parse(voter_address.text_for_map_search)
+                    if not positive_value_exists(voter_address.normalized_city):
+                        place_found = False
+                        number = ''
+                        street = ''
+                        street_type = ''
+                        state = ''
+                        city = ''
+                        zip_code = ''
+                        for tup in parsed:
+                            (value, key) = tup
+                            match key:           # switch case in most languages
+                                case 'AddressNumber':
+                                    number = value
+                                case 'StreetName':
+                                    street = value
+                                case 'StreetNamePostType':
+                                    street_type = value
+                                case 'PlaceName':
+                                    if place_found:      # handle multiple word cities like Tahoe City and Half Moon Bay
+                                        city = city + ' ' + (value.replace(',', '').replace('.', '').capitalize())
+                                    else:
+                                        city = value.replace(',', '').replace('.', '').capitalize()
+                                        place_found = True
+                                case 'StateName':
+                                    if value != 'USA':
+                                        state = value.upper().replace('.', "").replace(',', "")
+                                case 'ZipCode':
+                                    zip_code = value
+
+                        try:
+                            if state in valid_states and len(city) > 2:
+                                key = (self.city_key_cleaner(city) + ',' + state).lower()
+                                if positive_value_exists(city):
+                                    voter_address.normalized_city = city
+                                if positive_value_exists(state):
+                                    voter_address.normalized_state = state
+                                if positive_value_exists(zip_code):
+                                    voter_address.normalized_zip = zip_code
+                                if positive_value_exists(number) and positive_value_exists(street) and \
+                                        positive_value_exists(street_type):
+                                    voter_address.normalized_line1 = \
+                                        (number + ' ' + street + ' ' + street_type).replace(',', '')
+                                if key in lookup:
+                                    payload = lookup[key]
+                                    fips = payload['fips']
+                                    if positive_value_exists(fips):
+                                        voter_address.county_fips_code = fips
+                                        voter_address.county_name = payload['county']
+                                        voter_address.latitude = payload['lat']
+                                        voter_address.longitude = payload['lng']
+                                        try:
+                                            # print('va: ', json.dumps(voter_address))
+                                            voter_address.save()
+                                            saved += 1
+                                        except Exception as e:
+                                            logger.error('Failed to save address', str(e), voter_address)
+                                            failed += 1
+                                            handle_record_not_saved_exception(e, logger=logger,
+                                                                      exception_message_optional=e)
+
+                                    else:
+                                        print('FAILURE for :', voter_address.text_for_map_search, key)
+                                else:
+                                    # logger.error('No entry in fipsCodes.json for the city: ', key)
+                                    misses.append(key)
+                            else:
+                                garbled += 1
+
+                        except Exception as ge:
+                            print('General exception: ', ge)
+
+
+            ndmisses = list(dict.fromkeys(misses))
+            logger.error('fips_codes -- parseable, but no match', misses)
+            print(ndmisses)
+            print('misses: ', len(misses))
+            print('addresses_to_fix: ', len(addresses_to_fix))
+            status += "PARSED_" + str(total_addresses) + '_ADDRESSES NO_MATCH_ADDRESSES_' + str(len(misses)) + \
+                      " GARBLED_ADDRESSES_" + str(garbled) + " SAVED_" + str(saved) + " FAILED_" + str(failed)
+            success = True
+            voter_address_found = True
+        except Exception as ge2:
+            print('General exception 2: ', ge2)
+            # status += "UNABLE_TO_UPDATE_EXISTING_VOTER_ADDRESS "
+            success = False
+
+        results = {
+            'status':               status,
+            'success':              success,
+
         }
         return results
 
