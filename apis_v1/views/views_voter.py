@@ -3559,7 +3559,7 @@ def voter_contact_save_view(request):  # voterContactSave
 
 @csrf_exempt
 def voter_update_fips_view(request):  # voterUpdateFips
-    limit = request.GET.get('limit', 1000)
+    limit = request.GET.get('limit', 5000)
 
     voteraddress_manager = VoterAddressManager()
     json_data = voteraddress_manager.update_fips_codes_for_all_voteraddresses(limit)

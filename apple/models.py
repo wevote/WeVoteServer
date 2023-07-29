@@ -18,6 +18,7 @@ class AppleUser(models.Model):
     # objects = None
     # voter_device_id = models.CharField(verbose_name='voter device id',
     #                                    max_length=255, null=False, blank=False, unique=True, default='DELETE_ME')
+    DoesNotExist = None
     objects = None
     voter_we_vote_id = models.CharField(verbose_name="we vote id for the Apple ID owner", max_length=255, unique=True)
     user_code = models.CharField(verbose_name="User's apple id code", max_length=255, null=False, unique=False)
