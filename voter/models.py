@@ -4925,18 +4925,17 @@ class VoterAddressManager(models.Manager):
         parsed = usaddress.parse(text_no_usa)
         for tup in parsed:
             (value, key) = tup
-            match key:  # switch case in most languages
-                case 'PlaceName':
-                    if place_found:  # handle multiple word cities like Tahoe City and Half Moon Bay
-                        city = city + ' ' + (value.replace(',', '').replace('.', '').capitalize())
-                    else:
-                        city = value.replace(',', '').replace('.', '').capitalize()
-                        place_found = True
-                case 'StateName':
-                    if value != 'USA':
-                        state = value.upper().replace('.', "").replace(',', "")
-                case 'ZipCode':
-                    zip_code = value
+            if key == 'PlaceName':
+                if place_found:  # handle multiple word cities like Tahoe City and Half Moon Bay
+                    city = city + ' ' + (value.replace(',', '').replace('.', '').capitalize())
+                else:
+                    city = value.replace(',', '').replace('.', '').capitalize()
+                    place_found = True
+            elif key == 'StateName':
+                if value != 'USA':
+                    state = value.upper().replace('.', "").replace(',', "")
+            elif key == 'ZipCode':
+                zip_code = value
 
         f1 = line1low.find((city + ', ' + state).lower())
         f2 = line1low.find((city + ' ' + state).lower())
