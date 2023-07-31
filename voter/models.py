@@ -5068,7 +5068,7 @@ class VoterAddressManager(models.Manager):
 
             addresses_to_fix = VoterAddress.objects.exclude(invalid_address=True).order_by('text_for_map_search')
             logger.error('%s', 'KILL9 update_fips_codes_for_all_voteraddresses after query')
-            total_addresses = len(addresses_to_fix)
+            total_addresses = 659921  # len(addresses_to_fix)
             logger.error('%s', 'KILL9 update_fips_codes_for_all_voteraddresses after query after len calculation: ' + str(total_addresses))
 
             prior_text_for_map_search = ''
