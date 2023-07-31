@@ -4666,13 +4666,13 @@ class VoterAddressManager(models.Manager):
                     location = google_client.geocode(raw_address_text, sensor=False,
                                                      timeout=GEOCODE_TIMEOUT)
                     latitude, longitude = location.latitude, location.longitude
-                    fips, county = self.get_fips_from_fcc(latitude, longitude, city, state)
+                    fips, county, fallback = self.get_fips_from_fcc(latitude, longitude, city, state)
                 elif len(zip_code) > 0:     # With no city, Google can do plenty with just a zip code (but no line1)
                     invalid_address = False
                     loc = google_client.geocode(zip_code, sensor=False, timeout=GEOCODE_TIMEOUT)
                     address, latitude, longitude = loc.address, loc.latitude, loc.longitude
                     place_found, line1, state, city, zip_code = self.parse_address(address)
-                    fips, county = self.get_fips_from_fcc(latitude, longitude, city, state)
+                    fips, county, fallback = self.get_fips_from_fcc(latitude, longitude, city, state)
 
                 updated_values = {
                     # Values we search against
