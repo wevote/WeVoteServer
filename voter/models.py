@@ -13,7 +13,7 @@ import usaddress
 from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser)  # PermissionsMixin
 from django.core.validators import RegexValidator
 from django.db import (models, IntegrityError)
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.utils.timezone import now
 from geopy import get_geocoder_for_service
 from validate_email import validate_email
@@ -5058,15 +5058,19 @@ class VoterAddressManager(models.Manager):
             google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
             logger.error('%s', 'KILL9 update_fips_codes_for_all_voteraddresses after get_geocoder')
 
-            logic = Q(
-                county_fips_code__isnull=True,
-                county_fips_code__exact='',
-                latitude__isnull=True,
-                _connector=Q.OR)
-            addresses_to_fix = \
-                VoterAddress.objects.filter(logic).exclude(invalid_address=True).order_by('text_for_map_search')
+            # logic = Q(
+            #     county_fips_code__isnull=True,
+            #     county_fips_code__exact='',
+            #     latitude__isnull=True,
+            #     _connector=Q.OR)
+            # addresses_to_fix = \
+            #     VoterAddress.objects.filter(logic).exclude(invalid_address=True).order_by('text_for_map_search')
+
+            # Experiment to try to use less memory, to try to avoid messing up lazy loading of all addresses_to_fix
+            addresses_to_fix = VoterAddress.objects.exclude(invalid_address=True).order_by('text_for_map_search')
+            logger.error('%s', 'KILL9 update_fips_codes_for_all_voteraddresses after query')
             total_addresses = len(addresses_to_fix)
-            logger.error('%s', 'KILL9 update_fips_codes_for_all_voteraddresses after query, addr: ' + str(total_addresses))
+            logger.error('%s', 'KILL9 update_fips_codes_for_all_voteraddresses after query after len calculation: ' + str(total_addresses))
 
             prior_text_for_map_search = ''
             prior_voter_address = {}
