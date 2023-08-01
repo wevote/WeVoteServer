@@ -4957,6 +4957,7 @@ class VoterAddressManager(models.Manager):
         return place_found, line1, state, city, zip_code
 
     FIPS_LOOKUP = False
+
     def get_lookup(self):
         fl = __class__.FIPS_LOOKUP
         if fl is not False:
@@ -4978,12 +4979,11 @@ class VoterAddressManager(models.Manager):
             county_leaf = block['County']
             fips = county_leaf['FIPS']
             county = county_leaf['name'].replace('County', '').strip()
-        except Exception as e:
-            # On July 29, 2023 the fcc api started failing for many coordinates
+        except Exception:
+            # On July 29, 2023, the fcc api started failing for many coordinates, but was working again on the 31st
             logger.error('Failing FCC Fips Lookup: ' + url)
 
         if fips == '':
-            logger.error('%s', 'KILL9 update_fips_codes_for_all_voteraddresses in forloop before getting fips from fallback file')
             key = (self.city_key_cleaner(city) + ',' + state).lower()
             lookup = self.get_lookup()
             if key in lookup:
@@ -4992,7 +4992,7 @@ class VoterAddressManager(models.Manager):
                 county = payload['county']
             err = 'FIPS_FROM_FCC using fallback file fips: ' if county != '' else \
                 'FIPS_FROM_FCC CITY NOT IN fallback file fips: '
-            logger.error('%s', err  + state + '-' + county + '-' + city + '-' + fips)
+            logger.error('%s', err + state + '-' + county + '-' + city + '-' + fips)
             fallback = True
         return fips, county, fallback
 
@@ -5034,8 +5034,10 @@ class VoterAddressManager(models.Manager):
             voter = Voter.objects.get(id=voter_address.voter_id)
             voter.county_fips_code = voter_address.county_fips_code
             voter.county_name = voter_address.county_name
-            voter.latitude = voter_address.latitude
-            voter.longitude = voter_address.longitude
+            if positive_value_exists(voter_address.latitude):
+                voter.latitude = positive_value_exists(voter_address.latitude)
+            if positive_value_exists(voter_address.longitude):
+                voter.longitude = voter_address.longitude
             voter.save()
         except Exception as e:
             err = " VOTER_" + str(voter_address.voter_id) + "_NOT_UPDATED_WITH_ADDRESS: " + str(e) + " "
@@ -5054,22 +5056,15 @@ class VoterAddressManager(models.Manager):
         fcc_success = 0
         fcc_fallback = 0
         try:
-            logger.error('%s', 'KILL9 entry to update_fips_codes_for_all_voteraddresses')
             google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
-            logger.error('%s', 'KILL9 update_fips_codes_for_all_voteraddresses after get_geocoder')
-
-            # logic = Q(
-            #     county_fips_code__isnull=True,
-            #     county_fips_code__exact='',
-            #     latitude__isnull=True,
-            #     _connector=Q.OR)
-            # addresses_to_fix = \
-            #     VoterAddress.objects.filter(logic).exclude(invalid_address=True).order_by('text_for_map_search')
 
             addresses_to_fix = VoterAddress.objects.exclude(invalid_address=True).order_by('text_for_map_search')
-            logger.error('%s', 'KILL9 update_fips_codes_for_all_voteraddresses after query')
-            total_addresses = 0  # len(addresses_to_fix)
-            logger.error('%s', 'KILL9 update_fips_codes_for_all_voteraddresses after query after len calculation: ' + str(total_addresses))
+            total_addresses = 0
+            try:
+                # with Python 9, in July 2023, this throws an exception every time -- hopefully not with Python 11
+                total_addresses = len(addresses_to_fix)
+            except Exception as elen:
+                logger.error('%s', 'Length of query set calculation error: ' + str(elen))
 
             prior_text_for_map_search = ''
             prior_voter_address = {}
@@ -5087,11 +5082,9 @@ class VoterAddressManager(models.Manager):
                     self.mark_address_as_invalid(voter_address)
                     garbled += 1
                 elif prior_text_for_map_search != this_text_for_map_search:
-                    logger.error('%s', 'KILL9 update_fips_codes_for_all_voteraddresses in forloop before 1st parse_address')
                     place_found, line1, state, city, zip_code = self.parse_address(this_text_for_map_search)
 
                     if not place_found:
-                        logger.error('%s', 'KILL9 update_fips_codes_for_all_voteraddresses in forloop before 1st mark_address_as_invalid 1')
                         self.mark_address_as_invalid(voter_address)
                         garbled += 1
                     else:
@@ -5099,47 +5092,36 @@ class VoterAddressManager(models.Manager):
                             google_lookups += 1
                             if (len(state) == 0 or len(state) > 2 or len(city) == 0) and len(zip_code) > 4:
                                 # If all we have is a zip code, Google does pretty well
-                                logger.error('%s', 'KILL9 update_fips_codes_for_all_voteraddresses in forloop before google_client.geocode(zip_code')
                                 loc = google_client.geocode(zip_code, sensor=False, timeout=GEOCODE_TIMEOUT)
                                 if loc is None:
-                                    raise Exception("Google geocode failed to process zip_code: " + zip_code )
+                                    raise Exception("Google geocode failed to process zip_code: " + zip_code)
                                 address, latitude, longitude = loc.address, loc.latitude, loc.longitude
-                                logger.error('%s', 'KILL9 update_fips_codes_for_all_voteraddresses in forloop before parse_address 2')
                                 place_found, line1, state, city, zip_code = self.parse_address(address)
                             else:
-                                logger.error('%s', 'KILL9 update_fips_codes_for_all_voteraddresses in forloop before google_client.geocode(this_text_for_map_search')
                                 loc = google_client.geocode(this_text_for_map_search, sensor=False,
-                                                                 timeout=GEOCODE_TIMEOUT)
+                                                            timeout=GEOCODE_TIMEOUT)
                                 if loc is None:
                                     raise Exception("Google geocode failed to process address: " +
                                                     this_text_for_map_search)
                                 latitude, longitude = loc.latitude, loc.longitude
-                            logger.error('%s', 'KILL9 update_fips_codes_for_all_voteraddresses in forloop before get_fips_from_fcc 2')
                             fips, county, fallback = self.get_fips_from_fcc(latitude, longitude, city, state)
                             if fallback:
                                 fcc_fallback += 1
                             else:
                                 fcc_success += 1
 
-
                         except Exception as goog:
                             google_lookups_failed += 1
-                            logger.error('%s', 'Google api excpt: ' + str(goog) + ' -- ' + this_text_for_map_search)
-                            logger.error('%s', 'KILL9 update_fips_codes_for_all_voteraddresses in forloop before mark_address_as_invalid 3')
-
-
+                            logger.error('%s', 'Google api exception: ' + str(goog) + ' -- ' + this_text_for_map_search)
                             self.mark_address_as_invalid(voter_address)
                             continue
 
                         try:
                             if state in VALID_STATES and len(city) > 2:
-                                logger.error('%s', 'KILL9 update_fips_codes_for_all_voteraddresses in forloop before set_normalized_address_fields 5098')
                                 self.set_normalized_address_fields(voter_address, line1, city, state, zip_code)
-                                logger.error('%s', 'KILL9 update_fips_codes_for_all_voteraddresses in forloop before add_fips_to_address 5100')
                                 self.add_fips_to_address(voter_address, fips, county, latitude, longitude)
                                 try:
                                     if positive_value_exists(voter_address.county_fips_code):
-                                        logger.error('%s', 'KILL9 update_fips_codes_for_all_voteraddresses in forloop before save_address_and_dupe_back_to_voter 5104')
                                         status = self.save_address_and_dupe_back_to_voter(voter_address, status)
                                         unique_saved += 1
                                         prior_voter_address = voter_address
@@ -5154,7 +5136,6 @@ class VoterAddressManager(models.Manager):
                             else:
                                 garbled += 1
                                 logger.error('%s', 'FAILURE to process address: ' + this_text_for_map_search)
-                                logger.error('%s', 'KILL9 update_fips_codes_for_all_voteraddresses in forloop before mark_address_as_invalid 5119')
                                 self.mark_address_as_invalid(voter_address)
 
                         except Exception as ge:
@@ -5177,13 +5158,13 @@ class VoterAddressManager(models.Manager):
                     except Exception as gedu:
                         logger.error('%s', 'General exception in dupe update: ' + str(gedu))
 
-            logger.error('%s', 'KILL9 update_fips_codes_for_all_voteraddresses in forloop before stats string build')
             stats = 'ADDRESESS_TO_PROCESS ' + str(total_addresses) + \
-                    ' GOOGLE_API_ATTEMPTED ' + str(google_lookups) + ' GOOGLE_API_FAILED ' + str(google_lookups_failed) + \
+                    ' GOOGLE_API_ATTEMPTED ' + str(google_lookups) + \
+                    ' GOOGLE_API_FAILED ' + str(google_lookups_failed) + \
                     ' SAVED_UNIQUE ' + str(unique_saved) + ' SAVED_DUPES_UPDATED ' + str(dupes_updated) + \
                     ' FCC_API_SUCCESS ' + str(fcc_success) + ' FIPS_FROM_FALLBACK ' + str(fcc_fallback) + \
                     ' GARBLED_ADDRESSES ' + str(garbled) + ' ADDRESS_NOT_IN_FIPS__BACKUP ' + str(failed)
-            logger.error('%s', 'update_fips_codes_for_all_voteraddresses status: ' + status)
+            # logger.error('%s', 'update_fips_codes_for_all_voteraddresses status: ' + status)
             logger.error('%s', 'update_fips_codes_for_all_voteraddresses statistics: ' + stats)
             status += stats
             success = True
