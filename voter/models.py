@@ -5062,7 +5062,9 @@ class VoterAddressManager(models.Manager):
             total_addresses = 0
             try:
                 # with Python 9, in July 2023, this throws an exception every time -- hopefully not with Python 11
-                total_addresses = len(addresses_to_fix)
+                # total_addresses = len(addresses_to_fix)  8/1/23 This caused a "Worker with pid 10 was terminated due to signal 9
+                total_addresses = addresses_to_fix.count()
+
             except Exception as elen:
                 logger.error('%s', 'Length of query set calculation error: ' + str(elen))
 
