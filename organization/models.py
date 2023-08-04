@@ -661,25 +661,32 @@ class OrganizationManager(models.Manager):
                 organization_on_stage_id = organization_on_stage.id
                 status = "ORGANIZATION_FOUND_WITH_TWITTER_ID "
             elif positive_value_exists(incoming_hostname):
-                status = "RETRIEVING_ORGANIZATION_WITH_INCOMING_HOSTNAME "
-                incoming_hostname = incoming_hostname.strip().lower()
-                incoming_hostname = incoming_hostname.replace('http://', '')
-                incoming_hostname = incoming_hostname.replace('https://', '')
-                incoming_subdomain = incoming_hostname.replace('.wevote.us', '')
-                if read_only:
-                    organization_on_stage = Organization.objects.using('readonly')\
-                        .get(Q(chosen_domain_string__iexact=incoming_hostname) |
-                             Q(chosen_domain_string2__iexact=incoming_hostname) |
-                             Q(chosen_domain_string3__iexact=incoming_hostname) |
-                             Q(chosen_subdomain_string__iexact=incoming_subdomain))
+                skip = ['wevote.us', 'quality.wevote.us', 'localhost', 'wevotedeveloper']
+                if incoming_hostname not in skip:
+                    status = "RETRIEVING_ORGANIZATION_WITH_INCOMING_HOSTNAME "
+                    incoming_hostname = incoming_hostname.strip().lower()
+                    incoming_hostname = incoming_hostname.replace('http://', '')
+                    incoming_hostname = incoming_hostname.replace('https://', '')
+                    incoming_subdomain = incoming_hostname.replace('.wevote.us', '')
+                    if read_only:
+                        organization_on_stage = Organization.objects.using('readonly')\
+                            .get(Q(chosen_domain_string__iexact=incoming_hostname) |
+                                 Q(chosen_domain_string2__iexact=incoming_hostname) |
+                                 Q(chosen_domain_string3__iexact=incoming_hostname) |
+                                 Q(chosen_subdomain_string__iexact=incoming_subdomain))
+                    else:
+                        organization_on_stage = Organization.objects\
+                            .get(Q(chosen_domain_string__iexact=incoming_hostname) |
+                                 Q(chosen_domain_string2__iexact=incoming_hostname) |
+                                 Q(chosen_domain_string3__iexact=incoming_hostname) |
+                                 Q(chosen_subdomain_string__iexact=incoming_subdomain))
+                    organization_on_stage_id = organization_on_stage.id
+                    status = "ORGANIZATION_FOUND_WITH_INCOMING_HOSTNAME "
                 else:
-                    organization_on_stage = Organization.objects\
-                        .get(Q(chosen_domain_string__iexact=incoming_hostname) |
-                             Q(chosen_domain_string2__iexact=incoming_hostname) |
-                             Q(chosen_domain_string3__iexact=incoming_hostname) |
-                             Q(chosen_subdomain_string__iexact=incoming_subdomain))
-                organization_on_stage_id = organization_on_stage.id
-                status = "ORGANIZATION_FOUND_WITH_INCOMING_HOSTNAME "
+                    # No need to do an expensive query
+                    status = "ORGANIZATION_CHECK_FOR_WEVOTE_US "
+                    error_result = True
+                    exception_does_not_exist = True
         except Organization.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger)
             error_result = True
@@ -3203,9 +3210,9 @@ class Organization(models.Model):
     chosen_domain_type_is_campaign = models.BooleanField(default=False)
     # This is the domain name the client has configured for their We Vote configured site
     chosen_domain_string = models.CharField(
-        verbose_name="client domain name for we vote site", max_length=255, null=True, blank=True)
-    chosen_domain_string2 = models.CharField(max_length=255, null=True, blank=True)  # Alternate ex/ www
-    chosen_domain_string3 = models.CharField(max_length=255, null=True, blank=True)  # Another alternate
+        verbose_name="client domain name for we vote site", max_length=255, null=True, blank=True, db_index=True)
+    chosen_domain_string2 = models.CharField(max_length=255, null=True, blank=True, db_index=True)  # Alternate ex/ www
+    chosen_domain_string3 = models.CharField(max_length=255, null=True, blank=True, db_index=True)  # Another alternate
     chosen_favicon_url_https = models.TextField(
         verbose_name='url of client favicon', blank=True, null=True)
     chosen_google_analytics_tracking_id = models.CharField(max_length=255, null=True, blank=True)
@@ -3463,6 +3470,7 @@ class OrganizationChangeLog(models.Model):
 
 
 class OrganizationReservedDomain(models.Model):
+    MultipleObjectsReturned = None
     objects = None
 
     def __unicode__(self):
