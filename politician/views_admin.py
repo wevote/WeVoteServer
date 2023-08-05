@@ -1729,7 +1729,7 @@ def politician_edit_process_view(request):
     youtube_url = request.POST.get('youtube_url', False)
     # is_battleground_race_ values taken in below
 
-    # Check to see if this politician is already being used anywhere
+    # Check to see if this politician already exists
     politician_on_stage_found = False
     politician_on_stage = Politician()
     politician_manager = PoliticianManager()
@@ -1742,6 +1742,7 @@ def politician_edit_process_view(request):
                 politician_on_stage_found = True
         except Exception as e:
             messages.add_message(request, messages.ERROR, 'Could not retrieve politician: ' + str(e))
+            success = False
 
     # Check to see if there is a duplicate politician already saved
     existing_politician_found = False
@@ -1808,7 +1809,8 @@ def politician_edit_process_view(request):
                 if len(politician_duplicates_query):
                     existing_politician_found = True
         except Exception as e:
-            messages.add_message(request, messages.ERROR, 'Could not find politician: ' + str(e))
+            messages.add_message(request, messages.ERROR, 'Could not retrieve politician: ' + str(e))
+            success = False
 
     # We can use the same url_variables with any processing failures below
     url_variables = "?ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
@@ -1842,10 +1844,15 @@ def politician_edit_process_view(request):
                     "&vote_smart_id=" + str(vote_smart_id) + \
                     "&maplight_id=" + str(maplight_id)
 
+    if not success:
+        messages.add_message(request, messages.ERROR,
+                             'POLITICIAN_ERROR Please click the back arrow and report URL to the engineering team ')
+        return HttpResponseRedirect(reverse('politician:politician_list', args=()) + url_variables)
+
     push_seo_friendly_path_changes = False
     try:
         if existing_politician_found:
-            messages.add_message(request, messages.ERROR, 'This politician is already saved for this election.')
+            messages.add_message(request, messages.ERROR, 'This politician already exists.')
             return HttpResponseRedirect(reverse('politician:politician_new', args=()) + url_variables)
         elif politician_on_stage_found:
             # Update below
@@ -1865,6 +1872,7 @@ def politician_edit_process_view(request):
                 )
                 politician_on_stage_found = True
         if politician_on_stage_found:
+            # #################################################
             # Process incoming uploaded photo if there is one
             politician_photo_in_binary_format = None
             politician_photo_converted_to_binary = False
@@ -1893,7 +1901,7 @@ def politician_edit_process_view(request):
                     politician_on_stage.we_vote_hosted_profile_uploaded_image_url_tiny = \
                         create_resized_image_results['cached_resized_image_url_tiny']
                     if profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN \
-                            or politician_on_stage.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UPLOADED:
+                            or profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UPLOADED:
                         politician_on_stage.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UPLOADED
                         politician_on_stage.we_vote_hosted_profile_image_url_large = \
                             politician_on_stage.we_vote_hosted_profile_uploaded_image_url_large
@@ -1907,76 +1915,23 @@ def politician_edit_process_view(request):
                 politician_on_stage.we_vote_hosted_profile_uploaded_image_url_large = None
                 politician_on_stage.we_vote_hosted_profile_uploaded_image_url_medium = None
                 politician_on_stage.we_vote_hosted_profile_uploaded_image_url_tiny = None
-                if profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UPLOADED:
+                if profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UPLOADED \
+                        or profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
                     politician_on_stage.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UNKNOWN
                     politician_on_stage.we_vote_hosted_profile_image_url_large = None
                     politician_on_stage.we_vote_hosted_profile_image_url_medium = None
                     politician_on_stage.we_vote_hosted_profile_image_url_tiny = None
             elif profile_image_type_currently_active is not False:
-                politician_on_stage.profile_image_type_currently_active = profile_image_type_currently_active
-                uploaded_image_exists = True \
-                    if positive_value_exists(politician_on_stage.we_vote_hosted_profile_uploaded_image_url_large) \
-                    or positive_value_exists(politician_on_stage.we_vote_hosted_profile_uploaded_image_url_medium) \
-                    or positive_value_exists(politician_on_stage.we_vote_hosted_profile_uploaded_image_url_tiny) \
-                    else False
-                twitter_image_exists = True \
-                    if positive_value_exists(politician_on_stage.we_vote_hosted_profile_twitter_image_url_large) \
-                    or positive_value_exists(politician_on_stage.we_vote_hosted_profile_twitter_image_url_medium) \
-                    or positive_value_exists(politician_on_stage.we_vote_hosted_profile_twitter_image_url_tiny) \
-                    else False
-                facebook_image_exists = True \
-                    if positive_value_exists(politician_on_stage.we_vote_hosted_profile_facebook_image_url_large) \
-                    or positive_value_exists(politician_on_stage.we_vote_hosted_profile_facebook_image_url_medium) \
-                    or positive_value_exists(politician_on_stage.we_vote_hosted_profile_facebook_image_url_tiny) \
-                    else False
-                vote_usa_image_exists = True \
-                    if positive_value_exists(politician_on_stage.we_vote_hosted_profile_vote_usa_image_url_large) \
-                    or positive_value_exists(politician_on_stage.we_vote_hosted_profile_vote_usa_image_url_medium) \
-                    or positive_value_exists(politician_on_stage.we_vote_hosted_profile_vote_usa_image_url_tiny) \
-                    else False
-                if politician_on_stage.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
-                    if uploaded_image_exists:
-                        politician_on_stage.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UPLOADED
-                    elif twitter_image_exists:
-                        politician_on_stage.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_TWITTER
-                    elif facebook_image_exists:
-                        politician_on_stage.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_FACEBOOK
-                    elif vote_usa_image_exists:
-                        politician_on_stage.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_VOTE_USA
-                # Now move selected field into master politician image
-                if uploaded_image_exists and \
-                        politician_on_stage.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UPLOADED:
-                    politician_on_stage.we_vote_hosted_profile_image_url_large = \
-                        politician_on_stage.we_vote_hosted_profile_uploaded_image_url_large
-                    politician_on_stage.we_vote_hosted_profile_image_url_medium = \
-                        politician_on_stage.we_vote_hosted_profile_uploaded_image_url_medium
-                    politician_on_stage.we_vote_hosted_profile_image_url_tiny = \
-                        politician_on_stage.we_vote_hosted_profile_uploaded_image_url_tiny
-                elif twitter_image_exists and \
-                        politician_on_stage.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_TWITTER:
-                    politician_on_stage.we_vote_hosted_profile_image_url_large = \
-                        politician_on_stage.we_vote_hosted_profile_twitter_image_url_large
-                    politician_on_stage.we_vote_hosted_profile_image_url_medium = \
-                        politician_on_stage.we_vote_hosted_profile_twitter_image_url_medium
-                    politician_on_stage.we_vote_hosted_profile_image_url_tiny = \
-                        politician_on_stage.we_vote_hosted_profile_twitter_image_url_tiny
-                elif facebook_image_exists and \
-                        politician_on_stage.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_FACEBOOK:
-                    politician_on_stage.we_vote_hosted_profile_image_url_large = \
-                        politician_on_stage.we_vote_hosted_profile_facebook_image_url_large
-                    politician_on_stage.we_vote_hosted_profile_image_url_medium = \
-                        politician_on_stage.we_vote_hosted_profile_facebook_image_url_medium
-                    politician_on_stage.we_vote_hosted_profile_image_url_tiny = \
-                        politician_on_stage.we_vote_hosted_profile_facebook_image_url_tiny
-                elif vote_usa_image_exists and \
-                        politician_on_stage.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_VOTE_USA:
-                    politician_on_stage.we_vote_hosted_profile_image_url_large = \
-                        politician_on_stage.we_vote_hosted_profile_vote_usa_image_url_large
-                    politician_on_stage.we_vote_hosted_profile_image_url_medium = \
-                        politician_on_stage.we_vote_hosted_profile_vote_usa_image_url_medium
-                    politician_on_stage.we_vote_hosted_profile_image_url_tiny = \
-                        politician_on_stage.we_vote_hosted_profile_vote_usa_image_url_tiny
+                from image.controllers import organize_object_photo_fields_based_on_image_type_currently_active
+                results = organize_object_photo_fields_based_on_image_type_currently_active(
+                    object_with_photo_fields=politician_on_stage,
+                    profile_image_type_currently_active=profile_image_type_currently_active,
+                )
+                if results['success']:
+                    politician_on_stage = results['object_with_photo_fields']
 
+            # ###############################################
+            # Now process all other politician fields
             if ballot_guide_official_statement is not False:
                 politician_on_stage.ballot_guide_official_statement = ballot_guide_official_statement
             if ballotpedia_politician_name is not False:

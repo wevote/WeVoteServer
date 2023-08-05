@@ -61,7 +61,7 @@
     entries.</p>
 {% endif %}
 
-<form action="{% url 'organization:organization_edit_process' %}" method="post" class="form-horizontal">
+<form action="{% url 'organization:organization_edit_process' %}" method="post" class="form-horizontal" enctype="multipart/form-data">
 {% csrf_token %}
     <input type="hidden" name="organization_id" value="{% if organization %}{{ organization.id }}{% else %}0{% endif %}">
 
@@ -94,6 +94,23 @@
             Unknown
         {% endif %}
         </span>
+        {# Uploaded photo #}
+        <span style="float: left; padding: 8px 20px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="UPLOADED"
+                {% if organization.profile_image_type_currently_active == 'UPLOADED' %} checked {% endif %}
+                />
+            Uploaded
+        {% if organization.we_vote_hosted_profile_uploaded_image_url_tiny %}
+            <img src='{{ organization.we_vote_hosted_profile_uploaded_image_url_tiny }}' />
+            <label for="organization_photo_file_delete_id">
+              <input type="checkbox" name="organization_photo_file_delete" id="organization_photo_file_delete_id" value="1" />
+                delete&nbsp;&nbsp;&nbsp;
+            </label>
+        {% else %}
+            <input type="file" name="organization_photo_file" accept="image/*">
+        {% endif %}
+        </span>
+        {# Facebook photo #}
         {% if organization.we_vote_hosted_profile_facebook_image_url_tiny %}
         <span style="float: left; padding: 8px 20px 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="FACEBOOK"
