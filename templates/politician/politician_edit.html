@@ -51,6 +51,7 @@
             Unknown
         {% endif %}
         </span>
+        {# Uploaded photo #}
         <span style="float: left; padding: 8px 20px 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="UPLOADED"
                 {% if politician.profile_image_type_currently_active == 'UPLOADED' %} checked {% endif %}
@@ -66,6 +67,7 @@
             <input type="file" name="politician_photo_file" accept="image/*">
         {% endif %}
         </span>
+        {# Facebook photo #}
         {% if politician.we_vote_hosted_profile_facebook_image_url_tiny %}
         <span style="float: left; padding: 8px 20px 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="FACEBOOK"

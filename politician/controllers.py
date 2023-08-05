@@ -15,7 +15,7 @@ from candidate.models import CandidateListManager, CandidateManager, PROFILE_IMA
     PROFILE_IMAGE_TYPE_UNKNOWN, \
     PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_VOTE_USA
 from datetime import datetime
-from image.controllers import cache_image_object_to_aws, create_resized_images
+from image.controllers import cache_image_object_to_aws
 from office.models import ContestOfficeManager, ContestOfficeListManager
 from office_held.controllers import generate_office_held_dict_list_from_office_held_we_vote_id_list
 from politician.controllers_generate_seo_friendly_path import generate_campaign_title_from_politician
@@ -2146,72 +2146,15 @@ def update_politician_details_from_candidate(politician=None, candidate=None):
         if new_field not in fields_updated:
             fields_updated.append(new_field)
     profile_image_default_updated = False
-    uploaded_image_exists = True \
-        if positive_value_exists(candidate.we_vote_hosted_profile_uploaded_image_url_large) \
-        or positive_value_exists(candidate.we_vote_hosted_profile_uploaded_image_url_medium) \
-        or positive_value_exists(candidate.we_vote_hosted_profile_uploaded_image_url_tiny) else False
-    twitter_image_exists = True \
-        if positive_value_exists(candidate.we_vote_hosted_profile_twitter_image_url_large) \
-        or positive_value_exists(candidate.we_vote_hosted_profile_twitter_image_url_medium) \
-        or positive_value_exists(candidate.we_vote_hosted_profile_twitter_image_url_tiny) else False
-    facebook_image_exists = True \
-        if positive_value_exists(candidate.we_vote_hosted_profile_facebook_image_url_large) \
-        or positive_value_exists(candidate.we_vote_hosted_profile_facebook_image_url_medium) \
-        or positive_value_exists(candidate.we_vote_hosted_profile_facebook_image_url_tiny) else False
-    vote_usa_image_exists = True \
-        if positive_value_exists(candidate.we_vote_hosted_profile_vote_usa_image_url_large) \
-        or positive_value_exists(candidate.we_vote_hosted_profile_vote_usa_image_url_medium) \
-        or positive_value_exists(candidate.we_vote_hosted_profile_vote_usa_image_url_tiny) else False
-    if politician.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
-        if uploaded_image_exists:
-            politician.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UPLOADED
-            save_changes = True
-        elif twitter_image_exists:
-            politician.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_TWITTER
-            save_changes = True
-        elif facebook_image_exists:
-            politician.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_FACEBOOK
-            save_changes = True
-        elif vote_usa_image_exists:
-            politician.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_VOTE_USA
-            save_changes = True
-    # Now move selected field into master politician image
-    if uploaded_image_exists and politician.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UPLOADED:
-        politician.we_vote_hosted_profile_image_url_large = \
-            candidate.we_vote_hosted_profile_uploaded_image_url_large
-        politician.we_vote_hosted_profile_image_url_medium = \
-            candidate.we_vote_hosted_profile_uploaded_image_url_medium
-        politician.we_vote_hosted_profile_image_url_tiny = \
-            candidate.we_vote_hosted_profile_uploaded_image_url_tiny
-        profile_image_default_updated = True
-        save_changes = True
-    elif twitter_image_exists and politician.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_TWITTER:
-        politician.we_vote_hosted_profile_image_url_large = \
-            candidate.we_vote_hosted_profile_twitter_image_url_large
-        politician.we_vote_hosted_profile_image_url_medium = \
-            candidate.we_vote_hosted_profile_twitter_image_url_medium
-        politician.we_vote_hosted_profile_image_url_tiny = \
-            candidate.we_vote_hosted_profile_twitter_image_url_tiny
-        profile_image_default_updated = True
-        save_changes = True
-    elif facebook_image_exists and politician.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_FACEBOOK:
-        politician.we_vote_hosted_profile_image_url_large = \
-            candidate.we_vote_hosted_profile_facebook_image_url_large
-        politician.we_vote_hosted_profile_image_url_medium = \
-            candidate.we_vote_hosted_profile_facebook_image_url_medium
-        politician.we_vote_hosted_profile_image_url_tiny = \
-            candidate.we_vote_hosted_profile_facebook_image_url_tiny
-        profile_image_default_updated = True
-        save_changes = True
-    elif vote_usa_image_exists and politician.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_VOTE_USA:
-        politician.we_vote_hosted_profile_image_url_large = \
-            candidate.we_vote_hosted_profile_vote_usa_image_url_large
-        politician.we_vote_hosted_profile_image_url_medium = \
-            candidate.we_vote_hosted_profile_vote_usa_image_url_medium
-        politician.we_vote_hosted_profile_image_url_tiny = \
-            candidate.we_vote_hosted_profile_vote_usa_image_url_tiny
-        profile_image_default_updated = True
-        save_changes = True
+    from image.controllers import organize_object_photo_fields_based_on_image_type_currently_active
+    results = organize_object_photo_fields_based_on_image_type_currently_active(
+        object_with_photo_fields=politician,
+        profile_image_type_currently_active=politician.profile_image_type_currently_active,
+    )
+    if results['success']:
+        politician = results['object_with_photo_fields']
+        profile_image_default_updated = results['profile_image_default_updated']
+        save_changes = save_changes or results['values_changed']
 
     if profile_image_default_updated:
         if 'profile_image_type_currently_active' not in fields_updated:
