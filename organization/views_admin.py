@@ -1645,9 +1645,6 @@ def organization_edit_process_view(request):
             if organization_website is not False:
                 organization_on_stage.organization_website = organization_website.strip() \
                     if organization_website else None
-            if profile_image_type_currently_active is not False:
-                organization_on_stage.profile_image_type_currently_active = profile_image_type_currently_active \
-                    if profile_image_type_currently_active else PROFILE_IMAGE_TYPE_UNKNOWN
             if state_served_code is not False:
                 organization_on_stage.state_served_code = state_served_code.strip() if state_served_code else None
             if wikipedia_page_title is not False:
