@@ -23,8 +23,9 @@ def campaignx_friend_has_supported_send(  # CAMPAIGNX_FRIEND_HAS_SUPPORTED_TEMPL
     status = ""
 
     voter_manager = VoterManager()
-    from organization.controllers import transform_campaigns_url
-    campaigns_root_url_verified = transform_campaigns_url('')  # Change to client URL if needed
+    from organization.controllers import transform_web_app_url  # transform_campaigns_url
+    # campaigns_root_url_verified = transform_campaigns_url('')  # Change to client URL if needed
+    web_app_root_url_verified = transform_web_app_url('')  # Change to client URL if needed
 
     recipient_voter_results = voter_manager.retrieve_voter_by_we_vote_id(recipient_voter_we_vote_id)
     if not recipient_voter_results['voter_found']:
@@ -94,13 +95,20 @@ def campaignx_friend_has_supported_send(  # CAMPAIGNX_FRIEND_HAS_SUPPORTED_TEMPL
     campaignx_manager = CampaignXManager()
     results = campaignx_manager.retrieve_campaignx(campaignx_we_vote_id=campaignx_we_vote_id)
     campaignx_title = ''
-    campaignx_url = campaigns_root_url_verified + '/id/' + campaignx_we_vote_id  # Default link
+    campaignx_url = web_app_root_url_verified + '/id/' + campaignx_we_vote_id  # Default link
+    linked_politician_we_vote_id = ''
     we_vote_hosted_campaign_photo_large_url = ''
     if results['campaignx_found']:
         campaignx = results['campaignx']
         campaignx_title = campaignx.campaign_title
-        if positive_value_exists(campaignx.seo_friendly_path):
-            campaignx_url = campaigns_root_url_verified + '/c/' + campaignx.seo_friendly_path
+        linked_politician_we_vote_id = campaignx.linked_politician_we_vote_id
+        if positive_value_exists(linked_politician_we_vote_id):
+            if positive_value_exists(campaignx.seo_friendly_path):
+                campaignx_url = web_app_root_url_verified + '/' + campaignx.seo_friendly_path + '/-'
+            else:
+                campaignx_url = web_app_root_url_verified + '/p/' + campaignx.linked_politician_we_vote_id
+        elif positive_value_exists(campaignx.seo_friendly_path):
+            campaignx_url = web_app_root_url_verified + '/c/' + campaignx.seo_friendly_path
         we_vote_hosted_campaign_photo_large_url = campaignx.we_vote_hosted_campaign_photo_large_url
 
     politician_list = campaignx_manager.retrieve_campaignx_politician_list(campaignx_we_vote_id=campaignx_we_vote_id)
@@ -120,12 +128,12 @@ def campaignx_friend_has_supported_send(  # CAMPAIGNX_FRIEND_HAS_SUPPORTED_TEMPL
 
     # Unsubscribe link in email
     recipient_unsubscribe_url = \
-        campaigns_root_url_verified + "/settings/notifications/esk/" + recipient_email_subscription_secret_key
+        web_app_root_url_verified + "/settings/notifications/esk/" + recipient_email_subscription_secret_key
     # recipient_unsubscribe_url = \
     #     "{root_url}/unsubscribe/{email_secret_key}/friendcampaignsupport" \
     #     "".format(
     #         email_secret_key=recipient_email_subscription_secret_key,
-    #         root_url=campaigns_root_url_verified,
+    #         root_url=web_app_root_url_verified,
     #     )
     # Instant unsubscribe link in email header
     # list_unsubscribe_url = \
@@ -149,8 +157,8 @@ def campaignx_friend_has_supported_send(  # CAMPAIGNX_FRIEND_HAS_SUPPORTED_TEMPL
         "recipient_unsubscribe_url":        recipient_unsubscribe_url,
         "recipient_voter_email":            recipient_email,
         "speaker_voter_name":               speaker_voter_name,
-        "view_main_discussion_page_url":    campaigns_root_url_verified + "/news",
-        "view_your_ballot_url":             campaigns_root_url_verified + "/ballot",
+        "view_main_discussion_page_url":    web_app_root_url_verified + "/news",
+        "view_your_ballot_url":             web_app_root_url_verified + "/ballot",
         "we_vote_hosted_campaign_photo_large_url":  we_vote_hosted_campaign_photo_large_url,
     }
     template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
@@ -482,8 +490,9 @@ def campaignx_supporter_initial_response_send(  # CAMPAIGNX_SUPPORTER_INITIAL_RE
     status = ""
 
     voter_manager = VoterManager()
-    from organization.controllers import transform_campaigns_url
-    campaigns_root_url_verified = transform_campaigns_url('')  # Change to client URL if needed
+    from organization.controllers import transform_web_app_url  # transform_campaigns_url
+    # campaigns_root_url_verified = transform_campaigns_url('')  # Change to client URL if needed
+    web_app_root_url_verified = transform_web_app_url('')  # Change to client URL if needed
 
     recipient_voter_results = voter_manager.retrieve_voter_by_we_vote_id(recipient_voter_we_vote_id)
     if not recipient_voter_results['voter_found']:
@@ -543,13 +552,20 @@ def campaignx_supporter_initial_response_send(  # CAMPAIGNX_SUPPORTER_INITIAL_RE
     campaignx_manager = CampaignXManager()
     results = campaignx_manager.retrieve_campaignx(campaignx_we_vote_id=campaignx_we_vote_id)
     campaignx_title = ''
-    campaignx_url = campaigns_root_url_verified + '/id/' + campaignx_we_vote_id  # Default link
+    campaignx_url = web_app_root_url_verified + '/id/' + campaignx_we_vote_id  # Default link
+    linked_politician_we_vote_id = ''
     we_vote_hosted_campaign_photo_large_url = ''
     if results['campaignx_found']:
         campaignx = results['campaignx']
         campaignx_title = campaignx.campaign_title
-        if positive_value_exists(campaignx.seo_friendly_path):
-            campaignx_url = campaigns_root_url_verified + '/c/' + campaignx.seo_friendly_path
+        linked_politician_we_vote_id = campaignx.linked_politician_we_vote_id
+        if positive_value_exists(linked_politician_we_vote_id):
+            if positive_value_exists(campaignx.seo_friendly_path):
+                campaignx_url = web_app_root_url_verified + '/' + campaignx.seo_friendly_path + '/-'
+            else:
+                campaignx_url = web_app_root_url_verified + '/p/' + campaignx.linked_politician_we_vote_id
+        elif positive_value_exists(campaignx.seo_friendly_path):
+            campaignx_url = web_app_root_url_verified + '/c/' + campaignx.seo_friendly_path
         we_vote_hosted_campaign_photo_large_url = campaignx.we_vote_hosted_campaign_photo_large_url
     campaignx_share_campaign_url = campaignx_url + '/share-campaign'
 
@@ -571,18 +587,22 @@ def campaignx_supporter_initial_response_send(  # CAMPAIGNX_SUPPORTER_INITIAL_RE
             politician_list=politician_list,
         )
     else:
+        # TODO: retrieve the politician's name and use that instead
+        # if positive_value_exists(linked_politician_we_vote_id):
+        #     pass
+        # else:
         subject = "You support " + campaignx_title
         politician_full_sentence_string = ''
 
     recipient_email_subscription_secret_key = ''  # To be added
     # Unsubscribe link in email
     recipient_unsubscribe_url = \
-        campaigns_root_url_verified + "/settings/notifications/esk/" + recipient_email_subscription_secret_key
+        web_app_root_url_verified + "/settings/notifications/esk/" + recipient_email_subscription_secret_key
     # recipient_unsubscribe_url = \
     #     "{root_url}/unsubscribe/{email_secret_key}/supporterinitial" \
     #     "".format(
     #         email_secret_key=recipient_email_subscription_secret_key,
-    #         root_url=campaigns_root_url_verified,
+    #         root_url=web_app_root_url_verified,
     #     )
     # # Instant unsubscribe link in email header
     # list_unsubscribe_url = \
@@ -609,8 +629,8 @@ def campaignx_supporter_initial_response_send(  # CAMPAIGNX_SUPPORTER_INITIAL_RE
         "recipient_name":                   recipient_name,
         "recipient_unsubscribe_url":        recipient_unsubscribe_url,
         "recipient_voter_email":            recipient_email,
-        "view_main_discussion_page_url":    campaigns_root_url_verified + "/news",
-        "view_your_ballot_url":             campaigns_root_url_verified + "/ballot",
+        "view_main_discussion_page_url":    web_app_root_url_verified + "/news",
+        "view_your_ballot_url":             web_app_root_url_verified + "/ballot",
         "we_vote_hosted_campaign_photo_large_url":  we_vote_hosted_campaign_photo_large_url,
     }
     template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
