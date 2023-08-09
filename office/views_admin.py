@@ -1127,7 +1127,7 @@ def office_edit_process_view(request):
                         read_only=True)
                     if office_held_results['office_held_found']:
                         office_held = office_held_results['office_held']
-                        office_on_stage.office_held_name = office_held.office_name
+                        office_on_stage.office_held_name = office_held.office_held_name
                 if office_name is not False:
                     office_on_stage.office_name = office_name
                 if primary_party is not False:
@@ -1165,9 +1165,9 @@ def office_edit_process_view(request):
                                         "&state_code=" + str(state_code))
         except Exception as e:
             handle_record_not_saved_exception(e, logger=logger)
-            messages.add_message(request, messages.ERROR, 'Could not save office: ' + str(e))
+            messages.add_message(request, messages.ERROR, 'Could not save office (create new): ' + str(e))
     else:
-        messages.add_message(request, messages.ERROR, 'Could not save office: ' + status)
+        messages.add_message(request, messages.ERROR, 'Could not save office, success = False from above: ' + status)
 
     if redirect_to_contest_office_list:
         return HttpResponseRedirect(reverse('office:office_list', args=()) +
