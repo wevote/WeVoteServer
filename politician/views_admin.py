@@ -2329,7 +2329,8 @@ def politician_edit_process_view(request):
             now_as_integer = convert_we_vote_date_string_to_date_as_integer(now_as_we_vote_date_string)
             candidate_list = candidate_results['candidate_list']
             for candidate in candidate_list:
-                if candidate.candidate_ultimate_election_date > now_as_integer:
+                if positive_value_exists(candidate.candidate_ultimate_election_date) \
+                        and candidate.candidate_ultimate_election_date > now_as_integer:
                     candidates_to_update_from_politician.append(candidate)
                 elif positive_value_exists(politician_on_stage.seo_friendly_path) and push_seo_friendly_path_changes:
                     candidate.seo_friendly_path = politician_on_stage.seo_friendly_path
