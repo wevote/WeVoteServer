@@ -79,6 +79,9 @@ def office_held_list_view(request):
                 new_filter = Q(district_scope__icontains=one_word)
                 filters.append(new_filter)
 
+                new_filter = Q(ocd_division_id__icontains=one_word)
+                filters.append(new_filter)
+
                 new_filter = Q(office_held_description__icontains=one_word)
                 filters.append(new_filter)
 

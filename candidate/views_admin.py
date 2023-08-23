@@ -3767,7 +3767,7 @@ def candidate_summary_view(request, candidate_id):
 @login_required
 def candidate_create_process_view(request):
     """
-    Delete this candidate
+    Create candidate from politician
     :param request:
     :return:
     """
