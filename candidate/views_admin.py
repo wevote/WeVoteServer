@@ -3959,6 +3959,7 @@ def create_us_house_candidates_view(request):
     # TODO: Should we try to retrieve contest_office entries another way also, in case there are
     #  entries without office_held_we_vote_ids? Or deduplicate after this routine?
 
+    office_held_we_vote_id_by_politician_we_vote_id_dict = {}
     office_we_vote_id_by_politician_we_vote_id_dict = {}
     state_code_by_politician_we_vote_id_dict = {}
     politician_we_vote_id_list_to_create_candidate = []
@@ -3974,11 +3975,14 @@ def create_us_house_candidates_view(request):
         if positive_value_exists(representative.politician_we_vote_id):
             politician_we_vote_id_list_to_create_candidate.append(representative.politician_we_vote_id)
             contest_office_we_vote_id = ''
-            if representative.office_held_we_vote_id and \
-                    representative.office_held_we_vote_id in contest_office_we_vote_id_by_office_held_we_vote_id_dict \
-                    and contest_office_we_vote_id_by_office_held_we_vote_id_dict[representative.office_held_we_vote_id]:
-                contest_office_we_vote_id = \
-                    contest_office_we_vote_id_by_office_held_we_vote_id_dict[representative.office_held_we_vote_id]
+            if representative.office_held_we_vote_id:
+                if representative.office_held_we_vote_id in contest_office_we_vote_id_by_office_held_we_vote_id_dict:
+                    if contest_office_we_vote_id_by_office_held_we_vote_id_dict[representative.office_held_we_vote_id]:
+                        contest_office_we_vote_id = \
+                            contest_office_we_vote_id_by_office_held_we_vote_id_dict[
+                                representative.office_held_we_vote_id]
+                office_held_we_vote_id_by_politician_we_vote_id_dict[representative.politician_we_vote_id] = \
+                    representative.office_held_we_vote_id
             else:
                 status += "MISSING_CONTEST_OFFICE_WE_VOTE_ID "
             if positive_value_exists(contest_office_we_vote_id):
@@ -4016,7 +4020,14 @@ def create_us_house_candidates_view(request):
         if not create_results['success']:
             candidate_create_errors += 1
         elif create_results['candidate_created']:  # This function fails if candidate already exists
-            candidate_we_vote_id = create_results['candidate'].we_vote_id
+            candidate = create_results['candidate']
+            candidate_we_vote_id = candidate.we_vote_id
+            if politician_we_vote_id in office_held_we_vote_id_by_politician_we_vote_id_dict and \
+                    positive_value_exists(office_held_we_vote_id_by_politician_we_vote_id_dict[politician_we_vote_id]):
+                candidate.office_held_we_vote_id = \
+                    office_held_we_vote_id_by_politician_we_vote_id_dict[politician_we_vote_id]
+            candidate.candidate_is_incumbent = True
+            candidate.save()
             candidates_created += 1
             contest_office_we_vote_id = ''
             if politician_we_vote_id in office_we_vote_id_by_politician_we_vote_id_dict:
