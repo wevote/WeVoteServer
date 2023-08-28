@@ -33,9 +33,12 @@ from import_export_twitter.controllers import refresh_twitter_candidate_details
 from import_export_vote_smart.models import VoteSmartRatingOneCandidate
 from import_export_vote_smart.votesmart_local import VotesmartApiError
 from measure.models import ContestMeasure
+from office.controllers import office_create_from_office_held
 from office.models import ContestOffice, ContestOfficeManager
+from office_held.models import OfficeHeld
 from politician.models import PoliticianManager
 from position.models import PositionEntered, PositionListManager
+from representative.models import Representative
 from twitter.models import TwitterLinkPossibility, TwitterUserManager
 from voter.models import voter_has_authority
 from voter_guide.models import VoterGuide
@@ -2264,7 +2267,7 @@ def candidate_edit_process_view(request):
                 contest_office_we_vote_id=candidate_to_office_link_add_office_we_vote_id,
                 google_civic_election_id=candidate_to_office_link_add_election,
                 state_code=candidate_to_office_link_add_state_code)
-            if results['new_candidate_to_office_link_created']:
+            if results['candidate_to_office_link_created']:
                 messages.add_message(request, messages.INFO, 'Added Candidate-to-Office Link.')
             else:
                 messages.add_message(request, messages.ERROR, 'Candidate-to-Office Link already exists.')
@@ -3891,6 +3894,196 @@ def compare_two_candidates_for_merge_view(request):
         candidate_merge_conflict_values,
         candidate_year=candidate_year,
         remove_duplicate_process=remove_duplicate_process)
+
+
+@login_required
+def create_us_house_candidates_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = request.GET.get('google_civic_election_id', '')
+    message = ''
+    state_code = request.GET.get('state_code', '')
+    status = ''
+
+    # Get all office held entries labeled as is_us_national_house
+    queryset = OfficeHeld.objects.using('readonly').all()
+    queryset = queryset.filter(is_us_national_house=True)
+    if positive_value_exists(state_code):
+        queryset = queryset.filter(state_code__iexact=state_code)
+    office_held_we_vote_id_list = queryset.values_list('we_vote_id', flat=True).distinct()
+    office_held_list = list(queryset)
+
+    # Retrieve upcoming offices from this election with office_held_we_vote_ids, so we don't make a duplicate
+    queryset = ContestOffice.objects.using('readonly').all()
+    queryset = queryset.filter(google_civic_election_id=google_civic_election_id)
+    queryset = queryset.filter(office_held_we_vote_id__in=office_held_we_vote_id_list)
+    if positive_value_exists(state_code):
+        queryset = queryset.filter(state_code__iexact=state_code)
+    already_exists_office_held_we_vote_id_list = queryset.values_list('office_held_we_vote_id', flat=True).distinct()
+
+    full_set = set(office_held_we_vote_id_list)
+    if already_exists_office_held_we_vote_id_list and len(already_exists_office_held_we_vote_id_list) > 0:
+        already_exists_set = set(already_exists_office_held_we_vote_id_list)
+        contest_offices_to_be_created_list = list(full_set - already_exists_set)
+    else:
+        contest_offices_to_be_created_list = list(full_set)
+
+    for office_held in office_held_list:
+        if office_held.we_vote_id in contest_offices_to_be_created_list:
+            create_results = office_create_from_office_held(
+                office_held_we_vote_id=office_held.we_vote_id,
+                google_civic_election_id=google_civic_election_id)
+            if create_results['success']:
+                if positive_value_exists(create_results['office_we_vote_id']):
+                    contest_offices_to_be_created_list.remove(office_held.we_vote_id)
+
+    # Retrieve upcoming offices from this election with office_held_we_vote_ids
+    queryset = ContestOffice.objects.using('readonly').all()
+    # queryset = queryset.filter(google_civic_election_id=google_civic_election_id)  # Already restricted from above
+    queryset = queryset.filter(office_held_we_vote_id__in=office_held_we_vote_id_list)
+    # if positive_value_exists(state_code):
+    #     queryset = queryset.filter(state_code__iexact=state_code)  # Already restricted from above
+    contest_offices_needed = list(queryset)
+    contest_office_by_office_held_we_vote_id_dict = {}
+    contest_office_we_vote_id_by_office_held_we_vote_id_dict = {}
+    for contest_office in contest_offices_needed:
+        if (positive_value_exists(contest_office.office_held_we_vote_id)
+                and positive_value_exists(contest_office.we_vote_id)):
+            contest_office_by_office_held_we_vote_id_dict[contest_office.office_held_we_vote_id] = contest_office
+            contest_office_we_vote_id_by_office_held_we_vote_id_dict[contest_office.office_held_we_vote_id] = (
+                contest_office.we_vote_id)
+
+    # TODO: Should we try to retrieve contest_office entries another way also, in case there are
+    #  entries without office_held_we_vote_ids? Or deduplicate after this routine?
+
+    office_we_vote_id_by_politician_we_vote_id_dict = {}
+    state_code_by_politician_we_vote_id_dict = {}
+    politician_we_vote_id_list_to_create_candidate = []
+
+    # Retrieve Representatives associated with OfficeHeld entries with is_us_national_house=True
+    queryset = Representative.objects.using('readonly').all()
+    # Change this to support the year when script is run, so we aren't including Representatives who are not currently
+    #  in office. Should not use same year as this election. i.e., "less than 2024" for 2024 election.
+    queryset = queryset.filter(year_in_office_2023=True)
+    queryset = queryset.filter(office_held_we_vote_id__in=office_held_we_vote_id_list)
+    representative_list = list(queryset)
+    for representative in representative_list:
+        if positive_value_exists(representative.politician_we_vote_id):
+            politician_we_vote_id_list_to_create_candidate.append(representative.politician_we_vote_id)
+            contest_office_we_vote_id = ''
+            if representative.office_held_we_vote_id and \
+                    representative.office_held_we_vote_id in contest_office_we_vote_id_by_office_held_we_vote_id_dict \
+                    and contest_office_we_vote_id_by_office_held_we_vote_id_dict[representative.office_held_we_vote_id]:
+                contest_office_we_vote_id = \
+                    contest_office_we_vote_id_by_office_held_we_vote_id_dict[representative.office_held_we_vote_id]
+            else:
+                status += "MISSING_CONTEST_OFFICE_WE_VOTE_ID "
+            if positive_value_exists(contest_office_we_vote_id):
+                office_we_vote_id_by_politician_we_vote_id_dict[representative.politician_we_vote_id] = \
+                    contest_office_we_vote_id
+            if positive_value_exists(representative.state_code):
+                state_code_by_politician_we_vote_id_dict[representative.politician_we_vote_id] = \
+                    representative.state_code
+
+    # Are there any upcoming CandidateCampaigns with politician_we_vote_ids
+    #  in politician_we_vote_id_list_to_create_candidate? If so, don't recreate CandidateCampaign entries.
+    candidate_list_manager = CandidateListManager()
+    results = candidate_list_manager.retrieve_candidate_list(
+        politician_we_vote_id_list=politician_we_vote_id_list_to_create_candidate,
+        candidate_year_list=[2024])  # Upgrade this to match incoming election year
+    if results['candidate_list_found']:
+        existing_candidate_list = results['candidate_list']
+        for existing_candidate in existing_candidate_list:
+            if existing_candidate.politician_we_vote_id in politician_we_vote_id_list_to_create_candidate:
+                politician_we_vote_id_list_to_create_candidate.remove(existing_candidate.politician_we_vote_id)
+
+    # Create CandidateCampaign entries for each Representative found connected to OfficeHeld marked
+    #  with "is_us_national_house"
+    candidate_create_errors = 0
+    candidates_created = 0
+    candidates_already_existed = 0
+    candidate_to_office_link_errors = 0
+    candidate_to_office_links_created = 0
+    candidate_to_office_links_already_existed = 0
+    candidate_manager = CandidateManager()
+    from candidate.controllers import create_candidate_from_politician
+    for politician_we_vote_id in politician_we_vote_id_list_to_create_candidate:
+        create_results = create_candidate_from_politician(
+            politician_we_vote_id=politician_we_vote_id)
+        if not create_results['success']:
+            candidate_create_errors += 1
+        elif create_results['candidate_created']:  # This function fails if candidate already exists
+            candidate_we_vote_id = create_results['candidate'].we_vote_id
+            candidates_created += 1
+            contest_office_we_vote_id = ''
+            if politician_we_vote_id in office_we_vote_id_by_politician_we_vote_id_dict:
+                contest_office_we_vote_id = office_we_vote_id_by_politician_we_vote_id_dict[politician_we_vote_id]
+            state_code_for_candidate = ''
+            if politician_we_vote_id in state_code_by_politician_we_vote_id_dict:
+                state_code_for_candidate = state_code_by_politician_we_vote_id_dict[politician_we_vote_id]
+            if positive_value_exists(candidate_we_vote_id) and positive_value_exists(contest_office_we_vote_id) \
+                    and positive_value_exists(state_code_for_candidate):
+                # Link to correct ContestOffice
+                results = candidate_manager.get_or_create_candidate_to_office_link(
+                    candidate_we_vote_id=candidate_we_vote_id,
+                    contest_office_we_vote_id=contest_office_we_vote_id,
+                    google_civic_election_id=google_civic_election_id,
+                    state_code=state_code_for_candidate)
+                if results['success']:
+                    if results['candidate_to_office_link_created']:
+                        candidate_to_office_links_created += 1
+                    elif results['candidate_to_office_link_found']:
+                        candidate_to_office_links_already_existed += 1
+                    else:
+                        candidate_to_office_link_errors += 1
+                else:
+                    candidate_to_office_link_errors += 1
+            else:
+                candidate_to_office_link_errors += 1
+                message += "Unable to link candidate to contest_office--missing required variable. "
+                status += ""
+        else:
+            candidate_create_errors += 1
+
+    candidate_message = ""
+    if candidates_already_existed > 0:
+        candidate_message += "Candidate(s) already exist: " + str(candidates_already_existed) + " "
+
+    if candidates_created > 0:
+        candidate_message += "Candidate(s) created: " + str(candidates_created) + " "
+
+    if candidate_create_errors > 0:
+        candidate_message += "Candidate create errors: " + str(candidate_create_errors) + " "
+
+    if candidates_already_existed > 0 or candidates_created > 0 or candidate_create_errors > 0:
+        pass
+    else:
+        candidate_message += "No US House Candidates created. "
+    messages.add_message(request, messages.INFO, candidate_message)
+
+    candidate_link_message = ""
+    if candidate_to_office_links_already_existed > 0:
+        candidate_link_message += "Link(s) already exist: " + str(candidate_to_office_links_already_existed) + " "
+
+    if candidate_to_office_links_created > 0:
+        candidate_link_message += "Link(s) created: " + str(candidate_to_office_links_created) + " "
+
+    if candidate_to_office_link_errors > 0:
+        candidate_link_message += "Link create errors: " + str(candidate_to_office_link_errors) + " "
+
+    if (candidate_to_office_links_already_existed > 0 or candidate_to_office_links_created > 0
+            or candidate_to_office_link_errors > 0):
+        messages.add_message(request, messages.INFO, candidate_link_message)
+
+    return HttpResponseRedirect(
+        reverse('candidate:candidate_list', args=()) +
+        "?google_civic_election_id={google_civic_election_id}&state_code={state_code}"
+        "".format(
+            state_code=state_code,
+            google_civic_election_id=google_civic_election_id))
 
 
 @login_required

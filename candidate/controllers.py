@@ -1331,10 +1331,10 @@ def candidate_to_office_link_import_from_structured_json(structured_json):
                 and positive_value_exists(contest_office_we_vote_id) \
                 and positive_value_exists(google_civic_election_id):
             results = candidate_manager.get_or_create_candidate_to_office_link(
-                candidate_we_vote_id,
-                contest_office_we_vote_id,
-                google_civic_election_id,
-                state_code)
+                candidate_we_vote_id=candidate_we_vote_id,
+                contest_office_we_vote_id=contest_office_we_vote_id,
+                google_civic_election_id=google_civic_election_id,
+                state_code=state_code)
         else:
             entries_not_processed += 1
             results = {
@@ -1343,7 +1343,7 @@ def candidate_to_office_link_import_from_structured_json(structured_json):
             }
 
         if results['success']:
-            if results['new_candidate_to_office_link_created']:
+            if results['candidate_to_office_link_created']:
                 entries_saved += 1
             else:
                 entries_updated += 1
@@ -2018,6 +2018,7 @@ def create_candidate_from_politician(politician_we_vote_id=''):
     status = ''
     success = True
     candidate = None
+    candidate_created = False
     candidate_found = False
 
     politician_manager = PoliticianManager()
@@ -2029,16 +2030,17 @@ def create_candidate_from_politician(politician_we_vote_id=''):
         politician_found = True
     if not politician_found or not hasattr(politician, 'politician_name'):
         status += "VALID_POLITICIAN_NOT_FOUND "
+        success = False
         results = {
-            'success':          False,
-            'status':           status,
-            'candidate':        candidate,
-            'candidate_found':  candidate_found,
+            'success':              success,
+            'status':               status,
+            'candidate':            candidate,
+            'candidate_created':    candidate_created,
+            'candidate_found':      candidate_found,
         }
         return results
 
     try:
-        new_candidate_created = False
         candidate = CandidateCampaign.objects.create(
             ballot_guide_official_statement=politician.ballot_guide_official_statement,
             ballotpedia_candidate_url=politician.ballotpedia_politician_url,
@@ -2080,28 +2082,28 @@ def create_candidate_from_politician(politician_we_vote_id=''):
             wikipedia_url=politician.wikipedia_url,
             youtube_url=politician.youtube_url,
         )
+        candidate_created = True
         candidate_found = True
         if positive_value_exists(candidate.id):
             results = update_candidate_details_from_politician(candidate, politician)
             if results['save_changes']:
                 candidate = results['candidate']
                 candidate.save()
-                new_candidate_created = True
-        if new_candidate_created:
-            success = True
-            status += "CANDIDATE_CREATED "
-        else:
-            success = False
-            status += "CANDIDATE_NOT_CREATED "
 
     except Exception as e:
         status += 'FAILED_TO_CREATE_CANDIDATE ' \
                   '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
         success = False
 
+    if candidate_created:
+        status += "CANDIDATE_CREATED "
+    else:
+        status += "CANDIDATE_NOT_CREATED "
+
     results = {
         'success':            success,
         'status':             status,
+        'candidate_created':  candidate_created,
         'candidate_found':    candidate_found,
         'candidate':          candidate,
     }

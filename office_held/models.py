@@ -179,6 +179,8 @@ class OfficeHeld(models.Model):
     is_battleground_race_2024 = models.BooleanField(default=False, null=False)
     is_battleground_race_2025 = models.BooleanField(default=False, null=False)
     is_battleground_race_2026 = models.BooleanField(default=False, null=False)
+    is_us_national_house = models.BooleanField(null=True)
+    is_us_national_senate = models.BooleanField(null=True)
     # The number of candidates elected to office
     number_elected = models.CharField(max_length=255, null=True, blank=True)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)

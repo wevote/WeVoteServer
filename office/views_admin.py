@@ -684,6 +684,9 @@ def office_list_view(request):
                 new_filter = Q(ballotpedia_race_id__iexact=one_word)
                 filters.append(new_filter)
 
+                new_filter = Q(ocd_division_id__icontains=one_word)
+                filters.append(new_filter)
+
                 new_filter = Q(office_name__icontains=one_word)
                 filters.append(new_filter)
 
@@ -1521,7 +1524,7 @@ def find_and_merge_duplicate_offices_view(request):
     except ContestOffice.DoesNotExist:
         pass
 
-    # Loop through all of the offices in this election to see how many have possible duplicates
+    # Loop through all the offices in this election to see how many have possible duplicates
     if positive_value_exists(find_number_of_duplicates):
         duplicate_office_count = 0
         for contest_office in contest_office_list:
@@ -1537,7 +1540,7 @@ def find_and_merge_duplicate_offices_view(request):
                                                          "possible duplicates."
                                                          "".format(duplicate_office_count=duplicate_office_count))
 
-    # Loop through all of the contest offices in this election
+    # Loop through all the contest offices in this election
     ignore_office_we_vote_id_list = []
     for contest_office in contest_office_list:
         # Add current contest office entry to the ignore list
