@@ -296,6 +296,10 @@
 {% else %}
     (Vote USA Candidates API requires election and state)
 {% endif %}
+{% if google_civic_election_id %}
+    &nbsp;&nbsp;
+    <a href="{% url 'candidate:create_us_house_candidates' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" >Create US House Candidates</a>&nbsp;&nbsp;&nbsp;
+{% endif %}
 <br />
 
 <br />
