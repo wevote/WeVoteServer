@@ -3963,6 +3963,7 @@ def create_us_house_candidates_view(request):
     office_we_vote_id_by_politician_we_vote_id_dict = {}
     state_code_by_politician_we_vote_id_dict = {}
     politician_we_vote_id_list_to_create_candidate = []
+    representative_we_vote_id_by_politician_we_vote_id_dict = {}
 
     # Retrieve Representatives associated with OfficeHeld entries with is_us_national_house=True
     queryset = Representative.objects.using('readonly').all()
@@ -3975,6 +3976,8 @@ def create_us_house_candidates_view(request):
         if positive_value_exists(representative.politician_we_vote_id):
             politician_we_vote_id_list_to_create_candidate.append(representative.politician_we_vote_id)
             contest_office_we_vote_id = ''
+            representative_we_vote_id_by_politician_we_vote_id_dict[representative.politician_we_vote_id] = \
+                representative.we_vote_id
             if representative.office_held_we_vote_id:
                 if representative.office_held_we_vote_id in contest_office_we_vote_id_by_office_held_we_vote_id_dict:
                     if contest_office_we_vote_id_by_office_held_we_vote_id_dict[representative.office_held_we_vote_id]:
@@ -4022,10 +4025,15 @@ def create_us_house_candidates_view(request):
         elif create_results['candidate_created']:  # This function fails if candidate already exists
             candidate = create_results['candidate']
             candidate_we_vote_id = candidate.we_vote_id
-            if politician_we_vote_id in office_held_we_vote_id_by_politician_we_vote_id_dict and \
-                    positive_value_exists(office_held_we_vote_id_by_politician_we_vote_id_dict[politician_we_vote_id]):
-                candidate.office_held_we_vote_id = \
-                    office_held_we_vote_id_by_politician_we_vote_id_dict[politician_we_vote_id]
+            if politician_we_vote_id in office_held_we_vote_id_by_politician_we_vote_id_dict:
+                office_held_we_vote_id = office_held_we_vote_id_by_politician_we_vote_id_dict[politician_we_vote_id]
+                if positive_value_exists(office_held_we_vote_id):
+                    candidate.office_held_we_vote_id = office_held_we_vote_id
+            if politician_we_vote_id in representative_we_vote_id_by_politician_we_vote_id_dict:
+                representative_we_vote_id = \
+                    representative_we_vote_id_by_politician_we_vote_id_dict[politician_we_vote_id]
+                if positive_value_exists(representative_we_vote_id):
+                    candidate.representative_we_vote_id = representative_we_vote_id
             candidate.candidate_is_incumbent = True
             candidate.save()
             candidates_created += 1
