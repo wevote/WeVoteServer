@@ -21,7 +21,7 @@ from admin_tools.views import redirect_to_sign_in_page
 from email_outbound.models import EmailAddress, EmailManager
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
     handle_record_not_saved_exception, handle_exception
-from image.controllers import TWITTER, FACEBOOK, cache_master_and_resized_image, create_resized_images
+from image.controllers import create_resized_images
 from import_export_facebook.models import FacebookLinkToVoter, FacebookManager
 from organization.models import Organization, OrganizationManager, INDIVIDUAL
 from position.controllers import merge_duplicate_positions_for_voter
@@ -31,10 +31,11 @@ from share.models import SharedItem, VoterWhoSharesSummaryAllTime, VoterWhoShare
 from sms.models import SMSManager, SMSPhoneNumber
 from stripe_donations.models import StripeManager, StripePayments
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
+from voter.models import VoterIssuesLookup
 from wevote_functions.functions import convert_to_int, generate_random_string, get_voter_api_device_id, \
     get_voter_device_id, set_voter_api_device_id, positive_value_exists
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
-from .controllers import delete_all_voter_information_permanently, process_maintenance_status_flags, \
+from voter.controllers import delete_all_voter_information_permanently, process_maintenance_status_flags, \
     voter_merge_two_accounts_action, voter_save_photo_from_file_reader
 from .models import fetch_voter_id_from_voter_device_link, \
     PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
@@ -592,6 +593,26 @@ def voter_edit_process_view(request):
         except Exception as e:
             handle_record_not_saved_exception(e, logger=logger)
             messages.add_message(request, messages.ERROR, 'Could not save voter: {error}'.format(error=e))
+
+        # ##################################
+        # Deleting or editing a CampaignXSupporter
+        if positive_value_exists(voter_we_vote_id):
+            from campaign.models import CampaignXSupporter
+            supporters_query = CampaignXSupporter.objects.all()
+            supporters_query = supporters_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            supporters_list = list(supporters_query)
+            update_campaignx_supporter_count = False
+            from campaign.views_admin import deleting_or_editing_campaignx_supporter_list
+            results = deleting_or_editing_campaignx_supporter_list(
+                request=request,
+                supporters_list=supporters_list,
+            )
+            # TODO: Update campaignx_supporter_count
+            update_campaignx_supporter_count = update_campaignx_supporter_count or \
+                results['update_campaignx_supporter_count']
+            update_message = results['update_message']
+            if positive_value_exists(update_message):
+                messages.add_message(request, messages.INFO, update_message)
     else:
         try:
             # Create new
@@ -1042,6 +1063,49 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
         if positive_value_exists(positions_not_cross_linked):
             status_print_list += "positions_not_cross_linked: " + str(positions_not_cross_linked) + "<br />"
 
+        # ##########################################################################
+        # Show all of the campaigns which this voter supports
+        supporters_list = []
+        if positive_value_exists(voter_we_vote_id):
+            from campaign.models import CampaignXSupporter
+            supporters_query = CampaignXSupporter.objects.all()
+            supporters_query = supporters_query.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            # if positive_value_exists(only_show_supporters_with_endorsements):
+            #     supporters_query = supporters_query.exclude(
+            #         Q(supporter_endorsement__isnull=True) |
+            #         Q(supporter_endorsement__exact='')
+            #     )
+            supporters_query = supporters_query.order_by('-date_supported')
+            # Limit to only showing 200 on screen
+            show_all = request.GET.get('show_all', False)
+            show_more = request.GET.get('show_more', False)
+            if positive_value_exists(show_more):
+                supporters_list = supporters_query[:1000]
+            elif positive_value_exists(show_all):
+                supporters_list = supporters_query
+            else:
+                supporters_list = supporters_query[:200]
+            # Now augment with campaign data
+            campaignx_we_vote_id_list = []
+            campaigns_by_we_vote_id_dict = {}
+            for supporter in supporters_list:
+                if supporter.campaignx_we_vote_id not in campaignx_we_vote_id_list:
+                    campaignx_we_vote_id_list.append(supporter.campaignx_we_vote_id)
+            if len(campaignx_we_vote_id_list) > 0:
+                # Augment with
+                from campaign.models import CampaignX
+                queryset = CampaignX.objects.filter(we_vote_id__in=campaignx_we_vote_id_list)
+                campaign_list = list(queryset)
+                for campaign in campaign_list:
+                    campaigns_by_we_vote_id_dict[campaign.we_vote_id] = campaign
+                modified_supporters_list = []
+                for supporter in supporters_list:
+                    one_campaign = campaigns_by_we_vote_id_dict[supporter.campaignx_we_vote_id]
+                    if hasattr(one_campaign, 'campaign_title'):
+                        supporter.campaignx = campaigns_by_we_vote_id_dict.get(supporter.campaignx_we_vote_id)
+                    modified_supporters_list.append(supporter)
+                supporters_list = modified_supporters_list
+
         messages.add_message(request, messages.INFO, status_print_list)
 
         messages_on_stage = get_messages(request)
@@ -1054,11 +1118,12 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
             'public_positions_owned_by_this_voter':     public_positions_owned_by_this_voter,
             'positions_for_friends_owned_by_this_voter':    positions_for_friends_owned_by_this_voter,
             'sms_phone_numbers_list':                   sms_phone_numbers_list,
+            'stripe_payments':                         StripeManager.retrieve_payments_total(voter_on_stage.we_vote_id),
+            'supporters_list':                          supporters_list,
             'voter_id':                                 voter_on_stage.id,
             'voter':                                    voter_on_stage,
             'voter_list_duplicate_facebook':            voter_list_duplicate_facebook_updated,
             'voter_list_duplicate_twitter':             voter_list_duplicate_twitter_updated,
-            'stripe_payments':                         StripeManager.retrieve_payments_total(voter_on_stage.we_vote_id),
         }
     else:
         messages_on_stage = get_messages(request)
@@ -1211,6 +1276,8 @@ def voter_list_view(request):
     is_verified_volunteer = request.GET.get('is_verified_volunteer', '')
     has_contributed = request.GET.get('has_contributed', '')
     has_friends = request.GET.get('has_friends', '')
+    # run_scripts = positive_value_exists(request.GET.get('run_scripts', False))
+    run_scripts = True
     show_voter_merge_data = request.GET.get('show_voter_merge_data', '')
     has_voter_merge_problem = request.GET.get('has_voter_merge_problem', '')
 
@@ -1222,6 +1289,163 @@ def voter_list_view(request):
         voter = results['voter']
         voter_id = voter.id
         voter_id = convert_to_int(voter_id)
+
+    # If there is an entry in the VoterIssuesLookup table for a voter_we_vote_id, mark the voter table
+    voter_issues_lookup_repair = True
+    if voter_issues_lookup_repair and run_scripts:
+        voter_issues_query = VoterIssuesLookup.objects.using('readonly').all()
+        voter_issues_list = list(voter_issues_query)
+        voter_we_vote_id_list_to_update = []
+        for one_voter_issue in voter_issues_list:
+            voter_we_vote_id_list_to_update.append(one_voter_issue.voter_we_vote_id)
+        voter_update_query = Voter.objects.all()
+        voter_update_query = voter_update_query.filter(we_vote_id__in=voter_we_vote_id_list_to_update)
+        voter_update_query.update(voter_issues_lookup_updated=True)
+
+    # Populate the VoterIssuesLookup table
+    number_to_update = 100000
+    voter_issues_lookup_updates = True
+    if voter_issues_lookup_updates and run_scripts:
+        voter_issues_lookup_updates_status = ""
+        voter_query = Voter.objects.all()
+        voter_query = voter_query.exclude(voter_issues_lookup_updated=True)
+        total_to_convert = voter_query.count()
+        total_to_convert_after = total_to_convert - number_to_update if total_to_convert > number_to_update else 0
+        voter_list_one_batch = list(voter_query[:number_to_update])
+        voter_we_vote_id_list_one_batch = []
+        for one_voter in voter_list_one_batch:
+            voter_we_vote_id_list_one_batch.append(one_voter.we_vote_id)
+
+        # Retrieve all relevant FollowIssue entries in a single query
+        from follow.models import FOLLOWING, FollowIssue
+        follow_issue_query = FollowIssue.objects.using('readonly').all()
+        follow_issue_query = follow_issue_query.filter(voter_we_vote_id__in=voter_we_vote_id_list_one_batch)
+        follow_issue_query = follow_issue_query.filter(following_status=FOLLOWING)
+        follow_issue_list = list(follow_issue_query)
+
+        dict_of_voter_issue_defaults = {}  # voter_we_vote_id as key, value is list of defaults
+
+        from issue.models import VOTER_ISSUES_LOOKUP_DICT
+        deprecated_issues_count = 0
+        for one_follow in follow_issue_list:
+            voter_we_vote_id = one_follow.voter_we_vote_id
+            issue_we_vote_id = one_follow.issue_we_vote_id
+            if voter_we_vote_id not in dict_of_voter_issue_defaults:
+                dict_of_voter_issue_defaults[voter_we_vote_id] = {}
+            try:
+                issue_key = VOTER_ISSUES_LOOKUP_DICT[issue_we_vote_id]
+                if positive_value_exists(issue_key):
+                    dict_of_voter_issue_defaults[voter_we_vote_id][issue_key] = True
+                else:
+                    voter_issues_lookup_updates_status += "MISSING_ISSUE_KEY: " + issue_we_vote_id + " "
+            except Exception as e:
+                deprecated_issues_count += 1
+        if deprecated_issues_count > 0:
+            voter_issues_lookup_updates_status += "DEPRECATED_ISSUES: " + str(deprecated_issues_count) + " "
+
+        voter_issues_create_list = []
+        voter_issues_creates_made = 0
+        voter_issues_creates_needed = False
+        updates_made = 0
+        voter_update_list = []
+        voter_updates_made = 0
+        for voter_we_vote_id in voter_we_vote_id_list_one_batch:
+            if voter_we_vote_id not in dict_of_voter_issue_defaults:
+                continue
+            defaults = dict_of_voter_issue_defaults[voter_we_vote_id]
+            if voter_we_vote_id and len(defaults) > 0:
+                voter_issues_create_list.append(
+                    VoterIssuesLookup(
+                        voter_we_vote_id=voter_we_vote_id,
+                        **defaults,
+                    )
+                )
+                voter_issues_creates_made += 1
+                voter_issues_creates_needed = True
+        voter_issues_create_failed = False
+        if voter_issues_creates_needed:
+            try:
+                VoterIssuesLookup.objects.bulk_create(voter_issues_create_list)
+                voter_issues_lookup_updates_status += \
+                    "{updates_made:,} VoterIssuesLookup entries created. " \
+                    "{total_to_convert_after:,} remaining. " \
+                    "".format(
+                        total_to_convert_after=total_to_convert_after,
+                        updates_made=voter_issues_creates_made)
+            except Exception as e:
+                voter_issues_create_failed = True
+                voter_issues_lookup_updates_status += \
+                    "{updates_made:,} VoterIssuesLookup entries NOT created. " \
+                    "{total_to_convert_after:,} remaining. ERROR: {error}" \
+                    "".format(
+                         error=str(e),
+                         total_to_convert_after=total_to_convert_after,
+                         updates_made=updates_made)
+        if not voter_issues_create_failed:
+            for one_voter in voter_list_one_batch:
+                one_voter.voter_issues_lookup_updated = True
+                voter_update_list.append(one_voter)
+                voter_updates_made += 1
+
+        if voter_updates_made > 0:
+            try:
+                Voter.objects.bulk_update(
+                    voter_update_list, ['voter_issues_lookup_updated'])
+                voter_issues_lookup_updates_status += "Voter entries updated: {voter_updates_made:,}" \
+                                                      "".format(voter_updates_made=voter_updates_made)
+            except Exception as e:
+                voter_issues_lookup_updates_status += "Voter entries (" + str(voter_updates_made) + ") " \
+                    "NOT updated: " + str(e) + " "
+        if positive_value_exists(voter_issues_lookup_updates_status) or positive_value_exists(total_to_convert_after):
+            voter_issues_lookup_updates_status += \
+                "{total_to_convert_after:,} remaining. " \
+                "".format(
+                    total_to_convert_after=total_to_convert_after)
+            messages.add_message(request, messages.INFO, voter_issues_lookup_updates_status)
+
+    likely_political_party_analysis = True
+    number_to_update = 10000
+    updates_made = 0
+    if likely_political_party_analysis and run_scripts:
+        voter_issues_lookup_updates_status = ''
+        voter_issues_update_list = []
+        voter_issues_query = VoterIssuesLookup.objects.all()
+        voter_issues_query = voter_issues_query.exclude(likely_party_from_issues_analyzed=True)
+        voter_issues_list = list(voter_issues_query[:number_to_update])
+        from issue.controllers import calculate_likely_political_party_from_issues
+        for voter_issues_lookup in voter_issues_list:
+            results = calculate_likely_political_party_from_issues(voter_issues_lookup=voter_issues_lookup)
+            if results['success']:
+                # Left/Right
+                voter_issues_lookup.likely_left_from_issues = results['likely_left_from_issues']
+                voter_issues_lookup.likely_right_from_issues = results['likely_right_from_issues']
+                # We are only setting one party per person
+                voter_issues_lookup.likely_democrat_from_issues = results['likely_democrat_from_issues']
+                voter_issues_lookup.likely_green_from_issues = results['likely_green_from_issues']
+                voter_issues_lookup.likely_libertarian_from_issues = results['likely_libertarian_from_issues']
+                voter_issues_lookup.likely_republican_from_issues = results['likely_republican_from_issues']
+                voter_issues_lookup.likely_party_from_issues_analyzed = True
+                updates_made += 1
+                voter_issues_update_list.append(voter_issues_lookup)
+        if positive_value_exists(updates_made):
+            try:
+                VoterIssuesLookup.objects.bulk_update(
+                    voter_issues_update_list, [
+                        'likely_left_from_issues',
+                        'likely_right_from_issues',
+                        'likely_democrat_from_issues',
+                        'likely_green_from_issues',
+                        'likely_libertarian_from_issues',
+                        'likely_republican_from_issues',
+                        'likely_party_from_issues_analyzed',
+                    ])
+                voter_issues_lookup_updates_status += "VoterIssuesLookup entries updated: {updates_made:,}" \
+                                                      "".format(updates_made=updates_made)
+            except Exception as e:
+                voter_issues_lookup_updates_status += "VoterIssuesLookup entries (" + str(updates_made) + ") " \
+                                                      "NOT updated: " + str(e) + " "
+        if positive_value_exists(voter_issues_lookup_updates_status):
+            messages.add_message(request, messages.INFO, voter_issues_lookup_updates_status)
 
     messages_on_stage = get_messages(request)
     if positive_value_exists(voter_search):

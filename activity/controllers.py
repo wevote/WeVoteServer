@@ -1213,7 +1213,7 @@ def update_or_create_activity_notices_from_seed(activity_notice_seed):
     if positive_value_exists(activity_notice_seed.campaignx_we_vote_id):
         if activity_notice_seed.kind_of_seed == NOTICE_CAMPAIGNX_NEWS_ITEM_SEED:
             # #########
-            # Notice to the creator for drop down.
+            # Notice to the creator for dropdown.
             results = campaignx_manager.retrieve_campaignx(
                 campaignx_we_vote_id=activity_notice_seed.campaignx_we_vote_id,
                 read_only=True
@@ -1358,12 +1358,16 @@ def update_or_create_activity_notices_from_seed(activity_notice_seed):
                             # We will need to figure out if this endorsement is on this voter's ballot
                             # NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL
                             # NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_EMAIL
-                            send_to_email = friend_voter.is_notification_status_flag_set(
-                                NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL)
+                            # 2023-08-06 Dale: Turning this off because it could lead to too many notifications
+                            # send_to_email = friend_voter.is_notification_status_flag_set(
+                            #     NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL)
+                            send_to_email = False
                             # NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_SMS
                             # NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_SMS
-                            send_to_sms = friend_voter.is_notification_status_flag_set(
-                                NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_SMS)
+                            # 2023-08-06 Dale: Turning this off because it could lead to too many notifications
+                            # send_to_sms = friend_voter.is_notification_status_flag_set(
+                            #     NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_SMS)
+                            send_to_sms = False
 
                         # ###########################
                         # This is the entry that goes in the header drop-down
@@ -1419,12 +1423,18 @@ def update_or_create_activity_notices_from_seed(activity_notice_seed):
                     # We will need to figure out if this endorsement is on this voter's ballot
                     # NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL
                     # NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_EMAIL
-                    send_to_email = friend_voter.is_notification_status_flag_set(
-                        NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL)
+                    # DALE 2023-08-06 We are going to rely on NOTICE_VOTER_DAILY_SUMMARY instead of each individual
+                    #  support/oppose
+                    # send_to_email = friend_voter.is_notification_status_flag_set(
+                    #     NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_EMAIL)
+                    send_to_email = False
                     # NOTIFICATION_FRIEND_OPINIONS_YOUR_BALLOT_SMS
                     # NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_SMS
-                    send_to_sms = friend_voter.is_notification_status_flag_set(
-                        NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_SMS)
+                    # DALE 2023-08-06 We are going to rely on NOTICE_VOTER_DAILY_SUMMARY instead of each individual
+                    #  support/oppose
+                    # send_to_sms = friend_voter.is_notification_status_flag_set(
+                    #     NOTIFICATION_FRIEND_OPINIONS_OTHER_REGIONS_SMS)
+                    send_to_sms = False
 
                     # ###########################
                     # This is the entry that goes in the header drop-down
@@ -1851,6 +1861,9 @@ def schedule_activity_notices_from_seed(activity_notice_seed):
         while continue_retrieving and success \
                 and safety_valve_count < 500:  # Current limit: 5,000 friends (500 loops with 100 per)
             safety_valve_count += 1
+            # To find the code where we set an activity_notice to send_to_email or send_to_sms,
+            #  search for: kind_of_notice = NOTICE_CAMPAIGNX_FRIEND_HAS_SUPPORTED
+            # 2023-08-06 Not sending notifications to friends regarding Politician campaigns
             results = activity_manager.retrieve_activity_notice_list(
                 activity_notice_seed_id=activity_notice_seed.id,
                 to_be_sent_to_email=True,
@@ -1862,28 +1875,44 @@ def schedule_activity_notices_from_seed(activity_notice_seed):
                 success = False
             elif results['activity_notice_list_found']:
                 activity_notice_list = results['activity_notice_list']
+                # If missing campaignx_we_vote_id, then we don't want to send to friends
+                do_not_notify_friends = not positive_value_exists(activity_notice_seed.campaignx_we_vote_id)
                 for activity_notice in activity_notice_list:
-                    send_results = campaignx_friend_has_supported_send(
-                        campaignx_we_vote_id=activity_notice_seed.campaignx_we_vote_id,
-                        recipient_voter_we_vote_id=activity_notice.recipient_voter_we_vote_id,
-                        speaker_voter_we_vote_id=activity_notice.speaker_voter_we_vote_id)
-                    activity_notice_id_already_reviewed_list.append(activity_notice.id)
-                    if send_results['success']:
+                    if do_not_notify_friends:
+                        # Do not tell friends in this case
                         try:
+                            # This isn't accurate, but will stop further notices from being sent
+                            #  Should be looked at in the future
                             activity_notice.scheduled_to_email = True
                             activity_notice.sent_to_email = True
                             activity_notice.scheduled_to_sms = True
                             activity_notice.sent_to_sms = True
                             activity_notice.save()
-                            activity_notice_count += 1
-                            # We'll want to create a routine that connects up to the SendGrid API to tell us
-                            #  when the message was received or bounced
                         except Exception as e:
-                            status += "FAILED_SAVING_ACTIVITY_NOTICE_CAMPAIGNX_FRIEND_HAS_SUPPORTED: " + str(e) + " "
+                            status += "FAILED_SAVING_ACTIVITY_NOTICE_CAMPAIGNX_FRIEND_NOT_SENT: " + str(e) + " "
                             success = False
                     else:
-                        status += send_results['status']
-                        success = False
+                        send_results = campaignx_friend_has_supported_send(
+                            campaignx_we_vote_id=activity_notice_seed.campaignx_we_vote_id,
+                            recipient_voter_we_vote_id=activity_notice.recipient_voter_we_vote_id,
+                            speaker_voter_we_vote_id=activity_notice.speaker_voter_we_vote_id)
+                        activity_notice_id_already_reviewed_list.append(activity_notice.id)
+                        if send_results['success']:
+                            try:
+                                activity_notice.scheduled_to_email = True
+                                activity_notice.sent_to_email = True
+                                activity_notice.scheduled_to_sms = True
+                                activity_notice.sent_to_sms = True
+                                activity_notice.save()
+                                activity_notice_count += 1
+                                # We'll want to create a routine that connects up to the SendGrid API to tell us
+                                #  when the message was received or bounced
+                            except Exception as e:
+                                status += "FAILED_SAVING_ACTIVITY_NOTICE_CAMPAIGNX_FRIEND_HAS_SUPPORTED: " + str(e) + " "
+                                success = False
+                        else:
+                            status += send_results['status']
+                            success = False
             else:
                 continue_retrieving = False
         if success:
@@ -1902,7 +1931,7 @@ def schedule_activity_notices_from_seed(activity_notice_seed):
                 success = False
     elif activity_notice_seed.kind_of_seed == NOTICE_FRIEND_ENDORSEMENTS_SEED:
         # Schedule/send emails
-        # For these kind of seeds, we just send an email notification for the activity_notice (that is displayed
+        # For these kinds of seeds, we just send an email notification for the activity_notice (that is displayed
         #  to each voter in the header bar
         continue_retrieving = True
         activity_notice_id_already_reviewed_list = []

@@ -26,7 +26,9 @@
       <tr>
         <td>Linked Organization IDs:&nbsp;</td>
         <td>
+        {% if voter.linked_organization_we_vote_id %}
           <strong><a href="{% url 'organization:organization_we_vote_id_position_list' voter.linked_organization_we_vote_id %}">{{ voter.linked_organization_we_vote_id }} </a></strong>
+        {% endif %}
         </td>
       </tr>
       <tr>

@@ -1331,10 +1331,10 @@ def candidate_to_office_link_import_from_structured_json(structured_json):
                 and positive_value_exists(contest_office_we_vote_id) \
                 and positive_value_exists(google_civic_election_id):
             results = candidate_manager.get_or_create_candidate_to_office_link(
-                candidate_we_vote_id,
-                contest_office_we_vote_id,
-                google_civic_election_id,
-                state_code)
+                candidate_we_vote_id=candidate_we_vote_id,
+                contest_office_we_vote_id=contest_office_we_vote_id,
+                google_civic_election_id=google_civic_election_id,
+                state_code=state_code)
         else:
             entries_not_processed += 1
             results = {
@@ -1343,7 +1343,7 @@ def candidate_to_office_link_import_from_structured_json(structured_json):
             }
 
         if results['success']:
-            if results['new_candidate_to_office_link_created']:
+            if results['candidate_to_office_link_created']:
                 entries_saved += 1
             else:
                 entries_updated += 1
@@ -1761,13 +1761,14 @@ def generate_candidate_dict_from_candidate_object(
             contest_office_district_name = ''
             contest_office_name = ''
             office_found = False
-            if candidate_to_office_link.contest_office_we_vote_id in office_dict:
+            if positive_value_exists(candidate_to_office_link.contest_office_we_vote_id) and \
+                    candidate_to_office_link.contest_office_we_vote_id in office_dict:
                 office_found = True
                 contest_office = office_dict[candidate_to_office_link.contest_office_we_vote_id]
                 if contest_office:
                     contest_office_district_name = contest_office.district_name
                     contest_office_name = contest_office.office_name
-            if not office_found:
+            if not office_found and positive_value_exists(candidate_to_office_link.contest_office_we_vote_id):
                 results = office_manager.retrieve_contest_office_from_we_vote_id(
                     candidate_to_office_link.contest_office_we_vote_id)
                 if results['contest_office_found']:
@@ -1805,6 +1806,7 @@ def generate_candidate_dict_from_candidate_object(
     if positive_value_exists(candidate.date_last_updated):
         date_last_updated = candidate.date_last_updated.strftime('%Y-%m-%d %H:%M:%S')
     candidate_dict = {
+        'ballot_guide_official_statement':  candidate.ballot_guide_official_statement,
         'ballot_item_display_name':         candidate.display_candidate_name(),
         'ballotpedia_candidate_id':         candidate.ballotpedia_candidate_id,
         'ballotpedia_candidate_summary':    candidate.ballotpedia_candidate_summary,
@@ -2016,6 +2018,7 @@ def create_candidate_from_politician(politician_we_vote_id=''):
     status = ''
     success = True
     candidate = None
+    candidate_created = False
     candidate_found = False
 
     politician_manager = PoliticianManager()
@@ -2027,17 +2030,19 @@ def create_candidate_from_politician(politician_we_vote_id=''):
         politician_found = True
     if not politician_found or not hasattr(politician, 'politician_name'):
         status += "VALID_POLITICIAN_NOT_FOUND "
+        success = False
         results = {
-            'success':          False,
-            'status':           status,
-            'candidate':        candidate,
-            'candidate_found':  candidate_found,
+            'success':              success,
+            'status':               status,
+            'candidate':            candidate,
+            'candidate_created':    candidate_created,
+            'candidate_found':      candidate_found,
         }
         return results
 
     try:
-        new_candidate_created = False
         candidate = CandidateCampaign.objects.create(
+            ballot_guide_official_statement=politician.ballot_guide_official_statement,
             ballotpedia_candidate_url=politician.ballotpedia_politician_url,
             candidate_contact_form_url=politician.politician_contact_form_url,
             candidate_name=politician.politician_name,
@@ -2077,28 +2082,28 @@ def create_candidate_from_politician(politician_we_vote_id=''):
             wikipedia_url=politician.wikipedia_url,
             youtube_url=politician.youtube_url,
         )
+        candidate_created = True
         candidate_found = True
         if positive_value_exists(candidate.id):
             results = update_candidate_details_from_politician(candidate, politician)
             if results['save_changes']:
                 candidate = results['candidate']
                 candidate.save()
-                new_candidate_created = True
-        if new_candidate_created:
-            success = True
-            status += "CANDIDATE_CREATED "
-        else:
-            success = False
-            status += "CANDIDATE_NOT_CREATED "
 
     except Exception as e:
         status += 'FAILED_TO_CREATE_CANDIDATE ' \
                   '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
         success = False
 
+    if candidate_created:
+        status += "CANDIDATE_CREATED "
+    else:
+        status += "CANDIDATE_NOT_CREATED "
+
     results = {
         'success':            success,
         'status':             status,
+        'candidate_created':  candidate_created,
         'candidate_found':    candidate_found,
         'candidate':          candidate,
     }
@@ -2521,7 +2526,8 @@ def save_image_to_candidate_table(candidate, image_url, source_link, url_is_brok
     if IMAGE_SOURCE_BALLOTPEDIA in kind_of_source_website:
         # NOT FULLY UPDATED TO WORK
         cache_results = cache_master_and_resized_image(
-            candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
+            candidate_id=candidate.id,
+            candidate_we_vote_id=candidate.we_vote_id,
             ballotpedia_profile_image_url=image_url,
             image_source=IMAGE_SOURCE_BALLOTPEDIA)
         cached_ballotpedia_profile_image_url_https = cache_results['cached_ballotpedia_image_url_https']
@@ -2531,7 +2537,8 @@ def save_image_to_candidate_table(candidate, image_url, source_link, url_is_brok
     elif LINKEDIN in kind_of_source_website:
         # NOT FULLY UPDATED TO WORK
         cache_results = cache_master_and_resized_image(
-            candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
+            candidate_id=candidate.id,
+            candidate_we_vote_id=candidate.we_vote_id,
             linkedin_profile_image_url=image_url,
             image_source=LINKEDIN)
         cached_linkedin_profile_image_url_https = cache_results['cached_linkedin_image_url_https']
@@ -2541,7 +2548,8 @@ def save_image_to_candidate_table(candidate, image_url, source_link, url_is_brok
     elif WIKIPEDIA in kind_of_source_website:
         # NOT FULLY UPDATED TO WORK
         cache_results = cache_master_and_resized_image(
-            candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
+            candidate_id=candidate.id,
+            candidate_we_vote_id=candidate.we_vote_id,
             wikipedia_profile_image_url=image_url,
             image_source=WIKIPEDIA)
         cached_wikipedia_profile_image_url_https = cache_results['cached_wikipedia_image_url_https']
@@ -2587,7 +2595,8 @@ def save_image_to_candidate_table(candidate, image_url, source_link, url_is_brok
 
     else:
         cache_results = cache_master_and_resized_image(
-            candidate_id=candidate.id, candidate_we_vote_id=candidate.we_vote_id,
+            candidate_id=candidate.id,
+            candidate_we_vote_id=candidate.we_vote_id,
             other_source_image_url=image_url,
             other_source=kind_of_source_website)
         cached_other_source_image_url_https = cache_results['cached_other_source_image_url_https']
@@ -3229,7 +3238,7 @@ def update_candidate_details_from_politician(candidate=None, politician=None):
                 candidate.ballotpedia_candidate_url = politician.ballotpedia_politician_url
                 fields_updated.append('ballotpedia_candidate_url')
                 save_changes = True
-            # For identically named fields
+            # For identically named fields - no existing value
             results = copy_field_value_from_object1_to_object2(
                 object1=politician,
                 object2=candidate,
@@ -3250,6 +3259,22 @@ def update_candidate_details_from_politician(candidate=None, politician=None):
             for new_field in fields_updated_append:
                 if new_field not in fields_updated:
                     fields_updated.append(new_field)
+            # For identically named fields - lock together existing values
+            results = copy_field_value_from_object1_to_object2(
+                object1=politician,
+                object2=candidate,
+                object1_field_name_list=[
+                    'ballot_guide_official_statement',
+                ],
+                only_change_object2_field_if_incoming_value=False,
+                only_change_object2_field_if_no_existing_value=False)
+            candidate = results['object2'] if results['success'] and results['values_changed'] else candidate
+            save_changes = save_changes or results['values_changed']
+            fields_updated_append = results['fields_updated']
+            for new_field in fields_updated_append:
+                if new_field not in fields_updated:
+                    fields_updated.append(new_field)
+
             if positive_value_exists(politician.politician_name):
                 if positive_value_exists(candidate.candidate_name) \
                         and candidate.candidate_name != politician.politician_name:
@@ -3449,73 +3474,17 @@ def update_candidate_details_from_politician(candidate=None, politician=None):
             for new_field in fields_updated_append:
                 if new_field not in fields_updated:
                     fields_updated.append(new_field)
+
             profile_image_default_updated = False
-            uploaded_image_exists = True \
-                if positive_value_exists(politician.we_vote_hosted_profile_uploaded_image_url_large) \
-                or positive_value_exists(politician.we_vote_hosted_profile_uploaded_image_url_medium) \
-                or positive_value_exists(politician.we_vote_hosted_profile_uploaded_image_url_tiny) else False
-            twitter_image_exists = True \
-                if positive_value_exists(politician.we_vote_hosted_profile_twitter_image_url_large) \
-                or positive_value_exists(politician.we_vote_hosted_profile_twitter_image_url_medium) \
-                or positive_value_exists(politician.we_vote_hosted_profile_twitter_image_url_tiny) else False
-            facebook_image_exists = True \
-                if positive_value_exists(politician.we_vote_hosted_profile_facebook_image_url_large) \
-                or positive_value_exists(politician.we_vote_hosted_profile_facebook_image_url_medium) \
-                or positive_value_exists(politician.we_vote_hosted_profile_facebook_image_url_tiny) else False
-            vote_usa_image_exists = True \
-                if positive_value_exists(politician.we_vote_hosted_profile_vote_usa_image_url_large) \
-                or positive_value_exists(politician.we_vote_hosted_profile_vote_usa_image_url_medium) \
-                or positive_value_exists(politician.we_vote_hosted_profile_vote_usa_image_url_tiny) else False
-            if candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
-                if uploaded_image_exists:
-                    candidate.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UPLOADED
-                    save_changes = True
-                elif twitter_image_exists:
-                    candidate.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_TWITTER
-                    save_changes = True
-                elif facebook_image_exists:
-                    candidate.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_FACEBOOK
-                    save_changes = True
-                elif vote_usa_image_exists:
-                    candidate.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_VOTE_USA
-                    save_changes = True
-            # Now move selected field into master candidate image
-            if uploaded_image_exists and candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UPLOADED:
-                candidate.we_vote_hosted_profile_image_url_large = \
-                    politician.we_vote_hosted_profile_uploaded_image_url_large
-                candidate.we_vote_hosted_profile_image_url_medium = \
-                    politician.we_vote_hosted_profile_uploaded_image_url_medium
-                candidate.we_vote_hosted_profile_image_url_tiny = \
-                    politician.we_vote_hosted_profile_uploaded_image_url_tiny
-                profile_image_default_updated = True
-                save_changes = True
-            elif twitter_image_exists and candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_TWITTER:
-                candidate.we_vote_hosted_profile_image_url_large = \
-                    politician.we_vote_hosted_profile_twitter_image_url_large
-                candidate.we_vote_hosted_profile_image_url_medium = \
-                    politician.we_vote_hosted_profile_twitter_image_url_medium
-                candidate.we_vote_hosted_profile_image_url_tiny = \
-                    politician.we_vote_hosted_profile_twitter_image_url_tiny
-                profile_image_default_updated = True
-                save_changes = True
-            elif facebook_image_exists and candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_FACEBOOK:
-                candidate.we_vote_hosted_profile_image_url_large = \
-                    politician.we_vote_hosted_profile_facebook_image_url_large
-                candidate.we_vote_hosted_profile_image_url_medium = \
-                    politician.we_vote_hosted_profile_facebook_image_url_medium
-                candidate.we_vote_hosted_profile_image_url_tiny = \
-                    politician.we_vote_hosted_profile_facebook_image_url_tiny
-                profile_image_default_updated = True
-                save_changes = True
-            elif vote_usa_image_exists and candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_VOTE_USA:
-                candidate.we_vote_hosted_profile_image_url_large = \
-                    politician.we_vote_hosted_profile_vote_usa_image_url_large
-                candidate.we_vote_hosted_profile_image_url_medium = \
-                    politician.we_vote_hosted_profile_vote_usa_image_url_medium
-                candidate.we_vote_hosted_profile_image_url_tiny = \
-                    politician.we_vote_hosted_profile_vote_usa_image_url_tiny
-                profile_image_default_updated = True
-                save_changes = True
+            from image.controllers import organize_object_photo_fields_based_on_image_type_currently_active
+            results = organize_object_photo_fields_based_on_image_type_currently_active(
+                object_with_photo_fields=candidate,
+                profile_image_type_currently_active=candidate.profile_image_type_currently_active,
+            )
+            if results['success']:
+                candidate = results['object_with_photo_fields']
+                profile_image_default_updated = results['profile_image_default_updated']
+                save_changes = save_changes or results['values_changed']
 
             if profile_image_default_updated:
                 if 'profile_image_type_currently_active' not in fields_updated:

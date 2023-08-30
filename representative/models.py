@@ -205,6 +205,7 @@ class Representative(models.Model):
     # It starts with "wv" then we add on a database specific identifier like "3v" (WeVoteSetting.site_unique_id_prefix)
     # then the string "rep", and then a sequential integer like "123".
     # We keep the last value in WeVoteSetting.we_vote_id_last_representative_integer
+    objects = None
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id of this person in this position",
         max_length=255, default=None, null=True,

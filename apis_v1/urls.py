@@ -7,18 +7,18 @@ This is called from config/urls.py like this:
 """
 
 from django.conf import settings
-from django.conf.urls import re_path
+from django.urls import re_path
 from django.conf.urls.static import static
 
+from analytics.views_admin import analytics_action_sync_out_view, organization_daily_metrics_sync_out_view, \
+    organization_election_metrics_sync_out_view, sitewide_daily_metrics_sync_out_view, \
+    sitewide_election_metrics_sync_out_view, sitewide_voter_metrics_sync_out_view
 from apis_v1.views import views_activity, views_apple, views_docs, views_analytics, views_ballot, \
     views_campaign, views_candidate, views_donation, \
     views_election, views_extension, views_facebook, views_friend, \
     views_issues, views_measure, views_misc, views_organization, \
-    views_pledge_to_vote, views_politician, views_position, views_reaction, views_representative, views_retrieve_tables, \
-    views_task, views_share, views_twitter, views_voter, views_voter_guide
-from analytics.views_admin import analytics_action_sync_out_view, organization_daily_metrics_sync_out_view, \
-    organization_election_metrics_sync_out_view, sitewide_daily_metrics_sync_out_view, \
-    sitewide_election_metrics_sync_out_view, sitewide_voter_metrics_sync_out_view
+    views_pledge_to_vote, views_politician, views_position, views_reaction, views_representative, \
+    views_retrieve_tables, views_task, views_share, views_twitter, views_voter, views_voter_guide
 from ballot.views_admin import ballot_items_sync_out_view, ballot_returned_sync_out_view
 from candidate.views_admin import candidates_sync_out_view, candidate_to_office_link_sync_out_view
 from issue.views_admin import issue_descriptions_retrieve_view, issues_followed_retrieve_view, \
@@ -224,6 +224,9 @@ urlpatterns = [
       re_path(r'^pledgeToVoteWithVoterGuide/',
               views_pledge_to_vote.pledge_to_vote_with_voter_guide_view,
               name='pledgeToVoteWithVoterGuideView'),
+      re_path(r'^politicianSaveRepairedGenderIds/',
+              views_politician.save_repaired_gender_ids_view,
+              name='saveRepairedGenderIdsView'),
       re_path(r'^politicianRetrieve/', views_politician.politician_retrieve_view, name='politicianRetrieveView'),
       re_path(r'^politiciansSyncOut/', politicians_sync_out_view, name='politiciansSyncOutView'),
       re_path(r'^pollingLocationsSyncOut/', polling_locations_sync_out_view,
@@ -303,6 +306,8 @@ urlpatterns = [
       re_path(r'^voterAddressRetrieve/', views_voter.voter_address_retrieve_view,
               name='voterAddressRetrieveView'),
       re_path(r'^voterAddressSave/', views_voter.voter_address_save_view, name='voterAddressSaveView'),
+      re_path(r'^voterAggregateAnalytics/', views_analytics.voter_aggregate_analytics_view,
+              name='voterAggregateAnalyticsView'),
       re_path(r'^voterAllPositionsRetrieve/', views_voter.voter_all_positions_retrieve_view,
               name='voterAllPositionsRetrieveView'),
       re_path(r'^voterAllBookmarksStatusRetrieve/',
@@ -416,6 +421,8 @@ urlpatterns = [
               name='voterContactListSaveView'),
       re_path(r'^voterContactSave/', views_voter.voter_contact_save_view,
               name='voterContactSaveView'),
+      re_path(r'^voterUpdateFips/', views_voter.voter_update_fips_view,
+              name='voterUpdateFipsView'),
       re_path(r'^voterSMSPhoneNumberRetrieve/', views_voter.voter_sms_phone_number_retrieve_view,
               name='voterSMSPhoneNumberRetrieveView'),
       re_path(r'^voterSMSPhoneNumberSave/', views_voter.voter_sms_phone_number_save_view,
@@ -680,6 +687,8 @@ urlpatterns = [
               name='voterAddressRetrieveDocs'),
       re_path(r'^docs/voterAddressSave/$', views_docs.voter_address_save_doc_view,
               name='voterAddressSaveDocs'),
+      re_path(r'^docs/voterAggregateAnalytics/$', views_docs.voter_aggregate_analytics_doc_view,
+              name='voterAggregateAnalyticsDocs'),
       re_path(r'^docs/voterAllPositionsRetrieve/$',
               views_docs.voter_all_positions_retrieve_doc_view, name='voterAllPositionsRetrieveDocs'),
       re_path(r'^docs/voterAllBookmarksStatusRetrieve/$',

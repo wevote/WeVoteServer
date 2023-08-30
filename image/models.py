@@ -29,6 +29,7 @@ LINKEDIN_IMAGE_NAME = "linkedin_image"
 MAPLIGHT_IMAGE_NAME = "maplight_image"
 MASTER_IMAGE = "master"
 ORGANIZATION_ENDORSEMENTS_IMAGE_NAME = "organization_endorsements_image"
+ORGANIZATION_UPLOADED_PROFILE_IMAGE_NAME = "organization_uploaded_profile_image"
 POLITICIAN_UPLOADED_PROFILE_IMAGE_NAME = "politician_uploaded_profile_image"
 TWITTER_PROFILE_IMAGE_NAME = "twitter_profile_image"
 TWITTER_BACKGROUND_IMAGE_NAME = "twitter_background_image"
@@ -96,6 +97,7 @@ class WeVoteImage(models.Model):
         verbose_name='org master share image', blank=True, null=True)
     linkedin_profile_image_url = models.TextField(
         verbose_name='profile image from linkedin', blank=True, null=True)
+    organization_uploaded_profile_image_url_https = models.TextField(blank=True, null=True)
     photo_url_from_ctcl = models.TextField(blank=True, null=True)  # URL provided by CTCL stored on other server
     photo_url_from_vote_usa = models.TextField(blank=True, null=True)  # URL from Vote USA: stored on other server
     politician_uploaded_profile_image_url_https = models.TextField(blank=True, null=True)
@@ -125,6 +127,7 @@ class WeVoteImage(models.Model):
     kind_of_image_issue = models.BooleanField(verbose_name="image is for issue", default=False)
     kind_of_image_linkedin_profile = models.BooleanField(verbose_name="image is linkedin", default=False)
     kind_of_image_maplight = models.BooleanField(verbose_name="image is maplight", default=False)
+    kind_of_image_organization_uploaded_profile = models.BooleanField(default=False)
     kind_of_image_other_source = models.BooleanField(verbose_name="image is from other sources", default=False)
     kind_of_image_politician_uploaded_profile = models.BooleanField(default=False)
     kind_of_image_twitter_background = models.BooleanField(verbose_name="image is twitter background", default=False)
@@ -159,6 +162,8 @@ class WeVoteImage(models.Model):
             return "facebook_background"
         elif self.kind_of_image_original:
             return "original"
+        elif self.kind_of_image_organization_uploaded_profile:
+            return "organization_uploaded_profile"
         elif self.kind_of_image_politician_uploaded_profile:
             return "politician_uploaded_profile"
         elif self.kind_of_image_twitter_profile:
@@ -211,6 +216,7 @@ class WeVoteImageManager(models.Manager):
             kind_of_image_linkedin_profile=False,
             kind_of_image_maplight=False,
             kind_of_image_medium=False,
+            kind_of_image_organization_uploaded_profile=False,
             kind_of_image_original=False,
             kind_of_image_other_source=False,
             kind_of_image_politician_uploaded_profile=False,
@@ -248,6 +254,7 @@ class WeVoteImageManager(models.Manager):
         :param kind_of_image_linkedin_profile:
         :param kind_of_image_maplight:
         :param kind_of_image_medium:
+        :param kind_of_image_organization_uploaded_profile:
         :param kind_of_image_original:
         :param kind_of_image_other_source:
         :param kind_of_image_politician_uploaded_profile:
@@ -288,6 +295,7 @@ class WeVoteImageManager(models.Manager):
                 kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
                 kind_of_image_maplight=kind_of_image_maplight,
                 kind_of_image_medium=kind_of_image_medium,
+                kind_of_image_organization_uploaded_profile=kind_of_image_organization_uploaded_profile,
                 kind_of_image_original=kind_of_image_original,
                 kind_of_image_other_source=kind_of_image_other_source,
                 kind_of_image_politician_uploaded_profile=kind_of_image_politician_uploaded_profile,
@@ -822,6 +830,45 @@ class WeVoteImageManager(models.Manager):
         }
         return results
 
+    def save_we_vote_image_organization_uploaded_profile_info(
+            self,
+            we_vote_image=None,
+            image_width='',
+            image_height='',
+            image_url_https='',
+            same_day_image_version=0,
+            image_url_valid=False):
+        """
+        Save organization_uploaded_profile information to WeVoteImage
+        :param we_vote_image:
+        :param image_width:
+        :param image_height:
+        :param image_url_https:
+        :param same_day_image_version:
+        :param image_url_valid:
+        :return:
+        """
+        try:
+            we_vote_image.image_width = image_width
+            we_vote_image.image_height = image_height
+            we_vote_image.source_image_still_valid = image_url_valid
+            we_vote_image.same_day_image_version = same_day_image_version
+            we_vote_image.organization_uploaded_profile_image_url_https = image_url_https
+            we_vote_image.save()
+            success = True
+            status = "SAVED_WE_VOTE_IMAGE_ORGANIZATION_UPLOADED_PROFILE_INFO "
+        except Exception as e:
+            status = "UNABLE_TO_SAVE_WE_VOTE_IMAGE_ORGANIZATION_UPLOADED_PROFILE_INFO " + str(e) + ' '
+            success = False
+            handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
+
+        results = {
+            'status':           status,
+            'success':          success,
+            'we_vote_image':    we_vote_image,
+        }
+        return results
+
     def save_we_vote_image_other_source_info(self, we_vote_image, image_width, image_height,
                                              other_source, other_source_image_url, same_day_image_version,
                                              kind_of_image_other_source, image_url_valid=False):
@@ -998,6 +1045,7 @@ class WeVoteImageManager(models.Manager):
             kind_of_image_issue=False,
             kind_of_image_linkedin_profile=False,
             kind_of_image_maplight=False,
+            kind_of_image_organization_uploaded_profile=False,
             kind_of_image_other_source=False,
             kind_of_image_politician_uploaded_profile=False,
             kind_of_image_twitter_background=False,
@@ -1029,11 +1077,12 @@ class WeVoteImageManager(models.Manager):
         :param kind_of_image_issue:
         :param kind_of_image_linkedin_profile:
         :param kind_of_image_maplight:
+        :param kind_of_image_organization_uploaded_profile:
         :param kind_of_image_other_source:
+        :param kind_of_image_politician_uploaded_profile:
         :param kind_of_image_twitter_background:
         :param kind_of_image_twitter_banner:
         :param kind_of_image_twitter_profile:
-        :param kind_of_image_politician_uploaded_profile:
         :param kind_of_image_vote_smart:
         :param kind_of_image_vote_usa_profile:
         :param kind_of_image_voter_uploaded_profile:
@@ -1063,6 +1112,7 @@ class WeVoteImageManager(models.Manager):
                 kind_of_image_issue=kind_of_image_issue,
                 kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
                 kind_of_image_maplight=kind_of_image_maplight,
+                kind_of_image_organization_uploaded_profile=kind_of_image_organization_uploaded_profile,
                 kind_of_image_other_source=kind_of_image_other_source,
                 kind_of_image_politician_uploaded_profile=kind_of_image_politician_uploaded_profile,
                 kind_of_image_twitter_profile=kind_of_image_twitter_profile,
@@ -1102,6 +1152,9 @@ class WeVoteImageManager(models.Manager):
                 we_vote_image_list = we_vote_image_list.exclude(linkedin_profile_image_url=image_url_https)
             if kind_of_image_maplight:
                 we_vote_image_list = we_vote_image_list.exclude(maplight_image_url_https=image_url_https)
+            if kind_of_image_organization_uploaded_profile:
+                we_vote_image_list = we_vote_image_list.exclude(
+                    organization_uploaded_profile_image_url_https=image_url_https)
             if kind_of_image_other_source:
                 we_vote_image_list = we_vote_image_list.exclude(other_source_image_url=image_url_https)
             if kind_of_image_politician_uploaded_profile:
@@ -1364,6 +1417,7 @@ class WeVoteImageManager(models.Manager):
             kind_of_image_tiny=False,
             linkedin_profile_image_url=None,
             maplight_image_url_https=None,
+            organization_uploaded_profile_image_url_https=None,
             organization_we_vote_id=None,
             other_source_image_url=None,
             photo_url_from_ctcl=None,
@@ -1396,6 +1450,7 @@ class WeVoteImageManager(models.Manager):
         :param kind_of_image_tiny:
         :param linkedin_profile_image_url:
         :param maplight_image_url_https:
+        :param organization_uploaded_profile_image_url_https:
         :param organization_we_vote_id:
         :param other_source_image_url:
         :param photo_url_from_ctcl:
@@ -1445,6 +1500,7 @@ class WeVoteImageManager(models.Manager):
                 kind_of_image_tiny=kind_of_image_tiny,
                 linkedin_profile_image_url__iexact=linkedin_profile_image_url,
                 maplight_image_url_https__iexact=maplight_image_url_https,
+                organization_uploaded_profile_image_url_https=organization_uploaded_profile_image_url_https,
                 organization_we_vote_id__iexact=organization_we_vote_id,
                 other_source_image_url__iexact=other_source_image_url,
                 photo_url_from_ctcl=photo_url_from_ctcl,
@@ -1534,6 +1590,7 @@ class WeVoteImageManager(models.Manager):
             issue_we_vote_id=None,
             linkedin_profile_image_url=None,
             maplight_image_url_https=None,
+            organization_uploaded_profile_image_url_https=None,
             organization_we_vote_id=None,
             other_source_image_url=None,
             photo_url_from_ctcl=None,
@@ -1561,6 +1618,7 @@ class WeVoteImageManager(models.Manager):
         :param issue_we_vote_id:
         :param linkedin_profile_image_url:
         :param maplight_image_url_https:
+        :param organization_uploaded_profile_image_url_https:
         :param organization_we_vote_id:
         :param other_source_image_url:
         :param photo_url_from_ctcl:
@@ -1592,6 +1650,7 @@ class WeVoteImageManager(models.Manager):
                 issue_we_vote_id__iexact=issue_we_vote_id,
                 linkedin_profile_image_url__iexact=linkedin_profile_image_url,
                 maplight_image_url_https__iexact=maplight_image_url_https,
+                organization_uploaded_profile_image_url_https=organization_uploaded_profile_image_url_https,
                 organization_we_vote_id__iexact=organization_we_vote_id,
                 other_source_image_url__iexact=other_source_image_url,
                 photo_url_from_ctcl__iexact=photo_url_from_ctcl,
@@ -1652,6 +1711,7 @@ class WeVoteImageManager(models.Manager):
             kind_of_image_linkedin_profile=False,
             kind_of_image_maplight=False,
             kind_of_image_medium=False,
+            kind_of_image_organization_uploaded_profile=False,
             kind_of_image_original=False,
             kind_of_image_other_source=False,
             kind_of_image_politician_uploaded_profile=False,
@@ -1684,6 +1744,7 @@ class WeVoteImageManager(models.Manager):
         :param kind_of_image_linkedin_profile:
         :param kind_of_image_maplight:
         :param kind_of_image_medium:
+        :param kind_of_image_organization_uploaded_profile:
         :param kind_of_image_original:
         :param kind_of_image_other_source:
         :param kind_of_image_politician_uploaded_profile:
@@ -1735,6 +1796,7 @@ class WeVoteImageManager(models.Manager):
                     kind_of_image_large=kind_of_image_large,
                     kind_of_image_maplight=kind_of_image_maplight,
                     kind_of_image_medium=kind_of_image_medium,
+                    kind_of_image_organization_uploaded_profile=kind_of_image_organization_uploaded_profile,
                     kind_of_image_original=kind_of_image_original,
                     kind_of_image_other_source=kind_of_image_other_source,
                     kind_of_image_politician_uploaded_profile=kind_of_image_politician_uploaded_profile,
@@ -1794,6 +1856,7 @@ class WeVoteImageManager(models.Manager):
             kind_of_image_linkedin_profile=False,
             kind_of_image_maplight=False,
             kind_of_image_medium=False,
+            kind_of_image_organization_uploaded_profile=False,
             kind_of_image_original=False,
             kind_of_image_other_source=False,
             kind_of_image_politician_uploaded_profile=False,
@@ -1828,6 +1891,7 @@ class WeVoteImageManager(models.Manager):
         :param kind_of_image_linkedin_profile:
         :param kind_of_image_maplight:
         :param kind_of_image_medium:
+        :param kind_of_image_organization_uploaded_profile:
         :param kind_of_image_original:
         :param kind_of_image_other_source:
         :param kind_of_image_politician_uploaded_profile:
@@ -1866,6 +1930,7 @@ class WeVoteImageManager(models.Manager):
                 kind_of_image_issue=kind_of_image_issue,
                 kind_of_image_linkedin_profile=kind_of_image_linkedin_profile,
                 kind_of_image_maplight=kind_of_image_maplight,
+                kind_of_image_organization_uploaded_profile=kind_of_image_organization_uploaded_profile,
                 kind_of_image_original=kind_of_image_original,
                 kind_of_image_other_source=kind_of_image_other_source,
                 kind_of_image_politician_uploaded_profile=kind_of_image_politician_uploaded_profile,

@@ -3556,3 +3556,13 @@ def voter_contact_save_view(request):  # voterContactSave
         'stop_ignoring_voter_contact':  stop_ignoring_voter_contact,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+@csrf_exempt
+def voter_update_fips_view(request):  # voterUpdateFips
+    limit = request.GET.get('limit', 5000)
+    logger.error('%s', 'entry to voter_update_fips_view limit: ' + str(limit))
+
+    voteraddress_manager = VoterAddressManager()
+    json_data = voteraddress_manager.update_fips_codes_for_all_voteraddresses(limit)
+
+    return HttpResponse(json.dumps(json_data), content_type='application/json')

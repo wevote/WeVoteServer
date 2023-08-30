@@ -23,6 +23,179 @@ ORGANIZATION_LINK_TO_ISSUE_SYNC_URL = \
     get_environment_variable("ORGANIZATION_LINK_TO_ISSUE_SYNC_URL")  # organizationLinkToIssueSyncOut
 
 
+def calculate_likely_political_party_from_issues(voter_issues_lookup=None):
+    status = ''
+    success = True
+    likely_democrat_from_issues = False
+    likely_democrat_score = 0
+    likely_green_from_issues = False
+    likely_green_score = 0
+    likely_independent_from_issues = False
+    likely_independent_score = 0
+    likely_left_from_issues = False
+    likely_left_score = 0
+    likely_libertarian_from_issues = False
+    likely_libertarian_score = 0
+    likely_republican_from_issues = False
+    likely_republican_score = 0
+    likely_right_from_issues = False
+    likely_right_score = 0
+    likely_rural_from_issues = False
+    likely_rural_score = 0
+    likely_urban_from_issues = False
+    likely_urban_score = 0
+
+    if not hasattr(voter_issues_lookup, 'likely_party_from_issues_analyzed'):
+        status += "NO_VOTER_ISSUES_LOOKUP_OBJECT "
+        success = False
+    else:
+        # Not included:
+        # lgbtq
+        # pro_choice
+        # "wv02issue56": "marijuana",
+        # "wv02issue27": "pro_public_schools",
+        # "wv02issue66": "social_security",
+        # "wv02issue84": "voting_rights",
+        # "wv02issue86": "womens_equality",
+        # "wv02issue1": "animals",
+
+        # DEMOCRAT
+        if positive_value_exists(getattr(voter_issues_lookup, 'democratic_clubs')):
+            likely_democrat_score += 1
+            likely_left_score += 1
+        if positive_value_exists(getattr(voter_issues_lookup, 'democratic_politicians')):
+            likely_democrat_score += 1
+            likely_left_score += 1
+        if positive_value_exists(getattr(voter_issues_lookup, 'immigration')):
+            likely_democrat_score += 1
+            likely_left_score += 1
+        if positive_value_exists(getattr(voter_issues_lookup, 'pro_choice')):
+            likely_democrat_score += 1
+            likely_left_score += 1
+        if positive_value_exists(getattr(voter_issues_lookup, 'progressive')):
+            likely_democrat_score += 1
+            likely_left_score += 1
+
+        # GREEN
+        if positive_value_exists(getattr(voter_issues_lookup, 'green_clubs')):
+            likely_green_score += 1
+            likely_left_score += 1
+        if positive_value_exists(getattr(voter_issues_lookup, 'green_politicians')):
+            likely_green_score += 1
+            likely_left_score += 1
+
+        # INDEPENDENT
+        if positive_value_exists(getattr(voter_issues_lookup, 'independent_politicians')):
+            likely_independent_score += 1
+
+        # LEFT
+        if positive_value_exists(getattr(voter_issues_lookup, 'color')):
+            likely_left_score += 1
+        if positive_value_exists(getattr(voter_issues_lookup, 'homeless')):
+            likely_left_score += 1
+            likely_urban_score += 1
+        if positive_value_exists(getattr(voter_issues_lookup, 'justice_reform')):
+            likely_left_score += 1
+        if positive_value_exists(getattr(voter_issues_lookup, 'low_income')):
+            likely_left_score += 1
+        if positive_value_exists(getattr(voter_issues_lookup, 'money_in_politics')):
+            likely_left_score += 1
+        if positive_value_exists(getattr(voter_issues_lookup, 'public_healthcare')):
+            likely_left_score += 1
+        if positive_value_exists(getattr(voter_issues_lookup, 'student_debt')):
+            likely_left_score += 1
+
+        # LIBERTARIAN
+        if positive_value_exists(getattr(voter_issues_lookup, 'libertarian_clubs')):
+            likely_libertarian_score += 1
+            likely_right_score += 1
+        if positive_value_exists(getattr(voter_issues_lookup, 'libertarian_politicians')):
+            likely_libertarian_score += 1
+            likely_right_score += 1
+
+        # REPUBLICAN
+        if positive_value_exists(getattr(voter_issues_lookup, 'borders')):
+            likely_republican_score += 1
+            likely_right_score += 1
+        if positive_value_exists(getattr(voter_issues_lookup, 'conservative')):
+            likely_republican_score += 1
+            likely_right_score += 1
+        if positive_value_exists(getattr(voter_issues_lookup, 'maga')):
+            likely_republican_score += 3
+            likely_right_score += 1
+        if positive_value_exists(getattr(voter_issues_lookup, 'pro_life')):
+            likely_republican_score += 1
+            likely_right_score += 1
+        if positive_value_exists(getattr(voter_issues_lookup, 'republican_clubs')):
+            likely_republican_score += 1
+            likely_right_score += 1
+        if positive_value_exists(getattr(voter_issues_lookup, 'republican_politicians')):
+            likely_republican_score += 1
+            likely_right_score += 1
+        if positive_value_exists(getattr(voter_issues_lookup, 'second_amendment')):
+            likely_republican_score += 1
+            likely_right_score += 1
+            likely_rural_score += 1
+
+        # RIGHT
+        if positive_value_exists(getattr(voter_issues_lookup, 'pro_school_choice')):
+            likely_right_score += 1
+
+        # RURAL only
+
+        # URBAN only
+        if positive_value_exists(getattr(voter_issues_lookup, 'affordable_housing')):
+            likely_urban_score += 1
+        if positive_value_exists(getattr(voter_issues_lookup, 'bicycling')):
+            likely_urban_score += 1
+        if positive_value_exists(getattr(voter_issues_lookup, 'gun_reform')):
+            likely_urban_score += 1
+
+    # CALCULATE LEFT v. RIGHT
+    if likely_left_score > likely_right_score:
+        likely_left_from_issues = True
+    elif likely_right_score > likely_left_score:
+        likely_right_from_issues = True
+    # If both scores are 0, we don't want to choose one
+    # If both scores are 1+, we also don't want to choose one
+
+    # POLITICAL PARTY: ONLY CHOOSE ONE
+    if likely_left_from_issues:
+        if likely_green_score > likely_democrat_score:
+            likely_green_from_issues = True
+        elif likely_green_score >= 2:
+            likely_green_from_issues = True
+        elif likely_democrat_score > 0:
+            likely_democrat_from_issues = True
+    elif likely_right_from_issues:
+        if likely_libertarian_score > likely_republican_score:
+            likely_libertarian_from_issues = True
+        elif likely_libertarian_score >= 2:
+            likely_libertarian_from_issues = True
+        elif likely_republican_score > 0:
+            likely_republican_from_issues = True
+    else:
+        if likely_democrat_score > likely_republican_score:
+            likely_democrat_from_issues = True
+        elif likely_republican_score > likely_democrat_score:
+            likely_republican_from_issues = True
+        elif likely_republican_score > 0:
+            likely_republican_from_issues = True
+        elif likely_democrat_score > 0:
+            likely_democrat_from_issues = True
+    issues_results = {
+        'status':                           status,
+        'success':                          success,
+        'likely_democrat_from_issues':      likely_democrat_from_issues,
+        'likely_green_from_issues':         likely_green_from_issues,
+        'likely_left_from_issues':          likely_left_from_issues,
+        'likely_libertarian_from_issues':   likely_libertarian_from_issues,
+        'likely_republican_from_issues':    likely_republican_from_issues,
+        'likely_right_from_issues':         likely_right_from_issues,
+    }
+    return issues_results
+
+
 def update_issue_statistics():
     follow_issue_list_manager = FollowIssueList()
     organization_link_to_issue_list_manager = OrganizationLinkToIssueList()

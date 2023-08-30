@@ -24,8 +24,8 @@ from follow.controllers import delete_organization_followers_for_organization, \
     move_organization_followers_to_another_organization
 from follow.models import FollowOrganizationManager, FollowOrganizationList, FOLLOW_IGNORE, FOLLOWING, \
     STOP_FOLLOWING, STOP_IGNORING
-from image.controllers import cache_master_and_resized_image, \
-    FACEBOOK
+from image.controllers import cache_image_object_to_aws, cache_master_and_resized_image, FACEBOOK, \
+    PROFILE_IMAGE_ORIGINAL_MAX_WIDTH, PROFILE_IMAGE_ORIGINAL_MAX_HEIGHT
 from image.controllers import cache_organization_sharing_image, retrieve_all_images_for_one_organization
 from import_export_facebook.models import FacebookManager
 from politician.models import PoliticianManager
@@ -2412,6 +2412,86 @@ def organization_retrieve_for_api(  # organizationRetrieve
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
+def organization_save_photo_from_file_reader(
+        organization_we_vote_id='',
+        organization_photo_binary_file=None,
+        organization_photo_from_file_reader=None):
+    image_data_found = False
+    python_image_library_image = None
+    status = ""
+    success = True
+    we_vote_hosted_organization_photo_original_url = ''
+
+    if not positive_value_exists(organization_we_vote_id):
+        status += "MISSING_ORGANIZATION_WE_VOTE_ID "
+        results = {
+            'status': status,
+            'success': success,
+            'we_vote_hosted_organization_photo_original_url': we_vote_hosted_organization_photo_original_url,
+        }
+        return results
+
+    if not positive_value_exists(organization_photo_from_file_reader) \
+            and not positive_value_exists(organization_photo_binary_file):
+        status += "MISSING_ORGANIZATION_PHOTO_FROM_FILE_READER "
+        results = {
+            'status': status,
+            'success': success,
+            'we_vote_hosted_organization_photo_original_url': we_vote_hosted_organization_photo_original_url,
+        }
+        return results
+
+    if not organization_photo_binary_file:
+        try:
+            img_dict = re.match("data:(?P<type>.*?);(?P<encoding>.*?),(?P<data>.*)",
+                                organization_photo_from_file_reader).groupdict()
+            if img_dict['encoding'] == 'base64':
+                organization_photo_binary_file = img_dict['data']
+            else:
+                status += "INCOMING_ORGANIZATION_UPLOADED_PHOTO-BASE64_NOT_FOUND "
+        except Exception as e:
+            status += 'PROBLEM_EXTRACTING_BINARY_DATA_FROM_INCOMING_ORGANIZATION_DATA: {error} [type: {error_type}] ' \
+                      ''.format(error=e, error_type=type(e))
+
+    if organization_photo_binary_file:
+        try:
+            byte_data = base64.b64decode(organization_photo_binary_file)
+            image_data = BytesIO(byte_data)
+            original_image = Image.open(image_data)
+            format_to_cache = original_image.format
+            python_image_library_image = ImageOps.exif_transpose(original_image)
+            python_image_library_image.thumbnail(
+                (PROFILE_IMAGE_ORIGINAL_MAX_WIDTH, PROFILE_IMAGE_ORIGINAL_MAX_HEIGHT), Image.Resampling.LANCZOS)
+            python_image_library_image.format = format_to_cache
+            image_data_found = True
+        except Exception as e:
+            status += 'PROBLEM_EXTRACTING_ORGANIZATION_PHOTO_FROM_BINARY_DATA: {error} [type: {error_type}] ' \
+                      ''.format(error=e, error_type=type(e))
+
+    if image_data_found:
+        cache_results = cache_image_object_to_aws(
+            python_image_library_image=python_image_library_image,
+            organization_we_vote_id=organization_we_vote_id,
+            kind_of_image_organization_uploaded_profile=True,
+            kind_of_image_original=True)
+        status += cache_results['status']
+        if cache_results['success']:
+            cached_master_we_vote_image = cache_results['we_vote_image']
+            try:
+                we_vote_hosted_organization_photo_original_url = cached_master_we_vote_image.we_vote_image_url
+            except Exception as e:
+                status += "FAILED_TO_CACHE_ORGANIZATION_IMAGE: " + str(e) + ' '
+                success = False
+        else:
+            success = False
+    results = {
+        'status':                   status,
+        'success':                  success,
+        'we_vote_hosted_organization_photo_original_url': we_vote_hosted_organization_photo_original_url,
+    }
+    return results
+
+
 def organization_save_for_api(  # organizationSave
         voter_device_id='',
         organization_id=0,
@@ -3501,7 +3581,8 @@ def save_image_to_organization_table(organization, image_url, source_link, url_i
         # organization.facebook_url_is_broken = url_is_broken
         if not url_is_broken:
             cache_results = cache_master_and_resized_image(
-                candidate_id=organization.id, candidate_we_vote_id=organization.we_vote_id,
+                organization_id=organization.id,
+                organization_we_vote_id=organization.we_vote_id,
                 facebook_profile_image_url_https=image_url,
                 image_source=FACEBOOK)
             cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
@@ -3512,7 +3593,8 @@ def save_image_to_organization_table(organization, image_url, source_link, url_i
 
     # else:
     #     cache_results = cache_master_and_resized_image(
-    #         candidate_id=organization.id, candidate_we_vote_id=organization.we_vote_id,
+    #         organization_id=organization.id,
+    #         organization_we_vote_id=organization.we_vote_id,
     #         other_source_image_url=image_url,
     #         other_source=kind_of_source_website)
     #     cached_other_source_image_url_https = cache_results['cached_other_source_image_url_https']
@@ -3529,7 +3611,7 @@ def save_image_to_organization_table(organization, image_url, source_link, url_i
             organization.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
         organization.save()
     except Exception as e:
-        status += "CANDIDATE_NOT_SAVED: " + str(e) + " "
+        status += "ORGANIZATION_NOT_SAVED: " + str(e) + " "
 
     results = {
         'success': success,

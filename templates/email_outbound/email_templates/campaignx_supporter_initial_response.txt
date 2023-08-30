@@ -16,7 +16,7 @@ Thank you for being a voter! This is the campaign you supported:
 
 Click to see: {{ campaignx_url }}
 
-Please ask your friends to join you in supporting these candidates. Every vote counts, and many elections are won by a small number of voters. Can you help by spreading the word to your like-minded friends?
+Please ask your friends to join you in supporting this campaign. Every vote counts, and many elections are won by a small number of voters. Can you help by spreading the word to your like-minded friends?
 
 Click to share: {{ campaignx_share_campaign_url }}
 

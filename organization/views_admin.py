@@ -10,10 +10,12 @@ from .controllers_fastly import add_wevote_subdomain_to_fastly, add_subdomain_ro
     get_wevote_subdomain_status
 from .models import GROUP, INDIVIDUAL, Organization, OrganizationChangeLog, OrganizationReservedDomain, \
     OrganizationTeamMember, ORGANIZATION_UNIQUE_IDENTIFIERS
+from base64 import b64encode
 from admin_tools.views import redirect_to_sign_in_page
 from campaign.controllers import move_campaignx_to_another_organization
 from campaign.models import CampaignXListedByOrganization, CampaignXManager
-from candidate.models import CandidateCampaign, CandidateListManager, CandidateManager
+from candidate.models import CandidateCampaign, CandidateListManager, CandidateManager, \
+    PROFILE_IMAGE_TYPE_UNKNOWN, PROFILE_IMAGE_TYPE_UPLOADED
 from config.base import get_environment_variable
 from datetime import datetime
 from django.db.models import Q
@@ -29,17 +31,17 @@ from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_deleted_exception, handle_record_not_found_exception
 from election.controllers import retrieve_election_id_list_by_year_list, retrieve_upcoming_election_id_list
 from election.models import Election, ElectionManager
+from image.controllers import create_resized_images
 from import_export_twitter.controllers import refresh_twitter_organization_details
 from import_export_vote_smart.models import VoteSmartSpecialInterestGroupManager
 from issue.models import ALPHABETICAL_ASCENDING, IssueListManager, IssueManager, \
     OrganizationLinkToIssueList, OrganizationLinkToIssueManager, MOST_LINKED_ORGANIZATIONS
 import json
 from measure.models import ContestMeasure, ContestMeasureListManager, ContestMeasureManager
-from office.models import ContestOfficeManager
 import operator
 from organization.models import OrganizationListManager, OrganizationManager, ORGANIZATION_TYPE_MAP, UNKNOWN
 from organization.controllers import figure_out_organization_conflict_values, \
-    organization_retrieve_tweets_from_twitter, organization_analyze_tweets
+    organization_retrieve_tweets_from_twitter, organization_analyze_tweets, organization_save_photo_from_file_reader
 from position.models import PositionEntered, PositionForFriends, PositionListManager, PositionManager, \
     INFORMATION_ONLY, OPPOSE, STILL_DECIDING, SUPPORT
 from twitter.models import TwitterLinkToOrganization, TwitterUserManager
@@ -1262,6 +1264,8 @@ def organization_edit_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    status = ''
+    success = True
     voter_device_id = get_voter_api_device_id(request)
     voter = fetch_voter_from_voter_device_link(voter_device_id)
     change_description = ''
@@ -1274,17 +1278,24 @@ def organization_edit_process_view(request):
 
     issue_analysis_admin_notes = request.POST.get('issue_analysis_admin_notes', False)
     issue_analysis_done = request.POST.get('issue_analysis_done', False)
+    organization_contact_form_url = request.POST.get('organization_contact_form_url', False)
+    organization_email = request.POST.get('organization_email', False)
     organization_endorsements_api_url = request.POST.get('organization_endorsements_api_url', False)
+    organization_facebook = request.POST.get('organization_facebook', False)
     organization_id = convert_to_int(request.POST.get('organization_id', 0))
     organization_instagram_handle = request.POST.get('organization_instagram_handle', False)
     organization_link_issue_we_vote_ids = request.POST.getlist('selected_issues', False)
     organization_name = request.POST.get('organization_name', '')
-    organization_contact_form_url = request.POST.get('organization_contact_form_url', False)
+    try:
+        organization_photo_file = request.FILES['organization_photo_file']
+        organization_photo_file_found = True
+    except Exception as e:
+        organization_photo_file = None
+        organization_photo_file_found = False
+    organization_photo_file_delete = positive_value_exists(request.POST.get('organization_photo_file_delete', False))
     organization_twitter_handle = request.POST.get('organization_twitter_handle', False)
     organization_twitter_updates_failing = \
         positive_value_exists(request.POST.get('organization_twitter_updates_failing', False))
-    organization_email = request.POST.get('organization_email', False)
-    organization_facebook = request.POST.get('organization_facebook', False)
     organization_type = request.POST.get('organization_type', GROUP)
     organization_website = request.POST.get('organization_website', False)
     profile_image_type_currently_active = request.POST.get('profile_image_type_currently_active', False)
@@ -1309,11 +1320,9 @@ def organization_edit_process_view(request):
     organization_instagram_handle = extract_instagram_handle_from_text_string(organization_instagram_handle)
 
     # Check to see if this organization is already being used anywhere
-    new_organization_created = False
     organization_on_stage = None
     organization_on_stage_found = False
     organization_we_vote_id = ""
-    status = ""
     try:
         organization_query = Organization.objects.filter(id=organization_id)
         if organization_query.count():
@@ -1322,6 +1331,34 @@ def organization_edit_process_view(request):
             organization_we_vote_id = organization_on_stage.we_vote_id
     except Exception as e:
         handle_record_not_found_exception(e, logger=logger)
+        status += "ORGANIZATION_COULD_NOT_BE_RETRIEVED: " + str(e) + " "
+        success = False
+
+    # We can use the same url_variables with any processing failures below
+    url_variables = "?issue_analysis_admin_notes=" + str(issue_analysis_admin_notes) + \
+                    "&issue_analysis_done=" + str(issue_analysis_done) + \
+                    "&organization_contact_form_url=" + str(organization_contact_form_url) + \
+                    "&organization_email=" + str(organization_email) + \
+                    "&organization_endorsements_api_url=" + str(organization_endorsements_api_url) + \
+                    "&organization_facebook=" + str(organization_facebook) + \
+                    "&organization_id=" + str(organization_id) + \
+                    "&organization_instagram_handle=" + str(organization_instagram_handle) + \
+                    "&organization_name=" + str(organization_name) + \
+                    "&organization_twitter_handle=" + str(organization_twitter_handle) + \
+                    "&organization_twitter_updates_failing=" + str(organization_twitter_updates_failing) + \
+                    "&organization_type=" + str(organization_type) + \
+                    "&organization_website=" + str(organization_website) + \
+                    "&profile_image_type_currently_active=" + str(profile_image_type_currently_active) + \
+                    "&state_served_code=" + str(state_served_code) + \
+                    "&wikipedia_page_title=" + str(wikipedia_page_title) + \
+                    "&wikipedia_photo_url=" + str(wikipedia_photo_url) + \
+                    "&google_civic_election_id=" + str(google_civic_election_id)
+
+    if not success:
+        messages.add_message(request, messages.ERROR,
+                             'ORGANIZATION_ERROR Please click the back arrow and send URL to the engineering team: '
+                             '' + str(status))
+        return HttpResponseRedirect(reverse('organization:organization_list', args=()) + url_variables)
 
     twitter_user_manager = TwitterUserManager()
     create_twitter_link_to_organization_for_handle = False
@@ -1413,7 +1450,10 @@ def organization_edit_process_view(request):
         )
         if not org_results['success']:
             status += "CREATE_OR_UPDATE_ORGANIZATION_FAILED: " + str(org_results['status']) + " "
-            success = False
+            messages.add_message(request, messages.ERROR,
+                                 'ORGANIZATION_ERROR Please click the back arrow and send URL to the engineering team: '
+                                 '' + str(status))
+            return HttpResponseRedirect(reverse('organization:organization_list', args=()) + url_variables)
         else:
             organization_on_stage_found = True
             organization_on_stage = org_results['organization']
@@ -1431,47 +1471,12 @@ def organization_edit_process_view(request):
     issue_analysis_done_changed = False
     try:
         if organization_on_stage_found:
-            # Update
-            if issue_analysis_admin_notes is not False:
-                organization_on_stage.issue_analysis_admin_notes = issue_analysis_admin_notes.strip()
-            issue_analysis_done_before = positive_value_exists(organization_on_stage.issue_analysis_done)
-            if issue_analysis_done_before is not positive_value_exists(issue_analysis_done):
-                issue_analysis_done_changed = True
-            organization_on_stage.issue_analysis_done = positive_value_exists(issue_analysis_done)
-            if organization_twitter_handle is not False:
-                if twitter_handle_can_be_saved_without_conflict:
-                    organization_on_stage.organization_twitter_handle = organization_twitter_handle.strip()
-            organization_on_stage.organization_twitter_updates_failing = organization_twitter_updates_failing
-            if organization_contact_form_url is not False:
-                organization_on_stage.organization_contact_form_url = organization_contact_form_url.strip()
-            if organization_email is not False:
-                organization_on_stage.organization_email = organization_email.strip()
-            if organization_endorsements_api_url is not False:
-                organization_on_stage.organization_endorsements_api_url = organization_endorsements_api_url.strip()
-            if organization_facebook is not False:
-                organization_on_stage.organization_facebook = organization_facebook.strip()
-            if organization_instagram_handle is not False:
-                organization_on_stage.organization_instagram_handle = organization_instagram_handle.strip()
-            if organization_name is not False:
-                organization_on_stage.organization_name = organization_name.strip()
-            if organization_type is not False:
-                organization_on_stage.organization_type = organization_type.strip()
-            if organization_website is not False:
-                organization_on_stage.organization_website = organization_website.strip()
-            if profile_image_type_currently_active is not False:
-                organization_on_stage.profile_image_type_currently_active = profile_image_type_currently_active.strip()
-            if state_served_code is not False:
-                organization_on_stage.state_served_code = state_served_code.strip()
-            if wikipedia_page_title is not False:
-                organization_on_stage.wikipedia_page_title = wikipedia_page_title.strip()
-            if wikipedia_photo_url is not False:
-                organization_on_stage.wikipedia_photo_url = wikipedia_photo_url.strip()
-            organization_on_stage.save()
+            # Update below
             organization_id = organization_on_stage.id
             organization_we_vote_id = organization_on_stage.we_vote_id
-            status += "ORG_UPDATED "
+            status += "ORG_UPDATING "
 
-            messages.add_message(request, messages.INFO, 'Endorser updated.')
+            messages.add_message(request, messages.INFO, 'Endorser updating.')
         else:
             # Create new
             # But first double-check that we don't have an org entry already
@@ -1522,7 +1527,7 @@ def organization_edit_process_view(request):
                 state_list = STATE_CODE_MAP
                 sorted_state_list = sorted(state_list.items())
 
-                messages.add_message(request, messages.INFO, 'Missing name, which is required.')
+                messages.add_message(request, messages.INFO, 'Missing organization_name, which is required.')
                 messages_on_stage = get_messages(request)
                 template_values = {
                     'google_civic_election_id':     google_civic_election_id,
@@ -1543,37 +1548,111 @@ def organization_edit_process_view(request):
             organization_on_stage = Organization(
                 organization_name=organization_name,
             )
-            organization_on_stage.issue_analysis_admin_notes = issue_analysis_admin_notes
+            organization_on_stage_found = True
+            organization_id = organization_on_stage.id
+            organization_we_vote_id = organization_on_stage.we_vote_id
+            status += "ORG_CREATED "
+            messages.add_message(request, messages.INFO, 'New organization created.')
+
+        if organization_on_stage_found:
+            # #################################################
+            # Process incoming uploaded photo if there is one
+            organization_photo_in_binary_format = None
+            organization_photo_converted_to_binary = False
+            if organization_photo_file_found:
+                try:
+                    organization_photo_in_binary_format = b64encode(organization_photo_file.read()).decode('utf-8')
+                    organization_photo_converted_to_binary = True
+                except Exception as e:
+                    messages.add_message(request, messages.ERROR,
+                                         "Error converting organization photo to binary: {error}".format(error=e))
+            if organization_photo_file_found and organization_photo_converted_to_binary:
+                photo_results = organization_save_photo_from_file_reader(
+                    organization_we_vote_id=organization_we_vote_id,
+                    organization_photo_binary_file=organization_photo_in_binary_format)
+                if photo_results['we_vote_hosted_organization_photo_original_url']:
+                    we_vote_hosted_organization_photo_original_url = \
+                        photo_results['we_vote_hosted_organization_photo_original_url']
+                    # Now we want to resize to a large version
+                    create_resized_image_results = create_resized_images(
+                        organization_we_vote_id=organization_we_vote_id,
+                        organization_uploaded_profile_image_url_https=we_vote_hosted_organization_photo_original_url)
+                    organization_on_stage.we_vote_hosted_profile_uploaded_image_url_large = \
+                        create_resized_image_results['cached_resized_image_url_large']
+                    organization_on_stage.we_vote_hosted_profile_uploaded_image_url_medium = \
+                        create_resized_image_results['cached_resized_image_url_medium']
+                    organization_on_stage.we_vote_hosted_profile_uploaded_image_url_tiny = \
+                        create_resized_image_results['cached_resized_image_url_tiny']
+                    if profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN \
+                            or profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UPLOADED:
+                        organization_on_stage.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UPLOADED
+                        organization_on_stage.we_vote_hosted_profile_image_url_large = \
+                            organization_on_stage.we_vote_hosted_profile_uploaded_image_url_large
+                        organization_on_stage.we_vote_hosted_profile_image_url_medium = \
+                            organization_on_stage.we_vote_hosted_profile_uploaded_image_url_medium
+                        organization_on_stage.we_vote_hosted_profile_image_url_tiny = \
+                            organization_on_stage.we_vote_hosted_profile_uploaded_image_url_tiny
+                    elif profile_image_type_currently_active is not False:
+                        organization_on_stage.profile_image_type_currently_active = profile_image_type_currently_active
+            elif organization_photo_file_delete:
+                organization_on_stage.we_vote_hosted_profile_uploaded_image_url_large = None
+                organization_on_stage.we_vote_hosted_profile_uploaded_image_url_medium = None
+                organization_on_stage.we_vote_hosted_profile_uploaded_image_url_tiny = None
+                if profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UPLOADED \
+                        or profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
+                    organization_on_stage.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UNKNOWN
+                    organization_on_stage.we_vote_hosted_profile_image_url_large = None
+                    organization_on_stage.we_vote_hosted_profile_image_url_medium = None
+                    organization_on_stage.we_vote_hosted_profile_image_url_tiny = None
+            elif profile_image_type_currently_active is not False:
+                from image.controllers import organize_object_photo_fields_based_on_image_type_currently_active
+                results = organize_object_photo_fields_based_on_image_type_currently_active(
+                    object_with_photo_fields=organization_on_stage,
+                    profile_image_type_currently_active=profile_image_type_currently_active,
+                )
+                if results['success']:
+                    organization_on_stage = results['object_with_photo_fields']
+
+            # ###############################################
+            # Now process all other organization fields
+            if issue_analysis_admin_notes is not False:
+                organization_on_stage.issue_analysis_admin_notes = issue_analysis_admin_notes.strip()
+            issue_analysis_done_before = positive_value_exists(organization_on_stage.issue_analysis_done)
+            if issue_analysis_done_before is not positive_value_exists(issue_analysis_done):
+                issue_analysis_done_changed = True
             organization_on_stage.issue_analysis_done = positive_value_exists(issue_analysis_done)
             if organization_twitter_handle is not False:
                 if twitter_handle_can_be_saved_without_conflict:
                     organization_on_stage.organization_twitter_handle = organization_twitter_handle
+                organization_on_stage.organization_twitter_updates_failing = organization_twitter_updates_failing
+            if organization_contact_form_url is not False:
+                organization_on_stage.organization_contact_form_url = organization_contact_form_url.strip()
             if organization_email is not False:
-                organization_on_stage.organization_email = organization_email
-            if organization_facebook is not False:
-                organization_on_stage.organization_facebook = organization_facebook
-            if organization_instagram_handle is not False:
-                organization_on_stage.organization_instagram_handle = organization_instagram_handle
-            if organization_website is not False:
-                organization_on_stage.organization_website = organization_website
-            if profile_image_type_currently_active is not False:
-                organization_on_stage.profile_image_type_currently_active = profile_image_type_currently_active
-            if wikipedia_page_title is not False:
-                organization_on_stage.wikipedia_page_title = wikipedia_page_title
-            if wikipedia_photo_url is not False:
-                organization_on_stage.wikipedia_photo_url = wikipedia_photo_url
+                organization_on_stage.organization_email = organization_email.strip() if organization_email else None
             if organization_endorsements_api_url is not False:
-                organization_on_stage.organization_endorsements_api_url = organization_endorsements_api_url
-            if state_served_code is not False:
-                organization_on_stage.state_served_code = state_served_code
+                organization_on_stage.organization_endorsements_api_url = organization_endorsements_api_url.strip() \
+                    if organization_endorsements_api_url else None
+            if organization_facebook is not False:
+                organization_on_stage.organization_facebook = organization_facebook.strip() \
+                    if organization_facebook else None
+            if organization_instagram_handle is not False:
+                organization_on_stage.organization_instagram_handle = organization_instagram_handle.strip() \
+                    if organization_instagram_handle else None
+            if organization_name is not False:
+                organization_on_stage.organization_name = organization_name.strip() if organization_name else None
             if organization_type is not False:
-                organization_on_stage.organization_type = organization_type
+                organization_on_stage.organization_type = organization_type.strip() if organization_type else UNKNOWN
+            if organization_website is not False:
+                organization_on_stage.organization_website = organization_website.strip() \
+                    if organization_website else None
+            if state_served_code is not False:
+                organization_on_stage.state_served_code = state_served_code.strip() if state_served_code else None
+            if wikipedia_page_title is not False:
+                organization_on_stage.wikipedia_page_title = wikipedia_page_title.strip() \
+                    if wikipedia_page_title else None
+            if wikipedia_photo_url is not False:
+                organization_on_stage.wikipedia_photo_url = wikipedia_photo_url.strip() if wikipedia_photo_url else None
             organization_on_stage.save()
-            organization_id = organization_on_stage.id
-            organization_we_vote_id = organization_on_stage.we_vote_id
-            status += "ORG_CREATED "
-            messages.add_message(request, messages.INFO, 'New organization saved.')
-            new_organization_created = True
     except Exception as e:
         messages.add_message(request, messages.ERROR, 'Could not save organization.'
                                                       ' {error} [type: {error_type}]'.format(error=e,
@@ -1591,6 +1670,9 @@ def organization_edit_process_view(request):
     # Voter guide names are currently locked to the organization name, so we want to update all voter guides
     voter_guide_manager = VoterGuideManager()
     results = voter_guide_manager.update_organization_voter_guides_with_organization_data(organization_on_stage)
+    if not results['success']:
+        status += results['status']
+        messages.add_message(request, messages.ERROR, 'VOTER_GUIDE_UPDATE_FAILED: ' + status)
 
     # Create voter_guide for this election?
     if positive_value_exists(google_civic_election_id) and positive_value_exists(organization_we_vote_id):
@@ -3114,7 +3196,6 @@ def reserved_domain_edit_process_view(request):
 
     # Check to see if this organization is already being used anywhere
     reserved_domain_found = False
-    new_organization_created = False
     status = ""
     if positive_value_exists(reserved_domain_id):
         try:

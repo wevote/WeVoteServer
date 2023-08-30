@@ -684,6 +684,9 @@ def office_list_view(request):
                 new_filter = Q(ballotpedia_race_id__iexact=one_word)
                 filters.append(new_filter)
 
+                new_filter = Q(ocd_division_id__icontains=one_word)
+                filters.append(new_filter)
+
                 new_filter = Q(office_name__icontains=one_word)
                 filters.append(new_filter)
 
@@ -1127,7 +1130,7 @@ def office_edit_process_view(request):
                         read_only=True)
                     if office_held_results['office_held_found']:
                         office_held = office_held_results['office_held']
-                        office_on_stage.office_held_name = office_held.office_name
+                        office_on_stage.office_held_name = office_held.office_held_name
                 if office_name is not False:
                     office_on_stage.office_name = office_name
                 if primary_party is not False:
@@ -1165,9 +1168,9 @@ def office_edit_process_view(request):
                                         "&state_code=" + str(state_code))
         except Exception as e:
             handle_record_not_saved_exception(e, logger=logger)
-            messages.add_message(request, messages.ERROR, 'Could not save office: ' + str(e))
+            messages.add_message(request, messages.ERROR, 'Could not save office (create new): ' + str(e))
     else:
-        messages.add_message(request, messages.ERROR, 'Could not save office: ' + status)
+        messages.add_message(request, messages.ERROR, 'Could not save office, success = False from above: ' + status)
 
     if redirect_to_contest_office_list:
         return HttpResponseRedirect(reverse('office:office_list', args=()) +
@@ -1521,7 +1524,7 @@ def find_and_merge_duplicate_offices_view(request):
     except ContestOffice.DoesNotExist:
         pass
 
-    # Loop through all of the offices in this election to see how many have possible duplicates
+    # Loop through all the offices in this election to see how many have possible duplicates
     if positive_value_exists(find_number_of_duplicates):
         duplicate_office_count = 0
         for contest_office in contest_office_list:
@@ -1537,7 +1540,7 @@ def find_and_merge_duplicate_offices_view(request):
                                                          "possible duplicates."
                                                          "".format(duplicate_office_count=duplicate_office_count))
 
-    # Loop through all of the contest offices in this election
+    # Loop through all the contest offices in this election
     ignore_office_we_vote_id_list = []
     for contest_office in contest_office_list:
         # Add current contest office entry to the ignore list

@@ -51,6 +51,7 @@
             Unknown
         {% endif %}
         </span>
+        {# Uploaded photo #}
         <span style="float: left; padding: 8px 20px 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="UPLOADED"
                 {% if politician.profile_image_type_currently_active == 'UPLOADED' %} checked {% endif %}
@@ -66,6 +67,7 @@
             <input type="file" name="politician_photo_file" accept="image/*">
         {% endif %}
         </span>
+        {# Facebook photo #}
         {% if politician.we_vote_hosted_profile_facebook_image_url_tiny %}
         <span style="float: left; padding: 8px 20px 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="FACEBOOK"
@@ -97,7 +99,12 @@
 </div>
 
 <div class="form-group" style="height: 64px;">
-    <label for="politician_name_id" class="col-sm-3 control-label">Politician Name</label>
+    <label for="politician_name_id" class="col-sm-3 control-label">
+        Politician Name
+        {% if politician.supporters_count %}
+            <div class="u-no-break" style="color: darkgray; font-size: 10px;">supporters_count: {{ politician.supporters_count }}</div>
+        {% endif %}
+    </label>
     <div class="col-sm-8">
         <input type="text" name="politician_name" id="politician_name_id" class="form-control pol_name_text"
                value="{% if politician %}{{ politician.politician_name|default_if_none:"" }}{% else %}{{ politician_name|default_if_none:"" }}{% endif %}" />
@@ -155,6 +162,32 @@
 </div>
 
 <div class="form-group">
+    <label for="gender_id" class="col-sm-3 control-label">Gender</label>
+    <div class="col-sm-8 u-no-break">
+        <div>
+        <span style="border: 1px solid #ccc; border-radius: 4px; padding: 10px 6px 10px 10px">
+            <input type="radio" name="gender" id="gender_unknown_id" value="U"
+                {% if politician %}{% if politician.gender == 'U' %}checked{% endif %}{% else %}{% if gender == 'U' %}checked{% endif %}{% endif %} />
+            <label for="gender_unknown_id" style="padding-right: 8px;">Unknown</label>
+            <input type="radio" name="gender" id="gender_female_id" value="F"
+                {% if politician %}{% if politician.gender == 'F' %}checked{% endif %}{% else %}{% if gender == 'F' %}checked{% endif %}{% endif %} />
+            <label for="gender_female_id" style="padding-right: 8px;">Female</label>
+            <input type="radio" name="gender" id="gender_male_id" value="M"
+                {% if politician %}{% if politician.gender == 'M' %}checked{% endif %}{% else %}{% if gender == 'M' %}checked{% endif %}{% endif %} />
+            <label for="gender_male_id" style="padding-right: 8px;">Male</label>
+            <input type="radio" name="gender" id="gender_neutral_id" value="N"
+                {% if politician %}{% if politician.gender == 'N' %}checked{% endif %}{% else %}{% if gender == 'N' %}checked{% endif %}{% endif %} />
+            <label for="gender_neutral_id">Nonbinary</label>
+        </span>
+        <span class="u-no-break">
+            <label for="gender_source_label" style="padding-left: 5%; padding-right: 10px">Source of Gender Identification</label>
+            <span id="sourceString" style="color: darkgrey">{% if politician %}{% if politician.gender_likelihood == '' %}None{% else %}{{ politician.gender_likelihood }}{% endif %}{% endif %}</span>
+        </span>
+        </div>
+    </div>
+</div>
+
+<div class="form-group">
     <label for="seo_friendly_path_id" class="col-sm-3 control-label">
         SEO Friendly Path
         {% if politician.seo_friendly_path %}
@@ -166,6 +199,13 @@
     <div class="col-sm-8">
         <input type="text" name="seo_friendly_path" id="seo_friendly_path_id" class="form-control"
                value="{% if politician %}{{ politician.seo_friendly_path|default_if_none:"" }}{% else %}{{ seo_friendly_path|default_if_none:"" }}{% endif %}" />
+    {% if path_list %}
+        {% include "politician/seo_friendly_path_list.html" with path_list=path_list %}
+    {% else %}
+        <div style="color: darkgray">
+        No alternate URL paths found.
+        </div>
+    {% endif %}
     </div>
 </div>
 
@@ -367,6 +407,16 @@
 </div>
 
 <div class="form-group">
+    <label for="ballot_guide_official_statement_id" class="col-sm-3 control-label">Official Candidate Statement</label>
+    <div class="col-sm-8">
+        <textarea name="ballot_guide_official_statement"
+                  class="form-control animated"
+                  id="ballot_guide_official_statement_id"
+                  placeholder="Enter official statement from politician">{% if politician %}{{ politician.ballot_guide_official_statement|default_if_none:"" }}{% else %}{{ ballot_guide_official_statement|default_if_none:"" }}{% endif %}</textarea>
+    </div>
+</div>
+
+<div class="form-group">
     <label for="politician_contact_form_url_id" class="col-sm-3 control-label">
         Politician Contact Form
         {% if politician.politician_contact_form_url %}
@@ -541,27 +591,6 @@
     <div class="col-sm-8">
         <input type="text" name="youtube_url" id="youtube_url_id" class="form-control"
                value="{% if politician %}{{ politician.youtube_url|default_if_none:"" }}{% else %}{{ youtube_url|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="gender_id" class="col-sm-3 control-label">Gender</label>
-    <div class="col-sm-8">
-        <input type="radio" name="gender" id="gender_unknown_id" value="U"
-                {% if politician %}{% if politician.gender == 'U' %}checked{% endif %}{% else %}{% if gender == 'U' %}checked{% endif %}{% endif %} />
-        <label for="gender_unknown_id">Unknown</label>
-        &nbsp;&nbsp;&nbsp;
-        <input type="radio" name="gender" id="gender_female_id" value="F"
-                {% if politician %}{% if politician.gender == 'F' %}checked{% endif %}{% else %}{% if gender == 'F' %}checked{% endif %}{% endif %} />
-        <label for="gender_female_id">Female</label>
-        &nbsp;&nbsp;&nbsp;
-        <input type="radio" name="gender" id="gender_male_id" value="M"
-                {% if politician %}{% if politician.gender == 'M' %}checked{% endif %}{% else %}{% if gender == 'M' %}checked{% endif %}{% endif %} />
-        <label for="gender_male_id">Male</label>
-        &nbsp;&nbsp;&nbsp;
-        <input type="radio" name="gender" id="gender_neutral_id" value="N"
-                {% if politician %}{% if politician.gender == 'N' %}checked{% endif %}{% else %}{% if gender == 'N' %}checked{% endif %}{% endif %} />
-        <label for="gender_neutral_id">Nonbinary</label>
     </div>
 </div>
 
@@ -1170,7 +1199,30 @@
     }
 </style>
 <script>
-    $(function(){
+    function setSourceOfGenderId () {
+        const source = $('#sourceString');
+        if (source.length > 0) {
+            switch (source.text()) {
+                case 'PolDataMgr':
+                    source.text('Political Data Mgr');
+                    break;
+                case 'Politician':
+                    source.text('Politician Provided');
+                    break;
+                case 'GuessHigh':
+                    source.text('Gender Guesser High Likelihood');
+                    break;
+                case 'GuessLow':
+                    source.text('Gender Guesser Low Likelihood');
+                    break;
+                default:
+                    source.text('None');
+                    break;
+            }
+        }
+    }
+
+    $(() => {
         const { autosize } = window;
         autosize($('.normal'));
         autosize($('.animated'));
@@ -1179,8 +1231,17 @@
           $("input[name='politician_name']").val(name);
           $('#update_name_id').prop('disabled', true).css('opacity',0.5);
         });
-    }(window.$, window.autosize));
-</script>
 
+        // On click for gender buttons
+        $("input[id^=gender_]").on('click', (event) => {
+          const id = event.currentTarget.id;
+          const source = $('#sourceString');
+          source.text('gender_female_id,gender_male_id,gender_neutral_id'.indexOf(id) > -1 ? 'Political Data Mgr' : 'None');
+        });
+        // on page load translate the database token for politician.gender_likelihood to the text version
+        setSourceOfGenderId();
+    });
+
+</script>
 
 {% endblock %}

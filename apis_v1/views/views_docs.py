@@ -49,7 +49,7 @@ from apis_v1.documentation_source import \
     twitter_identity_retrieve_doc, \
     twitter_sign_in_request_access_token_doc, twitter_sign_in_request_voter_info_doc, twitter_sign_in_retrieve_doc, \
     twitter_sign_in_start_doc, twitter_retrieve_ids_i_follow_doc, voter_address_retrieve_doc, voter_address_save_doc, \
-    voter_all_positions_retrieve_doc, voter_all_bookmarks_status_retrieve_doc, \
+    voter_aggregate_analytics_doc, voter_all_positions_retrieve_doc, voter_all_bookmarks_status_retrieve_doc, \
     voter_ballot_items_retrieve_doc, \
     voter_ballot_items_retrieve_from_google_civic_doc, voter_ballot_list_retrieve_doc, \
     voter_bookmark_off_save_doc, \
@@ -1231,6 +1231,16 @@ def voter_address_save_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_address_save_doc.voter_address_save_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def voter_aggregate_analytics_doc_view(request):
+    """
+    Show documentation about voterAggregateAnalytics
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = voter_aggregate_analytics_doc.voter_aggregate_analytics_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 

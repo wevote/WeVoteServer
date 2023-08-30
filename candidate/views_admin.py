@@ -6,6 +6,7 @@ import json
 import re
 import string
 from datetime import datetime
+
 import pytz
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -16,6 +17,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.timezone import localtime, now
+
 import wevote_functions.admin
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.models import BallotReturnedListManager
@@ -31,13 +33,16 @@ from import_export_twitter.controllers import refresh_twitter_candidate_details
 from import_export_vote_smart.models import VoteSmartRatingOneCandidate
 from import_export_vote_smart.votesmart_local import VotesmartApiError
 from measure.models import ContestMeasure
+from office.controllers import office_create_from_office_held
 from office.models import ContestOffice, ContestOfficeManager
+from office_held.models import OfficeHeld
 from politician.models import PoliticianManager
 from position.models import PositionEntered, PositionListManager
+from representative.models import Representative
 from twitter.models import TwitterLinkPossibility, TwitterUserManager
 from voter.models import voter_has_authority
 from voter_guide.models import VoterGuide
-from wevote_functions.functions import convert_date_to_date_as_integer, convert_to_int, \
+from wevote_functions.functions import convert_to_int, \
     convert_we_vote_date_string_to_date_as_integer, \
     extract_instagram_handle_from_text_string, \
     extract_twitter_handle_from_text_string, list_intersection, \
@@ -54,7 +59,6 @@ from .controllers import candidates_import_from_master_server, candidates_import
 from .models import CandidateCampaign, CandidateListManager, CandidateManager, CandidateToOfficeLink, \
     CANDIDATE_UNIQUE_IDENTIFIERS, PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
     PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_VOTE_USA
-
 
 CANDIDATES_SYNC_URL = get_environment_variable("CANDIDATES_SYNC_URL")  # candidatesSyncOut
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
@@ -494,12 +498,13 @@ def candidate_list_view(request):
                 candidate_we_vote_id_list.append(candidate.we_vote_id)
 
         # Retrieve all CandidateToOfficeLink objects for these candidates
-        results = candidate_list_manager.retrieve_candidate_to_office_link_list(
-            candidate_we_vote_id_list=candidate_we_vote_id_list,
-            read_only=True
-        )
-        if results['candidate_to_office_link_list_found']:
-            candidate_to_office_link_list = results['candidate_to_office_link_list']
+        if len(candidate_we_vote_id_list) > 0:
+            results = candidate_list_manager.retrieve_candidate_to_office_link_list(
+                candidate_we_vote_id_list=candidate_we_vote_id_list,
+                read_only=True
+            )
+            if results['candidate_to_office_link_list_found']:
+                candidate_to_office_link_list = results['candidate_to_office_link_list']
 
         for one_link in candidate_to_office_link_list:
             if positive_value_exists(one_link.contest_office_we_vote_id) \
@@ -509,22 +514,25 @@ def candidate_list_view(request):
         # Retrieve all the offices for these candidates
         from office.models import ContestOfficeListManager
         contest_office_list_manager = ContestOfficeListManager()
-        results = contest_office_list_manager.retrieve_offices(
-            retrieve_from_this_office_we_vote_id_list=contest_office_we_vote_id_list,
-            return_list_of_objects=True,
-            read_only=True)
-        if results['office_list_found']:
-            contest_office_list = results['office_list_objects']
-            for one_office in contest_office_list:
-                if hasattr(one_office, 'district_name'):  # Make sure legit office object
-                    contest_office_by_we_vote_id_dict[one_office.we_vote_id] = one_office
+        if len(contest_office_we_vote_id_list) > 0:
+            results = contest_office_list_manager.retrieve_offices(
+                retrieve_from_this_office_we_vote_id_list=contest_office_we_vote_id_list,
+                return_list_of_objects=True,
+                read_only=True)
+            if results['office_list_found']:
+                contest_office_list = results['office_list_objects']
+                for one_office in contest_office_list:
+                    if hasattr(one_office, 'district_name'):  # Make sure legit office object
+                        contest_office_by_we_vote_id_dict[one_office.we_vote_id] = one_office
 
         # Take CandidateToOfficeLink entries for each candidate, and figure out the contest_office object
         #  furthest in the future. We will use this to find the district_name and contest_office_name
         for office in contest_office_list:
             for candidate in candidate_list:
                 for one_link in candidate_to_office_link_list:
-                    if candidate.we_vote_id == one_link.candidate_we_vote_id:
+                    # If the candidate and office match this candidate_to_office_link, proceed
+                    if candidate.we_vote_id == one_link.candidate_we_vote_id \
+                            and office.we_vote_id == one_link.contest_office_we_vote_id:
                         if candidate.we_vote_id in office_by_candidate_we_vote_id_dict:
                             # If this office is further in the future, replace the earlier version
                             try:
@@ -532,10 +540,15 @@ def candidate_list_view(request):
                             except Exception as e:
                                 office_election_date_as_integer = 0
                             try:
-                                office_election_date_from_dict_as_integer = \
-                                    office_by_candidate_we_vote_id_dict[candidate.we_vote_id].election_date_as_integer
-                                office_election_date_from_dict_as_integer = \
-                                    convert_to_int(office_election_date_from_dict_as_integer)
+                                office_by_candidate_we_vote_id = \
+                                    office_by_candidate_we_vote_id_dict[candidate.we_vote_id]
+                                if hasattr(office_by_candidate_we_vote_id, 'office_name'):
+                                    office_election_date_from_dict_as_integer = \
+                                        office_by_candidate_we_vote_id.election_date_as_integer
+                                    office_election_date_from_dict_as_integer = \
+                                        convert_to_int(office_election_date_from_dict_as_integer)
+                                else:
+                                    office_election_date_from_dict_as_integer = 0
                             except Exception as e:
                                 office_election_date_from_dict_as_integer = 0
                             try:
@@ -547,7 +560,8 @@ def candidate_list_view(request):
                             office_by_candidate_we_vote_id_dict[candidate.we_vote_id] = office
 
         for candidate in candidate_list:
-            if candidate.we_vote_id in office_by_candidate_we_vote_id_dict:
+            if positive_value_exists(candidate.we_vote_id) and \
+                    candidate.we_vote_id in office_by_candidate_we_vote_id_dict:
                 contest_office = office_by_candidate_we_vote_id_dict[candidate.we_vote_id]
                 if hasattr(contest_office, 'district_name'):  # Make sure legit office object
                     results = augment_candidate_with_contest_office_data(
@@ -899,6 +913,9 @@ def candidate_list_view(request):
                 new_filter = Q(contest_office_name__icontains=one_word)
                 filters.append(new_filter)
 
+                new_filter = Q(district_name__icontains=one_word)
+                filters.append(new_filter)
+
                 new_filter = Q(google_civic_candidate_name__icontains=one_word)
                 filters.append(new_filter)
 
@@ -915,6 +932,9 @@ def candidate_list_view(request):
                 filters.append(new_filter)
 
                 new_filter = Q(party__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(seo_friendly_path__icontains=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(twitter_description__icontains=one_word)
@@ -1749,6 +1769,9 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
     candidate_on_stage = CandidateCampaign()
     candidate_list_manager = CandidateListManager()
     google_civic_election_id = 0
+    politician_we_vote_id = ''
+    seo_friendly_path = ''
+    status = ''
 
     try:
         if positive_value_exists(candidate_id):
@@ -1759,6 +1782,8 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
         candidate_id = candidate_on_stage.id
         candidate_we_vote_id = candidate_on_stage.we_vote_id
         google_civic_election_id = candidate_on_stage.google_civic_election_id
+        politician_we_vote_id = candidate_on_stage.politician_we_vote_id
+        seo_friendly_path = candidate_on_stage.seo_friendly_path
     except CandidateCampaign.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
     except CandidateCampaign.DoesNotExist:
@@ -1771,16 +1796,41 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
         web_app_root_url = 'https://quality.WeVote.US'
     if candidate_on_stage_found:
         # Working with Vote Smart data
-        try:
-            vote_smart_candidate_id = candidate_on_stage.vote_smart_id
-            rating_list_query = VoteSmartRatingOneCandidate.objects.order_by('-timeSpan')  # Desc order
-            rating_list = rating_list_query.filter(candidateId=vote_smart_candidate_id)
-        except VotesmartApiError as error_instance:
-            # Catch the error message coming back from Vote Smart and pass it in the status
-            error_message = error_instance.args
-            status = "EXCEPTION_RAISED: {error_message}".format(error_message=error_message)
-            print_to_log(logger=logger, exception_message_optional=status)
-            rating_list = []
+        rating_list = []
+        vote_smart_turned_on = False
+        if vote_smart_turned_on:
+            try:
+                vote_smart_candidate_id = candidate_on_stage.vote_smart_id
+                rating_list_query = VoteSmartRatingOneCandidate.objects.order_by('-timeSpan')  # Desc order
+                rating_list = rating_list_query.filter(candidateId=vote_smart_candidate_id)
+            except VotesmartApiError as error_instance:
+                # Catch the error message coming back from Vote Smart and pass it in the status
+                error_message = error_instance.args
+                status = "EXCEPTION_RAISED: {error_message}".format(error_message=error_message)
+                print_to_log(logger=logger, exception_message_optional=status)
+                rating_list = []
+
+        # ##################################
+        # Show the seo friendly paths for this politician/candidate
+        path_count = 0
+        path_list = []
+        if positive_value_exists(politician_we_vote_id):
+            from politician.models import PoliticianSEOFriendlyPath
+            try:
+                path_query = PoliticianSEOFriendlyPath.objects.all()
+                path_query = path_query.filter(politician_we_vote_id__iexact=politician_we_vote_id)
+                path_count = path_query.count()
+                path_list = list(path_query[:4])
+            except Exception as e:
+                status += 'ERROR_RETRIEVING_FROM_PoliticianSEOFriendlyPath: ' + str(e) + ' '
+
+            if positive_value_exists(seo_friendly_path):
+                path_list_modified = []
+                for one_path in path_list:
+                    if seo_friendly_path != one_path.final_pathname_string:
+                        path_list_modified.append(one_path)
+                path_list = path_list_modified
+            path_list = path_list[:3]
 
         # Working with We Vote Positions
         try:
@@ -1849,33 +1899,6 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
                 candidate_on_stage.candidate_name_normalized = string.capwords(humanized_cleaned)
 
         template_values = {
-            'messages_on_stage':                messages_on_stage,
-            'candidate':                        candidate_on_stage,
-            'rating_list':                      rating_list,
-            'candidate_position_list':          candidate_position_list,
-            'candidate_to_office_link_list':    candidate_to_office_link_list,
-            # 'office_list':                      contest_office_list,
-            # 'contest_office_we_vote_id':        contest_office_we_vote_id,
-            # 'google_civic_election_id':         google_civic_election_id,
-            'state_code':                       state_code,
-            'twitter_link_possibility_list':    twitter_link_possibility_list,
-            'google_search_possibility_list':   google_search_possibility_list,
-            'google_search_possibility_total_count':    google_search_possibility_total_count,
-            # Incoming variables, not saved yet
-            'candidate_name':                   candidate_name,
-            'google_civic_candidate_name':      google_civic_candidate_name,
-            'google_civic_candidate_name2':     google_civic_candidate_name2,
-            'google_civic_candidate_name3':     google_civic_candidate_name3,
-            'candidate_twitter_handle':         candidate_twitter_handle,
-            'candidate_twitter_handle2':        candidate_twitter_handle2,
-            'candidate_twitter_handle3':        candidate_twitter_handle3,
-            'candidate_url':                    candidate_url,
-            'candidate_contact_form_url':       candidate_contact_form_url,
-            'facebook_url':                     facebook_url,
-            'instagram_handle':                 instagram_handle,
-            'candidate_email':                  candidate_email,
-            'candidate_phone':                  candidate_phone,
-            'party':                            party,
             'ballot_guide_official_statement':  ballot_guide_official_statement,
             'ballotpedia_candidate_id':         ballotpedia_candidate_id,
             'ballotpedia_candidate_name':       ballotpedia_candidate_name,
@@ -1883,14 +1906,42 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
             'ballotpedia_office_id':            ballotpedia_office_id,
             'ballotpedia_person_id':            ballotpedia_person_id,
             'ballotpedia_race_id':              ballotpedia_race_id,
-            'vote_smart_id':                    vote_smart_id,
+            'candidate':                        candidate_on_stage,
+            'candidate_email':                  candidate_email,
+            'candidate_phone':                  candidate_phone,
+            'candidate_name':                   candidate_name,
+            'candidate_position_list':          candidate_position_list,
+            'candidate_to_office_link_list':    candidate_to_office_link_list,
+            'candidate_twitter_handle':         candidate_twitter_handle,
+            'candidate_twitter_handle2':        candidate_twitter_handle2,
+            'candidate_twitter_handle3':        candidate_twitter_handle3,
+            'candidate_url':                    candidate_url,
+            'candidate_contact_form_url':       candidate_contact_form_url,
+            # 'contest_office_we_vote_id':        contest_office_we_vote_id,
+            'do_not_display_on_ballot':         do_not_display_on_ballot,
+            'facebook_url':                     facebook_url,
+            # 'google_civic_election_id':         google_civic_election_id,
+            'google_search_possibility_list':   google_search_possibility_list,
+            'google_search_possibility_total_count':    google_search_possibility_total_count,
+            'google_civic_candidate_name':      google_civic_candidate_name,
+            'google_civic_candidate_name2':     google_civic_candidate_name2,
+            'google_civic_candidate_name3':     google_civic_candidate_name3,
+            'instagram_handle':                 instagram_handle,
             'maplight_id':                      maplight_id,
+            'messages_on_stage':                messages_on_stage,
+            # 'office_list':                      contest_office_list,
             'page':                             page,
+            'party':                            party,
+            'path_count':                       path_count,
+            'path_list':                        path_list,
+            'rating_list':                      rating_list,
+            'state_code':                       state_code,
+            'twitter_link_possibility_list':    twitter_link_possibility_list,
+            'vote_smart_id':                    vote_smart_id,
             # 'vote_usa_profile_image_url_https': vote_usa_profile_image_url_https,
+            'web_app_root_url':                 web_app_root_url,
             'withdrawal_date':                  withdrawal_date,
             'withdrawn_from_election':          withdrawn_from_election,
-            'do_not_display_on_ballot':         do_not_display_on_ballot,
-            'web_app_root_url':                 web_app_root_url,
         }
     else:
         template_values = {
@@ -2033,6 +2084,8 @@ def candidate_edit_process_view(request):
     if positive_value_exists(candidate_twitter_handle3):
         candidate_twitter_handle3 = extract_twitter_handle_from_text_string(candidate_twitter_handle3)
     contest_office_id = request.POST.get('contest_office_id', False)
+    contest_office_name = request.POST.get('contest_office_name', False)
+    district_name = request.POST.get('district_name', False)
     do_not_display_on_ballot = positive_value_exists(request.POST.get('do_not_display_on_ballot', False))
     facebook_url = request.POST.get('facebook_url', False)
     google_civic_candidate_name = request.POST.get('google_civic_candidate_name', False)
@@ -2214,7 +2267,7 @@ def candidate_edit_process_view(request):
                 contest_office_we_vote_id=candidate_to_office_link_add_office_we_vote_id,
                 google_civic_election_id=candidate_to_office_link_add_election,
                 state_code=candidate_to_office_link_add_state_code)
-            if results['new_candidate_to_office_link_created']:
+            if results['candidate_to_office_link_created']:
                 messages.add_message(request, messages.INFO, 'Added Candidate-to-Office Link.')
             else:
                 messages.add_message(request, messages.ERROR, 'Candidate-to-Office Link already exists.')
@@ -2479,6 +2532,10 @@ def candidate_edit_process_view(request):
                 # else:
                 #     candidate_on_stage.candidate_ultimate_election_date = candidate_ultimate_election_date
             candidate_on_stage.do_not_display_on_ballot = do_not_display_on_ballot
+            if contest_office_name is not False:
+                candidate_on_stage.contest_office_name = contest_office_name
+            if district_name is not False:
+                candidate_on_stage.district_name = district_name
             if facebook_url is not False:
                 candidate_on_stage.facebook_url = facebook_url
             if google_civic_candidate_name is not False:
@@ -2705,6 +2762,15 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.seo_friendly_path = politician.seo_friendly_path
                 candidate_on_stage.seo_friendly_path_date_last_updated = politician.seo_friendly_path_date_last_updated
                 candidate_on_stage.save()
+
+                from politician.controllers import update_politician_details_from_candidate
+                results = update_politician_details_from_candidate(politician=politician, candidate=candidate_on_stage)
+                if results['success']:
+                    save_changes = results['save_changes']
+                    if positive_value_exists(save_changes):
+                        politician = results['politician']
+                        politician.save()
+
         except Exception as e:
             messages.add_message(request, messages.ERROR,
                                  'Could not save candidate with refreshed politician data:' + str(e))
@@ -3704,7 +3770,7 @@ def candidate_summary_view(request, candidate_id):
 @login_required
 def candidate_create_process_view(request):
     """
-    Delete this candidate
+    Create candidate from politician
     :param request:
     :return:
     """
@@ -3828,6 +3894,215 @@ def compare_two_candidates_for_merge_view(request):
         candidate_merge_conflict_values,
         candidate_year=candidate_year,
         remove_duplicate_process=remove_duplicate_process)
+
+
+@login_required
+def create_us_house_candidates_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = request.GET.get('google_civic_election_id', '')
+    message = ''
+    state_code = request.GET.get('state_code', '')
+    status = ''
+
+    # Get all office held entries labeled as is_us_national_house
+    queryset = OfficeHeld.objects.using('readonly').all()
+    queryset = queryset.filter(is_us_national_house=True)
+    if positive_value_exists(state_code):
+        queryset = queryset.filter(state_code__iexact=state_code)
+    office_held_we_vote_id_list = queryset.values_list('we_vote_id', flat=True).distinct()
+    office_held_list = list(queryset)
+
+    # Retrieve upcoming offices from this election with office_held_we_vote_ids, so we don't make a duplicate
+    queryset = ContestOffice.objects.using('readonly').all()
+    queryset = queryset.filter(google_civic_election_id=google_civic_election_id)
+    queryset = queryset.filter(office_held_we_vote_id__in=office_held_we_vote_id_list)
+    if positive_value_exists(state_code):
+        queryset = queryset.filter(state_code__iexact=state_code)
+    already_exists_office_held_we_vote_id_list = queryset.values_list('office_held_we_vote_id', flat=True).distinct()
+
+    full_set = set(office_held_we_vote_id_list)
+    if already_exists_office_held_we_vote_id_list and len(already_exists_office_held_we_vote_id_list) > 0:
+        already_exists_set = set(already_exists_office_held_we_vote_id_list)
+        contest_offices_to_be_created_list = list(full_set - already_exists_set)
+    else:
+        contest_offices_to_be_created_list = list(full_set)
+
+    for office_held in office_held_list:
+        if office_held.we_vote_id in contest_offices_to_be_created_list:
+            create_results = office_create_from_office_held(
+                office_held_we_vote_id=office_held.we_vote_id,
+                google_civic_election_id=google_civic_election_id)
+            if create_results['success']:
+                if positive_value_exists(create_results['office_we_vote_id']):
+                    contest_offices_to_be_created_list.remove(office_held.we_vote_id)
+
+    # Retrieve upcoming offices from this election with office_held_we_vote_ids
+    queryset = ContestOffice.objects.using('readonly').all()
+    # queryset = queryset.filter(google_civic_election_id=google_civic_election_id)  # Already restricted from above
+    queryset = queryset.filter(office_held_we_vote_id__in=office_held_we_vote_id_list)
+    # if positive_value_exists(state_code):
+    #     queryset = queryset.filter(state_code__iexact=state_code)  # Already restricted from above
+    contest_offices_needed = list(queryset)
+    contest_office_by_office_held_we_vote_id_dict = {}
+    contest_office_we_vote_id_by_office_held_we_vote_id_dict = {}
+    for contest_office in contest_offices_needed:
+        if (positive_value_exists(contest_office.office_held_we_vote_id)
+                and positive_value_exists(contest_office.we_vote_id)):
+            contest_office_by_office_held_we_vote_id_dict[contest_office.office_held_we_vote_id] = contest_office
+            contest_office_we_vote_id_by_office_held_we_vote_id_dict[contest_office.office_held_we_vote_id] = (
+                contest_office.we_vote_id)
+
+    # TODO: Should we try to retrieve contest_office entries another way also, in case there are
+    #  entries without office_held_we_vote_ids? Or deduplicate after this routine?
+
+    office_held_we_vote_id_by_politician_we_vote_id_dict = {}
+    office_we_vote_id_by_politician_we_vote_id_dict = {}
+    state_code_by_politician_we_vote_id_dict = {}
+    politician_we_vote_id_list_to_create_candidate = []
+    representative_we_vote_id_by_politician_we_vote_id_dict = {}
+
+    # Retrieve Representatives associated with OfficeHeld entries with is_us_national_house=True
+    queryset = Representative.objects.using('readonly').all()
+    # Change this to support the year when script is run, so we aren't including Representatives who are not currently
+    #  in office. Should not use same year as this election. i.e., "less than 2024" for 2024 election.
+    queryset = queryset.filter(year_in_office_2023=True)
+    queryset = queryset.filter(office_held_we_vote_id__in=office_held_we_vote_id_list)
+    representative_list = list(queryset)
+    for representative in representative_list:
+        if positive_value_exists(representative.politician_we_vote_id):
+            politician_we_vote_id_list_to_create_candidate.append(representative.politician_we_vote_id)
+            contest_office_we_vote_id = ''
+            representative_we_vote_id_by_politician_we_vote_id_dict[representative.politician_we_vote_id] = \
+                representative.we_vote_id
+            if representative.office_held_we_vote_id:
+                if representative.office_held_we_vote_id in contest_office_we_vote_id_by_office_held_we_vote_id_dict:
+                    if contest_office_we_vote_id_by_office_held_we_vote_id_dict[representative.office_held_we_vote_id]:
+                        contest_office_we_vote_id = \
+                            contest_office_we_vote_id_by_office_held_we_vote_id_dict[
+                                representative.office_held_we_vote_id]
+                office_held_we_vote_id_by_politician_we_vote_id_dict[representative.politician_we_vote_id] = \
+                    representative.office_held_we_vote_id
+            else:
+                status += "MISSING_CONTEST_OFFICE_WE_VOTE_ID "
+            if positive_value_exists(contest_office_we_vote_id):
+                office_we_vote_id_by_politician_we_vote_id_dict[representative.politician_we_vote_id] = \
+                    contest_office_we_vote_id
+            if positive_value_exists(representative.state_code):
+                state_code_by_politician_we_vote_id_dict[representative.politician_we_vote_id] = \
+                    representative.state_code
+
+    # Are there any upcoming CandidateCampaigns with politician_we_vote_ids
+    #  in politician_we_vote_id_list_to_create_candidate? If so, don't recreate CandidateCampaign entries.
+    candidate_list_manager = CandidateListManager()
+    results = candidate_list_manager.retrieve_candidate_list(
+        politician_we_vote_id_list=politician_we_vote_id_list_to_create_candidate,
+        candidate_year_list=[2024])  # Upgrade this to match incoming election year
+    if results['candidate_list_found']:
+        existing_candidate_list = results['candidate_list']
+        for existing_candidate in existing_candidate_list:
+            if existing_candidate.politician_we_vote_id in politician_we_vote_id_list_to_create_candidate:
+                politician_we_vote_id_list_to_create_candidate.remove(existing_candidate.politician_we_vote_id)
+
+    # Create CandidateCampaign entries for each Representative found connected to OfficeHeld marked
+    #  with "is_us_national_house"
+    candidate_create_errors = 0
+    candidates_created = 0
+    candidates_already_existed = 0
+    candidate_to_office_link_errors = 0
+    candidate_to_office_links_created = 0
+    candidate_to_office_links_already_existed = 0
+    candidate_manager = CandidateManager()
+    from candidate.controllers import create_candidate_from_politician
+    for politician_we_vote_id in politician_we_vote_id_list_to_create_candidate:
+        create_results = create_candidate_from_politician(
+            politician_we_vote_id=politician_we_vote_id)
+        if not create_results['success']:
+            candidate_create_errors += 1
+        elif create_results['candidate_created']:  # This function fails if candidate already exists
+            candidate = create_results['candidate']
+            candidate_we_vote_id = candidate.we_vote_id
+            if politician_we_vote_id in office_held_we_vote_id_by_politician_we_vote_id_dict:
+                office_held_we_vote_id = office_held_we_vote_id_by_politician_we_vote_id_dict[politician_we_vote_id]
+                if positive_value_exists(office_held_we_vote_id):
+                    candidate.office_held_we_vote_id = office_held_we_vote_id
+            if politician_we_vote_id in representative_we_vote_id_by_politician_we_vote_id_dict:
+                representative_we_vote_id = \
+                    representative_we_vote_id_by_politician_we_vote_id_dict[politician_we_vote_id]
+                if positive_value_exists(representative_we_vote_id):
+                    candidate.representative_we_vote_id = representative_we_vote_id
+            candidate.candidate_is_incumbent = True
+            candidate.save()
+            candidates_created += 1
+            contest_office_we_vote_id = ''
+            if politician_we_vote_id in office_we_vote_id_by_politician_we_vote_id_dict:
+                contest_office_we_vote_id = office_we_vote_id_by_politician_we_vote_id_dict[politician_we_vote_id]
+            state_code_for_candidate = ''
+            if politician_we_vote_id in state_code_by_politician_we_vote_id_dict:
+                state_code_for_candidate = state_code_by_politician_we_vote_id_dict[politician_we_vote_id]
+            if positive_value_exists(candidate_we_vote_id) and positive_value_exists(contest_office_we_vote_id) \
+                    and positive_value_exists(state_code_for_candidate):
+                # Link to correct ContestOffice
+                results = candidate_manager.get_or_create_candidate_to_office_link(
+                    candidate_we_vote_id=candidate_we_vote_id,
+                    contest_office_we_vote_id=contest_office_we_vote_id,
+                    google_civic_election_id=google_civic_election_id,
+                    state_code=state_code_for_candidate)
+                if results['success']:
+                    if results['candidate_to_office_link_created']:
+                        candidate_to_office_links_created += 1
+                    elif results['candidate_to_office_link_found']:
+                        candidate_to_office_links_already_existed += 1
+                    else:
+                        candidate_to_office_link_errors += 1
+                else:
+                    candidate_to_office_link_errors += 1
+            else:
+                candidate_to_office_link_errors += 1
+                message += "Unable to link candidate to contest_office--missing required variable. "
+                status += ""
+        else:
+            candidate_create_errors += 1
+
+    candidate_message = ""
+    if candidates_already_existed > 0:
+        candidate_message += "Candidate(s) already exist: " + str(candidates_already_existed) + " "
+
+    if candidates_created > 0:
+        candidate_message += "Candidate(s) created: " + str(candidates_created) + " "
+
+    if candidate_create_errors > 0:
+        candidate_message += "Candidate create errors: " + str(candidate_create_errors) + " "
+
+    if candidates_already_existed > 0 or candidates_created > 0 or candidate_create_errors > 0:
+        pass
+    else:
+        candidate_message += "No US House Candidates created. "
+    messages.add_message(request, messages.INFO, candidate_message)
+
+    candidate_link_message = ""
+    if candidate_to_office_links_already_existed > 0:
+        candidate_link_message += "Link(s) already exist: " + str(candidate_to_office_links_already_existed) + " "
+
+    if candidate_to_office_links_created > 0:
+        candidate_link_message += "Link(s) created: " + str(candidate_to_office_links_created) + " "
+
+    if candidate_to_office_link_errors > 0:
+        candidate_link_message += "Link create errors: " + str(candidate_to_office_link_errors) + " "
+
+    if (candidate_to_office_links_already_existed > 0 or candidate_to_office_links_created > 0
+            or candidate_to_office_link_errors > 0):
+        messages.add_message(request, messages.INFO, candidate_link_message)
+
+    return HttpResponseRedirect(
+        reverse('candidate:candidate_list', args=()) +
+        "?google_civic_election_id={google_civic_election_id}&state_code={state_code}"
+        "".format(
+            state_code=state_code,
+            google_civic_election_id=google_civic_election_id))
 
 
 @login_required

@@ -432,6 +432,7 @@ def campaignx_retrieve_for_api(  # campaignRetrieve & campaignRetrieveAsOwner (N
     success = True
     campaignx_dict = {}
     campaignx_error_dict = copy.deepcopy(CAMPAIGNX_ERROR_DICT)
+    campaignx_error_dict['seo_friendly_path'] = seo_friendly_path
     voter_signed_in_with_email = False
     voter_we_vote_id = ''
 
@@ -1272,6 +1273,7 @@ def create_campaignx_supporter_from_position(
 def create_campaignx_supporters_from_positions(
         request,
         friends_only_positions=False,
+        politician_we_vote_id_list=[],
         state_code=''):
     # Create default variables needed below
     campaignx_supporter_bulk_create_list = []
@@ -1281,9 +1283,8 @@ def create_campaignx_supporters_from_positions(
     campaignx_we_vote_id_list_to_refresh = []
     # key: politician_we_vote_id, value: linked_campaignx_we_vote_id
     linked_campaignx_we_vote_id_by_politician_we_vote_id_dict = {}
-    number_to_create = 20  # 1000
+    number_to_create = 1000
     from politician.models import Politician
-    politician_we_vote_id_list = []
     from position.models import PositionEntered, PositionForFriends
     position_objects_to_mark_as_having_campaignx_supporter_created = []
     position_updates_made = 0
@@ -1306,7 +1307,9 @@ def create_campaignx_supporters_from_positions(
         Q(position_ultimate_election_not_linked=True) |
         Q(position_ultimate_election_date__gte=date_today_as_integer)
     )
-    if positive_value_exists(state_code):
+    if positive_value_exists(len(politician_we_vote_id_list) > 0):
+        position_query = position_query.filter(politician_we_vote_id__in=politician_we_vote_id_list)
+    elif positive_value_exists(state_code):
         position_query = position_query.filter(state_code__iexact=state_code)
     total_to_convert = position_query.count()
     position_list_to_copy = list(position_query[:number_to_create])
@@ -1339,7 +1342,8 @@ def create_campaignx_supporters_from_positions(
         position_list_to_copy = position_list_modified
 
     for one_position in position_list_to_copy:
-        politician_we_vote_id_list.append(one_position.politician_we_vote_id)  # Needed to get campaignx_we_vote_id
+        if one_position.politician_we_vote_id not in politician_we_vote_id_list:
+            politician_we_vote_id_list.append(one_position.politician_we_vote_id)  # Needed to get campaignx_we_vote_id
         position_we_vote_id_list_to_create.append(one_position.we_vote_id)
 
     # Retrieve all the related politicians in a single query, so we can access the linked_campaignx_we_vote_id
@@ -1890,12 +1894,13 @@ def generate_campaignx_dict_from_campaignx_object(
     else:
         voter_campaignx_supporter_dict = {}
 
-    # Get most recent supporters
+    # Get most recent supporters, regardless of whether there is a written endorsement.
     latest_campaignx_supporter_list = []
     supporter_list_results = campaignx_manager.retrieve_campaignx_supporter_list(
         campaignx_we_vote_id=campaignx.we_vote_id,
         limit=7,
         read_only=True,
+        require_supporter_endorsement=False,
         require_visible_to_public=True)
     if supporter_list_results['supporter_list_found']:
         supporter_list = supporter_list_results['supporter_list']
@@ -1919,13 +1924,13 @@ def generate_campaignx_dict_from_campaignx_object(
             }
             latest_campaignx_supporter_list.append(one_supporter_dict)
 
-    # Get most recent supporter_endorsements (require_supporter_endorsement == True)
+    # Get most recent supporter_endorsements which include written endorsement (require_supporter_endorsement == True)
     latest_campaignx_supporter_endorsement_list = []
     supporter_list_results = campaignx_manager.retrieve_campaignx_supporter_list(
         campaignx_we_vote_id=campaignx.we_vote_id,
         limit=10,
-        require_supporter_endorsement=True,
-        read_only=True)
+        read_only=True,
+        require_supporter_endorsement=True)
     if supporter_list_results['supporter_list_found']:
         supporter_list = supporter_list_results['supporter_list']
         for campaignx_supporter in supporter_list:

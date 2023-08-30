@@ -22,9 +22,8 @@
                         target="_blank" >
             Update Politicians from Candidates <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
         <li><a href="{% url 'candidate:repair_imported_names' %}?is_candidate=false" >Repair Politician Names</a></li>
+        <li><a href="{% url 'politician:set_missing_gender_ids' %}" >Set Missing Politician Gender Ids</a></li>
     </ul>
-
-<br /><br />
 
 <form name="state_code_form" method="get" action="{% url 'politician:politician_list' %}">
     {% csrf_token %}
@@ -70,6 +69,11 @@
     <label for="show_related_candidates_id">
       <input type="checkbox" name="show_related_candidates" id="show_related_candidates_id" value="1"
              {% if show_related_candidates %}checked{% endif %} /> Show related candidates count
+    </label>
+
+   <label for="show_ocd_id_state_mismatch_id">
+      <input type="checkbox" name="show_ocd_id_state_mismatch" id="show_ocd_id_state_mismatch_id" value="1"
+             {% if show_ocd_id_state_mismatch %}checked{% endif %} /> Show OCD ID/State mismatch
     </label>
 </form>
 
@@ -196,6 +200,11 @@
         });
         $(function() {
             $('#show_related_candidates_id').change(function() {
+                this.form.submit();
+            });
+        });
+       $(function() {
+            $('#show_ocd_id_state_mismatch_id').change(function() {
                 this.form.submit();
             });
         });

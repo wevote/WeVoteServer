@@ -2,20 +2,22 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import OpenPeopleApiCounterManager
-from config.base import get_environment_variable
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from exception.models import handle_exception, handle_record_found_more_than_one_exception
 import json
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 import requests
 from requests.structures import CaseInsensitiveDict
+
+import wevote_functions.admin
+from config.base import get_environment_variable
+from exception.models import handle_exception
 from voter.controllers_contacts import assemble_contact_display_name
 from voter.models import VoterContactEmail
-import wevote_functions.admin
 from wevote_functions.functions import convert_state_text_to_state_code, convert_to_int, \
     display_city_with_correct_capitalization, display_full_name_with_correct_capitalization, \
     generate_date_as_integer, positive_value_exists
 from wevote_settings.models import WeVoteSetting, WeVoteSettingsManager
+from .models import OpenPeopleApiCounterManager
 
 logger = wevote_functions.admin.get_logger(__name__)
 

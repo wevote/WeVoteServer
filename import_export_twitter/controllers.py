@@ -1012,7 +1012,8 @@ def process_twitter_images(twitter_image_load_info):
             twitter_screen_name=organization.organization_twitter_handle,
             twitter_profile_image_url_https=twitter_profile_image_url_https,
             twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
-            twitter_profile_banner_url_https=twitter_profile_banner_url_https, image_source=TWITTER)
+            twitter_profile_banner_url_https=twitter_profile_banner_url_https,
+            image_source=TWITTER)
         cached_twitter_profile_image_url_https = cache_results['cached_twitter_profile_image_url_https']
         cached_twitter_profile_background_image_url_https = \
             cache_results['cached_twitter_profile_background_image_url_https']

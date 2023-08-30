@@ -19,6 +19,10 @@ urlpatterns = [
         views_admin.analytics_action_list_view, name='analytics_action_list'),  # Needed for bug with bad data
     re_path(r'^analytics_action_list/$',
         views_admin.analytics_action_list_view, name='analytics_action_list'),
+    re_path(r'^generate_counties_by_state/$',
+        views_admin.generate_counties_by_state_view, name='generate_counties_by_state'),
+    re_path(r'^query_builder/$',
+        views_admin.voter_aggregate_analytics_query_builder_view, name='query_builder'),
     re_path(r'^augment_voter_analytics_process/(?P<voter_we_vote_id>wv[\w]{2}voter[\w]+)/$',
         views_admin.augment_voter_analytics_process_view, name='augment_voter_analytics_process'),
     re_path(r'^organization_analytics_index/$',

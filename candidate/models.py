@@ -244,13 +244,14 @@ class CandidateListManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_candidate_list(
-            self,
             candidate_id_list=None,
             candidate_we_vote_id_list=None,
             candidate_maplight_id_list=None,
             candidate_vote_smart_id_list=None,
             candidate_ctcl_uuid_list=None,
+            candidate_year_list=[],
             ballotpedia_candidate_id_list=None,
             politician_we_vote_id_list=None,
             read_only=False):
@@ -264,6 +265,8 @@ class CandidateListManager(models.Manager):
                     candidate_query = CandidateCampaign.objects.using('readonly').filter(id__in=candidate_id_list)
                 else:
                     candidate_query = CandidateCampaign.objects.filter(id__in=candidate_id_list)
+                if candidate_year_list and len(candidate_year_list) > 0:
+                    candidate_query = candidate_query.filter(candidate_year__in=candidate_year_list)
                 candidate_list = list(candidate_query)
                 candidate_list_found = True
                 status += "RETRIEVE_CANDIDATE_LIST_FOUND_BY_ID_LIST "
@@ -273,6 +276,8 @@ class CandidateListManager(models.Manager):
                         we_vote_id__in=candidate_we_vote_id_list)
                 else:
                     candidate_query = CandidateCampaign.objects.filter(we_vote_id__in=candidate_we_vote_id_list)
+                if candidate_year_list and len(candidate_year_list) > 0:
+                    candidate_query = candidate_query.filter(candidate_year__in=candidate_year_list)
                 candidate_list = list(candidate_query)
                 candidate_list_found = True
                 status += "RETRIEVE_CANDIDATE_LIST_FOUND_BY_WE_VOTE_ID_LIST "
@@ -282,6 +287,8 @@ class CandidateListManager(models.Manager):
                         ctcl_uuid__in=candidate_ctcl_uuid_list)
                 else:
                     candidate_query = CandidateCampaign.objects.filter(ctcl_uuid__in=candidate_ctcl_uuid_list)
+                if candidate_year_list and len(candidate_year_list) > 0:
+                    candidate_query = candidate_query.filter(candidate_year__in=candidate_year_list)
                 candidate_list = list(candidate_query)
                 candidate_list_found = True
                 status += "RETRIEVE_CANDIDATE_LIST_FOUND_BY_CTCL_UUID_LIST "
@@ -291,6 +298,8 @@ class CandidateListManager(models.Manager):
                         maplight_id__in=candidate_maplight_id_list)
                 else:
                     candidate_query = CandidateCampaign.objects.filter(maplight_id__in=candidate_maplight_id_list)
+                if candidate_year_list and len(candidate_year_list) > 0:
+                    candidate_query = candidate_query.filter(candidate_year__in=candidate_year_list)
                 candidate_list = list(candidate_query)
                 candidate_list_found = True
                 status += "RETRIEVE_CANDIDATE_LIST_FOUND_BY_MAPLIGHT_ID_LIST "
@@ -300,6 +309,8 @@ class CandidateListManager(models.Manager):
                         vote_smart_id__in=candidate_vote_smart_id_list)
                 else:
                     candidate_query = CandidateCampaign.objects.filter(vote_smart_id__in=candidate_vote_smart_id_list)
+                if candidate_year_list and len(candidate_year_list) > 0:
+                    candidate_query = candidate_query.filter(candidate_year__in=candidate_year_list)
                 candidate_list = list(candidate_query)
                 candidate_list_found = True
                 status += "RETRIEVE_CANDIDATE_LIST_FOUND_BY_VOTE_SMART_ID_LIST "
@@ -314,6 +325,8 @@ class CandidateListManager(models.Manager):
                 else:
                     candidate_query = CandidateCampaign.objects.filter(
                         ballotpedia_candidate_id=ballotpedia_candidate_id_integer_list)
+                if candidate_year_list and len(candidate_year_list) > 0:
+                    candidate_query = candidate_query.filter(candidate_year__in=candidate_year_list)
                 candidate_list = list(candidate_query)
                 candidate_list_found = True
                 status += "RETRIEVE_CANDIDATE_LIST_FOUND_BY_BALLOTPEDIA_CANDIDATE_ID_LIST "
@@ -324,6 +337,8 @@ class CandidateListManager(models.Manager):
                 else:
                     candidate_query = CandidateCampaign.objects.filter(
                         politician_we_vote_id__in=politician_we_vote_id_list)
+                if candidate_year_list and len(candidate_year_list) > 0:
+                    candidate_query = candidate_query.filter(candidate_year__in=candidate_year_list)
                 candidate_list = list(candidate_query)
                 candidate_list_found = True
                 status += "RETRIEVE_CANDIDATE_LIST_FOUND_BY_WE_VOTE_ID_LIST "
@@ -941,6 +956,7 @@ class CandidateListManager(models.Manager):
             read_only=True):
         """
         retrieve_possible_duplicate_candidates is used primarily to avoid duplicate candidate imports.
+        See also retrieve_candidates_from_non_unique_identifiers
         :param candidate_name:
         :param google_civic_candidate_name:
         :param google_civic_candidate_name2:
@@ -985,7 +1001,7 @@ class CandidateListManager(models.Manager):
 
             # We want to find candidates with *any* of these values
             if positive_value_exists(google_civic_candidate_name):
-                # We intentionally use case sensitive matching here
+                # We intentionally use case-sensitive matching here
                 new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name)
                 filters.append(new_filter)
                 new_filter = Q(google_civic_candidate_name2__exact=google_civic_candidate_name)
@@ -1916,8 +1932,8 @@ class CandidateListManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_candidate_we_vote_id_list_from_year_list(
-            self,
             limit_to_this_state_code='',
             year_list=[]):
         """
@@ -2585,7 +2601,7 @@ class CandidateCampaign(models.Model):
 
     # Official Statement from Candidate in Ballot Guide
     ballot_guide_official_statement = models.TextField(verbose_name="official candidate statement from ballot guide",
-                                                       null=True, blank=True, default="")
+                                                       null=True, blank=True, default=None)
     crowdpac_candidate_id = models.PositiveIntegerField(
         verbose_name="crowdpac integer id", null=True, blank=True)
     # CTCL candidate data fields
@@ -2593,6 +2609,8 @@ class CandidateCampaign(models.Model):
 
     candidate_is_top_ticket = models.BooleanField(verbose_name="candidate is top ticket", default=False)
     candidate_is_incumbent = models.BooleanField(verbose_name="candidate is the current incumbent", default=False)
+    # If candidate is an incumbent, this is the we_vote_id of their Representative entry
+    representative_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
     # Candidacy Declared, (and others for withdrawing, etc.)
     candidate_participation_status = models.CharField(verbose_name="candidate participation status",
                                                       max_length=255, null=True, blank=True)
@@ -3877,16 +3895,17 @@ class CandidateManager(models.Manager):
             'success':                          success,
         }
 
+    @staticmethod
     def get_or_create_candidate_to_office_link(
-            self,
             candidate_we_vote_id='',
             contest_office_we_vote_id='',
             google_civic_election_id=0,
             state_code=''):
         exception_multiple_object_returned = False
         success = True
-        new_candidate_to_office_link_created = False
+        candidate_to_office_link_created = False
         candidate_to_office_link = None
+        candidate_to_office_link_found = False
         status = ""
 
         candidate_we_vote_id = str(candidate_we_vote_id).strip()
@@ -3899,12 +3918,13 @@ class CandidateManager(models.Manager):
             pass
 
         try:
-            candidate_to_office_link, new_candidate_to_office_link_created = \
+            candidate_to_office_link, candidate_to_office_link_created = \
                 CandidateToOfficeLink.objects.get_or_create(
                     candidate_we_vote_id=candidate_we_vote_id,
                     contest_office_we_vote_id=contest_office_we_vote_id,
                     google_civic_election_id=google_civic_election_id,
                     state_code=state_code)
+            candidate_to_office_link_found = True
             status += "CANDIDATE_TO_OFFICE_LINK_GET_OR_CREATE-SUCCESS "
         except CandidateToOfficeLink.MultipleObjectsReturned as e:
             success = False
@@ -3919,7 +3939,7 @@ class CandidateManager(models.Manager):
             status += 'EXCEPTION_UPDATE_OR_CREATE_CANDIDATE_TO_OFFICE_LINK: ' + str(e) + ' '
             success = False
 
-        if new_candidate_to_office_link_created:
+        if candidate_to_office_link_created:
             election_manager = ElectionManager()
             results = election_manager.retrieve_election(google_civic_election_id=google_civic_election_id)
             position_year = None
@@ -3962,8 +3982,9 @@ class CandidateManager(models.Manager):
             'success':                              success,
             'status':                               status,
             'MultipleObjectsReturned':              exception_multiple_object_returned,
-            'new_candidate_to_office_link_created': new_candidate_to_office_link_created,
+            'candidate_to_office_link_created':     candidate_to_office_link_created,
             'candidate_to_office_link':             candidate_to_office_link,
+            'candidate_to_office_link_found':       candidate_to_office_link_found,
         }
         return results
 

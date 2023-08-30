@@ -6,13 +6,14 @@ from .controllers import augment_one_voter_analytics_action_entries_without_elec
     augment_voter_analytics_action_entries_without_election_id, \
     save_organization_daily_metrics, save_organization_election_metrics, \
     save_sitewide_daily_metrics, save_sitewide_election_metrics, save_sitewide_voter_metrics
-from .models import ACTION_WELCOME_VISIT, AnalyticsAction, AnalyticsManager, display_action_constant_human_readable, \
+from .models import ACTION_BALLOT_VISIT, \
+    AnalyticsAction, AnalyticsManager, display_action_constant_human_readable, \
     fetch_action_constant_number_from_constant_string, OrganizationDailyMetrics, OrganizationElectionMetrics, \
     SitewideDailyMetrics, SitewideElectionMetrics, SitewideVoterMetrics
 from admin_tools.views import redirect_to_sign_in_page
 from config.base import get_environment_variable
 import csv
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.contrib import messages
@@ -24,10 +25,13 @@ from django.utils.timezone import now
 from election.models import Election, ElectionManager
 from exception.models import print_to_log
 import json
+import requests
+from socket import timeout
 from voter.models import voter_has_authority
 import wevote_functions.admin
+from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from wevote_functions.functions import convert_date_as_integer_to_date, convert_date_to_date_as_integer, \
-    convert_date_to_we_vote_date_string, convert_to_int, positive_value_exists
+    convert_to_int, positive_value_exists, STATE_CODE_MAP
 from wevote_settings.models import WeVoteSetting, WeVoteSettingsManager
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -38,6 +42,60 @@ SITEWIDE_DAILY_METRICS_SYNC_URL = "https://api.wevoteusa.org/apis/v1/sitewideDai
 SITEWIDE_ELECTION_METRICS_SYNC_URL = "https://api.wevoteusa.org/apis/v1/sitewideElectionMetricsSyncOut/"
 SITEWIDE_VOTER_METRICS_SYNC_URL = "https://api.wevoteusa.org/apis/v1/sitewideVoterMetricsSyncOut/"
 WEB_APP_ROOT_URL = get_environment_variable("WEB_APP_ROOT_URL")
+
+
+def voter_aggregate_analytics_query_builder_view(request):  # voterAggregateAnalytics Builder
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    show_county_topics = positive_value_exists(request.GET.get('show_county_topics', 0))
+    show_counties = show_county_topics or positive_value_exists(request.GET.get('show_county_topics', 0))
+    show_counties_without_activity = positive_value_exists(request.GET.get('show_counties_without_activity', 0))
+    show_state_topics = positive_value_exists(request.GET.get('show_state_topics', 1))
+    show_states_without_activity = positive_value_exists(request.GET.get('show_states_without_activity', 0))
+    show_this_year_of_analytics = convert_to_int(request.GET.get('show_this_year_of_analytics', 0))
+    state_code = request.GET.get('state_code', '')
+
+    analytics_action_code_list = []
+    analytics_action_code_list.append(ACTION_BALLOT_VISIT)
+
+    queryset = AnalyticsAction.objects.using('readonly').all()
+    queryset = queryset.filter(action_constant__in=analytics_action_code_list)
+    if positive_value_exists(show_this_year_of_analytics):
+        first_day_of_year = convert_to_int("{year}0101".format(year=show_this_year_of_analytics))
+        last_day_of_year = convert_to_int("{year}1231".format(year=show_this_year_of_analytics))
+        queryset = queryset.filter(date_as_integer__gte=first_day_of_year)
+        queryset = queryset.filter(date_as_integer__lte=last_day_of_year)
+    queryset = queryset.values_list('google_civic_election_id', flat=True).distinct()
+    google_civic_election_id_list = list(queryset)
+
+    queryset = Election.objects.using('readonly').all()
+    queryset = queryset.filter(google_civic_election_id__in=google_civic_election_id_list)
+    queryset = queryset.order_by('-election_day_text')
+    election_list = list(queryset)
+
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
+
+    current_year = date.today().year
+    election_years_without_future_years = [i for i in ELECTION_YEARS_AVAILABLE if i <= current_year]
+    election_years_available_sorted = sorted(election_years_without_future_years, reverse=True)
+
+    messages_on_stage = get_messages(request)
+
+    template_values = {
+        'election_list':                election_list,
+        'election_years_available':     election_years_available_sorted,
+        'google_civic_election_id':     google_civic_election_id,
+        'messages_on_stage':            messages_on_stage,
+        "show_counties":                show_counties,
+        "show_counties_without_activity": show_counties_without_activity,
+        "show_county_topics":           show_county_topics,
+        "show_state_topics":            show_state_topics,
+        "show_states_without_activity": show_states_without_activity,
+        "show_this_year_of_analytics":  show_this_year_of_analytics,
+        'state_code':                   state_code,
+        'state_list':                   sorted_state_list,
+    }
+    return render(request, 'analytics/voter_aggregate_analytics_query_builder.html', template_values)
 
 
 def analytics_action_sync_out_view(request):  # analyticsActionSyncOut
@@ -955,6 +1013,73 @@ def augment_voter_analytics_process_view(request, voter_we_vote_id):
                                 "&state_code=" + str(state_code) +
                                 "&date_as_integer=" + str(changes_since_this_date_as_integer)
                                 )
+
+
+def replace_from_end(source_string, replace_what, replace_with):
+    start, to_remove, tail = source_string.rpartition(replace_what)
+    if positive_value_exists(tail):
+        return source_string
+    else:
+        return start + replace_with
+
+
+def generate_counties_by_state_view(request):
+    """
+    Generate a dictionary of counties (organized by state) from data from the Census Bureau website.
+    """
+    status = ''
+    counties_by_state = {}
+
+    all_lines = []
+    data_found = False
+    try:
+        site_url = "https://www2.census.gov/geo/docs/reference/codes/files/national_county.txt"
+        response = requests.get(site_url)
+        all_lines = csv.reader(response.text.splitlines(), delimiter=',')
+        data_found = True
+    except timeout:
+        status += "CENSUS_BUREAU-WEB_PAGE_SCRAPE_TIMEOUT_ERROR "
+    except IOError as error_instance:
+        # Catch the error message coming back from urllib.request.urlopen and pass it in the status
+        error_message = error_instance
+        status += "SCRAPE_SOCIAL_IO_ERROR: {error_message}".format(error_message=error_message)
+    except Exception as e:
+        status += "UNKNOWN_ERROR: {error}".format(error=e)
+
+    if data_found:
+        words_to_remove_list = [
+            ' Borough',
+            ' Census Area',
+            ' County',
+            ' city',
+            ' City',
+            ' District',
+            ' Islands',
+            ' Island',
+            ' Municipality',
+            ' Municipio',
+            ' Parish',
+        ]
+        for row in all_lines:
+            state_code = row[0]
+            county_name = row[3]
+            county_short_name = county_name
+            for word_to_remove in words_to_remove_list:
+                county_short_name = replace_from_end(county_short_name, word_to_remove, '')
+            county_fips_code = "{state_code}{county_code}".format(
+                state_code=row[1],
+                county_code=row[2],
+            )
+
+            if state_code not in counties_by_state:
+                counties_by_state[state_code] = []
+
+            counties_by_state[state_code].append({
+                "county_name": county_name,
+                "county_short_name": county_short_name,
+                "county_fips_code": county_fips_code
+            })
+    return HttpResponse(json.dumps(counties_by_state), content_type='application/json')
 
 
 @login_required

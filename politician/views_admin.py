@@ -1,7 +1,7 @@
 # politician/views_admin.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-
+import re
 from base64 import b64encode
 import json
 import string
@@ -49,7 +49,7 @@ from .controllers import add_alternate_names_to_next_spot, add_twitter_handle_to
     fetch_duplicate_politician_count, figure_out_politician_conflict_values, find_duplicate_politician, \
     merge_if_duplicate_politicians, merge_these_two_politicians, politicians_import_from_master_server
 from .models import Politician, PoliticianManager, POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, \
-    POLITICIAN_UNIQUE_IDENTIFIERS, PoliticiansArePossibleDuplicates
+    POLITICIAN_UNIQUE_IDENTIFIERS, PoliticiansArePossibleDuplicates, POLITICAL_DATA_MANAGER, UNKNOWN
 
 POLITICIANS_SYNC_URL = get_environment_variable("POLITICIANS_SYNC_URL")  # politiciansSyncOut
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
@@ -399,6 +399,7 @@ def politician_list_view(request):
     show_all = positive_value_exists(request.GET.get('show_all', False))
     show_battleground = positive_value_exists(request.GET.get('show_battleground', False))
     show_related_candidates = positive_value_exists(request.GET.get('show_related_candidates', False))
+    show_ocd_id_state_mismatch = positive_value_exists(request.GET.get('show_ocd_id_state_mismatch', False))
     show_politicians_with_email = positive_value_exists(request.GET.get('show_politicians_with_email', False))
 
     state_list = STATE_CODE_MAP
@@ -666,6 +667,8 @@ def politician_list_view(request):
                 Q(politician_email2_length__gt=2) |
                 Q(politician_email3_length__gt=2)
             )
+        if positive_value_exists(show_ocd_id_state_mismatch):
+            politician_query = politician_query.filter(ocd_id_state_mismatch_found=True)
 
         if positive_value_exists(politician_search):
             search_words = politician_search.split()
@@ -708,6 +711,9 @@ def politician_list_view(request):
                 filters.append(new_filter)
 
                 new_filter = Q(political_party__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(seo_friendly_path__icontains=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(vote_usa_politician_id__icontains=one_word)
@@ -867,6 +873,7 @@ def politician_list_view(request):
         'show_battleground':            show_battleground,
         'show_politicians_with_email':  show_politicians_with_email,
         'show_related_candidates':      show_related_candidates,
+        'show_ocd_id_state_mismatch':   show_ocd_id_state_mismatch,
         'state_code':                   state_code,
         'state_list':                   sorted_state_list,
         'web_app_root_url':             web_app_root_url,
@@ -1026,6 +1033,8 @@ def politician_new_view(request):
     vote_smart_id = request.GET.get('vote_smart_id', "")
     maplight_id = request.GET.get('maplight_id', "")
     politician_we_vote_id = request.GET.get('politician_we_vote_id', "")
+    gender = request.GET.get('gender', "U")
+    gender_likelihood = request.GET.get('gender_likelihood', "")
 
     # These are the Offices already entered for this election
     try:
@@ -1035,7 +1044,7 @@ def politician_new_view(request):
         handle_record_not_found_exception(e, logger=logger)
         contest_office_list = []
 
-    # Its helpful to see existing politicians when entering a new politician
+    # It's helpful to see existing politicians when entering a new politician
     politician_list = []
     try:
         politician_list = Politician.objects.all()
@@ -1053,6 +1062,8 @@ def politician_new_view(request):
         'messages_on_stage':                messages_on_stage,
         'office_list':                      contest_office_list,
         'contest_office_id':                contest_office_id,  # Pass in separately for the template to work
+        'gender':                           gender,
+        'gender_likelihood':                gender_likelihood,
         'google_civic_election_id':         google_civic_election_id,
         'politician_list':                  politician_list,
         # Incoming variables, not saved yet
@@ -1235,6 +1246,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
     politician_url5 = request.GET.get('politician_url5', False)
     political_party = request.GET.get('political_party', False)
     state_code = request.GET.get('state_code', False)
+    status = ''
     vote_smart_id = request.GET.get('vote_smart_id', False)
     maplight_id = request.GET.get('maplight_id', False)
 
@@ -1267,16 +1279,41 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             politician_on_stage = results['politician']
 
         # Working with Vote Smart data
-        try:
-            vote_smart_politician_id = politician_on_stage.vote_smart_id
-            rating_list_query = VoteSmartRatingOneCandidate.objects.order_by('-timeSpan')  # Desc order
-            rating_list = rating_list_query.filter(candidateId=vote_smart_politician_id)
-        except VotesmartApiError as error_instance:
-            # Catch the error message coming back from Vote Smart and pass it in the status
-            error_message = error_instance.args
-            status = "EXCEPTION_RAISED: {error_message}".format(error_message=error_message)
-            print_to_log(logger=logger, exception_message_optional=status)
-            rating_list = []
+        rating_list = []
+        vote_smart_turned_on = False
+        if vote_smart_turned_on:
+            try:
+                vote_smart_politician_id = politician_on_stage.vote_smart_id
+                rating_list_query = VoteSmartRatingOneCandidate.objects.order_by('-timeSpan')  # Desc order
+                rating_list = rating_list_query.filter(candidateId=vote_smart_politician_id)
+            except VotesmartApiError as error_instance:
+                # Catch the error message coming back from Vote Smart and pass it in the status
+                error_message = error_instance.args
+                status = "EXCEPTION_RAISED: {error_message}".format(error_message=error_message)
+                print_to_log(logger=logger, exception_message_optional=status)
+                rating_list = []
+
+        # ##################################
+        # Show the seo friendly paths for this politician
+        path_count = 0
+        path_list = []
+        if positive_value_exists(politician_we_vote_id):
+            from politician.models import PoliticianSEOFriendlyPath
+            try:
+                path_query = PoliticianSEOFriendlyPath.objects.all()
+                path_query = path_query.filter(politician_we_vote_id__iexact=politician_we_vote_id)
+                path_count = path_query.count()
+                path_list = list(path_query[:4])
+            except Exception as e:
+                status += 'ERROR_RETRIEVING_FROM_PoliticianSEOFriendlyPath: ' + str(e) + ' '
+
+            if positive_value_exists(politician_on_stage.seo_friendly_path):
+                path_list_modified = []
+                for one_path in path_list:
+                    if politician_on_stage.seo_friendly_path != one_path.final_pathname_string:
+                        path_list_modified.append(one_path)
+                path_list = path_list_modified
+            path_list = path_list[:3]
 
         # Working with We Vote Positions
         try:
@@ -1434,6 +1471,8 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             'linked_representative_list':   linked_representative_list,
             'maplight_id':                  maplight_id,
             'messages_on_stage':            messages_on_stage,
+            'path_count':                   path_count,
+            'path_list':                    path_list,
             'politician':                   politician_on_stage,
             'politician_email':             politician_email,
             'politician_email2':            politician_email2,
@@ -1500,6 +1539,91 @@ def politician_not_duplicates_view(request):
                                 "?state_code=" + str(state_code))
 
 
+def politician_change_gender_id_view(changes):
+    count = 0
+    for change in changes:
+        try:
+            politician_query = Politician.objects.filter(we_vote_id=change['we_vote_id'])
+            politician_query = politician_query
+            politician_list = list(politician_query)
+            politician = politician_list[0]
+            if change['gender'] == 'S':  # If set to "Save Unknown", then save as "Unknown"
+                setattr(politician, 'gender', UNKNOWN)
+                setattr(politician, 'gender_likelihood', POLITICAL_DATA_MANAGER)
+            else:
+                setattr(politician, 'gender', change['gender'])
+                if 'gender_likelihood' in change:
+                    try:
+                        setattr(politician, 'gender_likelihood', change['gender_likelihood'])
+                    except Exception as err:
+                        logger.error('politician_change_gender_id gender_likelihood caught: ', err)
+            timezone = pytz.timezone("America/Los_Angeles")
+            datetime_now = timezone.localize(datetime.now())
+            setattr(politician, 'date_last_changed', datetime_now)
+            politician.save()
+            count += 1
+        except Exception as err:
+            logger.error('politician_change_gender_id caught: ', err)
+            count = -1
+
+    return count
+
+
+@login_required
+def set_missing_gender_ids_view(request):
+    """
+    Process repair imported names form
+    https://wevotedeveloper.com:8000/apis/v1/set_missing_gender_ids/?start=0&count=25
+    :param request:
+    :return:
+    """
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'verified_volunteer'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    start = int(request.GET.get('start', 0))
+    count = int(request.GET.get('count', 15))
+    politician_manager = PoliticianManager()
+    list_of_people_from_db, number_of_rows = politician_manager.retrieve_politicians_with_no_gender_id(
+        start, count)
+    people_list = []
+    for person in list_of_people_from_db:
+        if not hasattr(person, 'politician_name'):
+            continue
+        name = person.politician_name
+        cleaned = re.sub("\(|\)|\"|\'", " ", name)
+        cleaned = re.sub("\s+", "+", cleaned)
+        search = 'https://www.google.com/search?q=' + cleaned
+        politician_url = "/politician/{politician_id}/edit".format(politician_id=person.id)
+        politician_state_code = person.state_code.upper() if person.state_code else ''
+        politician_political_party = person.political_party.lower().capitalize() if person.political_party else ''
+
+        person_item = {
+            'person_name':                  name,
+            'politician_url':               politician_url,
+            'search_url':                   search,
+            'gender':                       person.gender,
+            'gender_guess':                 person.guess,
+            'displayable_guess':            person.displayable_guess,
+            'google_civic_candidate_name':  person.google_civic_candidate_name,
+            'date_last_updated':            person.date_last_updated,
+            'state_code':                   politician_state_code,
+            'we_vote_id':                   person.we_vote_id,
+            'we_vote_hosted_profile_image_url_medium':  person.we_vote_hosted_profile_image_url_medium,
+            'party':                        politician_political_party,
+        }
+        people_list.append(person_item)
+
+    template_values = {
+        'number_of_rows':                   number_of_rows,
+        'people_list':                      people_list,
+        'index_offset':                     start,
+        'return_link':                      '/politician/',
+    }
+    return render(request, 'politician/politician_gender_id_fix_list.html', template_values)
+
+
 def politician_change_names(changes):
     count = 0
     for change in changes:
@@ -1535,12 +1659,14 @@ def politician_edit_process_view(request):
 
     status = ''
     success = True
+    update_message = ''
 
+    ballot_guide_official_statement = request.POST.get('ballot_guide_official_statement', False)
     ballotpedia_politician_name = request.POST.get('ballotpedia_politician_name', False)
     ballotpedia_politician_url = request.POST.get('ballotpedia_politician_url', False)
     birth_date = request.POST.get('birth_date', False)
     first_name = request.POST.get('first_name', False)
-    gender = request.POST.get('gender', False)
+    gender = request.POST.get('gender', 'False')
     middle_name = request.POST.get('middle_name', False)
     last_name = request.POST.get('last_name', False)
     facebook_url = request.POST.get('facebook_url', False)
@@ -1606,7 +1732,7 @@ def politician_edit_process_view(request):
     youtube_url = request.POST.get('youtube_url', False)
     # is_battleground_race_ values taken in below
 
-    # Check to see if this politician is already being used anywhere
+    # Check to see if this politician already exists
     politician_on_stage_found = False
     politician_on_stage = Politician()
     politician_manager = PoliticianManager()
@@ -1619,6 +1745,7 @@ def politician_edit_process_view(request):
                 politician_on_stage_found = True
         except Exception as e:
             messages.add_message(request, messages.ERROR, 'Could not retrieve politician: ' + str(e))
+            success = False
 
     # Check to see if there is a duplicate politician already saved
     existing_politician_found = False
@@ -1685,10 +1812,12 @@ def politician_edit_process_view(request):
                 if len(politician_duplicates_query):
                     existing_politician_found = True
         except Exception as e:
-            messages.add_message(request, messages.ERROR, 'Could not find politician: ' + str(e))
+            messages.add_message(request, messages.ERROR, 'Could not retrieve politician: ' + str(e))
+            success = False
 
     # We can use the same url_variables with any processing failures below
-    url_variables = "?ballotpedia_politician_name=" + str(ballotpedia_politician_name) + \
+    url_variables = "?ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
+                    "&ballotpedia_politician_name=" + str(ballotpedia_politician_name) + \
                     "&ballotpedia_politician_url=" + str(ballotpedia_politician_url) + \
                     "&state_code=" + str(state_code) + \
                     "&google_civic_candidate_name=" + str(google_civic_candidate_name) + \
@@ -1718,10 +1847,15 @@ def politician_edit_process_view(request):
                     "&vote_smart_id=" + str(vote_smart_id) + \
                     "&maplight_id=" + str(maplight_id)
 
+    if not success:
+        messages.add_message(request, messages.ERROR,
+                             'POLITICIAN_ERROR Please click the back arrow and report URL to the engineering team ')
+        return HttpResponseRedirect(reverse('politician:politician_list', args=()) + url_variables)
+
     push_seo_friendly_path_changes = False
     try:
         if existing_politician_found:
-            messages.add_message(request, messages.ERROR, 'This politician is already saved for this election.')
+            messages.add_message(request, messages.ERROR, 'This politician already exists.')
             return HttpResponseRedirect(reverse('politician:politician_new', args=()) + url_variables)
         elif politician_on_stage_found:
             # Update below
@@ -1741,6 +1875,7 @@ def politician_edit_process_view(request):
                 )
                 politician_on_stage_found = True
         if politician_on_stage_found:
+            # #################################################
             # Process incoming uploaded photo if there is one
             politician_photo_in_binary_format = None
             politician_photo_converted_to_binary = False
@@ -1769,7 +1904,7 @@ def politician_edit_process_view(request):
                     politician_on_stage.we_vote_hosted_profile_uploaded_image_url_tiny = \
                         create_resized_image_results['cached_resized_image_url_tiny']
                     if profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN \
-                            or politician_on_stage.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UPLOADED:
+                            or profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UPLOADED:
                         politician_on_stage.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UPLOADED
                         politician_on_stage.we_vote_hosted_profile_image_url_large = \
                             politician_on_stage.we_vote_hosted_profile_uploaded_image_url_large
@@ -1783,76 +1918,25 @@ def politician_edit_process_view(request):
                 politician_on_stage.we_vote_hosted_profile_uploaded_image_url_large = None
                 politician_on_stage.we_vote_hosted_profile_uploaded_image_url_medium = None
                 politician_on_stage.we_vote_hosted_profile_uploaded_image_url_tiny = None
-                if profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UPLOADED:
+                if profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UPLOADED \
+                        or profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
                     politician_on_stage.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UNKNOWN
                     politician_on_stage.we_vote_hosted_profile_image_url_large = None
                     politician_on_stage.we_vote_hosted_profile_image_url_medium = None
                     politician_on_stage.we_vote_hosted_profile_image_url_tiny = None
             elif profile_image_type_currently_active is not False:
-                politician_on_stage.profile_image_type_currently_active = profile_image_type_currently_active
-                uploaded_image_exists = True \
-                    if positive_value_exists(politician_on_stage.we_vote_hosted_profile_uploaded_image_url_large) \
-                    or positive_value_exists(politician_on_stage.we_vote_hosted_profile_uploaded_image_url_medium) \
-                    or positive_value_exists(politician_on_stage.we_vote_hosted_profile_uploaded_image_url_tiny) \
-                    else False
-                twitter_image_exists = True \
-                    if positive_value_exists(politician_on_stage.we_vote_hosted_profile_twitter_image_url_large) \
-                    or positive_value_exists(politician_on_stage.we_vote_hosted_profile_twitter_image_url_medium) \
-                    or positive_value_exists(politician_on_stage.we_vote_hosted_profile_twitter_image_url_tiny) \
-                    else False
-                facebook_image_exists = True \
-                    if positive_value_exists(politician_on_stage.we_vote_hosted_profile_facebook_image_url_large) \
-                    or positive_value_exists(politician_on_stage.we_vote_hosted_profile_facebook_image_url_medium) \
-                    or positive_value_exists(politician_on_stage.we_vote_hosted_profile_facebook_image_url_tiny) \
-                    else False
-                vote_usa_image_exists = True \
-                    if positive_value_exists(politician_on_stage.we_vote_hosted_profile_vote_usa_image_url_large) \
-                    or positive_value_exists(politician_on_stage.we_vote_hosted_profile_vote_usa_image_url_medium) \
-                    or positive_value_exists(politician_on_stage.we_vote_hosted_profile_vote_usa_image_url_tiny) \
-                    else False
-                if politician_on_stage.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
-                    if uploaded_image_exists:
-                        politician_on_stage.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UPLOADED
-                    elif twitter_image_exists:
-                        politician_on_stage.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_TWITTER
-                    elif facebook_image_exists:
-                        politician_on_stage.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_FACEBOOK
-                    elif vote_usa_image_exists:
-                        politician_on_stage.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_VOTE_USA
-                # Now move selected field into master politician image
-                if uploaded_image_exists and \
-                        politician_on_stage.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UPLOADED:
-                    politician_on_stage.we_vote_hosted_profile_image_url_large = \
-                        politician_on_stage.we_vote_hosted_profile_uploaded_image_url_large
-                    politician_on_stage.we_vote_hosted_profile_image_url_medium = \
-                        politician_on_stage.we_vote_hosted_profile_uploaded_image_url_medium
-                    politician_on_stage.we_vote_hosted_profile_image_url_tiny = \
-                        politician_on_stage.we_vote_hosted_profile_uploaded_image_url_tiny
-                elif twitter_image_exists and \
-                        politician_on_stage.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_TWITTER:
-                    politician_on_stage.we_vote_hosted_profile_image_url_large = \
-                        politician_on_stage.we_vote_hosted_profile_twitter_image_url_large
-                    politician_on_stage.we_vote_hosted_profile_image_url_medium = \
-                        politician_on_stage.we_vote_hosted_profile_twitter_image_url_medium
-                    politician_on_stage.we_vote_hosted_profile_image_url_tiny = \
-                        politician_on_stage.we_vote_hosted_profile_twitter_image_url_tiny
-                elif facebook_image_exists and \
-                        politician_on_stage.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_FACEBOOK:
-                    politician_on_stage.we_vote_hosted_profile_image_url_large = \
-                        politician_on_stage.we_vote_hosted_profile_facebook_image_url_large
-                    politician_on_stage.we_vote_hosted_profile_image_url_medium = \
-                        politician_on_stage.we_vote_hosted_profile_facebook_image_url_medium
-                    politician_on_stage.we_vote_hosted_profile_image_url_tiny = \
-                        politician_on_stage.we_vote_hosted_profile_facebook_image_url_tiny
-                elif vote_usa_image_exists and \
-                        politician_on_stage.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_VOTE_USA:
-                    politician_on_stage.we_vote_hosted_profile_image_url_large = \
-                        politician_on_stage.we_vote_hosted_profile_vote_usa_image_url_large
-                    politician_on_stage.we_vote_hosted_profile_image_url_medium = \
-                        politician_on_stage.we_vote_hosted_profile_vote_usa_image_url_medium
-                    politician_on_stage.we_vote_hosted_profile_image_url_tiny = \
-                        politician_on_stage.we_vote_hosted_profile_vote_usa_image_url_tiny
+                from image.controllers import organize_object_photo_fields_based_on_image_type_currently_active
+                results = organize_object_photo_fields_based_on_image_type_currently_active(
+                    object_with_photo_fields=politician_on_stage,
+                    profile_image_type_currently_active=profile_image_type_currently_active,
+                )
+                if results['success']:
+                    politician_on_stage = results['object_with_photo_fields']
 
+            # ###############################################
+            # Now process all other politician fields
+            if ballot_guide_official_statement is not False:
+                politician_on_stage.ballot_guide_official_statement = ballot_guide_official_statement
             if ballotpedia_politician_name is not False:
                 politician_on_stage.ballotpedia_politician_name = ballotpedia_politician_name
             if ballotpedia_politician_url is not False:
@@ -1878,6 +1962,11 @@ def politician_edit_process_view(request):
             if last_name is not False:
                 politician_on_stage.last_name = last_name
             if gender is not False:
+                gender = gender[0]
+                if politician_on_stage.gender != gender:
+                    politician_on_stage.gender_likelihood = POLITICAL_DATA_MANAGER
+                if gender == 'U':
+                    politician_on_stage.gender_likelihood = ''
                 politician_on_stage.gender = gender
             if google_civic_candidate_name is not False:
                 politician_on_stage.google_civic_candidate_name = google_civic_candidate_name
@@ -1981,6 +2070,7 @@ def politician_edit_process_view(request):
                     # Update linked candidate & representative entries to use this latest seo_friendly_path
                     push_seo_friendly_path_changes = True
                 politician_on_stage.seo_friendly_path = seo_friendly_path
+
             politician_on_stage.twitter_handle_updates_failing = twitter_handle_updates_failing
             politician_on_stage.twitter_handle2_updates_failing = twitter_handle2_updates_failing
             if vote_smart_id is not False:
@@ -2239,7 +2329,8 @@ def politician_edit_process_view(request):
             now_as_integer = convert_we_vote_date_string_to_date_as_integer(now_as_we_vote_date_string)
             candidate_list = candidate_results['candidate_list']
             for candidate in candidate_list:
-                if candidate.candidate_ultimate_election_date > now_as_integer:
+                if positive_value_exists(candidate.candidate_ultimate_election_date) \
+                        and candidate.candidate_ultimate_election_date > now_as_integer:
                     candidates_to_update_from_politician.append(candidate)
                 elif positive_value_exists(politician_on_stage.seo_friendly_path) and push_seo_friendly_path_changes:
                     candidate.seo_friendly_path = politician_on_stage.seo_friendly_path
@@ -2293,6 +2384,55 @@ def politician_edit_process_view(request):
             and positive_value_exists(politician_on_stage.seo_friendly_path) and push_seo_friendly_path_changes:
         # TODO Implement this
         pass
+
+    # ####################################################################
+    # To make sure we have the freshest data, update supporters_count on all objects
+    if positive_value_exists(politician_on_stage.linked_campaignx_we_vote_id):
+        from campaign.controllers import create_campaignx_supporters_from_positions, \
+            refresh_campaignx_supporters_count_in_all_children
+        campaignx_we_vote_id_list_to_refresh = [politician_on_stage.linked_campaignx_we_vote_id]
+        politician_we_vote_id_list = [politician_on_stage.we_vote_id]
+        # #############################
+        # Create campaignx_supporters
+        create_from_friends_only_positions = False
+        results = create_campaignx_supporters_from_positions(
+            request,
+            friends_only_positions=False,
+            politician_we_vote_id_list=politician_we_vote_id_list)
+        campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
+        if len(campaignx_we_vote_id_list_changed) > 0:
+            campaignx_we_vote_id_list_to_refresh = \
+                list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
+        if not positive_value_exists(results['campaignx_supporter_entries_created']):
+            create_from_friends_only_positions = True
+        if create_from_friends_only_positions:
+            results = create_campaignx_supporters_from_positions(
+                request,
+                friends_only_positions=True,
+                politician_we_vote_id_list=politician_we_vote_id_list)
+            campaignx_we_vote_id_list_changed = results['campaignx_we_vote_id_list_to_refresh']
+            if len(campaignx_we_vote_id_list_changed) > 0:
+                campaignx_we_vote_id_list_to_refresh = \
+                    list(set(campaignx_we_vote_id_list_changed + campaignx_we_vote_id_list_to_refresh))
+
+        campaignx_manager = CampaignXManager()
+        supporter_count = campaignx_manager.fetch_campaignx_supporter_count(
+            politician_on_stage.linked_campaignx_we_vote_id)
+        results = campaignx_manager.retrieve_campaignx(
+            campaignx_we_vote_id=politician_on_stage.linked_campaignx_we_vote_id)
+        if results['campaignx_found']:
+            campaignx = results['campaignx']
+            campaignx.supporters_count = supporter_count
+            campaignx.save()
+
+        results = refresh_campaignx_supporters_count_in_all_children(
+            request,
+            campaignx_we_vote_id_list=campaignx_we_vote_id_list_to_refresh)
+        if positive_value_exists(results['update_message']):
+            update_message += results['update_message']
+
+    if positive_value_exists(update_message):
+        messages.add_message(request, messages.INFO, update_message)
 
     if politician_id:
         return HttpResponseRedirect(reverse('politician:politician_edit', args=(politician_id,)))

@@ -661,25 +661,32 @@ class OrganizationManager(models.Manager):
                 organization_on_stage_id = organization_on_stage.id
                 status = "ORGANIZATION_FOUND_WITH_TWITTER_ID "
             elif positive_value_exists(incoming_hostname):
-                status = "RETRIEVING_ORGANIZATION_WITH_INCOMING_HOSTNAME "
-                incoming_hostname = incoming_hostname.strip().lower()
-                incoming_hostname = incoming_hostname.replace('http://', '')
-                incoming_hostname = incoming_hostname.replace('https://', '')
-                incoming_subdomain = incoming_hostname.replace('.wevote.us', '')
-                if read_only:
-                    organization_on_stage = Organization.objects.using('readonly')\
-                        .get(Q(chosen_domain_string__iexact=incoming_hostname) |
-                             Q(chosen_domain_string2__iexact=incoming_hostname) |
-                             Q(chosen_domain_string3__iexact=incoming_hostname) |
-                             Q(chosen_subdomain_string__iexact=incoming_subdomain))
+                skip = ['wevote.us', 'quality.wevote.us', 'localhost', 'wevotedeveloper']
+                if incoming_hostname not in skip:
+                    status = "RETRIEVING_ORGANIZATION_WITH_INCOMING_HOSTNAME "
+                    incoming_hostname = incoming_hostname.strip().lower()
+                    incoming_hostname = incoming_hostname.replace('http://', '')
+                    incoming_hostname = incoming_hostname.replace('https://', '')
+                    incoming_subdomain = incoming_hostname.replace('.wevote.us', '')
+                    if read_only:
+                        organization_on_stage = Organization.objects.using('readonly')\
+                            .get(Q(chosen_domain_string__iexact=incoming_hostname) |
+                                 Q(chosen_domain_string2__iexact=incoming_hostname) |
+                                 Q(chosen_domain_string3__iexact=incoming_hostname) |
+                                 Q(chosen_subdomain_string__iexact=incoming_subdomain))
+                    else:
+                        organization_on_stage = Organization.objects\
+                            .get(Q(chosen_domain_string__iexact=incoming_hostname) |
+                                 Q(chosen_domain_string2__iexact=incoming_hostname) |
+                                 Q(chosen_domain_string3__iexact=incoming_hostname) |
+                                 Q(chosen_subdomain_string__iexact=incoming_subdomain))
+                    organization_on_stage_id = organization_on_stage.id
+                    status = "ORGANIZATION_FOUND_WITH_INCOMING_HOSTNAME "
                 else:
-                    organization_on_stage = Organization.objects\
-                        .get(Q(chosen_domain_string__iexact=incoming_hostname) |
-                             Q(chosen_domain_string2__iexact=incoming_hostname) |
-                             Q(chosen_domain_string3__iexact=incoming_hostname) |
-                             Q(chosen_subdomain_string__iexact=incoming_subdomain))
-                organization_on_stage_id = organization_on_stage.id
-                status = "ORGANIZATION_FOUND_WITH_INCOMING_HOSTNAME "
+                    # No need to do an expensive query
+                    status = "ORGANIZATION_CHECK_FOR_WEVOTE_US "
+                    error_result = True
+                    exception_does_not_exist = True
         except Organization.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger)
             error_result = True
@@ -3203,9 +3210,9 @@ class Organization(models.Model):
     chosen_domain_type_is_campaign = models.BooleanField(default=False)
     # This is the domain name the client has configured for their We Vote configured site
     chosen_domain_string = models.CharField(
-        verbose_name="client domain name for we vote site", max_length=255, null=True, blank=True)
-    chosen_domain_string2 = models.CharField(max_length=255, null=True, blank=True)  # Alternate ex/ www
-    chosen_domain_string3 = models.CharField(max_length=255, null=True, blank=True)  # Another alternate
+        verbose_name="client domain name for we vote site", max_length=255, null=True, blank=True, db_index=True)
+    chosen_domain_string2 = models.CharField(max_length=255, null=True, blank=True, db_index=True)  # Alternate ex/ www
+    chosen_domain_string3 = models.CharField(max_length=255, null=True, blank=True, db_index=True)  # Another alternate
     chosen_favicon_url_https = models.TextField(
         verbose_name='url of client favicon', blank=True, null=True)
     chosen_google_analytics_tracking_id = models.CharField(max_length=255, null=True, blank=True)
@@ -3442,44 +3449,10 @@ class OrganizationChangeLog(models.Model):
     status = models.TextField(null=True, blank=True)
 
     def change_description_augmented(self):
-        issue_we_vote_id_to_name_dictionary = {
-            "wv02issue63": "Pro-choice",
-            "wv02issue64": "Pro-life",
-            "wv02issue25": "Democratic Clubs",
-            "wv02issue68": "Republican Clubs",
-            "wv02issue4": "Climate Change",
-            "wv02issue51": "LGBTQ",
-            "wv02issue94": "Democratic Party Politicians",
-            "wv02issue95": "Republican Party Politicians",
-            "wv02issue65": "Progressive Values",
-            "wv02issue18": "Conservative Values",
-            "wv02issue37": "Common Sense Gun Reform",
-            "wv02issue36": "Gun / 2nd Amendment Rights",
-            "wv02issue91": "Affordable Housing",
-            "wv02issue1": "Animals & Wildlife",
-            "wv02issue7": "Bicycling",
-            "wv02issue16": "Communities of Color",
-            "wv02issue20": "Criminal Justice Reform",
-            "wv02issue35": "Green Party Clubs",
-            "wv02issue97": "Green Party Politicians",
-            "wv02issue42": "Homeless Well-Being",
-            "wv02issue46": "Immigration Rights",
-            "wv02issue98": "Independent Politicians",
-            "wv02issue53": "Libertarian Clubs",
-            "wv02issue96": "Libertarian Party Politicians",
-            "wv02issue82": "Low Income & Unemployment",
-            "wv87issue100": "Make America Great Again (MAGA)",
-            "wv02issue56": "Marijuana Legalization",
-            "wv02issue27": "Pro Public Schools",
-            "wv02issue10": "Pro School Choice",
-            "wv02issue99": "Publicly Funded Healthcare",
-            "wv02issue2": "Reducing Money in Politics",
-            "wv02issue76": "Reducing Student Debt",
-            "wv02issue45": "Securing Our Borders",
-            "wv02issue66": "Social Security & Medicare",
-            "wv02issue84": "Voting Rights & Education",
-            "wv02issue86": "Women's Equality",
-        }
+        # Issues with smaller integers need to be listed last.
+        # If not, 'wv02issue76' gets found when replacing 'wv02issue7' with the name of the issue.
+        from issue.models import ACTIVE_ISSUES_DICTIONARY
+        issue_we_vote_id_to_name_dictionary = ACTIVE_ISSUES_DICTIONARY
         if self.change_description:
             change_description_augmented = self.change_description
             if 'issue' in change_description_augmented:
@@ -3497,6 +3470,7 @@ class OrganizationChangeLog(models.Model):
 
 
 class OrganizationReservedDomain(models.Model):
+    MultipleObjectsReturned = None
     objects = None
 
     def __unicode__(self):

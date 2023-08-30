@@ -1,22 +1,26 @@
 # voter/models.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-
+import json
+import re
 import string
 import sys
-import time
 from datetime import datetime, timedelta
 
 import pytz
+import requests
+import usaddress
 from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser)  # PermissionsMixin
 from django.core.validators import RegexValidator
 from django.db import (models, IntegrityError)
 from django.db.models import Q
 from django.utils.timezone import now
+from geopy import get_geocoder_for_service
 from validate_email import validate_email
 
 import wevote_functions.admin
 from apple.models import AppleUser
+from config.base import get_environment_variable
 from exception.models import handle_exception, handle_record_found_more_than_one_exception, \
     handle_record_not_saved_exception
 from import_export_facebook.models import FacebookManager
@@ -101,8 +105,18 @@ IMPORT_CONTACT_SOURCE_CHOICES = (
     (IMPORT_CONTACT_GOOGLE_PEOPLE, 'Google People API'),
 )
 
+VALID_STATES = ['AL', 'AK', 'AZ', 'AR', 'AS', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA', 'GU', 'HI', 'ID', 'IL',
+                'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH',
+                'NJ', 'NM', 'NY', 'NC', 'ND', 'NP', 'OH', 'OK', 'OR', 'PA', 'PR', 'RI', 'SC', 'SD', 'TN', 'TX',
+                'TT', 'UT', 'VT', 'VA', 'VI', 'WA', 'WV', 'WI', 'WY']
+
+GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
+GEOCODE_TIMEOUT = 10
+
 
 # See AUTH_USER_MODEL in config/base.py
+
+
 class VoterManager(BaseUserManager):
 
     def __repr__(self):
@@ -3053,6 +3067,9 @@ class Voter(AbstractBaseUser):
     No fields are required, since at its very simplest, we only need the voter_id based on a voter_device_id.
     """
 
+    MultipleObjectsReturned = None
+    DoesNotExist = None
+
     def __repr__(self):
         return '__repr__ for Voter'
 
@@ -3090,6 +3107,15 @@ class Voter(AbstractBaseUser):
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
     # friend_count helps us quickly identify voters who have friends
     friend_count = models.PositiveIntegerField(default=None, null=True)
+    # The Federal Information Processing Standard (FIPS) code is a five-digit code that
+    # uniquely identifies counties and county equivalents in the United States.
+    # The first two digits of the code identify the state,
+    # and the last three digits identify the county or county equivalent.
+    county_fips_code = models.CharField(max_length=5, null=True)
+    county_name = models.CharField(max_length=255, null=True)
+    # Lat/Long is used for statistics. For returning ballot data, use VoterAddress Lat/Long
+    latitude = models.FloatField(default=None, null=True)
+    longitude = models.FloatField(default=None, null=True)
     state_code_for_display = models.CharField(max_length=2, null=True, blank=True)
     state_code_for_display_hidden = models.BooleanField(default=False)
     state_code_for_display_updated = models.BooleanField(default=False)  # Meant to be a transitory field during update
@@ -3172,6 +3198,7 @@ class Voter(AbstractBaseUser):
     # storing in cookie
     # current_google_civic_election_id = models.PositiveIntegerField(
     #     verbose_name="google civic election id", null=True, unique=False)
+    voter_issues_lookup_updated = models.BooleanField(default=False)
 
     objects = VoterManager()
 
@@ -3467,6 +3494,7 @@ class VoterContactEmail(models.Model):
     """
     One contact imported from third-party voter address book. Voter may delete at any time.
     """
+    objects = None
     city = models.CharField(max_length=255, default=None, null=True)
     date_last_changed = models.DateTimeField(null=True, auto_now=True, db_index=True)
     display_name = models.CharField(max_length=255, default=None, null=True)
@@ -4169,6 +4197,61 @@ class VoterDeviceLinkManager(models.Manager):
         return results
 
 
+class VoterIssuesLookup(models.Model):
+    """
+    A table for rapid lookup (analytics) of how many voters follow each Issue / Value / Topic.
+    """
+    #
+    # We are relying on built-in Python id field
+
+    objects = None
+    voter_we_vote_id = models.CharField(max_length=255, null=True, unique=True, db_index=True)
+    likely_democrat_from_issues = models.BooleanField(default=None, null=True)
+    likely_green_from_issues = models.BooleanField(default=None, null=True)
+    likely_left_from_issues = models.BooleanField(default=None, null=True)
+    likely_libertarian_from_issues = models.BooleanField(default=None, null=True)
+    likely_party_from_issues_analyzed = models.BooleanField(default=False)
+    likely_republican_from_issues = models.BooleanField(default=None, null=True)
+    likely_right_from_issues = models.BooleanField(default=None, null=True)
+
+    affordable_housing = models.BooleanField(default=None, null=True)
+    animals = models.BooleanField(default=None, null=True)
+    bicycling = models.BooleanField(default=None, null=True)
+    borders = models.BooleanField(default=None, null=True)
+    climate_change = models.BooleanField(default=None, null=True)
+    color = models.BooleanField(default=None, null=True)
+    conservative = models.BooleanField(default=None, null=True)
+    democratic_clubs = models.BooleanField(default=None, null=True)
+    democratic_politicians = models.BooleanField(default=None, null=True)
+    green_clubs = models.BooleanField(default=None, null=True)
+    green_politicians = models.BooleanField(default=None, null=True)
+    gun_reform = models.BooleanField(default=None, null=True)
+    homeless = models.BooleanField(default=None, null=True)
+    immigration = models.BooleanField(default=None, null=True)
+    independent_politicians = models.BooleanField(default=None, null=True)
+    justice_reform = models.BooleanField(default=None, null=True)
+    lgbtq = models.BooleanField(default=None, null=True)
+    libertarian_clubs = models.BooleanField(default=None, null=True)
+    libertarian_politicians = models.BooleanField(default=None, null=True)
+    low_income = models.BooleanField(default=None, null=True)
+    maga = models.BooleanField(default=None, null=True)
+    marijuana = models.BooleanField(default=None, null=True)
+    money_in_politics = models.BooleanField(default=None, null=True)
+    pro_choice = models.BooleanField(default=None, null=True)
+    pro_life = models.BooleanField(default=None, null=True)
+    pro_public_schools = models.BooleanField(default=None, null=True)
+    pro_school_choice = models.BooleanField(default=None, null=True)
+    progressive = models.BooleanField(default=None, null=True)
+    public_healthcare = models.BooleanField(default=None, null=True)
+    republican_clubs = models.BooleanField(default=None, null=True)
+    republican_politicians = models.BooleanField(default=None, null=True)
+    second_amendment = models.BooleanField(default=None, null=True)
+    social_security = models.BooleanField(default=None, null=True)
+    student_debt = models.BooleanField(default=None, null=True)
+    voting_rights = models.BooleanField(default=None, null=True)
+    womens_equality = models.BooleanField(default=None, null=True)
+
+
 # This method *just* returns the voter_id or 0
 def fetch_voter_id_from_voter_device_link(voter_device_id):
     voter_device_link_manager = VoterDeviceLinkManager()
@@ -4340,6 +4423,7 @@ def voter_has_authority(request, authority_required, authority_results=None):
 #     jurisdiction = models.ForeignKey(Jurisdiction,
 #                                      null=False, blank=False, verbose_name="jurisdiction this voter votes in")
 
+
 BALLOT_ADDRESS = 'B'
 MAILING_ADDRESS = 'M'
 FORMER_BALLOT_ADDRESS = 'F'
@@ -4358,6 +4442,8 @@ class VoterAddress(models.Model):
     # We are relying on built-in Python id field
 
     # The voter_id that owns this address
+    DoesNotExist = None
+    MultipleObjectsReturned = None
     objects = None
     voter_id = models.BigIntegerField(
         verbose_name="voter unique identifier", null=False, blank=False, unique=False, db_index=True)
@@ -4365,6 +4451,7 @@ class VoterAddress(models.Model):
         verbose_name="type of address", max_length=1, choices=ADDRESS_TYPE_CHOICES, default=BALLOT_ADDRESS)
 
     text_for_map_search = models.CharField(max_length=255, blank=False, null=False, verbose_name='address as entered')
+    invalid_address = models.BooleanField(verbose_name="Garbage, misspelled, or unparsable address", null=True)
 
     latitude = models.CharField(max_length=255, blank=True, null=True, verbose_name='latitude returned from Google')
     longitude = models.CharField(max_length=255, blank=True, null=True, verbose_name='longitude returned from Google')
@@ -4378,6 +4465,8 @@ class VoterAddress(models.Model):
                                         verbose_name='normalized state returned from Google')
     normalized_zip = models.CharField(max_length=255, blank=True, null=True,
                                       verbose_name='normalized zip returned from Google')
+    county_fips_code = models.CharField(max_length=5, null=True, verbose_name="FIPS code for this county")
+    county_name = models.CharField(max_length=255, null=True)
     # This is the election_id last found for this address
     google_civic_election_id = models.PositiveIntegerField(
         verbose_name="google civic election id for this address", null=True, unique=False)
@@ -4568,19 +4657,39 @@ class VoterAddressManager(models.Manager):
 
         if positive_value_exists(voter_id) and address_type in (BALLOT_ADDRESS, MAILING_ADDRESS, FORMER_BALLOT_ADDRESS):
             try:
+                google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
+                place_found, line1, state, city, zip_code = self.parse_address(raw_address_text)
+                invalid_address = True
+                fips, county, latitude, longitude = '', '', '', ''
+                if place_found:             # if a city was found, then hopefully a line1 was found
+                    invalid_address = False
+                    location = google_client.geocode(raw_address_text, sensor=False,
+                                                     timeout=GEOCODE_TIMEOUT)
+                    latitude, longitude = location.latitude, location.longitude
+                    fips, county, fallback = self.get_fips_from_fcc(latitude, longitude, city, state)
+                elif len(zip_code) > 0:     # With no city, Google can do plenty with just a zip code (but no line1)
+                    invalid_address = False
+                    loc = google_client.geocode(zip_code, sensor=False, timeout=GEOCODE_TIMEOUT)
+                    address, latitude, longitude = loc.address, loc.latitude, loc.longitude
+                    place_found, line1, state, city, zip_code = self.parse_address(address)
+                    fips, county, fallback = self.get_fips_from_fcc(latitude, longitude, city, state)
+
                 updated_values = {
                     # Values we search against
                     'voter_id': voter_id,
                     'address_type': address_type,
                     # The rest of the values are to be saved
                     'text_for_map_search':      raw_address_text,
-                    'latitude':                 None,
-                    'longitude':                None,
-                    'normalized_line1':         None,
+                    'latitude':                 latitude,
+                    'longitude':                longitude,
+                    'county_fips_code':         fips,
+                    'county_name':              county,
+                    'normalized_line1':         line1,
                     'normalized_line2':         None,
-                    'normalized_city':          None,
-                    'normalized_state':         None,
-                    'normalized_zip':           None,
+                    'normalized_city':          city,
+                    'normalized_state':         state,
+                    'normalized_zip':           zip_code,
+                    'invalid_address':          invalid_address,
                     # We clear out former values for these so voter_ballot_items_retrieve_for_api resets them
                     'refreshed_from_google':    False,
                     'voter_entered_address':    voter_entered_address,
@@ -4592,6 +4701,8 @@ class VoterAddressManager(models.Manager):
                     voter_id__exact=voter_id, address_type=address_type, defaults=updated_values)
                 voter_address_on_stage_found = voter_address_on_stage.id
                 voter_address_has_value = positive_value_exists(voter_address_on_stage.text_for_map_search)
+
+                status = self.save_address_and_dupe_back_to_voter(voter_address_on_stage, status)
                 success = True
                 status += "UPDATE_OR_CREATE_SUCCESSFUL "
             except VoterAddress.MultipleObjectsReturned as e:
@@ -4796,6 +4907,278 @@ class VoterAddressManager(models.Manager):
             'status':                   status,
             'voter_address_duplicated': voter_address_duplicated,
             'voter_address':            voter_address,
+        }
+        return results
+
+    def city_key_cleaner(self, raw):
+        clean = raw.replace(',', '').replace('.', '').replace('Twp', '').replace('Township', '').\
+            replace('St ', 'Saint ').replace('Ft ', 'Fort ').strip()
+        return clean
+
+    def parse_address(self, typed_address):
+        place_found = False
+        line1, state, city, zip_code = '', '', '', ''
+        if len(typed_address) == 0:
+            return place_found, line1, state, city, zip_code
+        if re.search(r"^\d{5}$", typed_address):
+            return True, line1, state, city, typed_address
+        text_no_usa = typed_address if not typed_address.endswith(', USA') else typed_address.replace(', USA', '')
+        line1 = text_no_usa
+        line1low = line1.lower()
+
+        parsed = usaddress.parse(text_no_usa)
+        for tup in parsed:
+            (value, key) = tup
+            if key == 'PlaceName':
+                if place_found:  # handle multiple word cities like Tahoe City and Half Moon Bay
+                    city = city + ' ' + (value.replace(',', '').replace('.', '').capitalize())
+                else:
+                    city = value.replace(',', '').replace('.', '').capitalize()
+                    place_found = True
+            elif key == 'StateName':
+                if value != 'USA':
+                    state = value.upper().replace('.', "").replace(',', "")
+            elif key == 'ZipCode':
+                zip_code = value
+
+        f1 = line1low.find((city + ', ' + state).lower())
+        f2 = line1low.find((city + ' ' + state).lower())
+        if f1 > 0:
+            line1 = line1[:f1].replace(',', '').strip()
+        elif f1 == 0:
+            line1 = ''
+        elif f2 > 0:
+            line1 = line1[:f2].replace(',', '').strip()
+        elif f2 == 0:
+            line1 = ''
+
+        # TODO: this function is reused when new voters are created, remove this log line anytime after mid august 2023
+        logger.error('%s', 'parse_address: ' + line1 + '-----' + typed_address + '===' + city + '====' + state)
+        return place_found, line1, state, city, zip_code
+
+    FIPS_LOOKUP = False
+
+    def get_lookup(self):
+        fl = __class__.FIPS_LOOKUP
+        if fl is not False:
+            return fl
+
+        with open('voter/fipsCodesWithPosition.json') as file:
+            # Fallback lookup for city/state to fips and county
+            __class__.FIPS_LOOKUP = json.load(file)
+            return __class__.FIPS_LOOKUP
+
+    def get_fips_from_fcc(self, latitude, longitude, city, state):
+        url = 'https://geo.fcc.gov/api/census/block/find?latitude=' + str(latitude) + '&longitude=' + str(longitude) + \
+              '&censusYear=2020&showall=false&format=json'
+        fips, county = '', ''
+        fallback = False
+        try:
+            response = requests.get(url)
+            block = response.json()
+            county_leaf = block['County']
+            fips = county_leaf['FIPS']
+            county = county_leaf['name'].replace('County', '').strip()
+        except Exception:
+            # On July 29, 2023, the fcc api started failing for many coordinates, but was working again on the 31st
+            logger.error('Failing FCC Fips Lookup: ' + url)
+
+        if fips == '':
+            key = (self.city_key_cleaner(city) + ',' + state).lower()
+            lookup = self.get_lookup()
+            if key in lookup:
+                payload = lookup[key]
+                fips = payload['fips']
+                county = payload['county']
+            err = 'FIPS_FROM_FCC using fallback file fips: ' if county != '' else \
+                'FIPS_FROM_FCC CITY NOT IN fallback file fips: '
+            logger.error('%s', err + state + '-' + county + '-' + city + '-' + fips)
+            fallback = True
+        return fips, county, fallback
+
+    @staticmethod
+    def set_normalized_address_fields(address, line1, city, state, zip_code):
+        if positive_value_exists(line1):
+            address.normalized_line1 = line1
+        if positive_value_exists(city):
+            address.normalized_city = city
+        if positive_value_exists(state):
+            address.normalized_state = state
+        if positive_value_exists(zip_code):
+            address.normalized_zip = zip_code
+
+    @staticmethod
+    def add_fips_to_address(address, fips, county, latitude, longitude):
+        address.county_fips_code = fips
+        address.county_name = county
+        address.latitude = latitude
+        address.longitude = longitude
+
+    @staticmethod
+    def mark_address_as_invalid(voter_address):
+        # TODO: this function is reused when new voters are created, remove this log line anytime after mid august 2023
+        logger.error('%s', 'mark_address_as_invalid, Marking as invalid: ' + voter_address.text_for_map_search)
+
+        voter_address.invalid_address = True
+        voter_address.save()
+
+    @staticmethod
+    def save_address_and_dupe_back_to_voter(voter_address, status):
+        # save updates to voter_address
+        voter_address.invalid_address = False
+        voter_address.save()
+
+        try:
+            # duplicate the newly acquired field data to voter record (as requested in the jira issue)
+            # There is no existing data of any value in Voter to be concerned about overwriting
+            voter = Voter.objects.get(id=voter_address.voter_id)
+            voter.county_fips_code = voter_address.county_fips_code
+            voter.county_name = voter_address.county_name
+            if positive_value_exists(voter_address.latitude):
+                voter.latitude = positive_value_exists(voter_address.latitude)
+            if positive_value_exists(voter_address.longitude):
+                voter.longitude = voter_address.longitude
+            voter.save()
+        except Exception as e:
+            err = " VOTER_" + str(voter_address.voter_id) + "_NOT_UPDATED_WITH_ADDRESS: " + str(e) + " "
+            handle_exception(e, logger=logger, exception_message=err)
+            status += err
+        return status
+
+    def update_fips_codes_for_all_voteraddresses(self, limit):  # /apis/v1/voterUpdateFips/?limit=10000
+        status = ''
+        garbled = 0
+        unique_saved = 0
+        dupes_updated = 0
+        failed = 0
+        google_lookups = 0
+        google_lookups_failed = 0
+        fcc_success = 0
+        fcc_fallback = 0
+        try:
+            google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
+
+            addresses_to_fix = VoterAddress.objects.exclude(invalid_address=True).order_by('text_for_map_search')
+            total_addresses = 0
+            try:
+                # with Python 9, in July 2023, this throws an exception every time -- hopefully not with Python 11
+                # total_addresses = len(addresses_to_fix)  8/1/23 This caused a "Worker with pid 10 was terminated due to signal 9
+                total_addresses = addresses_to_fix.count()
+
+            except Exception as elen:
+                logger.error('%s', 'Length of query set calculation error: ' + str(elen))
+
+            prior_text_for_map_search = ''
+            prior_voter_address = {}
+
+            cnt = 0
+            for voter_address in addresses_to_fix.iterator():
+                if google_lookups >= int(limit):
+                    break
+                this_text_for_map_search = voter_address.text_for_map_search
+                logger.error('%s', 'UPDATE_FIPS_CODES loop cnt: ' + str(cnt) +
+                             ', Google lookups: ' + str(google_lookups) + ', Dupes updated: ' + str(dupes_updated) +
+                             ', FCC Success: ' + str(fcc_success) + ', FCC Fallback: ' + str(fcc_fallback))
+                cnt += 1
+                if not positive_value_exists(this_text_for_map_search):
+                    self.mark_address_as_invalid(voter_address)
+                    garbled += 1
+                elif prior_text_for_map_search != this_text_for_map_search:
+                    place_found, line1, state, city, zip_code = self.parse_address(this_text_for_map_search)
+
+                    if not place_found:
+                        self.mark_address_as_invalid(voter_address)
+                        garbled += 1
+                    else:
+                        try:
+                            google_lookups += 1
+                            if (len(state) == 0 or len(state) > 2 or len(city) == 0) and len(zip_code) > 4:
+                                # If all we have is a zip code, Google does pretty well
+                                loc = google_client.geocode(zip_code, sensor=False, timeout=GEOCODE_TIMEOUT)
+                                if loc is None:
+                                    raise Exception("Google geocode failed to process zip_code: " + zip_code)
+                                address, latitude, longitude = loc.address, loc.latitude, loc.longitude
+                                place_found, line1, state, city, zip_code = self.parse_address(address)
+                            else:
+                                loc = google_client.geocode(this_text_for_map_search, sensor=False,
+                                                            timeout=GEOCODE_TIMEOUT)
+                                if loc is None:
+                                    raise Exception("Google geocode failed to process address: " +
+                                                    this_text_for_map_search)
+                                latitude, longitude = loc.latitude, loc.longitude
+                            fips, county, fallback = self.get_fips_from_fcc(latitude, longitude, city, state)
+                            if fallback:
+                                fcc_fallback += 1
+                            else:
+                                fcc_success += 1
+
+                        except Exception as goog:
+                            google_lookups_failed += 1
+                            logger.error('%s', 'Google api exception: ' + str(goog) + ' -- ' + this_text_for_map_search)
+                            self.mark_address_as_invalid(voter_address)
+                            continue
+
+                        try:
+                            if state in VALID_STATES and len(city) > 2:
+                                self.set_normalized_address_fields(voter_address, line1, city, state, zip_code)
+                                self.add_fips_to_address(voter_address, fips, county, latitude, longitude)
+                                try:
+                                    if positive_value_exists(voter_address.county_fips_code):
+                                        status = self.save_address_and_dupe_back_to_voter(voter_address, status)
+                                        unique_saved += 1
+                                        prior_voter_address = voter_address
+                                        prior_text_for_map_search = this_text_for_map_search
+                                    else:
+                                        failed += 1
+                                except Exception as e:
+                                    logger.error('Failed to save addr: ' + str(e) + ' -- ' +
+                                                 this_text_for_map_search)
+                                    failed += 1
+                                    self.mark_address_as_invalid(voter_address)
+                            else:
+                                garbled += 1
+                                logger.error('%s', 'FAILURE to process address: ' + this_text_for_map_search)
+                                self.mark_address_as_invalid(voter_address)
+
+                        except Exception as ge:
+                            logger.error('%s', 'General exception in unique save: ' + str(ge))
+                else:
+                    try:
+                        # This voter_address is a duplicate text_for_map_search as in the prior address in the q set
+                        normalized_city, normalized_state, normalized_line1, normalized_zip, county_fips_code, \
+                            county_name, latitude, longitude = prior_voter_address.normalized_city, \
+                            prior_voter_address.normalized_state, prior_voter_address.normalized_line1, \
+                            prior_voter_address.normalized_zip, prior_voter_address.county_fips_code, \
+                            prior_voter_address.county_name, prior_voter_address.latitude, \
+                            prior_voter_address.longitude
+                        self.set_normalized_address_fields(voter_address, normalized_line1, normalized_city,
+                                                           normalized_state, normalized_zip)
+                        self.add_fips_to_address(voter_address, county_fips_code, county_name, latitude, longitude)
+                        status = self.save_address_and_dupe_back_to_voter(voter_address, status)
+                        dupes_updated += 1
+
+                    except Exception as gedu:
+                        logger.error('%s', 'General exception in dupe update: ' + str(gedu))
+
+            stats = 'ADDRESESS_TO_PROCESS ' + str(total_addresses) + \
+                    ' GOOGLE_API_ATTEMPTED ' + str(google_lookups) + \
+                    ' GOOGLE_API_FAILED ' + str(google_lookups_failed) + \
+                    ' SAVED_UNIQUE ' + str(unique_saved) + ' SAVED_DUPES_UPDATED ' + str(dupes_updated) + \
+                    ' FCC_API_SUCCESS ' + str(fcc_success) + ' FIPS_FROM_FALLBACK ' + str(fcc_fallback) + \
+                    ' GARBLED_ADDRESSES ' + str(garbled) + ' ADDRESS_NOT_IN_FIPS__BACKUP ' + str(failed)
+            # logger.error('%s', 'update_fips_codes_for_all_voteraddresses status: ' + status)
+            logger.error('%s', 'update_fips_codes_for_all_voteraddresses statistics: ' + stats)
+            status += stats
+            success = True
+
+        except Exception as ge_outer:
+            logger.error('%s', 'General exception outer: ' + str(ge_outer))
+            success = False
+
+        results = {
+            'status':               status,
+            'success':              success,
+
         }
         return results
 
@@ -5036,6 +5419,7 @@ class VoterPlan(models.Model):
     """
     One voter's plan for when they will cast their vote for one election.
     """
+    objects = None
     google_civic_election_id = models.PositiveIntegerField(
         verbose_name="google civic election id", default=None, null=True, db_index=True)
     state_code = models.CharField(verbose_name="us state code", max_length=2, null=True)
@@ -5047,4 +5431,3 @@ class VoterPlan(models.Model):
     show_to_public = models.BooleanField(default=False)
     date_entered = models.DateTimeField(verbose_name='date entered', null=True, auto_now_add=True, db_index=True)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True, db_index=True)
-

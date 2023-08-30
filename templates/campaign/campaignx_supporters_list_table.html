@@ -1,0 +1,109 @@
+{# templates/campaign/campaignx_supporters_list_table.html #}
+
+{% if supporters_list %}
+<table class="table">
+    {% for campaignx_supporter in supporters_list %}
+    {% if forloop.counter == 1 or forloop.counter|divisibleby:16 %}
+    {# Show the header every ~15 lines #}
+     <thead>
+        <tr>
+            <th></th>
+        {% if not hide_supporter_column %}
+            <th></th>
+            <th>Supporter</th>
+        {% endif %}
+        {% if show_campaignx_column %}
+            <th></th>
+            <th>CampaignX</th>
+        {% endif %}
+            <th>Endorsement</th>
+            <th>Chip Ins</th>
+            <th>Supporter Wants Visibility</th>
+            <th>Visibility Blocked by We Vote?</th>
+            <th>Delete</th>
+        </tr>
+      </thead>
+    {% endif %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+        {% if not hide_supporter_column %}
+            <td>
+            {% if campaignx_supporter.we_vote_hosted_profile_image_url_tiny %}
+                {% if campaignx_supporter.voter_we_vote_id %}<a href="{% url 'voter:voter_edit_we_vote_id' campaignx_supporter.voter_we_vote_id %}" target="_blank">{% endif %}
+                    <img src="{{ campaignx_supporter.we_vote_hosted_profile_image_url_tiny }}" width="32px" />
+                {% if campaignx_supporter.voter_we_vote_id %}</a>{% endif %}
+            {% endif %}
+            </td>
+            <td>
+                {{ campaignx_supporter.supporter_name }}<br />
+                <input type="hidden" name="campaignx_supporter_{{ campaignx_supporter.id }}_exists" value="1">
+                <div class="u-no-break">
+                <span style="color: darkgray">{{ campaignx_supporter.voter_we_vote_id }} / {{ campaignx_supporter.organization_we_vote_id }}</span>&nbsp;
+                    {% if campaignx_supporter.voter_we_vote_id %}
+                    <a href="{% url 'voter:voter_edit_we_vote_id' campaignx_supporter.voter_we_vote_id %}"
+                       target="_blank">edit&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+                    {% endif %}
+                </div>
+            </td>
+        {% endif %}
+        {% if show_campaignx_column %}
+            <td>
+            {% if campaignx_supporter.campaignx %}
+            {% if campaignx_supporter.campaignx.we_vote_hosted_campaign_photo_small_url or campaignx_supporter.campaignx.we_vote_hosted_profile_image_url_tiny %}
+                <a href="{% url 'campaign:campaignx_summary' campaignx_supporter.campaignx_we_vote_id %}" target="_blank">
+                {% if campaignx_supporter.campaignx.we_vote_hosted_campaign_photo_small_url %}
+                    <img src="{{ campaignx_supporter.campaignx.we_vote_hosted_campaign_photo_small_url }}" width="32px" />
+                {% elif campaignx_supporter.campaignx.we_vote_hosted_profile_image_url_tiny %}
+                    <img src="{{ campaignx_supporter.campaignx.we_vote_hosted_profile_image_url_tiny }}" width="32px" />
+                {% endif %}
+                </a>
+            {% endif %}
+            {% endif %}
+            </td>
+            <td>
+            {% if campaignx_supporter.campaignx %}
+                {{ campaignx_supporter.campaignx.campaign_title }}<br />
+                <input type="hidden" name="campaignx_supporter_{{ campaignx_supporter.id }}_exists" value="1">
+                <div class="u-no-break">
+                <span style="color: darkgray">{{ campaignx_supporter.campaignx_we_vote_id }}</span>&nbsp;<a
+                    href="{% url 'campaign:campaignx_summary' campaignx_supporter.campaignx_we_vote_id %}"
+                    target="_blank">edit&nbsp;<span class="glyphicon glyphicon-new-window"></span></a>
+                </div>
+            {% endif %}
+            </td>
+        {% endif %}
+            <td>{{ campaignx_supporter.supporter_endorsement|default_if_none:"" }}</td>
+            <td>{% if campaignx_supporter.chip_in_total != 'none' %}{{ campaignx_supporter.chip_in_total|default_if_none:"" }}{% endif %}</td>
+            <td>
+                <input type="checkbox"
+                       name="campaignx_supporter_visible_to_public_{{ campaignx_supporter.id }}"
+                       id="campaignx_supporter_visible_to_public_{{ campaignx_supporter.id }}_id"
+                       value="True"
+                       {% if campaignx_supporter.visible_to_public %}
+                         checked="checked"
+                       {% endif %}
+                />
+                visible
+            </td>
+            <td style="color: darkgray">
+                <input type="checkbox"
+                       name="campaignx_supporter_visibility_blocked_by_we_vote_{{ campaignx_supporter.id }}"
+                       id="campaignx_supporter_visibility_blocked_by_we_vote_{{ campaignx_supporter.id }}_id"
+                       value="True"
+                       {% if campaignx_supporter.visibility_blocked_by_we_vote %}
+                         checked="checked"
+                       {% endif %}
+                />
+                blocked
+            </td>
+            <td>
+                <input type="checkbox"
+                       name="delete_campaignx_supporter_{{ campaignx_supporter.id }}"
+                       id="delete_campaignx_supporter_{{ campaignx_supporter.id }}_id"
+                       value="True"
+                />
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+{% endif %}
