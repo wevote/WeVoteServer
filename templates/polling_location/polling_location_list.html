@@ -1,7 +1,13 @@
 {# templates/polling_location/polling_location_list.html #}
 {% extends "template_base.html" %}
+{% load static %}
 
 {% block title %}{% if state_name %}{{ state_name }} {% endif %}Map Points{% endblock %}
+
+{% block js %}
+    <script src="{% static "js/PollingLocationVisualization.js" %}" type="text/javascript"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap" async defer></script>
+{% endblock %}
 
 {%  block content %}
 
@@ -103,6 +109,17 @@
       <input type="checkbox" name="show_bulk_retrieve" id="show_bulk_retrieve_id" value="1" onChange="this.form.submit()"
              {% if show_bulk_retrieve %}checked{% endif %} /> bulk retrieve locations
     </label>
+
+    {% if source_code_list %}
+        {% for source_code in source_code_list %}
+            {% if source_code %}
+                <label for="show_{{source_code}}_id">
+                    <input type="checkbox" name="show_{{source_code}}" id="show_{{source_code}}_id" value="1" onChange="this.form.submit()"
+                        {% if source_code in selected_types %}checked{% endif %} /> {{ source_code }}
+                </label>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
 </form>
 
 {% if polling_location_list %}

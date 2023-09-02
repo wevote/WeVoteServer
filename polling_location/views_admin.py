@@ -31,6 +31,7 @@ import json
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 POLLING_LOCATIONS_SYNC_URL = get_environment_variable("POLLING_LOCATIONS_SYNC_URL")  # pollingLocationsSyncOut
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
+GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -522,6 +523,19 @@ def polling_location_list_view(request):
     polling_location_count_query = PollingLocation.objects.all()
     polling_location_without_latitude_count = 0
     polling_location_query = PollingLocation.objects.all()
+
+    selected_types = []
+    polling_location_source_codes = {"PUBLIC_SCHOOLS", "POST_OFFICE_LAT_LONG"}
+
+    for polling_location_source_code in polling_location_source_codes:
+        if request.GET.get(f'show_{polling_location_source_code}', 0):
+            selected_types.append(polling_location_source_code)
+
+    if selected_types:
+        polling_location_count_query = polling_location_count_query.filter(source_code__in=selected_types)
+        polling_location_query = polling_location_query.filter(source_code__in=selected_types)
+
+
     if not positive_value_exists(polling_location_search):
         polling_location_count_query = polling_location_count_query.exclude(polling_location_deleted=True)
         polling_location_query = polling_location_query.exclude(polling_location_deleted=True)
@@ -691,6 +705,9 @@ def polling_location_list_view(request):
         'state_code':               state_code,
         'state_name':               convert_state_code_to_state_text(state_code),
         'state_list':               sorted_state_list,
+        'selected_types':           selected_types,
+        'source_code_list':         polling_location_source_codes,
+        'google_maps_api_key':      GOOGLE_MAPS_API_KEY,
     }
     return render(request, 'polling_location/polling_location_list.html', template_values)
 
