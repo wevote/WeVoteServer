@@ -705,9 +705,9 @@ def polling_location_list_view(request):
         'state_code':               state_code,
         'state_name':               convert_state_code_to_state_text(state_code),
         'state_list':               sorted_state_list,
-        'selected_types': selected_types,
-        'source_code_list': polling_location_source_codes,
-        'google_maps_api_key': GOOGLE_MAPS_API_KEY,
+        'selected_types':           selected_types,
+        'source_code_list':         polling_location_source_codes,
+        'google_maps_api_key':      GOOGLE_MAPS_API_KEY,
     }
     return render(request, 'polling_location/polling_location_list.html', template_values)
 
