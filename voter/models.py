@@ -3129,7 +3129,7 @@ class Voter(AbstractBaseUser):
     is_partner_organization = models.BooleanField(default=False)
     is_political_data_manager = models.BooleanField(default=False)
     is_political_data_viewer = models.BooleanField(default=False)
-    is_signed_in_cached = models.BooleanField(default=None, null=True)  # So we can do searches for analytics
+    is_signed_in_cached = models.BooleanField(default=None, null=True, db_index=True)  # So we can do searches for analytics
     is_verified_volunteer = models.BooleanField(default=False)
 
     # Facebook session information
