@@ -117,6 +117,7 @@
                     <input type="checkbox" name="show_{{source_code}}" id="show_{{source_code}}_id" value="1" onChange="this.form.submit()"
                         {% if source_code in selected_types %}checked{% endif %} /> {{ source_code }}
                 </label>
+                &nbsp;&nbsp;&nbsp;
             {% endif %}
         {% endfor %}
     {% endif %}

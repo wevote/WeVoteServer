@@ -525,7 +525,7 @@ def polling_location_list_view(request):
     polling_location_query = PollingLocation.objects.all()
 
     selected_types = []
-    polling_location_source_codes = {"PUBLIC_SCHOOLS", "POST_OFFICE_LAT_LONG"}
+    polling_location_source_codes = ["PUBLIC_SCHOOLS", "POST_OFFICE_LAT_LONG"]
 
     for polling_location_source_code in polling_location_source_codes:
         if request.GET.get(f'show_{polling_location_source_code}', 0):

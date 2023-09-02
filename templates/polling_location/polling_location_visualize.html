@@ -7,14 +7,15 @@
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCM0vM1mzh56OuA5IfgW_U6Qd9jD99WH6M&callback=initMap" async defer></script>
 {% endblock %}
 
-{% block title %}Map of Map Points{% endblock %}
+{% block title %}Map Points on Google Map{% endblock %}
 
 {% block content %}
   <div id='outer'>
     <a href="{% url 'polling_location:polling_location_list' %}?state_code={{ polling_location.state|default_if_none:"" }}">
       < Back to Map Points
     </a>
-    <br/><br/>
+    <br/>
+    <h1>Map Points on Google Map</h1>
     <div id='map'></div>
 
     <input type="hidden" id="source_html" value="polling_location_visualize.html">
