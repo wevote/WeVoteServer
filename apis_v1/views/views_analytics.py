@@ -10,7 +10,7 @@ import json
 from organization.models import OrganizationManager
 import robot_detection
 from django_user_agents.utils import get_user_agent
-from voter.models import Voter, VoterDeviceLinkManager, VoterManager
+from voter.models import Voter, VoterDeviceLinkManager, voter_has_authority, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_voter_device_id, is_voter_device_id_valid, \
     positive_value_exists, STATE_CODE_MAP
@@ -236,6 +236,84 @@ def voter_aggregate_analytics_view(request):  # voterAggregateAnalytics
     json_data['show_counties_without_activity'] = show_counties_without_activity
     json_data['show_county_topics'] = show_county_topics
     json_data['states'] = all_states_dict
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def voter_list_analytics_view(request):  # voterListAnalytics
+    show_signed_in_voters = positive_value_exists(request.GET.get('show_signed_in_voters', False))
+    show_we_vote_id_only = positive_value_exists(request.GET.get('show_we_vote_id_only', False))
+    voter_count_requested_default = 10000
+    voter_count_requested = convert_to_int(request.GET.get('voter_count_requested', voter_count_requested_default))
+    if not positive_value_exists(voter_count_requested):
+        voter_count_requested = voter_count_requested_default
+    voter_count_returned = 0
+    voter_count_total = 0
+    voter_index_end = 0
+    voter_index_start = convert_to_int(request.GET.get('voter_index_start', 0))
+    voter_list_of_dicts = []
+    status = ''
+    success = True
+
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin', 'analytics_admin'}
+    if not voter_has_authority(request, authority_required):
+        status += "VOTER_LIST_ANALYTICS_VIEW-MISSING_AUTHORITY "
+        success = False
+        json_data = {
+            'status':                   status,
+            'success':                  success,
+            'show_signed_in_voters':    show_signed_in_voters,
+            'voter_count_total':        voter_count_total,
+            'voter_count_requested':    voter_count_requested,
+            'voter_count_returned':     voter_count_returned,
+            'voter_index_start':        voter_index_start,
+            'voter_index_end':          voter_index_end,
+            'voter_list':               voter_list_of_dicts,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    voter_queryset = Voter.objects.using('readonly').all()
+    if show_signed_in_voters:
+        voter_queryset = voter_queryset.filter(is_signed_in_cached=True)
+    voter_count_total = voter_queryset.count()
+    voter_queryset = voter_queryset.order_by('-date_last_changed')
+    if positive_value_exists(voter_count_requested):
+        if positive_value_exists(voter_index_start):
+            voter_list = voter_queryset[voter_index_start:voter_count_requested]
+        else:
+            voter_list = voter_queryset[:voter_count_requested]
+    elif positive_value_exists(voter_index_start):
+        voter_list = voter_queryset[voter_index_start:voter_count_requested]
+    else:
+        voter_list = voter_queryset[:voter_count_requested_default]
+    voter_count_returned = voter_list.count()
+    if positive_value_exists((voter_index_start + voter_count_returned)):
+        voter_index_end = voter_index_start + voter_count_returned - 1
+    else:
+        voter_index_end = 0
+
+    voter_list_of_we_vote_ids = []
+    for voter in voter_list:
+        voter_dict = {
+            'we_vote_id': voter.we_vote_id,
+        }
+        voter_list_of_dicts.append(voter_dict)
+        voter_list_of_we_vote_ids.append(voter.we_vote_id)
+
+    if show_we_vote_id_only:
+        json_data = voter_list_of_we_vote_ids
+    else:
+        json_data = {
+            'status':                   status,
+            'success':                  success,
+            'show_signed_in_voters':    show_signed_in_voters,
+            'voter_count_total':        voter_count_total,
+            'voter_count_requested':    voter_count_requested,
+            'voter_count_returned':     voter_count_returned,
+            'voter_index_start':        voter_index_start,
+            'voter_index_end':          voter_index_end,
+            'voter_list':               voter_list_of_dicts,
+        }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 

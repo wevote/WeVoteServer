@@ -3129,6 +3129,7 @@ class Voter(AbstractBaseUser):
     is_partner_organization = models.BooleanField(default=False)
     is_political_data_manager = models.BooleanField(default=False)
     is_political_data_viewer = models.BooleanField(default=False)
+    is_signed_in_cached = models.BooleanField(default=None, null=True)  # So we can do searches for analytics
     is_verified_volunteer = models.BooleanField(default=False)
 
     # Facebook session information
@@ -5331,10 +5332,16 @@ class VoterMetricsManager(models.Manager):
     def fetch_voter_count_with_verified_sms(self):
         return self.fetch_voter_count(or_filter=True, has_verified_sms=True)
 
-    def fetch_voter_count(self, or_filter=True,
-                          has_twitter=False, has_facebook=False, has_email=False, has_verified_email=False,
-                          has_verified_sms=False,
-                          by_notification_settings=0, by_interface_status_flags=0):
+    @staticmethod
+    def fetch_voter_count(
+            or_filter=True,
+            has_twitter=False,
+            has_facebook=False,
+            has_email=False,
+            has_verified_email=False,
+            has_verified_sms=False,
+            by_notification_settings=0,
+            by_interface_status_flags=0):
         if 'test' in sys.argv:
             # If coming from a test, we cannot use readonly
             voter_queryset = Voter.objects.all()

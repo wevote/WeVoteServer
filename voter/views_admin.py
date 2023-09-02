@@ -1447,6 +1447,66 @@ def voter_list_view(request):
         if positive_value_exists(voter_issues_lookup_updates_status):
             messages.add_message(request, messages.INFO, voter_issues_lookup_updates_status)
 
+    # Set is_signed_in_cached True if a voter has signed in (needed for voterListAnalytics)
+    number_to_update = 10000
+    voter_is_signed_in_cached_updates = True
+    if voter_is_signed_in_cached_updates and run_scripts:
+        voter_is_signed_in_status = ""
+        voter_query = Voter.objects.all()
+        voter_query = voter_query.exclude(is_signed_in_cached=True)
+        # Focus on voters who have signed in for now
+        # In the future, we can also mark 'is_signed_in_cached' to be False for older records. Now, leave Null.
+
+        voter_raw_filters = []
+        new_voter_filter = Q(twitter_id__isnull=False)
+        voter_raw_filters.append(new_voter_filter)
+        new_voter_filter = Q(twitter_id__gt=0)
+        voter_raw_filters.append(new_voter_filter)
+
+        new_voter_filter = Q(facebook_id__isnull=False)
+        voter_raw_filters.append(new_voter_filter)
+        new_voter_filter = Q(facebook_id__gt=0)
+        voter_raw_filters.append(new_voter_filter)
+
+        # Does this catch voters signed in with Apple?
+        new_voter_filter = Q(primary_email_we_vote_id__isnull=False)
+        voter_raw_filters.append(new_voter_filter)
+
+        new_voter_filter = Q(primary_sms_we_vote_id__isnull=False)
+        voter_raw_filters.append(new_voter_filter)
+
+        final_voter_filters = voter_raw_filters.pop()
+
+        # ...and "OR" the remaining items in the list
+        for item in voter_raw_filters:
+            final_voter_filters |= item
+
+        voter_query = voter_query.filter(final_voter_filters)
+
+        total_to_convert = voter_query.count()
+        total_to_convert_after = total_to_convert - number_to_update if total_to_convert > number_to_update else 0
+        updates_made = 0
+        voter_list_one_batch = list(voter_query[:number_to_update])
+        voter_signed_in_update_list = []
+        for one_voter in voter_list_one_batch:
+            one_voter.is_signed_in_cached = True
+            voter_signed_in_update_list.append(one_voter)
+            updates_made += 1
+        if positive_value_exists(updates_made):
+            Voter.objects.bulk_update(
+                voter_signed_in_update_list, [
+                    'is_signed_in_cached',
+                ])
+            voter_is_signed_in_status += (
+                "Voter entries updated with is_signed_in_cached: {updates_made:,} "
+                "".format(updates_made=updates_made))
+        if positive_value_exists(total_to_convert_after):
+            voter_is_signed_in_status += (
+                "is_signed_in_cached updates needed: {total_to_convert_after:,} "
+                "".format(total_to_convert_after=total_to_convert_after))
+        if positive_value_exists(voter_is_signed_in_status):
+            messages.add_message(request, messages.INFO, voter_is_signed_in_status)
+
     messages_on_stage = get_messages(request)
     if positive_value_exists(voter_search):
         # Search for an email address - do not require to be verified
