@@ -838,6 +838,7 @@ def voter_facebook_sign_in_save_auth_for_api(voter_device_id,  # voterFacebookSi
 
 def get_facebook_photo_url_from_graphapi(facebook_candidate_url, facebook_id=False):
     clean_message = ''
+    fb_id_or_login_name = ''
     is_silhouette = False
     photo_url = ""
     photo_url_found = False
@@ -846,11 +847,16 @@ def get_facebook_photo_url_from_graphapi(facebook_candidate_url, facebook_id=Fal
 
     if facebook_id:
         fb_id_or_login_name = facebook_id
+    elif facebook_candidate_url:
+        try:
+            m = re.search(r'^.*?facebook.com/(.*?)((/$)|($)|(/.*?$))', facebook_candidate_url)
+            fb_id_or_login_name = m.group(1)
+            if len(m.groups()) < 2:
+                status += 'GET_FACEBOOK_PHOTO_URL_FROM_GRAPHAPI-PROPER_URL_NOT_PROVIDED: ' + facebook_candidate_url + " "
+        except Exception as e:
+            status += "ERROR_TRYING_TO_GET_FACEBOOK_PHOTO_ID_OR_LOGIN_NAME: " + str(e) + " "
     else:
-        m = re.search(r'^.*?facebook.com/(.*?)((/$)|($)|(/.*?$))', facebook_candidate_url)
-        fb_id_or_login_name = m.group(1)
-        if len(m.groups()) < 2:
-            status += 'GET_FACEBOOK_PHOTO_URL_FROM_GRAPHAPI-PROPER_URL_NOT_PROVIDED: ' + facebook_candidate_url + " "
+        status += "MISSING_BOTH_FACEBOOK_ID_AND_URL "
 
     if positive_value_exists(fb_id_or_login_name):
         results = FacebookManager.retrieve_facebook_photo_from_person_id(fb_id_or_login_name)
