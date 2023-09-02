@@ -58,7 +58,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 ELECTIONS_SYNC_URL = get_environment_variable("ELECTIONS_SYNC_URL")  # electionsSyncOut
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
-
+GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
 
 def test_view(request):
     success = True
@@ -2971,6 +2971,7 @@ def election_ballot_location_visualize_view(request):
         'show_no_pins':             show_no_pins,
         'state_code':               state_code,
         'state_list':               sorted_state_list,
+        'google_maps_api_key':      GOOGLE_MAPS_API_KEY,
     }
 
     return render(request, 'election/election_ballot_location_visualize.html', template_values)
