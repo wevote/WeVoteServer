@@ -1097,13 +1097,18 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
                 queryset = CampaignX.objects.filter(we_vote_id__in=campaignx_we_vote_id_list)
                 campaign_list = list(queryset)
                 for campaign in campaign_list:
-                    campaigns_by_we_vote_id_dict[campaign.we_vote_id] = campaign
+                    try:
+                        campaigns_by_we_vote_id_dict[campaign.we_vote_id] = campaign
+                    except Exception as e:
+                        pass
                 modified_supporters_list = []
                 for supporter in supporters_list:
-                    one_campaign = campaigns_by_we_vote_id_dict[supporter.campaignx_we_vote_id]
-                    if hasattr(one_campaign, 'campaign_title'):
-                        supporter.campaignx = campaigns_by_we_vote_id_dict.get(supporter.campaignx_we_vote_id)
-                    modified_supporters_list.append(supporter)
+                    if hasattr(supporter, 'campaignx_we_vote_id'):
+                        if supporter.campaignx_we_vote_id in campaigns_by_we_vote_id_dict:
+                            one_campaign = campaigns_by_we_vote_id_dict[supporter.campaignx_we_vote_id]
+                            if hasattr(one_campaign, 'campaign_title'):
+                                supporter.campaignx = campaigns_by_we_vote_id_dict.get(supporter.campaignx_we_vote_id)
+                        modified_supporters_list.append(supporter)
                 supporters_list = modified_supporters_list
 
         messages.add_message(request, messages.INFO, status_print_list)
@@ -1391,14 +1396,14 @@ def voter_list_view(request):
             try:
                 Voter.objects.bulk_update(
                     voter_update_list, ['voter_issues_lookup_updated'])
-                voter_issues_lookup_updates_status += "Voter entries updated: {voter_updates_made:,}" \
+                voter_issues_lookup_updates_status += "Voter entries updated: {voter_updates_made:,}. " \
                                                       "".format(voter_updates_made=voter_updates_made)
             except Exception as e:
                 voter_issues_lookup_updates_status += "Voter entries (" + str(voter_updates_made) + ") " \
                     "NOT updated: " + str(e) + " "
         if positive_value_exists(voter_issues_lookup_updates_status) or positive_value_exists(total_to_convert_after):
             voter_issues_lookup_updates_status += \
-                "{total_to_convert_after:,} remaining. " \
+                "Updates remaining: {total_to_convert_after:,}. " \
                 "".format(
                     total_to_convert_after=total_to_convert_after)
             messages.add_message(request, messages.INFO, voter_issues_lookup_updates_status)
