@@ -2057,19 +2057,19 @@ class PoliticianManager(models.Manager):
         }
         return results
 
-    def retrieve_politicians_with_no_gender_id(self, start=0, count=15):
+    def retrieve_politicians_with_no_gender_id(self, start=0, count=15, show_unknowns=True):
         """
         Get the first 15 records that have gender 'U' undefined
           use gender_guesser to set the gender if male or female or androgynous (can't guess other human gender states)
           set gender_likelihood to gender
         :param start:
         :param count:
+        :param show_unknowns: show "unknowns", candidates for whom the gender guesser couldn't determine their gender
         :return:
         """
         politician_query = Politician.objects.using('readonly').all()
         # Get all politicians who do not have gender specified
         politician_query = politician_query.filter(gender=UNKNOWN)
-        politician_query = politician_query.exclude(gender_likelihood=POLITICAL_DATA_MANAGER)
         number_of_rows = politician_query.count()
         politician_query = politician_query.order_by('politician_name')
         politician_query = politician_query[start:(start+count)]
@@ -2087,7 +2087,8 @@ class PoliticianManager(models.Manager):
             except KeyError:
                 pol.displayable_guess = DISPLAYABLE_GUESS['unknown']
                 pol.guess = 'unknown'
-            results_list.append(pol)
+            if pol.guess != 'unknown' or positive_value_exists(show_unknowns):
+                results_list.append(pol)
 
         return results_list, number_of_rows
 
