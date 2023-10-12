@@ -11,6 +11,11 @@
 <style>
  input[type=button] { margin: 10px 8px 16px 8px; }
 </style>
+<div style="margin-left: 10px; border: thin solid black; padding: 2px 6px 2px 2px; white-space: nowrap; overflow: hidden; display: inline-block">
+    <span style="padding: 0 10px 4px 6px">Show Politicians with &quot;Unknown&quot; genders</span>
+    <input type="radio" id="radio_button_show_unknowns" name="show_unknowns_choice" onClick="updateShowUnknowns()" />
+</div>
+<br />
 <input class="btn-success" type="button" id="button_save_and_load" value="Save any changes, then load the next 15" />
 <input type="button" id="button_load_no_save_prev" value="< Load the previous 15 without saving" onClick="goToPrevPage(0)" />
 <input type="button" id="button_load_no_save" value="Load the next 15 without saving >" onClick="goToNextPage(0, true)" />
@@ -82,6 +87,31 @@
     saveTextEl.text('Needs saving');
   }
 
+  function getCount() {
+      const count = window.location.href.match(/(?:count=)(\d+)/);
+      if (count && count.length > 1) {
+        return parseInt(count[1]);
+      }
+      return 15;
+  }
+
+  function getStart() {
+      const start = window.location.href.match(/(?:start=)(\d+)/);
+      if (start && start.length > 1) {
+          return parseInt(start[1]);
+      }
+      return 0;
+  }
+
+  function getShowUnknowns() {
+    if (window.location.href.includes('show_unknowns=true')) {
+      return true;
+    } else if (window.location.href.includes('show_unknowns=false')) {
+      return false;
+    }
+    return true;
+  }
+
   function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -100,14 +130,14 @@
 
     function goToNextPage(delay, increment) {
       const is_candidate = window.location.href.includes('is_candidate=true');
-      const matched = window.location.href.match(/(?:start=)(\d+)/);
       let newStart = 0;
       if (increment) {
-        newStart = matched ? parseInt(matched[1]) + 15 : 15;
+        newStart = getStart() + getCount();
       } else {
-        newStart = matched ? parseInt(matched[1]) : 0;
+        newStart = getStart() - getCount();
+        if (newStart < 0) newStart = 0;
       }
-      const newHref = window.location.origin + window.location.pathname + '?is_candidate=' + is_candidate + '&start=' + newStart + '&count=15';
+      const newHref = window.location.origin + window.location.pathname + '?is_candidate=' + is_candidate + '&start=' + newStart + '&count=' + getCount() + '&show_unknowns=' + getShowUnknowns();
       setTimeout(() => {
         window.location = newHref;
       }, delay);
@@ -115,9 +145,18 @@
 
   function goToPrevPage(delay) {
     const is_candidate = window.location.href.includes('is_candidate=true');
-    const matched = window.location.href.match(/(?:start=)(\d+)/);
-    const newStart = matched && parseInt(matched[1]) - 15 > 0 ? parseInt(matched[1]) - 15 : 0;
-    const newHref = window.location.origin + window.location.pathname + '?is_candidate=' + is_candidate + '&start=' + newStart + '&count=15';
+    const newStart = getStart() - getCount() > 0 ? getStart() - getCount() : 0;
+    const newHref = window.location.origin + window.location.pathname + '?is_candidate=' + is_candidate + '&start=' + newStart + '&count=' + getCount() +'&show_unknowns=' + getShowUnknowns();
+
+    setTimeout(() => {
+      window.location = newHref;
+    }, delay);
+  }
+
+  function updateShowUnknowns(delay) {
+    const is_candidate = window.location.href.includes('is_candidate=true');
+    const newHref = window.location.origin + window.location.pathname + '?is_candidate=' + is_candidate + '&start=' + getStart() +
+        '&count=' + getCount() +'&show_unknowns=' + !getShowUnknowns();
 
     setTimeout(() => {
       window.location = newHref;
@@ -125,6 +164,15 @@
   }
 
   $(function() {
+    $('#radio_button_show_unknowns').prop('checked',getShowUnknowns());
+
+    const count = getCount().toString();
+    if (count != '15') {
+      $('#button_save_and_load').attr('value', 'Save any changes, then load the next ' + count);
+      $('#button_load_no_save_prev').attr('value', '< Load the previous ' + count + ' without saving');
+      $('#button_load_no_save').attr('value', 'Load the next ' + count + ' without saving >');
+    }
+
     $('#button_save_and_load').click(function(evt) {
       let changes = []
       $("tr.person_row").each(function(i, tr) {
