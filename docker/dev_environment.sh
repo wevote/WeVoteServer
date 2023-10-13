@@ -77,7 +77,7 @@ start_wevote_localstack() {
 
 start_wevote_db() {
 	if [ -z "$(docker container ls -a | grep $DOCKER_DB_NAME)" ]; then
-		echo "Creating postgres container.."
+		echo "Building postgres container.."
 		# build db docker container
 		docker build -t $DOCKER_DB_TAG \
 			-f $BASEDIR/docker/Dockerfile.db $BASEDIR/docker
@@ -107,6 +107,7 @@ start_wevote_db() {
 
 build_wevote_api() {
 	# build API docker container
+	echo "Building WeVoteServer container.."
 	docker build --pull -t $DOCKER_API_TAG -f docker/Dockerfile.api $BASEDIR
 	if [ ! -e $BASEDIR/config/environment_variables.json ]; then
 		echo "Creating developer configuration file in config/environment_variables.json..."
