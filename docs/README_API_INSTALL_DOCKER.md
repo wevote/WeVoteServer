@@ -1,13 +1,11 @@
 # README for Installation with Docker (OSX or Linux)
 [Back to root README](../README.md)
 
-**This installation method only requires Docker to be installed and running. All dependencies (libraries or Python modules) reside within the docker containers. These instructions are intended for advanced users familiar with docker, git and python.""
+Only [Docker Desktop](https://docs.docker.com/get-docker/) is required.
 
-## Installing WeVoteServer: Using Docker
-These instructions are for OSX and Linux users.
+[WSL 2](https://learn.microsoft.com/en-us/windows/wsl/compare-versions#comparing-wsl-1-and-wsl-2) users should follow [this guide](https://docs.docker.com/desktop/wsl/) as well.
 
-This method requires [Docker](https://docs.docker.com/get-docker/) to be installed. 
-
+## Installation
 
 1. Clone your WeVoteServer fork
 
@@ -16,34 +14,56 @@ This method requires [Docker](https://docs.docker.com/get-docker/) to be install
     cd WeVoteServer
     ```
 
-2. (Optional) Start WeVote Localstack
-
-    Some parts of the WeVote API service utilize AWS services such as SQS. If you are developing this part of the WeVote API code, you can run a local AWS stack in a container to minimick real AWS services for testing. To start the localstack container, use the following command:
-    ```
-    docker/dev_environment.sh localstack
-    ```
-
-3. Start development environment
+2. Set environment variables in `.env`
 
     ```
-    docker/dev_environment.sh start
-    ```
-    This command will start a background postgres database container (named `wevote-db`) that will host your development database. It will also build and launch the WeVote API container. The WeVote API container will run in the foreground, where you can monitor the service logs while developing. This command may take a few minutes to build the API container the first time it is run.
+    # api
+    DATABASE_PASSWORD="secret"
 
-    Once the WeVote API container is running, you can access your local WeVote API dev environment at:
-        [http://localhost:8000/](http://localhost:8000/)
+    # db
+    POSTGRES_PASSWORD="secret"
+    ```
 
-    When you are done developing, press Control-C to stop your local WeVote API container in the running terminal. To shut down the database container (and localstack container, if running), you can use the following command:
+3. Configure PostgreSQL in `init.sql`
+
+    ```sql
+    ALTER SYSTEM SET listen_addresses = '*';
     ```
-    docker/dev_environment.sh stop
+    This setting allows other containers to access the database
+
+4. Create and start containers
+
     ```
-    Once stopped, there will be no running WeVote API resources. To delete the underlying containers (except Postgres database volume), use the following command:
+    docker compose up --detach
     ```
-    docker/dev_environment.sh delete
+    Use the `--profile` flag, if you need AWS
     ```
-    The WeVote API Postgres database is stored in a separate docker volume. To completely remove the database volume, use the following command:
+    docker compose --profile optional up --detach
     ```
-    docker/dev_environment.sh deletedb
+    Access the API at [http://localhost:8000/](http://localhost:8000/)
+
+5. Stop and remove containers
+
     ```
+    docker compose down
+    ```
+    Use the `--volumes` flag to remove volumes
+    ```
+    docker compose down --volumes
+    ```
+
+## Resources
+
+1. Docker Compose
+    
+    - [CLI](https://docs.docker.com/compose/reference/)
+
+    - [Networking](https://docs.docker.com/compose/networking/)
+
+2. PostgreSQL
+
+    - [Config](https://www.postgresql.org/docs/12/config-setting.html#CONFIG-SETTING-SQL-COMMAND-INTERACTION)
+
+    - [Official Docker Image](https://hub.docker.com/_/postgres)
 
 [Back to root README](../README.md)
