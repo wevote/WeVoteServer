@@ -1,4 +1,4 @@
-# README for Installation with Docker (OSX or Linux)
+# README for Installation with Docker
 [Back to root README](../README.md)
 
 Only [Docker Desktop](https://docs.docker.com/get-docker/) is required.
@@ -31,7 +31,15 @@ Only [Docker Desktop](https://docs.docker.com/get-docker/) is required.
     ```
     This setting allows other containers to access the database
 
-4. Create and start containers
+4. [Open the following ports](https://www.wikihow.com/Open-Ports), if they are not already open:
+
+    - 4566, if you need AWS
+    
+    - 5432 to access the database
+
+    - 8000 to access the API
+
+5. Create and start containers
 
     ```
     docker compose up --detach
@@ -42,7 +50,7 @@ Only [Docker Desktop](https://docs.docker.com/get-docker/) is required.
     ```
     Access the API at [http://localhost:8000/](http://localhost:8000/)
 
-5. Stop and remove containers
+6. Stop and remove containers
 
     ```
     docker compose down
@@ -60,7 +68,11 @@ Only [Docker Desktop](https://docs.docker.com/get-docker/) is required.
 
     - [Networking](https://docs.docker.com/compose/networking/)
 
-2. PostgreSQL
+2. Docker Desktop
+
+    - [Why does Docker Desktop for Linux run a VM?](https://docs.docker.com/desktop/faqs/linuxfaqs/#why-does-docker-desktop-for-linux-run-a-vm)
+
+3. PostgreSQL
 
     - [Config](https://www.postgresql.org/docs/12/config-setting.html#CONFIG-SETTING-SQL-COMMAND-INTERACTION)
 

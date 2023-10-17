@@ -21,7 +21,7 @@ services:
     networks:
       - ${COMPOSE_PROJECT_NAME}
     ports:
-      - "5000:5432"
+      - "5432:5432"
     restart: unless-stopped
     user: postgres
     volumes:
