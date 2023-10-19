@@ -4,6 +4,7 @@
 import base64
 import json
 import re
+from background_task import background
 from datetime import timedelta
 from io import BytesIO
 from time import time
@@ -141,8 +142,10 @@ def add_state_code_for_display_to_voter_list(voter_we_vote_id_list=None):
     }
     return results
 
-
-def delete_all_voter_information_permanently(voter_to_delete=None, user=None):  # voterDeleteAccount
+# voterDeleteAccount
+# Delete data 5 minutes later
+@background(schedule=300)
+def delete_all_voter_information_permanently(voter_to_delete=None, user=None):
     success = True
     status = ""
 
@@ -332,70 +335,37 @@ def delete_all_voter_information_permanently(voter_to_delete=None, user=None):  
     }
     return results
 
-
-def voter_delete_account_for_api(  # voterDeleteAccount
-        voter_device_id=''):
-    current_voter_found = False
-    email_owner_voter_found = False
-    facebook_owner_voter_found = False
-    twitter_owner_voter_found = False
-    invitation_owner_voter_found = False
-    new_owner_voter = None
-    success = False
-    status = ""
-
-    voter_device_link_manager = VoterDeviceLinkManager()
-    voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
-    if not voter_device_link_results['voter_device_link_found']:
-        error_results = {
-            'status': voter_device_link_results['status'],
-            'success': False,
-            'voter_device_id': voter_device_id,
-            'current_voter_found': current_voter_found,
-            'email_owner_voter_found': email_owner_voter_found,
-            'facebook_owner_voter_found': facebook_owner_voter_found,
-            'invitation_owner_voter_found': False,
-        }
-        return error_results
-
-    # We need this below
-    voter_device_link = voter_device_link_results['voter_device_link']
-
+# voterDeleteAccount
+def voter_delete_account_for_api(voter_device_id=''):
+    error_results = {
+        'success': False,
+        'current_voter_found': False,
+        'email_owner_voter_found': False,
+        'facebook_owner_voter_found': False,
+        'twitter_owner_voter_found': False,
+        'invitation_owner_voter_found': False,
+    }
     voter_manager = VoterManager()
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=False)
+
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
-        error_results = {
-            'status': "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
-            'success': False,
-            'voter_device_id': voter_device_id,
-            'current_voter_found': current_voter_found,
-            'email_owner_voter_found': email_owner_voter_found,
-            'facebook_owner_voter_found': facebook_owner_voter_found,
-            'invitation_owner_voter_found': False,
-        }
+        error_results['status'] = "VOTER_NOT_FOUND_BY_VOTER_ID"
         return error_results
 
-    voter = voter_results['voter']
-    status += "DELETE_VOTER-" + str(voter.we_vote_id) + " "
+    # If none of the keys are valid, error_results['status'] = "VOTER_SECRET_KEY_NOT_PASSED_IN"
+    # return error_results
+    
+    voter_to_delete = voter_results['voter']
 
-    # if not positive_value_exists(email_secret_key) \
-    #         and not positive_value_exists(facebook_secret_key) \
-    #         and not positive_value_exists(twitter_secret_key) \
-    #         and not positive_value_exists(invitation_secret_key):
-    #     error_results = {
-    #         'status': "VOTER_SPLIT_INTO_TWO_ACCOUNTS_SECRET_KEY_NOT_PASSED_IN",
-    #         'success': False,
-    #         'voter_device_id': voter_device_id,
-    #         'current_voter_found': current_voter_found,
-    #         'email_owner_voter_found': email_owner_voter_found,
-    #         'facebook_owner_voter_found': facebook_owner_voter_found,
-    #         'invitation_owner_voter_found': False,
-    #     }
-    #     return error_results
-
-    results = delete_all_voter_information_permanently(voter_to_delete=voter)
-
+    delete_all_voter_information_permanently(voter_to_delete)
+    
+    results = {
+        'status': "DELETE_VOTER ",
+        'success': True,
+        'voter_to_delete': voter_to_delete,
+    }
+    
     return results
 
 
