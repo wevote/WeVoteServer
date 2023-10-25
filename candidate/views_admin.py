@@ -46,7 +46,8 @@ from wevote_functions.functions import convert_to_int, \
     convert_we_vote_date_string_to_date_as_integer, \
     extract_instagram_handle_from_text_string, \
     extract_twitter_handle_from_text_string, list_intersection, \
-    positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization
+    positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization, \
+    extract_state_from_ocd_division_id
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from wevote_settings.models import RemoteRequestHistory, \
     RETRIEVE_POSSIBLE_GOOGLE_LINKS, RETRIEVE_POSSIBLE_TWITTER_HANDLES
@@ -4358,3 +4359,81 @@ def update_candidates_from_politicians_view(request):  # This is related to goog
             show_this_year_of_candidates=show_this_year_of_candidates,
             state_code=state_code,
             google_civic_election_id=google_civic_election_id))
+
+@login_required
+def update_ocd_id_state_mismatch_view(request):
+    authority_required={'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    
+    queryset = CandidateCampaign.objects.all()
+    queryset = queryset.exclude(ocd_id_state_mismatch_checked=True)
+    candidate_list = list(queryset[:10000])
+
+    bulk_update_list = []
+    candidate_we_vote_id_with_mismatch_list = []
+    candidates_updated = 0
+    candidates_without_mismatches = 0
+    for candidate in candidate_list:
+        # only if ocd_division_id is not null
+        if not positive_value_exists(candidate.ocd_division_id):
+            continue
+        candidate.ocd_id_state_mismatch_checked = True
+        state_code_lower_case = candidate.state_code.lower() \
+            if positive_value_exists(candidate.state_code) else ''
+        mismatch_found = (
+            positive_value_exists(state_code_lower_case) and
+            positive_value_exists(candidate.ocd_division_id) and
+            state_code_lower_case != extract_state_from_ocd_division_id(candidate.ocd_division_id))
+        mismatch_update_needed_on_politician = False
+        if mismatch_found:
+            if not candidate.ocd_id_state_mismatch_found:
+                candidate.ocd_id_state_mismatch_found = True
+                candidates_updated += 1
+                mismatch_update_needed_on_politician = True
+            else:
+                candidates_without_mismatches += 1
+        else:
+            if candidate.ocd_id_state_mismatch_found:
+                candidate.ocd_id_state_mismatch_found = False
+                candidates_updated += 1
+            else:
+                candidates_without_mismatches += 1
+        if mismatch_update_needed_on_politician:
+            if positive_value_exists(candidate.politician_we_vote_id):
+                if( candidate.politician_we_vote_id) not in politician_we_vote_id_with_mismatch_list:
+                    politician_we_vote_id_with_mismatch_list.append(candidate.politician_we_vote_id)
+        bulk_update_list.append(candidate)
+    try:
+        CandidateCampaign.objects.bulk_update(bulk_update_list, [
+            'ocd_id_state_mismatch_checked',
+            'ocd_id_state_mismatch_found',
+        ])
+        message = \
+            "Candidates updated: {candidates_updated:,}. " \
+            "Candidates without mismatches: {candidates_without_mismatches:,}. " \
+            "".format(
+                candidates_updated=candidates_updated,
+                candidates_without_mismatches=candidates_without_mismatches)
+        messages.add_message(request,messages.INFO,message)
+    except Exception as e:
+        messages.add_message(request,message.ERROR,
+                             "ERROR with update_ocd_id_state_mismatch_view: {e} "
+                             "".format(e=e))
+        
+    queryset = Politician.objects.all()
+    queryset = queryset.filter(we_vote_id__in=politician_we_vote_id_with_mismatch_list)
+    politician_list = list(queryset)
+    bulk_update_list = []
+    for politician in politician_list:
+        politician.ocd_id_state_mismatch_found = True
+        bulk_update_list.append(politician)
+    Politician.objects.bulk_update(bulk_update_list, ['ocd_id_state_mismatch_found'])
+    message = \
+        "Politicians updated: {politicians_updated:,}." \
+        "".format(
+            politicians_updated=len(politician_list))
+    messages.add_message(request, messages.INFO, message)
+
+    return HttpResponseRedirect(reverse('candidate:candidate_list', args=()))

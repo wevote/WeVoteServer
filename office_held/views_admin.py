@@ -914,3 +914,82 @@ def offices_held_for_location_sync_out_view(request):  # officesHeldForLocationS
         'status': 'OFFICES_HELD_FOR_LOCATION_SYNC_OUT_VIEW-LIST_MISSING '
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+@login_required
+def update_ocd_id_state_mismatch_view(request):
+    authority_required={'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    
+    queryset = OfficeHeld.objects.all()
+    queryset = queryset.exclude(ocd_id_state_mismatch_checked=True)
+    office_list = list(queryset[:10000])
+
+    bulk_update_list = []
+    office_we_vote_id_with_mismatch_list = []
+    offices_updated = 0
+    offices_without_mismatches = 0
+    for office in office_list:
+        # only if ocd_division_id is not null
+        if not positive_value_exists(office.ocd_division_id):
+            continue
+        office.ocd_id_state_mismatch_checked = True
+        state_code_lower_case = office.state_code.lower() \
+            if positive_value_exists(office.state_code) else ''
+        mismatch_found = (
+            positive_value_exists(state_code_lower_case) and
+            positive_value_exists(office.ocd_division_id) and
+            state_code_lower_case != extract_state_from_ocd_division_id(office.ocd_division_id))
+        mismatch_update_needed_on_politician = False
+        if mismatch_found:
+            if not office.ocd_id_state_mismatch_found:
+                office.ocd_id_state_mismatch_found = True
+                offices_updated += 1
+                mismatch_update_needed_on_politician = True
+            else:
+                offices_without_mismatches += 1
+        else:
+            if office.ocd_id_state_mismatch_found:
+                office.ocd_id_state_mismatch_found = False
+                offices_updated += 1
+            else:
+                offices_without_mismatches += 1
+        if mismatch_update_needed_on_politician:
+            if positive_value_exists(office.politician_we_vote_id):
+                if( office.politician_we_vote_id) not in politician_we_vote_id_with_mismatch_list:
+                    politician_we_vote_id_with_mismatch_list.append(office.politician_we_vote_id)
+        bulk_update_list.append(office)
+    try:
+        OfficeHeld.objects.bulk_update(bulk_update_list, [
+            'ocd_id_state_mismatch_checked',
+            'ocd_id_state_mismatch_found',
+        ])
+        message = \
+            "offices updated: {offices_updated:,}. " \
+            "offices without mismatches: {offices_without_mismatches:,}. " \
+            "".format(
+                offices_updated=offices_updated,
+                offices_without_mismatches=offices_without_mismatches)
+        messages.add_message(request,messages.INFO,message)
+    except Exception as e:
+        messages.add_message(request,message.ERROR,
+                             "ERROR with update_ocd_id_state_mismatch_view: {e} "
+                             "".format(e=e))
+        
+    queryset = Politician.objects.all()
+    queryset = queryset.filter(we_vote_id__in=politician_we_vote_id_with_mismatch_list)
+    politician_list = list(queryset)
+    bulk_update_list = []
+    for politician in politician_list:
+        politician.ocd_id_state_mismatch_found = True
+        bulk_update_list.append(politician)
+    Politician.objects.bulk_update(bulk_update_list, ['ocd_id_state_mismatch_found'])
+    message = \
+        "Politicians updated: {politicians_updated:,}." \
+        "".format(
+            politicians_updated=len(politician_list))
+    messages.add_message(request, messages.INFO, message)
+
+    return HttpResponseRedirect(reverse('office:office_list', args=()))

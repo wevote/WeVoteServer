@@ -44,6 +44,8 @@ urlpatterns = [
     re_path(r'^repair_imported_names/$', views_admin.repair_imported_names_view, name='repair_imported_names'),
     re_path(r'^(?P<candidate_id>[0-9]+)/summary/$', views_admin.candidate_summary_view,
             name='candidate_summary'),
+    re_path(r'^update_ocd_id_state_mismatch/', views_admin.update_ocd_id_state_mismatch_view,
+            name='update_ocd_id_state_mismatch'),
     re_path(r'^update_candidate_from_politician/', views_admin.update_candidate_from_politician_view,
             name='update_candidate_from_politician'),
     re_path(r'^update_candidates_from_politicians/', views_admin.update_candidates_from_politicians_view,
