@@ -20,7 +20,7 @@ from politician.controllers import update_parallel_fields_with_years_in_related_
 from representative.models import Representative, RepresentativeManager
 from voter.models import voter_has_authority
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
+from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP, extract_state_from_ocd_division_id
 from wevote_settings.constants import IS_BATTLEGROUND_YEARS_AVAILABLE
 
 OFFICE_HELD_SYNC_URL = "https://api.wevoteusa.org/apis/v1/officeHeldSyncOut/"
