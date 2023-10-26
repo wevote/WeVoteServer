@@ -41,6 +41,7 @@ from position.models import PositionEntered, PositionListManager
 from representative.models import Representative
 from twitter.models import TwitterLinkPossibility, TwitterUserManager
 from voter.models import voter_has_authority
+from politician.models import Politician
 from voter_guide.models import VoterGuide
 from wevote_functions.functions import convert_to_int, \
     convert_we_vote_date_string_to_date_as_integer, \
@@ -635,7 +636,7 @@ def candidate_list_view(request):
         updates_made = 0
         for one_candidate in candidate_list:
             one_politician = politician_dict_list.get(one_candidate.politician_we_vote_id)
-            if positive_value_exists(one_politician.seo_friendly_path):
+            if hasattr(one_politician, 'seo_friendly_path') and positive_value_exists(one_politician.seo_friendly_path):
                 one_candidate.seo_friendly_path = one_politician.seo_friendly_path
                 one_candidate.seo_friendly_path_date_last_updated = datetime_now
                 update_list.append(one_candidate)
@@ -4365,14 +4366,12 @@ def update_ocd_id_state_mismatch_view(request):
     authority_required={'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
-
-    
     queryset = CandidateCampaign.objects.all()
     queryset = queryset.exclude(ocd_id_state_mismatch_checked=True)
     candidate_list = list(queryset[:10000])
 
     bulk_update_list = []
-    candidate_we_vote_id_with_mismatch_list = []
+    politician_we_vote_id_with_mismatch_list = []
     candidates_updated = 0
     candidates_without_mismatches = 0
     for candidate in candidate_list:
