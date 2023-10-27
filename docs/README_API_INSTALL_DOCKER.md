@@ -19,12 +19,14 @@ Only [Docker Desktop](https://docs.docker.com/get-docker/) is required.
     ```
     # api
     DATABASE_PASSWORD="secret"
+    DJANGO_SUPERUSER_EMAIL="dev@test.com"
+    DJANGO_SUPERUSER_PASSWORD="secret"
 
     # db
     POSTGRES_PASSWORD="secret"
     ```
 
-3. Configure PostgreSQL in `init.sql`
+3. Configure PostgreSQL in `config.sql`
 
     ```sql
     ALTER SYSTEM SET listen_addresses = '*';
@@ -33,7 +35,7 @@ Only [Docker Desktop](https://docs.docker.com/get-docker/) is required.
 
 4. [Open the following ports](https://www.wikihow.com/Open-Ports), if they are not already open:
 
-    - 4566, if you need AWS
+    - 4566 to access AWS
     
     - 5432 to access the database
 
