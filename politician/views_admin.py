@@ -1584,9 +1584,10 @@ def set_missing_gender_ids_view(request):
 
     start = int(request.GET.get('start', 0))
     count = int(request.GET.get('count', 15))
+    show_unknowns = request.GET.get('show_unknowns', True)
     politician_manager = PoliticianManager()
     list_of_people_from_db, number_of_rows = politician_manager.retrieve_politicians_with_no_gender_id(
-        start, count)
+        start, count, show_unknowns)
     people_list = []
     for person in list_of_people_from_db:
         if not hasattr(person, 'politician_name'):
@@ -1616,9 +1617,10 @@ def set_missing_gender_ids_view(request):
         people_list.append(person_item)
 
     template_values = {
-        'number_of_rows':                   number_of_rows,
+        'number_of_rows':                   f'{number_of_rows:,}',
         'people_list':                      people_list,
         'index_offset':                     start,
+        'show_unknowns':                    show_unknowns,
         'return_link':                      '/politician/',
     }
     return render(request, 'politician/politician_gender_id_fix_list.html', template_values)

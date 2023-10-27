@@ -404,6 +404,10 @@ def csv_file_to_clean_csv_file2(table_name):
                     row[12] = get_dummy_unique_id()         # govtrack_id, looks like we don't even use this anymore
                     row[15] = get_dummy_unique_id()         # fec_id, looks like we don't even use this anymore
                     row[19] = get_dummy_unique_id()         # maplight_id, looks like we don't even use this anymore
+                    clean_row(row, 52)                      # twitter description
+                    clean_row(row, 54)                      # twitter_location
+                    clean_row(row, 55)                      # twitter_name
+                    clean_row(row, 111)                     # ballot_guide_official_statement
                 elif table_name == "polling_location_pollinglocation":
                     clean_row(row, 2)                       # location_name
                     row[2] = row[2].replace("\\", "")       # 'BIG BONE STATE PARK GARAGE BLDG\\'
@@ -517,6 +521,9 @@ def csv_file_to_clean_csv_file2(table_name):
                 elif table_name == 'voter_guide_voterguide':
                     clean_row(row, 14)                      # twitter_description
                     # dump_row_col_labels_and_errors(table_name, header, row, '3482')
+                elif table_name == 'representative_representative':
+                    clean_row(row, 18)                  # 'twitter_location'
+                    clean_row(row, 23)                  # 'twitter_description'
                 csv_rows.append(row)
             except Exception as e:
                 logger.error("csv_file_to_clean_csv_file2 (" + table_name + ") caught " + str(e))

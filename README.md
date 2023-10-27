@@ -19,7 +19,7 @@ To install and develop the WeVote API server, follow the instructions below base
 
 2. [Install directly](docs/README_API_INSTALL.md) on your Linux machine (or use WSL on Windows)
 
-3. For advanced users, use the [Docker Based Development](docs/README_API_INSTALL_DOCKER.md) for OSX and Linux users.
+3. Use [Docker](docs/README_API_INSTALL_DOCKER.md)
 
 ## Installing We Vote Mobile Web Application (React/Flux)
 
