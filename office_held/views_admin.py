@@ -20,7 +20,7 @@ from politician.controllers import update_parallel_fields_with_years_in_related_
 from representative.models import Representative, RepresentativeManager
 from voter.models import voter_has_authority
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
+from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP, extract_state_from_ocd_division_id
 from wevote_settings.constants import IS_BATTLEGROUND_YEARS_AVAILABLE
 
 OFFICE_HELD_SYNC_URL = "https://api.wevoteusa.org/apis/v1/officeHeldSyncOut/"
@@ -914,3 +914,59 @@ def offices_held_for_location_sync_out_view(request):  # officesHeldForLocationS
         'status': 'OFFICES_HELD_FOR_LOCATION_SYNC_OUT_VIEW-LIST_MISSING '
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+@login_required
+def update_ocd_id_state_mismatch_view(request):
+    authority_required={'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    queryset = OfficeHeld.objects.all()
+    queryset = queryset.exclude(ocd_id_state_mismatch_checked=True)
+    office_list = list(queryset[:10000])
+
+    bulk_update_list = []
+    offices_updated = 0
+    offices_without_mismatches = 0
+    for office in office_list:
+        if not positive_value_exists(office.ocd_division_id):
+            continue
+        office.ocd_id_state_mismatch_checked = True
+        state_code_lower_case = office.state_code.lower() \
+            if positive_value_exists(office.state_code) else ''
+        mismatch_found = (
+            positive_value_exists(state_code_lower_case) and
+            positive_value_exists(office.ocd_division_id) and
+            state_code_lower_case != extract_state_from_ocd_division_id(office.ocd_division_id))
+        if mismatch_found:
+            if not office.ocd_id_state_mismatch_found:
+                office.ocd_id_state_mismatch_found = True
+                offices_updated += 1
+            else:
+                offices_without_mismatches += 1
+        else:
+            if office.ocd_id_state_mismatch_found:
+                office.ocd_id_state_mismatch_found = False
+                offices_updated += 1
+            else:
+                offices_without_mismatches += 1
+        bulk_update_list.append(office)
+    try:
+        OfficeHeld.objects.bulk_update(bulk_update_list, [
+            'ocd_id_state_mismatch_checked',
+            'ocd_id_state_mismatch_found',
+        ])
+        message = \
+            "offices updated: {offices_updated:,}. " \
+            "offices without mismatches: {offices_without_mismatches:,}. " \
+            "".format(
+                offices_updated=offices_updated,
+                offices_without_mismatches=offices_without_mismatches)
+        messages.add_message(request,messages.INFO,message)
+    except Exception as e:
+        messages.add_message(request,message.ERROR,
+                             "ERROR with update_ocd_id_state_mismatch_view: {e} "
+                             "".format(e=e))
+
+    return HttpResponseRedirect(reverse('office:office_list', args=()))
