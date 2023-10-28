@@ -1057,6 +1057,7 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
         ballot_retrieval_based_on_voter_address = False
 
     offices_held_for_location_id = ''
+    offices_held_text_for_map_search = ''
     use_office_held_ballot = False
     use_voter_ballot_saved = False
     results = choose_election_and_prepare_ballot_data(
@@ -1069,6 +1070,8 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
     voter_ballot_saved_found = results['voter_ballot_saved_found']
     if results['use_office_held_ballot']:
         offices_held_for_location_id = results['offices_held_for_location_id']
+        if voter_address and hasattr(voter_address, 'text_for_map_search'):
+            offices_held_text_for_map_search = voter_address.text_for_map_search
         use_office_held_ballot = True
     elif voter_ballot_saved_found:
         use_voter_ballot_saved = True
@@ -1260,7 +1263,7 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
                 'substituted_address_city':             '',  # voter_ballot_saved.substituted_address_city,
                 'substituted_address_state':            '',  # voter_ballot_saved.substituted_address_state,
                 'substituted_address_zip':              '',  # voter_ballot_saved.substituted_address_zip,
-                'text_for_map_search':                  '',  # voter_ballot_saved.original_text_for_map_search,
+                'text_for_map_search':                  offices_held_text_for_map_search,
                 'voter_device_id':                      voter_device_id,
             }
             return json_data
@@ -1362,6 +1365,7 @@ def choose_election_and_prepare_ballot_data(
         voter_address=voter_address)
     status += results['status']
     if results['use_office_held_ballot'] and positive_value_exists(results['offices_held_for_location_id']):
+        results['status'] += 'USING_OFFICES_HELD_BALLOT '
         return results
 
     status += "BALLOT_NOT_FOUND_OR_GENERATED "
