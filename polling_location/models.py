@@ -909,8 +909,10 @@ class PollingLocationManager(models.Manager):
         }
         return results
 
-    def retrieve_polling_location_by_we_vote_id(self, polling_location_we_vote_id=''):
-        return self.retrieve_polling_location_by_id(polling_location_we_vote_id=polling_location_we_vote_id)
+    def retrieve_polling_location_by_we_vote_id(self, polling_location_we_vote_id='', read_only=False):
+        return self.retrieve_polling_location_by_id(
+            polling_location_we_vote_id=polling_location_we_vote_id,
+            read_only=read_only)
 
     def retrieve_polling_location_by_id(self, polling_location_id=0, polling_location_we_vote_id='', read_only=False):
         # Retrieve a polling_location entry
