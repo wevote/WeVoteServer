@@ -1058,6 +1058,11 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
 
     offices_held_for_location_id = ''
     offices_held_text_for_map_search = ''
+    polling_location_we_vote_id_source = ''
+    substituted_address_nearby = ''
+    substituted_address_city = ''
+    substituted_address_state = ''
+    substituted_address_zip = ''
     use_office_held_ballot = False
     use_voter_ballot_saved = False
     results = choose_election_and_prepare_ballot_data(
@@ -1072,6 +1077,14 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
         offices_held_for_location_id = results['offices_held_for_location_id']
         if voter_address and hasattr(voter_address, 'text_for_map_search'):
             offices_held_text_for_map_search = voter_address.text_for_map_search
+        if 'substituted_address_nearby' in results:
+            substituted_address_nearby = results['substituted_address_nearby']
+        if 'substituted_address_city' in results:
+            substituted_address_city = results['substituted_address_city']
+        if 'substituted_address_state' in results:
+            substituted_address_state = results['substituted_address_state']
+        if 'substituted_address_zip' in results:
+            substituted_address_zip = results['substituted_address_zip']
         use_office_held_ballot = True
     elif voter_ballot_saved_found:
         use_voter_ballot_saved = True
@@ -1106,11 +1119,11 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
             'original_text_city':                   '',
             'original_text_state':                  '',
             'original_text_zip':                    '',
-            'polling_location_we_vote_id_source':   '',
-            'substituted_address_nearby':           '',
-            'substituted_address_city':             '',
-            'substituted_address_state':            '',
-            'substituted_address_zip':              '',
+            'polling_location_we_vote_id_source':   polling_location_we_vote_id_source,
+            'substituted_address_nearby':           substituted_address_nearby,
+            'substituted_address_city':             substituted_address_city,
+            'substituted_address_state':            substituted_address_state,
+            'substituted_address_zip':              substituted_address_zip,
             'text_for_map_search':                  text_for_map_search,
             'voter_device_id':                      voter_device_id,
         }
@@ -1227,6 +1240,9 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
             # voter_id=voter_id,
             google_civic_election_id=google_civic_election_id,
             offices_held_for_location_id=offices_held_for_location_id)
+        if 'polling_location_we_vote_id' in results and \
+                positive_value_exists(results['polling_location_we_vote_id']):
+            polling_location_we_vote_id_source = results['polling_location_we_vote_id']
         ballot_item_list_found = results['ballot_item_list_found']
         if positive_value_exists(ballot_item_list_found):
             election_day_text = ''
@@ -1252,17 +1268,17 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
                 'election_name':                        election_description_text,
                 'election_day_text':                    election_day_text,
                 'google_civic_election_id':             google_civic_election_id,
-                'is_from_substituted_address':          '',  # voter_ballot_saved.is_from_substituted_address,
+                'is_from_substituted_address':          True,
                 'is_from_test_ballot':                  '',  # voter_ballot_saved.is_from_test_ballot,
                 'next_national_election_day_text':      next_national_election_day_text,
                 'original_text_city':                   '',  # voter_ballot_saved.original_text_city,
                 'original_text_state':                  '',  # voter_ballot_saved.original_text_state,
                 'original_text_zip':                    '',  # voter_ballot_saved.original_text_zip,
-                'polling_location_we_vote_id_source':   '',  # voter_ballot_saved.polling_location_we_vote_id_source,
-                'substituted_address_nearby':           '',  # voter_ballot_saved.substituted_address_nearby,
-                'substituted_address_city':             '',  # voter_ballot_saved.substituted_address_city,
-                'substituted_address_state':            '',  # voter_ballot_saved.substituted_address_state,
-                'substituted_address_zip':              '',  # voter_ballot_saved.substituted_address_zip,
+                'polling_location_we_vote_id_source':   polling_location_we_vote_id_source,
+                'substituted_address_nearby':           substituted_address_nearby,
+                'substituted_address_city':             substituted_address_city,
+                'substituted_address_state':            substituted_address_state,
+                'substituted_address_zip':              substituted_address_zip,
                 'text_for_map_search':                  offices_held_text_for_map_search,
                 'voter_device_id':                      voter_device_id,
             }
@@ -1285,11 +1301,11 @@ def voter_ballot_items_retrieve_for_api(  # voterBallotItemsRetrieve
         'original_text_city':                   '',
         'original_text_state':                  '',
         'original_text_zip':                    '',
-        'polling_location_we_vote_id_source':   '',
-        'substituted_address_nearby':           '',
-        'substituted_address_city':             '',
-        'substituted_address_state':            '',
-        'substituted_address_zip':              '',
+        'polling_location_we_vote_id_source':   polling_location_we_vote_id_source,
+        'substituted_address_nearby':           substituted_address_nearby,
+        'substituted_address_city':             substituted_address_city,
+        'substituted_address_state':            substituted_address_state,
+        'substituted_address_zip':              substituted_address_zip,
         'text_for_map_search':                  '',
         'voter_device_id':                      voter_device_id,
     }

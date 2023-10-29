@@ -18,8 +18,14 @@ def generate_ballot_data_from_offices_held(
         google_civic_election_id='',
         voter_address=None):
     offices_held_for_location_id = ''
+    polling_location_we_vote_id_source = ''
+    substituted_address_nearby = ''
+    substituted_address_city = ''
+    substituted_address_state = ''
+    substituted_address_zip = ''
     status = ''
     success = True
+    text_for_map_search = ''
 
     election_manager = ElectionManager()
 
@@ -37,19 +43,24 @@ def generate_ballot_data_from_offices_held(
     if not positive_value_exists(voter_id):
         status += "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID "
         results = {
-            'status':                   status,
-            'success':                  False,
-            'google_civic_election_id': google_civic_election_id,
+            'status':                       status,
+            'success':                      False,
+            'google_civic_election_id':     google_civic_election_id,
             'offices_held_for_location_id': offices_held_for_location_id,
-            'state_code':               '',
-            'use_office_held_ballot':   False,
-            'voter_ballot_saved':       None,
-            'voter_ballot_saved_found': False,
+            'state_code':                   '',
+            'substituted_address_nearby':   substituted_address_nearby,
+            'substituted_address_city':     substituted_address_city,
+            'substituted_address_state':    substituted_address_state,
+            'substituted_address_zip':      substituted_address_zip,
+            'text_for_map_search':          text_for_map_search,
+            'use_office_held_ballot':       False,
+            'voter_ballot_saved':           None,
+            'voter_ballot_saved_found':     False,
         }
         return results
 
     text_for_map_search = voter_address.text_for_map_search if voter_address_exists else ''
-
+    state_code_from_text_for_map_search = ''
     if positive_value_exists(google_civic_election_id):
         # If a specific google_civic_election_id came in, we need to return a ballot in that particular election,
         # even if it isn't an election the voter has seen before.
@@ -57,8 +68,6 @@ def generate_ballot_data_from_offices_held(
         # Is the voter's address in a particular state?
         if voter_address_exists:
             state_code_from_text_for_map_search = voter_address.get_state_code_from_text_for_map_search()
-        else:
-            state_code_from_text_for_map_search = ''
         if positive_value_exists(state_code_from_text_for_map_search):
             # If the voter address is for another state, then remove
             election_results = election_manager.retrieve_election(google_civic_election_id)
@@ -84,12 +93,17 @@ def generate_ballot_data_from_offices_held(
         results = {
             'status': status,
             'success': True,
-            'google_civic_election_id': google_civic_election_id,
+            'google_civic_election_id':     google_civic_election_id,
             'offices_held_for_location_id': offices_held_for_location_id,
-            'state_code': '',
-            'use_office_held_ballot':   False,
-            'voter_ballot_saved_found': False,
-            'voter_ballot_saved': None,
+            'state_code':                   state_code_from_text_for_map_search,
+            'substituted_address_nearby':   substituted_address_nearby,
+            'substituted_address_city':     substituted_address_city,
+            'substituted_address_state':    substituted_address_state,
+            'substituted_address_zip':      substituted_address_zip,
+            'text_for_map_search':          text_for_map_search,
+            'use_office_held_ballot':       False,
+            'voter_ballot_saved_found':     False,
+            'voter_ballot_saved':           None,
         }
         return results
 
@@ -108,19 +122,42 @@ def generate_ballot_data_from_offices_held(
         text_for_map_search=text_for_map_search,  # Make this more robust
     )
     if positive_value_exists(results['offices_held_for_location_id']):
+        offices_held_for_location = results['offices_held_for_location']
         offices_held_for_location_id = results['offices_held_for_location_id']
         use_office_held_ballot = True
+        if hasattr(offices_held_for_location, 'polling_location_we_vote_id'):
+            # Retrieve the substituted-address from polling_location_we_vote_id
+            polling_location_we_vote_id_source = offices_held_for_location.polling_location_we_vote_id
+            from polling_location.models import PollingLocationManager
+            polling_location_manager = PollingLocationManager()
+            polling_location_results = polling_location_manager.retrieve_polling_location_by_we_vote_id(
+                polling_location_we_vote_id=polling_location_we_vote_id_source,
+                read_only=True)
+            if polling_location_results['polling_location_found']:
+                polling_location = polling_location_results['polling_location']
+                substituted_address_nearby = polling_location.get_text_for_map_search()
+                if positive_value_exists(polling_location.city):
+                    substituted_address_city = polling_location.city
+                if positive_value_exists(polling_location.state):
+                    substituted_address_state = polling_location.state
+                if positive_value_exists(polling_location.zip_long):
+                    substituted_address_zip = polling_location.zip_long
 
     results = {
-        'status':                   status,
-        'success':                  True,
-        'google_civic_election_id': 0,
-        'offices_held_for_location_id':   offices_held_for_location_id,
-        'state_code':               '',
-        'text_for_map_search':      '',
-        'use_office_held_ballot':   use_office_held_ballot,
-        'voter_ballot_saved':       None,
-        'voter_ballot_saved_found': '',
+        'status':                               status,
+        'success':                              True,
+        'google_civic_election_id':             0,
+        'offices_held_for_location_id':         offices_held_for_location_id,
+        'polling_location_we_vote_id_source':   polling_location_we_vote_id_source,
+        'state_code':                           state_code_from_text_for_map_search,
+        'substituted_address_nearby':           substituted_address_nearby,
+        'substituted_address_city':             substituted_address_city,
+        'substituted_address_state':            substituted_address_state,
+        'substituted_address_zip':              substituted_address_zip,
+        'text_for_map_search':                  text_for_map_search,
+        'use_office_held_ballot':               use_office_held_ballot,
+        'voter_ballot_saved':                   None,
+        'voter_ballot_saved_found':             False,
     }
     return results
 
@@ -250,14 +287,17 @@ def voter_ballot_items_retrieve_for_one_election_by_offices_held_for_api(  # vot
             google_civic_election_id=google_civic_election_id,
             # voter_device_id=voter_device_id,
         )
+        results['is_from_substituted_address'] = True
+        results['polling_location_we_vote_id'] = polling_location_we_vote_id
     else:
         results = {
-            'status':                   status,
-            'success':                  False,
-            # 'voter_device_id':          voter_device_id,
-            'ballot_item_list':         [],
-            'ballot_item_list_found':   ballot_item_list_found,
-            'google_civic_election_id': google_civic_election_id,
+            'status':                       status,
+            'success':                      False,
+            # 'voter_device_id':            voter_device_id,
+            'ballot_item_list':             [],
+            'ballot_item_list_found':       ballot_item_list_found,
+            'google_civic_election_id':     google_civic_election_id,
+            'polling_location_we_vote_id':  polling_location_we_vote_id,
         }
 
     return results
