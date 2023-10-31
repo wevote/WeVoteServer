@@ -141,7 +141,7 @@ ALLOWED_HOSTS = [
 ]
 
 ALLOWED_CIDR_NETS = [
-    '172.1.1.0/24'
+    '172.27.0.0/16'
 ]
 
 # Application definition
