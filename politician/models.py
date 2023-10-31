@@ -2067,6 +2067,7 @@ class PoliticianManager(models.Manager):
         :param show_unknowns: show "unknowns", candidates for whom the gender guesser couldn't determine their gender
         :return:
         """
+        logger.error('On Entry start = ' + str(start) + '  show_unknowns = ' + str(show_unknowns))
         politician_query = Politician.objects.using('readonly').all()
         # Get all politicians who do not have gender specified
         politician_query = politician_query.filter(gender=UNKNOWN)
@@ -2089,6 +2090,11 @@ class PoliticianManager(models.Manager):
                 pol.guess = 'unknown'
             if pol.guess != 'unknown' or positive_value_exists(show_unknowns):
                 results_list.append(pol)
+
+        if len(results_list) == 0 and start + count < number_of_rows:
+            logger.error('recursive call with new start = ' + str(start + count))
+            # Make a recursive call if all the results are 'unknown's
+            results_list, number_of_rows = self.retrieve_politicians_with_no_gender_id(start + count, count, show_unknowns)
 
         return results_list, number_of_rows
 
