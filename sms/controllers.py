@@ -1173,8 +1173,10 @@ def voter_sms_phone_number_save_for_api(  # voterSMSPhoneNumberSave
         sms_phone_number_we_vote_id = sms_phone_number_we_vote_id \
             if positive_value_exists(sms_phone_number_we_vote_id) \
             else incoming_sms_we_vote_id
-        # We need to link a randomly generated 6 digit code to this voter_device_id
-        results = voter_device_link_manager.retrieve_voter_secret_code_up_to_date(voter_device_id)
+        # We need to link a randomly generated 6-digit code to this voter_device_id
+        cordova_review_bypass = normalized_sms_phone_number == '+1 808-935-8555'
+        results = voter_device_link_manager.retrieve_voter_secret_code_up_to_date(voter_device_id,
+                                                                                  cordova_review_bypass)
         secret_code = results['secret_code']
         secret_code_system_locked_for_this_voter_device_id = \
             results['secret_code_system_locked_for_this_voter_device_id']
