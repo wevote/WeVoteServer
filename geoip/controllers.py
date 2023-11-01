@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 import sys
+from ipaddress import IPv4Address
 import geoip2.database
 import wevote_functions.admin
 from config.base import get_environment_variable_default
@@ -24,50 +25,50 @@ def voter_location_retrieve_from_ip_for_api(request, ip_address=''):
     x_forwarded_for = request.META.get('X-Forwarded-For')
     http_x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
 
-    if not positive_value_exists(ip_address):
-        ip_address = get_ip_from_headers(request)
+    valid_ip_address = None
+    value = ip_address
 
-    # For testing - NY IP Address
-    # if not positive_value_exists(ip_address):
-    #     ip_address = '108.46.177.24'
+    try:
+        valid_ip_address = IPv4Address(value)
+    except:
+        value = get_ip_from_headers(request)
+        try:
+            valid_ip_address = IPv4Address(value)
+        except:
+            # None of the IP addresses are valid
+            response_content = {
+                'success':              False,
+                'status':               'LOCATION_RETRIEVE_IP_ADDRESS_REQUEST_PARAMETER_MISSING',
+                'voter_location_found': False,
+                'voter_location':       '',
+                'city':                 '',
+                'region':               '',
+                'postal_code':          '',
+                'country_code':         '',
+                'ip_address':           value,
+                'x_forwarded_for':      x_forwarded_for,
+                'http_x_forwarded_for': http_x_forwarded_for,
+            }
+            return response_content
 
-    if ip_address == '127.0.0.1' and 'test' not in sys.argv:
-        ip_address = '73.158.32.221'
+
+    if valid_ip_address.is_private and 'test' not in sys.argv:
+        value = '73.158.32.221'
         try:
             if 'only_log_ip_substitution_once' not in sys.argv:
                 sys.argv.append('only_log_ip_substitution_once')
-                print("Running on a local dev server, "
-                      "so we are sending a valid Oakland IP address 73.158.32.221 for use in geolocation")
+                print("Detected a private IP address, so we are providing a valid Oakland IP address 73.158.32.221 for geolocation purposes...")
         except Exception as e:
             pass
 
-    if not positive_value_exists(ip_address):
-        # return HttpResponse('missing ip_address request parameter', status=400)
-        response_content = {
-            'success':              False,
-            'status':               'LOCATION_RETRIEVE_IP_ADDRESS_REQUEST_PARAMETER_MISSING',
-            'voter_location_found': False,
-            'voter_location':       '',
-            'city':                 '',
-            'region':               '',
-            'postal_code':          '',
-            'country_code':         '',
-            'ip_address':           ip_address,
-            'x_forwarded_for':      x_forwarded_for,
-            'http_x_forwarded_for': http_x_forwarded_for,
-        }
-
-        return response_content
-
     try:
-        database_location = get_environment_variable_default('GEOLITE2_DATABASE_LOCATION',
-                                                             'geoip2/city-db/GeoLite2-City.mmdb')
+        database_location = get_environment_variable_default('GEOLITE2_DATABASE_LOCATION', 'geoip2/city-db/GeoLite2-City.mmdb')
         reader = geoip2.database.Reader(database_location)
-        response = reader.city(ip_address)
+        response = reader.city(value)
 
     except geoip2.errors.AddressNotFoundError as e:
         if 'test' not in sys.argv:
-            logger.error("voter_location_retrieve_from_ip_for_api ip " + ip_address + " not found: " + str(e))
+            logger.error("voter_location_retrieve_from_ip_for_api ip " + value + " not found: " + str(e))
 
         response_content = {
             'success':              True,
@@ -78,7 +79,7 @@ def voter_location_retrieve_from_ip_for_api(request, ip_address=''):
             'region':               '',
             'postal_code':          '',
             'country_code':         '',
-            'ip_address':           ip_address,
+            'ip_address':           value,
             'x_forwarded_for':      x_forwarded_for,
             'http_x_forwarded_for': http_x_forwarded_for,
         }
@@ -116,7 +117,7 @@ def voter_location_retrieve_from_ip_for_api(request, ip_address=''):
             voter_location_found = False
 
     except Exception as e:
-        logger.error("voter_location_retrieve_from_ip_for_api ip " + ip_address + " parse error: " + str(e))
+        logger.error("voter_location_retrieve_from_ip_for_api ip " + value + " parse error: " + str(e))
         status = str(e)
         success = False
 
@@ -129,7 +130,7 @@ def voter_location_retrieve_from_ip_for_api(request, ip_address=''):
         'region':               region,
         'postal_code':          postal_code,
         'country_code':         country_code,
-        'ip_address':           ip_address,
+        'ip_address':           value,
         'x_forwarded_for':      x_forwarded_for,
         'http_x_forwarded_for': http_x_forwarded_for,
     }

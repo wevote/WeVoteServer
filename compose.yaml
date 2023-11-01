@@ -21,13 +21,13 @@ services:
     networks:
       - ${COMPOSE_PROJECT_NAME}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     restart: unless-stopped
     user: postgres
     volumes:
       - "${COMPOSE_PROJECT_NAME}-postgres-data:/var/lib/postgresql/data"
     
-  aws:
+  localstack:
     container_name: "${COMPOSE_PROJECT_NAME}-localstack"
     depends_on:
       db:
@@ -39,10 +39,7 @@ services:
     networks:
       - ${COMPOSE_PROJECT_NAME}
     ports:
-      # Gateway
-      - "4566:4566"
-      # External
-      # - "4510-4559:4510-4559"
+      - "127.0.0.1:4566:4566"
     profiles:
       - optional
     volumes:
@@ -64,17 +61,23 @@ services:
       DATABASE_HOST: "${COMPOSE_PROJECT_NAME}-db"
       DATABASE_PASSWORD: ${DATABASE_PASSWORD:-secret}
       DATABASE_PORT: "5432"
+      DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL:-dev@test.com}
+      DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD:-secret}
     env_file: .env
     networks:
       - ${COMPOSE_PROJECT_NAME}
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     volumes:
       - "./:/${COMPOSE_PROJECT_NAME}"
     working_dir: "/${COMPOSE_PROJECT_NAME}"
 
 networks:
   wevote:
+    ipam:
+      config:
+        - subnet: "172.27.0.0/16"
+          gateway: "172.27.0.1"
     name: ${COMPOSE_PROJECT_NAME}
 
 volumes:

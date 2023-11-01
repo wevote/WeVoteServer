@@ -140,6 +140,9 @@ ALLOWED_HOSTS = [
     '127.0.0.1'
 ]
 
+ALLOWED_CIDR_NETS = [
+    '172.27.0.0/16'
+]
 
 # Application definition
 
@@ -231,6 +234,7 @@ INSTALLED_APPS = (
 )
 
 MIDDLEWARE = [
+    'allow_cidr.middleware.AllowCIDRMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'corsheaders.middleware.CorsPostCsrfMiddleware',

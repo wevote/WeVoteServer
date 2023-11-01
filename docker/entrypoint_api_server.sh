@@ -5,5 +5,5 @@ if [ ! -e ./config/environment_variables.json ]; then
 fi
 python manage.py makemigrations
 python manage.py migrate
-python manage.py create_dev_user Joe Smith joe@test.com secret
+python manage.py createsuperuser --no-input || echo "Superuser already created."
 python manage.py runserver 0.0.0.0:8000
