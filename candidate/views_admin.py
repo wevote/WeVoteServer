@@ -3211,10 +3211,17 @@ def find_and_merge_duplicate_candidates_view(request):
         )
         candidate_list = results['candidate_list_objects']
     elif retrieve_by_election_id_list:
-        results = candidate_list_manager.retrieve_candidates_for_specific_elections(
-            google_civic_election_id_list=google_civic_election_id_list,
-            return_list_of_objects=True)
-        candidate_list = results['candidate_list_objects']
+        if positive_value_exists(state_code):
+            results = candidate_list_manager.retrieve_candidates_for_specific_elections(
+                google_civic_election_id_list=google_civic_election_id_list,
+                limit_to_this_state_code=state_code,
+                return_list_of_objects=True)
+            candidate_list = results['candidate_list_objects']
+        else:
+            results = candidate_list_manager.retrieve_candidates_for_specific_elections(
+                google_civic_election_id_list=google_civic_election_id_list,
+                return_list_of_objects=True)
+            candidate_list = results['candidate_list_objects']
 
     # Loop through all the candidates in this election to see how many have possible duplicates
     if positive_value_exists(find_number_of_duplicates):
@@ -3230,6 +3237,15 @@ def find_and_merge_duplicate_candidates_view(request):
             messages.add_message(request, messages.INFO, "There are approximately {duplicate_candidate_count} "
                                                          "possible duplicates."
                                                          "".format(duplicate_candidate_count=duplicate_candidate_count))
+
+        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
+                                    "?google_civic_election_id={google_civic_election_id}"
+                                    "&show_this_year_of_candidates={show_this_year_of_candidates}"
+                                    "&state_code={state_code}"
+                                    "".format(
+                                        google_civic_election_id=google_civic_election_id,
+                                        show_this_year_of_candidates=candidate_year,
+                                        state_code=state_code))
 
     # Loop through all the candidates in this year or election
     ignore_candidate_id_list = []
