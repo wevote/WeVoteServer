@@ -9,6 +9,7 @@ from . import views_admin
 
 urlpatterns = [
     re_path(r'^$', views_admin.campaign_list_view, name='campaignx_list',),
+    re_path(r'^delete_process/$', views_admin.campaign_delete_process_view, name='campaignx_delete_process'),
     re_path(r'^(?P<campaignx_we_vote_id>wv[\w]{2}camp[\w]+)/edit$', views_admin.campaign_edit_view,
             name='campaignx_edit'),
     re_path(r'^edit_process/$', views_admin.campaign_edit_process_view, name='campaignx_edit_process'),

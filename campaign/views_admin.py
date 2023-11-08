@@ -34,6 +34,46 @@ WEB_APP_ROOT_URL = get_environment_variable("WEB_APP_ROOT_URL")
 
 
 @login_required
+def campaign_delete_process_view(request):
+    """
+    Delete a campaign
+    :param request:
+    :return:
+    """
+    status = ""
+    campaignx_we_vote_id = request.POST.get('campaignx_we_vote_id', 0)
+    confirm_delete = convert_to_int(request.POST.get('confirm_delete', 0))
+
+    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    state_code = request.POST.get('state_code', '')
+
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager', 'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    if not positive_value_exists(confirm_delete):
+        messages.add_message(request, messages.ERROR,
+                             'Unable to delete this Campaign. '
+                             'Please check the checkbox to confirm you want to delete this organization.')
+        return HttpResponseRedirect(reverse('campaign:campaignx_edit', args=(campaignx_we_vote_id,)) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
+
+    campaign_manager = CampaignXManager()
+    results = campaign_manager.retrieve_campaignx(campaignx_we_vote_id=campaignx_we_vote_id)
+    if results['campaignx_found']:
+        campaignx = results['campaignx']
+
+        campaignx.delete()
+        messages.add_message(request, messages.INFO, 'CampaignX deleted.')
+    else:
+        messages.add_message(request, messages.ERROR, 'CampaignX not found.')
+
+    return HttpResponseRedirect(reverse('campaign:campaignx_list', args=()))
+
+
+@login_required
 def campaign_edit_owners_process_view(request):
     """
 
@@ -600,8 +640,8 @@ def campaign_list_view(request):
             queryset = CampaignX.objects.all()
             queryset = queryset.exclude(
                 Q(linked_politician_we_vote_id__isnull=True) | Q(linked_politician_we_vote_id=''))
-            if positive_value_exists(state_code):
-                queryset = queryset.filter(state_code__iexact=state_code)
+            # if positive_value_exists(state_code):
+            #     queryset = queryset.filter(state_code__iexact=state_code)
             # Ignore Campaigns which have been updated in the last 6 months: date_last_updated_from_politician
             today = datetime.now().date()
             six_months_ago = today - timedelta(weeks=26)
