@@ -2286,10 +2286,18 @@ def politician_edit_process_view(request):
             messages.add_message(request, messages.ERROR, status)
         elif campaignx_results['campaignx_found']:
             campaignx = campaignx_results['campaignx']
-            value_changed = False
             if positive_value_exists(campaignx.linked_politician_we_vote_id) \
                     and campaignx.linked_politician_we_vote_id != politician_on_stage.we_vote_id:
                 heal_linked_campaignx_variables = False
+            if heal_linked_campaignx_variables and not positive_value_exists(campaignx.linked_politician_we_vote_id):
+                campaignx.linked_politician_we_vote_id = politician_on_stage.we_vote_id
+                try:
+                    campaignx.save()
+                    messages.add_message(request, messages.INFO, "Campaignx updated with linked_politician_we_vote_id.")
+                except Exception as e:
+                    messages.add_message(request, messages.ERROR, "Cannot heal Campaignx linked_politician_we_vote_id:"
+                                                                  "" + str(e))
+                    heal_linked_campaignx_variables = False
             if heal_linked_campaignx_variables and positive_value_exists(politician_on_stage.seo_friendly_path) \
                     and campaignx.seo_friendly_path != politician_on_stage.seo_friendly_path:
                 # Consider saving politician_on_stage.seo_friendly_path into CampaignXSEOFriendlyPath,
@@ -2299,17 +2307,15 @@ def politician_edit_process_view(request):
                 # When we unlink campaigns by removing linked_politician_we_vote_id from CampaignX, we will want to
                 #  generate a new seo_friendly_path for that historical campaignx.
                 campaignx.seo_friendly_path = politician_on_stage.seo_friendly_path
-                value_changed = True
-                messages.add_message(request, messages.INFO, "Campaignx updated with seo_friendly_path.")
-            if heal_linked_campaignx_variables and not positive_value_exists(campaignx.linked_politician_we_vote_id):
-                campaignx.linked_politician_we_vote_id = politician_on_stage.we_vote_id
-                value_changed = True
-                messages.add_message(request, messages.INFO, "Campaignx updated with linked_politician_we_vote_id.")
+                try:
+                    campaignx.save()
+                    messages.add_message(request, messages.INFO, "Campaignx updated with seo_friendly_path.")
+                except Exception as e:
+                    messages.add_message(request, messages.ERROR, "Cannot heal Campaignx seo_friendly_path:" + str(e))
+                    heal_linked_campaignx_variables = False
             if not heal_linked_campaignx_variables:
                 messages.add_message(request, messages.ERROR, "Cannot heal Campaignx linked variables.")
 
-            if value_changed:
-                campaignx.save()
 
     # Update Linked Candidates with seo_friendly_path, and
     if success and positive_value_exists(politician_we_vote_id):
