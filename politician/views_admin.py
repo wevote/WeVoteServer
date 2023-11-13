@@ -843,8 +843,12 @@ def politician_list_view(request):
                 queryset = queryset.filter(politician_we_vote_id__iexact=one_politician.we_vote_id)
                 linked_representative_we_vote_id_list = []
                 linked_representative_list = list(queryset)
+                if positive_value_exists(show_ocd_id_state_mismatch):
+                    one_politician.linked_representative_list = []
                 for representative in linked_representative_list:
                     linked_representative_we_vote_id_list.append(representative.we_vote_id)
+                    if positive_value_exists(show_ocd_id_state_mismatch):
+                        one_politician.linked_representative_list.append(representative)
                 one_politician.linked_representative_we_vote_id_list = linked_representative_we_vote_id_list
             except Exception as e:
                 related_candidate_list_count = 0
@@ -1441,6 +1445,8 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
                 # This is fine, create new
                 pass
 
+        # ##################################
+        # Find Representatives Linked to this Politician
         linked_representative_list = []
         if positive_value_exists(politician_we_vote_id):
             queryset = Representative.objects.using('readonly').all()
@@ -1452,6 +1458,21 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
         # Finding Representatives that *might* be "children" of this politician
         from politician.controllers import find_representatives_to_link_to_this_politician
         related_representative_list = find_representatives_to_link_to_this_politician(politician=politician_on_stage)
+
+        # ##################################
+        # Find Campaigns Linked to this Politician
+        linked_campaignx_list = []
+        if positive_value_exists(politician_we_vote_id):
+            from campaign.models import CampaignX
+            queryset = CampaignX.objects.using('readonly').all()
+            queryset = queryset.filter(linked_politician_we_vote_id__iexact=politician_we_vote_id)
+            linked_campaignx_list = list(queryset)
+
+        # ##################################
+        # Find Campaigns to Link to this Politician
+        # Finding Representatives that *might* be "children" of this politician
+        from politician.controllers import find_campaignx_list_to_link_to_this_politician
+        related_campaignx_list = find_campaignx_list_to_link_to_this_politician(politician=politician_on_stage)
 
         if 'localhost' in WEB_APP_ROOT_URL:
             web_app_root_url = 'https://localhost:3000'
@@ -1467,6 +1488,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             'google_civic_candidate_name2': google_civic_candidate_name2,
             'google_civic_candidate_name3': google_civic_candidate_name3,
             'instagram_handle':             instagram_handle,
+            'linked_campaignx_list':        linked_campaignx_list,
             'linked_candidate_list':        linked_candidate_list,
             'linked_representative_list':   linked_representative_list,
             'maplight_id':                  maplight_id,
@@ -1495,6 +1517,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             'politician_url5':              politician_url5,
             'political_party':              political_party,
             'rating_list':                  rating_list,
+            'related_campaignx_list':       related_campaignx_list,
             'related_candidate_list':       related_candidate_list,
             'related_representative_list':  related_representative_list,
             'state_code':                   state_code,

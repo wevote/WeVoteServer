@@ -258,6 +258,45 @@ def find_duplicate_politician(we_vote_politician, ignore_politician_id_list):
     return results
 
 
+def find_campaignx_list_to_link_to_this_politician(politician=None):
+    """
+    Find Campaigns to Link to this Politician
+    Finding Campaigns that *might* be "children" of this politician
+
+    :param politician:
+    :return:
+    """
+    if not hasattr(politician, 'we_vote_id'):
+        return []
+    from campaign.models import CampaignX
+    try:
+        related_list = CampaignX.objects.using('readonly').all()
+        related_list = related_list.exclude(
+            linked_politician_we_vote_id__iexact=politician.we_vote_id)
+
+        filters = []
+        new_filter = Q(campaign_title__icontains=politician.last_name)
+        # new_filter = \
+        #     Q(campaign_title__icontains=politician.first_name) & \
+        #     Q(campaign_title__icontains=politician.last_name)
+        filters.append(new_filter)
+
+        # Add the first query
+        if len(filters):
+            final_filters = filters.pop()
+
+            # ...and "OR" the remaining items in the list
+            for item in filters:
+                final_filters |= item
+
+            related_list = related_list.filter(final_filters)
+
+        related_list = related_list.order_by('campaign_title')[:20]
+    except Exception as e:
+        related_list = []
+    return related_list
+
+
 def find_candidates_to_link_to_this_politician(politician=None):
     """
     Find Candidates to Link to this Politician
@@ -270,7 +309,7 @@ def find_candidates_to_link_to_this_politician(politician=None):
         return []
     from candidate.models import CandidateCampaign
     try:
-        related_candidate_list = CandidateCampaign.objects.all()
+        related_candidate_list = CandidateCampaign.objects.using('readonly').all()
         related_candidate_list = related_candidate_list.exclude(
             politician_we_vote_id__iexact=politician.we_vote_id)
 
@@ -356,7 +395,7 @@ def find_representatives_to_link_to_this_politician(politician=None):
         return []
     from representative.models import Representative
     try:
-        related_representative_list = Representative.objects.all()
+        related_representative_list = Representative.objects.using('readonly').all()
         related_representative_list = related_representative_list.exclude(
             politician_we_vote_id__iexact=politician.we_vote_id)
 

@@ -621,6 +621,7 @@ def campaign_list_view(request):
         positive_value_exists(request.GET.get('show_campaigns_linked_to_politicians', False))
     show_more = request.GET.get('show_more', False)  # Show up to 1,000 organizations
     show_issues = request.GET.get('show_issues', '')
+    show_ocd_id_state_mismatch = positive_value_exists(request.GET.get('show_ocd_id_state_mismatch', False))
     show_organizations_without_email = positive_value_exists(request.GET.get('show_organizations_without_email', False))
     sort_by = request.GET.get('sort_by', '')
     state_code = request.GET.get('state_code', '')
@@ -786,21 +787,25 @@ def campaign_list_view(request):
             Q(final_election_date_as_integer__isnull=True) |
             Q(final_election_date_as_integer__gt=final_election_date_plus_cool_down))
 
-    if positive_value_exists(show_blocked_campaigns):
-        campaignx_list_query = campaignx_list_query.filter(is_blocked_by_we_vote=True)
+    if positive_value_exists(show_ocd_id_state_mismatch):
+        # If we are looking for bad data, ignore the filters below
+        campaignx_list_query = campaignx_list_query.filter(ocd_id_state_mismatch_found=True)
     else:
-        campaignx_list_query = campaignx_list_query.filter(is_blocked_by_we_vote=False)
+        if positive_value_exists(show_blocked_campaigns):
+            campaignx_list_query = campaignx_list_query.filter(is_blocked_by_we_vote=True)
+        else:
+            campaignx_list_query = campaignx_list_query.filter(is_blocked_by_we_vote=False)
 
-    if positive_value_exists(show_campaigns_in_draft):
-        campaignx_list_query = campaignx_list_query.filter(in_draft_mode=True)
-    else:
-        campaignx_list_query = campaignx_list_query.filter(in_draft_mode=False)
+        if positive_value_exists(show_campaigns_in_draft):
+            campaignx_list_query = campaignx_list_query.filter(in_draft_mode=True)
+        else:
+            campaignx_list_query = campaignx_list_query.filter(in_draft_mode=False)
 
-    if positive_value_exists(show_campaigns_linked_to_politicians):
-        campaignx_list_query = campaignx_list_query.filter(linked_politician_we_vote_id__isnull=False)
-    else:
-        campaignx_list_query = campaignx_list_query.filter(
-            Q(linked_politician_we_vote_id__isnull=True) | Q(linked_politician_we_vote_id__exact=''))
+        if positive_value_exists(show_campaigns_linked_to_politicians):
+            campaignx_list_query = campaignx_list_query.filter(linked_politician_we_vote_id__isnull=False)
+        else:
+            campaignx_list_query = campaignx_list_query.filter(
+                Q(linked_politician_we_vote_id__isnull=True) | Q(linked_politician_we_vote_id__exact=''))
 
     if positive_value_exists(campaignx_owner_organization_we_vote_id):
         campaignx_we_vote_id_list_from_owner_organization_we_vote_id = \
@@ -909,12 +914,13 @@ def campaign_list_view(request):
         'limit_to_opinions_in_this_year':           limit_to_opinions_in_this_year,
         'messages_on_stage':                        messages_on_stage,
         'show_all':                                 show_all,
-        'show_issues':                              show_issues,
-        'show_more':                                show_more,
-        'show_organizations_without_email':         show_organizations_without_email,
         'show_blocked_campaigns':                   show_blocked_campaigns,
         'show_campaigns_in_draft':                  show_campaigns_in_draft,
         'show_campaigns_linked_to_politicians':     show_campaigns_linked_to_politicians,
+        'show_issues':                              show_issues,
+        'show_more':                                show_more,
+        'show_ocd_id_state_mismatch':               show_ocd_id_state_mismatch,
+        'show_organizations_without_email':         show_organizations_without_email,
         'sort_by':                                  sort_by,
         'state_code':                               state_code,
         'state_list':                               sorted_state_list,
