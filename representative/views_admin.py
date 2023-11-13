@@ -688,20 +688,20 @@ def representative_list_view(request):
                              "".format(representative_count=representative_count))
 
     template_values = {
-        'messages_on_stage':        messages_on_stage,
-        'missing_politician':       missing_politician,
-        'google_civic_election_id': google_civic_election_id,
-        'election_list':            election_list,
-        'representative_list':      representative_list,
-        'representative_search':    representative_search,
-        'show_all':                 show_all,
-        'show_battleground':        show_battleground,
+        'messages_on_stage':                messages_on_stage,
+        'missing_politician':               missing_politician,
+        'google_civic_election_id':         google_civic_election_id,
+        'election_list':                    election_list,
+        'representative_list':              representative_list,
+        'representative_search':            representative_search,
+        'show_all':                         show_all,
+        'show_battleground':                show_battleground,
         'show_representatives_with_email':  show_representatives_with_email,
-        'show_this_year':           show_this_year,
-        'show_ocd_id_state_mismatch':    show_ocd_id_state_mismatch,
-        'state_code':               state_code,
-        'state_list':               sorted_state_list,
-        'years_available':          OFFICE_HELD_YEARS_AVAILABLE,
+        'show_this_year':                   show_this_year,
+        'show_ocd_id_state_mismatch':       show_ocd_id_state_mismatch,
+        'state_code':                       state_code,
+        'state_list':                       sorted_state_list,
+        'years_available':                  OFFICE_HELD_YEARS_AVAILABLE,
     }
     return render(request, 'representative/representative_list.html', template_values)
 
@@ -1907,19 +1907,54 @@ def update_ocd_id_state_mismatch_view(request):
                              "ERROR with update_ocd_id_state_mismatch_view: {e} "
                              "".format(e=e))
 
+    return HttpResponseRedirect(reverse('representative:representative_list', args=()))
+
+
+@login_required
+def update_ocd_id_state_mismatch_related_tables_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    queryset = Representative.objects.all()
+    queryset = queryset.filter(ocd_id_state_mismatch_checked=True)
+    representative_list = list(queryset[:10000])
+
+    politician_we_vote_id_with_mismatch_list = []
+    for representative in representative_list:
+        if representative.politician_we_vote_id not in politician_we_vote_id_with_mismatch_list:
+            politician_we_vote_id_with_mismatch_list.append(representative.politician_we_vote_id)
+
     # Now transfer ocd_id_state_mismatch_found to all linked Politician records
     #  using politician_we_vote_id_with_mismatch_list. We have to do it here, because the ocd_division_id
     #  data does not exist in the Politician table.
     queryset = Politician.objects.all()
     queryset = queryset.filter(we_vote_id__in=politician_we_vote_id_with_mismatch_list)
-    politician_list = list(queryset)
+    politician_list = list(queryset[:2])
     bulk_update_list = []
     for politician in politician_list:
         politician.ocd_id_state_mismatch_found = True
         bulk_update_list.append(politician)
     Politician.objects.bulk_update(bulk_update_list, ['ocd_id_state_mismatch_found'])
-    message = "Politicians updated: {politicians_updated:,}.".format(
+    message = "Politicians marked with ocd_id_state_mismatch_found: {politicians_updated:,}.".format(
         politicians_updated=len(politician_list)
+    )
+    messages.add_message(request, messages.INFO, message)
+
+    # Now transfer ocd_id_state_mismatch_found to all linked CampaignX records
+    #  using politician_we_vote_id_with_mismatch_list.
+    from campaign.models import CampaignX
+    queryset = CampaignX.objects.all()
+    queryset = queryset.filter(linked_politician_we_vote_id__in=politician_we_vote_id_with_mismatch_list)
+    campaignx_list = list(queryset[:2])
+    bulk_update_list = []
+    for campaignx in campaignx_list:
+        campaignx.ocd_id_state_mismatch_found = True
+        bulk_update_list.append(campaignx)
+    CampaignX.objects.bulk_update(bulk_update_list, ['ocd_id_state_mismatch_found'])
+    message = "CampaignX marked with ocd_id_state_mismatch_found: {campaignx_updated:,}.".format(
+        campaignx_updated=len(campaignx_list)
     )
     messages.add_message(request, messages.INFO, message)
 

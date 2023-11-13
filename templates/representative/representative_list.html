@@ -27,7 +27,11 @@
         target="_blank">
         Update Representatives from Politicians for this Year <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
         <li>Prepare: <a href="{% url 'representative:update_ocd_id_state_mismatch' %}" target="_blank">
-            Update Representatives with OCD ID/State mismatch <span class="glyphicon glyphicon-new-window"></span></a></li>
+            Update Representatives with OCD ID/State mismatch <span class="glyphicon glyphicon-new-window"></span></a>
+            &nbsp;&nbsp;
+             <a href="{% url 'representative:update_ocd_id_state_mismatch_related_tables' %}" target="_blank">
+            Update Related tables <span class="glyphicon glyphicon-new-window"></span></a>
+        </li>
     </ul>
 {% endif %}
 
@@ -119,7 +123,8 @@
                 {% endif %}
             </td>
             <td>
-                <a href="{% url 'representative:representative_edit' representative.id %}?google_civic_election_id={{ google_civic_election_id }}&show_this_year={{ show_this_year }}" class="u-no-break">{{ representative.representative_name }}</a>
+                <a href="{% url 'representative:representative_edit' representative.id %}?google_civic_election_id={{ google_civic_election_id }}&show_this_year={{ show_this_year }}" class="u-no-break">
+                    {% if representative.representative_name %}{{ representative.representative_name }}{% else %}no name{% endif %}</a>
                 <br />
                 <span class="u-no-break">In office:
         {% if representative.year_in_office_2023 %}2023 {% endif %}

@@ -56,7 +56,7 @@
     &nbsp;&nbsp;&nbsp;
     <label for="show_campaigns_linked_to_politicians_id">
       <input type="checkbox" name="show_campaigns_linked_to_politicians" id="show_campaigns_linked_to_politicians_id" value="1"
-             {% if show_campaigns_linked_to_politicians %}checked{% endif %} /> Only Show Campaigns Linked to Politician
+             {% if show_campaigns_linked_to_politicians %}checked{% endif %} /> Campaigns Linked to Politician
     </label>
 
     {#  #}
@@ -77,6 +77,11 @@
             {{ client_organization.organization_name }}</option>
     {% endfor %}
     </select>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <label for="show_ocd_id_state_mismatch_id">
+      <input type="checkbox" name="show_ocd_id_state_mismatch" id="show_ocd_id_state_mismatch_id" value="1"
+             {% if show_ocd_id_state_mismatch %}checked{% endif %} /> Show OCD ID/State mismatch
+    </label>
 
     <br />
 
@@ -292,6 +297,9 @@
                 this.form.submit();
             });
             $('#show_campaigns_linked_to_politicians_id').change(function() {
+                this.form.submit();
+            });
+            $('#show_ocd_id_state_mismatch_id').change(function() {
                 this.form.submit();
             });
             $('#state_code_id').change(function() {
