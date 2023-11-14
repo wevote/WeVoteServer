@@ -1924,7 +1924,7 @@ def update_ocd_id_state_mismatch_related_tables_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     queryset = Representative.objects.all()
-    queryset = queryset.filter(ocd_id_state_mismatch_checked=True)
+    queryset = queryset.filter(ocd_id_state_mismatch_found=True)
     representative_list = list(queryset[:10000])
 
     office_held_we_vote_id_with_mismatch_list = []
