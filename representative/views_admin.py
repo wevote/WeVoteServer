@@ -1921,17 +1921,39 @@ def update_ocd_id_state_mismatch_related_tables_view(request):
     queryset = queryset.filter(ocd_id_state_mismatch_checked=True)
     representative_list = list(queryset[:10000])
 
+    office_held_we_vote_id_with_mismatch_list = []
     politician_we_vote_id_with_mismatch_list = []
     for representative in representative_list:
-        if representative.politician_we_vote_id not in politician_we_vote_id_with_mismatch_list:
+        if (positive_value_exists(representative.office_held_we_vote_id) and
+                representative.office_held_we_vote_id not in office_held_we_vote_id_with_mismatch_list):
+            office_held_we_vote_id_with_mismatch_list.append(representative.office_held_we_vote_id)
+        if (positive_value_exists(representative.politician_we_vote_id) and
+                representative.politician_we_vote_id not in politician_we_vote_id_with_mismatch_list):
             politician_we_vote_id_with_mismatch_list.append(representative.politician_we_vote_id)
+
+    # Now transfer ocd_id_state_mismatch_found to all linked OfficeHeld records
+    #  using office_held_we_vote_id_with_mismatch_list.
+    queryset = OfficeHeld.objects.all()
+    queryset = queryset.filter(we_vote_id__in=office_held_we_vote_id_with_mismatch_list)
+    queryset = queryset.exclude(ocd_id_state_mismatch_found=True)
+    office_held_list = list(queryset[:1000])
+    bulk_update_list = []
+    for office_held in office_held_list:
+        office_held.ocd_id_state_mismatch_found = True
+        bulk_update_list.append(office_held)
+    OfficeHeld.objects.bulk_update(bulk_update_list, ['ocd_id_state_mismatch_found'])
+    message = "Office Held entries marked with ocd_id_state_mismatch_found: {office_held_list_updated:,}.".format(
+        office_held_list_updated=len(office_held_list)
+    )
+    messages.add_message(request, messages.INFO, message)
 
     # Now transfer ocd_id_state_mismatch_found to all linked Politician records
     #  using politician_we_vote_id_with_mismatch_list. We have to do it here, because the ocd_division_id
     #  data does not exist in the Politician table.
     queryset = Politician.objects.all()
     queryset = queryset.filter(we_vote_id__in=politician_we_vote_id_with_mismatch_list)
-    politician_list = list(queryset[:2])
+    queryset = queryset.exclude(ocd_id_state_mismatch_found=True)
+    politician_list = list(queryset[:1000])
     bulk_update_list = []
     for politician in politician_list:
         politician.ocd_id_state_mismatch_found = True
@@ -1947,7 +1969,8 @@ def update_ocd_id_state_mismatch_related_tables_view(request):
     from campaign.models import CampaignX
     queryset = CampaignX.objects.all()
     queryset = queryset.filter(linked_politician_we_vote_id__in=politician_we_vote_id_with_mismatch_list)
-    campaignx_list = list(queryset[:2])
+    queryset = queryset.exclude(ocd_id_state_mismatch_found=True)
+    campaignx_list = list(queryset[:1000])
     bulk_update_list = []
     for campaignx in campaignx_list:
         campaignx.ocd_id_state_mismatch_found = True

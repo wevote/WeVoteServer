@@ -43,6 +43,7 @@ def office_held_list_view(request):
     show_all = request.GET.get('show_all', False)
     show_battleground = positive_value_exists(request.GET.get('show_battleground', False))
     show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
+    show_ocd_id_state_mismatch = positive_value_exists(request.GET.get('show_ocd_id_state_mismatch', False))
     office_held_search = request.GET.get('office_held_search', '')
 
     office_held_list_found = False
@@ -65,6 +66,8 @@ def office_held_list_view(request):
                 for item in year_filters:
                     final_filters |= item
                 office_held_queryset = office_held_queryset.filter(final_filters)
+        if positive_value_exists(show_ocd_id_state_mismatch):
+            office_held_queryset = office_held_queryset.filter(ocd_id_state_mismatch_found=True)
         if positive_value_exists(state_code):
             office_held_queryset = office_held_queryset.filter(state_code__iexact=state_code)
         office_held_queryset = office_held_queryset.order_by("office_held_name")
@@ -184,6 +187,7 @@ def office_held_list_view(request):
         'state_code':               state_code,
         'show_all_elections':       show_all_elections,
         'show_battleground':        show_battleground,
+        'show_ocd_id_state_mismatch':   show_ocd_id_state_mismatch,
         'state_list':               sorted_state_list,
         'google_civic_election_id': google_civic_election_id,
         'status':                   status,

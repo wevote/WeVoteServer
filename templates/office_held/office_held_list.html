@@ -35,6 +35,11 @@
       <input type="checkbox" name="show_battleground" id="show_battleground_id" value="1"
              {% if show_battleground %}checked{% endif %} /> Show battleground races
     </label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <label for="show_ocd_id_state_mismatch_id">
+      <input type="checkbox" name="show_ocd_id_state_mismatch" id="show_ocd_id_state_mismatch_id" value="1"
+             {% if show_ocd_id_state_mismatch %}checked{% endif %} /> Show OCD ID/State mismatch
+    </label>
 <br/><br/>
 {% if office_held_search %}
     <a href="{% url 'office_held:office_held_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
@@ -99,6 +104,11 @@
     });
     $(function() {
         $('#show_battleground_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#show_ocd_id_state_mismatch_id').change(function() {
             this.form.submit();
         });
     });
