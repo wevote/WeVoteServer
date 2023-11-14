@@ -605,6 +605,15 @@ def representative_list_view(request):
             for one_word in search_words:
                 filters = []
 
+                new_filter = Q(office_held_name__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(office_held_we_vote_id__iexact=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(political_party__icontains=one_word)
+                filters.append(new_filter)
+
                 new_filter = (
                     Q(representative_email__icontains=one_word) |
                     Q(representative_email2__icontains=one_word) |
@@ -620,9 +629,6 @@ def representative_list_view(request):
                     Q(representative_twitter_handle2__icontains=one_word) |
                     Q(representative_twitter_handle3__icontains=one_word)
                 )
-                filters.append(new_filter)
-
-                new_filter = Q(political_party__icontains=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(we_vote_id__iexact=one_word)
@@ -1924,11 +1930,11 @@ def update_ocd_id_state_mismatch_related_tables_view(request):
     office_held_we_vote_id_with_mismatch_list = []
     politician_we_vote_id_with_mismatch_list = []
     for representative in representative_list:
-        if (positive_value_exists(representative.office_held_we_vote_id) and
-                representative.office_held_we_vote_id not in office_held_we_vote_id_with_mismatch_list):
+        if positive_value_exists(representative.office_held_we_vote_id) and \
+                representative.office_held_we_vote_id not in office_held_we_vote_id_with_mismatch_list:
             office_held_we_vote_id_with_mismatch_list.append(representative.office_held_we_vote_id)
-        if (positive_value_exists(representative.politician_we_vote_id) and
-                representative.politician_we_vote_id not in politician_we_vote_id_with_mismatch_list):
+        if positive_value_exists(representative.politician_we_vote_id) and \
+                representative.politician_we_vote_id not in politician_we_vote_id_with_mismatch_list:
             politician_we_vote_id_with_mismatch_list.append(representative.politician_we_vote_id)
 
     # Now transfer ocd_id_state_mismatch_found to all linked OfficeHeld records
