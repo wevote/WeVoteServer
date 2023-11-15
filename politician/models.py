@@ -746,16 +746,21 @@ class PoliticianManager(models.Manager):
                 status += "FAILED_TO_ADD_OTHER_FIELDS: " + str(e) + " "
                 success = False
 
-        # Generate seo_friendly_path
-        results = self.generate_seo_friendly_path(
-            politician_name=politician.politician_name,
-            politician_we_vote_id=politician.we_vote_id,
-            state_code=politician.state_code,
-        )
-        if results['seo_friendly_path_found']:
-            politician.seo_friendly_path = results['seo_friendly_path']
+        if politician_found:
+            # Generate seo_friendly_path
             try:
-                politician.save()
+                results = self.generate_seo_friendly_path(
+                    politician_name=politician.politician_name,
+                    politician_we_vote_id=politician.we_vote_id,
+                    state_code=politician.state_code,
+                )
+                if results['seo_friendly_path_found']:
+                    politician.seo_friendly_path = results['seo_friendly_path']
+                    try:
+                        politician.save()
+                    except Exception as e:
+                        status += "FAILED_TO_SAVE_SEO_FRIENDLY_PATH: " + str(e) + " "
+                        success = False
             except Exception as e:
                 status += "FAILED_TO_GENERATE_SEO_FRIENDLY_PATH: " + str(e) + " "
                 success = False
