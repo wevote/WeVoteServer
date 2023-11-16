@@ -921,6 +921,77 @@ def offices_held_for_location_sync_out_view(request):  # officesHeldForLocationS
 
 
 @login_required
+def repair_ocd_id_mismatch_damage_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    state_code = request.GET.get('state_code', '')
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+
+    office_held_we_vote_id_list = []
+    offices_held_dict = {}
+
+    office_held_error_count = 0
+    office_held_list_count = 0
+    states_already_match_count = 0
+    states_fixed_count = 0
+    states_to_be_fixed_count = 0
+    status = ''
+    try:
+        queryset = OfficeHeld.objects.all()
+        queryset = queryset.filter(ocd_id_state_mismatch_found=True)
+        office_held_list = list(queryset[:1000])
+        office_held_list_count = len(office_held_list)
+        for one_office_held in office_held_list:
+            try:
+                if positive_value_exists(one_office_held.ocd_division_id) and \
+                        positive_value_exists(one_office_held.state_code):
+                    # Is there a mismatch between the ocd_id and the office_held.state_code?
+                    state_code_from_ocd_id = extract_state_from_ocd_division_id(one_office_held.ocd_division_id)
+                    if not positive_value_exists(state_code_from_ocd_id):
+                        # Cannot compare
+                        pass
+                    elif one_office_held.state_code.lower() == state_code_from_ocd_id.lower():
+                        # Already ok
+                        states_already_match_count += 1
+                    else:
+                        # Fix
+                        states_to_be_fixed_count += 1
+                        one_office_held.state_code = state_code_from_ocd_id
+                        one_office_held.save()
+                        states_fixed_count += 1
+            except Exception as e:
+                office_held_error_count += 1
+                if office_held_error_count < 10:
+                    status += "COULD_NOT_SAVE_OFFICE_HELD: " + str(e) + " "
+            offices_held_dict[one_office_held.we_vote_id] = one_office_held
+            office_held_we_vote_id_list.append(one_office_held.we_vote_id)
+    except Exception as e:
+        status += "GENERAL_ERROR: " + str(e) + " "
+
+    messages.add_message(request, messages.INFO,
+                         "Offices Held analyzed: {office_held_list_count:,}. "
+                         "states_already_match_count: {states_already_match_count:,}. "
+                         "states_to_be_fixed_count: {states_to_be_fixed_count} "
+                         "status: {status}"
+                         "".format(
+                             office_held_list_count=office_held_list_count,
+                             states_already_match_count=states_already_match_count,
+                             states_to_be_fixed_count=states_to_be_fixed_count,
+                             status=status))
+
+    return HttpResponseRedirect(reverse('office_held:office_held_list', args=()) +
+                                "?google_civic_election_id={google_civic_election_id}"
+                                "&state_code={state_code}"
+                                "&show_ocd_id_state_mismatch=1"
+                                "".format(
+                                    google_civic_election_id=google_civic_election_id,
+                                    state_code=state_code))
+
+
+@login_required
 def update_ocd_id_state_mismatch_view(request):
     authority_required={'admin'}
     if not voter_has_authority(request, authority_required):

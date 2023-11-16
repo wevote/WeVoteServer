@@ -4,6 +4,7 @@
 {% block title %}{% if campaignx %}{{ campaignx.campaign_title  }}{% else %}New Campaign{% endif %}{% endblock %}
 
 {%  block content %}
+{% load humanize %}
 {% load template_filters %}
 <style>
     span.nobr { white-space: nowrap; }
@@ -46,7 +47,9 @@
             {{ campaignx.we_vote_id }}
             {% if campaignx.linked_politician_we_vote_id %}
                 <br />
-                <span style="color: darkgray;">This campaign ('{{ campaignx.campaign_title }}') was generated for this politician:</span>
+                <span style="color: darkgray;">
+                    This campaign ('{{ campaignx.campaign_title }}') was generated for this politician (state_code: {{ politician_state_code }}):
+                </span>
                 <a href="{% url 'politician:politician_we_vote_id_edit' campaignx.linked_politician_we_vote_id %}"
                    target="_blank">
                     {{ campaignx.linked_politician_we_vote_id }}
@@ -201,6 +204,54 @@
         <img src="{{ campaignx.we_vote_hosted_profile_image_url_large }}"><br />
         Politician Photo Large<br />
     {% endif %}
+{% endif %}
+
+{% if related_campaignx_list %}
+    <h4>Possibly Related Campaigns</h4>
+    <table class="table">
+        <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>Campaign Title</td>
+            <td>SEO Friendly Path</td>
+            <td>Id</td>
+        </tr>
+    {% for campaignx in related_campaignx_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                {% if campaignx.we_vote_hosted_campaign_photo_medium_url %}
+                <a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
+                    <img src='{{ campaignx.we_vote_hosted_campaign_photo_medium_url }}' height="48px" />
+                </a>
+                {% elif campaignx.we_vote_hosted_profile_image_url_medium %}
+                <a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
+                    <img src='{{ campaignx.we_vote_hosted_profile_image_url_medium }}' height="48px" />
+                </a>
+                {% endif %}
+            </td>
+            <td><a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
+                {{ campaignx.campaign_title }} <span class="glyphicon glyphicon-new-window"></span></a>
+            &nbsp;
+                <br />
+                {{ campaignx.supporters_count|intcomma }} supporters
+            </td>
+            <td class="padded">
+                {% if campaignx.seo_friendly_path %}<a href="https://quality.wevote.us/c/{{ campaignx.seo_friendly_path }}" target="_blank" target="_blank">{{ campaignx.seo_friendly_path }} <span class="glyphicon glyphicon-new-window"></span></a>{% endif %}</td>
+            </td>
+            <td>{{ campaignx.id }} &nbsp;
+                {{ campaignx.we_vote_id }}
+                {% if campaignx.linked_politician_we_vote_id %}
+                    {{ campaignx.linked_politician_we_vote_id }}
+                {% else %}
+                    ("pol"&nbsp;missing)
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
 {% endif %}
 
 

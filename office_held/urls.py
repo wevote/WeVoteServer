@@ -9,21 +9,21 @@ from . import views_admin
 urlpatterns = [
     # views_admin
     re_path(r'^$', views_admin.office_held_list_view, name='office_held_list', ),
-    re_path(r'^delete/$', views_admin.office_held_delete_process_view, name='office_held_delete_process'),
+    re_path(r'^(?P<office_held_id>[0-9]+)/edit/$', views_admin.office_held_edit_view, name='office_held_edit'),
     re_path(r'^edit_process/$', views_admin.office_held_edit_process_view, name='office_held_edit_process'),
-    re_path(r'^location_list/$', views_admin.offices_held_for_location_list_view, name='offices_held_location_list'),
-    re_path(r'^new/$', views_admin.office_held_new_view, name='office_held_new'),
+    re_path(r'^delete/$', views_admin.office_held_delete_process_view, name='office_held_delete_process'),
     re_path(r'^import/$',
             views_admin.office_held_import_from_master_server_view, name='office_held_import_from_master_server'),
     re_path(r'^import_for_location/$',
             views_admin.offices_held_for_location_import_from_master_server_view,
             name='offices_held_for_location_import_from_master_server'),
-    re_path(r'^update_ocd_id_state_mismatch/', views_admin.update_ocd_id_state_mismatch_view,
-            name='update_ocd_id_state_mismatch'),
+    re_path(r'^location_list/$', views_admin.offices_held_for_location_list_view, name='offices_held_location_list'),
+    re_path(r'^new/$', views_admin.office_held_new_view, name='office_held_new'),
     re_path(r'^real_time_status/$', views_admin.office_held_update_status, name='office_held_update_status'),
-    re_path(r'^(?P<office_held_id>[0-9]+)/edit/$', views_admin.office_held_edit_view, name='office_held_edit'),
+    re_path(r'^repair_ocd_id_mismatch/$',
+            views_admin.repair_ocd_id_mismatch_damage_view, name='repair_ocd_id_mismatch'),
     re_path(r'^(?P<office_held_we_vote_id>wv[\w]{2}officeheld[\w]+)/summary/$',
             views_admin.office_held_summary_view, name='office_held_summary'),
-        
-
+    re_path(r'^update_ocd_id_state_mismatch/', views_admin.update_ocd_id_state_mismatch_view,
+            name='update_ocd_id_state_mismatch'),
 ]
