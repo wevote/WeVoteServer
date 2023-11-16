@@ -8,8 +8,12 @@
 <h1>Offices Currently Held By Elected Representatives</h1>
 
 <p>
-    <a href="{% url 'office_held:office_held_new' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Add New Office Held</a>,
-    <a href="{% url 'office_held:offices_held_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">See 'OfficesHeldForLocation' List</a>
+    <a href="{% url 'office_held:office_held_new' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+        Add New Office Held</a>,
+    <a href="{% url 'office_held:offices_held_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+        See 'OfficesHeldForLocation' List</a>,
+    <a href="{% url 'office_held:repair_ocd_id_mismatch' %}?state_code={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}" >
+        Repair OCD ID Mismatches</a>
 </p>
 
 <form name="organization_position_choose_election" method="get" action="{% url 'office_held:office_held_list' %}">

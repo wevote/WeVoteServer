@@ -26,6 +26,8 @@ urlpatterns = [
             views_admin.politician_edit_view, name='politician_we_vote_id_edit'),
     re_path(r'^(?P<politician_id>[0-9]+)/retrieve_photos/$',
             views_admin.politician_retrieve_photos_view, name='politician_retrieve_photos'),
+    re_path(r'^repair_ocd_id_mismatch/$',
+            views_admin.repair_ocd_id_mismatch_damage_view, name='repair_ocd_id_mismatch'),
     re_path(r'^set_missing_gender_ids/$', views_admin.set_missing_gender_ids_view, name='set_missing_gender_ids'),
     re_path(r'^update_politician_from_candidate/', views_admin.update_politician_from_candidate_view,
             name='update_politician_from_candidate'),

@@ -576,6 +576,24 @@ def campaign_edit_view(request, campaignx_we_vote_id=""):
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
 
+    politician_state_code = ''
+    related_campaignx_list = []
+    if positive_value_exists(campaignx.linked_politician_we_vote_id):
+        try:
+            from politician.models import Politician
+            politician_queryset = Politician.objects.using('readonly').all()
+            politician = politician_queryset.get(we_vote_id=campaignx.linked_politician_we_vote_id)
+            if positive_value_exists(politician.last_name):
+                from campaign.models import CampaignX
+                queryset = CampaignX.objects.using('readonly').all()
+                queryset = queryset.exclude(we_vote_id=campaignx_we_vote_id)
+                queryset = queryset.filter(campaign_title__icontains=politician.last_name)
+                related_campaignx_list = list(queryset)
+            if positive_value_exists(politician.state_code):
+                politician_state_code = politician.state_code
+        except Exception as e:
+            related_campaignx_list = []
+
     if 'localhost' in WEB_APP_ROOT_URL:
         web_app_root_url = 'https://localhost:3000'
     else:
@@ -586,6 +604,8 @@ def campaign_edit_view(request, campaignx_we_vote_id=""):
         'campaignx_search':                         campaignx_search,
         'google_civic_election_id':                 google_civic_election_id,
         'messages_on_stage':                        messages_on_stage,
+        'politician_state_code':                    politician_state_code,
+        'related_campaignx_list':                   related_campaignx_list,
         'state_list':                               sorted_state_list,
         'upcoming_election_list':                   upcoming_election_list,
         'web_app_root_url':                         web_app_root_url,

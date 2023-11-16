@@ -21,7 +21,12 @@
         <li><a href="{% url 'politician:update_politicians_from_candidates' %}?state_code={{ state_code }}"
                         target="_blank" >
             Update Politicians from Candidates <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
-        <li><a href="{% url 'candidate:repair_imported_names' %}?is_candidate=false" >Repair Politician Names</a></li>
+        <li>
+            <a href="{% url 'candidate:repair_imported_names' %}?is_candidate=false" >
+                Repair Politician Names</a>,
+            <a href="{% url 'politician:repair_ocd_id_mismatch' %}?state_code={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}" >
+                Repair OCD ID Mismatches</a>
+        </li>
         <li><a href="{% url 'politician:set_missing_gender_ids' %}" >Set Missing Politician Gender Ids</a></li>
     </ul>
 

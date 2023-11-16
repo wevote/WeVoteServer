@@ -41,8 +41,8 @@ from voter.models import voter_has_authority
 from wevote_functions.functions import convert_date_to_we_vote_date_string, convert_to_int, \
     convert_to_political_party_constant, convert_we_vote_date_string_to_date_as_integer, \
     extract_first_name_from_full_name, extract_instagram_handle_from_text_string, \
-    extract_middle_name_from_full_name, \
-    extract_last_name_from_full_name, extract_twitter_handle_from_text_string, \
+    extract_middle_name_from_full_name, extract_last_name_from_full_name, \
+    extract_state_from_ocd_division_id, extract_twitter_handle_from_text_string, \
     positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization
 from wevote_settings.constants import IS_BATTLEGROUND_YEARS_AVAILABLE
 from .controllers import add_alternate_names_to_next_spot, add_twitter_handle_to_next_politician_spot, \
@@ -2748,6 +2748,84 @@ def politicians_sync_out_view(request):  # politiciansSyncOut
         'status': status
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+@login_required
+def repair_ocd_id_mismatch_damage_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    state_code = request.GET.get('state_code', '')
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+
+    politician_we_vote_id_list = []
+    politicians_dict = {}
+
+    politician_error_count = 0
+    politician_list_count = 0
+    states_already_match_count = 0
+    states_fixed_count = 0
+    states_to_be_fixed_count = 0
+    status = ''
+    try:
+        queryset = Politician.objects.using('readonly').all()
+        queryset = queryset.filter(ocd_id_state_mismatch_found=True)
+        politician_data_list = list(queryset[:1000])
+        politician_list_count = len(politician_data_list)
+        for one_politician in politician_data_list:
+            # Now find all representative ids related to this politician
+            try:
+                queryset = Representative.objects.all()
+                queryset = queryset.filter(politician_we_vote_id__iexact=one_politician.we_vote_id)
+                linked_representative_list = list(queryset)
+                linked_representative = linked_representative_list[0]  # For now, just take the first one
+                if positive_value_exists(linked_representative.ocd_division_id) and \
+                        positive_value_exists(one_politician.state_code):
+                    # Is there a mismatch between the ocd_id and the politician.state_code?
+                    state_code_from_ocd_id = extract_state_from_ocd_division_id(linked_representative.ocd_division_id)
+                    if not positive_value_exists(state_code_from_ocd_id):
+                        # Cannot compare
+                        pass
+                    elif one_politician.state_code.lower() == state_code_from_ocd_id.lower():
+                        # Already ok
+                        states_already_match_count += 1
+                    else:
+                        # Fix
+                        states_to_be_fixed_count += 1
+                        one_politician.state_code = state_code_from_ocd_id
+                        one_politician.seo_friendly_path = None
+                        one_politician.seo_friendly_path_date_last_updated = now()
+                        one_politician.save()
+                        states_fixed_count += 1
+            except Exception as e:
+                politician_error_count += 1
+                if politician_error_count < 10:
+                    status += "COULD_NOT_SAVE_POLITICIAN: " + str(e) + " "
+            politicians_dict[one_politician.we_vote_id] = one_politician
+            politician_we_vote_id_list.append(one_politician.we_vote_id)
+    except Exception as e:
+        status += "GENERAL_ERROR: " + str(e) + " "
+
+    messages.add_message(request, messages.INFO,
+                         "Politicians analyzed: {politician_list_count:,}. "
+                         "states_already_match_count: {states_already_match_count:,}. "
+                         "states_to_be_fixed_count: {states_to_be_fixed_count} "
+                         "status: {status}"
+                         "".format(
+                             politician_list_count=politician_list_count,
+                             states_already_match_count=states_already_match_count,
+                             states_to_be_fixed_count=states_to_be_fixed_count,
+                             status=status))
+
+    return HttpResponseRedirect(reverse('politician:politician_list', args=()) +
+                                "?google_civic_election_id={google_civic_election_id}"
+                                "&state_code={state_code}"
+                                "&show_ocd_id_state_mismatch=1"
+                                "".format(
+                                    google_civic_election_id=google_civic_election_id,
+                                    state_code=state_code))
 
 
 @login_required

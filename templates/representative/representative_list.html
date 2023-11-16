@@ -31,6 +31,9 @@
             &nbsp;&nbsp;
              <a href="{% url 'representative:update_ocd_id_state_mismatch_related_tables' %}" target="_blank">
             Update Related tables <span class="glyphicon glyphicon-new-window"></span></a>
+            &nbsp;&nbsp;
+            <a href="{% url 'representative:repair_ocd_id_mismatch' %}?state_code={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}" >
+                Repair OCD ID Mismatches (after Politicians)</a>
         </li>
     </ul>
 {% endif %}

@@ -1278,6 +1278,7 @@ def retrieve_google_civic_representatives_from_polling_location_api(
                 office_held_array_index = 0
                 offices_held_display_order = 1
                 for office_held_dict in representative_info_by_address_json['offices']:
+                    # Use extract_state_from_ocd_division_id(ocd_division_id)
                     groom_results = groom_and_store_office_held_with_representatives_google_civic_json(
                         divisions_dict=representative_info_by_address_json.get('divisions', {}),
                         office_held_dict_list_for_location=office_held_dict_list_for_location,
@@ -1285,7 +1286,7 @@ def retrieve_google_civic_representatives_from_polling_location_api(
                         offices_held_display_order=offices_held_display_order,
                         office_held_array_index=office_held_array_index,
                         officials_list=representative_info_by_address_json.get('officials', []),
-                        state_code=state_code,
+                        state_code=state_code,  # TODO DALE: 2023-11-15 I think this is cause of Representatives bug
                         polling_location_we_vote_id=polling_location_we_vote_id,
                         existing_offices_held_by_ocd_and_name_dict=existing_offices_held_by_ocd_and_name_dict,
                         existing_representative_objects_dict=existing_representative_objects_dict,
@@ -1298,14 +1299,17 @@ def retrieve_google_civic_representatives_from_polling_location_api(
                         )
                     status += groom_results['status']
                     office_held_dict_list_for_location = groom_results['office_held_dict_list_for_location']
-                    existing_offices_held_by_ocd_and_name_dict = groom_results['existing_offices_held_by_ocd_and_name_dict']
+                    existing_offices_held_by_ocd_and_name_dict = \
+                        groom_results['existing_offices_held_by_ocd_and_name_dict']
                     existing_representative_objects_dict = groom_results['existing_representative_objects_dict']
-                    existing_representative_to_office_held_links_dict = groom_results['existing_representative_to_office_held_links_dict']
+                    existing_representative_to_office_held_links_dict = \
+                        groom_results['existing_representative_to_office_held_links_dict']
                     new_office_held_we_vote_ids_list = groom_results['new_office_held_we_vote_ids_list']
                     new_representative_we_vote_ids_list = groom_results['new_representative_we_vote_ids_list']
                     office_held_array_index += 1
                     offices_held_display_order += 1
-                    successful_representatives_api_call = groom_results['success'] or successful_representatives_api_call
+                    successful_representatives_api_call = groom_results['success'] or \
+                        successful_representatives_api_call
 
                 # If we successfully save all of a location's elected representatives,
                 # create/update an OfficesHeldForLocation entry
@@ -1338,6 +1342,7 @@ def retrieve_google_civic_representatives_from_polling_location_api(
                                     year_with_data_key = 'year_with_data_' + str(this_year)
                                     defaults[year_with_data_key] = True
 
+                                # TODO DALE: 2023-11-15 I think state_code is cause of Representatives bug
                                 results = office_held_manager.create_offices_held_for_location_row_entry(
                                     polling_location_we_vote_id=polling_location_we_vote_id,
                                     state_code=state_code,

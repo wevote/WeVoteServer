@@ -24,6 +24,8 @@ urlpatterns = [
             views_admin.representative_politician_match_view, name='representative_politician_match'),
     re_path(r'^politician_match_this_year/', views_admin.representative_politician_match_this_year_view,
             name='representative_politician_match_this_year'),
+    re_path(r'^repair_ocd_id_mismatch/$',
+            views_admin.repair_ocd_id_mismatch_damage_view, name='repair_ocd_id_mismatch'),
     re_path(r'^update_representative_from_politician/', views_admin.update_representative_from_politician_view,
             name='update_representative_from_politician'),
     re_path(r'^update_from_politicians/', views_admin.update_representatives_from_politicians_view,
