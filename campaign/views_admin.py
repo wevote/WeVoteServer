@@ -456,6 +456,7 @@ def campaign_edit_process_view(request):
     is_not_promoted_by_we_vote = request.POST.get('is_not_promoted_by_we_vote', False)
     is_not_promoted_by_we_vote_reason = request.POST.get('is_not_promoted_by_we_vote_reason', None)
     is_ok_to_promote_on_we_vote = request.POST.get('is_ok_to_promote_on_we_vote', False)
+    ocd_id_state_mismatch_resolved = request.POST.get('ocd_id_state_mismatch_resolved', False)
     politician_starter_list_serialized = request.POST.get('politician_starter_list_serialized', None)
     seo_friendly_path = request.POST.get('seo_friendly_path', None)
     state_code = request.POST.get('state_code', None)
@@ -498,6 +499,10 @@ def campaign_edit_process_view(request):
             if is_not_promoted_by_we_vote_reason is not None:
                 campaignx.is_not_promoted_by_we_vote_reason = is_not_promoted_by_we_vote_reason.strip()
             campaignx.is_ok_to_promote_on_we_vote = positive_value_exists(is_ok_to_promote_on_we_vote)
+            # Only change ocd_id_state_mismatch_resolved if ocd_id_state_mismatch_found
+            if positive_value_exists(campaignx.ocd_id_state_mismatch_found) \
+                    and ocd_id_state_mismatch_resolved is not None:
+                campaignx.ocd_id_state_mismatch_resolved = positive_value_exists(ocd_id_state_mismatch_resolved)
             if politician_starter_list_serialized is not None:
                 campaignx.politician_starter_list_serialized = politician_starter_list_serialized.strip()
             if positive_value_exists(campaignx.linked_politician_we_vote_id):
@@ -587,6 +592,7 @@ def campaign_edit_view(request, campaignx_we_vote_id=""):
                 from campaign.models import CampaignX
                 queryset = CampaignX.objects.using('readonly').all()
                 queryset = queryset.exclude(we_vote_id=campaignx_we_vote_id)
+                queryset = queryset.filter(campaign_title__icontains=politician.first_name)
                 queryset = queryset.filter(campaign_title__icontains=politician.last_name)
                 related_campaignx_list = list(queryset)
             if positive_value_exists(politician.state_code):
@@ -838,7 +844,9 @@ def campaign_list_view(request):
     client_list_query = client_list_query.filter(chosen_feature_package__isnull=False)
     client_organization_list = list(client_list_query)
 
-    if positive_value_exists(sort_by):
+    if positive_value_exists(show_ocd_id_state_mismatch):
+        campaignx_list_query = campaignx_list_query.order_by('ocd_id_state_mismatch_resolved')
+    elif positive_value_exists(sort_by):
         # if sort_by == "twitter":
         #     campaignx_list_query = \
         #         campaignx_list_query.order_by('organization_name').order_by('-twitter_followers_count')
@@ -905,12 +913,28 @@ def campaign_list_view(request):
 
     # Now loop through these organizations and add owners
     modified_campaignx_list = []
+    politician_we_vote_id_list = []
     for campaignx in campaignx_list:
         campaignx.campaignx_owner_list = campaignx_manager.retrieve_campaignx_owner_list(
             campaignx_we_vote_id_list=[campaignx.we_vote_id],
             viewer_is_owner=True)
         campaignx.chip_in_total = StripeManager.retrieve_chip_in_total('', campaignx.we_vote_id)
         modified_campaignx_list.append(campaignx)
+        if positive_value_exists(campaignx.linked_politician_we_vote_id):
+            politician_we_vote_id_list.append(campaignx.linked_politician_we_vote_id)
+
+    if len(politician_we_vote_id_list) > 0:
+        modified_campaignx_list2 = []
+        from politician.models import Politician
+        queryset = Politician.objects.all()
+        queryset = queryset.filter(we_vote_id__in=politician_we_vote_id_list)
+        politician_list = list(queryset)
+        for campaignx in modified_campaignx_list:
+            for one_politician in politician_list:
+                if one_politician.we_vote_id == campaignx.linked_politician_we_vote_id:
+                    campaignx.linked_politician_state_code = one_politician.state_code
+            modified_campaignx_list2.append(campaignx)
+        modified_campaignx_list = modified_campaignx_list2
 
     state_list = STATE_CODE_MAP
     sorted_state_list = sorted(state_list.items())
