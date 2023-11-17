@@ -45,6 +45,11 @@
                value="{% if campaignx %}{{ campaignx.campaign_title }}{% else %}{{ campaign_title }}{% endif %}" />
         {% if campaignx %}
             {{ campaignx.we_vote_id }}
+            {% if campaignx.ocd_id_state_mismatch_found %}
+                &nbsp;&nbsp;&nbsp;
+                <input type="checkbox" name="ocd_id_state_mismatch_resolved" id="ocd_id_state_mismatch_resolved_id" value="1"
+                    {% if campaignx.ocd_id_state_mismatch_resolved %}checked{% endif %} />&nbsp;OCD ID Issue Resolved
+            {% endif %}
             {% if campaignx.linked_politician_we_vote_id %}
                 <br />
                 <span style="color: darkgray;">
