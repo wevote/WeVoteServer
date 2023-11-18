@@ -23,6 +23,8 @@ urlpatterns = [
         views_admin.campaign_edit_politicians_view, name='campaignx_edit_politicians'),
     re_path(r'^(?P<campaignx_we_vote_id>wv[\w]{2}camp[\w]+)/summary$',
         views_admin.campaign_summary_view, name='campaignx_summary'),
+    re_path(r'^repair_ocd_id_mismatch/$',
+            views_admin.repair_ocd_id_mismatch_damage_view, name='repair_ocd_id_mismatch'),
     re_path(r'^(?P<campaignx_we_vote_id>wv[\w]{2}camp[\w]+)/supporters$',
         views_admin.campaign_supporters_list_view, name='supporters_list'),
     re_path(r'^supporters_list_process/$', views_admin.campaign_supporters_list_process_view,

@@ -1522,3 +1522,84 @@ def deleting_or_editing_campaignx_supporter_list(
         'update_message': update_message,
     }
     return results
+
+
+@login_required
+def repair_ocd_id_mismatch_damage_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    state_code = request.GET.get('state_code', '')
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+
+    campaignx_list_count = 0
+    campaignx_db_error_count = 0
+    politician_db_error_count = 0
+    campaignx_entries_fixed_count = 0
+    campaignx_entries_to_be_fixed_count = 0
+    seo_friendly_path_failed_error_count = 0
+    status = ''
+    try:
+        queryset = CampaignX.objects.all()
+        queryset = queryset.filter(ocd_id_state_mismatch_checked_politician=False)
+        campaignx_list = list(queryset[:10])
+        campaignx_list_count = len(campaignx_list)
+        from campaign.controllers import update_campaignx_from_politician
+        from politician.models import Politician, PoliticianManager
+        politician_manager = PoliticianManager()
+        for one_campaignx in campaignx_list:
+            problem_with_this_campaignx = False
+            if positive_value_exists(one_campaignx.linked_politician_we_vote_id):
+                politician_results = politician_manager.retrieve_politician(
+                    politician_we_vote_id=one_campaignx.linked_politician_we_vote_id)
+                if politician_results['politician_found']:
+                    politician = politician_results['politician']
+                    results = update_campaignx_from_politician(campaignx=one_campaignx, politician=politician)
+                    if results['success']:
+                        one_campaignx = results['campaignx']
+                        one_campaignx.date_last_updated_from_politician = localtime(now()).date()
+                    else:
+                        seo_friendly_path_failed_error_count += 1
+                        problem_with_this_campaignx = True
+                        if seo_friendly_path_failed_error_count < 10:
+                            status += "SEO_FRIENDLY_ERROR: " + str(results['status']) + " "
+                elif politician_results['success']:
+                    campaignx_entries_to_be_fixed_count += 1
+                    one_campaignx.linked_politician_we_vote_id = None
+                    campaignx_entries_fixed_count += 1
+                else:
+                    problem_with_this_campaignx = True
+                    politician_db_error_count += 1
+                    if politician_db_error_count < 10:
+                        status += "ERROR_RETRIEVING_POLITICIAN: " + str(politician_results['status']) + " "
+            if not problem_with_this_campaignx:
+                try:
+                    one_campaignx.ocd_id_state_mismatch_checked_politician = True
+                    one_campaignx.save()
+                except Exception as e:
+                    campaignx_db_error_count += 1
+                    if campaignx_db_error_count < 10:
+                        status += "ERROR_SAVING_CAMPAIGNX: " + str(e) + " "
+    except Exception as e:
+        status += "GENERAL_ERROR: " + str(e) + " "
+
+    messages.add_message(request, messages.INFO,
+                         "CampaignX entries analyzed: {campaignx_list_count:,}. "
+                         "campaignx_entries_to_be_fixed_count: {campaignx_entries_to_be_fixed_count} "
+                         "campaignx_entries_fixed_count: {campaignx_entries_fixed_count:,}. "
+                         "status: {status}"
+                         "".format(
+                             campaignx_list_count=campaignx_list_count,
+                             campaignx_entries_fixed_count=campaignx_entries_fixed_count,
+                             campaignx_entries_to_be_fixed_count=campaignx_entries_to_be_fixed_count,
+                             status=status))
+
+    return HttpResponseRedirect(reverse('campaign:campaignx_list', args=()) +
+                                "?google_civic_election_id={google_civic_election_id}"
+                                "&state_code={state_code}"
+                                "&show_ocd_id_state_mismatch=1"
+                                "".format(
+                                    google_civic_election_id=google_civic_election_id,
+                                    state_code=state_code))

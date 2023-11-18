@@ -2547,6 +2547,10 @@ def update_campaignx_from_politician(campaignx, politician):
         campaignx.we_vote_hosted_campaign_photo_large_url = None
         campaignx.we_vote_hosted_campaign_photo_medium_url = None
         campaignx.we_vote_hosted_campaign_photo_small_url = None
+    if positive_value_exists(politician.seo_friendly_path):
+        campaignx.seo_friendly_path = politician.seo_friendly_path
+    else:
+        campaignx.seo_friendly_path = None
 
     # if not positive_value_exists(campaignx.wikipedia_url) and \
     #         positive_value_exists(politician.wikipedia_url):
