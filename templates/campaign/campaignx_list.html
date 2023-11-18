@@ -8,7 +8,14 @@
 {% load humanize %}
 
 <h1>Campaigns</h1>
-
+{% if show_ocd_id_state_mismatch %}
+<ul>
+    <li>
+        <a href="{% url 'campaign:repair_ocd_id_mismatch' %}?state_code={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}" >
+            Repair OCD ID Mismatches</a>
+    </li>
+</ul>
+{% endif %}
 <form name="state_code_form" method="get" action="{% url 'campaign:campaignx_list' %}">
     {% csrf_token %}
     <input type="hidden" name="sort_by" value="{{ sort_by }}">
@@ -260,16 +267,16 @@
     {% endfor %}
     </table>
     {% if not show_all and not show_more %}
-    <a href="{% url 'campaign:campaignx_list' %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_search={{ campaignx_search }}&state_code={{ state_code }}&show_issues={{ show_issues }}&campaignx_type_filter={{ campaignx_type_filter }}&sort_by={{ sort_by }}&show_more=1">
+    <a href="{% url 'campaign:campaignx_list' %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_search={{ campaignx_search }}&state_code={{ state_code }}&show_issues={{ show_issues }}&campaignx_type_filter={{ campaignx_type_filter }}&sort_by={{ sort_by }}&show_more=1&show_ocd_id_state_mismatch={{ show_ocd_id_state_mismatch }}">
         show more</a>
     {% endif %}
     {% if show_more %}
-    <a href="{% url 'campaign:campaignx_list' %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_search={{ campaignx_search }}&state_code={{ state_code }}&show_issues={{ show_issues }}&campaignx_type_filter={{ campaignx_type_filter }}&sort_by={{ sort_by }}&show_all=1">
+    <a href="{% url 'campaign:campaignx_list' %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_search={{ campaignx_search }}&state_code={{ state_code }}&show_issues={{ show_issues }}&campaignx_type_filter={{ campaignx_type_filter }}&sort_by={{ sort_by }}&show_all=1&show_ocd_id_state_mismatch={{ show_ocd_id_state_mismatch }}">
         show all</a>
     {% endif %}
     {% if show_all or show_more %}
     &nbsp;&nbsp;&nbsp;
-      (<a href="{% url 'campaign:campaignx_list' %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_search={{ campaignx_search }}&state_code={{ state_code }}&show_issues={{ show_issues }}&campaignx_type_filter={{ campaignx_type_filter }}&sort_by={{ sort_by }}">
+      (<a href="{% url 'campaign:campaignx_list' %}?google_civic_election_id={{ google_civic_election_id }}&campaignx_search={{ campaignx_search }}&state_code={{ state_code }}&show_issues={{ show_issues }}&campaignx_type_filter={{ campaignx_type_filter }}&sort_by={{ sort_by }}&show_ocd_id_state_mismatch={{ show_ocd_id_state_mismatch }}">
         show fewer</a>)
     {% endif %}
 
