@@ -273,23 +273,24 @@ def find_campaignx_list_to_link_to_this_politician(politician=None):
         related_list = CampaignX.objects.using('readonly').all()
         related_list = related_list.exclude(
             linked_politician_we_vote_id__iexact=politician.we_vote_id)
+        related_list = related_list.filter(campaign_title__icontains=politician.first_name)
+        related_list = related_list.filter(campaign_title__icontains=politician.last_name)
 
-        filters = []
-        new_filter = Q(campaign_title__icontains=politician.last_name)
+        # filters = []
         # new_filter = \
         #     Q(campaign_title__icontains=politician.first_name) & \
         #     Q(campaign_title__icontains=politician.last_name)
-        filters.append(new_filter)
-
-        # Add the first query
-        if len(filters):
-            final_filters = filters.pop()
-
-            # ...and "OR" the remaining items in the list
-            for item in filters:
-                final_filters |= item
-
-            related_list = related_list.filter(final_filters)
+        # filters.append(new_filter)
+        #
+        # # Add the first query
+        # if len(filters):
+        #     final_filters = filters.pop()
+        #
+        #     # ...and "OR" the remaining items in the list
+        #     for item in filters:
+        #         final_filters |= item
+        #
+        #     related_list = related_list.filter(final_filters)
 
         related_list = related_list.order_by('campaign_title')[:20]
     except Exception as e:

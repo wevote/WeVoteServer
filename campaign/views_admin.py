@@ -1545,6 +1545,8 @@ def repair_ocd_id_mismatch_damage_view(request):
     status = ''
     try:
         queryset = CampaignX.objects.all()
+        queryset = queryset.exclude(
+            Q(linked_politician_we_vote_id__isnull=True) | Q(linked_politician_we_vote_id=''))
         queryset = queryset.filter(ocd_id_state_mismatch_checked_politician=False)
         campaignx_list = list(queryset[:5000])
         campaignx_list_count = len(campaignx_list)
