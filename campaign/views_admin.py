@@ -661,7 +661,7 @@ def campaign_list_view(request):
     # Bring over updated politician profile photos to the campaignx entries with linked_politician_we_vote_id
     if update_campaigns_from_politicians_script:
         campaignx_list = []
-        number_to_update = 1000  # Set to 1,000 at a time
+        number_to_update = 5000  # Set to 5,000 at a time
         total_to_update_after = 0
         try:
             queryset = CampaignX.objects.all()
@@ -735,11 +735,12 @@ def campaign_list_view(request):
                          'we_vote_hosted_campaign_photo_medium_url',
                          'we_vote_hosted_campaign_photo_small_url',
                          'date_last_updated_from_politician',
+                         'seo_friendly_path',
                          'we_vote_hosted_profile_image_url_large',
                          'we_vote_hosted_profile_image_url_medium',
                          'we_vote_hosted_profile_image_url_tiny'])
                     messages.add_message(request, messages.INFO,
-                                         "{updates_made:,} campaignx entries updated. "
+                                         "{updates_made:,} campaignx entries updated from politicians. "
                                          "{total_to_update_after:,} remaining."
                                          "".format(total_to_update_after=total_to_update_after,
                                                    updates_made=campaigns_updated))
@@ -1537,8 +1538,8 @@ def repair_ocd_id_mismatch_damage_view(request):
     campaignx_list_count = 0
     campaignx_db_error_count = 0
     politician_db_error_count = 0
-    campaignx_entries_fixed_count = 0
-    campaignx_entries_to_be_fixed_count = 0
+    campaignx_politician_ids_removed_count = 0
+    campaignx_politician_id_to_be_removed_count = 0
     seo_friendly_path_failed_error_count = 0
     status = ''
     try:
@@ -1566,9 +1567,9 @@ def repair_ocd_id_mismatch_damage_view(request):
                         if seo_friendly_path_failed_error_count < 10:
                             status += "SEO_FRIENDLY_ERROR: " + str(results['status']) + " "
                 elif politician_results['success']:
-                    campaignx_entries_to_be_fixed_count += 1
+                    campaignx_politician_id_to_be_removed_count += 1
                     one_campaignx.linked_politician_we_vote_id = None
-                    campaignx_entries_fixed_count += 1
+                    campaignx_politician_ids_removed_count += 1
                 else:
                     problem_with_this_campaignx = True
                     politician_db_error_count += 1
@@ -1587,13 +1588,13 @@ def repair_ocd_id_mismatch_damage_view(request):
 
     messages.add_message(request, messages.INFO,
                          "CampaignX entries analyzed: {campaignx_list_count:,}. "
-                         "campaignx_entries_to_be_fixed_count: {campaignx_entries_to_be_fixed_count} "
-                         "campaignx_entries_fixed_count: {campaignx_entries_fixed_count:,}. "
+                         "campaignx_politician_id_to_be_removed_count: {campaignx_politician_id_to_be_removed_count} "
+                         "campaignx_politician_ids_removed_count: {campaignx_politician_ids_removed_count:,}. "
                          "status: {status}"
                          "".format(
                              campaignx_list_count=campaignx_list_count,
-                             campaignx_entries_fixed_count=campaignx_entries_fixed_count,
-                             campaignx_entries_to_be_fixed_count=campaignx_entries_to_be_fixed_count,
+                             campaignx_politician_ids_removed_count=campaignx_politician_ids_removed_count,
+                             campaignx_politician_id_to_be_removed_count=campaignx_politician_id_to_be_removed_count,
                              status=status))
 
     return HttpResponseRedirect(reverse('campaign:campaignx_list', args=()) +
