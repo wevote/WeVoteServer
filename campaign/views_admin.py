@@ -1548,6 +1548,7 @@ def repair_ocd_id_mismatch_damage_view(request):
         queryset = queryset.filter(ocd_id_state_mismatch_checked_politician=False)
         campaignx_list = list(queryset[:5000])
         campaignx_list_count = len(campaignx_list)
+        campaignx_list_remaining_count = queryset.count() - campaignx_list_count
         from campaign.controllers import update_campaignx_from_politician
         from politician.models import Politician, PoliticianManager
         politician_manager = PoliticianManager()
@@ -1559,6 +1560,7 @@ def repair_ocd_id_mismatch_damage_view(request):
                     read_only=True)
                 if politician_results['politician_found']:
                     # 2023-11-17 This pass we are just removing politician_we_vote_id if the politician doesn't exist
+                    save_campaignx_changes = True
                     pass
                     # politician = politician_results['politician']
                     # results = update_campaignx_from_politician(campaignx=one_campaignx, politician=politician)
@@ -1620,10 +1622,12 @@ def repair_ocd_id_mismatch_damage_view(request):
                          "campaignx_politician_id_to_be_removed_count: {campaignx_politician_id_to_be_removed_count} "
                          "campaignx_politician_ids_removed_count: {campaignx_politician_ids_removed_count:,}. "
                          "bulk_update_count: {bulk_update_count:,}. "
+                         "campaignx_list_remaining_count: {campaignx_list_remaining_count:,}. "
                          "status: {status}"
                          "".format(
                              bulk_update_count=len(bulk_update_campaignx_list),
                              campaignx_list_count=campaignx_list_count,
+                             campaignx_list_remaining_count=campaignx_list_remaining_count,
                              campaignx_politician_ids_removed_count=campaignx_politician_ids_removed_count,
                              campaignx_politician_id_to_be_removed_count=campaignx_politician_id_to_be_removed_count,
                              status=status))
