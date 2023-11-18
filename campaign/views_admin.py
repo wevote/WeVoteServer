@@ -657,7 +657,7 @@ def campaign_list_view(request):
     messages_on_stage = get_messages(request)
     campaignx_manager = CampaignXManager()
 
-    update_campaigns_from_politicians_script = True
+    update_campaigns_from_politicians_script = False
     # Bring over updated politician profile photos to the campaignx entries with linked_politician_we_vote_id
     if update_campaigns_from_politicians_script:
         campaignx_list = []
@@ -1607,9 +1607,9 @@ def repair_ocd_id_mismatch_damage_view(request):
                  # 'we_vote_hosted_profile_image_url_medium',
                  # 'we_vote_hosted_profile_image_url_tiny'
                  ])
-            messages.add_message(request, messages.INFO,
-                                 "{updates_made:,} campaignx entries updated from politicians. "
-                                 "".format(updates_made=len(bulk_update_campaignx_list)))
+            # messages.add_message(request, messages.INFO,
+            #                      "{updates_made:,} campaignx entries updated from politicians. "
+            #                      "".format(updates_made=len(bulk_update_campaignx_list)))
         except Exception as e:
             messages.add_message(request, messages.ERROR,
                                  "ERROR with campaigns repair_ocd_id_mismatch_damage: {e} "
@@ -1619,8 +1619,10 @@ def repair_ocd_id_mismatch_damage_view(request):
                          "CampaignX entries analyzed: {campaignx_list_count:,}. "
                          "campaignx_politician_id_to_be_removed_count: {campaignx_politician_id_to_be_removed_count} "
                          "campaignx_politician_ids_removed_count: {campaignx_politician_ids_removed_count:,}. "
+                         "bulk_update_count: {bulk_update_count:,}. "
                          "status: {status}"
                          "".format(
+                             bulk_update_count=len(bulk_update_campaignx_list),
                              campaignx_list_count=campaignx_list_count,
                              campaignx_politician_ids_removed_count=campaignx_politician_ids_removed_count,
                              campaignx_politician_id_to_be_removed_count=campaignx_politician_id_to_be_removed_count,
