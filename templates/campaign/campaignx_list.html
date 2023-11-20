@@ -166,6 +166,7 @@
                 </span><br />
                 <span style="color: darkgray">
                     {{ campaignx.we_vote_id }}&nbsp;&nbsp;
+                {% if campaignx.linked_politician_we_vote_id %}
                 {% if campaignx.ocd_id_state_mismatch_found %}
                     <a href="{% url 'politician:politician_we_vote_id_edit' campaignx.linked_politician_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
                         target="_blank">
@@ -174,6 +175,7 @@
                     ({{ campaignx.linked_politician_state_code|default_if_none:"" }})
                 {% else %}
                     {{ campaignx.linked_politician_we_vote_id|default_if_none:"" }}
+                {% endif %}
                 {% endif %}
                 </span>
                 <span style="font-size: .95rem; color: gray">
