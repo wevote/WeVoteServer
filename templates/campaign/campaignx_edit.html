@@ -262,6 +262,12 @@
     <p>&nbsp;</p>
 {% endif %}
 
+<form action="{% url "campaign:compare_two_campaigns_for_merge" %}" method="get" class="form-horizontal" target="_blank">
+    <input type="hidden" name="campaignx1_we_vote_id" value="{% if campaignx %}{{ campaignx.we_vote_id }}{% else %}0{% endif %}">
+    <input type="text" name="campaignx2_we_vote_id" placeholder="Enter We Vote ID for other campaign" size="40" />
+    <button type="submit" class="btn btn-default">Compare with Specific Campaign</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</form>
+
 
 {% if campaignx %}
   <br />
