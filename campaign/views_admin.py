@@ -585,7 +585,7 @@ def campaign_edit_view(request, campaignx_we_vote_id=""):
 
     politician_state_code = ''
     related_campaignx_list = []
-    if positive_value_exists(campaignx.linked_politician_we_vote_id):
+    if campaignx and positive_value_exists(campaignx.linked_politician_we_vote_id):
         try:
             from politician.models import Politician
             politician_queryset = Politician.objects.using('readonly').all()
@@ -1636,7 +1636,7 @@ def campaignx_merge_process_view(request):
     if positive_value_exists(merge_results['campaignx_entries_merged']):
         campaignx = merge_results['campaignx']
         messages.add_message(request, messages.INFO, "CampaignX '{campaignx_title}' merged."
-                                                     "".format(campaignx_title=campaignx.campaignx_title))
+                                                     "".format(campaignx_title=campaignx.campaign_title))
     else:
         # NOTE: We could also redirect to a page to look specifically at these two campaignx entries, but this should
         # also get you back to looking at the two campaignx entries

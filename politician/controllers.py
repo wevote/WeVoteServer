@@ -1044,6 +1044,13 @@ def merge_these_two_politicians(
         }
         return results
 
+    # Update any CampaignXPolitician entries to new politician_we_vote_id
+    from campaign.models import CampaignXPolitician
+    campaign_politicians_moved = CampaignXPolitician.objects \
+        .filter(politician_we_vote_id__iexact=politician2_we_vote_id) \
+        .update(politician_we_vote_id=politician1_we_vote_id)
+    status += "CAMPAIGNX_POLITICIANS_MOVED: " + str(campaign_politicians_moved) + " "
+
     # Update Representatives to new politician ids
     representative_results = move_representatives_to_another_politician(
         from_politician_id=politician2_id,
@@ -1060,6 +1067,13 @@ def merge_these_two_politicians(
             'politician': None,
         }
         return results
+
+    # Update any WeVoteImage entries to new politician_we_vote_id
+    from image.models import WeVoteImage
+    images_moved = WeVoteImage.objects \
+        .filter(politician_we_vote_id__iexact=politician2_we_vote_id) \
+        .update(politician_we_vote_id=politician1_we_vote_id)
+    status += "WE_VOTE_IMAGE_ENTRIES_MOVED: " + str(images_moved) + " "
 
     # Clear 'unique=True' fields in politician2, which need to be Null before politician1 can be saved
     #  with updated values
