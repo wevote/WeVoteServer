@@ -1669,7 +1669,7 @@ def campaignx_merge_process_view(request):
     #                                 '&campaignx_year=' + str(campaignx_year) +
     #                                 "&state_code=" + str(state_code))
 
-    return HttpResponseRedirect(reverse('campaign:campaignx_edit', args=(campaignx1_on_stage.id,)))
+    return HttpResponseRedirect(reverse('campaign:campaignx_edit', args=(campaignx.we_vote_id,)))
 
 
 def deleting_or_editing_campaignx_supporter_list(

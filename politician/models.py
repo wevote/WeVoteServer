@@ -115,6 +115,7 @@ POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED = [
     'bioguide_id',
     'fec_id',
     'govtrack_id',
+    'linked_campaignx_we_vote_id',
     'maplight_id',
     'seo_friendly_path',
     'thomas_id',
