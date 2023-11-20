@@ -31,7 +31,11 @@
 
 <div class="form-group">
     <label class="col-sm-3 control-label">
+    {% if campaignx %}
         <a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}?campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">cancel</a>
+    {% else %}
+        <a href="{% url 'campaign:campaignx_list' %}?campaignx_search={{ campaignx_search }}">cancel</a>
+    {% endif %}
     </label>
     <div class="col-sm-8">
         <button type="submit" class="btn btn-primary">{% if campaignx %}Update Campaign{% else %}CANNOT SAVE{% endif %}</button>
@@ -187,7 +191,11 @@
 
 <div class="form-group">
     <label class="col-sm-3 control-label">
+    {% if campaignx %}
         <a href="{% url 'campaign:campaignx_summary' campaignx.we_vote_id %}?campaignx_owner_organization_we_vote_id={{ campaignx_owner_organization_we_vote_id }}&campaignx_search={{ campaignx_search }}">cancel</a>
+    {% else %}
+        <a href="{% url 'campaign:campaignx_list' %}?campaignx_search={{ campaignx_search }}">cancel</a>
+    {% endif %}
     </label>
     <div class="col-sm-8">
         <button type="submit" class="btn btn-primary">{% if campaignx %}Update Campaign{% else %}CANNOT SAVE{% endif %}</button>
