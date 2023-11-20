@@ -83,6 +83,7 @@ POLITICIAN_UNIQUE_IDENTIFIERS = [
     'is_battleground_race_2025',
     'is_battleground_race_2026',
     'last_name',
+    'linked_campaignx_we_vote_id',
     'lis_id',
     'maplight_id',
     'middle_name',

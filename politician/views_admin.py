@@ -1757,6 +1757,9 @@ def politician_edit_process_view(request):
     youtube_url = request.POST.get('youtube_url', False)
     # is_battleground_race_ values taken in below
 
+    from campaign.controllers import update_campaignx_from_politician
+    campaignx_manager = CampaignXManager()
+
     # Check to see if this politician already exists
     politician_on_stage_found = False
     politician_on_stage = Politician()
@@ -2026,6 +2029,15 @@ def politician_edit_process_view(request):
                 politician_on_stage.politician_email2 = politician_email2
             if politician_email3 is not False:
                 politician_on_stage.politician_email3 = politician_email3
+            if positive_value_exists(politician_on_stage.linked_campaignx_we_vote_id):
+                campaignx_results = campaignx_manager.retrieve_campaignx(
+                    campaignx_we_vote_id=politician_on_stage.linked_campaignx_we_vote_id)
+                if campaignx_results['campaignx_found']:
+                    # Continue below
+                    pass
+                elif campaignx_results['success']:
+                    # If the linked_campaignx_we_vote_id points to a campaignx that doesn't exist anymore, unlink
+                    politician_on_stage.linked_campaignx_we_vote_id = None
             if politician_name is not False:
                 politician_on_stage.politician_name = politician_name
             if politician_phone_number is not False:
@@ -2128,8 +2140,6 @@ def politician_edit_process_view(request):
             messages.add_message(request, messages.INFO, 'Politician saved.')
 
             if positive_value_exists(politician_on_stage.linked_campaignx_we_vote_id):
-                from campaign.controllers import update_campaignx_from_politician
-                campaignx_manager = CampaignXManager()
                 campaignx_results = campaignx_manager.retrieve_campaignx(
                     campaignx_we_vote_id=politician_on_stage.linked_campaignx_we_vote_id)
                 if campaignx_results['campaignx_found']:
@@ -2139,6 +2149,7 @@ def politician_edit_process_view(request):
                         campaignx = results['campaignx']
                         campaignx.date_last_updated_from_politician = localtime(now()).date()
                         campaignx.save()
+
             # Find current representative for this politician
             representative_manager = RepresentativeManager()
             rep_results = representative_manager.retrieve_representative(
