@@ -1036,9 +1036,11 @@
             &nbsp;
                 <br />
                 {{ related_campaignx.supporters_count|intcomma }} supporters
+                {% if politician_linked_campaignx_we_vote_id %}
                 &nbsp;&nbsp;
-                <a href="{% url 'campaign:compare_two_campaigns_for_merge' %}?campaignx1_we_vote_id={{ campaignx.we_vote_id }}&campaignx2_we_vote_id={{ related_campaignx.we_vote_id }}" target="_blank">
+                <a href="{% url 'campaign:compare_two_campaigns_for_merge' %}?campaignx1_we_vote_id={{ politician_linked_campaignx_we_vote_id }}&campaignx2_we_vote_id={{ related_campaignx.we_vote_id }}" target="_blank">
                     compare for merge <span class="glyphicon glyphicon-new-window"></span></a>
+                {% endif %}
             </td>
             <td class="padded">
                 {% if related_campaignx.seo_friendly_path %}<a href="https://quality.wevote.us/c/{{ related_campaignx.seo_friendly_path }}" target="_blank" target="_blank">{{ related_campaignx.seo_friendly_path }} <span class="glyphicon glyphicon-new-window"></span></a>{% endif %}</td>

@@ -87,6 +87,7 @@ POLITICIAN_UNIQUE_IDENTIFIERS = [
     'lis_id',
     'maplight_id',
     'middle_name',
+    'ocd_id_state_mismatch_found',
     'opensecrets_id',
     'political_party',
     'politician_contact_form_url',
