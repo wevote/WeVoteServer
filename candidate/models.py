@@ -3725,7 +3725,7 @@ class CandidateManager(models.Manager):
 
     def update_or_create_candidates_are_not_duplicates(self, candidate1_we_vote_id, candidate2_we_vote_id):
         """
-        Either update or create a candidate entry.
+        Either update or create a CandidatesAreNotDuplicates entry.
         """
         exception_multiple_object_returned = False
         success = False
