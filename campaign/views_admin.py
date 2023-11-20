@@ -1656,11 +1656,12 @@ def campaignx_merge_process_view(request):
                                     '&show_this_year_of_campaignx_entries=' + str(campaignx_year) +
                                     '&state_code=' + str(state_code))
 
-    if remove_duplicate_process:
-        return HttpResponseRedirect(reverse('campaign:find_and_merge_duplicate_campaignx_entries', args=()) +
-                                    "?google_civic_election_id=" + str(google_civic_election_id) +
-                                    '&campaignx_year=' + str(campaignx_year) +
-                                    "&state_code=" + str(state_code))
+    # To be implemented
+    # if remove_duplicate_process:
+    #     return HttpResponseRedirect(reverse('campaign:find_and_merge_duplicate_campaignx_entries', args=()) +
+    #                                 "?google_civic_election_id=" + str(google_civic_election_id) +
+    #                                 '&campaignx_year=' + str(campaignx_year) +
+    #                                 "&state_code=" + str(state_code))
 
     return HttpResponseRedirect(reverse('campaign:campaignx_edit', args=(campaignx1_on_stage.id,)))
 

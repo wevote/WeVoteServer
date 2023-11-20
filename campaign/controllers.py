@@ -2182,6 +2182,13 @@ def merge_these_two_campaignx_entries(
         .update(campaignx_we_vote_id=campaignx1_we_vote_id)
 
     # ##################################
+    # Update the linked_campaignx_we_vote_id in Politician entries
+    from politician.models import Politician
+    linked_campaignx_we_vote_id_updated = Politician.objects \
+        .filter(linked_campaignx_we_vote_id__iexact=campaignx2_we_vote_id) \
+        .update(linked_campaignx_we_vote_id=campaignx1_we_vote_id)
+
+    # ##################################
     # Migrate campaignx owners
     campaignx1_owner_organization_we_vote_id_list = []
     campaignx1_owner_voter_we_vote_id_list = []
