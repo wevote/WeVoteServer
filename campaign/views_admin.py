@@ -22,9 +22,10 @@ from stripe_donations.models import StripeManager
 from voter.models import voter_has_authority, VoterManager
 from wevote_functions.functions import convert_to_int, \
     generate_date_as_integer, positive_value_exists, STATE_CODE_MAP
-from .controllers import create_campaignx_supporters_from_positions, refresh_campaignx_supporters_count_in_all_children
+from .controllers import create_campaignx_supporters_from_positions, figure_out_campaignx_conflict_values, \
+    refresh_campaignx_supporters_count_in_all_children, merge_these_two_campaignx_entries
 from .models import CampaignX, CampaignXManager, CampaignXOwner, CampaignXPolitician, CampaignXSupporter, \
-    FINAL_ELECTION_DATE_COOL_DOWN, SUPPORTERS_COUNT_MINIMUM_FOR_LISTING
+    CAMPAIGNX_UNIQUE_IDENTIFIERS, FINAL_ELECTION_DATE_COOL_DOWN, SUPPORTERS_COUNT_MINIMUM_FOR_LISTING
 
 logger = wevote_functions.admin.get_logger(__name__)
 CAMPAIGNS_ROOT_URL = get_environment_variable("CAMPAIGNS_ROOT_URL", no_exception=True)
@@ -372,6 +373,7 @@ def campaign_edit_politicians_process_view(request):
     campaignx_manager = CampaignXManager()
     campaignx_politician_list = campaignx_manager.retrieve_campaignx_politician_list(
         campaignx_we_vote_id=campaignx_we_vote_id,
+        read_only=False,
     )
     for campaignx_politician in campaignx_politician_list:
         if positive_value_exists(campaignx_politician.campaignx_we_vote_id):
@@ -1434,6 +1436,230 @@ def campaign_supporters_list_process_view(request):
                                 "&only_show_supporters_with_endorsements=" + str(only_show_supporters_with_endorsements) +
                                 "&show_supporters_not_visible_to_public=" + str(show_supporters_not_visible_to_public)
                                 )
+
+
+@login_required
+def compare_two_campaigns_for_merge_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'political_data_manager'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    # campaignx_year = request.GET.get('campaignx_year', 0)
+    campaignx1_we_vote_id = request.GET.get('campaignx1_we_vote_id', 0)
+    campaignx2_we_vote_id = request.GET.get('campaignx2_we_vote_id', 0)
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(google_civic_election_id)
+
+    campaignx_manager = CampaignXManager()
+    campaignx_results = campaignx_manager.retrieve_campaignx(campaignx_we_vote_id=campaignx1_we_vote_id, read_only=True)
+    if not campaignx_results['campaignx_found']:
+        messages.add_message(request, messages.ERROR, "CampaignX1 not found.")
+        return HttpResponseRedirect(reverse('campaign:campaignx_list', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id))
+
+    campaignx_option1_for_template = campaignx_results['campaignx']
+
+    campaignx_results = campaignx_manager.retrieve_campaignx(campaignx_we_vote_id=campaignx2_we_vote_id, read_only=True)
+    if not campaignx_results['campaignx_found']:
+        messages.add_message(request, messages.ERROR, "CampaignX2 not found.")
+        return HttpResponseRedirect(reverse('campaign:campaignx_summary',
+                                            args=(campaignx_option1_for_template.we_vote_id,)) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id))
+
+    campaignx_option2_for_template = campaignx_results['campaignx']
+
+    campaignx_merge_conflict_values = figure_out_campaignx_conflict_values(
+        campaignx_option1_for_template, campaignx_option2_for_template)
+
+    # This view function takes us to displaying a template
+    remove_duplicate_process = False  # Do not try to find another office to merge after finishing
+    return render_campaignx_merge_form(
+        request,
+        campaignx_option1_for_template,
+        campaignx_option2_for_template,
+        campaignx_merge_conflict_values,
+        # campaignx_year=campaignx_year,
+        remove_duplicate_process=remove_duplicate_process)
+
+
+def render_campaignx_merge_form(
+        request,
+        campaignx_option1_for_template,
+        campaignx_option2_for_template,
+        campaignx_merge_conflict_values,
+        campaignx_year=0,
+        remove_duplicate_process=True):
+    from politician.models import Politician
+
+    politician1_full_name = ''
+    politician1_state_code = ''
+    if campaignx_option1_for_template and \
+            positive_value_exists(campaignx_option1_for_template.linked_politician_we_vote_id):
+        try:
+            politician_queryset = Politician.objects.using('readonly').all()
+            politician = politician_queryset.get(we_vote_id=campaignx_option1_for_template.linked_politician_we_vote_id)
+            if politician and positive_value_exists(politician.first_name):
+                politician1_full_name = politician.display_full_name()
+            if politician and positive_value_exists(politician.state_code):
+                politician1_state_code = politician.state_code
+        except Exception as e:
+            pass
+
+    politician2_full_name = ''
+    politician2_state_code = ''
+    if campaignx_option1_for_template and \
+            positive_value_exists(campaignx_option2_for_template.linked_politician_we_vote_id):
+        try:
+            politician_queryset = Politician.objects.using('readonly').all()
+            politician = politician_queryset.get(we_vote_id=campaignx_option2_for_template.linked_politician_we_vote_id)
+            if politician and positive_value_exists(politician.first_name):
+                politician2_full_name = politician.display_full_name()
+            if politician and positive_value_exists(politician.state_code):
+                politician2_state_code = politician.state_code
+        except Exception as e:
+            pass
+
+    messages_on_stage = get_messages(request)
+    template_values = {
+        'campaignx_option1':        campaignx_option1_for_template,
+        'campaignx_option2':        campaignx_option2_for_template,
+        'campaignx_year':           campaignx_year,
+        'conflict_values':          campaignx_merge_conflict_values,
+        'messages_on_stage':        messages_on_stage,
+        'remove_duplicate_process': remove_duplicate_process,
+        'politician1_full_name':    politician1_full_name,
+        'politician1_state_code':   politician1_state_code,
+        'politician2_full_name':    politician2_full_name,
+        'politician2_state_code':   politician2_state_code,
+    }
+    return render(request, 'campaign/campaignx_merge.html', template_values)
+
+
+@login_required
+def campaignx_merge_process_view(request):
+    """
+    Process the merging of two campaignx entries
+    :param request:
+    :return:
+    """
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    campaignx_manager = CampaignXManager()
+
+    is_post = True if request.method == 'POST' else False
+
+    if is_post:
+        merge = request.POST.get('merge', False)
+        skip = request.POST.get('skip', False)
+
+        # CampaignX 1 is the one we keep, and CampaignX 2 is the one we will merge into CampaignX 1
+        campaignx_year = request.POST.get('campaignx_year', 0)
+        campaignx1_we_vote_id = request.POST.get('campaignx1_we_vote_id', 0)
+        campaignx2_we_vote_id = request.POST.get('campaignx2_we_vote_id', 0)
+        google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+        redirect_to_campaignx_list = request.POST.get('redirect_to_campaignx_list', False)
+        regenerate_campaign_title = positive_value_exists(request.POST.get('regenerate_campaign_title', False))
+        remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
+        state_code = request.POST.get('state_code', '')
+    else:
+        merge = request.GET.get('merge', False)
+        skip = request.GET.get('skip', False)
+
+        # CampaignX 1 is the one we keep, and CampaignX 2 is the one we will merge into CampaignX 1
+        campaignx_year = request.GET.get('campaignx_year', 0)
+        campaignx1_we_vote_id = request.GET.get('campaignx1_we_vote_id', 0)
+        campaignx2_we_vote_id = request.GET.get('campaignx2_we_vote_id', 0)
+        google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+        redirect_to_campaignx_list = request.GET.get('redirect_to_campaignx_list', False)
+        regenerate_campaign_title = positive_value_exists(request.GET.get('regenerate_campaign_title', False))
+        remove_duplicate_process = request.GET.get('remove_duplicate_process', False)
+        state_code = request.GET.get('state_code', '')
+
+    if positive_value_exists(skip):
+        results = campaignx_manager.update_or_create_campaignx_entries_are_not_duplicates(
+            campaignx1_we_vote_id, campaignx2_we_vote_id)
+        if not results['new_campaignx_entries_are_not_duplicates_created']:
+            messages.add_message(request, messages.ERROR, 'Could not save campaignx_entries_are_not_duplicates entry: ' +
+                                 results['status'])
+        messages.add_message(request, messages.INFO, 'Prior campaignx entries skipped, and not merged.')
+        # When implemented, consider directing here: find_and_merge_duplicate_campaignx_entries
+        return HttpResponseRedirect(reverse('campaign:campaignx_list', args=()) +
+                                    "?campaignx_year=" + str(campaignx_year) +
+                                    "&google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(state_code))
+
+    campaignx1_results = campaignx_manager.retrieve_campaignx(campaignx_we_vote_id=campaignx1_we_vote_id, read_only=True)
+    if campaignx1_results['campaignx_found']:
+        campaignx1_on_stage = campaignx1_results['campaignx']
+    else:
+        messages.add_message(request, messages.ERROR, 'Could not retrieve campaignx 1.')
+        return HttpResponseRedirect(reverse('campaign:campaignx_list', args=()) +
+                                    '?google_civic_election_id=' + str(google_civic_election_id) +
+                                    '&show_this_year_of_campaignx_entries=' + str(campaignx_year) +
+                                    '&state_code=' + str(state_code))
+
+    campaignx2_results = campaignx_manager.retrieve_campaignx(campaignx_we_vote_id=campaignx2_we_vote_id, read_only=True)
+    if campaignx2_results['campaignx_found']:
+        campaignx2_on_stage = campaignx2_results['campaignx']
+    else:
+        messages.add_message(request, messages.ERROR, 'Could not retrieve campaignx 2.')
+        return HttpResponseRedirect(reverse('campaign:campaignx_list', args=()) +
+                                    '?google_civic_election_id=' + str(google_civic_election_id) +
+                                    '&show_this_year_of_campaignx_entries=' + str(campaignx_year) +
+                                    '&state_code=' + str(state_code))
+
+    # Gather choices made from merge form
+    conflict_values = figure_out_campaignx_conflict_values(campaignx1_on_stage, campaignx2_on_stage)
+    admin_merge_choices = {}
+    for attribute in CAMPAIGNX_UNIQUE_IDENTIFIERS:
+        conflict_value = conflict_values.get(attribute, None)
+        if conflict_value == "CONFLICT":
+            if is_post:
+                choice = request.POST.get(attribute + '_choice', '')
+            else:
+                choice = request.GET.get(attribute + '_choice', '')
+            if campaignx2_we_vote_id == choice:
+                admin_merge_choices[attribute] = getattr(campaignx2_on_stage, attribute)
+        elif conflict_value == "CANDIDATE2":
+            admin_merge_choices[attribute] = getattr(campaignx2_on_stage, attribute)
+
+    merge_results = merge_these_two_campaignx_entries(
+        campaignx1_we_vote_id,
+        campaignx2_we_vote_id,
+        admin_merge_choices,
+        regenerate_campaign_title=regenerate_campaign_title)
+
+    if positive_value_exists(merge_results['campaignx_entries_merged']):
+        campaignx = merge_results['campaignx']
+        messages.add_message(request, messages.INFO, "CampaignX '{campaignx_title}' merged."
+                                                     "".format(campaignx_title=campaignx.campaignx_title))
+    else:
+        # NOTE: We could also redirect to a page to look specifically at these two campaignx entries, but this should
+        # also get you back to looking at the two campaignx entries
+        messages.add_message(request, messages.ERROR, merge_results['status'])
+        return HttpResponseRedirect(reverse('campaign:find_and_merge_duplicate_campaignx_entries', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    '&campaignx_year=' + str(campaignx_year) +
+                                    "&auto_merge_off=1" +
+                                    "&state_code=" + str(state_code))
+
+    if redirect_to_campaignx_list:
+        return HttpResponseRedirect(reverse('campaign:campaignx_list', args=()) +
+                                    '?google_civic_election_id=' + str(google_civic_election_id) +
+                                    '&show_this_year_of_campaignx_entries=' + str(campaignx_year) +
+                                    '&state_code=' + str(state_code))
+
+    if remove_duplicate_process:
+        return HttpResponseRedirect(reverse('campaign:find_and_merge_duplicate_campaignx_entries', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id) +
+                                    '&campaignx_year=' + str(campaignx_year) +
+                                    "&state_code=" + str(state_code))
+
+    return HttpResponseRedirect(reverse('campaign:campaignx_edit', args=(campaignx1_on_stage.id,)))
 
 
 def deleting_or_editing_campaignx_supporter_list(

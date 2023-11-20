@@ -3,7 +3,8 @@
 # -*- coding: UTF-8 -*-
 
 from .models import CampaignX, CampaignXListedByOrganization, CampaignXManager, CampaignXNewsItem, CampaignXOwner, \
-    CampaignXPolitician, CampaignXSupporter, FINAL_ELECTION_DATE_COOL_DOWN
+    CampaignXPolitician, CampaignXSupporter, CAMPAIGNX_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, CAMPAIGNX_UNIQUE_IDENTIFIERS, \
+    FINAL_ELECTION_DATE_COOL_DOWN
 import base64
 import copy
 from datetime import datetime, timedelta
@@ -1655,6 +1656,36 @@ def fetch_sentence_string_from_politician_list(politician_list, max_number_of_li
     return sentence_string
 
 
+def figure_out_campaignx_conflict_values(campaignx1, campaignx2):
+    campaignx_merge_conflict_values = {}
+
+    for attribute in CAMPAIGNX_UNIQUE_IDENTIFIERS:
+        try:
+            campaignx1_attribute_value = getattr(campaignx1, attribute)
+            campaignx2_attribute_value = getattr(campaignx2, attribute)
+            if campaignx1_attribute_value is None and campaignx2_attribute_value is None:
+                campaignx_merge_conflict_values[attribute] = 'MATCHING'
+            elif campaignx1_attribute_value is None or campaignx1_attribute_value == "":
+                campaignx_merge_conflict_values[attribute] = 'CAMPAIGNX2'
+            elif campaignx2_attribute_value is None or campaignx2_attribute_value == "":
+                campaignx_merge_conflict_values[attribute] = 'CAMPAIGNX1'
+            else:
+                if attribute == "campaign_title":
+                    if campaignx1_attribute_value.lower() == campaignx2_attribute_value.lower():
+                        campaignx_merge_conflict_values[attribute] = 'MATCHING'
+                    else:
+                        campaignx_merge_conflict_values[attribute] = 'CONFLICT'
+                else:
+                    if campaignx1_attribute_value == campaignx2_attribute_value:
+                        campaignx_merge_conflict_values[attribute] = 'MATCHING'
+                    else:
+                        campaignx_merge_conflict_values[attribute] = 'CONFLICT'
+        except AttributeError:
+            pass
+
+    return campaignx_merge_conflict_values
+
+
 def generate_campaignx_dict_list_from_campaignx_object_list(
         campaignx_object_list=[],
         hostname='',
@@ -2029,6 +2060,261 @@ def generate_campaignx_dict_from_campaignx_object(
         'campaignx_dict':   campaignx_dict,
         'status':           status,
         'success':          success,
+    }
+    return results
+
+
+def merge_these_two_campaignx_entries(
+        campaignx1_we_vote_id,
+        campaignx2_we_vote_id,
+        admin_merge_choices={},
+        regenerate_campaign_title=False):
+    """
+    Process the merging of two campaignx entries
+    :param campaignx1_we_vote_id:
+    :param campaignx2_we_vote_id:
+    :param admin_merge_choices: Dictionary with the attribute name as the key, and the chosen value as the value
+    :param regenerate_campaign_title:
+    :return:
+    """
+    status = ""
+    campaignx_manager = CampaignXManager()
+
+    # CampaignX 1 is the one we keep, and CampaignX 2 is the one we will merge into CampaignX 1
+    campaignx1_results = \
+        campaignx_manager.retrieve_campaignx(campaignx_we_vote_id=campaignx1_we_vote_id, read_only=False)
+    if campaignx1_results['campaignx_found']:
+        campaignx1_on_stage = campaignx1_results['campaignx']
+        campaignx1_id = campaignx1_on_stage.id
+    else:
+        results = {
+            'success': False,
+            'status': "MERGE_THESE_TWO_CAMPAIGNX_ENTRIES-COULD_NOT_RETRIEVE_CAMPAIGNX1 ",
+            'campaignx_entries_merged': False,
+            'campaignx': None,
+        }
+        return results
+
+    campaignx2_results = \
+        campaignx_manager.retrieve_campaignx(campaignx_we_vote_id=campaignx2_we_vote_id, read_only=False)
+    if campaignx2_results['campaignx_found']:
+        campaignx2_on_stage = campaignx2_results['campaignx']
+        campaignx2_id = campaignx2_on_stage.id
+    else:
+        results = {
+            'success': False,
+            'status': "MERGE_THESE_TWO_CAMPAIGNX_ENTRIES-COULD_NOT_RETRIEVE_CAMPAIGNX2 ",
+            'campaignx_entries_merged': False,
+            'campaignx': None,
+        }
+        return results
+
+    # TODO: Migrate images?
+
+    # Merge attribute values chosen by the admin
+    for attribute in CAMPAIGNX_UNIQUE_IDENTIFIERS:
+        # try:
+        if attribute in admin_merge_choices:
+            setattr(campaignx1_on_stage, attribute, admin_merge_choices[attribute])
+        # except Exception as e:
+        #     # Don't completely fail if in attribute can't be saved.
+        #     status += "ATTRIBUTE_SAVE_FAILED (" + str(attribute) + ") " + str(e) + " "
+
+    if positive_value_exists(regenerate_campaign_title):
+        if positive_value_exists(campaignx1_on_stage.linked_politician_we_vote_id):
+            from politician.models import PoliticianManager
+            politician_manager = PoliticianManager()
+            results = politician_manager.retrieve_politician(
+                politician_we_vote_id=campaignx1_on_stage.linked_politician_we_vote_id)
+            if results['politician_found']:
+                politician = results['politician']
+                politician_name = politician.politician_name
+                state_code = politician.state_code
+                from politician.controllers_generate_seo_friendly_path import generate_campaign_title_from_politician
+                campaignx1_on_stage.campaign_title = generate_campaign_title_from_politician(
+                    politician_name=politician_name,
+                    state_code=state_code)
+
+    # #####################################
+    # Merge CampaignXListedByOrganization
+    campaignx1_organization_we_vote_id_list = []
+    campaignx2_listed_by_organization_to_delete_list = []
+    queryset = CampaignXListedByOrganization.objects.all()
+    queryset = queryset.filter(campaignx_we_vote_id__iexact=campaignx1_we_vote_id)
+    campaignx1_listed_by_organization_list = list(queryset)
+    for campaignx1_listed_by_organization in campaignx1_listed_by_organization_list:
+        if positive_value_exists(campaignx1_listed_by_organization.site_owner_organization_we_vote_id) and \
+                campaignx1_listed_by_organization.site_owner_organization_we_vote_id \
+                not in campaignx1_organization_we_vote_id_list:
+            campaignx1_organization_we_vote_id_list\
+                .append(campaignx1_listed_by_organization.site_owner_organization_we_vote_id)
+
+    queryset = CampaignXListedByOrganization.objects.all()
+    queryset = queryset.filter(campaignx_we_vote_id__iexact=campaignx2_we_vote_id)
+    campaignx2_listed_by_organization_list = list(queryset)
+    for campaignx2_listed_by_organization in campaignx2_listed_by_organization_list:
+        # Is this listed_by_organization already in CampaignX 1?
+        campaignx2_listed_by_organization_matches_campaignx1_listed_by_organization = False
+        if positive_value_exists(campaignx2_listed_by_organization.site_owner_organization_we_vote_id) and \
+                campaignx2_listed_by_organization.site_owner_organization_we_vote_id \
+                in campaignx1_organization_we_vote_id_list:
+            campaignx2_listed_by_organization_matches_campaignx1_listed_by_organization = True
+        if campaignx2_listed_by_organization_matches_campaignx1_listed_by_organization:
+            # If the listed_by_organization is already in CampaignX 1, move them to campaignx1
+            campaignx2_listed_by_organization_to_delete_list.append(campaignx2_listed_by_organization)
+        else:
+            # If not, move them to campaignx1
+            campaignx2_listed_by_organization.campaignx_we_vote_id = campaignx1_we_vote_id
+            campaignx2_listed_by_organization.save()
+
+    # #####################################
+    # Merge CampaignXNewsItems
+    campaignx_news_items_moved = CampaignXNewsItem.objects \
+        .filter(campaignx_we_vote_id__iexact=campaignx2_we_vote_id) \
+        .update(campaignx_we_vote_id=campaignx1_we_vote_id)
+
+    # ##################################
+    # Move the seo friendly paths from campaignx2 over to campaignx1. CampaignXSEOFriendlyPath entries are unique,
+    #  so we don't need to check for duplicates.
+    from campaign.models import CampaignXSEOFriendlyPath
+    campaignx_seo_friendly_path_moved = CampaignXSEOFriendlyPath.objects \
+        .filter(campaignx_we_vote_id__iexact=campaignx2_we_vote_id) \
+        .update(campaignx_we_vote_id=campaignx1_we_vote_id)
+
+    # ##################################
+    # Migrate campaignx owners
+    campaignx1_owner_organization_we_vote_id_list = []
+    campaignx1_owner_voter_we_vote_id_list = []
+    campaignx2_owners_to_delete_list = []
+    campaignx1_owner_list = campaignx_manager.retrieve_campaignx_owner_list(
+        campaignx_we_vote_id_list=[campaignx1_we_vote_id],
+        viewer_is_owner=True
+    )
+    for campaignx1_owner in campaignx1_owner_list:
+        if positive_value_exists(campaignx1_owner.organization_we_vote_id) and \
+                campaignx1_owner.organization_we_vote_id not in campaignx1_owner_organization_we_vote_id_list:
+            campaignx1_owner_organization_we_vote_id_list.append(campaignx1_owner.organization_we_vote_id)
+        if positive_value_exists(campaignx1_owner.voter_we_vote_id) and \
+                campaignx1_owner.voter_we_vote_id not in campaignx1_owner_voter_we_vote_id_list:
+            campaignx1_owner_voter_we_vote_id_list.append(campaignx1_owner.voter_we_vote_id)
+
+    campaignx2_owner_list = campaignx_manager.retrieve_campaignx_owner_list(
+        campaignx_we_vote_id_list=[campaignx2_we_vote_id],
+        read_only=False,
+        viewer_is_owner=True
+    )
+    for campaignx2_owner in campaignx2_owner_list:
+        # Is this campaign owner already in CampaignX 1?
+        campaignx2_owner_matches_campaignx1_owner = False
+        if positive_value_exists(campaignx2_owner.organization_we_vote_id) and \
+                campaignx2_owner.organization_we_vote_id in campaignx1_owner_organization_we_vote_id_list:
+            campaignx2_owner_matches_campaignx1_owner = True
+        if positive_value_exists(campaignx2_owner.voter_we_vote_id) and \
+                campaignx2_owner.voter_we_vote_id in campaignx1_owner_voter_we_vote_id_list:
+            campaignx2_owner_matches_campaignx1_owner = True
+        if campaignx2_owner_matches_campaignx1_owner:
+            # If there is a match, save to delete below
+            campaignx2_owners_to_delete_list.append(campaignx2_owner)
+        else:
+            # If not, move them to campaignx1
+            campaignx2_owner.campaignx_we_vote_id = campaignx1_we_vote_id
+            campaignx2_owner.save()
+
+    # #####################################
+    # If a CampaignX politician isn't already in CampaignX 1, bring Politician over from CampaignX 2
+    campaignx1_politician_we_vote_id_list = []
+    campaignx2_politicians_to_delete_list = []
+    campaignx1_politician_list = campaignx_manager.retrieve_campaignx_politician_list(
+        campaignx_we_vote_id=campaignx1_we_vote_id,
+        read_only=False,
+    )
+    for campaignx1_politician in campaignx1_politician_list:
+        if positive_value_exists(campaignx1_politician.politician_we_vote_id) and \
+                campaignx1_politician.politician_we_vote_id not in campaignx1_politician_we_vote_id_list:
+            campaignx1_politician_we_vote_id_list.append(campaignx1_politician.politician_we_vote_id)
+
+    campaignx2_politician_list = campaignx_manager.retrieve_campaignx_politician_list(
+        campaignx_we_vote_id=campaignx2_we_vote_id,
+        read_only=False,
+    )
+    for campaignx2_politician in campaignx2_politician_list:
+        # Is this campaign politician already in CampaignX 1?
+        if not positive_value_exists(campaignx2_politician.politician_we_vote_id):
+            campaignx2_politicians_to_delete_list.append(campaignx2_politician)
+        elif campaignx2_politician.politician_we_vote_id not in campaignx1_politician_we_vote_id_list:
+            # If not, move them to campaignx1
+            campaignx2_politician.campaignx_we_vote_id = campaignx1_we_vote_id
+            campaignx2_politician.save()
+        else:
+            campaignx2_politicians_to_delete_list.append(campaignx2_politician)
+
+    # #####################################
+    # Merge CampaignX Supporters
+    campaignx1_organization_we_vote_id_list = []
+    campaignx1_voter_we_vote_id_list = []
+    campaignx2_supporters_to_delete_list = []
+    queryset = CampaignXSupporter.objects.all()
+    queryset = queryset.filter(campaignx_we_vote_id__iexact=campaignx1_we_vote_id)
+    campaignx1_supporters_list = list(queryset)
+    for campaignx1_supporter in campaignx1_supporters_list:
+        if positive_value_exists(campaignx1_supporter.organization_we_vote_id) and \
+                campaignx1_supporter.organization_we_vote_id not in campaignx1_organization_we_vote_id_list:
+            campaignx1_organization_we_vote_id_list.append(campaignx1_supporter.organization_we_vote_id)
+        if positive_value_exists(campaignx1_supporter.voter_we_vote_id) and \
+                campaignx1_supporter.voter_we_vote_id not in campaignx1_voter_we_vote_id_list:
+            campaignx1_voter_we_vote_id_list.append(campaignx1_supporter.voter_we_vote_id)
+
+    queryset = CampaignXSupporter.objects.all()
+    queryset = queryset.filter(campaignx_we_vote_id__iexact=campaignx2_we_vote_id)
+    campaignx2_supporters_list = list(queryset)
+    for campaignx2_supporter in campaignx2_supporters_list:
+        # Is this campaign politician already in CampaignX 1?
+        campaignx2_supporter_matches_campaignx1_supporter = False
+        if positive_value_exists(campaignx2_supporter.organization_we_vote_id) and \
+                campaignx2_supporter.organization_we_vote_id in campaignx1_organization_we_vote_id_list:
+            campaignx2_supporter_matches_campaignx1_supporter = True
+        if positive_value_exists(campaignx2_supporter.voter_we_vote_id) and \
+                campaignx2_supporter.voter_we_vote_id in campaignx1_voter_we_vote_id_list:
+            campaignx2_supporter_matches_campaignx1_supporter = True
+        if campaignx2_supporter_matches_campaignx1_supporter:
+            # If the supporter is already in CampaignX 1, move them to campaignx1
+            campaignx2_supporters_to_delete_list.append(campaignx2_supporter)
+        else:
+            # If not, move them to campaignx1
+            campaignx2_supporter.campaignx_we_vote_id = campaignx1_we_vote_id
+            campaignx2_supporter.save()
+
+    # Clear 'unique=True' fields in campaignx2_on_stage, which need to be Null before campaignx1_on_stage can be saved
+    #  with updated values
+    campaignx2_updated = False
+    for attribute in CAMPAIGNX_UNIQUE_ATTRIBUTES_TO_BE_CLEARED:
+        setattr(campaignx2_on_stage, attribute, None)
+        campaignx2_updated = True
+    if campaignx2_updated:
+        campaignx2_on_stage.save()
+
+    campaignx1_on_stage.save()
+
+    # Delete duplicate campaignx2 owner entries
+    for campaignx2owner in campaignx2_owners_to_delete_list:
+        campaignx2owner.delete()
+
+    # Delete duplicate campaignx2 politician entries
+    for campaignx2_politician in campaignx2_politicians_to_delete_list:
+        campaignx2_politician.delete()
+
+    # Delete duplicate campaignx2 supporter entries
+    for campaignx2_supporter in campaignx2_supporters_to_delete_list:
+        campaignx2_supporter.delete()
+
+    # Finally, remove campaignx 2
+    campaignx2_on_stage.delete()
+
+    results = {
+        'success': True,
+        'status': status,
+        'campaignx_entries_merged': True,
+        'campaignx': campaignx1_on_stage,
     }
     return results
 
