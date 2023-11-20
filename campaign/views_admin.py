@@ -1454,6 +1454,12 @@ def compare_two_campaigns_for_merge_view(request):
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     google_civic_election_id = convert_to_int(google_civic_election_id)
 
+    if campaignx1_we_vote_id == campaignx2_we_vote_id:
+        messages.add_message(request, messages.ERROR,
+                             "CampaignX1 and CampaignX2 are the same -- can't compare.")
+        return HttpResponseRedirect(reverse('campaign:campaignx_list', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id))
+
     campaignx_manager = CampaignXManager()
     campaignx_results = campaignx_manager.retrieve_campaignx(campaignx_we_vote_id=campaignx1_we_vote_id, read_only=True)
     if not campaignx_results['campaignx_found']:

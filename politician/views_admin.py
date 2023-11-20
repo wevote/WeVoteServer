@@ -1475,10 +1475,10 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
         related_campaignx_list = find_campaignx_list_to_link_to_this_politician(politician=politician_on_stage)
 
         politician_linked_campaignx_we_vote_id = ''
-        if len(related_campaignx_list) > 0:
-            related_campaignx = related_campaignx_list[0]
-            if related_campaignx and positive_value_exists(related_campaignx.we_vote_id):
-                politician_linked_campaignx_we_vote_id = related_campaignx.we_vote_id
+        if len(linked_campaignx_list) > 0:
+            linked_campaignx = linked_campaignx_list[0]
+            if linked_campaignx and positive_value_exists(linked_campaignx.we_vote_id):
+                politician_linked_campaignx_we_vote_id = linked_campaignx.we_vote_id
         elif positive_value_exists(politician_on_stage.linked_campaignx_we_vote_id):
             politician_linked_campaignx_we_vote_id = politician_on_stage.linked_campaignx_we_vote_id
 
