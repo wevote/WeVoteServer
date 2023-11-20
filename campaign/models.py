@@ -36,6 +36,7 @@ CAMPAIGNX_UNIQUE_IDENTIFIERS = [
     'is_still_active',
     'is_victorious',
     'linked_politician_we_vote_id',
+    'ocd_id_state_mismatch_found',
     'politician_starter_list_serialized',
     'seo_friendly_path',
     'started_by_voter_we_vote_id',

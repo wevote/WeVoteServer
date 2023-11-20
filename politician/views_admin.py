@@ -1474,6 +1474,14 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
         from politician.controllers import find_campaignx_list_to_link_to_this_politician
         related_campaignx_list = find_campaignx_list_to_link_to_this_politician(politician=politician_on_stage)
 
+        politician_linked_campaignx_we_vote_id = ''
+        if len(related_campaignx_list) > 0:
+            related_campaignx = related_campaignx_list[0]
+            if related_campaignx and positive_value_exists(related_campaignx.we_vote_id):
+                politician_linked_campaignx_we_vote_id = related_campaignx.we_vote_id
+        elif positive_value_exists(politician_on_stage.linked_campaignx_we_vote_id):
+            politician_linked_campaignx_we_vote_id = politician_on_stage.linked_campaignx_we_vote_id
+
         if 'localhost' in WEB_APP_ROOT_URL:
             web_app_root_url = 'https://localhost:3000'
         else:
@@ -1499,6 +1507,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             'politician_email':             politician_email,
             'politician_email2':            politician_email2,
             'politician_email3':            politician_email3,
+            'politician_linked_campaignx_we_vote_id':   politician_linked_campaignx_we_vote_id,
             'politician_name':              politician_name,
             'politician_phone_number':      politician_phone_number,
             'politician_phone_number2':     politician_phone_number2,

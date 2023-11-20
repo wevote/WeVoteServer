@@ -1675,6 +1675,13 @@ def figure_out_campaignx_conflict_values(campaignx1, campaignx2):
                         campaignx_merge_conflict_values[attribute] = 'MATCHING'
                     else:
                         campaignx_merge_conflict_values[attribute] = 'CONFLICT'
+                elif attribute == "ocd_id_state_mismatch_found":
+                    if positive_value_exists(campaignx1_attribute_value):
+                        campaignx_merge_conflict_values[attribute] = 'CAMPAIGNX1'
+                    elif positive_value_exists(campaignx2_attribute_value):
+                        campaignx_merge_conflict_values[attribute] = 'CAMPAIGNX2'
+                    else:
+                        campaignx_merge_conflict_values[attribute] = 'MATCHING'
                 else:
                     if campaignx1_attribute_value == campaignx2_attribute_value:
                         campaignx_merge_conflict_values[attribute] = 'MATCHING'

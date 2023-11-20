@@ -514,6 +514,13 @@ def figure_out_politician_conflict_values(politician1, politician2):
                     politician_merge_conflict_values[attribute] = 'POLITICIAN2'
                 else:
                     politician_merge_conflict_values[attribute] = 'POLITICIAN1'
+            elif attribute == "ocd_id_state_mismatch_found":
+                if positive_value_exists(politician1_attribute_value):
+                    politician_merge_conflict_values[attribute] = 'POLITICIAN1'
+                elif positive_value_exists(politician2_attribute_value):
+                    politician_merge_conflict_values[attribute] = 'POLITICIAN2'
+                else:
+                    politician_merge_conflict_values[attribute] = 'MATCHING'
             elif attribute == "political_party":
                 if convert_to_political_party_constant(politician1_attribute_value) == \
                         convert_to_political_party_constant(politician2_attribute_value):
