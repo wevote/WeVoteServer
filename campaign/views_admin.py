@@ -517,6 +517,9 @@ def campaign_edit_process_view(request):
                     if results['success']:
                         campaignx = results['campaignx']
                         campaignx.date_last_updated_from_politician = localtime(now()).date()
+                elif politician_results['success']:
+                    # It was a successful query, but politician wasn't found. Remove the linked_politician_we_vote_id
+                    campaignx.linked_politician_we_vote_id = None
             if seo_friendly_path is not None:
                 # If path isn't passed in, create one. If provided, verify it is unique.
                 seo_results = campaignx_manager.generate_seo_friendly_path(
