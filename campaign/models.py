@@ -101,6 +101,7 @@ class CampaignX(models.Model):
     #  the CampaignXPolitician table to store links to politicians.
     linked_politician_we_vote_id = models.CharField(max_length=255, null=True, unique=True)
     ocd_id_state_mismatch_checked_politician = models.BooleanField(default=False, null=False)
+    ocd_id_state_mismatch_checked_campaign_title = models.BooleanField(default=False, null=False)
     ocd_id_state_mismatch_found = models.BooleanField(default=False, null=False)
     ocd_id_state_mismatch_resolved = models.BooleanField(default=False, null=False)
     politician_starter_list_serialized = models.TextField(null=True, blank=True)

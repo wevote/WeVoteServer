@@ -20,7 +20,7 @@ from organization.models import Organization, OrganizationManager
 from politician.models import PoliticianManager
 from stripe_donations.models import StripeManager
 from voter.models import voter_has_authority, VoterManager
-from wevote_functions.functions import convert_to_int, \
+from wevote_functions.functions import convert_state_code_to_state_text, convert_to_int, \
     generate_date_as_integer, positive_value_exists, STATE_CODE_MAP
 from .controllers import create_campaignx_supporters_from_positions, figure_out_campaignx_conflict_values, \
     refresh_campaignx_supporters_count_in_all_children, merge_these_two_campaignx_entries
@@ -1780,6 +1780,7 @@ def repair_ocd_id_mismatch_damage_view(request):
 
     bulk_update_campaignx_list = []
     campaignx_list_count = 0
+    campaignx_list_remaining_count = 0
     campaignx_db_error_count = 0
     politician_db_error_count = 0
     campaignx_politician_ids_removed_count = 0
@@ -1790,45 +1791,65 @@ def repair_ocd_id_mismatch_damage_view(request):
         queryset = CampaignX.objects.all()
         queryset = queryset.exclude(
             Q(linked_politician_we_vote_id__isnull=True) | Q(linked_politician_we_vote_id=''))
-        queryset = queryset.filter(ocd_id_state_mismatch_checked_politician=False)
-        campaignx_list = list(queryset[:5000])
+        # queryset = queryset.filter(ocd_id_state_mismatch_checked_politician=False)
+        queryset = queryset.filter(ocd_id_state_mismatch_found=True)
+        queryset = queryset.filter(ocd_id_state_mismatch_checked_campaign_title=False)
+        campaignx_list = list(queryset[:10])
         campaignx_list_count = len(campaignx_list)
         campaignx_list_remaining_count = queryset.count() - campaignx_list_count
         from campaign.controllers import update_campaignx_from_politician
         from politician.models import Politician, PoliticianManager
         politician_manager = PoliticianManager()
         for one_campaignx in campaignx_list:
-            save_campaignx_changes = False
+            save_campaignx_changes = True  # Default to saving
             if positive_value_exists(one_campaignx.linked_politician_we_vote_id):
                 politician_results = politician_manager.retrieve_politician(
                     politician_we_vote_id=one_campaignx.linked_politician_we_vote_id,
                     read_only=True)
                 if politician_results['politician_found']:
-                    # 2023-11-17 This pass we are just removing politician_we_vote_id if the politician doesn't exist
-                    save_campaignx_changes = True
-                    pass
-                    # politician = politician_results['politician']
-                    # results = update_campaignx_from_politician(campaignx=one_campaignx, politician=politician)
-                    # if results['success']:
-                    #     one_campaignx = results['campaignx']
-                    #     one_campaignx.date_last_updated_from_politician = localtime(now()).date()
-                    #     save_campaignx_changes = True
-                    # else:
-                    #     seo_friendly_path_failed_error_count += 1
-                    #     if seo_friendly_path_failed_error_count < 10:
-                    #         status += "SEO_FRIENDLY_ERROR: " + str(results['status']) + " "
+                    politician = politician_results['politician']
+                    try:
+                        if positive_value_exists(politician.seo_friendly_path):
+                            one_campaignx.seo_friendly_path = politician.seo_friendly_path
+                            one_campaignx.save()
+                        else:
+                            one_campaignx.seo_friendly_path = None
+                    except Exception as e:
+                        # If the save failed, it is because the seo_friendly_path is already used by another CampaignX
+                        one_campaignx.seo_friendly_path = None
+                        seo_friendly_path_failed_error_count += 1
+                        if seo_friendly_path_failed_error_count < 10:
+                            status += "SEO_FRIENDLY_PATH_COLLISION "
+                    # Check to make sure the campaign_title contains the State name
+                    if positive_value_exists(politician.state_code) \
+                            and positive_value_exists(one_campaignx.campaign_title):
+                        new_state_name = convert_state_code_to_state_text(politician.state_code)
+                        if positive_value_exists(new_state_name) and new_state_name not in one_campaignx.campaign_title:
+                            # Cycle through
+                            for state_code, state_name in STATE_CODE_MAP.items():
+                                if state_name in one_campaignx.campaign_title:
+                                    temp_new_campaign_title = \
+                                        one_campaignx.campaign_title.replace(state_name, new_state_name)
+                                    if temp_new_campaign_title != one_campaignx.campaign_title:
+                                        # Update to the new campaign_title and break out of the for loop
+                                        save_campaignx_changes = True
+                                        one_campaignx.campaign_title = temp_new_campaign_title
+                                        break
                 elif politician_results['success']:
                     campaignx_politician_id_to_be_removed_count += 1
                     one_campaignx.linked_politician_we_vote_id = None
                     save_campaignx_changes = True
                     campaignx_politician_ids_removed_count += 1
                 else:
+                    save_campaignx_changes = False
                     politician_db_error_count += 1
                     if politician_db_error_count < 10:
                         status += "ERROR_RETRIEVING_POLITICIAN: " + str(politician_results['status']) + " "
             if save_campaignx_changes:
                 try:
+                    one_campaignx.ocd_id_state_mismatch_checked_campaign_title = True
                     one_campaignx.ocd_id_state_mismatch_checked_politician = True
+                    one_campaignx.date_last_updated_from_politician = localtime(now()).date()
                     # one_campaignx.save()
                     bulk_update_campaignx_list.append(one_campaignx)
                 except Exception as e:
@@ -1843,13 +1864,15 @@ def repair_ocd_id_mismatch_damage_view(request):
             CampaignX.objects.bulk_update(
                 bulk_update_campaignx_list,
                 [
-                 # 'date_last_updated_from_politician',
-                 'ocd_id_state_mismatch_checked_politician',
+                 'campaign_title',
+                 'date_last_updated_from_politician',
                  'linked_politician_we_vote_id',
+                 'ocd_id_state_mismatch_checked_campaign_title',
+                 'ocd_id_state_mismatch_checked_politician',
                  # 'we_vote_hosted_campaign_photo_large_url',
                  # 'we_vote_hosted_campaign_photo_medium_url',
                  # 'we_vote_hosted_campaign_photo_small_url',
-                 # 'seo_friendly_path',
+                 'seo_friendly_path',
                  # 'we_vote_hosted_profile_image_url_large',
                  # 'we_vote_hosted_profile_image_url_medium',
                  # 'we_vote_hosted_profile_image_url_tiny'
