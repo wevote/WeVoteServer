@@ -2190,10 +2190,13 @@ def merge_these_two_campaignx_entries(
 
     # ##################################
     # Update the linked_campaignx_we_vote_id in Politician entries
-    from politician.models import Politician
-    linked_campaignx_we_vote_id_updated = Politician.objects \
-        .filter(linked_campaignx_we_vote_id__iexact=campaignx2_we_vote_id) \
-        .update(linked_campaignx_we_vote_id=campaignx1_we_vote_id)
+    try:
+        from politician.models import Politician
+        linked_campaignx_we_vote_id_updated = Politician.objects \
+            .filter(linked_campaignx_we_vote_id__iexact=campaignx2_we_vote_id) \
+            .update(linked_campaignx_we_vote_id=campaignx1_we_vote_id)
+    except Exception as e:
+        status += "POLITICIAN_LINKED_CAMPAIGNX_WE_VOTE_ID_NOT_UPDATED: " + str(e) + " "
 
     # ##################################
     # Migrate campaignx owners
