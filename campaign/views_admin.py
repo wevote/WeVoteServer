@@ -850,7 +850,10 @@ def campaign_list_view(request):
     client_list_query = client_list_query.filter(chosen_feature_package__isnull=False)
     client_organization_list = list(client_list_query)
 
+    campaignx_to_repair_count = 0
     if positive_value_exists(show_ocd_id_state_mismatch):
+        campaignx_queryset_not_resolved = campaignx_list_query.exclude(ocd_id_state_mismatch_resolved=True)
+        campaignx_to_repair_count = campaignx_queryset_not_resolved.count()
         campaignx_list_query = campaignx_list_query.order_by('ocd_id_state_mismatch_resolved')
     elif positive_value_exists(sort_by):
         # if sort_by == "twitter":
@@ -893,6 +896,10 @@ def campaign_list_view(request):
     campaignx_count = campaignx_list_query.count()
     messages.add_message(request, messages.INFO,
                          '{campaignx_count:,} campaigns found.'.format(campaignx_count=campaignx_count))
+    if positive_value_exists(campaignx_to_repair_count):
+        messages.add_message(request, messages.INFO,
+                             '{campaignx_to_repair_count:,} campaigns to repair.'
+                             ''.format(campaignx_to_repair_count=campaignx_to_repair_count))
 
     # Limit to only showing 200 on screen
     if positive_value_exists(show_more):
