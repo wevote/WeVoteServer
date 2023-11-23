@@ -1793,8 +1793,9 @@ def repair_ocd_id_mismatch_damage_view(request):
             Q(linked_politician_we_vote_id__isnull=True) | Q(linked_politician_we_vote_id=''))
         # queryset = queryset.filter(ocd_id_state_mismatch_checked_politician=False)
         queryset = queryset.filter(ocd_id_state_mismatch_found=True)
+        queryset = queryset.filter(ocd_id_state_mismatch_resolved=False)
         queryset = queryset.filter(ocd_id_state_mismatch_checked_campaign_title=False)
-        campaignx_list = list(queryset[:10])
+        campaignx_list = list(queryset[:100])
         campaignx_list_count = len(campaignx_list)
         campaignx_list_remaining_count = queryset.count() - campaignx_list_count
         from campaign.controllers import update_campaignx_from_politician
