@@ -138,6 +138,9 @@
   "SNOVIO_CLIENT_ID":               "",
   "SNOVIO_CLIENT_SECRET":           "",
 
+  "_comment":                       "Vertex AI name recognition",
+  "VERTEX_AI_API_KEY":              "",
+
   "_comment":                       "python-social-auth ... Django social sign in ... social_django",
   "SOCIAL_AUTH_APPLE_KEY_ID":       "",
   "SOCIAL_AUTH_APPLE_TEAM_ID":      "",
@@ -175,9 +178,9 @@
   "SYSTEM_SENDER_SMS_PHONE_NUMBER": "",
 
   "_comment":                       "import_export_twitter",
-  "_comment2-Search_Google_Drive_for_TWITTER_CONSUMER_KEY_for_more_details": "",
-  "_comment2-SOCIAL_AUTH_TWITTER_KEY == TWITTER_CONSUMER_KEY": "",
-  "_comment2-SOCIAL_AUTH_TWITTER_SECRET == TWITTER_CONSUMER_SECRET": "",
+  "_comment-Search_Google_Drive_for_TWITTER_CONSUMER_KEY_for_more_details": "",
+  "_comment-SOCIAL_AUTH_TWITTER_KEY == TWITTER_CONSUMER_KEY": "",
+  "_comment-SOCIAL_AUTH_TWITTER_SECRET == TWITTER_CONSUMER_SECRET": "",
   "TWITTER_CONSUMER_KEY":           "<This is Twitter's `Consumer Key`>",
   "TWITTER_CONSUMER_SECRET":        "<This is Twitter's `Consumer Secret`>",
   "TWITTER_ACCESS_TOKEN":           "",
