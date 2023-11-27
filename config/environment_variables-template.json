@@ -139,7 +139,7 @@
   "SNOVIO_CLIENT_SECRET":           "",
 
   "_comment":                       "Vertex AI name recognition",
-  "VERTEX_AI_API_KEY":              "",
+  "GOOGLE_APPLICATION_CREDENTIALS_VERTEX":  "",
 
   "_comment":                       "python-social-auth ... Django social sign in ... social_django",
   "SOCIAL_AUTH_APPLE_KEY_ID":       "",
