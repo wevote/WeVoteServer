@@ -22,7 +22,7 @@ from wevote_functions.functions import convert_district_scope_to_ballotpedia_rac
 GEOCODE_TIMEOUT = 10
 GOOGLE_CIVIC_API_KEY = get_environment_variable("GOOGLE_CIVIC_API_KEY")
 GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
-GOOGLE_APPLICATION_CREDENTIALS_VERTEX_AI_API_KEY = get_environment_variable("VERTEX_AI_API_KEY")
+GOOGLE_APPLICATION_CREDENTIALS_VERTEX = get_environment_variable("GOOGLE_APPLICATION_CREDENTIALS_VERTEX")
 GOOGLE_PROJECT_ID = 'we-vote-ballot'
 VERTEX_SERVICE_ENDPOINT = 'us-west1'
 
@@ -67,10 +67,10 @@ def find_names_of_people_on_one_web_page(site_url):
             # all_html_lower_case = all_html.lower()
 
             # This is expecting a file instead of an API key
-            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS_VERTEX_AI_API_KEY
+            # os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS_VERTEX
             # os.environ["SERVICE_ACCOUNT_ID"] = 'vertexai-name-of-people@we-vote-ballot.iam.gserviceaccount.com'
             vertexai.init(
-                # credential_path=GOOGLE_APPLICATION_CREDENTIALS_VERTEX_AI_API_KEY,
+                credential_path=GOOGLE_APPLICATION_CREDENTIALS_VERTEX,
                 project=GOOGLE_PROJECT_ID,
                 location=VERTEX_SERVICE_ENDPOINT)
             temperature = 0.2
