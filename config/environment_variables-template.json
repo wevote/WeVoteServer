@@ -107,6 +107,9 @@
   "_comment":                       "Google Firebase Admin API (for Firebase Cloud Messaging send/receive)",
   "GOOGLE_APPLICATION_CREDENTIALS": "/etc/wevoteapps-f4b59fec8c57.json",
 
+ "_comment":                       "Vertex AI name recognition",
+  "GOOGLE_APPLICATION_CREDENTIALS_VERTEX":  "",
+
   "_comment":                       "Google reCAPTCHA",
   "GOOGLE_RECAPTCHA_SECRET_KEY":    "",
 
@@ -137,9 +140,6 @@
   "_comment":                       "import_export_snovio",
   "SNOVIO_CLIENT_ID":               "",
   "SNOVIO_CLIENT_SECRET":           "",
-
-  "_comment":                       "Vertex AI name recognition",
-  "GOOGLE_APPLICATION_CREDENTIALS_VERTEX":  "",
 
   "_comment":                       "python-social-auth ... Django social sign in ... social_django",
   "SOCIAL_AUTH_APPLE_KEY_ID":       "",
