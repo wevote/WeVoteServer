@@ -107,9 +107,9 @@ def voter_guide_possibility_highlights_retrieve_view(request):  # voterGuidePoss
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
 
     # Dale 2023-11-24 Still a work in progress
-    if positive_value_exists(url_to_scan):
-        from import_export_vertex.controllers import find_names_of_people_on_one_web_page
-        results = find_names_of_people_on_one_web_page(site_url=url_to_scan)
+    # if positive_value_exists(url_to_scan):
+    #     from import_export_vertex.controllers import find_names_of_people_on_one_web_page
+    #     results = find_names_of_people_on_one_web_page(site_url=url_to_scan)
 
     json_data = voter_guide_possibility_highlights_retrieve_for_api(
         voter_device_id=voter_device_id,
