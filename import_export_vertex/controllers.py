@@ -1,15 +1,18 @@
 # import_export_vertex/controllers.py
 # Brought to you by We Vote. Be good.
-
 import urllib.request
 from socket import timeout
+from time import time
 
 import vertexai
 from google.oauth2 import service_account
 from vertexai.language_models import TextGenerationModel
 
+import wevote_functions
 from config.base import get_environment_variable
 from wevote_functions.functions import positive_value_exists
+
+logger = wevote_functions.admin.get_logger(__name__)
 
 GEOCODE_TIMEOUT = 10
 GOOGLE_CIVIC_API_KEY = get_environment_variable("GOOGLE_CIVIC_API_KEY")
@@ -20,7 +23,7 @@ VERTEX_SERVICE_ENDPOINT = 'us-west1'
 
 class FakeFirefoxURLopener(urllib.request.FancyURLopener):
     version = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:25.0)' \
-            + ' Gecko/20100101 Firefox/25.0'
+              + ' Gecko/20100101 Firefox/25.0'
 
 
 def find_names_of_people_on_one_web_page(site_url):
@@ -42,18 +45,21 @@ def find_names_of_people_on_one_web_page(site_url):
     headers = {
         'User-Agent':
             'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
-           }
+    }
     # 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
     # 'Accept-Encoding': 'none',
     # 'Accept-Language': 'en-US,en;q=0.8',
     # 'Connection': 'keep-alive'
     # 'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+    t0 = time()
+    print('find_names_of_people_on_one_web_page -- ', site_url)
     try:
         request = urllib.request.Request(site_url, None, headers)
         page = urllib.request.urlopen(request, timeout=5)
         all_html_raw = page.read()
         all_html = all_html_raw.decode("utf8")
         page.close()
+        t1 = time()
         try:
             credentials = service_account.Credentials.from_service_account_file(
                 get_environment_variable("GOOGLE_APPLICATION_CREDENTIALS_VERTEX"))
@@ -64,23 +70,31 @@ def find_names_of_people_on_one_web_page(site_url):
                 credentials=credentials,
                 project=GOOGLE_PROJECT_ID,
                 location=VERTEX_SERVICE_ENDPOINT)
+            t2 = time()
             temperature = 0.2
             parameters = {
                 "temperature": temperature,  # Temperature controls the degree of randomness in token selection.
                 "max_output_tokens": 5,  # Token limit determines the maximum amount of text output.
                 "top_p": 0,  # Tokens are selected from most probable to least
-                             # until the sum of their probabilities equals the top_p value.
+                # until the sum of their probabilities equals the top_p value.
                 "top_k": 1,  # A top_k of 1 means the selected token is the most probable among all tokens.
             }
-            print('Before TextGenerationModel.from_pretrained (times out in 120 secs if unsuccessful)')
             model = TextGenerationModel.from_pretrained("text-bison")
-            print('TextGenerationModel.from_pretrained returned a model')
+            t3 = time()
             response = model.predict("""Background text: 
 One name is George Washington and another name is Thomas Jefferson.
 Q: Return a python list of names?""",
                 **parameters,
             )
-            print(f"Response from Vertex Model: {response.text}")
+            print(f'Response from Vertex Model: {response.text}')
+            t4 = time()
+            #  Feel free to remove logging and print lines in this file
+            logger.error('(Ok) find_names_of_people_on_one_web_page scrape took ' + "{:.6f}".format(t1 - t0) +
+                     ' seconds, init took ' + "{:.6f}".format(t2-t1) +
+                     ' seconds, load model (text-bison) took ' + "{:.6f}".format(t3-t2) +
+                     ' seconds, predict took ' + "{:.6f}".format(t4-t3) +
+                     ' seconds, total took ' + "{:.6f}".format(t4-t0) + ' seconds')
+
         except Exception as error_message:
             print(f"Error response from Vertex Model: {error_message}")
             status += "VERTEX_ERROR: {error_message}".format(error_message=error_message)
