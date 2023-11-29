@@ -8,11 +8,10 @@ import vertexai
 from google.oauth2 import service_account
 from vertexai.language_models import TextGenerationModel
 
-import wevote_functions
 from config.base import get_environment_variable
 from wevote_functions.functions import positive_value_exists
 
-logger = wevote_functions.admin.get_logger(__name__)
+# logger = wevote_functions.admin.get_logger(__name__)
 
 GEOCODE_TIMEOUT = 10
 GOOGLE_CIVIC_API_KEY = get_environment_variable("GOOGLE_CIVIC_API_KEY")
@@ -89,11 +88,11 @@ Q: Return a python list of names?""",
             print(f'Response from Vertex Model: {response.text}')
             t4 = time()
             #  Feel free to remove logging and print lines in this file
-            logger.error('(Ok) find_names_of_people_on_one_web_page scrape took ' + "{:.6f}".format(t1 - t0) +
-                     ' seconds, init took ' + "{:.6f}".format(t2-t1) +
-                     ' seconds, load model (text-bison) took ' + "{:.6f}".format(t3-t2) +
-                     ' seconds, predict took ' + "{:.6f}".format(t4-t3) +
-                     ' seconds, total took ' + "{:.6f}".format(t4-t0) + ' seconds')
+            print('(Ok) find_names_of_people_on_one_web_page scrape took ' + "{:.6f}".format(t1 - t0) +
+                  ' seconds, init took ' + "{:.6f}".format(t2-t1) +
+                  ' seconds, load model (text-bison) took ' + "{:.6f}".format(t3-t2) +
+                  ' seconds, predict took ' + "{:.6f}".format(t4-t3) +
+                  ' seconds, total took ' + "{:.6f}".format(t4-t0) + ' seconds')
 
         except Exception as error_message:
             print(f"Error response from Vertex Model: {error_message}")
