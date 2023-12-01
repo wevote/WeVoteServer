@@ -92,7 +92,7 @@ def find_names_of_people_on_one_web_page(site_url):
             'predict 1 took {:.6f} seconds, '.format(t3-t2) +
             'predict 2 took {:.6f} seconds, '.format(t4-t3) +
             'predict 3 took {:.6f} seconds, '.format(t5-t4) +
-            'predict 4 took {:.6f} seconds, '.format(t6-t6) +
+            'predict 4 took {:.6f} seconds, '.format(t6-t5) +
             'predict 5 took {:.6f} seconds, '.format(t7-t6) +
             'total took {:.6f} seconds'.format(t7-t0))
 
