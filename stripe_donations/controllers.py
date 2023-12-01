@@ -21,9 +21,11 @@ from wevote_functions.functions import positive_value_exists
 
 logger = get_logger(__name__)
 stripe.api_key = get_environment_variable_default("STRIPE_SECRET_KEY", "")
-if len(stripe.api_key) and not stripe.api_key.startswith("sk_"):
-    logger.error("Configuration error, the stripe secret key, must begin with 'sk_' -- don't use the publishable key "
-                 "on the server!")
+
+# November 2023, probably won't be using Stripe in the future
+# if len(stripe.api_key) and not stripe.api_key.startswith("sk_"):
+#     logger.error("Configuration error, the stripe secret key, must begin with 'sk_' -- don't use the publishable key "
+#                  "on the server!")
 
 
 def donation_active_paid_plan_retrieve(linked_organization_we_vote_id, voter_we_vote_id):
