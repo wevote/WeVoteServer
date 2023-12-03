@@ -353,7 +353,7 @@ def find_names_of_people_from_incoming_text(text_to_scan=''):
     return results
 
 
-def find_names_of_people_on_one_web_page(site_url='', visible_text_to_scan=''):
+def find_names_of_people_on_one_web_page(site_url=''):
     names_list = []
     names_list_found = False
     status = ""

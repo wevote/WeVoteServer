@@ -116,6 +116,7 @@ def voter_guide_possibility_highlights_retrieve_view(request):  # voterGuidePoss
         url_to_scan = request.GET.get('url_to_scan', '')
         pdf_url = request.GET.get('pdf_url', '')
         google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+        visible_text_to_scan = request.GET.get('visible_text_to_scan', '')
 
     # Dale & Steve 2023-12-02 Still verifying and testing more cases
     # if positive_value_exists(url_to_scan):
