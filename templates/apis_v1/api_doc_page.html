@@ -116,9 +116,12 @@
 <h3>Try It Now: API Variables</h3>
 <p>
     {{ api_introduction|safe }}
+    {% if get_or_post == "GET or POST" or get_or_post_selected == "POST" %}
+        <a href="{{ url_root }}/apis/v1/docs/{{ api_slug }}?get_or_post_selected={% if get_or_post_selected == "POST" %}GET{% else %}POST{% endif %}">Switch from {% if get_or_post_selected == "POST" %}POST TO GET{% else %}GET to POST{% endif %}</a>
+    {% endif %}
     {% load template_filters %}
 
-        <form name="{{ api_name }}" method="{% if get_or_post == "GET" %}get{% else %}post{% endif %}" action="{% url try_now_link %}{{ try_now_link_additional_path }}" target="_blank">
+        <form name="{{ api_name }}" method="{% if get_or_post == "GET" %}get{% elif get_or_post == "GET or POST" %}get{% else %}post{% endif %}" action="{% url try_now_link %}{{ try_now_link_additional_path }}" target="_blank">
         {% csrf_token %}
             <table>
                 <tr>
@@ -195,6 +198,13 @@
                             <td colspan="2">
                                 <input type="radio" name="{{ query_parameter.name }}" value="true" > True<br />
                                 <input type="radio" name="{{ query_parameter.name }}" value="false" > False
+                            </td>
+                        </tr>
+                    {% elif query_parameter.value == 'text' %}
+                        <tr>
+                            <td>{{ query_parameter.name }}: </td>
+                            <td colspan="2">
+                                <textarea name="{{ query_parameter.name }}" rows="4" cols="50"></textarea>
                             </td>
                         </tr>
                     {% endif %}

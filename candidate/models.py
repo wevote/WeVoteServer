@@ -730,12 +730,14 @@ class CandidateListManager(models.Manager):
     def retrieve_candidates_for_specific_elections(
             self,
             google_civic_election_id_list=[],
+            limit_to_these_last_names=[],
             limit_to_this_state_code="",
             return_list_of_objects=False,
             super_light_candidate_list=False):
         """
         This function is needed for our scraping tools.
         :param google_civic_election_id_list:
+        :param limit_to_these_last_names:
         :param limit_to_this_state_code:
         :param return_list_of_objects:
         :param super_light_candidate_list:
@@ -770,6 +772,21 @@ class CandidateListManager(models.Manager):
 
                 candidate_query = CandidateCampaign.objects.using('readonly').all()
                 candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+                if len(limit_to_these_last_names) > 0:
+                    filters = []
+                    for one_last_name in limit_to_these_last_names:
+                        new_filter = Q(candidate_name__icontains=one_last_name)
+                        filters.append(new_filter)
+
+                    # Add the first query
+                    if len(filters):
+                        final_filters = filters.pop()
+
+                        # ...and "OR" the remaining items in the list
+                        for item in filters:
+                            final_filters |= item
+
+                        candidate_query = candidate_query.filter(final_filters)
                 if positive_value_exists(limit_to_this_state_code):
                     candidate_query = candidate_query.filter(state_code__iexact=limit_to_this_state_code)
                 candidate_list_objects = list(candidate_query)
