@@ -2352,6 +2352,7 @@ def retrieve_candidate_list_for_entire_year(
 
 def retrieve_candidate_list_for_all_upcoming_elections(
         upcoming_google_civic_election_id_list=[],
+        limit_to_these_last_names=[],
         limit_to_this_state_code="",
         return_list_of_objects=False,
         super_light_candidate_list=False):
@@ -2376,6 +2377,7 @@ def retrieve_candidate_list_for_all_upcoming_elections(
         results = candidate_list_manager.retrieve_candidates_for_specific_elections(
             upcoming_google_civic_election_id_list,
             limit_to_this_state_code=limit_to_this_state_code,
+            limit_to_these_last_names=limit_to_these_last_names,
             return_list_of_objects=return_list_of_objects,
             super_light_candidate_list=super_light_candidate_list)
         if results['candidate_list_found']:
@@ -2400,6 +2402,7 @@ def retrieve_candidate_list_for_all_upcoming_elections(
 
 def retrieve_candidate_list_for_all_prior_elections_this_year(
         prior_google_civic_election_id_list=[],
+        limit_to_these_last_names=[],
         limit_to_this_state_code="",
         return_list_of_objects=False,
         super_light_candidate_list=False,
@@ -2425,6 +2428,7 @@ def retrieve_candidate_list_for_all_prior_elections_this_year(
         candidate_list_manager = CandidateListManager()
         results = candidate_list_manager.retrieve_candidates_for_specific_elections(
             prior_google_civic_election_id_list,
+            limit_to_these_last_names=limit_to_these_last_names,
             limit_to_this_state_code=limit_to_this_state_code,
             return_list_of_objects=return_list_of_objects,
             super_light_candidate_list=super_light_candidate_list)

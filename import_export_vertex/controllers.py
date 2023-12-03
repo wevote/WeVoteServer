@@ -70,22 +70,21 @@ def ask_google_vertex_a_question(question, text_to_search):
         t3 = time()
 
         #  Feel free to remove logging and print lines in this file
-        print(
-            '(Ok) ask_google_vertex_a_question ' +
-            'Vertex init took {:.6f} seconds, '.format(t1-t0) +
-            'load model (text-bison) took {:.6f} seconds, '.format(t2-t1) +
-            'Question query took {:.6f} seconds, '.format(t3-t2) +
-            'total took {:.6f} seconds'.format(t3-t0))
-
+        performance = "(Ok) ask_google_vertex_a_question Vertex init took {:.6f} seconds, ".format(t1-t0)
+        performance += "load model (text-bison) took {:.6f} seconds, ".format(t2-t1)
+        performance += "Question query took {:.6f} seconds, ".format(t3-t2)
+        performance += "total took {:.6f} seconds ".format(t3-t0)
+        print(performance)
+        status += performance
     except Exception as error_message:
         print(f"Error response from Vertex Model: {error_message}")
-        status += "VERTEX_ERROR: {error_message}".format(error_message=error_message)
+        status += "VERTEX_ERROR: {error_message} ".format(error_message=error_message)
 
     results = {
-        'status': status,
-        'success': success,
-        'response_text': response_text,
-        'response_text_found': response_text_found,
+        'status':               status,
+        'success':              success,
+        'response_text':        response_text,
+        'response_text_found':  response_text_found,
     }
     return results
 
@@ -138,7 +137,7 @@ def find_names_steve1(site_url):
         t4 = time()
 
         print('---- 3 ----')  # This kind of works 11/30/23, it returns a list of names
-        response = model.predict("What are the names on " + site_url)
+        response = model.predict("Return all names of people shown on this website: " + site_url)
         print(f"Response #3 from Model: {response.text}")
         t5 = time()
 
@@ -286,7 +285,75 @@ def find_names_dale1(site_url):
     return results
 
 
-def find_names_of_people_on_one_web_page(site_url):
+def find_names_of_people_from_incoming_text(text_to_scan=''):
+    names_list = []
+    names_list_found = False
+    status = ""
+    success = True
+    if len(text_to_scan) < 3:
+        status += 'FIND_NAMES_ON_ONE_PAGE-PROPER_TEXT_NOT_PROVIDED '
+        success = False
+        results = {
+            'status':           status,
+            'success':          success,
+            'names_list':       names_list,
+            'names_list_found': names_list_found,
+        }
+        return results
+
+    text_to_scan_cleaned = ""
+    text_to_scan_found = False
+    t0 = time()
+    try:
+        # from bs4 import BeautifulSoup
+        # soup = BeautifulSoup(all_html)
+        # soup.find('head').decompose()  # find head tag and decompose/destroy it from the html
+        # all_text_without_head = soup.get_text()
+
+        # import re
+        # clean = re.compile('<.*?>')
+        # all_text_without_html = re.sub(clean, '', all_html)
+
+        text_to_scan_cleaned = text_to_scan
+        if len(text_to_scan_cleaned) > 0:
+            text_to_scan_found = True
+
+        status += "FINISHED_CLEANING_INCOMING_TEXT "
+    except timeout:
+        status += "FIND_NAMES_IN_TEXT_CLEANING_TIMEOUT_ERROR "
+        success = False
+    except IOError as error_instance:
+        # Catch the error message coming back from urllib.request.urlopen and pass it in the status
+        error_message = error_instance
+        status += "FIND_NAMES_IN_TEXT_IO_ERROR: {error_message}".format(error_message=error_message)
+        success = False
+    except Exception as error_instance:
+        error_message = error_instance
+        status += "FIND_NAMES_IN_TEXT_GENERAL_EXCEPTION_ERROR: {error_message}".format(error_message=error_message)
+        success = False
+    t1 = time()
+
+    if text_to_scan_found:
+        question = "Return all names of people in this following text: "
+        results = ask_google_vertex_a_question(question, text_to_search=text_to_scan_cleaned)
+        if results['response_text_found']:
+            response_text = results['response_text']
+            if positive_value_exists(response_text):
+                import re
+                names_list = list(re.split('; |, |\*|\r\n|\r|\n', response_text))
+        status += results['status']
+
+    names_list_found = positive_value_exists(len(names_list))
+    results = {
+        'status':           status,
+        'success':          success,
+        'names_list':       names_list,
+        'names_list_found': names_list_found,
+    }
+    return results
+
+
+def find_names_of_people_on_one_web_page(site_url=''):
     names_list = []
     names_list_found = False
     status = ""
