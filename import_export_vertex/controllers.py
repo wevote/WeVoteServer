@@ -140,7 +140,9 @@ def find_names_of_people_from_incoming_text(text_to_scan=''):
             response_text = results['response_text']
             if positive_value_exists(response_text):
                 import re
-                names_list = list(re.split('; |, |\*|\r\n|\r|\n', response_text))
+                cleaned = response_text.replace('\n- ', '\n')
+                names_list = list(re.split('; |, |\*|\r\n|\r|\n', cleaned))
+                names_list.pop(0)     # remove 'The following names are mentioned in the text:'
         status += results['status']
 
     names_list_found = positive_value_exists(len(names_list))
