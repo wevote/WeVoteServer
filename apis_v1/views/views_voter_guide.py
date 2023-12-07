@@ -119,17 +119,17 @@ def voter_guide_possibility_highlights_retrieve_view(request):  # voterGuidePoss
         visible_text_to_scan = request.GET.get('visible_text_to_scan', '')
 
     # Dale & Steve 2023-12-02 Still verifying and testing more cases
-    # if positive_value_exists(url_to_scan):
+    enable_vertex_for_url_input = False   # 2023-12-06 Set true to test on server screen scraping path
     names_list = []
     if positive_value_exists(visible_text_to_scan):
-        # from import_export_vertex.controllers import find_names_steve1
-        # results = find_names_steve1(site_url=url_to_scan)
-        # from import_export_vertex.controllers import find_names_dale1
-        # results = find_names_dale1(site_url=url_to_scan)
-        # from import_export_vertex.controllers import find_names_of_people_on_one_web_page
-        # results = find_names_of_people_on_one_web_page(site_url=url_to_scan)
         from import_export_vertex.controllers import find_names_of_people_from_incoming_text
         results = find_names_of_people_from_incoming_text(text_to_scan=visible_text_to_scan)
+        if results['names_list_found']:
+            names_list = results['names_list']
+        status += results['status']
+    elif positive_value_exists(url_to_scan) and enable_vertex_for_url_input:
+        from import_export_vertex.controllers import find_names_of_people_on_one_web_page
+        results = find_names_of_people_on_one_web_page(site_url=url_to_scan)
         if results['names_list_found']:
             names_list = results['names_list']
         status += results['status']
