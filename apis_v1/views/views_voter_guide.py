@@ -111,15 +111,16 @@ def voter_guide_possibility_highlights_retrieve_view(request):  # voterGuidePoss
         visible_text_to_scan = request.POST.get('visible_text_to_scan', '')
         pdf_url = request.POST.get('pdf_url', '')
         google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+        enable_vertex_for_url_input = request.POST.get('enable_vertex_for_url_input', False)
     else:
         limit_to_existing = positive_value_exists(request.GET.get('limit_to_existing', True))
         url_to_scan = request.GET.get('url_to_scan', '')
         pdf_url = request.GET.get('pdf_url', '')
         google_civic_election_id = request.GET.get('google_civic_election_id', 0)
         visible_text_to_scan = request.GET.get('visible_text_to_scan', '')
+        enable_vertex_for_url_input = request.GET.get('enable_vertex_for_url_input', False)
 
     # Dale & Steve 2023-12-02 Still verifying and testing more cases
-    enable_vertex_for_url_input = False   # 2023-12-06 Set true to test on server screen scraping path
     names_list = []
     if positive_value_exists(visible_text_to_scan):
         from import_export_vertex.controllers import find_names_of_people_from_incoming_text
