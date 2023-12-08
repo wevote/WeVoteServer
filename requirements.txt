@@ -1,7 +1,8 @@
 boto3==1.26.46
 CacheControl==0.13.1
 cloudscraper==1.2.68
-cryptography==41.0.7
+cryptography==3.4.8
+# cryptography==41.0.7  # Does not seem compatible with Python 3.9
 dj-database-url==0.5.0
 dj-static==0.0.6
 Django==3.2.23
