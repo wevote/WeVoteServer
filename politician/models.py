@@ -353,6 +353,12 @@ class Politician(models.Model):
         else:
             return self.first_name + " " + self.last_name
 
+    def display_personal_statement(self):
+        if self.twitter_description:
+            return self.twitter_description
+        else:
+            return ""
+
     def politician_photo_url(self):
         """
         fetch URL of politician's photo from TheUnitedStatesIo repo
@@ -1430,7 +1436,9 @@ class PoliticianManager(models.Manager):
             politician_facebook_id='',
             politician_googleplus_id='',
             politician_youtube_id='',
-            politician_website_url=''):
+            politician_website_url='',
+            state_code=None,
+        ):
         """
 
         :param politician_name:
@@ -1454,6 +1462,7 @@ class PoliticianManager(models.Manager):
         :param politician_googleplus_id:
         :param politician_youtube_id:
         :param politician_website_url:
+        :param state_code:
         :return:
         """
         success = False
@@ -1484,6 +1493,7 @@ class PoliticianManager(models.Manager):
                 politician_googleplus_id=politician_googleplus_id,
                 politician_youtube_id=politician_youtube_id,
                 politician_url=politician_website_url,
+                state_code=state_code,
                 ctcl_uuid=ctcl_uuid)
             if new_politician:
                 success = True
