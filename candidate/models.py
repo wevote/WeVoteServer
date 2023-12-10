@@ -2751,6 +2751,12 @@ class CandidateCampaign(models.Model):
             alternate_names.append(self.google_civic_candidate_name3)
         return alternate_names
 
+    def display_personal_statement(self):
+        if self.twitter_description:
+            return self.twitter_description
+        else:
+            return ""
+
     def extract_title(self):
         full_name = self.display_candidate_name()
         return extract_title_from_full_name(full_name)

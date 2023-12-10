@@ -556,6 +556,32 @@ def figure_out_politician_conflict_values(politician1, politician2):
                             politician_merge_conflict_values[attribute] = 'CONFLICT'
                     else:
                         politician_merge_conflict_values[attribute] = 'CONFLICT'
+            elif attribute == "seo_friendly_path":
+                if politician1_attribute_value_lower_case == politician2_attribute_value_lower_case:
+                    politician_merge_conflict_values[attribute] = 'MATCHING'
+                elif len(politician1_attribute_value_lower_case) > 0 and len(
+                        politician2_attribute_value_lower_case) == 0:
+                    politician_merge_conflict_values[attribute] = 'POLITICIAN1'
+                elif len(politician1_attribute_value_lower_case) == 0 and len(
+                        politician2_attribute_value_lower_case) > 0:
+                    politician_merge_conflict_values[attribute] = 'POLITICIAN2'
+                elif len(politician1_attribute_value_lower_case) > 5 and len(
+                        politician2_attribute_value_lower_case) > 5:
+                    # If we remove the last four digits from the path, are the strings identical?
+                    politician1_attribute_value_lower_case_minus_four_digits = \
+                        politician1_attribute_value_lower_case[:-4]
+                    politician2_attribute_value_lower_case_minus_four_digits = \
+                        politician2_attribute_value_lower_case[:-4]
+                    if politician1_attribute_value_lower_case == \
+                            politician2_attribute_value_lower_case_minus_four_digits:
+                        politician_merge_conflict_values[attribute] = 'POLITICIAN1'
+                    elif politician2_attribute_value_lower_case == \
+                            politician1_attribute_value_lower_case_minus_four_digits:
+                        politician_merge_conflict_values[attribute] = 'POLITICIAN2'
+                    else:
+                        politician_merge_conflict_values[attribute] = 'CONFLICT'
+                else:
+                    politician_merge_conflict_values[attribute] = 'CONFLICT'
             elif attribute == "state_code":
                 if politician1_attribute_value_lower_case == politician2_attribute_value_lower_case:
                     politician_merge_conflict_values[attribute] = 'MATCHING'
