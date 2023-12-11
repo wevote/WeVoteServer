@@ -41,8 +41,8 @@ from voter.models import voter_has_authority
 from wevote_functions.functions import convert_date_to_we_vote_date_string, convert_to_int, \
     convert_to_political_party_constant, convert_we_vote_date_string_to_date_as_integer, \
     extract_first_name_from_full_name, extract_instagram_handle_from_text_string, \
-    extract_middle_name_from_full_name, \
-    extract_last_name_from_full_name, extract_twitter_handle_from_text_string, \
+    extract_middle_name_from_full_name, extract_last_name_from_full_name, \
+    extract_state_from_ocd_division_id, extract_twitter_handle_from_text_string, \
     positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization
 from wevote_settings.constants import IS_BATTLEGROUND_YEARS_AVAILABLE
 from .controllers import add_alternate_names_to_next_spot, add_twitter_handle_to_next_politician_spot, \
@@ -843,8 +843,12 @@ def politician_list_view(request):
                 queryset = queryset.filter(politician_we_vote_id__iexact=one_politician.we_vote_id)
                 linked_representative_we_vote_id_list = []
                 linked_representative_list = list(queryset)
+                if positive_value_exists(show_ocd_id_state_mismatch):
+                    one_politician.linked_representative_list = []
                 for representative in linked_representative_list:
                     linked_representative_we_vote_id_list.append(representative.we_vote_id)
+                    if positive_value_exists(show_ocd_id_state_mismatch):
+                        one_politician.linked_representative_list.append(representative)
                 one_politician.linked_representative_we_vote_id_list = linked_representative_we_vote_id_list
             except Exception as e:
                 related_candidate_list_count = 0
@@ -1441,6 +1445,8 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
                 # This is fine, create new
                 pass
 
+        # ##################################
+        # Find Representatives Linked to this Politician
         linked_representative_list = []
         if positive_value_exists(politician_we_vote_id):
             queryset = Representative.objects.using('readonly').all()
@@ -1452,6 +1458,29 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
         # Finding Representatives that *might* be "children" of this politician
         from politician.controllers import find_representatives_to_link_to_this_politician
         related_representative_list = find_representatives_to_link_to_this_politician(politician=politician_on_stage)
+
+        # ##################################
+        # Find Campaigns Linked to this Politician
+        linked_campaignx_list = []
+        if positive_value_exists(politician_we_vote_id):
+            from campaign.models import CampaignX
+            queryset = CampaignX.objects.using('readonly').all()
+            queryset = queryset.filter(linked_politician_we_vote_id__iexact=politician_we_vote_id)
+            linked_campaignx_list = list(queryset)
+
+        # ##################################
+        # Find Campaigns to Link to this Politician
+        # Finding Representatives that *might* be "children" of this politician
+        from politician.controllers import find_campaignx_list_to_link_to_this_politician
+        related_campaignx_list = find_campaignx_list_to_link_to_this_politician(politician=politician_on_stage)
+
+        politician_linked_campaignx_we_vote_id = ''
+        if len(linked_campaignx_list) > 0:
+            linked_campaignx = linked_campaignx_list[0]
+            if linked_campaignx and positive_value_exists(linked_campaignx.we_vote_id):
+                politician_linked_campaignx_we_vote_id = linked_campaignx.we_vote_id
+        elif positive_value_exists(politician_on_stage.linked_campaignx_we_vote_id):
+            politician_linked_campaignx_we_vote_id = politician_on_stage.linked_campaignx_we_vote_id
 
         if 'localhost' in WEB_APP_ROOT_URL:
             web_app_root_url = 'https://localhost:3000'
@@ -1467,6 +1496,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             'google_civic_candidate_name2': google_civic_candidate_name2,
             'google_civic_candidate_name3': google_civic_candidate_name3,
             'instagram_handle':             instagram_handle,
+            'linked_campaignx_list':        linked_campaignx_list,
             'linked_candidate_list':        linked_candidate_list,
             'linked_representative_list':   linked_representative_list,
             'maplight_id':                  maplight_id,
@@ -1477,6 +1507,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             'politician_email':             politician_email,
             'politician_email2':            politician_email2,
             'politician_email3':            politician_email3,
+            'politician_linked_campaignx_we_vote_id':   politician_linked_campaignx_we_vote_id,
             'politician_name':              politician_name,
             'politician_phone_number':      politician_phone_number,
             'politician_phone_number2':     politician_phone_number2,
@@ -1495,6 +1526,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             'politician_url5':              politician_url5,
             'political_party':              political_party,
             'rating_list':                  rating_list,
+            'related_campaignx_list':       related_campaignx_list,
             'related_candidate_list':       related_candidate_list,
             'related_representative_list':  related_representative_list,
             'state_code':                   state_code,
@@ -1733,6 +1765,9 @@ def politician_edit_process_view(request):
     wikipedia_url = request.POST.get('wikipedia_url', False)
     youtube_url = request.POST.get('youtube_url', False)
     # is_battleground_race_ values taken in below
+
+    from campaign.controllers import update_campaignx_from_politician
+    campaignx_manager = CampaignXManager()
 
     # Check to see if this politician already exists
     politician_on_stage_found = False
@@ -2003,6 +2038,15 @@ def politician_edit_process_view(request):
                 politician_on_stage.politician_email2 = politician_email2
             if politician_email3 is not False:
                 politician_on_stage.politician_email3 = politician_email3
+            if positive_value_exists(politician_on_stage.linked_campaignx_we_vote_id):
+                campaignx_results = campaignx_manager.retrieve_campaignx(
+                    campaignx_we_vote_id=politician_on_stage.linked_campaignx_we_vote_id)
+                if campaignx_results['campaignx_found']:
+                    # Continue below
+                    pass
+                elif campaignx_results['success']:
+                    # If the linked_campaignx_we_vote_id points to a campaignx that doesn't exist anymore, unlink
+                    politician_on_stage.linked_campaignx_we_vote_id = None
             if politician_name is not False:
                 politician_on_stage.politician_name = politician_name
             if politician_phone_number is not False:
@@ -2105,8 +2149,6 @@ def politician_edit_process_view(request):
             messages.add_message(request, messages.INFO, 'Politician saved.')
 
             if positive_value_exists(politician_on_stage.linked_campaignx_we_vote_id):
-                from campaign.controllers import update_campaignx_from_politician
-                campaignx_manager = CampaignXManager()
                 campaignx_results = campaignx_manager.retrieve_campaignx(
                     campaignx_we_vote_id=politician_on_stage.linked_campaignx_we_vote_id)
                 if campaignx_results['campaignx_found']:
@@ -2116,6 +2158,7 @@ def politician_edit_process_view(request):
                         campaignx = results['campaignx']
                         campaignx.date_last_updated_from_politician = localtime(now()).date()
                         campaignx.save()
+
             # Find current representative for this politician
             representative_manager = RepresentativeManager()
             rep_results = representative_manager.retrieve_representative(
@@ -2286,10 +2329,18 @@ def politician_edit_process_view(request):
             messages.add_message(request, messages.ERROR, status)
         elif campaignx_results['campaignx_found']:
             campaignx = campaignx_results['campaignx']
-            value_changed = False
             if positive_value_exists(campaignx.linked_politician_we_vote_id) \
                     and campaignx.linked_politician_we_vote_id != politician_on_stage.we_vote_id:
                 heal_linked_campaignx_variables = False
+            if heal_linked_campaignx_variables and not positive_value_exists(campaignx.linked_politician_we_vote_id):
+                campaignx.linked_politician_we_vote_id = politician_on_stage.we_vote_id
+                try:
+                    campaignx.save()
+                    messages.add_message(request, messages.INFO, "Campaignx updated with linked_politician_we_vote_id.")
+                except Exception as e:
+                    messages.add_message(request, messages.ERROR, "Cannot heal Campaignx linked_politician_we_vote_id:"
+                                                                  "" + str(e))
+                    heal_linked_campaignx_variables = False
             if heal_linked_campaignx_variables and positive_value_exists(politician_on_stage.seo_friendly_path) \
                     and campaignx.seo_friendly_path != politician_on_stage.seo_friendly_path:
                 # Consider saving politician_on_stage.seo_friendly_path into CampaignXSEOFriendlyPath,
@@ -2299,17 +2350,15 @@ def politician_edit_process_view(request):
                 # When we unlink campaigns by removing linked_politician_we_vote_id from CampaignX, we will want to
                 #  generate a new seo_friendly_path for that historical campaignx.
                 campaignx.seo_friendly_path = politician_on_stage.seo_friendly_path
-                value_changed = True
-                messages.add_message(request, messages.INFO, "Campaignx updated with seo_friendly_path.")
-            if heal_linked_campaignx_variables and not positive_value_exists(campaignx.linked_politician_we_vote_id):
-                campaignx.linked_politician_we_vote_id = politician_on_stage.we_vote_id
-                value_changed = True
-                messages.add_message(request, messages.INFO, "Campaignx updated with linked_politician_we_vote_id.")
+                try:
+                    campaignx.save()
+                    messages.add_message(request, messages.INFO, "Campaignx updated with seo_friendly_path.")
+                except Exception as e:
+                    messages.add_message(request, messages.ERROR, "Cannot heal Campaignx seo_friendly_path:" + str(e))
+                    heal_linked_campaignx_variables = False
             if not heal_linked_campaignx_variables:
                 messages.add_message(request, messages.ERROR, "Cannot heal Campaignx linked variables.")
 
-            if value_changed:
-                campaignx.save()
 
     # Update Linked Candidates with seo_friendly_path, and
     if success and positive_value_exists(politician_we_vote_id):
@@ -2719,6 +2768,84 @@ def politicians_sync_out_view(request):  # politiciansSyncOut
         'status': status
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+@login_required
+def repair_ocd_id_mismatch_damage_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    state_code = request.GET.get('state_code', '')
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+
+    politician_we_vote_id_list = []
+    politicians_dict = {}
+
+    politician_error_count = 0
+    politician_list_count = 0
+    states_already_match_count = 0
+    states_fixed_count = 0
+    states_to_be_fixed_count = 0
+    status = ''
+    try:
+        queryset = Politician.objects.using('readonly').all()
+        queryset = queryset.filter(ocd_id_state_mismatch_found=True)
+        politician_data_list = list(queryset[:1000])
+        politician_list_count = len(politician_data_list)
+        for one_politician in politician_data_list:
+            # Now find all representative ids related to this politician
+            try:
+                queryset = Representative.objects.all()
+                queryset = queryset.filter(politician_we_vote_id__iexact=one_politician.we_vote_id)
+                linked_representative_list = list(queryset)
+                linked_representative = linked_representative_list[0]  # For now, just take the first one
+                if positive_value_exists(linked_representative.ocd_division_id) and \
+                        positive_value_exists(one_politician.state_code):
+                    # Is there a mismatch between the ocd_id and the politician.state_code?
+                    state_code_from_ocd_id = extract_state_from_ocd_division_id(linked_representative.ocd_division_id)
+                    if not positive_value_exists(state_code_from_ocd_id):
+                        # Cannot compare
+                        pass
+                    elif one_politician.state_code.lower() == state_code_from_ocd_id.lower():
+                        # Already ok
+                        states_already_match_count += 1
+                    else:
+                        # Fix
+                        states_to_be_fixed_count += 1
+                        one_politician.state_code = state_code_from_ocd_id
+                        one_politician.seo_friendly_path = None
+                        one_politician.seo_friendly_path_date_last_updated = now()
+                        one_politician.save()
+                        states_fixed_count += 1
+            except Exception as e:
+                politician_error_count += 1
+                if politician_error_count < 10:
+                    status += "COULD_NOT_SAVE_POLITICIAN: " + str(e) + " "
+            politicians_dict[one_politician.we_vote_id] = one_politician
+            politician_we_vote_id_list.append(one_politician.we_vote_id)
+    except Exception as e:
+        status += "GENERAL_ERROR: " + str(e) + " "
+
+    messages.add_message(request, messages.INFO,
+                         "Politicians analyzed: {politician_list_count:,}. "
+                         "states_already_match_count: {states_already_match_count:,}. "
+                         "states_to_be_fixed_count: {states_to_be_fixed_count} "
+                         "status: {status}"
+                         "".format(
+                             politician_list_count=politician_list_count,
+                             states_already_match_count=states_already_match_count,
+                             states_to_be_fixed_count=states_to_be_fixed_count,
+                             status=status))
+
+    return HttpResponseRedirect(reverse('politician:politician_list', args=()) +
+                                "?google_civic_election_id={google_civic_election_id}"
+                                "&state_code={state_code}"
+                                "&show_ocd_id_state_mismatch=1"
+                                "".format(
+                                    google_civic_election_id=google_civic_election_id,
+                                    state_code=state_code))
 
 
 @login_required

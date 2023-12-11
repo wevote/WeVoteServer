@@ -83,9 +83,11 @@ POLITICIAN_UNIQUE_IDENTIFIERS = [
     'is_battleground_race_2025',
     'is_battleground_race_2026',
     'last_name',
+    'linked_campaignx_we_vote_id',
     'lis_id',
     'maplight_id',
     'middle_name',
+    'ocd_id_state_mismatch_found',
     'opensecrets_id',
     'political_party',
     'politician_contact_form_url',
@@ -113,6 +115,7 @@ POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED = [
     'bioguide_id',
     'fec_id',
     'govtrack_id',
+    'linked_campaignx_we_vote_id',
     'maplight_id',
     'seo_friendly_path',
     'thomas_id',
@@ -349,6 +352,12 @@ class Politician(models.Model):
             return self.google_civic_candidate_name
         else:
             return self.first_name + " " + self.last_name
+
+    def display_personal_statement(self):
+        if self.twitter_description:
+            return self.twitter_description
+        else:
+            return ""
 
     def politician_photo_url(self):
         """
@@ -746,16 +755,21 @@ class PoliticianManager(models.Manager):
                 status += "FAILED_TO_ADD_OTHER_FIELDS: " + str(e) + " "
                 success = False
 
-        # Generate seo_friendly_path
-        results = self.generate_seo_friendly_path(
-            politician_name=politician.politician_name,
-            politician_we_vote_id=politician.we_vote_id,
-            state_code=politician.state_code,
-        )
-        if results['seo_friendly_path_found']:
-            politician.seo_friendly_path = results['seo_friendly_path']
+        if politician_found:
+            # Generate seo_friendly_path
             try:
-                politician.save()
+                results = self.generate_seo_friendly_path(
+                    politician_name=politician.politician_name,
+                    politician_we_vote_id=politician.we_vote_id,
+                    state_code=politician.state_code,
+                )
+                if results['seo_friendly_path_found']:
+                    politician.seo_friendly_path = results['seo_friendly_path']
+                    try:
+                        politician.save()
+                    except Exception as e:
+                        status += "FAILED_TO_SAVE_SEO_FRIENDLY_PATH: " + str(e) + " "
+                        success = False
             except Exception as e:
                 status += "FAILED_TO_GENERATE_SEO_FRIENDLY_PATH: " + str(e) + " "
                 success = False
@@ -1422,7 +1436,9 @@ class PoliticianManager(models.Manager):
             politician_facebook_id='',
             politician_googleplus_id='',
             politician_youtube_id='',
-            politician_website_url=''):
+            politician_website_url='',
+            state_code=None,
+        ):
         """
 
         :param politician_name:
@@ -1446,6 +1462,7 @@ class PoliticianManager(models.Manager):
         :param politician_googleplus_id:
         :param politician_youtube_id:
         :param politician_website_url:
+        :param state_code:
         :return:
         """
         success = False
@@ -1476,6 +1493,7 @@ class PoliticianManager(models.Manager):
                 politician_googleplus_id=politician_googleplus_id,
                 politician_youtube_id=politician_youtube_id,
                 politician_url=politician_website_url,
+                state_code=state_code,
                 ctcl_uuid=ctcl_uuid)
             if new_politician:
                 success = True

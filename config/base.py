@@ -140,10 +140,6 @@ ALLOWED_HOSTS = [
     '127.0.0.1'
 ]
 
-ALLOWED_CIDR_NETS = [
-    '172.27.0.0/16'
-]
-
 # Application definition
 
 INSTALLED_APPS = (
@@ -199,6 +195,7 @@ INSTALLED_APPS = (
     'import_export_snovio',
     'import_export_targetsmart',
     'import_export_twitter',  # See also twitter (below)
+    'import_export_vertex',
     'import_export_vote_smart',
     'import_export_vote_usa',
     'import_export_wikipedia',
@@ -234,7 +231,6 @@ INSTALLED_APPS = (
 )
 
 MIDDLEWARE = [
-    'allow_cidr.middleware.AllowCIDRMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'corsheaders.middleware.CorsPostCsrfMiddleware',
