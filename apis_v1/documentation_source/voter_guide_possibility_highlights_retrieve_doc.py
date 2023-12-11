@@ -34,6 +34,7 @@ def voter_guide_possibility_highlights_retrieve_doc_template_values(url_root):
             'name':         'limit_to_existing',
             'value':        'boolean',  # boolean, integer, long, string
             'description':  'If True, only return candidates already identified as being endorsed.',
+            'default':      'true',
         },
         {
             'name':         'pdf_url',
@@ -44,6 +45,12 @@ def voter_guide_possibility_highlights_retrieve_doc_template_values(url_root):
             'name':         'visible_text_to_scan',
             'value':        'text',  # boolean, integer, long, string
             'description':  'Visible text from the page we are scanning. Only accepted in POST.',
+        },
+        {
+            'name':         'enable_vertex_for_url_input',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'For testing: Use Vertex AI  to limit returned names with url_to_scan.',
+            'default':      'false',
         },
     ]
 

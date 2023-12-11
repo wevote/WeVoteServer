@@ -196,8 +196,8 @@
                         <tr>
                             <td>{{ query_parameter.name }}: </td>
                             <td colspan="2">
-                                <input type="radio" name="{{ query_parameter.name }}" value="true" > True<br />
-                                <input type="radio" name="{{ query_parameter.name }}" value="false" > False
+                                <input type="radio" name="{{ query_parameter.name }}" {% if query_parameter.default|lower == 'true' %}checked{% endif %} value="true" > True<br />
+                                <input type="radio" name="{{ query_parameter.name }}" {% if query_parameter.default|lower == 'false' %}checked{% endif %} value="false" > False
                             </td>
                         </tr>
                     {% elif query_parameter.value == 'text' %}
