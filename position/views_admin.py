@@ -250,6 +250,8 @@ def position_list_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     position_search = request.GET.get('position_search', '')
     show_all_elections = positive_value_exists(request.GET.get('show_all_elections', False))
+    show_friends_only = positive_value_exists(request.GET.get('show_friends_only', False))  # wv-103
+    show_admin_options = False  # wv-103
     show_statistics = positive_value_exists(request.GET.get('show_statistics', False))
     show_this_year_of_elections = convert_to_int(request.GET.get('show_this_year_of_elections', 0))
     state_code = request.GET.get('state_code', '')
@@ -257,6 +259,12 @@ def position_list_view(request):
     state_list_modified = {}
     status = ''
     update_message = ''
+
+    # wv-103, make administrative objects visible if role = 'admin'
+    admin_authority_required = {'admin'}
+    if voter_has_authority(request, admin_authority_required):
+        show_admin_options = True
+    # wv-103 end
 
     create_campaignx_supporter_from_positions_on = True
     if create_campaignx_supporter_from_positions_on:
@@ -435,160 +443,174 @@ def position_list_view(request):
             update_position_list_with_contest_office_info(friend_position_list_candidate_clean)
 
     # Publicly visible positions
-    public_position_list_query = PositionEntered.objects.order_by('-id')  # This order_by is temp
-    public_position_list_query = public_position_list_query.exclude(stance__iexact=PERCENT_RATING)
-    public_position_list_query = public_position_list_query.filter(
-        Q(google_civic_election_id__in=google_civic_election_id_list_for_display) |
-        Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
-    if positive_value_exists(state_code):
-        public_position_list_query = public_position_list_query.filter(state_code__iexact=state_code)
-
-    if positive_value_exists(position_search):
-        search_words = position_search.split()
-        for one_word in search_words:
-            filters = []
-            new_filter = Q(state_code__icontains=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(we_vote_id__iexact=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(candidate_campaign_we_vote_id__iexact=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(contest_measure_we_vote_id__iexact=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(contest_office_we_vote_id__iexact=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(organization_we_vote_id__iexact=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(voter_we_vote_id__iexact=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(google_civic_measure_title__icontains=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(speaker_display_name__icontains=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(ballot_item_display_name__icontains=one_word)
-            filters.append(new_filter)
-
-            if len(filters):
-                final_filters = filters.pop()
-
-                # ...and "OR" the remaining items in the list
-                for item in filters:
-                    final_filters |= item
-
-                public_position_list_query = public_position_list_query.filter(final_filters)
-
+    public_position_list = []
     public_position_list_count = 0
     public_position_list_comments_count = 0
-    if positive_value_exists(show_statistics):
-        public_position_list_count_query = public_position_list_query
-        public_position_list_count = public_position_list_count_query.count()
+    if not positive_value_exists(show_friends_only):  # always run unless Friends only is checked
+        public_position_list_query = PositionEntered.objects.order_by('-id')  # This order_by is temp
+        public_position_list_query = public_position_list_query.exclude(stance__iexact=PERCENT_RATING)
+        public_position_list_query = public_position_list_query.filter(
+            Q(google_civic_election_id__in=google_civic_election_id_list_for_display) |
+            Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
+        if positive_value_exists(state_code):
+            public_position_list_query = public_position_list_query.filter(state_code__iexact=state_code)
 
-        public_position_list_comments_count_query = public_position_list_query
-        public_position_list_comments_count_query = public_position_list_comments_count_query.exclude(
-            (Q(statement_text__isnull=True) | Q(statement_text__exact='')))
-        public_position_list_comments_count = public_position_list_comments_count_query.count()
+        if positive_value_exists(position_search):
+            search_words = position_search.split()
+            for one_word in search_words:
+                filters = []
+                new_filter = Q(state_code__icontains=one_word)
+                filters.append(new_filter)
 
-    public_position_list_query = public_position_list_query[:10]
-    public_position_list = list(public_position_list_query)
+                new_filter = Q(we_vote_id__iexact=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(candidate_campaign_we_vote_id__iexact=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(contest_measure_we_vote_id__iexact=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(contest_office_we_vote_id__iexact=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(organization_we_vote_id__iexact=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(voter_we_vote_id__iexact=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(google_civic_measure_title__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(speaker_display_name__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(ballot_item_display_name__icontains=one_word)
+                filters.append(new_filter)
+
+                if len(filters):
+                    final_filters = filters.pop()
+
+                    # ...and "OR" the remaining items in the list
+                    for item in filters:
+                        final_filters |= item
+
+                    public_position_list_query = public_position_list_query.filter(final_filters)
+
+        if positive_value_exists(show_statistics):
+            public_position_list_count_query = public_position_list_query
+            public_position_list_count = public_position_list_count_query.count()
+
+            public_position_list_comments_count_query = public_position_list_query
+            public_position_list_comments_count_query = public_position_list_comments_count_query.exclude(
+                (Q(statement_text__isnull=True) | Q(statement_text__exact='')))
+            public_position_list_comments_count = public_position_list_comments_count_query.count()
+
+        public_position_list_query = public_position_list_query[:20]
+        public_position_list = list(public_position_list_query)
 
     # Friends-only visible positions
-    friends_only_position_list_query = PositionForFriends.objects.order_by('-id')  # This order_by is temp
-    # As of Aug 2018 we are no longer using PERCENT_RATING
-    friends_only_position_list_query = friends_only_position_list_query.exclude(stance__iexact=PERCENT_RATING)
-    friends_only_position_list_query = friends_only_position_list_query.filter(
-        Q(google_civic_election_id__in=google_civic_election_id_list_for_display) |
-        Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
-    if positive_value_exists(state_code):
-        friends_only_position_list_query = friends_only_position_list_query.filter(state_code__iexact=state_code)
-
-    if positive_value_exists(position_search):
-        search_words = position_search.split()
-        for one_word in search_words:
-            filters = []
-            new_filter = Q(state_code__icontains=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(we_vote_id__iexact=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(candidate_campaign_we_vote_id__iexact=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(contest_measure_we_vote_id__iexact=one_word)
-            filters.append(new_filter)
-
-            # new_filter = Q(contest_office_name__icontains=one_word)
-            # filters.append(new_filter)
-            #
-            # new_filter = Q(contest_office_we_vote_id__iexact=one_word)
-            # filters.append(new_filter)
-
-            new_filter = Q(organization_we_vote_id__iexact=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(voter_we_vote_id__iexact=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(google_civic_measure_title__icontains=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(speaker_display_name__icontains=one_word)
-            filters.append(new_filter)
-
-            new_filter = Q(ballot_item_display_name__icontains=one_word)
-            filters.append(new_filter)
-
-            if len(filters):
-                final_filters = filters.pop()
-
-                # ...and "OR" the remaining items in the list
-                for item in filters:
-                    final_filters |= item
-
-                friends_only_position_list_query = friends_only_position_list_query.filter(final_filters)
-
+    friends_only_position_list = []
     friends_only_position_list_count = 0
     friends_only_position_list_comments_count = 0
+    # wv-103: only execute this if role=admin and "Friends only" checkbox is checked
+    if voter_has_authority(request, admin_authority_required) and positive_value_exists(show_friends_only):
+        friends_only_position_list_query = PositionForFriends.objects.order_by('-id')  # This order_by is temp
+        # As of Aug 2018 we are no longer using PERCENT_RATING
+        friends_only_position_list_query = friends_only_position_list_query.exclude(stance__iexact=PERCENT_RATING)
+        friends_only_position_list_query = friends_only_position_list_query.filter(
+            Q(google_civic_election_id__in=google_civic_election_id_list_for_display) |
+            Q(candidate_campaign_we_vote_id__in=candidate_we_vote_id_list))
+        if positive_value_exists(state_code):
+            friends_only_position_list_query = friends_only_position_list_query.filter(state_code__iexact=state_code)
+
+        if positive_value_exists(position_search):
+            search_words = position_search.split()
+            for one_word in search_words:
+                filters = []
+                new_filter = Q(state_code__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(we_vote_id__iexact=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(candidate_campaign_we_vote_id__iexact=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(contest_measure_we_vote_id__iexact=one_word)
+                filters.append(new_filter)
+
+                # new_filter = Q(contest_office_name__icontains=one_word)
+                # filters.append(new_filter)
+                #
+                # new_filter = Q(contest_office_we_vote_id__iexact=one_word)
+                # filters.append(new_filter)
+
+                new_filter = Q(organization_we_vote_id__iexact=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(voter_we_vote_id__iexact=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(google_civic_measure_title__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(speaker_display_name__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(ballot_item_display_name__icontains=one_word)
+                filters.append(new_filter)
+
+                if len(filters):
+                    final_filters = filters.pop()
+
+                    # ...and "OR" the remaining items in the list
+                    for item in filters:
+                        final_filters |= item
+
+                    friends_only_position_list_query = friends_only_position_list_query.filter(final_filters)
+
+        if positive_value_exists(show_statistics):
+            friends_only_position_list_count_query = friends_only_position_list_query
+            friends_only_position_list_comments_count_query = friends_only_position_list_query
+            friends_only_position_list_count = friends_only_position_list_count_query.count()
+
+            friends_only_position_list_comments_count_query = friends_only_position_list_comments_count_query.exclude(
+                (Q(statement_text__isnull=True) | Q(statement_text__exact='')))
+            friends_only_position_list_comments_count = friends_only_position_list_comments_count_query.count()
+
+        friends_only_position_list_query = friends_only_position_list_query[:20]
+        friends_only_position_list = list(friends_only_position_list_query)
+
+    # wv-103: construct position_list
+    if positive_value_exists(show_friends_only):
+        position_list = friends_only_position_list
+    else:
+        position_list = public_position_list
+    # wv-103 end construct position_list
+
     if positive_value_exists(show_statistics):
-        friends_only_position_list_count_query = friends_only_position_list_query
-        friends_only_position_list_comments_count_query = friends_only_position_list_query
-        friends_only_position_list_count = friends_only_position_list_count_query.count()
-
-        friends_only_position_list_comments_count_query = friends_only_position_list_comments_count_query.exclude(
-            (Q(statement_text__isnull=True) | Q(statement_text__exact='')))
-        friends_only_position_list_comments_count = friends_only_position_list_comments_count_query.count()
-
-    friends_only_position_list_query = friends_only_position_list_query[:10]
-    friends_only_position_list = list(friends_only_position_list_query)
-
-    position_list = public_position_list + friends_only_position_list
-
-    if positive_value_exists(show_statistics):
-        public_position_list_count_string = \
-            convert_integer_to_string_with_comma_for_thousands_separator(public_position_list_count)
-        public_position_list_comments_count_string = \
-            convert_integer_to_string_with_comma_for_thousands_separator(public_position_list_comments_count)
-        friends_only_position_list_count_string = \
-            convert_integer_to_string_with_comma_for_thousands_separator(friends_only_position_list_count)
-        friends_only_position_list_comments_count_string = \
-            convert_integer_to_string_with_comma_for_thousands_separator(friends_only_position_list_comments_count)
-        messages.add_message(
-            request, messages.INFO,
-            public_position_list_count_string + ' public positions found ' +
-            '(' + public_position_list_comments_count_string + ' with commentary). ' +
-            friends_only_position_list_count_string + ' friends-only positions found ' +
-            '(' + friends_only_position_list_comments_count_string + ' with commentary). '
+        if not positive_value_exists(show_friends_only):  # wv-103, always run unless Friends only is checked
+            public_position_list_count_string = \
+                convert_integer_to_string_with_comma_for_thousands_separator(public_position_list_count)
+            public_position_list_comments_count_string = \
+                convert_integer_to_string_with_comma_for_thousands_separator(public_position_list_comments_count)
+            messages.add_message(
+                request, messages.INFO,
+                public_position_list_count_string + ' public positions found ' +
+                '(' + public_position_list_comments_count_string + ' with commentary). '
             )
-
+        if voter_has_authority(request, admin_authority_required) and positive_value_exists(show_friends_only):
+            friends_only_position_list_count_string = \
+                convert_integer_to_string_with_comma_for_thousands_separator(friends_only_position_list_count)
+            friends_only_position_list_comments_count_string = \
+                convert_integer_to_string_with_comma_for_thousands_separator(friends_only_position_list_comments_count)
+            messages.add_message(
+                request, messages.INFO,
+                friends_only_position_list_count_string + ' friends-only positions found ' +
+                '(' + friends_only_position_list_comments_count_string + ' with commentary). '
+            )
         if public_position_list_clean_count or friend_position_list_clean_count:
             public_position_list_clean_count_string = \
                 convert_integer_to_string_with_comma_for_thousands_separator(public_position_list_clean_count)
@@ -640,6 +662,8 @@ def position_list_view(request):
         'election_years_available': ELECTION_YEARS_AVAILABLE,
         'google_civic_election_id': google_civic_election_id,
         'show_all_elections':       show_all_elections,
+        'show_friends_only':        show_friends_only,  # wv-103
+        'show_admin_options':       show_admin_options,  # wv-103
         'show_statistics':          show_statistics,
         'show_this_year_of_elections':  show_this_year_of_elections,
         'state_code':               state_code,

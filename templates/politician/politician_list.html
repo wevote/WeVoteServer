@@ -21,7 +21,12 @@
         <li><a href="{% url 'politician:update_politicians_from_candidates' %}?state_code={{ state_code }}"
                         target="_blank" >
             Update Politicians from Candidates <span class="glyphicon glyphicon-new-window"></span></a> (about 1 minute)</li>
-        <li><a href="{% url 'candidate:repair_imported_names' %}?is_candidate=false" >Repair Politician Names</a></li>
+        <li>
+            <a href="{% url 'candidate:repair_imported_names' %}?is_candidate=false" >
+                Repair Politician Names</a>,
+            <a href="{% url 'politician:repair_ocd_id_mismatch' %}?state_code={{ state_code }}&google_civic_election_id={{ google_civic_election_id }}" >
+                Repair OCD ID Mismatches</a>
+        </li>
         <li><a href="{% url 'politician:set_missing_gender_ids' %}" >Set Missing Politician Gender Ids</a></li>
         <li><a href="{% url 'politician:update_politicians_profile_image_background_color' %}" >Set Politician Background Color</a></li>
     </ul>
@@ -71,8 +76,8 @@
       <input type="checkbox" name="show_related_candidates" id="show_related_candidates_id" value="1"
              {% if show_related_candidates %}checked{% endif %} /> Show related candidates count
     </label>
-
-   <label for="show_ocd_id_state_mismatch_id">
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <label for="show_ocd_id_state_mismatch_id">
       <input type="checkbox" name="show_ocd_id_state_mismatch" id="show_ocd_id_state_mismatch_id" value="1"
              {% if show_ocd_id_state_mismatch %}checked{% endif %} /> Show OCD ID/State mismatch
     </label>
@@ -116,7 +121,15 @@
                        target="_blank">/{{ politician.seo_friendly_path }} <span class="glyphicon glyphicon-new-window"></span></a>
                 {% endif %}
             </td>
-            <td>{{ politician.state_code|default_if_none:"" }}</td>
+            <td>
+                {{ politician.state_code|default_if_none:"" }}
+                {% if politician.linked_representative_list %}
+                    <br />
+                    {% for representative in politician.linked_representative_list %}
+                        <span style="color: #999">{{ representative.ocd_division_id }}&nbsp;</span>&nbsp;
+                    {% endfor %}
+                {% endif %}
+            </td>
             <td>
                 {{ politician.id }} - {{ politician.we_vote_id }}
                 {% if politician.linked_representative_we_vote_id_list %}

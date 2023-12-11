@@ -1419,6 +1419,20 @@ def extract_twitter_handle_from_text_string(twitter_text_string):
     return twitter_text_string
 
 
+def is_candidate_we_vote_id(candidate_we_vote_id):
+    if not positive_value_exists(candidate_we_vote_id):
+        return False
+    pattern = re.compile(r'^(wv[\w]{2}cand[\w]+)$')
+    return pattern.match(candidate_we_vote_id)
+
+
+def is_politician_we_vote_id(politician_we_vote_id):
+    if not positive_value_exists(politician_we_vote_id):
+        return False
+    pattern = re.compile(r'^(wv[\w]{2}pol[\w]+)$')
+    return pattern.match(politician_we_vote_id)
+
+
 def is_url_valid(url_to_test):
     if not url_to_test:
         return False
