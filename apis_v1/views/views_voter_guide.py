@@ -128,7 +128,7 @@ def voter_guide_possibility_highlights_retrieve_view(request):  # voterGuidePoss
         if results['names_list_found']:
             names_list = results['names_list']
         status += results['status']
-    elif positive_value_exists(url_to_scan) and enable_vertex_for_url_input:
+    elif positive_value_exists(url_to_scan) and positive_value_exists(enable_vertex_for_url_input):
         from import_export_vertex.controllers import find_names_of_people_on_one_web_page
         results = find_names_of_people_on_one_web_page(site_url=url_to_scan)
         if results['names_list_found']:
