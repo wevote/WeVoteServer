@@ -119,31 +119,22 @@ def voter_guide_possibility_highlights_retrieve_view(request):  # voterGuidePoss
         google_civic_election_id = request.GET.get('google_civic_election_id', 0)
         visible_text_to_scan = request.GET.get('visible_text_to_scan', '')
         enable_vertex_for_url_input = request.GET.get('enable_vertex_for_url_input', False)
-        logger.error('request.GET.get enable_vertex_for_url_input ' +
-                     str(request.GET.get('enable_vertex_for_url_input')))
-        logger.error('positive_value_exists url_to_scan ' +
-                     str(positive_value_exists(url_to_scan)))
 
     # Dale & Steve 2023-12-02 Still verifying and testing more cases
     names_list = []
     if positive_value_exists(visible_text_to_scan):
-        logger.error('positive_value_exists(visible_text_to_scan) ' +
-                     str(positive_value_exists(visible_text_to_scan)))
         from import_export_vertex.controllers import find_names_of_people_from_incoming_text
         results = find_names_of_people_from_incoming_text(text_to_scan=visible_text_to_scan)
         if results['names_list_found']:
             names_list = results['names_list']
         status += results['status']
     elif positive_value_exists(url_to_scan) and enable_vertex_for_url_input:
-        logger.error('Entry to find_names block ' + url_to_scan)
         from import_export_vertex.controllers import find_names_of_people_on_one_web_page
         results = find_names_of_people_on_one_web_page(site_url=url_to_scan)
-        logger.error('After find_names call ')
         if results['names_list_found']:
             names_list = results['names_list']
         status += results['status']
 
-    logger.error('before voter_guide_possibility_highlights_retrieve_for_api ')
     json_data = voter_guide_possibility_highlights_retrieve_for_api(
         google_civic_election_id=google_civic_election_id,
         limit_to_existing=limit_to_existing,
