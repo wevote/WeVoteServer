@@ -50,7 +50,7 @@ from .controllers import add_alternate_names_to_next_spot, add_twitter_handle_to
     merge_if_duplicate_politicians, merge_these_two_politicians, politicians_import_from_master_server
 from .models import Politician, PoliticianManager, POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, \
     POLITICIAN_UNIQUE_IDENTIFIERS, PoliticiansArePossibleDuplicates, POLITICAL_DATA_MANAGER, UNKNOWN
-
+from politician.controllers_generate_color import generate_background
 POLITICIANS_SYNC_URL = get_environment_variable("POLITICIANS_SYNC_URL")  # politiciansSyncOut
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 WEB_APP_ROOT_URL = get_environment_variable("WEB_APP_ROOT_URL")
@@ -2986,3 +2986,33 @@ def update_politicians_from_candidates_view(request):
                                 "?state_code={state_code}"
                                 "".format(
                                     state_code=state_code))
+
+def update_politicians_profile_image_background_color_view(request):
+
+    queryset = Politician.objects.all()
+    politician_list = list(queryset[1:10])
+
+    bulk_update_list = []
+    politicians_updated = 0
+    politicians_not_updated = 0
+    for politician in politician_list:
+        if positive_value_exists(politician.we_vote_hosted_profile_image_url_large):
+            hex = generate_background(politician)
+            politician.profile_image_background_color = hex
+            politicians_updated += 1
+        else:
+            politicians_not_updated += 1
+        bulk_update_list.append(politician)
+    try:
+        Politician.objects.bulk_update(bulk_update_list, ['profile_image_background_color'])
+        message = \
+            "Politicians updated: {politicians_updated:,}. " \
+            "Politicians without picture URL:  {politicians_not_updated:,}. " \
+            "".format(politicians_updated=politicians_updated, politicians_not_updated=politicians_not_updated)
+        messages.add_message(request, messages.INFO, message)
+    except Exception as e:
+        messages.add_message(request, messages.ERROR,
+                             "ERROR with update_politicians_profile_image_background_color_view: {e}"
+                             "".format(e=e))
+
+    return HttpResponseRedirect(reverse('politician:politician_list', args=()))
