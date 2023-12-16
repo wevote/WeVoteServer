@@ -2439,7 +2439,7 @@ class CandidateCampaign(models.Model):
     politician_id = models.BigIntegerField(verbose_name="politician unique identifier", null=True, blank=True)
     # The persistent We Vote unique ID of the Politician, so we can export and import into other databases.
     politician_we_vote_id = models.CharField(
-        verbose_name="we vote politician id", max_length=255, null=True, blank=True)
+        verbose_name="we vote politician id", max_length=255, null=True, blank=True, db_index=True)
     # The candidate's name.
     candidate_name = models.CharField(verbose_name="candidate name", max_length=255, null=False, blank=False,
                                       db_index=True)
@@ -2504,7 +2504,7 @@ class CandidateCampaign(models.Model):
     facebook_profile_image_url_https = models.TextField(
         verbose_name='url of profile image from facebook', blank=True, null=True)
     # seo_friendly_path data is copied from the Politician object, and isn't edited directly on this object
-    seo_friendly_path = models.CharField(max_length=255, null=True, unique=False)
+    seo_friendly_path = models.CharField(max_length=255, null=True, unique=False, db_index=True)
     seo_friendly_path_date_last_updated = models.DateTimeField(null=True)
     supporters_count = models.PositiveIntegerField(default=0)  # From linked_campaignx_we_vote_id CampaignX entry
 
