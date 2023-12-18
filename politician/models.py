@@ -387,6 +387,8 @@ class PoliticiansAreNotDuplicates(models.Model):
     """
     When checking for duplicates, there are times when we want to explicitly mark two politicians as NOT duplicates
     """
+    MultipleObjectsReturned = None
+    DoesNotExist = None
     objects = None
     politician1_we_vote_id = models.CharField(
         verbose_name="first politician we are tracking", max_length=255, null=True, unique=False)
@@ -510,6 +512,26 @@ class PoliticianManager(models.Manager):
             'status':                   status,
             'success':                  success,
         }
+
+    def get_politician_from_politicianseofriendlypath_table(self, path):
+        try:
+            path_query = PoliticianSEOFriendlyPath.objects.all()
+            path_query = path_query.filter(final_pathname_string=path)
+            path_count = path_query.count()
+            path_list = list(path_query)
+            if path_count == 0:
+                path_query = path_query.filter(Q(base_pathname_string=path))
+                path_count = path_query.count()
+                path_list = list(path_query)
+            if path_count == 0:
+                return 0, '', None, 'NO_PATH_MATCH_IN_POLITICIANSEOFRIENDLYPATH_TABLE '
+
+            politician = Politician.objects.get(we_vote_id=path_list[0].politician_we_vote_id)
+
+            return path_list[0].id, path_list[0].politician_we_vote_id, politician, ''
+        except Exception as e:
+            return 0, '', None, \
+                "FAILED_TO_GET_POLITICIAN_VIA_FALLBACK_TO_POLITICIANSEOFRIENDLYPATH_TABLE: " + str(e) + ' '
 
     def create_politician_from_similar_object(self, similar_object):
         """
@@ -839,9 +861,15 @@ class PoliticianManager(models.Manager):
             success = False
             status += "MULTIPLE_POLITICIANS_FOUND "
         except Politician.DoesNotExist:
-            error_result = True
-            exception_does_not_exist = True
-            status += "NO_POLITICIAN_FOUND "
+            politician_id, politician_we_vote_id, politician, status2 = \
+                self.get_politician_from_politicianseofriendlypath_table(seo_friendly_path)
+            status += status2
+            if politician_id == 0:
+                error_result = True
+                exception_does_not_exist = True
+                status += "NO_POLITICIAN_FOUND "
+            else:
+                politician_found = True
         except Exception as e:
             success = False
             status += "PROBLEM_WITH_RETRIEVE_POLITICIAN: " + str(e) + ' '
