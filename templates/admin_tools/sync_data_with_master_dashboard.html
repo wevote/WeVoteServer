@@ -1,4 +1,4 @@
-{# templates/admin_tools/statistics_summary.html #}
+{# templates/admin_tools/sync_data_with_master_dashboard.html #}
 {% extends "template_base.html" %}
 
 {% block title %}Sync Data With Master We Vote Servers{% endblock %}
@@ -314,7 +314,7 @@
     }, 1000);
 
     function fastLoadClick() {
-    console.log("ON CLICK fastLoadButton");
+        console.log("ON CLICK fastLoadButton");
         // http://localhost:8000/retrieve_tables/import/?
         if (!$("#fastLoadButton").html().includes('.....')) {
             $("#fastLoadButton").html("... Loading all data from the master server, this takes about 20 to 40 minutes ...")
