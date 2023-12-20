@@ -730,12 +730,14 @@ class CandidateListManager(models.Manager):
     def retrieve_candidates_for_specific_elections(
             self,
             google_civic_election_id_list=[],
+            limit_to_these_last_names=[],
             limit_to_this_state_code="",
             return_list_of_objects=False,
             super_light_candidate_list=False):
         """
         This function is needed for our scraping tools.
         :param google_civic_election_id_list:
+        :param limit_to_these_last_names:
         :param limit_to_this_state_code:
         :param return_list_of_objects:
         :param super_light_candidate_list:
@@ -770,6 +772,21 @@ class CandidateListManager(models.Manager):
 
                 candidate_query = CandidateCampaign.objects.using('readonly').all()
                 candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+                if len(limit_to_these_last_names) > 0:
+                    filters = []
+                    for one_last_name in limit_to_these_last_names:
+                        new_filter = Q(candidate_name__icontains=one_last_name)
+                        filters.append(new_filter)
+
+                    # Add the first query
+                    if len(filters):
+                        final_filters = filters.pop()
+
+                        # ...and "OR" the remaining items in the list
+                        for item in filters:
+                            final_filters |= item
+
+                        candidate_query = candidate_query.filter(final_filters)
                 if positive_value_exists(limit_to_this_state_code):
                     candidate_query = candidate_query.filter(state_code__iexact=limit_to_this_state_code)
                 candidate_list_objects = list(candidate_query)
@@ -2422,7 +2439,7 @@ class CandidateCampaign(models.Model):
     politician_id = models.BigIntegerField(verbose_name="politician unique identifier", null=True, blank=True)
     # The persistent We Vote unique ID of the Politician, so we can export and import into other databases.
     politician_we_vote_id = models.CharField(
-        verbose_name="we vote politician id", max_length=255, null=True, blank=True)
+        verbose_name="we vote politician id", max_length=255, null=True, blank=True, db_index=True)
     # The candidate's name.
     candidate_name = models.CharField(verbose_name="candidate name", max_length=255, null=False, blank=False,
                                       db_index=True)
@@ -2487,7 +2504,7 @@ class CandidateCampaign(models.Model):
     facebook_profile_image_url_https = models.TextField(
         verbose_name='url of profile image from facebook', blank=True, null=True)
     # seo_friendly_path data is copied from the Politician object, and isn't edited directly on this object
-    seo_friendly_path = models.CharField(max_length=255, null=True, unique=False)
+    seo_friendly_path = models.CharField(max_length=255, null=True, unique=False, db_index=True)
     seo_friendly_path_date_last_updated = models.DateTimeField(null=True)
     supporters_count = models.PositiveIntegerField(default=0)  # From linked_campaignx_we_vote_id CampaignX entry
 
@@ -2733,6 +2750,12 @@ class CandidateCampaign(models.Model):
         if self.google_civic_candidate_name3 and (self.google_civic_candidate_name3 != self.display_candidate_name()):
             alternate_names.append(self.google_civic_candidate_name3)
         return alternate_names
+
+    def display_personal_statement(self):
+        if self.twitter_description:
+            return self.twitter_description
+        else:
+            return ""
 
     def extract_title(self):
         full_name = self.display_candidate_name()
@@ -3725,7 +3748,7 @@ class CandidateManager(models.Manager):
 
     def update_or_create_candidates_are_not_duplicates(self, candidate1_we_vote_id, candidate2_we_vote_id):
         """
-        Either update or create a candidate entry.
+        Either update or create a CandidatesAreNotDuplicates entry.
         """
         exception_multiple_object_returned = False
         success = False

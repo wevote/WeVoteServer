@@ -321,6 +321,80 @@ def render_representative_merge_form(
 
 
 @login_required
+def repair_ocd_id_mismatch_damage_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    state_code = request.GET.get('state_code', '')
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+
+    representative_we_vote_id_list = []
+    representatives_dict = {}
+
+    representative_error_count = 0
+    representative_list_count = 0
+    states_already_match_count = 0
+    states_fixed_count = 0
+    states_to_be_fixed_count = 0
+    status = ''
+    try:
+        queryset = Representative.objects.all()
+        queryset = queryset.filter(ocd_id_state_mismatch_found=True)
+        representative_list = list(queryset[:1000])
+        representative_list_count = len(representative_list)
+        for one_representative in representative_list:
+            # Now find all representative ids related to this representative
+            try:
+                if positive_value_exists(one_representative.ocd_division_id) and \
+                        positive_value_exists(one_representative.state_code):
+                    # Is there a mismatch between the ocd_id and the representative.state_code?
+                    state_code_from_ocd_id = extract_state_from_ocd_division_id(one_representative.ocd_division_id)
+                    if not positive_value_exists(state_code_from_ocd_id):
+                        # Cannot compare
+                        pass
+                    elif one_representative.state_code.lower() == state_code_from_ocd_id.lower():
+                        # Already ok
+                        states_already_match_count += 1
+                    else:
+                        # Fix
+                        states_to_be_fixed_count += 1
+                        one_representative.state_code = state_code_from_ocd_id
+                        one_representative.seo_friendly_path = None
+                        one_representative.seo_friendly_path_date_last_updated = now()
+                        one_representative.save()
+                        states_fixed_count += 1
+            except Exception as e:
+                representative_error_count += 1
+                if representative_error_count < 10:
+                    status += "COULD_NOT_SAVE_REPRESENTATIVE: " + str(e) + " "
+            representatives_dict[one_representative.we_vote_id] = one_representative
+            representative_we_vote_id_list.append(one_representative.we_vote_id)
+    except Exception as e:
+        status += "GENERAL_ERROR: " + str(e) + " "
+
+    messages.add_message(request, messages.INFO,
+                         "Representatives analyzed: {representative_list_count:,}. "
+                         "states_already_match_count: {states_already_match_count:,}. "
+                         "states_to_be_fixed_count: {states_to_be_fixed_count} "
+                         "status: {status}"
+                         "".format(
+                             representative_list_count=representative_list_count,
+                             states_already_match_count=states_already_match_count,
+                             states_to_be_fixed_count=states_to_be_fixed_count,
+                             status=status))
+
+    return HttpResponseRedirect(reverse('representative:representative_list', args=()) +
+                                "?google_civic_election_id={google_civic_election_id}"
+                                "&state_code={state_code}"
+                                "&show_ocd_id_state_mismatch=1"
+                                "".format(
+                                    google_civic_election_id=google_civic_election_id,
+                                    state_code=state_code))
+
+
+@login_required
 def representatives_import_from_master_server_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'admin'}
@@ -413,7 +487,7 @@ def representative_list_view(request):
         datetime_now = timezone.localize(datetime.now())
         for one_representative in representative_list:
             one_politician = politician_dict_list.get(one_representative.politician_we_vote_id)
-            if positive_value_exists(one_politician.seo_friendly_path):
+            if one_politician and positive_value_exists(one_politician.seo_friendly_path):
                 one_representative.seo_friendly_path = one_politician.seo_friendly_path
                 one_representative.seo_friendly_path_date_last_updated = datetime_now
                 update_list.append(one_representative)
@@ -605,6 +679,15 @@ def representative_list_view(request):
             for one_word in search_words:
                 filters = []
 
+                new_filter = Q(office_held_name__icontains=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(office_held_we_vote_id__iexact=one_word)
+                filters.append(new_filter)
+
+                new_filter = Q(political_party__icontains=one_word)
+                filters.append(new_filter)
+
                 new_filter = (
                     Q(representative_email__icontains=one_word) |
                     Q(representative_email2__icontains=one_word) |
@@ -620,9 +703,6 @@ def representative_list_view(request):
                     Q(representative_twitter_handle2__icontains=one_word) |
                     Q(representative_twitter_handle3__icontains=one_word)
                 )
-                filters.append(new_filter)
-
-                new_filter = Q(political_party__icontains=one_word)
                 filters.append(new_filter)
 
                 new_filter = Q(we_vote_id__iexact=one_word)
@@ -688,20 +768,20 @@ def representative_list_view(request):
                              "".format(representative_count=representative_count))
 
     template_values = {
-        'messages_on_stage':        messages_on_stage,
-        'missing_politician':       missing_politician,
-        'google_civic_election_id': google_civic_election_id,
-        'election_list':            election_list,
-        'representative_list':      representative_list,
-        'representative_search':    representative_search,
-        'show_all':                 show_all,
-        'show_battleground':        show_battleground,
+        'messages_on_stage':                messages_on_stage,
+        'missing_politician':               missing_politician,
+        'google_civic_election_id':         google_civic_election_id,
+        'election_list':                    election_list,
+        'representative_list':              representative_list,
+        'representative_search':            representative_search,
+        'show_all':                         show_all,
+        'show_battleground':                show_battleground,
         'show_representatives_with_email':  show_representatives_with_email,
-        'show_this_year':           show_this_year,
-        'show_ocd_id_state_mismatch':    show_ocd_id_state_mismatch,
-        'state_code':               state_code,
-        'state_list':               sorted_state_list,
-        'years_available':          OFFICE_HELD_YEARS_AVAILABLE,
+        'show_this_year':                   show_this_year,
+        'show_ocd_id_state_mismatch':       show_ocd_id_state_mismatch,
+        'state_code':                       state_code,
+        'state_list':                       sorted_state_list,
+        'years_available':                  OFFICE_HELD_YEARS_AVAILABLE,
     }
     return render(request, 'representative/representative_list.html', template_values)
 
@@ -1907,19 +1987,77 @@ def update_ocd_id_state_mismatch_view(request):
                              "ERROR with update_ocd_id_state_mismatch_view: {e} "
                              "".format(e=e))
 
+    return HttpResponseRedirect(reverse('representative:representative_list', args=()))
+
+
+@login_required
+def update_ocd_id_state_mismatch_related_tables_view(request):
+    # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
+    authority_required = {'admin'}
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    queryset = Representative.objects.all()
+    queryset = queryset.filter(ocd_id_state_mismatch_found=True)
+    representative_list = list(queryset[:10000])
+
+    office_held_we_vote_id_with_mismatch_list = []
+    politician_we_vote_id_with_mismatch_list = []
+    for representative in representative_list:
+        if positive_value_exists(representative.office_held_we_vote_id) and \
+                representative.office_held_we_vote_id not in office_held_we_vote_id_with_mismatch_list:
+            office_held_we_vote_id_with_mismatch_list.append(representative.office_held_we_vote_id)
+        if positive_value_exists(representative.politician_we_vote_id) and \
+                representative.politician_we_vote_id not in politician_we_vote_id_with_mismatch_list:
+            politician_we_vote_id_with_mismatch_list.append(representative.politician_we_vote_id)
+
+    # Now transfer ocd_id_state_mismatch_found to all linked OfficeHeld records
+    #  using office_held_we_vote_id_with_mismatch_list.
+    queryset = OfficeHeld.objects.all()
+    queryset = queryset.filter(we_vote_id__in=office_held_we_vote_id_with_mismatch_list)
+    queryset = queryset.exclude(ocd_id_state_mismatch_found=True)
+    office_held_list = list(queryset[:1000])
+    bulk_update_list = []
+    for office_held in office_held_list:
+        office_held.ocd_id_state_mismatch_found = True
+        bulk_update_list.append(office_held)
+    OfficeHeld.objects.bulk_update(bulk_update_list, ['ocd_id_state_mismatch_found'])
+    message = "Office Held entries marked with ocd_id_state_mismatch_found: {office_held_list_updated:,}.".format(
+        office_held_list_updated=len(office_held_list)
+    )
+    messages.add_message(request, messages.INFO, message)
+
     # Now transfer ocd_id_state_mismatch_found to all linked Politician records
     #  using politician_we_vote_id_with_mismatch_list. We have to do it here, because the ocd_division_id
     #  data does not exist in the Politician table.
     queryset = Politician.objects.all()
     queryset = queryset.filter(we_vote_id__in=politician_we_vote_id_with_mismatch_list)
-    politician_list = list(queryset)
+    queryset = queryset.exclude(ocd_id_state_mismatch_found=True)
+    politician_list = list(queryset[:1000])
     bulk_update_list = []
     for politician in politician_list:
         politician.ocd_id_state_mismatch_found = True
         bulk_update_list.append(politician)
     Politician.objects.bulk_update(bulk_update_list, ['ocd_id_state_mismatch_found'])
-    message = "Politicians updated: {politicians_updated:,}.".format(
+    message = "Politicians marked with ocd_id_state_mismatch_found: {politicians_updated:,}.".format(
         politicians_updated=len(politician_list)
+    )
+    messages.add_message(request, messages.INFO, message)
+
+    # Now transfer ocd_id_state_mismatch_found to all linked CampaignX records
+    #  using politician_we_vote_id_with_mismatch_list.
+    from campaign.models import CampaignX
+    queryset = CampaignX.objects.all()
+    queryset = queryset.filter(linked_politician_we_vote_id__in=politician_we_vote_id_with_mismatch_list)
+    queryset = queryset.exclude(ocd_id_state_mismatch_found=True)
+    campaignx_list = list(queryset[:1000])
+    bulk_update_list = []
+    for campaignx in campaignx_list:
+        campaignx.ocd_id_state_mismatch_found = True
+        bulk_update_list.append(campaignx)
+    CampaignX.objects.bulk_update(bulk_update_list, ['ocd_id_state_mismatch_found'])
+    message = "CampaignX marked with ocd_id_state_mismatch_found: {campaignx_updated:,}.".format(
+        campaignx_updated=len(campaignx_list)
     )
     messages.add_message(request, messages.INFO, message)
 

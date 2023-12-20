@@ -258,6 +258,46 @@ def find_duplicate_politician(we_vote_politician, ignore_politician_id_list):
     return results
 
 
+def find_campaignx_list_to_link_to_this_politician(politician=None):
+    """
+    Find Campaigns to Link to this Politician
+    Finding Campaigns that *might* be "children" of this politician
+
+    :param politician:
+    :return:
+    """
+    if not hasattr(politician, 'we_vote_id'):
+        return []
+    from campaign.models import CampaignX
+    try:
+        related_list = CampaignX.objects.using('readonly').all()
+        related_list = related_list.exclude(
+            linked_politician_we_vote_id__iexact=politician.we_vote_id)
+        related_list = related_list.filter(campaign_title__icontains=politician.first_name)
+        related_list = related_list.filter(campaign_title__icontains=politician.last_name)
+
+        # filters = []
+        # new_filter = \
+        #     Q(campaign_title__icontains=politician.first_name) & \
+        #     Q(campaign_title__icontains=politician.last_name)
+        # filters.append(new_filter)
+        #
+        # # Add the first query
+        # if len(filters):
+        #     final_filters = filters.pop()
+        #
+        #     # ...and "OR" the remaining items in the list
+        #     for item in filters:
+        #         final_filters |= item
+        #
+        #     related_list = related_list.filter(final_filters)
+
+        related_list = related_list.order_by('campaign_title')[:20]
+    except Exception as e:
+        related_list = []
+    return related_list
+
+
 def find_candidates_to_link_to_this_politician(politician=None):
     """
     Find Candidates to Link to this Politician
@@ -270,7 +310,7 @@ def find_candidates_to_link_to_this_politician(politician=None):
         return []
     from candidate.models import CandidateCampaign
     try:
-        related_candidate_list = CandidateCampaign.objects.all()
+        related_candidate_list = CandidateCampaign.objects.using('readonly').all()
         related_candidate_list = related_candidate_list.exclude(
             politician_we_vote_id__iexact=politician.we_vote_id)
 
@@ -356,7 +396,7 @@ def find_representatives_to_link_to_this_politician(politician=None):
         return []
     from representative.models import Representative
     try:
-        related_representative_list = Representative.objects.all()
+        related_representative_list = Representative.objects.using('readonly').all()
         related_representative_list = related_representative_list.exclude(
             politician_we_vote_id__iexact=politician.we_vote_id)
 
@@ -474,6 +514,13 @@ def figure_out_politician_conflict_values(politician1, politician2):
                     politician_merge_conflict_values[attribute] = 'POLITICIAN2'
                 else:
                     politician_merge_conflict_values[attribute] = 'POLITICIAN1'
+            elif attribute == "ocd_id_state_mismatch_found":
+                if positive_value_exists(politician1_attribute_value):
+                    politician_merge_conflict_values[attribute] = 'POLITICIAN1'
+                elif positive_value_exists(politician2_attribute_value):
+                    politician_merge_conflict_values[attribute] = 'POLITICIAN2'
+                else:
+                    politician_merge_conflict_values[attribute] = 'MATCHING'
             elif attribute == "political_party":
                 if convert_to_political_party_constant(politician1_attribute_value) == \
                         convert_to_political_party_constant(politician2_attribute_value):
@@ -509,6 +556,32 @@ def figure_out_politician_conflict_values(politician1, politician2):
                             politician_merge_conflict_values[attribute] = 'CONFLICT'
                     else:
                         politician_merge_conflict_values[attribute] = 'CONFLICT'
+            elif attribute == "seo_friendly_path":
+                if politician1_attribute_value_lower_case == politician2_attribute_value_lower_case:
+                    politician_merge_conflict_values[attribute] = 'MATCHING'
+                elif len(politician1_attribute_value_lower_case) > 0 and len(
+                        politician2_attribute_value_lower_case) == 0:
+                    politician_merge_conflict_values[attribute] = 'POLITICIAN1'
+                elif len(politician1_attribute_value_lower_case) == 0 and len(
+                        politician2_attribute_value_lower_case) > 0:
+                    politician_merge_conflict_values[attribute] = 'POLITICIAN2'
+                elif len(politician1_attribute_value_lower_case) > 5 and len(
+                        politician2_attribute_value_lower_case) > 5:
+                    # If we remove the last four digits from the path, are the strings identical?
+                    politician1_attribute_value_lower_case_minus_four_digits = \
+                        politician1_attribute_value_lower_case[:-4]
+                    politician2_attribute_value_lower_case_minus_four_digits = \
+                        politician2_attribute_value_lower_case[:-4]
+                    if politician1_attribute_value_lower_case == \
+                            politician2_attribute_value_lower_case_minus_four_digits:
+                        politician_merge_conflict_values[attribute] = 'POLITICIAN1'
+                    elif politician2_attribute_value_lower_case == \
+                            politician1_attribute_value_lower_case_minus_four_digits:
+                        politician_merge_conflict_values[attribute] = 'POLITICIAN2'
+                    else:
+                        politician_merge_conflict_values[attribute] = 'CONFLICT'
+                else:
+                    politician_merge_conflict_values[attribute] = 'CONFLICT'
             elif attribute == "state_code":
                 if politician1_attribute_value_lower_case == politician2_attribute_value_lower_case:
                     politician_merge_conflict_values[attribute] = 'MATCHING'
@@ -1004,6 +1077,13 @@ def merge_these_two_politicians(
         }
         return results
 
+    # Update any CampaignXPolitician entries to new politician_we_vote_id
+    from campaign.models import CampaignXPolitician
+    campaign_politicians_moved = CampaignXPolitician.objects \
+        .filter(politician_we_vote_id__iexact=politician2_we_vote_id) \
+        .update(politician_we_vote_id=politician1_we_vote_id)
+    status += "CAMPAIGNX_POLITICIANS_MOVED: " + str(campaign_politicians_moved) + " "
+
     # Update Representatives to new politician ids
     representative_results = move_representatives_to_another_politician(
         from_politician_id=politician2_id,
@@ -1020,6 +1100,13 @@ def merge_these_two_politicians(
             'politician': None,
         }
         return results
+
+    # Update any WeVoteImage entries to new politician_we_vote_id
+    from image.models import WeVoteImage
+    images_moved = WeVoteImage.objects \
+        .filter(politician_we_vote_id__iexact=politician2_we_vote_id) \
+        .update(politician_we_vote_id=politician1_we_vote_id)
+    status += "WE_VOTE_IMAGE_ENTRIES_MOVED: " + str(images_moved) + " "
 
     # Clear 'unique=True' fields in politician2, which need to be Null before politician1 can be saved
     #  with updated values

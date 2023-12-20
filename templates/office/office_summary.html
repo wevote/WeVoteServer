@@ -13,19 +13,19 @@
 {%  block content %}
 {% load humanize %}
 
-<a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Offices</a>
-
 {% if office %}
+
+<a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Offices</a>
 
     <h1>{{ office.office_name }}</h1>
 
     <table>
-    {% if office.district_id or office.state_code %}
+{% if office.district_id or office.state_code %}
     <tr>
       <td>State/District:</td>
       <td><strong>{% if office.state_code %} {{ office.state_code }} {% endif %}{% if office.district_id %} - District {{ office.district_id }}{% endif %}</strong></td>
     </tr>
-    {% endif %}
+{% endif %}
     <tr>
       <td>Google Civic Election ID:</td>
       <td>
@@ -55,90 +55,114 @@
         {% if office.google_civic_office_name5 %}<br /><strong>5) {{ office.google_civic_office_name5|default_if_none:"" }}</strong>{% endif %}
       </td>
     </tr>
-    {% if office.ballotpedia_office_name %}
+{% if office.ballotpedia_office_name %}
     <tr>
       <td>Ballotpedia Office Name:</td>
       <td><strong>{{ office.ballotpedia_office_name }}</strong></td>
     </tr>
-    {% endif %}
-    {% if office.office_url %}
+{% endif %}
+{% if office.office_url %}
     <tr>
       <td>Office Website:</td>
       <td><strong>{{ office.office_url }}</strong></td>
     </tr>
-    {% endif %}
+{% endif %}
     <tr>
       <td style="padding-right: 8px;">Is Marquee? :: Is Battleground?</td>
       <td><strong>{{ office.ballotpedia_is_marquee|default_if_none:"No" }} :: {{ office.is_battleground_race|default_if_none:"No" }}</strong></td>
     </tr>
+{% if office.ballotpedia_office_url %}
     <tr>
       <td>Ballotpedia Office URL:</td>
       <td><strong>{{ office.ballotpedia_office_url|default_if_none:"" }}</strong></td>
     </tr>
-    {% if office.ballotpedia_race_office_level %}
+{% endif %}
+{% if office.ballotpedia_race_office_level %}
     <tr>
       <td>Race Office Level:</td>
       <td><strong>{{ office.ballotpedia_race_office_level|default_if_none:"" }}</strong></td>
     </tr>
-    {% endif %}
+{% endif %}
+{% if office.google_ballot_placement %}
     <tr>
       <td>Google Ballot Placement:</td>
       <td><strong>{{ office.google_ballot_placement|default_if_none:"" }}</strong></td>
     </tr>
+{% endif %}
+{% if office.district_id %}
     <tr>
       <td>District ID:</td>
       <td><strong>{{ office.district_id|default_if_none:"" }}</strong></td>
     </tr>
+{% endif %}
+{% if office.district_name %}
     <tr>
       <td>District Name:</td>
       <td><strong>{{ office.district_name|default_if_none:"" }}</strong></td>
     </tr>
+{% endif %}
+{% if office.district_scope %}
     <tr>
       <td>District Scope:</td>
       <td><strong>{{ office.district_scope|default_if_none:"" }}</strong></td>
     </tr>
+{% endif %}
+{% if office.number_elected %}
     <tr>
       <td>Number Elected:</td>
       <td><strong>{{ office.number_elected|default_if_none:"" }}</strong></td>
     </tr>
+{% endif %}
+{% if office.number_voting_for %}
     <tr>
       <td>Number Voting For:</td>
       <td><strong>{{ office.number_voting_for|default_if_none:"" }}</strong></td>
     </tr>
+{% endif %}
+{% if office.ballotpedia_election_id %}
     <tr>
       <td>Ballotpedia Election ID:</td>
       <td><strong>{{ office.ballotpedia_election_id|default_if_none:"" }}</strong></td>
     </tr>
+{% endif %}
+{% if office.ballotpedia_office_url %}
     <tr>
-      <td>Ballotpedia Race ID:</td>
+      <td>Ballotpedia Office URL:</td>
       <td>
-        {% if office.ballotpedia_office_url %}
         <strong><a href="{{ office.ballotpedia_office_url }}" target="_blank">{{ office.ballotpedia_race_id|default_if_none:"" }}</a></strong>
-        {% else %}
-        <strong>{{ office.ballotpedia_race_id|default_if_none:"" }}</strong>
-        {% endif %}
       </td>
     </tr>
+{% endif %}
+{% if office.ballotpedia_office_id %}
     <tr>
       <td>Ballotpedia Office Held ID:</td>
       <td><strong>{{ office.ballotpedia_office_id|default_if_none:"" }}</strong></td>
     </tr>
+{% endif %}
+{% if office.ballotpedia_district_id %}
     <tr>
       <td>Ballotpedia District ID:</td>
       <td><strong>{{ office.ballotpedia_district_id|default_if_none:"" }}</strong></td>
     </tr>
+{% endif %}
+{% if office.ctcl_uuid %}
     <tr>
       <td>CTCL UUID:</td>
       <td><strong>{{ office.ctcl_uuid|default_if_none:"" }}</strong></td>
     </tr>
+{% endif %}
+{% if office.ocd_division_id %}
     <tr>
       <td>OCD Division ID:</td>
       <td><strong>{{ office.ocd_division_id|default_if_none:"" }}</strong></td>
     </tr>
+{% endif %}
+{% if office.vote_usa_office_id %}
     <tr>
       <td>Vote Office USA ID:</td>
       <td><strong>{{ office.vote_usa_office_id|default_if_none:"" }}</strong></td>
     </tr>
+{% endif %}
     </table>
 
     <p>
@@ -158,16 +182,14 @@
                 <th>&nbsp;</th>
                 <th>Candidate&nbsp;Name</th>
                 <th>Party</th>
-                <th>Supporters</th>
-                <th>Opposers</th>
-                <th>% of Support</th>
+                <th>Support</th>
+                <th>Oppose</th>
+                <th>% Support</th>
                 <th>Twitter Handle</th>
                 <th>Website</th>
-                <th>Id</th>
                 <th>We Vote Id</th>
                 <th>State</th>
                 <th>IDs</th>
-                <th>&nbsp;</th>
             </tr>
         </thead>
     {% for candidate in candidate_list %}
@@ -177,8 +199,9 @@
                 {% if candidate.candidate_photo_url %}
                 <a href="{% url 'candidate:candidate_edit' candidate.id %}">
                     <img src='{{ candidate.candidate_photo_url }}' height="25px" />
-                </a>
+                </a><br />
                 {% endif %}
+                (<a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">edit</a>)
             </td>
             <td>
               <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">{{ candidate.candidate_name }}</a>
@@ -202,8 +225,12 @@
               {% if candidate.facebook_url %}<a href="{{ candidate.facebook_url }}" target="_blank">{{ candidate.facebook_url }}</a><br />{% endif %}
               {% if candidate.candidate_email %}{{ candidate.candidate_email }}{% endif %}
             </td>
-            <td>{{ candidate.id }}</td>
-            <td>{{ candidate.we_vote_id }}</td>
+            <td>{{ candidate.we_vote_id }}<br />
+            {% if candidate.politician_we_vote_id %}
+                <span style="color: darkgray">{{ candidate.politician_we_vote_id }}</span>
+            {% else %}
+                <span style="color: darkgray">politician&nbsp;missing</span>
+            {% endif %}</td>
             <td>{{ candidate.get_candidate_state }}</td>
             <td>
                 {% if candidate.ballotpedia_candidate_id %}
@@ -225,30 +252,203 @@
                     <br />
                 {% endif %}
             </td>
-            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" style="font-size: .65em">(edit)</a></td>
         </tr>
     {% endfor %}
     </table>
 
     <p></p>
 {% else %}
-    <p>(no candidates found)</p>
+    <p>(no office found)</p>
 {% endif %}
 
+{# ########################### #}
+{# ### ADD CANDIDATE TOOLS ### #}
 {% if office %}
+    <br />
+<h3>Add Candidates Running for this Office</h3>
+    <p>Enter one or more candidate names who are running for this office, and aren't listed above. Each name should be on its own line.</p>
+<form name="add_candidates_to_this_office" method="get" action="{% url 'office:office_summary' office.id %}">
+    {% csrf_token %}
+<div style="display: flex; justify-content: flex-start;">
+    <div>
+        <textarea name="candidate_possibility_search" id="candidate_possibility_search_id" rows="3" cols="50">{{ candidate_possibility_search }}</textarea>
+    </div>
+    <div>
+{% if not search_result_options_list %}
+    <input type="submit" value="Search" />
+{% endif %}
+        {% if candidate_possibility_search %}
+            &nbsp;&nbsp;
+            <a href="{% url 'office:office_summary' office.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+                 clear search</a>&nbsp;
+        {% endif %}
+    </div>
+
+    <input type="hidden" name="office_id" value="{{ office.id }}">
+    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
+    <input type="hidden" name="state_code" value="{{ state_code }}">
+</div>
+{% if search_result_options_list %}
+<table class="table">
+{% for search_result_option in search_result_options_list %}
+    <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th colspan="4">
+                        {% if search_result_option.candidate_name_to_search %}
+                        <strong>{{ search_result_option.candidate_name_to_search }}</strong>
+                        {% else %}
+                        NAME MISSING
+                        {% endif %}
+                    </th>
+                    <th>We Vote ID</th>
+                    <th>State Code</th>
+                    <th>Personal Statement</th>
+                </tr>
+            </thead>
+        {% for one_candidate in search_result_option.candidate_list %}
+            <tr>
+                <td>
+                    <input
+                       {% if one_candidate.we_vote_id in existing_candidate_we_vote_id_list or search_result_option.candidate_name_already_linked %}checked{% endif %}
+                       {% if one_candidate.we_vote_id in existing_candidate_we_vote_id_list or search_result_option.candidate_name_already_linked %}disabled{% endif %}
+                       type="radio"
+                       name="select_for_{{ search_result_option.candidate_slug }}"
+                       id="select_for_{{ search_result_option.candidate_slug }}_candidate_id_{{ one_candidate.we_vote_id }}"
+                       value="{{ one_candidate.we_vote_id }}"
+                    />
+                </td>
+                <td>
+                    {% if search_result_option.candidate_name_already_linked %}
+                        ALREADY LINKED
+                    {% elif search_result_option.candidate_name_created %}
+                        CANDIDATE CREATED BUT NOT LINKED
+                    {% else %}
+                        <label for="select_for_{{ search_result_option.candidate_slug }}_candidate_id_{{ one_candidate.we_vote_id }}">Choose This Candidate</label>
+                    {% endif %}
+                </td>
+                <td>
+                {% if one_candidate.we_vote_hosted_profile_image_url_tiny %}
+                    <img src="{{ one_candidate.we_vote_hosted_profile_image_url_tiny }}" />
+                {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'candidate:candidate_edit' one_candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
+                    {{ one_candidate.candidate_name }}&nbsp;<span class="glyphicon glyphicon-new-window"></span>
+                    </a>
+                    <span style="color: rgb(128,128,128);">(candidate)</span>
+                </td>
+                <td>
+                    {{ one_candidate.we_vote_id }}
+                </td>
+                <td>
+                    {{ one_candidate.state_code }}
+                </td>
+                <td>{{ one_candidate.display_personal_statement }}</td>
+            </tr>
+        {% endfor %}
+        {% for one_politician in search_result_option.politician_list %}
+            <tr>
+                <td>
+                    <input type="radio" name="select_for_{{ search_result_option.candidate_slug }}" id="select_for_{{ search_result_option.candidate_slug }}_politician_id_{{ one_politician.we_vote_id }}" value="{{ one_politician.we_vote_id }}"/>
+                </td>
+                <td>
+                    <label for="select_for_{{ search_result_option.candidate_slug }}_politician_id_{{ one_politician.we_vote_id }}">Create NEW Candidate</label>
+                </td>
+                <td>
+                {% if one_politician.we_vote_hosted_profile_image_url_tiny %}
+                    <img src="{{ one_politician.we_vote_hosted_profile_image_url_tiny }}" />
+                {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'politician:politician_edit' one_politician.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" target="_blank">
+                    {{ one_politician.politician_name }}&nbsp;<span class="glyphicon glyphicon-new-window"></span>
+                    </a>
+                    <span style="color: rgb(128,128,128);">(politician)</span>
+                </td>
+                <td>
+                    {{ one_politician.we_vote_id }}
+                </td>
+                <td>
+                    {{ one_politician.state_code }}
+                </td>
+                <td>{{ one_politician.display_personal_statement }}</td>
+            </tr>
+        {% endfor %}
+        {% if not search_result_option.candidate_name_already_linked %}
+            <tr>
+                <td>
+                    <input type="radio" name="select_for_{{ search_result_option.candidate_slug }}" id="select_for_{{ search_result_option.candidate_slug }}_name_id" value="{{ search_result_option.candidate_name_to_search }}"/>
+                </td>
+                <td>
+                    <label for="select_for_{{ search_result_option.candidate_slug }}_name_id">Create NEW Candidate AND Politician</label>
+                </td>
+                <td></td>
+                <td>{{ search_result_option.candidate_name_to_search }}</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="radio" name="select_for_{{ search_result_option.candidate_slug }}" id="select_for_{{ search_result_option.candidate_slug }}_skip_id" value="skip" checked />
+                </td>
+                <td>
+                    <label for="select_for_{{ search_result_option.candidate_slug }}_skip_id">SKIP</label>
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        {% endif %}
+        </table>
+        </td>
+    </tr>
+{% endfor %}
+{% if search_result_options_list %}
+    <tr>
+        <td colspan="2">
+    <input type="submit" class="btn btn-primary" value="Submit" />
+        </td>
+    </tr>
+{% endif %}
+</table>
+</form>
+{% endif %}
+
+{% endif %}
+{# ### END OF ADD CANDIDATE TOOLS ### #}
+{# ################################## #}
+
+
+
+
+{# ############################ #}
+{# ### OFFICE MERGING TOOLS ### #}
+{% if office %}
+    <br />
+    <br />
 <h3>Merge with Another Office</h3>
 <form name="find_another_to_merge" method="get" action="{% url 'office:office_summary' office.id %}">
     {% csrf_token %}
+{% if office_search_results_list %}
     <div class="form-group pull-right">
         <label for="which_marking_id" class="control-label">
           <span class="u-no-break">Mark selected rows as:</span>
         </label>
         <select id="which_marking_id" name="which_marking">
             {# note: option values match keys in updated_values parameter of update_or_create_voter_guide_possibility() #}
+            <option value="skip">-- Choose Action --</option>
             <option value="not_a_duplicate">Not Duplicates</option>
         </select>
         <input type="submit" value="Save" />
     </div>
+{% endif %}
     {% if office_search %}
         <a href="{% url 'office:office_summary' office.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
              clear search</a>&nbsp;
@@ -264,12 +464,11 @@
         <thead>
         <tr>
             <th>&nbsp;</th>
-            <th>ID</th>
-            <th>We Vote ID</th>
             <th>Office Name</th>
             <th>State</th>
+            <th>We Vote ID</th>
             <th>Candidates</th>
-            <th>IDs</th>
+            <th>Other IDs</th>
             <th>
               all
               <input type="checkbox" name="toggle_all" id="toggle_all_id" value="1"/>
@@ -279,12 +478,6 @@
     {% for found_office in office_search_results_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{{ found_office.id }}</td>
-            <td>
-                {{ found_office.we_vote_id }}
-                {% if found_office.not_a_duplicate %}<br />NOT&nbsp;DUPLICATE{% endif %}
-
-            </td>
             <td>
               {% if found_office.candidates_match_root_office %}
                 <strong>{{ found_office.office_name }}</strong>
@@ -296,6 +489,11 @@
               <a href="{% url 'office:compare_two_offices_for_merge' %}?contest_office1_we_vote_id={{ office.we_vote_id }}&contest_office2_we_vote_id={{ found_office.we_vote_id }}" target="_blank">compare&nbsp;for&nbsp;merge</a>)
             </td>
             <td>{{ found_office.state_code }}</td>
+            <td>
+                {{ found_office.we_vote_id }}
+                {% if found_office.not_a_duplicate %}<br />NOT&nbsp;DUPLICATE{% endif %}
+
+            </td>
             <td>
             {% if found_office.candidates_match_root_office %}
               <strong>{{ found_office.candidates_string }}</strong>
@@ -320,6 +518,8 @@
 {% endif %}
 
 {% endif %}
+{# ### END OF OFFICE MERGING TOOLS ### #}
+{# ################################### #}
 
 <p>&nbsp;</p>
 <p>&nbsp;</p>

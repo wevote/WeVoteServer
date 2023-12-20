@@ -1,0 +1,168 @@
+{# templates/campaign/campaignx_merge.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if campaignx_option1 %}Merge CampaignX Duplicates {{ campaignx_option1.campaignx_name  }}{% else %}CANNOT MERGE{% endif %}{% endblock %}
+
+{%  block content %}
+<a href="{% url 'campaign:campaignx_list' %}">< Back to CampaignX List</a>
+  <br /></r />
+{#<a href="{% url 'campaign:find_and_merge_duplicate_campaignxs' %}?campaignx_year={{ campaignx_year }}&google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&find_number_of_duplicates=1"#}
+{#   target="_blank" >Click to find number of possible duplicates <span class="glyphicon glyphicon-new-window"></span></a> (takes 30-60 seconds)#}
+
+<h1>{% if campaignx_option1 %}Merge CampaignX Duplicates{% else %}CANNOT MERGE{% endif %}</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form action="{% url 'campaign:campaignx_merge_process' %}" method="post">
+{% csrf_token %}
+{% if campaignx_option1 and campaignx_option2 %}
+<table>
+    <tr>
+        <th>&nbsp;</th>
+        <th>CampaignX Option 1</th>
+        <th>CampaignX Option 2</th>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td><a href="{% url 'campaign:campaignx_edit' campaignx_we_vote_id=campaignx_option1.we_vote_id %}"
+               target="_blank">view campaignx 1 <span class="glyphicon glyphicon-new-window"></span></a></td>
+        <td><a href="{% url 'campaign:campaignx_edit' campaignx_we_vote_id=campaignx_option2.we_vote_id %}"
+               target="_blank">view campaignx 2 <span class="glyphicon glyphicon-new-window"></span></a></td>
+    </tr>
+
+    {% if campaignx_option1.we_vote_id != None or campaignx_option2.we_vote_id != None %}
+    <tr>
+        <td>We Vote ID</td>
+        <td>{{ campaignx_option1.we_vote_id|default_if_none:"" }}</td>
+        <td>{{ campaignx_option2.we_vote_id|default_if_none:"" }}</td>
+    </tr>
+    {% endif %}
+
+    {% if campaignx_option1.id != None or campaignx_option2.id != None %}
+    <tr>
+        <td>ID</td>
+        <td>{{ campaignx_option1.id|default_if_none:"" }}</td>
+        <td>{{ campaignx_option2.id|default_if_none:"" }}</td>
+    </tr>
+    {% endif %}
+
+    <tr>
+        <td>&nbsp;</td>
+        <td>
+            {% if campaignx_option1.linked_politician_we_vote_id %}
+            <a href="{% url 'politician:politician_we_vote_id_edit' politician_we_vote_id=campaignx_option1.linked_politician_we_vote_id %}"
+               target="_blank">view politician 1 <span class="glyphicon glyphicon-new-window"></span></a>
+            &nbsp;&nbsp;
+            {{ politician1_full_name }}
+            &nbsp;&nbsp;
+                -
+            &nbsp;&nbsp;
+            {{ politician1_state_code }}
+            {% endif %}
+        </td>
+        <td>
+            {% if campaignx_option2.linked_politician_we_vote_id %}
+            <a href="{% url 'politician:politician_we_vote_id_edit' politician_we_vote_id=campaignx_option2.linked_politician_we_vote_id %}"
+               target="_blank">view politician 2 <span class="glyphicon glyphicon-new-window"></span></a>
+            &nbsp;&nbsp;
+            {{ politician2_full_name }}
+            &nbsp;&nbsp;
+                -
+            &nbsp;&nbsp;
+            {{ politician2_state_code }}
+            {% endif %}
+        </td>
+    </tr>
+
+{% include "campaign/campaignx_merge_one_field_decision.html" with field_name="linked_politician_we_vote_id" field_label="Politician We Vote ID" conflict_status=conflict_values.linked_politician_we_vote_id campaignx1_field_value=campaignx_option1.linked_politician_we_vote_id campaignx2_field_value=campaignx_option2.linked_politician_we_vote_id campaignx1=campaignx_option1 campaignx2=campaignx_option2 %}
+
+{% include "campaign/campaignx_merge_one_field_decision.html" with field_name="campaign_title" field_label="CampaignX Title" conflict_status=conflict_values.campaign_title campaignx1_field_value=campaignx_option1.campaign_title campaignx2_field_value=campaignx_option2.campaign_title campaignx1=campaignx_option1 campaignx2=campaignx_option2 %}
+
+    <tr>
+        <td>&nbsp;</td>
+        <td>
+            <input type="checkbox" name="regenerate_campaign_title" value="1" />
+            Regenerate CampaignX Title
+        </td>
+        <td></td>
+    </tr>
+
+{% include "campaign/campaignx_merge_one_field_decision.html" with field_name="seo_friendly_path" field_label="SEO Friendly Path" conflict_status=conflict_values.seo_friendly_path campaignx1_field_value=campaignx_option1.seo_friendly_path campaignx2_field_value=campaignx_option2.seo_friendly_path campaignx1=campaignx_option1 campaignx2=campaignx_option2 %}
+
+{% include "campaign/campaignx_merge_one_field_decision.html" with field_name="campaign_description" field_label="Campaign Description" conflict_status=conflict_values.campaign_description campaignx1_field_value=campaignx_option1.campaign_description campaignx2_field_value=campaignx_option2.campaign_description campaignx1=campaignx_option1 campaignx2=campaignx_option2 %}
+
+{% include "campaign/campaignx_merge_one_field_decision.html" with field_name="campaign_description_link_to_twitter" field_label="Description Linked to Twitter?" conflict_status=conflict_values.campaign_description_link_to_twitter campaignx1_field_value=campaignx_option1.campaign_description_link_to_twitter campaignx2_field_value=campaignx_option2.campaign_description_link_to_twitter campaignx1=campaignx_option1 campaignx2=campaignx_option2 %}
+
+{% include "campaign/campaignx_merge_one_field_decision.html" with field_name="started_by_voter_we_vote_id" field_label="Started by Voter ID" conflict_status=conflict_values.started_by_voter_we_vote_id campaignx1_field_value=campaignx_option1.started_by_voter_we_vote_id campaignx2_field_value=campaignx_option2.started_by_voter_we_vote_id campaignx1=campaignx_option1 campaignx2=campaignx_option2 %}
+
+    <tr>
+        <td>Final Election Date</td>
+        <td>{{ campaignx_option1.final_election_date_as_integer|default_if_none:"" }}</td>
+        <td>{{ campaignx_option2.final_election_date_as_integer|default_if_none:"" }}</td>
+    </tr>
+
+{# Politician profile image #}
+{% include "campaign/campaignx_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_tiny" field_label="We Vote Image (Tiny)" conflict_status=conflict_values.we_vote_hosted_profile_image_url_tiny campaignx1_field_value=campaignx_option1.we_vote_hosted_profile_image_url_tiny campaignx2_field_value=campaignx_option2.we_vote_hosted_profile_image_url_tiny campaignx1=campaignx_option1 campaignx2=campaignx_option2 %}
+
+{% include "campaign/campaignx_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_medium" field_label="We Vote Image (Medium)" conflict_status=conflict_values.we_vote_hosted_profile_image_url_medium campaignx1_field_value=campaignx_option1.we_vote_hosted_profile_image_url_medium campaignx2_field_value=campaignx_option2.we_vote_hosted_profile_image_url_medium campaignx1=campaignx_option1 campaignx2=campaignx_option2 %}
+
+{% include "campaign/campaignx_merge_one_field_decision.html" with field_name="we_vote_hosted_profile_image_url_large" field_label="We Vote Image (Large)" conflict_status=conflict_values.we_vote_hosted_profile_image_url_large campaignx1_field_value=campaignx_option1.we_vote_hosted_profile_image_url_large campaignx2_field_value=campaignx_option2.we_vote_hosted_profile_image_url_large campaignx1=campaignx_option1 campaignx2=campaignx_option2 %}
+
+{# Uploaded campaign image #}
+{% include "campaign/campaignx_merge_one_field_decision.html" with field_name="we_vote_hosted_campaign_photo_small_url" field_label="Campaign Image (Tiny)" conflict_status=conflict_values.we_vote_hosted_campaign_photo_small_url campaignx1_field_value=campaignx_option1.we_vote_hosted_campaign_photo_small_url campaignx2_field_value=campaignx_option2.we_vote_hosted_campaign_photo_small_url campaignx1=campaignx_option1 campaignx2=campaignx_option2 %}
+
+{% include "campaign/campaignx_merge_one_field_decision.html" with field_name="we_vote_hosted_campaign_photo_medium_url" field_label="Campaign Image (Medium)" conflict_status=conflict_values.we_vote_hosted_campaign_photo_medium_url campaignx1_field_value=campaignx_option1.we_vote_hosted_campaign_photo_medium_url campaignx2_field_value=campaignx_option2.we_vote_hosted_campaign_photo_medium_url campaignx1=campaignx_option1 campaignx2=campaignx_option2 %}
+
+{% include "campaign/campaignx_merge_one_field_decision.html" with field_name="we_vote_hosted_campaign_photo_large_url" field_label="Campaign Image (Large)" conflict_status=conflict_values.we_vote_hosted_campaign_photo_large_url campaignx1_field_value=campaignx_option1.we_vote_hosted_campaign_photo_large_url campaignx2_field_value=campaignx_option2.we_vote_hosted_campaign_photo_large_url campaignx1=campaignx_option1 campaignx2=campaignx_option2 %}
+
+{% include "campaign/campaignx_merge_one_field_decision.html" with field_name="we_vote_hosted_campaign_photo_original_url" field_label="Campaign Image (Large)" conflict_status=conflict_values.we_vote_hosted_campaign_photo_original_url campaignx1_field_value=campaignx_option1.we_vote_hosted_campaign_photo_original_url campaignx2_field_value=campaignx_option2.we_vote_hosted_campaign_photo_original_url campaignx1=campaignx_option1 campaignx2=campaignx_option2 %}
+
+    <tr>
+        <td>Supporters Count</td>
+        <td>{{ campaignx_option1.supporters_count }}</td>
+        <td>{{ campaignx_option2.supporters_count }}</td>
+    </tr>
+
+{% include "campaign/campaignx_merge_one_field_decision.html" with field_name="is_still_active" field_label="Is campaign still active?" conflict_status=conflict_values.is_still_active campaignx1_field_value=campaignx_option1.is_still_active campaignx2_field_value=campaignx_option2.is_still_active campaignx1=campaignx_option1 campaignx2=campaignx_option2 %}
+
+{% include "campaign/campaignx_merge_one_field_decision.html" with field_name="is_victorious" field_label="Is campaign victorious?" conflict_status=conflict_values.is_victorious campaignx1_field_value=campaignx_option1.is_victorious campaignx2_field_value=campaignx_option2.is_victorious campaignx1=campaignx_option1 campaignx2=campaignx_option2 %}
+
+{% include "campaign/campaignx_merge_one_field_decision.html" with field_name="politician_starter_list_serialized" field_label="Is ok to promote campaign on We Vote?" conflict_status=conflict_values.politician_starter_list_serialized campaignx1_field_value=campaignx_option1.politician_starter_list_serialized campaignx2_field_value=campaignx_option2.politician_starter_list_serialized campaignx1=campaignx_option1 campaignx2=campaignx_option2 %}
+
+{% include "campaign/campaignx_merge_one_field_decision.html" with field_name="is_ok_to_promote_on_we_vote" field_label="Is ok to promote campaign on We Vote?" conflict_status=conflict_values.is_ok_to_promote_on_we_vote campaignx1_field_value=campaignx_option1.is_ok_to_promote_on_we_vote campaignx2_field_value=campaignx_option2.is_ok_to_promote_on_we_vote campaignx1=campaignx_option1 campaignx2=campaignx_option2 %}
+
+{% include "campaign/campaignx_merge_one_field_decision.html" with field_name="is_blocked_by_we_vote" field_label="Is campaign blocked by We Vote?" conflict_status=conflict_values.is_blocked_by_we_vote campaignx1_field_value=campaignx_option1.is_blocked_by_we_vote campaignx2_field_value=campaignx_option2.is_blocked_by_we_vote campaignx1=campaignx_option1 campaignx2=campaignx_option2 %}
+
+{% include "campaign/campaignx_merge_one_field_decision.html" with field_name="is_blocked_by_we_vote_reason" field_label="Reason for being blocked" conflict_status=conflict_values.is_blocked_by_we_vote_reason campaignx1_field_value=campaignx_option1.is_blocked_by_we_vote_reason campaignx2_field_value=campaignx_option2.is_blocked_by_we_vote_reason campaignx1=campaignx_option1 campaignx2=campaignx_option2 %}
+
+{% include "campaign/campaignx_merge_one_field_decision.html" with field_name="is_in_team_review_mode" field_label="Is campaign in team review?" conflict_status=conflict_values.is_in_team_review_mode campaignx1_field_value=campaignx_option1.is_in_team_review_mode campaignx2_field_value=campaignx_option2.is_in_team_review_mode campaignx1=campaignx_option1 campaignx2=campaignx_option2 %}
+
+{% include "campaign/campaignx_merge_one_field_decision.html" with field_name="is_not_promoted_by_we_vote" field_label="Is campaign not promoted by We Vote?" conflict_status=conflict_values.is_not_promoted_by_we_vote campaignx1_field_value=campaignx_option1.is_not_promoted_by_we_vote campaignx2_field_value=campaignx_option2.is_not_promoted_by_we_vote campaignx1=campaignx_option1 campaignx2=campaignx_option2 %}
+
+{% include "campaign/campaignx_merge_one_field_decision.html" with field_name="is_not_promoted_by_we_vote_reason" field_label="Reason for not being promoted" conflict_status=conflict_values.is_not_promoted_by_we_vote_reason campaignx1_field_value=campaignx_option1.is_not_promoted_by_we_vote_reason campaignx2_field_value=campaignx_option2.is_not_promoted_by_we_vote_reason campaignx1=campaignx_option1 campaignx2=campaignx_option2 %}
+
+    <tr>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>
+          <a href="{% url 'campaign:campaignx_list' %}">cancel</a>&nbsp; <input type="submit" value="Skip - Not Duplicates" name="skip" />&nbsp;
+        </td>
+        <td></td>
+        <td><input type="submit" value="Merge CampaignX Records" name="merge" /></td>
+    </tr>
+</table>
+<input type="hidden" name="remove_duplicate_process" value="{{ remove_duplicate_process }}" />
+<input type="hidden" name="state_code" value="{% if state_code %}{{ state_code }}{% else %}{{ campaignx_option2.state_code }}{% endif %}" />
+<input type="hidden" name="google_civic_election_id" value="{% if google_civic_election_id %}{{ google_civic_election_id }}{% else %}{{ campaignx_option1.google_civic_election_id }}{% endif %}" />
+<input type="hidden" name="campaignx1_we_vote_id" value="{{ campaignx_option1.we_vote_id }}" />
+<input type="hidden" name="campaignx2_we_vote_id" value="{{ campaignx_option2.we_vote_id }}" />
+{% else %}
+<input type="submit" value="CANNOT MERGE" />
+{% endif %}
+</form>
+
+<br />
+
+{% endblock %}

@@ -1155,7 +1155,7 @@ def organization_edit_listed_campaigns_view(request, organization_id=0, organiza
             results = campaignx_manager.retrieve_campaignx(
                 campaignx_we_vote_id=campaignx_listed_by_organization.campaignx_we_vote_id)
             if results['campaignx_found']:
-                campaignx_listed_by_organization.campaignx_title = results['campaignx'].campaign_title
+                campaignx_listed_by_organization.campaign_title = results['campaignx'].campaign_title
         if positive_value_exists(campaignx_listed_by_organization.listing_requested_by_voter_we_vote_id):
             results = voter_manager.retrieve_voter_by_we_vote_id(
                 campaignx_listed_by_organization.listing_requested_by_voter_we_vote_id,
@@ -2320,7 +2320,7 @@ def organization_position_list_view(request, organization_id=0, organization_we_
             results = campaignx_manager.retrieve_campaignx(
                 campaignx_we_vote_id=campaignx_listed_by_organization.campaignx_we_vote_id)
             if results['campaignx_found']:
-                campaignx_listed_by_organization.campaignx_title = results['campaignx'].campaign_title
+                campaignx_listed_by_organization.campaign_title = results['campaignx'].campaign_title
         if positive_value_exists(campaignx_listed_by_organization.listing_requested_by_voter_we_vote_id):
             results = voter_manager.retrieve_voter_by_we_vote_id(
                 campaignx_listed_by_organization.listing_requested_by_voter_we_vote_id,

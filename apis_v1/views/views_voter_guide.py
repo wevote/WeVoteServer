@@ -100,17 +100,50 @@ def voter_guide_possibility_highlights_retrieve_view(request):  # voterGuidePoss
     :param request:
     :return:
     """
+    status = ''
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    limit_to_existing = request.GET.get('limit_to_existing', '')
-    url_to_scan = request.GET.get('url_to_scan', '')
-    pdf_url = request.GET.get('pdf_url', '')
-    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    is_post = True if request.method == 'POST' else False
+
+    visible_text_to_scan = ''
+    if is_post:
+        limit_to_existing = positive_value_exists(request.POST.get('limit_to_existing', True))
+        url_to_scan = request.POST.get('url_to_scan', '')
+        visible_text_to_scan = request.POST.get('visible_text_to_scan', '')
+        pdf_url = request.POST.get('pdf_url', '')
+        google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+        enable_vertex_for_url_input = request.POST.get('enable_vertex_for_url_input', False)
+    else:
+        limit_to_existing = positive_value_exists(request.GET.get('limit_to_existing', True))
+        url_to_scan = request.GET.get('url_to_scan', '')
+        pdf_url = request.GET.get('pdf_url', '')
+        google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+        visible_text_to_scan = request.GET.get('visible_text_to_scan', '')
+        enable_vertex_for_url_input = request.GET.get('enable_vertex_for_url_input', False)
+
+    # Dale & Steve 2023-12-02 Still verifying and testing more cases
+    names_list = []
+    if positive_value_exists(visible_text_to_scan):
+        from import_export_vertex.controllers import find_names_of_people_from_incoming_text
+        results = find_names_of_people_from_incoming_text(text_to_scan=visible_text_to_scan)
+        if results['names_list_found']:
+            names_list = results['names_list']
+        status += results['status']
+    elif positive_value_exists(url_to_scan) and positive_value_exists(enable_vertex_for_url_input):
+        from import_export_vertex.controllers import find_names_of_people_on_one_web_page
+        results = find_names_of_people_on_one_web_page(site_url=url_to_scan)
+        if results['names_list_found']:
+            names_list = results['names_list']
+        status += results['status']
+
     json_data = voter_guide_possibility_highlights_retrieve_for_api(
-        voter_device_id=voter_device_id,
-        url_to_scan=url_to_scan,
+        google_civic_election_id=google_civic_election_id,
         limit_to_existing=limit_to_existing,
+        names_list=names_list,
         pdf_url=pdf_url,
-        google_civic_election_id=google_civic_election_id)
+        status=status,
+        url_to_scan=url_to_scan,
+        voter_device_id=voter_device_id,
+    )
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 

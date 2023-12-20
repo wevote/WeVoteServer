@@ -1980,12 +1980,14 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
 
 
 def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilityHighlightsRetrieve
-        voter_device_id="",
-        url_to_scan="",
-        limit_to_existing=False,
+        google_civic_election_id=0,
+        limit_to_existing=True,
+        names_list=[],
         pdf_url="",
-        google_civic_election_id=0):
-    status = "VOTER_GUIDE_POSSIBILITY_HIGHLIGHTS_RETRIEVE "
+        status="",
+        url_to_scan="",
+        voter_device_id=""):
+    status += "VOTER_GUIDE_POSSIBILITY_HIGHLIGHTS_RETRIEVE "
     success = True
     highlight_list = []
     voter_we_vote_id = ''
@@ -2052,10 +2054,26 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
                                 }
                                 highlight_list.append(one_highlight)
 
-    if not positive_value_exists(limit_to_existing):
-        super_light_candidate_list = True
+    limit_to_these_last_names = []
+    names_list_found = len(names_list) > 0
+    # Do we want to return a full set of all possible candidate names? (This can create a lot of
+    #  work for the browser)
+    return_all_upcoming_candidates_in_database = not positive_value_exists(limit_to_existing)
+    if names_list_found:
+        from wevote_functions.functions import extract_last_name_from_full_name
+        for one_name in names_list:
+            try:
+                last_name = extract_last_name_from_full_name(one_name)
+                if last_name and positive_value_exists(last_name):
+                    last_name_lower = last_name.lower()
+                    if last_name_lower not in limit_to_these_last_names:
+                        limit_to_these_last_names.append(last_name_lower)
+            except Exception as e:
+                pass
+    if len(limit_to_these_last_names) > 0 or return_all_upcoming_candidates_in_database:
         results = retrieve_candidate_list_for_all_upcoming_elections(
-            super_light_candidate_list=super_light_candidate_list)
+            limit_to_these_last_names=limit_to_these_last_names,
+            super_light_candidate_list=True)
         if results['candidate_list_found']:
             all_possible_candidates_list_light = results['candidate_list_light']
             for one_possible_candidate in all_possible_candidates_list_light:
@@ -2081,7 +2099,8 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
                             highlight_list.append(one_highlight)
 
         results = retrieve_candidate_list_for_all_prior_elections_this_year(
-            super_light_candidate_list=super_light_candidate_list)
+            limit_to_these_last_names=limit_to_these_last_names,
+            super_light_candidate_list=True)
         if results['candidate_list_found']:
             all_possible_candidates_list_light = results['candidate_list_light']
             for one_possible_candidate in all_possible_candidates_list_light:

@@ -281,7 +281,7 @@ class Representative(models.Model):
     representative_url2 = models.TextField(max_length=255, blank=True, null=True)
     representative_url3 = models.TextField(max_length=255, blank=True, null=True)
     # seo_friendly_path data is copied from the Politician object, and isn't edited directly on this object
-    seo_friendly_path = models.CharField(max_length=255, null=True, unique=False)
+    seo_friendly_path = models.CharField(max_length=255, null=True, unique=False, db_index=True)
     seo_friendly_path_date_last_updated = models.DateTimeField(null=True)
     state_code = models.CharField(verbose_name="state this representative serves", max_length=2, null=True)
     supporters_count = models.PositiveIntegerField(default=0)  # From linked_campaignx_we_vote_id CampaignX entry

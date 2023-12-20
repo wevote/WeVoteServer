@@ -18,22 +18,39 @@ def voter_guide_possibility_highlights_retrieve_doc_template_values(url_root):
             'value':        'string (from post, cookie, or get (in that order))',  # boolean, integer, long, string
             'description':  'The unique key provided to any organization using the WeVoteServer APIs',
         },
-    ]
-    optional_query_parameter_list = [
         {
             'name':         'url_to_scan',
             'value':        'string',  # boolean, integer, long, string
             'description':  'The url of the list of endorsements that the voter is viewing.',
         },
-         {
+    ]
+    optional_query_parameter_list = [
+        {
+            'name':         'google_civic_election_id',
+            'value':        'integer',  # boolean, integer, long, string
+            'description':  'The Google civic election ID. Provide a value, only if you want data for a prior election.',
+        },
+        {
+            'name':         'limit_to_existing',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'If True, only return candidates already identified as being endorsed.',
+            'default':      'true',
+        },
+        {
             'name':         'pdf_url',
             'value':        'string',  # boolean, integer, long, string
             'description':  'The url of the list of endorsements, if the endorsement was originally on a pdf.',
         },
         {
-            'name':         'google_civic_election_id',
-            'value':        'integer',  # boolean, integer, long, string
-            'description':  'The Google civic election ID. Provide a value, only if you want data for a prior election.',
+            'name':         'visible_text_to_scan',
+            'value':        'text',  # boolean, integer, long, string
+            'description':  'Visible text from the page we are scanning. Only accepted in POST.',
+        },
+        {
+            'name':         'enable_vertex_for_url_input',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'For testing: Use Vertex AI  to limit returned names with url_to_scan.',
+            'default':      'false',
         },
     ]
 
@@ -93,7 +110,7 @@ def voter_guide_possibility_highlights_retrieve_doc_template_values(url_root):
         'try_now_link': 'apis_v1:voterGuidePossibilityHighlightsRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
-        'get_or_post': 'GET',
+        'get_or_post': 'GET or POST',
         'required_query_parameter_list': required_query_parameter_list,
         'optional_query_parameter_list': optional_query_parameter_list,
         'api_response': api_response,

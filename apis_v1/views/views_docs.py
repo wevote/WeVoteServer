@@ -1385,6 +1385,11 @@ def voter_guide_possibility_highlights_retrieve_doc_view(request):
     template_values = \
         voter_guide_possibility_highlights_retrieve_doc.voter_guide_possibility_highlights_retrieve_doc_template_values(
             url_root)
+    get_or_post_selected = request.GET.get('get_or_post_selected', '')
+    if 'get_or_post' in template_values and template_values['get_or_post'] == 'GET or POST':
+        if positive_value_exists(get_or_post_selected):
+            template_values['get_or_post'] = get_or_post_selected
+            template_values['get_or_post_selected'] = get_or_post_selected
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
