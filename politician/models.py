@@ -316,6 +316,7 @@ class Politician(models.Model):
     date_last_updated = models.DateTimeField(null=True, auto_now=True)
     date_last_updated_from_candidate = models.DateTimeField(null=True, default=None)
     profile_image_background_color = models.CharField(blank=True, null=True, max_length=7)
+    profile_image_background_color_needed = models.BooleanField(null=True)
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
         # Even if this data came from another source we still need a unique we_vote_id
