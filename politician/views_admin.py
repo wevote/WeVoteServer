@@ -1533,6 +1533,13 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             'vote_smart_id':                vote_smart_id,
             'web_app_root_url':             web_app_root_url,
         }
+        
+        if positive_value_exists(politician_on_stage.we_vote_hosted_profile_image_url_large):
+            if politician_on_stage.profile_image_background_color_needed is not False:
+                politician_on_stage.profile_image_background_color = generate_background(politician_on_stage)
+                politician_on_stage.profile_image_background_color_needed = False
+                politician_on_stage.save()
+                messages.add_message(request, messages.INFO, "Background color generated")       
     else:
         template_values = {
             'messages_on_stage':    messages_on_stage,
