@@ -2043,6 +2043,7 @@ def generate_campaignx_dict_from_campaignx_object(
         'latest_campaignx_supporter_list':  latest_campaignx_supporter_list,
         'linked_politician_we_vote_id':     campaignx.linked_politician_we_vote_id,
         'order_in_list':                    order_in_list,
+        'profile_image_background_color':   campaignx.profile_image_background_color,
         'seo_friendly_path':                campaignx.seo_friendly_path,
         'seo_friendly_path_list':           seo_friendly_path_list,
         'supporters_count':                 campaignx.supporters_count,
@@ -2844,6 +2845,7 @@ def update_campaignx_from_politician(campaignx, politician):
     campaignx.we_vote_hosted_profile_image_url_large = politician.we_vote_hosted_profile_image_url_large
     campaignx.we_vote_hosted_profile_image_url_medium = politician.we_vote_hosted_profile_image_url_medium
     campaignx.we_vote_hosted_profile_image_url_tiny = politician.we_vote_hosted_profile_image_url_tiny
+    campaignx.profile_image_background_color = politician.profile_image_background_color
     # TEMPORARY - Clear out we_vote_hosted_campaign_photo_large_url photos for campaigns hard-linked to politicians
     #  because all of these images were copied from the politician, and we now have a new location for them
     if positive_value_exists(campaignx.linked_politician_we_vote_id):
