@@ -183,6 +183,7 @@ INSTALLED_APPS = (
     'friend',
     'geoip',
     'google_custom_search',
+    'googlebot_site_map',
     'image',
     'import_export_ballotpedia',
     'import_export_batches',
