@@ -50,22 +50,3 @@ def get_sitemap_text_file(request):
     html += get_googlebot_map_file_body(request)
     html += "</html></body><br>"
     return HttpResponse(html)
-
-
-    # lines = [
-    #     "https://wevote.us/",
-    #     "https://wevote.us/privacy",
-    #     "https://wevote.us/more/terms",
-    #     "https://wevote.us/more/faq",
-    #     "https://wevote.us/more/about",
-    #     "https://wevote.us/more/attributions",
-    #     "https://wevote.us/more/credits",
-    #     "https://wevote.us/more/elections",
-    #     "https://wevote.us/mike-levin-politician-from-california/-",
-    # ]
-    #
-    # html = "<html><body>"
-    # for line in lines:
-    #     html += line + "<br>"
-    # html += "</html></body><br>"
-

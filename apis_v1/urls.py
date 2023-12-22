@@ -146,7 +146,7 @@ urlpatterns = [
       re_path(r'^friendListsAll/', views_friend.friend_lists_all_view, name='friendListsAllView'),
       re_path(r'^googleRecaptchaVerify/$', views_donation.google_recaptcha_verify_view,
               name='googleRecaptchaVerifyView'),
-      re_path(r'^googlebotSiteMap/sitemap_index.xml', views_googlebot_site_map.get_sitemap_index_xml,
+      re_path(r'^googlebotSiteMap\/sitemap_index.xml', views_googlebot_site_map.get_sitemap_index_xml,
               name='googlebotSiteMapView'),
       re_path(r'^googlebotSiteMap\/map\d+.html', views_googlebot_site_map.get_sitemap_text_file,
               name='googlebotSiteMapTextFileView'),
