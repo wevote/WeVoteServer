@@ -15,7 +15,6 @@ def get_googlebot_map_file_body(request):
     https_root = "https://wevote.us/"
     map_text = ''
     queryset = Politician.objects.using('readonly').order_by('id').filter(id__range=(num * 40000, (num + 1) * 40000))
-    # queryset = Politician.objects.using('readonly').order_by('id').filter(id__range=(num*40000, (num+1)*40000))
     politician_list = list(queryset)
     for pol in politician_list:
         map_text += https_root + pol.seo_friendly_path + '/-<br>'
