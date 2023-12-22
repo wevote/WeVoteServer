@@ -117,7 +117,10 @@
 <p>
     {{ api_introduction|safe }}
     {% if get_or_post == "GET or POST" or get_or_post_selected == "GET" or get_or_post_selected == "POST" %}
-        <a href="{{ url_root }}/apis/v1/docs/{{ api_slug }}?get_or_post_selected={% if get_or_post_selected == "POST" %}GET{% else %}POST{% endif %}">Switch from {% if get_or_post_selected == "POST" %}POST TO GET{% else %}GET to POST{% endif %}</a>
+        <br />
+        <a href="{{ url_root }}/apis/v1/docs/{{ api_slug }}?get_or_post_selected={% if get_or_post_selected == "POST" %}GET{% else %}POST{% endif %}">
+            <strong>{% if get_or_post_selected == "POST" %}POST{% else %}GET{% endif %}</strong>:
+            Switch from {% if get_or_post_selected == "POST" %}POST TO GET{% else %}GET to POST{% endif %}</a>
     {% endif %}
     {% load template_filters %}
 

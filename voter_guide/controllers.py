@@ -1981,7 +1981,6 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
 
 def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilityHighlightsRetrieve
         google_civic_election_id=0,
-        limit_to_existing=True,
         names_list=[],
         pdf_url="",
         status="",
@@ -2056,9 +2055,6 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
 
     limit_to_these_last_names = []
     names_list_found = len(names_list) > 0
-    # Do we want to return a full set of all possible candidate names? (This can create a lot of
-    #  work for the browser)
-    return_all_upcoming_candidates_in_database = not positive_value_exists(limit_to_existing)
     if names_list_found:
         from wevote_functions.functions import extract_last_name_from_full_name
         for one_name in names_list:
@@ -2070,7 +2066,7 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
                         limit_to_these_last_names.append(last_name_lower)
             except Exception as e:
                 pass
-    if len(limit_to_these_last_names) > 0 or return_all_upcoming_candidates_in_database:
+    if len(limit_to_these_last_names) > 0:
         results = retrieve_candidate_list_for_all_upcoming_elections(
             limit_to_these_last_names=limit_to_these_last_names,
             super_light_candidate_list=True)
@@ -2098,6 +2094,7 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
                             }
                             highlight_list.append(one_highlight)
 
+        # We include prior elections this year for primary candidates not linked to future election yet
         results = retrieve_candidate_list_for_all_prior_elections_this_year(
             limit_to_these_last_names=limit_to_these_last_names,
             super_light_candidate_list=True)
@@ -2126,6 +2123,18 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
                                 'prior':        1,
                             }
                             highlight_list.append(one_highlight)
+    if names_list_found:
+        # Finally, include the raw names from names_list (from Vertex AI) which weren't found in our database
+        for one_name in names_list:
+            if one_name and one_name not in names_already_included_list:
+                names_already_included_list.append(one_name)
+                one_highlight = {
+                    'name':         one_name,
+                    'we_vote_id':   '',
+                    'display':      'DEFAULT',
+                    'stance':       '',
+                }
+                highlight_list.append(one_highlight)
 
     json_data = {
         'status':               status,
