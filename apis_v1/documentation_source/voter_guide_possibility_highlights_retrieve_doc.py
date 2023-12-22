@@ -31,12 +31,6 @@ def voter_guide_possibility_highlights_retrieve_doc_template_values(url_root):
             'description':  'The Google civic election ID. Provide a value, only if you want data for a prior election.',
         },
         {
-            'name':         'limit_to_existing',
-            'value':        'boolean',  # boolean, integer, long, string
-            'description':  'If True, only return candidates already identified as being endorsed.',
-            'default':      'true',
-        },
-        {
             'name':         'pdf_url',
             'value':        'string',  # boolean, integer, long, string
             'description':  'The url of the list of endorsements, if the endorsement was originally on a pdf.',
@@ -47,10 +41,16 @@ def voter_guide_possibility_highlights_retrieve_doc_template_values(url_root):
             'description':  'Visible text from the page we are scanning. Only accepted in POST.',
         },
         {
-            'name':         'enable_vertex_for_url_input',
+            'name':         'use_vertex_to_scan_url_if_no_visible_text_provided',
             'value':        'boolean',  # boolean, integer, long, string
-            'description':  'For testing: Use Vertex AI  to limit returned names with url_to_scan.',
-            'default':      'false',
+            'description':  'IF visible_text_to_scan is provided using POST, we always use Vertex AI to identify the '
+                            'likely human names within the text provided. '
+                            'If this variable is set to True (which is the default), '
+                            'use Vertex to scan the url_to_scan (i.e., webpage) IFF a value '
+                            'is NOT provided in visible_text_to_scan. Note that if visible_text_to_scan has a value, '
+                            'we do NOT use Vertex AI to scan the url_to_scan. '
+                            'In all cases, Vertex AI adds about 2-3 seconds to the response time.',
+            'default':      'true',
         },
     ]
 
@@ -105,8 +105,18 @@ def voter_guide_possibility_highlights_retrieve_doc_template_values(url_root):
         'api_name': 'voterGuidePossibilityHighlightsRetrieve',
         'api_slug': 'voterGuidePossibilityHighlightsRetrieve',
         'api_introduction':
-            "Retrieve all the candidates that might be highlighted on an endorsement guide. "
-            "DEFAULT = there is no entry in this organization's Voter Guide Possibility yet.",
+            "WeVote's Political Data team uses an admin tool we call 'Voter Guide Possibilities'. With this tool, we "
+            "scan an organization's webpage that contains political endorsements. (Ex/ The National Bird Conservatory "
+            "endorses Donald Duck for County Tax Collector) WeVote finds the owner of the web page, "
+            "then finds all of the candidates listed on the page. We store in temporary tables, the SUPPORT and OPPOSE "
+            "endorsements found on this page, and let a Political Data Manager review these endorsements as they are "
+            "captured. Once the Political Data Manager has reviewed these endorsements, they can be saved to our "
+            "publicly available list of endorsements. This tool helps our team provide quality assurance as we "
+            "collect the data. This voterGuidePossibilityHighlightsRetrieve API connects WeVote's Chrome Extension to "
+            "the 'Voter Guide Possibilities' admin tools on WeVoteServer, and returns "
+            "what candidates have been identified, and whether the endorsing organization SUPPORTs, OPPOSEs, "
+            "or shares INFO_ONLY about the candidate. This API also returns names found on the page who might be "
+            "politicians, so the Political Data Manager can more easily capture endorsements.",
         'try_now_link': 'apis_v1:voterGuidePossibilityHighlightsRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
