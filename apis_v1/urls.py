@@ -18,7 +18,8 @@ from apis_v1.views import views_activity, views_apple, views_docs, views_analyti
     views_election, views_extension, views_facebook, views_friend, \
     views_issues, views_measure, views_misc, views_organization, \
     views_pledge_to_vote, views_politician, views_position, views_reaction, views_representative, \
-    views_retrieve_tables, views_task, views_share, views_twitter, views_voter, views_voter_guide
+    views_retrieve_tables, views_task, views_share, views_twitter, views_voter, views_voter_guide, \
+    views_googlebot_site_map
 from ballot.views_admin import ballot_items_sync_out_view, ballot_returned_sync_out_view
 from candidate.views_admin import candidates_sync_out_view, candidate_to_office_link_sync_out_view
 from issue.views_admin import issue_descriptions_retrieve_view, issues_followed_retrieve_view, \
@@ -145,6 +146,10 @@ urlpatterns = [
       re_path(r'^friendListsAll/', views_friend.friend_lists_all_view, name='friendListsAllView'),
       re_path(r'^googleRecaptchaVerify/$', views_donation.google_recaptcha_verify_view,
               name='googleRecaptchaVerifyView'),
+      re_path(r'^googlebotSiteMap/sitemap_index.xml', views_googlebot_site_map.get_sitemap_index_xml,
+              name='googlebotSiteMapView'),
+      re_path(r'^googlebotSiteMap\/map\d+.html', views_googlebot_site_map.get_sitemap_text_file,
+              name='googlebotSiteMapTextFileView'),
       re_path(r'^ipHistoryClearForOneIp/', stripe_ip_history_clear_for_one_ip,
               name=''),
       re_path(r'^issueDescriptionsRetrieve/', issue_descriptions_retrieve_view,
