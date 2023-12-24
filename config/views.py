@@ -1,11 +1,16 @@
 # config/views.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
+import os
+import re
 
-from django.urls import reverse
 from django.http import FileResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
 
+import wevote_functions.admin
+
+logger = wevote_functions.admin.get_logger(__name__)
 
 def favicon_view(request):
     """
@@ -50,3 +55,14 @@ def app_ads_view(request):
 
 def start_view(request):
     return HttpResponseRedirect(reverse('apis_v1:apisIndex', args=()))
+
+
+def google_verification_view(request):
+    template_values = {}
+    dirlist = os.listdir(os.getcwd() + '/templates')
+    r = re.compile("goog.*?html")
+    newlist = list(filter(r.match, dirlist))
+    if len(newlist) != 1:
+        logger.error('google_verification_view found zero, or more than one, google-site-verification files')
+
+    return render(request, newlist[0], template_values)
