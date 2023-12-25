@@ -27,6 +27,7 @@ from admin_tools.views import login_we_vote, logout_we_vote
 urlpatterns = [
     re_path(r'^$', views.start_view),  # Default page if none of the other patterns work
     re_path(r'^favicon.ico$', views.favicon_view),
+    re_path(r'^google.*?\.html$', views.google_verification_view),
     re_path(r'^robots.txt$', views.robots_view),
     re_path(r'^app-ads.txt$', views.app_ads_view),
     re_path(r'^admin/', include(('admin_tools.urls', 'admin_tools'), namespace="admin_tools")),
