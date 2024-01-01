@@ -6,7 +6,7 @@ from django.http import HttpResponse
 
 import wevote_functions.admin
 from config.base import get_environment_variable
-from googlebot_site_map.views_admin import get_googlebot_map_file_body
+from googlebot_site_map.views_admin import log_request, get_googlebot_map_file_body
 from politician.models import Politician
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -17,6 +17,7 @@ WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 # To test XML queries from Chrome try the "Tabbed Postman - REST Client"
 # https://chromewebstore.google.com/detail/tabbed-postman-rest-clien/coohjcphdfgbiolnekdpbcijmhambjff?hl=en-US&utm_source=ext_sidebar
 # Add a header "content-type" "application/xml", put in the URL and press Send
+# Test url is https://localhost:8000/apis/v1/googlebotSiteMap/sitemap_index.xml
 def xml_for_n_maps(n):
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     xml += '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
@@ -27,25 +28,34 @@ def xml_for_n_maps(n):
     xml += '</sitemapindex>'
     return xml
 
-
+# Test url is https://localhost:8000/apis/v1/googlebotSiteMap/map1.html
 def get_sitemap_index_xml(request):
-    politician_count = Politician.objects.using('readonly').all().count()
-    # print('politician count    ', politician_count)
+    log_request(request)
 
-    float_n = politician_count / 40000
-    if float_n < 1:
-        n = 1
-    else:
-        n = int(float_n) + 1
+    try:
+        politician_count = Politician.objects.using('readonly').all().count()
+        float_n = politician_count / 40000
+        if float_n < 1:
+            n = 1
+        else:
+            n = int(float_n) + 1
 
-    xml = xml_for_n_maps(n)
+        xml = xml_for_n_maps(n)
+    except Exception as e:
+        logger.error('googlebot_site_map get_sitemap_index_xml threw ', e)
+        xml = "error"
 
     return HttpResponse(xml)
 
 
 def get_sitemap_text_file(request):
+    log_request(request)
+
     print(request)
     html = "<html><body>"
-    html += get_googlebot_map_file_body(request)
+    try:
+        html += get_googlebot_map_file_body(request)
+    except Exception as e:
+        logger.error('googlebost_site_map get_sitemap_text_file threw ', e)
     html += "</html></body><br>"
     return HttpResponse(html)

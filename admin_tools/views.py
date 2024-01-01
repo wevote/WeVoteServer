@@ -2,30 +2,28 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from config.base import get_environment_variable, get_node_version, get_postgres_version, \
-    get_python_version, LOGIN_URL, get_git_commit_hash
-from ballot.models import BallotReturned, VoterBallotSaved
-from candidate.models import CandidateCampaign, CandidateManager
-from candidate.controllers import candidates_import_from_sample_file
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
-from django.urls import reverse
-from django.db.models import Count, Q
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from election.models import Election
+from django.urls import reverse
+
+from ballot.models import BallotReturned, VoterBallotSaved
+from candidate.controllers import candidates_import_from_sample_file
+from candidate.models import CandidateCampaign, CandidateManager
+from config.base import get_environment_variable, LOGIN_URL
 from election.controllers import elections_import_from_sample_file
+from election.models import Election
 from email_outbound.models import EmailAddress, SendGridApiCounterManager
 from follow.models import FollowOrganizationList
 from friend.models import CurrentFriend, FriendManager, SuggestedFriend
-from import_export_ballotpedia.models import BallotpediaApiCounterManager
 from import_export_ctcl.models import CTCLApiCounterManager
 from import_export_facebook.models import FacebookLinkToVoter, FacebookManager
 from import_export_google_civic.models import GoogleCivicApiCounterManager
 from import_export_targetsmart.models import TargetSmartApiCounterManager
-from import_export_vote_smart.models import VoteSmartApiCounterManager
 from import_export_vote_usa.models import VoteUSAApiCounterManager
 from measure.models import ContestMeasure, ContestMeasureManager
 from office.controllers import offices_import_from_sample_file
@@ -43,6 +41,8 @@ from voter.models import Voter, VoterAddress, VoterAddressManager, VoterDeviceLi
     voter_has_authority, voter_setup
 from wevote_functions.functions import convert_to_int, delete_voter_api_device_id_cookie, generate_voter_device_id, \
     get_voter_api_device_id, positive_value_exists, set_voter_api_device_id, STATE_CODE_MAP
+from wevote_functions.utils import get_node_version, get_postgres_version, get_python_version, get_git_commit_hash, \
+    get_git_commit_date
 
 BALLOT_ITEMS_SYNC_URL = get_environment_variable("BALLOT_ITEMS_SYNC_URL")  # ballotItemsSyncOut
 BALLOT_RETURNED_SYNC_URL = get_environment_variable("BALLOT_RETURNED_SYNC_URL")  # ballotReturnedSyncOut
@@ -115,6 +115,7 @@ def admin_home_view(request):
         'node_version':                       get_node_version(),
         'git_commit_hash':                    get_git_commit_hash(False),
         'git_commit_hash_url':                get_git_commit_hash(True),
+        'git_commit_date':                    get_git_commit_date(),
         'postgres_version':                   get_postgres_version(),
         'shared_link_clicked_unique_sharer_count': shared_link_clicked_unique_sharer_count,
         'shared_link_clicked_unique_viewer_count': shared_link_clicked_unique_viewer_count,
