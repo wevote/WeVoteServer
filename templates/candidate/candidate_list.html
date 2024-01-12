@@ -327,11 +327,12 @@
     {% endif %}
     <br />
 
-    {# Turn on/off review mode #}
+    {# Limit list to only display candidates with an email address #}
     <label for="show_candidates_with_email_id">
         <input type="checkbox" name="show_candidates_with_email" id="show_candidates_with_email_id" value="1"
                {% if show_candidates_with_email %}checked{% endif %} /> Has Email
     </label>
+    {# Turn on/off review mode #}
     &nbsp;&nbsp;&nbsp;&nbsp;
     <label for="review_mode_id">
       <input type="checkbox" name="review_mode" id="review_mode_id" value="1"

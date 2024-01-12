@@ -490,13 +490,9 @@ def candidate_list_view(request):
             candidate_query = \
                 candidate_query.annotate(candidate_email_address_length=Length('candidate_email_address'))
             candidate_query = candidate_query.annotate(candidate_email_length=Length('candidate_email'))
-            candidate_query = candidate_query.annotate(candidate_email2_length=Length('candidate_email2'))
-            candidate_query = candidate_query.annotate(candidate_email3_length=Length('candidate_email3'))
             candidate_query = candidate_query.filter(
                 Q(candidate_email_address_length__gt=2) |
-                Q(candidate_email_length__gt=2) |
-                Q(candidate_email2_length__gt=2) |
-                Q(candidate_email3_length__gt=2)
+                Q(candidate_email_length__gt=2)
             )
 
 
