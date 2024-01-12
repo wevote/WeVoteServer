@@ -10,6 +10,7 @@ import pytz
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
+from googlebot_site_map import supplemental_urls
 import wevote_functions.admin
 from admin_tools.views import redirect_to_sign_in_page
 from googlebot_site_map.models import GooglebotRequest
@@ -59,6 +60,9 @@ def get_googlebot_map_file_body(request):
     map_text = ''
     queryset = Politician.objects.using('readonly').order_by('id').filter(id__range=(num * 40000, (num + 1) * 40000))
     politician_list = list(queryset)
+    if num == 0:
+        for u in supplemental_urls.crawlable_urls:
+            map_text += u + '<br>'
     for pol in politician_list:
         map_text += https_root + pol.seo_friendly_path + '/-<br>'
 
