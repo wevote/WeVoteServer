@@ -51,7 +51,7 @@ def get_sitemap_index_xml(request):
 def get_sitemap_text_file(request):
     log_request(request)
 
-    print(request)
+    # print(request)
     html = "<html><body>"
     try:
         html += get_googlebot_map_file_body(request)
