@@ -638,7 +638,7 @@ def issues_sync_out_doc_view(request):
 
 def issues_linked_to_organization_doc_view(request):
     """
-    Show Documentation about issuesLinkedToOrganization 
+    Show Documentation about issuesLinkedToOrganization
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = issues_linked_to_organization_doc.issues_linked_to_organization_doc_template_values(url_root)
@@ -648,7 +648,7 @@ def issues_linked_to_organization_doc_view(request):
 
 def issues_to_link_to_for_organization_doc_view(request):
     """
-    Show Documentation about issuesToLinkToForOrganization 
+    Show Documentation about issuesToLinkToForOrganization
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = issues_to_link_to_for_organization_doc.\

@@ -39,12 +39,11 @@ DISPLAYABLE_GUESS = {
     'unknown': '...?...',
 }
 
-
-POLITICAL_DATA_MANAGER =         'PolDataMgr'
-PROVIDED_BY_POLITICIAN =         'Politician'
+POLITICAL_DATA_MANAGER = 'PolDataMgr'
+PROVIDED_BY_POLITICIAN = 'Politician'
 GENDER_GUESSER_HIGH_LIKELIHOOD = 'GuessHigh'
 GENDER_GUESSER_LOW_LIKELIHOOOD = 'GuessLow'
-NOT_ANALYZED =                   ''
+NOT_ANALYZED = ''
 GENDER_LIKELIHOOD = (
     (POLITICAL_DATA_MANAGER, 'Political Data Mgr'),
     (PROVIDED_BY_POLITICIAN, 'Politician Provided'),
@@ -317,6 +316,7 @@ class Politician(models.Model):
     date_last_updated_from_candidate = models.DateTimeField(null=True, default=None)
     profile_image_background_color = models.CharField(blank=True, null=True, max_length=7)
     profile_image_background_color_needed = models.BooleanField(null=True)
+
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
         # Even if this data came from another source we still need a unique we_vote_id
@@ -340,6 +340,18 @@ class Politician(models.Model):
 
     def __unicode__(self):
         return self.last_name
+
+    # added by ayumu
+    def __str__(self):
+        return f" {self.we_vote_id} - {self.state_code} -" \
+               f" {self.political_party} - {self.twitter_followers_count}"
+
+    def get_recommendation(self):
+        politician_manager = PoliticianManager()
+        results = politician_manager.fetch_recommend_list_by_we_vote_id(self.we_vote_id)
+        return results
+
+    # added by ayumu
 
     class Meta:
         ordering = ('last_name',)
@@ -382,6 +394,15 @@ class Politician(models.Model):
 
     def is_gender_specified(self):
         return self.gender in [FEMALE, GENDER_NEUTRAL, MALE]
+
+
+# added by ayumu
+class RecommendedPoliticianLinkByPolitician(models.Model):
+    from_politician_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
+    recommended_politician_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
+
+    def __str__(self):
+        return f"RecommendedPoliticianLinkByPolitician(id={self.from_politician_we_vote_id}, from_politician_we_vote_id={self.from_politician_we_vote_id}, recommended_politician_we_vote_id={self.recommended_politician_we_vote_id})"
 
 
 class PoliticiansAreNotDuplicates(models.Model):
@@ -428,6 +449,34 @@ class PoliticianManager(models.Manager):
 
     def __init__(self):
         pass
+
+    # added by ayumu
+    def retrieve_recommend_list_by_we_vote_id(self, we_vote_id):
+        # Retrieve a list of issues bocked for an organization
+        recommend_found = False
+        empty_list = []
+        try:
+            # something problem (unable to get reqr for <class django.db.models.query.QuerySet>
+            suggested_politicians = RecommendedPoliticianLinkByPolitician.objects.filter(
+                from_politician_we_vote_id__iexact=we_vote_id)
+            suggested_politicians = list(suggested_politicians)
+            if len(suggested_politicians):
+                recommend_found = True
+
+        except Exception as e:
+            pass
+
+        if recommend_found:
+            return suggested_politicians
+        else:
+            return empty_list
+
+    def fetch_recommend_list_by_we_vote_id(self, we_vote_id):
+        suggestion_list = []
+        retrieved_recommend_list = self.retrieve_recommend_list_by_we_vote_id(we_vote_id)
+        for recommended_politician in retrieved_recommend_list:
+            suggestion_list.append(recommended_politician.recommended_politician_we_vote_id)
+        return suggestion_list
 
     def add_politician_position_sorting_dates_if_needed(self, position_object=None, politician_we_vote_id=''):
         """
@@ -508,10 +557,10 @@ class PoliticianManager(models.Manager):
             position_object_updated = True
 
         return {
-            'position_object_updated':  position_object_updated,
-            'position_object':          position_object,
-            'status':                   status,
-            'success':                  success,
+            'position_object_updated': position_object_updated,
+            'position_object': position_object,
+            'status': status,
+            'success': success,
         }
 
     def get_politician_from_politicianseofriendlypath_table(self, path):
@@ -532,7 +581,7 @@ class PoliticianManager(models.Manager):
             return path_list[0].id, path_list[0].politician_we_vote_id, politician, ''
         except Exception as e:
             return 0, '', None, \
-                "FAILED_TO_GET_POLITICIAN_VIA_FALLBACK_TO_POLITICIANSEOFRIENDLYPATH_TABLE: " + str(e) + ' '
+                   "FAILED_TO_GET_POLITICIAN_VIA_FALLBACK_TO_POLITICIANSEOFRIENDLYPATH_TABLE: " + str(e) + ' '
 
     def create_politician_from_similar_object(self, similar_object):
         """
@@ -797,13 +846,13 @@ class PoliticianManager(models.Manager):
                 status += "FAILED_TO_GENERATE_SEO_FRIENDLY_PATH: " + str(e) + " "
                 success = False
         results = {
-            'success':                      success,
-            'status':                       status,
-            'politician':                   politician,
-            'politician_created':           politician_created,
-            'politician_found':             politician_found,
-            'politician_id':                politician_id,
-            'politician_we_vote_id':        politician_we_vote_id,
+            'success': success,
+            'status': status,
+            'politician': politician,
+            'politician_created': politician_created,
+            'politician_found': politician_found,
+            'politician_id': politician_id,
+            'politician_we_vote_id': politician_we_vote_id,
         }
         return results
 
@@ -896,16 +945,16 @@ class PoliticianManager(models.Manager):
         politician_owner_list = []
 
         results = {
-            'success':                      success,
-            'status':                       status,
-            'politician':                   politician,
-            'politician_found':             politician_found,
-            'politician_id':                politician_id,
-            'politician_owner_list':        politician_owner_list,
-            'politician_we_vote_id':        politician_we_vote_id,
-            'error_result':                 error_result,
-            'DoesNotExist':                 exception_does_not_exist,
-            'MultipleObjectsReturned':      exception_multiple_object_returned,
+            'success': success,
+            'status': status,
+            'politician': politician,
+            'politician_found': politician_found,
+            'politician_id': politician_id,
+            'politician_owner_list': politician_owner_list,
+            'politician_we_vote_id': politician_we_vote_id,
+            'error_result': error_result,
+            'DoesNotExist': exception_does_not_exist,
+            'MultipleObjectsReturned': exception_multiple_object_returned,
         }
         return results
 
@@ -961,9 +1010,9 @@ class PoliticianManager(models.Manager):
                     queryset = queryset.filter(final_search_filters)
 
         results = {
-            'filters':      filters,
-            'filter_set':   filter_set,
-            'queryset':     queryset,
+            'filters': filters,
+            'filter_set': filter_set,
+            'queryset': queryset,
         }
         return results
 
@@ -998,9 +1047,9 @@ class PoliticianManager(models.Manager):
                 filter_set = True
                 if positive_value_exists(facebook_url):
                     new_filter = (
-                        Q(facebook_url__iexact=facebook_url) |
-                        Q(facebook_url2__iexact=facebook_url) |
-                        Q(facebook_url3__iexact=facebook_url)
+                            Q(facebook_url__iexact=facebook_url) |
+                            Q(facebook_url2__iexact=facebook_url) |
+                            Q(facebook_url3__iexact=facebook_url)
                     )
                     filters.append(new_filter)
 
@@ -1018,11 +1067,11 @@ class PoliticianManager(models.Manager):
                 if positive_value_exists(twitter_handle):
                     filter_set = True
                     new_filter = (
-                        Q(politician_twitter_handle__iexact=twitter_handle) |
-                        Q(politician_twitter_handle2__iexact=twitter_handle) |
-                        Q(politician_twitter_handle3__iexact=twitter_handle) |
-                        Q(politician_twitter_handle4__iexact=twitter_handle) |
-                        Q(politician_twitter_handle5__iexact=twitter_handle)
+                            Q(politician_twitter_handle__iexact=twitter_handle) |
+                            Q(politician_twitter_handle2__iexact=twitter_handle) |
+                            Q(politician_twitter_handle3__iexact=twitter_handle) |
+                            Q(politician_twitter_handle4__iexact=twitter_handle) |
+                            Q(politician_twitter_handle5__iexact=twitter_handle)
                     )
                     filters.append(new_filter)
 
@@ -1087,12 +1136,12 @@ class PoliticianManager(models.Manager):
             pass
 
         results = {
-            'success':                  success,
-            'status':                   status,
-            'politician_list_found':    politician_list_found,
-            'politician_list':          politician_list,
-            'politician_found':         politician_found,
-            'politician':               politician,
+            'success': success,
+            'status': status,
+            'politician_list_found': politician_list_found,
+            'politician_list': politician_list,
+            'politician_found': politician_found,
+            'politician': politician,
         }
         return results
 
@@ -1124,9 +1173,9 @@ class PoliticianManager(models.Manager):
             status = "POLITICIAN_NOT_FOUND_IN_RESET_IMAGE_DETAILS"
 
         results = {
-            'success':      success,
-            'status':       status,
-            'politician':   politician
+            'success': success,
+            'status': status,
+            'politician': politician
         }
         return results
 
@@ -1177,9 +1226,9 @@ class PoliticianManager(models.Manager):
             status += "ERROR_SEARCHING_POLITICIANS: " + str(e) + " "
 
         results = {
-            'status':                           status,
-            'success':                          success,
-            'politician_search_results_list':   politician_search_results_list,
+            'status': status,
+            'success': success,
+            'politician_search_results_list': politician_search_results_list,
         }
         return results
 
@@ -1265,9 +1314,9 @@ class PoliticianManager(models.Manager):
             success = False
             status += "POLITICIAN_NOT_FOUND"
         results = {
-            'success':      success,
-            'status':       status,
-            'politician':   politician
+            'success': success,
+            'status': status,
+            'politician': politician
         }
         return results
 
@@ -1284,21 +1333,21 @@ class PoliticianManager(models.Manager):
         political_party = convert_to_political_party_constant(candidate.party)
         # TODO Add all other identifiers from other systems
         updated_politician_values = {
-            'vote_smart_id':                            candidate.vote_smart_id,
-            'vote_usa_politician_id':                   candidate.vote_usa_politician_id,
-            'maplight_id':                              candidate.maplight_id,
-            'politician_name':                          candidate.candidate_name,
-            'google_civic_candidate_name':              candidate.google_civic_candidate_name,
-            'state_code':                               candidate.state_code,
+            'vote_smart_id': candidate.vote_smart_id,
+            'vote_usa_politician_id': candidate.vote_usa_politician_id,
+            'maplight_id': candidate.maplight_id,
+            'politician_name': candidate.candidate_name,
+            'google_civic_candidate_name': candidate.google_civic_candidate_name,
+            'state_code': candidate.state_code,
             # See below
             # 'politician_twitter_handle':                candidate.candidate_twitter_handle,
-            'we_vote_hosted_profile_image_url_large':   candidate.we_vote_hosted_profile_image_url_large,
-            'we_vote_hosted_profile_image_url_medium':  candidate.we_vote_hosted_profile_image_url_medium,
-            'we_vote_hosted_profile_image_url_tiny':    candidate.we_vote_hosted_profile_image_url_tiny,
-            'first_name':                               first_name,
-            'middle_name':                              middle_name,
-            'last_name':                                last_name,
-            'political_party':                          political_party,
+            'we_vote_hosted_profile_image_url_large': candidate.we_vote_hosted_profile_image_url_large,
+            'we_vote_hosted_profile_image_url_medium': candidate.we_vote_hosted_profile_image_url_medium,
+            'we_vote_hosted_profile_image_url_tiny': candidate.we_vote_hosted_profile_image_url_tiny,
+            'first_name': first_name,
+            'middle_name': middle_name,
+            'last_name': last_name,
+            'political_party': political_party,
         }
 
         results = self.update_or_create_politician(
@@ -1417,11 +1466,11 @@ class PoliticianManager(models.Manager):
             status = 'UNABLE_TO_UPDATE_OR_CREATE_POLITICIAN: ' + str(e) + ' '
 
         results = {
-            'success':              success,
-            'status':               status,
-            'politician_created':   new_politician_created,
-            'politician_found':     politician_found,
-            'politician':           politician,
+            'success': success,
+            'status': status,
+            'politician_created': new_politician_created,
+            'politician_found': politician_found,
+            'politician': politician,
         }
         return results
 
@@ -1467,7 +1516,7 @@ class PoliticianManager(models.Manager):
             politician_youtube_id='',
             politician_website_url='',
             state_code=None,
-        ):
+    ):
         """
 
         :param politician_name:
@@ -1538,12 +1587,12 @@ class PoliticianManager(models.Manager):
             handle_exception(e, logger=logger, exception_message=status)
 
         results = {
-                'success':                  success,
-                'status':                   status,
-                'new_politician_created':   new_politician_created,
-                'politician_updated':       politician_updated,
-                'new_politician':           new_politician,
-            }
+            'success': success,
+            'status': status,
+            'new_politician_created': new_politician_created,
+            'politician_updated': politician_updated,
+            'new_politician': new_politician,
+        }
         return results
 
     def update_politician_row_entry(
@@ -1640,22 +1689,22 @@ class PoliticianManager(models.Manager):
             handle_exception(e, logger=logger, exception_message=status)
 
         results = {
-                'success':              success,
-                'status':               status,
-                'politician_updated':   politician_updated,
-                'updated_politician':   existing_politician_entry,
-            }
+            'success': success,
+            'status': status,
+            'politician_updated': politician_updated,
+            'updated_politician': existing_politician_entry,
+        }
         return results
 
-# def delete_all_politician_data():
-#     with open(LEGISLATORS_CURRENT_FILE, 'rU') as politicians_current_data:
-#         politicians_current_data.readline()             # Skip the header
-#         reader = csv.reader(politicians_current_data)   # Create a regular tuple reader
-#         for index, politician_row in enumerate(reader):
-#             if index > 3:
-#                 break
-#             politician_entry = Politician.objects.order_by('last_name')[0]
-#             politician_entry.delete()
+    # def delete_all_politician_data():
+    #     with open(LEGISLATORS_CURRENT_FILE, 'rU') as politicians_current_data:
+    #         politicians_current_data.readline()             # Skip the header
+    #         reader = csv.reader(politicians_current_data)   # Create a regular tuple reader
+    #         for index, politician_row in enumerate(reader):
+    #             if index > 3:
+    #                 break
+    #             politician_entry = Politician.objects.order_by('last_name')[0]
+    #             politician_entry.delete()
 
     def retrieve_politician_list(
             self,
@@ -1703,10 +1752,10 @@ class PoliticianManager(models.Manager):
             success = False
 
         results = {
-            'success':                  success,
-            'status':                   status,
-            'politician_list_found':    politician_list_found,
-            'politician_list':          politician_list,
+            'success': success,
+            'status': status,
+            'politician_list_found': politician_list_found,
+            'politician_list': politician_list,
         }
         return results
 
@@ -1746,11 +1795,11 @@ class PoliticianManager(models.Manager):
                 for one_twitter_handle in twitter_handle_list:
                     one_twitter_handle_cleaned = extract_twitter_handle_from_text_string(one_twitter_handle)
                     new_filter = (
-                        Q(politician_twitter_handle__iexact=one_twitter_handle_cleaned) |
-                        Q(politician_twitter_handle2__iexact=one_twitter_handle_cleaned) |
-                        Q(politician_twitter_handle3__iexact=one_twitter_handle_cleaned) |
-                        Q(politician_twitter_handle4__iexact=one_twitter_handle_cleaned) |
-                        Q(politician_twitter_handle5__iexact=one_twitter_handle_cleaned)
+                            Q(politician_twitter_handle__iexact=one_twitter_handle_cleaned) |
+                            Q(politician_twitter_handle2__iexact=one_twitter_handle_cleaned) |
+                            Q(politician_twitter_handle3__iexact=one_twitter_handle_cleaned) |
+                            Q(politician_twitter_handle4__iexact=one_twitter_handle_cleaned) |
+                            Q(politician_twitter_handle5__iexact=one_twitter_handle_cleaned)
                     )
                     twitter_filters.append(new_filter)
 
@@ -1897,13 +1946,13 @@ class PoliticianManager(models.Manager):
                     success = False
 
         results = {
-            'success':                  success,
-            'status':                   status,
-            'politician_found':         politician_found,
-            'politician':               politician,
-            'politician_list_found':    politician_list_found,
-            'politician_list':          politician_list,
-            'multiple_entries_found':   multiple_entries_found,
+            'success': success,
+            'status': status,
+            'politician_found': politician_found,
+            'politician': politician,
+            'politician_list_found': politician_list_found,
+            'politician_list': politician_list,
+            'multiple_entries_found': multiple_entries_found,
         }
         return results
 
@@ -1923,11 +1972,11 @@ class PoliticianManager(models.Manager):
                 for one_twitter_handle in twitter_handle_list:
                     one_twitter_handle_cleaned = extract_twitter_handle_from_text_string(one_twitter_handle)
                     new_filter = (
-                        Q(politician_twitter_handle__iexact=one_twitter_handle_cleaned) |
-                        Q(politician_twitter_handle2__iexact=one_twitter_handle_cleaned) |
-                        Q(politician_twitter_handle3__iexact=one_twitter_handle_cleaned) |
-                        Q(politician_twitter_handle4__iexact=one_twitter_handle_cleaned) |
-                        Q(politician_twitter_handle5__iexact=one_twitter_handle_cleaned)
+                            Q(politician_twitter_handle__iexact=one_twitter_handle_cleaned) |
+                            Q(politician_twitter_handle2__iexact=one_twitter_handle_cleaned) |
+                            Q(politician_twitter_handle3__iexact=one_twitter_handle_cleaned) |
+                            Q(politician_twitter_handle4__iexact=one_twitter_handle_cleaned) |
+                            Q(politician_twitter_handle5__iexact=one_twitter_handle_cleaned)
                     )
                     twitter_filters.append(new_filter)
 
@@ -2096,11 +2145,11 @@ class PoliticianManager(models.Manager):
             elif one_entry.politician2_we_vote_id != politician_we_vote_id:
                 politicians_are_not_duplicates_list_we_vote_ids.append(one_entry.politician2_we_vote_id)
         results = {
-            'success':                                          success,
-            'status':                                           status,
-            'politicians_are_not_duplicates_list_found':        politicians_are_not_duplicates_list_found,
-            'politicians_are_not_duplicates_list':              politicians_are_not_duplicates_list,
-            'politicians_are_not_duplicates_list_we_vote_ids':  politicians_are_not_duplicates_list_we_vote_ids,
+            'success': success,
+            'status': status,
+            'politicians_are_not_duplicates_list_found': politicians_are_not_duplicates_list_found,
+            'politicians_are_not_duplicates_list': politicians_are_not_duplicates_list,
+            'politicians_are_not_duplicates_list_we_vote_ids': politicians_are_not_duplicates_list_we_vote_ids,
         }
         return results
 
@@ -2120,7 +2169,7 @@ class PoliticianManager(models.Manager):
         politician_query = politician_query.filter(gender=UNKNOWN)
         number_of_rows = politician_query.count()
         politician_query = politician_query.order_by('politician_name')
-        politician_query = politician_query[start:(start+count)]
+        politician_query = politician_query[start:(start + count)]
         politician_list_objects = list(politician_query)
         results_list = []
         for pol in politician_list_objects:
@@ -2141,7 +2190,8 @@ class PoliticianManager(models.Manager):
         if len(results_list) == 0 and start + count < number_of_rows:
             logger.error('recursive call with new start = ' + str(start + count))
             # Make a recursive call if all the results are 'unknown's
-            results_list, number_of_rows = self.retrieve_politicians_with_no_gender_id(start + count, count, show_unknowns)
+            results_list, number_of_rows = self.retrieve_politicians_with_no_gender_id(start + count, count,
+                                                                                       show_unknowns)
 
         return results_list, number_of_rows
 
@@ -2163,10 +2213,10 @@ class PoliticianManager(models.Manager):
         else:
             politician_query = Politician.objects.all()
         # Get all politicians that have three capital letters in a row in their name, but exclude III (King Henry III)
-        politician_query = politician_query.filter(politician_name__regex=r'.*?[A-Z][A-Z][A-Z].*?(?<!III)').\
+        politician_query = politician_query.filter(politician_name__regex=r'.*?[A-Z][A-Z][A-Z].*?(?<!III)'). \
             order_by('politician_name')
         number_of_rows = politician_query.count()
-        politician_query = politician_query[start:(start+count)]
+        politician_query = politician_query[start:(start + count)]
         politician_list_objects = list(politician_query)
         results_list = []
         # out = ''
@@ -2220,10 +2270,10 @@ class PoliticianManager(models.Manager):
 
         if not success:
             results = {
-                'success':              success,
-                'status':               status,
-                'politician':           politician,
-                'politician_updated':   politician_updated,
+                'success': success,
+                'status': status,
+                'politician': politician,
+                'politician_updated': politician_updated,
             }
             return results
 
@@ -2329,10 +2379,10 @@ class PoliticianManager(models.Manager):
                 status += "NO_CHANGES_SAVED_TO_POLITICIAN_TWITTER_DETAILS: " + str(e) + " "
 
         results = {
-            'success':              success,
-            'status':               status,
-            'politician':           politician,
-            'politician_updated':   politician_updated,
+            'success': success,
+            'status': status,
+            'politician': politician,
+            'politician_updated': politician_updated,
         }
         return results
 
@@ -2349,8 +2399,8 @@ class PoliticianManager(models.Manager):
         if positive_value_exists(politician1_we_vote_id) and positive_value_exists(politician2_we_vote_id):
             try:
                 updated_values = {
-                    'politician1_we_vote_id':    politician1_we_vote_id,
-                    'politician2_we_vote_id':    politician2_we_vote_id,
+                    'politician1_we_vote_id': politician1_we_vote_id,
+                    'politician2_we_vote_id': politician2_we_vote_id,
                 }
                 politicians_are_not_duplicates, new_politicians_are_not_duplicates_created = \
                     PoliticiansAreNotDuplicates.objects.update_or_create(
@@ -2365,15 +2415,15 @@ class PoliticianManager(models.Manager):
                 exception_multiple_object_returned = True
             except Exception as e:
                 status += 'EXCEPTION_UPDATE_OR_CREATE_POLITICIANS_ARE_NOT_DUPLICATES ' \
-                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                          '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
                 success = False
 
         results = {
-            'success':                                      success,
-            'status':                                       status,
-            'MultipleObjectsReturned':                      exception_multiple_object_returned,
-            'new_politicians_are_not_duplicates_created':   new_politicians_are_not_duplicates_created,
-            'politicians_are_not_duplicates':               politicians_are_not_duplicates,
+            'success': success,
+            'status': status,
+            'MultipleObjectsReturned': exception_multiple_object_returned,
+            'new_politicians_are_not_duplicates_created': new_politicians_are_not_duplicates_created,
+            'politicians_are_not_duplicates': politicians_are_not_duplicates,
         }
         return results
 
