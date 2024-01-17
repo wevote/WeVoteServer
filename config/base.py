@@ -2,15 +2,10 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-import datetime
-import glob
 import json
 import os
-import pathlib
-import re
 
 from django.core.exceptions import ImproperlyConfigured
-from django.db import connection
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # Override in local.py for development
@@ -88,44 +83,6 @@ def get_environment_variable_default(var_name, default_value):
     except KeyError:
         return default_value
 
-
-def get_python_version():
-    version = os.popen('python --version').read().strip().replace('Python', '')
-    print('Python version: ' + version)    # Something like 'Python 3.7.2'
-    return version
-
-
-def get_node_version():
-    # Node is not installed on production API/Python servers
-    raw = os.popen('node -v').read().replace('\n', '').strip()
-    version = 'Node not installed on this server'
-    if len(raw) > 0:
-        version = os.popen('node -v').read().replace('\n', '').strip()
-    print('Node version: ' + version)    # Something like 'v14.15.1'
-    return version
-
-def get_git_commit_hash(full):
-    try:
-        file1 = open('git_commit_hash', 'r')
-        hash = file1.readline().strip()
-    except:
-        hash = 'git_commit_hash-file-not-found'
-
-    if full:
-        return "https://github.com/wevote/WeVoteServer/commit/" + hash
-    return hash
-
-def get_postgres_version():
-    formatted = 'fail'
-    try:
-        version = str(connection.cursor().connection.server_version)
-        version = ' ' + version if len(version) == 5 else version
-        formatted = version[0:2] + '.' + version[2:4] + '.' + version[4:6]
-    except Exception:
-        pass
-    print('Postgres version: ', formatted)
-    return formatted
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -183,6 +140,7 @@ INSTALLED_APPS = (
     'friend',
     'geoip',
     'google_custom_search',
+    'googlebot_site_map',
     'image',
     'import_export_ballotpedia',
     'import_export_batches',

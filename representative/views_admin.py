@@ -1390,6 +1390,7 @@ def representative_edit_process_view(request):
         )
         if results['politician_found']:
             defaults['politician_id'] = results['politician'].id
+            defaults['profile_image_background_color'] = results['politician'].profile_image_background_color
             defaults['seo_friendly_path'] = results['politician'].seo_friendly_path
         elif results['success']:
             defaults['politician_we_vote_id'] = None

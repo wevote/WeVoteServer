@@ -1580,6 +1580,15 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
     #         }
     #         latest_politician_supporter_endorsement_list.append(one_supporter_dict)
 
+    # Find alternate URLs from PoliticianSEOFriendlyPath
+    queryset = PoliticianSEOFriendlyPath.objects.using('readonly').all()
+    queryset = queryset.filter(politician_we_vote_id=politician.we_vote_id)
+    seo_friendly_path_object_list = list(queryset)
+    for one_seo_friendly_path_object in seo_friendly_path_object_list:
+        if one_seo_friendly_path_object.final_pathname_string and \
+                one_seo_friendly_path_object.final_pathname_string not in seo_friendly_path_list:
+            seo_friendly_path_list.append(one_seo_friendly_path_object.final_pathname_string)
+
     # If smaller sizes weren't stored, use large image
     if politician.we_vote_hosted_profile_image_url_medium:
         we_vote_hosted_profile_image_url_medium = politician.we_vote_hosted_profile_image_url_medium
@@ -1628,9 +1637,11 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
         # 'is_supporters_count_minimum_exceeded': politician.is_supporters_count_minimum_exceeded(),
         # 'latest_politician_supporter_endorsement_list':  latest_politician_supporter_endorsement_list,
         # 'latest_politician_supporter_list':  latest_politician_supporter_list,
+        'profile_image_background_color':   politician.profile_image_background_color,
         'representative_list':              politician_representative_dict_list,
         'representative_list_exists':       politician_representative_list_exists,
         'seo_friendly_path':                politician.seo_friendly_path,
+        'seo_friendly_path_list':           seo_friendly_path_list,
         'state_code':                       politician.state_code,
         'status':                           status,
         'success':                          success,
@@ -1765,6 +1776,7 @@ def politicians_import_from_structured_json(structured_json):  # politiciansSync
         'politician_url4',
         'politician_url5',
         'politician_youtube_id',
+        'profile_image_background_color',
         'profile_image_type_currently_active',
         'seo_friendly_path',
         'state_code',

@@ -309,6 +309,7 @@ class Representative(models.Model):
     # Which representative image is currently active?
     profile_image_type_currently_active = models.CharField(
         max_length=10, choices=PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES, default=PROFILE_IMAGE_TYPE_UNKNOWN)
+    profile_image_background_color = models.CharField(blank=True, null=True, max_length=7)
     # Image for representative from Facebook, cached on We Vote's servers. See also facebook_profile_image_url_https.
     we_vote_hosted_profile_facebook_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_facebook_image_url_medium = models.TextField(blank=True, null=True)

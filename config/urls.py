@@ -19,14 +19,17 @@ Including another URLconf
     2. Add a URL to urlpatterns:  re_path(r'^blog/', include(blog_urls))
 """
 
-from django.conf.urls import include, url, re_path
+from django.conf.urls import include, re_path
 from django.contrib.auth import views as auth_views
-from config import startup, views
+
 from admin_tools.views import login_we_vote, logout_we_vote
+from config import startup, views
 
 urlpatterns = [
     re_path(r'^$', views.start_view),  # Default page if none of the other patterns work
     re_path(r'^favicon.ico$', views.favicon_view),
+    re_path(r'^google\d.*?\.html$', views.google_verification_view),
+    re_path(r'^googlebot_site_map/', include(('googlebot_site_map.urls', 'googlebot_site_map'), namespace="googlebot_site_map")),
     re_path(r'^robots.txt$', views.robots_view),
     re_path(r'^app-ads.txt$', views.app_ads_view),
     re_path(r'^admin/', include(('admin_tools.urls', 'admin_tools'), namespace="admin_tools")),

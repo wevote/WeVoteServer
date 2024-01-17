@@ -1,4 +1,4 @@
-# apis_v1/views/views_organization.py
+# apis_v1/views/views_issues.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 from issue.models import *

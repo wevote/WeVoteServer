@@ -432,6 +432,7 @@ def generate_representative_dict_from_representative_object(
         'political_party':              representative.political_party_display(),
         'politician_id':                representative.politician_id,
         'politician_we_vote_id':        representative.politician_we_vote_id,
+        'profile_image_background_color': representative.profile_image_background_color,
         'representative_contact_form_url': representative.representative_contact_form_url,
         'representative_email':         representative.representative_email,
         'representative_email2':        representative.representative_email2,
@@ -1721,6 +1722,9 @@ def update_representative_details_from_politician(representative=None, politicia
                 politician.we_vote_hosted_profile_uploaded_image_url_medium
             representative.we_vote_hosted_profile_image_url_tiny = \
                 politician.we_vote_hosted_profile_uploaded_image_url_tiny
+    if politician.profile_image_background_color != representative.profile_image_background_color:
+        representative.profile_image_background_color = politician.profile_image_background_color
+        save_changes = True
     if not positive_value_exists(representative.wikipedia_url) and \
             positive_value_exists(politician.wikipedia_url):
         representative.wikipedia_url = politician.wikipedia_url

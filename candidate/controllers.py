@@ -1846,6 +1846,7 @@ def generate_candidate_dict_from_candidate_object(
         'party':                            candidate.political_party_display(),
         'politician_id':                    candidate.politician_id,
         'politician_we_vote_id':            candidate.politician_we_vote_id,
+        'profile_image_background_color':   candidate.profile_image_background_color,
         'seo_friendly_path':                candidate.seo_friendly_path,
         'state_code':                       candidate.state_code,
         'supporters_count':                 candidate.supporters_count,
@@ -3440,6 +3441,10 @@ def update_candidate_details_from_politician(candidate=None, politician=None):
             elif positive_value_exists(politician.politician_url5):
                 candidate.candidate_url = politician.politician_url5
                 fields_updated.append('candidate_url')
+                save_changes = True
+            if politician.profile_image_background_color != candidate.profile_image_background_color:
+                candidate.profile_image_background_color = politician.profile_image_background_color
+                fields_updated.append('profile_image_background_color')
                 save_changes = True
             if positive_value_exists(politician.vote_usa_politician_id):
                 candidate.vote_usa_politician_id = politician.vote_usa_politician_id

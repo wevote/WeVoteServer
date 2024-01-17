@@ -1956,6 +1956,7 @@ def politician_edit_process_view(request):
                             politician_on_stage.we_vote_hosted_profile_uploaded_image_url_medium
                         politician_on_stage.we_vote_hosted_profile_image_url_tiny = \
                             politician_on_stage.we_vote_hosted_profile_uploaded_image_url_tiny
+                        politician_on_stage.profile_image_background_color_needed = True
                     elif profile_image_type_currently_active is not False:
                         politician_on_stage.profile_image_type_currently_active = profile_image_type_currently_active
             elif politician_photo_file_delete:
@@ -2709,6 +2710,7 @@ def politicians_sync_out_view(request):  # politiciansSyncOut
             'politician_url4',
             'politician_url5',
             'politician_youtube_id',
+            'profile_image_background_color',
             'profile_image_type_currently_active',
             'seo_friendly_path',
             'seo_friendly_path_date_last_updated',
@@ -2994,10 +2996,12 @@ def update_politicians_from_candidates_view(request):
                                 "".format(
                                     state_code=state_code))
 
+
 def update_politicians_profile_image_background_color_view(request):
 
+    number_to_update = 10
     queryset = Politician.objects.all()
-    politician_list = list(queryset[1:10])
+    politician_list = list(queryset[:number_to_update])
 
     bulk_update_list = []
     politicians_updated = 0
@@ -3006,12 +3010,15 @@ def update_politicians_profile_image_background_color_view(request):
         if positive_value_exists(politician.we_vote_hosted_profile_image_url_large):
             hex = generate_background(politician)
             politician.profile_image_background_color = hex
+            politician.profile_image_background_color_needed = False
             politicians_updated += 1
         else:
             politicians_not_updated += 1
         bulk_update_list.append(politician)
     try:
-        Politician.objects.bulk_update(bulk_update_list, ['profile_image_background_color'])
+        Politician.objects.bulk_update(
+            bulk_update_list,
+            ['profile_image_background_color', 'profile_image_background_color_needed'])
         message = \
             "Politicians updated: {politicians_updated:,}. " \
             "Politicians without picture URL:  {politicians_not_updated:,}. " \

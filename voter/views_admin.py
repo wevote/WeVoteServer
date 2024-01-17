@@ -642,6 +642,14 @@ def voter_edit_process_view(request):
     return HttpResponseRedirect(reverse('voter:voter_edit', args=(voter_id,)))
 
 
+def generate_proposed_password():
+    # For the create new voter account form, create a proposed default password
+    return generate_random_string(
+        string_length=8,
+        chars=string.ascii_uppercase + string.digits + "!*$",
+        remove_confusing_digits=True
+    )
+
 @login_required
 def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
@@ -1129,6 +1137,7 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
             'voter':                                    voter_on_stage,
             'voter_list_duplicate_facebook':            voter_list_duplicate_facebook_updated,
             'voter_list_duplicate_twitter':             voter_list_duplicate_twitter_updated,
+            'password_proposed':                        generate_proposed_password(),
         }
     else:
         messages_on_stage = get_messages(request)
@@ -1645,15 +1654,6 @@ def voter_list_view(request):
             one_voter.to_voter_merge_status_list = to_merge_status_dict[one_voter.we_vote_id]
         modified_voter_list.append(one_voter)
 
-    # For the create new voter account form, create a proposed default password
-    # string.ascii_lowercase +
-    password_proposed = \
-        generate_random_string(
-            string_length=8,
-            chars=string.ascii_uppercase + string.digits + "!*$",
-            remove_confusing_digits=True
-        )
-
     template_values = {
         'is_admin':                     is_admin,
         'is_analytics_admin':           is_analytics_admin,
@@ -1665,7 +1665,7 @@ def voter_list_view(request):
         'has_friends':                  has_friends,
         'has_voter_merge_problem':      has_voter_merge_problem,
         'messages_on_stage':            messages_on_stage,
-        'password_proposed':            password_proposed,
+        'password_proposed':            generate_proposed_password(),
         'show_voter_merge_data':        show_voter_merge_data,
         'voter_list':                   modified_voter_list,
         'voter_list_found_count':       voter_list_found_count,
