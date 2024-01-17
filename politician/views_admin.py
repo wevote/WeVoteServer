@@ -60,7 +60,6 @@ WEB_APP_ROOT_URL = get_environment_variable("WEB_APP_ROOT_URL")
 
 logger = wevote_functions.admin.get_logger(__name__)
 
-# added for recommend engine
 from politician.models import Politician
 import pandas as pd
 from sklearn.cluster import KMeans
@@ -77,8 +76,6 @@ pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 nltk.download('punkt')
 
-
-# added
 
 @login_required
 def compare_two_politicians_for_merge_view(request):
@@ -3325,16 +3322,10 @@ def update_recommended_politicians_view(request):
         validation_list.extend(record)
 
     message = \
-        "sampled politician number: {politicians_updated:,}. " \
-        "avg recommended number : {politicians_without_changes:,}. " \
-        "unique recommend rate: {politician_update_errors:,}. " \
+        "avg recommended number : {politicians_avgs:,}. " \
         "".format(
-            politicians_updated=sampleNum,
-            politicians_without_changes=len(validation_list) / sampleNum,
-            politician_update_errors=len(set(validation_list)) / len(validation_list))
-
+            politicians_avgs=len(validation_list) / sampleNum)
     messages.add_message(request, messages.INFO, message)
-
     return HttpResponseRedirect(reverse('politician:politician_list', args=()) +
                                 "?state_code={state_code}"
                                 "".format(

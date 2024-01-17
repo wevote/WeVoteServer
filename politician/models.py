@@ -341,17 +341,18 @@ class Politician(models.Model):
     def __unicode__(self):
         return self.last_name
 
-    # added by ayumu
-    def __str__(self):
-        return f" {self.we_vote_id} - {self.state_code} -" \
-               f" {self.political_party} - {self.twitter_followers_count}"
+    def get_recommendation(self) -> list[str]:
 
-    def get_recommendation(self):
+        """
+            Get a list of recommended politicians for the current politician.
+
+            Returns:
+                list[str]: A list of We Vote IDs of recommended politicians.
+                If no recommendations are found, the list will be empty.
+        """
         politician_manager = PoliticianManager()
         results = politician_manager.fetch_recommend_list_by_we_vote_id(self.we_vote_id)
         return results
-
-    # added by ayumu
 
     class Meta:
         ordering = ('last_name',)
@@ -396,8 +397,32 @@ class Politician(models.Model):
         return self.gender in [FEMALE, GENDER_NEUTRAL, MALE]
 
 
-# added by ayumu
 class RecommendedPoliticianLinkByPolitician(models.Model):
+    """
+       Model to store links between a politician and recommended politicians.
+
+       Attributes:
+           from_politician_we_vote_id (str): We Vote ID of the politician accessed by User.
+           recommended_politician_we_vote_id (str):  We Vote ID of the recommended politician.
+
+       Note:
+           This model is configured to store up to five associated recommended politicians per one politician.
+           For instance,
+           from_politician_we_vote_id,   recommended_politician_we_vote_id
+           ww1,                          ww2
+           ww1,                          ww5
+           ww1,                          ww6
+           ww1,                          ww4
+           ww1,                          ww9
+           ww2,                          ww4
+              ,
+              ,
+              ,
+
+       Example:
+           A record in this model signifies that 'from_politician_we_vote_id' recommends 'recommended_politician_we_vote_id'.
+       """
+
     from_politician_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
     recommended_politician_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
 
@@ -450,13 +475,23 @@ class PoliticianManager(models.Manager):
     def __init__(self):
         pass
 
-    # added by ayumu
-    def retrieve_recommend_list_by_we_vote_id(self, we_vote_id):
-        # Retrieve a list of issues bocked for an organization
+    def retrieve_recommend_list_by_we_vote_id(self, we_vote_id: str) -> list[RecommendedPoliticianLinkByPolitician]:
+
+        """
+        retrieve a list of recommended politicians for a given politician's we vote ID.
+
+        Args:
+            we_vote_id (str): We Vote ID of the politician.
+
+        Returns:
+            list[RecommendedPoliticianLinkByPolitician]: A list of recommended politicians linked to the given We Vote ID.
+            either empty_list if it does not find anyone associated with we_vote_id
+
+        """
+
         recommend_found = False
         empty_list = []
         try:
-            # something problem (unable to get reqr for <class django.db.models.query.QuerySet>
             suggested_politicians = RecommendedPoliticianLinkByPolitician.objects.filter(
                 from_politician_we_vote_id__iexact=we_vote_id)
             suggested_politicians = list(suggested_politicians)
@@ -468,10 +503,22 @@ class PoliticianManager(models.Manager):
 
         if recommend_found:
             return suggested_politicians
+
         else:
             return empty_list
 
-    def fetch_recommend_list_by_we_vote_id(self, we_vote_id):
+    def fetch_recommend_list_by_we_vote_id(self, we_vote_id: str) -> list[str]:
+
+        """
+        Fetch a list of We Vote IDs of recommended politicians for a given politician's We Vote ID.
+
+        Args:
+            we_vote_id (str): We Vote ID of the politician.
+
+        Returns:
+            list[str]: A list of We Vote IDs of recommended politicians.
+        """
+
         suggestion_list = []
         retrieved_recommend_list = self.retrieve_recommend_list_by_we_vote_id(we_vote_id)
         for recommended_politician in retrieved_recommend_list:
