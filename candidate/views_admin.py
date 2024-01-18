@@ -485,13 +485,10 @@ def candidate_list_view(request):
                 "SCRIPT: {entries_to_process:,} entries to process (populate_contest_office_data). " \
                 "".format(entries_to_process=candidate_ultimate_count) + " "
 
-        # Filter a queryset of candidtes based on whether they have email-related fields with a length greater than 2
+        # Filter candidtes based on whether they have an email address
         if positive_value_exists(show_candidates_with_email):
-            candidate_query = \
-                candidate_query.annotate(candidate_email_address_length=Length('candidate_email_address'))
             candidate_query = candidate_query.annotate(candidate_email_length=Length('candidate_email'))
             candidate_query = candidate_query.filter(
-                Q(candidate_email_address_length__gt=2) |
                 Q(candidate_email_length__gt=2)
             )
 
