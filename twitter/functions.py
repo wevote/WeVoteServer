@@ -61,10 +61,15 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle=''):
     #     access_token=TWITTER_ACCESS_TOKEN,
     #     access_token_secret=TWITTER_ACCESS_TOKEN_SECRET)
 
-    auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
-    auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
-
-    api = tweepy.API(auth, timeout=10)
+    # auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
+    # auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
+    #
+    # api = tweepy.API(auth, timeout=10)
+    client = tweepy.Client(
+        consumer_key=TWITTER_CONSUMER_KEY,
+        consumer_secret=TWITTER_CONSUMER_SECRET,
+        access_token=TWITTER_ACCESS_TOKEN,
+        access_token_secret=TWITTER_ACCESS_TOKEN_SECRET)
 
     # Strip out the twitter handles "False" or "None"
     if twitter_handle is False:
@@ -82,14 +87,16 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle=''):
     twitter_user_id = convert_to_int(twitter_user_id)
     try:
         if positive_value_exists(twitter_handle):
-            twitter_user = api.get_user(screen_name=twitter_handle)
+            # twitter_user = api.get_user(screen_name=twitter_handle)
+            twitter_user = client.get_user(username=twitter_handle)
             twitter_json = twitter_user._json
             success = True
             # status += 'TWITTER_HANDLE_SUCCESS-' + str(twitter_handle) + " "
             twitter_handle_found = True
             twitter_user_id = twitter_user.id  # Integer value. id_str would be the String value
         elif positive_value_exists(twitter_user_id):
-            twitter_user = api.get_user(user_id=twitter_user_id)
+            # twitter_user = api.get_user(user_id=twitter_user_id)
+            twitter_user = client.get_user(id=twitter_user_id)
             twitter_json = twitter_user._json
             success = True
             # status += 'TWITTER_USER_ID_SUCCESS-' + str(twitter_user_id) + " "
