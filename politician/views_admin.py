@@ -2999,7 +2999,7 @@ def update_politicians_from_candidates_view(request):
 
 def update_politicians_profile_image_background_color_view(request):
 
-    number_to_update = 10
+    number_to_update = 100
     queryset = Politician.objects.all()
     politician_list = list(queryset[:number_to_update])
 
