@@ -10,18 +10,52 @@ import pytz
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
-from googlebot_site_map import supplemental_urls
 import wevote_functions.admin
 from admin_tools.views import redirect_to_sign_in_page
+from googlebot_site_map import supplemental_urls
 from googlebot_site_map.models import GooglebotRequest
 from politician.models import Politician
 from voter.models import voter_has_authority
+from wevote_functions.functions import get_ip_from_headers
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+# format_json = functools.partial(json.dumps, indent=2, sort_keys=True)
+# indent = functools.partial(textwrap.indent, prefix='  ')
+#
+# def format_prepared_request(req):
+#     headers = '\n'.join(f'{k}: {v}\n' for k, v in req.headers.items())
+#     metaraw = req.META
+#     if 'PATH' in metaraw:
+#         del metaraw['PATH']
+#     if 'PYTHONPATH' in metaraw:
+#         del metaraw['PYTHONPATH']
+#     if 'SHELL' in metaraw:
+#         del metaraw['SHELL']
+#     if 'LIBRARY_ROOTS' in metaraw:
+#         del metaraw['LIBRARY_ROOTS']
+#     if 'RBENV_SHELL' in metaraw:
+#         del metaraw['RBENV_SHELL']
+#
+#     meta = '\n'.join(f'{k}: {v}' for k, v in metaraw.items())
+#     meta = meta.replace('<', '|').replace('>', '|')
+#
+#     s = textwrap.dedent("""
+#     endpoint: {method} {url}
+#     headers:  {headers}
+#     meta:     {meta}
+#     """).strip()
+#     s = s.format(
+#         method=req.method,
+#         url=req.path,
+#         headers=indent(headers),
+#         meta=indent(meta),
+#         # body=indent(body),
+#     )
+#     return s
 
 def log_request(request):
-    ip = request.META['REMOTE_ADDR']
+    ip = get_ip_from_headers(request)
     user_agent = request.META['HTTP_USER_AGENT']
     host = googlebot_reverse_dns(ip)
     path = request.path
@@ -97,6 +131,7 @@ def googlebot_site_map_list_view(request):
         'counts_google_map':    counts_google_map,
         'counts_other_xml':     counts_other_xml,
         'counts_other_map':     counts_other_map,
+        # 'request_details':      format_prepared_request(request),
     }
     return render(request, 'googlebot_stats/googlebot_stats.html', template_values)
 
