@@ -47,7 +47,7 @@ def googlebot_reverse_dns(ip):
         run_cmd = 'host ' + ip
         process = subprocess.run([run_cmd], shell=True, stdout=subprocess.PIPE)
         output_raw = process.stdout
-        host = output_raw.decode("utf-8").replace('\n', '')
+        host = output_raw.decode("utf-8")
         if positive_value_exists(host):
             host = host.replace('\n', '')
 
