@@ -16,7 +16,7 @@ from googlebot_site_map import supplemental_urls
 from googlebot_site_map.models import GooglebotRequest
 from politician.models import Politician
 from voter.models import voter_has_authority
-from wevote_functions.functions import get_ip_from_headers
+from wevote_functions.functions import get_ip_from_headers, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -42,11 +42,14 @@ def log_request(request):
 
 def googlebot_reverse_dns(ip):
     host = 'localhost'
+    # ip = '66.249.66.9'
     if ip != '127.0.0.1':
         run_cmd = 'host ' + ip
         process = subprocess.run([run_cmd], shell=True, stdout=subprocess.PIPE)
         output_raw = process.stdout
-        host = output_raw.decode("utf-8")
+        host = output_raw.decode("utf-8").replace('\n', '')
+        if positive_value_exists(host):
+            host = host.replace('\n', '')
 
     logger.error('Not an error: host ip: ' + ip + ', raw output from host cmd: ' + host)
 
