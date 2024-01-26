@@ -20,40 +20,6 @@ from wevote_functions.functions import get_ip_from_headers
 
 logger = wevote_functions.admin.get_logger(__name__)
 
-# format_json = functools.partial(json.dumps, indent=2, sort_keys=True)
-# indent = functools.partial(textwrap.indent, prefix='  ')
-#
-# def format_prepared_request(req):
-#     headers = '\n'.join(f'{k}: {v}\n' for k, v in req.headers.items())
-#     metaraw = req.META
-#     if 'PATH' in metaraw:
-#         del metaraw['PATH']
-#     if 'PYTHONPATH' in metaraw:
-#         del metaraw['PYTHONPATH']
-#     if 'SHELL' in metaraw:
-#         del metaraw['SHELL']
-#     if 'LIBRARY_ROOTS' in metaraw:
-#         del metaraw['LIBRARY_ROOTS']
-#     if 'RBENV_SHELL' in metaraw:
-#         del metaraw['RBENV_SHELL']
-#
-#     meta = '\n'.join(f'{k}: {v}' for k, v in metaraw.items())
-#     meta = meta.replace('<', '|').replace('>', '|')
-#
-#     s = textwrap.dedent("""
-#     endpoint: {method} {url}
-#     headers:  {headers}
-#     meta:     {meta}
-#     """).strip()
-#     s = s.format(
-#         method=req.method,
-#         url=req.path,
-#         headers=indent(headers),
-#         meta=indent(meta),
-#         # body=indent(body),
-#     )
-#     return s
-
 def log_request(request):
     ip = get_ip_from_headers(request)
     user_agent = request.META['HTTP_USER_AGENT']
@@ -61,8 +27,7 @@ def log_request(request):
     path = request.path
     url_bits = path.split('/')
     request_url_type = '/' + url_bits[-1]
-    # print('log_request ', path, request_url_type)
-    # print(request_url_type)
+
     is_from_google = "googlebot.com" in host or "google.com" in host or \
                      "googleusercontent.com" in host
 
@@ -76,13 +41,15 @@ def log_request(request):
 
 
 def googlebot_reverse_dns(ip):
-    run_cmd = 'host ' + ip
-    process = subprocess.run([run_cmd], shell=True, stdout=subprocess.PIPE)
-    output_raw = process.stdout
-    host = output_raw.decode("utf-8")
-    # print('host is: ' + host)
-    if '1.0.0.127' in host:
-        host = 'localhost'
+    host = 'localhost'
+    if ip != '127.0.0.1':
+        run_cmd = 'host ' + ip
+        process = subprocess.run([run_cmd], shell=True, stdout=subprocess.PIPE)
+        output_raw = process.stdout
+        host = output_raw.decode("utf-8")
+
+    logger.error('Not an error: host ip: ' + ip + ', raw output from host cmd: ' + host)
+
     return host
 
 
