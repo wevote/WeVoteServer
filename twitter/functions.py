@@ -30,7 +30,7 @@ TWITTER_USER_SUSPENDED_LOG_RESPONSES = [
 ]
 
 
-def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle=''):
+def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api_counter_manager=None):
     """
     twitter_json values expected:
         description
@@ -45,6 +45,7 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle=''):
         calculated from nested arrays: expanded_url
     :param twitter_user_id:
     :param twitter_handle:
+    :param twitter_api_counter_manager:
     :return:
     """
     status = ""
@@ -55,12 +56,6 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle=''):
 
     # December 2021: Using the Twitter 1.1 API for OAuthHandler, since all other 2.0 apis that we need are not
     # yet available.
-    # client = tweepy.Client(
-    #     consumer_key=TWITTER_CONSUMER_KEY,
-    #     consumer_secret=TWITTER_CONSUMER_SECRET,
-    #     access_token=TWITTER_ACCESS_TOKEN,
-    #     access_token_secret=TWITTER_ACCESS_TOKEN_SECRET)
-
     # auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
     # auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
     #
@@ -87,6 +82,10 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle=''):
     twitter_user_id = convert_to_int(twitter_user_id)
     try:
         if positive_value_exists(twitter_handle):
+            # Use Twitter API call counter to track the number of queries we are doing each day
+            if hasattr(twitter_api_counter_manager, 'create_counter_entry'):
+                twitter_api_counter_manager.create_counter_entry('get_user')
+
             # twitter_user = api.get_user(screen_name=twitter_handle)
             twitter_user = client.get_user(username=twitter_handle)
             twitter_json = twitter_user._json
@@ -95,6 +94,10 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle=''):
             twitter_handle_found = True
             twitter_user_id = twitter_user.id  # Integer value. id_str would be the String value
         elif positive_value_exists(twitter_user_id):
+            # Use Twitter API call counter to track the number of queries we are doing each day
+            if hasattr(twitter_api_counter_manager, 'create_counter_entry'):
+                twitter_api_counter_manager.create_counter_entry('get_user')
+
             # twitter_user = api.get_user(user_id=twitter_user_id)
             twitter_user = client.get_user(id=twitter_user_id)
             twitter_json = twitter_user._json
@@ -116,7 +119,7 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle=''):
             twitter_user_not_found_in_twitter = True
         else:
             success = False
-            status += 'TWITTER_HTTP_EXCEPTION ' + str(error_instance) + ' '
+            status += 'TWITTER_HTTP_EXCEPTION: ' + str(error_instance) + ' '
             handle_exception(error_instance, logger=logger, exception_message=status)
     except tweepy.errors.TweepyException as error_instance:
         success = False

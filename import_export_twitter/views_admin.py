@@ -345,7 +345,12 @@ def scrape_website_for_social_media_view(request, organization_id, force_retriev
     # TODO DALE We should stop saving organization_twitter_handle without saving a TwitterLinkToOrganization
     if organization.organization_twitter_handle:
         twitter_user_id = 0
-        results = retrieve_twitter_user_info(twitter_user_id, organization.organization_twitter_handle)
+        from twitter.models import TwitterApiCounterManager
+        twitter_api_counter_manager = TwitterApiCounterManager()
+        results = retrieve_twitter_user_info(
+            twitter_user_id,
+            organization.organization_twitter_handle,
+            twitter_api_counter_manager=twitter_api_counter_manager)
 
         if results['success']:
             save_results = organization_manager.update_organization_twitter_details(
@@ -457,8 +462,9 @@ def refresh_twitter_candidate_details_for_election_view(request, election_id):
                                                              state_code=state_code)
 
     if not results['success']:
-        messages.add_message(request, messages.INFO, results['status'])
+        messages.add_message(request, messages.ERROR, results['status'])
     else:
+        messages.add_message(request, messages.INFO, results['status'])
         twitter_handles_added = results['twitter_handles_added']
         profiles_refreshed_with_twitter_data = results['profiles_refreshed_with_twitter_data']
         messages.add_message(request, messages.INFO,
