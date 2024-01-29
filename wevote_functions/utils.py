@@ -1,7 +1,6 @@
 import os
 import re
 import urllib.request
-import pprint
 from django.db import connection
 
 
@@ -52,14 +51,12 @@ def scrape_url(site_url, with_soup=True):
 
 def get_git_commit_date():
     scrape_res = scrape_url(get_git_commit_hash(True), False)
-   
-    date = re.search(r"<relative-time.*?>(.*?)<\/relative-time>", scrape_res['all_html']) or None
-    
-    date_string = date.group(1) if date and date.group(1) else 'Not found'
-    pprint.pprint("date is here --------------------", date_string)
-    # COMMIT_NOTE the above print statement returns an empty array [] so line 56 throws an error TODO show dale
-    # date_string = 'Not found'
-    return date_string 
+    try:
+        date = re.search(r"<relative-time.*?>(.*?)<\/relative-time>", scrape_res['all_html'])
+        date_string = date.group(1) if date and date.group(1) else 'Not found'
+        return date_string
+    except Exception as e:
+        return 'Not found: ' + str(e)
 
 
 def get_python_version():

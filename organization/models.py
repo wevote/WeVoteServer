@@ -12,7 +12,7 @@ from exception.models import handle_exception, \
     handle_record_found_more_than_one_exception, handle_record_not_saved_exception, handle_record_not_found_exception
 from import_export_facebook.models import FacebookManager
 from twitter.functions import retrieve_twitter_user_info
-from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
+from twitter.models import TwitterApiCounterManager, TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
 from voter.models import VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists
@@ -1349,6 +1349,7 @@ class OrganizationManager(models.Manager):
         organization_on_stage_found = False
         new_organization_created = False
         organization_on_stage = Organization()
+        twitter_api_counter_manager = TwitterApiCounterManager()
         status = "ENTERING_UPDATE_OR_CREATE_ORGANIZATION "
 
         organization_id = convert_to_int(organization_id) if positive_value_exists(organization_id) else False
@@ -1420,7 +1421,11 @@ class OrganizationManager(models.Manager):
                 # refresh_from_twitter is true
                 if positive_value_exists(organization_twitter_handle) and refresh_from_twitter:
                     twitter_user_id = 0
-                    results = retrieve_twitter_user_info(twitter_user_id, organization_twitter_handle)
+                    results = retrieve_twitter_user_info(
+                        twitter_user_id,
+                        organization_twitter_handle,
+                        twitter_api_counter_manager=twitter_api_counter_manager,
+                    )
                     if results['success']:
                         twitter_json = results['twitter_json']
                         if positive_value_exists(twitter_json['id']):
@@ -1658,7 +1663,11 @@ class OrganizationManager(models.Manager):
                     # refresh_from_twitter is true
                     if positive_value_exists(organization_twitter_handle) and refresh_from_twitter:
                         twitter_user_id = 0
-                        results = retrieve_twitter_user_info(twitter_user_id, organization_twitter_handle)
+                        results = retrieve_twitter_user_info(
+                            twitter_user_id,
+                            organization_twitter_handle,
+                            twitter_api_counter_manager=twitter_api_counter_manager,
+                        )
                         if results['success']:
                             twitter_json = results['twitter_json']
                             if positive_value_exists(twitter_json['id']):
@@ -1796,7 +1805,11 @@ class OrganizationManager(models.Manager):
                 # refresh_from_twitter is true
                 twitter_user_id = 0
                 if positive_value_exists(organization_twitter_handle) and refresh_from_twitter:
-                    results = retrieve_twitter_user_info(twitter_user_id, organization_twitter_handle)
+                    results = retrieve_twitter_user_info(
+                        twitter_user_id,
+                        organization_twitter_handle,
+                        twitter_api_counter_manager=twitter_api_counter_manager,
+                    )
                     if results['success']:
                         twitter_json = results['twitter_json']
                         if positive_value_exists(twitter_json['id']):

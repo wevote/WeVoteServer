@@ -124,32 +124,39 @@ def add_value_to_next_representative_spot(
         field_updated = field_name_base + '3'
         values_changed = True
     elif new_value_to_add.lower() == current_value3.lower():
-        # The value is already stored in representative.google_civic_candidate_name2 so doesn't need
+        # The value is already stored in representative.google_civic_candidate_name3 so doesn't need
         # to be added to representative.google_civic_candidate_name3
         pass
     elif name_changed and current_value3.lower() == new_value_modified.lower():
         # If representative.google_civic_candidate_name3 has a middle initial with/without a period
         # don't store it if the alternate without/with the period already is stored
         pass
-    elif not positive_value_exists(current_value4):
-        setattr(representative, field_name_base + '4', new_value_to_add)
-        field_updated = field_name_base + '4'
-        values_changed = True
-    elif new_value_to_add.lower() == current_value4.lower():
-        # The value is already stored in representative.google_civic_candidate_name2 so doesn't need
-        # to be added to representative.google_civic_candidate_name3
-        pass
-    # Not currently supported for a 4th name
-    # elif name_changed and current_value4.lower() == new_value_modified.lower():
-    #     # If representative.google_civic_candidate_name3 has a middle initial with/without a period
-    #     # don't store it if the alternate without/with the period already is stored
-    #     pass
-    elif not positive_value_exists(current_value5):
-        setattr(representative, field_name_base + '5', new_value_to_add)
-        field_updated = field_name_base + '5'
-        values_changed = True
+    elif field_name_base in ['politician_twitter_handle']:
+        # 2024-01-19 We support:
+        # politician_twitter_handle4, politician_twitter_handle5
+        # We do not currently support for a 4th or 5th name:
+        # google_civic_candidate_name4, google_civic_candidate_name5
+        # representative_twitter_handle4, representative_twitter_handle5
+        if not positive_value_exists(current_value4):
+            setattr(representative, field_name_base + '4', new_value_to_add)
+            field_updated = field_name_base + '4'
+            values_changed = True
+        elif new_value_to_add.lower() == current_value4.lower():
+            # The value is already stored in representative.google_civic_candidate_name4 so doesn't need
+            # to be added to representative.google_civic_candidate_name4
+            pass
+        elif name_changed and current_value4.lower() == new_value_modified.lower():
+            # If representative.google_civic_candidate_name4 has a middle initial with/without a period
+            # don't store it if the alternate without/with the period already is stored
+            pass
+        elif not positive_value_exists(current_value5):
+            setattr(representative, field_name_base + '5', new_value_to_add)
+            field_updated = field_name_base + '5'
+            values_changed = True
+        else:
+            status += "{field_name_base}5 FULL-COULD_NOT_STORE_VALUE ".format(field_name_base=field_name_base)
     else:
-        status += "{field_name_base}5 FULL-COULD_NOT_STORE_VALUE ".format(field_name_base=field_name_base)
+        status += "{field_name_base}4 NOT_SUPPORTED_FOR_THIS_OBJECT ".format(field_name_base=field_name_base)
     return {
         'field_updated':    field_updated,
         'representative':   representative,

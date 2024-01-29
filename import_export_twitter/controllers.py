@@ -36,7 +36,7 @@ from position.controllers import update_all_position_details_from_candidate, \
     update_position_entered_details_from_organization, update_position_for_friends_details_from_voter
 from representative.models import Representative, RepresentativeManager
 from twitter.functions import retrieve_twitter_user_info
-from twitter.models import TwitterLinkPossibility, TwitterUserManager
+from twitter.models import TwitterApiCounterManager, TwitterLinkPossibility, TwitterUserManager
 from voter.models import VoterManager
 from voter_guide.models import VoterGuideListManager
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, \
@@ -839,6 +839,184 @@ def refresh_twitter_representative_details(representative, use_cached_data_if_wi
     return results
 
 
+def check_for_fresh_enough_twitter_user_data_from_twitter_handle_list(
+        twitter_handle_list=[],
+        use_cached_data_if_within_x_days=30):
+    retrieve_latest_data_from_twitter = False
+    status = ""
+    success = True
+    twitter_handle_found_list = []
+    twitter_handles_to_retrieve_list = []
+    twitter_user_list_found = False
+    twitter_user_manager = TwitterUserManager()
+    twitter_users_to_update_list = []
+    twitter_users_to_not_update_list = []
+    use_cached_data_if_within_x_days = convert_to_int(use_cached_data_if_within_x_days)
+
+    if not positive_value_exists(len(twitter_handle_list)):
+        status += "TWITTER_HANDLE_LIST_MISSING_TWITTER_USER_RETRIEVE_NOT_STARTED "
+        results = {
+            'success':                              True,
+            'status':                               status,
+            'twitter_handle_not_found_list':        [],
+            'twitter_users_to_update_list':         twitter_users_to_update_list,
+            'twitter_users_to_not_update_list':     twitter_users_to_not_update_list,
+        }
+        return results
+
+    twitter_handle_cleaned_list = []
+    for twitter_handle in twitter_handle_list:
+        if positive_value_exists(twitter_handle):
+            twitter_handle_lower_case = twitter_handle.lower()
+            if twitter_handle_lower_case not in twitter_handle_cleaned_list:
+                twitter_handle_cleaned_list.append(twitter_handle_lower_case)
+    twitter_handle_list = twitter_handle_cleaned_list
+
+    # Check the Twitter data we have cached locally
+    results = twitter_user_manager.retrieve_twitter_user_list(
+        twitter_handle_list=twitter_handle_list,
+        read_only=False)
+    if results['success']:
+        twitter_user_list_found = results['twitter_user_list_found']
+        if twitter_user_list_found:
+            twitter_user_list = results['twitter_user_list']
+            for twitter_user in twitter_user_list:
+                twitter_handle_lower_case = twitter_user.twitter_handle.lower()
+                if twitter_handle_lower_case not in twitter_handle_found_list:
+                    twitter_handle_found_list.append(twitter_handle_lower_case)
+                if positive_value_exists(use_cached_data_if_within_x_days):
+                    earliest_date_considered_fresh = now() - timedelta(days=use_cached_data_if_within_x_days)
+                    if positive_value_exists(twitter_user.date_last_updated_from_twitter) \
+                            and twitter_user.date_last_updated_from_twitter > earliest_date_considered_fresh:
+                        # Use the data cached within We Vote and do not reach out to Twitter
+                        twitter_users_to_not_update_list.append(twitter_user)
+                    else:
+                        twitter_users_to_update_list.append(twitter_user)
+                else:
+                    twitter_users_to_update_list.append(twitter_user)
+
+    if positive_value_exists(len(twitter_users_to_update_list)):
+        retrieve_latest_data_from_twitter = True
+        # Create a simple list of twitter handles to retrieve based on results of looking at local twitter_user data
+        for twitter_user in twitter_users_to_update_list:
+            twitter_handle_lower_case = twitter_user.twitter_handle.lower()
+            if twitter_handle_lower_case not in twitter_handles_to_retrieve_list:
+                twitter_handles_to_retrieve_list.append(twitter_handle_lower_case)
+
+    # Now deduce which Twitter handles do not have a twitter_user entry in the database
+    twitter_handle_incoming_set = set(twitter_handle_list)
+    twitter_handle_found_set = set(twitter_handle_found_list)
+    twitter_handle_not_found_list = list(twitter_handle_incoming_set - twitter_handle_found_set)
+    if positive_value_exists(len(twitter_handle_not_found_list)):
+        retrieve_latest_data_from_twitter = True
+        twitter_handles_to_retrieve_list = twitter_handles_to_retrieve_list + twitter_handle_not_found_list
+
+    results = {
+        'retrieve_latest_data_from_twitter': retrieve_latest_data_from_twitter,
+        'success':                          success,
+        'status':                           status,
+        'twitter_handle_found_list':        twitter_handle_found_list,
+        'twitter_handle_not_found_list':    twitter_handle_not_found_list,
+        'twitter_handles_to_retrieve_list': twitter_handles_to_retrieve_list,
+        'twitter_user_list_found':          twitter_user_list_found,
+        'twitter_users_to_not_update_list': twitter_users_to_not_update_list,
+        'twitter_users_to_update_list':     twitter_users_to_update_list,
+    }
+    return results
+
+
+def update_twitter_user_list_from_twitter_response_list(twitter_response_list=[]):
+    we_vote_image_manager = WeVoteImageManager()
+    cached_image_dict = {}
+    twitter_json_dict = {}
+    if retrieve_latest_data_from_twitter:
+        status += "REACHING_OUT_TO_TWITTER: " + str(twitter_handle) + " "
+        twitter_api_counter_manager = TwitterApiCounterManager()
+        results = retrieve_twitter_user_info(
+            twitter_handle=twitter_handle,
+            twitter_api_counter_manager=twitter_api_counter_manager,
+            )
+        status += results['status']
+        if results['twitter_user_not_found_in_twitter'] or results['twitter_user_suspended_by_twitter']:
+            twitter_handle_update_failed = True
+            status += "HANDLE_NOT_FOUND_OR_SUSPENDED "
+            success = False
+            # This is updating the twitter_user above, if it exists
+            if hasattr(twitter_user, 'twitter_handle_updates_failing'):
+                try:
+                    twitter_user.twitter_handle_updates_failing = True
+                    twitter_user.save()
+                except Exception as e:
+                    status += "COULD_NOT_MARK_TWITTER_UPDATES_FAILING: " + str(e) + " "
+                    success = False
+        elif results['success']:
+            status += "DETAILS_RETRIEVED_FROM_TWITTER "
+            twitter_json_dict = results['twitter_json']
+            twitter_user_id = twitter_json_dict['id']
+
+            # Get original image url for cache original size image
+            twitter_profile_image_url_https = we_vote_image_manager.twitter_profile_image_url_https_original(
+                twitter_json_dict['profile_image_url_https'])
+            twitter_profile_background_image_url_https = twitter_json_dict['profile_background_image_url_https'] \
+                if 'profile_background_image_url_https' in twitter_json_dict else None
+            twitter_profile_banner_url_https = twitter_json_dict['profile_banner_url'] \
+                if 'profile_banner_url' in twitter_json_dict else None
+            cache_results = cache_master_and_resized_image(
+                candidate_id=candidate_id,
+                candidate_we_vote_id=candidate_we_vote_id,
+                organization_id=organization_id,
+                organization_we_vote_id=organization_we_vote_id,
+                politician_id=politician_id,
+                politician_we_vote_id=politician_we_vote_id,
+                representative_id=representative_id,
+                representative_we_vote_id=representative_we_vote_id,
+                twitter_id=twitter_user_id,
+                twitter_screen_name=twitter_handle,
+                twitter_profile_image_url_https=twitter_profile_image_url_https,
+                twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
+                twitter_profile_banner_url_https=twitter_profile_banner_url_https,
+                image_source=TWITTER)
+            cached_twitter_profile_image_url_https = cache_results['cached_twitter_profile_image_url_https']
+            cached_twitter_profile_background_image_url_https = \
+                cache_results['cached_twitter_profile_background_image_url_https']
+            cached_twitter_profile_banner_url_https = cache_results['cached_twitter_profile_banner_url_https']
+            we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+            we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+            we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+            if not positive_value_exists(cache_results['success']):
+                success = False
+                status += cache_results['status']
+
+            save_twitter_user_results = twitter_user_manager.update_or_create_twitter_user(
+                twitter_json=twitter_json_dict,
+                twitter_id=twitter_user_id,
+                cached_twitter_profile_image_url_https=cached_twitter_profile_image_url_https,
+                cached_twitter_profile_background_image_url_https=cached_twitter_profile_background_image_url_https,
+                cached_twitter_profile_banner_url_https=cached_twitter_profile_banner_url_https,
+                we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
+                we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
+                we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
+            if save_twitter_user_results['success']:
+                twitter_user = save_twitter_user_results['twitter_user']
+                twitter_user_found = save_twitter_user_results['twitter_user_found']
+                twitter_user_updated = True
+            else:
+                status += save_twitter_user_results['status']
+                success = False
+
+    results = {
+        'cached_image_dict':            cached_image_dict,
+        'success':                      success,
+        'status':                       status,
+        'twitter_handle_update_failed': twitter_handle_update_failed,
+        'twitter_json_dict':            twitter_json_dict,
+        'twitter_user':                 twitter_user,
+        'twitter_user_found':           twitter_user_found,
+        'twitter_user_updated':         twitter_user_updated,
+    }
+    return results
+
+
 def retrieve_fresh_enough_twitter_user_for_handle(
         candidate_id='',
         candidate_we_vote_id='',
@@ -906,7 +1084,13 @@ def retrieve_fresh_enough_twitter_user_for_handle(
 
     if retrieve_latest_data_from_twitter:
         status += "REACHING_OUT_TO_TWITTER: " + str(twitter_handle) + " "
-        results = retrieve_twitter_user_info(twitter_handle=twitter_handle)
+        twitter_api_counter_manager = TwitterApiCounterManager()
+        results = retrieve_twitter_user_info(
+            twitter_handle=twitter_handle,
+            twitter_api_counter_manager=twitter_api_counter_manager)
+        status += results['status']
+        if not results['success']:
+            success = False
         if results['twitter_user_not_found_in_twitter'] or results['twitter_user_suspended_by_twitter']:
             twitter_handle_update_failed = True
             status += "HANDLE_NOT_FOUND_OR_SUSPENDED "
@@ -1215,9 +1399,14 @@ def retrieve_possible_twitter_handles(candidate):
 
     # December 2021: Using the Twitter 1.1 API for search_users, since it is not yet available in 2.0
     # https://developer.twitter.com/en/docs/twitter-api/migrate/twitter-api-endpoint-map
-    auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
-    auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
-    api = tweepy.API(auth, timeout=20)
+    # auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
+    # auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
+    # api = tweepy.API(auth, timeout=20)
+    client = tweepy.Client(
+        consumer_key=TWITTER_CONSUMER_KEY,
+        consumer_secret=TWITTER_CONSUMER_SECRET,
+        access_token=TWITTER_ACCESS_TOKEN,
+        access_token_secret=TWITTER_ACCESS_TOKEN_SECRET)
     # results = {'possible_twitter_handles_list': []}
     possible_twitter_handles_list = []
 
@@ -1225,7 +1414,13 @@ def retrieve_possible_twitter_handles(candidate):
     # Search 1
     search_term = candidate.candidate_name
     try:
-        search_results = api.search_users(q=search_term, page=1)
+        # Use Twitter API call counter to track the number of queries we are doing each day
+        google_civic_api_counter_manager = TwitterApiCounterManager()
+        google_civic_api_counter_manager.create_counter_entry('search_users')
+
+        # DALE 2024-01-19 search_users NOT supported by tweepy yet, but Twitter API 2 seems to
+        # support it: https://developer.twitter.com/en/docs/twitter-api/users/search/api-reference/get-users-search
+        search_results = client.search_users(q=search_term, page=1)
 
         search_results.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
         search_results_length = len(search_results)
@@ -1257,7 +1452,9 @@ def retrieve_possible_twitter_handles(candidate):
     modified_search_term += modified_search_term_base
     if search_term != modified_search_term:
         try:
-            modified_search_results = api.search_users(q=modified_search_term, page=1)
+            # DALE 2024-01-19 search_users NOT supported by tweepy yet, but Twitter API 2 seems to
+            # support it: https://developer.twitter.com/en/docs/twitter-api/users/search/api-reference/get-users-search
+            modified_search_results = client.search_users(q=modified_search_term, page=1)
             modified_search_results.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
             modified_search_results_found = len(modified_search_results) > 0
             if modified_search_results_found:
@@ -1276,7 +1473,9 @@ def retrieve_possible_twitter_handles(candidate):
         modified_search_term_2 = candidate_name['nickname'] + " " + modified_search_term_base
 
         try:
-            modified_search_results_2 = api.search_users(q=modified_search_term_2, page=1)
+            # DALE 2024-01-19 search_users NOT supported by tweepy yet, but Twitter API 2 seems to
+            # support it: https://developer.twitter.com/en/docs/twitter-api/users/search/api-reference/get-users-search
+            modified_search_results_2 = client.search_users(q=modified_search_term_2, page=1)
             modified_search_results_2.sort(key=lambda possible_candidate: possible_candidate.followers_count, reverse=True)
             modified_search_results_2_found = len(modified_search_results_2) > 0
             if modified_search_results_2_found:
@@ -1743,7 +1942,42 @@ def retrieve_possible_twitter_handles_in_bulk(
         'candidates_to_analyze':    candidates_to_analyze,
         'candidates_analyzed':      candidates_analyzed,
     }
+    return results
 
+
+def retrieve_twitter_details_from_list(twitter_handles_list=[]):
+    retrieve_from_twitter = len(twitter_handles_list) > 0
+    success = True
+    status = ""
+    twitter_response_list = []
+    twitter_response_list_retrieved = False
+
+    if retrieve_from_twitter:
+        try:
+            client = tweepy.Client(
+                consumer_key=TWITTER_CONSUMER_KEY,
+                consumer_secret=TWITTER_CONSUMER_SECRET,
+                access_token=TWITTER_ACCESS_TOKEN,
+                access_token_secret=TWITTER_ACCESS_TOKEN_SECRET)
+
+            # Use Twitter API call counter to track the number of queries we are doing each day
+            google_civic_api_counter_manager = TwitterApiCounterManager()
+            google_civic_api_counter_manager.create_counter_entry('get_users')
+
+            twitter_response = client.get_users(usernames=twitter_handles_list)
+            # Temp
+            status += str(twitter_response)
+            print(twitter_response)
+        except Exception as e:
+            status += "PROBLEM_RETRIEVING_TWITTER_DETAILS: " + str(e) + " "
+            success = False
+    twitter_response_list_retrieved = len(twitter_response_list) > 0
+    results = {
+        'success':                          success,
+        'status':                           status,
+        'twitter_response_list':            twitter_response_list,
+        'twitter_response_list_retrieved':  twitter_response_list_retrieved,
+    }
     return results
 
 
@@ -2080,6 +2314,8 @@ def scrape_and_save_social_media_for_candidates_in_one_election(google_civic_ele
 
 
 def refresh_twitter_candidate_details_for_election(google_civic_election_id, state_code):
+    status = ""
+    success = True
     twitter_handles_added = 0
     profiles_refreshed_with_twitter_data = 0
 
@@ -2093,37 +2329,98 @@ def refresh_twitter_candidate_details_for_election(google_civic_election_id, sta
         state_code=state_code,
         return_list_of_objects=return_list_of_objects,
         read_only=False)
+    candidate_objects_to_update_list = []
+    twitter_handles_to_check_list = []
     if candidates_results['candidate_list_found']:
         candidate_list = candidates_results['candidate_list_objects']
 
         for candidate in candidate_list:
             # logger.info("refresh_twitter_candidate_details_for_election: " + candidate.candidate_name)
             # Extract twitter_handle from google_civic_election information
+            candidate_save_needed = False
             if positive_value_exists(candidate.twitter_url) \
                     and not positive_value_exists(candidate.candidate_twitter_handle):
                 # If we got a twitter_url from Google Civic, and we haven't already stored a twitter handle, move it
                 candidate.candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate.twitter_url)
-                candidate.save()
+                candidate_save_needed = True
                 twitter_handles_added += 1
-            if positive_value_exists(candidate.candidate_twitter_handle) and not positive_value_exists(candidate.twitter_url):
+            if positive_value_exists(candidate.candidate_twitter_handle) \
+                    and not positive_value_exists(candidate.twitter_url):
                 candidate.twitter_url = 'https://twitter.com/' + candidate.candidate_twitter_handle
                 # logger.info(
                 #     'refresh_twitter_candidate_details_for_election, twitter_url set to ' + candidate.twitter_url)
-                candidate.save()
-            if positive_value_exists(candidate.twitter_url) and not positive_value_exists(candidate.candidate_url):
+                candidate_save_needed = True
+            if positive_value_exists(candidate.twitter_url) \
+                    and not positive_value_exists(candidate.candidate_url):
                 candidate.candidate_url = candidate.twitter_url
                 # logger.info(
                 #     'refresh_twitter_candidate_details_for_election, candidate_url set to ' + candidate.candidate_url)
+                candidate_save_needed = True
+
+            if candidate_save_needed:
                 candidate.save()
 
             if positive_value_exists(candidate.candidate_twitter_handle):
-                refresh_twitter_candidate_details(candidate)
-                profiles_refreshed_with_twitter_data += 1
-                refresh_candidate_results = refresh_candidate_data_from_master_tables(candidate.we_vote_id)
+                candidate_objects_to_update_list.append(candidate)
+                twitter_handles_to_check_list.append(candidate.candidate_twitter_handle)
+                # TODO Replace refresh_twitter_candidate_details
+                # refresh_twitter_candidate_details(candidate)
+                # profiles_refreshed_with_twitter_data += 1
+                # refresh_candidate_results = refresh_candidate_data_from_master_tables(candidate.we_vote_id)
 
-    status = "CANDIDATE_SOCIAL_MEDIA_RETRIEVED"
+    # for candidate in candidate_objects_to_update_list:
+    #     # refresh_twitter_candidate_details(candidate)
+    #     # profiles_refreshed_with_twitter_data += 1
+    #     # refresh_candidate_results = refresh_candidate_data_from_master_tables(candidate.we_vote_id)
+
+    results = check_for_fresh_enough_twitter_user_data_from_twitter_handle_list(
+        twitter_handle_list=twitter_handles_to_check_list,
+        use_cached_data_if_within_x_days=30,
+    )
+    status += results['status']
+    twitter_handles_to_retrieve_list = results['twitter_handles_to_retrieve_list']
+    if len(twitter_handles_to_retrieve_list) > 0:
+        results = retrieve_twitter_details_from_list(
+            twitter_handles_list=twitter_handles_to_retrieve_list,
+        )
+        status += results['status']
+        if not results['success']:
+            success = False
+        if results['twitter_response_list_retrieved']:
+            twitter_response_list = results['twitter_response_list']
+            results = update_twitter_user_list_from_twitter_response_list(twitter_response_list=twitter_response_list)
+            for twitter_user in twitter_response_list:
+                # Now match retrieved twitter_user data with candidates. Then update the candidates
+                for candidate in candidate_objects_to_update_list:
+                    if candidate.candidate_twitter_handle == twitter_user['screen_name']:
+                        # TODO: Is this needed given save_fresh_twitter_details below?
+                        # refresh_twitter_candidate_details_from_twitter_user(
+                        #     candidate=candidate,
+                        #     twitter_user=twitter_user,
+                        # )
+                        # TEMP Listed here for reference
+                        # refresh_twitter_candidate_details(candidate)
+                        # refresh_twitter_organization_details_from_twitter_user()
+                        refresh_results = save_fresh_twitter_details(twitter_user=twitter_user, update_all=True)
+                        status += refresh_results['status']
+
+    for candidate in candidate_objects_to_update_list:
+        # twitter_user_found = results['twitter_user_found']
+        # twitter_user_updated = results['twitter_user_updated']
+        # # Now update all places where we use this twitter_handle
+        # twitter_user = results['twitter_user']
+        # # 'candidates_updated_count': candidates_updated_count,
+        # # 'organizations_updated_count': organizations_updated_count,
+        # # 'politicians_updated_count': politicians_updated_count,
+        # # 'representatives_updated_count': representatives_updated_count,
+        # # 'total_updated_count': total_updated_count,
+        # candidates_updated_count = refresh_results['candidates_updated_count']
+        pass
+
+    if success:
+        status += "CANDIDATE_SOCIAL_MEDIA_RETRIEVED "
     results = {
-        'success':                              True,
+        'success':                              success,
         'status':                               status,
         'twitter_handles_added':                twitter_handles_added,
         'profiles_refreshed_with_twitter_data': profiles_refreshed_with_twitter_data,
@@ -2843,7 +3140,6 @@ def twitter_process_deferred_images_for_api(
         voter_we_vote_id_for_cache):
     # After the voter signs in, and the ballot page (or other) is displayed,
     # then we process the images, to speed up signin
-    organization_manager = OrganizationManager()
     status = ''
     if not positive_value_exists(success):
         return {
@@ -2851,6 +3147,8 @@ def twitter_process_deferred_images_for_api(
             'success': False,
             'twitter_images_were_processed': False,
         }
+    organization_manager = OrganizationManager()
+    twitter_api_counter_manager = TwitterApiCounterManager()
     # voter_we_vote_id_for_cache = voter_we_vote_id_for_cache
     # twitter_id = twitter_imagtwitter_id
     # success = twitter_image_load_info['success']
@@ -2872,7 +3170,11 @@ def twitter_process_deferred_images_for_api(
     we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
 
     # Retrieve twitter user details from twitter
-    results = retrieve_twitter_user_info(twitter_id, twitter_screen_name)
+    results = retrieve_twitter_user_info(
+        twitter_id,
+        twitter_screen_name,
+        twitter_api_counter_manager=twitter_api_counter_manager,
+    )
     if not results['success']:
         twitter_json = {
             'id': twitter_id,
@@ -3084,6 +3386,7 @@ def twitter_sign_in_retrieve_for_api(voter_device_id, image_load_deferred):  # t
         }
         return error_results
 
+    twitter_api_counter_manager = TwitterApiCounterManager()
     twitter_user_manager = TwitterUserManager()
     twitter_sign_in_verified = True
     twitter_sign_in_failed = False
@@ -3165,7 +3468,11 @@ def twitter_sign_in_retrieve_for_api(voter_device_id, image_load_deferred):  # t
             voter_we_vote_id_for_cache=voter_we_vote_id_for_cache)
 
     # Retrieve twitter user details from twitter
-    results = retrieve_twitter_user_info(twitter_id, twitter_auth_response.twitter_screen_name)
+    results = retrieve_twitter_user_info(
+        twitter_id,
+        twitter_auth_response.twitter_screen_name,
+        twitter_api_counter_manager=twitter_api_counter_manager,
+    )
     if not results['success']:
         twitter_json = {
             'id': twitter_id,

@@ -1374,7 +1374,7 @@ class SendGridApiCounterManager(models.Manager):
         try:
             while number_found <= days_to_display and attempt_count <= maximum_attempts:
                 attempt_count += 1
-                counter_queryset = SendGridApiCounter.objects.all()
+                counter_queryset = SendGridApiCounter.objects.using('readonly').all()
                 if positive_value_exists(kind_of_action):
                     counter_queryset = counter_queryset.filter(kind_of_action=kind_of_action)
 
