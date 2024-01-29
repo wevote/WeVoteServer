@@ -4,12 +4,15 @@ import math
 from PIL import Image
 import requests
 
-def generate_background(politician):
+def generate_background(politician, base=None, edge_case=None):
+
+    print(edge_case)
+
+    base = base or 3
  
     image = Image.open(requests.get(politician.we_vote_hosted_profile_image_url_large, stream=True).raw)
     image_crop_left = image.crop((0, 0, 20, 20))
     image_crop_right = image.crop((image.width - 20, 0, image.width, 20))
-
 
     pixels_left = image_crop_left.convert('RGBA')
     pixels_right = image_crop_right.convert('RGBA')
@@ -24,14 +27,35 @@ def generate_background(politician):
             [],[],[],[],[],[],[],[],[],
             [],[],[],[],[],[],[],[],[]
             ]
-      
+    
+    ################# testing
+    test_base = 4
+    for r in range(test_base-1,-1,-1):
+        for g in range(test_base-1,-1,-1):
+            for b in range(test_base-1,-1,-1):
+                test = (r * (test_base**2)) + (g * test_base) + b
+                print(test)
+    print("**********")
+    for r in range(test_base-1,-1,-1):
+        print(r)
+
+    ## TODO nicer way to write this?
+    test_bin = []
+    for bin in range(base**3,-1,-1):
+        test_bin.append([])
+
+    print(test_bin)
+    ############################ end testing
+
+
+    divisor= 255/base
     for r,g,b,a in left_list:
        # turn math.floor etc into a variable
        # document the meaning of variables
-       r_binned = min(math.floor(r/(255/3)),2)
-       g_binned = min(math.floor(g/85),2)
-       b_binned = min(math.floor(b/85),2)
-       bin_index = (r_binned * 9) + (g_binned * 3) + b_binned
+       r_binned = min(math.floor(r/divisor),base-1)
+       g_binned = min(math.floor(g/divisor),base-1)
+       b_binned = min(math.floor(b/divisor),base-1)
+       bin_index = (r_binned * (base**2)) + (g_binned * base) + b_binned
        bins[bin_index].append((r,g,b))
     
     bins.sort(key=lambda l: -len(l))
