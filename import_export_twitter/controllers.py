@@ -2371,7 +2371,7 @@ def refresh_twitter_candidate_details_for_election(google_civic_election_id, sta
                     profiles_refreshed_with_twitter_data += 1
 
     if success:
-        status += "TWITTER_HANDLES_RETRIEVED_RETRIEVED "
+        status += "TWITTER_HANDLES_RETRIEVED "
     results = {
         'success':                              success,
         'status':                               status,
