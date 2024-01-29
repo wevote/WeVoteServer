@@ -2336,15 +2336,6 @@ def refresh_twitter_candidate_details_for_election(google_civic_election_id, sta
             if positive_value_exists(candidate.candidate_twitter_handle):
                 candidate_objects_to_update_list.append(candidate)
                 twitter_handles_to_check_list.append(candidate.candidate_twitter_handle)
-                # TODO Replace refresh_twitter_candidate_details
-                # refresh_twitter_candidate_details(candidate)
-                # profiles_refreshed_with_twitter_data += 1
-                # refresh_candidate_results = refresh_candidate_data_from_master_tables(candidate.we_vote_id)
-
-    # for candidate in candidate_objects_to_update_list:
-    #     # refresh_twitter_candidate_details(candidate)
-    #     # profiles_refreshed_with_twitter_data += 1
-    #     # refresh_candidate_results = refresh_candidate_data_from_master_tables(candidate.we_vote_id)
 
     results = check_for_fresh_enough_twitter_user_data_from_twitter_handle_list(
         twitter_handle_list=twitter_handles_to_check_list,
@@ -2353,6 +2344,10 @@ def refresh_twitter_candidate_details_for_election(google_civic_election_id, sta
     status += results['status']
     twitter_handles_to_retrieve_list = results['twitter_handles_to_retrieve_list']
     if len(twitter_handles_to_retrieve_list) > 0:
+        status += "TWITTER_HANDLES_TO_REQUEST: " + str(len(twitter_handles_to_retrieve_list)) + " "
+        if len(twitter_handles_to_retrieve_list) > 100:
+            twitter_handles_to_retrieve_list = twitter_handles_to_retrieve_list[:100]
+            status += "(REQUEST_LIMITED_TO_100) "
         # Use Twitter API call counter to track the number of queries we are doing each day
         google_civic_api_counter_manager = TwitterApiCounterManager()
         from twitter.functions import retrieve_twitter_user_info_from_handles_list
@@ -2363,6 +2358,7 @@ def refresh_twitter_candidate_details_for_election(google_civic_election_id, sta
         status += results['status']
         if not results['success']:
             success = False
+            status += "HANDLES_REQUESTED: " + str(twitter_handles_to_retrieve_list) + " "
         if results['twitter_response_list_retrieved']:
             twitter_dict_list = results['twitter_response_list']
             results = update_twitter_user_list_from_twitter_response_list(twitter_dict_list=twitter_dict_list)
@@ -2375,7 +2371,7 @@ def refresh_twitter_candidate_details_for_election(google_civic_election_id, sta
                     profiles_refreshed_with_twitter_data += 1
 
     if success:
-        status += "CANDIDATE_SOCIAL_MEDIA_RETRIEVED "
+        status += "TWITTER_HANDLES_RETRIEVED "
     results = {
         'success':                              success,
         'status':                               status,
