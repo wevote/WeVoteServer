@@ -161,13 +161,13 @@ class TwitterAuthManager(models.Manager):
             # 'utc_offset': 32400,
             # 'description': "Cars, Musics, Games, Electronics, toys, food, etc... I'm just a typical boy!",
             # 'profile_image_url': 'http://a1.twimg.com/profile_images/1213351752/_2_2__normal.jpg',
-            if hasattr(twitter_user_object, "profile_image_url_https") and \
-                    positive_value_exists(twitter_user_object.profile_image_url_https):
-                twitter_auth_response.twitter_profile_image_url_https = twitter_user_object.profile_image_url_https
+            if hasattr(twitter_user_object, "profile_image_url") and \
+                    positive_value_exists(twitter_user_object.profile_image_url):
+                twitter_auth_response.twitter_profile_image_url_https = twitter_user_object.profile_image_url
                 twitter_auth_value_to_save = True
             # 'profile_background_image_url': 'http://a2.twimg.com/a/1294785484/images/themes/theme15/bg.png',
-            if hasattr(twitter_user_object, "screen_name") and positive_value_exists(twitter_user_object.screen_name):
-                twitter_auth_response.twitter_screen_name = twitter_user_object.screen_name
+            if hasattr(twitter_user_object, "username") and positive_value_exists(twitter_user_object.username):
+                twitter_auth_response.twitter_screen_name = twitter_user_object.username
                 twitter_auth_value_to_save = True
             # 'lang': 'en',
             if hasattr(twitter_user_object, "name") and positive_value_exists(twitter_user_object.name):
@@ -175,10 +175,11 @@ class TwitterAuthManager(models.Manager):
                 twitter_auth_value_to_save = True
             # 'url': 'http://www.carbonize.co.kr',
             # 'time_zone': 'Seoul',
-            if hasattr(twitter_user_object, "profile_banner_url") and \
-                    positive_value_exists(twitter_user_object.profile_banner_url):
-                twitter_auth_response.twitter_profile_banner_url_https = twitter_user_object.profile_banner_url
-                twitter_auth_value_to_save = True
+            # 2024-01-27 Twitter API v2 doesn't return profile_banner_url any more
+            # if hasattr(twitter_user_object, "profile_banner_url") and \
+            #         positive_value_exists(twitter_user_object.profile_banner_url):
+            #     twitter_auth_response.twitter_profile_banner_url_https = twitter_user_object.profile_banner_url
+            #     twitter_auth_value_to_save = True
             if twitter_auth_value_to_save:
                 twitter_auth_response.save()
             success = True

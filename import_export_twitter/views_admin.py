@@ -354,7 +354,7 @@ def scrape_website_for_social_media_view(request, organization_id, force_retriev
 
         if results['success']:
             save_results = organization_manager.update_organization_twitter_details(
-                organization, results['twitter_json'])
+                organization, results['twitter_dict'])
 
             if save_results['success']:
                 organization = save_results['organization']

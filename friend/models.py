@@ -125,7 +125,7 @@ class FriendInvitationTwitterLink(models.Model):
     sender_voter_we_vote_id = models.CharField(
         verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False)
     recipient_twitter_handle = models.CharField(
-        verbose_name='twitter screen_name', max_length=255, null=False, unique=False)
+        verbose_name='twitter username', max_length=255, null=False, unique=False)
     secret_key = models.CharField(
         verbose_name="secret key to accept invite", max_length=255, null=True, blank=True, unique=True)
     invitation_message = models.TextField(null=True, blank=True)

@@ -2199,9 +2199,9 @@ class VoterManager(BaseUserManager):
             if positive_value_exists(cached_twitter_profile_image_url_https):
                 voter.twitter_profile_image_url_https = cached_twitter_profile_image_url_https
                 voter_to_save = True
-            elif hasattr(twitter_user_object, "profile_image_url_https") and \
-                    positive_value_exists(twitter_user_object.profile_image_url_https):
-                voter.twitter_profile_image_url_https = twitter_user_object.profile_image_url_https
+            elif hasattr(twitter_user_object, "profile_image_url") and \
+                    positive_value_exists(twitter_user_object.profile_image_url):
+                voter.twitter_profile_image_url_https = twitter_user_object.profile_image_url
                 voter_to_save = True
             # Always update to latest Twitter image
             if positive_value_exists(we_vote_hosted_profile_image_url_large):
@@ -2228,9 +2228,9 @@ class VoterManager(BaseUserManager):
                     voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
                     voter_to_save = True
             # 'profile_background_image_url': 'http://a2.twimg.com/a/1294785484/images/themes/theme15/bg.png',
-            # 'screen_name': 'jaeeeee',
-            if hasattr(twitter_user_object, "screen_name") and positive_value_exists(twitter_user_object.screen_name):
-                voter.twitter_screen_name = twitter_user_object.screen_name
+            # 'username': 'jaeeeee',
+            if hasattr(twitter_user_object, "username") and positive_value_exists(twitter_user_object.username):
+                voter.twitter_screen_name = twitter_user_object.username
                 voter_to_save = True
             # 'lang': 'en',
             if hasattr(twitter_user_object, "name") and positive_value_exists(twitter_user_object.name):
@@ -2312,7 +2312,7 @@ class VoterManager(BaseUserManager):
                     voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
                     voter_to_save = True
             # 'profile_background_image_url': 'http://a2.twimg.com/a/1294785484/images/themes/theme15/bg.png',
-            # 'screen_name': 'jaeeeee',
+            # 'username': 'jaeeeee',
             if hasattr(twitter_auth_response, "twitter_screen_name") and \
                     positive_value_exists(twitter_auth_response.twitter_screen_name):
                 voter.twitter_screen_name = twitter_auth_response.twitter_screen_name
@@ -2356,12 +2356,12 @@ class VoterManager(BaseUserManager):
             # 'profile_image_url': 'http://a1.twimg.com/profile_images/1213351752/_2_2__normal.jpg',
             if cached_twitter_profile_image_url_https:
                 voter.twitter_profile_image_url_https = cached_twitter_profile_image_url_https
-            elif 'profile_image_url_https' in twitter_user_dict:
-                voter.twitter_profile_image_url_https = twitter_user_dict['profile_image_url_https']
+            elif 'profile_image_url' in twitter_user_dict:
+                voter.twitter_profile_image_url_https = twitter_user_dict['profile_image_url']
             # 'profile_background_image_url': 'http://a2.twimg.com/a/1294785484/images/themes/theme15/bg.png',
-            # 'screen_name': 'jaeeeee',
-            if 'screen_name' in twitter_user_dict:
-                voter.twitter_screen_name = twitter_user_dict['screen_name']
+            # 'username': 'jaeeeee',
+            if 'username' in twitter_user_dict:
+                voter.twitter_screen_name = twitter_user_dict['username']
             if 'name' in twitter_user_dict:
                 voter.twitter_name = twitter_user_dict['name']
             # Always update to latest Twitter image
@@ -2575,7 +2575,7 @@ class VoterManager(BaseUserManager):
     def update_voter_twitter_details(
             self,
             twitter_id='',
-            twitter_json={},
+            twitter_dict={},
             cached_twitter_profile_image_url_https='',
             we_vote_hosted_profile_image_url_large='',
             we_vote_hosted_profile_image_url_medium='',
@@ -2583,7 +2583,7 @@ class VoterManager(BaseUserManager):
         """
         Update existing voter entry with details retrieved from the Twitter API
         :param twitter_id:
-        :param twitter_json:
+        :param twitter_dict:
         :param cached_twitter_profile_image_url_https:
         :param we_vote_hosted_profile_image_url_large:
         :param we_vote_hosted_profile_image_url_medium:
@@ -2595,7 +2595,7 @@ class VoterManager(BaseUserManager):
         if voter_results['voter_found']:
             # Twitter user already exists so update twitter user details
             results = self.save_twitter_user_values_from_dict(
-                voter, twitter_json,
+                voter, twitter_dict,
                 cached_twitter_profile_image_url_https=cached_twitter_profile_image_url_https,
                 we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
                 we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
