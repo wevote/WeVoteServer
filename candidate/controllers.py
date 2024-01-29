@@ -1878,7 +1878,7 @@ def refresh_candidate_data_from_master_tables(candidate_we_vote_id):
     we_vote_hosted_profile_image_url_large = None
     we_vote_hosted_profile_image_url_medium = None
     we_vote_hosted_profile_image_url_tiny = None
-    twitter_json = {}
+    twitter_dict = {}
     status = ""
 
     candidate_manager = CandidateManager()
@@ -1908,9 +1908,9 @@ def refresh_candidate_data_from_master_tables(candidate_we_vote_id):
                 twitter_user.twitter_location != candidate.twitter_location or \
                 twitter_user.twitter_followers_count != candidate.twitter_followers_count or \
                 twitter_user.twitter_description != candidate.twitter_description:
-            twitter_json = {
+            twitter_dict = {
                 'id': twitter_user.twitter_id,
-                'screen_name': twitter_user.twitter_handle,
+                'username': twitter_user.twitter_handle,
                 'name': twitter_user.twitter_name,
                 'followers_count': twitter_user.twitter_followers_count,
                 'location': twitter_user.twitter_location,

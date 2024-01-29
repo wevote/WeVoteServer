@@ -1102,7 +1102,7 @@ class VoterGuide(models.Model):
         verbose_name="is owner org, public figure, or voter?", max_length=2, choices=ORGANIZATION_TYPE_CHOICES,
         default=UNKNOWN)
 
-    twitter_handle = models.CharField(verbose_name='twitter screen_name', max_length=255, null=True, unique=False)
+    twitter_handle = models.CharField(verbose_name='twitter username', max_length=255, null=True, unique=False)
     twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
                                            max_length=255, null=True, blank=True)
     twitter_followers_count = models.PositiveIntegerField(
