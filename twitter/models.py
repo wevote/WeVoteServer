@@ -5,13 +5,16 @@
 # See also WeVoteServer/import_export_twitter/models.py for the code that interfaces with twitter (or other) servers
 import tweepy
 from django.db import models
+from django.db.models import Q
 from django.utils.timezone import localtime, now
 
 from config.base import get_environment_variable
+from datetime import date, timedelta
 from exception.models import handle_record_found_more_than_one_exception
 from twitter.functions import retrieve_twitter_user_info
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, generate_random_string, positive_value_exists
+
 
 TWITTER_BEARER_TOKEN = get_environment_variable("TWITTER_BEARER_TOKEN")
 
@@ -738,7 +741,12 @@ class TwitterUserManager(models.Manager):
             status += "TWITTER_USER_NOT_FOUND_LOCALLY "
 
         # If here, we want to reach out to Twitter to get info for this twitter_handle
-        twitter_results = retrieve_twitter_user_info(twitter_user_id, twitter_handle)
+        twitter_api_counter_manager = TwitterApiCounterManager()
+        twitter_results = retrieve_twitter_user_info(
+            twitter_user_id,
+            twitter_handle,
+            twitter_api_counter_manager=twitter_api_counter_manager,
+        )
         if twitter_results['success'] is False:
             status += twitter_results['status']
             success = False
@@ -819,6 +827,75 @@ class TwitterUserManager(models.Manager):
         }
         return results
 
+    def retrieve_twitter_user_list(self, twitter_user_id_list=[], twitter_handle_list=[], read_only=False):
+        twitter_user_list = []
+        twitter_user_list_found = False
+        success = True
+        status = ""
+
+        # Strip out the twitter handles "False" or "None"
+        twitter_handle_list_cleaned = []
+        for twitter_handle in twitter_handle_list:
+            if twitter_handle:
+                twitter_handle_lower = twitter_handle.lower()
+                if twitter_handle_lower == 'false' or twitter_handle_lower == 'none':
+                    pass
+                elif positive_value_exists(twitter_handle_lower) and \
+                        twitter_handle_lower not in twitter_handle_list_cleaned:
+                    twitter_handle_list_cleaned.append(twitter_handle_lower)
+        twitter_handle_list = twitter_handle_list_cleaned
+
+        # Strip out the twitter ids 0, "False" or "None"
+        twitter_user_id_list_cleaned = []
+        for twitter_user_id in twitter_user_id_list:
+            if twitter_user_id:
+                twitter_user_id_integer = convert_to_int(twitter_user_id)
+                if positive_value_exists(twitter_user_id_integer) and \
+                        twitter_user_id_integer not in twitter_user_id_list_cleaned:
+                    twitter_user_id_list_cleaned.append(twitter_user_id_integer)
+        twitter_user_id_list = twitter_user_id_list_cleaned
+
+        try:
+            if read_only:
+                queryset = TwitterUser.objects.using('readonly').all()
+            else:
+                queryset = TwitterUser.objects.all()
+            filters = []
+
+            # We want to find twitter_users with *any* of these values
+            for twitter_handle in twitter_handle_list:
+                new_filter = Q(twitter_handle__iexact=twitter_handle)
+                filters.append(new_filter)
+
+            for twitter_user_id in twitter_user_id_list:
+                new_filter = Q(twitter_id=twitter_user_id)
+                filters.append(new_filter)
+
+            if len(filters) > 0:
+                # Add the first query
+                final_filters = filters.pop()
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                queryset = queryset.filter(final_filters)
+                twitter_user_list = list(queryset)
+                twitter_user_list_found = len(twitter_user_list) > 0
+                status += "RETRIEVE_TWITTER_USER_LIST_COUNT: " + str(len(twitter_user_list)) + " "
+            else:
+                status += "RETRIEVE_TWITTER_USER_LIST_NO_FILTERS_FOUND "
+        except Exception as e:
+            success = False
+            status += "RETRIEVE_TWITTER_USER_LIST_EXCEPTION: " + str(e) + " "
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'twitter_user_list_found':  twitter_user_list_found,
+            'twitter_user_list':        twitter_user_list,
+        }
+        return results
+
     def retrieve_twitter_ids_i_follow_from_twitter(self, twitter_id_of_me, twitter_access_token, twitter_access_secret):
         """
         We use this routine to retrieve twitter ids who i (the voter) follow
@@ -834,6 +911,12 @@ class TwitterUserManager(models.Manager):
         success = False
         list_of_usernames = []
         client = tweepy.Client(bearer_token=TWITTER_BEARER_TOKEN, wait_on_rate_limit=True)
+
+        # TODO: Add counter
+        # # Use Twitter API call counter to track the number of queries we are doing each day
+        # google_civic_api_counter_manager = TwitterApiCounterManager()
+        # google_civic_api_counter_manager.create_counter_entry('get_users')
+
         try:
             tid = twitter_id_of_me
             for response in tweepy.Paginator(client.get_users_following, tid, max_results=1000, limit=5000):
@@ -1438,3 +1521,99 @@ class TwitterCursorState(models.Model):
 class TwitterWhoFollowMe(models.Model):
     handle_of_me = models.CharField(max_length=15, verbose_name='from this twitter handle\'s perspective...')
     handle_that_follows_me = models.CharField(max_length=15, verbose_name='twitter handle of this tweet\'s author')
+
+
+class TwitterApiCounter(models.Model):
+    datetime_of_action = models.DateTimeField(verbose_name='date and time of action', null=False, auto_now=True)
+    kind_of_action = models.CharField(
+        verbose_name="kind of call to Twitter", max_length=50, null=True, blank=True, db_index=True)
+    google_civic_election_id = models.PositiveIntegerField(
+        verbose_name="google civic election id", null=True, db_index=True)
+
+
+class TwitterApiCounterDailySummary(models.Model):
+    date_of_action = models.DateField(verbose_name='date of action', null=False, auto_now=False)
+    kind_of_action = models.CharField(verbose_name="kind of call to Twitter", max_length=50, null=True, blank=True)
+    google_civic_election_id = models.PositiveIntegerField(verbose_name="google civic election id", null=True)
+
+
+class TwitterApiCounterWeeklySummary(models.Model):
+    year_of_action = models.SmallIntegerField(verbose_name='year of action', null=False)
+    week_of_action = models.SmallIntegerField(verbose_name='number of the week', null=False)
+    kind_of_action = models.CharField(verbose_name="kind of call to Twitter", max_length=50, null=True, blank=True)
+    google_civic_election_id = models.PositiveIntegerField(verbose_name="google civic election id", null=True)
+
+
+class TwitterApiCounterMonthlySummary(models.Model):
+    year_of_action = models.SmallIntegerField(verbose_name='year of action', null=False)
+    month_of_action = models.SmallIntegerField(verbose_name='number of the month', null=False)
+    kind_of_action = models.CharField(verbose_name="kind of call to Twitter", max_length=50, null=True, blank=True)
+    google_civic_election_id = models.PositiveIntegerField(verbose_name="google civic election id", null=True)
+
+
+# noinspection PyBroadException
+class TwitterApiCounterManager(models.Manager):
+
+    def create_counter_entry(self, kind_of_action, google_civic_election_id=0):
+        """
+        Create an entry that records that a call to the Twitter Api was made.
+        """
+        try:
+            google_civic_election_id = convert_to_int(google_civic_election_id)
+
+            # TODO: We need to work out the timezone questions
+            TwitterApiCounter.objects.create(
+                kind_of_action=kind_of_action,
+                google_civic_election_id=google_civic_election_id,
+            )
+            success = True
+            status = 'ENTRY_SAVED'
+        except Exception:
+            success = False
+            status = 'SOME_ERROR'
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+        }
+        return results
+
+    def retrieve_daily_summaries(self, kind_of_action='', google_civic_election_id=0, days_to_display=30):
+        # Start with today and cycle backwards in time
+        daily_summaries = []
+        day_on_stage = date.today()  # TODO: We need to work out the timezone questions
+        number_found = 0
+        maximum_attempts = 365
+        attempt_count = 0
+
+        try:
+            while number_found <= days_to_display and attempt_count <= maximum_attempts:
+                attempt_count += 1
+                counter_queryset = TwitterApiCounter.objects.using('readonly').all()
+                if positive_value_exists(kind_of_action):
+                    counter_queryset = counter_queryset.filter(kind_of_action=kind_of_action)
+                if positive_value_exists(google_civic_election_id):
+                    counter_queryset = counter_queryset.filter(google_civic_election_id=google_civic_election_id)
+
+                # Find the number of these entries on that particular day
+                # counter_queryset = counter_queryset.filter(datetime_of_action__contains=day_on_stage)
+                counter_queryset = counter_queryset.filter(
+                    datetime_of_action__year=day_on_stage.year,
+                    datetime_of_action__month=day_on_stage.month,
+                    datetime_of_action__day=day_on_stage.day)
+                api_call_count = counter_queryset.count()
+
+                # If any api calls were found on that date, pass it out for display
+                if positive_value_exists(api_call_count):
+                    daily_summary = {
+                        'date_string': day_on_stage,
+                        'count': api_call_count,
+                    }
+                    daily_summaries.append(daily_summary)
+                    number_found += 1
+
+                day_on_stage -= timedelta(days=1)
+        except Exception:
+            pass
+
+        return daily_summaries

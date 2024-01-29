@@ -1278,7 +1278,12 @@ def retrieve_image_urls_from_twitter(twitter_id):
     latest_twitter_background_image_url = None
     latest_twitter_banner_image_url = None
 
-    twitter_user_info_results = retrieve_twitter_user_info(twitter_id, twitter_handle='')
+    from twitter.models import TwitterApiCounterManager
+    twitter_api_counter_manager = TwitterApiCounterManager()
+    twitter_user_info_results = retrieve_twitter_user_info(
+        twitter_id,
+        twitter_handle='',
+        twitter_api_counter_manager=twitter_api_counter_manager)
     if 'profile_image_url_https' in twitter_user_info_results['twitter_json'] \
             and twitter_user_info_results['twitter_json']['profile_image_url_https']:
         # new twitter image url found

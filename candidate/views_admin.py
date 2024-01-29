@@ -12,6 +12,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.db.models import Q
+from django.db.models.functions import Length
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -354,6 +355,7 @@ def candidate_list_view(request):
     show_election_statistics = positive_value_exists(request.GET.get('show_election_statistics', False))
     show_marquee_or_battleground = positive_value_exists(request.GET.get('show_marquee_or_battleground', False))
     show_this_year_of_candidates = convert_to_int(request.GET.get('show_this_year_of_candidates', 0))
+    show_candidates_with_email = positive_value_exists(request.GET.get('show_candidates_with_email', False))
 
     review_mode = positive_value_exists(request.GET.get('review_mode', False))
 
@@ -482,6 +484,15 @@ def candidate_list_view(request):
             populate_contest_office_data_status += \
                 "SCRIPT: {entries_to_process:,} entries to process (populate_contest_office_data). " \
                 "".format(entries_to_process=candidate_ultimate_count) + " "
+
+        # Filter candidtes based on whether they have an email address
+        if positive_value_exists(show_candidates_with_email):
+            candidate_query = candidate_query.annotate(candidate_email_length=Length('candidate_email'))
+            candidate_query = candidate_query.filter(
+                Q(candidate_email_length__gt=2)
+            )
+
+
         # Now process
         candidate_bulk_update_list = []
         candidate_list = candidate_query[:number_to_populate]
@@ -1289,6 +1300,7 @@ def candidate_list_view(request):
         'show_election_statistics':                 show_election_statistics,
         'show_marquee_or_battleground':             show_marquee_or_battleground,
         'show_this_year_of_candidates':             show_this_year_of_candidates,
+        'show_candidates_with_email':              show_candidates_with_email,
         'state_code':                               state_code,
         'state_list':                               sorted_state_list,
         'total_twitter_handles':                    total_twitter_handles,

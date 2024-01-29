@@ -10,25 +10,24 @@ import pytz
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
-from googlebot_site_map import supplemental_urls
 import wevote_functions.admin
 from admin_tools.views import redirect_to_sign_in_page
+from googlebot_site_map import supplemental_urls
 from googlebot_site_map.models import GooglebotRequest
 from politician.models import Politician
 from voter.models import voter_has_authority
+from wevote_functions.functions import get_ip_from_headers, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
-
 def log_request(request):
-    ip = request.META['REMOTE_ADDR']
+    ip = get_ip_from_headers(request)
     user_agent = request.META['HTTP_USER_AGENT']
     host = googlebot_reverse_dns(ip)
     path = request.path
     url_bits = path.split('/')
     request_url_type = '/' + url_bits[-1]
-    # print('log_request ', path, request_url_type)
-    # print(request_url_type)
+
     is_from_google = "googlebot.com" in host or "google.com" in host or \
                      "googleusercontent.com" in host
 
@@ -42,13 +41,18 @@ def log_request(request):
 
 
 def googlebot_reverse_dns(ip):
-    run_cmd = 'host ' + ip
-    process = subprocess.run([run_cmd], shell=True, stdout=subprocess.PIPE)
-    output_raw = process.stdout
-    host = output_raw.decode("utf-8")
-    # print('host is: ' + host)
-    if '1.0.0.127' in host:
-        host = 'localhost'
+    host = 'localhost'
+    # ip = '66.249.66.9'
+    if ip != '127.0.0.1':
+        run_cmd = 'host ' + ip
+        process = subprocess.run([run_cmd], shell=True, stdout=subprocess.PIPE)
+        output_raw = process.stdout
+        host = output_raw.decode("utf-8")
+        if positive_value_exists(host):
+            host = host.replace('\n', '')
+
+    logger.error('Not an error: host ip: ' + ip + ', raw output from host cmd: ' + host)
+
     return host
 
 
@@ -97,6 +101,7 @@ def googlebot_site_map_list_view(request):
         'counts_google_map':    counts_google_map,
         'counts_other_xml':     counts_other_xml,
         'counts_other_map':     counts_other_map,
+        # 'request_details':      format_prepared_request(request),
     }
     return render(request, 'googlebot_stats/googlebot_stats.html', template_values)
 

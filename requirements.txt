@@ -59,7 +59,7 @@ social-auth-app-django==5.0.0
 social-auth-core==4.2.0
 static3==0.7.0
 stripe==2.58.0
-tweepy==4.4.0
+tweepy==4.14.0
 twilio==7.8.2
 uritemplate==3.0.1
 usaddress==0.5.10

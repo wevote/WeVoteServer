@@ -327,6 +327,11 @@
     {% endif %}
     <br />
 
+    {# Limit list to only display candidates with an email address #}
+    <label for="show_candidates_with_email_id">
+        <input type="checkbox" name="show_candidates_with_email" id="show_candidates_with_email_id" value="1"
+               {% if show_candidates_with_email %}checked{% endif %} /> Has Email
+    </label>
     {# Turn on/off review mode #}
     &nbsp;&nbsp;&nbsp;&nbsp;
     <label for="review_mode_id">
@@ -762,6 +767,11 @@
     });
     $(function() {
         $('#state_code_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#show_candidates_with_email_id').change(function() {
             this.form.submit();
         });
     });
