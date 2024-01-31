@@ -1710,6 +1710,9 @@ def politician_edit_process_view(request):
     gender = request.POST.get('gender', 'False')
     middle_name = request.POST.get('middle_name', False)
     last_name = request.POST.get('last_name', False)
+    profile_image_background_color = request.POST.get('profile_image_background_color', False)
+    regenerate_color = request.POST.get('regenerate_color', False)
+    regenerate_color_edge_case = request.POST.get('regenerate_color_edge_case', False)
     facebook_url = request.POST.get('facebook_url', False)
     facebook_url2 = request.POST.get('facebook_url2', False)
     facebook_url3 = request.POST.get('facebook_url3', False)
@@ -2006,6 +2009,12 @@ def politician_edit_process_view(request):
                 politician_on_stage.middle_name = middle_name
             if last_name is not False:
                 politician_on_stage.last_name = last_name
+            if regenerate_color_edge_case is not False:
+                politician_on_stage.profile_image_background_color = generate_background(politician_on_stage,edge_case=True)
+            elif regenerate_color is not False:
+                politician_on_stage.profile_image_background_color = generate_background(politician_on_stage)
+            elif profile_image_background_color is not False:
+                politician_on_stage.profile_image_background_color = profile_image_background_color
             if gender is not False:
                 gender = gender[0]
                 if politician_on_stage.gender != gender:
@@ -2999,7 +3008,7 @@ def update_politicians_from_candidates_view(request):
 
 def update_politicians_profile_image_background_color_view(request):
 
-    number_to_update = 10
+    number_to_update = 3
     queryset = Politician.objects.all()
     politician_list = list(queryset[:number_to_update])
 
