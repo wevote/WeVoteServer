@@ -6,8 +6,8 @@ import requests
 
 def generate_background(politician, base=None, edge_case=None):
 
-    print(edge_case)
-
+    # specifiy how many bins will be generated for color sorting, the number of bins is base**3
+    
     base = base or 3
  
     image = Image.open(requests.get(politician.we_vote_hosted_profile_image_url_large, stream=True).raw)
@@ -22,36 +22,14 @@ def generate_background(politician, base=None, edge_case=None):
     for pixel in right_list:
         left_list.append(pixel)
    
-    bins = [
-            [],[],[],[],[],[],[],[],[],
-            [],[],[],[],[],[],[],[],[],
-            [],[],[],[],[],[],[],[],[]
-            ]
-    
-    ################# testing
-    test_base = 4
-    for r in range(test_base-1,-1,-1):
-        for g in range(test_base-1,-1,-1):
-            for b in range(test_base-1,-1,-1):
-                test = (r * (test_base**2)) + (g * test_base) + b
-                print(test)
-    print("**********")
-    for r in range(test_base-1,-1,-1):
-        print(r)
-
     ## TODO nicer way to write this?
-    test_bin = []
-    for bin in range(base**3,-1,-1):
-        test_bin.append([])
-
-    print(test_bin)
-    ############################ end testing
-
+    bins = []
+    for bin in range(base**3,0,-1):
+        bins.append([])
 
     divisor= 255/base
     for r,g,b,a in left_list:
-       # turn math.floor etc into a variable
-       # document the meaning of variables
+
        r_binned = min(math.floor(r/divisor),base-1)
        g_binned = min(math.floor(g/divisor),base-1)
        b_binned = min(math.floor(b/divisor),base-1)
@@ -61,17 +39,24 @@ def generate_background(politician, base=None, edge_case=None):
     bins.sort(key=lambda l: -len(l))
 
     final_color=[0,0,0,255]
-    #todo generate 30 or 50 at a time, viewable
-    #todo first make the variables editable
-    #add a regen button, as the formula is tweaked
+
     for rgb in bins[0]:
         final_color[0]+=rgb[0]
         final_color[1]+=rgb[1]
         final_color[2]+=rgb[2]
-    
-    final_color[0]=final_color[0]/len(bins[0])
-    final_color[1]=final_color[1]/len(bins[0])
-    final_color[2]=final_color[2]/len(bins[0])
-    
-    hex = '#{:02x}{:02x}{:02x}'.format(pixel[0], pixel[1], pixel[2])
+
+    denominator = len(bins[0])
+
+    if edge_case:
+        denominator+= len(bins[1])
+        for rgb in bins[1]:
+            final_color[0]+=rgb[0]
+            final_color[1]+=rgb[1]
+            final_color[2]+=rgb[2]
+
+    final_color[0]=math.floor(final_color[0]/denominator)
+    final_color[1]=math.floor(final_color[1]/denominator)
+    final_color[2]=math.floor(final_color[2]/denominator)
+
+    hex = '#{:02x}{:02x}{:02x}'.format(final_color[0], final_color[1], final_color[2])
     return hex

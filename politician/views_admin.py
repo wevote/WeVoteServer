@@ -1922,7 +1922,6 @@ def politician_edit_process_view(request):
                 )
                 politician_on_stage_found = True
         if politician_on_stage_found:
-            print("this is whats being hit")
             # #################################################
             # Process incoming uploaded photo if there is one
             politician_photo_in_binary_format = None
