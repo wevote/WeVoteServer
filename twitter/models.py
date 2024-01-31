@@ -185,7 +185,7 @@ class TwitterUserManager(models.Manager):
             status += 'MISSING_TWEET_JSON '
         else:
             new_tweet, created = Tweet.objects.update_or_create(
-                author_handle = tweet_json.user._json['screen_name'],
+                author_handle = tweet_json.user._json['username'],
                 twitter_id = tweet_json.user._json['id'],
                 tweet_id = tweet_json.id,
                 is_retweet = is_retweet_boolean,
@@ -272,7 +272,11 @@ class TwitterUserManager(models.Manager):
         return results
 
     def update_or_create_twitter_link_possibility_from_twitter_json(
-            self, candidate_campaign_we_vote_id, twitter_json, search_term, likelihood_score):
+            self,
+            candidate_campaign_we_vote_id,
+            twitter_dict,
+            search_term,
+            likelihood_score):
         created = False
         status = ""
         multiple_objects_returned = False
@@ -280,19 +284,19 @@ class TwitterUserManager(models.Manager):
         try:
             twitter_link_possibility, created = TwitterLinkPossibility.objects.update_or_create(
                 candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
-                twitter_id=twitter_json['id'],
+                twitter_id=twitter_dict['id'],
                 defaults={
                     'likelihood_score': likelihood_score,
                     'search_term_used': search_term,
-                    'twitter_name': twitter_json['name'],
-                    'twitter_handle': twitter_json['screen_name'],
-                    'twitter_id': twitter_json['id'],
-                    'twitter_description': twitter_json['description'],
-                    'twitter_profile_image_url_https': twitter_json['profile_image_url_https'],
-                    'twitter_url': twitter_json['url'],
-                    'twitter_location': twitter_json['location'],
-                    'twitter_followers_count': twitter_json['followers_count'],
-                    'twitter_utc_offset': twitter_json['utc_offset'],
+                    'twitter_name': twitter_dict['name'],
+                    'twitter_handle': twitter_dict['username'],
+                    'twitter_id': twitter_dict['id'],
+                    'twitter_description': twitter_dict['description'],
+                    'twitter_profile_image_url_https': twitter_dict['profile_image_url'],
+                    'twitter_url': twitter_dict['expanded_url'],
+                    'twitter_location': twitter_dict['location'],
+                    'twitter_followers_count': twitter_dict['followers_count'],
+                    # 'twitter_utc_offset': twitter_dict['utc_offset'], # No longer provided by Twitter API v2
                     }
                 )
             status += "TWITTER_LINK_TO_POSSIBILITY_CREATED "
@@ -752,7 +756,8 @@ class TwitterUserManager(models.Manager):
             success = False
         if twitter_results['twitter_handle_found']:
             twitter_save_results = self.update_or_create_twitter_user(
-                twitter_json=twitter_results['twitter_json'], twitter_id=twitter_user_id)
+                twitter_dict=twitter_results['twitter_dict'],
+                twitter_id=twitter_user_id)
             if twitter_save_results['twitter_user_found']:
                 twitter_user = twitter_save_results['twitter_user']
                 # If saved, pull the fresh results from the database and return
@@ -910,7 +915,9 @@ class TwitterUserManager(models.Manager):
         status = ""
         success = False
         list_of_usernames = []
-        client = tweepy.Client(bearer_token=TWITTER_BEARER_TOKEN, wait_on_rate_limit=True)
+        client = tweepy.Client(
+            bearer_token=TWITTER_BEARER_TOKEN,
+            wait_on_rate_limit=True)
 
         # TODO: Add counter
         # # Use Twitter API call counter to track the number of queries we are doing each day
@@ -1148,7 +1155,7 @@ class TwitterUserManager(models.Manager):
 
     def save_new_twitter_user_from_twitter_json(
             self,
-            twitter_json,
+            twitter_dict,
             cached_twitter_profile_image_url_https=None,
             cached_twitter_profile_background_image_url_https=None,
             cached_twitter_profile_banner_url_https=None,
@@ -1156,7 +1163,7 @@ class TwitterUserManager(models.Manager):
             we_vote_hosted_profile_image_url_medium=None,
             we_vote_hosted_profile_image_url_tiny=None):
         status = ""
-        if 'screen_name' not in twitter_json:
+        if 'username' not in twitter_dict:
             results = {
                 'success':              False,
                 'status':               "SAVE_NEW_TWITTER_USER_MISSING_HANDLE ",
@@ -1167,9 +1174,9 @@ class TwitterUserManager(models.Manager):
 
         try:
             # Create new twitter_user entry
-            twitter_description = twitter_json['description'] if 'description' in twitter_json else ""
-            twitter_followers_count = twitter_json['followers_count'] if 'followers_count' in twitter_json else 0
-            twitter_handle = twitter_json['screen_name'] if 'screen_name' in twitter_json else ""
+            twitter_description = twitter_dict['description'] if 'description' in twitter_dict else ""
+            twitter_followers_count = twitter_dict['followers_count'] if 'followers_count' in twitter_dict else 0
+            twitter_handle = twitter_dict['username'] if 'username' in twitter_dict else ""
 
             # Strip out the twitter handles "False" or "None"
             if twitter_handle:
@@ -1177,33 +1184,36 @@ class TwitterUserManager(models.Manager):
                 if twitter_handle_lower == 'false' or twitter_handle_lower == 'none':
                     twitter_handle = ''
 
-            twitter_id = twitter_json['id'] if 'id' in twitter_json else None
-            twitter_location = twitter_json['location'] if 'location' in twitter_json else ""
-            twitter_name = twitter_json['name'] if 'name' in twitter_json else ""
+            twitter_id = twitter_dict['id'] if 'id' in twitter_dict else None
+            twitter_location = twitter_dict['location'] if 'location' in twitter_dict else ""
+            twitter_name = twitter_dict['name'] if 'name' in twitter_dict else ""
 
+            # Twitter API v2 removed these fields
             if positive_value_exists(cached_twitter_profile_background_image_url_https):
                 twitter_profile_background_image_url_https = cached_twitter_profile_background_image_url_https
-            elif 'profile_background_image_url_https' in twitter_json:
-                twitter_profile_background_image_url_https = twitter_json['profile_background_image_url_https']
+            elif 'profile_background_image_url_https' in twitter_dict:
+                twitter_profile_background_image_url_https = twitter_dict['profile_background_image_url_https']
             else:
                 twitter_profile_background_image_url_https = ""
 
             if positive_value_exists(cached_twitter_profile_banner_url_https):
                 twitter_profile_banner_url_https = cached_twitter_profile_banner_url_https
-            elif 'profile_banner_url' in twitter_json:
-                twitter_profile_banner_url_https = twitter_json['profile_banner_url']
+            elif 'profile_banner_url' in twitter_dict:
+                twitter_profile_banner_url_https = twitter_dict['profile_banner_url']
             else:
                 twitter_profile_banner_url_https = ""
 
             if positive_value_exists(cached_twitter_profile_image_url_https):
                 twitter_profile_image_url_https = cached_twitter_profile_image_url_https
-            elif 'profile_image_url_https' in twitter_json:
-                twitter_profile_image_url_https = twitter_json['profile_image_url_https']
+            elif 'profile_image_url' in twitter_dict:
+                twitter_profile_image_url_https = twitter_dict['profile_image_url']
             else:
                 twitter_profile_image_url_https = ""
-            twitter_url = twitter_json['url'] if 'url' in twitter_json else ""
+            twitter_url = twitter_dict['expanded_url'] if 'expanded_url' in twitter_dict else ""
+            date_last_updated_from_twitter = localtime(now()).date()
 
             twitter_user_on_stage = TwitterUser(
+                date_last_updated_from_twitter=date_last_updated_from_twitter,
                 twitter_description=twitter_description,
                 twitter_followers_count=twitter_followers_count,
                 twitter_handle=twitter_handle,
@@ -1240,7 +1250,7 @@ class TwitterUserManager(models.Manager):
 
     def update_or_create_twitter_user(
             self,
-            twitter_json=None,
+            twitter_dict=None,
             twitter_id=None,
             cached_twitter_profile_image_url_https=None,
             cached_twitter_profile_background_image_url_https=None,
@@ -1252,7 +1262,7 @@ class TwitterUserManager(models.Manager):
         Update a twitter user entry with details retrieved from the Twitter API or
         create a twitter user entry if not exists.
         :param twitter_id:
-        :param twitter_json:
+        :param twitter_dict:
         :param cached_twitter_profile_image_url_https:
         :param cached_twitter_profile_background_image_url_https:
         :param cached_twitter_profile_banner_url_https:
@@ -1261,8 +1271,8 @@ class TwitterUserManager(models.Manager):
         :param we_vote_hosted_profile_image_url_tiny
         :return:
         """
-        if twitter_json is None:
-            twitter_json = {}
+        if twitter_dict is None:
+            twitter_dict = {}
         status = ""
         values_changed = False
 
@@ -1271,73 +1281,81 @@ class TwitterUserManager(models.Manager):
 
         if not twitter_user_found:
             # Make sure the handle isn't in use, under a different twitter_id
-            if 'screen_name' in twitter_json and positive_value_exists(twitter_json['screen_name']):
-                twitter_handle = twitter_json['screen_name']
+            if 'username' in twitter_dict and positive_value_exists(twitter_dict['username']):
+                twitter_handle = twitter_dict['username']
                 twitter_results = self.retrieve_twitter_user(0, twitter_handle)
                 twitter_user_found = twitter_results['twitter_user_found']
 
         if twitter_user_found:
-            # Twitter user already exists so update twitter user details
+            # Twitter user already exists so update Twitter user details
             twitter_user = twitter_results['twitter_user']
-            if 'id' in twitter_json and positive_value_exists(twitter_json['id']):
-                if convert_to_int(twitter_json['id']) != twitter_user.twitter_id:
-                    twitter_user.twitter_id = convert_to_int(twitter_json['id'])
+            if 'id' in twitter_dict and positive_value_exists(twitter_dict['id']):
+                if convert_to_int(twitter_dict['id']) != twitter_user.twitter_id:
+                    twitter_user.twitter_id = convert_to_int(twitter_dict['id'])
                     values_changed = True
-            if 'screen_name' in twitter_json and positive_value_exists(twitter_json['screen_name']):
-                if twitter_json['screen_name'] != twitter_user.twitter_handle:
-                    twitter_user.twitter_handle = twitter_json['screen_name']
+            if 'username' in twitter_dict and positive_value_exists(twitter_dict['username']):
+                if twitter_dict['username'] != twitter_user.twitter_handle:
+                    twitter_user.twitter_handle = twitter_dict['username']
                     values_changed = True
-            if 'name' in twitter_json and positive_value_exists(twitter_json['name']):
-                if twitter_json['name'] != twitter_user.twitter_name:
-                    twitter_user.twitter_name = twitter_json['name']
+            if 'name' in twitter_dict and positive_value_exists(twitter_dict['name']):
+                if twitter_dict['name'] != twitter_user.twitter_name:
+                    twitter_user.twitter_name = twitter_dict['name']
                     values_changed = True
-            if 'entities' in twitter_json and positive_value_exists(twitter_json['entities']):
-                if 'url' in twitter_json['entities']:
-                    if 'urls' in twitter_json['entities']['url'] \
-                            and positive_value_exists(twitter_json['entities']['url']['urls']):
-                        urls_list = twitter_json['entities']['url']['urls']
-                        for url_dict in urls_list:
-                            if twitter_user.twitter_url != url_dict['expanded_url']:
-                                twitter_user.twitter_url = url_dict['expanded_url']
-                                values_changed = True
-                            break
-            elif 'url' in twitter_json and positive_value_exists(twitter_json['url']):
-                if twitter_json['url'] != twitter_user.twitter_url:
-                    twitter_user.twitter_url = twitter_json['url']
+            # Upgraded to assume we transform raw Twitter incoming format to include 'expanded_url'
+            if 'expanded_url' in twitter_dict and positive_value_exists(twitter_dict['expanded_url']):
+                if twitter_dict['expanded_url'] != twitter_user.twitter_url:
+                    twitter_user.twitter_url = twitter_dict['expanded_url']
                     values_changed = True
-            if 'followers_count' in twitter_json and positive_value_exists(twitter_json['followers_count']):
-                if convert_to_int(twitter_json['followers_count']) != twitter_user.twitter_followers_count:
-                    twitter_user.twitter_followers_count = convert_to_int(twitter_json['followers_count'])
+            # if 'entities' in twitter_dict and positive_value_exists(twitter_dict['entities']):
+            #     if 'url' in twitter_dict['entities']:
+            #         if 'urls' in twitter_dict['entities']['url'] \
+            #                 and positive_value_exists(twitter_dict['entities']['url']['urls']):
+            #             urls_list = twitter_dict['entities']['url']['urls']
+            #             for url_dict in urls_list:
+            #                 if twitter_user.twitter_url != url_dict['expanded_url']:
+            #                     twitter_user.twitter_url = url_dict['expanded_url']
+            #                     values_changed = True
+            #                 break
+            # elif 'url' in twitter_dict and positive_value_exists(twitter_dict['url']):
+            #     if twitter_dict['url'] != twitter_user.twitter_url:
+            #         twitter_user.twitter_url = twitter_dict['url']
+            #         values_changed = True
+            if 'followers_count' in twitter_dict and positive_value_exists(twitter_dict['followers_count']):
+                if convert_to_int(twitter_dict['followers_count']) != twitter_user.twitter_followers_count:
+                    twitter_user.twitter_followers_count = convert_to_int(twitter_dict['followers_count'])
                     values_changed = True
 
             if positive_value_exists(cached_twitter_profile_image_url_https):
                 twitter_user.twitter_profile_image_url_https = cached_twitter_profile_image_url_https
                 values_changed = True
-            elif 'profile_image_url_https' in twitter_json and \
-                    positive_value_exists(twitter_json['profile_image_url_https']):
-                if twitter_json['profile_image_url_https'] != twitter_user.twitter_profile_image_url_https:
-                    twitter_user.twitter_profile_image_url_https = twitter_json['profile_image_url_https']
+            elif 'profile_image_url' in twitter_dict and \
+                    positive_value_exists(twitter_dict['profile_image_url']):
+                if twitter_dict['profile_image_url'] != twitter_user.twitter_profile_image_url_https:
+                    twitter_user.twitter_profile_image_url_https = twitter_dict['profile_image_url']
                     values_changed = True
 
+            # Twitter API v2 no longer returns twitter_profile_banner_url_https
             if positive_value_exists(cached_twitter_profile_banner_url_https):
                 twitter_user.twitter_profile_banner_url_https = cached_twitter_profile_banner_url_https
                 values_changed = True
-            elif ('profile_banner_url' in twitter_json) and positive_value_exists(twitter_json['profile_banner_url']):
-                if twitter_json['profile_banner_url'] != twitter_user.twitter_profile_banner_url_https:
-                    twitter_user.twitter_profile_banner_url_https = twitter_json['profile_banner_url']
-                    values_changed = True
+            # elif ('profile_banner_url' in twitter_dict) and positive_value_exists(twitter_dict['profile_banner_url']):
+            #     if twitter_dict['profile_banner_url'] != twitter_user.twitter_profile_banner_url_https:
+            #         twitter_user.twitter_profile_banner_url_https = twitter_dict['profile_banner_url']
+            #         values_changed = True
 
+            # Twitter API v2 no longer returns profile_background_image_url_https
             if positive_value_exists(cached_twitter_profile_background_image_url_https):
                 twitter_user.twitter_profile_background_image_url_https = \
                     cached_twitter_profile_background_image_url_https
                 values_changed = True
-            elif 'profile_background_image_url_https' in twitter_json and positive_value_exists(
-                    twitter_json['profile_background_image_url_https']):
-                if twitter_json['profile_background_image_url_https'] != \
-                        twitter_user.twitter_profile_background_image_url_https:
-                    twitter_user.twitter_profile_background_image_url_https = \
-                        twitter_json['profile_background_image_url_https']
-                    values_changed = True
+            # elif 'profile_background_image_url_https' in twitter_dict and positive_value_exists(
+            #         twitter_dict['profile_background_image_url_https']):
+            #     if twitter_dict['profile_background_image_url_https'] != \
+            #             twitter_user.twitter_profile_background_image_url_https:
+            #         twitter_user.twitter_profile_background_image_url_https = \
+            #             twitter_dict['profile_background_image_url_https']
+            #         values_changed = True
+
             if positive_value_exists(we_vote_hosted_profile_image_url_large):
                 twitter_user.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
                 values_changed = True
@@ -1348,13 +1366,13 @@ class TwitterUserManager(models.Manager):
                 twitter_user.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
                 values_changed = True
 
-            if 'description' in twitter_json:  # No value required to update description (so we can clear out)
-                if twitter_json['description'] != twitter_user.twitter_description:
-                    twitter_user.twitter_description = twitter_json['description']
+            if 'description' in twitter_dict:  # No value required to update description (so we can clear out)
+                if twitter_dict['description'] != twitter_user.twitter_description:
+                    twitter_user.twitter_description = twitter_dict['description']
                     values_changed = True
-            if 'location' in twitter_json:  # No value required to update location (so we can clear out)
-                if twitter_json['location'] != twitter_user.twitter_location:
-                    twitter_user.twitter_location = twitter_json['location']
+            if 'location' in twitter_dict:  # No value required to update location (so we can clear out)
+                if twitter_dict['location'] != twitter_user.twitter_location:
+                    twitter_user.twitter_location = twitter_dict['location']
                     values_changed = True
 
             if values_changed:
@@ -1372,6 +1390,7 @@ class TwitterUserManager(models.Manager):
             results = {
                 'success':              success,
                 'status':               status,
+                'twitter_user_created': False,
                 'twitter_user_found':   twitter_user_found,
                 'twitter_user':         twitter_user,
             }
@@ -1380,13 +1399,14 @@ class TwitterUserManager(models.Manager):
         else:
             # Twitter user does not exist so create new twitter user with latest twitter details
             twitter_save_results = self.save_new_twitter_user_from_twitter_json(
-                twitter_json,
+                twitter_dict,
                 cached_twitter_profile_image_url_https,
                 cached_twitter_profile_background_image_url_https,
                 cached_twitter_profile_banner_url_https,
                 we_vote_hosted_profile_image_url_large,
                 we_vote_hosted_profile_image_url_medium,
                 we_vote_hosted_profile_image_url_tiny)
+            twitter_save_results['twitter_user_created'] = True
             return twitter_save_results
 
     def delete_twitter_link_to_organization(self, twitter_id, organization_we_vote_id):

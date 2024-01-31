@@ -613,7 +613,7 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id):
     try:
         organization_twitter_id = organization_manager.fetch_twitter_handle_from_organization_we_vote_id(
             organization_we_vote_id)
-        new_tweets = api.user_timeline(screen_name=organization_twitter_id)
+        new_tweets = api.user_timeline(username=organization_twitter_id)
     except tweepy.errors.HTTPException as e:
         status = "ORGANIZATION_RETRIEVE_TWEETS_FROM_TWITTER_AUTH_FAIL_HTTPException: " + str(e) + " "
         success = False
@@ -3034,7 +3034,7 @@ def refresh_organization_data_from_master_tables(organization_we_vote_id):
     we_vote_hosted_profile_image_url_large = None
     we_vote_hosted_profile_image_url_medium = None
     we_vote_hosted_profile_image_url_tiny = None
-    twitter_json = {}
+    twitter_dict = {}
     success = False
     status = ""
     organization_updated = True
@@ -3099,9 +3099,9 @@ def refresh_organization_data_from_master_tables(organization_we_vote_id):
                     twitter_user.twitter_location != organization.twitter_location or \
                     twitter_user.twitter_followers_count != organization.twitter_followers_count or \
                     twitter_user.twitter_description != organization.twitter_description:
-                twitter_json = {
+                twitter_dict = {
                     'id':               twitter_user.twitter_id,
-                    'screen_name':      twitter_user.twitter_handle,
+                    'username':      twitter_user.twitter_handle,
                     'name':             twitter_user.twitter_name,
                     'followers_count':  twitter_user.twitter_followers_count,
                     'location':         twitter_user.twitter_location,
@@ -3128,7 +3128,7 @@ def refresh_organization_data_from_master_tables(organization_we_vote_id):
                     twitter_profile_banner_url_https = we_vote_image.we_vote_image_url
 
         update_organization_results = organization_manager.update_organization_twitter_details(
-            organization, twitter_json, twitter_profile_image_url_https,
+            organization, twitter_dict, twitter_profile_image_url_https,
             twitter_profile_background_image_url_https, twitter_profile_banner_url_https,
             we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
             we_vote_hosted_profile_image_url_tiny)

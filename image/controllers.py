@@ -1284,23 +1284,25 @@ def retrieve_image_urls_from_twitter(twitter_id):
         twitter_id,
         twitter_handle='',
         twitter_api_counter_manager=twitter_api_counter_manager)
-    if 'profile_image_url_https' in twitter_user_info_results['twitter_json'] \
-            and twitter_user_info_results['twitter_json']['profile_image_url_https']:
+    if 'profile_image_url' in twitter_user_info_results['twitter_dict'] \
+            and twitter_user_info_results['twitter_dict']['profile_image_url']:
         # new twitter image url found
-        latest_twitter_profile_image_url = twitter_user_info_results['twitter_json'][
-            'profile_image_url_https']
+        latest_twitter_profile_image_url = twitter_user_info_results['twitter_dict'][
+            'profile_image_url']
 
-    if 'profile_background_image_url_https' in twitter_user_info_results['twitter_json'] \
-            and twitter_user_info_results['twitter_json']['profile_background_image_url_https']:
-        # new twitter image url found
-        latest_twitter_background_image_url = twitter_user_info_results['twitter_json'][
-            'profile_background_image_url_https']
+    # 2024-01-27 Twitter API v2 doesn't return profile_background_image_url_https any more
+    # if 'profile_background_image_url_https' in twitter_user_info_results['twitter_dict'] \
+    #         and twitter_user_info_results['twitter_dict']['profile_background_image_url_https']:
+    #     # new twitter image url found
+    #     latest_twitter_background_image_url = twitter_user_info_results['twitter_dict'][
+    #         'profile_background_image_url_https']
 
-    if 'profile_banner_url' in twitter_user_info_results['twitter_json'] \
-            and twitter_user_info_results['twitter_json']['profile_banner_url']:
-        # new twitter image url found
-        latest_twitter_banner_image_url = twitter_user_info_results['twitter_json'][
-            'profile_banner_url']
+    # 2024-01-27 Twitter API v2 doesn't return profile_banner_url any more
+    # if 'profile_banner_url' in twitter_user_info_results['twitter_dict'] \
+    #         and twitter_user_info_results['twitter_dict']['profile_banner_url']:
+    #     # new twitter image url found
+    #     latest_twitter_banner_image_url = twitter_user_info_results['twitter_dict'][
+    #         'profile_banner_url']
 
     results = {
         'latest_twitter_profile_image_url':     latest_twitter_profile_image_url,

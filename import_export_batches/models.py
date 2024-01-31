@@ -6289,7 +6289,7 @@ class BatchRowActionOrganization(models.Model):
     # Twitter information
     twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)
     organization_twitter_handle = models.CharField(
-        verbose_name='organization twitter screen_name', max_length=255, null=True, unique=False)
+        verbose_name='organization twitter username', max_length=255, null=True, unique=False)
     twitter_name = models.CharField(
         verbose_name="org name from twitter", max_length=255, null=True, blank=True)
     twitter_location = models.CharField(
@@ -6382,7 +6382,7 @@ class BatchRowActionPosition(models.Model):
     # We cache the url to an image for the candidate, measure or office for rapid display
     ballot_item_image_url_https = models.URLField(
         verbose_name='url of https image for candidate, measure or office', max_length=255, blank=True, null=True)
-    ballot_item_twitter_handle = models.CharField(verbose_name='twitter screen_name for candidate, measure, or office',
+    ballot_item_twitter_handle = models.CharField(verbose_name='twitter username for candidate, measure, or office',
                                                   max_length=255, null=True, unique=False)
 
     # What is the organization name, voter name, or public figure name? We cache this here for rapid display
@@ -6391,7 +6391,7 @@ class BatchRowActionPosition(models.Model):
     # We cache the url to an image for the org, voter, or public_figure for rapid display
     speaker_image_url_https = models.URLField(
         verbose_name='url of https image for org or person with position', max_length=255, blank=True, null=True)
-    speaker_twitter_handle = models.CharField(verbose_name='twitter screen_name for org or person with position',
+    speaker_twitter_handle = models.CharField(verbose_name='twitter username for org or person with position',
                                               max_length=255, null=True, unique=False)
 
     date_entered = models.DateTimeField(verbose_name='date entered', null=True, auto_now=True)

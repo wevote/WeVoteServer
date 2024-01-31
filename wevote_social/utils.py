@@ -131,16 +131,16 @@ def social_user(backend, uid, details, user=None, *args, **kwargs):
                         user = social.user
                     twitter_user_dict = {
                         'id': uid,
-                        'profile_image_url_https': kwargs['response']['profile_image_url_https'],
-                        'screen_name': kwargs['response']['screen_name']
+                        'profile_image_url': kwargs['response']['profile_image_url'],
+                        'username': kwargs['response']['username']
                     }
                     if hasattr(user, 'we_vote_id'):
                         # Cache original and resized images
                         cache_results = cache_master_and_resized_image(
                             voter_we_vote_id=user.we_vote_id,
                             twitter_id=twitter_user_dict['id'],
-                            twitter_screen_name=twitter_user_dict['screen_name'],
-                            twitter_profile_image_url_https=twitter_user_dict['profile_image_url_https'],
+                            twitter_screen_name=twitter_user_dict['username'],
+                            twitter_profile_image_url_https=twitter_user_dict['profile_image_url'],
                             image_source=TWITTER)
                         cached_twitter_profile_image_url_https = cache_results['cached_twitter_profile_image_url_https']
                         we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
@@ -185,26 +185,26 @@ def social_user(backend, uid, details, user=None, *args, **kwargs):
             'new_association': False}
 
 # DATA FROM TWITTER SIGN IN
-# access_token = {dict} {'screen_name': 'WeVoteUSA', 'user_id': '2860808066', 'x_auth_expires': '0',
+# access_token = {dict} {'username': 'WeVoteUSA', 'user_id': '2860808066', 'x_auth_expires': '0',
 # 'oauth_token': '2860808066-OYDIwFb8YTDg3tHcdWw8tkJc6ZnzZu5pzZ7zClt',
 # 'oauth_token_secret': 'mOzin2QWoVk886JZdaWUxteMvTjpNo6L0qE489R5xQJcu'}
 #  __len__ = {int} 5
 #  'oauth_token' (4426310384) = {str} '2860808066-OYDIwFb8YTDg3tHcdWw8tkJc6ZnzZu5pzZ7zClt'
 #  'oauth_token_secret' (4426305728) = {str} 'mOzin2QWoVk886JZdaWUxteMvTjpNo6L0qE489R5xQJcu'
-#  'screen_name' (4426310256) = {str} 'WeVoteUSA'
+#  'username' (4426310256) = {str} 'WeVoteUSA'
 #  'user_id' (4426263944) = {str} '2860808066'
 #  'x_auth_expires' (4426310448) = {str} '0'
-# extra_data = {dict} {'id': 2860808066, 'access_token': {'screen_name': 'WeVoteUSA', 'user_id': '2860808066',
+# extra_data = {dict} {'id': 2860808066, 'access_token': {'username': 'WeVoteUSA', 'user_id': '2860808066',
 # 'x_auth_expires': '0', 'oauth_token': '2860808066-OYDIwFb8YTDg3tHcdWw8tkJc6ZnzZu5pzZ7zClt',
 # 'oauth_token_secret': 'mOzin2QWoVk886JZdaWUxteMvTjpNo6L0qE489R5xQJcu'}}
 #  __len__ = {int} 2
-#  'access_token' (4426310064) = {dict} {'screen_name': 'WeVoteUSA', 'user_id': '2860808066', 'x_auth_expires': '0',
+#  'access_token' (4426310064) = {dict} {'username': 'WeVoteUSA', 'user_id': '2860808066', 'x_auth_expires': '0',
 # 'oauth_token': '2860808066-OYDIwFb8YTDg3tHcdWw8tkJc6ZnzZu5pzZ7zClt',
 # 'oauth_token_secret': 'mOzin2QWoVk886JZdaWUxteMvTjpNo6L0qE489R5xQJcu'}
 #   __len__ = {int} 5
 #   'oauth_token' (4426310384) = {str} '2860808066-OYDIwFb8YTDg3tHcdWw8tkJc6ZnzZu5pzZ7zClt'
 #   'oauth_token_secret' (4426305728) = {str} 'mOzin2QWoVk886JZdaWUxteMvTjpNo6L0qE489R5xQJcu'
-#   'screen_name' (4426310256) = {str} 'WeVoteUSA'
+#   'username' (4426310256) = {str} 'WeVoteUSA'
 #   'user_id' (4426263944) = {str} '2860808066'
 #   'x_auth_expires' (4426310448) = {str} '0'
 #  'id' (4426263888) = {int} 2860808066

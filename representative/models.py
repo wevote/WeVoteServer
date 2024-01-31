@@ -1327,7 +1327,7 @@ class RepresentativeManager(models.Manager):
         }
         return results
 
-    def update_representative_twitter_details(self, representative, twitter_json,
+    def update_representative_twitter_details(self, representative, twitter_dict,
                                                 cached_twitter_profile_image_url_https,
                                                 cached_twitter_profile_background_image_url_https,
                                                 cached_twitter_profile_banner_url_https,
@@ -1342,51 +1342,53 @@ class RepresentativeManager(models.Manager):
         values_changed = False
 
         if representative:
-            if 'id' in twitter_json and positive_value_exists(twitter_json['id']):
-                if convert_to_int(twitter_json['id']) != representative.twitter_user_id:
-                    representative.twitter_user_id = convert_to_int(twitter_json['id'])
+            if 'id' in twitter_dict and positive_value_exists(twitter_dict['id']):
+                if convert_to_int(twitter_dict['id']) != representative.twitter_user_id:
+                    representative.twitter_user_id = convert_to_int(twitter_dict['id'])
                     values_changed = True
-            if 'screen_name' in twitter_json and positive_value_exists(twitter_json['screen_name']):
-                if twitter_json['screen_name'] != representative.representative_twitter_handle:
-                    representative.representative_twitter_handle = twitter_json['screen_name']
+            if 'username' in twitter_dict and positive_value_exists(twitter_dict['username']):
+                if twitter_dict['username'] != representative.representative_twitter_handle:
+                    representative.representative_twitter_handle = twitter_dict['username']
                     values_changed = True
-            if 'name' in twitter_json and positive_value_exists(twitter_json['name']):
-                if twitter_json['name'] != representative.twitter_name:
-                    representative.twitter_name = twitter_json['name']
+            if 'name' in twitter_dict and positive_value_exists(twitter_dict['name']):
+                if twitter_dict['name'] != representative.twitter_name:
+                    representative.twitter_name = twitter_dict['name']
                     values_changed = True
-            if 'followers_count' in twitter_json and positive_value_exists(twitter_json['followers_count']):
-                if convert_to_int(twitter_json['followers_count']) != representative.twitter_followers_count:
-                    representative.twitter_followers_count = convert_to_int(twitter_json['followers_count'])
+            if 'followers_count' in twitter_dict and positive_value_exists(twitter_dict['followers_count']):
+                if convert_to_int(twitter_dict['followers_count']) != representative.twitter_followers_count:
+                    representative.twitter_followers_count = convert_to_int(twitter_dict['followers_count'])
                     values_changed = True
 
             if positive_value_exists(cached_twitter_profile_image_url_https):
                 representative.twitter_profile_image_url_https = cached_twitter_profile_image_url_https
                 values_changed = True
-            elif 'profile_image_url_https' in twitter_json and positive_value_exists(
-                    twitter_json['profile_image_url_https']):
-                if twitter_json['profile_image_url_https'] != representative.twitter_profile_image_url_https:
-                    representative.twitter_profile_image_url_https = twitter_json['profile_image_url_https']
+            elif 'profile_image_url' in twitter_dict and positive_value_exists(
+                    twitter_dict['profile_image_url']):
+                if twitter_dict['profile_image_url'] != representative.twitter_profile_image_url_https:
+                    representative.twitter_profile_image_url_https = twitter_dict['profile_image_url']
                     values_changed = True
 
             if positive_value_exists(cached_twitter_profile_banner_url_https):
                 representative.twitter_profile_banner_url_https = cached_twitter_profile_banner_url_https
                 values_changed = True
-            elif ('profile_banner_url' in twitter_json) and positive_value_exists(twitter_json['profile_banner_url']):
-                if twitter_json['profile_banner_url'] != representative.twitter_profile_banner_url_https:
-                    representative.twitter_profile_banner_url_https = twitter_json['profile_banner_url']
-                    values_changed = True
+            # 2024-01-27 Twitter API v2 doesn't return profile_banner_url anymore
+            # elif ('profile_banner_url' in twitter_dict) and positive_value_exists(twitter_dict['profile_banner_url']):
+            #     if twitter_dict['profile_banner_url'] != representative.twitter_profile_banner_url_https:
+            #         representative.twitter_profile_banner_url_https = twitter_dict['profile_banner_url']
+            #         values_changed = True
 
             if positive_value_exists(cached_twitter_profile_background_image_url_https):
                 representative.twitter_profile_background_image_url_https = \
                     cached_twitter_profile_background_image_url_https
                 values_changed = True
-            elif 'profile_background_image_url_https' in twitter_json and positive_value_exists(
-                    twitter_json['profile_background_image_url_https']):
-                if twitter_json['profile_background_image_url_https'] != \
-                        representative.twitter_profile_background_image_url_https:
-                    representative.twitter_profile_background_image_url_https = \
-                        twitter_json['profile_background_image_url_https']
-                    values_changed = True
+            # 2024-01-27 Twitter API v2 doesn't return profile_background_image_url_https anymore
+            # elif 'profile_background_image_url_https' in twitter_dict and positive_value_exists(
+            #         twitter_dict['profile_background_image_url_https']):
+            #     if twitter_dict['profile_background_image_url_https'] != \
+            #             representative.twitter_profile_background_image_url_https:
+            #         representative.twitter_profile_background_image_url_https = \
+            #             twitter_dict['profile_background_image_url_https']
+            #         values_changed = True
             if positive_value_exists(we_vote_hosted_profile_image_url_large):
                 representative.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
                 values_changed = True
@@ -1397,13 +1399,13 @@ class RepresentativeManager(models.Manager):
                 representative.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
                 values_changed = True
 
-            if 'description' in twitter_json:  # No value required to update description (so we can clear out)
-                if twitter_json['description'] != representative.twitter_description:
-                    representative.twitter_description = twitter_json['description']
+            if 'description' in twitter_dict:  # No value required to update description (so we can clear out)
+                if twitter_dict['description'] != representative.twitter_description:
+                    representative.twitter_description = twitter_dict['description']
                     values_changed = True
-            if 'location' in twitter_json:  # No value required to update location (so we can clear out)
-                if twitter_json['location'] != representative.twitter_location:
-                    representative.twitter_location = twitter_json['location']
+            if 'location' in twitter_dict:  # No value required to update location (so we can clear out)
+                if twitter_dict['location'] != representative.twitter_location:
+                    representative.twitter_location = twitter_dict['location']
                     values_changed = True
 
             if values_changed:
