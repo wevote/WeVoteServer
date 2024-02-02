@@ -4,17 +4,19 @@
 
 ## Installing PostgreSQL on Linux
 
-    $ sudo apt-get install python-psycopg2 
-    $ sudo apt-get install python-dev
-    $ sudo apt-get install postgresql-client
-    $ sudo apt-get install postgresql postgresql-contrib
-    $ sudo -u postgres psql postgres
-    postgres=# \password postgres
-    (NOTE: We recommend using a very simple password like "123" since it is just local development)
-    postgres=# \q
-    $ sudo -u postgres createdb WeVoteServerDB
+(https://www.postgresql.org/download/linux/ubuntu/)
+	# Create the file repository configuration:
+	$ sudo sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
 
-See here for more detailed [instructions](https://help.ubuntu.com/community/PostgreSQL)
+	# Import the repository signing key:
+	$ wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+
+	# Update the package lists:
+	$ sudo apt-get update
+
+	# Install the latest version of PostgreSQL.
+	# If you want a specific version, use 'postgresql-12' or similar instead of 'postgresql':
+	$ sudo apt-get -y install postgresql
 
 ## Setup - Install pgAdmin 4
 
@@ -46,7 +48,7 @@ Open pgAdmin 4 and navigate to:
 
     Server Groups > Servers
 
-1) Right-click on "Servers" and choose "Create > Server"
+1) Right-click on "Servers" and choose "Register > Server"
 
 2) Name: WeVoteServer
 

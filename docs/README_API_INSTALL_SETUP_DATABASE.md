@@ -101,7 +101,7 @@ Open pgAdmin 4 and navigate to:
 
 If you do not see "WeVoteServer", then do the following:
 
-1) Right-click on "Servers" and choose "Create > Server"
+1) Right-click on "Servers" and choose "Register > Server"
 
 2) Name: WeVoteServer
 
