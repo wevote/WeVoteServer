@@ -1,5 +1,6 @@
 {# templates/candidate/google_search_users_for_candidate_table.html #}
 
+<a name="google_search_users_for_candidate_table" />
 <input type="hidden" name="google_search_image_file" id="google_search_image_file_id" class="form-control"
        value="{{ google_search_image_file }}" />
 <input type="hidden" name="google_search_link" id="google_search_link_id" class="form-control"
@@ -10,9 +11,8 @@
     <tr>
         <th>#</th>
         <th>Score</th>
-        <th>Image</th>
+        <th>Image &amp; Link Found</th>
         <th>Google search description</th>
-        <th>Google search link</th>
     </tr>
 {% for one_row in google_search_possibility_list %}
     <tr>
@@ -36,28 +36,72 @@
             {% endif %}
             {{ one_row.item_title }}
             <br />
-            {% if not one_row.not_a_match %}
-                {% if one_row.item_image %}
-                    {% if not one_row.from_twitter %}
-                        <input id="choose_and_update_{{ forloop.counter }}" type="button" value="Choose and Update" onclick="document.getElementById('google_search_image_file_id').value = '{{ one_row.item_image }}'
-                            document.getElementById('google_search_link_id').value = '{{ one_row.item_link }}';document.getElementById('candidate_edit').submit();" />
-                    {% else %}
-                        <input id="choose_and_update_from_twitter{{ forloop.counter }}" type="button" value="Choose and Update" onclick="document.getElementById('google_search_image_file_id').value = '{{ one_row.item_image }}'
-                            document.getElementById('google_search_link_id').value = '{{ one_row.item_link }}';
-                            document.getElementById('refresh_from_twitter_id').value = '{{ one_row.from_twitter }}';document.getElementById('candidate_edit').submit();" />
-                    {% endif %}
+            <span class="wrap_word">
+                <a href="{{ one_row.item_link }}" target="_blank">{{ one_row.item_link|default_if_none:"" }}</a>
+                <a href="{{ one_row.item_formatted_link }}" target="_blank">{{ one_row.item_formatted_url|default_if_none:"" }}</a>
+                {% if one_row.facebook_search_found %}
+                    <br />
+                    <a href="{{ one_row.item_formatted_link }}" target="_blank">{{ one_row.facebook_website|default_if_none:"" }}</a>
                 {% endif %}
                 <br />
+            </span>
+            {% if not one_row.not_a_match %}
+{#                {% if one_row.item_image %}#}
+{#                    {% if not one_row.from_twitter %}#}
+{#                        <input id="choose_and_update_{{ forloop.counter }}" type="button" value="Save Photo" onclick="document.getElementById('google_search_image_file_id').value = '{{ one_row.item_image }}'#}
+{#                            document.getElementById('google_search_link_id').value = '{{ one_row.item_link }}';document.getElementById('candidate_edit').submit();" />#}
+{#                    {% else %}#}
+{#                        <input id="choose_and_update_from_twitter{{ forloop.counter }}" type="button" value="Choose and Update 2" onclick="document.getElementById('google_search_image_file_id').value = '{{ one_row.item_image }}'#}
+{#                            document.getElementById('google_search_link_id').value = '{{ one_row.item_link }}';#}
+{#                            document.getElementById('refresh_from_twitter_id').value = '{{ one_row.from_twitter }}';document.getElementById('candidate_edit').submit();" />#}
+{#                    {% endif %}#}
+{#                {% endif %}#}
+{#                <br />#}
                 {% if one_row.from_ballotpedia %}
                     <input id="save_ballotpedia_{{ forloop.counter }}" type="button" value="Save Ballotpedia Link" onclick="document.getElementById('google_search_link_id').value = '{{ one_row.item_link }}';document.getElementById('candidate_edit').submit();" />
+                    {% if candidate.ballotpedia_candidate_url %}
+                        <span style="color: grey; font-size: .8em;">
+                        <br/>
+                        <br/>
+                        Saved: {{ candidate.ballotpedia_candidate_url }}
+                        </span>
+                    {% endif %}
                 {% elif one_row.from_facebook %}
                     <input id="save_facebook_{{ forloop.counter }}" type="button" value="Save Facebook Link" onclick="document.getElementById('google_search_link_id').value = '{{ one_row.item_link }}';document.getElementById('candidate_edit').submit();" />
+                    {% if candidate.facebook_url %}
+                        <span style="color: grey; font-size: .8em;">
+                        <br/>
+                        <br/>
+                        Saved: {{ candidate.facebook_url }}
+                        </span>
+                    {% endif %}
                 {% elif one_row.from_linkedin %}
                     <input id="save_linkedin_{{ forloop.counter }}" type="button" value="Save Linkedin Link" onclick="document.getElementById('google_search_link_id').value = '{{ one_row.item_link }}';document.getElementById('candidate_edit').submit();" />
+                    {% if candidate.linkedin_url %}
+                        <span style="color: grey; font-size: .8em;">
+                        <br/>
+                        <br/>
+                        Saved: {{ candidate.linkedin_url }}
+                        </span>
+                    {% endif %}
                 {% elif one_row.from_twitter %}
                     <input id="save_twitter_{{ forloop.counter }}" type="button" value="Save Twitter Link" onclick="document.getElementById('google_search_link_id').value = '{{ one_row.item_link }}';document.getElementById('candidate_edit').submit();" />
+                    {% if candidate.candidate_twitter_handle %}
+                        <span style="color: grey; font-size: .8em;">
+                        <br/>
+                        <br/>
+                        Saved: {{ candidate.candidate_twitter_handle }}
+                        </span>
+                    {% endif %}
                 {% elif one_row.from_wikipedia %}
                     <input id="save_wikipedia_{{ forloop.counter }}" type="button" value="Save Wikipedia Link" onclick="document.getElementById('google_search_link_id').value = '{{ one_row.item_link }}';document.getElementById('candidate_edit').submit();" />
+                    {% if candidate.wikipedia_url %}
+                        <span style="color: grey; font-size: .8em;">
+                        <br/>
+                        <br/>
+                        Saved: {{ candidate.wikipedia_url }}
+                        </span>
+                    {% endif %}
                 {% else %}
                     <input id="save_link_{{ forloop.counter }}" type="button" value="Save Candidate Link" onclick="document.getElementById('google_search_link_id').value = '{{ one_row.item_link }}';document.getElementById('candidate_edit').submit();" />
                 {% endif %}
@@ -81,18 +125,8 @@
                 {{ one_row.facebook_bio|default_if_none:"n/a"}}
                 {{ one_row.facebook_personal_info|default_if_none:"n/a"}}
             {% endif %}
-        </td>
-        <td style="width:50%;">
-            <span class="wrap_word">
-                <a href="{{ one_row.item_link }}" target="_blank">{{ one_row.item_link|default_if_none:"" }}</a>
-                <a href="{{ one_row.item_formatted_link }}" target="_blank">{{ one_row.item_formatted_url|default_if_none:"" }}</a>
-                {% if one_row.facebook_search_found %}
-                    <br />
-                    <a href="{{ one_row.item_formatted_link }}" target="_blank">{{ one_row.facebook_website|default_if_none:"" }}</a>
-                {% endif %}
-                <br />
-                <a href="{{ one_row.search_request_url }}" target="_blank">{{ one_row.search_request_url|default_if_none:"" }}</a>
-            </span>
+            <br />
+            <a href="{{ one_row.search_request_url }}" target="_blank">See Google Search API Results</a>
         </td>
     </tr>
 {% endfor %}

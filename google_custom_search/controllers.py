@@ -465,9 +465,10 @@ def update_google_search_with_wikipedia_results(wikipedia_page, search_term, can
     for google_search_user in possible_google_search_users_list:
         if wikipedia_page and wikipedia_page.url == google_search_user['google_json']['item_link']:
             wikipedia_user_exist_in_google_search = True
-            possible_wikipedia_search_user = possible_wikipedia_search_user[0]
-            google_search_user['likelihood_score'] = possible_wikipedia_search_user['likelihood_score']
-            break
+            if len(possible_wikipedia_search_user) > 0:
+                possible_wikipedia_search_user = possible_wikipedia_search_user[0]
+                google_search_user['likelihood_score'] = possible_wikipedia_search_user['likelihood_score']
+                break
 
     results = {
         'wikipedia_user_exist_in_google_search':    wikipedia_user_exist_in_google_search,

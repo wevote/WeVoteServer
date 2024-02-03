@@ -2620,6 +2620,50 @@ def save_image_to_candidate_table(candidate, image_url, source_link, url_is_brok
     return results
 
 
+def analyze_candidate_info_link_found_on_google(candidate_info_link):
+    is_from_ballotpedia = False
+    is_from_facebook = False
+    is_from_linkedin = False
+    is_from_twitter = False
+    is_from_wikipedia = False
+    link = ''
+    link_found = False
+    status = ''
+    success = True
+    google_search_website_name = candidate_info_link.split("//")[1].split("/")[0]
+    if IMAGE_SOURCE_BALLOTPEDIA in google_search_website_name:
+        is_from_ballotpedia = True
+        link_found = True
+    elif LINKEDIN in google_search_website_name:
+        is_from_linkedin = True
+        link_found = True
+    elif WIKIPEDIA in google_search_website_name:
+        is_from_wikipedia = True
+        link_found = True
+    elif TWITTER in google_search_website_name:
+        is_from_twitter = True
+        link_found = True
+    elif FACEBOOK in google_search_website_name:
+        is_from_facebook = True
+        link_found = True
+    elif positive_value_exists(candidate_info_link):
+        link_found = True
+    if link_found:
+        link = candidate_info_link
+    results = {
+        'is_from_ballotpedia':  is_from_ballotpedia,
+        'is_from_facebook':     is_from_facebook,
+        'is_from_linkedin':     is_from_linkedin,
+        'is_from_twitter':      is_from_twitter,
+        'is_from_wikipedia':    is_from_wikipedia,
+        'link':                 link,
+        'link_found':           link_found,
+        'status':               status,
+        'success':              success,
+    }
+    return results
+
+
 def save_google_search_link_to_candidate_table(candidate, google_search_link):
     google_search_website_name = google_search_link.split("//")[1].split("/")[0]
     if IMAGE_SOURCE_BALLOTPEDIA in google_search_website_name:
