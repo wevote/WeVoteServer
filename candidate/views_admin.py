@@ -53,7 +53,8 @@ from wevote_functions.functions import convert_to_int, \
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from wevote_settings.models import RemoteRequestHistory, \
     RETRIEVE_POSSIBLE_GOOGLE_LINKS, RETRIEVE_POSSIBLE_TWITTER_HANDLES
-from .controllers import candidates_import_from_master_server, candidates_import_from_sample_file, \
+from .controllers import add_twitter_handle_to_next_candidate_spot, analyze_candidate_info_link_found_on_google, \
+    candidates_import_from_master_server, candidates_import_from_sample_file, \
     candidate_politician_match, fetch_duplicate_candidate_count, figure_out_candidate_conflict_values, \
     find_duplicate_candidate, \
     merge_if_duplicate_candidates, merge_these_two_candidates, \
@@ -2470,7 +2471,33 @@ def candidate_edit_process_view(request):
                     google_search_user.save()
             elif google_search_link:
                 # save google search link
-                save_google_search_link_to_candidate_table(candidate_on_stage, google_search_link)
+                # save_google_search_link_to_candidate_table(candidate_on_stage, google_search_link)
+                results = analyze_candidate_info_link_found_on_google(google_search_link)
+                status += results['status']
+                if positive_value_exists(results['link_found']):
+                    if results['is_from_ballotpedia']:
+                        ballotpedia_candidate_url = results['link']
+                    elif results['is_from_facebook']:
+                        facebook_url = results['link']
+                    elif results['is_from_twitter']:
+                        twitter_handle_from_google_search = extract_twitter_handle_from_text_string(results['link'])
+                        # We create an empty, temporary candidate, so we can use the
+                        # add_twitter_handle_to_next_candidate_spot function
+                        temp_candidate = CandidateCampaign()
+                        add_results = add_twitter_handle_to_next_candidate_spot(
+                            temp_candidate, twitter_handle_from_google_search)
+                        add_results = add_twitter_handle_to_next_candidate_spot(
+                            add_results['candidate'], candidate_twitter_handle)
+                        add_results = add_twitter_handle_to_next_candidate_spot(
+                            add_results['candidate'], candidate_twitter_handle2)
+                        add_results = add_twitter_handle_to_next_candidate_spot(
+                            add_results['candidate'], candidate_twitter_handle3)
+                        temp_candidate = add_results['candidate']
+                        candidate_twitter_handle = temp_candidate.candidate_twitter_handle
+                        candidate_twitter_handle2 = temp_candidate.candidate_twitter_handle2
+                        candidate_twitter_handle3 = temp_candidate.candidate_twitter_handle3
+                    elif results['is_from_wikipedia']:
+                        wikipedia_url = results['link']
         else:
             # Create new
             # election must be found
@@ -2792,6 +2819,9 @@ def candidate_edit_process_view(request):
     url_variables = "?null=1"
     if positive_value_exists(show_all_twitter_search_results):
         url_variables += "&show_all_twitter_search_results=1#twitter_link_possibility_list"
+
+    if google_search_image_file or google_search_link:
+        url_variables += "&show_all_google_search_users=1#google_search_users_for_candidate_table"
 
     if redirect_to_candidate_list:
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +

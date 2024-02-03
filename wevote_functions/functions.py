@@ -1416,6 +1416,8 @@ def extract_twitter_handle_from_text_string(twitter_text_string):
     if twitter_text_string.find('/') > 0:
         twitter_text_string = twitter_text_string.split("/", 1)[0]  # Remove everything after first "/" (including "/")
     twitter_text_string = twitter_text_string.split("?", 1)[0]  # Remove everything after first "?" (including "?")
+    # TODO: Find original case of Twitter handle
+
     return twitter_text_string
 
 

@@ -174,7 +174,7 @@
                         {% if not candidate.google_search_merge_possibility.chosen_and_updated %}
                             <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
                                 <img src='{{ candidate.google_search_merge_possibility.item_image }}' height="25px" /></a>&nbsp;
-                            (<a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&show_all_google_search_users=1">
+                            (<a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&show_all_google_search_users=1#google_search_users_for_candidate_table">
                                 Best Guess: {{ candidate.google_search_merge_possibility.likelihood_score }}</a>)<br />
                             <a href="{{ candidate.google_search_merge_possibility.item_link }}" target="_blank">{{ candidate.google_search_merge_possibility.item_link|default_if_none:"" }}</a><br />
                             {{ candidate.google_search_merge_possibility.item_snippet|truncatechars:400 }}

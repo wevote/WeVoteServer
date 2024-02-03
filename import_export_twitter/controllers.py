@@ -1097,7 +1097,7 @@ def retrieve_fresh_enough_twitter_user_for_handle(
         elif results['success']:
             status += "DETAILS_RETRIEVED_FROM_TWITTER "
             twitter_dict = results['twitter_dict']
-            twitter_user_id = twitter_dict['id']
+            twitter_user_id = twitter_dict['id'] if 'id' in twitter_dict else 0
 
             # Get original image url for cache original size image
             try:
