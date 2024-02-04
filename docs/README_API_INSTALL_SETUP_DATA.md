@@ -16,7 +16,7 @@ Find the "Sync Data with Master We Vote Servers" link, and click it: http://loca
 
 Start by clicking the `Retrieve All Elections` link.
 
-Choose 1) an election from the drop down (we recommend `US 2018 Midterm Election - 6000`, and 2) your local state, and then run all scripts from top to bottom. Please make sure to let each step finish running before moving on to the next step.
+Choose 1) an election from the drop down (we recommend `2020-11-03: General Election - 1000112`, and 2) your local state, and then run all scripts from top to bottom. Please make sure to let each step finish running before moving on to the next step.
  
 ### Google Civic - Advanced (Please skip unless you are working on Google Civic integration code)
 In order to retrieve fresh ballot data, you will need to sign up for a Google Civic API key:

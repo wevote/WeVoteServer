@@ -42,7 +42,7 @@ Now activate this new virtual environment for WeVoteServer:
 
 ## Installing Python 3 on Linux
 
-    (WeVoteServer) $ pip3 install django-toolbelt
+    (WeVoteServer) $ pip3 install django
     (WeVoteServer) $ pip3 install --upgrade pip
     (WeVoteServer) $ pip3 install -r requirements.txt
     (WeVoteServer) $ python3 -m pip install pyopenssl pyasn1 ndg-httpsclient
