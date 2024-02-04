@@ -2056,11 +2056,14 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def save_facebook_user_values(self, voter, facebook_auth_response,
-                                  cached_facebook_profile_image_url_https=None,
-                                  we_vote_hosted_profile_image_url_large=None,
-                                  we_vote_hosted_profile_image_url_medium=None,
-                                  we_vote_hosted_profile_image_url_tiny=None):
+    def save_facebook_user_values(
+            self,
+            voter,
+            facebook_auth_response,
+            cached_facebook_profile_image_url_https=None,
+            we_vote_hosted_profile_image_url_large=None,
+            we_vote_hosted_profile_image_url_medium=None,
+            we_vote_hosted_profile_image_url_tiny=None):
         # 1/11/23: This is now only called from voter_cache_facebook_images_process() within an SQS job
         status = ''
         try:

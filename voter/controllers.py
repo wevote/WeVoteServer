@@ -1797,12 +1797,13 @@ def voter_cache_facebook_images_process(voter_id, facebook_auth_response_id, is_
     # Cache original and resized images
 
     t0 = time()
+    status = ""
     # print("process started")
     facebook_manager = FacebookManager()
     facebook_auth_response = facebook_manager.retrieve_facebook_auth_response_by_id(facebook_auth_response_id)
     voter = Voter.objects.get(id=voter_id)  # This voter existed immediately before the call -- so this is safe
     voter.last_login = now()                # TODO: 1/12/2023, We should do this for the other sign in methods too
-    voter.profile_image_type_currently_active = "FACEBOOK"
+    # voter.profile_image_type_currently_active = "FACEBOOK"  # This is handled in save_facebook_user_values
     voter.save()
 
     # print('^^^ voter_cache_facebook_images_process BEFORE in process', os.getpid())
@@ -1812,7 +1813,20 @@ def voter_cache_facebook_images_process(voter_id, facebook_auth_response_id, is_
         is_active_version=True,
         kind_of_image_facebook_profile=True,
         voter_we_vote_id=voter.we_vote_id)
-    image_url_https = initial_cache_results['image_url_https']
+    try:
+        image_url_https = initial_cache_results['image_url_https']
+    except Exception as e:
+        status += "FACEBOOK_IMAGE_URL_NOT_RETURNED: " + str(e) + " " + str(initial_cache_results) + " "
+        image_url_https = ''
+
+    if not positive_value_exists(image_url_https):
+        status += "VOTER_CACHE_FACEBOOK_IMAGES_PROCESS_NO_URL "
+        logger.error(status)
+        return {
+            'we_vote_hosted_profile_image_url_large': '',
+            'we_vote_hosted_profile_image_url_medium': '',
+            'we_vote_hosted_profile_image_url_tiny': '',
+        }
 
     we_vote_image_manager = WeVoteImageManager()
     set_active_results = we_vote_image_manager.set_active_version_false_for_other_images(
@@ -1838,9 +1852,12 @@ def voter_cache_facebook_images_process(voter_id, facebook_auth_response_id, is_
     # Update the facebook photos in the Voter record
     voter_manager = VoterManager()
     voter_manager.save_facebook_user_values(
-        voter, facebook_auth_response, cached_facebook_profile_image_url_https,
-        we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
-        we_vote_hosted_profile_image_url_tiny)
+        voter,
+        facebook_auth_response,
+        cached_facebook_profile_image_url_https=cached_facebook_profile_image_url_https,
+        we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
+        we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
+        we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
     dtc = time() - t0
     # 12/20/22: This takes 1.2 seconds on my local postgres, but 5 to 15 seconds in production,
     # leave this logger active for a few months, so we can gather data
@@ -1854,6 +1871,7 @@ def voter_cache_facebook_images_process(voter_id, facebook_auth_response_id, is_
         'we_vote_hosted_profile_image_url_medium': we_vote_hosted_profile_image_url_medium,
         'we_vote_hosted_profile_image_url_tiny': we_vote_hosted_profile_image_url_tiny,
     }
+
 
 def voter_merge_two_accounts_for_facebook(facebook_secret_key, facebook_user_id, from_voter, voter_device_id,
                                           current_voter_found, status):
@@ -1927,7 +1945,7 @@ def voter_merge_two_accounts_for_facebook(facebook_secret_key, facebook_user_id,
             return None, None, error_results
 
     # Cache original and resized images in a SQS message (job)
-    process_in_sqs_job = True
+    process_in_sqs_job = True  # Switch to 'False' to test locally without an SQS job
     if process_in_sqs_job:
         submit_web_function_job('voter_cache_facebook_images_process', {
                         'voter_id': facebook_owner_voter.id,

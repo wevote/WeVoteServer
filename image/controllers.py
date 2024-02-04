@@ -311,8 +311,12 @@ def cache_image_if_not_cached(
     # Jan 2022: Facebook reuses the same hash for the download link facebook_profile_image_url_https if you change
     # profile picture quickly enough (timing uncertain), so we can use that as a criteria.  Since we are processing
     # these asynchronously in a SQS job, run the job each time the voter signs in with Facebook.
+    # Feb 2023 Dale: This path is used for both SQS and at least one other Facebook retrieve path
+    #  voter_cache_facebook_images_process, and the SQS approach (of not using the original Facebook image url) isn't
+    #  compatible with how we use the original Facebook image url downstream for later processing.
+    #  REMOVED: and not kind_of_image_facebook_profile
     cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
-    if cached_we_vote_image_results['we_vote_image_found'] and not kind_of_image_facebook_profile and (\
+    if cached_we_vote_image_results['we_vote_image_found'] and (\
             image_url_https == cached_we_vote_image.ballotpedia_profile_image_url or \
             image_url_https == cached_we_vote_image.campaignx_photo_url_https or \
             image_url_https == cached_we_vote_image.facebook_background_image_url_https or \
@@ -840,6 +844,7 @@ def cache_image_locally(
             'image_stored_from_source':     image_stored_from_source,
             'image_stored_locally':         image_stored_locally,
             'image_stored_to_aws':          image_stored_to_aws,
+            'image_url_https':              '',
         }
         log_and_time_cache_action(False, time0, 'cache_image_locally -- create_we_vote_image_results, was not saved')
         return error_results
@@ -885,6 +890,7 @@ def cache_image_locally(
             'image_stored_from_source':     image_stored_from_source,
             'image_stored_locally':         image_stored_locally,
             'image_stored_to_aws':          image_stored_to_aws,
+            'image_url_https':              '',
         }
         delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
         log_and_time_cache_action(False, time0, 'cache_image_locally -- analyze_image_url_results problem')
@@ -1075,6 +1081,7 @@ def cache_image_locally(
                 'image_stored_from_source':     image_stored_from_source,
                 'image_stored_locally':         False,
                 'image_stored_to_aws':          image_stored_to_aws,
+                'image_url_https':              '',
             }
             delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
             log_and_time_cache_action(False, time0, 'cache_image_locally -- IMAGE_NOT_STORED_LOCALLY problem')
@@ -1094,6 +1101,7 @@ def cache_image_locally(
                 'image_stored_from_source':     image_stored_from_source,
                 'image_stored_locally':         image_stored_locally,
                 'image_stored_to_aws':          False,
+                'image_url_https':              '',
             }
             delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
             log_and_time_cache_action(False, time0, 'cache_image_locally -- IMAGE_NOT_STORED_TO_AWS problem')
@@ -1134,7 +1142,7 @@ def cache_image_locally(
             'image_stored_from_source':     False,
             'image_stored_locally':         image_stored_locally,
             'image_stored_to_aws':          image_stored_to_aws,
-            'image_url_https':                    '',
+            'image_url_https':              '',
         }
         delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
         log_and_time_cache_action(False, time0, 'cache_image_locally -- save_source_info_results problem')
@@ -2505,7 +2513,10 @@ def create_resized_image_if_not_created(we_vote_image):
     elif we_vote_image.kind_of_image_facebook_background:
         image_url_https = we_vote_image.facebook_background_image_url_https
     elif we_vote_image.kind_of_image_facebook_profile:
-        image_url_https = we_vote_image.we_vote_image_url
+        image_url_https = we_vote_image.facebook_profile_image_url_https
+        # 2024-02-04 Dale: This use of 'we_vote_image_url' instead of 'facebook_profile_image_url_https', was added for
+        # Facebook profile images brought in through SQS, but is non-standard and creates problems downstream
+        # image_url_https = we_vote_image.we_vote_image_url
     elif we_vote_image.kind_of_image_linkedin_profile:
         image_url_https = we_vote_image.linkedin_profile_image_url
     elif we_vote_image.kind_of_image_maplight:
