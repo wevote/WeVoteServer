@@ -91,18 +91,19 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
             facebook_auth_response.facebook_profile_image_url_https = photo_url
 
     # Cache original and resized images in a SQS job
-     # print('------------------------ submit_web_function_job in process', os.getpid())
-    process_in_sqs_job = True
+    # print('------------------------ submit_web_function_job in process', os.getpid())
+    process_in_sqs_job = True  # Switch to 'False' to test locally without an SQS job
     if process_in_sqs_job:
         submit_web_function_job('voter_cache_facebook_images_process', {
                         'voter_id': voter.id,
                         'facebook_auth_response_id': facebook_auth_response.id,
                         'is_retrieve': False,
                     })
+        status += " FACEBOOK_IMAGES_SCHEDULED_TO_BE_CACHED_VIA_SQS "
     else:
         voter_cache_facebook_images_process(voter.id, facebook_auth_response.id, False)
+        status += " FACEBOOK_IMAGES_CACHED_DURING_SIGN_IN_PROCESS "
 
-    status += " FACEBOOK_IMAGES_SCHEDULED_TO_BE_CACHED_VIA_SQS"
     success = True
 
     # ##### Make the facebook_email an email for the current voter (and possibly the primary email)
@@ -629,19 +630,25 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
 
     # Cache original and resized images in a SQS message (job) for read
 
-    # caching_facebook_images_for_retrieve_process(
-    #     repair_facebook_related_voter_caching_now, facebook_auth_response.id, voter_we_vote_id_attached_to_facebook,
-    #     voter_we_vote_id_attached_to_facebook_email, voter_we_vote_id)  # sleep10
-    # print('----- BEFORE SQS CALL caching_facebook_images_for_retrieve_process in process', os.getpid())
-    submit_web_function_job('caching_facebook_images_for_retrieve_process', {
-                        'repair_facebook_related_voter_caching_now': repair_facebook_related_voter_caching_now,
-                        'facebook_auth_response_id': facebook_auth_response.id,
-                        'voter_we_vote_id_attached_to_facebook': voter_we_vote_id_attached_to_facebook,
-                        'voter_we_vote_id_attached_to_facebook_email': voter_we_vote_id_attached_to_facebook_email,
-                        'voter_we_vote_id': voter_we_vote_id,
-                    })
+    process_in_sqs_job = True  # Switch to 'False' to test locally without an SQS job
+    if process_in_sqs_job:
+        # print('----- BEFORE SQS CALL caching_facebook_images_for_retrieve_process in process', os.getpid())
+        submit_web_function_job('caching_facebook_images_for_retrieve_process', {
+                            'repair_facebook_related_voter_caching_now': repair_facebook_related_voter_caching_now,
+                            'facebook_auth_response_id': facebook_auth_response.id,
+                            'voter_we_vote_id_attached_to_facebook': voter_we_vote_id_attached_to_facebook,
+                            'voter_we_vote_id_attached_to_facebook_email': voter_we_vote_id_attached_to_facebook_email,
+                            'voter_we_vote_id': voter_we_vote_id,
+                        })
+        status += " FACEBOOK_IMAGES_SCHEDULED_TO_BE_CACHED_VIA_SQS_BY_RETRIEVE"
+    else:
+        caching_facebook_images_for_retrieve_process(
+            repair_facebook_related_voter_caching_now,
+            facebook_auth_response.id,
+            voter_we_vote_id_attached_to_facebook,
+            voter_we_vote_id_attached_to_facebook_email,
+            voter_we_vote_id)
 
-    status += " FACEBOOK_IMAGES_SCHEDULED_TO_BE_CACHED_VIA_SQS_BY_RETRIEVE"
     t4 = time()
 
     fbuser = None
@@ -738,15 +745,23 @@ def update_organization_facebook_images(facebook_user_id, facebook_profile_image
     return
 
 
-def voter_facebook_sign_in_save_auth_for_api(voter_device_id,  # voterFacebookSignInSave
-                                        save_auth_data,
-                                        facebook_access_token, facebook_user_id, facebook_expires_in,
-                                        facebook_signed_request,
-                                        save_profile_data,
-                                        facebook_email, facebook_first_name, facebook_middle_name, facebook_last_name,
-                                        save_photo_data,
-                                        facebook_profile_image_url_https, facebook_background_image_url_https,
-                                        facebook_background_image_offset_x, facebook_background_image_offset_y):
+def voter_facebook_sign_in_save_auth_for_api(
+        voter_device_id,  # voterFacebookSignInSave
+        save_auth_data,
+        facebook_access_token,
+        facebook_user_id,
+        facebook_expires_in,
+        facebook_signed_request,
+        save_profile_data,
+        facebook_email,
+        facebook_first_name,
+        facebook_middle_name,
+        facebook_last_name,
+        save_photo_data,
+        facebook_profile_image_url_https,
+        facebook_background_image_url_https,
+        facebook_background_image_offset_x,
+        facebook_background_image_offset_y):
     """
 
     :param voter_device_id:

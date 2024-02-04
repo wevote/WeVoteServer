@@ -1474,8 +1474,16 @@ class WeVoteImageManager(models.Manager):
         we_vote_image_found = False
 
         # Handle facebook signins differently, in a more concise way
+        # Dale 2024-2-3 Only forking to this new path created if the we_vote_image_url is included
+        # TODO: I think some code that calls this function might have introduced a data bug
+        #   because within the WeVote image object,
+        #   we_vote_image_url refers to our cache on AWS, and facebook_profile_image_url_https in the Image object is
+        #   the original URL on Facebook. It is unfortunate that the facebook_profile_image_url_https field on the
+        #   Candidate object *does* refer to the WeVote image cached on AWS -- I wish I had given it a
+        #   different field name.
         if positive_value_exists(facebook_profile_image_url_https):
-            return self.retrieve_we_vote_image_from_facebook_url(we_vote_image_url)
+            if positive_value_exists(we_vote_image_url):
+                return self.retrieve_we_vote_image_from_facebook_url(we_vote_image_url)
 
         # Getting original image url
         twitter_profile_image_url_https = self.twitter_profile_image_url_https_original(twitter_profile_image_url_https)
@@ -1770,6 +1778,7 @@ class WeVoteImageManager(models.Manager):
             if kind_of_image_facebook_profile:
                 image_query = WeVoteImage.objects.all()
                 image_query = image_query.filter(
+                    candidate_we_vote_id__iexact=candidate_we_vote_id,
                     kind_of_image_facebook_profile=kind_of_image_facebook_profile,
                     is_active_version=is_active_version,
                     kind_of_image_original=kind_of_image_original,

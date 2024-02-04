@@ -23,17 +23,21 @@ def _init_client(queue_url):
 
 
 def submit_web_function_job(function_name, body):
-    queue_url = get_environment_variable("AWS_SQS_WEB_QUEUE_URL")
-    sqs = _init_client(queue_url)
-    response = sqs.send_message(
-        QueueUrl=queue_url,
-        MessageGroupId='WebFunctions',
-        MessageAttributes={
-            'Function': {
-                'DataType': 'String',
-                'StringValue': function_name
-            }
-        },
-        MessageBody=json.dumps(body)
-    )
-    return response['MessageId']
+    try:
+        queue_url = get_environment_variable("AWS_SQS_WEB_QUEUE_URL")
+        sqs = _init_client(queue_url)
+        response = sqs.send_message(
+            QueueUrl=queue_url,
+            MessageGroupId='WebFunctions',
+            MessageAttributes={
+                'Function': {
+                    'DataType': 'String',
+                    'StringValue': function_name
+                }
+            },
+            MessageBody=json.dumps(body)
+        )
+        message_id = response['MessageId']
+    except Exception as e:
+        message_id = 0
+    return message_id
