@@ -339,6 +339,8 @@ def candidate_list_view(request):
         positive_value_exists(request.GET.get('find_candidates_linked_to_multiple_offices', 0))
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     hide_candidate_tools = positive_value_exists(request.GET.get('hide_candidate_tools', 0))
+    hide_candidates_with_links = \
+        positive_value_exists(request.GET.get('hide_candidates_with_links', False))
     hide_candidates_with_photos = \
         positive_value_exists(request.GET.get('hide_candidates_with_photos', False))
     migrate_to_candidate_link = positive_value_exists(request.GET.get('migrate_to_candidate_link', False))
@@ -975,6 +977,15 @@ def candidate_list_view(request):
                         final_filters |= item
 
                     candidate_query = candidate_query.filter(final_filters)
+        if positive_value_exists(hide_candidates_with_links):
+            # Show candidates that do NOT have links: Twitter, Instagram, Facebook, Web, Ballotpedia
+            candidate_query = candidate_query.filter(
+                (Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url=""))
+                & (Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle="") | Q(twitter_handle_updates_failing=True))
+                & (Q(candidate_url__isnull=True) | Q(candidate_url=""))
+                & (Q(facebook_url__isnull=True) | Q(facebook_url="") | Q(facebook_url_is_broken=True))
+                & (Q(instagram_handle__isnull=True) | Q(instagram_handle=""))
+            )
         if positive_value_exists(hide_candidates_with_photos):
             # Show candidates that do NOT have photos
             candidate_query = candidate_query.filter(
@@ -1291,6 +1302,7 @@ def candidate_list_view(request):
         'find_candidates_linked_to_multiple_offices':   find_candidates_linked_to_multiple_offices,
         'google_civic_election_id':                 google_civic_election_id,
         'hide_candidate_tools':                     hide_candidate_tools,
+        'hide_candidates_with_links':               hide_candidates_with_links,
         'hide_candidates_with_photos':              hide_candidates_with_photos,
         'hide_pagination':                          hide_pagination,
         'messages_on_stage':                        messages_on_stage,
