@@ -930,6 +930,9 @@ def candidate_list_view(request):
                 new_filter = Q(district_name__icontains=one_word)
                 filters.append(new_filter)
 
+                new_filter = Q(facebook_url__icontains=one_word)
+                filters.append(new_filter)
+
                 new_filter = Q(google_civic_candidate_name__icontains=one_word)
                 filters.append(new_filter)
 
