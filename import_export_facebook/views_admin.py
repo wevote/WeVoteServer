@@ -186,30 +186,30 @@ def bulk_retrieve_facebook_photos_view(request):
         current_candidate_index = 0
         while positive_value_exists(number_of_candidates_to_search) \
                 and (current_candidate_index < candidate_list_count):
-            one_candidate = candidate_list[current_candidate_index]
-            # If the candidate has a facebook_url, but no facebook_profile_image_url_https,
-            # see if we already tried to scrape them
-            if positive_value_exists(one_candidate.facebook_url) \
-                    and not positive_value_exists(one_candidate.facebook_profile_image_url_https):
-                # Check to see if we have already tried to find their photo link from Facebook. We don't want to
-                #  search Facebook more than once.
-                request_history_query = RemoteRequestHistory.objects.filter(
-                    candidate_campaign_we_vote_id__iexact=one_candidate.we_vote_id,
-                    kind_of_action=RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS)
-                request_history_list = list(request_history_query)
+            if current_candidate_index in candidate_list:
+                one_candidate = candidate_list[current_candidate_index]
+                # If the candidate has a facebook_url, but no facebook_profile_image_url_https,
+                # see if we already tried to scrape them
+                if positive_value_exists(one_candidate.facebook_url) \
+                        and not positive_value_exists(one_candidate.facebook_profile_image_url_https):
+                    # Check to see if we have already tried to find their photo link from Facebook. We don't want to
+                    #  search Facebook more than once.
+                    request_history_query = RemoteRequestHistory.objects.filter(
+                        candidate_campaign_we_vote_id__iexact=one_candidate.we_vote_id,
+                        kind_of_action=RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS)
+                    request_history_list = list(request_history_query)
 
-                if not positive_value_exists(request_history_list):
-                    add_messages = False
-                    get_results = get_one_picture_from_facebook_graphapi(
-                        one_candidate, request, remote_request_history_manager, add_messages)
-                    status += get_results['status']
-                    number_of_candidates_to_search -= 1
+                    if not positive_value_exists(request_history_list):
+                        add_messages = False
+                        get_results = get_one_picture_from_facebook_graphapi(
+                            one_candidate, request, remote_request_history_manager, add_messages)
+                        status += get_results['status']
+                        number_of_candidates_to_search -= 1
+                    else:
+                        logger.info("Skipped URL: " + one_candidate.facebook_url)
+                        already_stored += 1
                 else:
-                    logger.info("Skipped URL: " + one_candidate.facebook_url)
                     already_stored += 1
-            else:
-                already_stored += 1
-
             current_candidate_index += 1
     except CandidateCampaign.DoesNotExist:
         # This is fine, do nothing
