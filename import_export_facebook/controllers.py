@@ -86,10 +86,10 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
 
     if not positive_value_exists(facebook_auth_response.facebook_profile_image_url_https):
         results = get_facebook_photo_url_from_graphapi('', facebook_auth_response.facebook_user_id)
-        photo_url = results['photo_url']
-        if positive_value_exists(photo_url):
-            facebook_auth_response.facebook_profile_image_url_https = photo_url
-
+        if results['photo_url_found']:
+            photo_url = results['photo_url']
+            if positive_value_exists(photo_url):
+                facebook_auth_response.facebook_profile_image_url_https = photo_url
     # Cache original and resized images in a SQS job
     # print('------------------------ submit_web_function_job in process', os.getpid())
     process_in_sqs_job = True  # Switch to 'False' to test locally without an SQS job
@@ -858,7 +858,7 @@ def get_facebook_photo_url_from_graphapi(facebook_candidate_url, facebook_id=Fal
     photo_url = ""
     photo_url_found = False
     status = ""
-    success = False
+    success = True
 
     if facebook_id:
         fb_id_or_login_name = facebook_id
@@ -870,6 +870,7 @@ def get_facebook_photo_url_from_graphapi(facebook_candidate_url, facebook_id=Fal
                 status += 'GET_FACEBOOK_PHOTO_URL_FROM_GRAPHAPI-PROPER_URL_NOT_PROVIDED: ' + facebook_candidate_url + " "
         except Exception as e:
             status += "ERROR_TRYING_TO_GET_FACEBOOK_PHOTO_ID_OR_LOGIN_NAME: " + str(e) + " "
+            success = False
     else:
         status += "MISSING_BOTH_FACEBOOK_ID_AND_URL "
 
@@ -881,6 +882,7 @@ def get_facebook_photo_url_from_graphapi(facebook_candidate_url, facebook_id=Fal
             photo_url = results['url']
         except Exception as e:
             status += "UNEXPECTED_RESULTS: " + str(e) + " "
+            success = False
 
         if len(photo_url) < 1:
             photo_url_found = False
@@ -893,14 +895,13 @@ def get_facebook_photo_url_from_graphapi(facebook_candidate_url, facebook_id=Fal
         else:
             photo_url_found = True
             status += 'GET_FACEBOOK_PHOTO_URL_FROM_GRAPHAPI-SUCCESS '
-            success = True
 
     results = {
-        'status':               status,
-        'success':              success,
+        'clean_message':        clean_message,
+        'is_silhouette':        is_silhouette,
         'photo_url':            photo_url,
         'photo_url_found':      photo_url_found,
-        'is_silhouette':        is_silhouette,
-        'clean_message':        clean_message,
+        'status':               status,
+        'success':              success,
     }
     return results
