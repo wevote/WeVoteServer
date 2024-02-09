@@ -335,6 +335,7 @@ def candidate_list_view(request):
 
     candidate_search = request.GET.get('candidate_search', '')
     current_page_url = request.get_full_path()
+    exclude_candidate_analysis_done = request.GET.get('exclude_candidate_analysis_done', False)
     find_candidates_linked_to_multiple_offices = \
         positive_value_exists(request.GET.get('find_candidates_linked_to_multiple_offices', 0))
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
@@ -826,7 +827,7 @@ def candidate_list_view(request):
     battleground_office_we_vote_ids = []
     battleground_candidate_we_vote_id_list = []
     if positive_value_exists(show_marquee_or_battleground):
-        # If we are trying to highlight all of the candidates that are in battleground races,
+        # If we are trying to highlight all the candidates that are in battleground races,
         # collect the office_we_vote_id's
         try:
             office_queryset = ContestOffice.objects.all()
@@ -883,6 +884,8 @@ def candidate_list_view(request):
                 or positive_value_exists(show_marquee_or_battleground) \
                 or positive_value_exists(show_this_year_of_candidates_restriction):
             candidate_query = candidate_query.filter(we_vote_id__in=filtered_candidate_we_vote_id_list)
+        if positive_value_exists(exclude_candidate_analysis_done):
+            candidate_query = candidate_query.exclude(candidate_analysis_done=True)
         if positive_value_exists(state_code):
             candidate_query = candidate_query.filter(state_code__iexact=state_code)
         if positive_value_exists(candidate_search):
@@ -1298,6 +1301,7 @@ def candidate_list_view(request):
         'election':                                 election,
         'election_list':                            election_list,
         'election_years_available':                 ELECTION_YEARS_AVAILABLE,
+        'exclude_candidate_analysis_done':          exclude_candidate_analysis_done,
         'facebook_urls_without_picture_urls':       facebook_urls_without_picture_urls,
         'find_candidates_linked_to_multiple_offices':   find_candidates_linked_to_multiple_offices,
         'google_civic_election_id':                 google_civic_election_id,
@@ -2096,6 +2100,7 @@ def candidate_edit_process_view(request):
     ballotpedia_office_id = request.POST.get('ballotpedia_office_id', False)
     ballotpedia_person_id = request.POST.get('ballotpedia_person_id', False)
     ballotpedia_race_id = request.POST.get('ballotpedia_race_id', False)
+    candidate_analysis_done = request.POST.get('candidate_analysis_done', False)
     candidate_id = convert_to_int(request.POST.get('candidate_id', 0))
     if not positive_value_exists(candidate_id):
         candidate_id = convert_to_int(request.GET.get('candidate_id', 0))
@@ -2158,6 +2163,7 @@ def candidate_edit_process_view(request):
 
     url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
                     "&ballot_guide_official_statement=" + str(ballot_guide_official_statement) + \
+                    "&candidate_analysis_done=" + str(candidate_analysis_done) + \
                     "&candidate_contact_form_url=" + str(candidate_contact_form_url) + \
                     "&candidate_email=" + str(candidate_email) + \
                     "&candidate_name=" + str(candidate_name) + \
@@ -2559,6 +2565,7 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.ballotpedia_person_id = convert_to_int(ballotpedia_person_id)
             if ballotpedia_race_id is not False:
                 candidate_on_stage.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
+            candidate_on_stage.candidate_analysis_done = candidate_analysis_done
             if candidate_contact_form_url is not False:
                 candidate_on_stage.candidate_contact_form_url = candidate_contact_form_url
             if candidate_email is not False:

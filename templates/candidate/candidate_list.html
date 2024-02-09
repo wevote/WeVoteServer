@@ -366,6 +366,11 @@
       <input type="checkbox" name="hide_candidates_with_links" id="hide_candidates_with_links_id" value="1"
              {% if hide_candidates_with_links %}checked{% endif %} /> Missing Links
     </label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <label for="exclude_candidate_analysis_done_id">
+      <input type="checkbox" name="exclude_candidate_analysis_done" id="exclude_candidate_analysis_done_id" value="1"
+             {% if exclude_candidate_analysis_done %}checked{% endif %} /> Exclude Analyzed
+    </label>
 
     <input type="hidden" name="page" value="{{ current_page_number }}" />
 </form>
@@ -483,6 +488,9 @@
                         <a href="https://twitter.com/{{ candidate.candidate_twitter_handle }}"
                             target="_blank">{{ candidate.candidate_twitter_handle }} <span class="glyphicon glyphicon-new-window"></span></a><br />
                         ({{ candidate.twitter_followers_count|intcomma }} followers)
+                        {% if candidate.twitter_handle_updates_failing %}
+                            FAILING
+                        {% endif %}
                     {% else %}
                         {% if candidate.candidate_merge_possibility %}
                         <ul><li>
@@ -580,9 +588,14 @@
                 <span class="u-wrap-links">
                   {% if candidate.candidate_contact_form_url %}<a href="{{ candidate.candidate_contact_form_url }}" target="_blank">{{ candidate.candidate_contact_form_url }}</a><br />{% endif %}
                 </span>
+                  {% if candidate.candidate_analysis_done %}
+                    (analysis done)<br />
+                  {% endif %}
                   {% if candidate.facebook_url %}<a href="{{ candidate.facebook_url }}" target="_blank">{{ candidate.facebook_url }}</a><br />{% endif %}
                   {% if candidate.instagram_url %}<a href="{{ candidate.instagram_url }}" target="_blank">{{ candidate.instagram_url }}</a><br />{% endif %}
                   {% if candidate.ballotpedia_candidate_url %}<a href="{{ candidate.ballotpedia_candidate_url }}" target="_blank">{{ candidate.ballotpedia_candidate_url }}</a><br />{% endif %}
+                  {% if candidate.wikipedia_url %}<a href="{{ candidate.wikipedia_url }}" target="_blank">{{ candidate.wikipedia_url }}</a><br />{% endif %}
+                  {% if candidate.linkedin_url %}<a href="{{ candidate.linkedin_url }}" target="_blank">{{ candidate.linkedin_url }}</a><br />{% endif %}
                   {% if candidate.candidate_email %}{{ candidate.candidate_email }}{% endif %}
                 </td>
                 <td>
@@ -663,6 +676,9 @@
                            target="_blank">{{ candidate.candidate_twitter_handle }}</a><br />
                                 ({{ candidate.twitter_followers_count|intcomma }} followers)
                     {% endif %}
+                    {% if candidate.twitter_handle_updates_failing %}
+                        FAILING
+                    {% endif %}
                 </td>
                 <td>{{ candidate.positions_count|intcomma }}</td>
                 <td>{{ candidate.get_candidate_state }}</td>
@@ -717,6 +733,11 @@
       x.style.display = "block";
     }
     $(function() {
+        $('#exclude_candidate_analysis_done_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
         $('#google_civic_election_id').change(function() {
             this.form.submit();
         });
@@ -728,32 +749,34 @@
     });
     $(function() {
         $('#hide_candidates_with_links_id').change(function() {
+            this.form.hide_candidates_with_photos_id.value = '0';
             this.form.submit();
         });
     });
     $(function() {
         $('#hide_candidates_with_photos_id').change(function() {
+            this.form.hide_candidates_with_links_id.value = '0';
             this.form.submit();
         });
     });
-    $(function() {
-        $('#show_candidates_with_best_twitter_options_id').change(function() {
-            this.form.show_candidates_with_twitter_options_id.value = '0';
-            this.form.show_candidates_without_twitter_id.value = '0';
-            this.form.submit();
-        });
-    });
-    $(function() {
-        $('#show_candidates_with_twitter_options_id').change(function() {
-            this.form.show_candidates_with_best_twitter_options_id.value = '0';
-            this.form.show_candidates_without_twitter_id.value = '0';
-            this.form.submit();
-        });
-    });
+    {#$(function() {#}
+    {#    $('#show_candidates_with_best_twitter_options_id').change(function() {#}
+    {#        this.form.show_candidates_with_twitter_options_id.value = '0';#}
+    {#        this.form.show_candidates_without_twitter_id.value = '0';#}
+    {#        this.form.submit();#}
+    {#    });#}
+    {#});#}
+    {#$(function() {#}
+    {#    $('#show_candidates_with_twitter_options_id').change(function() {#}
+    {#        this.form.show_candidates_with_best_twitter_options_id.value = '0';#}
+    {#        this.form.show_candidates_without_twitter_id.value = '0';#}
+    {#        this.form.submit();#}
+    {#    });#}
+    {#});#}
     $(function() {
         $('#show_candidates_without_twitter_id').change(function() {
-            this.form.show_candidates_with_best_twitter_options_id.value = '0';
-            this.form.show_candidates_with_twitter_options_id.value = '0';
+            {#this.form.show_candidates_with_best_twitter_options_id.value = '0';#}
+            {#this.form.show_candidates_with_twitter_options_id.value = '0';#}
             this.form.submit();
         });
     });

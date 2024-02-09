@@ -140,7 +140,7 @@ PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES = (
 
 # KIND_OF_LOG_ENTRY_HANDLE_NOT_FOUND_BY_TWITTER = 'HANDLE_NOT_FOUND_BY_TWITTER'
 # KIND_OF_LOG_ENTRY_DATA_UPDATED_FROM_TWITTER = 'DATA_UPDATED_FROM_TWITTER'
-class CandidateLogEntry(models.Model):
+class CandidateLogEntry(models.Model):  # CandidateChangeLog would be another name
     """
     We learn something about a candidate field. For example, Twitter tells us it cannot find candidate_twitter_handle.
     """
@@ -2440,6 +2440,7 @@ class CandidateCampaign(models.Model):
     # The persistent We Vote unique ID of the Politician, so we can export and import into other databases.
     politician_we_vote_id = models.CharField(
         verbose_name="we vote politician id", max_length=255, null=True, blank=True, db_index=True)
+    candidate_analysis_done = models.BooleanField(default=False)
     # The candidate's name.
     candidate_name = models.CharField(verbose_name="candidate name", max_length=255, null=False, blank=False,
                                       db_index=True)

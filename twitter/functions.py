@@ -161,11 +161,12 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
             try:
                 twitter_dict = convert_twitter_user_object_data_to_we_vote_dict(twitter_user.data)
                 twitter_user_id = getattr(twitter_user.data, 'id')  # Integer value. id_str would be the String value
+                twitter_handle_found = True
             except Exception as e:
                 status += 'TWITTER_DICT_DATA_NOT_FOUND-' + str(e) + " "
                 twitter_dict = {}
                 twitter_user_id = 0
-            twitter_handle_found = True
+                twitter_handle_found = False
             success = True
             # status += 'TWITTER_HANDLE_SUCCESS-' + str(twitter_handle) + " "
         elif positive_value_exists(twitter_user_id):
