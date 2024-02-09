@@ -3455,7 +3455,7 @@ class Organization(models.Model):
             return ''
 
 
-class OrganizationChangeLog(models.Model):
+class OrganizationChangeLog(models.Model):  # OrganizationLogEntry would be another name
     """
     What changes were made, and by whom?
     """
