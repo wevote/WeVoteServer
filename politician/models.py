@@ -190,6 +190,14 @@ class Politician(models.Model):
     wikipedia_id = models.CharField(verbose_name="wikipedia url",
                                     max_length=500, default=None, null=True, blank=True)
     wikipedia_url = models.TextField(null=True)
+    wikipedia_photo_url = models.TextField(
+        verbose_name='url of remote wikipedia profile photo', blank=True, null=True)
+    wikipedia_profile_image_url_https = models.TextField(
+        verbose_name='locally cached candidate profile image from wikipedia', blank=True, null=True)
+    ballotpedia_photo_url = models.TextField(
+        verbose_name='url of remote ballotpedia profile photo', blank=True, null=True)
+    ballotpedia_profile_image_url_https = models.TextField(
+        verbose_name='locally cached profile image from ballotpedia', blank=True, null=True)
     # The candidate's name as passed over by Ballotpedia
     ballotpedia_politician_name = models.CharField(
         verbose_name="name exactly as received from ballotpedia", max_length=255, null=True, blank=True)
@@ -239,12 +247,20 @@ class Politician(models.Model):
 
     # Which politician image is currently active?
     profile_image_type_currently_active = models.CharField(
-        max_length=10, choices=PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES, default=PROFILE_IMAGE_TYPE_UNKNOWN)
+        max_length=11, choices=PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES, default=PROFILE_IMAGE_TYPE_UNKNOWN)
     we_vote_hosted_politician_photo_original_url = models.TextField(blank=True, null=True)
+    # Image for candidate from Ballotpedia, cached on We Vote's servers. See also ballotpedia_profile_image_url_https.
+    we_vote_hosted_profile_ballotpedia_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_ballotpedia_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_ballotpedia_image_url_tiny = models.TextField(blank=True, null=True)
     # Image for politician from Facebook, cached on We Vote's servers. See also facebook_profile_image_url_https.
     we_vote_hosted_profile_facebook_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_facebook_image_url_medium = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_facebook_image_url_tiny = models.TextField(blank=True, null=True)
+    # Image for candidate from LinkedIn, cached on We Vote's servers. See also linkedin_profile_image_url_https.
+    we_vote_hosted_profile_linkedin_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_linkedin_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_linkedin_image_url_tiny = models.TextField(blank=True, null=True)
     # Image for politician from Twitter, cached on We Vote's servers. See local master twitter_profile_image_url_https.
     we_vote_hosted_profile_twitter_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_twitter_image_url_medium = models.TextField(blank=True, null=True)
@@ -253,10 +269,14 @@ class Politician(models.Model):
     we_vote_hosted_profile_uploaded_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_uploaded_image_url_medium = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_uploaded_image_url_tiny = models.TextField(blank=True, null=True)
-    # Image for politician from Vote USA, cached on We Vote's servers. See local master vote_usa_profile_image_url_https.
+    # Image for politician from Vote USA, cached on We Vote's servers. See local master vote_usa_profile_image_url_https
     we_vote_hosted_profile_vote_usa_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_vote_usa_image_url_medium = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_vote_usa_image_url_tiny = models.TextField(blank=True, null=True)
+    # Image for candidate from Wikipedia, cached on We Vote's servers. See also wikipedia_profile_image_url_https.
+    we_vote_hosted_profile_wikipedia_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_wikipedia_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_wikipedia_image_url_tiny = models.TextField(blank=True, null=True)
     # Image we are using as the profile photo (could be sourced from Twitter, Facebook, etc.)
     we_vote_hosted_profile_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_image_url_medium = models.TextField(blank=True, null=True)
@@ -282,6 +302,9 @@ class Politician(models.Model):
     linked_campaignx_we_vote_id = models.CharField(max_length=255, null=True, unique=True, db_index=True)
     linked_campaignx_we_vote_id_date_last_updated = models.DateTimeField(null=True)
     linkedin_url = models.TextField(null=True, blank=True)
+    linkedin_photo_url = models.TextField(verbose_name='url of remote linkedin profile photo', blank=True, null=True)
+    linkedin_profile_image_url_https = models.TextField(
+        verbose_name='locally cached candidate profile image from linkedin', blank=True, null=True)
     ocd_id_state_mismatch_found = models.BooleanField(default=False, null=False)
     politician_facebook_id = models.CharField(
         verbose_name='politician facebook user name', max_length=255, null=True, unique=False)

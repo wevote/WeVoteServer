@@ -8,9 +8,10 @@ import requests
 from django.db.models import Q
 
 import wevote_functions.admin
-from candidate.models import CandidateManager, PROFILE_IMAGE_TYPE_FACEBOOK, \
+from candidate.models import CandidateManager, PROFILE_IMAGE_TYPE_BALLOTPEDIA, PROFILE_IMAGE_TYPE_FACEBOOK, \
+    PROFILE_IMAGE_TYPE_LINKEDIN, \
     PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
-    PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_VOTE_USA
+    PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_VOTE_USA, PROFILE_IMAGE_TYPE_WIKIPEDIA
 from config.base import get_environment_variable
 from import_export_facebook.models import FacebookManager
 from issue.models import IssueManager
@@ -311,8 +312,8 @@ def cache_image_if_not_cached(
     # Jan 2022: Facebook reuses the same hash for the download link facebook_profile_image_url_https if you change
     # profile picture quickly enough (timing uncertain), so we can use that as a criteria.  Since we are processing
     # these asynchronously in a SQS job, run the job each time the voter signs in with Facebook.
-    # Feb 2023 Dale: This path is used for both SQS and at least one other Facebook retrieve path
-    #  voter_cache_facebook_images_process, and the SQS approach (of not using the original Facebook image url) isn't
+    # Feb 2023 Dale: This function is used for both SQS and at least one other Facebook retrieve path
+    #  (voter_cache_facebook_images_process), and the SQS approach (of not using the original Facebook image url) isn't
     #  compatible with how we use the original Facebook image url downstream for later processing.
     #  REMOVED: and not kind_of_image_facebook_profile
     cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
@@ -4195,6 +4196,19 @@ def cache_master_images(
     if not wikipedia_profile_image_url:
         cache_all_kind_of_images_results['cached_wikipedia_image'] = WIKIPEDIA_URL_NOT_FOUND
 
+    if ballotpedia_profile_image_url:
+        cache_all_kind_of_images_results['cached_ballotpedia_image'] = cache_image_if_not_cached(
+            google_civic_election_id=google_civic_election_id,
+            image_url_https=ballotpedia_profile_image_url,
+            voter_we_vote_id=voter_we_vote_id,
+            candidate_we_vote_id=candidate_we_vote_id,
+            organization_we_vote_id=organization_we_vote_id,
+            politician_we_vote_id=politician_we_vote_id,
+            representative_we_vote_id=representative_we_vote_id,
+            is_active_version=True,
+            kind_of_image_ballotpedia_profile=True,
+            kind_of_image_original=True)
+
     if facebook_profile_image_url_https:
         cache_all_kind_of_images_results['cached_facebook_profile_image'] = cache_image_if_not_cached(
             google_civic_election_id=google_civic_election_id,
@@ -4784,26 +4798,47 @@ def organize_object_photo_fields_based_on_image_type_currently_active(
         return results
 
     object_with_photo_fields.profile_image_type_currently_active = profile_image_type_currently_active
-    uploaded_image_exists = True \
-        if positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_uploaded_image_url_large) \
-           or positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_uploaded_image_url_medium) \
-           or positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_uploaded_image_url_tiny) \
+    ballotpedia_image_exists = True \
+        if hasattr(object_with_photo_fields, 'we_vote_hosted_profile_ballotpedia_image_url_large') \
+           and (
+                   positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_ballotpedia_image_url_large) \
+                   or positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_ballotpedia_image_url_medium) \
+                   or positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_ballotpedia_image_url_tiny) \
+               ) else False
+    facebook_image_exists = True \
+        if positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_facebook_image_url_large) \
+           or positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_facebook_image_url_medium) \
+           or positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_facebook_image_url_tiny) \
         else False
+    linkedin_image_exists = True \
+        if hasattr(object_with_photo_fields, 'we_vote_hosted_profile_linkedin_image_url_large') \
+           and (
+                   positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_linkedin_image_url_large) \
+                   or positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_linkedin_image_url_medium) \
+                   or positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_linkedin_image_url_tiny) \
+               ) else False
     twitter_image_exists = True \
         if positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_twitter_image_url_large) \
            or positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_twitter_image_url_medium) \
            or positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_twitter_image_url_tiny) \
         else False
-    facebook_image_exists = True \
-        if positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_facebook_image_url_large) \
-           or positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_facebook_image_url_medium) \
-           or positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_facebook_image_url_tiny) \
+    uploaded_image_exists = True \
+        if positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_uploaded_image_url_large) \
+           or positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_uploaded_image_url_medium) \
+           or positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_uploaded_image_url_tiny) \
         else False
     vote_usa_image_exists = True \
         if positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_vote_usa_image_url_large) \
            or positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_vote_usa_image_url_medium) \
            or positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_vote_usa_image_url_tiny) \
         else False
+    wikipedia_image_exists = True \
+        if hasattr(object_with_photo_fields, 'we_vote_hosted_profile_wikipedia_image_url_large') \
+           and (
+                   positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_wikipedia_image_url_large) \
+                   or positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_wikipedia_image_url_medium) \
+                   or positive_value_exists(object_with_photo_fields.we_vote_hosted_profile_wikipedia_image_url_tiny) \
+               ) else False
     if object_with_photo_fields.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
         if uploaded_image_exists:
             object_with_photo_fields.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UPLOADED
@@ -4811,8 +4846,17 @@ def organize_object_photo_fields_based_on_image_type_currently_active(
         elif twitter_image_exists:
             object_with_photo_fields.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_TWITTER
             save_changes = True
+        elif ballotpedia_image_exists:
+            object_with_photo_fields.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_BALLOTPEDIA
+            save_changes = True
         elif facebook_image_exists:
             object_with_photo_fields.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_FACEBOOK
+            save_changes = True
+        elif linkedin_image_exists:
+            object_with_photo_fields.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_LINKEDIN
+            save_changes = True
+        elif wikipedia_image_exists:
+            object_with_photo_fields.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_WIKIPEDIA
             save_changes = True
         elif vote_usa_image_exists:
             object_with_photo_fields.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_VOTE_USA
@@ -4826,6 +4870,16 @@ def organize_object_photo_fields_based_on_image_type_currently_active(
             object_with_photo_fields.we_vote_hosted_profile_uploaded_image_url_medium
         object_with_photo_fields.we_vote_hosted_profile_image_url_tiny = \
             object_with_photo_fields.we_vote_hosted_profile_uploaded_image_url_tiny
+        profile_image_default_updated = True
+        save_changes = True
+    elif ballotpedia_image_exists and \
+         object_with_photo_fields.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_BALLOTPEDIA:
+        object_with_photo_fields.we_vote_hosted_profile_image_url_large = \
+            object_with_photo_fields.we_vote_hosted_profile_ballotpedia_image_url_large
+        object_with_photo_fields.we_vote_hosted_profile_image_url_medium = \
+            object_with_photo_fields.we_vote_hosted_profile_ballotpedia_image_url_medium
+        object_with_photo_fields.we_vote_hosted_profile_image_url_tiny = \
+            object_with_photo_fields.we_vote_hosted_profile_ballotpedia_image_url_tiny
         profile_image_default_updated = True
         save_changes = True
     elif twitter_image_exists and \
@@ -4846,6 +4900,26 @@ def organize_object_photo_fields_based_on_image_type_currently_active(
             object_with_photo_fields.we_vote_hosted_profile_facebook_image_url_medium
         object_with_photo_fields.we_vote_hosted_profile_image_url_tiny = \
             object_with_photo_fields.we_vote_hosted_profile_facebook_image_url_tiny
+        profile_image_default_updated = True
+        save_changes = True
+    elif linkedin_image_exists and \
+         object_with_photo_fields.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_LINKEDIN:
+        object_with_photo_fields.we_vote_hosted_profile_image_url_large = \
+            object_with_photo_fields.we_vote_hosted_profile_linkedin_image_url_large
+        object_with_photo_fields.we_vote_hosted_profile_image_url_medium = \
+            object_with_photo_fields.we_vote_hosted_profile_linkedin_image_url_medium
+        object_with_photo_fields.we_vote_hosted_profile_image_url_tiny = \
+            object_with_photo_fields.we_vote_hosted_profile_linkedin_image_url_tiny
+        profile_image_default_updated = True
+        save_changes = True
+    elif wikipedia_image_exists and \
+         object_with_photo_fields.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_WIKIPEDIA:
+        object_with_photo_fields.we_vote_hosted_profile_image_url_large = \
+            object_with_photo_fields.we_vote_hosted_profile_wikipedia_image_url_large
+        object_with_photo_fields.we_vote_hosted_profile_image_url_medium = \
+            object_with_photo_fields.we_vote_hosted_profile_wikipedia_image_url_medium
+        object_with_photo_fields.we_vote_hosted_profile_image_url_tiny = \
+            object_with_photo_fields.we_vote_hosted_profile_wikipedia_image_url_tiny
         profile_image_default_updated = True
         save_changes = True
     elif vote_usa_image_exists and \

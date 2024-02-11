@@ -45,6 +45,7 @@
         <span style="color: darkgray">{{ politician.profile_image_type_currently_active }}</span>
     </label>
     <div class="col-sm-8">
+    {# UNKNOWN IMAGE #}
         <span style="float: left; padding: 8px 20px 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="UNKNOWN"
                 {% if politician.profile_image_type_currently_active == 'UNKNOWN' %} checked {% endif %}
@@ -55,7 +56,7 @@
             Unknown
         {% endif %}
         </span>
-        {# Uploaded photo #}
+    {# Uploaded photo #}
         <span style="float: left; padding: 8px 20px 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="UPLOADED"
                 {% if politician.profile_image_type_currently_active == 'UPLOADED' %} checked {% endif %}
@@ -71,7 +72,7 @@
             <input type="file" name="politician_photo_file" accept="image/*">
         {% endif %}
         </span>
-        {# Facebook photo #}
+    {# Facebook photo #}
         {% if politician.we_vote_hosted_profile_facebook_image_url_tiny %}
         <span style="float: left; padding: 8px 20px 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="FACEBOOK"
@@ -81,6 +82,7 @@
             Facebook
         </span>
         {% endif %}
+    {# TWITTER IMAGE #}
         {% if politician.we_vote_hosted_profile_twitter_image_url_tiny %}
         <span style="float: left; padding: 8px 20px 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="TWITTER"
@@ -90,6 +92,27 @@
             Twitter
         </span>
         {% endif %}
+    {# BALLOTPEDIA IMAGE #}
+        {% if politician.we_vote_hosted_profile_ballotpedia_image_url_tiny %}
+        <span style="float: left; padding: 8px 20px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="BALLOTPEDIA"
+                {% if politician.profile_image_type_currently_active == 'BALLOTPEDIA' %} checked {% endif %}
+                />
+            <img src='{{ politician.we_vote_hosted_profile_ballotpedia_image_url_tiny }}' />
+            Ballotpedia
+        </span>
+        {% endif %}
+    {# LINKEDIN IMAGE #}
+        {% if politician.we_vote_hosted_profile_linkedin_image_url_tiny %}
+        <span style="float: left; padding: 8px 20px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="LINKEDIN"
+                {% if politician.profile_image_type_currently_active == 'LINKEDIN' %} checked {% endif %}
+                />
+            <img src='{{ politician.we_vote_hosted_profile_linkedin_image_url_tiny }}' />
+            LinkedIn
+        </span>
+        {% endif %}
+    {# VOTE_USA IMAGE #}
         {% if politician.we_vote_hosted_profile_vote_usa_image_url_tiny %}
         <span style="float: left; padding: 8px 25px 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="VOTE_USA"
@@ -97,6 +120,16 @@
                 />
             <img src='{{ politician.we_vote_hosted_profile_vote_usa_image_url_tiny }}' />
             Vote USA
+        {% endif %}
+        </span>
+    {# WIKIPEDIA IMAGE #}
+        {% if politician.we_vote_hosted_profile_wikipedia_image_url_tiny %}
+        <span style="float: left; padding: 8px 25px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="WIKIPEDIA"
+                {% if politician.profile_image_type_currently_active == 'WIKIPEDIA' %} checked {% endif %}
+                />
+            <img src='{{ politician.we_vote_hosted_profile_wikipedia_image_url_tiny }}' />
+            Wikipedia
         {% endif %}
         </span>
     </div>

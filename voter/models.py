@@ -3155,7 +3155,7 @@ class Voter(AbstractBaseUser):
     we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
     # Which voter image is currently active?
     profile_image_type_currently_active = models.CharField(
-        max_length=10, choices=PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES, default=PROFILE_IMAGE_TYPE_UNKNOWN)
+        max_length=11, choices=PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES, default=PROFILE_IMAGE_TYPE_UNKNOWN)
     # Image for voter from Facebook
     we_vote_hosted_profile_facebook_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_facebook_image_url_medium = models.TextField(blank=True, null=True)
