@@ -60,8 +60,11 @@ def get_one_picture_from_facebook_graphapi(one_entity, request, remote_request_h
             # Create a record denoting that we have retrieved from Facebook for this candidate
             if is_candidate:
                 save_results_history = remote_request_history_manager.create_remote_request_history_entry(
-                    RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS, google_civic_election_id,
-                    we_vote_id, None, 1, "CANDIDATE_FACEBOOK_URL_IS_PLACEHOLDER_SILHOUETTE:" + photo_url)
+                    kind_of_action=RETRIEVE_POSSIBLE_FACEBOOK_PHOTOS,
+                    google_civic_election_id=google_civic_election_id,
+                    candidate_campaign_we_vote_id=we_vote_id,
+                    number_of_results=1,
+                    status="CANDIDATE_FACEBOOK_URL_IS_PLACEHOLDER_SILHOUETTE:" + str(photo_url))
         elif results['photo_url_found']:
             # Success!
             logger.info("Queried URL: " + facebook_url + " ==> " + photo_url)

@@ -5,7 +5,7 @@
 # See also WeVoteServer/import_export_twitter/controllers.py for routines that manage incoming twitter data
 from image.functions import analyze_remote_url
 from .models import GoogleSearchUserManager, GOOGLE_SEARCH_API_NAME, GOOGLE_SEARCH_API_VERSION, GOOGLE_SEARCH_API_KEY, \
-    GOOGLE_SEARCH_ENGINE_ID, BALLOTPEDIA_LOGO_URL, MAXIMUM_CHARACTERS_LENGTH, MAXIMUM_GOOGLE_SEARCH_USERS, URL_PATTERNS_TO_IGNORE
+    GOOGLE_SEARCH_ENGINE_ID, BALLOTPEDIA_LOGO_URL, MAXIMUM_CHARACTERS_LENGTH, URL_PATTERNS_TO_IGNORE
 from googleapiclient.discovery import build
 from image.controllers import IMAGE_SOURCE_BALLOTPEDIA, LINKEDIN, FACEBOOK, TWITTER, WIKIPEDIA
 from import_export_facebook.models import FacebookManager
@@ -133,6 +133,7 @@ def retrieve_possible_google_search_users(candidate, voter_device_id):
         'nickname':    sub(name_handling_regex, "", candidate.extract_nickname().lower()),
     }
 
+    candidate_last_name = candidate.extract_last_name()
     search_term = candidate.candidate_name
     or_terms = " candidate election office politician"
     if positive_value_exists(candidate.state_code):
@@ -144,13 +145,11 @@ def retrieve_possible_google_search_users(candidate, voter_device_id):
         search_results = google_api.cse().list(
             q=search_term,
             cx=GOOGLE_SEARCH_ENGINE_ID,
+            exactTerms=candidate_last_name,
             gl="countryUS",
-            lr="lang_en",
-            orTerms=or_terms,
+            # lr="lang_en",
+            # orTerms=or_terms,
             filter='1').execute()
-        # exactTerms
-        # start=11
-        # lr=lang_en
         google_search_users_list.extend(
             analyze_google_search_results(
                 search_results, search_term, candidate_name, candidate, voter_device_id))
@@ -161,9 +160,10 @@ def retrieve_possible_google_search_users(candidate, voter_device_id):
         search_results = google_api.cse().list(
             q=search_term,
             cx=GOOGLE_SEARCH_ENGINE_ID,
+            exactTerms=candidate_last_name,
             gl="countryUS",
-            lr="lang_en",
-            orTerms=or_terms,
+            # lr="lang_en",
+            # orTerms=or_terms,
             start=11,
             filter='1').execute()
         google_search_users_list.extend(
@@ -190,8 +190,9 @@ def retrieve_possible_google_search_users(candidate, voter_device_id):
             modified_search_results = google_api.cse().list(
                 q=modified_search_term,
                 cx=GOOGLE_SEARCH_ENGINE_ID,
+                exactTerms=candidate_last_name,
                 gl="countryUS",
-                lr="lang_en",
+                # lr="lang_en",
                 filter='1').execute()
             google_search_users_list.extend(
                 analyze_google_search_results(
@@ -206,14 +207,34 @@ def retrieve_possible_google_search_users(candidate, voter_device_id):
             modified_search_results_2 = google_api.cse().list(
                 q=modified_search_term_2,
                 cx=GOOGLE_SEARCH_ENGINE_ID,
+                exactTerms=candidate_last_name,
                 gl="countryUS",
-                lr="lang_en",
+                # lr="lang_en",
                 filter='1').execute()
             google_search_users_list.extend(
                 analyze_google_search_results(
                     modified_search_results_2, modified_search_term_2, candidate_name, candidate, voter_device_id))
         except Exception as e:
             status += "GOOGLE_SEARCH3_PAGE1_FAILED: " + str(e) + " "
+    # DALE 2024-02-11 This Twitter search block didn't perform as I had hoped
+    # # Try to find Twitter matches
+    # try:
+    #     twitter_search_term = search_term
+    #     # if positive_value_exists(candidate.state_code):
+    #     #     twitter_search_term += " " + convert_state_code_to_state_text(candidate.state_code)
+    #     twitter_search_results = google_api.cse().list(
+    #         q=twitter_search_term,
+    #         cx=GOOGLE_SEARCH_ENGINE_ID,
+    #         exactTerms=candidate_last_name,
+    #         gl="countryUS",
+    #         # lr="lang_en",
+    #         linkSite="twitter.com",
+    #         filter='1').execute()
+    #     google_search_users_list.extend(
+    #         analyze_google_search_results(
+    #             twitter_search_results, twitter_search_term, candidate_name, candidate, voter_device_id))
+    # except Exception as e:
+    #     status += "GOOGLE_SEARCH1_PAGE1_FAILED: " + str(e) + " "
 
     # remove duplicates
     for possible_user in google_search_users_list:
@@ -237,26 +258,34 @@ def retrieve_possible_google_search_users(candidate, voter_device_id):
 
     google_search_user_count = 0
     if success:
-        status += "RETRIEVE_POSSIBLE_GOOGLE_SEARCH_USERS-RETRIEVED_FROM_GOOGLE"
+        status += "RETRIEVE_POSSIBLE_GOOGLE_SEARCH_USERS-RETRIEVED_FROM_GOOGLE "
         for possibility_result in possible_google_search_users_list:
             save_google_search_user_results = google_search_user_manager.\
                 update_or_create_google_search_user_possibility(
-                    candidate.we_vote_id, possibility_result['google_json'], possibility_result['search_term'],
-                    possibility_result['likelihood_score'], possibility_result['facebook_json'],
-                    possibility_result['from_ballotpedia'], possibility_result['from_facebook'],
-                    possibility_result['from_linkedin'], possibility_result['from_twitter'],
-                    possibility_result['from_wikipedia'])
+                    candidate_we_vote_id=candidate.we_vote_id,
+                    google_json=possibility_result['google_json'],
+                    search_term=possibility_result['search_term'],
+                    likelihood_score=possibility_result['likelihood_score'],
+                    facebook_json=possibility_result['facebook_json'],
+                    from_ballotpedia=possibility_result['from_ballotpedia'],
+                    from_facebook=possibility_result['from_facebook'],
+                    from_linkedin=possibility_result['from_linkedin'],
+                    from_twitter=possibility_result['from_twitter'],
+                    from_wikipedia=possibility_result['from_wikipedia'])
             if save_google_search_user_results['success'] and \
                     save_google_search_user_results['google_search_user_created']:
                 google_search_user_count += 1
-                if google_search_user_count == MAXIMUM_GOOGLE_SEARCH_USERS:
-                    break
+                # if google_search_user_count == MAXIMUM_GOOGLE_SEARCH_USERS:
+                #     break
 
     # Create a record denoting that we have retrieved from Google for this candidate
     remote_request_history_manager = RemoteRequestHistoryManager()
     save_results_history = remote_request_history_manager.create_remote_request_history_entry(
-        RETRIEVE_POSSIBLE_GOOGLE_LINKS, candidate.google_civic_election_id,
-        candidate.we_vote_id, None, len(possible_google_search_users_list), status)
+        kind_of_action=RETRIEVE_POSSIBLE_GOOGLE_LINKS,
+        google_civic_election_id=candidate.google_civic_election_id,
+        candidate_campaign_we_vote_id=candidate.we_vote_id,
+        number_of_results=len(possible_google_search_users_list),
+        status=status)
 
     results = {
         'success':                  True,

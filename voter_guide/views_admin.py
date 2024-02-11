@@ -234,8 +234,8 @@ def create_possible_voter_guides_from_prior_elections_view(request):
                     voter_guides_suggested += 1
                     urls_already_stored.append(voter_guide_possibility_url)
                     history_results = remote_request_history_manager.create_remote_request_history_entry(
-                        SUGGESTED_VOTER_GUIDE_FROM_PRIOR,
-                        target_google_civic_election_id,
+                        kind_of_action=SUGGESTED_VOTER_GUIDE_FROM_PRIOR,
+                        google_civic_election_id=target_google_civic_election_id,
                         organization_we_vote_id=voter_guide.organization_we_vote_id,
                     )
                 if positive_value_exists(limit):
