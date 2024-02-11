@@ -22,6 +22,7 @@ MAXIMUM_CHARACTERS_LENGTH = 1024
 URL_PATTERNS_TO_IGNORE = [
     r"^https?://uk.linkedin.com",
     r"^https?://nz.linkedin.com",
+    r"^https?://www.linkedin.com/posts/",
     r"^https?://www.linkedin.com/pub/dir",
     r"^https?://www.facebook.com/events",
     r"^https?://twitter.com/\w+/status"

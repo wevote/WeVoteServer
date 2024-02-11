@@ -58,7 +58,7 @@
 {#                {% endif %}#}
 {#                <br />#}
                 {% if one_row.from_ballotpedia %}
-                    <input id="save_ballotpedia_{{ forloop.counter }}" type="button" value="Save Ballotpedia Link" onclick="document.getElementById('google_search_link_id').value = '{{ one_row.item_link }}';document.getElementById('candidate_edit').submit();" />
+                    <input id="save_ballotpedia_{{ forloop.counter }}" type="button" value="Save Ballotpedia Link" onclick="document.getElementById('google_search_link_id').value = '{{ one_row.item_link }}';document.getElementById('google_search_image_file_id').value = '{{ one_row.item_image }}';document.getElementById('candidate_edit').submit();" />
                     {% if candidate.ballotpedia_candidate_url %}
                         <span style="color: grey; font-size: .8em;">
                         <br/>
@@ -76,7 +76,7 @@
                         </span>
                     {% endif %}
                 {% elif one_row.from_linkedin %}
-                    <input id="save_linkedin_{{ forloop.counter }}" type="button" value="Save Linkedin Link" onclick="document.getElementById('google_search_link_id').value = '{{ one_row.item_link }}';document.getElementById('candidate_edit').submit();" />
+                    <input id="save_linkedin_{{ forloop.counter }}" type="button" value="Save Linkedin Link" onclick="document.getElementById('google_search_link_id').value = '{{ one_row.item_link }}';document.getElementById('google_search_image_file_id').value = '{{ one_row.item_image }}';document.getElementById('candidate_edit').submit();" />
                     {% if candidate.linkedin_url %}
                         <span style="color: grey; font-size: .8em;">
                         <br/>
@@ -94,7 +94,7 @@
                         </span>
                     {% endif %}
                 {% elif one_row.from_wikipedia %}
-                    <input id="save_wikipedia_{{ forloop.counter }}" type="button" value="Save Wikipedia Link" onclick="document.getElementById('google_search_link_id').value = '{{ one_row.item_link }}';document.getElementById('candidate_edit').submit();" />
+                    <input id="save_wikipedia_{{ forloop.counter }}" type="button" value="Save Wikipedia Link" onclick="document.getElementById('google_search_link_id').value = '{{ one_row.item_link }}';document.getElementById('google_search_image_file_id').value = '{{ one_row.item_image }}';document.getElementById('candidate_edit').submit();" />
                     {% if candidate.wikipedia_url %}
                         <span style="color: grey; font-size: .8em;">
                         <br/>

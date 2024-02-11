@@ -131,6 +131,7 @@ th, td {
         <span style="color: darkgray">{{ candidate.profile_image_type_currently_active }}</span>
     </label>
     <div class="col-sm-8">
+    {# UNKNOWN IMAGE #}
         <span style="float: left; padding: 8px 20px 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="UNKNOWN"
                 {% if candidate.profile_image_type_currently_active == 'UNKNOWN' %} checked {% endif %}
@@ -141,6 +142,7 @@ th, td {
             Unknown
         {% endif %}
         </span>
+    {# UPLOADED IMAGE #}
         <span style="float: left; padding: 8px 20px 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="UPLOADED"
                 {% if candidate.profile_image_type_currently_active == 'UPLOADED' %} checked {% endif %}
@@ -153,6 +155,7 @@ th, td {
             (add on politician)
         {% endif %}
         </span>
+    {# FACEBOOK IMAGE #}
         {% if candidate.we_vote_hosted_profile_facebook_image_url_tiny %}
         <span style="float: left; padding: 8px 20px 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="FACEBOOK"
@@ -162,6 +165,7 @@ th, td {
             Facebook
         </span>
         {% endif %}
+    {# TWITTER IMAGE #}
         {% if candidate.we_vote_hosted_profile_twitter_image_url_tiny %}
         <span style="float: left; padding: 8px 20px 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="TWITTER"
@@ -171,6 +175,27 @@ th, td {
             Twitter
         </span>
         {% endif %}
+    {# BALLOTPEDIA IMAGE #}
+        {% if candidate.we_vote_hosted_profile_ballotpedia_image_url_tiny %}
+        <span style="float: left; padding: 8px 25px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="BALLOTPEDIA"
+                {% if candidate.profile_image_type_currently_active == 'BALLOTPEDIA' %} checked {% endif %}
+                />
+            <img src='{{ candidate.we_vote_hosted_profile_ballotpedia_image_url_tiny }}' />
+            Ballotpedia
+        {% endif %}
+        </span>
+    {# LINKEDIN IMAGE #}
+        {% if candidate.we_vote_hosted_profile_linkedin_image_url_tiny %}
+        <span style="float: left; padding: 8px 25px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="LINKEDIN"
+                {% if candidate.profile_image_type_currently_active == 'LINKEDIN' %} checked {% endif %}
+                />
+            <img src='{{ candidate.we_vote_hosted_profile_linkedin_image_url_tiny }}' />
+            LinkedIn
+        {% endif %}
+        </span>
+    {# VOTE_USA IMAGE #}
         {% if candidate.we_vote_hosted_profile_vote_usa_image_url_tiny %}
         <span style="float: left; padding: 8px 25px 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="VOTE_USA"
@@ -178,6 +203,16 @@ th, td {
                 />
             <img src='{{ candidate.we_vote_hosted_profile_vote_usa_image_url_tiny }}' />
             Vote USA
+        {% endif %}
+        </span>
+    {# WIKIPEDIA IMAGE #}
+        {% if candidate.we_vote_hosted_profile_wikipedia_image_url_tiny %}
+        <span style="float: left; padding: 8px 25px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="WIKIPEDIA"
+                {% if candidate.profile_image_type_currently_active == 'WIKIPEDIA' %} checked {% endif %}
+                />
+            <img src='{{ candidate.we_vote_hosted_profile_wikipedia_image_url_tiny }}' />
+            Wikipedia
         {% endif %}
         </span>
     </div>
@@ -785,10 +820,10 @@ th, td {
         Candidate Analysis
     </label>
     <div class="col-sm-8">
-{#        <textarea name="analysis_comment"#}
-{#                  class="form-control animated"#}
-{#                  id="analysis_comment_id"#}
-{#                  placeholder="Note about candidate..."></textarea>#}
+        <textarea name="candidate_analysis_comment"
+                  class="form-control animated"
+                  id="candidate_analysis_comment_id"
+                  placeholder="Note about candidate..."></textarea>
         <input type="checkbox" name="candidate_analysis_done" id="candidate_analysis_done_id" value="1"
                 {% if candidate.candidate_analysis_done %}checked{% endif %} />
         <label for="candidate_analysis_done_id" style="font-weight: normal !important;">Candidate Analysis Complete{% if candidate.candidate_analysis_done %}. <span style="color: darkgray">One of our team has researched this candidate and could not find more information.</span>{% endif %}</label>
@@ -805,6 +840,12 @@ th, td {
 {% endif %}
 <input name="submit_text" type="submit" value="{% if candidate %}Update Candidate{% else %}Save New Candidate{% endif %}" /></p>
 </form>
+{% if change_log_list %}
+    <br />
+<div class="form-group">
+    {% include "candidate/change_log_list.html" with change_log_list=change_log_list %}
+</div>
+{% endif %}
 
 <br />
 {% if candidate %}

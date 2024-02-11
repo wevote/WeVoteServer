@@ -121,39 +121,66 @@ CANDIDATE_UNIQUE_ATTRIBUTES_TO_BE_CLEARED = [
     'seo_friendly_path',
 ]
 
+KIND_OF_LOG_ENTRY_ANALYSIS_COMMENT = 'ANALYSIS_COMMENT'
 KIND_OF_LOG_ENTRY_HANDLE_NOT_FOUND_BY_TWITTER = 'HANDLE_NOT_FOUND_BY_TWITTER'
 KIND_OF_LOG_ENTRY_DATA_UPDATED_FROM_TWITTER = 'DATA_UPDATED_FROM_TWITTER'
 
+PROFILE_IMAGE_TYPE_BALLOTPEDIA = 'BALLOTPEDIA'
 PROFILE_IMAGE_TYPE_FACEBOOK = 'FACEBOOK'
+PROFILE_IMAGE_TYPE_LINKEDIN = 'LINKEDIN'
 PROFILE_IMAGE_TYPE_TWITTER = 'TWITTER'
 PROFILE_IMAGE_TYPE_UNKNOWN = 'UNKNOWN'
 PROFILE_IMAGE_TYPE_UPLOADED = 'UPLOADED'
 PROFILE_IMAGE_TYPE_VOTE_USA = 'VOTE_USA'
+PROFILE_IMAGE_TYPE_WIKIPEDIA = 'WIKIPEDIA'
 PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES = (
+    (PROFILE_IMAGE_TYPE_BALLOTPEDIA, 'Ballotpedia'),
     (PROFILE_IMAGE_TYPE_FACEBOOK, 'Facebook'),
+    (PROFILE_IMAGE_TYPE_LINKEDIN, 'LinkedIn'),
     (PROFILE_IMAGE_TYPE_TWITTER, 'Twitter'),
     (PROFILE_IMAGE_TYPE_UNKNOWN, 'Unknown'),
     (PROFILE_IMAGE_TYPE_UPLOADED, 'Uploaded'),
     (PROFILE_IMAGE_TYPE_VOTE_USA, 'Vote-USA'),
+    (PROFILE_IMAGE_TYPE_WIKIPEDIA, 'Wikipedia'),
 )
 
 
 # KIND_OF_LOG_ENTRY_HANDLE_NOT_FOUND_BY_TWITTER = 'HANDLE_NOT_FOUND_BY_TWITTER'
 # KIND_OF_LOG_ENTRY_DATA_UPDATED_FROM_TWITTER = 'DATA_UPDATED_FROM_TWITTER'
-class CandidateLogEntry(models.Model):  # CandidateChangeLog would be another name
+class CandidateChangeLog(models.Model):  # Formerly called CandidateLogEntry
     """
     We learn something about a candidate field. For example, Twitter tells us it cannot find candidate_twitter_handle.
     """
     batch_process_id = models.PositiveIntegerField(db_index=True, null=True, unique=False)
     candidate_we_vote_id = models.CharField(max_length=255, null=False, unique=False)
-    candidate_field_name = models.CharField(max_length=255, null=True, unique=False)
-    date_time = models.DateTimeField(null=False, auto_now_add=True)
+    changed_by_name = models.CharField(max_length=255, default=None, null=True)
+    changed_by_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True)
+    change_description = models.TextField(null=True, blank=True)
+    log_datetime = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
     google_civic_election_id = models.PositiveIntegerField(db_index=True, null=True, unique=False)
     is_from_twitter = models.BooleanField(db_index=True, default=False, null=True)  # Error retrieving from Twitter
     kind_of_log_entry = models.CharField(db_index=True, max_length=50, default=None, null=True)
-    log_entry_deleted = models.BooleanField(db_index=True, default=False)
-    log_entry_message = models.TextField(null=True)
     state_code = models.CharField(db_index=True, max_length=2, null=True)
+
+    def change_description_augmented(self):
+        # Issues with smaller integers need to be listed last.
+        # If not, 'wv02issue76' gets found when replacing 'wv02issue7' with the name of the issue.
+        # from issue.models import ACTIVE_ISSUES_DICTIONARY
+        # issue_we_vote_id_to_name_dictionary = ACTIVE_ISSUES_DICTIONARY
+        if self.change_description:
+            change_description_augmented = self.change_description
+            # if 'issue' in change_description_augmented:
+            #     for we_vote_id, issue_name in issue_we_vote_id_to_name_dictionary.items():
+            #         change_description_augmented = change_description_augmented.replace(
+            #             we_vote_id,
+            #             "{issue_name}".format(issue_name=issue_name))
+            # change_description_augmented = change_description_augmented\
+            #     .replace("ADD", "<span style=\'color: #A9A9A9;\'>ADDED</span><br />")
+            # change_description_augmented = change_description_augmented\
+            #     .replace("REMOVE", "<span style=\'color: #A9A9A9;\'>REMOVED</span><br />")
+            return change_description_augmented
+        else:
+            return ''
 
 
 class CandidateListManager(models.Manager):
@@ -2544,12 +2571,20 @@ class CandidateCampaign(models.Model):
 
     # Which candidate image is currently active?
     profile_image_type_currently_active = models.CharField(
-        max_length=10, choices=PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES, default=PROFILE_IMAGE_TYPE_UNKNOWN)
+        max_length=11, choices=PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES, default=PROFILE_IMAGE_TYPE_UNKNOWN)
     profile_image_background_color = models.CharField(blank=True, null=True, max_length=7)
+    # Image for candidate from Ballotpedia, cached on We Vote's servers. See also ballotpedia_profile_image_url_https.
+    we_vote_hosted_profile_ballotpedia_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_ballotpedia_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_ballotpedia_image_url_tiny = models.TextField(blank=True, null=True)
     # Image for candidate from Facebook, cached on We Vote's servers. See also facebook_profile_image_url_https.
     we_vote_hosted_profile_facebook_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_facebook_image_url_medium = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_facebook_image_url_tiny = models.TextField(blank=True, null=True)
+    # Image for candidate from LinkedIn, cached on We Vote's servers. See also linkedin_profile_image_url_https.
+    we_vote_hosted_profile_linkedin_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_linkedin_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_linkedin_image_url_tiny = models.TextField(blank=True, null=True)
     # Image for candidate from Twitter, cached on We Vote's servers. See local master twitter_profile_image_url_https.
     we_vote_hosted_profile_twitter_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_twitter_image_url_medium = models.TextField(blank=True, null=True)
@@ -2562,6 +2597,10 @@ class CandidateCampaign(models.Model):
     we_vote_hosted_profile_vote_usa_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_vote_usa_image_url_medium = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_vote_usa_image_url_tiny = models.TextField(blank=True, null=True)
+    # Image for candidate from Wikipedia, cached on We Vote's servers. See also wikipedia_profile_image_url_https.
+    we_vote_hosted_profile_wikipedia_image_url_large = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_wikipedia_image_url_medium = models.TextField(blank=True, null=True)
+    we_vote_hosted_profile_wikipedia_image_url_tiny = models.TextField(blank=True, null=True)
     # Image we are using as the profile photo (could be sourced from Twitter, Facebook, etc.)
     we_vote_hosted_profile_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_image_url_medium = models.TextField(blank=True, null=True)
@@ -2581,10 +2620,14 @@ class CandidateCampaign(models.Model):
     wikipedia_page_title = models.CharField(
         verbose_name="Page title on Wikipedia", max_length=255, null=True, blank=True)
     wikipedia_photo_url = models.TextField(
-        verbose_name='url of wikipedia logo', blank=True, null=True)
+        verbose_name='url of remote wikipedia profile photo', blank=True, null=True)
+    wikipedia_profile_image_url_https = models.TextField(
+        verbose_name='locally cached candidate profile image from wikipedia', blank=True, null=True)
     wikipedia_url = models.TextField(null=True)
     linkedin_url = models.TextField(null=True, blank=True)
-    linkedin_photo_url = models.TextField(verbose_name='url of linkedin logo', blank=True, null=True)
+    linkedin_photo_url = models.TextField(verbose_name='url of remote linkedin profile photo', blank=True, null=True)
+    linkedin_profile_image_url_https = models.TextField(
+        verbose_name='locally cached candidate profile image from linkedin', blank=True, null=True)
 
     # other_source_url is the location (ex/ http://mywebsite.com/candidate1.html) where we find
     # the other_source_photo_url OR the original url of the photo before we store it locally
@@ -2614,7 +2657,9 @@ class CandidateCampaign(models.Model):
     # Equivalent to Politician
     ballotpedia_person_id = models.PositiveIntegerField(verbose_name="ballotpedia integer id", null=True, blank=True)
     ballotpedia_photo_url = models.TextField(
-        verbose_name='url of ballotpedia logo', blank=True, null=True)
+        verbose_name='url of remote ballotpedia profile photo', blank=True, null=True)
+    ballotpedia_profile_image_url_https = models.TextField(
+        verbose_name='locally cached profile image from ballotpedia', blank=True, null=True)
     # Equivalent to Contest Office
     ballotpedia_race_id = models.PositiveIntegerField(verbose_name="ballotpedia race integer id", null=True, blank=True)
 
@@ -4344,38 +4389,39 @@ class CandidateManager(models.Manager):
 
         return candidate_object
 
+    @staticmethod
     def create_candidate_log_entry(
-            self,
             batch_process_id=None,
-            candidate_field_name=None,
+            change_description=None,
+            changed_by_name=None,
+            changed_by_voter_we_vote_id=None,
             candidate_we_vote_id=None,
             google_civic_election_id=None,
             is_from_twitter=None,
             kind_of_log_entry=None,
-            log_entry_message=None,
             state_code=None,
     ):
         """
-        Create CandidateLogEntry data
+        Create CandidateChangeLog data
         """
         success = True
-        status = " "
+        status = ""
         candidate_log_entry_saved = False
         candidate_log_entry = None
         missing_required_variable = False
 
-        if not is_from_twitter:
-            missing_required_variable = True
-            status += 'MISSING_IS_FROM_SOURCE '
-        if not kind_of_log_entry:
-            missing_required_variable = True
-            status += 'MISSING_KIND_OF_LOG_ENTRY '
+        # if not is_from_twitter:
+        #     missing_required_variable = True
+        #     status += 'MISSING_IS_FROM_SOURCE '
+        # if not kind_of_log_entry:
+        #     missing_required_variable = True
+        #     status += 'MISSING_KIND_OF_LOG_ENTRY '
         if not candidate_we_vote_id:
             missing_required_variable = True
             status += 'MISSING_CANDIDATE_WE_VOTE_ID '
-        if not state_code:
-            missing_required_variable = True
-            status += 'MISSING_STATE_CODE '
+        # if not state_code:
+        #     missing_required_variable = True
+        #     status += 'MISSING_STATE_CODE '
 
         if missing_required_variable:
             results = {
@@ -4387,14 +4433,15 @@ class CandidateManager(models.Manager):
             return results
 
         try:
-            candidate_log_entry = CandidateLogEntry.objects.using('analytics').create(
+            candidate_log_entry = CandidateChangeLog.objects.using('analytics').create(
                 batch_process_id=batch_process_id,
-                candidate_field_name=candidate_field_name,
+                change_description=change_description,
+                changed_by_name=changed_by_name,
+                changed_by_voter_we_vote_id=changed_by_voter_we_vote_id,
                 candidate_we_vote_id=candidate_we_vote_id,
                 google_civic_election_id=google_civic_election_id,
                 is_from_twitter=is_from_twitter,
                 kind_of_log_entry=kind_of_log_entry,
-                log_entry_message=log_entry_message,
                 state_code=state_code,
             )
             success = True

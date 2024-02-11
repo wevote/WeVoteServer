@@ -1,4 +1,4 @@
-{# templates/organization/change_log_list.html #}
+{# templates/candidate/change_log_list.html #}
 
 <table class="table">
     <thead>
@@ -11,9 +11,6 @@
     <tr>
         <td>
             {{ change_log_entry.change_description_augmented|safe }}
-            {% if change_log_entry.log_entry_message %}
-                {{ change_log_entry.log_entry_message }}
-            {% endif %}
         </td>
         <td>
             {% if change_log_entry.changed_by_name %}

@@ -47,7 +47,9 @@ from voter.controllers import delete_all_voter_information_permanently, \
 from voter.controllers_contacts import delete_all_voter_contact_emails_for_voter, save_google_contacts, \
     voter_contact_list_retrieve_for_api
 from voter.models import BALLOT_ADDRESS, fetch_voter_we_vote_id_from_voter_device_link, \
-    PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, PROFILE_IMAGE_TYPE_UPLOADED, \
+    PROFILE_IMAGE_TYPE_FACEBOOK, \
+    PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
+    PROFILE_IMAGE_TYPE_UPLOADED, \
     VoterAddressManager, VoterDeviceLink, VoterDeviceLinkManager, VoterManager, Voter, \
     voter_has_authority
 from voter_guide.controllers import voter_follow_all_organizations_followed_by_organization_for_api

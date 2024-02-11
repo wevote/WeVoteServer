@@ -30,8 +30,10 @@ from wevote_functions.functions import add_period_to_middle_name_initial, add_pe
     extract_twitter_handle_from_text_string, extract_website_from_url, \
     remove_period_from_middle_name_initial, remove_period_from_name_prefix_and_suffix
 from .models import CandidateListManager, CandidateCampaign, CandidateManager, \
-    CANDIDATE_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, CANDIDATE_UNIQUE_IDENTIFIERS, PROFILE_IMAGE_TYPE_FACEBOOK, \
-    PROFILE_IMAGE_TYPE_UNKNOWN, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_VOTE_USA
+    CANDIDATE_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, CANDIDATE_UNIQUE_IDENTIFIERS, \
+    PROFILE_IMAGE_TYPE_BALLOTPEDIA, PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_LINKEDIN, \
+    PROFILE_IMAGE_TYPE_TWITTER, \
+    PROFILE_IMAGE_TYPE_UNKNOWN, PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_VOTE_USA, PROFILE_IMAGE_TYPE_WIKIPEDIA
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -2529,18 +2531,34 @@ def save_image_to_candidate_table(candidate, image_url, source_link, url_is_brok
     if not positive_value_exists(kind_of_source_website):
         kind_of_source_website = extract_website_from_url(source_link)
     if IMAGE_SOURCE_BALLOTPEDIA in kind_of_source_website:
-        # NOT FULLY UPDATED TO WORK
         cache_results = cache_master_and_resized_image(
             candidate_id=candidate.id,
             candidate_we_vote_id=candidate.we_vote_id,
             ballotpedia_profile_image_url=image_url,
             image_source=IMAGE_SOURCE_BALLOTPEDIA)
         cached_ballotpedia_profile_image_url_https = cache_results['cached_ballotpedia_image_url_https']
-        candidate.ballotpedia_photo_url = cached_ballotpedia_profile_image_url_https
+        candidate.ballotpedia_photo_url = image_url
+        candidate.ballotpedia_profile_image_url_https = cached_ballotpedia_profile_image_url_https
         candidate.ballotpedia_page_title = source_link
-
+        if positive_value_exists(candidate.ballotpedia_profile_image_url_https):
+            # Store the We Vote cached URL
+            candidate.we_vote_hosted_profile_ballotpedia_image_url_large = \
+                cache_results['we_vote_hosted_profile_image_url_large']
+            candidate.we_vote_hosted_profile_ballotpedia_image_url_medium = \
+                cache_results['we_vote_hosted_profile_image_url_medium']
+            candidate.we_vote_hosted_profile_ballotpedia_image_url_tiny = \
+                cache_results['we_vote_hosted_profile_image_url_tiny']
+            # Update the active image
+            if candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
+                candidate.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_BALLOTPEDIA
+            if candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_BALLOTPEDIA:
+                candidate.we_vote_hosted_profile_image_url_large = \
+                    cache_results['we_vote_hosted_profile_image_url_large']
+                candidate.we_vote_hosted_profile_image_url_medium = \
+                    cache_results['we_vote_hosted_profile_image_url_medium']
+                candidate.we_vote_hosted_profile_image_url_tiny = \
+                    cache_results['we_vote_hosted_profile_image_url_tiny']
     elif LINKEDIN in kind_of_source_website:
-        # NOT FULLY UPDATED TO WORK
         cache_results = cache_master_and_resized_image(
             candidate_id=candidate.id,
             candidate_we_vote_id=candidate.we_vote_id,
@@ -2548,18 +2566,55 @@ def save_image_to_candidate_table(candidate, image_url, source_link, url_is_brok
             image_source=LINKEDIN)
         cached_linkedin_profile_image_url_https = cache_results['cached_linkedin_image_url_https']
         candidate.linkedin_url = source_link
-        candidate.linkedin_photo_url = cached_linkedin_profile_image_url_https
+        candidate.linkedin_photo_url = image_url
+        candidate.linkedin_profile_image_url_https = cached_linkedin_profile_image_url_https
+        if positive_value_exists(candidate.linkedin_profile_image_url_https):
+            # Store the We Vote cached URL
+            candidate.we_vote_hosted_profile_linkedin_image_url_large = \
+                cache_results['we_vote_hosted_profile_image_url_large']
+            candidate.we_vote_hosted_profile_linkedin_image_url_medium = \
+                cache_results['we_vote_hosted_profile_image_url_medium']
+            candidate.we_vote_hosted_profile_linkedin_image_url_tiny = \
+                cache_results['we_vote_hosted_profile_image_url_tiny']
+            # Update the active image
+            if candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
+                candidate.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_LINKEDIN
+            if candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_LINKEDIN:
+                candidate.we_vote_hosted_profile_image_url_large = \
+                    cache_results['we_vote_hosted_profile_image_url_large']
+                candidate.we_vote_hosted_profile_image_url_medium = \
+                    cache_results['we_vote_hosted_profile_image_url_medium']
+                candidate.we_vote_hosted_profile_image_url_tiny = \
+                    cache_results['we_vote_hosted_profile_image_url_tiny']
 
     elif WIKIPEDIA in kind_of_source_website:
-        # NOT FULLY UPDATED TO WORK
         cache_results = cache_master_and_resized_image(
             candidate_id=candidate.id,
             candidate_we_vote_id=candidate.we_vote_id,
             wikipedia_profile_image_url=image_url,
             image_source=WIKIPEDIA)
         cached_wikipedia_profile_image_url_https = cache_results['cached_wikipedia_image_url_https']
-        candidate.wikipedia_photo_url = cached_wikipedia_profile_image_url_https
+        candidate.wikipedia_photo_url = image_url
+        candidate.wikipedia_profile_image_url_https = cached_wikipedia_profile_image_url_https
         candidate.wikipedia_page_title = source_link
+        if positive_value_exists(candidate.wikipedia_profile_image_url_https):
+            # Store the We Vote cached URL
+            candidate.we_vote_hosted_profile_wikipedia_image_url_large = \
+                cache_results['we_vote_hosted_profile_image_url_large']
+            candidate.we_vote_hosted_profile_wikipedia_image_url_medium = \
+                cache_results['we_vote_hosted_profile_image_url_medium']
+            candidate.we_vote_hosted_profile_wikipedia_image_url_tiny = \
+                cache_results['we_vote_hosted_profile_image_url_tiny']
+            # Update the active image
+            if candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
+                candidate.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_WIKIPEDIA
+            if candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_WIKIPEDIA:
+                candidate.we_vote_hosted_profile_image_url_large = \
+                    cache_results['we_vote_hosted_profile_image_url_large']
+                candidate.we_vote_hosted_profile_image_url_medium = \
+                    cache_results['we_vote_hosted_profile_image_url_medium']
+                candidate.we_vote_hosted_profile_image_url_tiny = \
+                    cache_results['we_vote_hosted_profile_image_url_tiny']
 
     elif TWITTER in kind_of_source_website:
         # NOT FULLY UPDATED TO WORK
@@ -2578,23 +2633,24 @@ def save_image_to_candidate_table(candidate, image_url, source_link, url_is_brok
             cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
             candidate.facebook_url = source_link
             candidate.facebook_profile_image_url_https = cached_facebook_profile_image_url_https
-            # Store the We Vote cached URL
-            candidate.we_vote_hosted_profile_facebook_image_url_large = \
-                cache_results['we_vote_hosted_profile_image_url_large']
-            candidate.we_vote_hosted_profile_facebook_image_url_medium = \
-                cache_results['we_vote_hosted_profile_image_url_medium']
-            candidate.we_vote_hosted_profile_facebook_image_url_tiny = \
-                cache_results['we_vote_hosted_profile_image_url_tiny']
-            # Update the active image
-            if candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
-                candidate.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_FACEBOOK
-            if candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_FACEBOOK:
-                candidate.we_vote_hosted_profile_image_url_large = \
+            if positive_value_exists(candidate.facebook_profile_image_url_https):
+                # Store the We Vote cached URL
+                candidate.we_vote_hosted_profile_facebook_image_url_large = \
                     cache_results['we_vote_hosted_profile_image_url_large']
-                candidate.we_vote_hosted_profile_image_url_medium = \
+                candidate.we_vote_hosted_profile_facebook_image_url_medium = \
                     cache_results['we_vote_hosted_profile_image_url_medium']
-                candidate.we_vote_hosted_profile_image_url_tiny = \
+                candidate.we_vote_hosted_profile_facebook_image_url_tiny = \
                     cache_results['we_vote_hosted_profile_image_url_tiny']
+                # Update the active image
+                if candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
+                    candidate.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_FACEBOOK
+                if candidate.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_FACEBOOK:
+                    candidate.we_vote_hosted_profile_image_url_large = \
+                        cache_results['we_vote_hosted_profile_image_url_large']
+                    candidate.we_vote_hosted_profile_image_url_medium = \
+                        cache_results['we_vote_hosted_profile_image_url_medium']
+                    candidate.we_vote_hosted_profile_image_url_tiny = \
+                        cache_results['we_vote_hosted_profile_image_url_tiny']
         else:
             candidate.facebook_profile_image_url_https = None
 
@@ -3292,12 +3348,18 @@ def update_candidate_details_from_politician(candidate=None, politician=None):
                 object1=politician,
                 object2=candidate,
                 object1_field_name_list=[
+                    'ballotpedia_photo_url',
+                    'ballotpedia_profile_image_url_https',
                     'instagram_followers_count',
                     'instagram_handle',
+                    'linkedin_photo_url',
+                    'linkedin_profile_image_url_https',
                     'linkedin_url',
                     'photo_url_from_vote_usa',
                     'vote_usa_profile_image_url_https',
+                    'wikipedia_photo_url',
                     'wikipedia_url',
+                    'wikipedia_profile_image_url_https',
                     'youtube_url',
                 ],
                 only_change_object2_field_if_incoming_value=True,
@@ -3506,9 +3568,15 @@ def update_candidate_details_from_politician(candidate=None, politician=None):
                 object1=politician,
                 object2=candidate,
                 object1_field_name_list=[
+                    'we_vote_hosted_profile_ballotpedia_image_url_large',
+                    'we_vote_hosted_profile_ballotpedia_image_url_medium',
+                    'we_vote_hosted_profile_ballotpedia_image_url_tiny',
                     'we_vote_hosted_profile_facebook_image_url_large',
                     'we_vote_hosted_profile_facebook_image_url_medium',
                     'we_vote_hosted_profile_facebook_image_url_tiny',
+                    'we_vote_hosted_profile_linkedin_image_url_large',
+                    'we_vote_hosted_profile_linkedin_image_url_medium',
+                    'we_vote_hosted_profile_linkedin_image_url_tiny',
                     'we_vote_hosted_profile_twitter_image_url_large',
                     'we_vote_hosted_profile_twitter_image_url_medium',
                     'we_vote_hosted_profile_twitter_image_url_tiny',
@@ -3518,6 +3586,9 @@ def update_candidate_details_from_politician(candidate=None, politician=None):
                     'we_vote_hosted_profile_vote_usa_image_url_large',
                     'we_vote_hosted_profile_vote_usa_image_url_medium',
                     'we_vote_hosted_profile_vote_usa_image_url_tiny',
+                    'we_vote_hosted_profile_wikipedia_image_url_large',
+                    'we_vote_hosted_profile_wikipedia_image_url_medium',
+                    'we_vote_hosted_profile_wikipedia_image_url_tiny',
                 ],
                 only_change_object2_field_if_incoming_value=True,
                 only_change_object2_field_if_no_existing_value=True)

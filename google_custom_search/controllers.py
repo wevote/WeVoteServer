@@ -134,15 +134,43 @@ def retrieve_possible_google_search_users(candidate, voter_device_id):
     }
 
     search_term = candidate.candidate_name
-    google_api = build(GOOGLE_SEARCH_API_NAME, GOOGLE_SEARCH_API_VERSION,
-                       developerKey=GOOGLE_SEARCH_API_KEY)
+    or_terms = " candidate election office politician"
+    if positive_value_exists(candidate.state_code):
+        or_terms += " " + convert_state_code_to_state_text(candidate.state_code)
+    if positive_value_exists(candidate.contest_office_name):
+        or_terms += " " + candidate.contest_office_name
+    google_api = build(GOOGLE_SEARCH_API_NAME, GOOGLE_SEARCH_API_VERSION, developerKey=GOOGLE_SEARCH_API_KEY)
     try:
-        search_results = google_api.cse().list(q=search_term, cx=GOOGLE_SEARCH_ENGINE_ID, gl="countryUS",
-                                               filter='1').execute()
-        google_search_users_list.extend(analyze_google_search_results(search_results, search_term, candidate_name,
-                                                                      candidate, voter_device_id))
+        search_results = google_api.cse().list(
+            q=search_term,
+            cx=GOOGLE_SEARCH_ENGINE_ID,
+            gl="countryUS",
+            lr="lang_en",
+            orTerms=or_terms,
+            filter='1').execute()
+        # exactTerms
+        # start=11
+        # lr=lang_en
+        google_search_users_list.extend(
+            analyze_google_search_results(
+                search_results, search_term, candidate_name, candidate, voter_device_id))
     except Exception as e:
-        pass
+        status += "GOOGLE_SEARCH1_PAGE1_FAILED: " + str(e) + " "
+    # PAGE 2
+    try:
+        search_results = google_api.cse().list(
+            q=search_term,
+            cx=GOOGLE_SEARCH_ENGINE_ID,
+            gl="countryUS",
+            lr="lang_en",
+            orTerms=or_terms,
+            start=11,
+            filter='1').execute()
+        google_search_users_list.extend(
+            analyze_google_search_results(
+                search_results, search_term, candidate_name, candidate, voter_device_id))
+    except Exception as e:
+        status += "GOOGLE_SEARCH1_PAGE2_FAILED: " + str(e) + " "
 
     # Also include search results omitting any single-letter initials and periods in name.
     # Example: "A." is ignored while "A.J." becomes "AJ"
@@ -159,25 +187,33 @@ def retrieve_possible_google_search_users(candidate, voter_device_id):
     modified_search_term += modified_search_term_base
     if search_term != modified_search_term:
         try:
-            modified_search_results = google_api.cse().list(q=modified_search_term, cx=GOOGLE_SEARCH_ENGINE_ID,
-                                                            gl="countryUS", filter='1').execute()
-            google_search_users_list.extend(analyze_google_search_results(modified_search_results,
-                                                                          modified_search_term, candidate_name,
-                                                                          candidate, voter_device_id))
+            modified_search_results = google_api.cse().list(
+                q=modified_search_term,
+                cx=GOOGLE_SEARCH_ENGINE_ID,
+                gl="countryUS",
+                lr="lang_en",
+                filter='1').execute()
+            google_search_users_list.extend(
+                analyze_google_search_results(
+                    modified_search_results, modified_search_term, candidate_name, candidate, voter_device_id))
         except Exception as e:
-            pass
+            status += "GOOGLE_SEARCH2_PAGE1_FAILED: " + str(e) + " "
 
     # If nickname exists, try searching with nickname instead of first name
     if len(candidate_name['nickname']):
         modified_search_term_2 = candidate_name['nickname'] + " " + modified_search_term_base
         try:
-            modified_search_results_2 = google_api.cse().list(q=modified_search_term_2, cx=GOOGLE_SEARCH_ENGINE_ID,
-                                                              gl="countryUS", filter='1').execute()
-            google_search_users_list.extend(analyze_google_search_results(modified_search_results_2,
-                                                                          modified_search_term_2, candidate_name,
-                                                                          candidate, voter_device_id))
+            modified_search_results_2 = google_api.cse().list(
+                q=modified_search_term_2,
+                cx=GOOGLE_SEARCH_ENGINE_ID,
+                gl="countryUS",
+                lr="lang_en",
+                filter='1').execute()
+            google_search_users_list.extend(
+                analyze_google_search_results(
+                    modified_search_results_2, modified_search_term_2, candidate_name, candidate, voter_device_id))
         except Exception as e:
-            pass
+            status += "GOOGLE_SEARCH3_PAGE1_FAILED: " + str(e) + " "
 
     # remove duplicates
     for possible_user in google_search_users_list:
@@ -230,6 +266,7 @@ def retrieve_possible_google_search_users(candidate, voter_device_id):
 
     return results
 
+
 def should_ignore_google_json(google_json):
     '''
     Tests if the google_json object should have a likelihood score of 0 and therefore be ignored
@@ -237,8 +274,13 @@ def should_ignore_google_json(google_json):
     '''
     return any((pattern.match(google_json['item_link']) for pattern in URL_PATTERNS_TO_IGNORE))
 
-def analyze_google_search_results(search_results, search_term, candidate_name,
-                                  candidate, voter_device_id):
+
+def analyze_google_search_results(
+        search_results,
+        search_term,
+        candidate_name,
+        candidate,
+        voter_device_id):
     total_search_results = 0
     state_code = candidate.state_code
     state_full_name = convert_state_code_to_state_text(state_code)
@@ -271,7 +313,8 @@ def analyze_google_search_results(search_results, search_term, candidate_name,
                     continue
 
             # if item_image does not exist and this link is not from ballotpedia then skip this
-            if not positive_value_exists(google_json['item_image']) and IMAGE_SOURCE_BALLOTPEDIA not in google_json['item_link']:
+            if not positive_value_exists(google_json['item_image']) \
+                    and IMAGE_SOURCE_BALLOTPEDIA not in google_json['item_link']:
                 continue
             elif BALLOTPEDIA_LOGO_URL in google_json['item_image']:
                 google_json['item_image'] = ""
@@ -323,13 +366,23 @@ def analyze_google_search_results(search_results, search_term, candidate_name,
                 likelihood_score += 20
             if LINKEDIN in google_json['item_link']:
                 from_linkedin = True
-                likelihood_score += 20
+                if '/posts/' in google_json['item_link']:
+                    likelihood_score -= 100
+                else:
+                    likelihood_score += 20
             if FACEBOOK in google_json['item_link']:
                 from_facebook = True
-                likelihood_score += 20
+                if '/posts/' in google_json['item_link'] or '/photos/' in google_json['item_link']:
+                    # See also analyze_facebook_search_results. Usually that processes entry and code never gets here.
+                    likelihood_score -= 100
+                else:
+                    likelihood_score += 20
             if TWITTER in google_json['item_link']:
                 from_twitter = True
-                likelihood_score += 20
+                if '/status/' in google_json['item_link']:
+                    likelihood_score -= 100
+                else:
+                    likelihood_score += 20
             if WIKIPEDIA in google_json['item_link']:
                 from_wikipedia = True
                 likelihood_score += 20
@@ -445,9 +498,9 @@ def retrieve_possible_wikipedia_page(search_term):
         wikipedia_page = wikipedia_auto_suggest_results['wikipedia_page']
 
     if page_found:
-        status += "RETRIEVED_CANDIDATE_WIKIPEDIA_RESULTS"
+        status += "RETRIEVED_CANDIDATE_WIKIPEDIA_RESULTS "
     else:
-        status += "RETRIEVE_CANDIDATE_WIKIPEDIA_RESULTS_FALIED"
+        status += "RETRIEVE_CANDIDATE_WIKIPEDIA_RESULTS_FAILED "
 
     results = {
         'status':                  status,
@@ -572,6 +625,11 @@ def analyze_facebook_search_results(google_json, search_term, candidate_name,
     likelihood_score = 20
     state_code = candidate.state_code
     state_full_name = convert_state_code_to_state_text(state_code)
+
+    if '/posts/' in google_json['item_link'] \
+            or '/photos/' in google_json['item_link'] \
+            or '/photo.php' in google_json['item_link']:
+        likelihood_score -= 100
 
     facebook_user_manager = FacebookManager()
     facebook_user_name = extract_facebook_username_from_text_string(google_json['item_link'])
