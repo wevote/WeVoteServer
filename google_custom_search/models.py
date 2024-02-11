@@ -162,7 +162,7 @@ class GoogleSearchUserManager(models.Manager):
             success = True
 
         except Exception as e:
-            status += "GOOGLE_SEARCH_USER_POSSIBILITY_NOT_CREATED " + str(e) + " "
+            status += "GOOGLE_SEARCH_USER_POSSIBILITY_NOT_CREATED: " + str(e) + " "
             success = False
 
         results = {
@@ -176,6 +176,7 @@ class GoogleSearchUserManager(models.Manager):
     @staticmethod
     def retrieve_google_search_user_from_item_link(candidate_we_vote_id, item_link):
         google_search_user = GoogleSearchUser()
+        status = ""
         try:
             if positive_value_exists(candidate_we_vote_id):
                 google_search_user = GoogleSearchUser.objects.get(
@@ -183,15 +184,15 @@ class GoogleSearchUserManager(models.Manager):
                     item_link=item_link)
             success = True
             google_search_user_found = True
-            status = "RETRIEVE_GOOGLE_SEARCH_USER_BY_WE_VOTE_ID "
+            status += "RETRIEVE_GOOGLE_SEARCH_USER_BY_WE_VOTE_ID "
         except GoogleSearchUser.DoesNotExist:
             google_search_user_found = False
             success = True
-            status = "RETRIEVE_GOOGLE_SEARCH_USER_NOT_FOUND "
+            status += "RETRIEVE_GOOGLE_SEARCH_USER_NOT_FOUND "
         except Exception as e:
             google_search_user_found = False
             success = False
-            status = 'FAILED retrieve_googgle_search_user: ' + str(e) + " "
+            status += 'FAILED retrieve_googgle_search_user: ' + str(e) + " "
 
         results = {
             'success':                      success,
@@ -204,6 +205,7 @@ class GoogleSearchUserManager(models.Manager):
     @staticmethod
     def retrieve_google_search_users_list(candidate_we_vote_id):
         google_search_users_list = []
+        status = ""
         try:
             google_search_users_queryset = GoogleSearchUser.objects.all()
             google_search_users_queryset = google_search_users_queryset.filter(
@@ -211,15 +213,15 @@ class GoogleSearchUserManager(models.Manager):
             google_search_users_list = google_search_users_queryset
 
             if len(google_search_users_list):
-                status = "GOOGLE_SEARCH_USERS_LIST_FOUND "
+                status += "GOOGLE_SEARCH_USERS_LIST_FOUND "
                 success = True
                 google_search_users_found = True
             else:
-                status = "GOOGLE_SEARCH_USERS_LIST_NOT_FOUND "
+                status += "GOOGLE_SEARCH_USERS_LIST_NOT_FOUND "
                 success = True
                 google_search_users_found = False
         except Exception as e:
-            status = "FAILED_RETRIEVE_GOOGLE_SEARCH_USERS_LIST: " + str(e) + " "
+            status += "FAILED_RETRIEVE_GOOGLE_SEARCH_USERS_LIST: " + str(e) + " "
             success = False
             google_search_users_found = False
         results = {
@@ -232,12 +234,13 @@ class GoogleSearchUserManager(models.Manager):
 
     @staticmethod
     def delete_google_search_users_possibilities(candidate_we_vote_id):
+        status = ""
         try:
             GoogleSearchUser.objects.filter(candidate_campaign_we_vote_id=candidate_we_vote_id).delete()
-            status = "GOOGLE_SEARCH_USERS_POSSIBILITY_DELETED "
+            status += "GOOGLE_SEARCH_USERS_POSSIBILITY_DELETED "
             success = True
         except Exception as e:
-            status = "GOOGLE_SEARCH_USERS_POSSIBILITY_NOT_DELETED: " + str(e) + " "
+            status += "GOOGLE_SEARCH_USERS_POSSIBILITY_NOT_DELETED: " + str(e) + " "
             success = False
 
         results = {
