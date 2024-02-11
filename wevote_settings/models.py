@@ -575,8 +575,8 @@ class RemoteRequestHistoryManager(models.Manager):
     def __unicode__(self):
         return "RemoteRequestHistoryManager"
 
+    @staticmethod
     def create_remote_request_history_entry(
-            self,
             kind_of_action='',
             google_civic_election_id=0,
             candidate_campaign_we_vote_id=None,

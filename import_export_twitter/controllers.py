@@ -1520,8 +1520,11 @@ def retrieve_possible_twitter_handles(candidate):
 
     # Create a record denoting that we have retrieved from Twitter for this candidate
     save_results_history = remote_request_history_manager.create_remote_request_history_entry(
-        RETRIEVE_POSSIBLE_TWITTER_HANDLES, candidate.google_civic_election_id,
-        candidate.we_vote_id, None, len(possible_twitter_handles_list), status)
+        kind_of_action=RETRIEVE_POSSIBLE_TWITTER_HANDLES,
+        google_civic_election_id=candidate.google_civic_election_id,
+        candidate_campaign_we_vote_id=candidate.we_vote_id,
+        number_of_results=len(possible_twitter_handles_list),
+        status=status)
     if not save_results_history['success']:
         status += save_results_history['status']
         success = False

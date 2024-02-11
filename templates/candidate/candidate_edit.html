@@ -375,6 +375,25 @@ th, td {
 {% endif %}
 
 
+    {% if candidate %}
+<div class="form-group">
+    <label for="google_search_image_file_id" class="col-sm-3 control-label">Search Google for Links to Candidate</label>
+    <div class="col-sm-8">
+        (<a href="{% url 'google_custom_search:retrieve_possible_google_search_users' candidate.we_vote_id %}">retrieve possibilities from Google</a>)
+    {% if google_search_possibility_list %}
+        (<a href="{% url 'google_custom_search:delete_possible_google_search_users' candidate.we_vote_id %}">delete these possibilities</a>)
+        (<a href="{% url 'google_custom_search:bulk_possible_google_search_users_do_not_match' candidate.we_vote_id %}">mark all as "Not a Match"</a>)
+        {% include "candidate/google_search_users_for_candidate_table.html" with candidate=candidate google_search_possibility_list=google_search_possibility_list %}
+        {% if google_search_possibility_list|length == 1 and google_search_possibility_total_count > 1 %}
+            <a href="{% url 'candidate:candidate_edit' candidate.id %}?show_all_google_search_users=1#google_search_users_for_candidate_table">Show more Google search users</a>
+        {% elif google_search_possibility_list|length > 1 %}
+            <a href="{% url 'candidate:candidate_edit' candidate.id %}?show_all_google_search_users=0">Show fewer Google search users</a>
+        {% endif %}
+    {% endif %}
+    </div>
+</div>
+    {% endif %}
+
 <div class="form-group">
     <label for="candidate_withdrawal_date_id" class="col-sm-3 control-label">Candidate Has Withdrawn From Election</label>
     <div class="col-sm-8">
@@ -597,25 +616,6 @@ th, td {
     {% endif %}
     </div>
 </div>
-
-    {% if candidate %}
-<div class="form-group">
-    <label for="google_search_image_file_id" class="col-sm-3 control-label">Search Google for Links to Candidate</label>
-    <div class="col-sm-8">
-        (<a href="{% url 'google_custom_search:retrieve_possible_google_search_users' candidate.we_vote_id %}">retrieve possibilities from Google</a>)
-    {% if google_search_possibility_list %}
-        (<a href="{% url 'google_custom_search:delete_possible_google_search_users' candidate.we_vote_id %}">delete these possibilities</a>)
-        (<a href="{% url 'google_custom_search:bulk_possible_google_search_users_do_not_match' candidate.we_vote_id %}">mark all as "Not a Match"</a>)
-        {% include "candidate/google_search_users_for_candidate_table.html" with candidate=candidate google_search_possibility_list=google_search_possibility_list %}
-        {% if google_search_possibility_list|length == 1 and google_search_possibility_total_count > 1 %}
-            <a href="{% url 'candidate:candidate_edit' candidate.id %}?show_all_google_search_users=1#google_search_users_for_candidate_table">Show more Google search users</a>
-        {% elif google_search_possibility_list|length > 1 %}
-            <a href="{% url 'candidate:candidate_edit' candidate.id %}?show_all_google_search_users=0">Show fewer Google search users</a>
-        {% endif %}
-    {% endif %}
-    </div>
-</div>
-    {% endif %}
 
 <div class="form-group">
     <label for="candidate_url_id" class="col-sm-3 control-label">
