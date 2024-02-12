@@ -62,7 +62,7 @@ from .controllers import add_twitter_handle_to_next_candidate_spot, analyze_cand
     save_google_search_link_to_candidate_table, save_image_to_candidate_table
 from .models import CandidateCampaign, CandidateListManager, CandidateChangeLog, CandidateManager, \
     CandidateToOfficeLink, \
-    CANDIDATE_UNIQUE_IDENTIFIERS, KIND_OF_LOG_ENTRY_ANALYSIS_COMMENT, \
+    CANDIDATE_UNIQUE_IDENTIFIERS, KIND_OF_LOG_ENTRY_ANALYSIS_COMMENT, KIND_OF_LOG_ENTRY_LINK_ADDED, \
     PROFILE_IMAGE_TYPE_BALLOTPEDIA, PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_LINKEDIN, \
     PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
     PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_VOTE_USA, PROFILE_IMAGE_TYPE_WIKIPEDIA
@@ -2102,6 +2102,12 @@ def candidate_edit_process_view(request):
     candidate_year = False
     change_description = ""
     change_description_changed = False
+    is_ballotpedia_added = None
+    is_candidate_analysis_done = None
+    is_facebook_added = None
+    is_linkedin_added = None
+    is_twitter_handle_added = None
+    is_wikipedia_added = None
 
     status = ""
 
@@ -2593,6 +2599,15 @@ def candidate_edit_process_view(request):
             if ballotpedia_candidate_name is not False:
                 candidate_on_stage.ballotpedia_candidate_name = ballotpedia_candidate_name
             if ballotpedia_candidate_url is not False:
+                incoming_value_lower_case = ballotpedia_candidate_url.strip().lower() \
+                    if positive_value_exists(ballotpedia_candidate_url) else ''
+                existing_value_lower_case = candidate_on_stage.ballotpedia_candidate_url.strip().lower() \
+                    if positive_value_exists(candidate_on_stage.ballotpedia_candidate_url) else ''
+                if positive_value_exists(ballotpedia_candidate_url) and \
+                        incoming_value_lower_case != existing_value_lower_case:
+                    change_description += "ADDED: Ballotpedia "
+                    change_description_changed = True
+                    is_ballotpedia_added = True
                 candidate_on_stage.ballotpedia_candidate_url = ballotpedia_candidate_url
             if ballotpedia_candidate_summary is not False:
                 candidate_on_stage.ballotpedia_candidate_summary = ballotpedia_candidate_summary
@@ -2602,9 +2617,11 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.ballotpedia_person_id = convert_to_int(ballotpedia_person_id)
             if ballotpedia_race_id is not False:
                 candidate_on_stage.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
-            if candidate_analysis_done != candidate_on_stage.candidate_analysis_done:
+            if positive_value_exists(candidate_analysis_done) and \
+                    candidate_analysis_done != candidate_on_stage.candidate_analysis_done:
                 change_description += "CHANGED: ANALYSIS_DONE (" + str(candidate_analysis_done) + ") "
                 change_description_changed = True
+                is_candidate_analysis_done = True
             candidate_on_stage.candidate_analysis_done = candidate_analysis_done
             if candidate_contact_form_url is not False:
                 candidate_on_stage.candidate_contact_form_url = candidate_contact_form_url
@@ -2615,10 +2632,37 @@ def candidate_edit_process_view(request):
             if candidate_phone is not False:
                 candidate_on_stage.candidate_phone = candidate_phone
             if candidate_twitter_handle is not False:
+                incoming_value_lower_case = candidate_twitter_handle.strip().lower() \
+                    if positive_value_exists(candidate_twitter_handle) else ''
+                existing_value_lower_case = candidate_on_stage.candidate_twitter_handle.strip().lower() \
+                    if positive_value_exists(candidate_on_stage.candidate_twitter_handle) else ''
+                if positive_value_exists(candidate_twitter_handle) and \
+                        incoming_value_lower_case != existing_value_lower_case:
+                    change_description += "ADDED: Twitter "
+                    change_description_changed = True
+                    is_twitter_handle_added = True
                 candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
             if candidate_twitter_handle2 is not False:
+                incoming_value_lower_case = candidate_twitter_handle2.strip().lower() \
+                    if positive_value_exists(candidate_twitter_handle2) else ''
+                existing_value_lower_case = candidate_on_stage.candidate_twitter_handle2.strip().lower() \
+                    if positive_value_exists(candidate_on_stage.candidate_twitter_handle2) else ''
+                if positive_value_exists(candidate_twitter_handle2) and \
+                        incoming_value_lower_case != existing_value_lower_case:
+                    change_description += "ADDED: Twitter2 "
+                    change_description_changed = True
+                    is_twitter_handle_added = True
                 candidate_on_stage.candidate_twitter_handle2 = candidate_twitter_handle2
             if candidate_twitter_handle3 is not False:
+                incoming_value_lower_case = candidate_twitter_handle3.strip().lower() \
+                    if positive_value_exists(candidate_twitter_handle3) else ''
+                existing_value_lower_case = candidate_on_stage.candidate_twitter_handle3.strip().lower() \
+                    if positive_value_exists(candidate_on_stage.candidate_twitter_handle3) else ''
+                if positive_value_exists(candidate_twitter_handle3) and \
+                        incoming_value_lower_case != existing_value_lower_case:
+                    change_description += "ADDED: Twitter3 "
+                    change_description_changed = True
+                    is_twitter_handle_added = True
                 candidate_on_stage.candidate_twitter_handle3 = candidate_twitter_handle3
             if candidate_url is not False:
                 candidate_on_stage.candidate_url = candidate_url
@@ -2640,6 +2684,15 @@ def candidate_edit_process_view(request):
             if district_name is not False:
                 candidate_on_stage.district_name = district_name
             if facebook_url is not False:
+                incoming_value_lower_case = facebook_url.strip().lower() \
+                    if positive_value_exists(facebook_url) else ''
+                existing_value_lower_case = candidate_on_stage.facebook_url.strip().lower() \
+                    if positive_value_exists(candidate_on_stage.facebook_url) else ''
+                if positive_value_exists(facebook_url) and \
+                        incoming_value_lower_case != existing_value_lower_case:
+                    change_description += "ADDED: Facebook "
+                    change_description_changed = True
+                    is_facebook_added = True
                 candidate_on_stage.facebook_url = facebook_url
             if google_civic_candidate_name is not False:
                 candidate_on_stage.google_civic_candidate_name = google_civic_candidate_name
@@ -2651,6 +2704,14 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.instagram_handle = instagram_handle
             candidate_on_stage.is_battleground_race = is_battleground_race
             if linkedin_url is not False:
+                incoming_value_lower_case = linkedin_url.strip().lower() \
+                    if positive_value_exists(linkedin_url) else ''
+                existing_value_lower_case = candidate_on_stage.linkedin_url.strip().lower() \
+                    if positive_value_exists(candidate_on_stage.linkedin_url) else ''
+                if positive_value_exists(linkedin_url) and incoming_value_lower_case != existing_value_lower_case:
+                    change_description += "ADDED: LinkedIn "
+                    change_description_changed = True
+                    is_linkedin_added = True
                 candidate_on_stage.linkedin_url = linkedin_url
             if maplight_id is not False:
                 candidate_on_stage.maplight_id = maplight_id
@@ -2673,6 +2734,14 @@ def candidate_edit_process_view(request):
             if vote_usa_office_id is not False:
                 candidate_on_stage.vote_usa_office_id = vote_usa_office_id
             if wikipedia_url is not False:
+                incoming_value_lower_case = wikipedia_url.strip().lower() \
+                    if positive_value_exists(wikipedia_url) else ''
+                existing_value_lower_case = candidate_on_stage.wikipedia_url.strip().lower() \
+                    if positive_value_exists(candidate_on_stage.wikipedia_url) else ''
+                if positive_value_exists(wikipedia_url) and incoming_value_lower_case != existing_value_lower_case:
+                    change_description += "ADDED: Wikipedia "
+                    change_description_changed = True
+                    is_wikipedia_added = True
                 candidate_on_stage.wikipedia_url = wikipedia_url
             if youtube_url is not False:
                 candidate_on_stage.youtube_url = youtube_url
@@ -2811,12 +2880,22 @@ def candidate_edit_process_view(request):
             voter_full_name = voter_on_stage.get_full_name(real_name_only=True)
             voter_we_vote_id = voter_on_stage.we_vote_id
 
+        if positive_value_exists(candidate_analysis_comment) or is_candidate_analysis_done:
+            kind_of_log_entry = KIND_OF_LOG_ENTRY_ANALYSIS_COMMENT
+        else:
+            kind_of_log_entry = KIND_OF_LOG_ENTRY_LINK_ADDED
         results = candidate_manager.create_candidate_log_entry(
             candidate_we_vote_id=candidate_we_vote_id,
             change_description=change_description,
             changed_by_name=voter_full_name,
             changed_by_voter_we_vote_id=voter_we_vote_id,
-            kind_of_log_entry=KIND_OF_LOG_ENTRY_ANALYSIS_COMMENT,
+            is_ballotpedia_added=is_ballotpedia_added,
+            is_candidate_analysis_done=is_candidate_analysis_done,
+            is_facebook_added=is_facebook_added,
+            is_linkedin_added=is_linkedin_added,
+            is_twitter_handle_added=is_twitter_handle_added,
+            is_wikipedia_added=is_wikipedia_added,
+            kind_of_log_entry=kind_of_log_entry,
         )
 
     # Make sure 'which_marking' is one of the allowed Filter fields

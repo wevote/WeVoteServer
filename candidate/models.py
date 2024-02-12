@@ -123,6 +123,7 @@ CANDIDATE_UNIQUE_ATTRIBUTES_TO_BE_CLEARED = [
 
 KIND_OF_LOG_ENTRY_ANALYSIS_COMMENT = 'ANALYSIS_COMMENT'
 KIND_OF_LOG_ENTRY_HANDLE_NOT_FOUND_BY_TWITTER = 'HANDLE_NOT_FOUND_BY_TWITTER'
+KIND_OF_LOG_ENTRY_LINK_ADDED = 'LINK_ADDED'
 KIND_OF_LOG_ENTRY_DATA_UPDATED_FROM_TWITTER = 'DATA_UPDATED_FROM_TWITTER'
 
 PROFILE_IMAGE_TYPE_BALLOTPEDIA = 'BALLOTPEDIA'
@@ -158,7 +159,15 @@ class CandidateChangeLog(models.Model):  # Formerly called CandidateLogEntry
     change_description = models.TextField(null=True, blank=True)
     log_datetime = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
     google_civic_election_id = models.PositiveIntegerField(db_index=True, null=True, unique=False)
-    is_from_twitter = models.BooleanField(db_index=True, default=False, null=True)  # Error retrieving from Twitter
+    # We keep track of which volunteer adds links to social accounts. We run reports seeing when any of these fields
+    # are set, so we can show the changed_by_voter_we_vote_id who collected the data.
+    is_ballotpedia_added = models.BooleanField(db_index=True, default=None, null=True)  # New Ballotpedia link
+    is_candidate_analysis_done = models.BooleanField(db_index=True, default=None, null=True)  # Analysis complete
+    is_facebook_added = models.BooleanField(db_index=True, default=None, null=True)  # New Facebook account added
+    is_from_twitter = models.BooleanField(db_index=True, default=None, null=True)  # Error retrieving from Twitter
+    is_linkedin_added = models.BooleanField(db_index=True, default=None, null=True)  # New LinkedIn link added
+    is_twitter_handle_added = models.BooleanField(db_index=True, default=None, null=True)  # New Twitter handle saved
+    is_wikipedia_added = models.BooleanField(db_index=True, default=None, null=True)  # New Wikipedia link added
     kind_of_log_entry = models.CharField(db_index=True, max_length=50, default=None, null=True)
     state_code = models.CharField(db_index=True, max_length=2, null=True)
 
@@ -4397,7 +4406,13 @@ class CandidateManager(models.Manager):
             changed_by_voter_we_vote_id=None,
             candidate_we_vote_id=None,
             google_civic_election_id=None,
+            is_ballotpedia_added=None,
+            is_candidate_analysis_done=None,
+            is_facebook_added=None,
             is_from_twitter=None,
+            is_linkedin_added=None,
+            is_twitter_handle_added=None,
+            is_wikipedia_added=None,
             kind_of_log_entry=None,
             state_code=None,
     ):
@@ -4440,7 +4455,13 @@ class CandidateManager(models.Manager):
                 changed_by_voter_we_vote_id=changed_by_voter_we_vote_id,
                 candidate_we_vote_id=candidate_we_vote_id,
                 google_civic_election_id=google_civic_election_id,
+                is_ballotpedia_added=is_ballotpedia_added,
+                is_candidate_analysis_done=is_candidate_analysis_done,
+                is_facebook_added=is_facebook_added,
                 is_from_twitter=is_from_twitter,
+                is_linkedin_added=is_linkedin_added,
+                is_twitter_handle_added=is_twitter_handle_added,
+                is_wikipedia_added=is_wikipedia_added,
                 kind_of_log_entry=kind_of_log_entry,
                 state_code=state_code,
             )
