@@ -519,10 +519,11 @@ def voter_address_save_view(request):  # voterAddressSave
         # Search for these variables elsewhere when updating code
         turn_off_direct_voter_ballot_retrieve = False
         default_election_data_source_is_ballotpedia = False
-        # default_election_data_source_is_ctcl = False
+        default_election_data_source_is_ctcl = True
         default_election_data_source_is_google_civic = False
-        default_election_data_source_is_vote_usa = True
+        default_election_data_source_is_vote_usa = False
         was_refreshed_from_ballotpedia_just_now = False
+        was_refreshed_from_ctcl_just_now = False
         was_refreshed_from_vote_usa_just_now = False
         if positive_value_exists(simple_save):
             # Do not retrieve / return a ballot
@@ -594,6 +595,72 @@ def voter_address_save_view(request):  # voterAddressSave
                     google_civic_election_id = ballotpedia_retrieve_results['google_civic_election_id']
             else:
                 status += "NOT_REACHING_OUT_TO_BALLOTPEDIA_TEXT_NOT_LONG_ENOUGH "
+        elif default_election_data_source_is_ctcl:
+            status += "VOTER_ADDRESS_SAVE-USING_CTCL "
+            length_at_which_we_suspect_address_has_street = 25
+            length_of_text_for_map_search = 0
+            if isinstance(text_for_map_search, str):
+                length_of_text_for_map_search = len(text_for_map_search)
+
+            # We don't want to call CTCL when we just have "City, State ZIP".
+            # Since we don't always know whether we have a street address or not, then we use a
+            # simple string length cut-off.
+            if length_of_text_for_map_search > length_at_which_we_suspect_address_has_street:
+                status += "ADDRESS_SAVE_CTCL_TEXT_FOR_MAP_SEARCH_LONG_ENOUGH "
+                # 1a) Get ballot data for the actual VoterAddress
+                from import_export_google_civic.controllers import \
+                    voter_ballot_items_retrieve_from_google_civic_2021
+                ctcl_results = voter_ballot_items_retrieve_from_google_civic_2021(
+                    voter_device_id,
+                    google_civic_election_id=google_civic_election_id,
+                    text_for_map_search=text_for_map_search,
+                    use_ctcl=True)
+                status += ctcl_results['status']
+                if not ctcl_results['success']:
+                    pass
+                elif ctcl_results['google_civic_election_id'] \
+                        and ctcl_results['ballot_returned_found']:
+                    was_refreshed_from_ctcl_just_now = True
+                    is_from_substituted_address = False
+                    substituted_address_nearby = ''
+                    is_from_test_address = False
+                    polling_location_we_vote_id_source = ''  # Not used when retrieving directly for the voter
+
+                    # These variables are needed below
+                    ballot_location_display_name = ctcl_results['ballot_location_display_name']
+                    ballot_returned_we_vote_id = ctcl_results['ballot_returned_we_vote_id']
+
+                    # We update the voter_address with this google_civic_election_id outside this function
+
+                    # Save the meta information for this ballot data
+                    save_results = voter_ballot_saved_manager.update_or_create_voter_ballot_saved(
+                        voter_id=voter_id,
+                        google_civic_election_id=ctcl_results['google_civic_election_id'],
+                        state_code=ctcl_results['state_code'],
+                        election_day_text=ctcl_results['election_day_text'],
+                        election_description_text=ctcl_results['election_description_text'],
+                        original_text_for_map_search=ctcl_results['text_for_map_search'],
+                        substituted_address_nearby=substituted_address_nearby,
+                        is_from_substituted_address=is_from_substituted_address,
+                        is_from_test_ballot=is_from_test_address,
+                        polling_location_we_vote_id_source=polling_location_we_vote_id_source,
+                        ballot_location_display_name=ctcl_results['ballot_location_display_name'],
+                        ballot_returned_we_vote_id=ctcl_results['ballot_returned_we_vote_id'],
+                        ballot_location_shortcut=ctcl_results['ballot_location_shortcut'],
+                        original_text_city=ctcl_results['original_text_city'],
+                        original_text_state=ctcl_results['original_text_state'],
+                        original_text_zip=ctcl_results['original_text_zip'],
+                    )
+                    original_text_city = ctcl_results['original_text_city']
+                    original_text_state = ctcl_results['original_text_state']
+                    original_text_zip = ctcl_results['original_text_zip']
+                    # substituted_address_city = ''
+                    # substituted_address_state = ''
+                    # substituted_address_zip = ''
+                    status += save_results['status']
+                    google_civic_election_id = save_results['google_civic_election_id']
+            else:
+                status += "NOT_REACHING_OUT_TO_VOTE_USA "
         elif default_election_data_source_is_vote_usa:
             status += "VOTER_ADDRESS_SAVE-USING_VOTE_USA "
             length_at_which_we_suspect_address_has_street = 25
@@ -680,7 +747,9 @@ def voter_address_save_view(request):  # voterAddressSave
 
         if default_election_data_source_is_ballotpedia or default_election_data_source_is_vote_usa:
             # If we did not retrieve a ballot from these ballot sources, then find a nearby ballot to return
-            if not was_refreshed_from_ballotpedia_just_now and not was_refreshed_from_vote_usa_just_now:
+            if not was_refreshed_from_ballotpedia_just_now \
+                    and not was_refreshed_from_ctcl_just_now \
+                    and not was_refreshed_from_vote_usa_just_now:
                 # 2) Find ballot data previously stored from a nearby address
                 ballot_returned_results = find_best_previously_stored_ballot_returned(voter_id, text_for_map_search)
                 status += ballot_returned_results['status']
