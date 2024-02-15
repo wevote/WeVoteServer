@@ -1585,9 +1585,9 @@ def generate_ballot_data(
         # Search for these variables elsewhere when updating code
         turn_off_direct_voter_ballot_retrieve = False
         default_election_data_source_is_ballotpedia = False
-        default_election_data_source_is_ctcl = False
+        default_election_data_source_is_ctcl = True
         default_election_data_source_is_google_civic = False
-        default_election_data_source_is_vote_usa = True
+        default_election_data_source_is_vote_usa = False
         if turn_off_direct_voter_ballot_retrieve:
             # We set this option when we want to force the retrieval of a nearby ballot
             pass

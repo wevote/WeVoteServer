@@ -2869,7 +2869,7 @@ def voter_ballot_items_retrieve_from_google_civic_2021(
                         if positive_value_exists(route):
                             normalized_line1 += " " + route
     except Exception as e:
-        status += "RETRIEVE_FROM_VOTE_USA-EXCEPTION with get_geocoder_for_service ERROR: " + str(e) + " "
+        status += "RETRIEVE_FROM_CTCL_OR_VOTE_USA-EXCEPTION with get_geocoder_for_service ERROR: " + str(e) + " "
         success = False
 
     if not success:

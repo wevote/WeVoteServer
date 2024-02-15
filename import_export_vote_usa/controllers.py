@@ -206,7 +206,10 @@ def retrieve_vote_usa_ballot_items_for_one_voter_api(
         api_counter_manager.create_counter_entry(
             VOTE_USA_VOTER_INFO_QUERY_TYPE,
             google_civic_election_id=google_civic_election_id)
+    except Exception as e:
+        status += 'COULD_NOT_STORE_METRICS_FOR_VOTE_USA_API:' + str(e) +''
 
+    try:
         if 'contests' in one_ballot_json:
             update_or_create_rules = {
                 'create_candidates': True,
