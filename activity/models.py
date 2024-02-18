@@ -81,8 +81,8 @@ class ActivityManager(models.Manager):
     def __unicode__(self):
         return "ActivityManager"
 
+    @staticmethod
     def create_activity_notice(
-            self,
             activity_notice_seed_id=0,
             activity_tidbit_we_vote_id='',
             campaignx_news_item_we_vote_id=None,

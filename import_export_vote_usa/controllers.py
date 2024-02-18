@@ -270,23 +270,23 @@ def retrieve_vote_usa_ballot_items_for_one_voter_api(
         handle_exception(e, logger=logger, exception_message=status)
 
     results = {
-        'status': status,
-        'success': success,
-        'google_civic_election_id': google_civic_election_id,
-        'state_code': state_code,
+        'ballot_location_display_name': "",
+        'ballot_location_shortcut': "",
+        'ballot_returned': ballot_returned,
+        'ballot_returned_found': ballot_returned_found,
+        'ballot_returned_we_vote_id': ballot_returned_we_vote_id,
         'election_day_text': election_day_text,
         'election_description_text': "",
         'election_data_retrieved': bool(ballot_items_count),
-        'text_for_map_search': text_for_map_search,
+        'google_civic_election_id': google_civic_election_id,
         'original_text_city': '',
         'original_text_state': '',
         'original_text_zip': '',
         'polling_location_retrieved': False,
-        'ballot_returned_found': ballot_returned_found,
-        'ballot_location_display_name': "",
-        'ballot_location_shortcut': "",
-        'ballot_returned': ballot_returned,
-        'ballot_returned_we_vote_id': ballot_returned_we_vote_id,
+        'state_code': state_code,
+        'status': status,
+        'success': success,
+        'text_for_map_search': text_for_map_search,
     }
     return results
 

@@ -2702,10 +2702,10 @@ def voter_ballot_items_retrieve_from_google_civic_2021(
             'original_text_state':          '',
             'original_text_zip':            '',
             'polling_location_retrieved':   False,
-            'ballot_returned_found':        False,
             'ballot_location_display_name': "",
             'ballot_location_shortcut':     "",
             'ballot_returned':              None,
+            'ballot_returned_found':        False,
             'ballot_returned_we_vote_id':   "",
         }
         return results
@@ -2815,10 +2815,10 @@ def voter_ballot_items_retrieve_from_google_civic_2021(
             'original_text_state':          original_text_state,
             'original_text_zip':            original_text_zip,
             'polling_location_retrieved':   polling_location_retrieved,
-            'ballot_returned_found':        ballot_returned_found,
             'ballot_location_display_name': ballot_location_display_name,
             'ballot_location_shortcut':     ballot_location_shortcut,
             'ballot_returned':              ballot_returned,
+            'ballot_returned_found':        ballot_returned_found,
             'ballot_returned_we_vote_id':   ballot_returned_we_vote_id,
         }
         return results
@@ -2887,10 +2887,10 @@ def voter_ballot_items_retrieve_from_google_civic_2021(
             'original_text_state':          original_text_state,
             'original_text_zip':            original_text_zip,
             'polling_location_retrieved':   polling_location_retrieved,
-            'ballot_returned_found':        ballot_returned_found,
             'ballot_location_display_name': ballot_location_display_name,
             'ballot_location_shortcut':     ballot_location_shortcut,
             'ballot_returned':              ballot_returned,
+            'ballot_returned_found':        ballot_returned_found,
             'ballot_returned_we_vote_id':   ballot_returned_we_vote_id,
         }
         return results
@@ -2950,7 +2950,8 @@ def voter_ballot_items_retrieve_from_google_civic_2021(
     else:
         status += "RETRIEVE_ONE_BALLOT-SUCCESS "
         success = True
-        ballot_returned_found = one_ballot_results['ballot_returned_found']
+        ballot_returned_found = one_ballot_results['ballot_returned_found'] \
+            if 'ballot_returned_found' in one_ballot_results else False
         if positive_value_exists(ballot_returned_found):
             ballot_returned = one_ballot_results['ballot_returned']
             ballot_returned_we_vote_id = ballot_returned.we_vote_id
@@ -2959,11 +2960,11 @@ def voter_ballot_items_retrieve_from_google_civic_2021(
             # We include a google_civic_election_id, so only the ballot info for this election is removed
             google_civic_election_id_to_delete = google_civic_election_id
             if positive_value_exists(google_civic_election_id_to_delete) and positive_value_exists(voter_id):
-                # Remove all prior ballot items, so we make room for store_one_ballot_from_ballotpedia_api to save
+                # Remove all prior ballot items, so we make room for saving new ones
                 #  ballot items
                 voter_ballot_saved_manager = VoterBallotSavedManager()
                 voter_ballot_saved_id = 0
-                voter_ballot_saved_manager.delete_voter_ballot_saved(
+                delete_results = voter_ballot_saved_manager.delete_voter_ballot_saved(
                     voter_ballot_saved_id, voter_id, google_civic_election_id_to_delete)
         else:
             status += "BALLOT_RETURNED_MISSING: "
