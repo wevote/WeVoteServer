@@ -81,7 +81,7 @@
     <tr><td><h4>Offices Held</h4></td></tr>
     <tr>
         <td>&nbsp;&nbsp;&nbsp;&nbsp;
-            <a href="{% url 'office_held:office_held_import_from_master_server' %}?state_code={{ state_code }}">
+            <a href="{% url 'office_held:office_held_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
                 Retrieve Office Held Entries</a>
             {% if state_code %} for the state {{ state_code }}{% else %} for ALL states{% endif %}
             &nbsp;&nbsp;
@@ -92,7 +92,7 @@
     <tr><td><h4>Offices Held for Location</h4></td></tr>
     <tr>
         <td>&nbsp;&nbsp;&nbsp;&nbsp;
-            <a href="{% url 'office_held:offices_held_for_location_import_from_master_server' %}?state_code={{ state_code }}">
+            <a href="{% url 'office_held:offices_held_for_location_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
                 Retrieve Offices Held for Location</a>
             {% if state_code %} for the state {{ state_code }}{% else %} for ALL states{% endif %}
             &nbsp;&nbsp;
@@ -103,7 +103,7 @@
     <tr><td><h4>Representatives</h4></td></tr>
     <tr>
         <td>&nbsp;&nbsp;&nbsp;&nbsp;
-            <a href="{% url 'representative:representatives_import_from_master_server' %}?state_code={{ state_code }}">
+            <a href="{% url 'representative:representatives_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
                 Retrieve Representatives</a>
             {% if state_code %} for the state {{ state_code }}{% else %} for ALL states{% endif %}
             &nbsp;&nbsp;

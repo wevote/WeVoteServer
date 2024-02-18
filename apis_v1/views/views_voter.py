@@ -745,7 +745,8 @@ def voter_address_save_view(request):  # voterAddressSave
             if google_retrieve_results['ballot_returned_we_vote_id']:
                 ballot_returned_we_vote_id = google_retrieve_results['ballot_returned_we_vote_id']
 
-        if default_election_data_source_is_ballotpedia or default_election_data_source_is_vote_usa:
+        if default_election_data_source_is_ballotpedia or default_election_data_source_is_ctcl \
+                or default_election_data_source_is_vote_usa:
             # If we did not retrieve a ballot from these ballot sources, then find a nearby ballot to return
             if not was_refreshed_from_ballotpedia_just_now \
                     and not was_refreshed_from_ctcl_just_now \

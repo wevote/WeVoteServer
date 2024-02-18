@@ -120,7 +120,8 @@ class BallotItem(models.Model):
     def display_ballot_item(self):
         return self.ballot_item_display_name
 
-    def fetch_ballot_order(self):
+    @staticmethod
+    def fetch_ballot_order():
         return 3
 
     def candidates_list(self):
@@ -132,9 +133,13 @@ class BallotItem(models.Model):
 
 class BallotItemManager(models.Manager):
 
+    @staticmethod
     def remove_duplicate_ballot_item_entries(
-            self, google_civic_election_id, contest_measure_id, contest_office_id,
-            voter_id=0, polling_location_we_vote_id=""):
+            google_civic_election_id,
+            contest_measure_id,
+            contest_office_id,
+            voter_id=0,
+            polling_location_we_vote_id=""):
         status = ""
         success = ""
         ballot_item_found = False
@@ -592,8 +597,13 @@ class BallotItemManager(models.Manager):
         }
         return results
 
-    def create_ballot_item_row_entry(self, ballot_item_display_name, local_ballot_order, state_code,
-                                     google_civic_election_id, defaults):
+    @staticmethod
+    def create_ballot_item_row_entry(
+            ballot_item_display_name,
+            local_ballot_order,
+            state_code,
+            google_civic_election_id,
+            defaults):
         """
         Create BallotItem table entry with BallotItem details
         :param ballot_item_display_name:
@@ -3829,8 +3839,14 @@ class VoterBallotSavedManager(models.Manager):
         return self.retrieve_voter_ballot_saved(voter_ballot_saved_id, voter_id, google_civic_election_id,
                                                 text_for_map_search)
 
-    def retrieve_voter_ballot_saved(self, voter_ballot_saved_id, voter_id=0, google_civic_election_id=0,
-                                    text_for_map_search='', ballot_returned_we_vote_id='', ballot_location_shortcut=''):
+    @staticmethod
+    def retrieve_voter_ballot_saved(
+            voter_ballot_saved_id,
+            voter_id=0,
+            google_civic_election_id=0,
+            text_for_map_search='',
+            ballot_returned_we_vote_id='',
+            ballot_location_shortcut=''):
         """
 
         :param voter_ballot_saved_id:

@@ -1496,10 +1496,18 @@ def generate_ballot_data(
                 if election_results['election_found']:
                     election = election_results['election']
                     # If the voter's address is in a state supported by this election, pass in the text_for_map_search
-                    if election.state_code.lower() == "na" or election.state_code.lower() == "":
+                    try:
+                        election_state_code_lower = election.state_code.lower()
+                    except Exception as e:
+                        election_state_code_lower = ''
+                    try:
+                        state_code_from_text_for_map_search_lower = state_code_from_text_for_map_search.lower()
+                    except Exception as e:
+                        state_code_from_text_for_map_search_lower = ''
+                    if election_state_code_lower == "na" or election_state_code_lower == "":
                         # If a National election, then we want the address passed in
                         text_for_map_search_for_google_civic_retrieve = text_for_map_search
-                    elif election.state_code.lower() == state_code_from_text_for_map_search.lower():
+                    elif election_state_code_lower == state_code_from_text_for_map_search_lower:
                         text_for_map_search_for_google_civic_retrieve = text_for_map_search
                     else:
                         text_for_map_search_for_google_civic_retrieve = ""
@@ -2241,10 +2249,13 @@ def choose_election_from_existing_data(voter_device_link, google_civic_election_
                 # Remove google_civic_election_id from voter address.
                 status += "VOTER_BALLOT_SAVED_MISSING_REMOVE_ADDRESS_ELECTION "
                 try:
+                    voter_address.ballot_returned_we_vote_id = ""
                     voter_address.google_civic_election_id = 0
                     voter_address.save()
                 except Exception as e:
                     status += "VOTER_ADDRESS_ELECTION_COULD_NOT_BE_REMOVED2: " + str(e) + " "
+        else:
+            status += "VOTER_ADDRESS_ELECTION_NOT_CURRENT "
 
     status += "VOTER_BALLOT_SAVED_NOT_FOUND_FROM_EXISTING_DATA "
     error_results = {
