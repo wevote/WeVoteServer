@@ -50,7 +50,7 @@ from .controllers import add_alternate_names_to_next_spot, add_twitter_handle_to
     merge_if_duplicate_politicians, merge_these_two_politicians, politicians_import_from_master_server
 from .models import Politician, PoliticianManager, POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, \
     POLITICIAN_UNIQUE_IDENTIFIERS, PoliticiansArePossibleDuplicates, POLITICAL_DATA_MANAGER, UNKNOWN
-from politician.controllers_generate_color import generate_background
+from politician.controllers_generate_color import generate_background, validate_hex
 POLITICIANS_SYNC_URL = get_environment_variable("POLITICIANS_SYNC_URL")  # politiciansSyncOut
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 WEB_APP_ROOT_URL = get_environment_variable("WEB_APP_ROOT_URL")
@@ -2009,12 +2009,13 @@ def politician_edit_process_view(request):
                 politician_on_stage.middle_name = middle_name
             if last_name is not False:
                 politician_on_stage.last_name = last_name
-            if regenerate_color_edge_case is not False:
-                politician_on_stage.profile_image_background_color = generate_background(politician_on_stage,edge_case=True)
-            elif regenerate_color is not False:
+            if regenerate_color is not False:
                 politician_on_stage.profile_image_background_color = generate_background(politician_on_stage)
             elif profile_image_background_color is not False:
-                politician_on_stage.profile_image_background_color = profile_image_background_color
+                if validate_hex(profile_image_background_color):
+                    politician_on_stage.profile_image_background_color = profile_image_background_color
+                else:
+                    messages.add_message(request, messages.ERROR, 'Enter hex as \'#\' followed by six hexadecimal characters 0-9a-f')
             if gender is not False:
                 gender = gender[0]
                 if politician_on_stage.gender != gender:
