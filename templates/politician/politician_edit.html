@@ -141,7 +141,8 @@
         
         <input type="text" name="profile_image_background_color" id="profile_image_background_color_id" class="form-control"
                value="{% if politician %}{{ politician.profile_image_background_color|default_if_none:"" }}{% else %}{{ profile_image_background_color|default_if_none:"" }}{% endif %}" />
-        <input name="regenerate_color" type="checkbox"/><label> &nbsp; Regenerate default color</label>
+        <input name="regenerate_color" id="regenerate_color_id" type="checkbox"/>
+        <label for="regenerate_color_id">&nbsp;Regenerate default color</label>
        {#  <label>Regenerate default color &#40;different algorithm&#41;  &nbsp;</label><input name="regenerate_color_edge_case" type="checkbox"/> #}
     </div>
 </div>
