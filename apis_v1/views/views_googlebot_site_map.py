@@ -23,7 +23,7 @@ def xml_for_n_maps(n):
     xml += '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
     for i in range(n):
         xml += '  <sitemap>'
-        xml += '    <loc>%s/apis/v1/googlebotSiteMap/map%s.html</loc>' % (WE_VOTE_SERVER_ROOT_URL, i)
+        xml += '    <loc>https://wevote.us/map%s.html</loc>' % (i)
         xml += '  </sitemap>'
     xml += '</sitemapindex>'
     return xml
