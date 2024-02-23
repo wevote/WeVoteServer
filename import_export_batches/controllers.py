@@ -126,7 +126,7 @@ def create_batch_row_actions(
         kind_of_batch = batch_description.kind_of_batch
 
         try:
-            batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
+            batch_header_map = BatchHeaderMap.objects.using('readonly').get(batch_header_id=batch_header_id)
             batch_header_map_found = True
         except BatchHeaderMap.DoesNotExist:
             # This is fine
@@ -3013,7 +3013,7 @@ def create_batch_row_action_ballot_item(batch_description,
     else:
         google_civic_election_id = str(batch_description.google_civic_election_id)
 
-    # Gather information in advance so we can try to only do a single create (and avoid another save if we can help it)
+    # Gather information in advance, so we can try to only do a single create (and avoid another save if we can help it)
 
     # NOTE: If you add incoming header names here, make sure to update BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
     # These are variables that might come from an import file, and are used to identify which
@@ -3097,7 +3097,7 @@ def create_batch_row_action_ballot_item(batch_description,
             positive_value_exists(contest_office_name):
         # See if we have an office name
         contest_office_list_manager = ContestOfficeListManager()
-        # Needs to be read_only=False so we don't get "terminating connection due to conflict with recovery" error
+        # Needs to be read_only=False, so we don't get "terminating connection due to conflict with recovery" error
         matching_results = contest_office_list_manager.retrieve_contest_offices_from_non_unique_identifiers(
             contest_office_name=contest_office_name,
             google_civic_election_id=google_civic_election_id,

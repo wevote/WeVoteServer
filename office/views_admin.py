@@ -1521,27 +1521,24 @@ def office_summary_add_candidates_process_view(
             if one_candidate.we_vote_id not in candidate_by_we_vote_id_dict:
                 candidate_by_we_vote_id_dict[one_candidate.we_vote_id] = one_candidate
             if one_candidate.we_vote_id in existing_candidate_we_vote_id_list:
-                candidate_list_limited = []
                 candidate_list_limited.append(one_candidate)
                 candidate_name_already_linked = True
             if positive_value_exists(one_candidate.politician_we_vote_id):
                 exclude_politician_we_vote_id_list.append(one_candidate.politician_we_vote_id)
 
-        politician_list = []
+        # Find all politicians that match the last name
         politician_by_we_vote_id_dict = {}
-        if not candidate_name_already_linked:
-            # Find all politicians that match the last name
-            from politician.models import Politician
-            queryset = Politician.objects.all()
-            queryset = queryset.filter(last_name__iexact=last_name)
-            if len(exclude_politician_we_vote_id_list) > 0:
-                queryset = queryset.exclude(we_vote_id__in=exclude_politician_we_vote_id_list)
-            if positive_value_exists(state_code):
-                queryset = queryset.filter(state_code__iexact=state_code)
-            politician_list = list(queryset)
-            for one_politician in politician_list:
-                if one_politician.we_vote_id not in politician_by_we_vote_id_dict:
-                    politician_by_we_vote_id_dict[one_politician.we_vote_id] = one_politician
+        from politician.models import Politician
+        queryset = Politician.objects.all()
+        queryset = queryset.filter(last_name__iexact=last_name)
+        if len(exclude_politician_we_vote_id_list) > 0:
+            queryset = queryset.exclude(we_vote_id__in=exclude_politician_we_vote_id_list)
+        if positive_value_exists(state_code):
+            queryset = queryset.filter(state_code__iexact=state_code)
+        politician_list = list(queryset)
+        for one_politician in politician_list:
+            if one_politician.we_vote_id not in politician_by_we_vote_id_dict:
+                politician_by_we_vote_id_dict[one_politician.we_vote_id] = one_politician
 
         # ############################
         # Now process incoming choices for candidate, politician, or "create new"
@@ -1605,7 +1602,6 @@ def office_summary_add_candidates_process_view(
                     results = create_candidate_from_politician(create_candidate_for_politician_we_vote_id)
                     if results['success']:
                         one_candidate = results['candidate']
-                        candidate_list_limited = []
                         candidate_list_limited.append(one_candidate)
                         at_least_one_candidate_created = True
                         candidate_name_created = True
@@ -1632,7 +1628,6 @@ def office_summary_add_candidates_process_view(
             if results['success']:
                 if link_candidate_we_vote_id_to_office in candidate_by_we_vote_id_dict:
                     one_candidate = candidate_by_we_vote_id_dict[link_candidate_we_vote_id_to_office]
-                    candidate_list_limited = []
                     candidate_list_limited.append(one_candidate)
                     at_least_one_candidate_created = True
                     candidate_name_already_linked = True
@@ -1644,12 +1639,12 @@ def office_summary_add_candidates_process_view(
 
         # Bundle up the options into data package
         search_result_option_dict = {
-            'candidate_name_created':       candidate_name_created,
+            'candidate_name_created':           candidate_name_created,
             'candidate_name_already_linked':    candidate_name_already_linked,
-            'candidate_name_to_search':     one_name_to_search,
-            'candidate_slug':               slugify(one_name_to_search),
-            'candidate_list':               candidate_list_limited if candidate_name_already_linked else candidate_list,
-            'politician_list':              politician_list,
+            'candidate_name_to_search':         one_name_to_search,
+            'candidate_slug':                   slugify(one_name_to_search),
+            'candidate_list':                   candidate_list_limited if candidate_name_already_linked else candidate_list,
+            'politician_list':                  politician_list,
         }
         search_result_options_dict[one_name_to_search] = search_result_option_dict
 

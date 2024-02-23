@@ -1175,7 +1175,7 @@ def twitter_sign_in_start_doc_view(request):
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
-def twitter_sign_in_request_access_token_doc_view(request):
+def twitter_sign_in_request_access_token_doc_view(request):  # twitterSignInRequestAccessToken
     """
     Show documentation about twitterSignInRequestAccessToken
     """
