@@ -2670,17 +2670,17 @@ def twitter_sign_in_start_for_api(voter_device_id, return_url, cordova):  # twit
             twitter_auth_response.save()
 
             success = True
-            status = "TWITTER_REDIRECT_URL_RETRIEVED"
+            status = "TWITTER_REDIRECT_URL_RETRIEVED "
         else:
             success = False
-            status = "TWITTER_REDIRECT_URL_NOT_RETRIEVED"
+            status = "TWITTER_REDIRECT_URL_NOT_RETRIEVED "
 
     except tweepy.TooManyRequests:
         success = False
-        status = 'TWITTER_RATE_LIMIT_ERROR'
+        status = 'TWITTER_RATE_LIMIT_ERROR '
     except tweepy.TweepyException as error_instance:
         success = False
-        err_string = 'GENERAL_TWEEPY_EXCEPTION'
+        err_string = 'GENERAL_TWEEPY_EXCEPTION '
         try:
             # Yuck, we should iterate down until we get the first string
             err_string = error_instance.args[0].args[0].args[0]
@@ -2818,6 +2818,7 @@ def twitter_native_sign_in_save_for_api(voter_device_id, twitter_access_token, t
     return results
 
 
+# 2024-02-23 This might be deprecated   # twitterSignInRequestAccessToken (Step 2)
 def twitter_sign_in_request_access_token_for_api(voter_device_id,
                                                  incoming_request_token, incoming_oauth_verifier,
                                                  return_url, cordova):
@@ -3246,14 +3247,16 @@ def twitter_sign_in_retrieve_for_api(voter_device_id, image_load_deferred):  # t
     :param voter_device_id:
     :return:
     """
+    status = ""
     voter_manager = VoterManager()
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id, read_only=True)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
+        status += "TWITTER_SIGN_IN_NO_VOTER "
         success = False
         error_results = {
             'success':                                  success,
-            'status':                                   "TWITTER_SIGN_IN_NO_VOTER",
+            'status':                                   status,
             'existing_twitter_account_found':           False,
             'twitter_access_secret':                    "",
             'twitter_access_token':                     "",
@@ -3283,7 +3286,7 @@ def twitter_sign_in_retrieve_for_api(voter_device_id, image_load_deferred):  # t
 
     twitter_auth_manager = TwitterAuthManager()
     auth_response_results = twitter_auth_manager.retrieve_twitter_auth_response(voter_device_id)
-    status = auth_response_results['status']
+    status += auth_response_results['status']
     if not auth_response_results['twitter_auth_response_found']:
         success = False
         error_results = {
@@ -3318,6 +3321,7 @@ def twitter_sign_in_retrieve_for_api(voter_device_id, image_load_deferred):  # t
     twitter_id = twitter_auth_response.twitter_id
 
     if not twitter_id:
+        status += "TWITTER_SIGN_IN_NO_TWITTER_ID "
         success = False
         error_results = {
             'success':                                  success,
@@ -3378,7 +3382,7 @@ def twitter_sign_in_retrieve_for_api(voter_device_id, image_load_deferred):  # t
                 if save_results['success']:
                     repair_twitter_related_voter_caching_now = True
         else:
-            # The very first time a new twitter user signs in
+            # The very first time a new Twitter user signs in
             save_results = twitter_user_manager.create_twitter_link_to_voter(
                 twitter_id, voter_we_vote_id)
     t1 = time()

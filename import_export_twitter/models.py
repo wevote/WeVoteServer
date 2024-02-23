@@ -118,19 +118,19 @@ class TwitterAuthManager(models.Manager):
                 twitter_auth_response_id = twitter_auth_response.id
                 twitter_auth_response_found = True
                 success = True
-                status = "RETRIEVE_TWITTER_AUTH_RESPONSE_FOUND_BY_VOTER_DEVICE_ID"
+                status = "RETRIEVE_TWITTER_AUTH_RESPONSE_FOUND_BY_VOTER_DEVICE_ID "
             else:
                 twitter_auth_response_found = False
                 success = False
-                status = "RETRIEVE_TWITTER_AUTH_RESPONSE_VARIABLES_MISSING"
+                status = "RETRIEVE_TWITTER_AUTH_RESPONSE_VARIABLES_MISSING "
         except TwitterAuthResponse.DoesNotExist:
             twitter_auth_response_found = False
             success = True
-            status = "RETRIEVE_TWITTER_AUTH_RESPONSE_NOT_FOUND"
+            status = "RETRIEVE_TWITTER_AUTH_RESPONSE_NOT_FOUND "
         except Exception as e:
             twitter_auth_response_found = False
             success = False
-            status = 'FAILED retrieve_twitter_auth_response'
+            status = 'FAILED retrieve_twitter_auth_response: ' + str(e) + " "
 
         results = {
             'success': success,

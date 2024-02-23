@@ -378,7 +378,7 @@
                 <td>{{ one_politician.display_personal_statement }}</td>
             </tr>
         {% endfor %}
-        {% if not search_result_option.candidate_name_already_linked %}
+{#        {% if not search_result_option.candidate_name_already_linked %}#}
             <tr>
                 <td>
                     <input type="radio" name="select_for_{{ search_result_option.candidate_slug }}" id="select_for_{{ search_result_option.candidate_slug }}_name_id" value="{{ search_result_option.candidate_name_to_search }}"/>
@@ -394,7 +394,7 @@
             </tr>
             <tr>
                 <td>
-                    <input type="radio" name="select_for_{{ search_result_option.candidate_slug }}" id="select_for_{{ search_result_option.candidate_slug }}_skip_id" value="skip" checked />
+                    <input type="radio" name="select_for_{{ search_result_option.candidate_slug }}" id="select_for_{{ search_result_option.candidate_slug }}_skip_id" value="skip"{% if not search_result_option.candidate_name_already_linked %} checked{% endif %} />
                 </td>
                 <td>
                     <label for="select_for_{{ search_result_option.candidate_slug }}_skip_id">SKIP</label>
@@ -405,7 +405,7 @@
                 <td></td>
                 <td></td>
             </tr>
-        {% endif %}
+{#        {% endif %}#}
         </table>
         </td>
     </tr>
