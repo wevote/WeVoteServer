@@ -66,6 +66,7 @@ def voter_retrieve_doc_template_values(url_root):
                    '  "is_political_data_viewer": boolean,\n' \
                    '  "is_signed_in": boolean,\n' \
                    '  "is_verified_volunteer": boolean,\n' \
+                   '  "is_voter_manager": boolean,\n' \
                    '  "last_name": string,\n' \
                    '  "linked_organization_we_vote_id": string,\n' \
                    '  "notification_settings_flags": integer,\n' \

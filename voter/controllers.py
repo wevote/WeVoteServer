@@ -828,6 +828,7 @@ def merge_voter_accounts(from_voter, to_voter):
             or positive_value_exists(from_voter.is_political_data_manager) \
             or positive_value_exists(from_voter.is_political_data_viewer) \
             or positive_value_exists(from_voter.is_verified_volunteer) \
+            or positive_value_exists(from_voter.is_voter_manager) \
             or positive_value_exists(from_voter.last_name) \
             or positive_value_exists(from_voter.middle_name) \
             or positive_value_exists(from_voter.notification_settings_flags) \
@@ -873,6 +874,9 @@ def merge_voter_accounts(from_voter, to_voter):
             if positive_value_exists(from_voter.is_verified_volunteer) \
                     and not positive_value_exists(to_voter.is_verified_volunteer):
                 to_voter.is_verified_volunteer = from_voter.is_verified_volunteer
+            if positive_value_exists(from_voter.is_voter_manager) \
+                    and not positive_value_exists(to_voter.is_voter_manager):
+                to_voter.is_voter_manager = from_voter.is_voter_manager
             if positive_value_exists(from_voter.last_name) and not positive_value_exists(to_voter.last_name):
                 to_voter.last_name = from_voter.last_name
             if positive_value_exists(from_voter.middle_name) and not positive_value_exists(to_voter.middle_name):
@@ -4148,6 +4152,7 @@ def voter_retrieve_for_api(  # voterRetrieve
             'is_political_data_viewer':         voter.is_political_data_viewer,
             'is_signed_in':                     voter.is_signed_in(),
             'is_verified_volunteer':            voter.is_verified_volunteer,
+            'is_voter_manager':                 voter.is_voter_manager,
             'last_name':                        voter.last_name,
             'linked_organization_we_vote_id':   voter.linked_organization_we_vote_id,
             'notification_settings_flags':      voter.notification_settings_flags,
@@ -4201,6 +4206,7 @@ def voter_retrieve_for_api(  # voterRetrieve
             'is_political_data_manager':        False,
             'is_political_data_viewer':         False,
             'is_verified_volunteer':            False,
+            'is_voter_manager':                 False,
             'profile_image_type_currently_active':  '',
             'signed_in':                        False,
             'signed_in_facebook':               False,

@@ -1014,7 +1014,8 @@ def voter_create_view(request):  # voterCreate
 
 
 def voter_create_new_account_view(request):  # voterCreateNewAccount
-    authority_required = {'admin'}
+    authority_required = {'admin', 'voter_manager'}
+    viewer_is_admin = voter_has_authority(request, {'admin'})
     status = ""
     if voter_has_authority(request, authority_required):
         # voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
@@ -1028,6 +1029,7 @@ def voter_create_new_account_view(request):  # voterCreateNewAccount
         is_political_data_manager = request.GET.get('is_political_data_manager', False) == 'true'
         is_political_data_viewer = request.GET.get('is_political_data_viewer', False) == 'true'
         is_verified_volunteer = request.GET.get('is_verified_volunteer', False) == 'true'
+        is_voter_manager = request.GET.get('is_voter_manager', False) == 'true'
 
         # Check to make sure email isn't attached to existing account in EmailAddress table
         existing_voter_found = False
@@ -1052,7 +1054,7 @@ def voter_create_new_account_view(request):  # voterCreateNewAccount
 
         if existing_voter_found:
             voter.set_password(password)
-            if is_admin:
+            if is_admin and viewer_is_admin:
                 voter.is_admin = True
             if is_analytics_admin:
                 voter.is_analytics_admin = True
@@ -1064,6 +1066,8 @@ def voter_create_new_account_view(request):  # voterCreateNewAccount
                 voter.is_political_data_viewer = True
             if is_verified_volunteer:
                 voter.is_verified_volunteer = True
+            if is_voter_manager:
+                voter.is_voter_manager = True
             if not positive_value_exists(voter.first_name) and positive_value_exists(first_name):
                 voter.first_name = first_name
             if not positive_value_exists(voter.last_name) and positive_value_exists(last_name):
@@ -1072,28 +1076,46 @@ def voter_create_new_account_view(request):  # voterCreateNewAccount
 
             status += "EMAIL_ADDRESS_ALREADY_IN_USE-UPDATED_VOTER "
             json_data = {
-                'status':           status,
-                'success':          True,
                 'duplicate_email':  False,
                 'has_permission':   True,
+                'email':            email,
+                'first_name':       first_name,
+                'password':         password,
+                'status':           status,
+                'success':          True,
             }
         else:
             results = Voter.objects.create_new_voter_account(
-                first_name, last_name, email, password, is_admin, is_analytics_admin, is_partner_organization,
-                is_political_data_manager, is_political_data_viewer, is_verified_volunteer)
+                first_name,
+                last_name,
+                email,
+                password,
+                is_admin=is_admin and viewer_is_admin,
+                is_analytics_admin=is_analytics_admin,
+                is_partner_organization=is_partner_organization,
+                is_political_data_manager=is_political_data_manager,
+                is_political_data_viewer=is_political_data_viewer,
+                is_verified_volunteer=is_verified_volunteer,
+                is_voter_manager=is_voter_manager)
 
             json_data = {
-                'status':           results['status'],
-                'success':          results['success'],
                 'duplicate_email':  results['duplicate_email'],
                 'has_permission':   True,
+                'email':            email,
+                'first_name':       first_name,
+                'password':         password,
+                'status':           results['status'],
+                'success':          results['success'],
             }
     else:
         json_data = {
-            'status':           "Insufficient rights to add user",
-            'success':          True,
             'duplicate_email':  False,
             'has_permission':   False,
+            'email':            '',
+            'first_name':       '',
+            'password':         '',
+            'status':           "Insufficient rights to add user",
+            'success':          True,
         }
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')

@@ -30,7 +30,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 @login_required
 def shared_item_list_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'admin'}  # We may want to add a "voter_admin"
+    authority_required = {'admin', 'analytics_admin', 'voter_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -252,7 +252,7 @@ def shared_item_list_view(request):
 @login_required
 def voter_who_shares_summary_list_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'admin'}  # We may want to add a "voter_admin"
+    authority_required = {'admin', 'voter_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 

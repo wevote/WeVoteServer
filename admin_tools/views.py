@@ -65,7 +65,7 @@ WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 def admin_home_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'admin', 'partner_organization', 'political_data_manager', 'political_data_viewer',
-                          'verified_volunteer'}
+                          'verified_volunteer', 'voter_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 

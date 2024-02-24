@@ -75,7 +75,7 @@ def organization_subscription_list_view(request):
 
 @login_required
 def suspect_charges_list_view(request):
-    authority_required = {'partner_organization', 'political_data_viewer', 'verified_volunteer'}
+    authority_required = {'admin', 'analytics_admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
     template_values = {}

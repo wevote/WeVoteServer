@@ -758,11 +758,12 @@ def candidate_list_view(request):
                 if linked_campaignx_we_vote_id_missing < 10:
                     candidate_without_linked_campaignx_we_vote_id_status += \
                             one_candidate.display_candidate_name() + \
-                            " (" + one_candidate.we_vote_id + ") "
+                            " (" + one_candidate.we_vote_id + "/" + one_candidate.politician_we_vote_id + ") "
         if positive_value_exists(linked_campaignx_we_vote_id_missing):
             campaignx_we_vote_id_updates_status += \
                 "{linked_campaignx_we_vote_id_missing:,} politicians missing linked_campaignx_we_vote_id. " \
-                "(Add campaigns by visiting Campaigns list.) {candidate_without_linked_campaignx_we_vote_id_status}" \
+                "(Add campaigns by visiting Campaigns list.) " \
+                "EXAMPLES: {candidate_without_linked_campaignx_we_vote_id_status}" \
                 "".format(
                     candidate_without_linked_campaignx_we_vote_id_status=
                     candidate_without_linked_campaignx_we_vote_id_status,
