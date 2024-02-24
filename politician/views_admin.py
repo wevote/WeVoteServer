@@ -1968,11 +1968,12 @@ def politician_edit_process_view(request):
                 politician_on_stage.we_vote_hosted_profile_uploaded_image_url_tiny = None
                 if profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UPLOADED \
                         or profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
+                    profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UNKNOWN
                     politician_on_stage.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UNKNOWN
                     politician_on_stage.we_vote_hosted_profile_image_url_large = None
                     politician_on_stage.we_vote_hosted_profile_image_url_medium = None
                     politician_on_stage.we_vote_hosted_profile_image_url_tiny = None
-            elif profile_image_type_currently_active is not False:
+            if profile_image_type_currently_active is not False:
                 from image.controllers import organize_object_photo_fields_based_on_image_type_currently_active
                 results = organize_object_photo_fields_based_on_image_type_currently_active(
                     object_with_photo_fields=politician_on_stage,

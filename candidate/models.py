@@ -2682,6 +2682,8 @@ class CandidateCampaign(models.Model):
 
     candidate_is_top_ticket = models.BooleanField(verbose_name="candidate is top ticket", default=False)
     candidate_is_incumbent = models.BooleanField(verbose_name="candidate is the current incumbent", default=False)
+    # Federal, State, Local: This is a copy of the value in contest_office.ballotpedia_race_office_level
+    race_office_level = models.CharField(verbose_name="race office level", max_length=255, null=True, blank=True)
     # If candidate is an incumbent, this is the we_vote_id of their Representative entry
     representative_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
     # Candidacy Declared, (and others for withdrawing, etc.)
