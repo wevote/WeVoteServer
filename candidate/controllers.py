@@ -234,6 +234,10 @@ def augment_candidate_with_contest_office_data(candidate, office):
             and office.district_name != candidate.district_name:
         candidate.district_name = office.district_name
         values_changed = True
+    if positive_value_exists(office.ballotpedia_race_office_level) \
+            and office.ballotpedia_race_office_level != candidate.race_office_level:
+        candidate.race_office_level = office.ballotpedia_race_office_level
+        values_changed = True
     return {
         'candidate':                candidate,
         'success':                  success,

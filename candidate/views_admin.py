@@ -339,6 +339,7 @@ def candidate_list_view(request):
     candidate_search = request.GET.get('candidate_search', '')
     current_page_url = request.get_full_path()
     exclude_candidate_analysis_done = request.GET.get('exclude_candidate_analysis_done', False)
+    federal_or_state = positive_value_exists(request.GET.get('federal_or_state', False))
     find_candidates_linked_to_multiple_offices = \
         positive_value_exists(request.GET.get('find_candidates_linked_to_multiple_offices', 0))
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
@@ -424,6 +425,8 @@ def candidate_list_view(request):
         #  this to refresh the candidate_ultimate_election_date data for all candidates.
         candidate_query = candidate_query.filter(
             Q(candidate_ultimate_election_date=0) | Q(candidate_ultimate_election_date__isnull=True))
+        if positive_value_exists(state_code):
+            candidate_query = candidate_query.filter(state_code__iexact=state_code)
         candidate_ultimate_count = candidate_query.count()
         if positive_value_exists(candidate_ultimate_count):
             populate_candidate_ultimate_election_date_status += \
@@ -467,24 +470,30 @@ def candidate_list_view(request):
 
     # We use the contest_office_name and/or district_name some places on WebApp. Update candidates missing this data.
     populate_contest_office_data = True
-    number_to_populate = 1000  # Normally we can process 1000 at a time
+    number_to_populate = 500  # Normally we can process 1000 at a time
     if populate_contest_office_data and run_scripts:
         populate_contest_office_data_status = ''
         candidate_query = CandidateCampaign.objects.all()
         # Restrict to candidates who are in the future
         year_list = [2023, 2024]
+        try:
+            now = datetime.now()
+            date_string = now.strftime('%Y%m%d')
+            date_int = int(date_string)
+        except Exception as e:
+            date_int = 20240101
         candidate_query = candidate_query.filter(
-            Q(candidate_ultimate_election_date__gt=20230601) |
+            Q(candidate_ultimate_election_date__gt=date_int) |
             Q(candidate_year__in=year_list)
         )
+        if positive_value_exists(state_code):
+            candidate_query = candidate_query.filter(state_code__iexact=state_code)
         # Restrict to entries with BOTH contest_office_name and district_name empty
+        #  OR race_office_level null or empty
         candidate_query = candidate_query.filter(
-            Q(contest_office_name__isnull=True) |
-            Q(contest_office_name='')
-        )
-        candidate_query = candidate_query.filter(
-            Q(district_name__isnull=True) |
-            Q(district_name='')
+            ((Q(contest_office_name__isnull=True) | Q(contest_office_name='')) &
+             (Q(district_name__isnull=True) | Q(district_name=''))) |
+            (Q(race_office_level__isnull=True) | Q(race_office_level=''))
         )
         candidate_ultimate_count = candidate_query.count()
         if positive_value_exists(candidate_ultimate_count):
@@ -492,13 +501,12 @@ def candidate_list_view(request):
                 "SCRIPT: {entries_to_process:,} entries to process (populate_contest_office_data). " \
                 "".format(entries_to_process=candidate_ultimate_count) + " "
 
-        # Filter candidtes based on whether they have an email address
+        # Filter candidates based on whether they have an email address
         if positive_value_exists(show_candidates_with_email):
             candidate_query = candidate_query.annotate(candidate_email_length=Length('candidate_email'))
             candidate_query = candidate_query.filter(
                 Q(candidate_email_length__gt=2)
             )
-
 
         # Now process
         candidate_bulk_update_list = []
@@ -595,17 +603,20 @@ def candidate_list_view(request):
         if len(candidate_bulk_update_list) > 0:
             try:
                 CandidateCampaign.objects.bulk_update(
-                    candidate_bulk_update_list, ['contest_office_name', 'district_name'])
+                    candidate_bulk_update_list, ['contest_office_name', 'district_name', 'race_office_level'])
             except Exception as e:
                 messages.add_message(request, messages.ERROR, "FAILED_BULK_UPDATE: " + str(e))
 
+        # If there are some leftover entries which we can't update, we don't want to show a message like this forever:
+        #  SCRIPT: 7 entries to process (populate_contest_office_data).
+        candidates_updated_or_not_updated = False
         if positive_value_exists(candidates_updated):
-            populate_contest_office_data_status += \
-                "candidates_updated: " + str(candidates_updated) + " "
+            populate_contest_office_data_status += "candidates_updated: " + str(candidates_updated) + " "
+            candidates_updated_or_not_updated = True
         if positive_value_exists(candidates_not_updated):
-            populate_contest_office_data_status += \
-                "candidates_not_updated: " + str(candidates_updated) + " "
-        if positive_value_exists(populate_contest_office_data_status):
+            populate_contest_office_data_status += "candidates_not_updated: " + str(candidates_updated) + " "
+            candidates_updated_or_not_updated = True
+        if candidates_updated_or_not_updated and positive_value_exists(populate_contest_office_data_status):
             messages.add_message(request, messages.INFO, populate_contest_office_data_status)
 
     # Update candidates who currently don't have seo_friendly_path, if there is seo_friendly_path
@@ -992,6 +1003,9 @@ def candidate_list_view(request):
                 & (Q(facebook_url__isnull=True) | Q(facebook_url="") | Q(facebook_url_is_broken=True))
                 & (Q(instagram_handle__isnull=True) | Q(instagram_handle=""))
             )
+        if positive_value_exists(federal_or_state):
+            # Show candidates that with a race_office_level of 'Federal' or 'State'
+            candidate_query = candidate_query.filter(Q(race_office_level="Federal") | Q(race_office_level="State"))
         if positive_value_exists(hide_candidates_with_photos):
             # Show candidates that do NOT have photos
             candidate_query = candidate_query.filter(
@@ -1307,6 +1321,7 @@ def candidate_list_view(request):
         'election_years_available':                 ELECTION_YEARS_AVAILABLE,
         'exclude_candidate_analysis_done':          exclude_candidate_analysis_done,
         'facebook_urls_without_picture_urls':       facebook_urls_without_picture_urls,
+        'federal_or_state':                         federal_or_state,
         'find_candidates_linked_to_multiple_offices':   find_candidates_linked_to_multiple_offices,
         'google_civic_election_id':                 google_civic_election_id,
         'hide_candidate_tools':                     hide_candidate_tools,
@@ -2132,6 +2147,7 @@ def candidate_edit_process_view(request):
     candidate_contact_form_url = request.POST.get('candidate_contact_form_url', False)
     candidate_email = request.POST.get('candidate_email', False)
     candidate_phone = request.POST.get('candidate_phone', False)
+    candidate_photo_file_delete = positive_value_exists(request.POST.get('candidate_photo_file_delete', False))
     candidate_twitter_handle = request.POST.get('candidate_twitter_handle', False)
     if positive_value_exists(candidate_twitter_handle):
         candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle)
@@ -2752,66 +2768,25 @@ def candidate_edit_process_view(request):
                 else:
                     candidate_on_stage.withdrawal_date = None
 
+            if candidate_photo_file_delete:
+                candidate_on_stage.we_vote_hosted_profile_uploaded_image_url_large = None
+                candidate_on_stage.we_vote_hosted_profile_uploaded_image_url_medium = None
+                candidate_on_stage.we_vote_hosted_profile_uploaded_image_url_tiny = None
+                if profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UPLOADED \
+                        or profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UNKNOWN:
+                    profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UNKNOWN
+                    candidate_on_stage.profile_image_type_currently_active = PROFILE_IMAGE_TYPE_UNKNOWN
+                    candidate_on_stage.we_vote_hosted_profile_image_url_large = None
+                    candidate_on_stage.we_vote_hosted_profile_image_url_medium = None
+                    candidate_on_stage.we_vote_hosted_profile_image_url_tiny = None
             if profile_image_type_currently_active is not False:
-                if profile_image_type_currently_active in [
-                        PROFILE_IMAGE_TYPE_BALLOTPEDIA,
-                        PROFILE_IMAGE_TYPE_FACEBOOK,
-                        PROFILE_IMAGE_TYPE_LINKEDIN,
-                        PROFILE_IMAGE_TYPE_TWITTER,
-                        PROFILE_IMAGE_TYPE_UNKNOWN,
-                        PROFILE_IMAGE_TYPE_UPLOADED,
-                        PROFILE_IMAGE_TYPE_VOTE_USA,
-                        PROFILE_IMAGE_TYPE_WIKIPEDIA]:
-                    candidate_on_stage.profile_image_type_currently_active = profile_image_type_currently_active
-                    if profile_image_type_currently_active == PROFILE_IMAGE_TYPE_BALLOTPEDIA:
-                        candidate_on_stage.we_vote_hosted_profile_image_url_large = \
-                            candidate_on_stage.we_vote_hosted_profile_ballotpedia_image_url_large
-                        candidate_on_stage.we_vote_hosted_profile_image_url_medium = \
-                            candidate_on_stage.we_vote_hosted_profile_ballotpedia_image_url_medium
-                        candidate_on_stage.we_vote_hosted_profile_image_url_tiny = \
-                            candidate_on_stage.we_vote_hosted_profile_ballotpedia_image_url_tiny
-                    elif profile_image_type_currently_active == PROFILE_IMAGE_TYPE_FACEBOOK:
-                        candidate_on_stage.we_vote_hosted_profile_image_url_large = \
-                            candidate_on_stage.we_vote_hosted_profile_facebook_image_url_large
-                        candidate_on_stage.we_vote_hosted_profile_image_url_medium = \
-                            candidate_on_stage.we_vote_hosted_profile_facebook_image_url_medium
-                        candidate_on_stage.we_vote_hosted_profile_image_url_tiny = \
-                            candidate_on_stage.we_vote_hosted_profile_facebook_image_url_tiny
-                    elif profile_image_type_currently_active == PROFILE_IMAGE_TYPE_LINKEDIN:
-                        candidate_on_stage.we_vote_hosted_profile_image_url_large = \
-                            candidate_on_stage.we_vote_hosted_profile_linkedin_image_url_large
-                        candidate_on_stage.we_vote_hosted_profile_image_url_medium = \
-                            candidate_on_stage.we_vote_hosted_profile_linkedin_image_url_medium
-                        candidate_on_stage.we_vote_hosted_profile_image_url_tiny = \
-                            candidate_on_stage.we_vote_hosted_profile_linkedin_image_url_tiny
-                    elif profile_image_type_currently_active == PROFILE_IMAGE_TYPE_TWITTER:
-                        candidate_on_stage.we_vote_hosted_profile_image_url_large = \
-                            candidate_on_stage.we_vote_hosted_profile_twitter_image_url_large
-                        candidate_on_stage.we_vote_hosted_profile_image_url_medium = \
-                            candidate_on_stage.we_vote_hosted_profile_twitter_image_url_medium
-                        candidate_on_stage.we_vote_hosted_profile_image_url_tiny = \
-                            candidate_on_stage.we_vote_hosted_profile_twitter_image_url_tiny
-                    elif profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UPLOADED:
-                        candidate_on_stage.we_vote_hosted_profile_image_url_large = \
-                            candidate_on_stage.we_vote_hosted_profile_uploaded_image_url_large
-                        candidate_on_stage.we_vote_hosted_profile_image_url_medium = \
-                            candidate_on_stage.we_vote_hosted_profile_uploaded_image_url_medium
-                        candidate_on_stage.we_vote_hosted_profile_image_url_tiny = \
-                            candidate_on_stage.we_vote_hosted_profile_uploaded_image_url_tiny
-                    elif profile_image_type_currently_active == PROFILE_IMAGE_TYPE_VOTE_USA:
-                        candidate_on_stage.we_vote_hosted_profile_image_url_large = \
-                            candidate_on_stage.we_vote_hosted_profile_vote_usa_image_url_large
-                        candidate_on_stage.we_vote_hosted_profile_image_url_medium = \
-                            candidate_on_stage.we_vote_hosted_profile_vote_usa_image_url_medium
-                        candidate_on_stage.we_vote_hosted_profile_image_url_tiny = \
-                            candidate_on_stage.we_vote_hosted_profile_vote_usa_image_url_tiny
-                    elif profile_image_type_currently_active == PROFILE_IMAGE_TYPE_WIKIPEDIA:
-                        candidate_on_stage.we_vote_hosted_profile_image_url_large = \
-                            candidate_on_stage.we_vote_hosted_profile_wikipedia_image_url_large
-                        candidate_on_stage.we_vote_hosted_profile_image_url_medium = \
-                            candidate_on_stage.we_vote_hosted_profile_wikipedia_image_url_medium
-                        candidate_on_stage.we_vote_hosted_profile_image_url_tiny = \
-                            candidate_on_stage.we_vote_hosted_profile_wikipedia_image_url_tiny
+                from image.controllers import organize_object_photo_fields_based_on_image_type_currently_active
+                results = organize_object_photo_fields_based_on_image_type_currently_active(
+                    object_with_photo_fields=candidate_on_stage,
+                    profile_image_type_currently_active=profile_image_type_currently_active,
+                )
+                if results['success']:
+                    candidate_on_stage = results['object_with_photo_fields']
 
             candidate_on_stage.save()
             candidate_id = candidate_on_stage.id

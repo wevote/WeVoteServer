@@ -367,6 +367,11 @@
              {% if hide_candidates_with_links %}checked{% endif %} /> Missing Links
     </label>
     &nbsp;&nbsp;&nbsp;&nbsp;
+    <label for="federal_or_state_id">
+      <input type="checkbox" name="federal_or_state" id="federal_or_state_id" value="1"
+             {% if federal_or_state %}checked{% endif %} /> Federal or State
+    </label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
     <label for="exclude_candidate_analysis_done_id">
       <input type="checkbox" name="exclude_candidate_analysis_done" id="exclude_candidate_analysis_done_id" value="1"
              {% if exclude_candidate_analysis_done %}checked{% endif %} /> Exclude Analyzed
@@ -744,6 +749,11 @@
     });
     $(function() {
         $('#review_mode_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#federal_or_state_id').change(function() {
             this.form.submit();
         });
     });
