@@ -1015,6 +1015,7 @@ def voter_create_view(request):  # voterCreate
 
 def voter_create_new_account_view(request):  # voterCreateNewAccount
     authority_required = {'admin', 'voter_manager'}
+    viewer_is_admin = voter_has_authority(request, {'admin'})
     status = ""
     if voter_has_authority(request, authority_required):
         # voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
@@ -1053,7 +1054,7 @@ def voter_create_new_account_view(request):  # voterCreateNewAccount
 
         if existing_voter_found:
             voter.set_password(password)
-            if is_admin:
+            if is_admin and viewer_is_admin:
                 voter.is_admin = True
             if is_analytics_admin:
                 voter.is_analytics_admin = True
@@ -1089,7 +1090,7 @@ def voter_create_new_account_view(request):  # voterCreateNewAccount
                 last_name,
                 email,
                 password,
-                is_admin=is_admin,
+                is_admin=is_admin and viewer_is_admin,
                 is_analytics_admin=is_analytics_admin,
                 is_partner_organization=is_partner_organization,
                 is_political_data_manager=is_political_data_manager,
