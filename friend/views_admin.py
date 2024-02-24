@@ -25,7 +25,7 @@ def current_friends_data_healing_view(request):
     voter_we_vote_id_list = []
 
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'admin'}  # We may want to add a "voter_admin"
+    authority_required = {'admin', 'voter_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -79,7 +79,7 @@ def generate_mutual_friends_for_all_voters_view(request):
     status = ""
 
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'admin'}  # We may want to add a "voter_admin"
+    authority_required = {'admin', 'voter_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -95,7 +95,7 @@ def generate_mutual_friends_for_one_voter_view(request):
     status = ""
 
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'admin'}  # We may want to add a "voter_admin"
+    authority_required = {'admin', 'voter_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -120,7 +120,7 @@ def refresh_voter_friend_count_view(request):
     status = ""
 
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'admin'}  # We may want to add a "voter_admin"
+    authority_required = {'admin', 'voter_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 

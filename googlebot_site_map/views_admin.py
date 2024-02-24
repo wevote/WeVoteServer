@@ -75,7 +75,7 @@ def get_googlebot_map_file_body(request):
 
 @login_required
 def googlebot_site_map_list_view(request):
-    authority_required = {'admin'}  # We may want to add a "voter_admin"
+    authority_required = {'admin'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 

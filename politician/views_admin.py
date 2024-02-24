@@ -514,7 +514,7 @@ def politician_list_view(request):
                                      "".format(e=e))
 
     # Create default CampaignX for all politicians who currently don't have one
-    generate_campaignx_for_every_politician = False
+    generate_campaignx_for_every_politician = True
     number_to_create = 1000
     if generate_campaignx_for_every_politician and run_scripts:
         politician_query = Politician.objects.all()

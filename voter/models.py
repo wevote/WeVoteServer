@@ -740,9 +740,19 @@ class VoterManager(BaseUserManager):
 
         return voter
 
-    def create_new_voter_account(self, first_name, last_name, email, password, is_admin, is_analytics_admin,
-                                 is_partner_organization, is_political_data_manager, is_political_data_viewer,
-                                 is_verified_volunteer):
+    @staticmethod
+    def create_new_voter_account(
+            first_name,
+            last_name,
+            email,
+            password,
+            is_admin=False,
+            is_analytics_admin=False,
+            is_partner_organization=False,
+            is_political_data_manager=False,
+            is_political_data_viewer=False,
+            is_verified_volunteer=False,
+            is_voter_manager=False):
         """
         Create a new voter, called from the api.wevoteusa.org/voter page
         :param first_name:
@@ -755,6 +765,7 @@ class VoterManager(BaseUserManager):
         :param is_political_data_manager:
         :param is_political_data_viewer:
         :param is_verified_volunteer:
+        :param is_voter_manager:
         :return:
         """
         voter = Voter()
@@ -775,6 +786,7 @@ class VoterManager(BaseUserManager):
             voter.is_political_data_manager = is_political_data_manager
             voter.is_political_data_viewer = is_political_data_viewer
             voter.is_verified_volunteer = is_verified_volunteer
+            voter.is_voter_manager = is_voter_manager
             voter.is_active = True
             voter.save()
             voter_created = True
@@ -1812,6 +1824,7 @@ class VoterManager(BaseUserManager):
             is_political_data_manager=False,
             is_political_data_viewer=False,
             is_verified_volunteer=False,
+            is_voter_manager=False,
             or_filter=True):
         """
         Retrieve list of voters based on the permissions they have been granted
@@ -1826,7 +1839,8 @@ class VoterManager(BaseUserManager):
                 and not positive_value_exists(is_partner_organization) \
                 and not positive_value_exists(is_political_data_manager) \
                 and not positive_value_exists(is_political_data_viewer) \
-                and not positive_value_exists(is_verified_volunteer):
+                and not positive_value_exists(is_verified_volunteer) \
+                and not positive_value_exists(is_voter_manager):
             status += "MUST_SPECIFY_ONE_PERMISSION_TYPE "
             result = {
                 'status': status,
@@ -1855,6 +1869,9 @@ class VoterManager(BaseUserManager):
             voter_raw_filters.append(new_voter_filter)
         if positive_value_exists(is_verified_volunteer):
             new_voter_filter = Q(is_verified_volunteer=True)
+            voter_raw_filters.append(new_voter_filter)
+        if positive_value_exists(is_voter_manager):
+            new_voter_filter = Q(is_voter_manager=True)
             voter_raw_filters.append(new_voter_filter)
 
         if len(voter_raw_filters):
@@ -3132,8 +3149,9 @@ class Voter(AbstractBaseUser):
     is_partner_organization = models.BooleanField(default=False)
     is_political_data_manager = models.BooleanField(default=False)
     is_political_data_viewer = models.BooleanField(default=False)
-    is_signed_in_cached = models.BooleanField(default=None, null=True, db_index=True)  # So we can do searches for analytics
+    is_signed_in_cached = models.BooleanField(default=None, null=True, db_index=True)  # For analytics reports
     is_verified_volunteer = models.BooleanField(default=False)
+    is_voter_manager = models.BooleanField(default=False)
 
     # Facebook session information
     facebook_id = models.BigIntegerField(verbose_name="facebook big integer id", null=True, blank=True)
@@ -4377,6 +4395,7 @@ def retrieve_voter_authority(request):
             'is_political_data_manager':    positive_value_exists(voter.is_political_data_manager),
             'is_political_data_viewer':     positive_value_exists(voter.is_political_data_viewer),
             'is_verified_volunteer':        positive_value_exists(voter.is_verified_volunteer),
+            'is_voter_manager':             positive_value_exists(voter.is_voter_manager),
         }
         return authority_results
 
@@ -4389,6 +4408,7 @@ def retrieve_voter_authority(request):
         'is_political_data_manager':    False,
         'is_political_data_viewer':     False,
         'is_verified_volunteer':        False,
+        'is_voter_manager':             False,
     }
     return authority_results
 
@@ -4399,35 +4419,52 @@ def voter_has_authority(request, authority_required, authority_results=None):
     if not positive_value_exists(authority_results['is_active']):
         return False
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    if 'admin' in authority_required:
-        if positive_value_exists(authority_results['is_admin']):
-            return True
-    if 'analytics_admin' in authority_required:
-        if positive_value_exists(authority_results['is_analytics_admin']) or \
-                positive_value_exists(authority_results['is_admin']):
-            return True
-    if 'partner_organization' in authority_required:
-        if positive_value_exists(authority_results['is_partner_organization']) or \
-                positive_value_exists(authority_results['is_political_data_manager']) or \
-                positive_value_exists(authority_results['is_admin']):
-            return True
-    if 'political_data_manager' in authority_required:
-        if positive_value_exists(authority_results['is_political_data_manager']) or \
-                positive_value_exists(authority_results['is_admin']):
-            return True
-    if 'political_data_viewer' in authority_required:
-        if positive_value_exists(authority_results['is_political_data_viewer']) or \
-                positive_value_exists(authority_results['is_analytics_admin']) or \
-                positive_value_exists(authority_results['is_verified_volunteer']) or \
-                positive_value_exists(authority_results['is_political_data_manager']) or \
-                positive_value_exists(authority_results['is_admin']):
-            return True
-    if 'verified_volunteer' in authority_required:
-        if positive_value_exists(authority_results['is_verified_volunteer']) or \
-                positive_value_exists(authority_results['is_analytics_admin']) or \
-                positive_value_exists(authority_results['is_political_data_manager']) or \
-                positive_value_exists(authority_results['is_admin']):
-            return True
+    if 'admin' in authority_required and \
+            positive_value_exists(authority_results['is_admin']):
+        return True
+    if 'analytics_admin' in authority_required and \
+            (
+            positive_value_exists(authority_results['is_analytics_admin']) or
+            positive_value_exists(authority_results['is_admin'])
+            ):
+        return True
+    if 'voter_manager' in authority_required and \
+            (
+            positive_value_exists(authority_results['is_voter_manager']) or
+            positive_value_exists(authority_results['is_admin'])
+            ):
+        return True
+    if 'partner_organization' in authority_required and \
+            (
+            positive_value_exists(authority_results['is_partner_organization']) or
+            positive_value_exists(authority_results['is_political_data_manager']) or
+            positive_value_exists(authority_results['is_admin'])
+            ):
+        return True
+    if 'political_data_manager' in authority_required and \
+            (
+            positive_value_exists(authority_results['is_political_data_manager']) or
+            positive_value_exists(authority_results['is_admin'])
+            ):
+        return True
+    if 'political_data_viewer' in authority_required and \
+            (
+            positive_value_exists(authority_results['is_political_data_viewer']) or
+            positive_value_exists(authority_results['is_analytics_admin']) or
+            positive_value_exists(authority_results['is_verified_volunteer']) or
+            positive_value_exists(authority_results['is_political_data_manager']) or
+            positive_value_exists(authority_results['is_admin'])
+            ):
+        return True
+    if 'verified_volunteer' in authority_required and \
+            (
+            positive_value_exists(authority_results['is_verified_volunteer']) or
+            positive_value_exists(authority_results['is_analytics_admin']) or
+            positive_value_exists(authority_results['is_political_data_manager']) or
+            positive_value_exists(authority_results['is_voter_manager']) or
+            positive_value_exists(authority_results['is_admin'])
+            ):
+        return True
     return False
 
 # class VoterJurisdictionLink(models.Model):
