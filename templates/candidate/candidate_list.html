@@ -18,8 +18,13 @@
 
 <form name="candidate_choose_election" method="get" action="{% url 'candidate:candidate_list' %}">
     {# These are input checkboxes from a form further down this page #}
-    <input type="hidden" name="review_mode" value="{{ review_mode }}" />
+
+{#    <input type="hidden" name="exclude_candidate_analysis_done" value="{{ exclude_candidate_analysis_done }}" />#}
+    <input type="hidden" name="federal_or_state" value="{{ federal_or_state }}" />
+    <input type="hidden" name="hide_candidates_with_links" value="{{ hide_candidates_with_links }}" />
     <input type="hidden" name="hide_candidates_with_photos" value="{{ hide_candidates_with_photos }}" />
+    <input type="hidden" name="review_mode" value="{{ review_mode }}" />
+    <input type="hidden" name="show_candidates_with_email" value="{{ show_candidates_with_email }}" />
     <input type="hidden" name="show_candidates_without_twitter" value="{{ show_candidates_without_twitter }}" />
     <input type="hidden" name="show_candidates_with_best_twitter_options" value="{{ show_candidates_with_best_twitter_options }}" />
     <input type="hidden" name="show_candidates_with_twitter_options" value="{{ show_candidates_with_twitter_options }}" />
