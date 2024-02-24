@@ -662,7 +662,7 @@ def campaign_list_view(request):
     messages_on_stage = get_messages(request)
     campaignx_manager = CampaignXManager()
 
-    update_campaigns_from_politicians_script = False
+    update_campaigns_from_politicians_script = True
     # Bring over updated politician profile photos to the campaignx entries with linked_politician_we_vote_id
     if update_campaigns_from_politicians_script:
         campaignx_list = []

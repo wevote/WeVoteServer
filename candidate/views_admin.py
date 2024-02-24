@@ -587,6 +587,7 @@ def candidate_list_view(request):
                         else:
                             office_by_candidate_we_vote_id_dict[candidate.we_vote_id] = office
 
+        why_candidates_did_not_update = ""
         for candidate in candidate_list:
             if positive_value_exists(candidate.we_vote_id) and \
                     candidate.we_vote_id in office_by_candidate_we_vote_id_dict:
@@ -600,6 +601,11 @@ def candidate_list_view(request):
                         candidates_updated += 1
                     else:
                         candidates_not_updated += 1
+                        if candidates_not_updated < 10:
+                            why_candidates_did_not_update += "[" + contest_office.office_name + " (" + \
+                                contest_office.we_vote_id + ") "
+                            why_candidates_did_not_update += ":: " + candidate.candidate_name + " (" + \
+                                                             candidate.we_vote_id + ")] "
         if len(candidate_bulk_update_list) > 0:
             try:
                 CandidateCampaign.objects.bulk_update(
@@ -614,7 +620,9 @@ def candidate_list_view(request):
             populate_contest_office_data_status += "candidates_updated: " + str(candidates_updated) + " "
             candidates_updated_or_not_updated = True
         if positive_value_exists(candidates_not_updated):
-            populate_contest_office_data_status += "candidates_not_updated: " + str(candidates_updated) + " "
+            populate_contest_office_data_status += \
+                "candidates_not_updated: " + str(candidates_not_updated) + " " + \
+                why_candidates_did_not_update + " "
             candidates_updated_or_not_updated = True
         if candidates_updated_or_not_updated and positive_value_exists(populate_contest_office_data_status):
             messages.add_message(request, messages.INFO, populate_contest_office_data_status)
@@ -735,6 +743,7 @@ def candidate_list_view(request):
         update_list = []
         updates_needed = False
         updates_made = 0
+        candidate_without_linked_campaignx_we_vote_id_status = ""
         for one_candidate in candidate_list:
             one_politician = politician_dict_list.get(one_candidate.politician_we_vote_id)
             if one_politician and hasattr(one_politician, 'linked_campaignx_we_vote_id') \
@@ -746,10 +755,18 @@ def candidate_list_view(request):
                 updates_made += 1
             else:
                 linked_campaignx_we_vote_id_missing += 1
+                if linked_campaignx_we_vote_id_missing < 10:
+                    candidate_without_linked_campaignx_we_vote_id_status += \
+                            one_candidate.display_candidate_name() + \
+                            " (" + one_candidate.we_vote_id + ") "
         if positive_value_exists(linked_campaignx_we_vote_id_missing):
             campaignx_we_vote_id_updates_status += \
-                "{linked_campaignx_we_vote_id_missing:,} missing linked_campaignx_we_vote_id." \
-                "".format(linked_campaignx_we_vote_id_missing=linked_campaignx_we_vote_id_missing)
+                "{linked_campaignx_we_vote_id_missing:,} politicians missing linked_campaignx_we_vote_id. " \
+                "(Add campaigns by visiting Campaigns list.) {candidate_without_linked_campaignx_we_vote_id_status}" \
+                "".format(
+                    candidate_without_linked_campaignx_we_vote_id_status=
+                    candidate_without_linked_campaignx_we_vote_id_status,
+                    linked_campaignx_we_vote_id_missing=linked_campaignx_we_vote_id_missing)
         if updates_needed:
             try:
                 CandidateCampaign.objects.bulk_update(
