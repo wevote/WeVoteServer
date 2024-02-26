@@ -4,6 +4,7 @@
 
 from ballot.controllers import choose_election_from_existing_data
 from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 import json
 from api_internal_cache.models import ApiInternalCacheManager
 from position.models import FRIENDS_AND_PUBLIC, FRIENDS_ONLY, PUBLIC_ONLY
@@ -24,6 +25,7 @@ from wevote_functions.functions import convert_to_int, get_maximum_number_to_ret
 logger = wevote_functions.admin.get_logger(__name__)
 
 
+@csrf_exempt
 def voter_guide_possibility_retrieve_view(request):  # voterGuidePossibilityRetrieve
     """
     Retrieve a previously saved website that may contain a voter guide (voterGuidePossibilityRetrieve)

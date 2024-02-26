@@ -153,17 +153,17 @@
 {# ################## #}
 <h2>Maintenance</h2>
     <p><a href="{% url 'apis_v1:apisIndex' %}">API Documentation</a></p>
+    <p><a href="{% url 'admin_tools:sync_dashboard' %}">Sync Data with Master We Vote Servers</a></p>
     <p><a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
         >Batch Process Status List</a></p>
+    <p><a href="{% url 'voter:voter_list' %}">Voters</a></p>
     <p><a href="{% url 'admin_tools:data_cleanup' %}">Data Cleanup Routines</a></p>
     <p><a href="{% url 'import_export_batches:batches_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
         >Import Data in Batches</a></p>
+    <p><a href="{% url 'googlebot_site_map:googlebot_site_map_list_view' %}">Googlebot Site Map Stats</a></p>
     <p><a href="{% url 'organization_plans:plan_list' %}">Paid Subscriptions for Endorsers</a></p>
     <p><a href="{% url 'scheduled_tasks:task_list' %}">Scheduled Tasks</a></p>
-    <p><a href="{% url 'admin_tools:sync_dashboard' %}">Sync Data with Master We Vote Servers</a></p>
     <p><a href="{% url 'import_export_vote_smart:vote_smart_index' %}">Vote Smart Tools</a></p>
-    <p><a href="{% url 'googlebot_site_map:googlebot_site_map_list_view' %}">Googlebot Site Map Stats</a></p>
-    <p><a href="{% url 'voter:voter_list' %}">Voters</a></p>
 
 <br>
 <br>
