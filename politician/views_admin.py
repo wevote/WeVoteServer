@@ -468,6 +468,11 @@ def politician_list_view(request):
                                      "ERROR with google_civic_name_alternates_generated: {e} "
                                      "".format(e=e))
 
+    generate_backgrounds = False
+    if generate_backgrounds and positive_value_exists(state_code) and run_scripts:
+        politician_query = Politician.objects.all()
+        
+
     # Create seo_friendly_path for all politicians who currently don't have one
     generate_seo_friendly_path_updates = True  # Set False on local machine for now
     number_to_create = 1000
