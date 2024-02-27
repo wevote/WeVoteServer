@@ -154,4 +154,6 @@ web_app/build/*
 /cert/
 /cert/wevotedeveloper.com.crt
 /cert/wevotedeveloper.com_key.txt
+/cert/2023/wevotedeveloper.com.crt
+/cert/2023/wevotedeveloper.com_key.txt
 WeVoteServerDB*.pgsql

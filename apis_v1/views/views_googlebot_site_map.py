@@ -6,7 +6,7 @@ from django.http import HttpResponse
 
 import wevote_functions.admin
 from config.base import get_environment_variable
-from googlebot_site_map.views_admin import log_request, get_googlebot_map_file_body
+from googlebot_site_map.views_admin import log_request, get_googlebot_map_file_body, get_googlebot_map_xml_body
 from politician.models import Politician
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -23,7 +23,7 @@ def xml_for_n_maps(n):
     xml += '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
     for i in range(n):
         xml += '  <sitemap>'
-        xml += '    <loc>https://wevote.us/map%s.html</loc>' % (i)
+        xml += '    <loc>https://wevote.us/map%s.xml</loc>' % (i)
         xml += '  </sitemap>'
     xml += '</sitemapindex>'
     return xml
@@ -59,3 +59,17 @@ def get_sitemap_text_file(request):
         logger.error('googlebost_site_map get_sitemap_text_file threw ', e)
     html += "</html></body><br>"
     return HttpResponse(html)
+
+
+def get_sitemap_xml_file(request):
+    log_request(request)
+
+    # print(request)
+    xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    try:
+        xml += get_googlebot_map_xml_body(request)
+    except Exception as e:
+        logger.error('get_sitemap_xml_file get_googlebot_map_xml_body threw ', e)
+    xml += "</urlset>"
+    return HttpResponse(xml)
