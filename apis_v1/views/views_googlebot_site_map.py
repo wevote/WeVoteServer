@@ -28,6 +28,7 @@ def xml_for_n_maps(n):
     xml += '</sitemapindex>'
     return xml
 
+
 # Test url is https://wevotedeveloper.com:8000/apis/v1/googlebotSiteMap/map1.xml
 def get_sitemap_index_xml(request):
     log_request(request)
