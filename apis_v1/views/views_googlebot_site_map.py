@@ -17,7 +17,7 @@ WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 # To test XML queries from Chrome try the "Tabbed Postman - REST Client"
 # https://chromewebstore.google.com/detail/tabbed-postman-rest-clien/coohjcphdfgbiolnekdpbcijmhambjff?hl=en-US&utm_source=ext_sidebar
 # Add a header "content-type" "application/xml", put in the URL and press Send
-# Test url is https://localhost:8000/apis/v1/googlebotSiteMap/sitemap_index.xml
+# Test url is https://wevotedeveloper.com:8000/apis/v1/googlebotSiteMap/sitemap_index.xml
 def xml_for_n_maps(n):
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     xml += '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
@@ -28,7 +28,7 @@ def xml_for_n_maps(n):
     xml += '</sitemapindex>'
     return xml
 
-# Test url is https://localhost:8000/apis/v1/googlebotSiteMap/map1.html
+# Test url is https://wevotedeveloper.com:8000/apis/v1/googlebotSiteMap/map1.xml
 def get_sitemap_index_xml(request):
     log_request(request)
 
