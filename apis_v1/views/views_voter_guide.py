@@ -96,6 +96,7 @@ def voter_guide_possibility_position_save_view(request):  # voterGuidePossibilit
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
+@csrf_exempt
 def voter_guide_possibility_highlights_retrieve_view(request):  # voterGuidePossibilityHighlightsRetrieve
     """
     Retrieve the possible highlights from one organization on one page.
