@@ -514,7 +514,9 @@ def office_held_import_from_master_server_view(request):
         messages.add_message(request, messages.ERROR, "Cannot sync with Master We Vote Server -- "
                                                       "this is the Master We Vote Server.")
         return HttpResponseRedirect(reverse('admin_tools:admin_home', args=()))
+    google_civic_election_id = request.GET.get('google_civic_election_id', '')
     state_code = request.GET.get('state_code', '')
+    
 
     from office_held.controllers import office_held_import_from_master_server
     results = office_held_import_from_master_server(request, state_code)
@@ -530,8 +532,8 @@ def office_held_import_from_master_server_view(request):
                                                                not_processed=results['not_processed']))
     else:
         messages.add_message(request, messages.ERROR, results['status'])
-
-    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?state_code=" + str(state_code))
+ 
+    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) +"?google_civic_election_id=" + str(google_civic_election_id) +  "&state_code=" + str(state_code))
 
 
 @login_required
@@ -546,6 +548,7 @@ def offices_held_for_location_import_from_master_server_view(request):  # office
         messages.add_message(request, messages.ERROR, "Cannot sync with Master We Vote Server -- "
                                                       "this is the Master We Vote Server.")
         return HttpResponseRedirect(reverse('admin_tools:admin_home', args=()))
+    google_civic_election_id = request.GET.get('google_civic_election_id', '')
     state_code = request.GET.get('state_code', '')
 
     from office_held.controllers import offices_held_for_location_import_from_master_server
@@ -563,8 +566,8 @@ def offices_held_for_location_import_from_master_server_view(request):  # office
     else:
         messages.add_message(request, messages.ERROR, results['status'])
 
-    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?state_code=" + str(state_code))
-
+    #return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?state_code=" + str(state_code))
+    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?google_civic_election_id=" + str(google_civic_election_id) +  "&state_code=" + str(state_code))
 
 def office_held_update_status(request):
     global office_held_status_string
