@@ -1398,17 +1398,14 @@ def extract_twitter_handle_from_text_string(twitter_text_string):
         return ""
     twitter_text_string = str(twitter_text_string)
     twitter_text_string.strip()
-    twitter_text_string = twitter_text_string.lower()
-    twitter_text_string = twitter_text_string.replace("http://twitter.com", "")
-    twitter_text_string = twitter_text_string.replace("http://www.twitter.com", "")
-    twitter_text_string = twitter_text_string.replace("http://m.twitter.com", "")
-    twitter_text_string = twitter_text_string.replace("https://twitter.com", "")
-    twitter_text_string = twitter_text_string.replace("https://m.twitter.com", "")
-    twitter_text_string = twitter_text_string.replace("https://www.twitter.com", "")
-    twitter_text_string = twitter_text_string.replace("/www.twitter.com", "")
-    twitter_text_string = twitter_text_string.replace("www.twitter.com", "")
-    twitter_text_string = twitter_text_string.replace("twitter.com", "")
-    twitter_text_string = twitter_text_string.replace("@", "")
+    strings_to_be_removed_from_url = [
+        "http://twitter.com","http://www.twitter.com", "http://m.twitter.com", "https://twitter.com",
+        "https://m.twitter.com", "https://www.twitter.com", "/www.twitter.com", "www.twitter.com",
+        "twitter.com", "@"
+    ]
+    for string_to_be_removed in strings_to_be_removed_from_url:
+        twitter_text_string = re.compile(re.escape(string_to_be_removed), re.IGNORECASE).sub("", twitter_text_string)
+    twitter_text_string = str(twitter_text_string)
     while twitter_text_string.find('/') == 0 or \
             twitter_text_string.find('#') == 0 or \
             twitter_text_string.find('!') == 0:
@@ -1416,7 +1413,6 @@ def extract_twitter_handle_from_text_string(twitter_text_string):
     if twitter_text_string.find('/') > 0:
         twitter_text_string = twitter_text_string.split("/", 1)[0]  # Remove everything after first "/" (including "/")
     twitter_text_string = twitter_text_string.split("?", 1)[0]  # Remove everything after first "?" (including "?")
-    # TODO: Find original case of Twitter handle
 
     return twitter_text_string
 
