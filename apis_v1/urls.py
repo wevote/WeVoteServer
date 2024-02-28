@@ -150,6 +150,8 @@ urlpatterns = [
               name='googlebotSiteMapView'),
       re_path(r'^googlebotSiteMap\/map\d+.html', views_googlebot_site_map.get_sitemap_text_file,
               name='googlebotSiteMapTextFileView'),
+      re_path(r'^googlebotSiteMap\/map\d+.xml', views_googlebot_site_map.get_sitemap_xml_file,
+              name='googlebotSiteMapXmlFileView'),
       re_path(r'^ipHistoryClearForOneIp/', stripe_ip_history_clear_for_one_ip,
               name=''),
       re_path(r'^issueDescriptionsRetrieve/', issue_descriptions_retrieve_view,
