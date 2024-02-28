@@ -73,6 +73,33 @@ def get_googlebot_map_file_body(request):
     return map_text
 
 
+def xml_chunk(loc, lastmod):
+    chunk = '  <url>\n'
+    chunk += '    <loc>' + loc + '</loc>\n'
+    chunk += '    <lastmod>' + lastmod + '</lastmod>\n'
+    chunk += '  </url>\n'
+
+    return chunk
+
+
+def get_googlebot_map_xml_body(request):
+    map_num_result = re.findall(r'googlebotSiteMap\/map(\d+)', request.path)
+    num = int(map_num_result[0])
+    https_root = "https://wevote.us/"
+    dt = datetime.date.today()
+    lastmod = dt.strftime("%Y-%m-%d")
+    map_xml = ''
+    queryset = Politician.objects.using('readonly').order_by('id').filter(id__range=(num * 40000, (num + 1) * 40000))
+    politician_list = list(queryset)
+    if num == 0:
+        for loc in supplemental_urls.crawlable_urls:
+            map_xml += xml_chunk(loc, lastmod)
+    for pol in politician_list:
+        map_xml += xml_chunk(https_root + pol.seo_friendly_path, lastmod)
+
+    return map_xml
+
+
 @login_required
 def googlebot_site_map_list_view(request):
     authority_required = {'admin'}

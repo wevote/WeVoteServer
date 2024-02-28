@@ -273,6 +273,7 @@ def voter_authenticate_manually_process_view(request):
         return HttpResponseRedirect(reverse('voter:authenticate_manually', args=()))
 
 
+
 @login_required
 def voter_delete_process_view(request):
     """
