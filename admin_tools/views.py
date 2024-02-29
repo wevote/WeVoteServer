@@ -91,7 +91,8 @@ def admin_home_view(request):
 
     friend_manager = FriendManager()
     friendlinks = friend_manager.fetch_voters_with_friends_dataset_improved()
-    voters_with_friends_for_graph, voter_with_friends_counts = friend_manager.fetch_voters_with_friends_for_graph(friendlinks)
+    (voters_with_friends_for_graph, voter_with_friends_counts) = \
+        friend_manager.fetch_voters_with_friends_for_graph(friendlinks)
     voter_friendships_count = friend_manager.fetch_voter_friendships_count()
 
     position_metrics_manager = PositionMetricsManager()
@@ -272,7 +273,8 @@ def data_cleanup_organization_analysis_view(request):
 
             for one_duplicate_organization in organization_list_with_duplicate_twitter:
                 try:
-                    linked_voter = Voter.objects.get(linked_organization_we_vote_id__iexact=one_duplicate_organization.we_vote_id)
+                    linked_voter = \
+                        Voter.objects.get(linked_organization_we_vote_id__iexact=one_duplicate_organization.we_vote_id)
                     one_duplicate_organization.linked_voter = linked_voter
                 except Voter.DoesNotExist:
                     pass
@@ -1739,7 +1741,7 @@ def login_we_vote(request):
             voter_on_stage = request.user
             voter_on_stage_id = voter_on_stage.id
     elif request.POST:
-        username = request.POST.get('username')
+        username = request.POST.get('username').lower()
         password = request.POST.get('password')
 
         user = authenticate(username=username, password=password)
