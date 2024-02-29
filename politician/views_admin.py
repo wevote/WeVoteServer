@@ -468,6 +468,41 @@ def politician_list_view(request):
                                      "ERROR with google_civic_name_alternates_generated: {e} "
                                      "".format(e=e))
 
+    generate_backgrounds = False
+    number_to_generate = 1000
+    if generate_backgrounds and positive_value_exists(state_code) and run_scripts:
+        politician_query = Politician.objects.all()
+        politician_query = politician_query.filter(state_code__iexact=state_code)
+        total_to_convert = politician_query.count()
+        total_to_convert_after = total_to_convert - number_to_generate if total_to_convert > number_to_generate else 0
+        politician_list_to_convert = list(politician_query[:number_to_generate])
+        update_list = []
+        updates_needed = False
+        politicians_updated = 0
+        politicians_not_updated = 0
+        for politician in politician_list_to_convert:
+            if politician.profile_image_background_color_needed is not False:
+                if positive_value_exists(politician.we_vote_hosted_profile_image_url_large):
+                    hex = generate_background(politician)
+                    politician.profile_image_background_color = hex
+                    politician.profile_image_background_color_needed = False
+                    politicians_updated += 1
+                else:
+                    politicians_not_updated += 1
+            update_list.append(politician)
+        if updates_needed:
+            try:
+                Politician.objects.bulk_update( update_list, ['profile_image_background_color', 'profile_image_background_color_needed'])
+                message = \
+                    "Politicians updated: {politicians_updated:,}. " \
+                    "Politicians without picture URL:  {politicians_not_updated:,}. " \
+                    "".format(politicians_updated=politicians_updated, politicians_not_updated=politicians_not_updated)
+                messages.add_message(request, messages.INFO, message)
+            except Exception as e:
+                messages.add_message(request, messages.ERROR,
+                                "ERROR with update_politicians_profile_image_background_color_view: {e}"
+                                "".format(e=e))
+
     # Create seo_friendly_path for all politicians who currently don't have one
     generate_seo_friendly_path_updates = True  # Set False on local machine for now
     number_to_create = 1000
@@ -3010,7 +3045,7 @@ def update_politicians_from_candidates_view(request):
 
 def update_politicians_profile_image_background_color_view(request):
 
-    number_to_update = 3
+    number_to_update = 0
     queryset = Politician.objects.all()
     politician_list = list(queryset[:number_to_update])
 
