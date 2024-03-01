@@ -1741,8 +1741,16 @@ def login_we_vote(request):
             voter_on_stage = request.user
             voter_on_stage_id = voter_on_stage.id
     elif request.POST:
-        username = request.POST.get('username').lower()
         password = request.POST.get('password')
+        input_username = request.POST.get('username').strip()
+        # Retrieve user email address (as entered when account created) to avoid issue from WV-284
+        # Login Admin login page email field being case-sensitive
+        # Maybe in future can be dealt with by making emails in db all lowercase and lower-casing new user emails
+        user_obj = Voter.objects.filter(email__iexact=input_username).first()
+        if user_obj:
+            username = user_obj.email
+        else:
+            username = None
 
         user = authenticate(username=username, password=password)
         if user is not None:
