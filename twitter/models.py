@@ -901,14 +901,15 @@ class TwitterUserManager(models.Manager):
         }
         return results
 
-    def retrieve_twitter_ids_i_follow_from_twitter(self, twitter_id_of_me, twitter_access_token, twitter_access_secret):
+    def retrieve_twitter_ids_i_follow_from_twitter(self, twitter_id_of_me, twitter_voters_access_token_secret,
+                                                   twitter_voters_access_secret):
         """
         We use this routine to retrieve twitter ids who i (the voter) follow
         3/1/22: TwitterCursorState and Cursor is not currently used, we load the first 5000 "follows" in line
         3/1/22: This can take a 1/4 to 2 seconds to execute, but does not block/slow down login on the WebApp
         :param twitter_id_of_me:
-        :param twitter_access_token:
-        :param twitter_access_secret:
+        :param twitter_voters_access_token_secret:
+        :param twitter_voters_access_secret:
         :return: twitter_ids_i_follow
         """
 
