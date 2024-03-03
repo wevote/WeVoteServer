@@ -60,7 +60,7 @@ So we have to make a small change to /etc/hosts.  This is the before:
 ```
 We have added a local domain `wevotedeveloper.com` (with a real SSL certificate, but not in the public DNS system) for the 
 [Facebook Valid OAuth Redirect URIs](https://developers.facebook.com/apps/1097389196952441/fb-login/settings/), 
-you need to add that domain to your 127.0.0.1 line in /etc/hosts.  (This is also needed to run a local WebApp on your Mac for Sign In with Facebook and Twitter, but you will need to use the Safari browser). After the change:
+you need to add that domain to your 127.0.0.1 line in /etc/hosts.  (This is also needed to run a local WebApp on your Mac for Sign In with Facebook and Twitter, but you will need to use the Safari browser instead of Chrome to test this). After the change:
 ```
     (venv2) stevepodell@StevesM1Dec2021 WeVoteServer % cat /etc/hosts
     ##
