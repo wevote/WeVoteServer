@@ -468,29 +468,30 @@ def politician_list_view(request):
                                      "ERROR with google_civic_name_alternates_generated: {e} "
                                      "".format(e=e))
 
-    generate_backgrounds = False
-    number_to_generate = 1000
+    generate_backgrounds = True
+    number_to_generate = 10
     if generate_backgrounds and positive_value_exists(state_code) and run_scripts:
         politician_query = Politician.objects.all()
         politician_query = politician_query.filter(state_code__iexact=state_code)
+        politician_query = politician_query.exclude(profile_image_background_color_needed=False)
         total_to_convert = politician_query.count()
         total_to_convert_after = total_to_convert - number_to_generate if total_to_convert > number_to_generate else 0
         politician_list_to_convert = list(politician_query[:number_to_generate])
         update_list = []
-        updates_needed = False
         politicians_updated = 0
         politicians_not_updated = 0
+
         for politician in politician_list_to_convert:
-            if politician.profile_image_background_color_needed is not False:
-                if positive_value_exists(politician.we_vote_hosted_profile_image_url_large):
-                    hex = generate_background(politician)
-                    politician.profile_image_background_color = hex
-                    politician.profile_image_background_color_needed = False
-                    politicians_updated += 1
-                else:
-                    politicians_not_updated += 1
-            update_list.append(politician)
-        if updates_needed:
+            politician.profile_image_background_color_needed = False
+            if positive_value_exists(politician.we_vote_hosted_profile_image_url_large):
+                hex = generate_background(politician)
+                politician.profile_image_background_color = hex
+                politicians_updated += 1
+                update_list.append(politician)
+            else:
+                politicians_not_updated += 1
+
+        if len(update_list) > 0:
             try:
                 Politician.objects.bulk_update( update_list, ['profile_image_background_color', 'profile_image_background_color_needed'])
                 message = \
@@ -502,7 +503,7 @@ def politician_list_view(request):
                 messages.add_message(request, messages.ERROR,
                                 "ERROR with update_politicians_profile_image_background_color_view: {e}"
                                 "".format(e=e))
-
+    
     # Create seo_friendly_path for all politicians who currently don't have one
     generate_seo_friendly_path_updates = True  # Set False on local machine for now
     number_to_create = 1000
@@ -3045,18 +3046,25 @@ def update_politicians_from_candidates_view(request):
 
 def update_politicians_profile_image_background_color_view(request):
 
+    # put 1000 in the interface, and match that number here, add a comment regarding time
+    # in both scripts profile_image_background_color_needed will need to be set to false if they don't have a picture
     number_to_update = 0
     queryset = Politician.objects.all()
+    state_code = request.GET.get('state_code', '')
+    if positive_value_exists(state_code):
+        queryset = politician_query.filter(state_code__iexact=state_code)
+    queryset = politician_query.exclude(profile_image_background_color_needed=False)
+    
     politician_list = list(queryset[:number_to_update])
-
+    
     bulk_update_list = []
     politicians_updated = 0
     politicians_not_updated = 0
     for politician in politician_list:
+        politician.profile_image_background_color_needed = False
         if positive_value_exists(politician.we_vote_hosted_profile_image_url_large):
             hex = generate_background(politician)
             politician.profile_image_background_color = hex
-            politician.profile_image_background_color_needed = False
             politicians_updated += 1
         else:
             politicians_not_updated += 1
