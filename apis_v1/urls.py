@@ -7,8 +7,8 @@ This is called from config/urls.py like this:
 """
 
 from django.conf import settings
-from django.urls import re_path
 from django.conf.urls.static import static
+from django.urls import re_path
 
 from analytics.views_admin import analytics_action_sync_out_view, organization_daily_metrics_sync_out_view, \
     organization_election_metrics_sync_out_view, sitewide_daily_metrics_sync_out_view, \
@@ -290,8 +290,8 @@ urlpatterns = [
       re_path(r'^testRealTimeUpdate/', test_real_time_update, name='testRealTimeUpdate'),
       re_path(r'^twitterIdentityRetrieve/', views_twitter.twitter_identity_retrieve_view,
               name='twitterIdentityRetrieveView'),
-      re_path(r'^twitterNativeSignInSave/', views_twitter.twitter_native_sign_in_save_view,
-              name='twitterNativeSignInSave'),
+      re_path(r'^twitterOauth1UserHandler/', views_twitter.twitter_oauth1_user_handler_view,
+              name='twitterOauth1UserHandler'),
       re_path(r'^twitterSignInRequest/',
               views_twitter.twitter_sign_in_request_view, name='twitterSignInRequestView'),
       # re_path(r'^twitterSignInRequestAccessToken/',
