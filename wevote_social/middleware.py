@@ -24,6 +24,10 @@ class SocialMiddleware(object):
         # Code to be executed for each request before
         # the view (and later middleware) are called.
 
+        if "/complete/twitter/" in request.path:
+            # Bypass the state check in middleware for Twitter V2 API and the '/complete/twitter/' request
+            return HttpResponse()
+
         response = self.get_response(request)
     # def process_request(self, request):
         if hasattr(request, 'user'):
