@@ -25,7 +25,8 @@ class SocialMiddleware(object):
         # the view (and later middleware) are called.
 
         if "/complete/twitter/" in request.path:
-            # Bypass the state check in middleware for Twitter V2 API and the '/complete/twitter/' request
+            # Bypass the state check in middleware for Twitter V2 API and the '/complete/twitter/' request ...
+            #   In this case unconditionally return a 200
             return HttpResponse()
 
         response = self.get_response(request)
