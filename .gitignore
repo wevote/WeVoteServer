@@ -128,6 +128,10 @@ sftp-config.json
 *.swp
 *.swo
 
+# VS Code #
+###########
+.vscode/
+
 # npm #
 #######
 node_modules/
