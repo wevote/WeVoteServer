@@ -3046,7 +3046,6 @@ def update_politicians_from_candidates_view(request):
 
 def update_politicians_profile_image_background_color_view(request):
 
-    # in both scripts profile_image_background_color_needed will need to be set to false if they don't have a picture
     number_to_update = 1000
     politician_query = Politician.objects.all()
     state_code = request.GET.get('state_code', '')
