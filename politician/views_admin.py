@@ -3046,17 +3046,16 @@ def update_politicians_from_candidates_view(request):
 
 def update_politicians_profile_image_background_color_view(request):
 
-    # put 1000 in the interface, and match that number here, add a comment regarding time
     # in both scripts profile_image_background_color_needed will need to be set to false if they don't have a picture
-    number_to_update = 0
-    queryset = Politician.objects.all()
+    number_to_update = 1000
+    politician_query = Politician.objects.all()
     state_code = request.GET.get('state_code', '')
     if positive_value_exists(state_code):
-        queryset = politician_query.filter(state_code__iexact=state_code)
-    queryset = politician_query.exclude(profile_image_background_color_needed=False)
+        politician_query = politician_query.filter(state_code__iexact=state_code)
+    politician_query = politician_query.exclude(profile_image_background_color_needed=False)
     
-    politician_list = list(queryset[:number_to_update])
-    
+    politician_list = list(politician_query[:number_to_update])
+
     bulk_update_list = []
     politicians_updated = 0
     politicians_not_updated = 0
