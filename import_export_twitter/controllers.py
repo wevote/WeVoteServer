@@ -1403,6 +1403,13 @@ def retrieve_possible_twitter_handles(candidate):
     # auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
     # auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
     # api = tweepy.API(auth, timeout=20)
+    try:
+        logger.error("import_export_twitter/controllers.py 1406: session: client = tweepy.Client() candidate_name: ",
+                     candidate.candidate_name)
+    except Exception as excpt:
+        logger.error("import_export_twitter/controllers.py 1406: session: client = tweepy.Client() "
+                     "TRIED TO GET candidate name ", str(excpt))
+
     client = tweepy.Client(
         bearer_token=TWITTER_BEARER_TOKEN,
         consumer_key=TWITTER_CONSUMER_KEY,
@@ -2606,6 +2613,7 @@ def twitter_oauth1_user_handler_for_api(voter_device_id, oauth_token, oauth_veri
         )
         print('voters_access_token, voters_access_token_secret: ', voters_access_token, voters_access_token_secret)
 
+        logger.error("import_export_twitter/controllers.py 2616: session: client = tweepy.Client()")
         client = tweepy.Client(
             consumer_key=TWITTER_CONSUMER_KEY,
             consumer_secret=TWITTER_CONSUMER_SECRET,
@@ -3024,6 +3032,7 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
 
     try:
         # March 2024, now using Twitter V2 API
+        logger.error("import_export_twitter/controllers.py 3035: session: client = tweepy.Client()")
         client = tweepy.Client(
             consumer_key=TWITTER_CONSUMER_KEY,
             consumer_secret=TWITTER_CONSUMER_SECRET,
