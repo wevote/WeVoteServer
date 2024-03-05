@@ -1,0 +1,8 @@
+target-version = "py39"
+
+[format]
+exclude = ["**/*"]
+
+[lint]
+extend-select = ["PLR6301"]
+preview = true

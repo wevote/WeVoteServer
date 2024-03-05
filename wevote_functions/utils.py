@@ -1,7 +1,10 @@
 import os
 import re
 import urllib.request
+from datetime import datetime, date
+
 from django.db import connection
+from django.utils.timezone import localtime
 
 
 class FakeFirefoxURLopener(urllib.request.FancyURLopener):
@@ -52,8 +55,12 @@ def scrape_url(site_url, with_soup=True):
 def get_git_commit_date():
     scrape_res = scrape_url(get_git_commit_hash(True), False)
     try:
-        date = re.search(r"<relative-time.*?>(.*?)<\/relative-time>", scrape_res['all_html'])
-        date_string = date.group(1) if date and date.group(1) else 'Not found'
+        reg = re.search(r"<relative-time datetime=\"(.*?)\"", scrape_res['all_html'])
+        date_string = "Not found"
+        if date and reg.group(1):
+            dt = reg.group(1)
+            utc_time = datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S%z')            # 2024-03-04T21:58:40Z
+            date_string= localtime(utc_time).strftime("%d/%m/%Y %H:%M")
         return date_string
     except Exception as e:
         return 'Not found: ' + str(e)

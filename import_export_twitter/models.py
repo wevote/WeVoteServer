@@ -3,8 +3,9 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
-from wevote_functions.functions import positive_value_exists
+
 import wevote_functions.admin
+from wevote_functions.functions import positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -30,6 +31,7 @@ class TwitterAuthResponse(models.Model):
     """
     This is the authResponse data from a Twitter authentication
     """
+    objects = None
     voter_device_id = models.CharField(
         verbose_name="voter_device_id initiating Twitter Auth", max_length=255, null=False, blank=False, unique=True)
     datetime_of_authorization = models.DateTimeField(verbose_name='date and time of action', null=False, auto_now=True)
@@ -43,8 +45,12 @@ class TwitterAuthResponse(models.Model):
     twitter_profile_banner_url_https = models.URLField(verbose_name='url of banner from twitter', blank=True, null=True)
     twitter_request_token = models.TextField(verbose_name='twitter request token', null=True, blank=True)
     twitter_request_secret = models.TextField(verbose_name='twitter request secret', null=True, blank=True)
-    twitter_access_token = models.TextField(verbose_name='twitter access token', null=True, blank=True)
-    twitter_access_secret = models.TextField(verbose_name='twitter access secret', null=True, blank=True)
+    twitter_voters_access_token_secret = models.TextField(verbose_name='twitter access token', null=True, blank=True)
+    twitter_voters_access_secret = models.TextField(verbose_name='twitter access secret', null=True, blank=True)
+    twitter_description = models.TextField(verbose_name='twitter description', null=True, blank=True)
+    twitter_location = models.TextField(verbose_name='twitter location', null=True, blank=True)
+    twitter_verified= models.BooleanField(verbose_name='twitter verified', default=False)
+    twitter_verified_type = models.TextField(verbose_name='twitter verified type', default='')
 
 
 class TwitterAuthManager(models.Manager):
@@ -52,28 +58,42 @@ class TwitterAuthManager(models.Manager):
     def __unicode__(self):
         return "TwitterAuthManager"
 
-    def update_or_create_twitter_auth_response(self, voter_device_id, twitter_id=0, twitter_screen_name='',
-                                               twitter_profile_image_url_https='', twitter_request_token='',
-                                               twitter_request_secret='', twitter_access_token='',
-                                               twitter_access_secret=''):
+    def update_or_create_twitter_auth_response(self, voter_device_id, id=0,
+                                               username='', name='', profile_image_url='',
+                                               twitter_request_token='', twitter_request_secret='',
+                                               voters_access_token='', voters_access_token_secret='',
+                                               description='', location='', verified='', verified_type=''
+    ):
 
         defaults = {
             "voter_device_id": voter_device_id,
         }
-        if positive_value_exists(twitter_id):
-            defaults["twitter_id"] = twitter_id
-        if positive_value_exists(twitter_screen_name):
-            defaults["twitter_screen_name"] = twitter_screen_name
-        if positive_value_exists(twitter_profile_image_url_https):
-            defaults["twitter_profile_image_url_https"] = twitter_profile_image_url_https
+        if positive_value_exists(id):
+            defaults["twitter_id"] = id
+        if positive_value_exists(username):
+            defaults["twitter_screen_name"] = username
+        if positive_value_exists(name):
+            defaults["twitter_name"] = name
+        if positive_value_exists(profile_image_url):
+            defaults["twitter_profile_image_url_https"] = profile_image_url
         if positive_value_exists(twitter_request_token):
             defaults["twitter_request_token"] = twitter_request_token
         if positive_value_exists(twitter_request_secret):
             defaults["twitter_request_secret"] = twitter_request_secret
-        if positive_value_exists(twitter_access_token):
-            defaults["twitter_access_token"] = twitter_access_token
-        if positive_value_exists(twitter_access_secret):
-            defaults["twitter_access_secret"] = twitter_access_secret
+        if positive_value_exists(voters_access_token):
+            defaults["twitter_voters_access_token_secret"] = voters_access_token
+        if positive_value_exists(voters_access_token_secret):
+            defaults["twitter_voters_access_secret"] = voters_access_token_secret
+        if positive_value_exists(description):
+            defaults["twitter_description"] = description
+        if positive_value_exists(location):
+            defaults["twitter_location"] = location
+        if positive_value_exists(profile_image_url):
+            defaults["twitter_profile_image_url_https"] = profile_image_url
+        if positive_value_exists(verified):
+            defaults["twitter_verified"] = verified
+        if positive_value_exists(verified_type):
+            defaults["twitter_verified_type"] = verified_type
 
         try:
             twitter_auth_response, created = TwitterAuthResponse.objects.update_or_create(

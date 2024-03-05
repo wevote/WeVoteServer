@@ -5,12 +5,15 @@
 """Social middleware"""
 
 from django.http import HttpResponse
+from django.shortcuts import redirect
+
 from wevote_social.facebook import FacebookAPI
 # from social_django import exceptions as social_exceptions
 # from social.apps.django_app.middleware import SocialAuthExceptionMiddleware
 # from social_core.exceptions import SocialAuthBaseException
 import wevote_functions.admin
-
+from inspect import getmembers
+from types import FunctionType
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -20,9 +23,38 @@ class SocialMiddleware(object):
         self.get_response = get_response
         # One-time configuration and initialization.
 
+    def attributes(self, obj):
+        disallowed_names = {
+            name for name, value in getmembers(type(obj))
+            if isinstance(value, FunctionType)}
+        return {
+            name: getattr(obj, name) for name in dir(obj)
+            if name[0] != '_' and name not in disallowed_names and hasattr(obj, name)}
+
     def __call__(self, request):
         # Code to be executed for each request before
         # the view (and later middleware) are called.
+
+        print('----- request.path: ', request.path)
+        # print('----- request.GET: ', request.GET)
+        if "/complete/twitter/" in request.path:
+            # Bypass the state check in middleware for Twitter V2 API and the '/complete/twitter/' request ...
+            #   In this case unconditionally return a 200
+            print("MIDDLEWARE: object: " + str(request))
+            print("MIDDLEWARE: headers: " + str(request.headers))
+            print("MIDDLEWARE: session: " + str(self.attributes(request.session)))
+            tok = request.GET['oauth_token'] if request.GET['oauth_token'] else ""
+            ver = request.GET['oauth_verifier'] if request.GET['oauth_verifier'] else ""
+            resp = 'https://wevotedeveloper.com:3000/twittersigninprocess?oauth_token=' + tok + '&oauth_verifier=' + ver
+            print("MIDDLEWARE: uresp: " + resp)
+            logger.error("MIDDLEWARE: uresp: " + resp)
+            logger.error("MIDDLEWARE: object: " + str(request))
+            logger.error("MIDDLEWARE: headers: " + str(request.headers))
+            logger.error("MIDDLEWARE: session: " + str(self.attributes(request.session)))
+
+            # response = redirect(uresp)
+            # return response     # TODO FIX THIS RETURN
+            return HttpResponse()
 
         response = self.get_response(request)
     # def process_request(self, request):
