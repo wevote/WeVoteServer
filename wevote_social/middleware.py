@@ -4,16 +4,14 @@
 
 """Social middleware"""
 
-from django.http import HttpResponse
-from django.shortcuts import redirect
-
-from wevote_social.facebook import FacebookAPI
-# from social_django import exceptions as social_exceptions
-# from social.apps.django_app.middleware import SocialAuthExceptionMiddleware
-# from social_core.exceptions import SocialAuthBaseException
-import wevote_functions.admin
 from inspect import getmembers
 from types import FunctionType
+
+from django.http import HttpResponse
+
+import wevote_functions.admin
+from config.base import get_environment_variable
+from wevote_social.facebook import FacebookAPI
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -36,7 +34,12 @@ class SocialMiddleware(object):
         # the view (and later middleware) are called.
 
         print('----- request.path: ', request.path)
-        # print('----- request.GET: ', request.GET)
+        if 'siteConfigurationRetrieve' in request.path:
+            print('----- TWITTER_CONSUMER_KEY:', get_environment_variable("TWITTER_CONSUMER_KEY"),
+                  ' - TWITTER_CONSUMER_SECRET:', get_environment_variable("TWITTER_CONSUMER_SECRET"),
+                  ' - TWITTER_ACCESS_TOKEN:', get_environment_variable("TWITTER_ACCESS_TOKEN"),
+                  ' - TWITTER_ACCESS_TOKEN_SECRET:',  get_environment_variable("TWITTER_ACCESS_TOKEN_SECRET"))
+
         if "/complete/twitter/" in request.path:
             # Bypass the state check in middleware for Twitter V2 API and the '/complete/twitter/' request ...
             #   In this case unconditionally return a 200
