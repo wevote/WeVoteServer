@@ -5004,8 +5004,6 @@ class VoterAddressManager(models.Manager):
         elif f2 == 0:
             line1 = ''
 
-        # TODO: this function is reused when new voters are created, remove this log line anytime after mid august 2023
-        logger.error('%s', 'parse_address: ' + line1 + '-----' + typed_address + '===' + city + '====' + state)
         return place_found, line1, state, city, zip_code
 
     FIPS_LOOKUP = False

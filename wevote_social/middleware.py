@@ -35,17 +35,19 @@ class SocialMiddleware(object):
         # Code to be executed for each request before
         # the view (and later middleware) are called.
 
-        print('----- request.path: ', request.path)
-        print('----- request.GET: ', request.GET)
         if "/complete/twitter/" in request.path:
             # Bypass the state check in middleware for Twitter V2 API and the '/complete/twitter/' request ...
             #   In this case unconditionally return a 200
             uresp = 'https://wevotedeveloper.com:3000/twittersigninprocess?oauth_token=' + \
                     request.GET['oauth_token'] + '&oauth_verifier=' + request.GET['oauth_verifier']
             logger.error("MIDDLEWARE: object: " + str(request))
+            print("MIDDLEWARE: object: " + str(request))
             logger.error("MIDDLEWARE: headers: " + str(request.headers))
+            print("MIDDLEWARE: headers: " + str(request.headers))
             logger.error("MIDDLEWARE: session: " + str(self.attributes(request.session)))
+            print("MIDDLEWARE: session: " + str(self.attributes(request.session)))
             logger.error("MIDDLEWARE: uresp: " + uresp)
+            print("MIDDLEWARE: uresp: " + uresp)
 
             # response = redirect(uresp)
             # return response     # TODO FIX THIS RETURN
