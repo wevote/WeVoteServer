@@ -405,21 +405,18 @@ class IssueManager(models.Manager):
         return "IssueManager"
 
     @staticmethod
-    def retrieve_issue_from_id(
-            issue_id):
+    def retrieve_issue_from_id(issue_id):
         issue_manager = IssueManager()
         return issue_manager.retrieve_issue(issue_id)
 
     @staticmethod
-    def retrieve_issue_from_we_vote_id(
-            we_vote_id):
+    def retrieve_issue_from_we_vote_id(we_vote_id):
         issue_id = 0
         issue_manager = IssueManager()
         return issue_manager.retrieve_issue(issue_id, we_vote_id)
 
     @staticmethod
-    def fetch_issue_id_from_we_vote_id(
-            we_vote_id):
+    def fetch_issue_id_from_we_vote_id(we_vote_id):
         issue_id = 0
         issue_manager = IssueManager()
         results = issue_manager.retrieve_issue(issue_id, we_vote_id)
@@ -428,8 +425,7 @@ class IssueManager(models.Manager):
         return 0
 
     @staticmethod
-    def fetch_issue_name_from_we_vote_id(
-            we_vote_id):
+    def fetch_issue_name_from_we_vote_id(we_vote_id):
         issue_id = 0
         issue_manager = IssueManager()
         results = issue_manager.retrieve_issue(issue_id, we_vote_id)
@@ -438,8 +434,7 @@ class IssueManager(models.Manager):
         return ''
 
     @staticmethod
-    def fetch_issue_we_vote_id_from_id(
-            issue_id):
+    def fetch_issue_we_vote_id_from_id(issue_id):
         we_vote_id = ''
         issue_manager = IssueManager()
         results = issue_manager.retrieve_issue(issue_id, we_vote_id)
@@ -448,8 +443,7 @@ class IssueManager(models.Manager):
         return ''
 
     @staticmethod
-    def fetch_issue_from_we_vote_id(
-            we_vote_id):
+    def fetch_issue_from_we_vote_id(we_vote_id):
         issue_id = 0
         issue_manager = IssueManager()
         results = issue_manager.retrieve_issue(issue_id, we_vote_id)
@@ -458,8 +452,7 @@ class IssueManager(models.Manager):
         return None
 
     @staticmethod
-    def retrieve_issue_from_issue_name(
-            issue_name):
+    def retrieve_issue_from_issue_name(issue_name):
         issue_id = 0
         we_vote_id = ''
         issue_manager = IssueManager()
@@ -534,7 +527,8 @@ class IssueManager(models.Manager):
     @staticmethod
     def update_or_create_issue(
             issue_we_vote_id,
-            issue_name='', issue_description=''):
+            issue_name='',
+            issue_description=''):
         """
         Either update or create a issue entry.
         """
@@ -655,9 +649,7 @@ class IssueManager(models.Manager):
         return results
 
     @staticmethod
-    def reset_issue_image_details(
-            issue,
-            issue_icon_local_path=False):
+    def reset_issue_image_details(issue, issue_icon_local_path=False):
         """
         Reset an issue entry with original image details from we vote image.
         """
@@ -773,9 +765,7 @@ class OrganizationLinkToIssueList(models.Manager):
             return link_issue_list
 
     @staticmethod
-    def retrieve_issue_blocked_list_by_organization_we_vote_id(
-            organization_we_vote_id,
-            read_only=False):
+    def retrieve_issue_blocked_list_by_organization_we_vote_id(organization_we_vote_id, read_only=False):
         # Retrieve a list of issues bocked for an organization
         link_issue_list_found = False
         link_blocked = True
@@ -815,9 +805,7 @@ class OrganizationLinkToIssueList(models.Manager):
         return organization_we_vote_id_list
 
     @staticmethod
-    def fetch_issue_count_for_organization(
-            organization_id=0,
-            organization_we_vote_id=''):
+    def fetch_issue_count_for_organization(organization_id=0, organization_we_vote_id=''):
         link_issue_list_count = 0
         try:
             link_issue_list = OrganizationLinkToIssue.objects.using('readonly').all()
@@ -831,8 +819,7 @@ class OrganizationLinkToIssueList(models.Manager):
         return link_issue_list_count
 
     @staticmethod
-    def fetch_organization_count_for_issue(
-            issue_we_vote_id=''):
+    def fetch_organization_count_for_issue(issue_we_vote_id=''):
         link_active = True
         link_issue_list_count = 0
         try:
@@ -847,8 +834,7 @@ class OrganizationLinkToIssueList(models.Manager):
         return link_issue_list_count
 
     @staticmethod
-    def fetch_linked_organization_count(
-            issue_we_vote_id):
+    def fetch_linked_organization_count(issue_we_vote_id):
         number_of_organizations_following_this_issue = 0
 
         try:
@@ -864,8 +850,7 @@ class OrganizationLinkToIssueList(models.Manager):
         return number_of_organizations_following_this_issue
 
     @staticmethod
-    def retrieve_organization_we_vote_id_list_from_issue_we_vote_id_list(
-            issue_we_vote_id_list):
+    def retrieve_organization_we_vote_id_list_from_issue_we_vote_id_list(issue_we_vote_id_list):
         success = True
         organization_we_vote_id_list = []
         organization_we_vote_id_list_found = False
