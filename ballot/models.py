@@ -291,19 +291,19 @@ class BallotItemManager(models.Manager):
 
     @staticmethod
     def update_or_create_ballot_item_for_voter(
-        voter_id=0,
-        google_civic_election_id='',
-        google_ballot_placement=None,
-        ballot_item_display_name='',
-        measure_subtitle='',
-        measure_text='',
-        local_ballot_order=0,
-        contest_office_id=0,
-        contest_office_we_vote_id='',
-        contest_measure_id=0,
-        contest_measure_we_vote_id='',
-        state_code='',
-        defaults={}):
+            voter_id=0,
+            google_civic_election_id='',
+            google_ballot_placement=None,
+            ballot_item_display_name='',
+            measure_subtitle='',
+            measure_text='',
+            local_ballot_order=0,
+            contest_office_id=0,
+            contest_office_we_vote_id='',
+            contest_measure_id=0,
+            contest_measure_we_vote_id='',
+            state_code='',
+            defaults={}):
         ballot_item_found = False  # At the end, does a ballot_item exist?
         ballot_item_on_stage = None
         delete_extra_ballot_item_entries = False
@@ -440,19 +440,19 @@ class BallotItemManager(models.Manager):
 
     @staticmethod
     def update_or_create_ballot_item_for_polling_location(
-        polling_location_we_vote_id,
-        google_civic_election_id,
-        google_ballot_placement,
-        ballot_item_display_name,
-        measure_subtitle,
-        measure_text,
-        local_ballot_order,
-        contest_office_id=0,
-        contest_office_we_vote_id='',
-        contest_measure_id=0,
-        contest_measure_we_vote_id='',
-        state_code='',
-        defaults={}):
+            polling_location_we_vote_id,
+            google_civic_election_id,
+            google_ballot_placement,
+            ballot_item_display_name,
+            measure_subtitle,
+            measure_text,
+            local_ballot_order,
+            contest_office_id=0,
+            contest_office_we_vote_id='',
+            contest_measure_id=0,
+            contest_measure_we_vote_id='',
+            state_code='',
+            defaults={}):
         ballot_item_found = False  # At the end, does a ballot_item exist?
         ballot_item_on_stage = None
         delete_extra_ballot_item_entries = False
@@ -611,11 +611,11 @@ class BallotItemManager(models.Manager):
 
     @staticmethod
     def create_ballot_item_row_entry(
-        ballot_item_display_name,
-        local_ballot_order,
-        state_code,
-        google_civic_election_id,
-        defaults):
+            ballot_item_display_name,
+            local_ballot_order,
+            state_code,
+            google_civic_election_id,
+            defaults):
         """
         Create BallotItem table entry with BallotItem details
         :param ballot_item_display_name:
@@ -1224,11 +1224,11 @@ class BallotItemListManager(models.Manager):
 
     @staticmethod
     def retrieve_ballot_item_duplicate_list(
-        google_civic_election_id,
-        contest_measure_id,
-        contest_office_id,
-        voter_id=0,
-        polling_location_we_vote_id=""):
+            google_civic_election_id,
+            contest_measure_id,
+            contest_office_id,
+            voter_id=0,
+            polling_location_we_vote_id=""):
         ballot_item_list = []
         ballot_item_list_count = 0
         ballot_item_list_found = False
@@ -1332,10 +1332,10 @@ class BallotItemListManager(models.Manager):
 
     @staticmethod
     def retrieve_all_ballot_items_for_voter(
-        voter_id=0,
-        google_civic_election_id_list=[],
-        ignore_ballot_item_order=False,
-        read_only=False):
+            voter_id=0,
+            google_civic_election_id_list=[],
+            ignore_ballot_item_order=False,
+            read_only=False):
         polling_location_we_vote_id = ''
         ballot_item_list = []
         ballot_item_list_found = False
@@ -1388,10 +1388,10 @@ class BallotItemListManager(models.Manager):
 
     @staticmethod
     def retrieve_all_ballot_items_for_polling_location(
-        polling_location_we_vote_id='',
-        google_civic_election_id_list=[],
-        ignore_ballot_item_order=False,
-        read_only=True):
+            polling_location_we_vote_id='',
+            google_civic_election_id_list=[],
+            ignore_ballot_item_order=False,
+            read_only=True):
         voter_id = 0
         ballot_item_list = []
         ballot_item_list_found = False
@@ -1652,13 +1652,13 @@ class BallotItemListManager(models.Manager):
 
     @staticmethod
     def retrieve_possible_duplicate_ballot_items(
-        ballot_item_display_name,
-        google_civic_election_id,
-        polling_location_we_vote_id,
-        voter_id,
-        contest_office_we_vote_id,
-        contest_measure_we_vote_id,
-        state_code):
+            ballot_item_display_name,
+            google_civic_election_id,
+            polling_location_we_vote_id,
+            voter_id,
+            contest_office_we_vote_id,
+            contest_measure_we_vote_id,
+            state_code):
         ballot_item_list_objects = []
         ballot_item_list_found = False
         ballot_item_list_count = 0
@@ -1898,9 +1898,9 @@ class BallotReturnedManager(models.Manager):
 
     @staticmethod
     def remove_duplicate_ballot_returned_entries(
-        google_civic_election_id,
-        polling_location_we_vote_id,
-        voter_id):
+            google_civic_election_id,
+            polling_location_we_vote_id,
+            voter_id):
         status = ""
         success = ""
         ballot_returned_found = False
@@ -1983,12 +1983,12 @@ class BallotReturnedManager(models.Manager):
 
     @staticmethod
     def retrieve_existing_ballot_returned_by_identifier(
-        ballot_returned_id=0,
-        google_civic_election_id=0,
-        voter_id=0,
-        polling_location_we_vote_id='',
-        ballot_returned_we_vote_id='',
-        ballot_location_shortcut=''):
+            ballot_returned_id=0,
+            google_civic_election_id=0,
+            voter_id=0,
+            polling_location_we_vote_id='',
+            ballot_returned_we_vote_id='',
+            ballot_location_shortcut=''):
         """
         Search by voter_id (or polling_location_we_vote_id) + google_civic_election_id to see if have an entry
         :param ballot_returned_id:
@@ -2092,12 +2092,12 @@ class BallotReturnedManager(models.Manager):
 
     @staticmethod
     def delete_ballot_returned_by_identifier(
-        ballot_returned_id=0,
-        google_civic_election_id=0,
-        voter_id=0,
-        polling_location_we_vote_id='',
-        ballot_returned_we_vote_id='',
-        ballot_location_shortcut=''):
+            ballot_returned_id=0,
+            google_civic_election_id=0,
+            voter_id=0,
+            polling_location_we_vote_id='',
+            ballot_returned_we_vote_id='',
+            ballot_location_shortcut=''):
         """
         :param ballot_returned_id:
         :param google_civic_election_id:
@@ -2174,14 +2174,14 @@ class BallotReturnedManager(models.Manager):
 
     @staticmethod
     def create_ballot_returned_with_normalized_values(
-        google_civic_address_dict,
-        election_day_text,
-        election_description_text,
-        google_civic_election_id,
-        voter_id=0,
-        polling_location_we_vote_id='',
-        latitude='',
-        longitude=''):
+            google_civic_address_dict,
+            election_day_text,
+            election_description_text,
+            google_civic_election_id,
+            voter_id=0,
+            polling_location_we_vote_id='',
+            latitude='',
+            longitude=''):
         status = ''
         # Protect against ever saving test elections in the BallotReturned table
         if positive_value_exists(google_civic_election_id) and convert_to_int(google_civic_election_id) == 2000:
@@ -2256,12 +2256,12 @@ class BallotReturnedManager(models.Manager):
 
     @staticmethod
     def create_ballot_returned(
-        voter_id=0,
-        google_civic_election_id=0,
-        polling_location_we_vote_id='',
-        election_day_text='',
-        election_description_text='',
-        updates={}):
+            voter_id=0,
+            google_civic_election_id=0,
+            polling_location_we_vote_id='',
+            election_day_text='',
+            election_description_text='',
+            updates={}):
         status = ''
         # Protect against ever saving test elections in the BallotReturned table
         if positive_value_exists(google_civic_election_id) and convert_to_int(google_civic_election_id) == 2000:
@@ -2342,11 +2342,11 @@ class BallotReturnedManager(models.Manager):
 
     @staticmethod
     def create_ballot_returned_empty(
-        google_civic_election_id=0,
-        is_from_ctcl=False,
-        is_from_vote_usa=False,
-        polling_location_we_vote_id='',
-        state_code=None):
+            google_civic_election_id=0,
+            is_from_ctcl=False,
+            is_from_vote_usa=False,
+            polling_location_we_vote_id='',
+            state_code=None):
         ballot_returned_empty = None
         ballot_returned_empty_found = False
         if positive_value_exists(google_civic_election_id):
@@ -2914,20 +2914,20 @@ class BallotReturnedManager(models.Manager):
 
     @staticmethod
     def update_or_create_ballot_returned(
-        polling_location_we_vote_id='',
-        voter_id=0,
-        google_civic_election_id='',
-        election_day_text=False,
-        election_description_text=False,
-        latitude=False,
-        longitude=False,
-        normalized_city=False,
-        normalized_line1=False,
-        normalized_line2=False,
-        normalized_state=False,
-        normalized_zip=False,
-        text_for_map_search=False,
-        ballot_location_display_name=False):
+            polling_location_we_vote_id='',
+            voter_id=0,
+            google_civic_election_id='',
+            election_day_text=False,
+            election_description_text=False,
+            latitude=False,
+            longitude=False,
+            normalized_city=False,
+            normalized_line1=False,
+            normalized_line2=False,
+            normalized_state=False,
+            normalized_zip=False,
+            text_for_map_search=False,
+            ballot_location_display_name=False):
         status = ""
 
         exception_multiple_object_returned = False
@@ -3155,12 +3155,12 @@ class BallotReturnedListManager(models.Manager):
 
     @staticmethod
     def retrieve_ballot_returned_list(
-        google_civic_election_id,
-        polling_location_we_vote_id='',
-        for_voters=False,
-        state_code='',
-        date_last_updated_should_not_exceed=None,
-        limit=0):
+            google_civic_election_id,
+            polling_location_we_vote_id='',
+            for_voters=False,
+            state_code='',
+            date_last_updated_should_not_exceed=None,
+            limit=0):
         google_civic_election_id = convert_to_int(google_civic_election_id)
         ballot_returned_list = []
         ballot_returned_list_found = False
@@ -3283,9 +3283,9 @@ class BallotReturnedListManager(models.Manager):
 
     @staticmethod
     def retrieve_polling_location_we_vote_id_list_from_ballot_returned(
-        google_civic_election_id,
-        state_code='',
-        limit=750):
+            google_civic_election_id,
+            state_code='',
+            limit=750):
         google_civic_election_id = convert_to_int(google_civic_election_id)
         polling_location_we_vote_id_list = []
         status = ''
@@ -3324,11 +3324,11 @@ class BallotReturnedListManager(models.Manager):
 
     @staticmethod
     def retrieve_polling_location_we_vote_id_list_from_ballot_returned_empty(
-        batch_process_date_started=None,
-        is_from_ctcl=False,
-        is_from_vote_usa=False,
-        google_civic_election_id='',
-        state_code=''):
+            batch_process_date_started=None,
+            is_from_ctcl=False,
+            is_from_vote_usa=False,
+            google_civic_election_id='',
+            state_code=''):
         google_civic_election_id = convert_to_int(google_civic_election_id)
         polling_location_we_vote_id_list = []
         status = ''
@@ -3364,11 +3364,11 @@ class BallotReturnedListManager(models.Manager):
 
     @staticmethod
     def retrieve_ballot_returned_list_for_election(
-        google_civic_election_id,
-        state_code='',
-        limit=0,
-        ballot_returned_search_str='',
-        read_only=False):
+            google_civic_election_id,
+            state_code='',
+            limit=0,
+            ballot_returned_search_str='',
+            read_only=False):
         google_civic_election_id = convert_to_int(google_civic_election_id)
         ballot_returned_list = []
         ballot_returned_list_found = False
@@ -3646,10 +3646,10 @@ class BallotReturnedListManager(models.Manager):
 
     @staticmethod
     def retrieve_possible_duplicate_ballot_returned(
-        google_civic_election_id,
-        normalized_line1,
-        normalized_zip,
-        polling_location_we_vote_id):
+            google_civic_election_id,
+            normalized_line1,
+            normalized_zip,
+            polling_location_we_vote_id):
         ballot_returned_list_objects = []
         ballot_returned_list_found = False
         status = ''
@@ -4070,12 +4070,12 @@ class VoterBallotSavedManager(models.Manager):
     
     @staticmethod
     def retrieve_voter_ballot_saved_list_for_election(
-        google_civic_election_id,
-        polling_location_we_vote_id_source="",
-        state_code="",
-        find_only_entries_not_copied_from_polling_location=False,
-        find_all_entries_for_election=False,
-        read_only=False):
+            google_civic_election_id,
+            polling_location_we_vote_id_source="",
+            state_code="",
+            find_only_entries_not_copied_from_polling_location=False,
+            find_all_entries_for_election=False,
+            read_only=False):
         status = ""
         google_civic_election_id = convert_to_int(google_civic_election_id)
         voter_ballot_saved_list = []
