@@ -1,17 +1,19 @@
 # apis_v1/views/views_twitter.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-from config.base import get_environment_variable
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
-from import_export_twitter.controllers import twitter_identity_retrieve_for_api, twitter_sign_in_start_for_api, \
-    twitter_sign_in_request_access_token_for_api, twitter_sign_in_request_voter_info_for_api, \
-    twitter_process_deferred_images_for_api, twitter_sign_in_retrieve_for_api, twitter_retrieve_ids_i_follow_for_api, \
-    twitter_native_sign_in_save_for_api
 import json
 from urllib.parse import quote
 from urllib.parse import urlencode
+
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render
+
 import wevote_functions.admin
+from config.base import get_environment_variable
+from import_export_twitter.controllers import twitter_identity_retrieve_for_api, twitter_sign_in_start_for_api, \
+    twitter_sign_in_request_access_token_for_api, twitter_sign_in_request_voter_info_for_api, \
+    twitter_process_deferred_images_for_api, twitter_sign_in_retrieve_for_api, twitter_retrieve_ids_i_follow_for_api, \
+    twitter_oauth1_user_handler_for_api
 from wevote_functions.functions import get_voter_device_id, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -66,6 +68,16 @@ def twitter_identity_retrieve_view(request):  # twitterIdentityRetrieve
         'twitter_name':                             results['twitter_name'],
         }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def twitter_oauth1_user_handler_view(request):  # twitterOauth1UserHandler March 2024 for Twitter API 2
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    oauth_token = request.GET.get('oauth_token', '')
+    oauth_verifier = request.GET.get('oauth_verifier', '')
+
+    results = twitter_oauth1_user_handler_for_api(voter_device_id, oauth_token, oauth_verifier)
+
+    return HttpResponse(json.dumps(results), content_type='application/json')
 
 
 def twitter_sign_in_start_view(request):  # twitterSignInStart (Step 1)
@@ -152,39 +164,6 @@ def twitter_sign_in_request_access_token_view(request):  # twitterSignInRequestA
         return twitter_cordova_signin_response(request, json_data)
     else:
         return HttpResponse(json.dumps(json_data), content_type='application/json')
-
-
-def twitter_native_sign_in_save_view(request):  # twitterNativeSignInSave
-    """
-    For the native "app" react-native-oauth, replaces Steps 1 & 2 of the WebApp Twitter Sign In Process.
-    Receives twitter_access_token and twitter_access_token_secret from the native app's authenticate() call
-    :param request:
-    :return:
-    """
-
-    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    twitter_access_token = request.GET.get('twitter_access_token', '')
-    twitter_access_token_secret = request.GET.get('twitter_access_token_secret', '')
-    results_native = twitter_native_sign_in_save_for_api(voter_device_id, twitter_access_token,
-                                                         twitter_access_token_secret)
-
-    if not results_native['success'] == True:
-        logger.error("Bad save in twitter_native_sign_in_save_view: " + results_native['status'])
-
-    # Call equivalent of oAuth for WebApp Step 3
-    results_voter_info = twitter_sign_in_request_voter_info_for_api(voter_device_id, "Native API Call, No Return URL")
-
-    json_data = {
-        'status':               results_voter_info['status'] + ' ' + results_native['status'],
-        'success':              results_voter_info['success'],
-        'twitter_handle':       results_voter_info['twitter_handle'],
-        'twitter_handle_found': results_voter_info['twitter_handle_found'],
-        'twitter_secret_key':   results_voter_info['twitter_secret_key'],
-        'voter_device_id':      results_voter_info['voter_device_id'],
-        'voter_info_retrieved': results_voter_info['voter_info_retrieved'],
-        'switch_accounts':      results_voter_info['switch_accounts'],
-    }
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def twitter_sign_in_request_voter_info_view(request):  # twitterSignInRequestVoterInfo (Step 3)

@@ -108,6 +108,7 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
     # auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
     #
     # api = tweepy.API(auth, timeout=10)
+    logger.error("twitter/functions 111: session: client = tweepy.Client() twitter_handle: ", twitter_handle)
     client = tweepy.Client(
         bearer_token=TWITTER_BEARER_TOKEN,
         consumer_key=TWITTER_CONSUMER_KEY,
@@ -272,6 +273,7 @@ def retrieve_twitter_user_info_from_handles_list(
 
     if retrieve_from_twitter:
         try:
+            logger.error("twitter/functions.py 278: session: client = tweepy.Client()")
             client = tweepy.Client(
                 bearer_token=TWITTER_BEARER_TOKEN,
                 consumer_key=TWITTER_CONSUMER_KEY,

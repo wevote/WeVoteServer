@@ -46,7 +46,7 @@ def twitter_sign_in_retrieve_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
-                   '  "twitter_access_token": string,\n' \
+                   '  "twitter_voters_access_token_secret": string,\n' \
                    '  "twitter_email": string,\n' \
                    '  "twitter_first_name": string,\n' \
                    '  "twitter_image_load_info: object,\n' \
