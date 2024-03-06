@@ -14,8 +14,8 @@ class ApiInternalCacheManager(models.Manager):
     def __unicode__(self):
         return "ApiInternalCacheManager"
 
+    @staticmethod
     def create_api_internal_cache(
-            self,
             api_name='',
             cached_api_response_serialized='',
             election_id_list_serialized='',
@@ -64,11 +64,8 @@ class ApiInternalCacheManager(models.Manager):
         }
         return results
 
-    def create_api_refresh_request(
-            self,
-            api_name='',
-            election_id_list_serialized='',
-            date_refresh_is_needed=None):
+    @staticmethod
+    def create_api_refresh_request(api_name='', election_id_list_serialized='', date_refresh_is_needed=None):
         status = ''
         api_refresh_request = None
         api_refresh_request_saved = False
@@ -109,10 +106,8 @@ class ApiInternalCacheManager(models.Manager):
         }
         return results
 
-    def does_api_refresh_request_exist_in_future(
-            self,
-            api_name='',
-            election_id_list_serialized=''):
+    @staticmethod
+    def does_api_refresh_request_exist_in_future(api_name='', election_id_list_serialized=''):
         api_refresh_request_found = False
         status = ''
         success = True
@@ -139,8 +134,8 @@ class ApiInternalCacheManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def mark_prior_api_internal_cache_entries_as_replaced(
-            self,
             api_name="",
             election_id_list_serialized="",
             excluded_api_internal_cache_id=0):
@@ -171,10 +166,8 @@ class ApiInternalCacheManager(models.Manager):
         }
         return results
 
-    def mark_refresh_completed_for_prior_api_refresh_requested(
-            self,
-            api_name='',
-            election_id_list_serialized=''):
+    @staticmethod
+    def mark_refresh_completed_for_prior_api_refresh_requested(api_name='', election_id_list_serialized=''):
         status = ''
         try:
             number_updated = ApiRefreshRequest.objects.filter(
@@ -197,7 +190,8 @@ class ApiInternalCacheManager(models.Manager):
         }
         return results
 
-    def retrieve_next_api_refresh_request(self):
+    @staticmethod
+    def retrieve_next_api_refresh_request():
         api_refresh_request = None
         api_refresh_request_found = False
         api_refresh_request_list = []
@@ -232,10 +226,8 @@ class ApiInternalCacheManager(models.Manager):
         }
         return results
 
-    def retrieve_latest_api_internal_cache(
-            self,
-            api_name='',
-            election_id_list_serialized=''):
+    @staticmethod
+    def retrieve_latest_api_internal_cache(api_name='', election_id_list_serialized=''):
         api_internal_cache = None
         api_internal_cache_found = False
         api_internal_cache_list = []
