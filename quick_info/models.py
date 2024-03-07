@@ -281,10 +281,10 @@ class QuickInfoManager(models.Manager):
         )
 
     def retrieve_quick_info(self, quick_info_id, quick_info_we_vote_id=None,
-                            contest_office_we_vote_id=None,
-                            candidate_we_vote_id=None,
-                            politician_we_vote_id=None,
-                            contest_measure_we_vote_id=None):
+		    contest_office_we_vote_id=None,
+		    candidate_we_vote_id=None,
+		    politician_we_vote_id=None,
+		    contest_measure_we_vote_id=None):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -411,20 +411,20 @@ class QuickInfoManager(models.Manager):
         return results
 
     def update_or_create_quick_info(self, quick_info_id, quick_info_we_vote_id,
-                                    ballot_item_display_name,
-                                    contest_office_we_vote_id,
-                                    candidate_we_vote_id,
-                                    politician_we_vote_id,
-                                    contest_measure_we_vote_id,
-                                    info_html,
-                                    info_text,
-                                    language,
-                                    last_editor_we_vote_id,
-                                    quick_info_master_we_vote_id,
-                                    more_info_url,
-                                    more_info_credit,
-                                    google_civic_election_id
-                                    ):
+		    ballot_item_display_name,
+		    contest_office_we_vote_id,
+		    candidate_we_vote_id,
+		    politician_we_vote_id,
+		    contest_measure_we_vote_id,
+		    info_html,
+		    info_text,
+		    language,
+		    last_editor_we_vote_id,
+		    quick_info_master_we_vote_id,
+		    more_info_url,
+		    more_info_credit,
+		    google_civic_election_id
+            ):
         # Does a quick_info entry already exist?
         quick_info_manager = QuickInfoManager()
         results = quick_info_manager.retrieve_quick_info(quick_info_id, quick_info_we_vote_id,
@@ -759,15 +759,14 @@ class QuickInfoMasterManager(models.Manager):
         return results
 
     def update_or_create_quick_info_master(self, quick_info_master_id,
-                                           quick_info_master_we_vote_id,
-                                           master_entry_name,
-                                           info_html, info_text,
-                                           language,
-                                           kind_of_ballot_item,
-                                           last_editor_we_vote_id,
-                                           more_info_url,
-                                           more_info_credit,
-                                           ):
+		    quick_info_master_we_vote_id,
+		    master_entry_name,
+		    info_html, info_text,
+		    language,
+		    kind_of_ballot_item,
+		    last_editor_we_vote_id,
+		    more_info_url,
+		    more_info_credit):
         # Does a quick_info_master entry already exist?
         quick_info_master_manager = QuickInfoMasterManager()
         if positive_value_exists(quick_info_master_id) or positive_value_exists(quick_info_master_we_vote_id):
