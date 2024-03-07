@@ -37,8 +37,9 @@ class ReactionManager(models.Manager):
 
     def __unicode__(self):
         return "ReactionManager"
-
-    def count_all_reaction_likes(self, liked_item_we_vote_id):
+    
+    @staticmethod
+    def count_all_reaction_likes(liked_item_we_vote_id):
         # How many people, across the entire network, like this position?
         try:
             reaction_like_query = ReactionLike.objects.using('readonly').all()
@@ -63,8 +64,8 @@ class ReactionManager(models.Manager):
         results = self.count_all_reaction_likes(liked_item_we_vote_id)
         return results['number_of_likes']
 
+    @staticmethod
     def retrieve_reaction_like(
-            self,
             reaction_like_id=0,
             voter_id=0,
             liked_item_we_vote_id=''):
@@ -115,7 +116,8 @@ class ReactionManager(models.Manager):
         }
         return results
 
-    def retrieve_reaction_like_list_for_voter(self, voter_id):
+    @staticmethod
+    def retrieve_reaction_like_list_for_voter(voter_id):
         # Retrieve a list of reaction entries for this voter
         reaction_like_list_found = False
         reaction_like_list = {}
@@ -133,7 +135,8 @@ class ReactionManager(models.Manager):
             reaction_like_list = {}
             return reaction_like_list
 
-    def count_voter_network_reaction_likes(self, liked_item_we_vote_id, voter_id):
+    @staticmethod
+    def count_voter_network_reaction_likes(liked_item_we_vote_id, voter_id):
         # How many people, limited to the voter's network, like this position?  # TODO limit to just the voter's network
         try:
             reaction_like_query = ReactionLike.objects.using('readonly').all()
@@ -154,8 +157,8 @@ class ReactionManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def toggle_off_voter_reaction_like(
-            self,
             liked_item_we_vote_id='',
             reaction_like_id=0,
             voter_id=0):
@@ -185,8 +188,8 @@ class ReactionManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def toggle_on_voter_reaction_like(
-            self,
             voter_id=0,
             voter_we_vote_id=0,
             voter_display_name='',
