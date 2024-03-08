@@ -2,19 +2,18 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from datetime import date, timedelta
+
 # See also WeVoteServer/import_export_twitter/models.py for the code that interfaces with twitter (or other) servers
 import tweepy
 from django.db import models
 from django.db.models import Q
 from django.utils.timezone import localtime, now
 
-from config.base import get_environment_variable
-from datetime import date, timedelta
-from exception.models import handle_record_found_more_than_one_exception
-from twitter.functions import retrieve_twitter_user_info
 import wevote_functions.admin
+from config.base import get_environment_variable
+from exception.models import handle_record_found_more_than_one_exception
 from wevote_functions.functions import convert_to_int, generate_random_string, positive_value_exists
-
 
 TWITTER_BEARER_TOKEN = get_environment_variable("TWITTER_BEARER_TOKEN")
 
@@ -745,6 +744,7 @@ class TwitterUserManager(models.Manager):
             status += "TWITTER_USER_NOT_FOUND_LOCALLY "
 
         # If here, we want to reach out to Twitter to get info for this twitter_handle
+        from twitter.functions import retrieve_twitter_user_info
         twitter_api_counter_manager = TwitterApiCounterManager()
         twitter_results = retrieve_twitter_user_info(
             twitter_user_id,
@@ -1545,11 +1545,20 @@ class TwitterWhoFollowMe(models.Model):
 
 
 class TwitterApiCounter(models.Model):
+    objects = None
     datetime_of_action = models.DateTimeField(verbose_name='date and time of action', null=False, auto_now=True)
     kind_of_action = models.CharField(
         verbose_name="kind of call to Twitter", max_length=50, null=True, blank=True, db_index=True)
+    function = models.CharField(verbose_name='function', max_length=255, null=True, unique=False)
+    disambiguator = models.PositiveIntegerField(verbose_name="disambiguate within the function", default=0, null=True)
+    candidate_name = models.CharField(verbose_name='twitter screen name / handle', max_length=255, null=True,
+                                      unique=False)
     google_civic_election_id = models.PositiveIntegerField(
         verbose_name="google civic election id", null=True, db_index=True)
+    search_term = models.CharField(verbose_name='search term to API', max_length=255, null=True, unique=False)
+    text = models.CharField(verbose_name='text', max_length=255, null=True, unique=False)
+    username = models.CharField(verbose_name='twitter screen name / handle', max_length=64, null=True, unique=False)
+    voter_we_vote_id = models.CharField(verbose_name='voter we vote id', max_length=255, null=True, unique=False)
 
 
 class TwitterApiCounterDailySummary(models.Model):
@@ -1638,3 +1647,34 @@ class TwitterApiCounterManager(models.Manager):
             pass
 
         return daily_summaries
+
+
+def create_detailed_counter_entry(kind_of_action, function, elements):
+    """
+    Create a detailed entry that records that a call to the Twitter Api was made.
+    """
+    try:
+        # TODO: We need to work out the timezone questions
+        TwitterApiCounter.objects.create(
+            kind_of_action=kind_of_action,
+            google_civic_election_id=elements.get('google_civic_election_id', None),
+            function=function,
+            disambiguator=elements.get('disambiguator', None),
+            candidate_name=elements.get('candidate_name', None),
+            search_term=elements.get('search_term', None),
+            text=elements.get('text', None),
+            username=elements.get('username', None),
+            voter_we_vote_id=elements.get('voter_we_vote_id', None),
+        )
+        success = True
+        status = 'ENTRY_SAVED'
+    except Exception as e:
+        print('create_detailed_counter_entry error ' + str(e))
+        success = False
+        status = 'SOME_ERROR'
+
+    results = {
+        'success':                  success,
+        'status':                   status,
+    }
+    return results

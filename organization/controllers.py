@@ -33,7 +33,7 @@ from position.controllers import delete_positions_for_organization, move_positio
     update_position_entered_details_from_organization
 from position.models import PositionListManager
 from stripe_donations.controllers import move_donation_info_to_another_organization
-from twitter.models import TwitterUserManager
+from twitter.models import TwitterUserManager, create_detailed_counter_entry
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager, Voter
 from voter_guide.models import VoterGuide, VoterGuideManager, VoterGuideListManager
 from wevote_functions.functions import convert_to_int, \
@@ -604,6 +604,8 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id):
 
     # December 2021: Using the Twitter 1.1 API for user_timeline, since it is not yet available in 2.0
     # https://developer.twitter.com/en/docs/twitter-api/migrate/twitter-api-endpoint-map
+    print("tweepy OAuthHandler (Old API, probably in deprecated code) in organization_retrieve_tweets_from_twitter"
+          " -- organization_we_vote_id: ", organization_we_vote_id)
     auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
     auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
     api = tweepy.API(auth)
@@ -613,6 +615,12 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id):
     try:
         organization_twitter_id = organization_manager.fetch_twitter_handle_from_organization_we_vote_id(
             organization_we_vote_id)
+        print("tweepy api.user_timeline (Old API, probably in deprecated code) in "
+              "organization_retrieve_tweets_from_twitter -- organization_we_vote_id: ", organization_we_vote_id)
+        create_detailed_counter_entry('user_timeline', 'organization_retrieve_tweets_from_twitter',
+                                      {'voter_we_vote_id': organization_we_vote_id,
+                                       'text': 'Suspect that this code is deprecated'})
+
         new_tweets = api.user_timeline(username=organization_twitter_id)
     except tweepy.errors.HTTPException as e:
         status = "ORGANIZATION_RETRIEVE_TWEETS_FROM_TWITTER_AUTH_FAIL_HTTPException: " + str(e) + " "
