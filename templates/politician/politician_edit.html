@@ -283,7 +283,7 @@
 <div class="row">
 	<div class="col">
 		<div class="form-group row">
-			<label for="google_civic_candidate_name_id" class="col control-label u-no-break">Politician Name (for Google Civic matching)</label>
+			<label for="google_civic_candidate_name_id" class="pl-3 control-label u-no-break">Politician Name (for Google Civic matching)</label>
 			<div class="col">
 				<input type="text" name="google_civic_candidate_name" id="google_civic_candidate_name_id" class="form-control"
 					value="{% if politician %}{{ politician.google_civic_candidate_name|default_if_none:"" }}{% else %}{{ google_civic_candidate_name|default_if_none:"" }}{% endif %}" />
@@ -293,7 +293,7 @@
 
 	<div class="col">
 		<div class="form-group row">
-			<label for="google_civic_candidate_name2_id" class="col control-label u-no-break">Politician Name 2 (for Google Civic matching)</label>
+			<label for="google_civic_candidate_name2_id" class="control-label u-no-break">Politician Name 2 (for Google Civic matching)</label>
 			<div class="col">
 				<input type="text" name="google_civic_candidate_name2" id="google_civic_candidate_name2_id" class="form-control"
 					value="{% if politician %}{{ politician.google_civic_candidate_name2|default_if_none:"" }}{% else %}{{ google_civic_candidate_name2|default_if_none:"" }}{% endif %}" />
