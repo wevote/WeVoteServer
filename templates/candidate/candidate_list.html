@@ -38,7 +38,7 @@
         <option value="{{ one_election.google_civic_election_id }}"
                 {% if one_election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
         {% if one_election.state_code %}{{ one_election.state_code }} {% endif %}
-            {{ one_election.election_day_text }}: {{ one_election.election_name }} - {{ one_election.google_civic_election_id }}</option>
+            {{ one_election.election_day_text }}: {{ one_election.election_name }} &ndash; {{ one_election.google_civic_election_id }}</option>
         {% endfor %}
     </select>
     {% endif %}{# End of if election_list #}
@@ -229,7 +229,7 @@
 
     <ol>
         <!-- <li><a href="{% url 'candidate:photos_for_election' google_civic_election_id %}" target="_blank" >
-            Retrieve Candidate Photos from Vote Smart for this Election</a> (3-10 minutes - Open in New Window)</li> // -->
+            Retrieve Candidate Photos from Vote Smart for this Election</a> (3-10 minutes &ndash; Open in New Window)</li> // -->
 
         {% if google_civic_election_id < 1000000 %}
         <li><a href="{% url 'import_export_twitter:transfer_candidate_twitter_handles_from_google_civic' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" >
@@ -240,7 +240,7 @@
         Go to Candidate Sites and get Twitter Handles for this Election</a> (1-2 minutes)</li>
 
 {#        <li><a href="{% url 'import_export_twitter:bulk_retrieve_possible_twitter_handles' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}" target="_blank" >#}
-{#        Retrieve Possible Twitter Handles</a> (25 at a time - about 30 seconds - Open in New Window)</li>#}
+{#        Retrieve Possible Twitter Handles</a> (25 at a time &ndash; about 30 seconds &ndash; Open in New Window)</li>#}
 
         <li><a href="{% url 'import_export_facebook:bulk_retrieve_facebook_photos' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}"
                target="_blank" >
@@ -248,13 +248,13 @@
 
         <li><a href="{% url 'google_custom_search:bulk_retrieve_possible_google_search_users' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
                target="_blank" >
-        Retrieve Possible Candidates from Google <span class="glyphicon glyphicon-new-window"></span></a> (20 at a time - 1-2 minutes)</li>
+        Retrieve Possible Candidates from Google <span class="glyphicon glyphicon-new-window"></span></a> (20 at a time &ndash; 1-2 minutes)</li>
 
         <li><a href="{% url 'import_export_twitter:refresh_twitter_candidate_details_for_election' google_civic_election_id %}?state_code={{ state_code }}" >
         Retrieve/Refresh Candidate Twitter Info for this Election</a> (1-2 minutes)</li>
 
 {#        <li><a href="{% url 'import_export_vote_smart:retrieve_positions_from_vote_smart_for_election' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >#}
-{#        Retrieve Positions from Vote Smart for this Election</a> (5-15 minutes - Open in New Window)</li>#}
+{#        Retrieve Positions from Vote Smart for this Election</a> (5-15 minutes &ndash; Open in New Window)</li>#}
 
         <li><a href="{% url 'voter_guide:generate_voter_guides_one_election' %}?google_civic_election_id={{ google_civic_election_id }}" >
         Generate Voter Guides for this Election</a> (about 1 minute)</li>
@@ -456,7 +456,7 @@
                 <td>{{ candidate.get_candidate_state }}</td>
                 {% if not google_civic_election_id %}
                 <td>
-                    {{ candidate.election.election_name }} - {{ candidate.election.google_civic_election_id }}, <span class="u-no-break">{{ candidate.election.election_day_text }}</span>
+                    {{ candidate.election.election_name }} &ndash; {{ candidate.election.google_civic_election_id }}, <span class="u-no-break">{{ candidate.election.election_day_text }}</span>
                     {% if candidate.supporters_count %}
                         <div class="u-no-break" style="color: darkgray; font-size: 10px;">supporters_count: {{ candidate.supporters_count }}</div>
                     {% endif %}
@@ -472,6 +472,13 @@
                         {{ candidate.office.office_name }}
                     </a><br />
                     {{ candidate.office.we_vote_id }}
+                    {% if candidate.office.ballotpedia_race_office_level %}
+                      <span style="color: darkgray">
+                      &ndash;
+                      Level:
+                      {{ candidate.office.ballotpedia_race_office_level }}
+                      </span>
+                    {% endif %}
                     {% if candidate.office.district_name or candidate.office.district_id %}
                       <br />
                       <span style="color: darkgray">
@@ -480,7 +487,7 @@
                             {{ candidate.office.district_name }}
                         {% endif %}
                         {% if candidate.office.district_id %}
-                            - District {{ candidate.office.district_id }}
+                            &ndash; District {{ candidate.office.district_id }}
                         {% endif %}
                     {% if candidate.office.district_name or candidate.office.district_id %}
                       </span>
@@ -693,16 +700,16 @@
                 <td>{{ candidate.positions_count|intcomma }}</td>
                 <td>{{ candidate.get_candidate_state }}</td>
                 {% if not google_civic_election_id %}
-                <td>{{ candidate.election.election_name }} - {{ candidate.election.google_civic_election_id }}</td>
+                <td>{{ candidate.election.election_name }} &ndash; {{ candidate.election.google_civic_election_id }}</td>
                 {% endif %}
                 <td>
                   {% if candidate.office %}
                     <a href="{% url 'office:office_summary' candidate.office.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&page={{ current_page_number }}">{{ candidate.office.office_name }}
                     {% if candidate.office.district_id %}
-                        - District {{ candidate.office.district_id }}
+                        &ndash; District {{ candidate.office.district_id }}
                     {% endif %}
                     {% if candidate.office.state_code %}
-                        - {{ candidate.office.state_code }}
+                        &ndash; {{ candidate.office.state_code }}
                     {% endif %}
                     </a>
                   {% else %}
@@ -780,14 +787,14 @@
     {#        this.form.show_candidates_without_twitter_id.value = '0';#}
     {#        this.form.submit();#}
     {#    });#}
-    {#});#}
+    {# }); #}
     {#$(function() {#}
     {#    $('#show_candidates_with_twitter_options_id').change(function() {#}
     {#        this.form.show_candidates_with_best_twitter_options_id.value = '0';#}
     {#        this.form.show_candidates_without_twitter_id.value = '0';#}
     {#        this.form.submit();#}
     {#    });#}
-    {#});#}
+    {# }); #}
     $(function() {
         $('#show_candidates_without_twitter_id').change(function() {
             {#this.form.show_candidates_with_best_twitter_options_id.value = '0';#}

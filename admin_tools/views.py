@@ -1750,9 +1750,21 @@ def login_we_vote(request):
         if user_obj:
             username = user_obj.email
         else:
-            username = None
+            # Find the voter based on authenticated emails
+            queryset = EmailAddress.objects.filter(normalized_email_address__iexact=input_username)
+            queryset = queryset.filter(email_ownership_is_verified=True)
+            email_address_obj = queryset.first()
+            if email_address_obj:
+                voter_we_vote_id = email_address_obj.voter_we_vote_id
+                user_obj = Voter.objects.filter(we_vote_id__iexact=voter_we_vote_id).get()
+                username = user_obj.email
+            else:
+                username = None
 
-        user = authenticate(username=username, password=password)
+        if positive_value_exists(username):
+            user = authenticate(username=username, password=password)
+        else:
+            user = None
         if user is not None:
             if user.is_active:
                 login(request, user)
