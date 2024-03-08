@@ -135,7 +135,9 @@
     </div>
 </div>
 
+{% if politician.we_vote_hosted_profile_image_url_large %}
 <div class="form-group">
+    
     <label for="first_name_id" class="col-sm-3 control-label">Background Color</label>
     <div class="col-sm-8">
         
@@ -146,6 +148,7 @@
        {#  <label>Regenerate default color &#40;different algorithm&#41;  &nbsp;</label><input name="regenerate_color_edge_case" type="checkbox"/> #}
     </div>
 </div>
+{% endif %}
 
 <div class="form-group" style="height: 64px;">
     <label for="politician_name_id" class="col-sm-3 control-label">
