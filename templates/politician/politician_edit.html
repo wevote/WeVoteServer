@@ -189,7 +189,7 @@
 <div class="row">
 	<div class="col">
 		<div class="form-group row">
-			<label for="first_name_id" class="col control-label">First Name</label>
+			<label for="first_name_id" class="pl-3 control-label">First Name</label>
 			<div class="col">
 				<input type="text" name="first_name" id="first_name_id" class="form-control"
 					value="{% if politician %}{{ politician.first_name|default_if_none:"" }}{% else %}{{ first_name|default_if_none:"" }}{% endif %}" />
@@ -199,17 +199,27 @@
 
 	<div class="col">
 		<div class="form-group row">
-			<label for="middle_name_id" class="col control-label">Middle Name</label>
+			<label for="middle_name_id" class="control-label">Middle Name</label>
 			<div class="col">
 				<input type="text" name="middle_name" id="middle_name_id" class="form-control"
 					value="{% if politician %}{{ politician.middle_name|default_if_none:"" }}{% else %}{{ middle_name|default_if_none:"" }}{% endif %}" />
 			</div>
 		</div>
 	</div>
+
+	<div class="col">
+		<div class="form-group row">
+			<label for="last_name_id" class="control-label">Last Name</label>
+			<div class="col">
+				<input type="text" name="last_name" id="last_name_id" class="form-control"
+					value="{% if politician %}{{ politician.last_name|default_if_none:"" }}{% else %}{{ last_name|default_if_none:"" }}{% endif %}" />
+			</div>
+		</div>
+	</div>
 </div>
 
 <div class="row">
-	<div class="col">
+	<!-- <div class="col">
 		<div class="form-group row">
 			<label for="last_name_id" class="col control-label">Last Name</label>
 			<div class="col">
@@ -217,7 +227,7 @@
 					value="{% if politician %}{{ politician.last_name|default_if_none:"" }}{% else %}{{ last_name|default_if_none:"" }}{% endif %}" />
 			</div>
 		</div>
-	</div>
+	</div> -->
 
 	<div class="col">
 		<div class="form-group row">

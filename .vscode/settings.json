@@ -1,0 +1,5 @@
+{
+"ruff.lint.args":
+["--extend-select=PLR6301",
+"--preview"]
+}
