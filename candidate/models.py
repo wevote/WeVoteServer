@@ -2664,8 +2664,6 @@ class CandidateCampaign(models.Model):
     ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True, blank=True)
     # The id of the image for retrieval from Ballotpedia API
     ballotpedia_image_id = models.PositiveIntegerField(verbose_name="ballotpedia image id", null=True, blank=True)
-    ballotpedia_profile_image_url_https = models.TextField(
-        verbose_name='locally cached candidate profile image from ballotpedia', blank=True, null=True)
     # Equivalent to Office Held
     ballotpedia_office_id = models.PositiveIntegerField(
         verbose_name="ballotpedia office held integer id", null=True, blank=True)
