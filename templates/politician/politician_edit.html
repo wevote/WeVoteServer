@@ -39,12 +39,12 @@
 <input name="submit_text" type="submit" value="{% if politician %}Update Politician{% else %}Save New Politician{% endif %}" /></p>
 
 
-<div class="form-group">
-    <label for="profile_image_type_currently_active_id" class="col-sm-3 control-label">
+<div class="row form-group">
+    <label for="profile_image_type_currently_active_id" class="pl-3 control-label">
         Politician Photo Choice<br />
         <span style="color: darkgray">{{ politician.profile_image_type_currently_active }}</span>
     </label>
-    <div class="col-sm-8">
+    <div class="col">
     {# UNKNOWN IMAGE #}
         <span style="float: left; padding: 8px 20px 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="UNKNOWN"
@@ -135,11 +135,13 @@
     </div>
 </div>
 
+<div class="row">
 {% if politician.we_vote_hosted_profile_image_url_large %}
-<div class="form-group">
+<div class="col">
+<div class="row form-group">
     
-    <label for="first_name_id" class="col-sm-3 control-label">Background Color</label>
-    <div class="col-sm-8">
+    <label for="first_name_id" class="pl-3 control-label">Background Color</label>
+    <div class="col">
         
         <input type="text" name="profile_image_background_color" id="profile_image_background_color_id" class="form-control"
                value="{% if politician %}{{ politician.profile_image_background_color|default_if_none:"" }}{% else %}{{ profile_image_background_color|default_if_none:"" }}{% endif %}" />
@@ -148,16 +150,19 @@
        {#  <label>Regenerate default color &#40;different algorithm&#41;  &nbsp;</label><input name="regenerate_color_edge_case" type="checkbox"/> #}
     </div>
 </div>
+</div>
 {% endif %}
+</div>
 
-<div class="form-group" style="height: 64px;">
-    <label for="politician_name_id" class="col-sm-3 control-label">
+<div class="col">
+<div class="row form-group">
+    <label for="politician_name_id" class="control-label">
         Politician Name
         {% if politician.supporters_count %}
             <div class="u-no-break" style="color: darkgray; font-size: 10px;">supporters_count: {{ politician.supporters_count }}</div>
         {% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="politician_name" id="politician_name_id" class="form-control pol_name_text"
                value="{% if politician %}{{ politician.politician_name|default_if_none:"" }}{% else %}{{ politician_name|default_if_none:"" }}{% endif %}" />
         {% if politician %}
@@ -188,34 +193,45 @@
         {% endif %}
     </div>
 </div>
+</div>
+</div>
 
-<div class="form-group">
-    <label for="first_name_id" class="col-sm-3 control-label">First Name</label>
-    <div class="col-sm-8">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="first_name_id" class="pl-5 control-label">First Name</label>
+    <div class="col">
         <input type="text" name="first_name" id="first_name_id" class="form-control"
                value="{% if politician %}{{ politician.first_name|default_if_none:"" }}{% else %}{{ first_name|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="middle_name_id" class="col-sm-3 control-label">Middle Name</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="middle_name_id" class="control-label">Middle Name</label>
+    <div class="col">
         <input type="text" name="middle_name" id="middle_name_id" class="form-control"
                value="{% if politician %}{{ politician.middle_name|default_if_none:"" }}{% else %}{{ middle_name|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
-
-<div class="form-group">
-    <label for="last_name_id" class="col-sm-3 control-label">Last Name</label>
-    <div class="col-sm-8">
+</div>
+<div class="col">
+<div class="row form-group">
+    <label for="last_name_id" class="control-label">Last Name</label>
+    <div class="col">
         <input type="text" name="last_name" id="last_name_id" class="form-control"
                value="{% if politician %}{{ politician.last_name|default_if_none:"" }}{% else %}{{ last_name|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
+</div>
 
-<div class="form-group">
-    <label for="gender_id" class="col-sm-3 control-label">Gender</label>
-    <div class="col-sm-8 u-no-break">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="gender_id" class="pl-5 control-label">Gender</label>
+    <div class="col u-no-break">
         <div>
         <span style="border: 1px solid #ccc; border-radius: 4px; padding: 10px 6px 10px 10px">
             <input type="radio" name="gender" id="gender_unknown_id" value="U"
@@ -238,9 +254,11 @@
         </div>
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="seo_friendly_path_id" class="col-sm-3 control-label">
+<div class="col">
+<div class="row form-group">
+    <label for="seo_friendly_path_id" class="control-label">
         SEO Friendly Path
         {% if politician.seo_friendly_path %}
             <a href="{{ web_app_root_url }}/{{ politician.seo_friendly_path }}/-/" target="_blank">
@@ -248,7 +266,7 @@
             </a>
         {% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="seo_friendly_path" id="seo_friendly_path_id" class="form-control"
                value="{% if politician %}{{ politician.seo_friendly_path|default_if_none:"" }}{% else %}{{ seo_friendly_path|default_if_none:"" }}{% endif %}" />
     {% if path_list %}
@@ -260,66 +278,88 @@
     {% endif %}
     </div>
 </div>
+</div>
+</div>
 
-<div class="form-group">
-    <label for="google_civic_candidate_name_id" class="col-sm-3 control-label u-no-break">Politician Name (for Google Civic matching)</label>
-    <div class="col-sm-8">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="google_civic_candidate_name_id" class="pl-5 control-label u-no-break">Politician Name (for Google Civic matching)</label>
+    <div class="col">
         <input type="text" name="google_civic_candidate_name" id="google_civic_candidate_name_id" class="form-control"
                value="{% if politician %}{{ politician.google_civic_candidate_name|default_if_none:"" }}{% else %}{{ google_civic_candidate_name|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="google_civic_candidate_name2_id" class="col-sm-3 control-label u-no-break">Politician Name 2 (for Google Civic matching)</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="google_civic_candidate_name2_id" class="control-label u-no-break">Politician Name 2 (for Google Civic matching)</label>
+    <div class="col">
         <input type="text" name="google_civic_candidate_name2" id="google_civic_candidate_name2_id" class="form-control"
                value="{% if politician %}{{ politician.google_civic_candidate_name2|default_if_none:"" }}{% else %}{{ google_civic_candidate_name2|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="google_civic_candidate_name3_id" class="col-sm-3 control-label u-no-break">Politician Name 3 (for Google Civic matching)</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="google_civic_candidate_name3_id" class="control-label u-no-break">Politician Name 3 (for Google Civic matching)</label>
+    <div class="col">
         <input type="text" name="google_civic_candidate_name3" id="google_civic_candidate_name3_id" class="form-control"
                value="{% if politician %}{{ politician.google_civic_candidate_name3|default_if_none:"" }}{% else %}{{ google_civic_candidate_name3|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
+</div>
 
-<div class="form-group">
-    <label for="ballotpedia_politician_name_id" class="col-sm-3 control-label">Name from Ballotpedia</label>
-    <div class="col-sm-8">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="ballotpedia_politician_name_id" class="pl-5 control-label">Name from Ballotpedia</label>
+    <div class="col">
         <input type="text" name="ballotpedia_politician_name" id="ballotpedia_politician_name_id" class="form-control"
                value="{% if politician %}{{ politician.ballotpedia_politician_name|default_if_none:"" }}{% else %}{{ ballotpedia_politician_name|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="state_code_id" class="col-sm-3 control-label">State Code</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="state_code_id" class="control-label">State Code</label>
+    <div class="col">
         <input type="text" name="state_code" id="state_code_id" class="form-control"
                value="{% if politician %}{{ politician.state_code|default_if_none:"" }}{% else %}{{ state_code|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="political_party_id" class="col-sm-3 control-label">Politician Party</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="political_party_id" class="control-label">Politician Party</label>
+    <div class="col">
         <input type="text" name="political_party" id="political_party_id" class="form-control"
                value="{% if politician %}{{ politician.political_party|default_if_none:"" }}{% else %}{{ political_party|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="vote_usa_politician_id_id" class="col-sm-3 control-label">Vote USA Politician Id</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="vote_usa_politician_id_id" class="control-label">Vote USA Politician Id</label>
+    <div class="col">
         <input type="text" name="vote_usa_politician_id" id="vote_usa_politician_id_id" class="form-control"
                value="{% if politician %}{{ politician.vote_usa_politician_id|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
+</div>
 
-<div class="form-group">
-    <label for="politician_twitter_handle_id" class="col-sm-3 control-label">Twitter Handle</label>
-    <div class="col-sm-8">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="politician_twitter_handle_id" class=" pl-5 control-label">Twitter Handle</label>
+    <div class="col">
         <input type="text" name="politician_twitter_handle" id="politician_twitter_handle_id" class="form-control"
                value="{% if politician %}{{ politician.politician_twitter_handle|default_if_none:"" }}{% else %}{{ politician_twitter_handle|default_if_none:"" }}{% endif %}" />
     {% if politician.politician_twitter_handle %}
@@ -337,10 +377,12 @@
     {% if politician.twitter_url %}Twitter URL (from Google Civic): {{ politician.twitter_url }}{% endif %}
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="politician_twitter_handle2_id" class="col-sm-3 control-label">Twitter Handle 2</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="politician_twitter_handle2_id" class="control-label">Twitter Handle 2</label>
+    <div class="col">
         <input type="text" name="politician_twitter_handle2" id="politician_twitter_handle2_id" class="form-control"
                value="{% if politician %}{{ politician.politician_twitter_handle2|default_if_none:"" }}{% else %}{{ politician_twitter_handle2|default_if_none:"" }}{% endif %}" />
     {% if politician.politician_twitter_handle2 %}
@@ -353,10 +395,12 @@
     {% endif %}
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="politician_twitter_handle3_id" class="col-sm-3 control-label">Twitter Handle 3</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="politician_twitter_handle3_id" class="control-label">Twitter Handle 3</label>
+    <div class="col">
         <input type="text" name="politician_twitter_handle3" id="politician_twitter_handle3_id" class="form-control"
                value="{% if politician %}{{ politician.politician_twitter_handle3|default_if_none:"" }}{% else %}{{ politician_twitter_handle3|default_if_none:"" }}{% endif %}" />
     {% if politician.politician_twitter_handle3 %}
@@ -366,10 +410,12 @@
     {% endif %}
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="politician_twitter_handle4_id" class="col-sm-3 control-label">Twitter Handle 4</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="politician_twitter_handle4_id" class="control-label">Twitter Handle 4</label>
+    <div class="col">
         <input type="text" name="politician_twitter_handle4" id="politician_twitter_handle4_id" class="form-control"
                value="{% if politician %}{{ politician.politician_twitter_handle4|default_if_none:"" }}{% else %}{{ politician_twitter_handle4|default_if_none:"" }}{% endif %}" />
     {% if politician.politician_twitter_handle4 %}
@@ -379,10 +425,12 @@
     {% endif %}
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="politician_twitter_handle5_id" class="col-sm-3 control-label">Twitter Handle 5</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="politician_twitter_handle5_id" class="control-label">Twitter Handle 5</label>
+    <div class="col">
         <input type="text" name="politician_twitter_handle5" id="politician_twitter_handle5_id" class="form-control"
                value="{% if politician %}{{ politician.politician_twitter_handle5|default_if_none:"" }}{% else %}{{ politician_twitter_handle5|default_if_none:"" }}{% endif %}" />
     {% if politician.politician_twitter_handle5 %}
@@ -392,258 +440,321 @@
     {% endif %}
     </div>
 </div>
+</div>
+</div>
 
-<div class="form-group">
-    <label for="politician_url_id" class="col-sm-3 control-label">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="politician_url_id" class="pl-5 control-label">
         Politician Website
         {% if politician.politician_url %}
         <a href="{{ politician.politician_url }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="politician_url" id="politician_url_id" class="form-control"
                value="{% if politician %}{{ politician.politician_url|default_if_none:"" }}{% else %}{{ politician_url|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="politician_url2_id" class="col-sm-3 control-label">
+<div class="col">
+<div class="row form-group">
+    <label for="politician_url2_id" class="control-label">
         Website 2
         {% if politician.politician_url2 %}
         <a href="{{ politician.politician_url2 }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="politician_url2" id="politician_url2_id" class="form-control"
                value="{% if politician %}{{ politician.politician_url2|default_if_none:"" }}{% else %}{{ politician_url2|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="politician_url3_id" class="col-sm-3 control-label">
+<div class="col">
+<div class="row form-group">
+    <label for="politician_url3_id" class="control-label">
         Website 3
         {% if politician.politician_url3 %}
         <a href="{{ politician.politician_url3 }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="politician_url3" id="politician_url3_id" class="form-control"
                value="{% if politician %}{{ politician.politician_url3|default_if_none:"" }}{% else %}{{ politician_url3|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="politician_url4_id" class="col-sm-3 control-label">
+<div class="col">
+<div class="row form-group">
+    <label for="politician_url4_id" class="pl-5 control-label">
         Website 4
         {% if politician.politician_url4 %}
         <a href="{{ politician.politician_url4 }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="politician_url4" id="politician_url4_id" class="form-control"
                value="{% if politician %}{{ politician.politician_url4|default_if_none:"" }}{% else %}{{ politician_url4|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="politician_url5_id" class="col-sm-3 control-label">
+<div class="col">
+<div class="row form-group">
+    <label for="politician_url5_id" class="control-label">
         Website 5
         {% if politician.politician_url5 %}
         <a href="{{ politician.politician_url5 }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="politician_url5" id="politician_url5_id" class="form-control"
                value="{% if politician %}{{ politician.politician_url5|default_if_none:"" }}{% else %}{{ politician_url5|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
+</div>
 
-<div class="form-group">
-    <label for="ballot_guide_official_statement_id" class="col-sm-3 control-label">Official Candidate Statement</label>
-    <div class="col-sm-8">
+
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="ballot_guide_official_statement_id" class="pl-5 control-label">Official Candidate Statement</label>
+    <div class="col">
         <textarea name="ballot_guide_official_statement"
                   class="form-control animated"
                   id="ballot_guide_official_statement_id"
                   placeholder="Enter official statement from politician">{% if politician %}{{ politician.ballot_guide_official_statement|default_if_none:"" }}{% else %}{{ ballot_guide_official_statement|default_if_none:"" }}{% endif %}</textarea>
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="politician_contact_form_url_id" class="col-sm-3 control-label">
+<div class="col">
+<div class="row form-group">
+    <label for="politician_contact_form_url_id" class="control-label">
         Politician Contact Form
         {% if politician.politician_contact_form_url %}
         <a href="{{ politician.politician_contact_form_url }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="politician_contact_form_url" id="politician_contact_form_url_id" class="form-control"
                value="{% if politician %}{{ politician.politician_contact_form_url|default_if_none:"" }}{% else %}{{ politician_contact_form_url|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
+</div>
 
-<div class="form-group">
-    <label for="facebook_url_id" class="col-sm-3 control-label">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="facebook_url_id" class="pl-5 control-label">
         Facebook URL
         {% if politician.facebook_url %}
         <a href="{{ politician.facebook_url }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="facebook_url" id="facebook_url_id" class="form-control"
                value="{% if politician %}{{ politician.facebook_url|default_if_none:"" }}{% else %}{{ facebook_url|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="facebook_url2_id" class="col-sm-3 control-label">
+<div class="col">
+<div class="row form-group">
+    <label for="facebook_url2_id" class="control-label">
         Facebook URL 2
         {% if politician.facebook_url2 %}
         <a href="{{ politician.facebook_url2 }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="facebook_url2" id="facebook_url2_id" class="form-control"
                value="{% if politician %}{{ politician.facebook_url2|default_if_none:"" }}{% else %}{{ facebook_url2|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="facebook_url3_id" class="col-sm-3 control-label">
+<div class="col">
+<div class="row form-group">
+    <label for="facebook_url3_id" class="control-label">
         Facebook URL 3
         {% if politician.facebook_url3 %}
         <a href="{{ politician.facebook_url3 }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="facebook_url3" id="facebook_url3_id" class="form-control"
                value="{% if politician %}{{ politician.facebook_url3|default_if_none:"" }}{% else %}{{ facebook_url3|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
+</div>
 
-<div class="form-group">
-    <label for="instagram_handle_id" class="col-sm-3 control-label">
+<div class="row form-group">
+    <label for="instagram_handle_id" class="pl-5 control-label">
         Instagram Handle
         {% if politician.instagram_handle %}
         <a href="https://www.instagram.com/{{ politician.instagram_handle }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="instagram_handle" id="instagram_handle_id" class="form-control"
                value="{% if politician %}{{ politician.instagram_handle|default_if_none:"" }}{% else %}{{ instagram_handle|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
 
-<div class="form-group">
-    <label for="politician_email_id" class="col-sm-3 control-label">Politician Email</label>
-    <div class="col-sm-8">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="politician_email_id" class="pl-5 control-label">Politician Email</label>
+    <div class="col">
         <input type="text" name="politician_email" id="politician_email_id" class="form-control"
                value="{% if politician %}{{ politician.politician_email|default_if_none:"" }}{% else %}{{ politician_email|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="politician_email2_id" class="col-sm-3 control-label">Email 2</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="politician_email2_id" class="control-label">Email 2</label>
+    <div class="col">
         <input type="text" name="politician_email2" id="politician_email2_id" class="form-control"
                value="{% if politician %}{{ politician.politician_email2|default_if_none:"" }}{% else %}{{ politician_email2|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="politician_email3_id" class="col-sm-3 control-label">Email 3</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="politician_email3_id" class="control-label">Email 3</label>
+    <div class="col">
         <input type="text" name="politician_email3" id="politician_email3_id" class="form-control"
                value="{% if politician %}{{ politician.politician_email3|default_if_none:"" }}{% else %}{{ politician_email3|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
+</div>
 
-<div class="form-group">
-    <label for="politician_phone_number_id" class="col-sm-3 control-label">Politician Phone</label>
-    <div class="col-sm-8">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="politician_phone_number_id" class="pl-5 control-label">Politician Phone</label>
+    <div class="col">
         <input type="text" name="politician_phone_number" id="politician_phone_number_id" class="form-control"
                value="{% if politician %}{{ politician.politician_phone_number|default_if_none:"" }}{% else %}{{ politician_phone_number|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="politician_phone_number2_id" class="col-sm-3 control-label">Phone 2</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="politician_phone_number2_id" class="control-label">Phone 2</label>
+    <div class="col">
         <input type="text" name="politician_phone_number2" id="politician_phone_number2_id" class="form-control"
                value="{% if politician %}{{ politician.politician_phone_number2|default_if_none:"" }}{% else %}{{ politician_phone_number2|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="politician_phone_number3_id" class="col-sm-3 control-label">Phone 3</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="politician_phone_number3_id" class="control-label">Phone 3</label>
+    <div class="col">
         <input type="text" name="politician_phone_number3" id="politician_phone_number3_id" class="form-control"
                value="{% if politician %}{{ politician.politician_phone_number3|default_if_none:"" }}{% else %}{{ politician_phone_number3|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
+</div>
 
-<div class="form-group">
-    <label for="ballotpedia_politician_url_id" class="col-sm-3 control-label">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="ballotpedia_politician_url_id" class="pl-5 control-label">
         Ballotpedia Politician Page
         {% if politician and politician.ballotpedia_politician_url %}(<a href="{{ politician.ballotpedia_politician_url }}" target="_blank">Go</a>){% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="ballotpedia_politician_url" id="ballotpedia_politician_url_id" class="form-control"
                value="{% if politician %}{{ politician.ballotpedia_politician_url|default_if_none:"" }}{% else %}{{ ballotpedia_politician_url|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="wikipedia_url_id" class="col-sm-3 control-label">
+<div class="col">
+<div class="row form-group">
+    <label for="wikipedia_url_id" class="control-label">
         Wikipedia Page
         {% if politician and politician.wikipedia_url %}(<a href="{{ politician.wikipedia_url }}" target="_blank">Go</a>){% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="wikipedia_url" id="wikipedia_url_id" class="form-control"
                value="{% if politician %}{{ politician.wikipedia_url|default_if_none:"" }}{% else %}{{ wikipedia_url|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="linkedin_url_id" class="col-sm-3 control-label">
+<div class="col">
+<div class="row form-group">
+    <label for="linkedin_url_id" class="control-label">
         LinkedIn
         {% if politician and politician.linkedin_url %}(<a href="{{ politician.linkedin_url }}" target="_blank">Go</a>){% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="linkedin_url" id="linkedin_url_id" class="form-control"
                value="{% if politician %}{{ politician.linkedin_url|default_if_none:"" }}{% else %}{{ linkedin_url|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
+</div>
 
-<div class="form-group">
-    <label for="vote_smart_id_id" class="col-sm-3 control-label">Vote Smart Id</label>
-    <div class="col-sm-8">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="vote_smart_id_id" class="pl-5 control-label">Vote Smart Id</label>
+    <div class="col">
         <input type="text" name="vote_smart_id" id="vote_smart_id_id" class="form-control"
                value="{% if politician %}{{ politician.vote_smart_id|default_if_none:"" }}{% else %}{{ vote_smart_id|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="maplight_id_id" class="col-sm-3 control-label">MapLight Id</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="maplight_id_id" class="control-label">MapLight Id</label>
+    <div class="col">
         <input type="text" name="maplight_id" id="maplight_id_id" class="form-control"
                value="{% if politician %}{{ politician.maplight_id|default_if_none:"" }}{% else %}{{ maplight_id|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="birth_date_id" class="col-sm-3 control-label">Birthdate (format Feb. 16, 1955)</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="birth_date_id" class="control-label">Birthdate (format Feb. 16, 1955)</label>
+    <div class="col">
         <input type="text" name="birth_date" id="birth_date_id" class="form-control"
                value="{% if politician %}{{ politician.birth_date|default_if_none:"" }}{% else %}{{ birth_date|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="youtube_url_id" class="col-sm-3 control-label">YouTube URL</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="youtube_url_id" class="control-label">YouTube URL</label>
+    <div class="col">
         <input type="text" name="youtube_url" id="youtube_url_id" class="form-control"
                value="{% if politician %}{{ politician.youtube_url|default_if_none:"" }}{% else %}{{ youtube_url|default_if_none:"" }}{% endif %}" />
     </div>
+</div>
+</div>
 </div>
 
 <p><a href="{% url 'politician:politician_list' %}?state_code={{ state_code }}">cancel</a>
