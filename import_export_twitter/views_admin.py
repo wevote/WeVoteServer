@@ -350,7 +350,9 @@ def scrape_website_for_social_media_view(request, organization_id, force_retriev
         results = retrieve_twitter_user_info(
             twitter_user_id,
             organization.organization_twitter_handle,
-            twitter_api_counter_manager=twitter_api_counter_manager)
+            twitter_api_counter_manager=twitter_api_counter_manager,
+            parent='parent = scrape_website_for_social_media_view'
+        )
 
         if results['success']:
             save_results = organization_manager.update_organization_twitter_details(

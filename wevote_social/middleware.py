@@ -8,6 +8,7 @@ from inspect import getmembers
 from types import FunctionType
 
 from django.http import HttpResponse
+from django.shortcuts import redirect
 
 import wevote_functions.admin
 from wevote_social.facebook import FacebookAPI
@@ -42,10 +43,12 @@ class SocialMiddleware(object):
             print("MIDDLEWARE: session: " + str(self.attributes(request.session)))
             tok = request.GET['oauth_token'] if request.GET['oauth_token'] else ""
             ver = request.GET['oauth_verifier'] if request.GET['oauth_verifier'] else ""
-            resp = 'https://wevotedeveloper.com:3000/twittersigninprocess?oauth_token=' + tok + '&oauth_verifier=' + ver
-            print("MIDDLEWARE: uresp: " + resp)
+            # respURL = 'https://' + request.headers['Host'] + '/twittersigninprocess?oauth_token=' + tok + '&oauth_verifier=' + ver
+            # respURL = request.build_absolute_uri()  loops exactly to here
+            respURL = 'https://' + request.headers['Host'] + '/login_we_vote'
+            print("MIDDLEWARE: respURL: " + respURL)
 
-            # response = redirect(uresp)
+            # response = redirect(respURL)
             # return response     # TODO FIX THIS RETURN
             return HttpResponse()
 

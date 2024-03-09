@@ -90,11 +90,12 @@ def expand_twitter_public_metrics(twitter_dict):
     return twitter_dict
 
 
-def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api_counter_manager=None):
+def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api_counter_manager=None, parent=None):
     """
     :param twitter_user_id:
     :param twitter_handle:
     :param twitter_api_counter_manager:
+    :param parent, calling function
     :return:
     """
     status = ""
@@ -133,7 +134,7 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
 
             print("tweepy client get_user #1 in retrieve_twitter_user_info -- twitter_handle: ", twitter_handle)
             create_detailed_counter_entry('get_user', 'retrieve_twitter_user_info',
-                                          {'username': twitter_handle, 'disambiguator': 1})
+                                          {'username': twitter_handle, 'disambiguator': 1, 'text': parent})
             twitter_user = client.get_user(
                 username=twitter_handle,
                 user_fields=[
@@ -173,7 +174,8 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
             # twitter_user = api.get_user(user_id=twitter_user_id)
             print("tweepy client get_user #2 in retrieve_twitter_user_info -- twitter_handle: ", twitter_handle)
             create_detailed_counter_entry('get_user', 'retrieve_twitter_user_info',
-                                          {'username': twitter_handle, 'disambiguator': 2, 'text': twitter_user_id})
+                                          {'username': twitter_handle, 'disambiguator': 2,
+                                           'text': twitter_user_id + ' - ' + parent})
             twitter_user = client.get_user(id=twitter_user_id)
             try:
                 twitter_dict = convert_twitter_user_object_data_to_we_vote_dict(twitter_user.data)
