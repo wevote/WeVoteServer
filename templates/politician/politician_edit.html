@@ -39,12 +39,12 @@
 <input name="submit_text" type="submit" value="{% if politician %}Update Politician{% else %}Save New Politician{% endif %}" /></p>
 
 
-<div class="form-group">
-    <label for="profile_image_type_currently_active_id" class="col-sm-3 control-label">
+<div class="row form-group">
+    <label for="profile_image_type_currently_active_id" class="pl-3 control-label">
         Politician Photo Choice<br />
         <span style="color: darkgray">{{ politician.profile_image_type_currently_active }}</span>
     </label>
-    <div class="col-sm-8">
+    <div class="col">
     {# UNKNOWN IMAGE #}
         <span style="float: left; padding: 8px 20px 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="UNKNOWN"
@@ -135,11 +135,13 @@
     </div>
 </div>
 
+<div class="row">
 {% if politician.we_vote_hosted_profile_image_url_large %}
-<div class="form-group">
+<div class="col">
+<div class="row form-group">
     
-    <label for="first_name_id" class="col-sm-3 control-label">Background Color</label>
-    <div class="col-sm-8">
+    <label for="first_name_id" class="pl-3 control-label">Background Color</label>
+    <div class="col">
         
         <input type="text" name="profile_image_background_color" id="profile_image_background_color_id" class="form-control"
                value="{% if politician %}{{ politician.profile_image_background_color|default_if_none:"" }}{% else %}{{ profile_image_background_color|default_if_none:"" }}{% endif %}" />
@@ -148,16 +150,19 @@
        {#  <label>Regenerate default color &#40;different algorithm&#41;  &nbsp;</label><input name="regenerate_color_edge_case" type="checkbox"/> #}
     </div>
 </div>
+</div>
 {% endif %}
+</div>
 
-<div class="form-group">
-    <label for="politician_name_id" class="col-sm-3 control-label">
+<div class="col">
+<div class="row form-group">
+    <label for="politician_name_id" class="control-label">
         Politician Name
         {% if politician.supporters_count %}
             <div class="u-no-break" style="color: darkgray; font-size: 10px;">supporters_count: {{ politician.supporters_count }}</div>
         {% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="politician_name" id="politician_name_id" class="form-control pol_name_text"
                value="{% if politician %}{{ politician.politician_name|default_if_none:"" }}{% else %}{{ politician_name|default_if_none:"" }}{% endif %}" />
         {% if politician %}
@@ -187,6 +192,8 @@
             {% include "office_held/is_battleground_race_year_checkboxes.html" with office_held=politician %}
         {% endif %}
     </div>
+</div>
+</div>
 </div>
 
 <div class="row">
@@ -220,9 +227,11 @@
 </div>
 </div>
 
-<div class="form-group">
-    <label for="gender_id" class="col-sm-3 control-label">Gender</label>
-    <div class="col-sm-8 u-no-break">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="gender_id" class="pl-5 control-label">Gender</label>
+    <div class="col u-no-break">
         <div>
         <span style="border: 1px solid #ccc; border-radius: 4px; padding: 10px 6px 10px 10px">
             <input type="radio" name="gender" id="gender_unknown_id" value="U"
@@ -245,9 +254,11 @@
         </div>
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="seo_friendly_path_id" class="col-sm-3 control-label">
+<div class="col">
+<div class="row form-group">
+    <label for="seo_friendly_path_id" class="control-label">
         SEO Friendly Path
         {% if politician.seo_friendly_path %}
             <a href="{{ web_app_root_url }}/{{ politician.seo_friendly_path }}/-/" target="_blank">
@@ -255,7 +266,7 @@
             </a>
         {% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="seo_friendly_path" id="seo_friendly_path_id" class="form-control"
                value="{% if politician %}{{ politician.seo_friendly_path|default_if_none:"" }}{% else %}{{ seo_friendly_path|default_if_none:"" }}{% endif %}" />
     {% if path_list %}
@@ -266,6 +277,8 @@
         </div>
     {% endif %}
     </div>
+</div>
+</div>
 </div>
 
 <div class="row">
