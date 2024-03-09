@@ -1425,6 +1425,7 @@ class OrganizationManager(models.Manager):
                         twitter_user_id,
                         organization_twitter_handle,
                         twitter_api_counter_manager=twitter_api_counter_manager,
+                        parent='parent = update_or_create_organization #1',
                     )
                     if results['success']:
                         twitter_dict = results['twitter_dict']
@@ -1668,6 +1669,7 @@ class OrganizationManager(models.Manager):
                             twitter_user_id,
                             organization_twitter_handle,
                             twitter_api_counter_manager=twitter_api_counter_manager,
+                            parent='parent = update_or_create_organization #2',
                         )
                         if results['success']:
                             twitter_dict = results['twitter_dict']
@@ -1811,6 +1813,7 @@ class OrganizationManager(models.Manager):
                         twitter_user_id,
                         organization_twitter_handle,
                         twitter_api_counter_manager=twitter_api_counter_manager,
+                        parent='parent = update_or_create_organization #3',
                     )
                     if results['success']:
                         twitter_dict = results['twitter_dict']

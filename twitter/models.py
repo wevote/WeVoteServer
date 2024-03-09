@@ -750,6 +750,7 @@ class TwitterUserManager(models.Manager):
             twitter_user_id,
             twitter_handle,
             twitter_api_counter_manager=twitter_api_counter_manager,
+            parent='retrieve_twitter_user_locally_or_remotely'
         )
         if twitter_results['success'] is False:
             status += twitter_results['status']

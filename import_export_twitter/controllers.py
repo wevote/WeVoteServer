@@ -1077,7 +1077,9 @@ def retrieve_fresh_enough_twitter_user_for_handle(
         twitter_api_counter_manager = TwitterApiCounterManager()
         results = retrieve_twitter_user_info(
             twitter_handle=twitter_handle,
-            twitter_api_counter_manager=twitter_api_counter_manager)
+            twitter_api_counter_manager=twitter_api_counter_manager,
+            parent='parent = retrieve_fresh_enough_twitter_user_for_handle'
+        )
         status += results['status']
         if not results['success']:
             success = False
@@ -2371,7 +2373,7 @@ def refresh_twitter_candidate_details_for_election(google_civic_election_id, sta
         results = retrieve_twitter_user_info_from_handles_list(
             twitter_handles_list=twitter_handles_to_retrieve_list,
             google_civic_api_counter_manager=google_civic_api_counter_manager,
-        )
+            parent='parent = refresh_twitter_candidate_details_for_election')
         status += results['status']
         if not results['success']:
             success = False
@@ -3156,6 +3158,7 @@ def twitter_process_deferred_images_for_api(
         twitter_id,
         twitter_screen_name,
         twitter_api_counter_manager=twitter_api_counter_manager,
+        parent='parent = twitter_process_deferred_images_for_api',
     )
     if not results['success']:
         twitter_dict = {
@@ -3457,6 +3460,7 @@ def twitter_sign_in_retrieve_for_api(voter_device_id, image_load_deferred):  # t
         twitter_id,
         twitter_auth_response.twitter_screen_name,
         twitter_api_counter_manager=twitter_api_counter_manager,
+        parent='parent = twitter_sign_in_retrieve_for_api'
     )
     if not results['success']:
         twitter_dict = {
