@@ -3074,6 +3074,60 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
     else:
         move_twitter_end_time = time()
 
+    move_candidate_change_log_start_time = time()
+    if not voter_merge_status.move_candidate_change_log_complete:  # Proceed even if process above has failed
+        from voter.controllers_changes import move_candidate_change_log_entries_to_another_voter
+        move_candidate_change_log_results = move_candidate_change_log_entries_to_another_voter(
+            from_voter_we_vote_id, to_voter_we_vote_id)
+        # Log the results
+        move_candidate_change_log_end_time = time()
+        status += move_candidate_change_log_results['status']
+        local_success = move_candidate_change_log_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=move_candidate_change_log_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_candidate_change_log_start_time,
+            status=status,
+            step_name='move_candidate_change_log',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_candidate_change_log_end_time = time()
+
+    move_voter_change_log_start_time = time()
+    if not voter_merge_status.move_voter_change_log_complete:  # Proceed even if process above has failed
+        from voter.controllers_changes import move_voter_change_log_entries_to_another_voter
+        move_voter_change_log_results = move_voter_change_log_entries_to_another_voter(
+            from_voter_we_vote_id, to_voter_we_vote_id)
+        # Log the results
+        move_voter_change_log_end_time = time()
+        status += move_voter_change_log_results['status']
+        local_success = move_voter_change_log_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=move_voter_change_log_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_voter_change_log_start_time,
+            status=status,
+            step_name='move_voter_change_log',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_voter_change_log_end_time = time()
+
     move_voter_contact_start_time = time()
     if not voter_merge_status.move_voter_contact_complete:  # Proceed even if process above has failed
         from voter.controllers_contacts import move_voter_contact_email_to_another_voter
@@ -3550,6 +3604,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
     voter_linked_org_duration = voter_linked_org_end_time - voter_linked_org_start_time
     move_apple_duration = move_apple_user_end_time - move_apple_user_start_time
     repair_positions_duration = repair_positions_end_time - repair_positions_start_time
+    move_candidate_change_log_duration = move_candidate_change_log_end_time - move_candidate_change_log_start_time
     move_positions_duration = move_positions_end_time - move_positions_start_time
     move_organization_duration = move_organization_end_time - move_organization_start_time
     move_friends_duration = move_friends_end_time - move_friends_start_time
@@ -3561,6 +3616,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
     move_sms_duration = move_sms_end_time - move_sms_start_time
     move_facebook_duration = move_facebook_end_time - move_facebook_start_time
     move_twitter_duration = move_twitter_end_time - move_twitter_start_time
+    move_voter_change_log_duration = move_voter_change_log_end_time - move_voter_change_log_start_time
     move_voter_contact_duration = move_voter_contact_end_time - move_voter_contact_start_time
     move_voter_plan_duration = move_voter_plan_end_time - move_voter_plan_start_time
     move_donations_duration = move_donations_end_time - move_donations_start_time
@@ -3591,6 +3647,8 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
                  ' seconds, move_sms took ' + "{:.6f}".format(move_sms_duration) +
                  ' seconds, move_facebook took ' + "{:.6f}".format(move_facebook_duration) +
                  ' seconds, move_twitter took ' + "{:.6f}".format(move_twitter_duration) +
+                 ' seconds, move_candidate_change_log took ' + "{:.6f}".format(move_candidate_change_log_duration) +
+                 ' seconds, move_voter_change_log took ' + "{:.6f}".format(move_voter_change_log_duration) +
                  ' seconds, move_voter_contact took ' + "{:.6f}".format(move_voter_contact_duration) +
                  ' seconds, move_voter_plan took ' + "{:.6f}".format(move_voter_plan_duration) +
                  ' seconds, move_donations took ' + "{:.6f}".format(move_donations_duration) +
@@ -3608,8 +3666,8 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
                  ' seconds, total took ' + "{:.6f}".format(time_difference) + ' seconds')
 
     results = {
-        'status':                       status,
-        'success':                      success,
+        'status':   status,
+        'success':  success,
     }
     return results
 
@@ -4926,7 +4984,7 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
                     current_voter_linked_organization.twitter_location = None
                     current_voter_linked_organization.save()
                 except Exception as e:
-                    status += "UNABLE_TO_SAVE_FROM_ORGANIZATION "
+                    status += "UNABLE_TO_SAVE_FROM_ORGANIZATION: " + str(e) + " "
 
                 # Update the link to the organization on the split_off_voter, and other Twitter values
                 try:
