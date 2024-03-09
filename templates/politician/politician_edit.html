@@ -572,52 +572,68 @@
     </div>
 </div>
 
-<div class="form-group">
-    <label for="politician_email_id" class="col-sm-3 control-label">Politician Email</label>
-    <div class="col-sm-8">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="politician_email_id" class="pl-3 control-label">Politician Email</label>
+    <div class="col">
         <input type="text" name="politician_email" id="politician_email_id" class="form-control"
                value="{% if politician %}{{ politician.politician_email|default_if_none:"" }}{% else %}{{ politician_email|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="politician_email2_id" class="col-sm-3 control-label">Email 2</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="politician_email2_id" class="control-label">Email 2</label>
+    <div class="col">
         <input type="text" name="politician_email2" id="politician_email2_id" class="form-control"
                value="{% if politician %}{{ politician.politician_email2|default_if_none:"" }}{% else %}{{ politician_email2|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="politician_email3_id" class="col-sm-3 control-label">Email 3</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="politician_email3_id" class="control-label">Email 3</label>
+    <div class="col">
         <input type="text" name="politician_email3" id="politician_email3_id" class="form-control"
                value="{% if politician %}{{ politician.politician_email3|default_if_none:"" }}{% else %}{{ politician_email3|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
+</div>
 
-<div class="form-group">
-    <label for="politician_phone_number_id" class="col-sm-3 control-label">Politician Phone</label>
-    <div class="col-sm-8">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="politician_phone_number_id" class="pl-3 control-label">Politician Phone</label>
+    <div class="col">
         <input type="text" name="politician_phone_number" id="politician_phone_number_id" class="form-control"
                value="{% if politician %}{{ politician.politician_phone_number|default_if_none:"" }}{% else %}{{ politician_phone_number|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="politician_phone_number2_id" class="col-sm-3 control-label">Phone 2</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="politician_phone_number2_id" class="control-label">Phone 2</label>
+    <div class="col">
         <input type="text" name="politician_phone_number2" id="politician_phone_number2_id" class="form-control"
                value="{% if politician %}{{ politician.politician_phone_number2|default_if_none:"" }}{% else %}{{ politician_phone_number2|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="politician_phone_number3_id" class="col-sm-3 control-label">Phone 3</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="politician_phone_number3_id" class="control-label">Phone 3</label>
+    <div class="col">
         <input type="text" name="politician_phone_number3" id="politician_phone_number3_id" class="form-control"
                value="{% if politician %}{{ politician.politician_phone_number3|default_if_none:"" }}{% else %}{{ politician_phone_number3|default_if_none:"" }}{% endif %}" />
     </div>
+</div>
+</div>
 </div>
 
 <div class="form-group">
