@@ -1325,6 +1325,8 @@ def voter_guide_create_process_view(request):
 
                 updated_position_values = {
                     'ballot_item_name':                 one_possible_endorsement['ballot_item_name'],
+                    'ballot_item_state_code':           one_possible_endorsement['ballot_item_state_code']
+                    if 'ballot_item_state_code' in one_possible_endorsement else '',
                     'candidate_we_vote_id':             one_possible_endorsement['candidate_we_vote_id'],
                     'google_civic_election_id': convert_to_int(one_possible_endorsement['google_civic_election_id']),
                     'measure_we_vote_id':               one_possible_endorsement['measure_we_vote_id'],
