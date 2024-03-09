@@ -189,28 +189,35 @@
     </div>
 </div>
 
-<div class="form-group">
-    <label for="first_name_id" class="col-sm-3 control-label">First Name</label>
-    <div class="col-sm-8">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="first_name_id" class="pl-3 control-label">First Name</label>
+    <div class="col">
         <input type="text" name="first_name" id="first_name_id" class="form-control"
                value="{% if politician %}{{ politician.first_name|default_if_none:"" }}{% else %}{{ first_name|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="middle_name_id" class="col-sm-3 control-label">Middle Name</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="middle_name_id" class="control-label">Middle Name</label>
+    <div class="col">
         <input type="text" name="middle_name" id="middle_name_id" class="form-control"
                value="{% if politician %}{{ politician.middle_name|default_if_none:"" }}{% else %}{{ middle_name|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
-
-<div class="form-group">
-    <label for="last_name_id" class="col-sm-3 control-label">Last Name</label>
-    <div class="col-sm-8">
+</div>
+<div class="col">
+<div class="row form-group">
+    <label for="last_name_id" class="control-label">Last Name</label>
+    <div class="col">
         <input type="text" name="last_name" id="last_name_id" class="form-control"
                value="{% if politician %}{{ politician.last_name|default_if_none:"" }}{% else %}{{ last_name|default_if_none:"" }}{% endif %}" />
     </div>
+</div>
+</div>
 </div>
 
 <div class="form-group">
@@ -293,36 +300,46 @@
 </div>
 </div>
 
-<div class="form-group">
-    <label for="ballotpedia_politician_name_id" class="col-sm-3 control-label">Name from Ballotpedia</label>
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="ballotpedia_politician_name_id" class="pl-3 control-label">Name from Ballotpedia</label>
     <div class="col">
         <input type="text" name="ballotpedia_politician_name" id="ballotpedia_politician_name_id" class="form-control"
                value="{% if politician %}{{ politician.ballotpedia_politician_name|default_if_none:"" }}{% else %}{{ ballotpedia_politician_name|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="state_code_id" class="col-sm-3 control-label">State Code</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="state_code_id" class="control-label">State Code</label>
+    <div class="col">
         <input type="text" name="state_code" id="state_code_id" class="form-control"
                value="{% if politician %}{{ politician.state_code|default_if_none:"" }}{% else %}{{ state_code|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="political_party_id" class="col-sm-3 control-label">Politician Party</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="political_party_id" class="control-label">Politician Party</label>
+    <div class="col">
         <input type="text" name="political_party" id="political_party_id" class="form-control"
                value="{% if politician %}{{ politician.political_party|default_if_none:"" }}{% else %}{{ political_party|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="vote_usa_politician_id_id" class="col-sm-3 control-label">Vote USA Politician Id</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="vote_usa_politician_id_id" class="control-label">Vote USA Politician Id</label>
+    <div class="col">
         <input type="text" name="vote_usa_politician_id" id="vote_usa_politician_id_id" class="form-control"
                value="{% if politician %}{{ politician.vote_usa_politician_id|default_if_none:"" }}{% endif %}" />
     </div>
+</div>
+</div>
 </div>
 
 <div class="form-group">
