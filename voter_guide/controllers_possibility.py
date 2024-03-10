@@ -3,14 +3,14 @@
 # -*- coding: UTF-8 -*-
 
 import copy
+from django.utils.timezone import localtime, now
 from config.base import get_environment_variable
 from candidate.controllers import find_candidate_endorsements_on_one_candidate_web_page, \
     find_organization_endorsements_of_candidates_on_one_web_page, \
     retrieve_candidate_list_for_all_upcoming_elections
-from candidate.models import CandidateListManager, CandidateManager
+from candidate.models import CandidateCampaign, CandidateListManager, CandidateManager
 from election.controllers import retrieve_this_and_next_years_election_id_list
 from import_export_twitter.controllers import refresh_twitter_organization_details, scrape_social_media_from_one_site
-from office.models import ContestOfficeManager
 from organization.controllers import retrieve_organization_list_for_all_upcoming_elections
 from organization.models import OrganizationListManager, OrganizationManager, GROUP
 from measure.controllers import add_measure_name_alternatives_to_measure_list_light, \
@@ -51,6 +51,7 @@ def convert_organization_endorsement_list_light_to_possible_endorsement_list(end
             continue
         possible_endorsement = {
             'ballot_item_name': "",
+            'ballot_item_state_code': "",
             'candidate_we_vote_id': one_endorsement['candidate_we_vote_id'],
             'google_civic_election_id': "",
             'measure_we_vote_id': "",
@@ -277,8 +278,15 @@ def convert_candidate_endorsement_list_light_to_possible_endorsement_list(endors
             continue
         google_civic_election_id = one_endorsement['google_civic_election_id'] \
             if 'google_civic_election_id' in one_endorsement else ''
+        if 'ballot_item_state_code' in one_endorsement:
+            ballot_item_state_code = one_endorsement['ballot_item_state_code']
+        elif 'state_code' in one_endorsement:
+            ballot_item_state_code = one_endorsement['state_code']
+        else:
+            ballot_item_state_code = ''
         possible_endorsement = {
             'ballot_item_name': one_endorsement['ballot_item_display_name'],
+            'ballot_item_state_code': ballot_item_state_code,
             'candidate_we_vote_id': one_endorsement['candidate_we_vote_id'],
             'google_civic_election_id': google_civic_election_id,
             'measure_we_vote_id': one_endorsement['measure_we_vote_id'],
@@ -963,6 +971,51 @@ def process_organization_endorsing_candidates_input_form(
         results = fix_sequence_of_possible_endorsement_list(possible_endorsement_list)
         if results['possible_endorsement_list_found']:
             possible_endorsement_list = results['possible_endorsement_list']
+
+    # Now look for candidate possibilities that have states attached so we can add them to the database
+    if len(possible_endorsement_list):
+        try:
+            datetime_now = localtime(now()).date()  # We Vote uses Pacific Time for TIME_ZONE
+            current_year = convert_to_int(datetime_now.year)
+        except Exception as e:
+            status += "FAILED_TO_GET_CURRENT_YEAR: " + str(e) + " "
+            current_year = 2024
+        adjusted_possible_endorsement_list = []
+        for one_possible_endorsement in possible_endorsement_list:
+            if 'candidate_we_vote_id' in one_possible_endorsement \
+                    and positive_value_exists(one_possible_endorsement['candidate_we_vote_id']):
+                adjusted_possible_endorsement_list.append(one_possible_endorsement)
+                continue
+            elif 'measure_we_vote_id' in one_possible_endorsement \
+                    and positive_value_exists(one_possible_endorsement['measure_we_vote_id']):
+                adjusted_possible_endorsement_list.append(one_possible_endorsement)
+                continue
+            ballot_item_name = one_possible_endorsement['ballot_item_name'] \
+                if 'ballot_item_name' in one_possible_endorsement \
+                and positive_value_exists(one_possible_endorsement['ballot_item_name']) else ''
+            ballot_item_state_code = one_possible_endorsement['ballot_item_state_code'] \
+                if 'ballot_item_state_code' in one_possible_endorsement \
+                and positive_value_exists(one_possible_endorsement['ballot_item_state_code']) else ''
+            # Note: We currently assume this is a candidate (as opposed to a measure)
+            if positive_value_exists(ballot_item_name) and positive_value_exists(ballot_item_state_code):
+                try:
+                    candidate_on_stage, new_candidate_created = CandidateCampaign.objects.update_or_create(
+                        candidate_name=ballot_item_name,
+                        candidate_year=current_year,
+                        google_civic_candidate_name=ballot_item_name,
+                        state_code=ballot_item_state_code,
+                    )
+                    if new_candidate_created:
+                        status += "NEW_CANDIDATE_CAMPAIGN_CREATED "
+                    else:
+                        status += "CANDIDATE_CAMPAIGN_UPDATED "
+                    if positive_value_exists(candidate_on_stage.we_vote_id):
+                        one_possible_endorsement['candidate_we_vote_id'] = candidate_on_stage.we_vote_id
+                except Exception as e:
+                    status += 'FAILED_TO_CREATE_CANDIDATE ' \
+                             '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            adjusted_possible_endorsement_list.append(one_possible_endorsement)
+        possible_endorsement_list = adjusted_possible_endorsement_list
 
     if positive_value_exists(ignore_stored_positions):
         # Identify which candidates already have positions stored, and remove them

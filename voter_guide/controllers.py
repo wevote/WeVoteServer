@@ -10,6 +10,7 @@ from urllib.parse import urlparse
 import pytz
 from django.db.models import Q
 from django.http import HttpResponse
+from django.utils.timezone import localtime, now
 
 import wevote_functions.admin
 from ballot.models import OFFICE, CANDIDATE, MEASURE
@@ -411,6 +412,7 @@ def extract_voter_guide_possibility_position_list_from_database(
             'possibility_position_id': possibility_position.id,
             'possibility_position_number': possibility_position.possibility_position_number,
             'ballot_item_name': possibility_position.ballot_item_name,
+            'ballot_item_state_code': possibility_position.ballot_item_state_code,
             'candidate_alternate_names': candidate_alternate_names,
             'candidate_twitter_handle': candidate_twitter_handle,
             'candidate_we_vote_id': candidate_we_vote_id,
@@ -1694,6 +1696,7 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
         voter_guide_possibility_id=None,
         voter_guide_possibility_position_id=None,
         ballot_item_name=None,
+        ballot_item_state_code=None,
         position_stance=None,
         statement_text=None,
         more_info_url=None,
@@ -1870,6 +1873,9 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
             voter_guide_possibility_position.possibility_should_be_ignored = \
                 positive_value_exists(possibility_should_be_ignored)
             at_least_one_change = True
+        if positive_value_exists(ballot_item_state_code):
+            voter_guide_possibility_position.ballot_item_state_code = ballot_item_state_code
+            at_least_one_change = True
         if statement_text is not None:
             voter_guide_possibility_position.statement_text = statement_text
             at_least_one_change = True
@@ -1890,6 +1896,7 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
     possible_endorsement_dict = {
         'possibility_position_id': voter_guide_possibility_position.id,
         'ballot_item_name': voter_guide_possibility_position.ballot_item_name,
+        'ballot_item_state_code': voter_guide_possibility_position.ballot_item_state_code,
         'candidate_twitter_handle': voter_guide_possibility_position.candidate_twitter_handle,
         'candidate_we_vote_id': voter_guide_possibility_position.candidate_we_vote_id,
         # 'contest_office_name': 'contest_office_name',
@@ -1977,6 +1984,37 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
             position_we_vote_id = modified_possible_endorsement_dict['position_we_vote_id']
             if not positive_value_exists(position_we_vote_id):
                 position_we_vote_id = None  # Only save if we have a new value
+
+            # If here, we may want to create a new candidate
+            if not positive_value_exists(candidate_we_vote_id) and not positive_value_exists(measure_we_vote_id):
+                ballot_item_name = modified_possible_endorsement_dict['ballot_item_name'] \
+                    if 'ballot_item_name' in modified_possible_endorsement_dict \
+                       and positive_value_exists(modified_possible_endorsement_dict['ballot_item_name']) else ''
+                ballot_item_state_code = modified_possible_endorsement_dict['ballot_item_state_code'] \
+                    if 'ballot_item_state_code' in modified_possible_endorsement_dict \
+                       and positive_value_exists(modified_possible_endorsement_dict['ballot_item_state_code']) else ''
+                # Note: We currently assume this is a candidate (as opposed to a measure)
+                if positive_value_exists(ballot_item_name) and positive_value_exists(ballot_item_state_code):
+                    from candidate.models import CandidateCampaign
+                    try:
+                        datetime_now = localtime(now()).date()  # We Vote uses Pacific Time for TIME_ZONE
+                        current_year = convert_to_int(datetime_now.year)
+                        candidate_on_stage, new_candidate_created = CandidateCampaign.objects.update_or_create(
+                            candidate_name=ballot_item_name,
+                            candidate_year=current_year,
+                            google_civic_candidate_name=ballot_item_name,
+                            state_code=ballot_item_state_code,
+                        )
+                        if new_candidate_created:
+                            status += "NEW_CANDIDATE_CAMPAIGN_CREATED "
+                        else:
+                            status += "NEW_CANDIDATE_CAMPAIGN_UPDATED "
+                        if positive_value_exists(candidate_on_stage.we_vote_id):
+                            candidate_we_vote_id = candidate_on_stage.we_vote_id
+                            modified_possible_endorsement_dict['candidate_we_vote_id'] = candidate_on_stage.we_vote_id
+                    except Exception as e:
+                        status += 'FAILED_TO_CREATE_CANDIDATE ' \
+                                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
             at_least_one_change = False
             try:
