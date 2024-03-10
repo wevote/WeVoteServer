@@ -901,6 +901,11 @@ def voter_guide_create_process_view(request):
                 for key, value in updated_position_values.items():
                     if hasattr(voter_guide_possibility_position, key):
                         voter_guide_possibility_position_has_changes = True
+                        if key == 'ballot_item_state_code':
+                            if value == "None":
+                                value = None
+                            elif len(value) > 2:
+                                value = value[:2]
                         setattr(voter_guide_possibility_position, key, value)
                 if voter_guide_possibility_position_has_changes:
                     timezone = pytz.timezone("America/Los_Angeles")
