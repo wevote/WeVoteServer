@@ -2995,7 +2995,7 @@ def generate_ballot_item_list_from_object_list(
 def ballot_item_highlights_retrieve_for_api(starting_year):  # ballotItemHighlightsRetrieve
     from candidate.controllers import retrieve_candidate_list_for_all_prior_elections_this_year, \
         retrieve_candidate_list_for_all_upcoming_elections
-    from voter_guide.controllers import URLS_TO_NEVER_HIGHLIGHT
+    from voter_guide.models import WEBSITES_TO_NEVER_HIGHLIGHT_ENDORSEMENTS
     status = "BALLOT_ITEM_HIGHLIGHTS_RETRIEVE "
     success = True
     highlight_list = []
@@ -3052,7 +3052,7 @@ def ballot_item_highlights_retrieve_for_api(starting_year):  # ballotItemHighlig
         'status':               status,
         'success':              success,
         'highlight_list':       highlight_list,
-        'never_highlight_on':   URLS_TO_NEVER_HIGHLIGHT,
+        'never_highlight_on':   WEBSITES_TO_NEVER_HIGHLIGHT_ENDORSEMENTS,
     }
     return json_data
 

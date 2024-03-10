@@ -43,7 +43,8 @@ from .controllers_possibility import candidates_found_on_url, \
 from .controllers_possibility_shared import fix_sequence_of_possible_endorsement_list
 from .models import INDIVIDUAL, VoterGuide, VoterGuideManager, VoterGuidePossibility, \
     VoterGuidePossibilityManager, VoterGuidePossibilityPosition, \
-    ORGANIZATION_ENDORSING_CANDIDATES, ENDORSEMENTS_FOR_CANDIDATE, UNKNOWN_TYPE
+    ORGANIZATION_ENDORSING_CANDIDATES, ENDORSEMENTS_FOR_CANDIDATE, UNKNOWN_TYPE, \
+    WEBSITES_WE_DO_NOT_SCAN_FOR_ENDORSEMENTS
 
 VOTER_GUIDES_SYNC_URL = get_environment_variable("VOTER_GUIDES_SYNC_URL")  # voterGuidesSyncOut
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
@@ -59,34 +60,6 @@ def create_possible_voter_guides_from_prior_elections_view(request):
     # From Prior Elections - from_prior_election
     # Endorsements from these urls are not the same from election to election, so bringing them forward
     # to the current election is not helpful to the political data team
-    domains_to_not_consider = [
-        'adirondackdailyenterprise.com', 'about:blank', 'alternet.org', 'apnews.com', 'apple.com',
-        'baltimoresun.com', 'billboard.com', 'bloomberg.com', 'boston.com', 'bostonglobe.com',
-        'broadwayworld.com', 'buffalonews.com', 'businessinsider.com', 'buzzfeed.com',
-        'charlotteobserver.com', 'chicagotibune.com', 'cnbc.com', 'cnn.com',
-        'dailydot.com', 'dailykos.com', 'dallasnews.com', 'democracynow.org', 'denverpost.com',
-        'desmoinesregister.com', 'dispatch.com',
-        'docs.google.com', 'drive.google.com',
-        'essence.com',
-        'facebook.com', 'foxbusiness.com', 'foxnews.com',
-        'hollywoodreporter.com', 'houstonchronicle.com', 'huffpost.com',
-        'indystar.com', 'instagram.com',
-        'gayly.com',
-        'kansascity.com', 'kentucky.com', 'ksat.com',
-        'latimes.com', 'localhost:8000',
-        'mercurynews.com', 'miaminewtimes.com', 'motherjones.com', 'msnbc.com',
-        'nationalreview.com', 'nbcnews.com', 'newsweek.com', 'npr.org', 'nydailynews.com', 'nypost.com', 'nytimes.com',
-        'ocregister.org', 'opensecrets.org', 'orlandosentinel.com',
-        'palmbeachpost.com', 'people.com', 'politico.com',
-        'reviewjournal.com', 'rollingstone.com',
-        'sacbee.com', 'sfchronicle.com', 'snewsnet.com', 'spectator.us', 'sun-sentinel.com', 'suntimes.com',
-        'http://t.co', 'https://t.co', 'tampabay.com', 'techcrunch.com', 'texastribune.com', 'thehill.com',
-        'thenation.com', 'thestate.com', 'twitter.com',
-        'usatoday.com',
-        'vox.com',
-        'wapo.st', 'washingtonpost.com', 'westword.com', 'wsj.com',
-        'youtu.be', 'youtube.com',
-    ]
 
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_api_device_id
     voter_manager = VoterManager()
@@ -202,7 +175,8 @@ def create_possible_voter_guides_from_prior_elections_view(request):
                         voter_guide_possibility_url = one_position.more_info_url
                         break  # Break out of this position loop
             if positive_value_exists(voter_guide_possibility_url):
-                if any(domain in voter_guide_possibility_url.lower() for domain in domains_to_not_consider):
+                if any(domain.lower() in voter_guide_possibility_url.lower()
+                       for domain in WEBSITES_WE_DO_NOT_SCAN_FOR_ENDORSEMENTS):
                     # If this URL is for a domain that always contains "single use" endorsements, don't suggest again
                     continue
                 if voter_guide_possibility_url in urls_already_stored:
@@ -217,7 +191,7 @@ def create_possible_voter_guides_from_prior_elections_view(request):
                     # 'voter_who_submitted_we_vote_id': voter_who_submitted_we_vote_id,
                 }
                 results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
-                    voter_guide_possibility_url,
+                    voter_guide_possibility_url=voter_guide_possibility_url,
                     target_google_civic_election_id=target_google_civic_election_id,
                     voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id,
                     updated_values=updated_values,
@@ -712,6 +686,18 @@ def voter_guide_create_process_view(request):
     voter_guide_possibility_url = request.POST.get('voter_guide_possibility_url', '')
     voter_who_submitted_we_vote_id = request.POST.get('voter_who_submitted_we_vote_id', '')
 
+    # Do not allow processing of certain websites
+    if any(value.lower() in voter_guide_possibility_url.lower() for value in WEBSITES_WE_DO_NOT_SCAN_FOR_ENDORSEMENTS):
+        # return to form with message
+        messages.add_message(
+            request, messages.ERROR,
+            "We cannot scan '{url}' for endorsements. "
+            "Please try another website.".format(url=voter_guide_possibility_url))
+        template_values = {
+            # 'voter_guide_possibility_url': voter_guide_possibility_url,
+        }
+        return render(request, 'voter_guide/voter_guide_create.html', template_values)
+
     # Filter incoming data
     candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle)
     organization_twitter_handle = extract_twitter_handle_from_text_string(organization_twitter_handle)
@@ -851,8 +837,8 @@ def voter_guide_create_process_view(request):
             updated_values['hide_from_active_review'] = hide_from_active_review
 
         results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
-            voter_guide_possibility_url,
-            voter_who_submitted_we_vote_id,
+            voter_guide_possibility_url=voter_guide_possibility_url,
+            voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id,
             voter_guide_possibility_id=voter_guide_possibility_id,
             updated_values=updated_values)
         if positive_value_exists(results['success']):
@@ -2055,8 +2041,6 @@ def voter_guide_possibility_list_process_view(request):
                 voter_guide_possibility_id = int(voter_guide_possibility_id_string)
                 if which_marking == "add_to_active_review":
                     results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
-                        None,
-                        None,
                         voter_guide_possibility_id=voter_guide_possibility_id,
                         updated_values={
                             'from_prior_election': False,
@@ -2064,8 +2048,6 @@ def voter_guide_possibility_list_process_view(request):
                         })
                 else:
                     results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
-                        None,
-                        None,
                         voter_guide_possibility_id=voter_guide_possibility_id,
                         updated_values={which_marking: True})
                 if results['success']:
