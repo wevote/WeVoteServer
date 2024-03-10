@@ -39,6 +39,7 @@
         {% endif %}
         <input type="hidden" name="candidate_we_vote_id_{{ possible_endorsement.possibility_position_number }}" value="{{ possible_endorsement.candidate_we_vote_id }}">
         <input type="hidden" name="ballot_item_name_{{ possible_endorsement.possibility_position_number }}" value="{{ possible_endorsement.ballot_item_name }}">
+        <input type="hidden" name="ballot_item_state_code_{{ possible_endorsement.possibility_position_number }}" value="{{ possible_endorsement.ballot_item_state_code }}">
         <input type="hidden" name="organization_we_vote_id_{{ possible_endorsement.possibility_position_number }}" value="{{ possible_endorsement.organization_we_vote_id }}">
     {% elif possible_endorsement.measure_we_vote_id %}
         <span><span class="h4">{{ possible_endorsement.measure.measure_title|default_if_none:"" }}</span>&nbsp;&nbsp;&nbsp;</span>
@@ -49,6 +50,7 @@
         {% endif %}
         <input type="hidden" name="measure_we_vote_id_{{ possible_endorsement.possibility_position_number }}" value="{{ possible_endorsement.measure_we_vote_id }}">
         <input type="hidden" name="ballot_item_name_{{ possible_endorsement.possibility_position_number }}" value="{{ possible_endorsement.ballot_item_name }}">
+        <input type="hidden" name="ballot_item_state_code_{{ possible_endorsement.possibility_position_number }}" value="{{ possible_endorsement.ballot_item_state_code }}">
         <input type="hidden" name="organization_we_vote_id_{{ possible_endorsement.possibility_position_number }}" value="{{ possible_endorsement.organization_we_vote_id }}">
     {% else %}
         <span class="u-no-break">
