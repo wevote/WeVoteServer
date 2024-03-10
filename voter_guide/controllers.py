@@ -46,7 +46,8 @@ from voter_guide.controllers_possibility import candidates_found_on_url, \
     organizations_found_on_url
 from voter_guide.models import ENDORSEMENTS_FOR_CANDIDATE, ORGANIZATION_ENDORSING_CANDIDATES, UNKNOWN_TYPE, \
     VoterGuide, VoterGuideListManager, VoterGuideManager, \
-    VoterGuidePossibility, VoterGuidePossibilityManager, VoterGuidePossibilityPosition
+    VoterGuidePossibility, VoterGuidePossibilityManager, VoterGuidePossibilityPosition, \
+    WEBSITES_TO_NEVER_HIGHLIGHT_ENDORSEMENTS, WEBSITES_WE_DO_NOT_SCAN_FOR_ENDORSEMENTS
 from wevote_functions.functions import convert_to_int, is_voter_device_id_valid, positive_value_exists, \
     process_request_from_master, is_link_to_video
 
@@ -55,30 +56,6 @@ logger = wevote_functions.admin.get_logger(__name__)
 VOTER_GUIDES_SYNC_URL = get_environment_variable("VOTER_GUIDES_SYNC_URL")  # voterGuidesSyncOut
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
-
-# TODO: 9/17/19, URLs for sites excluded from highlighting - should be in the db
-URLS_TO_NEVER_HIGHLIGHT = [
-    '*.google.com',
-    '*.newrelic.com',
-    '*.slack.com',
-    '*.wevote.us',
-    '*.zendesk.com',
-    'api.wevoteusa.org',
-    'dashlane.com',
-    'github.com'
-    'localhost',
-    'localhost:3000',
-    'localhost:8000',
-    'localhost:8001',
-    'sketchviewer.com',
-    '*.travis-ci.com',
-    '*.travis-ci.org',
-    'blank',
-    'platform.twitter.com',
-    's7.addthis.com',
-    'vars.hotjar.com',
-    'regex101.com',
-]
 
 
 def augment_with_voter_guide_possibility_position_data(voter_guide_possibility_list):
@@ -905,8 +882,12 @@ def voter_guides_import_from_structured_json(structured_json):
     return voter_guides_results
 
 
-def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possibility_id=0, url_to_scan='', pdf_url='',
-                                             limit_to_this_year=True):
+def voter_guide_possibility_retrieve_for_api(  # voterGuidePossibilityRetrieve
+        voter_device_id='',
+        voter_guide_possibility_id=0,
+        url_to_scan='',
+        pdf_url='',
+        limit_to_this_year=True):
     """
     voterGuidePossibilityRetrieve
     :param voter_device_id:
@@ -1004,26 +985,33 @@ def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possib
     else:
         # Current entry not found. Create new entry.
         status += "EXISTING_VOTER_GUIDE_POSSIBILITY_NOT_FOUND "
-        is_candidate_focused_page = False  # To be extended to also save candidate focused endorsement pages
-        if positive_value_exists(is_candidate_focused_page):
-            voter_guide_possibility_type = ENDORSEMENTS_FOR_CANDIDATE
+        if any(value.lower() in url_to_scan.lower() for value in WEBSITES_WE_DO_NOT_SCAN_FOR_ENDORSEMENTS):
+            voter_guide_possibility_found = False
+            status += "URL_TO_SCAN_IS_IN-WEBSITES_WE_DO_NOT_SCAN_FOR_ENDORSEMENTS "
         else:
-            voter_guide_possibility_type = ORGANIZATION_ENDORSING_CANDIDATES
-        updated_values = {
-            'voter_guide_possibility_type':     voter_guide_possibility_type,
-            'voter_who_submitted_name':         voter_who_submitted_name,
-            'voter_who_submitted_we_vote_id':   voter_who_submitted_we_vote_id,
-            'assigned_to_voter_we_vote_id':     assigned_to_voter_we_vote_id,
-            'assigned_to_name':                 assigned_to_name,
-        }
-        create_results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
-            url_to_scan, pdf_url, voter_who_submitted_we_vote_id, updated_values=updated_values)
-        if create_results['voter_guide_possibility_saved']:
-            voter_guide_possibility_found = True
-            voter_guide_possibility = create_results['voter_guide_possibility']
-            voter_guide_possibility_id = create_results['voter_guide_possibility_id']
-            organization_we_vote_id = voter_guide_possibility.organization_we_vote_id
-            candidate_we_vote_id = voter_guide_possibility.candidate_we_vote_id
+            is_candidate_focused_page = False  # To be extended to also save candidate focused endorsement pages
+            if positive_value_exists(is_candidate_focused_page):
+                voter_guide_possibility_type = ENDORSEMENTS_FOR_CANDIDATE
+            else:
+                voter_guide_possibility_type = ORGANIZATION_ENDORSING_CANDIDATES
+            updated_values = {
+                'voter_guide_possibility_type':     voter_guide_possibility_type,
+                'voter_who_submitted_name':         voter_who_submitted_name,
+                'voter_who_submitted_we_vote_id':   voter_who_submitted_we_vote_id,
+                'assigned_to_voter_we_vote_id':     assigned_to_voter_we_vote_id,
+                'assigned_to_name':                 assigned_to_name,
+            }
+            create_results = voter_guide_possibility_manager.update_or_create_voter_guide_possibility(
+                voter_guide_possibility_url=url_to_scan,
+                # pdf_url,
+                voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id,
+                updated_values=updated_values)
+            if create_results['voter_guide_possibility_saved']:
+                voter_guide_possibility_found = True
+                voter_guide_possibility = create_results['voter_guide_possibility']
+                voter_guide_possibility_id = create_results['voter_guide_possibility_id']
+                organization_we_vote_id = voter_guide_possibility.organization_we_vote_id
+                candidate_we_vote_id = voter_guide_possibility.candidate_we_vote_id
 
     candidates_missing_from_we_vote = False
     cannot_find_endorsements = False
@@ -1343,7 +1331,7 @@ def voter_guide_possibility_highlights_retrieve_for_api(  # voterGuidePossibilit
         'success':              success,
         'url_to_scan':          url_to_scan,
         'highlight_list':       highlight_list,
-        'never_highlight_on':   URLS_TO_NEVER_HIGHLIGHT,
+        'never_highlight_on':   WEBSITES_TO_NEVER_HIGHLIGHT_ENDORSEMENTS,
     }
     return json_data
 
