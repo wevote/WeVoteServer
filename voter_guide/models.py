@@ -2996,6 +2996,7 @@ class VoterGuidePossibilityPosition(models.Model):
     # 001 - 999
     possibility_position_number = models.PositiveIntegerField(null=True, db_index=True)
     ballot_item_name = models.CharField(max_length=255, null=True, unique=False)
+    ballot_item_state_code = models.CharField(max_length=2, null=True, unique=False)
     candidate_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
     candidate_twitter_handle = models.CharField(max_length=255, null=True, unique=False)
     organization_name = models.CharField(max_length=255, null=True, unique=False)

@@ -36,6 +36,12 @@ def voter_guide_possibility_position_save_doc_template_values(url_root):
             'description':  'The candidate or measure name shown on the web page.',
         },
         {
+            'name':         'ballot_item_state_code',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The 2 digit state code of this candidate or measure. When state_code is provided, '
+                            'create a candidate if an existing entry can\'t be found.',
+        },
+        {
             'name':         'position_stance',
             'value':        'string',  # boolean, integer, long, string
             'description':  'SUPPORT, OPPOSE or INFORMATION_ONLY',
@@ -123,6 +129,7 @@ def voter_guide_possibility_position_save_doc_template_values(url_root):
                    '     "possibility_position_id": integer,\n' \
                    '     "possibility_position_number": integer,\n' \
                    '     "ballot_item_name": string,\n' \
+                   '     "ballot_item_state_code": string,\n' \
                    '     "candidate_twitter_handle": string,\n' \
                    '     "candidate_we_vote_id": string,\n' \
                    '     "edit_position_url": string,\n' \

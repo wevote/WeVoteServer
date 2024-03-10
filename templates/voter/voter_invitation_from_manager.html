@@ -10,16 +10,14 @@
           class="form-control animated"
           id="voter_invitation_subject_id"
           rows="1"
-        >WeVote Admin Server Access: {{ voter_invitation_email }} (Political Data Tools)</textarea>
+        >WeVote Admin Tools Access: {{ voter_invitation_email }} (Political Data Tools)</textarea>
         <textarea
           name="voter_invitation"
           class="form-control animated"
           id="voter_invitation_id"
           rows="12"
         >
-Hello{% if voter_invitation_first_name %} {{ voter_invitation_first_name }}{% endif %},
-
-You can sign into the WeVote Admin server (sometimes called the API server) with this account. Through this interface, you can see all of our current data, and find the tools we use to collect it.
+Hello{% if voter_invitation_first_name %} {{ voter_invitation_first_name }}{% endif %}, you can sign into the WeVote Admin Tools server (sometimes called the API server) with this account. Through this interface, you can see our current data, and find the tools we use to collect it.
 
 URL: https://api.WeVoteUSA.org/admin
 Email: {{ voter_invitation_email }}

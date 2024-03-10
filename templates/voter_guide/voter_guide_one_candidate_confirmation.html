@@ -22,8 +22,9 @@
         <input type="hidden" name="organization_we_vote_id_{{ possible_endorsement.possibility_position_number }}" value="{{ organization_we_vote_id }}">
     {% elif possible_endorsement.candidate_we_vote_id %}
         <span>
-          <span class="h4">{{ possible_endorsement.candidate.display_candidate_name|default_if_none:"" }}</span>,
+          <span class="h4">{{ possible_endorsement.candidate.display_candidate_name|default_if_none:"" }}{% if possible_endorsement.ballot_item_state_code %} ({{ possible_endorsement.ballot_item_state_code }}){% endif %}</span>{% if possible_endorsement.candidate.contest_office_name %},
           <span>{{ possible_endorsement.candidate.contest_office_name|default_if_none:"" }}</span>
+            {% endif %}
           {% if possible_endorsement.google_civic_election_id %}
           <span>
           (election: {{ possible_endorsement.google_civic_election_id }})
