@@ -1,0 +1,53 @@
+{# templates/volunteer_task/performance_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Performance List{% endblock %}
+
+{% block content %}
+{% load template_filters %}
+{% load humanize %}
+
+<h1>Performance List</h1>
+<table class="table table-condensed table-hover">
+    <thead>
+    <tr>
+        <th></th>
+        <th>Who</th>
+    {% for end_of_week_date_integer in end_of_week_date_integer_list %}
+        <th>{{ end_of_week_date_integer }}</th>
+    {% endfor %}
+    </tr>
+    </thead>
+
+{% for voter_display_name in voter_display_name_list %}
+    <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>
+            {{ voter_display_name }}<br />
+            &nbsp;&nbsp;&nbsp;Positions Saved<br />
+            &nbsp;&nbsp;&nbsp;Positions Comments Saved<br />
+        </td>
+    {% for end_of_week_date_integer in end_of_week_date_integer_list %}
+        <td>
+        <br />
+        {% with voter_date_dict=performance_display_dict|get_value_from_dict:voter_display_name %}
+        {% with voter_one_date_dict=voter_date_dict|get_value_from_dict:end_of_week_date_integer %}
+            {{ voter_one_date_dict.positions_saved }}<br />
+            {{ voter_one_date_dict.positions_written_saved }}
+        {% endwith %}
+        {% endwith %}
+        </td>
+    {% endfor %}
+    </tr>
+{% endfor %}
+</table>
+
+<table class="table table-condensed">
+    <tr>
+        {# Positions Saved #}
+        <td></td>
+        <td></td>
+    </tr>
+</table>
+
+{% endblock %}

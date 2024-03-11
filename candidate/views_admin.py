@@ -477,8 +477,8 @@ def candidate_list_view(request):
         # Restrict to candidates who are in the future
         year_list = [2023, 2024]
         try:
-            now = datetime.now()
-            date_string = now.strftime('%Y%m%d')
+            datetime_now = datetime.now()
+            date_string = datetime_now.strftime('%Y%m%d')
             date_int = int(date_string)
         except Exception as e:
             date_int = 20240101
@@ -829,8 +829,9 @@ def candidate_list_view(request):
             state_name_modified += " - 0"
             state_list_modified[one_state_code] = state_name_modified
         else:
-            # Do not include state in drop-down if there aren't any candidates in that state
-            pass
+            # At one point we did not include state in drop-down if there weren't any candidates in that state.
+            #  Now we do.
+            state_list_modified[one_state_code] = state_name_modified
     sorted_state_list = sorted(state_list_modified.items())
     # if positive_value_exists(google_civic_election_id):
     #     pass
@@ -915,7 +916,21 @@ def candidate_list_view(request):
         if positive_value_exists(google_civic_election_id_list_generated) \
                 or positive_value_exists(show_marquee_or_battleground) \
                 or positive_value_exists(show_this_year_of_candidates_restriction):
-            candidate_query = candidate_query.filter(we_vote_id__in=filtered_candidate_we_vote_id_list)
+            datetime_now = localtime(now()).date()  # We Vote uses Pacific Time for TIME_ZONE
+            current_year = datetime_now.year
+            # # We could include all candidates in this year
+            # candidate_query = candidate_query.filter(
+            #     Q(we_vote_id__in=filtered_candidate_we_vote_id_list) |
+            #     Q(candidate_year=current_year)
+            # )
+            # We currently only add the year when searching
+            if positive_value_exists(candidate_search):
+                candidate_query = candidate_query.filter(
+                    Q(we_vote_id__in=filtered_candidate_we_vote_id_list) |
+                    Q(candidate_year=current_year)
+                )
+            else:
+                candidate_query = candidate_query.filter(we_vote_id__in=filtered_candidate_we_vote_id_list)
         if positive_value_exists(exclude_candidate_analysis_done):
             candidate_query = candidate_query.exclude(candidate_analysis_done=True)
         if positive_value_exists(state_code):

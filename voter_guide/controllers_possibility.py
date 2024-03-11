@@ -18,6 +18,8 @@ from measure.controllers import add_measure_name_alternatives_to_measure_list_li
 from measure.models import ContestMeasureListManager, ContestMeasureManager
 from position.models import PositionEntered
 from twitter.models import TwitterUserManager
+from volunteer_task.models import VOLUNTEER_ACTION_CANDIDATE_CREATED, VolunteerTaskManager
+from voter.models import fetch_voter_from_voter_device_link
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, convert_date_to_we_vote_date_string, \
     extract_facebook_username_from_text_string, \
@@ -748,6 +750,15 @@ def process_organization_endorsing_candidates_input_form(
     status = ""
     success = True
     twitter_user_manager = TwitterUserManager()
+    volunteer_task_manager = VolunteerTaskManager()
+    voter_device_id = get_voter_api_device_id(request)
+    voter = fetch_voter_from_voter_device_link(voter_device_id)
+    if hasattr(voter, 'we_vote_id'):
+        voter_id = voter.id
+        voter_we_vote_id = voter.we_vote_id
+    else:
+        voter_id = 0
+        voter_we_vote_id = ""
     # First, identify the organization that is the subject of the page we are analyzing
     if positive_value_exists(organization_we_vote_id):
         results = organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
@@ -997,6 +1008,7 @@ def process_organization_endorsing_candidates_input_form(
                 if 'ballot_item_state_code' in one_possible_endorsement \
                 and positive_value_exists(one_possible_endorsement['ballot_item_state_code']) else ''
             # Note: We currently assume this is a candidate (as opposed to a measure)
+            new_candidate_created = False
             if positive_value_exists(ballot_item_name) and positive_value_exists(ballot_item_state_code):
                 try:
                     candidate_on_stage, new_candidate_created = CandidateCampaign.objects.update_or_create(
@@ -1015,6 +1027,17 @@ def process_organization_endorsing_candidates_input_form(
                     status += 'FAILED_TO_CREATE_CANDIDATE ' \
                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             adjusted_possible_endorsement_list.append(one_possible_endorsement)
+            if new_candidate_created and positive_value_exists(voter_we_vote_id):
+                try:
+                    # Give the volunteer who entered this credit
+                    results = volunteer_task_manager.create_volunteer_task_completed(
+                        action_constant=VOLUNTEER_ACTION_CANDIDATE_CREATED,
+                        voter_id=voter_id,
+                        voter_we_vote_id=voter_we_vote_id,
+                    )
+                except Exception as e:
+                    status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED: ' \
+                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
         possible_endorsement_list = adjusted_possible_endorsement_list
 
     if positive_value_exists(ignore_stored_positions):
