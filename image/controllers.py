@@ -1292,7 +1292,9 @@ def retrieve_image_urls_from_twitter(twitter_id):
     twitter_user_info_results = retrieve_twitter_user_info(
         twitter_id,
         twitter_handle='',
-        twitter_api_counter_manager=twitter_api_counter_manager)
+        twitter_api_counter_manager=twitter_api_counter_manager,
+        parent='parent = retrieve_image_urls_from_twitter'
+    )
     if 'profile_image_url' in twitter_user_info_results['twitter_dict'] \
             and twitter_user_info_results['twitter_dict']['profile_image_url']:
         # new twitter image url found

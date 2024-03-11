@@ -154,3 +154,20 @@ def search_all_view(request):  # searchAll
         'search_results':           search_results,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def log_environment_to_cloudwatch_view(request):            # logEnvironmentToCloudWatch
+    # Log environment_variables.json to CloudWatch WeVoteServer Python logs
+    f = open('config/environment_variables.json')
+    data = json.load(f)
+    for row in data:
+        if '_comment' not in row:
+            print(f'environment - \'{row}\' = \'{data[row]}\'')
+
+    f.close()
+    results = {
+        'status': 'environment variables have been logged to CloudWatch',
+        'success': 'true'
+    }
+
+    return HttpResponse(json.dumps(results), content_type='application/json')

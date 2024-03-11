@@ -26,6 +26,7 @@ eggs/
 .eggs/
 lib/
 lib64/
+package-lock.json
 parts/
 python*
 sdist/

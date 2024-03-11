@@ -7,6 +7,7 @@ import tweepy
 import wevote_functions.admin
 from config.base import get_environment_variable
 from exception.models import handle_exception
+from twitter.models import create_detailed_counter_entry
 from wevote_functions.functions import positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -89,11 +90,12 @@ def expand_twitter_public_metrics(twitter_dict):
     return twitter_dict
 
 
-def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api_counter_manager=None):
+def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api_counter_manager=None, parent=None):
     """
     :param twitter_user_id:
     :param twitter_handle:
     :param twitter_api_counter_manager:
+    :param parent, calling function
     :return:
     """
     status = ""
@@ -102,22 +104,13 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
     twitter_user_suspended_by_twitter = False
     write_to_server_logs = False
 
-    # December 2021: Using the Twitter 1.1 API for OAuthHandler, since all other 2.0 apis that we need are not
-    # yet available.
-    # auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
-    # auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
-    #
-    # api = tweepy.API(auth, timeout=10)
-    logger.error("twitter/functions 111: session: client = tweepy.Client() twitter_handle: ", twitter_handle)
+    print("tweepy client init. in retrieve_twitter_user_info -- twitter_handle: ", twitter_handle)
     client = tweepy.Client(
         bearer_token=TWITTER_BEARER_TOKEN,
         consumer_key=TWITTER_CONSUMER_KEY,
         consumer_secret=TWITTER_CONSUMER_SECRET,
         access_token=TWITTER_ACCESS_TOKEN,
         access_token_secret=TWITTER_ACCESS_TOKEN_SECRET)
-    # client = tweepy.Client(
-    #     bearer_token=TWITTER_BEARER_TOKEN,
-    # )
 
     # Strip out the twitter handles "False" or "None"
     if twitter_handle is False:
@@ -136,9 +129,12 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
     try:
         if positive_value_exists(twitter_handle):
             # Use Twitter API call counter to track the number of queries we are doing each day
-            if hasattr(twitter_api_counter_manager, 'create_counter_entry'):
-                twitter_api_counter_manager.create_counter_entry('get_user')
+            # if hasattr(twitter_api_counter_manager, 'create_counter_entry'):
+            #     twitter_api_counter_manager.create_counter_entry('get_user')
 
+            print("tweepy client get_user #1 in retrieve_twitter_user_info -- twitter_handle: ", twitter_handle)
+            create_detailed_counter_entry('get_user', 'retrieve_twitter_user_info',
+                                          {'username': twitter_handle, 'disambiguator': 1, 'text': parent})
             twitter_user = client.get_user(
                 username=twitter_handle,
                 user_fields=[
@@ -172,10 +168,14 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
             # status += 'TWITTER_HANDLE_SUCCESS-' + str(twitter_handle) + " "
         elif positive_value_exists(twitter_user_id):
             # Use Twitter API call counter to track the number of queries we are doing each day
-            if hasattr(twitter_api_counter_manager, 'create_counter_entry'):
-                twitter_api_counter_manager.create_counter_entry('get_user')
+            # if hasattr(twitter_api_counter_manager, 'create_counter_entry'):
+            #     twitter_api_counter_manager.create_counter_entry('get_user')
 
             # twitter_user = api.get_user(user_id=twitter_user_id)
+            print("tweepy client get_user #2 in retrieve_twitter_user_info -- twitter_handle: ", twitter_handle)
+            create_detailed_counter_entry('get_user', 'retrieve_twitter_user_info',
+                                          {'username': twitter_handle, 'disambiguator': 2,
+                                           'text': twitter_user_id + ' - ' + parent})
             twitter_user = client.get_user(id=twitter_user_id)
             try:
                 twitter_dict = convert_twitter_user_object_data_to_we_vote_dict(twitter_user.data)
@@ -198,6 +198,9 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
         success = False
         status += 'TWITTER_RATE_LIMIT_ERROR: ' + str(rate_limit_error) + " "
         handle_exception(rate_limit_error, logger=logger, exception_message=status)
+        # March 7, 2024 TODO:  We might be able to get useful info in this situation
+        #  https://docs.tweepy.org/en/stable/api.html#tweepy.API.rate_limit_status
+        # https://developer.twitter.com/en/docs/twitter-api/v1/developer-utilities/rate-limit-status/api-reference/get-application-rate_limit_status
     except tweepy.errors.HTTPException as error_instance:
         if 'User not found.' in error_instance.api_messages:
             status += 'TWITTER_USER_NOT_FOUND_ON_TWITTER: ' + str(error_instance) + ' '
@@ -273,7 +276,7 @@ def retrieve_twitter_user_info_from_handles_list(
 
     if retrieve_from_twitter:
         try:
-            logger.error("twitter/functions.py 278: session: client = tweepy.Client()")
+            print("tweepy client init in retrieve_twitter_user_info_from_handles_list")
             client = tweepy.Client(
                 bearer_token=TWITTER_BEARER_TOKEN,
                 consumer_key=TWITTER_CONSUMER_KEY,
@@ -282,9 +285,12 @@ def retrieve_twitter_user_info_from_handles_list(
                 access_token_secret=TWITTER_ACCESS_TOKEN_SECRET)
 
             # Use Twitter API call counter to track the number of queries we are doing each day
-            if hasattr(google_civic_api_counter_manager, 'create_counter_entry'):
-                google_civic_api_counter_manager.create_counter_entry('get_users')
+            # if hasattr(google_civic_api_counter_manager, 'create_counter_entry'):
+            #     google_civic_api_counter_manager.create_counter_entry('get_users')
 
+            create_detailed_counter_entry('get_users', 'retrieve_twitter_user_info_from_handles_list',
+                                          {'text': "".join(twitter_handles_list)})
+            print("tweepy client get_users in retrieve_twitter_user_info_from_handles_list")
             twitter_response = client.get_users(
                 usernames=twitter_handles_list,
                 user_fields=[

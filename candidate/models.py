@@ -197,7 +197,8 @@ class CandidateListManager(models.Manager):
     This is a class to make it easy to retrieve lists of Candidates
     """
 
-    def retrieve_all_candidates_for_office(self, office_id=0, office_we_vote_id='', read_only=False):
+    @staticmethod
+    def retrieve_all_candidates_for_office(office_id=0, office_we_vote_id='', read_only=False):
         candidate_list = []
         candidate_list_found = False
         candidate_we_vote_id_list = []
@@ -684,7 +685,8 @@ class CandidateListManager(models.Manager):
         }
         return results
 
-    def retrieve_all_offices_for_candidate(self, candidate_id=0, candidate_we_vote_id='', read_only=False):
+    @staticmethod
+    def retrieve_all_offices_for_candidate(candidate_id=0, candidate_we_vote_id='', read_only=False):
         office_list = []
         office_list_found = False
         office_we_vote_id_list = []
@@ -875,7 +877,8 @@ class CandidateListManager(models.Manager):
         }
         return results
 
-    def retrieve_candidate_count_for_office(self, office_id=0, office_we_vote_id=''):
+    @staticmethod
+    def retrieve_candidate_count_for_office(office_id=0, office_we_vote_id=''):
         status = ""
         if not positive_value_exists(office_id) and not positive_value_exists(office_we_vote_id):
             status += 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING '
@@ -980,7 +983,8 @@ class CandidateListManager(models.Manager):
         }
         return results
 
-    def retrieve_candidates_from_all_elections_list(self):
+    @staticmethod
+    def retrieve_candidates_from_all_elections_list():
         """
         This is used by the admin tools to show CandidateCampaigns in a drop-down for example
         """
@@ -1563,10 +1567,13 @@ class CandidateListManager(models.Manager):
                 candidate_list = list(candidate_query)
                 # May 2023, added indexes to 10 more fields in CandidateCampaign, the fields searched in this function
                 # Explain before: Gather  (cost=1000.00..352051.88 rows=10 width=5203)
-                # Explain after: Bitmap Heap Scan on candidate_candidatecampaign  (cost=918.57..3845.34 rows=15 width=5203)
+                # Explain after: Bitmap Heap Scan on candidate_candidatecampaign
+                # (cost=918.57..3845.34 rows=15 width=5203)
                 # Went from 2 seconds to execute this function, to 27ms, roughly 100x faster.
-                # voterGuidePossibilityHighlightsRetrieve went from 28 seconds for a site with 14 matches, to 0.5 seconds
-                # logger.error('retrieve_candidates_from_non_unique_identifiers 1513 explain: ' + candidate_query.explain())
+                # voterGuidePossibilityHighlightsRetrieve went from 28 seconds for a site with 14 matches,
+                # to 0.5 seconds
+                # logger.error('retrieve_candidates_from_non_unique_identifiers 1513 explain: ' +
+                # candidate_query.explain())
                 if len(candidate_list):
                     # entry exists
                     status += 'CANDIDATE_ENTRY_EXISTS1 '
@@ -1829,8 +1836,8 @@ class CandidateListManager(models.Manager):
 
         return 0
 
+    @staticmethod
     def retrieve_candidate_to_office_link_duplicate_candidate_we_vote_ids(
-            self,
             google_civic_election_id=0,
             state_code=''):
         """
@@ -1863,8 +1870,8 @@ class CandidateListManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_candidate_to_office_link_list(
-            self,
             candidate_we_vote_id_list=[],
             contest_office_we_vote_id_list=[],
             google_civic_election_id_list=[],
@@ -2110,6 +2117,7 @@ class CandidateListManager(models.Manager):
         :param twitter_handle_list:
         :param facebook_page_list:
         :param exact_match:
+        :param read_only:
         :return:
         """
         status = ""
@@ -2291,7 +2299,8 @@ class CandidateListManager(models.Manager):
         }
         return results
 
-    def retrieve_candidates_with_misformatted_names(self, start=0, count=15, read_only=True):
+    @staticmethod
+    def retrieve_candidates_with_misformatted_names(start=0, count=15, read_only=True):
         """
         Get the first 15 records that have 3 capitalized letters in a row, as long as those letters
         are not 'III' i.e. King Henry III.  Also exclude the names where the word "WITHDRAWN" has been appended when
@@ -2330,7 +2339,8 @@ class CandidateListManager(models.Manager):
 
         return results_list, number_of_rows
 
-    def retrieve_candidates_from_politician(self, politician_id=0, politician_we_vote_id='', read_only=False):
+    @staticmethod
+    def retrieve_candidates_from_politician(politician_id=0, politician_we_vote_id='', read_only=False):
         success = True
         status = ""
         candidate_list = []
@@ -2374,9 +2384,8 @@ class CandidateListManager(models.Manager):
         }
         return results
 
-    def retrieve_politician_we_vote_id_list_from_candidate_we_vote_id_list(
-            self,
-            candidate_we_vote_id_list=[]):
+    @staticmethod
+    def retrieve_politician_we_vote_id_list_from_candidate_we_vote_id_list(candidate_we_vote_id_list=[]):
         success = True
         status = ""
         politician_we_vote_id_list = []
@@ -2401,8 +2410,8 @@ class CandidateListManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def update_politician_we_vote_id_in_all_candidates(
-            self,
             candidate_we_vote_id='',
             politician_id=0,
             politician_we_vote_id='',
@@ -2655,8 +2664,6 @@ class CandidateCampaign(models.Model):
     ballotpedia_election_id = models.PositiveIntegerField(verbose_name="ballotpedia election id", null=True, blank=True)
     # The id of the image for retrieval from Ballotpedia API
     ballotpedia_image_id = models.PositiveIntegerField(verbose_name="ballotpedia image id", null=True, blank=True)
-    ballotpedia_profile_image_url_https = models.TextField(
-        verbose_name='locally cached candidate profile image from ballotpedia', blank=True, null=True)
     # Equivalent to Office Held
     ballotpedia_office_id = models.PositiveIntegerField(
         verbose_name="ballotpedia office held integer id", null=True, blank=True)
@@ -2911,16 +2918,19 @@ class CandidateManager(models.Manager):
     def __unicode__(self):
         return "CandidateManager"
 
-    def retrieve_candidate_from_id(self, candidate_id, read_only=False):
+    @staticmethod
+    def retrieve_candidate_from_id(candidate_id, read_only=False):
         candidate_manager = CandidateManager()
         return candidate_manager.retrieve_candidate(candidate_id, read_only=read_only)
 
-    def retrieve_candidate_from_we_vote_id(self, we_vote_id, read_only=False):
+    @staticmethod
+    def retrieve_candidate_from_we_vote_id(we_vote_id, read_only=False):
         candidate_id = 0
         candidate_manager = CandidateManager()
         return candidate_manager.retrieve_candidate(candidate_id, we_vote_id, read_only=read_only)
 
-    def fetch_candidate_id_from_we_vote_id(self, we_vote_id):
+    @staticmethod
+    def fetch_candidate_id_from_we_vote_id(we_vote_id):
         candidate_id = 0
         candidate_manager = CandidateManager()
         results = candidate_manager.retrieve_candidate(candidate_id, we_vote_id, read_only=True)
@@ -2928,7 +2938,8 @@ class CandidateManager(models.Manager):
             return results['candidate_id']
         return 0
 
-    def fetch_candidate_we_vote_id_from_id(self, candidate_id):
+    @staticmethod
+    def fetch_candidate_we_vote_id_from_id(candidate_id):
         we_vote_id = ''
         candidate_manager = CandidateManager()
         results = candidate_manager.retrieve_candidate(candidate_id, we_vote_id, read_only=True)
@@ -2936,7 +2947,8 @@ class CandidateManager(models.Manager):
             return results['candidate_we_vote_id']
         return ''
 
-    def fetch_google_civic_candidate_name_from_we_vote_id(self, we_vote_id):
+    @staticmethod
+    def fetch_google_civic_candidate_name_from_we_vote_id(we_vote_id):
         candidate_id = 0
         candidate_manager = CandidateManager()
         results = candidate_manager.retrieve_candidate(candidate_id, we_vote_id, read_only=True)
@@ -2946,8 +2958,8 @@ class CandidateManager(models.Manager):
         return 0
 
     # NOTE: searching by all other variables seems to return a list of objects
+    @staticmethod
     def retrieve_candidate(
-            self,
             candidate_id=0,
             candidate_we_vote_id=None,
             candidate_maplight_id=None,
@@ -3090,7 +3102,8 @@ class CandidateManager(models.Manager):
             candidate_id, we_vote_id, candidate_maplight_id, candidate_name, candidate_vote_smart_id,
             ballotpedia_candidate_id, read_only=read_only)
 
-    def retrieve_candidate_from_candidate_name(self, candidate_name):
+    @staticmethod
+    def retrieve_candidate_from_candidate_name(candidate_name):
         candidate_id = 0
         we_vote_id = ''
         candidate_maplight_id = ''
@@ -3120,14 +3133,16 @@ class CandidateManager(models.Manager):
         # Otherwise return failed results
         return results
 
-    def retrieve_candidate_from_maplight_id(self, candidate_maplight_id):
+    @staticmethod
+    def retrieve_candidate_from_maplight_id(candidate_maplight_id):
         candidate_id = 0
         we_vote_id = ''
         candidate_manager = CandidateManager()
         return candidate_manager.retrieve_candidate(
             candidate_id, we_vote_id, candidate_maplight_id)
 
-    def retrieve_candidate_from_vote_smart_id(self, candidate_vote_smart_id):
+    @staticmethod
+    def retrieve_candidate_from_vote_smart_id(candidate_vote_smart_id):
         candidate_id = 0
         we_vote_id = ''
         candidate_maplight_id = ''
@@ -3136,8 +3151,8 @@ class CandidateManager(models.Manager):
         return candidate_manager.retrieve_candidate(
             candidate_id, we_vote_id, candidate_maplight_id, candidate_name, candidate_vote_smart_id)
 
+    @staticmethod
     def retrieve_candidate_from_vote_usa_variables(
-            self,
             candidate_year=0,
             vote_usa_politician_id='',
             vote_usa_office_id='',
@@ -3228,7 +3243,8 @@ class CandidateManager(models.Manager):
         }
         return results
 
-    def retrieve_candidates_are_not_duplicates(self, candidate1_we_vote_id, candidate2_we_vote_id, read_only=True):
+    @staticmethod
+    def retrieve_candidates_are_not_duplicates(candidate1_we_vote_id, candidate2_we_vote_id, read_only=True):
         candidates_are_not_duplicates = CandidatesAreNotDuplicates()
         status = ""
         # Note that the direction of the friendship does not matter
@@ -3291,7 +3307,8 @@ class CandidateManager(models.Manager):
         }
         return results
 
-    def retrieve_candidates_are_not_duplicates_list(self, candidate_we_vote_id, read_only=True):
+    @staticmethod
+    def retrieve_candidates_are_not_duplicates_list(candidate_we_vote_id, read_only=True):
         """
         Get a list of other candidate_we_vote_id's that are not duplicates
         :param candidate_we_vote_id:
@@ -3361,8 +3378,8 @@ class CandidateManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_candidate_to_office_link(
-            self,
             candidate_we_vote_id='',
             candidate_we_vote_id_list=[],
             contest_office_we_vote_id='',
@@ -3449,8 +3466,8 @@ class CandidateManager(models.Manager):
         results = self.retrieve_candidates_are_not_duplicates_list(candidate_we_vote_id, read_only=True)
         return results['candidates_are_not_duplicates_list_we_vote_ids']
 
+    @staticmethod
     def update_or_create_candidate(
-            self,
             candidate_we_vote_id='',
             google_civic_election_id='',
             ocd_division_id='',
@@ -3804,7 +3821,8 @@ class CandidateManager(models.Manager):
         }
         return results
 
-    def update_or_create_candidates_are_not_duplicates(self, candidate1_we_vote_id, candidate2_we_vote_id):
+    @staticmethod
+    def update_or_create_candidates_are_not_duplicates(candidate1_we_vote_id, candidate2_we_vote_id):
         """
         Either update or create a CandidatesAreNotDuplicates entry.
         """
@@ -3845,7 +3863,8 @@ class CandidateManager(models.Manager):
         }
         return results
 
-    def add_candidate_position_sorting_dates_if_needed(self, position_object=None, candidate=None):
+    @staticmethod
+    def add_candidate_position_sorting_dates_if_needed(position_object=None, candidate=None):
         generate_sorting_dates = False
         position_object_updated = False
         candidate_year_changed = False
@@ -4069,7 +4088,8 @@ class CandidateManager(models.Manager):
         }
         return results
 
-    def update_candidate_social_media(self, candidate, candidate_twitter_handle=False, candidate_facebook=False):
+    @staticmethod
+    def update_candidate_social_media(candidate, candidate_twitter_handle=False, candidate_facebook=False):
         """
         Update a candidate entry with general social media data. If a value is passed in False
         it means "Do not update"
@@ -4118,8 +4138,9 @@ class CandidateManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def update_candidate_ballotpedia_image_details(
-            self, candidate,
+            candidate,
             cached_ballotpedia_profile_image_url_https,
             we_vote_hosted_profile_image_url_large,
             we_vote_hosted_profile_image_url_medium,
@@ -4160,11 +4181,8 @@ class CandidateManager(models.Manager):
         }
         return results
 
-    def save_fresh_twitter_details_to_candidate(
-            self,
-            candidate=None,
-            candidate_we_vote_id='',
-            twitter_user=None):
+    @staticmethod
+    def save_fresh_twitter_details_to_candidate(candidate=None, candidate_we_vote_id='', twitter_user=None):
         """
         Update a candidate entry with details retrieved from the Twitter API.
         """
@@ -4305,9 +4323,12 @@ class CandidateManager(models.Manager):
         }
         return results
 
-    def reset_candidate_image_details(self, candidate, twitter_profile_image_url_https,
-                                      twitter_profile_background_image_url_https,
-                                      twitter_profile_banner_url_https):
+    @staticmethod
+    def reset_candidate_image_details(
+            candidate,
+            twitter_profile_image_url_https,
+            twitter_profile_background_image_url_https,
+            twitter_profile_banner_url_https):
         """
         Reset a candidate entry with original image details from we vote image.
         """
@@ -4335,7 +4356,8 @@ class CandidateManager(models.Manager):
         }
         return results
 
-    def clear_candidate_twitter_details(self, candidate):
+    @staticmethod
+    def clear_candidate_twitter_details(candidate):
         """
         Update an candidate entry with details retrieved from the Twitter API.
         """
@@ -4365,7 +4387,8 @@ class CandidateManager(models.Manager):
         }
         return results
 
-    def refresh_cached_candidate_office_info(self, candidate_object, office_object=None):
+    @staticmethod
+    def refresh_cached_candidate_office_info(candidate_object, office_object=None):
         """
         The candidate tables cache information from other tables. This function reaches out to the source tables
         and copies over the latest information to the candidate table.
@@ -4482,7 +4505,8 @@ class CandidateManager(models.Manager):
         }
         return results
 
-    def create_candidate_row_entry(self, update_values):
+    @staticmethod
+    def create_candidate_row_entry(update_values):
         """
         Create CandidateCampaign table entry with CandidateCampaign details
         :param update_values:
@@ -4815,7 +4839,9 @@ class CandidateManager(models.Manager):
                     existing_candidate_entry.vote_usa_politician_id = update_values['vote_usa_politician_id']
                     values_changed = True
                 if 'vote_usa_profile_image_url_https' in update_values:
-                    existing_candidate_entry.vote_usa_profile_image_url_https = update_values['vote_usa_profile_image_url_https']
+                    existing_candidate_entry.vote_usa_profile_image_url_https = (
+                        update_values['vote_usa_profile_image_url_https']
+                    )
                     values_changed = True
 
                 # now go ahead and save this entry (update)
@@ -4842,8 +4868,11 @@ class CandidateManager(models.Manager):
             }
         return results
 
-    def modify_candidate_with_organization_endorsements_image(self, candidate, candidate_photo_url,
-                                                              save_to_candidate_object):
+    @staticmethod
+    def modify_candidate_with_organization_endorsements_image(
+            candidate,
+            candidate_photo_url,
+            save_to_candidate_object):
         """
         Save profile image url for candidate in image table
         This function could be updated to save images from other sources beyond ORGANIZATION_ENDORSEMENTS_IMAGE_NAME
@@ -4903,7 +4932,8 @@ class CandidateManager(models.Manager):
 
         return results
 
-    def count_candidates_for_election(self, google_civic_election_id):
+    @staticmethod
+    def count_candidates_for_election(google_civic_election_id):
         """
         Return count of candidates found for a given election        
         :param google_civic_election_id: 

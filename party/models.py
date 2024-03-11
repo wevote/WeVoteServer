@@ -55,7 +55,8 @@ class Party(models.Model):
 
 class PartyManager(models.Manager):
 
-    def update_or_create_party(self, party_id_temp='', ctcl_uuid='', party_name='', updated_values={}):
+    @staticmethod
+    def update_or_create_party(party_id_temp='', ctcl_uuid='', party_name='', updated_values={}):
         """
         Either update or create a party entry.
         """
@@ -89,7 +90,8 @@ class PartyManager(models.Manager):
         }
         return results
 
-    def retrieve_all_party_names_and_ids(self):
+    @staticmethod
+    def retrieve_all_party_names_and_ids():
         """
         Retrieves party name and corresponding party_id_temp from the database
         :return:
@@ -102,4 +104,3 @@ class PartyManager(models.Manager):
             handle_record_not_found_exception(e, logger=logger)
 
         return party_items_list
-

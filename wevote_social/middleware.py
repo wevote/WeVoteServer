@@ -8,9 +8,9 @@ from inspect import getmembers
 from types import FunctionType
 
 from django.http import HttpResponse
+from django.shortcuts import redirect
 
 import wevote_functions.admin
-from config.base import get_environment_variable
 from wevote_social.facebook import FacebookAPI
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -33,14 +33,9 @@ class SocialMiddleware(object):
         # Code to be executed for each request before
         # the view (and later middleware) are called.
 
-        print('----- request.path: ', request.path)
-        if 'siteConfigurationRetrieve' in request.path:
-            print('----- TWITTER_CONSUMER_KEY:', get_environment_variable("TWITTER_CONSUMER_KEY"),
-                  ' - TWITTER_CONSUMER_SECRET:', get_environment_variable("TWITTER_CONSUMER_SECRET"),
-                  ' - TWITTER_ACCESS_TOKEN:', get_environment_variable("TWITTER_ACCESS_TOKEN"),
-                  ' - TWITTER_ACCESS_TOKEN_SECRET:',  get_environment_variable("TWITTER_ACCESS_TOKEN_SECRET"))
 
         if "/complete/twitter/" in request.path:
+            print('----- request.path: ', request.path)
             # Bypass the state check in middleware for Twitter V2 API and the '/complete/twitter/' request ...
             #   In this case unconditionally return a 200
             print("MIDDLEWARE: object: " + str(request))
@@ -48,14 +43,12 @@ class SocialMiddleware(object):
             print("MIDDLEWARE: session: " + str(self.attributes(request.session)))
             tok = request.GET['oauth_token'] if request.GET['oauth_token'] else ""
             ver = request.GET['oauth_verifier'] if request.GET['oauth_verifier'] else ""
-            resp = 'https://wevotedeveloper.com:3000/twittersigninprocess?oauth_token=' + tok + '&oauth_verifier=' + ver
-            print("MIDDLEWARE: uresp: " + resp)
-            logger.error("MIDDLEWARE: uresp: " + resp)
-            logger.error("MIDDLEWARE: object: " + str(request))
-            logger.error("MIDDLEWARE: headers: " + str(request.headers))
-            logger.error("MIDDLEWARE: session: " + str(self.attributes(request.session)))
+            # respURL = 'https://' + request.headers['Host'] + '/twittersigninprocess?oauth_token=' + tok + '&oauth_verifier=' + ver
+            # respURL = request.build_absolute_uri()  loops exactly to here
+            respURL = 'https://' + request.headers['Host'] + '/login_we_vote'
+            print("MIDDLEWARE: respURL: " + respURL)
 
-            # response = redirect(uresp)
+            # response = redirect(respURL)
             # return response     # TODO FIX THIS RETURN
             return HttpResponse()
 

@@ -183,8 +183,10 @@ def find_names_of_people_on_one_web_page(site_url=''):
 
         print('---- find_names_of_people_on_one_web_page scrape took {:.6f} seconds'.format(time()-t0))
         sub_results = find_names_of_people_from_incoming_text(all_text_without_head)
-        status += sub_results['status']
-        success &= sub_results['success']
+        if 'status' in sub_results:
+            status += sub_results['status']
+        if 'success' in sub_results:
+            success &= sub_results['success']
         names_list = sub_results['names_list']
         names_list_found = sub_results['names_list_found']
 

@@ -68,7 +68,7 @@ def get_googlebot_map_file_body(request):
         for u in supplemental_urls.crawlable_urls:
             map_text += u + '<br>'
     for pol in politician_list:
-        map_text += https_root + pol.seo_friendly_path + '/-<br>'
+        map_text += https_root + pol.seo_friendly_path + '/-/<br>'
 
     return map_text
 
@@ -95,7 +95,7 @@ def get_googlebot_map_xml_body(request):
         for loc in supplemental_urls.crawlable_urls:
             map_xml += xml_chunk(loc, lastmod)
     for pol in politician_list:
-        map_xml += xml_chunk(https_root + pol.seo_friendly_path, lastmod)
+        map_xml += xml_chunk(https_root + pol.seo_friendly_path + "/-/", lastmod)
 
     return map_xml
 

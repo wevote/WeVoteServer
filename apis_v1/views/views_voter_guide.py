@@ -52,6 +52,7 @@ def voter_guide_possibility_position_save_view(request):  # voterGuidePossibilit
     voter_guide_possibility_id = request.GET.get('voter_guide_possibility_id', 0)
     voter_guide_possibility_position_id = request.GET.get('voter_guide_possibility_position_id', 0)
     ballot_item_name = request.GET.get('ballot_item_name', None)
+    ballot_item_state_code = request.GET.get('ballot_item_state_code', None)
     candidate_twitter_handle = request.GET.get('candidate_twitter_handle', None)
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', None)
     measure_we_vote_id = request.GET.get('measure_we_vote_id', None)
@@ -80,6 +81,7 @@ def voter_guide_possibility_position_save_view(request):  # voterGuidePossibilit
         voter_guide_possibility_id=voter_guide_possibility_id,
         voter_guide_possibility_position_id=voter_guide_possibility_position_id,
         ballot_item_name=ballot_item_name,
+        ballot_item_state_code=ballot_item_state_code,
         position_stance=position_stance,
         statement_text=statement_text,
         more_info_url=more_info_url,

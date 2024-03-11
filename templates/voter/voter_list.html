@@ -175,13 +175,10 @@
         <tr>
             <th></th>
             <th>ID</th>
-            <th>&nbsp;</th>
             <th>We Vote ID</th>
             <th>You</th>
             <th>Friends</th>
-            <th>Facebook</th>
-            <th>Tw / Apple</th>
-            <th>Email / Phone</th>
+            <th>Tw / Apple / Email / Phone</th>
             <th>Opt In</th>
             <th style='text-align: right'>Contributions</th>
             <th>Roles</th>
@@ -193,16 +190,15 @@
             <td>{{ forloop.counter }}</td>
             <td>
                 <a href="{% url 'voter:voter_summary' voter.id %}">
-                {{ voter.id }}
+                    {% if voter.we_vote_hosted_profile_image_url_tiny %}<img src="{{ voter.we_vote_hosted_profile_image_url_tiny }}" /><br />{% endif %}
+                    {{ voter.id }}
                 </a>
             </td>
-            <td>{% if voter.we_vote_hosted_profile_image_url_tiny %}<img src="{{ voter.we_vote_hosted_profile_image_url_tiny }}" />{% endif %}</td>
             <td>
                 {{ voter.get_full_name|default_if_none:"" }}
-                <a href="{% url 'voter:voter_edit' voter.id %}">
-                    {{ voter.we_vote_id }}
-                </a>
+                (<a href="{% url 'voter:voter_edit' voter.id %}">edit</a>)
                 <br />
+                {{ voter.we_vote_id }}
                 {% if voter.linked_organization_we_vote_id %}
                 <a href="{% url 'organization:organization_edit_we_vote_id' voter.linked_organization_we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
                    class="">
@@ -210,6 +206,13 @@
                 </a>
                 {% else %}
                     <span style="color: #888888;">Linked org missing</span>
+                {% endif %}
+                {% if voter.date_last_changed %}
+                    <br />
+                    <span style="color: #888888;">
+                    Last change:
+                    {{ voter.date_last_changed|default_if_none:"" }}
+                    </span>
                 {% endif %}
             </td>
             <!-- Is this you? //-->
@@ -220,18 +223,13 @@
             <td>
             {% if voter.friend_count %}{{ voter.friend_count }}{% else %}{% endif %}
             </td>
-            <!-- Facebook? //-->
             <td>
-            <!-- {% if voter.facebook_id %}{{ voter.facebook_id|default_if_none:"" }}<br />{% endif %} //-->
-            {% if voter.retrieved_facebook_id %}{{ voter.retrieved_facebook_id|default_if_none:"" }}<br />{% endif %}
-            <!-- If we don't have a cached facebook_id, then fb_username is leftover //-->
-                <span {% if not voter.facebook_id %}style="text-decoration: line-through"{% endif %}>
-                {% if voter.fb_username %}{{ voter.fb_username }}{% else %}{% endif %}
-                {% if voter.signed_in_facebook %} (fb account){% endif %}
-                </span>
-            </td>
+            <!-- Email //-->
+            {% if voter.email %}{{ voter.email }}{% else %}{% endif %}
+            {% if voter.facebook_email %}fb:&nbsp;{{ voter.facebook_email|default_if_none:"" }}{% else %}{% endif %}
+            <!-- SMS //-->
+            {% if voter.normalized_sms_phone_number %} {{ voter.normalized_sms_phone_number }}{% else %}{% endif %}
             <!-- From TwitterLinkToVoter //-->
-            <td>
             {% if voter.twitter_handle %}
               @{{ voter.twitter_handle }}
             {% else %}{% endif %}
@@ -239,13 +237,14 @@
               &nbsp;/&nbsp;
             {% endif %}
             {% if voter.signed_in_with_apple %}Apple{% endif %}
-            </td>
-            <td>
-            <!-- Email //-->
-            {% if voter.email %}{{ voter.email }}{% else %}{% endif %}
-            {% if voter.facebook_email %}fb:&nbsp;{{ voter.facebook_email|default_if_none:"" }}{% else %}{% endif %}
-            <!-- SMS //-->
-            {% if voter.normalized_sms_phone_number %} {{ voter.normalized_sms_phone_number }}{% else %}{% endif %}
+            <!-- Facebook //-->
+            <!-- {% if voter.facebook_id %}{{ voter.facebook_id|default_if_none:"" }}<br />{% endif %} //-->
+            {% if voter.retrieved_facebook_id %}{{ voter.retrieved_facebook_id|default_if_none:"" }}<br />{% endif %}
+            <!-- If we don't have a cached facebook_id, then fb_username is leftover //-->
+                <span {% if not voter.facebook_id %}style="text-decoration: line-through"{% endif %}>
+                {% if voter.fb_username %}{{ voter.fb_username }}{% else %}{% endif %}
+                {% if voter.signed_in_facebook %} (fb account){% endif %}
+                </span>
             </td>
             <!-- Opt In //-->
             <td>

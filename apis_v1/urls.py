@@ -171,6 +171,7 @@ urlpatterns = [
               issues_under_ballot_items_retrieve_view, name='issuesUnderBallotItemsRetrieveView'),
       re_path(r'^issuesSyncOut/', issues_sync_out_view, name='issuesSyncOutView'),
       re_path(r'^logToCloudWatch/$', views_donation.log_to_cloudwatch_view, name='log_to_cloudwatch'),
+      re_path(r'^logEnvironmentToCloudWatch/$', views_misc.log_environment_to_cloudwatch_view, name='log_to_cloudwatch'),
       re_path(r'^measureRetrieve/', views_measure.measure_retrieve_view, name='measureRetrieveView'),
       re_path(r'^measuresSyncOut/', measures_sync_out_view, name='measuresSyncOutView'),
       re_path(r'^measureListForUpcomingElectionsRetrieve/',
