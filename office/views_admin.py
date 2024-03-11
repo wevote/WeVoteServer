@@ -15,6 +15,7 @@ from config.base import get_environment_variable
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.text import slugify
+from django.utils.timezone import localtime, now
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
@@ -25,9 +26,11 @@ from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
 from position.controllers import move_positions_to_another_office
 from position.models import OPPOSE, PositionListManager, SUPPORT
-from voter.models import voter_has_authority
+from volunteer_task.models import VOLUNTEER_ACTION_CANDIDATE_CREATED, VolunteerTaskManager
+from voter.models import fetch_voter_from_voter_device_link, voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, convert_we_vote_date_string_to_date_as_integer, \
+    get_voter_api_device_id, \
     extract_first_name_from_full_name, extract_middle_name_from_full_name, extract_last_name_from_full_name, \
     is_candidate_we_vote_id, is_politician_we_vote_id, positive_value_exists, \
     STATE_CODE_MAP
@@ -1459,7 +1462,15 @@ def office_summary_add_candidates_process_view(
     candidate_possibility_search = request.GET.get('candidate_possibility_search', "")
     state_code = request.GET.get('state_code', "")
     status = ''
-
+    volunteer_task_manager = VolunteerTaskManager()
+    voter_device_id = get_voter_api_device_id(request)
+    voter = fetch_voter_from_voter_device_link(voter_device_id)
+    if hasattr(voter, 'we_vote_id'):
+        voter_id = voter.id
+        voter_we_vote_id = voter.we_vote_id
+    else:
+        voter_id = 0
+        voter_we_vote_id = ""
     at_least_one_candidate_created = False
     names_to_search_list = []
     # Break up multiple lines
@@ -1491,7 +1502,9 @@ def office_summary_add_candidates_process_view(
         allowed_years.append(election_year_as_integer)
     else:
         # Calculate this year
-        allowed_years.append(2024)
+        datetime_now = localtime(now()).date()  # We Vote uses Pacific Time for TIME_ZONE
+        current_year = datetime_now.year
+        allowed_years.append(current_year)
 
     # We list all options in a single list of dicts, so we can display complex options
     from candidate.models import CandidateCampaign, CandidateManager
@@ -1618,6 +1631,19 @@ def office_summary_add_candidates_process_view(
                                      'Did not create candidate from politician-object not retrieved: {status}'
                                      ''.format(status=status))
 
+        if (new_politician_created or candidate_name_created or link_candidate_we_vote_id_to_office) \
+                and positive_value_exists(voter_we_vote_id):
+            try:
+                # Give the volunteer who entered this credit
+                results = volunteer_task_manager.create_volunteer_task_completed(
+                    action_constant=VOLUNTEER_ACTION_CANDIDATE_CREATED,
+                    voter_id=voter_id,
+                    voter_we_vote_id=voter_we_vote_id,
+                )
+            except Exception as e:
+                status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED: ' \
+                          '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+
         if positive_value_exists(link_candidate_we_vote_id_to_office):
             results = candidate_manager.get_or_create_candidate_to_office_link(
                 candidate_we_vote_id=link_candidate_we_vote_id_to_office,
@@ -1643,7 +1669,8 @@ def office_summary_add_candidates_process_view(
             'candidate_name_already_linked':    candidate_name_already_linked,
             'candidate_name_to_search':         one_name_to_search,
             'candidate_slug':                   slugify(one_name_to_search),
-            'candidate_list':                   candidate_list_limited if candidate_name_already_linked else candidate_list,
+            'candidate_list':                   candidate_list_limited
+            if candidate_name_already_linked else candidate_list,
             'politician_list':                  politician_list,
         }
         search_result_options_dict[one_name_to_search] = search_result_option_dict

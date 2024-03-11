@@ -38,7 +38,8 @@ from position.models import ANY_STANCE, FRIENDS_AND_PUBLIC, FRIENDS_ONLY, INFORM
     PositionEntered, PositionManager, PositionListManager, PUBLIC_ONLY, SUPPORT
 from share.models import ShareManager
 from twitter.models import TwitterUserManager
-from voter.models import fetch_voter_id_from_voter_device_link, fetch_voter_we_vote_id_from_voter_device_link, \
+from volunteer_task.models import VOLUNTEER_ACTION_CANDIDATE_CREATED, VolunteerTaskManager
+from voter.models import fetch_voter_from_voter_device_link, fetch_voter_id_from_voter_device_link, fetch_voter_we_vote_id_from_voter_device_link, \
     fetch_voter_we_vote_id_from_voter_id, VoterManager
 from voter_guide.controllers_possibility import candidates_found_on_url, \
     match_endorsement_list_with_candidates_in_database, \
@@ -1713,7 +1714,13 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
             }
         return json_data
 
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    voter = fetch_voter_from_voter_device_link(voter_device_id)
+    if hasattr(voter, 'we_vote_id'):
+        voter_id = voter.id
+        voter_we_vote_id = voter.we_vote_id
+    else:
+        voter_id = 0
+        voter_we_vote_id = ""
     if not positive_value_exists(voter_id):
         status += "VOTER_NOT_FOUND_FROM_DEVICE_ID-VOTER_GUIDE_POSSIBILITY "
         # json_data = {
@@ -1725,6 +1732,7 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
 
     # At this point, we may or may not have a valid voter
 
+    volunteer_task_manager = VolunteerTaskManager()
     voter_guide_possibility_manager = VoterGuidePossibilityManager()
     voter_guide_possibility_position = VoterGuidePossibilityPosition()
     voter_guide_possibility = None
@@ -1982,6 +1990,7 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
                     if 'ballot_item_state_code' in modified_possible_endorsement_dict \
                        and positive_value_exists(modified_possible_endorsement_dict['ballot_item_state_code']) else ''
                 # Note: We currently assume this is a candidate (as opposed to a measure)
+                new_candidate_created = False
                 if positive_value_exists(ballot_item_name) and positive_value_exists(ballot_item_state_code):
                     from candidate.models import CandidateCampaign
                     try:
@@ -2003,7 +2012,17 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
                     except Exception as e:
                         status += 'FAILED_TO_CREATE_CANDIDATE ' \
                                   '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
-
+                if new_candidate_created and positive_value_exists(voter_we_vote_id):
+                    try:
+                        # Give the volunteer who entered this credit
+                        results = volunteer_task_manager.create_volunteer_task_completed(
+                            action_constant=VOLUNTEER_ACTION_CANDIDATE_CREATED,
+                            voter_id=voter_id,
+                            voter_we_vote_id=voter_we_vote_id,
+                        )
+                    except Exception as e:
+                        status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED: ' \
+                                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             at_least_one_change = False
             try:
                 if candidate_we_vote_id is not None:

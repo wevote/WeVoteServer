@@ -81,6 +81,7 @@ urlpatterns = [
     re_path(r'^tag/', include(('tag.urls', 'tag'), namespace="tag")),
     re_path(r'^twitter/', include(('import_export_twitter.urls', 'twitter'), namespace="twitter")),
     re_path(r'^twitter2/', include(('twitter.urls', 'twitter2'), namespace="twitter2")),
+    re_path(r'^volunteer/', include(('volunteer_task.urls', 'volunteer'), namespace="volunteer")),
     re_path(r'^voter/', include(('voter.urls', 'voter'), namespace="voter")),
     re_path(r'^vg/', include(('voter_guide.urls', 'voter_guide'), namespace="voter_guide")),
     # Authentication
