@@ -35,6 +35,7 @@ from position.controllers import find_organizations_referenced_in_positions_for_
     positions_import_from_sample_file
 from position.models import PositionEntered, PositionForFriends, PositionMetricsManager
 from share.models import ShareManager
+from twitter.functions import retrieve_twitter_rate_limit_info
 from twitter.models import TwitterApiCounterManager, TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
 from voter.models import Voter, VoterAddress, VoterAddressManager, VoterDeviceLinkManager, \
     VoterManager, VoterMetricsManager, \
@@ -1930,19 +1931,21 @@ def statistics_summary_view(request):
 
     twitter_api_counter_manager = TwitterApiCounterManager()
     twitter_daily_summary_list = twitter_api_counter_manager.retrieve_daily_summaries(days_to_display=15)
+    twitter_api_limits = retrieve_twitter_rate_limit_info()
 
     vote_usa_api_counter_manager = VoteUSAApiCounterManager()
     vote_usa_daily_summary_list = vote_usa_api_counter_manager.retrieve_daily_summaries(days_to_display=15)
 
     template_values = {
         'ctcl_daily_summary_list':          ctcl_daily_summary_list,
-        # 'ballotpedia_daily_summary_list':   ballotpedia_daily_summary_list,
         'google_civic_daily_summary_list':  google_civic_daily_summary_list,
+        'twitter_daily_summary_list':       twitter_daily_summary_list,
+        'twitter_api_limits':               twitter_api_limits,
+        'vote_usa_daily_summary_list':      vote_usa_daily_summary_list,
+        # 'ballotpedia_daily_summary_list':   ballotpedia_daily_summary_list,
         # 'sendgrid_daily_summary_list':      sendgrid_daily_summary_list,
         # 'vote_smart_daily_summary_list':    vote_smart_daily_summary_list,
         # 'targetsmart_daily_summary_list':   targetsmart_daily_summary_list,
-        'twitter_daily_summary_list':      twitter_daily_summary_list,
-        'vote_usa_daily_summary_list': vote_usa_daily_summary_list,
     }
     response = render(request, 'admin_tools/statistics_summary.html', template_values)
 

@@ -1,6 +1,8 @@
 # twitter/functions.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
+import json
+from datetime import datetime
 
 import tweepy
 
@@ -88,6 +90,28 @@ def expand_twitter_public_metrics(twitter_dict):
         if 'following_count' in public_metrics:
             twitter_dict['following_count'] = public_metrics['following_count']
     return twitter_dict
+
+
+def retrieve_twitter_rate_limit_info():
+    try:
+        auth = tweepy.OAuth2BearerHandler(TWITTER_BEARER_TOKEN)
+        api = tweepy.API(auth)
+        limits_json = api.rate_limit_status()   # March 2023, this api is not yet available in Twitter API V2
+        # print(json.dumps(limits_json))
+        output = []
+        for key, value in limits_json['resources'].items():
+            for endpoint, value2 in value.items():
+                output.append({
+                    'endpoint': endpoint,
+                    'limit': value2['limit'],
+                    'remaining': value2['remaining'],
+                    'reset': str(datetime.fromtimestamp(value2['reset']))
+                })
+        return json.dumps(output)
+    except Exception as e:
+        logger.error('retrieve_twitter_rate_limit_info caught: '+ str(e))
+        return ""
+
 
 
 def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api_counter_manager=None, parent=None):
@@ -266,7 +290,7 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
 
 
 def retrieve_twitter_user_info_from_handles_list(
-        twitter_handles_list=[],
+        twitter_handles_list=None,
         google_civic_api_counter_manager=None):
     retrieve_from_twitter = len(twitter_handles_list) > 0
     success = True

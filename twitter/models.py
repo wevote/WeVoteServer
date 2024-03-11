@@ -138,7 +138,7 @@ class TwitterUser(models.Model):
     DoesNotExist = None
     MultipleObjectsReturned = None
     objects = None
-    date_last_updated_from_twitter = models.DateTimeField(null=True)
+    date_last_updated_from_twitter = models.DateTimeField(null=True, db_index=True)
     twitter_description = models.CharField(
         verbose_name="Text description of this organization from twitter.", max_length=255, null=True, blank=True)
     twitter_followers_count = models.IntegerField(
@@ -146,7 +146,7 @@ class TwitterUser(models.Model):
     twitter_handle = models.CharField(
         verbose_name='twitter screen name / handle', max_length=255, null=False, unique=True)
     twitter_handle_updates_failing = models.BooleanField(default=None, null=True)
-    twitter_id = models.BigIntegerField(verbose_name="twitter big integer id", null=True, blank=True)
+    twitter_id = models.BigIntegerField(verbose_name="twitter big integer id", null=True, blank=True, db_index=True)
     twitter_location = models.CharField(verbose_name="location from twitter", max_length=255, null=True, blank=True)
     twitter_name = models.CharField(verbose_name="display name from twitter", max_length=255, null=True, blank=True)
     twitter_profile_image_url_https = models.TextField(verbose_name='url of logo from twitter', blank=True, null=True)
