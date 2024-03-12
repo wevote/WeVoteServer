@@ -8,7 +8,6 @@ from inspect import getmembers
 from types import FunctionType
 
 from django.http import HttpResponse
-from django.shortcuts import redirect
 
 import wevote_functions.admin
 from wevote_social.facebook import FacebookAPI
