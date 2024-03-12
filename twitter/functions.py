@@ -5,6 +5,7 @@ import json
 from datetime import datetime
 
 import tweepy
+from dateutil.tz import tz
 
 import wevote_functions.admin
 from config.base import get_environment_variable
@@ -101,11 +102,20 @@ def retrieve_twitter_rate_limit_info():
         output = []
         for key, value in limits_json['resources'].items():
             for endpoint, value2 in value.items():
+                from_zone = tz.tzutc()
+                to_zone = tz.tzlocal()
+                utc_naive = datetime.fromtimestamp(value2['reset'])
+                utc_dt = utc_naive.replace(tzinfo=from_zone)
+                local_dt = utc_dt.astimezone(to_zone)
+                local_tz = datetime.utcnow().astimezone().tzinfo
+                local_tzname = local_tz.tzname(local_dt)
+                reset = local_dt.strftime("%Y-%m-%d  %H:%M:%S") + "  " + local_tzname
+
                 output.append({
                     'endpoint': endpoint,
                     'limit': value2['limit'],
                     'remaining': value2['remaining'],
-                    'reset': str(datetime.fromtimestamp(value2['reset']))
+                    'reset': reset,
                 })
         return json.dumps(output)
     except Exception as e:
