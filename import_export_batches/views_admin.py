@@ -53,7 +53,7 @@ import requests
 from voter.models import voter_has_authority
 from voter_guide.models import ORGANIZATION_WORD
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
+from wevote_functions.functions import convert_to_int, get_voter_api_device_id, positive_value_exists, STATE_CODE_MAP
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -1232,6 +1232,8 @@ def batch_action_list_update_or_create_process_view(request):
     kind_of_batch = request.GET.get('kind_of_batch', '')
     kind_of_action = request.GET.get('kind_of_action')
     state_code = request.GET.get('state_code', '')
+
+    voter_device_id = get_voter_api_device_id(request)
     # do for entire batch_rows
     try:
         batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
@@ -1260,7 +1262,13 @@ def batch_action_list_update_or_create_process_view(request):
 
     if batch_header_map_found and batch_row_list_found:
         results = import_data_from_batch_row_actions(
-            kind_of_batch, kind_of_action, batch_header_id, batch_row_id, state_code, ballot_item_id=ballot_item_id)
+            kind_of_batch,
+            kind_of_action,
+            batch_header_id,
+            batch_row_id,
+            state_code,
+            ballot_item_id=ballot_item_id,
+            voter_device_id=voter_device_id)
         if kind_of_action == IMPORT_CREATE:
             if results['success']:
                 messages.add_message(request, messages.INFO,
@@ -2404,6 +2412,8 @@ def batch_set_batch_list_view(request):
     office_objects_dict = {}
     measure_objects_dict = {}
 
+    voter_device_id = get_voter_api_device_id(request)
+
     try:
         if positive_value_exists(analyze_all_button):
             batch_actions_analyzed = 0
@@ -2502,7 +2512,10 @@ def batch_set_batch_list_view(request):
             batch_actions_not_updated = 0
             for one_batch_description in batch_list:
                 results = import_data_from_batch_row_actions(
-                    one_batch_description.kind_of_batch, IMPORT_ADD_TO_EXISTING, one_batch_description.batch_header_id)
+                    one_batch_description.kind_of_batch,
+                    IMPORT_ADD_TO_EXISTING,
+                    one_batch_description.batch_header_id,
+                    voter_device_id=voter_device_id)
                 if results['number_of_table_rows_updated']:
                     batch_actions_updated += 1
                 else:
@@ -2530,7 +2543,10 @@ def batch_set_batch_list_view(request):
             not_created_status = ""
             for one_batch_description in batch_list:
                 results = import_data_from_batch_row_actions(
-                    one_batch_description.kind_of_batch, IMPORT_CREATE, one_batch_description.batch_header_id)
+                    one_batch_description.kind_of_batch,
+                    IMPORT_CREATE,
+                    one_batch_description.batch_header_id,
+                    voter_device_id=voter_device_id)
                 if results['number_of_table_rows_created']:
                     batch_actions_created += 1
 

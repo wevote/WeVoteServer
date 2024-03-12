@@ -38,8 +38,10 @@ from position.models import ANY_STANCE, FRIENDS_AND_PUBLIC, FRIENDS_ONLY, INFORM
     PositionEntered, PositionManager, PositionListManager, PUBLIC_ONLY, SUPPORT
 from share.models import ShareManager
 from twitter.models import TwitterUserManager
-from volunteer_task.models import VOLUNTEER_ACTION_CANDIDATE_CREATED, VolunteerTaskManager
-from voter.models import fetch_voter_from_voter_device_link, fetch_voter_id_from_voter_device_link, fetch_voter_we_vote_id_from_voter_device_link, \
+from volunteer_task.models import VOLUNTEER_ACTION_CANDIDATE_CREATED, \
+    VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED, VolunteerTaskManager
+from voter.models import fetch_voter_from_voter_device_link, fetch_voter_id_from_voter_device_link, \
+    fetch_voter_we_vote_id_from_voter_device_link, \
     fetch_voter_we_vote_id_from_voter_id, VoterManager
 from voter_guide.controllers_possibility import candidates_found_on_url, \
     match_endorsement_list_with_candidates_in_database, \
@@ -1013,6 +1015,19 @@ def voter_guide_possibility_retrieve_for_api(  # voterGuidePossibilityRetrieve
                 voter_guide_possibility_id = create_results['voter_guide_possibility_id']
                 organization_we_vote_id = voter_guide_possibility.organization_we_vote_id
                 candidate_we_vote_id = voter_guide_possibility.candidate_we_vote_id
+                if create_results['new_voter_guide_possibility_created'] and \
+                        positive_value_exists(voter_who_submitted_we_vote_id):
+                    try:
+                        # Give the volunteer who entered this credit
+                        volunteer_task_manager = VolunteerTaskManager()
+                        task_results = volunteer_task_manager.create_volunteer_task_completed(
+                            action_constant=VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED,
+                            voter_id=voter_id,
+                            voter_we_vote_id=voter_who_submitted_we_vote_id,
+                        )
+                    except Exception as e:
+                        status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED: ' \
+                                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
     candidates_missing_from_we_vote = False
     cannot_find_endorsements = False
@@ -2015,7 +2030,7 @@ def voter_guide_possibility_position_save_for_api(  # voterGuidePossibilityPosit
                 if new_candidate_created and positive_value_exists(voter_we_vote_id):
                     try:
                         # Give the volunteer who entered this credit
-                        results = volunteer_task_manager.create_volunteer_task_completed(
+                        task_results = volunteer_task_manager.create_volunteer_task_completed(
                             action_constant=VOLUNTEER_ACTION_CANDIDATE_CREATED,
                             voter_id=voter_id,
                             voter_we_vote_id=voter_we_vote_id,
