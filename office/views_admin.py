@@ -1603,8 +1603,7 @@ def office_summary_add_candidates_process_view(
             politician_by_we_vote_id_dict[new_politician.we_vote_id] = new_politician
 
         if positive_value_exists(create_candidate_for_politician_we_vote_id):
-            if positive_value_exists(create_candidate_for_politician_we_vote_id) \
-                    and create_candidate_for_politician_we_vote_id in politician_by_we_vote_id_dict:
+            if create_candidate_for_politician_we_vote_id in politician_by_we_vote_id_dict:
                 politician = politician_by_we_vote_id_dict[create_candidate_for_politician_we_vote_id]
                 if not hasattr(politician, 'politician_name'):
                     messages.add_message(request, messages.ERROR,
@@ -1635,7 +1634,7 @@ def office_summary_add_candidates_process_view(
                 and positive_value_exists(voter_we_vote_id):
             try:
                 # Give the volunteer who entered this credit
-                results = volunteer_task_manager.create_volunteer_task_completed(
+                task_results = volunteer_task_manager.create_volunteer_task_completed(
                     action_constant=VOLUNTEER_ACTION_CANDIDATE_CREATED,
                     voter_id=voter_id,
                     voter_we_vote_id=voter_we_vote_id,

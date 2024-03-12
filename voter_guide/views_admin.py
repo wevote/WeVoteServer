@@ -26,6 +26,7 @@ from organization.models import GROUP, OrganizationListManager, OrganizationMana
 from organization.views_admin import organization_edit_process_view
 from position.models import PositionEntered, PositionListManager
 from twitter.models import TwitterUserManager
+from volunteer_task.models import VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED, VolunteerTaskManager
 from voter.models import voter_has_authority, VoterManager
 from wevote_functions.functions import convert_to_int, convert_date_to_we_vote_date_string, \
     extract_twitter_handle_from_text_string, positive_value_exists, \
@@ -702,6 +703,9 @@ def voter_guide_create_process_view(request):
     candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle)
     organization_twitter_handle = extract_twitter_handle_from_text_string(organization_twitter_handle)
 
+    voter_id = 0
+    volunteer_task_manager = VolunteerTaskManager()
+    voter_we_vote_id = ""
     voter_manager = VoterManager()
     voter_who_submitted_is_political_data_manager = False
     organization_twitter_followers_count = 0
@@ -712,6 +716,8 @@ def voter_guide_create_process_view(request):
         voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
         if voter_results['voter_found']:
             voter = voter_results['voter']
+            voter_id = voter.id
+            voter_we_vote_id = voter.we_vote_id
             voter_who_submitted_is_political_data_manager = voter.is_political_data_manager
             voter_found = True
             voter_who_submitted_name = voter.get_full_name()
@@ -726,6 +732,8 @@ def voter_guide_create_process_view(request):
         voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
         if voter_results['voter_found']:
             voter = voter_results['voter']
+            voter_id = voter.id
+            voter_we_vote_id = voter.we_vote_id
             voter_who_submitted_is_political_data_manager = voter.is_political_data_manager
             voter_found = True
             voter_who_submitted_name = voter.get_full_name()
@@ -740,6 +748,8 @@ def voter_guide_create_process_view(request):
         voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
         if voter_results['voter_found']:
             voter = voter_results['voter']
+            voter_id = voter.id
+            voter_we_vote_id = voter.we_vote_id
             voter_who_submitted_is_political_data_manager = voter.is_political_data_manager
             voter_who_submitted_name = voter.get_full_name()
             voter_who_submitted_we_vote_id = voter.we_vote_id
@@ -842,6 +852,17 @@ def voter_guide_create_process_view(request):
             voter_guide_possibility_id=voter_guide_possibility_id,
             updated_values=updated_values)
         if positive_value_exists(results['success']):
+            if results['new_voter_guide_possibility_created'] and positive_value_exists(voter_we_vote_id):
+                try:
+                    # Give the volunteer who entered this credit
+                    task_results = volunteer_task_manager.create_volunteer_task_completed(
+                        action_constant=VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED,
+                        voter_id=voter_id,
+                        voter_we_vote_id=voter_we_vote_id,
+                    )
+                except Exception as e:
+                    status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED: ' \
+                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             voter_guide_possibility_id = results['voter_guide_possibility_id']
             results = voter_guide_possibility_manager.retrieve_voter_guide_possibility_position_list(
                 voter_guide_possibility_id)

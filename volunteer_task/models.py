@@ -5,12 +5,14 @@
 from django.db import models
 from django.utils.timezone import localtime, now
 
+from voter.models import fetch_voter_from_voter_device_link
 from wevote_functions.functions import convert_date_as_integer_to_date, convert_date_to_date_as_integer, \
     convert_to_int, positive_value_exists
 
 VOLUNTEER_ACTION_POSITION_SAVED = 1
 VOLUNTEER_ACTION_POSITION_COMMENT_SAVED = 2
 VOLUNTEER_ACTION_CANDIDATE_CREATED = 3
+VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED = 4
 
 
 class VolunteerTaskCompleted(models.Model):
@@ -64,10 +66,19 @@ class VolunteerTaskManager(models.Manager):
         action = VolunteerTaskCompleted()
         missing_required_variable = False
 
+        if voter_device_id and not positive_value_exists(voter_we_vote_id):
+            voter = fetch_voter_from_voter_device_link(voter_device_id)
+            if hasattr(voter, 'we_vote_id'):
+                voter_id = voter.id
+                voter_we_vote_id = voter.we_vote_id
+            else:
+                voter_id = 0
+                voter_we_vote_id = ""
+
         if not action_constant:
             missing_required_variable = True
             status += 'MISSING_ACTION_CONSTANT '
-        if not voter_we_vote_id:
+        if not positive_value_exists(voter_we_vote_id):
             missing_required_variable = True
             status += 'MISSING_VOTER_WE_VOTE_ID '
 
@@ -118,6 +129,8 @@ class VolunteerWeeklyMetrics(models.Model):
 def display_action_constant_human_readable(action_constant):
     if action_constant == VOLUNTEER_ACTION_CANDIDATE_CREATED:
         return "CANDIDATE_CREATED"
+    if action_constant == VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED:
+        return "VOTER_GUIDE_POSSIBILITY_CREATED"
     if action_constant == VOLUNTEER_ACTION_POSITION_COMMENT_SAVED:
         return "POSITION_COMMENT_SAVED"
     if action_constant == VOLUNTEER_ACTION_POSITION_SAVED:

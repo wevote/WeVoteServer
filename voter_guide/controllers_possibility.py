@@ -1030,7 +1030,7 @@ def process_organization_endorsing_candidates_input_form(
             if new_candidate_created and positive_value_exists(voter_we_vote_id):
                 try:
                     # Give the volunteer who entered this credit
-                    results = volunteer_task_manager.create_volunteer_task_completed(
+                    task_results = volunteer_task_manager.create_volunteer_task_completed(
                         action_constant=VOLUNTEER_ACTION_CANDIDATE_CREATED,
                         voter_id=voter_id,
                         voter_we_vote_id=voter_we_vote_id,

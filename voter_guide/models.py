@@ -46,6 +46,7 @@ VOTER_GUIDE_POSSIBILITY_TYPES = (
 # Used in different places than WEBSITES_WE_DO_NOT_SCAN_FOR_ENDORSEMENTS - could possibly be combined?
 # This constant is passed over to WebApp
 WEBSITES_TO_NEVER_HIGHLIGHT_ENDORSEMENTS = [
+    '*.atlassian.com',
     '*.atlassian.net',
     '*.google.com',
     '*.newrelic.com',
@@ -71,7 +72,7 @@ WEBSITES_TO_NEVER_HIGHLIGHT_ENDORSEMENTS = [
 # Used to prevent entering url to scan from being processed. Only used in WeVoteServer.
 WEBSITES_WE_DO_NOT_SCAN_FOR_ENDORSEMENTS = [
     'adirondackdailyenterprise.com', 'about:blank', 'alternet.org', 'apnews.com', 'apple.com',
-    'atlassian.net',
+    'atlassian.com', 'atlassian.net',
     'baltimoresun.com', 'billboard.com', 'bloomberg.com', 'boston.com', 'bostonglobe.com',
     'broadwayworld.com', 'buffalonews.com', 'businessinsider.com', 'buzzfeed.com',
     'charlotteobserver.com', 'chicagotibune.com', 'cnbc.com', 'cnn.com',
