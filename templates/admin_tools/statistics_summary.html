@@ -197,7 +197,8 @@
   <script>
     const lim = $('#limit');
     const unlim = $('#unlimited');
-    const twitter_api_limits = JSON.parse($('input#twitter_api_limits').val());
+    const json_limits = $('input#twitter_api_limits').val()
+    const twitter_api_limits = JSON.parse(json_limits);
     // for testing ... twitter_api_limits[6]['remaining'] = 25;
 
     function showAPIRows() {
