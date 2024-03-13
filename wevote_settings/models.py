@@ -635,8 +635,11 @@ class RemoteRequestHistoryManager(models.Manager):
         return results
 
     @staticmethod
-    def remote_request_history_entry_exists(kind_of_action, google_civic_election_id,
-                                            candidate_campaign_we_vote_id='', organization_we_vote_id=''):
+    def remote_request_history_entry_exists(
+            kind_of_action,
+            google_civic_election_id,
+            candidate_campaign_we_vote_id='',
+            organization_we_vote_id=''):
         success = False
         status = ""
 
