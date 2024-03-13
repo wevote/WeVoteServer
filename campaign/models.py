@@ -2605,12 +2605,12 @@ class CampaignXManager(models.Manager):
                         politician_name=results['politician'].politician_name,
                         politician_we_vote_id=campaignx_politician_we_vote_id,
                         state_code=results['politician'].state_code,
-                        we_vote_hosted_profile_image_url_large=
-                        results['politician'].we_vote_hosted_profile_image_url_large,
-                        we_vote_hosted_profile_image_url_medium=
-                        results['politician'].we_vote_hosted_profile_image_url_medium,
-                        we_vote_hosted_profile_image_url_tiny=
-                        results['politician'].we_vote_hosted_profile_image_url_tiny,
+                        we_vote_hosted_profile_image_url_large=results['politician']
+                        .we_vote_hosted_profile_image_url_large,
+                        we_vote_hosted_profile_image_url_medium=results['politician']
+                        .we_vote_hosted_profile_image_url_medium,
+                        we_vote_hosted_profile_image_url_tiny=results['politician']
+                        .we_vote_hosted_profile_image_url_tiny,
                     )
                     if campaignx_politician_we_vote_id not in campaignx_politician_existing_we_vote_id_list and \
                             create_results['campaignx_politician_found'] or \
