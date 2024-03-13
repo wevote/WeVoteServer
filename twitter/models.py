@@ -1699,7 +1699,6 @@ def mark_detailed_counter_entry(id, success, status):
         counter_row.text = status + counter_row.text
         counter_row.save()
 
-        print(status)
     except Exception as e:
         print('mark_detailed_counter_entry exception ' + str(e))
 
