@@ -207,7 +207,8 @@ class CampaignXManager(models.Manager):
 
         return 0
 
-    def fetch_campaignx_news_item_count(self, campaignx_we_vote_id=None):
+    @staticmethod
+    def fetch_campaignx_news_item_count(campaignx_we_vote_id=None):
         status = ""
 
         try:
@@ -219,8 +220,8 @@ class CampaignXManager(models.Manager):
 
         return 0
 
+    @staticmethod
     def fetch_next_goal_level(
-            self,
             supporters_count=1,
             tier_size=1000):
         try:
@@ -284,7 +285,8 @@ class CampaignXManager(models.Manager):
         except Exception as e:
             return 0
 
-    def generate_seo_friendly_path(self, base_pathname_string='', campaignx_we_vote_id='', campaignx_title=None):
+    @staticmethod
+    def generate_seo_friendly_path(base_pathname_string='', campaignx_we_vote_id='', campaignx_title=None):
         """
         Generate the closest possible SEO friendly path for this campaign. Note that these paths
         are only generated for campaigns which are already published.
@@ -302,7 +304,8 @@ class CampaignXManager(models.Manager):
             campaignx_we_vote_id=campaignx_we_vote_id,
         )
 
-    def is_voter_campaignx_owner(self, campaignx_we_vote_id='', voter_we_vote_id=''):
+    @staticmethod
+    def is_voter_campaignx_owner(campaignx_we_vote_id='', voter_we_vote_id=''):
         """
         We will also need functions that return the rights of the voter:
         - can_edit_campaignx_owned_by_organization
@@ -353,7 +356,8 @@ class CampaignXManager(models.Manager):
 
         return voter_is_campaignx_owner
 
-    def is_voter_campaignx_supporter(self, campaignx_we_vote_id='', voter_we_vote_id=''):
+    @staticmethod
+    def is_voter_campaignx_supporter(campaignx_we_vote_id='', voter_we_vote_id=''):
         """
 
         :param campaignx_we_vote_id:
@@ -377,7 +381,8 @@ class CampaignXManager(models.Manager):
     def remove_campaignx_owner(self, campaignx_we_vote_id='', voter_we_vote_id=''):
         return
 
-    def remove_campaignx_politicians_from_delete_list(self, campaignx_we_vote_id='', politician_delete_list=''):
+    @staticmethod
+    def remove_campaignx_politicians_from_delete_list(campaignx_we_vote_id='', politician_delete_list=''):
         success = True
         status = ''
         campaignx_manager = CampaignXManager()
@@ -398,8 +403,8 @@ class CampaignXManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_campaignx_as_owner(
-            self,
             campaignx_we_vote_id='',
             seo_friendly_path='',
             voter_we_vote_id='',
@@ -550,8 +555,8 @@ class CampaignXManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_campaignx(
-            self,
             campaignx_we_vote_id='',
             linked_politician_we_vote_id='',
             seo_friendly_path='',
@@ -643,8 +648,8 @@ class CampaignXManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_campaignx_listed_by_organization_list(
-            self,
             site_owner_organization_we_vote_id='',
             visible_to_public=True,
             ignore_visible_to_public=False,
@@ -719,8 +724,8 @@ class CampaignXManager(models.Manager):
         simple_list = list(set(simple_list))
         return simple_list
 
+    @staticmethod
     def retrieve_campaignx_list(
-            self,
             including_started_by_voter_we_vote_id=None,
             including_campaignx_we_vote_id_list=[],
             excluding_campaignx_we_vote_id_list=[],
@@ -852,8 +857,8 @@ class CampaignXManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_campaignx_list_for_private_label(
-            self,
             including_started_by_voter_we_vote_id='',
             limit=150,
             site_owner_organization_we_vote_id='',
@@ -977,7 +982,8 @@ class CampaignXManager(models.Manager):
         }
         return results
 
-    def retrieve_campaignx_we_vote_id_list_filler_options(self, campaignx_we_vote_id_list_to_exclude=[], limit=0):
+    @staticmethod
+    def retrieve_campaignx_we_vote_id_list_filler_options(campaignx_we_vote_id_list_to_exclude=[], limit=0):
         """
         Used for "recommended-campaigns"
         :param campaignx_we_vote_id_list_to_exclude:
@@ -1019,7 +1025,8 @@ class CampaignXManager(models.Manager):
         }
         return results
 
-    def retrieve_campaignx_we_vote_id_list_by_politician_we_vote_id(self, politician_we_vote_id_list=[]):
+    @staticmethod
+    def retrieve_campaignx_we_vote_id_list_by_politician_we_vote_id(politician_we_vote_id_list=[]):
         campaignx_we_vote_id_list = []
         success = True
         status = ""
@@ -1044,7 +1051,8 @@ class CampaignXManager(models.Manager):
         }
         return results
 
-    def retrieve_campaignx_we_vote_id_list_started_by_voter(self, started_by_voter_we_vote_id=''):
+    @staticmethod
+    def retrieve_campaignx_we_vote_id_list_started_by_voter(started_by_voter_we_vote_id=''):
         campaignx_we_vote_id_list_found = False
         campaignx_we_vote_id_list = []
         status = ''
@@ -1066,7 +1074,8 @@ class CampaignXManager(models.Manager):
         }
         return results
 
-    def retrieve_campaignx_we_vote_id_list_supported_by_voter(self, voter_we_vote_id=None):
+    @staticmethod
+    def retrieve_campaignx_we_vote_id_list_supported_by_voter(voter_we_vote_id=None):
         campaignx_we_vote_id_list = []
         success = True
         status = ""
@@ -1091,7 +1100,8 @@ class CampaignXManager(models.Manager):
         }
         return results
 
-    def retrieve_campaignx_list_by_campaignx_we_vote_id_list(self, campaignx_we_vote_id_list=[], read_only=True):
+    @staticmethod
+    def retrieve_campaignx_list_by_campaignx_we_vote_id_list(campaignx_we_vote_id_list=[], read_only=True):
         campaignx_list = []
         campaignx_list_found = False
         status = ''
@@ -1117,7 +1127,8 @@ class CampaignXManager(models.Manager):
         }
         return results
 
-    def retrieve_campaignx_list_for_voter(self, started_by_voter_we_vote_id=''):
+    @staticmethod
+    def retrieve_campaignx_list_for_voter(started_by_voter_we_vote_id=''):
         campaignx_list_found = False
         campaignx_list = []
         status = ''
@@ -1136,7 +1147,8 @@ class CampaignXManager(models.Manager):
             campaignx_list = []
             return campaignx_list
 
-    def retrieve_campaignx_owner(self, campaignx_we_vote_id='', voter_we_vote_id='', read_only=False):
+    @staticmethod
+    def retrieve_campaignx_owner(campaignx_we_vote_id='', voter_we_vote_id='', read_only=False):
         exception_does_not_exist = False
         exception_multiple_object_returned = False
         campaignx_owner = None
@@ -1183,8 +1195,8 @@ class CampaignXManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_campaignx_owner_list(
-            self,
             campaignx_we_vote_id_list=[],
             has_order_in_list=False,
             organization_we_vote_id='',
@@ -1222,8 +1234,8 @@ class CampaignXManager(models.Manager):
             campaignx_owner_list = []
             return campaignx_owner_list
 
+    @staticmethod
     def retrieve_campaignx_politician(
-            self,
             campaignx_we_vote_id='',
             politician_we_vote_id='',
             politician_name='',
@@ -1294,8 +1306,8 @@ class CampaignXManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_campaignx_politician_list(
-            self,
             campaignx_we_vote_id='',
             limit_to_this_state_code='',
             read_only=True,
@@ -1352,7 +1364,8 @@ class CampaignXManager(models.Manager):
             campaignx_politician_list = []
             return campaignx_politician_list
 
-    def repair_campaignx_supporter(self, campaignx_we_vote_id='', voter_we_vote_id=''):
+    @staticmethod
+    def repair_campaignx_supporter(campaignx_we_vote_id='', voter_we_vote_id=''):
         campaignx_supporter = None
         campaignx_supporter_found = False
         campaignx_supporter_repaired = False
@@ -1521,8 +1534,8 @@ class CampaignXManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_campaignx_supporter_list(
-            self,
             campaignx_we_vote_id=None,
             voter_we_vote_id=None,
             require_supporter_endorsement=False,
@@ -1574,8 +1587,8 @@ class CampaignXManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_campaignx_news_item(
-            self,
             campaignx_news_item_we_vote_id='',
             read_only=False):
         campaignx_news_item = None
@@ -1611,8 +1624,8 @@ class CampaignXManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_campaignx_news_item_list(
-            self,
             campaignx_we_vote_id=None,
             limit=0,
             read_only=True,
@@ -1670,7 +1683,8 @@ class CampaignXManager(models.Manager):
             # Some test data will throw this, no worries
             return ''
 
-    def retrieve_seo_friendly_path_list(self, campaignx_we_vote_id=''):
+    @staticmethod
+    def retrieve_seo_friendly_path_list(campaignx_we_vote_id=''):
         seo_friendly_path_list_found = False
         seo_friendly_path_list = []
         try:
@@ -1697,7 +1711,8 @@ class CampaignXManager(models.Manager):
                 simple_list.append(one_path.final_pathname_string)
         return simple_list
 
-    def retrieve_voter_can_send_updates_campaignx_we_vote_ids(self, voter_we_vote_id=''):
+    @staticmethod
+    def retrieve_voter_can_send_updates_campaignx_we_vote_ids(voter_we_vote_id=''):
         """
         :param voter_we_vote_id:
         :return:
@@ -1742,7 +1757,8 @@ class CampaignXManager(models.Manager):
 
         return list(combined_set)
 
-    def retrieve_voter_owned_campaignx_we_vote_ids(self, voter_we_vote_id=''):
+    @staticmethod
+    def retrieve_voter_owned_campaignx_we_vote_ids(voter_we_vote_id=''):
         """
         :param voter_we_vote_id:
         :return:
@@ -1789,8 +1805,8 @@ class CampaignXManager(models.Manager):
 
         return list(combined_set)
 
+    @staticmethod
     def update_campaignx_owners_with_organization_change(
-            self,
             organization_we_vote_id,
             organization_name,
             we_vote_hosted_profile_image_url_medium,
@@ -1816,8 +1832,8 @@ class CampaignXManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def update_campaignx_supporters_with_organization_change(
-            self,
             organization_we_vote_id,
             supporter_name,
             we_vote_hosted_profile_image_url_medium,
@@ -1877,8 +1893,8 @@ class CampaignXManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def update_or_create_campaignx(
-            self,
             campaignx_we_vote_id='',
             voter_we_vote_id='',
             organization_we_vote_id='',
@@ -2126,7 +2142,8 @@ class CampaignXManager(models.Manager):
         }
         return results
 
-    def update_or_create_campaignx_entries_are_not_duplicates(self, campaignx1_we_vote_id, campaignx2_we_vote_id):
+    @staticmethod
+    def update_or_create_campaignx_entries_are_not_duplicates(campaignx1_we_vote_id, campaignx2_we_vote_id):
         """
         Either update or create a CampaignXEntriesAreNotDuplicates entry.
         """
@@ -2167,8 +2184,8 @@ class CampaignXManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def update_or_create_campaignx_news_item(
-            self,
             campaignx_news_item_we_vote_id='',
             campaignx_we_vote_id='',
             organization_we_vote_id='',
@@ -2321,8 +2338,8 @@ class CampaignXManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def update_or_create_campaignx_owner(
-            self,
             campaignx_we_vote_id='',
             voter_we_vote_id='',
             organization_we_vote_id=None,
@@ -2431,8 +2448,8 @@ class CampaignXManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def update_or_create_campaignx_politician(
-            self,
             campaignx_we_vote_id='',
             politician_name=None,
             politician_we_vote_id=None,
@@ -2534,8 +2551,8 @@ class CampaignXManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def update_or_create_campaignx_politicians_from_starter(
-            self,
             campaignx_we_vote_id='',
             politician_starter_list=[]):
         success = True
@@ -2622,8 +2639,8 @@ class CampaignXManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def update_or_create_campaignx_supporter(
-            self,
             campaignx_we_vote_id='',
             voter_we_vote_id='',
             organization_we_vote_id='',
