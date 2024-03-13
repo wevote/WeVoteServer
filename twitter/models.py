@@ -1537,7 +1537,7 @@ class TwitterCursorState(models.Model):
     twitter_next_cursor = models.BigIntegerField(verbose_name="twitter next cursor state", null=False, unique=False)
 
 
-# This is a we vote copy (for speed) of Twitter handles that follow me. We should have self-healing scripts that set up
+# This is a wevote copy (for speed) of Twitter handles that follow me. We should have self-healing scripts that set up
 #  entries in TwitterWhoIFollow for everyone following someone in the We Vote network, so this table could be flushed
 #  and rebuilt at any time
 class TwitterWhoFollowMe(models.Model):
@@ -1551,6 +1551,7 @@ class TwitterApiCounter(models.Model):
     kind_of_action = models.CharField(
         verbose_name="kind of call to Twitter", max_length=50, null=True, blank=True, db_index=True)
     function = models.CharField(verbose_name='function', max_length=255, null=True, unique=False)
+    success = models.BooleanField(verbose_name='api call succeeded', default=True, db_index=True)
     disambiguator = models.PositiveIntegerField(verbose_name="disambiguate within the function", default=0, null=True)
     candidate_name = models.CharField(verbose_name='twitter screen name / handle', max_length=255, null=True,
                                       unique=False)
@@ -1632,13 +1633,18 @@ class TwitterApiCounterManager(models.Manager):
                     datetime_of_action__year=day_on_stage.year,
                     datetime_of_action__month=day_on_stage.month,
                     datetime_of_action__day=day_on_stage.day)
-                api_call_count = counter_queryset.count()
+                total_api_call_count = counter_queryset.count()
+                fail_counter_queryset = counter_queryset.filter(success=False)
+                failing_api_call_count = fail_counter_queryset.count()
+                succeeding_api_call_count = total_api_call_count - failing_api_call_count
 
                 # If any api calls were found on that date, pass it out for display
-                if positive_value_exists(api_call_count):
+                if positive_value_exists(total_api_call_count):
                     daily_summary = {
                         'date_string': day_on_stage,
-                        'count': api_call_count,
+                        'total_count': total_api_call_count,
+                        'succeeding_count': succeeding_api_call_count,
+                        'failing_count': failing_api_call_count,
                     }
                     daily_summaries.append(daily_summary)
                     number_found += 1
@@ -1650,16 +1656,18 @@ class TwitterApiCounterManager(models.Manager):
         return daily_summaries
 
 
-def create_detailed_counter_entry(kind_of_action, function, elements):
+def create_detailed_counter_entry(kind_of_action, function, success, elements):
     """
     Create a detailed entry that records that a call to the Twitter Api was made.
     """
+    id = None
     try:
         # TODO: We need to work out the timezone questions
-        TwitterApiCounter.objects.create(
+        counter = TwitterApiCounter.objects.create(
             kind_of_action=kind_of_action,
             google_civic_election_id=elements.get('google_civic_election_id', None),
             function=function,
+            success=success,
             disambiguator=elements.get('disambiguator', None),
             candidate_name=elements.get('candidate_name', None),
             search_term=elements.get('search_term', None),
@@ -1669,13 +1677,29 @@ def create_detailed_counter_entry(kind_of_action, function, elements):
         )
         success = True
         status = 'ENTRY_SAVED'
+        id = counter.id
     except Exception as e:
         print('create_detailed_counter_entry error ' + str(e))
         success = False
-        status = 'SOME_ERROR'
-
+        status = 'create_detailed_counter_entry error ' + str(e)
     results = {
         'success':                  success,
         'status':                   status,
+        'id':                       id,
     }
     return results
+
+
+# If we got a tweepy error, mark the row as NOT success
+def mark_detailed_counter_entry(id, success, status):
+    try:
+        counter_queryset = TwitterApiCounter.objects.filter(id=id)
+        counter_row = counter_queryset.first()
+        counter_row.success = success
+        counter_row.text = status + counter_row.text
+        counter_row.save()
+
+        print(status)
+    except Exception as e:
+        print('mark_detailed_counter_entry exception ' + str(e))
+

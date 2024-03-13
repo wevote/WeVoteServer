@@ -37,7 +37,7 @@ from representative.models import Representative, RepresentativeManager
 from twitter.functions import convert_twitter_user_object_data_to_we_vote_dict, expand_twitter_public_metrics, \
     expand_twitter_entities, retrieve_twitter_user_info
 from twitter.models import TwitterApiCounterManager, TwitterLinkPossibility, TwitterUserManager, \
-    create_detailed_counter_entry
+    create_detailed_counter_entry, mark_detailed_counter_entry
 from voter.models import VoterManager
 from voter_guide.models import VoterGuideListManager
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, \
@@ -1367,6 +1367,7 @@ def refresh_twitter_organization_details(organization, use_cached_data_if_within
 def retrieve_possible_twitter_handles(candidate):
     status = ""
     success = True
+    counter = None
     twitter_user_manager = TwitterUserManager()
     remote_request_history_manager = RemoteRequestHistoryManager()
 
@@ -1421,14 +1422,12 @@ def retrieve_possible_twitter_handles(candidate):
     search_term = candidate.candidate_name
     try:
         # Use Twitter API call counter to track the number of queries we are doing each day
-        google_civic_api_counter_manager = TwitterApiCounterManager()
-        # google_civic_api_counter_manager.create_counter_entry('search_users')
 
         # DALE 2024-01-19 search_users NOT supported by tweepy yet, but Twitter API 2 seems to
         # support it: https://developer.twitter.com/en/docs/twitter-api/users/search/api-reference/get-users-search
         print("tweepy client.search_users in retrieve_possible_twitter_handles -- search_term:", search_term)
-        create_detailed_counter_entry(
-            'search_users', 'retrieve_possible_twitter_handles',
+        counter = create_detailed_counter_entry(
+            'search_users', 'retrieve_possible_twitter_handles', success,
             {'search_term': search_term,  'candidate_name': candidate.candidate_name, 'disambiguator': 1})
         search_results = client.search_users(q=search_term, page=1)
         # TODO ADD SUPPORT FOR: one_result = expand_twitter_public_metrics(one_result)
@@ -1442,6 +1441,11 @@ def retrieve_possible_twitter_handles(candidate):
                 candidate_name=candidate_name,
                 candidate=candidate,
                 possible_twitter_handles_list=possible_twitter_handles_list)
+    except tweepy.TooManyRequests as rate_limit_error:
+        success = False
+        status += 'TWITTER_RATE_LIMIT_ERROR: ' + str(rate_limit_error) + " "
+        if counter:
+            mark_detailed_counter_entry(counter.id, success, status)
     except Exception as e:
         status += "ERROR_RETURNED_FROM_TWITTER_SEARCH1: " + str(e) + " "
 
@@ -1466,8 +1470,8 @@ def retrieve_possible_twitter_handles(candidate):
             # support it: https://developer.twitter.com/en/docs/twitter-api/users/search/api-reference/get-users-search
             print("tweepy client.search_users in retrieve_possible_twitter_handles -- modified_search_term:",
                   modified_search_term)
-            create_detailed_counter_entry(
-                'search_users', 'retrieve_possible_twitter_handles',
+            counter = create_detailed_counter_entry(
+                'search_users', 'retrieve_possible_twitter_handles', success,
                 {'search_term': modified_search_term, 'candidate_name': candidate.candidate_name, 'disambiguator': 2})
             modified_search_results = client.search_users(q=modified_search_term, page=1)
             # TODO ADD SUPPORT FOR: one_result = expand_twitter_public_metrics(one_result)
@@ -1479,6 +1483,12 @@ def retrieve_possible_twitter_handles(candidate):
                     candidate_name=candidate_name,
                     candidate=candidate,
                     possible_twitter_handles_list=possible_twitter_handles_list)
+        except tweepy.TooManyRequests as rate_limit_error:
+            success = False
+            status += 'TWITTER_RATE_LIMIT_ERROR: ' + str(rate_limit_error) + " "
+            if counter:
+                mark_detailed_counter_entry(counter.id, success, status)
+
         except Exception as e:
             status += "ERROR_RETURNED_FROM_TWITTER_SEARCH2: " + str(e) + " "
 
@@ -1493,8 +1503,8 @@ def retrieve_possible_twitter_handles(candidate):
             # support it: https://developer.twitter.com/en/docs/twitter-api/users/search/api-reference/get-users-search
             print("tweepy client.search_users in retrieve_possible_twitter_handles -- modified_search_term_2:",
                   modified_search_term_2)
-            create_detailed_counter_entry(
-                'search_users', 'retrieve_possible_twitter_handles',
+            counter = create_detailed_counter_entry(
+                'search_users', 'retrieve_possible_twitter_handles', success,
                 {'search_term': modified_search_term_2, 'candidate_name': candidate.candidate_name, 'disambiguator': 3})
             modified_search_results_2 = client.search_users(q=modified_search_term_2, page=1)
             # TODO ADD SUPPORT FOR: one_result = expand_twitter_public_metrics(one_result)
@@ -1506,6 +1516,11 @@ def retrieve_possible_twitter_handles(candidate):
                     candidate_name=candidate_name,
                     candidate=candidate,
                     possible_twitter_handles_list=possible_twitter_handles_list)
+        except tweepy.TooManyRequests as rate_limit_error:
+            success = False
+            status += 'TWITTER_RATE_LIMIT_ERROR: ' + str(rate_limit_error) + " "
+            if counter:
+                mark_detailed_counter_entry(counter.id, success, status)
         except Exception as e:
             status += "ERROR_RETURNED_FROM_TWITTER_SEARCH3: " + str(e) + " "
 
@@ -2577,12 +2592,13 @@ def transfer_candidate_twitter_handles_from_google_civic(google_civic_election_i
 
 
 def twitter_oauth1_user_handler_for_api(voter_device_id, oauth_token, oauth_verifier):
-    results = is_voter_device_id_valid(voter_device_id)
     success = False
     status = ""
+    counter = None
     idt = 0
     name = ""
     username = ""
+    results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         results = {
             'success':                      success,
@@ -2635,7 +2651,8 @@ def twitter_oauth1_user_handler_for_api(voter_device_id, oauth_token, oauth_veri
         )
 
         print("tweepy client get_me (voter) in twitter_oauth1_user_handler_for_api -- oauth_token:", oauth_token)
-        create_detailed_counter_entry('get_me', 'twitter_oauth1_user_handler_for_api', {'text': oauth_token})
+        counter = create_detailed_counter_entry('get_me', 'twitter_oauth1_user_handler_for_api', success,
+                                                {'text': oauth_token})
         me = client.get_me(user_fields=['id', 'username', 'created_at', 'location', 'description', 'verified',
                                         'profile_image_url'])  # 'followers_count', 'friends_count', 'profile_banner_url',
         # print(me.data)
@@ -2660,6 +2677,11 @@ def twitter_oauth1_user_handler_for_api(voter_device_id, oauth_token, oauth_veri
         success = True
         status = "TWITTER_VOTER_DATA_ADDED_TO_DB"
 
+    except tweepy.TooManyRequests as rate_limit_error:
+        success = False
+        status += 'TWITTER_RATE_LIMIT_ERROR: ' + str(rate_limit_error) + " "
+        if counter:
+            mark_detailed_counter_entry(counter.id, success, status)
     except Exception as ex:
         logger.error("twitter_oauth1_user_handler_for_api caught exception: " + str(ex))
         status = "twitter_oauth1_user_handler_for_api caught exception: " + str(ex)
@@ -2985,7 +3007,9 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
     :param return_url: Where to return the browser when sign in process is complete
     :return:
     """
+    success = True
     status = ''
+    counter = None
     twitter_handle = ''
     twitter_handle_found = False
     tweepy_user_object = None
@@ -3046,7 +3070,6 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
         return results
 
     twitter_auth_response = auth_response_results['twitter_auth_response']
-    success = True
 
     try:
         # March 2024, now using Twitter V2 API
@@ -3059,7 +3082,8 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
         )
 
         print("tweepy client get_me (WeVote) in twitter_sign_in_request_voter_info_for_api")
-        create_detailed_counter_entry('get_me', 'twitter_sign_in_request_voter_info_for_api', {'text': 'For WeVote'})
+        counter = create_detailed_counter_entry('get_me', 'twitter_sign_in_request_voter_info_for_api', success,
+                                                {'text': 'For WeVote'})
 
         tweepy_user_object = client.get_me()
         twitter_dict = tweepy_user_object.data
@@ -3074,11 +3098,15 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
     except tweepy.TooManyRequests:
         success = False
         status = 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_RATE_LIMIT_ERROR '
+        if counter:
+            mark_detailed_counter_entry(counter.id, success, status)
     except tweepy.TweepyException as error_instance:
         err_string = 'GENERAL_TWEEPY_EXCEPTION'
         try:
             # Dec 2012: Tweepy V$ (Twitter V2) returns these errors as (yuck): List[dict[str, Union[int, str]]]
             err_string = error_instance.args[0].args[0].args[0]
+            if counter:
+                mark_detailed_counter_entry(counter.id, success, status)
         except Exception:
             pass
         print(err_string)

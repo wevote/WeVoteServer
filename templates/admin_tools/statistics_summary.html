@@ -17,13 +17,13 @@
       <input type="radio" id="unlimited" name="lim" value="child" style="margin-left: 16px">
       <label for="unlimited">Show All API Endpoints</label>
     </div>
-    <table class="table">
+    <table class="table" style="width: 900px">
         <thead id="twit_stat_rows">
             <tr>
                 <th>Twitter API Endpoint</th>
                 <th>Remaining</th>
                 <th>Limit</th>
-                <th>Date Limit Resets</th>
+                <th style="width: 200px">Date Limit Resets</th>
             </tr>
         </thead>
     </table>
@@ -33,17 +33,21 @@
 <h4>Twitter / X API Calls (Our Count)</h4>
     <p>15 most recent days-worth of API calls.</p>
     <p>We need to track the number of calls to the X API because there are limits to the number of calls we can make per day.</p>
-    <table class="table">
+    <table class="table" style="width: 500px">
         <thead>
             <tr>
                 <th>Date</th>
-                <th># of Calls</th>
+                <th>Total # of Calls</th>
+                <th>Succeeding</th>
+                <th>Failing</th>
             </tr>
         </thead>
        {% for twitter_daily_summary in twitter_daily_summary_list %}
         <tr>
             <td>{{ twitter_daily_summary.date_string }}</td>
-            <td>{{ twitter_daily_summary.count|intcomma }}</td>
+            <td>{{ twitter_daily_summary.total_count|intcomma }}</td>
+            <td>{{ twitter_daily_summary.succeeding_count|intcomma }}</td>
+            <td>{{ twitter_daily_summary.failing_count|intcomma }}</td>
         </tr>
         {% endfor %}
     </table>

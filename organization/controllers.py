@@ -33,7 +33,7 @@ from position.controllers import delete_positions_for_organization, move_positio
     update_position_entered_details_from_organization
 from position.models import PositionListManager
 from stripe_donations.controllers import move_donation_info_to_another_organization
-from twitter.models import TwitterUserManager, create_detailed_counter_entry
+from twitter.models import TwitterUserManager, create_detailed_counter_entry, mark_detailed_counter_entry
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager, Voter
 from voter_guide.models import VoterGuide, VoterGuideManager, VoterGuideListManager
 from wevote_functions.functions import convert_to_int, \
@@ -586,8 +586,9 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id):
     :param organization_we_vote_id:
     :return:
     """
-    status = ""
     success = True
+    status = ""
+    counter = None
     tweets_saved = None
     tweets_not_saved = None
 
@@ -617,11 +618,16 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id):
             organization_we_vote_id)
         print("tweepy api.user_timeline (Old API, probably in deprecated code) in "
               "organization_retrieve_tweets_from_twitter -- organization_we_vote_id: ", organization_we_vote_id)
-        create_detailed_counter_entry('user_timeline', 'organization_retrieve_tweets_from_twitter',
-                                      {'voter_we_vote_id': organization_we_vote_id,
-                                       'text': 'Suspect that this code is deprecated'})
+        counter = create_detailed_counter_entry('user_timeline', 'organization_retrieve_tweets_from_twitter', success,
+                                                {'voter_we_vote_id': organization_we_vote_id,
+                                                'text': 'Suspect that this code is deprecated'})
 
         new_tweets = api.user_timeline(username=organization_twitter_id)
+    except tweepy.TooManyRequests:
+        success = False
+        status = 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_RATE_LIMIT_ERROR '
+        if counter:
+            mark_detailed_counter_entry(counter.id, success, status)
     except tweepy.errors.HTTPException as e:
         status = "ORGANIZATION_RETRIEVE_TWEETS_FROM_TWITTER_AUTH_FAIL_HTTPException: " + str(e) + " "
         success = False
@@ -631,10 +637,14 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id):
             'tweets_saved': tweets_saved,
             'tweets_not_saved': tweets_not_saved
         }
+        if counter:
+            mark_detailed_counter_entry(counter.id, success, status)
         return results
     except tweepy.TweepyException as e:
         status = "ORGANIZATION_RETRIEVE_TWEETS_FROM_TWITTER_AUTH_FAIL: " + str(e) + " "
         success = False
+        if counter:
+            mark_detailed_counter_entry(counter.id, success, status)
         results = {
             'success': success,
             'status': status,
