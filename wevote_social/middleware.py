@@ -34,10 +34,13 @@ class SocialMiddleware(object):
 
 
         if "/complete/twitter/" in request.path:
-            print('----- request.path: ', request.path)
-            # Bypass the state check in middleware for Twitter V2 API and the '/complete/twitter/' request ...
-            #   In this case unconditionally return a 200
+            print('MIDDLEWARE:request.path: ', request.path)
             print("MIDDLEWARE: object: " + str(request))
+            if 'redirect_state' in request.GET:
+                print("MIDDLEWARE: redirect_state: " + request.GET['redirect_state'])
+            else:
+                print("MIDDLEWARE: redirect_state: NO REDIRECT STATE RECEIVED (this is a problem)")
+
             print("MIDDLEWARE: headers: " + str(request.headers))
             print("MIDDLEWARE: session: " + str(self.attributes(request.session)))
             tok = request.GET['oauth_token'] if request.GET['oauth_token'] else ""
@@ -47,9 +50,12 @@ class SocialMiddleware(object):
             respURL = 'https://' + request.headers['Host'] + '/login_we_vote'
             print("MIDDLEWARE: respURL: " + respURL)
 
+            # Bypass the state check in middleware for Twitter V2 API and the '/complete/twitter/' request ...
+            #   In this case unconditionally return a 200
             # response = redirect(respURL)
-            # return response     # TODO FIX THIS RETURN
-            return HttpResponse()
+            # return response
+            # return HttpResponse()       TODO March 13, 2024 ... let fall through in all cases for now
+
 
         response = self.get_response(request)
     # def process_request(self, request):

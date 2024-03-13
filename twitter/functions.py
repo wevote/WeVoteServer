@@ -95,7 +95,10 @@ def expand_twitter_public_metrics(twitter_dict):
 
 def retrieve_twitter_rate_limit_info():
     try:
-        auth = tweepy.OAuth2BearerHandler(TWITTER_BEARER_TOKEN)  # TODO this might need to be NOT bearer token based https://developer.twitter.com/en/docs/twitter-api/v1/rate-limits
+        # auth = tweepy.OAuth2BearerHandler(TWITTER_BEARER_TOKEN)  # Theory is that this auth only reports rate_limit_status for requests made with a bearer token
+        # See "This limit is considered completely separate from per-application Bearer Token limits."  At https://developer.twitter.com/en/docs/twitter-api/v1/rate-limits
+        auth = tweepy.OAuth2AppHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
+
         api = tweepy.API(auth)
         limits_json = api.rate_limit_status()   # March 2023, this api is not yet available in Twitter API V2
         # print(json.dumps(limits_json))
