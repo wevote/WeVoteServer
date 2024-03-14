@@ -32,30 +32,6 @@ def performance_list_view(request):
     results = update_weekly_volunteer_metrics()
 
     performance_list = []
-    # one_person_one_week_dict = {
-    #     'end_of_week_date_integer': 20240302,
-    #     'voter_display_name': 'Michael G',
-    #     'voter_we_vote_id': '',
-    #     'positions_saved': 12,
-    #     'position_comments_saved': 3,
-    # }
-    # performance_list.append(one_person_one_week_dict)
-    # one_person_one_week_dict = {
-    #     'end_of_week_date_integer': 20240309,
-    #     'voter_display_name': 'Michael G',
-    #     'voter_we_vote_id': '',
-    #     'positions_saved': 8,
-    #     'position_comments_saved': 5,
-    # }
-    # performance_list.append(one_person_one_week_dict)
-    # one_person_one_week_dict = {
-    #     'end_of_week_date_integer': 20240309,
-    #     'voter_display_name': 'Dale McGrew',
-    #     'voter_we_vote_id': '',
-    #     'positions_saved': 10,
-    #     'position_comments_saved': 0,
-    # }
-    # performance_list.append(one_person_one_week_dict)
     try:
         queryset = VolunteerWeeklyMetrics.objects.using('readonly').all()  # 'analytics'
         # queryset = queryset.filter(we_vote_id__in=campaignx_we_vote_id_list)
@@ -82,6 +58,7 @@ def performance_list_view(request):
         if end_of_week_date_integer not in actions_completed_dict[voter_display_name]:
             actions_completed_dict[voter_display_name][end_of_week_date_integer] = {
                 'candidates_created': one_person_one_week.candidates_created,
+                'politicians_deduplicated': one_person_one_week.politicians_deduplicated,
                 'positions_saved': one_person_one_week.positions_saved,
                 'position_comments_saved': one_person_one_week.position_comments_saved,
                 'voter_guide_possibilities_created': one_person_one_week.voter_guide_possibilities_created,
@@ -90,6 +67,7 @@ def performance_list_view(request):
     for voter_display_name in voter_display_name_list:
         # Set these values to true if we have any tasks completed in any of the weeks we are displaying
         performance_display_dict[voter_display_name]['candidates_created'] = 0
+        performance_display_dict[voter_display_name]['politicians_deduplicated'] = 0
         performance_display_dict[voter_display_name]['positions_saved'] = 0
         performance_display_dict[voter_display_name]['position_comments_saved'] = 0
         performance_display_dict[voter_display_name]['voter_guide_possibilities_created'] = 0
@@ -98,27 +76,39 @@ def performance_list_view(request):
             if end_of_week_date_integer in actions_completed_dict[voter_display_name]:
                 candidates_created = \
                     actions_completed_dict[voter_display_name][end_of_week_date_integer]['candidates_created']
+                politicians_deduplicated = \
+                    actions_completed_dict[voter_display_name][end_of_week_date_integer]['politicians_deduplicated']
                 positions_saved = \
                     actions_completed_dict[voter_display_name][end_of_week_date_integer]['positions_saved']
                 position_comments_saved = \
                     actions_completed_dict[voter_display_name][end_of_week_date_integer]['position_comments_saved']
                 voter_guide_possibilities_created = \
                     actions_completed_dict[voter_display_name][end_of_week_date_integer]['voter_guide_possibilities_created']
+                volunteer_task_total = \
+                    candidates_created + politicians_deduplicated + positions_saved + \
+                    position_comments_saved + voter_guide_possibilities_created
             else:
-                candidates_created
+                candidates_created = 0
+                politicians_deduplicated = 0
                 positions_saved = 0
                 position_comments_saved = 0
                 voter_guide_possibilities_created = 0
+                volunteer_task_total = 0
             performance_display_dict[voter_display_name][end_of_week_date_integer] = {
                 'candidates_created': candidates_created,
+                'politicians_deduplicated': politicians_deduplicated,
                 'positions_saved': positions_saved,
                 'position_comments_saved': position_comments_saved,
+                'volunteer_task_total': volunteer_task_total,
                 'voter_guide_possibilities_created': voter_guide_possibilities_created,
             }
 
             if candidates_created > 0:
                 performance_display_dict[voter_display_name]['candidates_created'] += candidates_created
                 performance_display_dict[voter_display_name]['volunteer_task_total'] += candidates_created
+            if politicians_deduplicated > 0:
+                performance_display_dict[voter_display_name]['politicians_deduplicated'] += politicians_deduplicated
+                performance_display_dict[voter_display_name]['volunteer_task_total'] += politicians_deduplicated
             if positions_saved > 0:
                 performance_display_dict[voter_display_name]['positions_saved'] += positions_saved
                 performance_display_dict[voter_display_name]['volunteer_task_total'] += positions_saved
