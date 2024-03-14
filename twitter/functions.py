@@ -126,7 +126,6 @@ def retrieve_twitter_rate_limit_info():
         return ""
 
 
-
 def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api_counter_manager=None, parent=None):
     """
     :param twitter_user_id:
@@ -212,11 +211,21 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
 
             # twitter_user = api.get_user(user_id=twitter_user_id)
             print("tweepy client get_user #2 in retrieve_twitter_user_info -- twitter_handle: ", twitter_handle)
-            counter = create_detailed_counter_entry('get_user', 'retrieve_twitter_user_info', success,
-                                                    {'username': twitter_handle, 'disambiguator': 2,
-                                                     'text': twitter_user_id + ' - ' + parent})
-            twitter_user = client.get_user(id=twitter_user_id)
             try:
+                counter = create_detailed_counter_entry(
+                    kind_of_action='get_user',
+                    function='retrieve_twitter_user_info',
+                    success=success,
+                    elements={
+                        'username': twitter_handle,
+                        'disambiguator': 2,
+                        'text': str(twitter_user_id) + ' - ' + parent
+                    },
+                )
+            except Exception as e:
+                counter = None
+            try:
+                twitter_user = client.get_user(id=twitter_user_id)
                 twitter_dict = convert_twitter_user_object_data_to_we_vote_dict(twitter_user.data)
                 twitter_user_id = getattr(twitter_user.data, 'id')  # Integer value. id_str would be the String value
                 twitter_handle = getattr(twitter_user.data, 'username')
@@ -236,7 +245,7 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
     except tweepy.TooManyRequests as rate_limit_error:
         success = False
         status += 'TWITTER_RATE_LIMIT_ERROR: ' + str(rate_limit_error) + " "
-        if counter:
+        if counter and hasattr(counter, 'id'):
             mark_detailed_counter_entry(counter.id, success, status)
         handle_exception(rate_limit_error, logger=logger, exception_message=status)
         # March 7, 2024 TODO:  We might be able to get useful info in this situation
@@ -250,14 +259,14 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
             success = False
             status += 'TWITTER_HTTP_EXCEPTION: ' + str(error_instance) + ' '
             handle_exception(error_instance, logger=logger, exception_message=status)
-        if counter:
+        if counter and hasattr(counter, 'id'):
             mark_detailed_counter_entry(counter.id, success, status)
     except tweepy.errors.TweepyException as error_instance:
         success = False
         status += "TWEEPY_EXCEPTION_ERROR: "
         status += twitter_handle + " " if positive_value_exists(twitter_handle) else ""
         status += str(twitter_user_id) + " " if positive_value_exists(twitter_user_id) else " "
-        if counter:
+        if counter and hasattr(counter, 'id'):
             mark_detailed_counter_entry(counter.id, status)
         if error_instance:
             status += str(error_instance) + " "
@@ -266,7 +275,8 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
                 error_tuple = error_instance.args
                 for error_dict in error_tuple:
                     for one_error in error_dict:
-                        status += '[' + one_error['message'] + '] '
+                        if 'message' in one_error:
+                            status += '[' + str(one_error['message']) + '] '
                         if one_error['message'] in TWITTER_USER_NOT_FOUND_LOG_RESPONSES:
                             twitter_user_not_found_in_twitter = True
                         elif one_error['message'] in TWITTER_USER_SUSPENDED_LOG_RESPONSES:
@@ -362,8 +372,11 @@ def retrieve_twitter_user_info_from_handles_list(
         except tweepy.TooManyRequests as rate_limit_error:
             success = False
             status += 'TWITTER_RATE_LIMIT_ERROR: ' + str(rate_limit_error) + " "
-            if counter:
-                mark_detailed_counter_entry(counter.id, success, status)
+            if counter and hasattr(counter, 'id'):
+                try:
+                    mark_detailed_counter_entry(counter.id, success, status)
+                except Exception as e:
+                    status += "PROBLEM_MARKING_TWITTER_COUNTER " + str(e) + " "
         except Exception as e:
             status += "PROBLEM_RETRIEVING_TWITTER_DETAILS: " + str(e) + " "
             success = False
