@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 from datetime import date, timedelta
 from volunteer_task.models import VOLUNTEER_ACTION_CANDIDATE_CREATED, VOLUNTEER_ACTION_POSITION_COMMENT_SAVED, \
+    VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION, \
     VOLUNTEER_ACTION_POSITION_SAVED, VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED, VolunteerTaskCompleted, \
     VolunteerWeeklyMetrics
 from voter.models import Voter
@@ -71,12 +72,13 @@ def update_or_create_weekly_metrics_one_volunteer(
         voter_we_vote_id=None):
     candidates_created = 0
     positions_saved = 0
+    politicians_deduplicated = 0
     position_comments_saved = 0
     volunteer_weekly_metrics = None
     volunteer_weekly_metrics_saved = False
     voter_guide_possibilities_created = 0
     status = ""
-    success = False
+    success = True
 
     if hasattr(voter, 'we_vote_id'):
         voter_display_name = voter.get_full_name()
@@ -97,6 +99,7 @@ def update_or_create_weekly_metrics_one_volunteer(
         missing_required_variable = True
 
     if missing_required_variable:
+        success = False
         results = {
             'success':                          success,
             'status':                           status,
@@ -113,6 +116,8 @@ def update_or_create_weekly_metrics_one_volunteer(
             if start_of_week_date_integer <= volunteer_task_completed.date_as_integer <= end_of_week_date_integer:
                 if volunteer_task_completed.action_constant == VOLUNTEER_ACTION_CANDIDATE_CREATED:
                     candidates_created += 1
+                if volunteer_task_completed.action_constant == VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION:
+                    politicians_deduplicated += 1
                 elif volunteer_task_completed.action_constant == VOLUNTEER_ACTION_POSITION_COMMENT_SAVED:
                     position_comments_saved += 1
                 elif volunteer_task_completed.action_constant == VOLUNTEER_ACTION_POSITION_SAVED:
@@ -124,6 +129,7 @@ def update_or_create_weekly_metrics_one_volunteer(
     updates = {
         'candidates_created':                   candidates_created,
         'end_of_week_date_integer':             end_of_week_date_integer,
+        'politicians_deduplicated':             politicians_deduplicated,
         'positions_saved':                      positions_saved,
         'position_comments_saved':              position_comments_saved,
         'voter_date_unique_string':             voter_date_unique_string,
@@ -159,14 +165,28 @@ def update_weekly_volunteer_metrics():
 
     # Retrieve the last complete day we processed
     # If we run updates Wed March 13th, 2024, then the date stored is yesterday: 20240312
-    weekly_metrics_last_updated_date_integer = fetch_volunteer_task_weekly_metrics_last_updated()
+    day_before_last_update_date_integer = fetch_volunteer_task_weekly_metrics_last_updated()
+
+    try:
+        day_before_last_update_date = convert_date_as_integer_to_date(day_before_last_update_date_integer)
+        # Roll back to the Monday, of the week containing the earliest_date
+        weekday_of_last_update_date = day_before_last_update_date.weekday()
+        if weekday_of_last_update_date == 0:
+            earliest_monday_date = day_before_last_update_date
+        else:
+            earliest_monday_date = day_before_last_update_date - timedelta(days=weekday_of_last_update_date)
+        earliest_monday_integer = convert_date_to_date_as_integer(earliest_monday_date)
+    except Exception as e:
+        earliest_monday_integer = 0
+        status += "ERROR_RETRIEVING_EARLIEST_MONDAY_DATE: " + str(e) + ' '
 
     try:
         queryset = VolunteerTaskCompleted.objects.using('readonly').all()  # 'analytics'
-        # queryset = queryset.filter(we_vote_id__in=campaignx_we_vote_id_list)
+        # We have to process an entire week of task metrics if we last processed within the week.
+        #  Once past the Sunday of a week, we can stop fresh calculations and move onto weeks we haven't processed
+        #  completely yet.
+        queryset = queryset.filter(date_as_integer__gte=earliest_monday_integer)
         task_list = list(queryset)
-        if len(task_list):
-            task_list_found = True
     except Exception as e:
         status += "ERROR_RETRIEVING_VOLUNTEER_TASK_COMPLETED_LIST: " + str(e) + ' '
         success = False
@@ -203,6 +223,7 @@ def update_weekly_volunteer_metrics():
     for voter in voter_list:
         voter_dict_by_voter_we_vote_id[voter.we_vote_id] = voter
 
+    all_voters_updated_successfully = True
     for voter_we_vote_id in voter_we_vote_id_list:
         voter = voter_dict_by_voter_we_vote_id.get(voter_we_vote_id)
         for start_and_end_of_week_dict in start_and_end_of_week_date_integer_list:
@@ -212,12 +233,19 @@ def update_weekly_volunteer_metrics():
                 volunteer_task_completed_list=tasks_by_voter_we_vote_id[voter_we_vote_id],
                 voter=voter,
             )
+            if not results['success']:
+                all_voters_updated_successfully = False
 
-    if success and positive_value_exists(end_date_integer):
+    yesterday_integer = 0
+    if all_voters_updated_successfully:
+        today = date.today()
+        yesterday = today - timedelta(days=1)
+        yesterday_integer = convert_date_to_date_as_integer(yesterday)
+    if all_voters_updated_successfully and positive_value_exists(yesterday_integer):
         we_vote_settings_manager = WeVoteSettingsManager()
         results = we_vote_settings_manager.save_setting(
             setting_name="volunteer_task_weekly_metrics_last_updated",
-            setting_value=end_date_integer,
+            setting_value=yesterday_integer,
             value_type=WeVoteSetting.INTEGER)
         if not results['success']:
             status += results['status']

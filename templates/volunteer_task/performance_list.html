@@ -29,6 +29,9 @@
             {% if voter_dict.candidates_created %}
             &nbsp;&nbsp;&nbsp;Candidates Created<br />
             {% endif %}
+            {% if voter_dict.politicians_deduplicated %}
+            &nbsp;&nbsp;&nbsp;Candidates / Politicians Deduplicated<br />
+            {% endif %}
             {% if voter_dict.positions_saved %}
             &nbsp;&nbsp;&nbsp;Positions Saved<br />
             {% endif %}
@@ -42,9 +45,12 @@
         </td>
         <td>
         {% with voter_dict=performance_display_dict|get_value_from_dict:voter_display_name %}
-            <strong>{{ voter_dict.volunteer_task_total }}</strong><br />
+            <strong><span style="font-size: 1.2em">{{ voter_dict.volunteer_task_total }}</span></strong><br />
             {% if voter_dict.candidates_created %}
             {{ voter_dict.candidates_created }}<br />
+            {% endif %}
+            {% if voter_dict.politicians_deduplicated %}
+            {{ voter_dict.politicians_deduplicated }}<br />
             {% endif %}
             {% if voter_dict.positions_saved %}
             {{ voter_dict.positions_saved }}<br />
@@ -59,11 +65,14 @@
         </td>
     {% for end_of_week_date_integer in end_of_week_date_integer_list %}
         <td>
-        <br />
         {% with voter_dict=performance_display_dict|get_value_from_dict:voter_display_name %}
         {% with voter_one_date_dict=voter_dict|get_value_from_dict:end_of_week_date_integer %}
-            {% if voter_dict.candidates_created %}
-            {{ voter_dict.candidates_created }}<br />
+            {{ voter_one_date_dict.volunteer_task_total }}<br />
+            {% if voter_dict.candidates_created %}{# Show row if any candidates_created #}
+            {{ voter_one_date_dict.candidates_created }}<br />
+            {% endif %}
+            {% if voter_dict.politicians_deduplicated %}
+            {{ voter_one_date_dict.politicians_deduplicated }}<br />
             {% endif %}
             {% if voter_dict.positions_saved %}
             {{ voter_one_date_dict.positions_saved }}<br />
@@ -72,7 +81,7 @@
             {{ voter_one_date_dict.position_comments_saved }}<br />
             {% endif %}
             {% if voter_dict.voter_guide_possibilities_created %}
-            {{ voter_dict.voter_guide_possibilities_created }}<br />
+            {{ voter_one_date_dict.voter_guide_possibilities_created }}<br />
             {% endif %}
         {% endwith %}
         {% endwith %}

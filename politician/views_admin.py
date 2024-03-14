@@ -37,12 +37,13 @@ from politician.controllers import generate_campaignx_for_politician, politician
     update_politician_details_from_candidate
 from position.models import PositionEntered, PositionListManager
 from representative.models import Representative, RepresentativeManager
-from voter.models import voter_has_authority
+from volunteer_task.models import VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION, VolunteerTaskManager
+from voter.models import fetch_voter_from_voter_device_link, voter_has_authority
 from wevote_functions.functions import convert_date_to_we_vote_date_string, convert_to_int, \
     convert_to_political_party_constant, convert_we_vote_date_string_to_date_as_integer, \
     extract_first_name_from_full_name, extract_instagram_handle_from_text_string, \
     extract_middle_name_from_full_name, extract_last_name_from_full_name, \
-    extract_state_from_ocd_division_id, extract_twitter_handle_from_text_string, \
+    extract_state_from_ocd_division_id, extract_twitter_handle_from_text_string, get_voter_api_device_id, \
     positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization
 from wevote_settings.constants import IS_BATTLEGROUND_YEARS_AVAILABLE
 from .controllers import add_alternate_names_to_next_spot, add_twitter_handle_to_next_politician_spot, \
@@ -946,6 +947,15 @@ def politician_merge_process_view(request):
     redirect_to_politician_list = request.POST.get('redirect_to_politician_list', False)
     remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
     state_code = request.POST.get('state_code', '')
+    volunteer_task_manager = VolunteerTaskManager()
+    voter_device_id = get_voter_api_device_id(request)
+    voter_id = 0
+    voter_we_vote_id = ''
+    if positive_value_exists(voter_device_id):
+        voter = fetch_voter_from_voter_device_link(voter_device_id)
+        if hasattr(voter, 'we_vote_id'):
+            voter_id = voter.id
+            voter_we_vote_id = voter.we_vote_id
 
     if positive_value_exists(skip):
         results = politician_manager.update_or_create_politicians_are_not_duplicates(
@@ -956,6 +966,17 @@ def politician_merge_process_view(request):
                 politician2_we_vote_id__iexact=politician2_we_vote_id,
             )
             queryset.delete()
+            if positive_value_exists(voter_we_vote_id):
+                try:
+                    # Give the volunteer who entered this credit
+                    task_results = volunteer_task_manager.create_volunteer_task_completed(
+                        action_constant=VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION,
+                        voter_id=voter_id,
+                        voter_we_vote_id=voter_we_vote_id,
+                    )
+                except Exception as e:
+                    status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED-DEDUPLICATION: ' \
+                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
         if not results['new_politicians_are_not_duplicates_created']:
             messages.add_message(request, messages.ERROR, 'Could not save politicians_are_not_duplicates entry: ' +
                                  results['status'])
@@ -1020,6 +1041,17 @@ def politician_merge_process_view(request):
             politician2_we_vote_id__iexact=politician2_we_vote_id,
         )
         queryset.delete()
+        if positive_value_exists(voter_we_vote_id):
+            try:
+                # Give the volunteer who entered this credit
+                task_results = volunteer_task_manager.create_volunteer_task_completed(
+                    action_constant=VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION,
+                    voter_id=voter_id,
+                    voter_we_vote_id=voter_we_vote_id,
+                )
+            except Exception as e:
+                status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED-DEDUPLICATION: ' \
+                          '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
     else:
         # NOTE: We could also redirect to a page to look specifically at these two politicians, but this should
         # also get you back to looking at the two politicians
@@ -1595,6 +1627,16 @@ def politician_not_duplicates_view(request):
     politician1_we_vote_id = request.GET.get('politician1_we_vote_id', '')
     politician2_we_vote_id = request.GET.get('politician2_we_vote_id', '')
     state_code = request.GET.get('state_code', '')
+    status = ""
+    volunteer_task_manager = VolunteerTaskManager()
+    voter_id = 0
+    voter_we_vote_id = ""
+    voter_device_id = get_voter_api_device_id(request)
+    if positive_value_exists(voter_device_id):
+        voter = fetch_voter_from_voter_device_link(voter_device_id)
+        if hasattr(voter, 'we_vote_id'):
+            voter_id = voter.id
+            voter_we_vote_id = voter.we_vote_id
 
     politician_manager = PoliticianManager()
     results = politician_manager.update_or_create_politicians_are_not_duplicates(
@@ -1605,6 +1647,17 @@ def politician_not_duplicates_view(request):
             politician2_we_vote_id__iexact=politician2_we_vote_id,
         )
         queryset.delete()
+        if positive_value_exists(voter_we_vote_id):
+            try:
+                # Give the volunteer who entered this credit
+                task_results = volunteer_task_manager.create_volunteer_task_completed(
+                    action_constant=VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION,
+                    voter_id=voter_id,
+                    voter_we_vote_id=voter_we_vote_id,
+                )
+            except Exception as e:
+                status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED-DEDUPLICATION: ' \
+                          '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
     if not results['new_politicians_are_not_duplicates_created']:
         messages.add_message(request, messages.ERROR, 'Could not save politicians_are_not_duplicates entry: ' +

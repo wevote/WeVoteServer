@@ -37,12 +37,12 @@ from measure.models import ContestMeasure
 from office.controllers import office_create_from_office_held
 from office.models import ContestOffice, ContestOfficeManager
 from office_held.models import OfficeHeld
-from politician.models import PoliticianManager
+from politician.models import Politician, PoliticianManager
 from position.models import PositionEntered, PositionListManager
 from representative.models import Representative
 from twitter.models import TwitterLinkPossibility, TwitterUserManager
-from voter.models import VoterDeviceLinkManager, VoterManager, voter_has_authority
-from politician.models import Politician
+from voter.models import fetch_voter_from_voter_device_link, VoterDeviceLinkManager, VoterManager, voter_has_authority
+from volunteer_task.models import VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION, VolunteerTaskManager
 from voter_guide.models import VoterGuide
 from wevote_functions.functions import convert_to_int, \
     convert_we_vote_date_string_to_date_as_integer, \
@@ -3304,6 +3304,16 @@ def candidate_merge_process_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     candidate_manager = CandidateManager()
+    status = ""
+    volunteer_task_manager = VolunteerTaskManager()
+    voter_device_id = get_voter_api_device_id(request)
+    voter_id = 0
+    voter_we_vote_id = ''
+    if positive_value_exists(voter_device_id):
+        voter = fetch_voter_from_voter_device_link(voter_device_id)
+        if hasattr(voter, 'we_vote_id'):
+            voter_id = voter.id
+            voter_we_vote_id = voter.we_vote_id
 
     is_post = True if request.method == 'POST' else False
 
@@ -3335,7 +3345,19 @@ def candidate_merge_process_view(request):
     if positive_value_exists(skip):
         results = candidate_manager.update_or_create_candidates_are_not_duplicates(
             candidate1_we_vote_id, candidate2_we_vote_id)
-        if not results['new_candidates_are_not_duplicates_created']:
+        if results['new_candidates_are_not_duplicates_created']:
+            if positive_value_exists(voter_we_vote_id):
+                try:
+                    # Give the volunteer who entered this credit
+                    task_results = volunteer_task_manager.create_volunteer_task_completed(
+                        action_constant=VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION,
+                        voter_id=voter_id,
+                        voter_we_vote_id=voter_we_vote_id,
+                    )
+                except Exception as e:
+                    status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED-DEDUPLICATION: ' \
+                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+        else:
             messages.add_message(request, messages.ERROR, 'Could not save candidates_are_not_duplicates entry: ' +
                                  results['status'])
         messages.add_message(request, messages.INFO, 'Prior candidates skipped, and not merged.')
@@ -3385,6 +3407,17 @@ def candidate_merge_process_view(request):
         candidate = merge_results['candidate']
         messages.add_message(request, messages.INFO, "Candidate '{candidate_name}' merged."
                                                      "".format(candidate_name=candidate.candidate_name))
+        if positive_value_exists(voter_we_vote_id):
+            try:
+                # Give the volunteer who entered this credit
+                task_results = volunteer_task_manager.create_volunteer_task_completed(
+                    action_constant=VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION,
+                    voter_id=voter_id,
+                    voter_we_vote_id=voter_we_vote_id,
+                )
+            except Exception as e:
+                status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED-DEDUPLICATION: ' \
+                          '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
     else:
         # NOTE: We could also redirect to a page to look specifically at these two candidates, but this should
         # also get you back to looking at the two candidates

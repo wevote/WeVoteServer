@@ -13,6 +13,7 @@ VOLUNTEER_ACTION_POSITION_SAVED = 1
 VOLUNTEER_ACTION_POSITION_COMMENT_SAVED = 2
 VOLUNTEER_ACTION_CANDIDATE_CREATED = 3
 VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED = 4
+VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION = 5
 
 
 class VolunteerTaskCompleted(models.Model):
@@ -121,6 +122,7 @@ class VolunteerWeeklyMetrics(models.Model):
     #  And this end-of-week date is Sunday from ISO 8601 Standard
     end_of_week_date_integer = models.PositiveIntegerField(null=True, db_index=True)
     candidates_created = models.PositiveIntegerField(null=True)
+    politicians_deduplicated = models.PositiveIntegerField(null=True)
     positions_saved = models.PositiveIntegerField(null=True)
     position_comments_saved = models.PositiveIntegerField(null=True)
     # We create this unique identifier to we can prevent duplicates: voter_we_vote_id + "-" + end_of_week_date_integer
