@@ -10,7 +10,7 @@ from dateutil.tz import tz
 import wevote_functions.admin
 from config.base import get_environment_variable
 from exception.models import handle_exception
-from twitter.models import create_detailed_counter_entry
+from twitter.models import create_detailed_counter_entry, mark_detailed_counter_entry
 from wevote_functions.functions import positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -135,8 +135,9 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
     :param parent, calling function
     :return:
     """
-    status = ""
     success = True
+    status = ""
+    counter = None
     twitter_user_not_found_in_twitter = False
     twitter_user_suspended_by_twitter = False
     write_to_server_logs = False
@@ -170,8 +171,9 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
             #     twitter_api_counter_manager.create_counter_entry('get_user')
 
             print("tweepy client get_user #1 in retrieve_twitter_user_info -- twitter_handle: ", twitter_handle)
-            create_detailed_counter_entry('get_user', 'retrieve_twitter_user_info',
-                                          {'username': twitter_handle, 'disambiguator': 1, 'text': parent})
+            counter = create_detailed_counter_entry(
+                'get_user', 'retrieve_twitter_user_info', success,
+                {'username': twitter_handle, 'disambiguator': 1, 'text': parent})
             twitter_user = client.get_user(
                 username=twitter_handle,
                 user_fields=[
@@ -210,9 +212,9 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
 
             # twitter_user = api.get_user(user_id=twitter_user_id)
             print("tweepy client get_user #2 in retrieve_twitter_user_info -- twitter_handle: ", twitter_handle)
-            create_detailed_counter_entry('get_user', 'retrieve_twitter_user_info',
-                                          {'username': twitter_handle, 'disambiguator': 2,
-                                           'text': twitter_user_id + ' - ' + parent})
+            counter = create_detailed_counter_entry('get_user', 'retrieve_twitter_user_info', success,
+                                                    {'username': twitter_handle, 'disambiguator': 2,
+                                                     'text': twitter_user_id + ' - ' + parent})
             twitter_user = client.get_user(id=twitter_user_id)
             try:
                 twitter_dict = convert_twitter_user_object_data_to_we_vote_dict(twitter_user.data)
@@ -234,6 +236,8 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
     except tweepy.TooManyRequests as rate_limit_error:
         success = False
         status += 'TWITTER_RATE_LIMIT_ERROR: ' + str(rate_limit_error) + " "
+        if counter:
+            mark_detailed_counter_entry(counter.id, success, status)
         handle_exception(rate_limit_error, logger=logger, exception_message=status)
         # March 7, 2024 TODO:  We might be able to get useful info in this situation
         #  https://docs.tweepy.org/en/stable/api.html#tweepy.API.rate_limit_status
@@ -246,11 +250,15 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
             success = False
             status += 'TWITTER_HTTP_EXCEPTION: ' + str(error_instance) + ' '
             handle_exception(error_instance, logger=logger, exception_message=status)
+        if counter:
+            mark_detailed_counter_entry(counter.id, success, status)
     except tweepy.errors.TweepyException as error_instance:
         success = False
-        status += "[TWEEPY_EXCEPTION_ERROR: "
+        status += "TWEEPY_EXCEPTION_ERROR: "
         status += twitter_handle + " " if positive_value_exists(twitter_handle) else ""
         status += str(twitter_user_id) + " " if positive_value_exists(twitter_user_id) else " "
+        if counter:
+            mark_detailed_counter_entry(counter.id, status)
         if error_instance:
             status += str(error_instance) + " "
         if error_instance and hasattr(error_instance, 'args'):
@@ -305,11 +313,11 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
 def retrieve_twitter_user_info_from_handles_list(
         twitter_handles_list=None,
         google_civic_api_counter_manager=None):
-    retrieve_from_twitter = len(twitter_handles_list) > 0
     success = True
     status = ""
+    counter = None
     twitter_response_dict_list = []
-    twitter_response_object_list = []
+    retrieve_from_twitter = len(twitter_handles_list) > 0
 
     if retrieve_from_twitter:
         try:
@@ -325,8 +333,9 @@ def retrieve_twitter_user_info_from_handles_list(
             # if hasattr(google_civic_api_counter_manager, 'create_counter_entry'):
             #     google_civic_api_counter_manager.create_counter_entry('get_users')
 
-            create_detailed_counter_entry('get_users', 'retrieve_twitter_user_info_from_handles_list',
-                                          {'text': "".join(twitter_handles_list)})
+            counter = create_detailed_counter_entry(
+                'get_users', 'retrieve_twitter_user_info_from_handles_list', success,
+                {'text': "".join(twitter_handles_list)})
             print("tweepy client get_users in retrieve_twitter_user_info_from_handles_list")
             twitter_response = client.get_users(
                 usernames=twitter_handles_list,
@@ -350,9 +359,15 @@ def retrieve_twitter_user_info_from_handles_list(
                     twitter_dict = expand_twitter_entities(twitter_dict)
                     twitter_dict = expand_twitter_public_metrics(twitter_dict)
                     twitter_response_dict_list.append(twitter_dict)
+        except tweepy.TooManyRequests as rate_limit_error:
+            success = False
+            status += 'TWITTER_RATE_LIMIT_ERROR: ' + str(rate_limit_error) + " "
+            if counter:
+                mark_detailed_counter_entry(counter.id, success, status)
         except Exception as e:
             status += "PROBLEM_RETRIEVING_TWITTER_DETAILS: " + str(e) + " "
             success = False
+
     twitter_response_list_retrieved = len(twitter_response_dict_list) > 0
     results = {
         'success':                          success,
