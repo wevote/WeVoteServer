@@ -1,18 +1,19 @@
 {# templates/volunteer_task/performance_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Performance List{% endblock %}
+{% block title %}Scoreboard{% endblock %}
 
 {% block content %}
 {% load template_filters %}
 {% load humanize %}
 
-<h1>Performance List</h1>
+<h1>Scoreboard</h1>
 <table class="table table-condensed table-hover">
     <thead>
     <tr>
         <th></th>
         <th>Who</th>
+        <th>Totals</th>
     {% for end_of_week_date_integer in end_of_week_date_integer_list %}
         <th>{{ end_of_week_date_integer }}</th>
     {% endfor %}
@@ -23,17 +24,56 @@
     <tr>
         <td>{{ forloop.counter }}</td>
         <td>
+        {% with voter_dict=performance_display_dict|get_value_from_dict:voter_display_name %}
             {{ voter_display_name }}<br />
+            {% if voter_dict.candidates_created %}
+            &nbsp;&nbsp;&nbsp;Candidates Created<br />
+            {% endif %}
+            {% if voter_dict.positions_saved %}
             &nbsp;&nbsp;&nbsp;Positions Saved<br />
+            {% endif %}
+            {% if voter_dict.position_comments_saved %}
             &nbsp;&nbsp;&nbsp;Positions Comments Saved<br />
+            {% endif %}
+            {% if voter_dict.voter_guide_possibilities_created %}
+            &nbsp;&nbsp;&nbsp;Voter Guides Saved<br />
+            {% endif %}
+        {% endwith %}
+        </td>
+        <td>
+        {% with voter_dict=performance_display_dict|get_value_from_dict:voter_display_name %}
+            <strong>{{ voter_dict.volunteer_task_total }}</strong><br />
+            {% if voter_dict.candidates_created %}
+            {{ voter_dict.candidates_created }}<br />
+            {% endif %}
+            {% if voter_dict.positions_saved %}
+            {{ voter_dict.positions_saved }}<br />
+            {% endif %}
+            {% if voter_dict.position_comments_saved %}
+            {{ voter_dict.position_comments_saved }}<br />
+            {% endif %}
+            {% if voter_dict.voter_guide_possibilities_created %}
+            {{ voter_dict.voter_guide_possibilities_created }}<br />
+            {% endif %}
+        {% endwith %}
         </td>
     {% for end_of_week_date_integer in end_of_week_date_integer_list %}
         <td>
         <br />
-        {% with voter_date_dict=performance_display_dict|get_value_from_dict:voter_display_name %}
-        {% with voter_one_date_dict=voter_date_dict|get_value_from_dict:end_of_week_date_integer %}
+        {% with voter_dict=performance_display_dict|get_value_from_dict:voter_display_name %}
+        {% with voter_one_date_dict=voter_dict|get_value_from_dict:end_of_week_date_integer %}
+            {% if voter_dict.candidates_created %}
+            {{ voter_dict.candidates_created }}<br />
+            {% endif %}
+            {% if voter_dict.positions_saved %}
             {{ voter_one_date_dict.positions_saved }}<br />
-            {{ voter_one_date_dict.positions_written_saved }}
+            {% endif %}
+            {% if voter_dict.position_comments_saved %}
+            {{ voter_one_date_dict.position_comments_saved }}<br />
+            {% endif %}
+            {% if voter_dict.voter_guide_possibilities_created %}
+            {{ voter_dict.voter_guide_possibilities_created }}<br />
+            {% endif %}
         {% endwith %}
         {% endwith %}
         </td>

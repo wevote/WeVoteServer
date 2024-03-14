@@ -424,6 +424,25 @@ def fetch_stripe_processing_enabled_state():
         return False
 
 
+def fetch_volunteer_task_weekly_metrics_last_updated():
+    we_vote_settings_manager = WeVoteSettingsManager()
+    # Date as integer ex/ 20240308
+    results = we_vote_settings_manager.fetch_setting_results(
+        'volunteer_task_weekly_metrics_last_updated', read_only=True)
+    if results['success']:
+        if results['we_vote_setting_found']:
+            return results['setting_value']
+        else:
+            # Create the setting the first time
+            results = we_vote_settings_manager.save_setting(
+                setting_name='volunteer_task_weekly_metrics_last_updated',
+                setting_value=True,
+                value_type=WeVoteSetting.INTEGER)
+            return results['success']
+    else:
+        return False
+
+
 def set_stripe_processing_enabled_state(new_state):
     we_vote_settings_manager = WeVoteSettingsManager()
     results = we_vote_settings_manager.save_setting(
