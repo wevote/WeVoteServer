@@ -206,7 +206,8 @@ class AnalyticsAction(models.Model):
 
 class AnalyticsCountManager(models.Manager):
 
-    def fetch_ballot_views(self, google_civic_election_id=0, limit_to_one_date_as_integer=0):
+    @staticmethod
+    def fetch_ballot_views(google_civic_election_id=0, limit_to_one_date_as_integer=0):
         """
         Count the number of voters that viewed at least one ballot
         :param google_civic_election_id:
@@ -227,7 +228,8 @@ class AnalyticsCountManager(models.Manager):
             pass
         return count_result
 
-    def fetch_organization_entrants_list(self, organization_we_vote_id, google_civic_election_id=0):
+    @staticmethod
+    def fetch_organization_entrants_list(organization_we_vote_id, google_civic_election_id=0):
         """
         :param organization_we_vote_id:
         :param google_civic_election_id:
@@ -310,7 +312,8 @@ class AnalyticsCountManager(models.Manager):
             pass
         return count_result
 
-    def fetch_organization_followers_took_position(self, organization_we_vote_id, google_civic_election_id=0):
+    @staticmethod
+    def fetch_organization_followers_took_position(organization_we_vote_id, google_civic_election_id=0):
         follow_organization_list = FollowOrganizationList()
         return_voter_we_vote_id = True
         voter_we_vote_ids_of_organization_followers = \
@@ -330,7 +333,8 @@ class AnalyticsCountManager(models.Manager):
             pass
         return count_result
 
-    def fetch_organization_followers_visited_ballot(self, organization_we_vote_id, google_civic_election_id=0):
+    @staticmethod
+    def fetch_organization_followers_visited_ballot(organization_we_vote_id, google_civic_election_id=0):
         follow_organization_list = FollowOrganizationList()
         return_voter_we_vote_id = True
         voter_we_vote_ids_of_organization_followers = \
@@ -349,9 +353,13 @@ class AnalyticsCountManager(models.Manager):
             pass
         return count_result
 
-    def fetch_visitors(self, google_civic_election_id=0, organization_we_vote_id='',
-                       limit_to_one_date_as_integer=0, count_through_this_date_as_integer=0,
-                       limit_to_authenticated=False):
+    @staticmethod
+    def fetch_visitors(
+            google_civic_election_id=0,
+            organization_we_vote_id='',
+            limit_to_one_date_as_integer=0,
+            count_through_this_date_as_integer=0,
+            limit_to_authenticated=False):
         count_result = None
         try:
             count_query = AnalyticsAction.objects.using('analytics').all()
@@ -372,7 +380,8 @@ class AnalyticsCountManager(models.Manager):
             pass
         return count_result
 
-    def fetch_visitors_first_visit_to_organization_in_election(self, organization_we_vote_id, google_civic_election_id):
+    @staticmethod
+    def fetch_visitors_first_visit_to_organization_in_election(organization_we_vote_id, google_civic_election_id):
         """
         Entries are marked "first_visit_today" if it is the first visit in one day
         :param organization_we_vote_id:
@@ -393,7 +402,8 @@ class AnalyticsCountManager(models.Manager):
             pass
         return count_result
 
-    def fetch_new_followers_in_election(self, google_civic_election_id, organization_we_vote_id=""):
+    @staticmethod
+    def fetch_new_followers_in_election(google_civic_election_id, organization_we_vote_id=""):
         """
         :param organization_we_vote_id:
         :param google_civic_election_id:
@@ -413,7 +423,8 @@ class AnalyticsCountManager(models.Manager):
             pass
         return count_result
 
-    def fetch_new_auto_followers_in_election(self, google_civic_election_id, organization_we_vote_id=""):
+    @staticmethod
+    def fetch_new_auto_followers_in_election(google_civic_election_id, organization_we_vote_id=""):
         """
         :param organization_we_vote_id:
         :param google_civic_election_id:
@@ -432,7 +443,8 @@ class AnalyticsCountManager(models.Manager):
             pass
         return count_result
 
-    def fetch_voter_action_count(self, voter_we_vote_id):
+    @staticmethod
+    def fetch_voter_action_count(voter_we_vote_id):
         count_result = None
         try:
             count_query = AnalyticsAction.objects.using('analytics').all()
@@ -442,7 +454,8 @@ class AnalyticsCountManager(models.Manager):
             pass
         return count_result
 
-    def fetch_voter_ballot_visited(self, voter_we_vote_id, google_civic_election_id=0, organization_we_vote_id=''):
+    @staticmethod
+    def fetch_voter_ballot_visited(voter_we_vote_id, google_civic_election_id=0, organization_we_vote_id=''):
         count_result = None
         try:
             count_query = AnalyticsAction.objects.using('analytics').all()
@@ -457,7 +470,8 @@ class AnalyticsCountManager(models.Manager):
             pass
         return count_result
 
-    def fetch_voter_welcome_visited(self, voter_we_vote_id):
+    @staticmethod
+    def fetch_voter_welcome_visited(voter_we_vote_id):
         count_result = None
         try:
             count_query = AnalyticsAction.objects.using('analytics').all()
@@ -468,7 +482,8 @@ class AnalyticsCountManager(models.Manager):
             pass
         return count_result
 
-    def fetch_voter_days_visited(self, voter_we_vote_id):
+    @staticmethod
+    def fetch_voter_days_visited(voter_we_vote_id):
         count_result = None
         try:
             count_query = AnalyticsAction.objects.using('analytics').all()
@@ -479,7 +494,8 @@ class AnalyticsCountManager(models.Manager):
             pass
         return count_result
 
-    def fetch_voter_last_action_date(self, voter_we_vote_id):
+    @staticmethod
+    def fetch_voter_last_action_date(voter_we_vote_id):
         last_action_date = None
         try:
             fetch_query = AnalyticsAction.objects.using('analytics').all()
@@ -493,7 +509,8 @@ class AnalyticsCountManager(models.Manager):
             pass
         return last_action_date
 
-    def fetch_voter_voter_guides_viewed(self, voter_we_vote_id):
+    @staticmethod
+    def fetch_voter_voter_guides_viewed(voter_we_vote_id):
         count_result = 0
         try:
             count_query = AnalyticsAction.objects.using('analytics').all()
@@ -505,8 +522,11 @@ class AnalyticsCountManager(models.Manager):
             pass
         return count_result
 
+    @staticmethod
     def fetch_voter_guides_viewed(
-            self, google_civic_election_id=0, limit_to_one_date_as_integer=0, count_through_this_date_as_integer=0):
+            google_civic_election_id=0,
+            limit_to_one_date_as_integer=0,
+            count_through_this_date_as_integer=0):
         count_result = 0
         try:
             count_query = AnalyticsAction.objects.using('analytics').all()
@@ -526,11 +546,23 @@ class AnalyticsCountManager(models.Manager):
 
 class AnalyticsManager(models.Manager):
 
+    @staticmethod
     def create_action_type1(
-            self, action_constant, voter_we_vote_id, voter_id, is_signed_in, state_code,
-            organization_we_vote_id, organization_id, google_civic_election_id,
-            user_agent_string, is_bot, is_mobile, is_desktop, is_tablet,
-            ballot_item_we_vote_id="", voter_device_id=None):
+            action_constant,
+            voter_we_vote_id,
+            voter_id,
+            is_signed_in,
+            state_code,
+            organization_we_vote_id,
+            organization_id,
+            google_civic_election_id,
+            user_agent_string,
+            is_bot,
+            is_mobile,
+            is_desktop,
+            is_tablet,
+            ballot_item_we_vote_id="",
+            voter_device_id=None):
         """
         Create AnalyticsAction data
         """
@@ -591,11 +623,22 @@ class AnalyticsManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def create_action_type2(
-            self, action_constant, voter_we_vote_id, voter_id, is_signed_in, state_code,
-            organization_we_vote_id, google_civic_election_id,
-            user_agent_string, is_bot, is_mobile, is_desktop, is_tablet,
-            ballot_item_we_vote_id, voter_device_id=None):
+            action_constant,
+            voter_we_vote_id,
+            voter_id,
+            is_signed_in,
+            state_code,
+            organization_we_vote_id,
+            google_civic_election_id,
+            user_agent_string,
+            is_bot,
+            is_mobile,
+            is_desktop,
+            is_tablet,
+            ballot_item_we_vote_id,
+            voter_device_id=None):
         """
         Create AnalyticsAction data
         """
@@ -652,9 +695,15 @@ class AnalyticsManager(models.Manager):
         }
         return results
 
-    def retrieve_analytics_action_list(self, voter_we_vote_id='', voter_we_vote_id_list=[], google_civic_election_id=0,
-                                       organization_we_vote_id='', action_constant='', distinct_for_members=False,
-                                       state_code=''):
+    @staticmethod
+    def retrieve_analytics_action_list(
+            voter_we_vote_id='',
+            voter_we_vote_id_list=[],
+            google_civic_election_id=0,
+            organization_we_vote_id='',
+            action_constant='',
+            distinct_for_members=False,
+            state_code=''):
         success = True
         status = ""
         analytics_action_list = []
@@ -691,8 +740,8 @@ class AnalyticsManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_analytics_processed_list(
-            self,
             analytics_date_as_integer=0,
             voter_we_vote_id='',
             voter_we_vote_id_list=[],
@@ -755,9 +804,14 @@ class AnalyticsManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def delete_analytics_processed_list(
-            self, analytics_date_as_integer=0, voter_we_vote_id='', voter_we_vote_id_list=[],
-            google_civic_election_id=0, organization_we_vote_id='', kind_of_process=''):
+            analytics_date_as_integer=0,
+            voter_we_vote_id='',
+            voter_we_vote_id_list=[],
+            google_civic_election_id=0,
+            organization_we_vote_id='',
+            kind_of_process=''):
         success = True
         status = ""
 
@@ -788,7 +842,8 @@ class AnalyticsManager(models.Manager):
         }
         return results
 
-    def save_analytics_processed(self, analytics_date_as_integer, voter_we_vote_id, defaults):
+    @staticmethod
+    def save_analytics_processed(analytics_date_as_integer, voter_we_vote_id, defaults):
         success = True
         status = ""
         analytics_processed = None
@@ -815,7 +870,8 @@ class AnalyticsManager(models.Manager):
         }
         return results
 
-    def save_analytics_processing_status(self, analytics_date_as_integer, defaults):
+    @staticmethod
+    def save_analytics_processing_status(analytics_date_as_integer, defaults):
         success = True
         status = ""
         analytics_processing_status = None
@@ -840,7 +896,8 @@ class AnalyticsManager(models.Manager):
         }
         return results
 
-    def retrieve_analytics_processing_status_by_date_as_integer(self, analytics_date_as_integer):
+    @staticmethod
+    def retrieve_analytics_processing_status_by_date_as_integer(analytics_date_as_integer):
         success = False
         status = ""
 
@@ -861,7 +918,8 @@ class AnalyticsManager(models.Manager):
         }
         return results
 
-    def find_next_date_with_analytics_to_process(self, last_analytics_date_as_integer):
+    @staticmethod
+    def find_next_date_with_analytics_to_process(last_analytics_date_as_integer):
         status = ""
         success = True
         times_tried = 0
@@ -919,7 +977,8 @@ class AnalyticsManager(models.Manager):
         }
         return results
 
-    def does_analytics_processing_status_exist_for_one_date(self, analytics_date_as_integer_last_processed):
+    @staticmethod
+    def does_analytics_processing_status_exist_for_one_date(analytics_date_as_integer_last_processed):
         status = ""
         success = True
 
@@ -944,7 +1003,8 @@ class AnalyticsManager(models.Manager):
         }
         return results
 
-    def request_unfinished_analytics_processing_status_for_one_date(self, analytics_date_as_integer_last_processed):
+    @staticmethod
+    def request_unfinished_analytics_processing_status_for_one_date(analytics_date_as_integer_last_processed):
         status = ""
         success = True
 
@@ -1120,7 +1180,8 @@ class AnalyticsManager(models.Manager):
         }
         return results
 
-    def retrieve_organization_election_metrics_list(self, google_civic_election_id=0):
+    @staticmethod
+    def retrieve_organization_election_metrics_list(google_civic_election_id=0):
         success = False
         status = ""
         organization_election_metrics_list = []
@@ -1144,7 +1205,8 @@ class AnalyticsManager(models.Manager):
         }
         return results
 
-    def retrieve_sitewide_election_metrics_list(self, google_civic_election_id=0):
+    @staticmethod
+    def retrieve_sitewide_election_metrics_list(google_civic_election_id=0):
         success = False
         status = ""
         sitewide_election_metrics_list = []
@@ -1167,7 +1229,8 @@ class AnalyticsManager(models.Manager):
         }
         return results
 
-    def retrieve_list_of_dates_with_actions(self, date_as_integer, through_date_as_integer=0):
+    @staticmethod
+    def retrieve_list_of_dates_with_actions(date_as_integer, through_date_as_integer=0):
         success = False
         status = ""
         date_list = []
@@ -1196,7 +1259,8 @@ class AnalyticsManager(models.Manager):
         }
         return results
 
-    def retrieve_organization_list_with_election_activity(self, google_civic_election_id):
+    @staticmethod
+    def retrieve_organization_list_with_election_activity(google_civic_election_id):
         success = False
         status = ""
         organization_list = []
@@ -1223,7 +1287,8 @@ class AnalyticsManager(models.Manager):
         }
         return results
 
-    def retrieve_voter_we_vote_id_list_with_changes_since(self, date_as_integer, through_date_as_integer):
+    @staticmethod
+    def retrieve_voter_we_vote_id_list_with_changes_since(date_as_integer, through_date_as_integer):
         success = True
         status = ""
         voter_list = []
@@ -1279,7 +1344,8 @@ class AnalyticsManager(models.Manager):
                                             user_agent_string, is_bot, is_mobile, is_desktop, is_tablet,
                                             ballot_item_we_vote_id, voter_device_id)
 
-    def save_organization_daily_metrics_values(self, organization_daily_metrics_values):
+    @staticmethod
+    def save_organization_daily_metrics_values(organization_daily_metrics_values):
         success = False
         status = ""
         metrics_saved = False
@@ -1316,7 +1382,8 @@ class AnalyticsManager(models.Manager):
         }
         return results
 
-    def save_organization_election_metrics_values(self, organization_election_metrics_values):
+    @staticmethod
+    def save_organization_election_metrics_values(organization_election_metrics_values):
         success = False
         status = ""
         metrics_saved = False
@@ -1353,7 +1420,8 @@ class AnalyticsManager(models.Manager):
         }
         return results
 
-    def save_sitewide_daily_metrics_values(self, sitewide_daily_metrics_values):
+    @staticmethod
+    def save_sitewide_daily_metrics_values(sitewide_daily_metrics_values):
         success = True
         status = ""
         sitewide_daily_metrics_saved = False
@@ -1383,7 +1451,8 @@ class AnalyticsManager(models.Manager):
         }
         return results
 
-    def save_sitewide_election_metrics_values(self, sitewide_election_metrics_values):
+    @staticmethod
+    def save_sitewide_election_metrics_values(sitewide_election_metrics_values):
         success = False
         status = ""
         metrics_saved = False
@@ -1409,7 +1478,8 @@ class AnalyticsManager(models.Manager):
         }
         return results
 
-    def save_sitewide_voter_metrics_values_for_one_voter(self, sitewide_voter_metrics_values):
+    @staticmethod
+    def save_sitewide_voter_metrics_values_for_one_voter(sitewide_voter_metrics_values):
         success = False
         status = ""
         metrics_saved = False
@@ -1443,14 +1513,16 @@ class AnalyticsManager(models.Manager):
         }
         return results
 
-    def sitewide_voter_metrics_for_this_voter_updated_this_date(self, voter_we_vote_id, updated_date_integer):
+    @staticmethod
+    def sitewide_voter_metrics_for_this_voter_updated_this_date(voter_we_vote_id, updated_date_integer):
         updated_on_date_query = SitewideVoterMetrics.objects.using('analytics').filter(
             voter_we_vote_id__iexact=voter_we_vote_id,
             last_calculated_date_as_integer=updated_date_integer
         )
         return positive_value_exists(updated_on_date_query.count())
 
-    def update_first_visit_today_for_all_voters_since_date(self, date_as_integer, through_date_as_integer):
+    @staticmethod
+    def update_first_visit_today_for_all_voters_since_date(date_as_integer, through_date_as_integer):
         success = True
         status = ""
         distinct_days_list = []
@@ -1533,7 +1605,8 @@ class AnalyticsManager(models.Manager):
         }
         return results
 
-    def update_first_visit_today_for_one_voter(self, voter_we_vote_id):
+    @staticmethod
+    def update_first_visit_today_for_one_voter(voter_we_vote_id):
         success = False
         status = ""
         distinct_days_list = []
@@ -1633,14 +1706,14 @@ class OrganizationDailyMetrics(models.Model):
     followers_visiting_ballot = models.PositiveIntegerField(verbose_name="", null=True, unique=False)
 
     followers_total = models.PositiveIntegerField(verbose_name="all time",
-                                                               null=True, unique=False)
+                                                  null=True, unique=False)
     new_followers_today = models.PositiveIntegerField(verbose_name="today",
-                                                               null=True, unique=False)
+                                                      null=True, unique=False)
 
     auto_followers_total = models.PositiveIntegerField(verbose_name="all",
-                                                                   null=True, unique=False)
+                                                       null=True, unique=False)
     new_auto_followers_today = models.PositiveIntegerField(verbose_name="today",
-                                                                   null=True, unique=False)
+                                                           null=True, unique=False)
 
     issues_linked_total = models.PositiveIntegerField(verbose_name="organization classifications, all time",
                                                       null=True, unique=False)
@@ -1729,11 +1802,11 @@ class SitewideDailyMetrics(models.Model):
     new_visitors_today = models.PositiveIntegerField(verbose_name="new visitors, today", null=True, unique=False)
 
     voter_guide_entrants_today = models.PositiveIntegerField(verbose_name="first touch, voter guide",
-                                                            null=True, unique=False)
-    welcome_page_entrants_today = models.PositiveIntegerField(verbose_name="first touch, welcome page",
                                                              null=True, unique=False)
+    welcome_page_entrants_today = models.PositiveIntegerField(verbose_name="first touch, welcome page",
+                                                              null=True, unique=False)
     friend_entrants_today = models.PositiveIntegerField(verbose_name="first touch, response to friend",
-                                                       null=True, unique=False)
+                                                        null=True, unique=False)
 
     authenticated_visitors_total = models.PositiveIntegerField(verbose_name="number of visitors, all time",
                                                                null=True, unique=False)
@@ -1741,7 +1814,7 @@ class SitewideDailyMetrics(models.Model):
                                                                null=True, unique=False)
 
     ballot_views_today = models.PositiveIntegerField(verbose_name="number of voters who viewed a ballot today",
-                                                       null=True, unique=False)
+                                                     null=True, unique=False)
     voter_guides_viewed_total = models.PositiveIntegerField(verbose_name="number of voter guides viewed, all time",
                                                             null=True, unique=False)
     voter_guides_viewed_today = models.PositiveIntegerField(verbose_name="number of voter guides viewed, today",
@@ -1832,11 +1905,11 @@ class SitewideElectionMetrics(models.Model):
     unique_voters_that_auto_followed_organizations = models.PositiveIntegerField(verbose_name="",
                                                                                  null=True, unique=False)
     organizations_followed = models.PositiveIntegerField(verbose_name="voter follow organizations, today",
-                                                               null=True, unique=False)
+                                                         null=True, unique=False)
     organizations_auto_followed = models.PositiveIntegerField(verbose_name="auto_follow organizations, today",
-                                                                   null=True, unique=False)
+                                                              null=True, unique=False)
     organizations_signed_in = models.PositiveIntegerField(verbose_name="organizations signed in, all",
-                                                                null=True, unique=False)
+                                                          null=True, unique=False)
 
     organizations_with_positions = models.PositiveIntegerField(verbose_name="all",
                                                                null=True, unique=False)
