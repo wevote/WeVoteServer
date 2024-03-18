@@ -487,7 +487,12 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):  # tw
     #             owner_found = True
     #             status = "OWNER_OF_THIS_TWITTER_HANDLE_FOUND-CANDIDATE"
 
-    if not positive_value_exists(owner_found):
+    twitter_handle_format_valid = True
+    if len(twitter_handle) > 15:
+        twitter_handle_format_valid = False
+        status += "TWITTER_HANDLE_TOO_LONG "
+
+    if twitter_handle_format_valid and not positive_value_exists(owner_found):
         organization_list_manager = OrganizationListManager()
         organization_results = organization_list_manager.retrieve_organizations_from_twitter_handle(
             twitter_handle=twitter_handle, read_only=True)
@@ -513,7 +518,9 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):  # tw
 
     # Reach out to Twitter (or our Twitter account cache) to retrieve some information we can display
     twitter_user_manager = TwitterUserManager()
-    if not positive_value_exists(owner_found) or not positive_value_exists(we_vote_hosted_profile_image_url_large):
+    if twitter_handle_format_valid and \
+            (not positive_value_exists(owner_found)
+             or not positive_value_exists(we_vote_hosted_profile_image_url_large)):
         twitter_user_id = 0
         twitter_results = \
             twitter_user_manager.retrieve_twitter_user_locally_or_remotely(twitter_user_id, twitter_handle)
@@ -532,7 +539,7 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):  # tw
             twitter_user_website = twitter_user.twitter_url
             twitter_name = twitter_user.twitter_name
 
-    if not positive_value_exists(owner_found) and positive_value_exists(twitter_id):
+    if twitter_handle_format_valid and not positive_value_exists(owner_found) and positive_value_exists(twitter_id):
         # Create an organization
         organization_manager = OrganizationManager()
         create_results = organization_manager.create_organization(

@@ -54,6 +54,7 @@ WEBSITES_TO_NEVER_HIGHLIGHT_ENDORSEMENTS = [
     '*.wevote.us',
     '*.zendesk.com',
     'api.wevoteusa.org',
+    'app.jazz.co',
     'dashlane.com',
     'github.com'
     'localhost',
@@ -71,7 +72,7 @@ WEBSITES_TO_NEVER_HIGHLIGHT_ENDORSEMENTS = [
 ]
 # Used to prevent entering url to scan from being processed. Only used in WeVoteServer.
 WEBSITES_WE_DO_NOT_SCAN_FOR_ENDORSEMENTS = [
-    'adirondackdailyenterprise.com', 'about:blank', 'alternet.org', 'apnews.com', 'apple.com',
+    'adirondackdailyenterprise.com', 'about:blank', 'alternet.org', 'apple.com', 'app.jazz.co'
     'atlassian.com', 'atlassian.net',
     'baltimoresun.com', 'billboard.com', 'bloomberg.com', 'boston.com', 'bostonglobe.com',
     'broadwayworld.com', 'buffalonews.com', 'businessinsider.com', 'buzzfeed.com',
@@ -82,7 +83,7 @@ WEBSITES_WE_DO_NOT_SCAN_FOR_ENDORSEMENTS = [
     'docs.google.com', 'drive.google.com', 'mail.google.com', 'www.google.com',
     'essence.com',
     'facebook.com', 'foxbusiness.com', 'foxnews.com',
-    'gayly.com',
+    'gayly.com', 'github.com',
     'hollywoodreporter.com', 'houstonchronicle.com', 'huffpost.com',
     'indystar.com', 'instagram.com',
     'jobs.com',

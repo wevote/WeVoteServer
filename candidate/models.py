@@ -2717,6 +2717,10 @@ class CandidateCampaign(models.Model):
         return election
 
     def office(self):
+        """
+        For display in the Django template
+        :return:
+        """
         try:
             office = ContestOffice.objects.get(we_vote_id=self.contest_office_we_vote_id)
         except ContestOffice.MultipleObjectsReturned as e:
@@ -2728,6 +2732,19 @@ class CandidateCampaign(models.Model):
                          str(self.contest_office_we_vote_id))
             return
         return office
+
+    def office_list(self):
+        """
+        For display in the Django template
+        :return:
+        """
+        try:
+            office_list = ContestOffice.objects.filter(we_vote_id__in=self.contest_office_we_vote_id_list)
+        except Exception as e:
+            logger.error("CandidateCampaign.office_list no objects, we_vote_id: " +
+                         str(self.we_vote_id) + " " + str(e))
+            return
+        return office_list
 
     def candidate_photo_url(self):
         if self.we_vote_hosted_profile_image_url_tiny:
