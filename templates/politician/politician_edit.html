@@ -827,6 +827,10 @@
             <td class="padded">
                 {% if candidate.office %}
                     <a href="{% url 'office:office_summary' candidate.office.id %}" target="_blank">{{ candidate.office.office_name }} <span class="glyphicon glyphicon-new-window"></span></a>
+                {% elif candidate.office_list %}
+                    {% for office in candidate.office_list %}
+                        <a href="{% url 'office:office_summary' office.id %}" target="_blank">{{ office.office_name }} <span class="glyphicon glyphicon-new-window"></span></a>
+                    {% endfor %}
                 {% else %}
                     (office missing)
                 {% endif %}

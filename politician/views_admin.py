@@ -22,8 +22,8 @@ import wevote_functions.admin
 from admin_tools.views import redirect_to_sign_in_page
 from campaign.models import CampaignXManager
 from candidate.controllers import retrieve_candidate_photos
-from candidate.models import CandidateCampaign, CandidateListManager, CandidateManager, PROFILE_IMAGE_TYPE_FACEBOOK, \
-    PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
+from candidate.models import CandidateCampaign, CandidateListManager, CandidateManager, CandidateToOfficeLink, \
+    PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
     PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_VOTE_USA
 from config.base import get_environment_variable
 from election.models import Election
@@ -1397,7 +1397,8 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
         except Exception as e:
             politician_position_list = []
 
-        # Working with Candidate "children" of this politician
+        # ##################################
+        # Find Candidate "children" of this politician
         try:
             linked_candidate_list = CandidateCampaign.objects.all()
             linked_candidate_list = linked_candidate_list.filter(
@@ -1405,6 +1406,27 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
                 Q(politician_id=politician_on_stage.id))
         except Exception as e:
             linked_candidate_list = []
+
+        linked_candidate_we_vote_id_list = []
+        for candidate in linked_candidate_list:
+            linked_candidate_we_vote_id_list.append(candidate.we_vote_id)
+        if len(linked_candidate_we_vote_id_list) > 0:
+            try:
+                queryset = CandidateToOfficeLink.objects.all()
+                queryset = queryset.filter(candidate_we_vote_id__in=linked_candidate_we_vote_id_list)
+                candidate_to_office_link_list = list(queryset)
+            except Exception as e:
+                candidate_to_office_link_list = []
+            if len(candidate_to_office_link_list) > 0:
+                modified_linked_candidate_list = []
+                for one_candidate in linked_candidate_list:
+                    one_candidate.contest_office_we_vote_id_list = []  # Add new variable for template display purposes
+                    for candidate_to_office_link in candidate_to_office_link_list:
+                        if candidate_to_office_link.candidate_we_vote_id == one_candidate.we_vote_id:
+                            one_candidate.contest_office_we_vote_id_list\
+                                .append(candidate_to_office_link.contest_office_we_vote_id)
+                    modified_linked_candidate_list.append(one_candidate)
+                linked_candidate_list = modified_linked_candidate_list
 
         # ##################################
         # Find Candidates to Link to this Politician
