@@ -17,6 +17,27 @@
             <a href="{% url 'logout_we_vote' %}?next={{ request.path }}">Logout</a>
     </p>
     {% endif %}
+
+    {# ################## #}
+<h2>Analytics</h2>
+
+<p><a href="{% url 'analytics:analytics_index' %}">Voter, Daily &amp; Election Metrics</a></p>
+
+<p>
+    <a href="{% url 'issue:issue_partisan_analysis' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+        target="_blank">Breakdown of Endorsements, by Partisan Leaning <span class="glyphicon glyphicon-new-window"></span></a>
+</p>
+
+{# ################## #}
+<h2>Statistics</h2>
+<p><a href="{% url 'analytics:query_builder' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+        target="_blank">Voter Statistics: Query Builder <span class="glyphicon glyphicon-new-window"></span></a>
+    (aggregate voter usage)
+</p>
+<p><a href="{% url 'share:voter_who_shares_summary_list' %}">Statistics About Voters Who Share</a></p>
+<p><a href="{% url 'admin_tools:statistics_summary' %}">API Usage Statistics</a></p>
+
+<p>Opinions and Links Statistics:</p>
     <table style="margin-left: 20px; width: 80%">
         <tr style="border-bottom: 1px solid black" >
             <th style="width: fit-content; padding: 4px 10px 4px 0px !important">Statistics</th>
@@ -129,24 +150,7 @@
       });
   </script>
 
-{# ################## #}
-<h2>Analytics</h2>
 
-<p><a href="{% url 'analytics:analytics_index' %}">Voter, Daily &amp; Election Metrics</a></p>
-
-<p>
-    <a href="{% url 'issue:issue_partisan_analysis' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-        target="_blank">Breakdown of Endorsements, by Partisan Leaning <span class="glyphicon glyphicon-new-window"></span></a>
-</p>
-
-{# ################## #}
-<h2>Statistics</h2>
-<p><a href="{% url 'analytics:query_builder' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-        target="_blank">Voter Statistics: Query Builder <span class="glyphicon glyphicon-new-window"></span></a>
-    (aggregate voter usage)
-</p>
-<p><a href="{% url 'share:voter_who_shares_summary_list' %}">Statistics About Voters Who Share</a></p>
-<p><a href="{% url 'admin_tools:statistics_summary' %}">API Usage Statistics</a></p>
 
 {# ################## #}
 <h2>Security</h2>
