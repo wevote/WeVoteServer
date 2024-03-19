@@ -212,17 +212,11 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
             # twitter_user = api.get_user(user_id=twitter_user_id)
             print("tweepy client get_user #2 in retrieve_twitter_user_info -- twitter_handle: ", twitter_handle)
             try:
-                counter = create_detailed_counter_entry(
-                    kind_of_action='get_user',
-                    function='retrieve_twitter_user_info',
-                    success=success,
-                    elements={
-                        'username': twitter_handle,
-                        'disambiguator': 2,
-                        'text': str(twitter_user_id) + ' - ' + parent
-                    },
-                )
+                counter = create_detailed_counter_entry('get_user', 'retrieve_twitter_user_info', success,
+                                                        {'username': twitter_handle, 'disambiguator': 2,
+                                                         'text': twitter_user_id + ' - ' + parent})
             except Exception as e:
+                logger.error('retrieve_twitter_user_info create_detailed_counter_entry threw ' + str(e))
                 counter = None
             try:
                 twitter_user = client.get_user(id=twitter_user_id)
@@ -242,11 +236,12 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
             success = False
             status += 'TWITTER_RETRIEVE_NOT_SUCCESSFUL-MISSING_VARIABLE '
             twitter_handle_found = False
+
     except tweepy.TooManyRequests as rate_limit_error:
         success = False
-        status += 'TWITTER_RATE_LIMIT_ERROR: ' + str(rate_limit_error) + " "
-        if counter and hasattr(counter, 'id'):
-            mark_detailed_counter_entry(counter.id, success, status)
+        user = twitter_handle if twitter_handle else 'NO_HANDLE'
+        status += 'TWITTER_RATE_LIMIT_ERROR (' + user + '): ' + str(rate_limit_error) + " "
+        mark_detailed_counter_entry(counter, success, status)
         handle_exception(rate_limit_error, logger=logger, exception_message=status)
         # March 7, 2024 TODO:  We might be able to get useful info in this situation
         #  https://docs.tweepy.org/en/stable/api.html#tweepy.API.rate_limit_status
@@ -259,15 +254,13 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
             success = False
             status += 'TWITTER_HTTP_EXCEPTION: ' + str(error_instance) + ' '
             handle_exception(error_instance, logger=logger, exception_message=status)
-        if counter and hasattr(counter, 'id'):
-            mark_detailed_counter_entry(counter.id, success, status)
+        mark_detailed_counter_entry(counter, False, status)
     except tweepy.errors.TweepyException as error_instance:
         success = False
         status += "TWEEPY_EXCEPTION_ERROR: "
         status += twitter_handle + " " if positive_value_exists(twitter_handle) else ""
         status += str(twitter_user_id) + " " if positive_value_exists(twitter_user_id) else " "
-        if counter and hasattr(counter, 'id'):
-            mark_detailed_counter_entry(counter.id, status)
+        mark_detailed_counter_entry(counter, success, status)
         if error_instance:
             status += str(error_instance) + " "
         if error_instance and hasattr(error_instance, 'args'):
@@ -372,11 +365,8 @@ def retrieve_twitter_user_info_from_handles_list(
         except tweepy.TooManyRequests as rate_limit_error:
             success = False
             status += 'TWITTER_RATE_LIMIT_ERROR: ' + str(rate_limit_error) + " "
-            if counter and hasattr(counter, 'id'):
-                try:
-                    mark_detailed_counter_entry(counter.id, success, status)
-                except Exception as e:
-                    status += "PROBLEM_MARKING_TWITTER_COUNTER " + str(e) + " "
+            mark_detailed_counter_entry(counter, success, status)
+
         except Exception as e:
             status += "PROBLEM_RETRIEVING_TWITTER_DETAILS: " + str(e) + " "
             success = False

@@ -626,8 +626,7 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id):
     except tweepy.TooManyRequests:
         success = False
         status = 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_RATE_LIMIT_ERROR '
-        if counter and hasattr(counter, 'id'):
-            mark_detailed_counter_entry(counter.id, success, status)
+        mark_detailed_counter_entry(counter, success, status)
     except tweepy.errors.HTTPException as e:
         status = "ORGANIZATION_RETRIEVE_TWEETS_FROM_TWITTER_AUTH_FAIL_HTTPException: " + str(e) + " "
         success = False
@@ -637,14 +636,12 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id):
             'tweets_saved': tweets_saved,
             'tweets_not_saved': tweets_not_saved
         }
-        if counter and hasattr(counter, 'id'):
-            mark_detailed_counter_entry(counter.id, success, status)
+        mark_detailed_counter_entry(counter, success, status)
         return results
     except tweepy.TweepyException as e:
         status = "ORGANIZATION_RETRIEVE_TWEETS_FROM_TWITTER_AUTH_FAIL: " + str(e) + " "
         success = False
-        if counter and hasattr(counter, 'id'):
-            mark_detailed_counter_entry(counter.id, success, status)
+        mark_detailed_counter_entry(counter, success, status)
         results = {
             'success': success,
             'status': status,
