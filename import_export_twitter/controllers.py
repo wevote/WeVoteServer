@@ -1451,8 +1451,7 @@ def retrieve_possible_twitter_handles(candidate):
     except tweepy.TooManyRequests as rate_limit_error:
         success = False
         status += 'TWITTER_RATE_LIMIT_ERROR: ' + str(rate_limit_error) + " "
-        if counter and hasattr(counter, 'id'):
-            mark_detailed_counter_entry(counter.id, success, status)
+        mark_detailed_counter_entry(counter, success, status)
     except Exception as e:
         status += "ERROR_RETURNED_FROM_TWITTER_SEARCH1: " + str(e) + " "
 
@@ -1493,8 +1492,7 @@ def retrieve_possible_twitter_handles(candidate):
         except tweepy.TooManyRequests as rate_limit_error:
             success = False
             status += 'TWITTER_RATE_LIMIT_ERROR: ' + str(rate_limit_error) + " "
-            if counter and hasattr(counter, 'id'):
-                mark_detailed_counter_entry(counter.id, success, status)
+            mark_detailed_counter_entry(counter, success, status)
 
         except Exception as e:
             status += "ERROR_RETURNED_FROM_TWITTER_SEARCH2: " + str(e) + " "
@@ -1526,8 +1524,7 @@ def retrieve_possible_twitter_handles(candidate):
         except tweepy.TooManyRequests as rate_limit_error:
             success = False
             status += 'TWITTER_RATE_LIMIT_ERROR: ' + str(rate_limit_error) + " "
-            if counter and hasattr(counter, 'id'):
-                mark_detailed_counter_entry(counter.id, success, status)
+            mark_detailed_counter_entry(counter, success, status)
         except Exception as e:
             status += "ERROR_RETURNED_FROM_TWITTER_SEARCH3: " + str(e) + " "
 
@@ -2658,7 +2655,7 @@ def twitter_oauth1_user_handler_for_api(voter_device_id, oauth_token, oauth_veri
         )
 
         print("tweepy client get_me (voter) in twitter_oauth1_user_handler_for_api -- oauth_token:", oauth_token)
-        counter = create_detailed_counter_entry('get_me', 'twitter_oauth1_user_handler_for_api', success,
+        counter = create_detailed_counter_entry('get_me', 'twitter_oauth1_user_handler_for_api', True,
                                                 {'text': oauth_token})
         me = client.get_me(user_fields=['id', 'username', 'created_at', 'location', 'description', 'verified',
                                         'profile_image_url'])  # 'followers_count', 'friends_count', 'profile_banner_url',
@@ -2687,8 +2684,7 @@ def twitter_oauth1_user_handler_for_api(voter_device_id, oauth_token, oauth_veri
     except tweepy.TooManyRequests as rate_limit_error:
         success = False
         status += 'TWITTER_RATE_LIMIT_ERROR: ' + str(rate_limit_error) + " "
-        if counter and hasattr(counter, 'id'):
-            mark_detailed_counter_entry(counter.id, success, status)
+        mark_detailed_counter_entry(counter, success, status)
     except Exception as ex:
         logger.error("twitter_oauth1_user_handler_for_api caught exception: " + str(ex))
         status = "twitter_oauth1_user_handler_for_api caught exception: " + str(ex)
@@ -3105,15 +3101,14 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
     except tweepy.TooManyRequests:
         success = False
         status = 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_RATE_LIMIT_ERROR '
-        if counter and hasattr(counter, 'id'):
-            mark_detailed_counter_entry(counter.id, success, status)
+        mark_detailed_counter_entry(counter, success, status)
     except tweepy.TweepyException as error_instance:
+        success = False
         err_string = 'GENERAL_TWEEPY_EXCEPTION'
         try:
             # Dec 2012: Tweepy V$ (Twitter V2) returns these errors as (yuck): List[dict[str, Union[int, str]]]
             err_string = error_instance.args[0].args[0].args[0]
-            if counter and hasattr(counter, 'id'):
-                mark_detailed_counter_entry(counter.id, success, status)
+            mark_detailed_counter_entry(counter, success, status)
         except Exception:
             pass
         print(err_string)
@@ -3121,6 +3116,7 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
     except Exception as e:
         success = False
         status += "TWEEPY_EXCEPTION: " + str(e) + " "
+        mark_detailed_counter_entry(counter, success, status)
 
     if twitter_user_object_found:
         status += "TWITTER_SIGN_IN-ALREADY_LINKED_TO_OTHER_ACCOUNT "

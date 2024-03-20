@@ -1660,8 +1660,6 @@ def create_detailed_counter_entry(kind_of_action=None, function=None, success=Tr
     """
     Create a detailed entry that records that a call to the Twitter Api was made.
     """
-    id = None
-    status = ''
     try:
         # TODO: We need to work out the timezone questions
         counter = TwitterApiCounter.objects.create(
@@ -1677,29 +1675,31 @@ def create_detailed_counter_entry(kind_of_action=None, function=None, success=Tr
             voter_we_vote_id=elements.get('voter_we_vote_id', None),
         )
         success = True
-        status += 'ENTRY_SAVED'
-        id = counter.id
+        status = 'ENTRY_SAVED'
+        idt = counter.id
     except Exception as e:
         print('create_detailed_counter_entry error ' + str(e))
         success = False
-        status += 'create_detailed_counter_entry error ' + str(e) + " "
+        status = 'create_detailed_counter_entry error ' + str(e) + " "
     results = {
         'success':                  success,
         'status':                   status,
-        'id':                       id,
+        'id':                       idt,
     }
     return results
 
 
 # If we got a tweepy error, mark the row as NOT success
-def mark_detailed_counter_entry(id, success, status):
+def mark_detailed_counter_entry(counter, success, status):
     try:
-        counter_queryset = TwitterApiCounter.objects.filter(id=id)
+        idt = counter['id']
+        print('mark_detailed_counter_entry id: ', idt, ', success: ', success, ', status: ', status)
+        counter_queryset = TwitterApiCounter.objects.filter(id=idt)
         counter_row = counter_queryset.first()
         counter_row.success = success
         counter_row.text = status + counter_row.text
         counter_row.save()
 
     except Exception as e:
-        print('mark_detailed_counter_entry exception ' + str(e))
+        print('mark_detailed_counter_entry exception (' + status + ')' + str(e))
 

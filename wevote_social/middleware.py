@@ -39,7 +39,7 @@ class SocialMiddleware(object):
             if 'redirect_state' in request.GET:
                 print("MIDDLEWARE: redirect_state: " + request.GET['redirect_state'])
             else:
-                print("MIDDLEWARE: redirect_state: NO REDIRECT STATE RECEIVED (this is a problem)")
+                print("MIDDLEWARE: redirect_state: NO REDIRECT STATE RECEIVED (this could be a problem)")
 
             print("MIDDLEWARE: headers: " + str(request.headers))
             print("MIDDLEWARE: session: " + str(self.attributes(request.session)))
