@@ -495,32 +495,40 @@ th, td {
 </div>
 </div>
 
-<div class="form-group">
-    <label for="vote_usa_politician_id_id" class="col-sm-3 control-label">Vote USA Politician Id</label>
-    <div class="col-sm-8">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="vote_usa_politician_id_id" class="pl-4 control-label">Vote USA Politician Id</label>
+    <div class="col">
         <input type="text" name="vote_usa_politician_id" id="vote_usa_politician_id_id" class="form-control"
                value="{% if candidate %}{{ candidate.vote_usa_politician_id|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="vote_usa_office_id_id" class="col-sm-3 control-label">Vote USA Office Id</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="vote_usa_office_id_id" class="control-label">Vote USA Office Id</label>
+    <div class="col">
         <input type="text" name="vote_usa_office_id" id="vote_usa_office_id_id" class="form-control"
                value="{% if candidate %}{{ candidate.vote_usa_office_id|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
+</div>
 
 <a name="twitter_link_possibility_list" />
 
-<div class="form-group">
-    <label for="candidate_twitter_handle_id" class="col-sm-3 control-label">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="candidate_twitter_handle_id" class="pl-4 control-label">
         {% if candidate.we_vote_hosted_profile_twitter_image_url_tiny %}
             <img src='{{ candidate.we_vote_hosted_profile_twitter_image_url_tiny }}' />
         {% endif %}
         Twitter Handle
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="candidate_twitter_handle" id="candidate_twitter_handle_id" class="form-control"
                value="{% if candidate %}{{ candidate.candidate_twitter_handle|default_if_none:"" }}{% else %}{{ candidate_twitter_handle|default_if_none:"" }}{% endif %}" />
     {% if candidate.candidate_twitter_handle %}
@@ -612,10 +620,12 @@ th, td {
     {% endif %}
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="candidate_twitter_handle2_id" class="col-sm-3 control-label">Twitter Handle 2</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="candidate_twitter_handle2_id" class="control-label">Twitter Handle 2</label>
+    <div class="col">
         <input type="text" name="candidate_twitter_handle2" id="candidate_twitter_handle2_id" class="form-control"
                value="{% if candidate %}{{ candidate.candidate_twitter_handle2|default_if_none:"" }}{% else %}{{ candidate_twitter_handle2|default_if_none:"" }}{% endif %}" />
     {% if candidate.candidate_twitter_handle2 %}
@@ -628,10 +638,12 @@ th, td {
     {% endif %}
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="candidate_twitter_handle3_id" class="col-sm-3 control-label">Twitter Handle 3</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="candidate_twitter_handle3_id" class="control-label">Twitter Handle 3</label>
+    <div class="col">
         <input type="text" name="candidate_twitter_handle3" id="candidate_twitter_handle3_id" class="form-control"
                value="{% if candidate %}{{ candidate.candidate_twitter_handle3|default_if_none:"" }}{% else %}{{ candidate_twitter_handle3|default_if_none:"" }}{% endif %}" />
     {% if candidate.candidate_twitter_handle3 %}
@@ -641,41 +653,49 @@ th, td {
     {% endif %}
     </div>
 </div>
+</div>
+</div>
 
-<div class="form-group">
-    <label for="candidate_url_id" class="col-sm-3 control-label">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="candidate_url_id" class="pl-4 control-label">
         Candidate Website
         {% if candidate.candidate_url %}
         <a href="{{ candidate.candidate_url }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="candidate_url" id="candidate_url_id" class="form-control"
                value="{% if candidate %}{{ candidate.candidate_url|default_if_none:"" }}{% else %}{{ candidate_url|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="candidate_contact_form_url_id" class="col-sm-3 control-label">
+<div class="col">
+<div class="row form-group">
+    <label for="candidate_contact_form_url_id" class="control-label">
         Candidate Contact Form
         {% if candidate.candidate_contact_form_url %}
         <a href="{{ candidate.candidate_contact_form_url }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="candidate_contact_form_url" id="candidate_contact_form_url_id" class="form-control"
                value="{% if candidate %}{{ candidate.candidate_contact_form_url|default_if_none:"" }}{% else %}{{ candidate_contact_form_url|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="facebook_url_id" class="col-sm-3 control-label">
+<div class="col">
+<div class="row form-group">
+    <label for="facebook_url_id" class="control-label">
         Facebook URL
         {% if candidate.facebook_url %}
         <a href="{{ candidate.facebook_url }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="facebook_url" id="facebook_url_id" class="form-control"
                value="{% if candidate %}{{ candidate.facebook_url|default_if_none:"" }}{% else %}{{ facebook_url|default_if_none:"" }}{% endif %}" />
       {% if candidate.facebook_url %}
@@ -692,18 +712,22 @@ th, td {
       {% endif %}
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="instagram_handle_id" class="col-sm-3 control-label">
+<div class="col">
+<div class="row form-group">
+    <label for="instagram_handle_id" class="control-label">
         Instagram Handle
         {% if candidate.instagram_handle %}
         <a href="https://www.instagram.com/{{ candidate.instagram_handle }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="instagram_handle" id="instagram_handle_id" class="form-control"
                value="{% if candidate %}{{ candidate.instagram_handle|default_if_none:"" }}{% else %}{{ instagram_handle|default_if_none:"" }}{% endif %}" />
     </div>
+</div>
+</div>
 </div>
 
 <div class="form-group">
