@@ -46,8 +46,8 @@ th, td {
 {% endif %}
 <input name="submit_text" type="submit" value="{% if candidate %}Update Candidate{% else %}Save New Candidate{% endif %}" /></p>
 
-<div class="form-group" style="height: 60px;">
-    <label for="candidate_name_id" class="col-sm-3 control-label">
+<div class="row form-group" style="height: 60px;">
+    <label for="candidate_name_id" class="pl-4 control-label">
       Candidate Name
       {% if candidate %}
         <div>
@@ -70,7 +70,7 @@ th, td {
         {% endif %}
       {% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="candidate_name" id="candidate_name_id" class="form-control"
                value="{% if candidate %}{{ candidate.candidate_name|default_if_none:"" }}{% else %}{{ candidate_name|default_if_none:"" }}{% endif %}" />
         <div>
@@ -125,12 +125,12 @@ th, td {
 </div>
 
 
-<div class="form-group">
-    <label for="profile_image_type_currently_active_id" class="col-sm-3 control-label">
+<div class="row form-group">
+    <label for="profile_image_type_currently_active_id" class="pl-4 control-label">
         Candidate Photo Choice<br />
         <span style="color: darkgray">{{ candidate.profile_image_type_currently_active }}</span>
     </label>
-    <div class="col-sm-8">
+    <div class="col">
     {# UNKNOWN IMAGE #}
         <span style="float: left; padding: 8px 20px 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="UNKNOWN"
@@ -222,8 +222,8 @@ th, td {
 </div>
 
 <input type="hidden" name="google_civic_election_id" value="{% if candidate %}{{ candidate.google_civic_election_id }}{% else %}{{ google_civic_election_id }}{% endif %}">
-<div class="form-group">
-    <label for="google_civic_election_id_id" class="col-sm-3 control-label">
+<div class="row form-group">
+    <label for="google_civic_election_id_id" class="pl-4 control-label">
         Candidate to Office Link
         (<span onclick="showElement('candidate_to_office_link_table_add');" style="color: royalblue" >add</span>)
         <span style="color: slategray; font-weight: 400;">
@@ -279,7 +279,7 @@ th, td {
         {% endif %}
         </span>
     </label>
-    <div class="col-sm-8">
+    <div class="col">
     {% if office_name %}
         Adding Candidate to: {{ office_name }}
         <input type="hidden" name="contest_office_id" value="{{ contest_office_id }}">
@@ -385,9 +385,9 @@ th, td {
 
 
     {% if candidate %}
-<div class="form-group">
-    <label for="google_search_image_file_id" class="col-sm-3 control-label">Search Google for Links to Candidate</label>
-    <div class="col-sm-8">
+<div class="row form-group">
+    <label for="google_search_image_file_id" class="pl-4 control-label">Search Google for Links to Candidate</label>
+    <div class="col">
         (<a href="{% url 'google_custom_search:retrieve_possible_google_search_users' candidate.we_vote_id %}">retrieve possibilities from Google</a>)
     {% if google_search_possibility_list %}
         (<a href="{% url 'google_custom_search:delete_possible_google_search_users' candidate.we_vote_id %}">delete these possibilities</a>)
@@ -403,9 +403,9 @@ th, td {
 </div>
     {% endif %}
 
-<div class="form-group">
-    <label for="candidate_withdrawal_date_id" class="col-sm-3 control-label">Candidate Has Withdrawn From Election</label>
-    <div class="col-sm-8">
+<div class="row form-group">
+    <label for="candidate_withdrawal_date_id" class="pl-4 control-label">Candidate Has Withdrawn From Election</label>
+    <div class="col">
         <span style="float: left; padding: 8px 10px 0 0;">
             <input type="radio" name="withdrawn_from_election" value="True"
                 {% if candidate.withdrawn_from_election %} checked {% endif %}
@@ -790,9 +790,9 @@ th, td {
 </div>
 </div>
 
-<div class="form-group">
-    <label for="ballotpedia_candidate_summary_id" class="col-sm-3 control-label">Ballotpedia Candidate Summary</label>
-    <div class="col-sm-8">
+<div class="row form-group">
+    <label for="ballotpedia_candidate_summary_id" class="pl-4 control-label">Ballotpedia Candidate Summary</label>
+    <div class="col">
         <textarea name="ballotpedia_candidate_summary"
                   class="form-control animated"
                   id="ballotpedia_candidate_summary_id"
@@ -800,9 +800,9 @@ th, td {
     </div>
 </div>
 
-<div class="form-group">
-    <label for="ballot_guide_official_statement_id" class="col-sm-3 control-label">Official Candidate Statement</label>
-    <div class="col-sm-8">
+<div class="row form-group">
+    <label for="ballot_guide_official_statement_id" class="pl-4 control-label">Official Candidate Statement</label>
+    <div class="col">
         <textarea name="ballot_guide_official_statement"
                   class="form-control animated"
                   id="ballot_guide_official_statement_id"
@@ -896,11 +896,11 @@ th, td {
 </div>
 </div>
 
-<div class="form-group">
-    <label for="analysis_comment_id" class="col-sm-3 control-label">
+<div class="row form-group">
+    <label for="analysis_comment_id" class="pl-4 control-label">
         Candidate Analysis
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <textarea name="candidate_analysis_comment"
                   class="form-control animated"
                   id="candidate_analysis_comment_id"
