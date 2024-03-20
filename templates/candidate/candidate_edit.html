@@ -730,50 +730,64 @@ th, td {
 </div>
 </div>
 
-<div class="form-group">
-    <label for="linkedin_url_id" class="col-sm-3 control-label">LinkedIn URL</label>
-    <div class="col-sm-8">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="linkedin_url_id" class="pl-4 control-label">LinkedIn URL</label>
+    <div class="col">
         <input type="text" name="linkedin_url" id="linkedin_url_id" class="form-control"
                value="{% if candidate %}{{ candidate.linkedin_url|default_if_none:"" }}{% else %}{{ linkedin_url|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="candidate_email_id" class="col-sm-3 control-label">Candidate Email</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="candidate_email_id" class="control-label">Candidate Email</label>
+    <div class="col">
         <input type="text" name="candidate_email" id="candidate_email_id" class="form-control"
                value="{% if candidate %}{{ candidate.candidate_email|default_if_none:"" }}{% else %}{{ candidate_email|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="candidate_phone_id" class="col-sm-3 control-label">Candidate Phone</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="candidate_phone_id" class="control-label">Candidate Phone</label>
+    <div class="col">
         <input type="text" name="candidate_phone" id="candidate_phone_id" class="form-control"
                value="{% if candidate %}{{ candidate.candidate_phone|default_if_none:"" }}{% else %}{{ candidate_phone|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
+</div>
 
-<div class="form-group">
-    <label for="ballotpedia_candidate_url_id" class="col-sm-3 control-label">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="ballotpedia_candidate_url_id" class="pl-4 control-label">
         Ballotpedia Candidate Page
         {% if candidate and candidate.ballotpedia_candidate_url %}(<a href="{{ candidate.ballotpedia_candidate_url }}" target="_blank">Go</a>){% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="ballotpedia_candidate_url" id="ballotpedia_candidate_url_id" class="form-control"
                value="{% if candidate %}{{ candidate.ballotpedia_candidate_url|default_if_none:"" }}{% else %}{{ ballotpedia_candidate_url|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="wikipedia_url_id" class="col-sm-3 control-label">
+<div class="col">
+<div class="row form-group">
+    <label for="wikipedia_url_id" class="control-label">
         Wikipedia URL
         {% if candidate and candidate.wikipedia_url %}(<a href="{{ candidate.wikipedia_url }}" target="_blank">Go</a>){% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="wikipedia_url" id="wikipedia_url_id" class="form-control"
                value="{% if candidate %}{{ candidate.wikipedia_url|default_if_none:"" }}{% else %}{{ wikipedia_url|default_if_none:"" }}{% endif %}" />
     </div>
+</div>
+</div>
 </div>
 
 <div class="form-group">
@@ -796,56 +810,71 @@ th, td {
     </div>
 </div>
 
-<div class="form-group">
-    <label for="ballotpedia_race_id_id" class="col-sm-3 control-label">Ballotpedia Race Id</label>
-    <div class="col-sm-8">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="ballotpedia_race_id_id" class="pl-4 control-label">Ballotpedia Race Id</label>
+    <div class="col">
         <input type="text" name="ballotpedia_race_id" id="ballotpedia_race_id_id" class="form-control"
                value="{% if candidate %}{{ candidate.ballotpedia_race_id|default_if_none:"" }}{% else %}{{ ballotpedia_race_id|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="ballotpedia_office_id_id" class="col-sm-3 control-label">Ballotpedia Office Held Id</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="ballotpedia_office_id_id" class="control-label">Ballotpedia Office Held Id</label>
+    <div class="col">
         <input type="text" name="ballotpedia_office_id" id="ballotpedia_office_id_id" class="form-control"
                value="{% if candidate %}{{ candidate.ballotpedia_office_id|default_if_none:"" }}{% else %}{{ ballotpedia_office_id|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="ballotpedia_candidate_id_id" class="col-sm-3 control-label">Ballotpedia Candidate Id</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="ballotpedia_candidate_id_id" class="control-label">Ballotpedia Candidate Id</label>
+    <div class="col">
         <input type="text" name="ballotpedia_candidate_id" id="ballotpedia_candidate_id_id" class="form-control"
                value="{% if candidate %}{{ candidate.ballotpedia_candidate_id|default_if_none:"" }}{% else %}{{ ballotpedia_candidate_id|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="ballotpedia_person_id_id" class="col-sm-3 control-label">Ballotpedia Person Id</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="ballotpedia_person_id_id" class="control-label">Ballotpedia Person Id</label>
+    <div class="col">
         <input type="text" name="ballotpedia_person_id" id="ballotpedia_person_id_id" class="form-control"
                value="{% if candidate %}{{ candidate.ballotpedia_person_id|default_if_none:"" }}{% else %}{{ ballotpedia_person_id|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
+</div>
 
-<div class="form-group">
-    <label for="photo_url_from_vote_usa_id" class="col-sm-3 control-label">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="photo_url_from_vote_usa_id" class="pl-4 control-label">
         {% if candidate.photo_url_from_vote_usa %}
             <img src='{{ candidate.photo_url_from_vote_usa }}' height="48" />
         {% endif %}
         Vote USA Image</label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="photo_url_from_vote_usa" id="photo_url_from_vote_usa_id" class="form-control"
                value="{% if candidate %}{{ candidate.photo_url_from_vote_usa|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="vote_smart_id_id" class="col-sm-3 control-label">Vote Smart Id</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="vote_smart_id_id" class="control-label">Vote Smart Id</label>
+    <div class="col">
         <input type="text" name="vote_smart_id" id="vote_smart_id_id" class="form-control"
                value="{% if candidate %}{{ candidate.vote_smart_id|default_if_none:"" }}{% else %}{{ vote_smart_id|default_if_none:"" }}{% endif %}" />
     </div>
+</div>
 </div>
 
 {#<div class="form-group">#}
@@ -856,12 +885,15 @@ th, td {
 {#    </div>#}
 {#</div>#}
 
-<div class="form-group">
-    <label for="youtube_url_id" class="col-sm-3 control-label">YouTube URL</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="youtube_url_id" class="control-label">YouTube URL</label>
+    <div class="col">
         <input type="text" name="youtube_url" id="youtube_url_id" class="form-control"
                value="{% if candidate %}{{ candidate.youtube_url|default_if_none:"" }}{% else %}{{ youtube_url|default_if_none:"" }}{% endif %}" />
     </div>
+</div>
+</div>
 </div>
 
 <div class="form-group">
