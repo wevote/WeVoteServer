@@ -1660,6 +1660,9 @@ def create_detailed_counter_entry(kind_of_action=None, function=None, success=Tr
     """
     Create a detailed entry that records that a call to the Twitter Api was made.
     """
+    idt = 0
+    status = ''
+    success = True
     try:
         # TODO: We need to work out the timezone questions
         counter = TwitterApiCounter.objects.create(
@@ -1674,13 +1677,12 @@ def create_detailed_counter_entry(kind_of_action=None, function=None, success=Tr
             username=elements.get('username', None),
             voter_we_vote_id=elements.get('voter_we_vote_id', None),
         )
-        success = True
-        status = 'ENTRY_SAVED'
+        status += 'ENTRY_SAVED'
         idt = counter.id
     except Exception as e:
         print('create_detailed_counter_entry error ' + str(e))
         success = False
-        status = 'create_detailed_counter_entry error ' + str(e) + " "
+        status += 'CREATE_DETAILED_COUNTER_ENTRY_ERROR: ' + str(e) + " "
     results = {
         'success':                  success,
         'status':                   status,
