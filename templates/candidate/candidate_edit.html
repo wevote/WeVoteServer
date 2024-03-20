@@ -351,20 +351,26 @@ th, td {
     </div>
 </div>
 
-<div class="form-group">
-    <label for="contest_office_name_id" class="col-sm-3 control-label">Contest Office Name (Cached)</label>
-    <div class="col-sm-8">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="contest_office_name_id" class="pl-4">Contest Office Name (Cached)</label>
+    <div class="col">
         <input type="text" name="contest_office_name" id="contest_office_name_id" class="form-control"
                value="{% if candidate %}{{ candidate.contest_office_name|default_if_none:"" }}{% else %}{{ contest_office_name|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="district_name_id" class="col-sm-3 control-label">District Name (Cached)</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="district_name_id" class="control-label">District Name (Cached)</label>
+    <div class="col">
         <input type="text" name="district_name" id="district_name_id" class="form-control"
                value="{% if candidate %}{{ candidate.district_name|default_if_none:"" }}{% else %}{{ district_name|default_if_none:"" }}{% endif %}" />
     </div>
+</div>
+</div>
 </div>
 
 {% if state_code_from_election == "" %}
@@ -425,52 +431,68 @@ th, td {
     </div>
 </div>
 
+<div class="row">
+<div class="col">
 <div class="form-group">
-    <label for="google_civic_candidate_name_id" class="col-sm-3 control-label">Candidate Name1 (for Google Civic matching)</label>
-    <div class="col-sm-8">
+    <label for="google_civic_candidate_name_id" class="pl-4 control-label">Candidate Name1 (for Google Civic matching)</label>
+    <div class="col">
         <input type="text" name="google_civic_candidate_name" id="google_civic_candidate_name_id" class="form-control"
                value="{% if candidate %}{{ candidate.google_civic_candidate_name|default_if_none:"" }}{% else %}{{ google_civic_candidate_name|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
+<div class="col">
 <div class="form-group">
-    <label for="google_civic_candidate_name2_id" class="col-sm-3 control-label">Candidate Name2 (for Google Civic matching)</label>
-    <div class="col-sm-8">
+    <label for="google_civic_candidate_name2_id" class="pl-4 control-label">Candidate Name2 (for Google Civic matching)</label>
+    <div class="col">
         <input type="text" name="google_civic_candidate_name2" id="google_civic_candidate_name2_id" class="form-control"
                value="{% if candidate %}{{ candidate.google_civic_candidate_name2|default_if_none:"" }}{% else %}{{ google_civic_candidate_name2|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
+<div class="col">
 <div class="form-group">
-    <label for="google_civic_candidate_name3_id" class="col-sm-3 control-label">Candidate Name3 (for Google Civic matching)</label>
-    <div class="col-sm-8">
+    <label for="google_civic_candidate_name3_id" class="pl-4 control-label">Candidate Name3 (for Google Civic matching)</label>
+    <div class="col">
         <input type="text" name="google_civic_candidate_name3" id="google_civic_candidate_name3_id" class="form-control"
                value="{% if candidate %}{{ candidate.google_civic_candidate_name3|default_if_none:"" }}{% else %}{{ google_civic_candidate_name3|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
+</div>
 
-<div class="form-group">
-    <label for="ballotpedia_candidate_name_id" class="col-sm-3 control-label">Candidate Name (from Ballotpedia)</label>
-    <div class="col-sm-8">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="ballotpedia_candidate_name_id" class="pl-4 control-label">Candidate Name (from Ballotpedia)</label>
+    <div class="col">
         <input type="text" name="ballotpedia_candidate_name" id="ballotpedia_candidate_name_id" class="form-control"
                value="{% if candidate %}{{ candidate.ballotpedia_candidate_name|default_if_none:"" }}{% else %}{{ ballotpedia_candidate_name|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="state_code_id" class="col-sm-3 control-label">Candidate State Code</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="state_code_id" class="control-label">Candidate State Code</label>
+    <div class="col">
         <input type="text" name="state_code" id="state_code_id" class="form-control"
                value="{% if candidate %}{{ candidate.state_code|default_if_none:"" }}{% else %}{{ state_code|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="party_id" class="col-sm-3 control-label">Candidate Party</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="party_id" class="control-label">Candidate Party</label>
+    <div class="col">
         <input type="text" name="party" id="party_id" class="form-control"
                value="{% if candidate %}{{ candidate.party|default_if_none:"" }}{% else %}{{ party|default_if_none:"" }}{% endif %}" />
     </div>
+</div>
+</div>
 </div>
 
 <div class="form-group">
