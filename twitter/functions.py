@@ -212,9 +212,16 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
             # twitter_user = api.get_user(user_id=twitter_user_id)
             print("tweepy client get_user #2 in retrieve_twitter_user_info -- twitter_handle: ", twitter_handle)
             try:
-                counter = create_detailed_counter_entry('get_user', 'retrieve_twitter_user_info', success,
-                                                        {'username': twitter_handle, 'disambiguator': 2,
-                                                         'text': twitter_user_id + ' - ' + parent})
+                counter = create_detailed_counter_entry(
+                    kind_of_action='get_user',
+                    function='retrieve_twitter_user_info',
+                    success=success,
+                    elements={
+                        'username': twitter_handle,
+                        'disambiguator': 2,
+                        'text': str(twitter_user_id) + ' - ' + parent
+                    },
+                )
             except Exception as e:
                 logger.error('retrieve_twitter_user_info create_detailed_counter_entry threw ' + str(e))
                 counter = None
@@ -236,7 +243,6 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
             success = False
             status += 'TWITTER_RETRIEVE_NOT_SUCCESSFUL-MISSING_VARIABLE '
             twitter_handle_found = False
-
     except tweepy.TooManyRequests as rate_limit_error:
         success = False
         user = twitter_handle if twitter_handle else 'NO_HANDLE'

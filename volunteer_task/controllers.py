@@ -17,7 +17,12 @@ def generate_start_and_end_of_week_date_integer(earliest_date_integer=None, late
     status = ""
     success = True
     start_and_end_of_week_date_integer_list = []
-    earliest_date = convert_date_as_integer_to_date(earliest_date_integer)
+    try:
+        earliest_date = convert_date_as_integer_to_date(earliest_date_integer)
+    except Exception as e:
+        earliest_date_integer = 99990101
+        earliest_date = convert_date_as_integer_to_date(earliest_date_integer)
+        status += "FAILED_TO_CREATE_EARLIEST_DATE-FALLING_BACK_ON_99991231: " + str(e) + " "
     # Roll back to the Monday, of the week containing the earliest_date
     weekday_of_earliest_date = earliest_date.weekday()
     if weekday_of_earliest_date == 0:
@@ -26,7 +31,12 @@ def generate_start_and_end_of_week_date_integer(earliest_date_integer=None, late
         earliest_monday_date = earliest_date - timedelta(days=weekday_of_earliest_date)
     earliest_monday_integer = convert_date_to_date_as_integer(earliest_monday_date)
 
-    latest_date = convert_date_as_integer_to_date(latest_date_integer)
+    try:
+        latest_date = convert_date_as_integer_to_date(latest_date_integer)
+    except Exception as e:
+        latest_date_integer = 19700201
+        latest_date = convert_date_as_integer_to_date(latest_date_integer)
+        status += "FAILED_TO_CREATE_LATEST_DATE-FALLING_BACK_ON_19700101: " + str(e) + " "
     # Figure out the Sunday of the week containing the latest_date
     weekday_of_latest_date = latest_date.weekday()
     if weekday_of_latest_date == 6:
@@ -192,8 +202,8 @@ def update_weekly_volunteer_metrics():
         success = False
 
     # Break up the results by voter_we_vote_id
-    earliest_date_integer = 99991231  # Temp date far in the future, meant to be replaced immediately below
-    latest_date_integer = 0
+    earliest_date_integer = 99991201  # Temp date far in the future, meant to be replaced immediately below
+    latest_date_integer = 19700201  # Temp date in the past
     tasks_by_voter_we_vote_id = {}
     voter_we_vote_id_list = []
     for volunteer_task_completed in task_list:

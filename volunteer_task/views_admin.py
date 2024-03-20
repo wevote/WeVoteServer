@@ -21,7 +21,7 @@ from .controllers import update_weekly_volunteer_metrics
 @login_required
 def performance_list_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'political_data_manager'}
+    authority_required = {'analytics_admin', 'political_data_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
