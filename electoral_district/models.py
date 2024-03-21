@@ -187,8 +187,11 @@ class ElectoralDistrictLinkToPollingLocation(models.Model):
 
 class ElectoralDistrictManager(models.Manager):
 
-    def delete_electoral_district_link(self, polling_location_we_vote_id="", electoral_district_we_vote_id="",
-                                       ballotpedia_district_id=0):
+    @staticmethod
+    def delete_electoral_district_link(
+            polling_location_we_vote_id="",
+            electoral_district_we_vote_id="",
+            ballotpedia_district_id=0):
         """
         Remove specific electoral district link entries
         """
@@ -229,7 +232,8 @@ class ElectoralDistrictManager(models.Manager):
         }
         return results
 
-    def retrieve_electoral_district(self, ballotpedia_district_id=0, read_only=True):
+    @staticmethod
+    def retrieve_electoral_district(ballotpedia_district_id=0, read_only=True):
         status = ""
         ballotpedia_district_id = convert_to_int(ballotpedia_district_id)
 
@@ -296,10 +300,12 @@ class ElectoralDistrictManager(models.Manager):
         }
         return results
 
-    def retrieve_electoral_district_link_list(self, polling_location_we_vote_id="",
-                                              electoral_district_we_vote_id="",
-                                              ballotpedia_district_id=0,
-                                              read_only=True):
+    @staticmethod
+    def retrieve_electoral_district_link_list(
+            polling_location_we_vote_id="",
+            electoral_district_we_vote_id="",
+            ballotpedia_district_id=0,
+            read_only=True):
         # Retrieve a list of electoral_district_link entries
         success = True
         status = ""
@@ -352,8 +358,11 @@ class ElectoralDistrictManager(models.Manager):
         }
         return results
 
-    def update_or_create_electoral_district(self, ctcl_id_temp, electoral_district_name,
-                                            updated_values):
+    @staticmethod
+    def update_or_create_electoral_district(
+            ctcl_id_temp,
+            electoral_district_name,
+            updated_values):
         """
         Either update or create an electoral district entry.
         """
@@ -388,8 +397,12 @@ class ElectoralDistrictManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def update_or_create_electoral_district_link_to_polling_location(
-            self, polling_location_we_vote_id, electoral_district_we_vote_id, ballotpedia_district_id, state_code=""):
+            polling_location_we_vote_id,
+            electoral_district_we_vote_id,
+            ballotpedia_district_id,
+            state_code=""):
         if not positive_value_exists(polling_location_we_vote_id):
             success = False
             status = "MISSING_POLLING_LOCATION_WE_VOTE_ID "
