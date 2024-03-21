@@ -167,7 +167,8 @@ class Election(models.Model):
 
 class ElectionManager(models.Manager):
 
-    def fetch_next_local_google_civic_election_id_integer(self):
+    @staticmethod
+    def fetch_next_local_google_civic_election_id_integer():
         highest_id = 0
         election_query = Election.objects.all()
         election_query = election_query.order_by('-google_civic_election_id')
@@ -187,7 +188,8 @@ class ElectionManager(models.Manager):
             last_integer = 1000000
         return last_integer
 
-    def fetch_google_civic_election_id_from_list(self, google_civic_election_id_list):
+    @staticmethod
+    def fetch_google_civic_election_id_from_list(google_civic_election_id_list):
         try:
             election_query = Election.objects.all()
             election_query = election_query.order_by('election_day_text')
@@ -473,7 +475,8 @@ class ElectionManager(models.Manager):
         }
         return results
 
-    def retrieve_ballotpedia_election(self, ballotpedia_election_id=0):
+    @staticmethod
+    def retrieve_ballotpedia_election(ballotpedia_election_id=0):
         ballotpedia_election_id = convert_to_int(ballotpedia_election_id)
 
         ballotpedia_election = BallotpediaElection()
@@ -509,8 +512,8 @@ class ElectionManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_elections_between_dates(
-            self,
             starting_date_as_integer=0,
             ending_date_as_integer=0,
             restrict_to_elections_visible_to_voters=False):
@@ -553,7 +556,8 @@ class ElectionManager(models.Manager):
         }
         return results
 
-    def retrieve_elections_by_date(self, newest_to_oldest=True, include_test_election=False):
+    @staticmethod
+    def retrieve_elections_by_date(newest_to_oldest=True, include_test_election=False):
         try:
             election_list_query = Election.objects.using('readonly').all()
             if not positive_value_exists(include_test_election):
@@ -577,8 +581,8 @@ class ElectionManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_election(
-            self,
             google_civic_election_id=0,
             election_id=0,
             read_only=True,
@@ -664,7 +668,8 @@ class ElectionManager(models.Manager):
         }
         return results
 
-    def retrieve_listed_elections(self):
+    @staticmethod
+    def retrieve_listed_elections():
         """
         These are all the elections marked as "listed" with "include_in_list_for_voters"
         :return:
@@ -690,8 +695,8 @@ class ElectionManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_upcoming_elections(
-            self,
             state_code="",
             without_state_code=False,
             require_include_in_list_for_voters=False,
@@ -781,7 +786,11 @@ class ElectionManager(models.Manager):
         }
         return results
 
-    def retrieve_prior_elections_this_year(self, state_code="", without_state_code=False, starting_year=0):
+    @staticmethod
+    def retrieve_prior_elections_this_year(
+            state_code="",
+            without_state_code=False,
+            starting_year=0):
         status = ""
         success = True
         election_list_found = False
@@ -1123,9 +1132,8 @@ class ElectionManager(models.Manager):
         }
         return results
 
-    def retrieve_year_list_by_election_list(
-            self,
-            google_civic_election_id_list=[]):
+    @staticmethod
+    def retrieve_year_list_by_election_list(google_civic_election_id_list=[]):
         success = True
         status = ""
         year_list = []
@@ -1153,7 +1161,8 @@ class ElectionManager(models.Manager):
         }
         return results
 
-    def retrieve_we_vote_elections(self):
+    @staticmethod
+    def retrieve_we_vote_elections():
         """
         Only retrieve the elections we have entered without a Google Civic Election Id
         :return:
@@ -1181,7 +1190,8 @@ class ElectionManager(models.Manager):
         }
         return results
 
-    def retrieve_google_civic_elections_in_state_list(self, state_code_list):
+    @staticmethod
+    def retrieve_google_civic_elections_in_state_list(state_code_list):
         try:
             election_list_query = Election.objects.using('readonly').all()
             election_list_query = election_list_query.extra(where=["CHAR_LENGTH(google_civic_election_id) < 7"])
@@ -1211,7 +1221,8 @@ class ElectionManager(models.Manager):
         }
         return results
 
-    def retrieve_elections(self, include_test_election=False):
+    @staticmethod
+    def retrieve_elections(include_test_election=False):
         """
         Retrieve all elections
         :param include_test_election:
@@ -1238,7 +1249,11 @@ class ElectionManager(models.Manager):
         }
         return results
 
-    def retrieve_elections_by_election_date(self, election_day_text='', include_test_election=False, read_only=True):
+    @staticmethod
+    def retrieve_elections_by_election_date(
+            election_day_text='',
+            include_test_election=False,
+            read_only=True):
         """
         Retrieve elections using election_day_text
         :param election_day_text: 
@@ -1272,7 +1287,10 @@ class ElectionManager(models.Manager):
         }
         return results
 
-    def retrieve_elections_by_google_civic_election_id_list(self, google_civic_election_id_list=[], read_only=False):
+    @staticmethod
+    def retrieve_elections_by_google_civic_election_id_list(
+            google_civic_election_id_list=[],
+            read_only=False):
         """
         Retrieve elections using google_civic_election_id
         :param google_civic_election_id_list:
@@ -1314,8 +1332,12 @@ class ElectionManager(models.Manager):
         }
         return results
 
-    def retrieve_elections_by_state_and_election_date(self, state_code='', election_day_text='',
-                                                      include_test_election=False, read_only=True):
+    @staticmethod
+    def retrieve_elections_by_state_and_election_date(
+            state_code='',
+            election_day_text='',
+            include_test_election=False,
+            read_only=True):
         """
           Retrieve elections using state_code and election_day_text
         :param state_code:
