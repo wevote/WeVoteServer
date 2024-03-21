@@ -1,4 +1,4 @@
-boto3==1.26.46
+boto3==1.34.66
 CacheControl==0.13.1
 cloudscraper==1.2.68
 cryptography==3.4.8
@@ -36,7 +36,7 @@ oauthlib==3.2.2
 phonenumbers==8.13.26
 Pillow==9.4.0
 psycopg2-binary==2.9.3
-py3dns==4.0.1
+py3dns==3.2.1
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pygeoip==0.3.2
@@ -53,13 +53,12 @@ robot-detection==0.4
 rsa==4.7.2
 ruff==0.2.2
 sendgrid==6.9.7
-setuptools==69.2.0     # (Deprecated in Py 3.10, AND removed in Py 3.12, but still needed by some slow to update packages) "Deprecated in Python 3.10 by PEP 632 “Deprecate distutils module”. For projects still using distutils and cannot be updated to something else, the setuptools project can be installed: it still provides distutils. (Contributed by Victor Stinner in gh-92584.)"
 simplejson==3.17.2
-six==1.14.0
+six==1.16.0
 social-auth-app-django==5.0.0
 social-auth-core==4.2.0
 static3==0.7.0
-stripe==2.58.0
+stripe==8.7.0
 tweepy==4.14.0
 twilio==7.8.2
 uritemplate==3.0.1
@@ -68,6 +67,7 @@ user-agents==1.1.0
 validate-email==1.3
 wikipedia==1.4.0
 xmltodict==0.12.0
-certifi>=2023.7.22 # not directly required, pinned by Snyk to avoid a vulnerability
+certifi>=2024.2.2 # Want to update continuously to the latest.  Root Certificates used by Requests (within Python)
 protobuf>=3.18.3 # not directly required, pinned by Snyk to avoid a vulnerability
-setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
+setuptools>=68.0.0 # not directly required, pinned by Snyk to avoid a vulnerability
+
