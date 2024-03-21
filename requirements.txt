@@ -1,4 +1,4 @@
-boto3==1.26.46
+boto3==1.34.66
 CacheControl==0.13.1
 cloudscraper==1.2.68
 cryptography==3.4.8
@@ -70,4 +70,3 @@ wikipedia==1.4.0
 xmltodict==0.12.0
 certifi>=2023.7.22 # not directly required, pinned by Snyk to avoid a vulnerability
 protobuf>=3.18.3 # not directly required, pinned by Snyk to avoid a vulnerability
-setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
