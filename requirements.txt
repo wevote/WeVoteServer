@@ -53,7 +53,7 @@ robot-detection==0.4
 rsa==4.7.2
 ruff==0.2.2
 sendgrid==6.9.7
-setuptools==69.2.0     # Deprecated in Python 3.10 by PEP 632 “Deprecate distutils module”. For projects still using distutils and cannot be updated to something else, the setuptools project can be installed: it still provides distutils. (Contributed by Victor Stinner in gh-92584.)
+setuptools==69.2.0     # (Deprecated in Py 3.10, AND removed in Py 3.12, but still needed by some slow to update packages) "Deprecated in Python 3.10 by PEP 632 “Deprecate distutils module”. For projects still using distutils and cannot be updated to something else, the setuptools project can be installed: it still provides distutils. (Contributed by Victor Stinner in gh-92584.)"
 simplejson==3.17.2
 six==1.14.0
 social-auth-app-django==5.0.0
