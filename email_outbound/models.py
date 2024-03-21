@@ -176,7 +176,8 @@ class EmailManager(models.Manager):
     def __unicode__(self):
         return "EmailManager"
 
-    def clear_secret_key_from_email_address(self, email_secret_key):
+    @staticmethod
+    def clear_secret_key_from_email_address(email_secret_key):
         """
 
         :param email_secret_key:
@@ -223,8 +224,8 @@ class EmailManager(models.Manager):
     def create_email_address_for_voter(self, normalized_email_address, voter, email_ownership_is_verified=False):
         return self.create_email_address(normalized_email_address, voter.we_vote_id, email_ownership_is_verified)
 
+    @staticmethod
     def create_email_address(
-            self,
             normalized_email_address='',
             voter_we_vote_id='',
             email_ownership_is_verified=False,
@@ -272,8 +273,8 @@ class EmailManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def create_email_outbound_description(
-            self,
             sender_voter_we_vote_id='',
             sender_voter_email='',
             sender_voter_name='',
@@ -283,8 +284,7 @@ class EmailManager(models.Manager):
             template_variables_in_json='',
             kind_of_email_template='',
             list_unsubscribe_mailto=None,
-            list_unsubscribe_url=None,
-    ):
+            list_unsubscribe_url=None):
         status = ""
         if not positive_value_exists(kind_of_email_template):
             kind_of_email_template = GENERIC_EMAIL_TEMPLATE
@@ -401,7 +401,8 @@ class EmailManager(models.Manager):
         }
         return results
 
-    def merge_two_duplicate_emails(self, email_address_object1, email_address_object2):
+    @staticmethod
+    def merge_two_duplicate_emails(email_address_object1, email_address_object2):
         """
         We assume that the checking to see if these are duplicates has been done outside this function.
         We will keep email_address_object1 and eliminate email_address_object2.
@@ -474,7 +475,8 @@ class EmailManager(models.Manager):
         }
         return results
 
-    def parse_raw_emails_into_list(self, email_addresses_raw):
+    @staticmethod
+    def parse_raw_emails_into_list(email_addresses_raw):
         success = True
         status = "EMAIL_MANAGER_PARSE_RAW_EMAILS"
         email_list = extract_email_addresses_from_string(email_addresses_raw)
@@ -488,8 +490,8 @@ class EmailManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_email_address_object(
-            self,
             normalized_email_address='',
             email_address_object_we_vote_id='',
             voter_we_vote_id=''):
@@ -590,7 +592,8 @@ class EmailManager(models.Manager):
         }
         return results
 
-    def retrieve_email_address_object_from_secret_key(self, email_secret_key='', subscription_secret_key=''):
+    @staticmethod
+    def retrieve_email_address_object_from_secret_key(email_secret_key='', subscription_secret_key=''):
         """
         :param email_secret_key:
         :param subscription_secret_key:
@@ -644,7 +647,8 @@ class EmailManager(models.Manager):
         }
         return results
 
-    def verify_email_address_object_from_secret_key(self, email_secret_key=''):
+    @staticmethod
+    def verify_email_address_object_from_secret_key(email_secret_key=''):
         """
 
         :param email_secret_key:
@@ -706,7 +710,8 @@ class EmailManager(models.Manager):
         }
         return results
 
-    def retrieve_voter_email_address_list(self, voter_we_vote_id):
+    @staticmethod
+    def retrieve_voter_email_address_list(voter_we_vote_id):
         """
 
         :param voter_we_vote_id:
@@ -764,7 +769,8 @@ class EmailManager(models.Manager):
         }
         return results
 
-    def retrieve_primary_email_with_ownership_verified(self, voter_we_vote_id='', normalized_email_address=''):
+    @staticmethod
+    def retrieve_primary_email_with_ownership_verified(voter_we_vote_id='', normalized_email_address=''):
         status = ""
         email_address_list = []
         email_address_list_found = False
@@ -841,7 +847,8 @@ class EmailManager(models.Manager):
 
         return simple_email_address_list
 
-    def retrieve_scheduled_email_list_from_send_status(self, sender_voter_we_vote_id, send_status):
+    @staticmethod
+    def retrieve_scheduled_email_list_from_send_status(sender_voter_we_vote_id, send_status):
         status = ""
         scheduled_email_list = []
         try:
@@ -880,7 +887,8 @@ class EmailManager(models.Manager):
         }
         return results
 
-    def update_scheduled_email_with_new_send_status(self, email_scheduled_object, send_status):
+    @staticmethod
+    def update_scheduled_email_with_new_send_status(email_scheduled_object, send_status):
         try:
             email_scheduled_object.send_status = send_status
             email_scheduled_object.save()
@@ -890,8 +898,8 @@ class EmailManager(models.Manager):
             print(status)
             return email_scheduled_object
 
+    @staticmethod
     def schedule_email(
-            self,
             email_outbound_description=None,
             subject="",
             message_text="",
@@ -980,7 +988,8 @@ class EmailManager(models.Manager):
             }
             return results
 
-    def send_scheduled_email_via_sendgrid(self, email_scheduled):
+    @staticmethod
+    def send_scheduled_email_via_sendgrid(email_scheduled):
         """
         Send a single scheduled email
         :param email_scheduled:
@@ -1065,7 +1074,8 @@ class EmailManager(models.Manager):
         }
         return results
 
-    def send_scheduled_email_via_smtp(self, email_scheduled):
+    @staticmethod
+    def send_scheduled_email_via_smtp(email_scheduled):
         """
         Send a single scheduled email but using the SMTP settings in environment_variables
         :param email_scheduled:
@@ -1152,7 +1162,8 @@ class EmailManager(models.Manager):
         }
         return results
 
-    def send_scheduled_email_list(self, messages_to_send):
+    @staticmethod
+    def send_scheduled_email_list(messages_to_send):
         """
         Take in a list of scheduled_email_id's, and send them
         :param messages_to_send:
@@ -1279,7 +1290,8 @@ class EmailManager(models.Manager):
         else:
             return ""
 
-    def update_email_address_object_as_verified(self, email_address_object):
+    @staticmethod
+    def update_email_address_object_as_verified(email_address_object):
         try:
             email_address_object.email_ownership_is_verified = True
             email_address_object.save()
@@ -1339,7 +1351,8 @@ class SendGridApiCounterMonthlySummary(models.Model):
 # noinspection PyBroadException
 class SendGridApiCounterManager(models.Manager):
 
-    def create_counter_entry(self, kind_of_action, number_of_items_sent_in_query=0):
+    @staticmethod
+    def create_counter_entry(kind_of_action, number_of_items_sent_in_query=0):
         """
         Create an entry that records that a call to the SendGrid Api was made.
         """
@@ -1363,7 +1376,8 @@ class SendGridApiCounterManager(models.Manager):
         }
         return results
 
-    def retrieve_daily_summaries(self, kind_of_action='', days_to_display=30):
+    @staticmethod
+    def retrieve_daily_summaries(kind_of_action='', days_to_display=30):
         # Start with today and cycle backwards in time
         daily_summaries = []
         day_on_stage = date.today()  # TODO: We need to work out the timezone questions
