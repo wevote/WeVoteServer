@@ -36,7 +36,7 @@ oauthlib==3.2.2
 phonenumbers==8.13.26
 Pillow==9.4.0
 psycopg2-binary==2.9.3
-py3dns==3.2.1
+py3dns==4.0.1
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pygeoip==0.3.2
