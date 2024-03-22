@@ -387,7 +387,7 @@ th, td {
     {% if candidate %}
 <div class="row form-group">
     <label for="google_search_image_file_id" class="pl-4 control-label">Search Google for Links to Candidate</label>
-    <div class="col">
+    <div class="col d-flex align-items-end">
         (<a href="{% url 'google_custom_search:retrieve_possible_google_search_users' candidate.we_vote_id %}">retrieve possibilities from Google</a>)
     {% if google_search_possibility_list %}
         (<a href="{% url 'google_custom_search:delete_possible_google_search_users' candidate.we_vote_id %}">delete these possibilities</a>)
@@ -404,7 +404,7 @@ th, td {
     {% endif %}
 
 <div class="row form-group">
-    <label for="candidate_withdrawal_date_id" class="pl-4 control-label">Candidate Has Withdrawn From Election</label>
+    <label for="candidate_withdrawal_date_id" class="pl-4 control-label  d-flex align-items-end">Candidate Has Withdrawn From Election</label>
     <div class="col">
         <span style="float: left; padding: 8px 10px 0 0;">
             <input type="radio" name="withdrawn_from_election" value="True"
@@ -686,10 +686,12 @@ th, td {
     </div>
 </div>
 </div>
+</div>
 
+<div class="row">
 <div class="col">
 <div class="row form-group">
-    <label for="facebook_url_id" class="control-label">
+    <label for="facebook_url_id" class="pl-4 control-label">
         Facebook URL
         {% if candidate.facebook_url %}
         <a href="{{ candidate.facebook_url }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
@@ -876,6 +878,7 @@ th, td {
     </div>
 </div>
 </div>
+</div>
 
 {#<div class="form-group">#}
 {#    <label for="maplight_id_id" class="col-sm-3 control-label">MapLight Id</label>#}
@@ -885,15 +888,12 @@ th, td {
 {#    </div>#}
 {#</div>#}
 
-<div class="col">
 <div class="row form-group">
-    <label for="youtube_url_id" class="control-label">YouTube URL</label>
+    <label for="youtube_url_id" class="pl-4 control-label">YouTube URL</label>
     <div class="col">
         <input type="text" name="youtube_url" id="youtube_url_id" class="form-control"
                value="{% if candidate %}{{ candidate.youtube_url|default_if_none:"" }}{% else %}{{ youtube_url|default_if_none:"" }}{% endif %}" />
     </div>
-</div>
-</div>
 </div>
 
 <div class="row form-group">
