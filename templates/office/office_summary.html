@@ -17,7 +17,7 @@
 
 <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">< Back to Offices</a>
 
-    <h1>{{ office.office_name }}</h1>
+    <h1>{{ office.office_name }}{% if office.primary_party %}, {{ office.primary_party }} Primary{% endif %}</h1>
 
     <table>
 {% if office.district_id or office.state_code %}
@@ -197,14 +197,14 @@
             <td>{{ forloop.counter }}</td>
             <td>
                 {% if candidate.candidate_photo_url %}
-                <a href="{% url 'candidate:candidate_edit' candidate.id %}">
+                <a href="{% url 'candidate:candidate_summary' candidate.id %}">
                     <img src='{{ candidate.candidate_photo_url }}' height="25px" />
                 </a><br />
                 {% endif %}
                 (<a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">edit</a>)
             </td>
             <td>
-              <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">{{ candidate.candidate_name }}</a>
+              <a href="{% url 'candidate:candidate_summary' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">{{ candidate.candidate_name }}</a>
               {% if candidate.withdrawn_from_election %}
                 <strong>WITHDRAWN </strong>
               {% endif %}

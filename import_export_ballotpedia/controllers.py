@@ -2086,7 +2086,7 @@ def groom_and_store_sample_ballot_results_api_v4(
                                 updated_contest_office_values["ocd_division_id"] = ocd_division_id
                             if positive_value_exists(office_name):
                                 updated_contest_office_values["office_name"] = office_name
-                                # We store the literal spelling here so we can match in the future
+                                # We store the literal spelling here, so we can match in the future
                                 updated_contest_office_values["ballotpedia_office_name"] = ballotpedia_office_name
                             if positive_value_exists(state_code) and office_name not in office_names_with_no_state:
                                 updated_contest_office_values["state_code"] = state_code

@@ -1768,11 +1768,15 @@ def process_request_from_master(request, message_text, get_url, get_params):
     :param get_params:
     :return: structured_json and import_results
     """
-    if 'google_civic_election_id' in get_params:
-        message_text += " for google_civic_election_id " + str(get_params['google_civic_election_id'])
-    messages.add_message(request, messages.INFO, message_text)
-    logger.info(message_text)
-    print("process_request_from_master: " + message_text)  # Please don't remove this line
+    status_message = ""
+    try:
+        if 'google_civic_election_id' in get_params:
+            message_text += " for google_civic_election_id " + str(get_params['google_civic_election_id'])
+        messages.add_message(request, messages.INFO, message_text)
+        logger.info(message_text)
+        print("process_request_from_master: " + message_text)  # Please don't remove this line
+    except Exception as e:
+        status_message += "ERROR_PRINTING_MESSAGE_TEXT: " + str(e) + " "
 
     response = requests.get(get_url, params=get_params)
 
@@ -1789,12 +1793,12 @@ def process_request_from_master(request, message_text, get_url, get_params):
         }
 
     if 'google_civic_election_id' in get_params:
-        status_message = "... the master server returned " + str(len(structured_json)) + " items.  Election " \
+        status_message += "... the master server returned " + str(len(structured_json)) + " items.  Election " \
                                  + str(get_params['google_civic_election_id'])  # Please don't remove this line
         print(status_message)
     else:
         # Please don't remove this line
-        status_message = "... the master server returned " + str(len(structured_json)) + " items."
+        status_message += "... the master server returned " + str(len(structured_json)) + " items."
         print(status_message)
 
     return import_results, structured_json

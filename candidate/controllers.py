@@ -511,6 +511,26 @@ def figure_out_candidate_conflict_values(candidate1, candidate2):
                         candidate_merge_conflict_values[attribute] = 'MATCHING'
                     else:
                         candidate_merge_conflict_values[attribute] = 'CONFLICT'
+                elif attribute == "candidate_ultimate_election_date":
+                    candidate1_attribute_value_integer = convert_to_int(candidate1_attribute_value) \
+                        if positive_value_exists(candidate1_attribute_value) else 0
+                    candidate2_attribute_value_integer = convert_to_int(candidate2_attribute_value) \
+                        if positive_value_exists(candidate2_attribute_value) else 0
+                    if positive_value_exists(candidate1_attribute_value_integer) \
+                            and positive_value_exists(candidate2_attribute_value_integer):
+                        if candidate1_attribute_value_integer >= candidate2_attribute_value_integer:
+                            candidate_merge_conflict_values[attribute] = 'CANDIDATE1'
+                        elif candidate2_attribute_value_integer > candidate1_attribute_value_integer:
+                            candidate_merge_conflict_values[attribute] = 'CANDIDATE2'
+                        else:
+                            # Something is wrong, so we want to put human eyes on the choice
+                            candidate_merge_conflict_values[attribute] = 'CONFLICT'
+                    elif positive_value_exists(candidate1_attribute_value_integer):
+                        candidate_merge_conflict_values[attribute] = 'CANDIDATE1'
+                    elif positive_value_exists(candidate2_attribute_value_integer):
+                        candidate_merge_conflict_values[attribute] = 'CANDIDATE2'
+                    else:
+                        candidate_merge_conflict_values[attribute] = 'CANDIDATE1'
                 elif attribute == "candidate_url":
                     candidate1_attribute_value_trimmed = candidate1_attribute_value.rstrip('/')
                     candidate2_attribute_value_trimmed = candidate2_attribute_value.rstrip('/')
