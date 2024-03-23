@@ -1083,6 +1083,8 @@ class ContestOfficeManager(models.Manager):
                         defaults['is_ballotpedia_primary_runoff_election']
                 if 'ocd_division_id' in defaults:
                     new_contest_office.ocd_division_id = defaults['ocd_division_id']
+                if 'primary_party' in defaults:
+                    new_contest_office.primary_party = defaults['primary_party']
                 if 'vote_usa_office_id' in defaults:
                     new_contest_office.vote_usa_office_id = defaults['vote_usa_office_id']
                 new_contest_office.save()
@@ -1189,6 +1191,8 @@ class ContestOfficeManager(models.Manager):
                         defaults['is_ballotpedia_primary_runoff_election']
                 if 'ocd_division_id' in defaults:
                     existing_office_entry.ocd_division_id = defaults['ocd_division_id']
+                if 'primary_party' in defaults:
+                    existing_office_entry.primary_party = defaults['primary_party']
                 if 'vote_usa_office_id' in defaults:
                     existing_office_entry.vote_usa_office_id = defaults['vote_usa_office_id']
                 # now go ahead and save this entry (update)

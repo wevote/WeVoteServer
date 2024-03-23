@@ -38,6 +38,7 @@ VOTER_INFO_URL = get_environment_variable("VOTER_INFO_URL")
 VOTER_INFO_JSON_FILE = get_environment_variable("VOTER_INFO_JSON_FILE")
 REPRESENTATIVES_BY_ADDRESS_URL = get_environment_variable("REPRESENTATIVES_BY_ADDRESS_URL")
 
+OFFICE_NAMES_WITH_NO_STATE = ['President of the United States']
 PRESIDENTIAL_CANDIDATES_JSON_LIST = [
     {
         'id': 54804,
@@ -81,8 +82,12 @@ PRESIDENTIAL_CANDIDATES_JSON_LIST = [
 # GoogleRepresentatives
 # https://developers.google.com/resources/api-libraries/documentation/civicinfo/v2/python/latest/civicinfo_v2.representatives.html
 def process_candidates_from_structured_json(
-        candidates_structured_json, google_civic_election_id, ocd_division_id, state_code, contest_office_id,
-        contest_office_we_vote_id):
+        candidates_structured_json=None,
+        google_civic_election_id=None,
+        ocd_division_id=None,
+        state_code=None,
+        contest_office_id=None,
+        contest_office_we_vote_id=None):
     """
     "candidates": [
         {
@@ -173,10 +178,19 @@ def process_candidates_from_structured_json(
                 # Note: When we decide to start updating candidate_name elsewhere within We Vote, we should stop
                 #  updating candidate_name via subsequent Google Civic imports
                 updated_candidate_values['candidate_name'] = candidate_name
-                # We store the literal spelling here so we can match in the future, even if we customize candidate_name
+                # We store the literal spelling here, so we can match in the future, even if we customize candidate_name
                 updated_candidate_values['google_civic_candidate_name'] = candidate_name
-            if positive_value_exists(state_code):
-                updated_candidate_values['state_code'] = state_code.lower()
+            if positive_value_exists(contest_office_name) and contest_office_name in OFFICE_NAMES_WITH_NO_STATE:
+                updated_candidate_values['state_code'] = 'NA'
+            elif positive_value_exists(state_code):
+                state_code_for_error_checking = state_code.lower()
+                # Limit to 2 digits, so we don't exceed the database limit
+                state_code_for_error_checking = state_code_for_error_checking[-2:]
+                # Make sure we recognize the state
+                list_of_states_matching = [key.lower() for key, value in STATE_CODE_MAP.items() if
+                                           state_code_for_error_checking in key.lower()]
+                state_code_for_error_checking = list_of_states_matching.pop()
+                updated_candidate_values['state_code'] = state_code_for_error_checking
             if positive_value_exists(party):
                 updated_candidate_values['party'] = party
             if positive_value_exists(email):
@@ -239,8 +253,6 @@ def groom_and_store_google_civic_ballot_json_2021(
     success = False
     ballot_item_dict_list = []
     incoming_state_code = state_code
-
-    office_names_with_no_state = ["President of the United States"]
 
     error = one_ballot_json.get('error', {})
     errors = error.get('errors', {})
@@ -709,9 +721,12 @@ def groom_and_store_google_civic_candidates_json_2021(
 
         if continue_searching_for_candidate:
             candidate_list_manager = CandidateListManager()
+            state_code_for_search = state_code
+            if positive_value_exists(contest_office_name) and contest_office_name in OFFICE_NAMES_WITH_NO_STATE:
+                state_code_for_search = 'NA'
             results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(
                 google_civic_election_id_list=[google_civic_election_id],
-                state_code=state_code,
+                state_code=state_code_for_search,
                 candidate_twitter_handle=None,
                 candidate_name=candidate_name,
                 instagram_handle=None,
@@ -825,8 +840,17 @@ def groom_and_store_google_civic_candidates_json_2021(
                     updated_candidate_values['photo_url_from_ctcl'] = photo_url_from_ctcl
                 if positive_value_exists(photo_url_from_vote_usa):
                     updated_candidate_values['photo_url_from_vote_usa'] = photo_url_from_vote_usa
-                if positive_value_exists(state_code):
-                    updated_candidate_values['state_code'] = state_code.lower()
+                if positive_value_exists(contest_office_name) and contest_office_name in OFFICE_NAMES_WITH_NO_STATE:
+                    updated_candidate_values['state_code'] = 'NA'
+                elif positive_value_exists(state_code):
+                    state_code_for_error_checking = state_code.lower()
+                    # Limit to 2 digits, so we don't exceed the database limit
+                    state_code_for_error_checking = state_code_for_error_checking[-2:]
+                    # Make sure we recognize the state
+                    list_of_states_matching = [key.lower() for key, value in STATE_CODE_MAP.items() if
+                                               state_code_for_error_checking in key.lower()]
+                    state_code_for_error_checking = list_of_states_matching.pop()
+                    updated_candidate_values['state_code'] = state_code_for_error_checking
                 if positive_value_exists(vimeo_url):
                     updated_candidate_values['vimeo_url'] = vimeo_url
                 if positive_value_exists(vote_usa_office_id):
@@ -950,8 +974,13 @@ def update_existing_candidate_to_office_links_dict(
 
 
 def process_contest_office_from_structured_json(
-        one_contest_office_structured_json, google_civic_election_id, state_code, ocd_division_id, local_ballot_order,
-        voter_id, polling_location_we_vote_id):
+        one_contest_office_structured_json,
+        google_civic_election_id,
+        state_code,
+        ocd_division_id,
+        local_ballot_order,
+        voter_id,
+        polling_location_we_vote_id):
 
     # Protect against the case where this is NOT an office
     if 'candidates' not in one_contest_office_structured_json:
@@ -1071,9 +1100,11 @@ def process_contest_office_from_structured_json(
         updated_contest_office_values = {
             'google_civic_election_id': google_civic_election_id,
         }
-        if positive_value_exists(state_code):
+        if positive_value_exists(office_name) and office_name in OFFICE_NAMES_WITH_NO_STATE:
+            updated_contest_office_values['state_code'] = 'NA'
+        elif positive_value_exists(state_code):
             state_code_for_error_checking = state_code.lower()
-            # Limit to 2 digits so we don't exceed the database limit
+            # Limit to 2 digits, so we don't exceed the database limit
             state_code_for_error_checking = state_code_for_error_checking[-2:]
             # Make sure we recognize the state
             list_of_states_matching = [key.lower() for key, value in STATE_CODE_MAP.items() if
@@ -1178,7 +1209,11 @@ def process_contest_office_from_structured_json(
     # Presidential races don't have either district_id or district_name, so we can't require one.
     # Perhaps have a special case for "district" -> "scope": "stateUpper"/"stateLower" vs. "scope": "statewide"
     candidates_results = process_candidates_from_structured_json(
-        candidates_structured_json, google_civic_election_id, ocd_division_id, state_code, contest_office_id,
+        candidates_structured_json,
+        google_civic_election_id,
+        ocd_division_id,
+        state_code,
+        contest_office_id,
         contest_office_we_vote_id)
 
     return update_or_create_contest_office_results

@@ -2878,6 +2878,7 @@ def generate_ballot_item_list_from_object_list(
             kind_of_ballot_item = OFFICE
             office_id = ballot_item.contest_office_id
             office_we_vote_id = ballot_item.contest_office_we_vote_id
+            primary_party = ""
             race_office_level = ""
             if positive_value_exists(office_we_vote_id):
                 office_results = contest_office_manager.retrieve_contest_office_from_we_vote_id(
@@ -2886,6 +2887,7 @@ def generate_ballot_item_list_from_object_list(
                     contest_office = office_results['contest_office']
                     office_id = contest_office.id
                     office_name = contest_office.office_name
+                    primary_party = contest_office.primary_party
                     race_office_level = contest_office.ballotpedia_race_office_level
             try:
                 results = candidate_list_object.retrieve_all_candidates_for_office(
@@ -2919,6 +2921,7 @@ def generate_ballot_item_list_from_object_list(
                     'id':                           office_id,
                     'local_ballot_order':           ballot_item.local_ballot_order,
                     'kind_of_ballot_item':          kind_of_ballot_item,
+                    'primary_party':                primary_party,
                     'race_office_level':            race_office_level,
                     'we_vote_id':                   office_we_vote_id,
                     'candidate_list':               candidates_to_display,
