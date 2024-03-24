@@ -558,6 +558,16 @@ def figure_out_candidate_conflict_values(candidate1, candidate2):
                         candidate_merge_conflict_values[attribute] = 'MATCHING'
                     else:
                         candidate_merge_conflict_values[attribute] = 'CONFLICT'
+                elif attribute == "withdrawn_from_election":
+                    if positive_value_exists(candidate1_attribute_value) and \
+                            positive_value_exists(candidate2_attribute_value):
+                        candidate_merge_conflict_values[attribute] = 'MATCHING'
+                    elif positive_value_exists(candidate1_attribute_value):
+                        candidate_merge_conflict_values[attribute] = 'CANDIDATE1'
+                    elif positive_value_exists(candidate2_attribute_value):
+                        candidate_merge_conflict_values[attribute] = 'CANDIDATE2'
+                    else:
+                        candidate_merge_conflict_values[attribute] = 'MATCHING'
                 else:
                     if candidate1_attribute_value == candidate2_attribute_value:
                         candidate_merge_conflict_values[attribute] = 'MATCHING'
