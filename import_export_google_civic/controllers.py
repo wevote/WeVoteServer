@@ -1304,7 +1304,10 @@ def groom_and_store_google_civic_office_json_2021(
     # district's geography is not known. One of: national, statewide, congressional, stateUpper, stateLower,
     # countywide, judicial, schoolBoard, cityWide, township, countyCouncil, cityCouncil, ward, special
     district_scope = results['district_scope']
-    ballotpedia_race_office_level = convert_district_scope_to_ballotpedia_race_office_level(district_scope)
+    if office_name in OFFICE_NAMES_WITH_NO_STATE:
+        ballotpedia_race_office_level = 'Federal'
+    else:
+        ballotpedia_race_office_level = convert_district_scope_to_ballotpedia_race_office_level(district_scope)
     office_ocd_division_id = results['contest_ocd_division_id']
     district_id = results['district_id']
     district_name = results['district_name']  # The name of the district.
