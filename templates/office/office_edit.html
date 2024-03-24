@@ -1,7 +1,7 @@
 {# templates/office/office_edit.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if office %}{{ office.office_name }}
+{% block title %}{% if office %}{{ office.office_name }}{% if office.primary_party %}, {{ office.primary_party }} Primary{% endif %}
                 {% if office.district_id %}
                     - District {{ office.district_id }}
                 {% endif %}
@@ -13,7 +13,7 @@
 {%  block content %}
 {% load template_filters %}
 
-<h1>{% if office %}Edit {{ office.office_name|default_if_none:"" }}
+<h1>{% if office %}Edit {{ office.office_name|default_if_none:"" }}{% if office.primary_party %}, {{ office.primary_party }} Primary{% endif %}
                 {% if office.district_id %}
                     - District {{ office.district_id }}
                 {% endif %}
