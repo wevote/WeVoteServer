@@ -466,10 +466,10 @@
                 </td>
                 {% endif %}
                 <td>
-                <span class="u-no-break">
+                <span>
                   {% if candidate.office %}
                     <a href="{% url 'office:office_summary' candidate.office.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
-                        {{ candidate.office.office_name }}
+                        {{ candidate.office.office_name }}{% if candidate.office.primary_party %}, {{ candidate.office.primary_party }} Primary{% endif %}
                     </a><br />
                     {{ candidate.office.we_vote_id }}
                     {% if candidate.office.ballotpedia_race_office_level %}
