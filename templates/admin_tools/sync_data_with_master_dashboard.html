@@ -289,7 +289,7 @@
 
     function getEstimatedCompletionTime (t0, current_record, total_records) {
         if (current_record === 0) {
-            return 'Estimated completion in 30 minutes';
+            return 'Save off estimated duration is 40 seconds';
         }
         const currentDate = new Date();
         const t1 = currentDate.getTime();
@@ -331,6 +331,7 @@
     const fastInit = $('#started_fast_init');
     const currentDate = new Date();
     const t0 = currentDate.getTime();
+    let saveOffDBComplete = false;
 
     setInterval(function () {
       let origin = new URL('{{request.build_absolute_uri}}').origin;
@@ -365,10 +366,14 @@
                   if (fastLoadButton.html().startsWith('...')) {
                       let newHtml = '';
                       if (data.current_record === 0) {
-                          newHtml = '.... saving a copy of your local database to &apos;WeVoteServerDB-*.pgsql&apos; files (this takes about 30 seconds) ....';
-                          countCopy += 0.33;
+                          newHtml = '.... saving a copy of your local database to &apos;WeVoteServerDB-*.pgsql&apos; files ....';
+                          countCopy += 2.5;
                           prog = Math.trunc(countCopy);
                       } else {
+                          if (!saveOffDBComplete) {
+                              saveOffDBComplete = true;
+                              progress.val(prog);  // Reset the progress bar after saving off completes
+                          }
                           const current = data.current_record.toLocaleString();
                           const total = data.total_records.toLocaleString();
                           newHtml = `.... loading table: '${data.table_name}', record ${current} of ${total} records`;
