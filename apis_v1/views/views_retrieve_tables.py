@@ -1,11 +1,14 @@
 # apis_v1/views/views_ballot.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-from config.base import get_environment_variable
-from django.http import HttpResponse
 import json
-from retrieve_tables.controllers import retrieve_sql_tables_as_csv
+
+from django.http import HttpResponse
+
 import wevote_functions.admin
+from config.base import get_environment_variable
+from retrieve_tables.controllers import retrieve_sql_tables_as_csv, fast_load_status_retrieve
+from wevote_functions.functions import get_voter_device_id
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -21,6 +24,10 @@ def retrieve_sql_tables(request):  # retrieveSQLTables
     table = request.GET.get('table', '')
     start = request.GET.get('start', '')
     end = request.GET.get('end', '')
-    json_data = retrieve_sql_tables_as_csv(table, start, end)
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+
+    json_data = retrieve_sql_tables_as_csv(voter_device_id, table, start, end)
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
+def fast_load_status_retrieve_view(request):   # fastLoadStatusRetrieve
+    return fast_load_status_retrieve(request)

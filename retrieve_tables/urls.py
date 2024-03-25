@@ -8,6 +8,8 @@ from . import controllers
 
 urlpatterns = [
     # views_admin
-    re_path(r'^import/$',
+    re_path(r'^import/status/$',
+        controllers.fast_load_status_retrieve, name='fast_load_status_retrieve'),
+    re_path(r'^import/files/$',
         controllers.retrieve_sql_files_from_master_server, name='retrieve_sql_files_from_master_server'),
 ]
