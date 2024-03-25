@@ -1681,7 +1681,7 @@ def create_detailed_counter_entry(kind_of_action=None, function=None, success=Tr
     except Exception as e:
         print('create_detailed_counter_entry error ' + str(e))
         success = False
-        status = 'create_detailed_counter_entry error ' + str(e) + " "
+        status = 'CREATE_DETAILED_COUNTER_ENTRY_ERROR: ' + str(e) + " "
     results = {
         'success':                  success,
         'status':                   status,
