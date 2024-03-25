@@ -3,6 +3,7 @@ import json
 import os
 import re
 import time
+from datetime import datetime, timezone
 from io import StringIO
 
 import psycopg2
@@ -11,7 +12,8 @@ from django.http import HttpResponse
 
 import wevote_functions.admin
 from config.base import get_environment_variable
-from wevote_functions.functions import positive_value_exists
+from retrieve_tables.models import RetrieveTableState
+from wevote_functions.functions import positive_value_exists, get_voter_device_id
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -30,7 +32,6 @@ allowable_tables = [
     'election_ballotpediaelection',
     'election_election',
     'electoral_district_electoraldistrict',
-    # 'electoral_district_electoraldistrictlinktopollinglocation',
     'issue_issue',
     'issue_organizationlinktoissue',
     'measure_contestmeasure',
@@ -60,9 +61,34 @@ dummy_unique_id = 10000000
 LOCAL_TMP_PATH = '/tmp/'
 
 
-def retrieve_sql_tables_as_csv(table_name, start, end):
+def get_total_row_count():
+    conn = psycopg2.connect(
+        database=get_environment_variable('DATABASE_NAME'),
+        user=get_environment_variable('DATABASE_USER'),
+        password=get_environment_variable('DATABASE_PASSWORD'),
+        host=get_environment_variable('DATABASE_HOST'),
+        port=get_environment_variable('DATABASE_PORT')
+    )
+
+    rows = 0
+    for table in allowable_tables:
+        with conn.cursor() as cursor:
+            sql = "SELECT COUNT(id) FROM \"public\".\"{table}\";".format(table=table)
+            cursor.execute(sql)
+            row = cursor.fetchone()
+            cnt = int(row[0])
+            # print('get_total_row_count of table ', table, ' is ', cnt)
+            rows += cnt
+
+    print('get_total_row_count is ', rows)
+
+    conn.close()
+    return rows
+
+
+def retrieve_sql_tables_as_csv(voter_device_id, table_name, start, end):
     """
-    Extract one of the (originally) 15 allowable database tables to CSV (pipe delimited) and send it to the
+    Extract one of the approximately 21 allowable database tables to CSV (pipe delimited) and send it to the
     developer's local WeVoteServer instance
     limit is used to specify a number of rows to return (this is the SQL LIMIT clause), non-zero or ignored
     offset is used to specify the first row to return (this is the SQL OFFSET clause), non-zero or ignored
@@ -204,8 +230,21 @@ def retrieve_sql_files_from_master_server(request):
     """
     status = ''
     t0 = time.time()
-
+    print(
+        'Saving off a copy of your local database in \'WeVoteServerDB-*.pgsql\' files, feel free to delete them at anytime')
     save_off_database()
+    dt = time.time() - t0
+    print('Saved off local database in ' + str(int(dt)) + ' seconds')
+
+    # ONLY CHANGE host to 'wevotedeveloper.com' while debugging the fast load code, where Master and Client are the same
+    # host = 'https://wevotedeveloper.com:8000/'
+    host = 'https://api.wevoteusa.org/'
+
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    verify_bool = not ('localhost' in host or '127.0.0.1' in host or 'wevotedeveloper.com' in host)
+    response = requests.get(host + '/apis/v1/fastLoadStatusRetrieve',
+                            params={ "initialize": True, "voter_device_id": voter_device_id }, verify=verify_bool)
+    # print("response from master server ", str(response))
 
     for table_name in allowable_tables:
         print('Starting on the ' + table_name + ' table, requesting up to 500,000 rows')
@@ -221,16 +260,15 @@ def retrieve_sql_files_from_master_server(request):
             response = {}
 
             while wait_for_a_http_200:
-                # To test locally:  https://wevotedeveloper.com:8000/apis/v1/retrieveSQLTables/?table=election_election
-                response = requests.get("https://api.wevoteusa.org/apis/v1/retrieveSQLTables/",
-                                        params={'table': table_name, 'start': start, 'end': end})
+                response = requests.get(host + 'apis/v1/retrieveSQLTables/',
+                                        verify=verify_bool,
+                                        params={'table': table_name, 'start': start, 'end': end,
+                                                'voter_device_id': voter_device_id })
                 request_count += 1
-                # print("... https://api.wevoteusa.org/apis/v1/retrieveSQLTables/?table=" + table_name +
-                #        '&start=' + str(start) + '&end=' + str(end))
-                # print('... HTTP response #' + str(request_count) + ' for table \'' + table_name +
-                #       '\' start ' + str(start) + ', was an HTTP: ' + str(response.status_code))
                 if response.status_code == 200:
                     wait_for_a_http_200 = False
+                else:
+                    print(host + 'apis/v1/retrieveSQLTables/   (failing) response.status_code' +  response.status_code)
 
             structured_json = json.loads(response.text)
             if structured_json['success'] is False:
@@ -247,6 +285,7 @@ def retrieve_sql_files_from_master_server(request):
             final_lines_count += len(lines)
             print('... Intermediate line count from this request of 500k, returned ' + "{:,}".format(len(lines)) +
                   " rows, cumulative is " + "{:,}".format(final_lines_count))
+            fast_load_status_update(voter_device_id, table_name, None, len(lines), None, True)
 
             if len(lines) > 0:
                 try:
@@ -538,3 +577,86 @@ def csv_file_to_clean_csv_file2(table_name):
             csvwriter.writerow(row)
     csv_file.close()
     return header
+
+
+def fast_load_status_retrieve(request):   # fastLoadStatusRetrieve
+    initialize = positive_value_exists(request.GET.get('initialize', False))
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    is_running = positive_value_exists(request.GET.get('is_running', True))
+    table_name = ''
+    chunk = 0
+    records = 0
+    total = 0
+    status = ""
+    success = True
+    started = None
+
+    try:
+        if initialize:
+            total = get_total_row_count()
+            started = datetime.now(tz=timezone.utc)
+            RetrieveTableState.objects.update_or_create(
+                voter_device_id=voter_device_id,
+                defaults={
+                    'is_running':       is_running,
+                    'started_date':     started,
+                    'table_name':       '',
+                    'chunk':            0,
+                    'current_record':   0,
+                    'total_records':    total,
+                })
+            status += "ROW_INITIALIZED "
+        else:
+            row = RetrieveTableState.objects.get(voter_device_id=voter_device_id)
+            is_running = row.is_running
+            table_name = row.table_name
+            chunk = row.chunk
+            records = row.current_record
+            total = row.total_records
+            started = row.started_date
+            status += "ROW_RETRIEVED "
+
+    except Exception as e:
+        status += "fast_load_status_retrieve caught exception: " + str(e)
+        logger.error("fast_load_status_retrieve caught exception: " + str(e))
+        success = False
+
+    started_txt = started.strftime('%Y-%m-%d %H:%M:%S') if started else ""
+    results = {
+        'status': status,
+        'success': success,
+        'initialize': initialize,
+        'is_running': is_running,
+        'voter_device_id': voter_device_id,
+        'started_date': started_txt,
+        'table_name': table_name,
+        'chunk': chunk,
+        'current_record': records,
+        'total_records': total,
+    }
+
+    return HttpResponse(json.dumps(results), content_type='application/json')
+
+
+def fast_load_status_update(voter_device_id, table_name, chunk, additional_records, total_records, is_running):
+    success = True
+    try:
+        row = RetrieveTableState.objects.get(voter_device_id=voter_device_id)
+        current_record = row.current_record
+        row.is_running = is_running
+        if positive_value_exists(table_name):
+            row.table_name = table_name
+        if positive_value_exists(chunk):
+            row.chunk = chunk
+        if positive_value_exists(additional_records):
+            row.current_record += additional_records
+        if positive_value_exists(total_records):
+            row.total_records = total_records
+        row.save()
+        # print('fast_load_status_update table_name', table_name, chunk, current_record, additional_records)
+
+    except Exception as e:
+        logger.error("fast_load_status_update caught exception: " + str(e))
+        success = False
+
+    return success

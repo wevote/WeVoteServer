@@ -50,7 +50,7 @@ def voter_guide_possibility_highlights_retrieve_doc_template_values(url_root):
                             'is NOT provided in visible_text_to_scan. Note that if visible_text_to_scan has a value, '
                             'we do NOT use Vertex AI to scan the url_to_scan. '
                             'In all cases, Vertex AI adds about 2-3 seconds to the response time.',
-            'default':      'true',
+            'default':      'true',       # default 'checked' for a boolean radio input
         },
     ]
 

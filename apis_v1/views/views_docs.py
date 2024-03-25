@@ -19,6 +19,7 @@ from apis_v1.documentation_source import \
     candidates_sync_out_doc, candidate_to_office_link_sync_out_doc, device_id_generate_doc, \
     device_store_firebase_fcm_token_doc, donation_with_stripe_doc, \
     elections_retrieve_doc, elections_sync_out_doc, facebook_disconnect_doc, facebook_friends_action_doc, \
+    fast_load_status_retrieve_doc, \
     friend_invitation_by_email_send_doc, \
     friend_invitation_by_email_verify_doc, friend_invitation_by_we_vote_id_send_doc, \
     friend_invitation_by_facebook_send_doc, friend_invitation_by_facebook_verify_doc, \
@@ -1933,5 +1934,15 @@ def pdf_to_html_retrieve_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = pdf_to_html_doc.pdf_to_html_retrieve_view(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def fast_load_status_retrieve_doc_view(request):
+    """
+    Show documentation about fastLoadStatusRetrieve
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = fast_load_status_retrieve_doc.fast_load_status_retrieve_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
