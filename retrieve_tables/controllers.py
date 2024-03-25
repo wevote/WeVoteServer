@@ -268,7 +268,9 @@ def retrieve_sql_files_from_master_server(request):
                 if response.status_code == 200:
                     wait_for_a_http_200 = False
                 else:
-                    print(host + 'apis/v1/retrieveSQLTables/   (failing) response.status_code' +  response.status_code)
+                    print(host + 'apis/v1/retrieveSQLTables/   (failing) response.status_code' +
+                          str(response.status_code) + '  RETRYING ---------------------------')
+                    continue
 
             structured_json = json.loads(response.text)
             if structured_json['success'] is False:
