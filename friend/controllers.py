@@ -4,7 +4,7 @@
 
 from django.db.models import F, Q
 from django.utils.timezone import localtime, now
-from .models import ACCEPTED, CurrentFriend, FriendInvitationVoterLink, FriendManager, CURRENT_FRIENDS, \
+from .models import ACCEPTED, CurrentFriend, FriendInvitationVoterLink, FriendManager, CURRENT_FRIENDS, FriendInvitationEmailLink, \
     DELETE_INVITATION_EMAIL_SENT_BY_ME, DELETE_INVITATION_VOTER_SENT_BY_ME, FRIEND_INVITATION_SECRET_KEY_LENGTH, \
     FRIEND_INVITATIONS_PROCESSED, \
     FRIEND_INVITATIONS_SENT_BY_ME, FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_WAITING_FOR_VERIFICATION, \
@@ -47,62 +47,46 @@ def delete_friend_invitations_for_voter(voter_to_delete_we_vote_id):
             'friend_invitation_entries_not_deleted':  0,
         }
         return results
-
-    friend_manager = FriendManager()
-
+    
     # ###############################
     # FriendInvitationEmailLink
     # SENDER entries
     # FROM SENDER: Invitations sent BY the voter_to_delete to others
-    friend_invitation_email_link_from_sender_results = friend_manager.retrieve_friend_invitation_email_link_list(
-        voter_to_delete_we_vote_id)
-    if friend_invitation_email_link_from_sender_results['friend_invitation_list_found']:
-        friend_invitation_email_link_from_sender_list = \
-            friend_invitation_email_link_from_sender_results['friend_invitation_list']
-
-        for from_sender_entry in friend_invitation_email_link_from_sender_list:
-            # Change the sender_voter_we_vote_id to the new we_vote_id
-            try:
-                from_sender_entry.delete()
-                friend_invitation_entries_deleted += 1
-            except Exception as e:
-                status += "FriendInvitationEmailLink Sender entries not deleted: " + str(e) + ' '
-                friend_invitation_entries_not_deleted += 1
-
+    try:
+        number_deleted, details = FriendInvitationEmailLink.objects\
+            .filter(sender_voter_we_vote_id__iexact=voter_to_delete_we_vote_id, )\
+            .delete()
+        friend_invitation_entries_deleted += number_deleted
+    except Exception as e:
+        status += "FriendInvitationEmailLink Sender entries not deleted: " + str(e) + " "
+        friend_invitation_entries_not_deleted += 1
+                
     # ###############################
     # FriendInvitationVoterLink
     # FROM SENDER: Invitations sent BY the voter_to_delete to others
-    friend_invitation_voter_link_from_sender_results = friend_manager.retrieve_friend_invitation_voter_link_list(
-        voter_to_delete_we_vote_id)
-    if friend_invitation_voter_link_from_sender_results['friend_invitation_list_found']:
-        friend_invitation_voter_link_from_sender_list = \
-            friend_invitation_voter_link_from_sender_results['friend_invitation_list']
-        for from_sender_entry in friend_invitation_voter_link_from_sender_list:
-            try:
-                from_sender_entry.delete()
-                friend_invitation_entries_deleted += 1
-            except Exception as e:
-                status += "FriendInvitationVoterLink Sender entries not deleted: " + str(e) + ' '
-                friend_invitation_entries_not_deleted += 1
+    try:
+        number_deleted, details = FriendInvitationVoterLink.objects\
+            .filter(sender_voter_we_vote_id__iexact=voter_to_delete_we_vote_id, )\
+            .delete()
+        friend_invitation_entries_deleted += number_deleted
+    except Exception as e:
+        status += "FriendInvitationVoterLink Sender entries not deleted: " + str(e) + " "
+        friend_invitation_entries_not_deleted += 1
 
     # RECIPIENT entries
-    # FROM RECIPIENT: Invitations sent TO the voter_to_delete from others
-    friend_invitation_voter_link_from_recipient_results = friend_manager.retrieve_friend_invitation_voter_link_list(
-        '', voter_to_delete_we_vote_id)
-    if friend_invitation_voter_link_from_recipient_results['friend_invitation_list_found']:
-        friend_invitation_voter_link_from_recipient_list = \
-            friend_invitation_voter_link_from_recipient_results['friend_invitation_list']
+    # FROM RECIPIENT: Invitations sent TO the voter_to_delete from others            
+    try:
+        number_deleted, details = FriendInvitationVoterLink.objects\
+            .filter(recipient_voter_we_vote_id__iexact=voter_to_delete_we_vote_id, )\
+            .delete()
+        friend_invitation_entries_deleted += number_deleted
+    except Exception as e:
+        status += "FriendInvitationVoterLink Recipient entries not deleted: " + str(e) + " "
+        friend_invitation_entries_not_deleted += 1
 
-        for from_sender_entry in friend_invitation_voter_link_from_recipient_list:
-            try:
-                from_sender_entry.delete()
-                friend_invitation_entries_deleted += 1
-            except Exception as e:
-                status += "FriendInvitationVoterLink Recipient entries not deleted: " + str(e) + " "
-                friend_invitation_entries_not_deleted += 1
     status += " FRIEND_INVITATIONS moved: " + str(friend_invitation_entries_deleted) + \
               ", not moved: " + str(friend_invitation_entries_not_deleted) + " "
-
+    
     results = {
         'status':                   status,
         'success':                  success,
