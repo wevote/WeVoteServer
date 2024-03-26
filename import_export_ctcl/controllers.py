@@ -18,8 +18,10 @@ from polling_location.models import KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR, \
     KIND_OF_LOG_ENTRY_NO_BALLOT_JSON, PollingLocationManager
 import requests
 import wevote_functions.admin
-from wevote_functions.functions import convert_we_vote_date_string_to_date, extract_state_code_from_address_string, \
-    positive_value_exists
+# from wevote_functions.functions import convert_we_vote_date_string_to_date, extract_state_code_from_address_string, \
+#     positive_value_exists
+from wevote_functions.functions import extract_state_code_from_address_string, positive_value_exists
+from wevote_functions.functions_time import convert_we_vote_date_string_to_date
 
 logger = wevote_functions.admin.get_logger(__name__)
 

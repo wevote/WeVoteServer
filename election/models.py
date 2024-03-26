@@ -8,9 +8,12 @@ from django.db import models
 from django.db.models import Q
 
 import wevote_functions.admin
-from wevote_functions.functions import convert_date_as_integer_to_date, convert_date_to_date_as_integer, \
-    convert_date_to_we_vote_date_string, \
-    convert_to_int, extract_state_from_ocd_division_id, positive_value_exists
+# from wevote_functions.functions import convert_date_as_integer_to_date, convert_date_to_date_as_integer, \
+#     convert_date_to_we_vote_date_string, \
+#     convert_to_int, extract_state_from_ocd_division_id, positive_value_exists
+from wevote_functions.functions import convert_to_int, extract_state_from_ocd_division_id, positive_value_exists
+from wevote_functions.functions_time import convert_date_as_integer_to_date, convert_date_to_date_as_integer, \
+    convert_date_to_we_vote_date_string
 
 TIME_SPAN_LIST = [
     '2016',

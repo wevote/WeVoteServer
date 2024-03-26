@@ -48,10 +48,14 @@ from twitter.models import TwitterLinkToOrganization, TwitterUserManager
 from voter.models import fetch_voter_from_voter_device_link, retrieve_voter_authority, voter_has_authority, VoterManager
 from voter_guide.models import VoterGuideManager
 import wevote_functions.admin
-from wevote_functions.functions import convert_date_to_date_as_integer, convert_to_int, \
-    get_voter_api_device_id, extract_instagram_handle_from_text_string, \
-    extract_twitter_handle_from_text_string, positive_value_exists, \
-    STATE_CODE_MAP
+# from wevote_functions.functions import convert_date_to_date_as_integer, convert_to_int, \
+#     get_voter_api_device_id, extract_instagram_handle_from_text_string, \
+#     extract_twitter_handle_from_text_string, positive_value_exists, \
+#     STATE_CODE_MAP
+from wevote_functions.functions import convert_to_int, get_voter_api_device_id, \
+    extract_instagram_handle_from_text_string, extract_twitter_handle_from_text_string, \
+    positive_value_exists, STATE_CODE_MAP
+from wevote_functions.functions_time import convert_date_to_date_as_integer
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 
 

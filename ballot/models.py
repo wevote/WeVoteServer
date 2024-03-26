@@ -18,8 +18,11 @@ from exception.models import handle_exception, handle_record_found_more_than_one
 from measure.models import ContestMeasureManager
 from office.models import ContestOfficeManager
 from polling_location.models import PollingLocationManager
-from wevote_functions.functions import convert_date_to_date_as_integer, convert_to_int, \
-    extract_state_code_from_address_string, positive_value_exists, STATE_CODE_MAP
+# from wevote_functions.functions import convert_date_to_date_as_integer, convert_to_int, \
+#     extract_state_code_from_address_string, positive_value_exists, STATE_CODE_MAP
+from wevote_functions.functions import convert_to_int, extract_state_code_from_address_string, \
+    positive_value_exists, STATE_CODE_MAP
+from wevote_functions.functions_time import convert_date_to_date_as_integer
 from wevote_settings.models import fetch_next_we_vote_id_ballot_returned_integer, fetch_site_unique_id_prefix
 
 OFFICE = 'OFFICE'

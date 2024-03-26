@@ -29,10 +29,14 @@ from representative.models import RepresentativeManager
 from voter.models import VoterManager
 from config.base import get_environment_variable
 import wevote_functions.admin
+# from wevote_functions.functions import candidate_party_display, convert_to_int, \
+#     convert_to_political_party_constant, \
+#     convert_we_vote_date_string_to_date_as_integer, generate_random_string, positive_value_exists, \
+#     process_request_from_master, remove_middle_initial_from_name
 from wevote_functions.functions import candidate_party_display, convert_to_int, \
-    convert_to_political_party_constant, \
-    convert_we_vote_date_string_to_date_as_integer, generate_random_string, positive_value_exists, \
+    convert_to_political_party_constant, generate_random_string, positive_value_exists, \
     process_request_from_master, remove_middle_initial_from_name
+from wevote_functions.functions_time import convert_we_vote_date_string_to_date_as_integer
 
 logger = wevote_functions.admin.get_logger(__name__)
 
