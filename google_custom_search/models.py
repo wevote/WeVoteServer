@@ -60,7 +60,7 @@ class GoogleSearchUser(models.Model):
     from_facebook = models.BooleanField(default=False, verbose_name="searched link from facebook")
     from_linkedin = models.BooleanField(default=False, verbose_name="searched link from linkedin")
     from_twitter = models.BooleanField(default=False, verbose_name="searched link from twitter")
-    from_wikipedia = models.BooleanField (default=False, verbose_name="searched link from wikipedia")
+    from_wikipedia = models.BooleanField(default=False, verbose_name="searched link from wikipedia")
     not_a_match = models.BooleanField(default=False, verbose_name="this candidate does not match")
     likelihood_score = models.IntegerField(verbose_name="score for a match", null=True, unique=False)
     chosen_and_updated = models.BooleanField(
@@ -192,7 +192,7 @@ class GoogleSearchUserManager(models.Manager):
         except Exception as e:
             google_search_user_found = False
             success = False
-            status += 'FAILED retrieve_googgle_search_user: ' + str(e) + " "
+            status += 'FAILED retrieve_google_search_user: ' + str(e) + " "
 
         results = {
             'success':                      success,
@@ -248,4 +248,3 @@ class GoogleSearchUserManager(models.Manager):
             'status': status,
         }
         return results
-
