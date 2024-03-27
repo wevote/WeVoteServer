@@ -21,7 +21,8 @@ from position.models import OPPOSE, SUPPORT
 import pytz
 from voter.models import Voter, VoterManager
 import wevote_functions.admin
-from wevote_functions.functions import convert_date_to_date_as_integer, generate_date_as_integer, positive_value_exists
+from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions_date import convert_date_to_date_as_integer, generate_date_as_integer
 
 logger = wevote_functions.admin.get_logger(__name__)
 

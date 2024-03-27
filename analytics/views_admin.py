@@ -30,8 +30,8 @@ from socket import timeout
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
-from wevote_functions.functions import convert_date_as_integer_to_date, convert_date_to_date_as_integer, \
-    convert_to_int, positive_value_exists, STATE_CODE_MAP
+from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
+from wevote_functions.functions_date import convert_date_as_integer_to_date, convert_date_to_date_as_integer
 from wevote_settings.models import WeVoteSetting, WeVoteSettingsManager
 
 logger = wevote_functions.admin.get_logger(__name__)

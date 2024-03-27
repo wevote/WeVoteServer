@@ -28,9 +28,9 @@ from position.models import PositionEntered, PositionListManager
 from twitter.models import TwitterUserManager
 from volunteer_task.models import VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED, VolunteerTaskManager
 from voter.models import voter_has_authority, VoterManager
-from wevote_functions.functions import convert_to_int, convert_date_to_we_vote_date_string, \
-    extract_twitter_handle_from_text_string, positive_value_exists, \
+from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists, \
     STATE_CODE_MAP, get_voter_device_id, get_voter_api_device_id
+from wevote_functions.functions_date import convert_date_to_we_vote_date_string
 from wevote_settings.models import RemoteRequestHistoryManager, SUGGESTED_VOTER_GUIDE_FROM_PRIOR
 from .controllers import augment_with_voter_guide_possibility_position_data, \
     extract_import_position_list_from_voter_guide_possibility, \

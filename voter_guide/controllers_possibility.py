@@ -21,10 +21,10 @@ from twitter.models import TwitterUserManager
 from volunteer_task.models import VOLUNTEER_ACTION_CANDIDATE_CREATED, VolunteerTaskManager
 from voter.models import fetch_voter_from_voter_device_link
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, convert_date_to_we_vote_date_string, \
-    extract_facebook_username_from_text_string, \
+from wevote_functions.functions import convert_to_int, extract_facebook_username_from_text_string, \
     extract_twitter_handle_from_text_string, extract_website_from_url, positive_value_exists, \
     STATE_CODE_MAP, get_voter_device_id, get_voter_api_device_id
+from wevote_functions.functions_date import convert_date_to_we_vote_date_string
 from .controllers_possibility_shared import fix_sequence_of_possible_endorsement_list
 
 logger = wevote_functions.admin.get_logger(__name__)

@@ -13,9 +13,13 @@ from config.base import get_environment_variable
 from exception.models import handle_exception
 from voter.controllers_contacts import assemble_contact_display_name
 from voter.models import VoterContactEmail
+# from wevote_functions.functions import convert_state_text_to_state_code, convert_to_int, \
+#     display_city_with_correct_capitalization, display_full_name_with_correct_capitalization, \
+#     generate_date_as_integer, positive_value_exists
 from wevote_functions.functions import convert_state_text_to_state_code, convert_to_int, \
     display_city_with_correct_capitalization, display_full_name_with_correct_capitalization, \
-    generate_date_as_integer, positive_value_exists
+    positive_value_exists
+from wevote_functions.functions import generate_date_as_integer
 from wevote_settings.models import WeVoteSetting, WeVoteSettingsManager
 from .models import OpenPeopleApiCounterManager
 

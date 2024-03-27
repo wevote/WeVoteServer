@@ -23,7 +23,8 @@ from voter.models import \
     NOTIFICATION_VOTER_DAILY_SUMMARY_EMAIL, NOTIFICATION_VOTER_DAILY_SUMMARY_SMS, \
     VoterDeviceLinkManager, VoterManager
 import wevote_functions.admin
-from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists, return_first_x_words
+from wevote_functions.functions import is_voter_device_id_valid, return_first_x_words
+from wevote_functions.functions_date import positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
