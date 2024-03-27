@@ -39,18 +39,12 @@ from position.models import PositionEntered, PositionListManager
 from representative.models import Representative, RepresentativeManager
 from volunteer_task.models import VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION, VolunteerTaskManager
 from voter.models import fetch_voter_from_voter_device_link, voter_has_authority
-# from wevote_functions.functions import convert_date_to_we_vote_date_string, convert_to_int, \
-#     convert_to_political_party_constant, convert_we_vote_date_string_to_date_as_integer, \
-#     extract_first_name_from_full_name, extract_instagram_handle_from_text_string, \
-#     extract_middle_name_from_full_name, extract_last_name_from_full_name, \
-#     extract_state_from_ocd_division_id, extract_twitter_handle_from_text_string, get_voter_api_device_id, \
-#     positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization
 from wevote_functions.functions import convert_to_int, convert_to_political_party_constant, \
     extract_first_name_from_full_name, extract_instagram_handle_from_text_string, \
     extract_middle_name_from_full_name, extract_last_name_from_full_name, \
     extract_state_from_ocd_division_id, extract_twitter_handle_from_text_string, get_voter_api_device_id, \
     positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization
-from wevote_functions.functions_time import convert_date_to_we_vote_date_string, convert_we_vote_date_string_to_date_as_integer
+from wevote_functions.functions_date import convert_date_to_we_vote_date_string, convert_we_vote_date_string_to_date_as_integer
 from wevote_settings.constants import IS_BATTLEGROUND_YEARS_AVAILABLE
 from .controllers import add_alternate_names_to_next_spot, add_twitter_handle_to_next_politician_spot, \
     fetch_duplicate_politician_count, figure_out_politician_conflict_values, find_duplicate_politician, \

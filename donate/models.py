@@ -10,9 +10,8 @@ from organization.models import CHOSEN_FAVICON_ALLOWED, CHOSEN_FULL_DOMAIN_ALLOW
 
 import wevote_functions.admin
 from voter.models import VoterManager
-# from wevote_functions.functions import positive_value_exists, convert_date_to_date_as_integer
 from wevote_functions.functions import positive_value_exists
-from wevote_functions.functions_time import convert_date_to_date_as_integer
+from wevote_functions.functions_date import convert_date_to_date_as_integer
 import stripe
 import textwrap
 import time

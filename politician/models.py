@@ -14,15 +14,11 @@ from candidate.models import PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKN
     PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from tag.models import Tag
-# from wevote_functions.functions import candidate_party_display, convert_to_int, convert_date_to_date_as_integer, \
-#     convert_to_political_party_constant, display_full_name_with_correct_capitalization, \
-#     extract_first_name_from_full_name, extract_middle_name_from_full_name, \
-#     extract_last_name_from_full_name, extract_twitter_handle_from_text_string, positive_value_exists
 from wevote_functions.functions import candidate_party_display, convert_to_int, convert_to_political_party_constant, \
     display_full_name_with_correct_capitalization, extract_first_name_from_full_name, \
     extract_middle_name_from_full_name, extract_last_name_from_full_name, \
     extract_twitter_handle_from_text_string, positive_value_exists
-from wevote_functions.functions_time import convert_date_to_date_as_integer
+from wevote_functions.functions_date import convert_date_to_date_as_integer
 from wevote_settings.models import fetch_next_we_vote_id_politician_integer, fetch_site_unique_id_prefix
 
 FEMALE = 'F'

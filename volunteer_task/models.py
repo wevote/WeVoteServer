@@ -6,10 +6,8 @@ from django.db import models
 from django.utils.timezone import localtime, now
 
 from voter.models import fetch_voter_from_voter_device_link
-# from wevote_functions.functions import convert_date_as_integer_to_date, convert_date_to_date_as_integer, \
-#     convert_to_int, positive_value_exists
 from wevote_functions.functions import convert_to_int, positive_value_exists
-from wevote_functions.functions_time import convert_date_as_integer_to_date, convert_date_to_date_as_integer
+from wevote_functions.functions_date import convert_date_as_integer_to_date, convert_date_to_date_as_integer
 
 VOLUNTEER_ACTION_POSITION_SAVED = 1
 VOLUNTEER_ACTION_POSITION_COMMENT_SAVED = 2

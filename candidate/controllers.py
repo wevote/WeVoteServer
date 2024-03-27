@@ -23,18 +23,12 @@ from office.models import ContestOfficeListManager, ContestOfficeManager
 from politician.models import PoliticianManager
 from position.controllers import move_positions_to_another_candidate, update_all_position_details_from_candidate
 from twitter.models import TwitterUserManager
-# from wevote_functions.functions import add_period_to_middle_name_initial, add_period_to_name_prefix_and_suffix, \
-#     convert_date_to_we_vote_date_string, convert_to_int, \
-#     convert_to_political_party_constant, convert_we_vote_date_string_to_date_as_integer, positive_value_exists, \
-#     process_request_from_master, \
-#     extract_twitter_handle_from_text_string, extract_website_from_url, \
-#     remove_period_from_middle_name_initial, remove_period_from_name_prefix_and_suffix
 from wevote_functions.functions import add_period_to_middle_name_initial, add_period_to_name_prefix_and_suffix, \
     convert_to_int, convert_to_political_party_constant, positive_value_exists, \
     process_request_from_master, extract_twitter_handle_from_text_string, \
     extract_website_from_url, remove_period_from_middle_name_initial, \
     remove_period_from_name_prefix_and_suffix
-from wevote_functions.functions_time import convert_date_to_we_vote_date_string, convert_we_vote_date_string_to_date_as_integer
+from wevote_functions.functions_date import convert_date_to_we_vote_date_string, convert_we_vote_date_string_to_date_as_integer
 from .models import CandidateListManager, CandidateCampaign, CandidateManager, \
     CANDIDATE_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, CANDIDATE_UNIQUE_IDENTIFIERS, \
     PROFILE_IMAGE_TYPE_BALLOTPEDIA, PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_LINKEDIN, \

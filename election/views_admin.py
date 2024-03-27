@@ -49,11 +49,9 @@ from voter.models import VoterAddressManager, VoterDeviceLink, voter_has_authori
 from voter_guide.models import VoterGuide, VoterGuidePossibility, \
     VoterGuideListManager
 import wevote_functions.admin
-# from wevote_functions.functions import convert_to_int, convert_we_vote_date_string_to_date, positive_value_exists,\
-#     STATE_CODE_MAP, STATE_GEOGRAPHIC_CENTER
 from wevote_functions.functions import convert_to_int, positive_value_exists,\
     STATE_CODE_MAP, STATE_GEOGRAPHIC_CENTER
-from wevote_functions.functions_time import convert_we_vote_date_string_to_date
+from wevote_functions.functions_date import convert_we_vote_date_string_to_date
 from wevote_settings.constants import ELECTION_YEARS_AVAILABLE
 from wevote_settings.models import RemoteRequestHistoryManager
 

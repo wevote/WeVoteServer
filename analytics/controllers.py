@@ -25,9 +25,8 @@ from position.models import PositionMetricsManager
 from share.models import ShareManager
 from voter.models import VoterManager, VoterMetricsManager
 import wevote_functions.admin
-# from wevote_functions.functions import convert_date_to_date_as_integer, convert_to_int, positive_value_exists
 from wevote_functions.functions import convert_to_int, positive_value_exists
-from wevote_functions.functions_time import convert_date_to_date_as_integer
+from wevote_functions.functions_date import convert_date_to_date_as_integer
 
 logger = wevote_functions.admin.get_logger(__name__)
 

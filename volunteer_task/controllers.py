@@ -7,10 +7,8 @@ from volunteer_task.models import VOLUNTEER_ACTION_CANDIDATE_CREATED, VOLUNTEER_
     VOLUNTEER_ACTION_POSITION_SAVED, VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED, VolunteerTaskCompleted, \
     VolunteerWeeklyMetrics
 from voter.models import Voter
-# from wevote_functions.functions import convert_date_as_integer_to_date, convert_date_to_date_as_integer, \
-#     positive_value_exists
 from wevote_functions.functions import positive_value_exists
-from wevote_functions.functions_time import convert_date_as_integer_to_date, convert_date_to_date_as_integer
+from wevote_functions.functions_date import convert_date_as_integer_to_date, convert_date_to_date_as_integer
 from wevote_settings.models import fetch_volunteer_task_weekly_metrics_last_updated, WeVoteSetting, \
     WeVoteSettingsManager
 
