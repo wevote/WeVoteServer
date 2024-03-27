@@ -56,7 +56,8 @@ class FollowCampaignXManager(models.Manager):
     def __unicode__(self):
         return "FollowCampaignXManager"
 
-    def toggle_on_follow_campaignx(self, voter_we_vote_id, issue_id, issue_we_vote_id, following_status):
+    @staticmethod
+    def toggle_on_follow_campaignx(voter_we_vote_id, issue_id, issue_we_vote_id, following_status):
         follow_campaignx_on_stage_found = False
         follow_campaignx_changed = False
         follow_campaignx_on_stage_id = 0
@@ -145,7 +146,11 @@ class FollowCampaignXManager(models.Manager):
         }
         return results
 
-    def retrieve_follow_campaignx(self, follow_campaignx_id, voter_we_vote_id, issue_id, issue_we_vote_id):
+    @staticmethod
+    def retrieve_follow_campaignx(
+            follow_campaignx_id,
+            voter_we_vote_id, issue_id,
+            issue_we_vote_id):
         """
         follow_campaignx_id is the identifier for records stored in this table (it is NOT the issue_id)
         """
@@ -215,7 +220,8 @@ class FollowCampaignXManager(models.Manager):
         }
         return results
 
-    def delete_follow_campaignx(self, follow_campaignx_id, voter_we_vote_id, issue_id, issue_we_vote_id):
+    @staticmethod
+    def delete_follow_campaignx(follow_campaignx_id, voter_we_vote_id, issue_id, issue_we_vote_id):
         """
         Remove any follow issue entries (we may have duplicate entries)
         """
@@ -312,25 +318,29 @@ class FollowIssueManager(models.Manager):
     def __unicode__(self):
         return "FollowIssueManager"
 
-    def toggle_on_voter_following_issue(self, voter_we_vote_id, issue_id, issue_we_vote_id):
+    @staticmethod
+    def toggle_on_voter_following_issue(voter_we_vote_id, issue_id, issue_we_vote_id):
         following_status = FOLLOWING
         follow_issue_manager = FollowIssueManager()
         return follow_issue_manager.toggle_following_issue(voter_we_vote_id, issue_id, issue_we_vote_id,
                                                            following_status)
 
-    def toggle_off_voter_following_issue(self, voter_we_vote_id, issue_id, issue_we_vote_id):
+    @staticmethod
+    def toggle_off_voter_following_issue(voter_we_vote_id, issue_id, issue_we_vote_id):
         following_status = STOP_FOLLOWING
         follow_issue_manager = FollowIssueManager()
         return follow_issue_manager.toggle_following_issue(voter_we_vote_id, issue_id, issue_we_vote_id,
                                                            following_status)
 
-    def toggle_ignore_voter_following_issue(self, voter_we_vote_id, issue_id, issue_we_vote_id):
+    @staticmethod
+    def toggle_ignore_voter_following_issue(voter_we_vote_id, issue_id, issue_we_vote_id):
         following_status = FOLLOW_IGNORE
         follow_issue_manager = FollowIssueManager()
         return follow_issue_manager.toggle_following_issue(voter_we_vote_id, issue_id, issue_we_vote_id,
                                                            following_status)
 
-    def toggle_following_issue(self, voter_we_vote_id, issue_id, issue_we_vote_id, following_status):
+    @staticmethod
+    def toggle_following_issue(voter_we_vote_id, issue_id, issue_we_vote_id, following_status):
         follow_issue_on_stage_found = False
         follow_issue_changed = False
         follow_issue_on_stage_id = 0
@@ -419,7 +429,8 @@ class FollowIssueManager(models.Manager):
         }
         return results
 
-    def retrieve_follow_issue(self, follow_issue_id, voter_we_vote_id, issue_id, issue_we_vote_id):
+    @staticmethod
+    def retrieve_follow_issue(follow_issue_id, voter_we_vote_id, issue_id, issue_we_vote_id):
         """
         follow_issue_id is the identifier for records stored in this table (it is NOT the issue_id)
         """
@@ -489,7 +500,8 @@ class FollowIssueManager(models.Manager):
         }
         return results
 
-    def delete_follow_issue(self, follow_issue_id, voter_we_vote_id, issue_id, issue_we_vote_id):
+    @staticmethod
+    def delete_follow_issue(follow_issue_id, voter_we_vote_id, issue_id, issue_we_vote_id):
         """
         Remove any follow issue entries (we may have duplicate entries)
         """
@@ -537,8 +549,11 @@ class FollowIssueManager(models.Manager):
         }
         return results
 
-    def update_or_create_suggested_issue_to_follow(self, viewer_voter_we_vote_id, issue_we_vote_id,
-                                                   from_twitter=False):
+    @staticmethod
+    def update_or_create_suggested_issue_to_follow(
+            viewer_voter_we_vote_id,
+            issue_we_vote_id,
+            from_twitter=False):
         """
         Create or update the SuggestedIssueToFollow table with suggested issues from twitter ids i follow
         or issue of my friends follow.
@@ -574,7 +589,8 @@ class FollowIssueManager(models.Manager):
         }
         return results
 
-    def retrieve_suggested_issue_to_follow_list(self, viewer_voter_we_vote_id, from_twitter=False):
+    @staticmethod
+    def retrieve_suggested_issue_to_follow_list(viewer_voter_we_vote_id, from_twitter=False):
         """
         Retrieving suggested issues who i follow from SuggestedOrganizationToFollow table.
         :param viewer_voter_we_vote_id:
@@ -620,7 +636,8 @@ class FollowMetricsManager(models.Manager):
     def __unicode__(self):
         return "FollowMetricsManager"
 
-    def fetch_organization_followers(self, organization_we_vote_id, google_civic_election_id=0):
+    @staticmethod
+    def fetch_organization_followers(organization_we_vote_id, google_civic_election_id=0):
         count_result = None
         try:
             count_query = FollowOrganization.objects.using('readonly').all()
@@ -646,8 +663,8 @@ class FollowMetricsManager(models.Manager):
             pass
         return count_result
 
+    @staticmethod
     def fetch_issues_followed(
-            self,
             voter_we_vote_id='',
             limit_to_one_date_as_integer=0,
             count_through_this_date_as_integer=0):
@@ -680,7 +697,8 @@ class FollowMetricsManager(models.Manager):
             pass
         return count_result
 
-    def fetch_voter_organizations_followed(self, voter_id):
+    @staticmethod
+    def fetch_voter_organizations_followed(voter_id):
         count_result = None
         try:
             count_query = FollowOrganization.objects.using('readonly').all()
@@ -697,7 +715,8 @@ class FollowIssueList(models.Model):
     A way to retrieve all the follow_issue information
     """
 
-    def fetch_follow_issue_count_by_issue_we_vote_id(self, issue_we_vote_id):
+    @staticmethod
+    def fetch_follow_issue_count_by_issue_we_vote_id(issue_we_vote_id):
         follow_issue_list_length = 0
         try:
             follow_issue_list_query = FollowIssue.objects.using('readonly').all()
@@ -710,7 +729,8 @@ class FollowIssueList(models.Model):
 
         return follow_issue_list_length
 
-    def fetch_follow_issue_count_by_voter_we_vote_id(self, voter_we_vote_id, following_status=None):
+    @staticmethod
+    def fetch_follow_issue_count_by_voter_we_vote_id(voter_we_vote_id, following_status=None):
         if following_status is None:
             following_status = FOLLOWING
         follow_issue_list_length = 0
@@ -725,7 +745,11 @@ class FollowIssueList(models.Model):
 
         return follow_issue_list_length
 
-    def retrieve_follow_issue_list_by_voter_we_vote_id(self, voter_we_vote_id, following_status=None, read_only=True):
+    @staticmethod
+    def retrieve_follow_issue_list_by_voter_we_vote_id(
+            voter_we_vote_id,
+            following_status=None,
+            read_only=True):
         """
         Retrieve a list of follow_issue entries for this voter
         :param voter_we_vote_id: 
@@ -756,7 +780,10 @@ class FollowIssueList(models.Model):
             follow_issue_list = {}
             return follow_issue_list
 
-    def retrieve_follow_issue_we_vote_id_list_by_voter_we_vote_id(self, voter_we_vote_id, following_status=None):
+    @staticmethod
+    def retrieve_follow_issue_we_vote_id_list_by_voter_we_vote_id(
+            voter_we_vote_id,
+            following_status=None):
         follow_issue_we_vote_id_list = []
         follow_issue_we_vote_id_list_result = []
         if following_status is None:
@@ -808,7 +835,8 @@ class FollowIssueList(models.Model):
         following_status = FOLLOWING
         return self.retrieve_follow_issue_list(issue_id, issue_we_vote_id, following_status)
 
-    def retrieve_follow_issue_list(self, issue_id, issue_we_vote_id, following_status):
+    @staticmethod
+    def retrieve_follow_issue_list(issue_id, issue_we_vote_id, following_status):
         follow_issue_list_found = False
         follow_issue_list = {}
         try:
@@ -887,7 +915,8 @@ class FollowOrganizationManager(models.Manager):
     def __unicode__(self):
         return "FollowOrganizationManager"
 
-    def fetch_number_of_organizations_followed(self, voter_id):
+    @staticmethod
+    def fetch_number_of_organizations_followed(voter_id):
         number_of_organizations_followed = 0
 
         try:
@@ -902,39 +931,60 @@ class FollowOrganizationManager(models.Manager):
 
         return number_of_organizations_followed
 
-    def toggle_on_voter_following_organization(self, voter_id, organization_id, organization_we_vote_id,
-                                               voter_linked_organization_we_vote_id,
-                                               auto_followed_from_twitter_suggestion=False):
+    @staticmethod
+    def toggle_on_voter_following_organization(
+            voter_id,
+            organization_id,
+            organization_we_vote_id,
+            voter_linked_organization_we_vote_id,
+            auto_followed_from_twitter_suggestion=False):
         following_status = FOLLOWING
         follow_organization_manager = FollowOrganizationManager()
         return follow_organization_manager.toggle_voter_following_organization(
             voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id, following_status,
             auto_followed_from_twitter_suggestion)
 
-    def toggle_off_voter_following_organization(self, voter_id, organization_id, organization_we_vote_id,
-                                                voter_linked_organization_we_vote_id):
+    @staticmethod
+    def toggle_off_voter_following_organization(
+            voter_id,
+            organization_id,
+            organization_we_vote_id,
+            voter_linked_organization_we_vote_id):
         following_status = STOP_FOLLOWING
         follow_organization_manager = FollowOrganizationManager()
         return follow_organization_manager.toggle_voter_following_organization(
             voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id, following_status)
 
-    def toggle_ignore_voter_following_organization(self, voter_id, organization_id, organization_we_vote_id,
-                                                   voter_linked_organization_we_vote_id):
+    @staticmethod
+    def toggle_ignore_voter_following_organization(
+            voter_id,
+            organization_id,
+            organization_we_vote_id,
+            voter_linked_organization_we_vote_id):
         following_status = FOLLOW_IGNORE
         follow_organization_manager = FollowOrganizationManager()
         return follow_organization_manager.toggle_voter_following_organization(
             voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id, following_status)
 
-    def toggle_off_voter_ignoring_organization(self, voter_id, organization_id, organization_we_vote_id,
-                                               voter_linked_organization_we_vote_id):
+    @staticmethod
+    def toggle_off_voter_ignoring_organization(
+            voter_id,
+            organization_id,
+            organization_we_vote_id,
+            voter_linked_organization_we_vote_id):
         following_status = STOP_FOLLOWING  # STOP_IGNORING (We don't actually store STOP_IGNORING in the database
         follow_organization_manager = FollowOrganizationManager()
         return follow_organization_manager.toggle_voter_following_organization(
             voter_id, organization_id, organization_we_vote_id, voter_linked_organization_we_vote_id, following_status)
 
-    def toggle_voter_following_organization(self, voter_id, organization_id, organization_we_vote_id,
-                                            voter_linked_organization_we_vote_id, following_status,
-                                            auto_followed_from_twitter_suggestion=False):
+    @staticmethod
+    def toggle_voter_following_organization(
+            voter_id,
+            organization_id,
+            organization_we_vote_id,
+            voter_linked_organization_we_vote_id,
+            following_status,
+            auto_followed_from_twitter_suggestion=False):
         status = ""
         # Does a follow_organization entry exist from this voter already exist?
         follow_organization_manager = FollowOrganizationManager()
@@ -1015,8 +1065,13 @@ class FollowOrganizationManager(models.Manager):
         }
         return results
 
-    def retrieve_follow_organization(self, follow_organization_id, voter_id, organization_id, organization_we_vote_id,
-                                     read_only=False):
+    @staticmethod
+    def retrieve_follow_organization(
+            follow_organization_id,
+            voter_id,
+            organization_id,
+            organization_we_vote_id,
+            read_only=False):
         """
         follow_organization_id is the identifier for records stored in this table (it is NOT the organization_id)
         """
@@ -1166,8 +1221,11 @@ class FollowOrganizationManager(models.Manager):
         return self.retrieve_follow_organization(
             0, voter_id, organization_id, organization_we_vote_id, read_only=read_only)
 
-    def update_or_create_suggested_organization_to_follow(self, viewer_voter_we_vote_id, organization_we_vote_id,
-                                                          from_twitter=False):
+    @staticmethod
+    def update_or_create_suggested_organization_to_follow(
+            viewer_voter_we_vote_id,
+            organization_we_vote_id,
+            from_twitter=False):
         """
         Create or update the SuggestedOrganizationToFollow table with suggested organizations from twitter ids i follow
         or organization of my friends follow.
@@ -1203,7 +1261,10 @@ class FollowOrganizationManager(models.Manager):
         }
         return results
 
-    def retrieve_suggested_organization_to_follow_list(self, viewer_voter_we_vote_id, from_twitter=False):
+    @staticmethod
+    def retrieve_suggested_organization_to_follow_list(
+            viewer_voter_we_vote_id,
+            from_twitter=False):
         """
         Retrieving suggested organizations who i follow from SuggestedOrganizationToFollow table.
         :param viewer_voter_we_vote_id:
@@ -1253,8 +1314,11 @@ class FollowOrganizationList(models.Model):
         follow_organization_list = self.retrieve_follow_organization_by_voter_id(voter_id)
         return len(follow_organization_list)
 
-    def retrieve_follow_organization_by_voter_id(self, voter_id, auto_followed_from_twitter_suggestion=False,
-                                                 read_only=False):
+    @staticmethod
+    def retrieve_follow_organization_by_voter_id(
+            voter_id,
+            auto_followed_from_twitter_suggestion=False,
+            read_only=False):
         # Retrieve a list of follow_organization entries for this voter
         follow_organization_list_found = False
         follow_organization_list = {}
@@ -1280,10 +1344,8 @@ class FollowOrganizationList(models.Model):
             follow_organization_list = {}
             return follow_organization_list
 
-    def delete_follow_organization_list_for_voter_id(
-            self,
-            voter_id=0,
-    ):
+    @staticmethod
+    def delete_follow_organization_list_for_voter_id(voter_id=0):
         number_deleted = 0
         success = True
         status = ''
@@ -1304,12 +1366,11 @@ class FollowOrganizationList(models.Model):
         }
         return results
 
+    @staticmethod
     def move_follow_organization_from_voter_id_to_new_voter_id(
-            self,
             from_voter_id=0,
             to_voter_id=0,
-            exclude_organization_we_vote_id_list=[],
-    ):
+            exclude_organization_we_vote_id_list=[]):
         success = True
         status = ''
         try:
@@ -1333,8 +1394,10 @@ class FollowOrganizationList(models.Model):
         }
         return results
 
-    def retrieve_follow_organization_by_own_organization_we_vote_id(self, organization_we_vote_id,
-                                                                    auto_followed_from_twitter_suggestion=False):
+    @staticmethod
+    def retrieve_follow_organization_by_own_organization_we_vote_id(
+            organization_we_vote_id,
+            auto_followed_from_twitter_suggestion=False):
         # Retrieve a list of followed organizations entries by voter_linked_organization_we_vote_id for voter guides
         follow_organization_list_found = False
         following_status = FOLLOWING
@@ -1358,7 +1421,8 @@ class FollowOrganizationList(models.Model):
             follow_organization_list = []
             return follow_organization_list
 
-    def retrieve_ignore_organization_by_voter_id(self, voter_id, read_only=False):
+    @staticmethod
+    def retrieve_ignore_organization_by_voter_id(voter_id, read_only=False):
         # Retrieve a list of follow_organization entries for this voter
         follow_organization_list_found = False
         following_status = FOLLOW_IGNORE
@@ -1381,8 +1445,8 @@ class FollowOrganizationList(models.Model):
             follow_organization_list = {}
             return follow_organization_list
 
+    @staticmethod
     def retrieve_follow_organization_by_voter_id_simple_id_array(
-            self,
             voter_id=0,
             return_we_vote_id=False,
             auto_followed_from_twitter_suggestion=False):
@@ -1401,8 +1465,10 @@ class FollowOrganizationList(models.Model):
 
         return follow_organization_list_simple_array
 
+    @staticmethod
     def retrieve_followed_organization_by_organization_we_vote_id_simple_id_array(
-            self, organization_we_vote_id, return_we_vote_id=False,
+            organization_we_vote_id,
+            return_we_vote_id=False,
             auto_followed_from_twitter_suggestion=False):
         follow_organization_list_manager = FollowOrganizationList()
         follow_organization_list = \
@@ -1417,8 +1483,10 @@ class FollowOrganizationList(models.Model):
                     follow_organization_list_simple_array.append(follow_organization.organization_id)
         return follow_organization_list_simple_array
 
+    @staticmethod
     def fetch_followers_list_by_organization_we_vote_id(
-            self, organization_we_vote_id, return_voter_we_vote_id=False):
+            organization_we_vote_id,
+            return_voter_we_vote_id=False):
         """
         Fetch a list of the voter_id or voter_we_vote_id of followers of organization_we_vote_id.
         :param organization_we_vote_id:
@@ -1442,8 +1510,10 @@ class FollowOrganizationList(models.Model):
                         followers_list_simple_array.append(follow_organization.voter_id)
         return followers_list_simple_array
 
+    @staticmethod
     def retrieve_followers_organization_by_organization_we_vote_id_simple_id_array(
-            self, organization_we_vote_id, return_we_vote_id=False,
+            organization_we_vote_id,
+            return_we_vote_id=False,
             auto_followed_from_twitter_suggestion=False):
         """
         Retrieve the organization_id (or organization_we_vote_id) for each voter that follows organization_we_vote_id.
@@ -1467,8 +1537,10 @@ class FollowOrganizationList(models.Model):
                     followers_organization_list_simple_array.append(follow_organization.organization_id)
         return followers_organization_list_simple_array
 
+    @staticmethod
     def retrieve_ignore_organization_by_voter_id_simple_id_array(
-            self, voter_id, return_we_vote_id=False):
+            voter_id,
+            return_we_vote_id=False):
         try:
             queryset = FollowOrganization.objects.using('readonly').all()
             queryset = queryset.filter(voter_id=voter_id)
@@ -1483,7 +1555,8 @@ class FollowOrganizationList(models.Model):
 
         return follow_organization_list_simple_array
 
-    def retrieve_follow_organization_by_organization_id(self, organization_id):
+    @staticmethod
+    def retrieve_follow_organization_by_organization_id(organization_id):
         # Retrieve a list of follow_organization entries for this organization
         follow_organization_list_found = False
         following_status = FOLLOWING
@@ -1503,7 +1576,8 @@ class FollowOrganizationList(models.Model):
             follow_organization_list = {}
             return follow_organization_list
 
-    def retrieve_follow_organization_by_organization_we_vote_id(self, organization_we_vote_id):
+    @staticmethod
+    def retrieve_follow_organization_by_organization_we_vote_id(organization_we_vote_id):
         # Retrieve a list of follow_organization entries for this organization
         follow_organization_list_found = False
         following_status = FOLLOWING
