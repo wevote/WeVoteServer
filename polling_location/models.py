@@ -144,8 +144,8 @@ class PollingLocationLogEntry(models.Model):
 
 class PollingLocationManager(models.Manager):
 
+    @staticmethod
     def create_polling_location_log_entry(
-            self,
             batch_process_id=None,
             google_civic_election_id=None,
             is_from_ballotpedia=None,
@@ -218,7 +218,8 @@ class PollingLocationManager(models.Manager):
         }
         return results
 
-    def calculate_number_of_map_points_to_retrieve_with_each_batch_chunk(self, state_code):
+    @staticmethod
+    def calculate_number_of_map_points_to_retrieve_with_each_batch_chunk(state_code):
         # For both REFRESH and RETRIEVE, see if the number of map points for this state exceed the "large" threshold
         retrieved_each_batch_chunk = MAP_POINTS_RETRIEVED_EACH_BATCH_CHUNK  # 125. Formerly 250 and 111
         if positive_value_exists(state_code):
@@ -237,9 +238,8 @@ class PollingLocationManager(models.Manager):
 
         return retrieved_each_batch_chunk
 
-    def fetch_polling_location_count(
-            self,
-            state_code=''):
+    @staticmethod
+    def fetch_polling_location_count(state_code=''):
         status = ''
         try:
             polling_location_queryset = PollingLocation.objects.using('readonly').all()
@@ -253,8 +253,8 @@ class PollingLocationManager(models.Manager):
 
         return polling_location_count
 
+    @staticmethod
     def update_or_create_polling_location(
-            self,
             we_vote_id,
             polling_location_id,
             location_name,
@@ -498,8 +498,8 @@ class PollingLocationManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def update_polling_location_row(
-            self,
             polling_location_we_vote_id='',
             update_values={}):
         polling_location = None
@@ -525,8 +525,8 @@ class PollingLocationManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def soft_delete_polling_location_log_entry_list(
-            self,
             kind_of_log_entry_list=[],
             polling_location_we_vote_id=''):
         status = ''
@@ -914,7 +914,11 @@ class PollingLocationManager(models.Manager):
             polling_location_we_vote_id=polling_location_we_vote_id,
             read_only=read_only)
 
-    def retrieve_polling_location_by_id(self, polling_location_id=0, polling_location_we_vote_id='', read_only=False):
+    @staticmethod
+    def retrieve_polling_location_by_id(
+            polling_location_id=0,
+            polling_location_we_vote_id='',
+            read_only=False):
         # Retrieve a polling_location entry
         polling_location = None
         status = ""
@@ -967,8 +971,8 @@ class PollingLocationManager(models.Manager):
             }
             return results
 
+    @staticmethod
     def retrieve_polling_location_log_entry_list(
-            self,
             batch_process_id=0,
             exclude_deleted=True,
             is_from_ctcl=False,
@@ -1043,7 +1047,11 @@ class PollingLocationManager(models.Manager):
             polling_location_log_entry_list = []
             return polling_location_log_entry_list
 
-    def retrieve_polling_locations_in_city_or_state(self, state='', city='', polling_location_zip=''):
+    @staticmethod
+    def retrieve_polling_locations_in_city_or_state(
+            state='',
+            city='',
+            polling_location_zip=''):
         # Retrieve a list of polling_location entries
         polling_location_list_found = False
         polling_location_list = []
@@ -1091,8 +1099,8 @@ class PollingLocationManager(models.Manager):
             }
             return results
 
+    @staticmethod
     def retrieve_duplicate_polling_locations(
-            self,
             polling_location_id='',
             state='',
             location_name='',
@@ -1183,8 +1191,8 @@ class PollingLocationManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_possible_duplicate_polling_locations(
-            self,
             polling_location_id,
             state,
             location_name,
