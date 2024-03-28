@@ -7,6 +7,7 @@ import re
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 import wikipedia  # https://pypi.python.org/pypi/wikipedia
+from bs4 import BeautifulSoup
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -780,3 +781,24 @@ def retrieve_candidate_images_from_wikipedia_page(candidate, wikipedia_page, for
 #         }
 #     }
 # }
+
+
+def retrieve_from_wikipedia_test(test_title):
+
+    response = {"success": True, "status": "", "result": ""}
+    #TODO look at wikipediaPage.images API
+    try:
+        test_page = wikipedia.page(title=test_title,pageid=None)
+        test_html = test_page.html()
+        tree = BeautifulSoup(test_html)
+        img_link = tree.find('img').get('src')
+        response["status"] += "SUCCESS "
+        response["result"] = img_link
+    except retrievePageError:
+        response["success"] = False
+        response["status"] += "WIKIPEDIA_RETRIEVE_IMAGE_ERROR "
+        response["result"] = "retrieve wikipedia page error"
+    
+    return response
+
+    
