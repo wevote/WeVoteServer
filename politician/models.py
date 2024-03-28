@@ -452,7 +452,8 @@ class PoliticianManager(models.Manager):
     def __init__(self):
         pass
 
-    def add_politician_position_sorting_dates_if_needed(self, position_object=None, politician_we_vote_id=''):
+    @staticmethod
+    def add_politician_position_sorting_dates_if_needed(position_object=None, politician_we_vote_id=''):
         """
         Search for any CandidateCampaign objects for this politician in the future
          Then find the latest election that candidate is running for, so we can get
@@ -537,7 +538,8 @@ class PoliticianManager(models.Manager):
             'success':                  success,
         }
 
-    def get_politician_from_politicianseofriendlypath_table(self, path):
+    @staticmethod
+    def get_politician_from_politicianseofriendlypath_table(path):
         try:
             path_query = PoliticianSEOFriendlyPath.objects.all()
             path_query = path_query.filter(final_pathname_string=path)
@@ -830,7 +832,8 @@ class PoliticianManager(models.Manager):
         }
         return results
 
-    def politician_photo_url(self, politician_id):
+    @staticmethod
+    def politician_photo_url(politician_id):
         politician_manager = PoliticianManager()
         results = politician_manager.retrieve_politician(politician_id=politician_id, read_only=True)
 
@@ -935,8 +938,8 @@ class PoliticianManager(models.Manager):
     def retrieve_politician_from_we_vote_id(self, politician_we_vote_id):
         return self.retrieve_politician(politician_we_vote_id=politician_we_vote_id)
 
+    @staticmethod
     def create_politician_name_filter(
-            self,
             filters=[],
             politician_name='',
             queryset=None,
@@ -1153,7 +1156,8 @@ class PoliticianManager(models.Manager):
         }
         return results
 
-    def search_politicians(self, name_search_terms=None):
+    @staticmethod
+    def search_politicians(name_search_terms=None):
         status = ""
         success = True
         politician_search_results_list = []
@@ -1344,8 +1348,8 @@ class PoliticianManager(models.Manager):
                 results['success'] = False
         return results
 
+    @staticmethod
     def update_or_create_politician(
-            self,
             updated_politician_values={},
             politician_we_vote_id='',
             vote_smart_id=0,
@@ -1448,14 +1452,16 @@ class PoliticianManager(models.Manager):
         }
         return results
 
-    def fetch_politician_id_from_we_vote_id(self, we_vote_id):
+    @staticmethod
+    def fetch_politician_id_from_we_vote_id(we_vote_id):
         politician_manager = PoliticianManager()
         results = politician_manager.retrieve_politician(politician_we_vote_id=we_vote_id, read_only=True)
         if results['success']:
             return results['politician_id']
         return 0
 
-    def fetch_politician_we_vote_id_from_id(self, politician_id):
+    @staticmethod
+    def fetch_politician_we_vote_id_from_id(politician_id):
         politician_manager = PoliticianManager()
         results = politician_manager.retrieve_politician(politician_id=politician_id, read_only=True)
         if results['success']:
@@ -1466,8 +1472,8 @@ class PoliticianManager(models.Manager):
         results = self.retrieve_politicians_are_not_duplicates_list(politician_we_vote_id)
         return results['politicians_are_not_duplicates_list_we_vote_ids']
 
+    @staticmethod
     def create_politician_row_entry(
-            self,
             politician_name='',
             politician_first_name='',
             politician_middle_name='',
@@ -1569,8 +1575,8 @@ class PoliticianManager(models.Manager):
             }
         return results
 
+    @staticmethod
     def update_politician_row_entry(
-            self,
             politician_name='',
             politician_first_name='',
             politician_middle_name='',
@@ -1680,8 +1686,8 @@ class PoliticianManager(models.Manager):
 #             politician_entry = Politician.objects.order_by('last_name')[0]
 #             politician_entry.delete()
 
+    @staticmethod
     def retrieve_politician_list(
-            self,
             limit_to_this_state_code="",
             politician_we_vote_id_list=[],
             read_only=False,
@@ -1733,8 +1739,8 @@ class PoliticianManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_politicians_from_non_unique_identifiers(
-            self,
             state_code='',
             twitter_handle_list=[],
             politician_name='',
@@ -1930,8 +1936,8 @@ class PoliticianManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def fetch_politicians_from_non_unique_identifiers_count(
-            self,
             state_code='',
             twitter_handle_list=[],
             politician_name='',
@@ -2030,8 +2036,8 @@ class PoliticianManager(models.Manager):
 
         return 0
 
+    @staticmethod
     def generate_seo_friendly_path(
-            self,
             base_pathname_string=None,
             politician_name=None,
             politician_we_vote_id='',
@@ -2055,7 +2061,8 @@ class PoliticianManager(models.Manager):
             state_code=state_code,
         )
 
-    def retrieve_politicians_are_not_duplicates_list(self, politician_we_vote_id, read_only=True):
+    @staticmethod
+    def retrieve_politicians_are_not_duplicates_list(politician_we_vote_id, read_only=True):
         """
         Get a list of other politician_we_vote_id's that are not duplicates
         :param politician_we_vote_id:
@@ -2168,7 +2175,8 @@ class PoliticianManager(models.Manager):
 
         return results_list, number_of_rows
 
-    def retrieve_politicians_with_misformatted_names(self, start=0, count=15, read_only=False):
+    @staticmethod
+    def retrieve_politicians_with_misformatted_names(start=0, count=15, read_only=False):
         """
         Get the first 15 records that have 3 capitalized letters in a row, as long as those letters
         are not 'III' i.e. King Henry III.  Also exclude the names where the word "WITHDRAWN" has been appended when
@@ -2204,8 +2212,8 @@ class PoliticianManager(models.Manager):
 
         return results_list, number_of_rows
 
+    @staticmethod
     def save_fresh_twitter_details_to_politician(
-            self,
             politician=None,
             politician_we_vote_id='',
             twitter_user=None):
@@ -2359,7 +2367,8 @@ class PoliticianManager(models.Manager):
         }
         return results
 
-    def update_or_create_politicians_are_not_duplicates(self, politician1_we_vote_id, politician2_we_vote_id):
+    @staticmethod
+    def update_or_create_politicians_are_not_duplicates(politician1_we_vote_id, politician2_we_vote_id):
         """
         Either update or create a politician entry.
         """
@@ -2404,7 +2413,8 @@ class PoliticianManager(models.Manager):
 class PoliticianSEOFriendlyPath(models.Model):
     objects = None
 
-    def __unicode__(self):
+    @staticmethod
+    def __unicode__():
         return "PoliticianSEOFriendlyPath"
 
     politician_we_vote_id = models.CharField(max_length=255, null=True)
