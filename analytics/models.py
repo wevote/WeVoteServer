@@ -188,6 +188,8 @@ class AnalyticsAction(models.Model):
             return
         except Election.DoesNotExist:
             return
+        except Exception as e:
+            return
         return election
 
     def organization(self):
@@ -1773,6 +1775,8 @@ class OrganizationElectionMetrics(models.Model):
             return
         except Election.DoesNotExist:
             return
+        except Exception as e:
+            return
         return election
 
     def organization(self):
@@ -1936,6 +1940,8 @@ class SitewideElectionMetrics(models.Model):
         except Election.MultipleObjectsReturned as e:
             return
         except Election.DoesNotExist:
+            return
+        except Exception as e:
             return
         return election
 

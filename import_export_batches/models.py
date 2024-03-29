@@ -5597,9 +5597,11 @@ class BatchProcess(models.Model):
         try:
             election = Election.objects.using('readonly').get(google_civic_election_id=self.google_civic_election_id)
         except Election.MultipleObjectsReturned as e:
-            logger.error("position.election Found multiple")
+            logger.error("BatchProcess.election Found multiple")
             return
         except Election.DoesNotExist:
+            return
+        except Exception as e:
             return
         return election
 
