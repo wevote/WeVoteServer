@@ -171,8 +171,10 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
 
             print("tweepy client get_user #1 in retrieve_twitter_user_info -- twitter_handle: ", twitter_handle)
             counter = create_detailed_counter_entry(
-                'get_user', 'retrieve_twitter_user_info', success,
-                {'username': twitter_handle, 'disambiguator': 1, 'text': parent})
+                kind_of_action='get_user',
+                function='retrieve_twitter_user_info',
+                success=success,
+                elements={'username': twitter_handle, 'disambiguator': 1, 'text': parent})
             twitter_user = client.get_user(
                 username=twitter_handle,
                 user_fields=[
@@ -321,7 +323,8 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
 
 def retrieve_twitter_user_info_from_handles_list(
         twitter_handles_list=None,
-        google_civic_api_counter_manager=None):
+        google_civic_api_counter_manager=None,
+        parent=""):
     success = True
     status = ""
     counter = None

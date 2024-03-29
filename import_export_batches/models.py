@@ -9,14 +9,13 @@ from django.db import models
 from django.db.models import Q
 from django.utils.http import urlquote
 from django.utils.timezone import localtime, now
-from election.models import ElectionManager
+from election.models import Election, ElectionManager
 from electoral_district.controllers import electoral_district_import_from_xml_data
 from exception.models import handle_exception
 import json
 import magic
 from organization.models import ORGANIZATION_TYPE_CHOICES, UNKNOWN, alphanumeric
 from party.controllers import retrieve_all_party_names_and_ids_api, party_import_from_xml_data
-
 from politician.models import GENDER_CHOICES, UNKNOWN
 import urllib
 from urllib.request import Request, urlopen
@@ -5591,6 +5590,18 @@ class BatchProcess(models.Model):
     use_ballotpedia = models.BooleanField(default=False)
     use_ctcl = models.BooleanField(default=False)
     use_vote_usa = models.BooleanField(default=False)
+
+    def election(self):
+        if not self.google_civic_election_id:
+            return
+        try:
+            election = Election.objects.using('readonly').get(google_civic_election_id=self.google_civic_election_id)
+        except Election.MultipleObjectsReturned as e:
+            logger.error("position.election Found multiple")
+            return
+        except Election.DoesNotExist:
+            return
+        return election
 
 
 class BatchProcessAnalyticsChunk(models.Model):
