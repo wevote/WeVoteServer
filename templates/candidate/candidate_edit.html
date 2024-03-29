@@ -431,37 +431,7 @@ th, td {
     </div>
 </div>
 
-<div class="row">
-<div class="col">
-<div class="form-group">
-    <label for="google_civic_candidate_name_id" class="pl-4 control-label">Candidate Name1 (for Google Civic matching)</label>
-    <div class="col">
-        <input type="text" name="google_civic_candidate_name" id="google_civic_candidate_name_id" class="form-control"
-               value="{% if candidate %}{{ candidate.google_civic_candidate_name|default_if_none:"" }}{% else %}{{ google_civic_candidate_name|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-
-<div class="col">
-<div class="form-group">
-    <label for="google_civic_candidate_name2_id" class="pl-4 control-label">Candidate Name2 (for Google Civic matching)</label>
-    <div class="col">
-        <input type="text" name="google_civic_candidate_name2" id="google_civic_candidate_name2_id" class="form-control"
-               value="{% if candidate %}{{ candidate.google_civic_candidate_name2|default_if_none:"" }}{% else %}{{ google_civic_candidate_name2|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-
-<div class="col">
-<div class="form-group">
-    <label for="google_civic_candidate_name3_id" class="pl-4 control-label">Candidate Name3 (for Google Civic matching)</label>
-    <div class="col">
-        <input type="text" name="google_civic_candidate_name3" id="google_civic_candidate_name3_id" class="form-control"
-               value="{% if candidate %}{{ candidate.google_civic_candidate_name3|default_if_none:"" }}{% else %}{{ google_civic_candidate_name3|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-</div>
+{% include "../form_inputs/three_form_group_stacked.html" with field_label_1="Candidate Name1 (for Google Civic matching)" field_label_2="Candidate Name2 (for Google Civic matching)" field_label_3="Candidate Name3 (for Google Civic matching)" %}
 
 <div class="row">
 <div class="col">
