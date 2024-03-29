@@ -9,11 +9,14 @@
 <h1>Fast Load Data From We Vote Master Servers</h1>
     <div style="padding: 25px 25px 75px 25px; font-size: 18px">
         If you are loading election data for the first time to your local postgres, press the "FAST LOAD" button below, and within about
-        twenty five minutes, it will have loaded and stored all the election data we have for all elections and for all the states.
-        <div style="padding-left: 33%; padding-top: 30px; padding-bottom: 30px">
-            {% comment %}<form name="retrieve_tables_form" method="get" action="{% url 'retrieve_tables:retrieve_sql_files_from_master_server'  %}">{% endcomment %}
-            <button id="fastLoadButton" type="submit" value="1" onClick="fastLoadClick()">FAST LOAD ALL OF THE ELECTION DATA, TO YOUR LOCAL POSTGRES</button>
-            {% comment %}</form>{% endcomment %}
+        twenty-five minutes, it will have loaded and stored all the election data we have for all elections and for all the states.
+
+        <input type="hidden" id="started_fast_update" name="started_fast_update" value="false">
+        <input type="hidden" id="started_fast_init" name="started_fast_init" value="true">
+        <div style="padding-left: 15%; padding-top: 30px; padding-bottom: 30px">
+            <button id="fastLoadButton" type="submit" value="1" onClick="fastLoadClick()">FAST LOAD ALL THE ELECTION DATA, TO YOUR LOCAL POSTGRES</button>
+            <progress id="progress" value="0" max="100" style="display: none"></progress>
+            <span id="completion"></span>
         </div>
         If you want to update to current election data, and don't care about overwriting your existing election data,
         "FAST LOAD" is all you need.  The Python console shows progress as the tables are loaded.
@@ -208,7 +211,7 @@
                 <input type="submit" value="Retrieve Map Points for the State of {{ state_code }}" style="color: #337ab7; margin-left: 12px">
 
                 <input type="hidden" id="google_civic_election_id" name="google_civic_election_id" value="{{ google_civic_election_id }}">
-                <input type="hidden" id="started_update" name="started_update" value="stop">
+                <input type="hidden" id="started_original_update" name="started_original_update" value="stop">
                 <input type="hidden" id="state_code" name="state_code" value="{{ state_code }}">
                 <br/>
                 <div id="realTimeStatusPollingLocations" style=" margin: 5px 0 0 30px;"></div>
@@ -276,13 +279,37 @@
 <p>POSITIONS_SYNC_URL: {{ positions_sync_url }}</p>
 <p>VOTER_GUIDES_SYNC_URL: {{ voter_guides_sync_url }}</p>
 
-
 <script>
+    function getDeviceId () {
+        let cookie =  document.cookie
+        const regex = /voter_device_id=(.*?);/gm;
+        const voterDeviceId = cookie.search(regex)
+        return voterDeviceId;
+    }
+
+    function getEstimatedCompletionTime (t0, current_record, total_records) {
+        if (current_record === 0) {
+            return 'Save off estimated duration is 40 seconds';
+        }
+        const currentDate = new Date();
+        const t1 = currentDate.getTime();
+        const dt = t1 - t0;
+        const percentComplete = current_record / total_records;
+        const totalEstimate = dt / percentComplete;
+        const timeLeftMs = Math.trunc(totalEstimate - dt);
+        const timeLeftSec = Math.trunc(timeLeftMs /1000);
+        const timeLeftMin = Math.trunc(timeLeftSec / 60);
+        const secRemainder = timeLeftSec - (60 * timeLeftMin)
+        return `Estimated completion in ${timeLeftMin} minutes ${secRemainder} seconds`;
+
+    }
+
     $(function() {
         $('#google_civic_election_id').change(function() {
             this.form.submit();
         });
     });
+
     $(function() {
         $('#state_code').change(function() {
             this.form.submit();
@@ -290,52 +317,113 @@
     });
 
     $('#retrieve_polling_locations').submit(function( event ) {
-         document.getElementById('started_update').value = 'start'
+         document.getElementById('started_original_update').value = 'start'
     });
+
+    // Inline code follows
+    let countCopy = 0.0;
+    let prog = 0;
+
+    const fastLoadButton = $("#fastLoadButton");
+    const progress = $("#progress");
+    const completion = $("#completion");
+    const startedFastUpdate = $('#started_fast_update');
+    const fastInit = $('#started_fast_init');
+    const currentDate = new Date();
+    const t0 = currentDate.getTime();
+    let saveOffDBComplete = false;
 
     setInterval(function () {
       let origin = new URL('{{request.build_absolute_uri}}').origin;
       let apiURL = origin + '/pl/import_status/';
-      let startedElement = document.getElementById('started_update');
-      let started = startedElement ? startedElement.value : "no";
+      let startedOriginalElement = document.getElementById('started_original_update');
+      let startedOriginal = startedOriginalElement ? startedOriginalElement.value : "no";
 
-      console.log("started ---- " + started);
-      if (started === 'start') {
+      console.log("started sync_data---- ", startedOriginal, startedFastUpdate.val());
+      if (startedOriginal === 'start') {
         $.ajax({
           type: "GET",
           url: apiURL,
           success: function (data) {
             let status = data.text;
-            console.log(status);
-            $('#realTimeStatusPollingLocations').html('<font color="LIMEGREEN">' + status +'</font>');
+            // console.log('realTimeStatusPollingLocations', status);
+            $('#realTimeStatusPollingLocations').html('<font color="LIMEGREEN">' + status + '</font>');
           },
         });
+      }
+      let apiUrlFastLoadStatus = origin + '/apis/v1/fastLoadStatusRetrieve?&initialize=' + fastInit.val();
+      if (fastInit.val() === 'true') {
+        fastInit.val("false")
+      }
+      if (startedFastUpdate.val() === 'true') {
+          let voterDeviceId = getDeviceId();
+          $.ajax({
+              type: "GET",
+              url: apiUrlFastLoadStatus,
+              headers: {'voter_device_id': voterDeviceId},
+              success: function (data) {
+                  // console.log('status from fastLoadStatusRetrieve', data.current_record, ' of ', data.total_records);
+                  if (fastLoadButton.html().startsWith('...')) {
+                      let newHtml = '';
+                      if (data.current_record === 0) {
+                          newHtml = '.... saving a copy of your local database to &apos;WeVoteServerDB-*.pgsql&apos; files ....';
+                          countCopy += 2.5;
+                          prog = Math.trunc(countCopy);
+                      } else {
+                          if (!saveOffDBComplete) {
+                              saveOffDBComplete = true;
+                              progress.val(prog);  // Reset the progress bar after saving off completes
+                          }
+                          const current = data.current_record.toLocaleString();
+                          const total = data.total_records.toLocaleString();
+                          newHtml = `.... loading table: '${data.table_name}', record ${current} of ${total} records`;
+                          prog = Math.trunc(((data.current_record / data.total_records) * 100) - 1.5);
+                      }
+                      // console.log('progress ======= ', prog);
+                      progress.val(prog);
+                      completion.text(getEstimatedCompletionTime(t0, data.current_record, data.total_records));
+                      fastLoadButton.html(newHtml);
+
+                  }
+              },
+              error: function (XMLHttpRequest, textStatus, errorThrown) {
+                  console.log('ERROR status from fastLoadStatusRetrieve', textStatus);
+              },
+          });
       }
     }, 1000);
 
     function fastLoadClick() {
-        console.log("ON CLICK fastLoadButton");
-        // http://localhost:8000/retrieve_tables/import/?
-        if (!$("#fastLoadButton").html().includes('.....')) {
-            $("#fastLoadButton").html("... Loading all data from the master server, this takes about 20 to 40 minutes ...")
-                .css('background-color', 'gold');
-            let origin = new URL('{{request.build_absolute_uri}}').origin;
-            let apiURL = origin + '/retrieve_tables/import/?';
-            $.ajax({
-              type: "GET",
-              url: apiURL,
-              success: function (data) {
-                let status = data.text;
-                console.log(status);
-                $("#fastLoadButton").html("DONE: Successfully loaded election data from the master server").css('background-color', 'MEDIUMSPRINGGREEN');
-              },
-              error: function(XMLHttpRequest, textStatus, errorThrown) {
-                $("#fastLoadButton").html("FAILURE: Look at the local Python console log to figure out what went wrong").css('background-color', 'LIGHTCORAL');
-              },
-            });
-        } else {
-            console.log("fastLoadButton clicked while loading");
-        }
+      console.log("ON CLICK fastLoadButton");
+      startedFastUpdate.val("true");
+
+      if (!fastLoadButton.html().includes('.....')) {
+        progress.css({'display': 'block', 'font-size': '38px'}).val(0);
+        fastLoadButton.html("... Loading all data from the master server, this takes about 20 to 40 minutes ...").css('background-color', '#FFFF00');
+
+        let origin = new URL('{{request.build_absolute_uri}}').origin;
+
+        const apiURL = origin + '/retrieve_tables/import/files/?';
+        $.ajax({
+          type: "GET",
+          url: apiURL,
+          headers: { 'voter_device_id': getDeviceId() },
+          success: function (data) {
+            let status = data.text;
+            // console.log(status);
+            fastLoadButton.html("DONE: Successfully loaded election data from the master server").css('background-color', 'MEDIUMSPRINGGREEN');
+            startedFastUpdate.val("false");
+            progress.val(100);
+            completion.text('Complete')
+            },
+          error: function(XMLHttpRequest, textStatus, errorThrown) {
+            fastLoadButton.html("FAILURE: Look at the local Python console log to figure out what went wrong").css('background-color', 'LIGHTCORAL');
+          },
+        });
+        fastInit.val("true");   // In case they want to run this twice without refreshing page
+      } else {
+         console.log("fastLoadButton clicked while loading");
+      }
     }
 </script>
 
