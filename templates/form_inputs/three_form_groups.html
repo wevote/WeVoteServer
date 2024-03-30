@@ -1,0 +1,33 @@
+<!-- A row of three form groups  -->
+
+<div class="row">
+	<div class="col">
+		<div class="row form-group">
+			<label for={{field_id_1}} class="pl-4 control-label">{{field_label_1}}</label>
+			<div class="col">
+				<input type="text" name={{field_name}} id={{field_id_1}} class="form-control"
+				value="{% if candidate %}{{ candidate.ballotpedia_candidate_name|default_if_none:"" }}{% else %}{{ ballotpedia_candidate_name|default_if_none:"" }}{% endif %}" />
+			</div>
+		</div>
+	</div>
+
+	<div class="col">
+		<div class="row form-group">
+			<label for={{field_id_2}} class="control-label">{{field_label_2}}</label>
+			<div class="col">
+				<input type="text" name={{field_name_2}} id="google_civic_candidate_name2_id" class="form-control"
+				value="{% if candidate %}{{ candidate.state_code|default_if_none:"" }}{% else %}{{ state_code|default_if_none:"" }}{% endif %}" />
+			</div>
+		</div>
+	</div>
+
+	<div class="col">
+		<div class="row form-group">
+			<label for={{field_id_3}} class="control-label">{{field_label_3}}</label>
+			<div class="col">
+				<input type="text" name={{field_name_3}} id={{field_id_3}} class="form-control"
+				value="{% if candidate %}{{ candidate.party|default_if_none:"" }}{% else %}{{ party|default_if_none:"" }}{% endif %}" />
+			</div>
+		</div>
+	</div>
+</div>

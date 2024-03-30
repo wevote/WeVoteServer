@@ -1,12 +1,12 @@
-<!-- Three form groups  -->
+<!-- A row of three form groups  -->
 <!-- Label stacked on top of input  -->
 
 <div class="row">
 	<div class="col">
 		<div class="form-group">
-			<label for="google_civic_candidate_name_id" class="pl-4 control-label">{{field_label_1}}</label>
+			<label for={{field_id_1}} class="pl-4 control-label">{{field_label_1}}</label>
 			<div class="col">
-				<input type="text" name="google_civic_candidate_name" id="google_civic_candidate_name_id" class="form-control"
+				<input type="text" name={{field_name}} id={{field_id_1}} class="form-control"
 					value="{% if candidate %}{{ candidate.google_civic_candidate_name|default_if_none:"" }}{% else %}{{ google_civic_candidate_name|default_if_none:"" }}{% endif %}" />
 			</div>
 		</div>
@@ -14,9 +14,9 @@
 
 	<div class="col">
 		<div class="form-group">
-			<label for="google_civic_candidate_name2_id" class="pl-4 control-label">{{field_label_2}}</label>
+			<label for={{field_id_2}} class="pl-4 control-label">{{field_label_2}}</label>
 			<div class="col">
-				<input type="text" name="google_civic_candidate_name2" id="google_civic_candidate_name2_id" class="form-control"
+				<input type="text" name={{field_name_2}} id="google_civic_candidate_name2_id" class="form-control"
 					value="{% if candidate %}{{ candidate.google_civic_candidate_name2|default_if_none:"" }}{% else %}{{ google_civic_candidate_name2|default_if_none:"" }}{% endif %}" />
 			</div>
 		</div>
@@ -24,9 +24,9 @@
 
 	<div class="col">
 		<div class="form-group">
-			<label for="google_civic_candidate_name3_id" class="pl-4 control-label">{{field_label_3}}</label>
+			<label for={{field_id_3}} class="pl-4 control-label">{{field_label_3}}</label>
 			<div class="col">
-				<input type="text" name="google_civic_candidate_name3" id="google_civic_candidate_name3_id" class="form-control"
+				<input type="text" name={{field_name_3}} id={{field_id_3}} class="form-control"
 					value="{% if candidate %}{{ candidate.google_civic_candidate_name3|default_if_none:"" }}{% else %}{{ google_civic_candidate_name3|default_if_none:"" }}{% endif %}" />
 			</div>
 		</div>
