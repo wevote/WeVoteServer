@@ -2350,23 +2350,25 @@ def refresh_twitter_candidate_details_for_election(google_civic_election_id, sta
             # logger.info("refresh_twitter_candidate_details_for_election: " + candidate.candidate_name)
             # Extract twitter_handle from google_civic_election information
             candidate_save_needed = False
-            if positive_value_exists(candidate.twitter_url) \
-                    and not positive_value_exists(candidate.candidate_twitter_handle):
-                # If we got a twitter_url from Google Civic, and we haven't already stored a twitter handle, move it
-                candidate.candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate.twitter_url)
-                candidate_save_needed = True
-            if positive_value_exists(candidate.candidate_twitter_handle) \
-                    and not positive_value_exists(candidate.twitter_url):
-                candidate.twitter_url = 'https://twitter.com/' + candidate.candidate_twitter_handle
-                # logger.info(
-                #     'refresh_twitter_candidate_details_for_election, twitter_url set to ' + candidate.twitter_url)
-                candidate_save_needed = True
-            if positive_value_exists(candidate.twitter_url) \
-                    and not positive_value_exists(candidate.candidate_url):
-                candidate.candidate_url = candidate.twitter_url
-                # logger.info(
-                #     'refresh_twitter_candidate_details_for_election, candidate_url set to ' + candidate.candidate_url)
-                candidate_save_needed = True
+            if not positive_value_exists(candidate.candidate_twitter_updates_failing):
+                if positive_value_exists(candidate.twitter_url) \
+                        and not positive_value_exists(candidate.candidate_twitter_handle):
+                    # If we got a twitter_url from Google Civic, and we haven't already stored a twitter handle, move it
+                    candidate.candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate.twitter_url)
+                    candidate_save_needed = True
+                if positive_value_exists(candidate.candidate_twitter_handle) \
+                        and not positive_value_exists(candidate.twitter_url):
+                    candidate.twitter_url = 'https://twitter.com/' + candidate.candidate_twitter_handle
+                    # logger.info(
+                    #     'refresh_twitter_candidate_details_for_election, twitter_url set to ' + candidate.twitter_url)
+                    candidate_save_needed = True
+                if positive_value_exists(candidate.twitter_url) \
+                        and not positive_value_exists(candidate.candidate_url):
+                    candidate.candidate_url = candidate.twitter_url
+                    # logger.info(
+                    #     'refresh_twitter_candidate_details_for_election, candidate_url set to ' + \
+                    #     candidate.candidate_url)
+                    candidate_save_needed = True
 
             if candidate_save_needed:
                 candidate.save()
