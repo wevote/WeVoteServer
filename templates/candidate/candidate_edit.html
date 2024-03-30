@@ -431,34 +431,17 @@ th, td {
     </div>
 </div>
 
-{% include "../form_inputs/three_form_groups_stacked.html" with field_label_1="Candidate Name1 (for Google Civic matching)" field_label_2="Candidate Name2 (for Google Civic matching)" field_label_3="Candidate Name3 (for Google Civic matching)" field_name_1="google_civic_candidate_name"  field_name_2="google_civic_candidate_name2" field_name_3="google_civic_candidate_name3" field_id_1="google_civic_candidate_name_id" field_id_2="google_civic_candidate_name2_id" field_id_3="google_civic_candidate_name3_id" %}
+{% include "../form_inputs/three_form_groups_stacked.html" with field_label_1="Candidate Name1 (for Google Civic matching)" field_label_2="Candidate Name2 (for Google Civic matching)" field_label_3="Candidate Name3 (for Google Civic matching)" field_name_1="google_civic_candidate_name"  field_name_2="google_civic_candidate_name2" field_name_3="google_civic_candidate_name3" field_id_1="google_civic_candidate_name_id" field_id_2="google_civic_candidate_name2_id" field_id_3="google_civic_candidate_name3_id" value_1="" value_2="" value_3="" %}
 
 {% include "../form_inputs/three_form_groups.html" with field_label_1="Candidate Name (from Ballotpedia)" field_label_2="Candidate State Code" field_label_3="Candidate Party" field_name_1="ballotpedia_candidate_name" field_name_2="state_code" field_name_3="party" field_id_1="ballotpedia_candidate_name_id" field_id_2="state_code_id" field_id_3="party_id" value_1="" value_2="" value_3="" %}
 
-
-<div class="row">
-<div class="col">
-<div class="row form-group">
-    <label for="vote_usa_politician_id_id" class="pl-4 control-label">Vote USA Politician Id</label>
-    <div class="col">
-        <input type="text" name="vote_usa_politician_id" id="vote_usa_politician_id_id" class="form-control"
-               value="{% if candidate %}{{ candidate.vote_usa_politician_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-
-<div class="col">
-<div class="row form-group">
-    <label for="vote_usa_office_id_id" class="control-label">Vote USA Office Id</label>
-    <div class="col">
-        <input type="text" name="vote_usa_office_id" id="vote_usa_office_id_id" class="form-control"
-               value="{% if candidate %}{{ candidate.vote_usa_office_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-</div>
+{% include "../form_inputs/two_form_groups.html" with field_label_1="Vote USA Politician Id" field_label_2="Vote USA Office Id" field_name_1="vote_usa_politician_id" field_name_2="vote_usa_office_id" field_id_1="vote_usa_politician_id_id" field_id_2="vote_usa_office_id_id" value_1="" value_2="" %}
 
 <a name="twitter_link_possibility_list" />
+
+{% include "../form_inputs/three_form_groups.html" with field_label_1="Twitter Handle" field_label_2="Twitter Handle 2" field_label_3="Twitter Handle 3" field_name_1="ballotpedia_candidate_name" field_name_2="state_code" field_name_3="party" field_id_1="ballotpedia_candidate_name_id" field_id_2="state_code_id" field_id_3="party_id" value_1="" value_2="" value_3="" %}
+
+
 
 <div class="row">
 <div class="col">
