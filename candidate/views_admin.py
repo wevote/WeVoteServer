@@ -2017,6 +2017,13 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
             'google_search_possibility_list':   google_search_possibility_list,
             'google_search_possibility_total_count':    google_search_possibility_total_count,
             'google_civic_candidate_name':      google_civic_candidate_name,
+            'google_civic_candidate_name_dict':              
+            {
+                'label': 'Candidate Name',
+                'id': 'google_civic_candidate_name_id',
+                'name': 'google_civic_candidate_name',
+                'value': google_civic_candidate_name if google_civic_candidate_name else candidate_on_stage.google_civic_candidate_name
+			},
             'google_civic_candidate_name2':     google_civic_candidate_name2,
             'google_civic_candidate_name3':     google_civic_candidate_name3,
             'instagram_handle':                 instagram_handle,
