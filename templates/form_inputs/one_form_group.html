@@ -1,4 +1,4 @@
-<!-- A row of two form groups -->
+<!-- A row of one form group -->
 
 <div class="row" style="background-color: lime;">
 	<div class="col">
@@ -7,16 +7,6 @@
 			<div class="col">
 				<input type="text" name="{{field_dict_1.name}}" id="{{field_dict_1.id}}" class="form-control"
 					value='{{ field_dict_1.value|default_if_none:"" }}' />
-			</div>
-		</div>
-	</div>
-
-	<div class="col">
-		<div class="row form-group">
-			<label for="{{field_dict_2.id}}" class="control-label">{{field_dict_2.label}}</label>
-			<div class="col">
-				<input type="text" name="{{field_dict_2.name}}" id="{{field_dict_2.id}}" class="form-control"
-					value='{{ field_dict_2.value|default_if_none:"" }}' />
 			</div>
 		</div>
 	</div>

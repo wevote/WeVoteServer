@@ -2035,7 +2035,21 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
 			},
             'candidate':                        candidate_on_stage,
             'candidate_email':                  candidate_email,
+            'candidate_email_dict':              
+            {
+                'label': 'Candidate Email',
+                'id': 'candidate_email_id',
+                'name': 'candidate_email',
+                'value': candidate_email if candidate_email else candidate_on_stage.candidate_email
+			},
             'candidate_phone':                  candidate_phone,
+            'candidate_phone_dict':              
+            {
+                'label': 'Candidate Phone',
+                'id': 'candidate_phone_id',
+                'name': 'candidate_phone',
+                'value': candidate_phone if candidate_phone else candidate_on_stage.candidate_phone
+			},
             'candidate_name':                   candidate_name,
             'candidate_position_list':          candidate_position_list,
             'candidate_to_office_link_list':    candidate_to_office_link_list,
@@ -2046,6 +2060,20 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
             'candidate_contact_form_url':       candidate_contact_form_url,
             'change_log_list':                  change_log_list,
             # 'contest_office_we_vote_id':        contest_office_we_vote_id,
+            'contest_office_name_dict':              
+            {
+                'label': 'Contest Office Name (Cached)',
+                'id': 'contest_office_name_id',
+                'name': 'contest_office_name',
+                'value': candidate_on_stage.contest_office_name
+			},
+            'district_name_dict':              
+            {
+                'label': 'District Name (Cached)',
+                'id': 'district_name_id',
+                'name': 'district_name',
+                'value': candidate_on_stage.district_name
+			},
             'do_not_display_on_ballot':         do_not_display_on_ballot,
             'facebook_url':                     facebook_url,
             # 'google_civic_election_id':         google_civic_election_id,
@@ -2076,6 +2104,13 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
                 'value': google_civic_candidate_name3 if google_civic_candidate_name3 else candidate_on_stage.google_civic_candidate_name3
 			},
             'instagram_handle':                 instagram_handle,
+            'linkedin_url_dict':              
+            {
+                'label': 'LinkedIn URL',
+                'id': 'linkedin_url_id',
+                'name': 'linkedin_url',
+                'value': candidate_on_stage.linkedin_url
+			},
             'maplight_id':                      maplight_id,
             'messages_on_stage':                messages_on_stage,
             # 'office_list':                      contest_office_list,
@@ -2120,6 +2155,13 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
             'web_app_root_url':                 web_app_root_url,
             'withdrawal_date':                  withdrawal_date,
             'withdrawn_from_election':          withdrawn_from_election,
+            'youtube_url_dict':              
+            {
+                'label': 'YouTube URL',
+                'id': 'youtube_url_id',
+                'name': 'youtube_url',
+                'value': candidate_on_stage.youtube_url
+			},
         }
     else:
         template_values = {
