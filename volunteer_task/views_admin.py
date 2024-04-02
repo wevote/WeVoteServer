@@ -125,7 +125,7 @@ def performance_list_view(request):
     try:
         voter_display_name_list_modified = \
             sorted(voter_display_name_list,
-                   key=lambda x: convert_to_int(performance_display_dict[x]['volunteer_task_total']))
+                   key=lambda x: (-convert_to_int(performance_display_dict[x]['volunteer_task_total'])))
     except Exception as e:
         voter_display_name_list_modified = voter_display_name_list
 

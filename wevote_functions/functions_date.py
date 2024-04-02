@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 import datetime
-from functions import positive_value_exists, convert_to_int, convert_to_str
+from wevote_functions.functions import positive_value_exists, convert_to_int, convert_to_str
 from math import log10
 from django.utils.timezone import localtime, now
 from nameparser.config import CONSTANTS
