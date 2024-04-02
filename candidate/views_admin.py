@@ -2136,7 +2136,6 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
 			},
             'twitter_link_possibility_list':    twitter_link_possibility_list,
             'vote_smart_id':                    vote_smart_id,
-            # note sure about these two below
             'vote_usa_office_dict':              
             {
                 'label': 'Vote USA Office Id',
