@@ -1,22 +1,22 @@
-<!-- A row of two form groups  -->
+<!-- A row of three form groups  -->
 
-<div class="row" style="background-color: yellow;">
+<div class="row" style="background-color: lime;">
 	<div class="col">
 		<div class="row form-group">
-			<label for={{field_id_1}} class="pl-4 control-label">{{field_label_1}}</label>
+			<label for="{{field_dict_1.id}}" class="pl-4 control-label">{{field_dict_1.label}}</label>
 			<div class="col">
-				<input type="text" name={{field_name}} id={{field_id_1}} class="form-control"
-				value="{% if candidate %}{{ candidate.ballotpedia_candidate_name|default_if_none:"" }}{% else %}{{ ballotpedia_candidate_name|default_if_none:"" }}{% endif %}" />
+				<input type="text" name="{{field_dict_1.name}}" id="{{field_dict_1.id}}" class="form-control"
+					value='{{ field_dict_1.value|default_if_none:"" }}' />
 			</div>
 		</div>
 	</div>
 
 	<div class="col">
 		<div class="row form-group">
-			<label for={{field_id_2}} class="control-label">{{field_label_2}}</label>
+			<label for="{{field_dict_2.id}}" class="pl-4 control-label">{{field_dict_2.label}}</label>
 			<div class="col">
-				<input type="text" name={{field_name_2}} id="google_civic_candidate_name2_id" class="form-control"
-				value="{% if candidate %}{{ candidate.state_code|default_if_none:"" }}{% else %}{{ state_code|default_if_none:"" }}{% endif %}" />
+				<input type="text" name="{{field_dict_2.name}}" id="{{field_dict_2.id}}" class="form-control"
+					value='{{ field_dict_2.value|default_if_none:"" }}' />
 			</div>
 		</div>
 	</div>

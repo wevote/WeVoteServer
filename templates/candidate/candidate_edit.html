@@ -431,16 +431,13 @@ th, td {
     </div>
 </div>
 
-{% include "../form_inputs/three_form_groups_stacked.html" with field_dict_1=google_civic_candidate_name_dict field_dict_2=google_civic_candidate_name_dict field_dict_3=google_civic_candidate_name_dict %}
+{% include "../form_inputs/three_form_groups_stacked.html" with field_dict_1=google_civic_candidate_name_dict field_dict_2=google_civic_candidate_name2_dict field_dict_3=google_civic_candidate_name3_dict %}
 
-{% include "../form_inputs/three_form_groups.html" with field_label_1="Candidate Name (from Ballotpedia)" field_label_2="Candidate State Code" field_label_3="Candidate Party" field_name_1="ballotpedia_candidate_name" field_name_2="state_code" field_name_3="party" field_id_1="ballotpedia_candidate_name_id" field_id_2="state_code_id" field_id_3="party_id" value_1="" value_2="" value_3="" %}
+{% include "../form_inputs/three_form_groups.html" with field_dict_1=ballotpedia_candidate_name_dict field_dict_2=state_code_dict field_dict_3=party_dict %}
 
-{% include "../form_inputs/two_form_groups.html" with field_label_1="Vote USA Politician Id" field_label_2="Vote USA Office Id" field_name_1="vote_usa_politician_id" field_name_2="vote_usa_office_id" field_id_1="vote_usa_politician_id_id" field_id_2="vote_usa_office_id_id" value_1="" value_2="" %}
+{% include "../form_inputs/two_form_groups.html" with field_dict_1=vote_usa_politician_dict field_dict_2=vote_usa_office_dict %}
 
 <a name="twitter_link_possibility_list" />
-
-{% include "../form_inputs/three_form_groups.html" with field_label_1="Twitter Handle" field_label_2="Twitter Handle 2" field_label_3="Twitter Handle 3" field_name_1="ballotpedia_candidate_name" field_name_2="state_code" field_name_3="party" field_id_1="ballotpedia_candidate_name_id" field_id_2="state_code_id" field_id_3="party_id" value_1="" value_2="" value_3="" %}
-
 
 
 <div class="row">
