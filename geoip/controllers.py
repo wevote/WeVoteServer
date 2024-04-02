@@ -23,7 +23,7 @@ def voter_location_retrieve_from_ip_for_api(request, ip_address=''):
     :return:
     """
     x_forwarded_for = request.META.get('X-Forwarded-For')
-    http_x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    http_x_forwarded_for = request.headers.get('x-forwarded-for')
 
     valid_ip_address = None
     value = ip_address

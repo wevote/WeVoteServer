@@ -55,7 +55,7 @@ def shared_item_retrieve_view(request):  # sharedItemRetrieve
     destination_full_url = request.GET.get('destination_full_url', '')
     shared_item_code = request.GET.get('shared_item_code', '')
     shared_item_clicked = positive_value_exists(request.GET.get('shared_item_clicked', False))
-    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_string = request.headers['user-agent']
     user_agent_object = get_user_agent(request)
     json_data = shared_item_retrieve_for_api(
         voter_device_id=voter_device_id,

@@ -94,6 +94,7 @@ SECRET_KEY = get_environment_variable("SECRET_KEY")
 # Comment out when running Heroku
 ALLOWED_HOSTS = [
     'localhost',
+    'wevotedeveloper.com',
     '127.0.0.1'
 ]
 
@@ -172,7 +173,7 @@ INSTALLED_APPS = (
     'representative',
     'rest_framework',    # Jan 2019, looks abandoned
     'retrieve_tables',
-    'scheduled_tasks',
+    # 'scheduled_tasks',  # April 2024, Disabled for Python 11, could be revived
     'search',
     'share',
     'sms',
@@ -192,7 +193,7 @@ INSTALLED_APPS = (
 MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'corsheaders.middleware.CorsPostCsrfMiddleware',
+    # 'corsheaders.middleware.CorsPostCsrfMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -240,7 +241,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'config.wsgi.application'
+# WSGI_APPLICATION = 'config.wsgi.application'
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
@@ -271,7 +272,6 @@ MEDIA_ROOT = os.path.join(PROJECT_PATH, "static", "media")  # Django Cookbook
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'        # Added for Django 3.2, June 2021
 
 # We want to default to cookie storage of messages so we don't overload our app servers with session data
-# MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'
 MESSAGE_STORAGE = 'django.contrib.messages.storage.fallback.FallbackStorage'
 
 # Default settings described here: http://django-bootstrap3.readthedocs.org/en/latest/settings.html
@@ -339,8 +339,9 @@ CORS_ORIGIN_ALLOW_ALL = True  # CORS_ORIGIN_ALLOW_ALL: if True, the whitelist wi
 CORS_ALLOW_CREDENTIALS = True
 # specify whether to replace the HTTP_REFERER header if CORS checks pass so that CSRF django middleware checks
 # will work with https
-CORS_REPLACE_HTTPS_REFERER = True
-CSRF_TRUSTED_ORIGINS = ['api.wevoteusa.org', 'wevotedeveloper.com']
+# April 2024: 4.0.0 (2023-05-12) drops the following two settings
+# CORS_REPLACE_HTTPS_REFERER = True
+# CSRF_TRUSTED_ORIGINS = ['http://api.wevoteusa.org', 'http://wevotedeveloper.com']
 DATA_UPLOAD_MAX_MEMORY_SIZE = 6000000
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 4096
 

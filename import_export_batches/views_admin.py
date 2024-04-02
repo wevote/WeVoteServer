@@ -35,7 +35,7 @@ from django.utils.timezone import now
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
-from django.utils.http import urlquote
+from urllib.parse import quote
 from election.models import Election, ElectionManager
 from exception.models import handle_exception
 from import_export_ballotpedia.controllers import groom_ballotpedia_data_for_processing, \
@@ -214,7 +214,7 @@ def batch_list_process_view(request):
 
     kind_of_batch = request.POST.get('kind_of_batch', '')
     batch_uri = request.POST.get('batch_uri', '')
-    batch_uri_encoded = urlquote(batch_uri) if positive_value_exists(batch_uri) else ""
+    batch_uri_encoded = quote(batch_uri) if positive_value_exists(batch_uri) else ""
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     polling_location_we_vote_id = request.POST.get('polling_location_we_vote_id', "")
     polling_location_city = request.POST.get('polling_location_city', '')
@@ -1445,7 +1445,7 @@ def batch_set_list_process_view(request):
     show_status_statistics = positive_value_exists(show_status_statistics)
     state_code = request.POST.get('state_code', '')
 
-    batch_uri_encoded = urlquote(batch_uri) if positive_value_exists(batch_uri) else ""
+    batch_uri_encoded = quote(batch_uri) if positive_value_exists(batch_uri) else ""
     batch_file = None
 
     # Store contents of spreadsheet?

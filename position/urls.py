@@ -2,8 +2,9 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from django.conf.urls import re_path
-from . import views, views_admin
+from django.urls import re_path
+
+from . import views_admin
 
 urlpatterns = [
     # views_admin.py

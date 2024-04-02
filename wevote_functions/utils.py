@@ -7,22 +7,20 @@ from django.db import connection
 from django.utils.timezone import localtime
 
 
-class FakeFirefoxURLopener(urllib.request.FancyURLopener):
-    version = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) ' \
-              'Chrome/120.0.0.0 Safari/537.36'
+def staticUserAgent():
+    # Updated March 26, 2024
+    user_agent_chrome = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) "
+                   "Chrome/123.0.0.0 Safari/537.36")
+    headers = { 'User-Agent': user_agent_chrome }
+    return headers
+
 
 def scrape_url(site_url, with_soup=True):
-    urllib._urlopener = FakeFirefoxURLopener()
-    headers = {
-        'User-Agent':
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 ' 
-            'Safari/537.36',
-    }
     all_html_found = False
     all_html = []
     status = ''
     try:
-        request = urllib.request.Request(site_url, None, headers)
+        request = urllib.request.Request(site_url, None, staticUserAgent())
         page = urllib.request.urlopen(request, timeout=5)
         all_html_raw = page.read()
         all_html = all_html_raw.decode("utf8")
