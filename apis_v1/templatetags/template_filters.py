@@ -17,6 +17,21 @@ def convert_to_int(value):
     return functions.convert_to_int(value)
 
 
+@register.filter(name="display_nothing_if_zero")
+def display_nothing_if_zero(value):
+    value_integer = functions.convert_to_int(value)
+    if functions.positive_value_exists(value_integer):
+        return value
+    return ''
+
+
+@register.filter(name="get_date_from_date_as_integer")
+def get_date_from_date_as_integer(value):
+    value_integer = functions.convert_to_int(value)
+    if functions.positive_value_exists(value_integer):
+        return functions.convert_date_as_integer_to_date(value_integer)
+    return value
+
 @register.filter(name="get_value_from_dict")
 def get_value_from_dict(dict_variable, dict_key):
     return dict_variable[dict_key]
