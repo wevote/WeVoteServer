@@ -733,47 +733,7 @@ th, td {
     </div>
 </div>
 
-<div class="row">
-<div class="col">
-<div class="row form-group">
-    <label for="ballotpedia_race_id_id" class="pl-4 control-label">Ballotpedia Race Id</label>
-    <div class="col">
-        <input type="text" name="ballotpedia_race_id" id="ballotpedia_race_id_id" class="form-control"
-               value="{% if candidate %}{{ candidate.ballotpedia_race_id|default_if_none:"" }}{% else %}{{ ballotpedia_race_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-
-<div class="col">
-<div class="row form-group">
-    <label for="ballotpedia_office_id_id" class="control-label">Ballotpedia Office Held Id</label>
-    <div class="col">
-        <input type="text" name="ballotpedia_office_id" id="ballotpedia_office_id_id" class="form-control"
-               value="{% if candidate %}{{ candidate.ballotpedia_office_id|default_if_none:"" }}{% else %}{{ ballotpedia_office_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-
-<div class="col">
-<div class="row form-group">
-    <label for="ballotpedia_candidate_id_id" class="control-label">Ballotpedia Candidate Id</label>
-    <div class="col">
-        <input type="text" name="ballotpedia_candidate_id" id="ballotpedia_candidate_id_id" class="form-control"
-               value="{% if candidate %}{{ candidate.ballotpedia_candidate_id|default_if_none:"" }}{% else %}{{ ballotpedia_candidate_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-
-<div class="col">
-<div class="row form-group">
-    <label for="ballotpedia_person_id_id" class="control-label">Ballotpedia Person Id</label>
-    <div class="col">
-        <input type="text" name="ballotpedia_person_id" id="ballotpedia_person_id_id" class="form-control"
-               value="{% if candidate %}{{ candidate.ballotpedia_person_id|default_if_none:"" }}{% else %}{{ ballotpedia_person_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-</div>
+{% include "../form_inputs/four_form_groups.html" with field_dict_1=ballotpedia_race_id_dict field_dict_2=ballotpedia_office_id_dict field_dict_3=ballotpedia_candidate_id_dict field_dict_4=ballotpedia_person_id_dict %}
 
 <div class="row">
 <div class="col">

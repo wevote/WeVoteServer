@@ -30,4 +30,14 @@
 			</div>
 		</div>
 	</div>
+
+	<div class="col">
+		<div class="row form-group">
+			<label for="{{field_dict_4.id}}" class="control-label">{{field_dict_4.label}}</label>
+			<div class="col">
+				<input type="text" name="{{field_dict_4.name}}" id="{{field_dict_4.id}}" class="form-control"
+					value='{{ field_dict_4.value|default_if_none:"" }}' />
+			</div>
+		</div>
+	</div>
 </div>
