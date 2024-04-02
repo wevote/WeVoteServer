@@ -342,7 +342,6 @@ class Representative(models.Model):
     year_in_office_2026 = models.BooleanField(default=None, null=True)
     youtube_url = models.TextField(blank=True, null=True)
 
-
     def office_held(self):
         try:
             office_held = OfficeHeld.objects.get(id=self.office_held_id)
@@ -491,9 +490,9 @@ class RepresentativeManager(models.Manager):
         success = True
 
         try:
-            query = RepresentativesMissingFromPollingLocation.objects.using('readonly')\
-                .order_by('-date_last_updated')\
-                .filter(issue_resolved=False)\
+            query = RepresentativesMissingFromPollingLocation.objects.using('readonly') \
+                .order_by('-date_last_updated') \
+                .filter(issue_resolved=False) \
                 .exclude(Q(polling_location_we_vote_id__isnull=True) | Q(polling_location_we_vote_id=""))
             if batch_process_date_started:
                 query = query.filter(date_last_updated__gt=batch_process_date_started)
@@ -508,10 +507,10 @@ class RepresentativeManager(models.Manager):
         # status += "PL_LIST: " + str(polling_location_we_vote_id_list) + " "
         polling_location_we_vote_id_list_found = positive_value_exists(len(polling_location_we_vote_id_list))
         results = {
-            'success':                                  success,
-            'status':                                   status,
-            'polling_location_we_vote_id_list_found':   polling_location_we_vote_id_list_found,
-            'polling_location_we_vote_id_list':         polling_location_we_vote_id_list,
+            'success': success,
+            'status': status,
+            'polling_location_we_vote_id_list_found': polling_location_we_vote_id_list_found,
+            'polling_location_we_vote_id_list': polling_location_we_vote_id_list,
         }
         return results
 
@@ -711,20 +710,22 @@ class RepresentativeManager(models.Manager):
             success = False
 
         results = {
-            'success':                      success,
-            'status':                       status,
-            'representative_found':         representative_found,
-            'representative_id':            convert_to_int(representative_id),
-            'representative_list':          representative_list,
-            'representative_list_found':    representative_list_found,
-            'representative_we_vote_id':    representative_we_vote_id,
-            'representative':               representative_on_stage,
+            'success': success,
+            'status': status,
+            'representative_found': representative_found,
+            'representative_id': convert_to_int(representative_id),
+            'representative_list': representative_list,
+            'representative_list_found': representative_list_found,
+            'representative_we_vote_id': representative_we_vote_id,
+            'representative': representative_on_stage,
         }
         return results
 
     @staticmethod
-    def retrieve_representatives_are_not_duplicates(representative1_we_vote_id, representative2_we_vote_id,
-                                                    read_only=True):
+    def retrieve_representatives_are_not_duplicates(
+            representative1_we_vote_id,
+            representative2_we_vote_id,
+            read_only=True):
         status = ''
         representatives_are_not_duplicates = RepresentativesAreNotDuplicates()
         # Note that the direction of the friendship does not matter
@@ -782,10 +783,10 @@ class RepresentativeManager(models.Manager):
                 status += "REPRESENTATIVES_NOT_DUPLICATES_NOT_UPDATED_OR_CREATED2: " + str(e) + " "
 
         results = {
-            'success':                                      success,
-            'status':                                       status,
-            'representatives_are_not_duplicates_found':   representatives_are_not_duplicates_found,
-            'representatives_are_not_duplicates':         representatives_are_not_duplicates,
+            'success': success,
+            'status': status,
+            'representatives_are_not_duplicates_found': representatives_are_not_duplicates_found,
+            'representatives_are_not_duplicates': representatives_are_not_duplicates,
         }
         return results
 
@@ -844,7 +845,7 @@ class RepresentativeManager(models.Manager):
                 status += "REPRESENTATIVES_NOT_DUPLICATES_LIST_NOT_UPDATED_OR_CREATED2: " + str(e) + " "
 
         representatives_are_not_duplicates_list = representatives_are_not_duplicates_list1 + \
-            representatives_are_not_duplicates_list2
+                                                  representatives_are_not_duplicates_list2
         representatives_are_not_duplicates_list_found = positive_value_exists(len(
             representatives_are_not_duplicates_list))
         representatives_are_not_duplicates_list_we_vote_ids = []
@@ -854,10 +855,10 @@ class RepresentativeManager(models.Manager):
             elif one_entry.representative2_we_vote_id != representative_we_vote_id:
                 representatives_are_not_duplicates_list_we_vote_ids.append(one_entry.representative2_we_vote_id)
         results = {
-            'success':                                          success,
-            'status':                                           status,
-            'representatives_are_not_duplicates_list_found':    representatives_are_not_duplicates_list_found,
-            'representatives_are_not_duplicates_list':          representatives_are_not_duplicates_list,
+            'success': success,
+            'status': status,
+            'representatives_are_not_duplicates_list_found': representatives_are_not_duplicates_list_found,
+            'representatives_are_not_duplicates_list': representatives_are_not_duplicates_list,
             'representatives_are_not_duplicates_list_we_vote_ids':
                 representatives_are_not_duplicates_list_we_vote_ids,
         }
@@ -877,8 +878,7 @@ class RepresentativeManager(models.Manager):
             read_only=False,
             representatives_limit=300,
             search_string='',
-            years_list=[],
-    ):
+            years_list=[]):
         """
 
         :param index_start:
@@ -928,12 +928,12 @@ class RepresentativeManager(models.Manager):
         if len(year_integer_list) == 0:
             status += "VALID_YEAR_NOT_PROVIDED-EARLIEST_REPRESENTATIVE_DATA_IS_2022 "
             results = {
-                'success':                      success,
-                'status':                       status,
-                'representative_list_found':    representative_list_found,
-                'representative_list':          representative_list,
-                'returned_count':               returned_count,
-                'total_count':                  total_count,
+                'success': success,
+                'status': status,
+                'representative_list_found': representative_list_found,
+                'representative_list': representative_list,
+                'returned_count': returned_count,
+                'total_count': total_count,
             }
             return results
 
@@ -1033,12 +1033,12 @@ class RepresentativeManager(models.Manager):
         returned_count = len(representative_list)
 
         results = {
-            'success':                      success,
-            'status':                       status,
-            'representative_list_found':    representative_list_found,
-            'representative_list':          representative_list,
-            'returned_count':               returned_count,
-            'total_count':                  total_count,
+            'success': success,
+            'status': status,
+            'representative_list_found': representative_list_found,
+            'representative_list': representative_list,
+            'returned_count': returned_count,
+            'total_count': total_count,
         }
         return results
 
@@ -1082,10 +1082,10 @@ class RepresentativeManager(models.Manager):
 
         if not success:
             results = {
-                'success':              success,
-                'status':               status,
-                'representative':           representative,
-                'representative_updated':   representative_updated,
+                'success': success,
+                'status': status,
+                'representative': representative,
+                'representative_updated': representative_updated,
             }
             return results
 
@@ -1195,10 +1195,10 @@ class RepresentativeManager(models.Manager):
                 status += "NO_CHANGES_SAVED_TO_REPRESENTATIVE_TWITTER_DETAILS: " + str(e) + " "
 
         results = {
-            'success':                  success,
-            'status':                   status,
-            'representative':           representative,
-            'representative_updated':   representative_updated,
+            'success': success,
+            'status': status,
+            'representative': representative,
+            'representative_updated': representative_updated,
         }
         return results
 
@@ -1232,18 +1232,18 @@ class RepresentativeManager(models.Manager):
                 exception_multiple_object_returned = True
             except Exception as e:
                 status += 'FAILED_TO_RETRIEVE_REPRESENTATIVE_BY_WE_VOTE_ID ' \
-                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                          '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
                 success = False
 
         results = {
-            'success':                      success,
-            'status':                       status,
-            'MultipleObjectsReturned':      exception_multiple_object_returned,
-            'new_representative_created':   new_representative_created,
-            'representative':               representative,
-            'saved':                        new_representative_created or representative_updated,
-            'updated':                      representative_updated,
-            'not_processed':                True if not success else False,
+            'success': success,
+            'status': status,
+            'MultipleObjectsReturned': exception_multiple_object_returned,
+            'new_representative_created': new_representative_created,
+            'representative': representative,
+            'saved': new_representative_created or representative_updated,
+            'updated': representative_updated,
+            'not_processed': True if not success else False,
         }
         return results
 
@@ -1263,8 +1263,8 @@ class RepresentativeManager(models.Manager):
         if positive_value_exists(representative1_we_vote_id) and positive_value_exists(representative2_we_vote_id):
             try:
                 updated_values = {
-                    'representative1_we_vote_id':    representative1_we_vote_id,
-                    'representative2_we_vote_id':    representative2_we_vote_id,
+                    'representative1_we_vote_id': representative1_we_vote_id,
+                    'representative2_we_vote_id': representative2_we_vote_id,
                 }
                 representatives_are_not_duplicates, new_representatives_are_not_duplicates_created = \
                     RepresentativesAreNotDuplicates.objects.update_or_create(
@@ -1279,21 +1279,23 @@ class RepresentativeManager(models.Manager):
                 exception_multiple_object_returned = True
             except Exception as e:
                 status += 'EXCEPTION_UPDATE_OR_CREATE_REPRESENTATIVES_ARE_NOT_DUPLICATES ' \
-                         '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
+                          '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
                 success = False
 
         results = {
-            'success':                                      success,
-            'status':                                       status,
-            'MultipleObjectsReturned':                      exception_multiple_object_returned,
-            'new_representatives_are_not_duplicates_created':    new_representatives_are_not_duplicates_created,
-            'representatives_are_not_duplicates':                representatives_are_not_duplicates,
+            'success': success,
+            'status': status,
+            'MultipleObjectsReturned': exception_multiple_object_returned,
+            'new_representatives_are_not_duplicates_created': new_representatives_are_not_duplicates_created,
+            'representatives_are_not_duplicates': representatives_are_not_duplicates,
         }
         return results
 
     @staticmethod
-    def update_representative_social_media(representative, representative_twitter_handle=False,
-                                           representative_facebook=False):
+    def update_representative_social_media(
+            representative,
+            representative_twitter_handle=False,
+            representative_facebook=False):
         """
         Update a representative entry with general social media data. If a value is passed in False
         it means "Do not update"
@@ -1328,22 +1330,23 @@ class RepresentativeManager(models.Manager):
                 status += "NO_CHANGES_SAVED_TO_REPRESENTATIVE_SOCIAL_MEDIA "
 
         results = {
-            'success':                  success,
-            'status':                   status,
-            'DoesNotExist':             exception_does_not_exist,
-            'MultipleObjectsReturned':  exception_multiple_object_returned,
-            'representative':         representative,
+            'success': success,
+            'status': status,
+            'DoesNotExist': exception_does_not_exist,
+            'MultipleObjectsReturned': exception_multiple_object_returned,
+            'representative': representative,
         }
         return results
 
     @staticmethod
-    def update_representative_twitter_details(representative, twitter_dict,
-                                              cached_twitter_profile_image_url_https,
-                                              cached_twitter_profile_background_image_url_https,
-                                              cached_twitter_profile_banner_url_https,
-                                              we_vote_hosted_profile_image_url_large,
-                                              we_vote_hosted_profile_image_url_medium,
-                                              we_vote_hosted_profile_image_url_tiny):
+    def update_representative_twitter_details(
+            representative, twitter_dict,
+            cached_twitter_profile_image_url_https,
+            cached_twitter_profile_background_image_url_https,
+            cached_twitter_profile_banner_url_https,
+            we_vote_hosted_profile_image_url_large,
+            we_vote_hosted_profile_image_url_medium,
+            we_vote_hosted_profile_image_url_tiny):
         """
         Update a representative entry with details retrieved from the Twitter API.
         """
@@ -1427,16 +1430,18 @@ class RepresentativeManager(models.Manager):
                 status += "NO_CHANGES_SAVED_TO_REPRESENTATIVE_TWITTER_DETAILS "
 
         results = {
-            'success':      success,
-            'status':       status,
-            'representative':    representative,
+            'success': success,
+            'status': status,
+            'representative': representative,
         }
         return results
 
     @staticmethod
-    def reset_representative_image_details(representative, twitter_profile_image_url_https,
-                                           twitter_profile_background_image_url_https,
-                                           twitter_profile_banner_url_https):
+    def reset_representative_image_details(
+            representative,
+            twitter_profile_image_url_https,
+            twitter_profile_background_image_url_https,
+            twitter_profile_banner_url_https):
         """
         Reset an representative entry with original image details from we vote image.
         """
@@ -1458,9 +1463,9 @@ class RepresentativeManager(models.Manager):
             status += "RESET_REPRESENTATIVE_IMAGE_DETAILS "
 
         results = {
-            'success':      success,
-            'status':       status,
-            'representative':    representative,
+            'success': success,
+            'status': status,
+            'representative': representative,
         }
         return results
 
@@ -1489,9 +1494,9 @@ class RepresentativeManager(models.Manager):
             status += "CLEARED_REPRESENTATIVE_TWITTER_DETAILS "
 
         results = {
-            'success':      success,
-            'status':       status,
-            'representative':    representative,
+            'success': success,
+            'status': status,
+            'representative': representative,
         }
         return results
 
@@ -1520,13 +1525,13 @@ class RepresentativeManager(models.Manager):
             # If we don't have the minimum values required to create a representative, then don't proceed
             status += "CREATE_REPRESENTATIVE_ROW-MISSING_REQUIRED_FIELDS "
             results = {
-                    'success':                  success,
-                    'status':                   status,
-                    'representative':           representative,
-                    'representative_created':   representative_created,
-                    'representative_found':     representative_found,
-                    'representative_updated':   representative_updated,
-                }
+                'success': success,
+                'status': status,
+                'representative': representative,
+                'representative_created': representative_created,
+                'representative_found': representative_found,
+                'representative_updated': representative_updated,
+            }
             return results
 
         try:
@@ -1562,13 +1567,13 @@ class RepresentativeManager(models.Manager):
                 handle_exception(e, logger=logger, exception_message=status)
 
         results = {
-                'success':                  success,
-                'status':                   status,
-                'representative':           representative,
-                'representative_created':   representative_created,
-                'representative_found':     representative_found,
-                'representative_updated':   representative_updated,
-            }
+            'success': success,
+            'status': status,
+            'representative': representative,
+            'representative_created': representative_created,
+            'representative_found': representative_found,
+            'representative_updated': representative_updated,
+        }
         return results
 
     @staticmethod
@@ -1576,8 +1581,7 @@ class RepresentativeManager(models.Manager):
             is_from_google_civic=False,
             polling_location_we_vote_id='',
             state_code=None,
-            defaults={}
-    ):
+            defaults={}):
         entry_created = False
         representatives_missing = None
         representatives_missing_found = False
@@ -1597,11 +1601,11 @@ class RepresentativeManager(models.Manager):
             success = False
 
         results = {
-            'status':                           status,
-            'success':                          success,
-            'representatives_missing':          representatives_missing,
-            'representatives_missing_created':  entry_created,
-            'representatives_missing_found':    representatives_missing_found,
+            'status': status,
+            'success': success,
+            'representatives_missing': representatives_missing,
+            'representatives_missing_created': entry_created,
+            'representatives_missing_found': representatives_missing_found,
         }
         return results
 
@@ -1645,12 +1649,12 @@ class RepresentativeManager(models.Manager):
             handle_exception(e, logger=logger, exception_message=status)
 
         results = {
-                'success':                  success,
-                'status':                   status,
-                'representative':           representative,
-                'representative_found':     representative_found,
-                'representative_updated':   representative_updated,
-            }
+            'success': success,
+            'status': status,
+            'representative': representative,
+            'representative_found': representative_found,
+            'representative_updated': representative_updated,
+        }
         return results
 
     @staticmethod
@@ -1685,9 +1689,9 @@ class RepresentativeManager(models.Manager):
                 for one_twitter_handle in twitter_handle_list:
                     one_twitter_handle_cleaned = extract_twitter_handle_from_text_string(one_twitter_handle)
                     new_filter = (
-                        Q(representative_twitter_handle__iexact=one_twitter_handle_cleaned) |
-                        Q(representative_twitter_handle2__iexact=one_twitter_handle_cleaned) |
-                        Q(representative_twitter_handle3__iexact=one_twitter_handle_cleaned)
+                            Q(representative_twitter_handle__iexact=one_twitter_handle_cleaned) |
+                            Q(representative_twitter_handle2__iexact=one_twitter_handle_cleaned) |
+                            Q(representative_twitter_handle3__iexact=one_twitter_handle_cleaned)
                     )
                     twitter_filters.append(new_filter)
 
@@ -1820,14 +1824,14 @@ class RepresentativeManager(models.Manager):
                 success = False
 
         results = {
-            'success':                      success,
-            'status':                       status,
-            'ocd_division_id':              ocd_division_id,
-            'representative_found':         representative_found,
-            'representative':               representative,
-            'representative_list_found':    representative_list_found,
-            'representative_list':          representative_list,
-            'multiple_entries_found':       multiple_entries_found,
+            'success': success,
+            'status': status,
+            'ocd_division_id': ocd_division_id,
+            'representative_found': representative_found,
+            'representative': representative,
+            'representative_list_found': representative_list_found,
+            'representative_list': representative_list,
+            'multiple_entries_found': multiple_entries_found,
         }
         return results
 
@@ -1947,7 +1951,6 @@ class RepresentativesMissingFromPollingLocation(models.Model):
         verbose_name="we vote permanent id of the map point", max_length=255, default=None, null=True,
         blank=True, unique=False)
     state_code = models.CharField(max_length=2, null=True, db_index=True)
-
 
 # Instead of using this model currently, we simply store the office_held_we_vote_id in the Representative table.
 # class RepresentativeToOfficeHeldLink(models.Model):
