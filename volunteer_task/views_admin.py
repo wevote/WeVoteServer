@@ -14,7 +14,7 @@ from django.shortcuts import render
 from admin_tools.views import redirect_to_sign_in_page
 from volunteer_task.models import VolunteerWeeklyMetrics
 from voter.models import voter_has_authority, VoterManager
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists
 from .controllers import update_weekly_volunteer_metrics
 
 
@@ -25,7 +25,7 @@ def performance_list_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    assigned_to_voter_we_vote_id = request.GET.get('assigned_to_voter_we_vote_id', False)
+    team_name = request.GET.get('team_name', False)
     status = ""
     success = True
 
@@ -64,6 +64,7 @@ def performance_list_view(request):
                 'voter_guide_possibilities_created': one_person_one_week.voter_guide_possibilities_created,
             }
 
+    end_of_week_date_integer_list = sorted(end_of_week_date_integer_list)
     for voter_display_name in voter_display_name_list:
         # Set these values to true if we have any tasks completed in any of the weeks we are displaying
         performance_display_dict[voter_display_name]['candidates_created'] = 0
@@ -121,12 +122,19 @@ def performance_list_view(request):
                 performance_display_dict[voter_display_name]['volunteer_task_total'] += \
                     voter_guide_possibilities_created
 
+    try:
+        voter_display_name_list_modified = \
+            sorted(voter_display_name_list,
+                   key=lambda x: convert_to_int(performance_display_dict[x]['volunteer_task_total']))
+    except Exception as e:
+        voter_display_name_list_modified = voter_display_name_list
+
     messages_on_stage = get_messages(request)
     template_values = {
         'end_of_week_date_integer_list':    end_of_week_date_integer_list,
-        'messages_on_stage':        messages_on_stage,
-        'performance_display_dict': performance_display_dict,
-        'performance_list':         performance_list,
-        'voter_display_name_list':  voter_display_name_list,
+        'messages_on_stage':                messages_on_stage,
+        'performance_display_dict':         performance_display_dict,
+        'performance_list':                 performance_list,
+        'voter_display_name_list':          voter_display_name_list_modified,
     }
     return render(request, 'volunteer_task/performance_list.html', template_values)

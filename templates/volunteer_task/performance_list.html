@@ -8,15 +8,25 @@
 {% load humanize %}
 
 <h1>Scoreboard</h1>
+<div style="font-size: 1.4em">
 <table class="table table-condensed table-hover">
     <thead>
     <tr>
         <th></th>
+        <th></th>
+        <th colspan="10">For Week Ending:</th>
+    </tr>
+    <tr>
+        <th></th>
         <th>Who</th>
-        <th>Totals</th>
     {% for end_of_week_date_integer in end_of_week_date_integer_list %}
-        <th>{{ end_of_week_date_integer }}</th>
+        {% with end_of_week_date=end_of_week_date_integer|get_date_from_date_as_integer %}
+        <th>
+            {{ end_of_week_date|date:'D M d, Y' }}
+        </th>
+        {% endwith %}
     {% endfor %}
+        <th>Totals All Weeks</th>
     </tr>
     </thead>
 
@@ -25,7 +35,7 @@
         <td>{{ forloop.counter }}</td>
         <td>
         {% with voter_dict=performance_display_dict|get_value_from_dict:voter_display_name %}
-            {{ voter_display_name }}<br />
+            <strong><span style="font-size: 1.2em">{{ voter_display_name }}</span></strong><br />
             {% if voter_dict.candidates_created %}
             &nbsp;&nbsp;&nbsp;Candidates Created<br />
             {% endif %}
@@ -43,6 +53,30 @@
             {% endif %}
         {% endwith %}
         </td>
+    {% for end_of_week_date_integer in end_of_week_date_integer_list %}
+        <td>
+        {% with voter_dict=performance_display_dict|get_value_from_dict:voter_display_name %}
+        {% with voter_one_date_dict=voter_dict|get_value_from_dict:end_of_week_date_integer %}
+            <strong><span style="font-size: 1.2em">{{ voter_one_date_dict.volunteer_task_total|display_nothing_if_zero }}</span></strong><br />
+            {% if voter_dict.candidates_created %}{# Show row if any candidates_created #}
+            {{ voter_one_date_dict.candidates_created|display_nothing_if_zero }}<br />
+            {% endif %}
+            {% if voter_dict.politicians_deduplicated %}
+            {{ voter_one_date_dict.politicians_deduplicated|display_nothing_if_zero }}<br />
+            {% endif %}
+            {% if voter_dict.positions_saved %}
+            {{ voter_one_date_dict.positions_saved|display_nothing_if_zero }}<br />
+            {% endif %}
+            {% if voter_dict.position_comments_saved %}
+            {{ voter_one_date_dict.position_comments_saved|display_nothing_if_zero }}<br />
+            {% endif %}
+            {% if voter_dict.voter_guide_possibilities_created %}
+            {{ voter_one_date_dict.voter_guide_possibilities_created|display_nothing_if_zero }}<br />
+            {% endif %}
+        {% endwith %}
+        {% endwith %}
+        </td>
+    {% endfor %}
         <td>
         {% with voter_dict=performance_display_dict|get_value_from_dict:voter_display_name %}
             <strong><span style="font-size: 1.2em">{{ voter_dict.volunteer_task_total }}</span></strong><br />
@@ -63,30 +97,6 @@
             {% endif %}
         {% endwith %}
         </td>
-    {% for end_of_week_date_integer in end_of_week_date_integer_list %}
-        <td>
-        {% with voter_dict=performance_display_dict|get_value_from_dict:voter_display_name %}
-        {% with voter_one_date_dict=voter_dict|get_value_from_dict:end_of_week_date_integer %}
-            {{ voter_one_date_dict.volunteer_task_total }}<br />
-            {% if voter_dict.candidates_created %}{# Show row if any candidates_created #}
-            {{ voter_one_date_dict.candidates_created }}<br />
-            {% endif %}
-            {% if voter_dict.politicians_deduplicated %}
-            {{ voter_one_date_dict.politicians_deduplicated }}<br />
-            {% endif %}
-            {% if voter_dict.positions_saved %}
-            {{ voter_one_date_dict.positions_saved }}<br />
-            {% endif %}
-            {% if voter_dict.position_comments_saved %}
-            {{ voter_one_date_dict.position_comments_saved }}<br />
-            {% endif %}
-            {% if voter_dict.voter_guide_possibilities_created %}
-            {{ voter_one_date_dict.voter_guide_possibilities_created }}<br />
-            {% endif %}
-        {% endwith %}
-        {% endwith %}
-        </td>
-    {% endfor %}
     </tr>
 {% endfor %}
 </table>
@@ -98,5 +108,5 @@
         <td></td>
     </tr>
 </table>
-
+</div>{# End of font-size: 1.4em #}
 {% endblock %}
