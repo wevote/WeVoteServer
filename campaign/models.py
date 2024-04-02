@@ -13,8 +13,9 @@ import wevote_functions.admin
 from exception.models import handle_record_found_more_than_one_exception, \
     handle_record_not_found_exception
 from organization.models import OrganizationManager, OrganizationTeamMember
-from wevote_functions.functions import convert_to_int, generate_date_as_integer, generate_random_string, \
+from wevote_functions.functions import convert_to_int, generate_random_string, \
     positive_value_exists
+from wevote_functions.functions_date import generate_date_as_integer
 from wevote_settings.models import fetch_next_we_vote_id_campaignx_integer, \
     fetch_next_we_vote_id_campaignx_news_item_integer, fetch_site_unique_id_prefix
 
