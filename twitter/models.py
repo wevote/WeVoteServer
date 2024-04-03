@@ -168,7 +168,8 @@ class TwitterUserManager(models.Manager):
     def __unicode__(self):
         return "TwitterUserManager"
 
-    def update_or_create_tweet(self, tweet_json, organization_we_vote_id):
+    @staticmethod
+    def update_or_create_tweet(tweet_json, organization_we_vote_id):
         """
         Either update or create a tweet entry.
         """
@@ -184,15 +185,15 @@ class TwitterUserManager(models.Manager):
             status += 'MISSING_TWEET_JSON '
         else:
             new_tweet, created = Tweet.objects.update_or_create(
-                author_handle = tweet_json.user._json['username'],
-                twitter_id = tweet_json.user._json['id'],
-                tweet_id = tweet_json.id,
-                is_retweet = is_retweet_boolean,
-                tweet_text = tweet_json.text,
+                author_handle=tweet_json.user._json['username'],
+                twitter_id=tweet_json.user._json['id'],
+                tweet_id=tweet_json.id,
+                is_retweet=is_retweet_boolean,
+                tweet_text=tweet_json.text,
                 # RuntimeWarning: DateTimeField Tweet.date_published received a naive datetime (2017-11-30 21:32:35)
                 # while time zone support is active.
-                date_published = tweet_json.created_at,
-                organization_we_vote_id= organization_we_vote_id)
+                date_published=tweet_json.created_at,
+                organization_we_vote_id=organization_we_vote_id)
             if new_tweet or len(new_tweet):
                 success = True
                 status += 'TWEET_SAVED '
@@ -208,7 +209,8 @@ class TwitterUserManager(models.Manager):
         }
         return results
 
-    def retrieve_tweets_cached_locally(self, organization_we_vote_id):
+    @staticmethod
+    def retrieve_tweets_cached_locally(organization_we_vote_id):
         """
 
         :param organization_we_vote_id:
@@ -233,8 +235,8 @@ class TwitterUserManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def update_or_create_twitter_link_possibility(
-            self,
             twitter_link_possibility_id=0,
             candidate_campaign_we_vote_id='',
             twitter_handle='',
@@ -270,8 +272,8 @@ class TwitterUserManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def update_or_create_twitter_link_possibility_from_twitter_json(
-            self,
             candidate_campaign_we_vote_id,
             twitter_dict,
             search_term,
@@ -331,7 +333,8 @@ class TwitterUserManager(models.Manager):
             twitter_id=twitter_user_id,
             organization_we_vote_id=organization_we_vote_id)
 
-    def create_twitter_link_to_organization(self, twitter_id, organization_we_vote_id):
+    @staticmethod
+    def create_twitter_link_to_organization(twitter_id, organization_we_vote_id):
         status = ""
         if not positive_value_exists(twitter_id) or not \
                 positive_value_exists(organization_we_vote_id):
@@ -368,7 +371,8 @@ class TwitterUserManager(models.Manager):
         }
         return results
 
-    def create_twitter_link_to_voter(self, twitter_id, voter_we_vote_id):
+    @staticmethod
+    def create_twitter_link_to_voter(twitter_id, voter_we_vote_id):
         status = ""
         # Any attempts to save a twitter_link using either twitter_id or voter_we_vote_id that already
         #  exist in the table will fail, since those fields are required to be unique.
@@ -397,7 +401,8 @@ class TwitterUserManager(models.Manager):
         }
         return results
 
-    def delete_twitter_link_possibilities(self, candidate_campaign_we_vote_id):
+    @staticmethod
+    def delete_twitter_link_possibilities(candidate_campaign_we_vote_id):
         status = ""
         try:
             TwitterLinkPossibility.objects.filter(candidate_campaign_we_vote_id=candidate_campaign_we_vote_id).delete()
@@ -413,7 +418,8 @@ class TwitterUserManager(models.Manager):
         }
         return results
 
-    def delete_twitter_link_possibility(self, candidate_campaign_we_vote_id, twitter_id):
+    @staticmethod
+    def delete_twitter_link_possibility(candidate_campaign_we_vote_id, twitter_id):
         status = ""
         try:
             TwitterLinkPossibility.objects.filter(
@@ -507,12 +513,15 @@ class TwitterUserManager(models.Manager):
             return twitter_user.twitter_id
         return 0
 
-    def retrieve_twitter_link_to_organization_from_organization_we_vote_id(self, organization_we_vote_id,
-                                                                           read_only=False):
+    def retrieve_twitter_link_to_organization_from_organization_we_vote_id(
+            self,
+            organization_we_vote_id,
+            read_only=False):
         twitter_user_id = 0
         return self.retrieve_twitter_link_to_organization(twitter_user_id, organization_we_vote_id, read_only=read_only)
 
-    def retrieve_twitter_link_to_organization(self, twitter_id=0, organization_we_vote_id='', read_only=False):
+    @staticmethod
+    def retrieve_twitter_link_to_organization(twitter_id=0, organization_we_vote_id='', read_only=False):
         """
 
         :param twitter_id:
@@ -568,7 +577,8 @@ class TwitterUserManager(models.Manager):
         }
         return results
 
-    def retrieve_twitter_link_to_organization_list(self, read_only=True, return_we_vote_id_list_only=False):
+    @staticmethod
+    def retrieve_twitter_link_to_organization_list(read_only=True, return_we_vote_id_list_only=False):
         """
 
         :param read_only:
@@ -620,8 +630,10 @@ class TwitterUserManager(models.Manager):
 
     def retrieve_twitter_link_to_voter_from_twitter_handle(self, twitter_handle, read_only=False):
         twitter_user_id = 0
-        twitter_user_results = self.retrieve_twitter_user_locally_or_remotely(twitter_user_id, twitter_handle,
-                                                                              read_only=False)
+        twitter_user_results = self.retrieve_twitter_user_locally_or_remotely(
+            twitter_user_id,
+            twitter_handle,
+            read_only=False)
         if twitter_user_results['twitter_user_found']:
             twitter_user = twitter_user_results['twitter_user']
             if positive_value_exists(twitter_user.twitter_id):
@@ -640,16 +652,23 @@ class TwitterUserManager(models.Manager):
     def retrieve_twitter_link_to_voter_from_voter_we_vote_id(self, voter_we_vote_id, read_only=False):
         twitter_id = 0
         twitter_secret_key = ""
-        return self.retrieve_twitter_link_to_voter(twitter_id, voter_we_vote_id, twitter_secret_key,
-                                                   read_only=read_only)
+        return self.retrieve_twitter_link_to_voter(
+            twitter_id,
+            voter_we_vote_id,
+            twitter_secret_key,
+            read_only=read_only)
 
     def retrieve_twitter_link_to_voter_from_twitter_secret_key(self, twitter_secret_key, read_only=False):
         twitter_id = 0
         voter_we_vote_id = ""
-        return self.retrieve_twitter_link_to_voter(twitter_id, voter_we_vote_id, twitter_secret_key,
-                                                   read_only=read_only)
+        return self.retrieve_twitter_link_to_voter(
+            twitter_id,
+            voter_we_vote_id,
+            twitter_secret_key,
+            read_only=read_only)
 
-    def retrieve_twitter_link_to_voter(self, twitter_id=0, voter_we_vote_id='', twitter_secret_key='', read_only=False):
+    @staticmethod
+    def retrieve_twitter_link_to_voter(twitter_id=0, voter_we_vote_id='', twitter_secret_key='', read_only=False):
         """
 
         :param twitter_id:
@@ -782,7 +801,8 @@ class TwitterUserManager(models.Manager):
         }
         return results
 
-    def retrieve_twitter_user(self, twitter_user_id=0, twitter_handle='', read_only=False):
+    @staticmethod
+    def retrieve_twitter_user(twitter_user_id=0, twitter_handle='', read_only=False):
         twitter_user_on_stage = None
         twitter_user_found = False
         success = False
@@ -833,11 +853,17 @@ class TwitterUserManager(models.Manager):
         }
         return results
 
-    def retrieve_twitter_user_list(self, twitter_user_id_list=[], twitter_handle_list=[], read_only=False):
+    @staticmethod
+    def retrieve_twitter_user_list(twitter_user_id_list=None, twitter_handle_list=None, read_only=False):
         twitter_user_list = []
         twitter_user_list_found = False
         success = True
         status = ""
+
+        if twitter_user_id_list is None:
+            twitter_user_id_list = []
+        if twitter_handle_list is None:
+            twitter_handle_list = []
 
         # Strip out the twitter handles "False" or "None"
         twitter_handle_list_cleaned = []
@@ -902,8 +928,11 @@ class TwitterUserManager(models.Manager):
         }
         return results
 
-    def retrieve_twitter_ids_i_follow_from_twitter(self, twitter_id_of_me, twitter_voters_access_token_secret,
-                                                   twitter_voters_access_secret):
+    @staticmethod
+    def retrieve_twitter_ids_i_follow_from_twitter(
+            twitter_id_of_me,
+            twitter_voters_access_token_secret,
+            twitter_voters_access_secret):
         """
         We use this routine to retrieve twitter ids who i (the voter) follow
         3/1/22: TwitterCursorState and Cursor is not currently used, we load the first 5000 "follows" in line
@@ -957,7 +986,8 @@ class TwitterUserManager(models.Manager):
         }
         return results
 
-    def retrieve_twitter_who_i_follow_list(self, twitter_id_of_me):
+    @staticmethod
+    def retrieve_twitter_who_i_follow_list(twitter_id_of_me):
         """
         Retrieve twitter ids that twitter_id_of_me follows from TwitterWhoIFollow table.
         :param twitter_id_of_me:
@@ -1010,7 +1040,8 @@ class TwitterUserManager(models.Manager):
         }
         return results
 
-    def retrieve_twitter_next_cursor_state(self, twitter_id_of_me):
+    @staticmethod
+    def retrieve_twitter_next_cursor_state(twitter_id_of_me):
         """
         We use this subroutine to get twitter next cursor value from TwitterCursorState table
         :param twitter_id_of_me:
@@ -1040,7 +1071,8 @@ class TwitterUserManager(models.Manager):
         }
         return results
 
-    def create_twitter_who_i_follow_entries(self, twitter_id_of_me, twitter_ids_i_follow, organization_found=False):
+    @staticmethod
+    def create_twitter_who_i_follow_entries(twitter_id_of_me, twitter_ids_i_follow, organization_found=False):
         """
         We use this subroutine to create or update TwitterWhoIFollow table with twitter ids i follow.
         :param organization_found:
@@ -1079,7 +1111,8 @@ class TwitterUserManager(models.Manager):
             }
         return results
 
-    def create_twitter_next_cursor_state(self, twitter_id_of_me, twitter_api_name, twitter_next_cursor):
+    @staticmethod
+    def create_twitter_next_cursor_state(twitter_id_of_me, twitter_api_name, twitter_next_cursor):
         """
         We use this subroutine to create or update TwitterCursorState table with next cursor value
         :param twitter_id_of_me:
@@ -1114,9 +1147,12 @@ class TwitterUserManager(models.Manager):
         }
         return results
 
-    def reset_twitter_user_image_details(self, twitter_id, twitter_profile_image_url_https,
-                                         twitter_profile_background_image_url_https,
-                                         twitter_profile_banner_url_https):
+    def reset_twitter_user_image_details(
+            self,
+            twitter_id,
+            twitter_profile_image_url_https,
+            twitter_profile_background_image_url_https,
+            twitter_profile_banner_url_https):
         """
         Reset an twitter user entry with original image details from we vote image.
         """
@@ -1155,8 +1191,8 @@ class TwitterUserManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def save_new_twitter_user_from_twitter_json(
-            self,
             twitter_dict,
             cached_twitter_profile_image_url_https=None,
             cached_twitter_profile_background_image_url_https=None,
@@ -1586,7 +1622,8 @@ class TwitterApiCounterMonthlySummary(models.Model):
 # noinspection PyBroadException
 class TwitterApiCounterManager(models.Manager):
 
-    def create_counter_entry(self, kind_of_action, google_civic_election_id=0):
+    @staticmethod
+    def create_counter_entry(kind_of_action, google_civic_election_id=0):
         """
         Create an entry that records that a call to the Twitter Api was made.
         """
@@ -1610,7 +1647,8 @@ class TwitterApiCounterManager(models.Manager):
         }
         return results
 
-    def retrieve_daily_summaries(self, kind_of_action='', google_civic_election_id=0, days_to_display=30):
+    @staticmethod
+    def retrieve_daily_summaries(kind_of_action='', google_civic_election_id=0, days_to_display=30):
         # Start with today and cycle backwards in time
         daily_summaries = []
         day_on_stage = date.today()  # TODO: We need to work out the timezone questions
@@ -1703,4 +1741,3 @@ def mark_detailed_counter_entry(counter, success, status):
 
     except Exception as e:
         print('mark_detailed_counter_entry exception (' + status + ')' + str(e))
-
