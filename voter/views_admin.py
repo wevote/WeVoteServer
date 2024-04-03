@@ -32,6 +32,7 @@ from share.models import SharedItem, VoterWhoSharesSummaryAllTime, VoterWhoShare
 from sms.models import SMSManager, SMSPhoneNumber
 from stripe_donations.models import StripeManager, StripePayments
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
+from volunteer_task.models import VolunteerTeam, VolunteerTeamMember
 from voter.models import VoterIssuesLookup
 from wevote_functions.functions import convert_to_int, generate_random_string, get_voter_api_device_id, \
     get_voter_device_id, set_voter_api_device_id, positive_value_exists
@@ -347,13 +348,15 @@ def voter_edit_process_view(request):
     voter_on_stage = Voter()
     at_least_one_value_changed = False
 
+    add_to_new_team = request.POST.get('add_to_new_team', False)
+    email = request.POST.get('email', False)
     first_name = request.POST.get('first_name', False)
     last_name = request.POST.get('last_name', False)
-    twitter_handle = request.POST.get('twitter_handle', False)
-    email = request.POST.get('email', False)
     password_text = request.POST.get('password_text', False)
     profile_image_type_currently_active = request.POST.get('profile_image_type_currently_active', False)
     sms_phone_number = request.POST.get('sms_phone_number', False)
+    team_name_new = request.POST.get('team_name_new', False)
+    twitter_handle = request.POST.get('twitter_handle', False)
     try:
         voter_photo_file = request.FILES['voter_photo_file']
         voter_photo_file_found = True
@@ -640,6 +643,139 @@ def voter_edit_process_view(request):
             messages.add_message(request, messages.INFO, 'Added new Voter.')
         except Exception as e:
             messages.add_message(request, messages.ERROR, 'Could not save voter:' + str(e))
+
+    # ##########################################################################
+    # Update volunteer teams this voter is a member of
+    volunteer_team_success = True
+    team_name = ''
+    team_we_vote_id = ''
+    if positive_value_exists(team_name_new):
+        volunteer_team_found = False
+        try:
+            volunteer_team = VolunteerTeam.objects.using('readonly').get(team_name__iexact=team_name_new)
+            volunteer_team_found = True
+            team_name = volunteer_team.team_name
+            team_we_vote_id = volunteer_team.we_vote_id
+        except VolunteerTeam.DoesNotExist:
+            volunteer_team_found = False
+        except Exception as e:
+            message = "COULD_NOT_RETRIEVE_EXISTING_VOLUNTEER_TEAM: " + str(e) + " "
+            messages.add_message(request, messages.ERROR, message)
+            volunteer_team_success = False
+
+        if volunteer_team_success and not positive_value_exists(volunteer_team_found):
+            try:
+                volunteer_team = VolunteerTeam.objects.create(team_name=team_name_new)
+                team_name = volunteer_team.team_name
+                team_we_vote_id = volunteer_team.we_vote_id
+                volunteer_team_found = True
+                message = "Successfully created {team_name}. "
+                messages.add_message(request, messages.INFO, message)
+            except Exception as e:
+                message = "COULD_NOT_CREATE_VOLUNTEER_TEAM: " + str(e) + " "
+                messages.add_message(request, messages.ERROR, message)
+
+        if positive_value_exists(volunteer_team_found) and positive_value_exists(add_to_new_team):
+            if not positive_value_exists(voter_we_vote_id) or not positive_value_exists(team_we_vote_id):
+                message = \
+                    "MISSING_REQUIRED_TEAM_MEMBER_VARIABLE:"\
+                    " team_we_vote_id: {team_we_vote_id}."\
+                    " voter_we_vote_id: {voter_we_vote_id}.".format(
+                        team_we_vote_id=team_we_vote_id,
+                        voter_we_vote_id=voter_we_vote_id)
+                messages.add_message(request, messages.ERROR, message)
+            else:
+                try:
+                    defaults = {
+                        'team_we_vote_id': team_we_vote_id,
+                        'voter_we_vote_id': voter_we_vote_id,
+                    }
+                    volunteer_team_member, volunteer_team_member_created = \
+                        VolunteerTeamMember.objects.update_or_create(
+                            team_we_vote_id=team_we_vote_id,
+                            voter_we_vote_id=voter_we_vote_id,
+                            defaults=defaults,
+                        )
+                    if volunteer_team_member_created:
+                        message = \
+                            "Successfully added {voter_we_vote_id} to {team_name}. ".format(
+                                team_name=team_name,
+                                voter_we_vote_id=voter_we_vote_id)
+                    else:
+                        message = \
+                            "{voter_we_vote_id} is already a member of {team_name}. ".format(
+                                team_name=team_name,
+                                voter_we_vote_id=voter_we_vote_id)
+                    messages.add_message(request, messages.INFO, message)
+                except Exception as e:
+                    message = "COULD_NOT_ADD_TEAM_MEMBER: " + str(e) + " "
+                    messages.add_message(request, messages.ERROR, message)
+
+    # ##########################################################################
+    # Now delete or add this voter from/to one of the teams
+    volunteer_team_list = []
+    try:
+        queryset = VolunteerTeam.objects.all()
+        volunteer_team_list = list(queryset)
+    except Exception as e:
+        message = "COULD_NOT_GET_VOLUNTEER_TEAM_LIST2: " + str(e) + " "
+        messages.add_message(request, messages.ERROR, message)
+
+    for volunteer_team in volunteer_team_list:
+        # Delete this voter from the team
+        delete_variable_name = "delete_volunteer_team_member_" + str(volunteer_team.id)
+        delete_voter_from_team = positive_value_exists(request.POST.get(delete_variable_name, False))
+        if positive_value_exists(delete_voter_from_team):
+            team_name = volunteer_team.team_name
+            team_we_vote_id = volunteer_team.we_vote_id
+            if positive_value_exists(team_we_vote_id) and positive_value_exists(voter_we_vote_id):
+                try:
+                    number_deleted, details = VolunteerTeamMember.objects \
+                        .filter(
+                            team_we_vote_id__iexact=team_we_vote_id,
+                            voter_we_vote_id__iexact=voter_we_vote_id,
+                        ) \
+                        .delete()
+                    messages.add_message(request, messages.INFO,
+                                         "Deleted VolunteerTeamMember ({number_deleted})."
+                                         .format(number_deleted=number_deleted))
+                except Exception as e:
+                    messages.add_message(request, messages.ERROR, 'Could not delete team membership: ' + str(e))
+            else:
+                messages.add_message(request, messages.ERROR, 'Could not delete team membership.')
+        # Add this voter to the team
+        add_variable_name = "add_volunteer_team_member_" + str(volunteer_team.id)
+        add_voter_to_team = positive_value_exists(request.POST.get(add_variable_name, False))
+        if positive_value_exists(add_voter_to_team):
+            team_name = volunteer_team.team_name
+            team_we_vote_id = volunteer_team.we_vote_id
+            if positive_value_exists(team_we_vote_id) and positive_value_exists(voter_we_vote_id):
+                try:
+                    defaults = {
+                        'team_we_vote_id': team_we_vote_id,
+                        'voter_we_vote_id': voter_we_vote_id,
+                    }
+                    volunteer_team_member, volunteer_team_member_created = \
+                        VolunteerTeamMember.objects.update_or_create(
+                            team_we_vote_id=team_we_vote_id,
+                            voter_we_vote_id=voter_we_vote_id,
+                            defaults=defaults,
+                        )
+                    if volunteer_team_member_created:
+                        message = \
+                            "Successfully added {voter_we_vote_id} to {team_name}. ".format(
+                                team_name=team_name,
+                                voter_we_vote_id=voter_we_vote_id)
+                    else:
+                        message = \
+                            "{voter_we_vote_id} is already a member of {team_name}. ".format(
+                                team_name=team_name,
+                                voter_we_vote_id=voter_we_vote_id)
+                    messages.add_message(request, messages.INFO, message)
+                except Exception as e:
+                    messages.add_message(request, messages.ERROR, 'Could not delete team membership: ' + str(e))
+            else:
+                messages.add_message(request, messages.ERROR, 'Could not delete team membership.')
 
     return HttpResponseRedirect(reverse('voter:voter_edit', args=(voter_id,)) +
                                 "?voter_invitation_password=" + password_text)
@@ -1123,6 +1259,32 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
                         modified_supporters_list.append(supporter)
                 supporters_list = modified_supporters_list
 
+        volunteer_team_member_dict = {}
+        try:
+            queryset = VolunteerTeamMember.objects.all().filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            volunteer_team_membership_list = list(queryset)
+            if len(volunteer_team_membership_list) > 0:
+                for volunteer_team_member in volunteer_team_membership_list:
+                    if volunteer_team_member.team_we_vote_id not in volunteer_team_member_dict:
+                        volunteer_team_member_dict[volunteer_team_member.team_we_vote_id] = True
+        except Exception as e:
+            message = "COULD_NOT_GET_VOLUNTEER_TEAM_MEMBER_LIST: " + str(e) + " "
+            messages.add_message(request, messages.ERROR, message)
+
+        volunteer_team_list = []
+        try:
+            queryset = VolunteerTeam.objects.all().order_by('team_name')
+            volunteer_team_list = list(queryset)
+            if len(volunteer_team_list) > 0:
+                volunteer_team_list_modified = []
+                for volunteer_team in volunteer_team_list:
+                    volunteer_team.is_voter_member = (volunteer_team.we_vote_id in volunteer_team_member_dict)
+                    volunteer_team_list_modified.append(volunteer_team)
+                volunteer_team_list = volunteer_team_list_modified
+        except Exception as e:
+            message = "COULD_NOT_GET_VOLUNTEER_TEAM_LIST: " + str(e) + " "
+            messages.add_message(request, messages.ERROR, message)
+
         messages.add_message(request, messages.INFO, status_print_list)
 
         messages_on_stage = get_messages(request)
@@ -1137,6 +1299,7 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
             'sms_phone_numbers_list':                   sms_phone_numbers_list,
             'stripe_payments':                          StripeManager.retrieve_payments_total(voter_on_stage.we_vote_id),
             'supporters_list':                          supporters_list,
+            'volunteer_team_list':                      volunteer_team_list,
             'voter_id':                                 voter_on_stage.id,
             'voter':                                    voter_on_stage,
             'voter_invitation_first_name':              voter_on_stage.first_name,
