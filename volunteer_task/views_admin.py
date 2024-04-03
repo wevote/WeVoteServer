@@ -14,8 +14,9 @@ from django.shortcuts import render
 from admin_tools.views import redirect_to_sign_in_page
 from volunteer_task.models import VolunteerWeeklyMetrics
 from voter.models import voter_has_authority, VoterManager
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists
 from .controllers import update_weekly_volunteer_metrics
+from .models import VolunteerTeam, VolunteerTeamMember
 
 
 @login_required
@@ -25,16 +26,31 @@ def performance_list_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    assigned_to_voter_we_vote_id = request.GET.get('assigned_to_voter_we_vote_id', False)
     status = ""
     success = True
+    team_we_vote_id = request.GET.get('team_we_vote_id', False)
 
     results = update_weekly_volunteer_metrics()
+
+    volunteer_team_member_list = []
+    voter_we_vote_id_list = []
+    if positive_value_exists(team_we_vote_id):
+        try:
+            queryset = VolunteerTeamMember.objects.using('analytics').all()
+            queryset = queryset.filter(team_we_vote_id=team_we_vote_id)
+            # Get the voter objects
+            volunteer_team_member_list = list(queryset)
+            # Just get the voter_we_vote_id's
+            queryset_flat = queryset.values_list('voter_we_vote_id', flat=True).distinct()
+            voter_we_vote_id_list = list(queryset_flat)
+        except Exception as e:
+            status += "ERROR_FIND_VOLUNTEER_TEAM_MEMBERS: " + str(e) + " "
 
     performance_list = []
     try:
         queryset = VolunteerWeeklyMetrics.objects.using('readonly').all()  # 'analytics'
-        # queryset = queryset.filter(we_vote_id__in=campaignx_we_vote_id_list)
+        if positive_value_exists(team_we_vote_id):
+            queryset = queryset.filter(voter_we_vote_id__in=voter_we_vote_id_list)
         performance_list = list(queryset)
     except Exception as e:
         status += "ERROR_RETRIEVING_VOLUNTEER_TASK_COMPLETED_LIST: " + str(e) + ' '
@@ -64,6 +80,7 @@ def performance_list_view(request):
                 'voter_guide_possibilities_created': one_person_one_week.voter_guide_possibilities_created,
             }
 
+    end_of_week_date_integer_list = sorted(end_of_week_date_integer_list)
     for voter_display_name in voter_display_name_list:
         # Set these values to true if we have any tasks completed in any of the weeks we are displaying
         performance_display_dict[voter_display_name]['candidates_created'] = 0
@@ -121,12 +138,30 @@ def performance_list_view(request):
                 performance_display_dict[voter_display_name]['volunteer_task_total'] += \
                     voter_guide_possibilities_created
 
+    try:
+        voter_display_name_list_modified = \
+            sorted(voter_display_name_list,
+                   key=lambda x: (-convert_to_int(performance_display_dict[x]['volunteer_task_total'])))
+    except Exception as e:
+        voter_display_name_list_modified = voter_display_name_list
+
+    volunteer_team_list = []
+    try:
+        queryset = VolunteerTeam.objects.all().order_by('team_name')
+        volunteer_team_list = list(queryset)
+    except Exception as e:
+        message = "COULD_NOT_GET_VOLUNTEER_TEAM_LIST: " + str(e) + " "
+        messages.add_message(request, messages.ERROR, message)
+
     messages_on_stage = get_messages(request)
     template_values = {
         'end_of_week_date_integer_list':    end_of_week_date_integer_list,
-        'messages_on_stage':        messages_on_stage,
-        'performance_display_dict': performance_display_dict,
-        'performance_list':         performance_list,
-        'voter_display_name_list':  voter_display_name_list,
+        'messages_on_stage':                messages_on_stage,
+        'performance_display_dict':         performance_display_dict,
+        'performance_list':                 performance_list,
+        'team_we_vote_id':                  team_we_vote_id,
+        'volunteer_team_list':              volunteer_team_list,
+        'volunteer_team_member_list':       volunteer_team_member_list,
+        'voter_display_name_list':          voter_display_name_list_modified,
     }
     return render(request, 'volunteer_task/performance_list.html', template_values)

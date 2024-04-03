@@ -148,6 +148,7 @@ def admin_home_view(request):
         'voter_with_friends_counts':          voter_with_friends_counts,
         'voters_with_plan_count':             voters_with_plan_count,
         'voter_friendships_count':            friend_manager.get_count_of_friendships(friendlinks),
+        'WE_VOTE_SERVER_ROOT_URL':            WE_VOTE_SERVER_ROOT_URL,
     }
     response = render(request, 'admin_tools/index.html', template_values)
 

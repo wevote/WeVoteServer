@@ -559,6 +559,10 @@ def fetch_next_we_vote_id_sms_integer():
     return fetch_next_we_vote_id_integer('we_vote_id_last_sms_integer')
 
 
+def fetch_next_we_vote_id_volunteer_team_integer():
+    return fetch_next_we_vote_id_integer('we_vote_id_last_volunteer_team_integer')
+
+
 def fetch_next_we_vote_id_voter_integer():
     return fetch_next_we_vote_id_integer('we_vote_id_last_voter_integer')
 
