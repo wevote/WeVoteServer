@@ -16,6 +16,7 @@ from volunteer_task.models import VolunteerWeeklyMetrics
 from voter.models import voter_has_authority, VoterManager
 from wevote_functions.functions import convert_to_int, positive_value_exists
 from .controllers import update_weekly_volunteer_metrics
+from .models import VolunteerTeam, VolunteerTeamMember
 
 
 @login_required
@@ -25,16 +26,31 @@ def performance_list_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    team_name = request.GET.get('team_name', False)
     status = ""
     success = True
+    team_we_vote_id = request.GET.get('team_we_vote_id', False)
 
     results = update_weekly_volunteer_metrics()
+
+    volunteer_team_member_list = []
+    voter_we_vote_id_list = []
+    if positive_value_exists(team_we_vote_id):
+        try:
+            queryset = VolunteerTeamMember.objects.using('analytics').all()
+            queryset = queryset.filter(team_we_vote_id=team_we_vote_id)
+            # Get the voter objects
+            volunteer_team_member_list = list(queryset)
+            # Just get the voter_we_vote_id's
+            queryset_flat = queryset.values_list('voter_we_vote_id', flat=True).distinct()
+            voter_we_vote_id_list = list(queryset_flat)
+        except Exception as e:
+            status += "ERROR_FIND_VOLUNTEER_TEAM_MEMBERS: " + str(e) + " "
 
     performance_list = []
     try:
         queryset = VolunteerWeeklyMetrics.objects.using('readonly').all()  # 'analytics'
-        # queryset = queryset.filter(we_vote_id__in=campaignx_we_vote_id_list)
+        if positive_value_exists(team_we_vote_id):
+            queryset = queryset.filter(voter_we_vote_id__in=voter_we_vote_id_list)
         performance_list = list(queryset)
     except Exception as e:
         status += "ERROR_RETRIEVING_VOLUNTEER_TASK_COMPLETED_LIST: " + str(e) + ' '
@@ -129,12 +145,23 @@ def performance_list_view(request):
     except Exception as e:
         voter_display_name_list_modified = voter_display_name_list
 
+    volunteer_team_list = []
+    try:
+        queryset = VolunteerTeam.objects.all().order_by('team_name')
+        volunteer_team_list = list(queryset)
+    except Exception as e:
+        message = "COULD_NOT_GET_VOLUNTEER_TEAM_LIST: " + str(e) + " "
+        messages.add_message(request, messages.ERROR, message)
+
     messages_on_stage = get_messages(request)
     template_values = {
         'end_of_week_date_integer_list':    end_of_week_date_integer_list,
         'messages_on_stage':                messages_on_stage,
         'performance_display_dict':         performance_display_dict,
         'performance_list':                 performance_list,
+        'team_we_vote_id':                  team_we_vote_id,
+        'volunteer_team_list':              volunteer_team_list,
+        'volunteer_team_member_list':       volunteer_team_member_list,
         'voter_display_name_list':          voter_display_name_list_modified,
     }
     return render(request, 'volunteer_task/performance_list.html', template_values)

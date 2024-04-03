@@ -44,6 +44,7 @@ def get_list_from_dict(dict_variable, dict_key):
     except Exception as e:
         return []
 
+
 @register.filter
 def pennies_to_money(number):
     number_string = str(number)

@@ -8,6 +8,37 @@
 {% load humanize %}
 
 <h1>Scoreboard</h1>
+{# Dropdown to choose which team scores to display #}
+<form name="team_name" method="get" action="{% url 'volunteer_task:performance_list' %}">
+  {% csrf_token %}
+  {# Filter by VolunteerTeam: Only show members of the chosen team #}
+  <div class="form-group pull-left">
+      <label for="team_name_id" class="control-label">
+        <span class="u-no-break">Filter by Team:</span>
+      </label>
+      <select id="team_select_id" name="team_we_vote_id">
+          <option value="">-- choose team --</option>
+        {% for volunteer_team in volunteer_team_list %}
+          <option value="{{ volunteer_team.we_vote_id }}" {% if team_we_vote_id|slugify == volunteer_team.we_vote_id|slugify %}selected="selected"{% endif %}>{{ volunteer_team.team_name }}</option>
+        {% endfor %}
+          <option value="NOT_ASSIGNED_TO_TEAM" {% if team_name|slugify == "NOT_ASSIGNED_TO_TEAM"|slugify %}selected="selected"{% endif %}>* Not Assigned to Team *</option>
+      </select>
+    &nbsp;&nbsp;&nbsp;
+  </div>
+</form>
+
+{% if team_we_vote_id %}
+    <div>
+        {% for volunteer_team_member in volunteer_team_member_list %}
+            {% if forloop.counter > 1 %}&nbsp;|&nbsp;{% endif %}
+            <a href="{% url 'voter:voter_summary_we_vote_id' volunteer_team_member.voter.we_vote_id %}"
+                target="_blank">
+                {{ volunteer_team_member.voter.get_full_name }}
+                <span class="glyphicon glyphicon-new-window"></span></a>
+        {% endfor %}
+    </div>
+{% endif %}
+
 <div style="font-size: 1.4em">
 <table class="table table-condensed table-hover">
     <thead>
@@ -101,12 +132,15 @@
 {% endfor %}
 </table>
 
-<table class="table table-condensed">
-    <tr>
-        {# Positions Saved #}
-        <td></td>
-        <td></td>
-    </tr>
-</table>
+
 </div>{# End of font-size: 1.4em #}
+
+<script>
+    $(function() {
+        $('#team_select_id').change(function() {
+            this.form.submit();
+        });
+    });
+</script>
+
 {% endblock %}

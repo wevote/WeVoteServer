@@ -13,6 +13,25 @@ from wevote_settings.models import fetch_volunteer_task_weekly_metrics_last_upda
     WeVoteSettingsManager
 
 
+def augmentation_change_found(changes_found_dict={}):  # politician_requested_change_found
+    status = ""
+    # Which kinds of changes are considered VOLUNTEER_ACTION_POLITICIAN_AUGMENTATION
+    changes_which_count = \
+        ['is_ballotpedia_added', 'is_candidate_analysis_done', 'is_facebook_added', 'is_linkedin_added',
+         'is_twitter_handle_added', 'is_wikipedia_added', 'is_website_added']
+    return changes_which_count_found(changes_found_dict=changes_found_dict, changes_which_count=changes_which_count)
+
+
+def is_key_in_dict_and_true(dict_to_search={}, key_to_search=''):
+    status = ""
+    try:
+        if key_to_search in dict_to_search:
+            return positive_value_exists(dict_to_search[key_to_search])
+    except Exception as e:
+        status += "FAILED_TO_CHECK_KEY_IN_DICT_AND_TRUE: " + str(e) + " "
+    return False
+
+
 def generate_start_and_end_of_week_date_integer(earliest_date_integer=None, latest_date_integer=None):
     status = ""
     success = True
@@ -71,6 +90,31 @@ def generate_start_and_end_of_week_date_integer(earliest_date_integer=None, late
         'start_and_end_of_week_date_integer_list':  start_and_end_of_week_date_integer_list,
     }
     return results
+
+
+def is_candidate_analysis_done(changes_found_dict={}):
+    # Which kinds of changes are considered VOLUNTEER_ACTION_POLITICIAN_AUGMENTATION
+    changes_which_count = ['is_candidate_analysis_done']
+    return changes_which_count_found(changes_found_dict=changes_found_dict, changes_which_count=changes_which_count)
+
+
+def politician_requested_change_found(changes_found_dict={}):
+    status = ""
+    # Which kinds of changes are considered VOLUNTEER_ACTION_POLITICIAN_REQUEST
+    changes_which_count = \
+        ['is_ballotpedia_added', 'is_candidate_analysis_done', 'is_facebook_added', 'is_linkedin_added',
+         'is_twitter_handle_added', 'is_wikipedia_added', 'is_website_added']
+    return changes_which_count_found(changes_found_dict=changes_found_dict, changes_which_count=changes_which_count)
+
+
+def changes_which_count_found(changes_found_dict={}, changes_which_count=[]):
+    status = ""
+    for one_change in changes_which_count:
+        try:
+            is_key_in_dict_and_true(dict_to_search=changes_found_dict, key_to_search=one_change)
+        except Exception as e:
+            status += "FAILED_TO_CALCULATE_WHICH_COUNT_MATCH: " + str(e) + " "
+    return False
 
 
 def update_or_create_weekly_metrics_one_volunteer(
