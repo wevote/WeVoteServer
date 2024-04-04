@@ -669,7 +669,7 @@ def voter_edit_process_view(request):
                 team_name = volunteer_team.team_name
                 team_we_vote_id = volunteer_team.we_vote_id
                 volunteer_team_found = True
-                message = "Successfully created {team_name}. "
+                message = "Successfully created {team_name}. ".format(team_name=team_name)
                 messages.add_message(request, messages.INFO, message)
             except Exception as e:
                 message = "COULD_NOT_CREATE_VOLUNTEER_TEAM: " + str(e) + " "
@@ -715,7 +715,7 @@ def voter_edit_process_view(request):
     # Now delete or add this voter from/to one of the teams
     volunteer_team_list = []
     try:
-        queryset = VolunteerTeam.objects.all()
+        queryset = VolunteerTeam.objects.using('readonly').all()
         volunteer_team_list = list(queryset)
     except Exception as e:
         message = "COULD_NOT_GET_VOLUNTEER_TEAM_LIST2: " + str(e) + " "
@@ -730,7 +730,7 @@ def voter_edit_process_view(request):
             team_we_vote_id = volunteer_team.we_vote_id
             if positive_value_exists(team_we_vote_id) and positive_value_exists(voter_we_vote_id):
                 try:
-                    number_deleted, details = VolunteerTeamMember.objects \
+                    number_deleted, details = VolunteerTeamMember.objects.using('readonly') \
                         .filter(
                             team_we_vote_id__iexact=team_we_vote_id,
                             voter_we_vote_id__iexact=voter_we_vote_id,
@@ -1261,7 +1261,8 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
 
         volunteer_team_member_dict = {}
         try:
-            queryset = VolunteerTeamMember.objects.all().filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            queryset = VolunteerTeamMember.objects.using('readonly').all()\
+                .filter(voter_we_vote_id__iexact=voter_we_vote_id)
             volunteer_team_membership_list = list(queryset)
             if len(volunteer_team_membership_list) > 0:
                 for volunteer_team_member in volunteer_team_membership_list:
@@ -1273,7 +1274,7 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
 
         volunteer_team_list = []
         try:
-            queryset = VolunteerTeam.objects.all().order_by('team_name')
+            queryset = VolunteerTeam.objects.using('readonly').all().order_by('team_name')
             volunteer_team_list = list(queryset)
             if len(volunteer_team_list) > 0:
                 volunteer_team_list_modified = []
