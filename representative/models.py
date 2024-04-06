@@ -723,8 +723,10 @@ class RepresentativeManager(models.Manager):
         return results
 
     @staticmethod
-    def retrieve_representatives_are_not_duplicates(representative1_we_vote_id, representative2_we_vote_id,
-                                                    read_only=True):
+    def retrieve_representatives_are_not_duplicates(
+            representative1_we_vote_id,
+            representative2_we_vote_id,
+            read_only=True):
         status = ''
         representatives_are_not_duplicates = RepresentativesAreNotDuplicates()
         # Note that the direction of the friendship does not matter
@@ -877,8 +879,7 @@ class RepresentativeManager(models.Manager):
             read_only=False,
             representatives_limit=300,
             search_string='',
-            years_list=[],
-    ):
+            years_list=[]):
         """
 
         :param index_start:
@@ -1232,7 +1233,7 @@ class RepresentativeManager(models.Manager):
                 exception_multiple_object_returned = True
             except Exception as e:
                 status += 'FAILED_TO_RETRIEVE_REPRESENTATIVE_BY_WE_VOTE_ID ' \
-                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                        '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
                 success = False
 
         results = {
@@ -1279,7 +1280,7 @@ class RepresentativeManager(models.Manager):
                 exception_multiple_object_returned = True
             except Exception as e:
                 status += 'EXCEPTION_UPDATE_OR_CREATE_REPRESENTATIVES_ARE_NOT_DUPLICATES ' \
-                         '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
+                        '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
                 success = False
 
         results = {
@@ -1292,8 +1293,10 @@ class RepresentativeManager(models.Manager):
         return results
 
     @staticmethod
-    def update_representative_social_media(representative, representative_twitter_handle=False,
-                                           representative_facebook=False):
+    def update_representative_social_media(
+            representative,
+            representative_twitter_handle=False,
+            representative_facebook=False):
         """
         Update a representative entry with general social media data. If a value is passed in False
         it means "Do not update"
@@ -1337,13 +1340,14 @@ class RepresentativeManager(models.Manager):
         return results
 
     @staticmethod
-    def update_representative_twitter_details(representative, twitter_dict,
-                                              cached_twitter_profile_image_url_https,
-                                              cached_twitter_profile_background_image_url_https,
-                                              cached_twitter_profile_banner_url_https,
-                                              we_vote_hosted_profile_image_url_large,
-                                              we_vote_hosted_profile_image_url_medium,
-                                              we_vote_hosted_profile_image_url_tiny):
+    def update_representative_twitter_details(
+            representative, twitter_dict,
+            cached_twitter_profile_image_url_https,
+            cached_twitter_profile_background_image_url_https,
+            cached_twitter_profile_banner_url_https,
+            we_vote_hosted_profile_image_url_large,
+            we_vote_hosted_profile_image_url_medium,
+            we_vote_hosted_profile_image_url_tiny):
         """
         Update a representative entry with details retrieved from the Twitter API.
         """
@@ -1434,9 +1438,11 @@ class RepresentativeManager(models.Manager):
         return results
 
     @staticmethod
-    def reset_representative_image_details(representative, twitter_profile_image_url_https,
-                                           twitter_profile_background_image_url_https,
-                                           twitter_profile_banner_url_https):
+    def reset_representative_image_details(
+            representative,
+            twitter_profile_image_url_https,
+            twitter_profile_background_image_url_https,
+            twitter_profile_banner_url_https):
         """
         Reset an representative entry with original image details from we vote image.
         """
@@ -1576,8 +1582,7 @@ class RepresentativeManager(models.Manager):
             is_from_google_civic=False,
             polling_location_we_vote_id='',
             state_code=None,
-            defaults={}
-    ):
+            defaults={}):
         entry_created = False
         representatives_missing = None
         representatives_missing_found = False
