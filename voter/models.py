@@ -3158,7 +3158,7 @@ class Voter(AbstractBaseUser):
     # When a person using an organization's Twitter handle signs in, we create a voter account. This is how
     #  we link the voter account to the organization.
     linked_organization_we_vote_id = models.CharField(
-        verbose_name="we vote id for linked organization", max_length=255, null=True, blank=True, unique=True)
+        verbose_name="we vote id for linked organization", max_length=255, null=True, unique=True, db_index=True)
 
     # Redefine the basic fields that would normally be defined in User
     # username = models.CharField(unique=True, max_length=50, validators=[alphanumeric])  # Increase max_length to 255
