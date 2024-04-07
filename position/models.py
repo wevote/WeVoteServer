@@ -453,9 +453,11 @@ class PositionEntered(models.Model):
             election = Election.objects.get(google_civic_election_id=self.google_civic_election_id)
         except Election.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
-            logger.error("position.election Found multiple")
+            logger.error("PositionEntered.election Found multiple")
             return
         except Election.DoesNotExist:
+            return
+        except Exception as e:
             return
         return election
 
@@ -871,9 +873,11 @@ class PositionForFriends(models.Model):
             election = Election.objects.get(google_civic_election_id=self.google_civic_election_id)
         except Election.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
-            logger.error("position.election Found multiple")
+            logger.error("PositionForFriends.election Found multiple")
             return
         except Election.DoesNotExist:
+            return
+        except Exception as e:
             return
         return election
 

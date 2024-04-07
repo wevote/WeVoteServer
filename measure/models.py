@@ -266,13 +266,15 @@ class ContestMeasureManager(models.Manager):
     def __unicode__(self):
         return "ContestMeasureManager"
 
-    def retrieve_contest_measure_from_id(self, contest_measure_id, read_only=False):
+    @staticmethod
+    def retrieve_contest_measure_from_id(contest_measure_id, read_only=False):
         contest_measure_manager = ContestMeasureManager()
         return contest_measure_manager.retrieve_contest_measure(
             contest_measure_id=contest_measure_id,
             read_only=read_only)
 
-    def retrieve_contest_measure_from_we_vote_id(self, contest_measure_we_vote_id, read_only=False):
+    @staticmethod
+    def retrieve_contest_measure_from_we_vote_id(contest_measure_we_vote_id, read_only=False):
         contest_measure_id = 0
         contest_measure_manager = ContestMeasureManager()
         return contest_measure_manager.retrieve_contest_measure(
@@ -280,7 +282,8 @@ class ContestMeasureManager(models.Manager):
             contest_measure_we_vote_id=contest_measure_we_vote_id,
             read_only=read_only)
 
-    def retrieve_contest_measure_from_maplight_id(self, maplight_id, read_only=False):
+    @staticmethod
+    def retrieve_contest_measure_from_maplight_id(maplight_id, read_only=False):
         contest_measure_id = 0
         contest_measure_we_vote_id = ''
         contest_measure_manager = ContestMeasureManager()
@@ -290,13 +293,15 @@ class ContestMeasureManager(models.Manager):
             maplight_id=maplight_id,
             read_only=read_only)
 
-    def retrieve_contest_measure_from_ballotpedia_measure_id(self, ballotpedia_measure_id, read_only=False):
+    @staticmethod
+    def retrieve_contest_measure_from_ballotpedia_measure_id(ballotpedia_measure_id, read_only=False):
         contest_measure_manager = ContestMeasureManager()
         return contest_measure_manager.retrieve_contest_measure(
             ballotpedia_measure_id=ballotpedia_measure_id,
             read_only=read_only)
 
-    def fetch_contest_measure_id_from_maplight_id(self, maplight_id):
+    @staticmethod
+    def fetch_contest_measure_id_from_maplight_id(maplight_id):
         contest_measure_id = 0
         contest_measure_we_vote_id = ''
         contest_measure_manager = ContestMeasureManager()
@@ -309,7 +314,8 @@ class ContestMeasureManager(models.Manager):
             return results['contest_measure_id']
         return 0
 
-    def fetch_contest_measure_we_vote_id_from_id(self, contest_measure_id):
+    @staticmethod
+    def fetch_contest_measure_we_vote_id_from_id(contest_measure_id):
         contest_measure_we_vote_id = ''
         maplight_id = ''
         contest_measure_manager = ContestMeasureManager()
@@ -322,7 +328,8 @@ class ContestMeasureManager(models.Manager):
             return results['contest_measure_we_vote_id']
         return 0
 
-    def fetch_google_civic_election_id_from_measure_we_vote_id(self, contest_measure_we_vote_id):
+    @staticmethod
+    def fetch_google_civic_election_id_from_measure_we_vote_id(contest_measure_we_vote_id):
         """
         Take in contest_measure_we_vote_id and return google_civic_election_id
         :param contest_measure_we_vote_id:
@@ -343,8 +350,8 @@ class ContestMeasureManager(models.Manager):
 
         return google_civic_election_id
 
+    @staticmethod
     def update_or_create_contest_measure(
-            self,
             ballotpedia_measure_id='',
             ctcl_uuid=None,
             district_id='',
@@ -585,8 +592,8 @@ class ContestMeasureManager(models.Manager):
         return results
 
     # NOTE: searching by all other variables seems to return a list of objects
+    @staticmethod
     def retrieve_contest_measure(
-            self,
             ballotpedia_measure_id=0,
             contest_measure_id=0,
             contest_measure_we_vote_id='',
@@ -668,7 +675,6 @@ class ContestMeasureManager(models.Manager):
             status += "RETRIEVE_MEASURE_EXCEPTION: " + str(e) + " "
             success = False
 
-
         results = {
             'success':                      success,
             'status':                       status,
@@ -682,7 +688,8 @@ class ContestMeasureManager(models.Manager):
         }
         return results
 
-    def fetch_contest_measure_id_from_we_vote_id(self, contest_measure_we_vote_id):
+    @staticmethod
+    def fetch_contest_measure_id_from_we_vote_id(contest_measure_we_vote_id):
         """
         Take in contest_measure_we_vote_id and return internal/local-to-this-database contest_measure_id
         :param contest_measure_we_vote_id:
@@ -702,7 +709,8 @@ class ContestMeasureManager(models.Manager):
 
         return contest_measure_id
 
-    def fetch_state_code_from_we_vote_id(self, contest_measure_we_vote_id):
+    @staticmethod
+    def fetch_state_code_from_we_vote_id(contest_measure_we_vote_id):
         """
         Take in contest_measure_we_vote_id and return return the state_code
         :param contest_measure_we_vote_id:
@@ -722,7 +730,8 @@ class ContestMeasureManager(models.Manager):
 
         return state_code
 
-    def add_measure_position_sorting_dates_if_needed(self, position_object=None, contest_measure=None):
+    @staticmethod
+    def add_measure_position_sorting_dates_if_needed(position_object=None, contest_measure=None):
         generate_sorting_dates = False
         position_object_updated = False
         measure_year_changed = False
@@ -788,7 +797,8 @@ class ContestMeasureManager(models.Manager):
             'success':                  success,
         }
 
-    def generate_measure_position_sorting_dates(self, google_civic_election_id=''):
+    @staticmethod
+    def generate_measure_position_sorting_dates(google_civic_election_id=''):
         largest_year_integer = 0
         largest_election_date_integer = 0
         election_manager = ElectionManager()
@@ -809,7 +819,8 @@ class ContestMeasureManager(models.Manager):
             'largest_election_date_integer':  largest_election_date_integer,
         }
 
-    def retrieve_measures_are_not_duplicates_list(self, contest_measure_we_vote_id, read_only=True):
+    @staticmethod
+    def retrieve_measures_are_not_duplicates_list(contest_measure_we_vote_id, read_only=True):
         """
         Get a list of other measure_we_vote_id's that are not duplicates
         :param contest_measure_we_vote_id:
@@ -887,8 +898,8 @@ class ContestMeasureManager(models.Manager):
         results = self.retrieve_measures_are_not_duplicates_list(measure_we_vote_id)
         return results['contest_measures_are_not_duplicates_list_we_vote_ids']
 
+    @staticmethod
     def create_measure_row_entry(
-            self,
             ctcl_uuid=None,
             google_civic_election_id=None,
             measure_subtitle=None,
@@ -965,8 +976,16 @@ class ContestMeasureManager(models.Manager):
             }
         return results
 
-    def update_measure_row_entry(self, measure_title, measure_subtitle, measure_text, state_code, ctcl_uuid,
-                                 google_civic_election_id, measure_we_vote_id, defaults):
+    @staticmethod
+    def update_measure_row_entry(
+            measure_title,
+            measure_subtitle,
+            measure_text,
+            state_code,
+            ctcl_uuid,
+            google_civic_election_id,
+            measure_we_vote_id,
+            defaults):
         """
             Update ContestMeasure table entry with matching we_vote_id 
         :param measure_title: 
@@ -1054,8 +1073,12 @@ class ContestMeasureListManager(models.Manager):
     def __unicode__(self):
         return "ContestMeasureListManager"
 
+    @staticmethod
     def fetch_measures_from_non_unique_identifiers_count(
-            self, google_civic_election_id, state_code, measure_title, ignore_measure_we_vote_id_list=[]):
+            google_civic_election_id,
+            state_code,
+            measure_title,
+            ignore_measure_we_vote_id_list=[]):
         keep_looking_for_duplicates = True
         status = ""
 
@@ -1081,8 +1104,8 @@ class ContestMeasureListManager(models.Manager):
 
         return 0
 
+    @staticmethod
     def retrieve_measures(
-            self,
             google_civic_election_id=0,
             ballotpedia_district_id=0,
             state_code="",
@@ -1149,8 +1172,8 @@ class ContestMeasureListManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_all_measures_for_upcoming_election(
-            self,
             google_civic_election_id_list=[],
             state_code='',
             search_string=False,
@@ -1265,8 +1288,8 @@ class ContestMeasureListManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_contest_measures_from_non_unique_identifiers(
-            self,
             google_civic_election_id_list=[],
             incoming_state_code='',
             contest_measure_title='',
@@ -1537,9 +1560,11 @@ class ContestMeasureListManager(models.Manager):
         }
         return results
 
-    def retrieve_measures_for_specific_elections(self, google_civic_election_id_list=[],
-                                                 limit_to_this_state_code="",
-                                                 return_list_of_objects=False):
+    @staticmethod
+    def retrieve_measures_for_specific_elections(
+            google_civic_election_id_list=[],
+            limit_to_this_state_code="",
+            return_list_of_objects=False):
         status = ""
         measure_list_objects = []
         measure_list_light = []
@@ -1604,7 +1629,8 @@ class ContestMeasureListManager(models.Manager):
         }
         return results
 
-    def retrieve_measure_count_for_election_and_state(self, google_civic_election_id=0, state_code=''):
+    @staticmethod
+    def retrieve_measure_count_for_election_and_state(google_civic_election_id=0, state_code=''):
         status = ''
         if not positive_value_exists(google_civic_election_id) and not positive_value_exists(state_code):
             status += 'VALID_ELECTION_ID_AND_STATE_CODE_MISSING '
@@ -1648,9 +1674,14 @@ class ContestMeasureListManager(models.Manager):
         }
         return results
 
-    def retrieve_possible_duplicate_measures(self, measure_title, google_civic_election_id, measure_url, maplight_id,
-                                             vote_smart_id,
-                                             we_vote_id_from_master=''):
+    @staticmethod
+    def retrieve_possible_duplicate_measures(
+            measure_title,
+            google_civic_election_id,
+            measure_url,
+            maplight_id,
+            vote_smart_id,
+            we_vote_id_from_master=''):
         measure_list_objects = []
         filters = []
         measure_list_found = False
@@ -1722,7 +1753,8 @@ class ContestMeasureListManager(models.Manager):
         }
         return results
 
-    def search_measures_in_specific_elections(self, google_civic_election_id_list, search_string='', state_code=''):
+    @staticmethod
+    def search_measures_in_specific_elections(google_civic_election_id_list, search_string='', state_code=''):
         """
         This function, search_measures_in_specific_elections, is meant to cast a wider net for any
         possible candidates that might match.
@@ -1817,8 +1849,10 @@ class ContestMeasureListManager(models.Manager):
         }
         return results
 
-    def update_or_create_contest_measures_are_not_duplicates(self, contest_measure1_we_vote_id,
-                                                             contest_measure2_we_vote_id):
+    @staticmethod
+    def update_or_create_contest_measures_are_not_duplicates(
+            contest_measure1_we_vote_id,
+            contest_measure2_we_vote_id):
         """
         Either update or create a contest_measure entry.
         """

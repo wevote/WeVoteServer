@@ -21,7 +21,8 @@ from politician.models import PoliticianManager
 from stripe_donations.models import StripeManager
 from voter.models import voter_has_authority, VoterManager
 from wevote_functions.functions import convert_state_code_to_state_text, convert_to_int, \
-    generate_date_as_integer, positive_value_exists, STATE_CODE_MAP
+    positive_value_exists, STATE_CODE_MAP
+from wevote_functions.functions_date import generate_date_as_integer
 from .controllers import create_campaignx_supporters_from_positions, figure_out_campaignx_conflict_values, \
     refresh_campaignx_supporters_count_in_all_children, merge_these_two_campaignx_entries
 from .models import CampaignX, CampaignXManager, CampaignXOwner, CampaignXPolitician, CampaignXSupporter, \
@@ -875,6 +876,9 @@ def campaign_list_view(request):
             filters.append(new_filter)
 
             new_filter = Q(linked_politician_we_vote_id__iexact=one_word)
+            filters.append(new_filter)
+
+            new_filter = Q(seo_friendly_path__iexact=one_word)
             filters.append(new_filter)
 
             new_filter = Q(started_by_voter_we_vote_id__iexact=one_word)

@@ -5,15 +5,18 @@
 from django.db import models
 from django.utils.timezone import localtime, now
 
-from voter.models import fetch_voter_from_voter_device_link
-from wevote_functions.functions import convert_date_as_integer_to_date, convert_date_to_date_as_integer, \
-    convert_to_int, positive_value_exists
+from voter.models import fetch_voter_from_voter_device_link, Voter
+from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_settings.models import fetch_next_we_vote_id_volunteer_team_integer, fetch_site_unique_id_prefix
 
 VOLUNTEER_ACTION_POSITION_SAVED = 1
 VOLUNTEER_ACTION_POSITION_COMMENT_SAVED = 2
 VOLUNTEER_ACTION_CANDIDATE_CREATED = 3
 VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED = 4
-VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION = 5
+VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION = 5  # Including starting process
+VOLUNTEER_ACTION_POLITICIAN_AUGMENTATION = 6  # Candidate or Politician
+VOLUNTEER_ACTION_POLITICIAN_PHOTO = 7  # Candidate or Politician: Photo related change
+VOLUNTEER_ACTION_POLITICIAN_REQUEST = 8  # Politician sends in personal statement
 
 
 class VolunteerTaskCompleted(models.Model):
@@ -112,6 +115,65 @@ class VolunteerTaskManager(models.Manager):
             'action':       action,
         }
         return results
+
+
+class VolunteerTeam(models.Model):
+    """
+    A team of volunteers
+    """
+    team_name = models.CharField(max_length=255, null=True, unique=True, db_index=True)
+    team_description = models.TextField(null=True)
+    # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our data
+    # It starts with "wv" then we add on a database specific identifier like "3v" (WeVoteSetting.site_unique_id_prefix)
+    # then the string "team", and then a sequential integer like "123".
+    # We keep the last value in WeVoteSetting.we_vote_id_last_volunteer_team_integer
+    we_vote_id = models.CharField(
+        max_length=255, default=None, null=True,
+        blank=True, unique=True, db_index=True)
+
+    # We override the save function, so we can auto-generate we_vote_id
+    def save(self, *args, **kwargs):
+        # Even if this data came from another source we still need a unique we_vote_id
+        if self.we_vote_id:
+            self.we_vote_id = self.we_vote_id.strip().lower()
+        if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
+            # ...generate a new id
+            site_unique_id_prefix = fetch_site_unique_id_prefix()
+            next_local_integer = fetch_next_we_vote_id_volunteer_team_integer()
+            # "wv" = We Vote
+            # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
+            # "team" = tells us this is a unique id for a VolunteerTeam
+            # next_integer = a unique, sequential integer for this server - not necessarily tied to database id
+            self.we_vote_id = "wv{site_unique_id_prefix}team{next_integer}".format(
+                site_unique_id_prefix=site_unique_id_prefix,
+                next_integer=next_local_integer,
+            )
+        super(VolunteerTeam, self).save(*args, **kwargs)
+
+
+class VolunteerTeamMember(models.Model):
+    DoesNotExist = None
+    MultipleObjectsReturned = None
+    objects = None
+
+    @staticmethod
+    def __unicode__():
+        return "VolunteerTeamMember"
+
+    date_last_changed = models.DateTimeField(null=True, auto_now=True, db_index=True)
+    team_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
+    voter_we_vote_id = models.CharField(max_length=255, default=None, null=True, db_index=True)
+
+    def voter(self):
+        if not self.voter_we_vote_id:
+            return
+        try:
+            voter = Voter.objects.get(we_vote_id=self.voter_we_vote_id)
+        except Voter.MultipleObjectsReturned as e:
+            return
+        except Voter.DoesNotExist:
+            return
+        return voter
 
 
 class VolunteerWeeklyMetrics(models.Model):

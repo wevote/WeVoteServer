@@ -3158,7 +3158,7 @@ class Voter(AbstractBaseUser):
     # When a person using an organization's Twitter handle signs in, we create a voter account. This is how
     #  we link the voter account to the organization.
     linked_organization_we_vote_id = models.CharField(
-        verbose_name="we vote id for linked organization", max_length=255, null=True, blank=True, unique=True)
+        verbose_name="we vote id for linked organization", max_length=255, null=True, unique=True, db_index=True)
 
     # Redefine the basic fields that would normally be defined in User
     # username = models.CharField(unique=True, max_length=50, validators=[alphanumeric])  # Increase max_length to 255
@@ -4769,6 +4769,7 @@ class VoterAddressManager(models.Manager):
         :return:
         """
         status = ''
+        success = True
         exception_multiple_object_returned = False
         new_address_created = False
         voter_address_has_value = False
@@ -4826,11 +4827,16 @@ class VoterAddressManager(models.Manager):
                 status = self.save_address_and_dupe_back_to_voter(voter_address_on_stage, status)
                 success = True
                 status += "UPDATE_OR_CREATE_SUCCESSFUL "
+            except Exception as e:
+                status += f'CRASHING_GOOGLE_GEOCODER: '
+
             except VoterAddress.MultipleObjectsReturned as e:
                 handle_record_found_more_than_one_exception(e, logger=logger)
                 success = False
                 status += 'MULTIPLE_MATCHING_ADDRESSES_FOUND '
                 exception_multiple_object_returned = True
+
+            
         else:
             success = False
             status += 'MISSING_VOTER_ID_OR_ADDRESS_TYPE '

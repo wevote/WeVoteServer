@@ -256,25 +256,30 @@ class OfficeHeld(models.Model):
 
 class OfficeHeldManager(models.Manager):
 
-    def __unicode__(self):
+    @staticmethod
+    def __unicode__():
         return "OfficeHeldManager"
 
-    def retrieve_office_held_from_id(self, office_held_id):
+    @staticmethod
+    def retrieve_office_held_from_id(office_held_id):
         office_held_manager = OfficeHeldManager()
         return office_held_manager.retrieve_office_held(office_held_id)
 
-    def retrieve_office_held_from_we_vote_id(self, office_held_we_vote_id):
+    @staticmethod
+    def retrieve_office_held_from_we_vote_id(office_held_we_vote_id):
         office_held_id = 0
         office_held_manager = OfficeHeldManager()
         return office_held_manager.retrieve_office_held(office_held_id, office_held_we_vote_id)
 
-    def retrieve_office_held_from_maplight_id(self, maplight_id):
+    @staticmethod
+    def retrieve_office_held_from_maplight_id(maplight_id):
         office_held_id = 0
         office_held_we_vote_id = ''
         office_held_manager = OfficeHeldManager()
         return office_held_manager.retrieve_office_held(office_held_id, office_held_we_vote_id, maplight_id)
 
-    def fetch_office_held_id_from_maplight_id(self, maplight_id):
+    @staticmethod
+    def fetch_office_held_id_from_maplight_id(maplight_id):
         office_held_id = 0
         office_held_we_vote_id = ''
         office_held_manager = OfficeHeldManager()
@@ -284,7 +289,8 @@ class OfficeHeldManager(models.Manager):
             return results['office_held_id']
         return 0
 
-    def fetch_office_held_we_vote_id_from_id(self, office_held_id):
+    @staticmethod
+    def fetch_office_held_we_vote_id_from_id(office_held_id):
         maplight_id = 0
         office_held_we_vote_id = ''
         office_held_manager = OfficeHeldManager()
@@ -629,8 +635,8 @@ class OfficeHeldManager(models.Manager):
             'offices_held_for_location':        offices_held_for_location,
         }
 
+    @staticmethod
     def retrieve_office_held(
-            self,
             google_civic_office_held_name='',
             maplight_id=None,
             ocd_division_id='',
@@ -735,7 +741,8 @@ class OfficeHeldManager(models.Manager):
         }
         return results
 
-    def fetch_office_held_id_from_we_vote_id(self, office_held_we_vote_id):
+    @staticmethod
+    def fetch_office_held_id_from_we_vote_id(office_held_we_vote_id):
         """
         Take in office_held_we_vote_id and return internal/local-to-this-database office_held_id
         :param office_held_we_vote_id:
@@ -755,8 +762,8 @@ class OfficeHeldManager(models.Manager):
 
         return office_held_id
 
+    @staticmethod
     def create_office_held_row_entry(
-            self,
             office_held_name,
             defaults={}):
         """
@@ -802,8 +809,8 @@ class OfficeHeldManager(models.Manager):
             }
         return results
 
+    @staticmethod
     def create_offices_held_for_location_row_entry(
-            self,
             polling_location_we_vote_id=None,
             state_code=None,
             voter_we_vote_id=None,
@@ -857,8 +864,8 @@ class OfficeHeldManager(models.Manager):
             }
         return results
 
+    @staticmethod
     def update_office_held_row_entry(
-            self,
             office_held_we_vote_id='',
             defaults={}):
         """
@@ -898,8 +905,8 @@ class OfficeHeldManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def update_offices_held_for_location_row_entry(
-            self,
             offices_held_for_location=None,
             defaults={}):
         success = False
@@ -932,8 +939,8 @@ class OfficeHeldManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_office_held_list(
-            self,
             state_code="",
             office_held_we_vote_id_list=[],
             read_only=False):
@@ -975,8 +982,8 @@ class OfficeHeldManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_offices_held_for_location(
-            self,
             offices_held_for_location_id=0,
             polling_location_we_vote_id='',
             voter_we_vote_id='',
@@ -1051,8 +1058,12 @@ class OfficeHeldManager(models.Manager):
             read_only=read_only,
         )
 
-    def retrieve_possible_duplicate_offices_held(self, google_civic_election_id, office_held_name, state_code,
-                                                    we_vote_id_from_master=''):
+    @staticmethod
+    def retrieve_possible_duplicate_offices_held(
+            google_civic_election_id,
+            office_held_name,
+            state_code,
+            we_vote_id_from_master=''):
         """
         Find entry that matches another entry in all critical fields other than we_vote_id_from_master
         :param google_civic_election_id:
@@ -1110,8 +1121,8 @@ class OfficeHeldManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def update_or_create_office_held(
-            self,
             office_held_we_vote_id,
             updated_values={}):
         """
@@ -1155,8 +1166,8 @@ class OfficeHeldManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def update_or_create_offices_held_for_location(
-            self,
             polling_location_we_vote_id='',
             updated_values={}):
         """

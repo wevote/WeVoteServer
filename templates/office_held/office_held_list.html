@@ -135,7 +135,7 @@
       let origin = new URL('{{request.build_absolute_uri}}').origin;
       let apiURL = origin + '/office_held/real_time_status/';
       let started = document.getElementById('started_update').value;
-      console.log("started ---- " + started);
+      console.log("started office_held_list ---- " + started);
       if (started === 'start') {
         $.ajax({
           type: "GET",

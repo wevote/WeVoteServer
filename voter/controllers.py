@@ -208,6 +208,9 @@ def delete_all_voter_information_permanently(voter_to_delete=None, user=None):  
 
     # Delete suggested friends
     delete_suggested_friends_results = delete_suggested_friends_for_voter(voter_to_delete_we_vote_id)
+
+    # make delete suggested for
+
     status += " " + delete_suggested_friends_results['status']
 
     # Delete friend invitations

@@ -12,8 +12,8 @@ from follow.models import FollowOrganizationList
 from organization.models import Organization
 import pytz
 import wevote_functions.admin
-from wevote_functions.functions import convert_date_as_integer_to_date, convert_date_to_date_as_integer, \
-    convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_functions.functions_date import convert_date_as_integer_to_date, convert_date_to_date_as_integer
 from wevote_settings.models import WeVoteSetting, WeVoteSettingsManager
 
 ACTION_VOTER_GUIDE_VISIT = 1
@@ -187,6 +187,8 @@ class AnalyticsAction(models.Model):
             logger.error("position.election Found multiple")
             return
         except Election.DoesNotExist:
+            return
+        except Exception as e:
             return
         return election
 
@@ -1773,6 +1775,8 @@ class OrganizationElectionMetrics(models.Model):
             return
         except Election.DoesNotExist:
             return
+        except Exception as e:
+            return
         return election
 
     def organization(self):
@@ -1936,6 +1940,8 @@ class SitewideElectionMetrics(models.Model):
         except Election.MultipleObjectsReturned as e:
             return
         except Election.DoesNotExist:
+            return
+        except Exception as e:
             return
         return election
 

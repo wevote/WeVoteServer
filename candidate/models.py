@@ -2714,6 +2714,8 @@ class CandidateCampaign(models.Model):
         except Election.DoesNotExist:
             logger.error("CandidateCampaign.election not attached to object, id: " + str(self.google_civic_election_id))
             return
+        except Exception as e:
+            return
         return election
 
     def office(self):
@@ -5030,6 +5032,8 @@ class CandidateToOfficeLink(models.Model):
         except Election.DoesNotExist:
             logger.error("CandidateToOfficeLink.election not attached to object, id: "
                          "" + str(self.google_civic_election_id))
+            return
+        except Exception as e:
             return
         return election
 
