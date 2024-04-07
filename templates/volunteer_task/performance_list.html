@@ -71,14 +71,23 @@
             {% if team_performance_dict.candidates_created %}
             &nbsp;&nbsp;&nbsp;Candidates Created<br />
             {% endif %}
+            {% if team_performance_dict.politicians_augmented %}
+            &nbsp;&nbsp;&nbsp;Candidates / Politicians Augmented<br />
+            {% endif %}
             {% if team_performance_dict.politicians_deduplicated %}
             &nbsp;&nbsp;&nbsp;Candidates / Politicians Deduplicated<br />
+            {% endif %}
+            {% if team_performance_dict.politicians_photo_added %}
+            &nbsp;&nbsp;&nbsp;Candidates / Politicians Photos Added<br />
             {% endif %}
             {% if team_performance_dict.positions_saved %}
             &nbsp;&nbsp;&nbsp;Opinions/Endorsements Saved<br />
             {% endif %}
             {% if team_performance_dict.position_comments_saved %}
             &nbsp;&nbsp;&nbsp;Opinion/Endorsement Comments Saved<br />
+            {% endif %}
+            {% if team_performance_dict.politicians_requested_changes %}
+            &nbsp;&nbsp;&nbsp;Politicians Requested Changes<br />
             {% endif %}
             {% if team_performance_dict.voter_guide_possibilities_created %}
             &nbsp;&nbsp;&nbsp;Voter Guides Saved<br />
@@ -91,14 +100,23 @@
             {% if team_performance_dict.candidates_created %}{# Show row if any candidates_created #}
             {{ team_one_date_dict.candidates_created|display_nothing_if_zero }}<br />
             {% endif %}
+            {% if team_performance_dict.politicians_augmented %}
+            {{ team_one_date_dict.politicians_augmented|display_nothing_if_zero }}<br />
+            {% endif %}
             {% if team_performance_dict.politicians_deduplicated %}
             {{ team_one_date_dict.politicians_deduplicated|display_nothing_if_zero }}<br />
+            {% endif %}
+            {% if team_performance_dict.politicians_photo_added %}
+            {{ team_one_date_dict.politicians_photo_added|display_nothing_if_zero }}<br />
             {% endif %}
             {% if team_performance_dict.positions_saved %}
             {{ team_one_date_dict.positions_saved|display_nothing_if_zero }}<br />
             {% endif %}
             {% if team_performance_dict.position_comments_saved %}
             {{ team_one_date_dict.position_comments_saved|display_nothing_if_zero }}<br />
+            {% endif %}
+            {% if team_performance_dict.politicians_requested_changes %}
+            {{ team_one_date_dict.politicians_requested_changes|display_nothing_if_zero }}<br />
             {% endif %}
             {% if team_performance_dict.voter_guide_possibilities_created %}
             {{ team_one_date_dict.voter_guide_possibilities_created|display_nothing_if_zero }}<br />
@@ -111,8 +129,14 @@
             {% if team_performance_dict.candidates_created %}
             {{ team_performance_dict.candidates_created }}<br />
             {% endif %}
+            {% if team_performance_dict.politicians_augmented %}
+            {{ team_performance_dict.politicians_augmented }}<br />
+            {% endif %}
             {% if team_performance_dict.politicians_deduplicated %}
             {{ team_performance_dict.politicians_deduplicated }}<br />
+            {% endif %}
+            {% if team_performance_dict.politicians_photo_added %}
+            {{ team_performance_dict.politicians_photo_added }}<br />
             {% endif %}
             {% if team_performance_dict.positions_saved %}
             {{ team_performance_dict.positions_saved }}<br />
@@ -120,10 +144,19 @@
             {% if team_performance_dict.position_comments_saved %}
             {{ team_performance_dict.position_comments_saved }}<br />
             {% endif %}
+            {% if team_performance_dict.politicians_requested_changes %}
+            {{ team_performance_dict.politicians_requested_changes }}<br />
+            {% endif %}
             {% if team_performance_dict.voter_guide_possibilities_created %}
             {{ team_performance_dict.voter_guide_possibilities_created }}<br />
             {% endif %}
         </td>
+    </tr>
+    <tr> {# Visual spacer #}
+        <td colspan="12"><p>
+            &nbsp;<br />
+            &nbsp;<br />
+        </p></td>
     </tr>
 {% endif %}
 
@@ -164,14 +197,23 @@
             {% if voter_dict.candidates_created %}
             &nbsp;&nbsp;&nbsp;Candidates Created<br />
             {% endif %}
+            {% if voter_dict.politicians_augmented %}
+            &nbsp;&nbsp;&nbsp;Candidates / Politicians Augmented<br />
+            {% endif %}
             {% if voter_dict.politicians_deduplicated %}
             &nbsp;&nbsp;&nbsp;Candidates / Politicians Deduplicated<br />
+            {% endif %}
+            {% if voter_dict.politicians_photo_added %}
+            &nbsp;&nbsp;&nbsp;Candidates / Politicians Photos Added<br />
             {% endif %}
             {% if voter_dict.positions_saved %}
             &nbsp;&nbsp;&nbsp;Opinions/Endorsements Saved<br />
             {% endif %}
             {% if voter_dict.position_comments_saved %}
             &nbsp;&nbsp;&nbsp;Opinion/Endorsement Comments Saved<br />
+            {% endif %}
+            {% if voter_dict.politicians_requested_changes %}
+            &nbsp;&nbsp;&nbsp;Politicians Requested Changes<br />
             {% endif %}
             {% if voter_dict.voter_guide_possibilities_created %}
             &nbsp;&nbsp;&nbsp;Voter Guides Saved<br />
@@ -186,14 +228,23 @@
             {% if voter_dict.candidates_created %}{# Show row if any candidates_created #}
             {{ voter_one_date_dict.candidates_created|display_nothing_if_zero }}<br />
             {% endif %}
+            {% if voter_dict.politicians_augmented %}
+            {{ voter_one_date_dict.politicians_augmented|display_nothing_if_zero }}<br />
+            {% endif %}
             {% if voter_dict.politicians_deduplicated %}
             {{ voter_one_date_dict.politicians_deduplicated|display_nothing_if_zero }}<br />
+            {% endif %}
+            {% if voter_dict.politicians_photo_added %}
+            {{ voter_one_date_dict.politicians_photo_added|display_nothing_if_zero }}<br />
             {% endif %}
             {% if voter_dict.positions_saved %}
             {{ voter_one_date_dict.positions_saved|display_nothing_if_zero }}<br />
             {% endif %}
             {% if voter_dict.position_comments_saved %}
             {{ voter_one_date_dict.position_comments_saved|display_nothing_if_zero }}<br />
+            {% endif %}
+            {% if voter_dict.politicians_requested_changes %}
+            {{ voter_one_date_dict.politicians_requested_changes|display_nothing_if_zero }}<br />
             {% endif %}
             {% if voter_dict.voter_guide_possibilities_created %}
             {{ voter_one_date_dict.voter_guide_possibilities_created|display_nothing_if_zero }}<br />
@@ -208,14 +259,23 @@
             {% if voter_dict.candidates_created %}
             {{ voter_dict.candidates_created }}<br />
             {% endif %}
+            {% if voter_dict.politicians_augmented %}
+            {{ voter_dict.politicians_augmented }}<br />
+            {% endif %}
             {% if voter_dict.politicians_deduplicated %}
             {{ voter_dict.politicians_deduplicated }}<br />
+            {% endif %}
+            {% if voter_dict.politicians_photo_added %}
+            {{ voter_dict.politicians_photo_added }}<br />
             {% endif %}
             {% if voter_dict.positions_saved %}
             {{ voter_dict.positions_saved }}<br />
             {% endif %}
             {% if voter_dict.position_comments_saved %}
             {{ voter_dict.position_comments_saved }}<br />
+            {% endif %}
+            {% if voter_dict.politicians_requested_changes %}
+            {{ voter_dict.politicians_requested_changes }}<br />
             {% endif %}
             {% if voter_dict.voter_guide_possibilities_created %}
             {{ voter_dict.voter_guide_possibilities_created }}<br />

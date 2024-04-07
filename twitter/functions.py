@@ -2,6 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 import json
+import re
 from datetime import datetime
 
 import tweepy
@@ -36,6 +37,8 @@ TWITTER_USER_SUSPENDED_LOG_RESPONSES = [
 
 
 def convert_twitter_user_object_data_to_we_vote_dict(twitter_user_data):
+    if twitter_user_data is None:
+        twitter_user_data = {}
     twitter_dict = {
         'description': twitter_user_data['description']
         if 'description' in twitter_user_data else '',
@@ -93,6 +96,21 @@ def expand_twitter_public_metrics(twitter_dict):
     return twitter_dict
 
 
+def is_valid_twitter_handle_format(twitter_handle):
+    if len(twitter_handle) > 15:
+        return False
+    return True
+    # We need to make this function more robust, something like the following...
+    # if not positive_value_exists(twitter_handle):
+    #     return False
+    # pattern = re.compile(r'^[a-zA-Z0-9_]{1,15}$')  # There are some older Twitter handles that are shorter
+    # results = pattern.match(twitter_handle)
+    # if hasattr(results, 'match'):
+    #     if getattr(results, 'match') == twitter_handle:
+    #         return True
+    # return False
+
+
 def retrieve_twitter_rate_limit_info():
     try:
         # auth = tweepy.OAuth2BearerHandler(TWITTER_BEARER_TOKEN)  # Theory is that this auth only reports rate_limit_status for requests made with a bearer token
@@ -122,7 +140,7 @@ def retrieve_twitter_rate_limit_info():
                 })
         return json.dumps(output)
     except Exception as e:
-        logger.error('retrieve_twitter_rate_limit_info caught: '+ str(e))
+        logger.error('retrieve_twitter_rate_limit_info caught: ' + str(e))
         return ""
 
 
@@ -140,6 +158,28 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
     twitter_user_not_found_in_twitter = False
     twitter_user_suspended_by_twitter = False
     write_to_server_logs = False
+
+    twitter_handle_format_valid = is_valid_twitter_handle_format(twitter_handle)
+
+    if not twitter_handle_format_valid:
+        status += "TWITTER_HANDLE_TOO_LONG "
+        twitter_user_not_found_in_twitter = True
+        twitter_dict = {
+            'twitter_handle_updates_failing': True,
+            'username': twitter_handle,
+        }
+        twitter_handle_found = False
+        results = {
+            'status': status,
+            'success': success,
+            'twitter_handle': twitter_handle,
+            'twitter_handle_found': twitter_handle_found,
+            'twitter_dict': twitter_dict,
+            'twitter_user_id': twitter_user_id,
+            'twitter_user_not_found_in_twitter': twitter_user_not_found_in_twitter,
+            'twitter_user_suspended_by_twitter': twitter_user_suspended_by_twitter,
+        }
+        return results
 
     print("tweepy client init. in retrieve_twitter_user_info -- twitter_handle: ", twitter_handle)
     client = tweepy.Client(
@@ -198,12 +238,16 @@ def retrieve_twitter_user_info(twitter_user_id=0, twitter_handle='', twitter_api
             try:
                 twitter_dict = convert_twitter_user_object_data_to_we_vote_dict(twitter_user.data)
                 twitter_user_id = getattr(twitter_user.data, 'id')  # Integer value. id_str would be the String value
-                twitter_handle_found = True
+                twitter_handle_found = positive_value_exists(twitter_user_id)
             except Exception as e:
                 status += 'TWITTER_DICT_DATA_NOT_FOUND-' + str(e) + " "
-                twitter_dict = {}
+                twitter_dict = {
+                    'twitter_handle_updates_failing': True,
+                    'username': twitter_handle,
+                }
                 twitter_user_id = 0
                 twitter_handle_found = False
+                twitter_user_not_found_in_twitter = True
             success = True
             # status += 'TWITTER_HANDLE_SUCCESS-' + str(twitter_handle) + " "
         elif positive_value_exists(twitter_user_id):

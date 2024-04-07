@@ -23,6 +23,7 @@ from admin_tools.views import redirect_to_sign_in_page
 from campaign.models import CampaignXManager
 from candidate.controllers import retrieve_candidate_photos
 from candidate.models import CandidateCampaign, CandidateListManager, CandidateManager, CandidateToOfficeLink, \
+    KIND_OF_LOG_ENTRY_ANALYSIS_COMMENT, KIND_OF_LOG_ENTRY_LINK_ADDED, \
     PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKNOWN, \
     PROFILE_IMAGE_TYPE_UPLOADED, PROFILE_IMAGE_TYPE_VOTE_USA
 from config.base import get_environment_variable
@@ -33,23 +34,25 @@ from image.controllers import create_resized_images
 from import_export_vote_smart.models import VoteSmartRatingOneCandidate
 from import_export_vote_smart.votesmart_local import VotesmartApiError
 from office.models import ContestOffice
-from politician.controllers import generate_campaignx_for_politician, politician_save_photo_from_file_reader, \
-    update_politician_details_from_candidate
 from position.models import PositionEntered, PositionListManager
 from representative.models import Representative, RepresentativeManager
+from volunteer_task.controllers import change_tracking, change_tracking_boolean
 from volunteer_task.models import VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION, VolunteerTaskManager
-from voter.models import fetch_voter_from_voter_device_link, voter_has_authority
+from voter.models import fetch_voter_from_voter_device_link, voter_has_authority, VoterManager
 from wevote_functions.functions import convert_to_int, convert_to_political_party_constant, \
     extract_first_name_from_full_name, extract_instagram_handle_from_text_string, \
     extract_middle_name_from_full_name, extract_last_name_from_full_name, \
     extract_state_from_ocd_division_id, extract_twitter_handle_from_text_string, get_voter_api_device_id, \
     positive_value_exists, STATE_CODE_MAP, display_full_name_with_correct_capitalization
-from wevote_functions.functions_date import convert_date_to_we_vote_date_string, convert_we_vote_date_string_to_date_as_integer
+from wevote_functions.functions_date import convert_date_to_we_vote_date_string, \
+    convert_we_vote_date_string_to_date_as_integer
 from wevote_settings.constants import IS_BATTLEGROUND_YEARS_AVAILABLE
 from .controllers import add_alternate_names_to_next_spot, add_twitter_handle_to_next_politician_spot, \
     fetch_duplicate_politician_count, figure_out_politician_conflict_values, find_duplicate_politician, \
+    generate_campaignx_for_politician, politician_save_photo_from_file_reader, \
+    update_politician_details_from_candidate, \
     merge_if_duplicate_politicians, merge_these_two_politicians, politicians_import_from_master_server
-from .models import Politician, PoliticianManager, POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, \
+from .models import Politician, PoliticianChangeLog, PoliticianManager, POLITICIAN_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, \
     POLITICIAN_UNIQUE_IDENTIFIERS, PoliticiansArePossibleDuplicates, POLITICAL_DATA_MANAGER, UNKNOWN
 from politician.controllers_generate_color import generate_background, validate_hex
 POLITICIANS_SYNC_URL = get_environment_variable("POLITICIANS_SYNC_URL")  # politiciansSyncOut
@@ -1572,12 +1575,18 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
         elif positive_value_exists(politician_on_stage.linked_campaignx_we_vote_id):
             politician_linked_campaignx_we_vote_id = politician_on_stage.linked_campaignx_we_vote_id
 
+        queryset = PoliticianChangeLog.objects.using('readonly').all()
+        queryset = queryset.filter(politician_we_vote_id__iexact=politician_we_vote_id)
+        queryset = queryset.order_by('-log_datetime')
+        change_log_list = list(queryset)
+
         if 'localhost' in WEB_APP_ROOT_URL:
             web_app_root_url = 'https://localhost:3000'
         else:
             web_app_root_url = 'https://quality.WeVote.US'
         template_values = {
             'ballotpedia_politician_url':   ballotpedia_politician_url,
+            'change_log_list':              change_log_list,
             'duplicate_politician_list':    duplicate_politician_list,
             'facebook_url':                 facebook_url,
             'facebook_url2':                facebook_url2,
@@ -1809,9 +1818,14 @@ def politician_edit_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    change_description = ""
+    change_description_changed = False
+    changes_found_dict = {}
+    primary_twitter_handle_changed = False
     status = ''
     success = True
     update_message = ''
+    volunteer_task_manager = VolunteerTaskManager()
 
     ballot_guide_official_statement = request.POST.get('ballot_guide_official_statement', False)
     ballotpedia_politician_name = request.POST.get('ballotpedia_politician_name', False)
@@ -1823,7 +1837,6 @@ def politician_edit_process_view(request):
     last_name = request.POST.get('last_name', False)
     profile_image_background_color = request.POST.get('profile_image_background_color', False)
     regenerate_color = request.POST.get('regenerate_color', False)
-    regenerate_color_edge_case = request.POST.get('regenerate_color_edge_case', False)
     facebook_url = request.POST.get('facebook_url', False)
     facebook_url2 = request.POST.get('facebook_url2', False)
     facebook_url3 = request.POST.get('facebook_url3', False)
@@ -1835,6 +1848,10 @@ def politician_edit_process_view(request):
         instagram_handle = extract_instagram_handle_from_text_string(instagram_handle)
     linkedin_url = request.POST.get('linkedin_url', False)
     maplight_id = request.POST.get('maplight_id', False)
+    candidate_analysis_comment = request.POST.get('candidate_analysis_comment', '')
+    if positive_value_exists(candidate_analysis_comment):
+        change_description += "ANALYSIS_COMMENT: " + candidate_analysis_comment + " "
+        change_description_changed = True
     politician_email = request.POST.get('politician_email', False)
     politician_email2 = request.POST.get('politician_email2', False)
     politician_email3 = request.POST.get('politician_email3', False)
@@ -2045,6 +2062,9 @@ def politician_edit_process_view(request):
                     messages.add_message(request, messages.ERROR,
                                          "Error converting politician photo to binary: {error}".format(error=e))
             if politician_photo_file_found and politician_photo_converted_to_binary:
+                changes_found_dict['is_photo_added'] = True
+                change_description += "Photo ADDED "
+                change_description_changed = True
                 photo_results = politician_save_photo_from_file_reader(
                     politician_we_vote_id=politician_we_vote_id,
                     politician_photo_binary_file=politician_photo_in_binary_format)
@@ -2074,6 +2094,10 @@ def politician_edit_process_view(request):
                     elif profile_image_type_currently_active is not False:
                         politician_on_stage.profile_image_type_currently_active = profile_image_type_currently_active
             elif politician_photo_file_delete:
+                changes_found_dict['is_photo_removed'] = True
+                change_description += "Photo REMOVED "
+                change_description_changed = True
+
                 politician_on_stage.we_vote_hosted_profile_uploaded_image_url_large = None
                 politician_on_stage.we_vote_hosted_profile_uploaded_image_url_medium = None
                 politician_on_stage.we_vote_hosted_profile_uploaded_image_url_tiny = None
@@ -2096,10 +2120,32 @@ def politician_edit_process_view(request):
             # ###############################################
             # Now process all other politician fields
             if ballot_guide_official_statement is not False:
+                change_results = change_tracking(
+                    existing_value=politician_on_stage.ballot_guide_official_statement,
+                    new_value=ballot_guide_official_statement,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_official_statement',
+                    changes_found_key_name='Official Statement',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
+                    change_description_changed = True
                 politician_on_stage.ballot_guide_official_statement = ballot_guide_official_statement
             if ballotpedia_politician_name is not False:
                 politician_on_stage.ballotpedia_politician_name = ballotpedia_politician_name
             if ballotpedia_politician_url is not False:
+                change_results = change_tracking(
+                    existing_value=politician_on_stage.ballotpedia_politician_url,
+                    new_value=ballotpedia_politician_url,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_ballotpedia',
+                    changes_found_key_name='Ballotpedia',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
+                    change_description_changed = True
                 politician_on_stage.ballotpedia_politician_url = ballotpedia_politician_url
             try:
                 if birth_date is not False:
@@ -2110,10 +2156,43 @@ def politician_edit_process_view(request):
             except Exception as e:
                 messages.add_message(request, messages.ERROR, 'Could not save birthdate:' + str(e))
             if facebook_url is not False:
+                change_results = change_tracking(
+                    existing_value=politician_on_stage.facebook_url,
+                    new_value=facebook_url,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_facebook',
+                    changes_found_key_name='Facebook',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
+                    change_description_changed = True
                 politician_on_stage.facebook_url = facebook_url
             if facebook_url2 is not False:
+                change_results = change_tracking(
+                    existing_value=politician_on_stage.facebook_url2,
+                    new_value=facebook_url2,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_facebook',
+                    changes_found_key_name='Facebook2',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
+                    change_description_changed = True
                 politician_on_stage.facebook_url2 = facebook_url2
             if facebook_url3 is not False:
+                change_results = change_tracking(
+                    existing_value=politician_on_stage.facebook_url3,
+                    new_value=facebook_url3,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_facebook',
+                    changes_found_key_name='Facebook3',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
+                    change_description_changed = True
                 politician_on_stage.facebook_url3 = facebook_url3
             if first_name is not False:
                 politician_on_stage.first_name = first_name
@@ -2157,6 +2236,17 @@ def politician_edit_process_view(request):
                     setattr(politician_on_stage, is_battleground_race_key, incoming_is_battleground_race)
             years_list = list(set(years_false_list + years_true_list))
             if linkedin_url is not False:
+                change_results = change_tracking(
+                    existing_value=politician_on_stage.linkedin_url,
+                    new_value=linkedin_url,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_linkedin',
+                    changes_found_key_name='LinkedIn',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
+                    change_description_changed = True
                 politician_on_stage.linkedin_url = linkedin_url
             if maplight_id is not False:
                 politician_on_stage.maplight_id = maplight_id
@@ -2185,6 +2275,12 @@ def politician_edit_process_view(request):
                 politician_on_stage.politician_phone_number2 = politician_phone_number2
             if politician_phone_number3 is not False:
                 politician_on_stage.politician_phone_number3 = politician_phone_number3
+            # Save current twitter_handle settings so we can compare values below
+            current_politician_twitter_handle = politician_on_stage.politician_twitter_handle
+            current_politician_twitter_handle2 = politician_on_stage.politician_twitter_handle2
+            current_politician_twitter_handle3 = politician_on_stage.politician_twitter_handle3
+            current_politician_twitter_handle4 = politician_on_stage.politician_twitter_handle4
+            current_politician_twitter_handle5 = politician_on_stage.politician_twitter_handle5
             # Reset all politician_twitter_handles
             politician_on_stage.politician_twitter_handle = None
             politician_on_stage.politician_twitter_handle2 = None
@@ -2192,39 +2288,150 @@ def politician_edit_process_view(request):
             politician_on_stage.politician_twitter_handle4 = None
             politician_on_stage.politician_twitter_handle5 = None
             if politician_twitter_handle is not False:
+                change_results = change_tracking(
+                    existing_value=current_politician_twitter_handle,
+                    new_value=politician_twitter_handle,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_twitter_handle',
+                    changes_found_key_name='TwitterHandle',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
+                    change_description_changed = True
+                    primary_twitter_handle_changed = True
                 add_results = add_twitter_handle_to_next_politician_spot(
                     politician_on_stage, politician_twitter_handle)
                 if add_results['success']:
                     politician_on_stage = add_results['politician']
             if politician_twitter_handle2 is not False:
+                change_results = change_tracking(
+                    existing_value=current_politician_twitter_handle2,
+                    new_value=politician_twitter_handle2,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_twitter_handle',
+                    changes_found_key_name='TwitterHandle2',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
+                    change_description_changed = True
                 add_results = add_twitter_handle_to_next_politician_spot(
                     politician_on_stage, politician_twitter_handle2)
                 if add_results['success']:
                     politician_on_stage = add_results['politician']
             if politician_twitter_handle3 is not False:
+                change_results = change_tracking(
+                    existing_value=current_politician_twitter_handle3,
+                    new_value=politician_twitter_handle3,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_twitter_handle',
+                    changes_found_key_name='TwitterHandle3',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
+                    change_description_changed = True
                 add_results = add_twitter_handle_to_next_politician_spot(
                     politician_on_stage, politician_twitter_handle3)
                 if add_results['success']:
                     politician_on_stage = add_results['politician']
             if politician_twitter_handle4 is not False:
+                change_results = change_tracking(
+                    existing_value=current_politician_twitter_handle4,
+                    new_value=politician_twitter_handle4,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_twitter_handle',
+                    changes_found_key_name='TwitterHandle4',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
+                    change_description_changed = True
                 add_results = add_twitter_handle_to_next_politician_spot(
                     politician_on_stage, politician_twitter_handle4)
                 if add_results['success']:
                     politician_on_stage = add_results['politician']
             if politician_twitter_handle5 is not False:
+                change_results = change_tracking(
+                    existing_value=current_politician_twitter_handle5,
+                    new_value=politician_twitter_handle5,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_twitter_handle',
+                    changes_found_key_name='TwitterHandle5',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
+                    change_description_changed = True
                 add_results = add_twitter_handle_to_next_politician_spot(
                     politician_on_stage, politician_twitter_handle5)
                 if add_results['success']:
                     politician_on_stage = add_results['politician']
             if politician_url is not False:
+                change_results = change_tracking(
+                    existing_value=politician_on_stage.politician_url,
+                    new_value=politician_url,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_politician_url',
+                    changes_found_key_name='URL',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
+                    change_description_changed = True
                 politician_on_stage.politician_url = politician_url
             if politician_url2 is not False:
+                change_results = change_tracking(
+                    existing_value=politician_on_stage.politician_url2,
+                    new_value=politician_url2,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_politician_url',
+                    changes_found_key_name='URL2',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
+                    change_description_changed = True
                 politician_on_stage.politician_url2 = politician_url2
             if politician_url3 is not False:
+                change_results = change_tracking(
+                    existing_value=politician_on_stage.politician_url3,
+                    new_value=politician_url3,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_politician_url',
+                    changes_found_key_name='URL3',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
+                    change_description_changed = True
                 politician_on_stage.politician_url3 = politician_url3
             if politician_url4 is not False:
+                change_results = change_tracking(
+                    existing_value=politician_on_stage.politician_url4,
+                    new_value=politician_url4,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_politician_url',
+                    changes_found_key_name='URL4',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
+                    change_description_changed = True
                 politician_on_stage.politician_url4 = politician_url4
             if politician_url5 is not False:
+                change_results = change_tracking(
+                    existing_value=politician_on_stage.politician_url5,
+                    new_value=politician_url5,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_politician_url',
+                    changes_found_key_name='URL5',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
+                    change_description_changed = True
                 politician_on_stage.politician_url5 = politician_url5
             if political_party is not False:
                 political_party = convert_to_political_party_constant(political_party)
@@ -2247,8 +2454,38 @@ def politician_edit_process_view(request):
                     push_seo_friendly_path_changes = True
                 politician_on_stage.seo_friendly_path = seo_friendly_path
 
+            # if politician_on_stage.twitter_handle_updates_failing != twitter_handle_updates_failing:
+            #     changes_found_dict['is_twitter_handle_removed'] = True
+            # twitter_handle_updates_failing
+            change_results = change_tracking_boolean(
+                existing_value=politician_on_stage.twitter_handle_updates_failing,
+                new_value=twitter_handle_updates_failing,
+                changes_found_dict=changes_found_dict,
+                changes_found_key_base='is_twitter_handle',
+                changes_found_key_name='Twitter Updates Failing',
+            )
+            changes_found_dict = change_results['changes_found_dict']
+            if change_results['change_description_changed']:
+                change_description += change_results['change_description']
+                change_description_changed = True
             politician_on_stage.twitter_handle_updates_failing = twitter_handle_updates_failing
+
+            # if politician_on_stage.twitter_handle2_updates_failing != twitter_handle2_updates_failing:
+            #     changes_found_dict['is_twitter_handle_removed'] = True
+            # twitter_handle2_updates_failing
+            change_results = change_tracking_boolean(
+                existing_value=politician_on_stage.twitter_handle2_updates_failing,
+                new_value=twitter_handle2_updates_failing,
+                changes_found_dict=changes_found_dict,
+                changes_found_key_base='is_twitter_handle',
+                changes_found_key_name='Twitter2 Updates Failing',
+            )
+            changes_found_dict = change_results['changes_found_dict']
+            if change_results['change_description_changed']:
+                change_description += change_results['change_description']
+                change_description_changed = True
             politician_on_stage.twitter_handle2_updates_failing = twitter_handle2_updates_failing
+
             if vote_smart_id is not False:
                 politician_on_stage.vote_smart_id = vote_smart_id
             if politician_we_vote_id is not False:
@@ -2256,6 +2493,17 @@ def politician_edit_process_view(request):
             if vote_usa_politician_id is not False:
                 politician_on_stage.vote_usa_politician_id = vote_usa_politician_id
             if wikipedia_url is not False:
+                change_results = change_tracking(
+                    existing_value=politician_on_stage.wikipedia_url,
+                    new_value=wikipedia_url,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_wikipedia',
+                    changes_found_key_name='Wikipedia',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
+                    change_description_changed = True
                 politician_on_stage.wikipedia_url = wikipedia_url
             if youtube_url is not False:
                 politician_on_stage.youtube_url = youtube_url
@@ -2489,7 +2737,6 @@ def politician_edit_process_view(request):
             if not heal_linked_campaignx_variables:
                 messages.add_message(request, messages.ERROR, "Cannot heal Campaignx linked variables.")
 
-
     # Update Linked Candidates with seo_friendly_path, and
     if success and positive_value_exists(politician_we_vote_id):
         candidate_list_manager = CandidateListManager()
@@ -2611,6 +2858,74 @@ def politician_edit_process_view(request):
             campaignx_we_vote_id_list=campaignx_we_vote_id_list_to_refresh)
         if positive_value_exists(results['update_message']):
             update_message += results['update_message']
+
+    # ##################################################
+    # Change log and volunteer scoring
+    if change_description_changed:
+        voter_manager = VoterManager()
+        voter_api_device_id = get_voter_api_device_id(request)
+        results = voter_manager.retrieve_voter_from_voter_device_id(voter_api_device_id, read_only=True)
+        voter_full_name = ''
+        voter_id = ''
+        voter_we_vote_id = ''
+        if results['voter_found']:
+            voter_on_stage = results['voter']
+            voter_full_name = voter_on_stage.get_full_name(real_name_only=True)
+            voter_id = voter_on_stage.id
+            voter_we_vote_id = voter_on_stage.we_vote_id
+
+        from volunteer_task.controllers import is_candidate_or_politician_analysis_done
+        if positive_value_exists(candidate_analysis_comment) \
+                or is_candidate_or_politician_analysis_done(changes_found_dict=changes_found_dict):
+            kind_of_log_entry = KIND_OF_LOG_ENTRY_ANALYSIS_COMMENT
+        else:
+            kind_of_log_entry = KIND_OF_LOG_ENTRY_LINK_ADDED
+        results = politician_manager.create_politician_log_entry(
+            politician_we_vote_id=politician_we_vote_id,
+            change_description=change_description,
+            changes_found_dict=changes_found_dict,
+            changed_by_name=voter_full_name,
+            changed_by_voter_we_vote_id=voter_we_vote_id,
+            kind_of_log_entry=kind_of_log_entry,
+        )
+        # Now add to the volunteers scores for doing tasks
+        if positive_value_exists(voter_we_vote_id):
+            # Give the volunteer who entered this credit
+            from volunteer_task.controllers import augmentation_change_found
+            from volunteer_task.models import VOLUNTEER_ACTION_POLITICIAN_AUGMENTATION, \
+                VOLUNTEER_ACTION_POLITICIAN_REQUEST, VOLUNTEER_ACTION_POLITICIAN_PHOTO
+            if augmentation_change_found(changes_found_dict=changes_found_dict):
+                try:
+                    task_results = volunteer_task_manager.create_volunteer_task_completed(
+                        action_constant=VOLUNTEER_ACTION_POLITICIAN_AUGMENTATION,
+                        voter_id=voter_id,
+                        voter_we_vote_id=voter_we_vote_id,
+                    )
+                except Exception as e:
+                    status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED-AUGMENTATION: ' \
+                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            from volunteer_task.controllers import politician_requested_change_found
+            if politician_requested_change_found(changes_found_dict=changes_found_dict):
+                try:
+                    task_results = volunteer_task_manager.create_volunteer_task_completed(
+                        action_constant=VOLUNTEER_ACTION_POLITICIAN_REQUEST,
+                        voter_id=voter_id,
+                        voter_we_vote_id=voter_we_vote_id,
+                    )
+                except Exception as e:
+                    status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED-POLITICIAN_REQUEST: ' \
+                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            from volunteer_task.controllers import photo_change_found
+            if photo_change_found(changes_found_dict=changes_found_dict):
+                try:
+                    task_results = volunteer_task_manager.create_volunteer_task_completed(
+                        action_constant=VOLUNTEER_ACTION_POLITICIAN_PHOTO,
+                        voter_id=voter_id,
+                        voter_we_vote_id=voter_we_vote_id,
+                    )
+                except Exception as e:
+                    status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED-PHOTO: ' \
+                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
     if positive_value_exists(update_message):
         messages.add_message(request, messages.INFO, update_message)
