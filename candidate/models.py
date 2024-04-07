@@ -162,12 +162,27 @@ class CandidateChangeLog(models.Model):  # Formerly called CandidateLogEntry
     # We keep track of which volunteer adds links to social accounts. We run reports seeing when any of these fields
     # are set, so we can show the changed_by_voter_we_vote_id who collected the data.
     is_ballotpedia_added = models.BooleanField(db_index=True, default=None, null=True)  # New Ballotpedia link
+    is_ballotpedia_removed = models.BooleanField(db_index=True, default=None, null=True)
     is_candidate_analysis_done = models.BooleanField(db_index=True, default=None, null=True)  # Analysis complete
+    is_candidate_url_added = models.BooleanField(db_index=True, default=None, null=True)  # New Ballotpedia link
+    is_candidate_url_removed = models.BooleanField(db_index=True, default=None, null=True)
     is_facebook_added = models.BooleanField(db_index=True, default=None, null=True)  # New Facebook account added
+    is_facebook_removed = models.BooleanField(db_index=True, default=None, null=True)
     is_from_twitter = models.BooleanField(db_index=True, default=None, null=True)  # Error retrieving from Twitter
     is_linkedin_added = models.BooleanField(db_index=True, default=None, null=True)  # New LinkedIn link added
+    is_linkedin_removed = models.BooleanField(db_index=True, default=None, null=True)
+    is_official_statement_added = models.BooleanField(db_index=True, default=None, null=True)  # New Official Statement
+    is_official_statement_removed = models.BooleanField(db_index=True, default=None, null=True)
+    is_photo_added = models.BooleanField(db_index=True, default=None, null=True)  # New Photo added
+    is_photo_removed = models.BooleanField(db_index=True, default=None, null=True)
     is_twitter_handle_added = models.BooleanField(db_index=True, default=None, null=True)  # New Twitter handle saved
+    is_twitter_handle_removed = models.BooleanField(db_index=True, default=None, null=True)
+    is_website_added = models.BooleanField(db_index=True, default=None, null=True)  # New Website link added
+    is_website_removed = models.BooleanField(db_index=True, default=None, null=True)
     is_wikipedia_added = models.BooleanField(db_index=True, default=None, null=True)  # New Wikipedia link added
+    is_wikipedia_removed = models.BooleanField(db_index=True, default=None, null=True)
+    is_withdrawal_date_added = models.BooleanField(db_index=True, default=None, null=True)  # New Withdrawal Date
+    is_withdrawal_date_removed = models.BooleanField(db_index=True, default=None, null=True)
     kind_of_log_entry = models.CharField(db_index=True, max_length=50, default=None, null=True)
     state_code = models.CharField(db_index=True, max_length=2, null=True)
 
@@ -4446,17 +4461,11 @@ class CandidateManager(models.Manager):
     def create_candidate_log_entry(
             batch_process_id=None,
             change_description=None,
+            changes_found_dict=None,
             changed_by_name=None,
             changed_by_voter_we_vote_id=None,
             candidate_we_vote_id=None,
             google_civic_election_id=None,
-            is_ballotpedia_added=None,
-            is_candidate_analysis_done=None,
-            is_facebook_added=None,
-            is_from_twitter=None,
-            is_linkedin_added=None,
-            is_twitter_handle_added=None,
-            is_wikipedia_added=None,
             kind_of_log_entry=None,
             state_code=None,
     ):
@@ -4469,18 +4478,9 @@ class CandidateManager(models.Manager):
         candidate_log_entry = None
         missing_required_variable = False
 
-        # if not is_from_twitter:
-        #     missing_required_variable = True
-        #     status += 'MISSING_IS_FROM_SOURCE '
-        # if not kind_of_log_entry:
-        #     missing_required_variable = True
-        #     status += 'MISSING_KIND_OF_LOG_ENTRY '
         if not candidate_we_vote_id:
             missing_required_variable = True
             status += 'MISSING_CANDIDATE_WE_VOTE_ID '
-        # if not state_code:
-        #     missing_required_variable = True
-        #     status += 'MISSING_STATE_CODE '
 
         if missing_required_variable:
             results = {
@@ -4499,19 +4499,23 @@ class CandidateManager(models.Manager):
                 changed_by_voter_we_vote_id=changed_by_voter_we_vote_id,
                 candidate_we_vote_id=candidate_we_vote_id,
                 google_civic_election_id=google_civic_election_id,
-                is_ballotpedia_added=is_ballotpedia_added,
-                is_candidate_analysis_done=is_candidate_analysis_done,
-                is_facebook_added=is_facebook_added,
-                is_from_twitter=is_from_twitter,
-                is_linkedin_added=is_linkedin_added,
-                is_twitter_handle_added=is_twitter_handle_added,
-                is_wikipedia_added=is_wikipedia_added,
                 kind_of_log_entry=kind_of_log_entry,
                 state_code=state_code,
             )
+            status += 'CANDIDATE_LOG_ENTRY_SAVED '
+            update_found = False
+            for change_found_key, change_found_value in changes_found_dict.items():
+                if hasattr(candidate_log_entry, change_found_key):
+                    setattr(candidate_log_entry, change_found_key, change_found_value)
+                    update_found = True
+                else:
+                    status += "** MISSING_FROM_MODEL:" + change_found_key + ' '
+            if update_found:
+                candidate_log_entry.save()
+                candidate_log_entry_saved = True
+                status += 'CANDIDATE_LOG_ENTRY_UPDATED '
             success = True
             candidate_log_entry_saved = True
-            status += 'CANDIDATE_LOG_ENTRY_SAVED '
         except Exception as e:
             success = False
             status += 'COULD_NOT_SAVE_CANDIDATE_LOG_ENTRY: ' + str(e) + ' '

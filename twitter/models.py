@@ -1225,6 +1225,8 @@ class TwitterUserManager(models.Manager):
             twitter_id = twitter_dict['id'] if 'id' in twitter_dict else None
             twitter_location = twitter_dict['location'] if 'location' in twitter_dict else ""
             twitter_name = twitter_dict['name'] if 'name' in twitter_dict else ""
+            twitter_handle_updates_failing = twitter_dict['twitter_handle_updates_failing'] \
+                if 'twitter_handle_updates_failing' in twitter_dict else False
 
             # Twitter API v2 removed these fields
             if positive_value_exists(cached_twitter_profile_background_image_url_https):
@@ -1255,6 +1257,7 @@ class TwitterUserManager(models.Manager):
                 twitter_description=twitter_description,
                 twitter_followers_count=twitter_followers_count,
                 twitter_handle=twitter_handle,
+                twitter_handle_updates_failing=twitter_handle_updates_failing,
                 twitter_id=twitter_id,
                 twitter_location=twitter_location,
                 twitter_name=twitter_name,
@@ -1412,7 +1415,10 @@ class TwitterUserManager(models.Manager):
                 if twitter_dict['location'] != twitter_user.twitter_location:
                     twitter_user.twitter_location = twitter_dict['location']
                     values_changed = True
-
+            if 'twitter_handle_updates_failing' in twitter_dict:
+                if twitter_dict['twitter_handle_updates_failing'] != twitter_user.twitter_handle_updates_failing:
+                    twitter_user.twitter_handle_updates_failing = twitter_dict['twitter_handle_updates_failing']
+                    values_changed = True
             if values_changed:
                 try:
                     twitter_user.date_last_updated_from_twitter = localtime(now()).date()
@@ -1435,7 +1441,7 @@ class TwitterUserManager(models.Manager):
             return results
 
         else:
-            # Twitter user does not exist so create new twitter user with latest twitter details
+            # Twitter user does not exist so create new Twitter user with latest twitter details
             twitter_save_results = self.save_new_twitter_user_from_twitter_json(
                 twitter_dict,
                 cached_twitter_profile_image_url_https,

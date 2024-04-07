@@ -2,8 +2,9 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 from datetime import date, timedelta
-from volunteer_task.models import VOLUNTEER_ACTION_CANDIDATE_CREATED, VOLUNTEER_ACTION_POSITION_COMMENT_SAVED, \
-    VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION, \
+from volunteer_task.models import VOLUNTEER_ACTION_CANDIDATE_CREATED, VOLUNTEER_ACTION_POLITICIAN_AUGMENTATION, \
+    VOLUNTEER_ACTION_POLITICIAN_PHOTO, VOLUNTEER_ACTION_POLITICIAN_REQUEST, \
+    VOLUNTEER_ACTION_POSITION_COMMENT_SAVED, VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION, \
     VOLUNTEER_ACTION_POSITION_SAVED, VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED, VolunteerTaskCompleted, \
     VolunteerWeeklyMetrics
 from voter.models import Voter
@@ -17,9 +18,74 @@ def augmentation_change_found(changes_found_dict={}):  # politician_requested_ch
     status = ""
     # Which kinds of changes are considered VOLUNTEER_ACTION_POLITICIAN_AUGMENTATION
     changes_which_count = \
-        ['is_ballotpedia_added', 'is_candidate_analysis_done', 'is_facebook_added', 'is_linkedin_added',
-         'is_twitter_handle_added', 'is_wikipedia_added', 'is_website_added']
+        [
+            'is_ballotpedia_added', 'is_ballotpedia_removed',
+            'is_candidate_analysis_done',
+            'is_candidate_url_added', 'is_candidate_url_removed',
+            'is_facebook_added', 'is_facebook_removed',
+            'is_linkedin_added', 'is_linkedin_removed',
+            'is_politician_analysis_done',
+            'is_politician_url_added', 'is_politician_url_removed',
+            'is_twitter_handle_added', 'is_twitter_handle_removed',
+            'is_wikipedia_added', 'is_wikipedia_removed',
+            'is_withdrawal_date_added', 'is_withdrawal_date_removed',
+            'is_website_added', 'is_website_removed',
+        ]
+    # We intentionally do not include 'is_official_statement_added'
     return changes_which_count_found(changes_found_dict=changes_found_dict, changes_which_count=changes_which_count)
+
+
+def change_tracking(
+        existing_value='',
+        new_value='',
+        changes_found_dict={},
+        changes_found_key_base='',
+        changes_found_key_name='',
+):
+    change_description = ''
+    change_description_changed = False
+    incoming_value_lower_case = new_value.strip().lower() \
+        if positive_value_exists(new_value) else ''
+    existing_value_lower_case = existing_value.strip().lower() \
+        if positive_value_exists(existing_value) else ''
+    if positive_value_exists(new_value) and \
+            incoming_value_lower_case != existing_value_lower_case:
+        change_description += "ADDED: " + changes_found_key_name + " " \
+                              + str(new_value) + " "
+        change_description_changed = True
+        changes_found_dict[changes_found_key_base + '_added'] = True
+    elif incoming_value_lower_case != existing_value_lower_case:
+        change_description += "REMOVED: " + changes_found_key_name + " " \
+                              + str(existing_value) + " "
+        change_description_changed = True
+        changes_found_dict[changes_found_key_base + '_removed'] = True
+    results = {
+        'change_description':           change_description,
+        'change_description_changed':   change_description_changed,
+        'changes_found_dict':           changes_found_dict,
+    }
+    return results
+
+
+def change_tracking_boolean(
+        existing_value='',
+        new_value='',
+        changes_found_dict={},
+        changes_found_key_base='',
+        changes_found_key_name='',
+):
+    change_description = ''
+    change_description_changed = False
+    if new_value != existing_value:
+        change_description += "BOOL-CHANGED: " + changes_found_key_name + " " + str(new_value) + " "
+        change_description_changed = True
+        changes_found_dict[changes_found_key_base + '_added'] = True
+    results = {
+        'change_description':           change_description,
+        'change_description_changed':   change_description_changed,
+        'changes_found_dict':           changes_found_dict,
+    }
+    return results
 
 
 def is_key_in_dict_and_true(dict_to_search={}, key_to_search=''):
@@ -92,18 +158,21 @@ def generate_start_and_end_of_week_date_integer(earliest_date_integer=None, late
     return results
 
 
-def is_candidate_analysis_done(changes_found_dict={}):
+def is_candidate_or_politician_analysis_done(changes_found_dict={}):
     # Which kinds of changes are considered VOLUNTEER_ACTION_POLITICIAN_AUGMENTATION
-    changes_which_count = ['is_candidate_analysis_done']
+    changes_which_count = ['is_candidate_analysis_done', 'is_politician_analysis_done']
+    return changes_which_count_found(changes_found_dict=changes_found_dict, changes_which_count=changes_which_count)
+
+
+def photo_change_found(changes_found_dict={}):
+    # Which kinds of changes are considered VOLUNTEER_ACTION_POLITICIAN_PHOTO
+    changes_which_count = ['is_photo_added', 'is_photo_removed']
     return changes_which_count_found(changes_found_dict=changes_found_dict, changes_which_count=changes_which_count)
 
 
 def politician_requested_change_found(changes_found_dict={}):
-    status = ""
     # Which kinds of changes are considered VOLUNTEER_ACTION_POLITICIAN_REQUEST
-    changes_which_count = \
-        ['is_ballotpedia_added', 'is_candidate_analysis_done', 'is_facebook_added', 'is_linkedin_added',
-         'is_twitter_handle_added', 'is_wikipedia_added', 'is_website_added']
+    changes_which_count = ['is_official_statement_added', 'is_official_statement_removed']
     return changes_which_count_found(changes_found_dict=changes_found_dict, changes_which_count=changes_which_count)
 
 
@@ -111,7 +180,8 @@ def changes_which_count_found(changes_found_dict={}, changes_which_count=[]):
     status = ""
     for one_change in changes_which_count:
         try:
-            is_key_in_dict_and_true(dict_to_search=changes_found_dict, key_to_search=one_change)
+            if is_key_in_dict_and_true(dict_to_search=changes_found_dict, key_to_search=one_change):
+                return True
         except Exception as e:
             status += "FAILED_TO_CALCULATE_WHICH_COUNT_MATCH: " + str(e) + " "
     return False
@@ -124,13 +194,18 @@ def update_or_create_weekly_metrics_one_volunteer(
         voter=None,
         voter_display_name=None,
         voter_we_vote_id=None):
-    candidates_created = 0
-    positions_saved = 0
-    politicians_deduplicated = 0
-    position_comments_saved = 0
+
+    candidates_created = 0                  # VOLUNTEER_ACTION_CANDIDATE_CREATED = 3
+    politicians_augmented = 0               # VOLUNTEER_ACTION_POLITICIAN_AUGMENTATION = 6
+    politicians_deduplicated = 0            # VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION = 5
+    politicians_photo_added = 0             # VOLUNTEER_ACTION_POLITICIAN_PHOTO = 7
+    politicians_requested_changes = 0       # VOLUNTEER_ACTION_POLITICIAN_REQUEST = 8
+    position_comments_saved = 0             # VOLUNTEER_ACTION_POSITION_COMMENT_SAVED = 2
+    positions_saved = 0                     # VOLUNTEER_ACTION_POSITION_SAVED = 1
+    voter_guide_possibilities_created = 0   # VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED = 4
+
     volunteer_weekly_metrics = None
     volunteer_weekly_metrics_saved = False
-    voter_guide_possibilities_created = 0
     status = ""
     success = True
 
@@ -178,12 +253,21 @@ def update_or_create_weekly_metrics_one_volunteer(
                     positions_saved += 1
                 elif volunteer_task_completed.action_constant == VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED:
                     voter_guide_possibilities_created += 1
+                elif volunteer_task_completed.action_constant == VOLUNTEER_ACTION_POLITICIAN_AUGMENTATION:
+                    politicians_augmented += 1
+                elif volunteer_task_completed.action_constant == VOLUNTEER_ACTION_POLITICIAN_PHOTO:
+                    politicians_photo_added += 1
+                elif volunteer_task_completed.action_constant == VOLUNTEER_ACTION_POLITICIAN_REQUEST:
+                    politicians_requested_changes += 1
 
     voter_date_unique_string = str(voter_we_vote_id) + "-" + str(end_of_week_date_integer)
     updates = {
         'candidates_created':                   candidates_created,
         'end_of_week_date_integer':             end_of_week_date_integer,
+        'politicians_augmented':                politicians_augmented,
         'politicians_deduplicated':             politicians_deduplicated,
+        'politicians_photo_added':              politicians_photo_added,
+        'politicians_requested_changes':        politicians_requested_changes,
         'positions_saved':                      positions_saved,
         'position_comments_saved':              position_comments_saved,
         'voter_date_unique_string':             voter_date_unique_string,
