@@ -51,6 +51,7 @@ ruff==0.2.2
 sendgrid==6.9.7
 simplejson==3.17.2
 six==1.16.0
+setuptools==69.2.0 # Deprecated in Py 3.10, AND removed in Py 3.12, but still needed by some slow to update packages)
 social-auth-app-django==5.0.0
 social-auth-core==4.2.0
 stripe==8.7.0
@@ -64,4 +65,3 @@ wikipedia==1.4.0
 xmltodict==0.12.0
 certifi>=2024.2.2 # Want to update continuously to the latest.  Root Certificates used by Requests in Python
 protobuf>=3.18.3 # not directly required, pinned by Snyk to avoid a vulnerability
-setuptools==69.2.0 # Deprecated in Py 3.10, AND removed in Py 3.12, but still needed by some slow to update packages)
