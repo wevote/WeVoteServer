@@ -37,7 +37,8 @@ from office.models import ContestOffice
 from position.models import PositionEntered, PositionListManager
 from representative.models import Representative, RepresentativeManager
 from volunteer_task.controllers import change_tracking, change_tracking_boolean
-from volunteer_task.models import VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION, VolunteerTaskManager
+from volunteer_task.models import VOLUNTEER_ACTION_DUPLICATE_POLITICIAN_ANALYSIS, \
+    VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION, VolunteerTaskManager
 from voter.models import fetch_voter_from_voter_device_link, voter_has_authority, VoterManager
 from wevote_functions.functions import convert_to_int, convert_to_political_party_constant, \
     extract_first_name_from_full_name, extract_instagram_handle_from_text_string, \
@@ -134,6 +135,7 @@ def find_and_merge_duplicate_politicians_view(request):
 
     find_number_of_duplicates = request.GET.get('find_number_of_duplicates', 0)
     state_code = request.GET.get('state_code', "")
+    status = ""
     politician_manager = PoliticianManager()
 
     queryset = PoliticiansArePossibleDuplicates.objects.using('readonly').all()
@@ -168,6 +170,16 @@ def find_and_merge_duplicate_politicians_view(request):
                                  "There are approximately {duplicate_politician_count} "
                                  "possible duplicates."
                                  "".format(duplicate_politician_count=duplicate_politician_count))
+    try:
+        # Give the volunteer who entered this credit
+        volunteer_task_manager = VolunteerTaskManager()
+        task_results = volunteer_task_manager.create_volunteer_task_completed(
+            action_constant=VOLUNTEER_ACTION_DUPLICATE_POLITICIAN_ANALYSIS,
+            request=request,
+        )
+    except Exception as e:
+        status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED: ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
     # Loop through all the politicians in this election
     for we_vote_politician in politician_list:

@@ -87,29 +87,46 @@ def performance_list_view(request):
         if end_of_week_date_integer not in actions_completed_dict[voter_we_vote_id]:
             actions_completed_dict[voter_we_vote_id][end_of_week_date_integer] = {
                 'candidates_created': one_person_one_week.candidates_created,
+                'duplicate_politician_analysis': one_person_one_week.duplicate_politician_analysis,
+                'election_retrieve_started': one_person_one_week.election_retrieve_started,
+                'match_candidates_to_politicians': one_person_one_week.match_candidates_to_politicians,
                 'politicians_augmented': one_person_one_week.politicians_augmented,
                 'politicians_deduplicated': one_person_one_week.politicians_deduplicated,
                 'politicians_photo_added': one_person_one_week.politicians_photo_added,
                 'politicians_requested_changes': one_person_one_week.politicians_requested_changes,
                 'positions_saved': one_person_one_week.positions_saved,
                 'position_comments_saved': one_person_one_week.position_comments_saved,
+                'twitter_bulk_retrieve': one_person_one_week.twitter_bulk_retrieve,
                 'voter_guide_possibilities_created': one_person_one_week.voter_guide_possibilities_created,
             }
         if end_of_week_date_integer not in team_actions_completed_dict:
             team_actions_completed_dict[end_of_week_date_integer] = {
                 'candidates_created': 0,
+                'duplicate_politician_analysis': 0,
+                'election_retrieve_started': 0,
+                'match_candidates_to_politicians': 0,
                 'politicians_augmented': 0,
                 'politicians_deduplicated': 0,
                 'politicians_photo_added': 0,
                 'politicians_requested_changes': 0,
                 'positions_saved': 0,
                 'position_comments_saved': 0,
+                'twitter_bulk_retrieve': 0,
                 'voter_guide_possibilities_created': 0,
             }
         team_actions_completed_dict[end_of_week_date_integer] = {
             'candidates_created':
                 team_actions_completed_dict[end_of_week_date_integer]['candidates_created'] +
                 one_person_one_week.candidates_created,
+            'duplicate_politician_analysis':
+                team_actions_completed_dict[end_of_week_date_integer]['duplicate_politician_analysis'] +
+                one_person_one_week.duplicate_politician_analysis,
+            'election_retrieve_started':
+                team_actions_completed_dict[end_of_week_date_integer]['election_retrieve_started'] +
+                one_person_one_week.election_retrieve_started,
+            'match_candidates_to_politicians':
+                team_actions_completed_dict[end_of_week_date_integer]['match_candidates_to_politicians'] +
+                one_person_one_week.match_candidates_to_politicians,
             'politicians_augmented':
                 team_actions_completed_dict[end_of_week_date_integer]['politicians_augmented'] +
                 one_person_one_week.politicians_augmented,
@@ -128,6 +145,9 @@ def performance_list_view(request):
             'position_comments_saved':
                 team_actions_completed_dict[end_of_week_date_integer]['position_comments_saved'] +
                 one_person_one_week.position_comments_saved,
+            'twitter_bulk_retrieve':
+                team_actions_completed_dict[end_of_week_date_integer]['twitter_bulk_retrieve'] +
+                one_person_one_week.twitter_bulk_retrieve,
             'voter_guide_possibilities_created':
                 team_actions_completed_dict[end_of_week_date_integer]['voter_guide_possibilities_created'] +
                 one_person_one_week.voter_guide_possibilities_created,
@@ -138,9 +158,10 @@ def performance_list_view(request):
     # ########################################
     # Work on individual Volunteer statistics
     weekly_metrics_fields = [
-        'candidates_created', 'politicians_augmented', 'politicians_deduplicated',
+        'candidates_created', 'duplicate_politician_analysis', 'election_retrieve_started',
+        'match_candidates_to_politicians', 'politicians_augmented', 'politicians_deduplicated',
         'politicians_photo_added', 'politicians_requested_changes', 'positions_saved',
-        'position_comments_saved', 'voter_guide_possibilities_created',
+        'position_comments_saved', 'twitter_bulk_retrieve', 'voter_guide_possibilities_created',
     ]
     for voter_we_vote_id in voter_we_vote_id_list:
         # Set these values to true if we have any tasks completed in any of the weeks we are displaying
@@ -153,6 +174,12 @@ def performance_list_view(request):
             if end_of_week_date_integer in actions_completed_dict[voter_we_vote_id]:
                 candidates_created = \
                     actions_completed_dict[voter_we_vote_id][end_of_week_date_integer]['candidates_created']
+                duplicate_politician_analysis = \
+                    actions_completed_dict[voter_we_vote_id][end_of_week_date_integer]['duplicate_politician_analysis']
+                election_retrieve_started = \
+                    actions_completed_dict[voter_we_vote_id][end_of_week_date_integer]['election_retrieve_started']
+                match_candidates_to_politicians = \
+                    actions_completed_dict[voter_we_vote_id][end_of_week_date_integer]['match_candidates_to_politicians']
                 politicians_augmented = \
                     actions_completed_dict[voter_we_vote_id][end_of_week_date_integer]['politicians_augmented']
                 politicians_deduplicated = \
@@ -165,30 +192,43 @@ def performance_list_view(request):
                     actions_completed_dict[voter_we_vote_id][end_of_week_date_integer]['positions_saved']
                 position_comments_saved = \
                     actions_completed_dict[voter_we_vote_id][end_of_week_date_integer]['position_comments_saved']
+                twitter_bulk_retrieve = \
+                    actions_completed_dict[voter_we_vote_id][end_of_week_date_integer]['twitter_bulk_retrieve']
                 voter_guide_possibilities_created = \
-                    actions_completed_dict[voter_we_vote_id][end_of_week_date_integer]['voter_guide_possibilities_created']
+                    actions_completed_dict[voter_we_vote_id][end_of_week_date_integer][
+                        'voter_guide_possibilities_created']
                 volunteer_task_total = \
-                    candidates_created + politicians_augmented + politicians_deduplicated + politicians_photo_added + \
-                    politicians_requested_changes + positions_saved + \
-                    position_comments_saved + voter_guide_possibilities_created
+                    candidates_created + duplicate_politician_analysis + election_retrieve_started + \
+                    match_candidates_to_politicians + \
+                    politicians_augmented + politicians_deduplicated + politicians_photo_added + \
+                    politicians_requested_changes + positions_saved + position_comments_saved + \
+                    twitter_bulk_retrieve + voter_guide_possibilities_created
             else:
                 candidates_created = 0
+                duplicate_politician_analysis = 0
+                election_retrieve_started = 0
+                match_candidates_to_politicians = 0
                 politicians_augmented = 0
                 politicians_deduplicated = 0
                 politicians_photo_added = 0
                 politicians_requested_changes = 0
                 positions_saved = 0
                 position_comments_saved = 0
+                twitter_bulk_retrieve = 0
                 voter_guide_possibilities_created = 0
                 volunteer_task_total = 0
             individual_performance_dict[voter_we_vote_id][end_of_week_date_integer] = {
                 'candidates_created': candidates_created,
+                'duplicate_politician_analysis': duplicate_politician_analysis,
+                'election_retrieve_started': election_retrieve_started,
+                'match_candidates_to_politicians': match_candidates_to_politicians,
                 'politicians_augmented': politicians_augmented,
                 'politicians_deduplicated': politicians_deduplicated,
                 'politicians_photo_added': politicians_photo_added,
                 'politicians_requested_changes': politicians_requested_changes,
                 'positions_saved': positions_saved,
                 'position_comments_saved': position_comments_saved,
+                'twitter_bulk_retrieve': twitter_bulk_retrieve,
                 'volunteer_task_total': volunteer_task_total,
                 'voter_guide_possibilities_created': voter_guide_possibilities_created,
             }
@@ -196,6 +236,17 @@ def performance_list_view(request):
             if candidates_created > 0:
                 individual_performance_dict[voter_we_vote_id]['candidates_created'] += candidates_created
                 individual_performance_dict[voter_we_vote_id]['volunteer_task_total'] += candidates_created
+            if duplicate_politician_analysis > 0:
+                individual_performance_dict[voter_we_vote_id]['duplicate_politician_analysis'] += \
+                    duplicate_politician_analysis
+                individual_performance_dict[voter_we_vote_id]['volunteer_task_total'] += duplicate_politician_analysis
+            if election_retrieve_started > 0:
+                individual_performance_dict[voter_we_vote_id]['election_retrieve_started'] += election_retrieve_started
+                individual_performance_dict[voter_we_vote_id]['volunteer_task_total'] += election_retrieve_started
+            if match_candidates_to_politicians > 0:
+                individual_performance_dict[voter_we_vote_id]['match_candidates_to_politicians'] += \
+                    match_candidates_to_politicians
+                individual_performance_dict[voter_we_vote_id]['volunteer_task_total'] += match_candidates_to_politicians
             if politicians_augmented > 0:
                 individual_performance_dict[voter_we_vote_id]['politicians_augmented'] += politicians_augmented
                 individual_performance_dict[voter_we_vote_id]['volunteer_task_total'] += politicians_augmented
@@ -215,6 +266,9 @@ def performance_list_view(request):
             if position_comments_saved > 0:
                 individual_performance_dict[voter_we_vote_id]['position_comments_saved'] += position_comments_saved
                 individual_performance_dict[voter_we_vote_id]['volunteer_task_total'] += position_comments_saved
+            if twitter_bulk_retrieve > 0:
+                individual_performance_dict[voter_we_vote_id]['twitter_bulk_retrieve'] += twitter_bulk_retrieve
+                individual_performance_dict[voter_we_vote_id]['volunteer_task_total'] += twitter_bulk_retrieve
             if voter_guide_possibilities_created > 0:
                 individual_performance_dict[voter_we_vote_id]['voter_guide_possibilities_created'] += \
                     voter_guide_possibilities_created
@@ -239,6 +293,12 @@ def performance_list_view(request):
         if end_of_week_date_integer in team_actions_completed_dict:
             candidates_created = \
                 team_actions_completed_dict[end_of_week_date_integer]['candidates_created']
+            duplicate_politician_analysis = \
+                team_actions_completed_dict[end_of_week_date_integer]['duplicate_politician_analysis']
+            election_retrieve_started = \
+                team_actions_completed_dict[end_of_week_date_integer]['election_retrieve_started']
+            match_candidates_to_politicians = \
+                team_actions_completed_dict[end_of_week_date_integer]['match_candidates_to_politicians']
             politicians_augmented = \
                 team_actions_completed_dict[end_of_week_date_integer]['politicians_augmented']
             politicians_deduplicated = \
@@ -251,6 +311,8 @@ def performance_list_view(request):
                 team_actions_completed_dict[end_of_week_date_integer]['positions_saved']
             position_comments_saved = \
                 team_actions_completed_dict[end_of_week_date_integer]['position_comments_saved']
+            twitter_bulk_retrieve = \
+                team_actions_completed_dict[end_of_week_date_integer]['twitter_bulk_retrieve']
             voter_guide_possibilities_created = \
                 team_actions_completed_dict[end_of_week_date_integer]['voter_guide_possibilities_created']
             volunteer_task_total = \
@@ -259,22 +321,30 @@ def performance_list_view(request):
                 position_comments_saved + voter_guide_possibilities_created
         else:
             candidates_created = 0
+            duplicate_politician_analysis = 0
+            election_retrieve_started = 0
+            match_candidates_to_politicians = 0
             politicians_augmented = 0
             politicians_deduplicated = 0
             politicians_photo_added = 0
             politicians_requested_changes = 0
             positions_saved = 0
             position_comments_saved = 0
+            twitter_bulk_retrieve = 0
             voter_guide_possibilities_created = 0
             volunteer_task_total = 0
         team_performance_dict[end_of_week_date_integer] = {
             'candidates_created': candidates_created,
+            'duplicate_politician_analysis': duplicate_politician_analysis,
+            'election_retrieve_started': election_retrieve_started,
+            'match_candidates_to_politicians': match_candidates_to_politicians,
             'politicians_augmented': politicians_augmented,
             'politicians_deduplicated': politicians_deduplicated,
             'politicians_photo_added': politicians_photo_added,
             'politicians_requested_changes': politicians_requested_changes,
             'positions_saved': positions_saved,
             'position_comments_saved': position_comments_saved,
+            'twitter_bulk_retrieve': twitter_bulk_retrieve,
             'volunteer_task_total': volunteer_task_total,
             'voter_guide_possibilities_created': voter_guide_possibilities_created,
         }
@@ -282,6 +352,15 @@ def performance_list_view(request):
         if candidates_created > 0:
             team_performance_dict['candidates_created'] += candidates_created
             team_performance_dict['volunteer_task_total'] += candidates_created
+        if duplicate_politician_analysis > 0:
+            team_performance_dict['duplicate_politician_analysis'] += duplicate_politician_analysis
+            team_performance_dict['volunteer_task_total'] += duplicate_politician_analysis
+        if election_retrieve_started > 0:
+            team_performance_dict['election_retrieve_started'] += election_retrieve_started
+            team_performance_dict['volunteer_task_total'] += election_retrieve_started
+        if match_candidates_to_politicians > 0:
+            team_performance_dict['match_candidates_to_politicians'] += match_candidates_to_politicians
+            team_performance_dict['volunteer_task_total'] += match_candidates_to_politicians
         if politicians_augmented > 0:
             team_performance_dict['politicians_augmented'] += politicians_augmented
             team_performance_dict['volunteer_task_total'] += politicians_augmented
@@ -300,6 +379,9 @@ def performance_list_view(request):
         if position_comments_saved > 0:
             team_performance_dict['position_comments_saved'] += position_comments_saved
             team_performance_dict['volunteer_task_total'] += position_comments_saved
+        if twitter_bulk_retrieve > 0:
+            team_performance_dict['twitter_bulk_retrieve'] += twitter_bulk_retrieve
+            team_performance_dict['volunteer_task_total'] += twitter_bulk_retrieve
         if voter_guide_possibilities_created > 0:
             team_performance_dict['voter_guide_possibilities_created'] += \
                 voter_guide_possibilities_created
