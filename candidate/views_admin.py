@@ -42,7 +42,9 @@ from position.models import PositionEntered, PositionListManager
 from representative.models import Representative
 from twitter.models import TwitterLinkPossibility, TwitterUserManager
 from volunteer_task.controllers import change_tracking, change_tracking_boolean
-from volunteer_task.models import VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION, VOLUNTEER_ACTION_POLITICIAN_AUGMENTATION, \
+from volunteer_task.models import VOLUNTEER_ACTION_DUPLICATE_POLITICIAN_ANALYSIS, \
+    VOLUNTEER_ACTION_MATCH_CANDIDATES_TO_POLITICIANS, \
+    VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION, VOLUNTEER_ACTION_POLITICIAN_AUGMENTATION, \
     VOLUNTEER_ACTION_POLITICIAN_PHOTO, VOLUNTEER_ACTION_POLITICIAN_REQUEST, VolunteerTaskManager
 from voter.models import fetch_voter_from_voter_device_link, VoterDeviceLinkManager, VoterManager, voter_has_authority
 from voter_guide.models import VoterGuide
@@ -3428,6 +3430,7 @@ def candidate_politician_match_this_election_view(request):
 
 @login_required
 def candidate_politician_match_this_year_view(request):
+    status = ""
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
@@ -3440,6 +3443,17 @@ def candidate_politician_match_this_year_view(request):
     if not positive_value_exists(candidate_year):
         messages.add_message(request, messages.ERROR, "Year required.")
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()))
+
+    try:
+        # Give the volunteer who entered this credit
+        volunteer_task_manager = VolunteerTaskManager()
+        task_results = volunteer_task_manager.create_volunteer_task_completed(
+            action_constant=VOLUNTEER_ACTION_MATCH_CANDIDATES_TO_POLITICIANS,
+            request=request,
+        )
+    except Exception as e:
+        status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED: ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
     candidate_list_manager = CandidateListManager()
     results = candidate_list_manager.retrieve_all_candidates_for_one_year(
@@ -3703,6 +3717,7 @@ def find_and_merge_duplicate_candidates_view(request):
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     google_civic_election_id = convert_to_int(google_civic_election_id)
     state_code = request.GET.get('state_code', "")
+    status = ""
     candidate_manager = CandidateManager()
     candidate_list_manager = CandidateListManager()
     election_manager = ElectionManager()
@@ -3764,6 +3779,17 @@ def find_and_merge_duplicate_candidates_view(request):
                                         google_civic_election_id=google_civic_election_id,
                                         show_this_year_of_candidates=candidate_year,
                                         state_code=state_code))
+
+    try:
+        # Give the volunteer who entered this credit
+        volunteer_task_manager = VolunteerTaskManager()
+        task_results = volunteer_task_manager.create_volunteer_task_completed(
+            action_constant=VOLUNTEER_ACTION_DUPLICATE_POLITICIAN_ANALYSIS,
+            request=request,
+        )
+    except Exception as e:
+        status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED: ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
     # Loop through all the candidates in this year or election
     ignore_candidate_id_list = []

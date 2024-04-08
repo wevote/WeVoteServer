@@ -2,10 +2,14 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 from datetime import date, timedelta
-from volunteer_task.models import VOLUNTEER_ACTION_CANDIDATE_CREATED, VOLUNTEER_ACTION_POLITICIAN_AUGMENTATION, \
+from volunteer_task.models import VOLUNTEER_ACTION_CANDIDATE_CREATED, \
+    VOLUNTEER_ACTION_DUPLICATE_POLITICIAN_ANALYSIS, VOLUNTEER_ACTION_ELECTION_RETRIEVE_STARTED, \
+    VOLUNTEER_ACTION_MATCH_CANDIDATES_TO_POLITICIANS, \
+    VOLUNTEER_ACTION_POLITICIAN_AUGMENTATION, VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION, \
     VOLUNTEER_ACTION_POLITICIAN_PHOTO, VOLUNTEER_ACTION_POLITICIAN_REQUEST, \
-    VOLUNTEER_ACTION_POSITION_COMMENT_SAVED, VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION, \
-    VOLUNTEER_ACTION_POSITION_SAVED, VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED, VolunteerTaskCompleted, \
+    VOLUNTEER_ACTION_POSITION_COMMENT_SAVED, VOLUNTEER_ACTION_POSITION_SAVED, \
+    VOLUNTEER_ACTION_TWITTER_BULK_RETRIEVE, \
+    VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED, VolunteerTaskCompleted, \
     VolunteerWeeklyMetrics
 from voter.models import Voter
 from wevote_functions.functions import positive_value_exists
@@ -196,12 +200,16 @@ def update_or_create_weekly_metrics_one_volunteer(
         voter_we_vote_id=None):
 
     candidates_created = 0                  # VOLUNTEER_ACTION_CANDIDATE_CREATED = 3
+    duplicate_politician_analysis = 0       # VOLUNTEER_ACTION_DUPLICATE_POLITICIAN_ANALYSIS = 10
+    election_retrieve_started = 0           # VOLUNTEER_ACTION_ELECTION_RETRIEVE_STARTED = 9
+    match_candidates_to_politicians = 0     # VOLUNTEER_ACTION_MATCH_CANDIDATES_TO_POLITICIANS = 11
     politicians_augmented = 0               # VOLUNTEER_ACTION_POLITICIAN_AUGMENTATION = 6
     politicians_deduplicated = 0            # VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION = 5
     politicians_photo_added = 0             # VOLUNTEER_ACTION_POLITICIAN_PHOTO = 7
     politicians_requested_changes = 0       # VOLUNTEER_ACTION_POLITICIAN_REQUEST = 8
     position_comments_saved = 0             # VOLUNTEER_ACTION_POSITION_COMMENT_SAVED = 2
     positions_saved = 0                     # VOLUNTEER_ACTION_POSITION_SAVED = 1
+    twitter_bulk_retrieve = 0               # VOLUNTEER_ACTION_TWITTER_BULK_RETRIEVE = 12
     voter_guide_possibilities_created = 0   # VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED = 4
 
     volunteer_weekly_metrics = None
@@ -245,24 +253,35 @@ def update_or_create_weekly_metrics_one_volunteer(
             if start_of_week_date_integer <= volunteer_task_completed.date_as_integer <= end_of_week_date_integer:
                 if volunteer_task_completed.action_constant == VOLUNTEER_ACTION_CANDIDATE_CREATED:
                     candidates_created += 1
-                if volunteer_task_completed.action_constant == VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION:
-                    politicians_deduplicated += 1
-                elif volunteer_task_completed.action_constant == VOLUNTEER_ACTION_POSITION_COMMENT_SAVED:
-                    position_comments_saved += 1
-                elif volunteer_task_completed.action_constant == VOLUNTEER_ACTION_POSITION_SAVED:
-                    positions_saved += 1
-                elif volunteer_task_completed.action_constant == VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED:
-                    voter_guide_possibilities_created += 1
+                elif volunteer_task_completed.action_constant == VOLUNTEER_ACTION_DUPLICATE_POLITICIAN_ANALYSIS:
+                    duplicate_politician_analysis += 1
+                elif volunteer_task_completed.action_constant == VOLUNTEER_ACTION_ELECTION_RETRIEVE_STARTED:
+                    election_retrieve_started += 1
+                elif volunteer_task_completed.action_constant == VOLUNTEER_ACTION_MATCH_CANDIDATES_TO_POLITICIANS:
+                    match_candidates_to_politicians += 1
                 elif volunteer_task_completed.action_constant == VOLUNTEER_ACTION_POLITICIAN_AUGMENTATION:
                     politicians_augmented += 1
+                elif volunteer_task_completed.action_constant == VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION:
+                    politicians_deduplicated += 1
                 elif volunteer_task_completed.action_constant == VOLUNTEER_ACTION_POLITICIAN_PHOTO:
                     politicians_photo_added += 1
                 elif volunteer_task_completed.action_constant == VOLUNTEER_ACTION_POLITICIAN_REQUEST:
                     politicians_requested_changes += 1
+                elif volunteer_task_completed.action_constant == VOLUNTEER_ACTION_POSITION_COMMENT_SAVED:
+                    position_comments_saved += 1
+                elif volunteer_task_completed.action_constant == VOLUNTEER_ACTION_POSITION_SAVED:
+                    positions_saved += 1
+                elif volunteer_task_completed.action_constant == VOLUNTEER_ACTION_TWITTER_BULK_RETRIEVE:
+                    twitter_bulk_retrieve += 1
+                elif volunteer_task_completed.action_constant == VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED:
+                    voter_guide_possibilities_created += 1
 
     voter_date_unique_string = str(voter_we_vote_id) + "-" + str(end_of_week_date_integer)
     updates = {
         'candidates_created':                   candidates_created,
+        'duplicate_politician_analysis':        duplicate_politician_analysis,
+        'election_retrieve_started':            election_retrieve_started,
+        'match_candidates_to_politicians':      match_candidates_to_politicians,
         'end_of_week_date_integer':             end_of_week_date_integer,
         'politicians_augmented':                politicians_augmented,
         'politicians_deduplicated':             politicians_deduplicated,
@@ -270,6 +289,7 @@ def update_or_create_weekly_metrics_one_volunteer(
         'politicians_requested_changes':        politicians_requested_changes,
         'positions_saved':                      positions_saved,
         'position_comments_saved':              position_comments_saved,
+        'twitter_bulk_retrieve':                twitter_bulk_retrieve,
         'voter_date_unique_string':             voter_date_unique_string,
         'voter_display_name':                   voter_display_name,
         'voter_guide_possibilities_created':    voter_guide_possibilities_created,
