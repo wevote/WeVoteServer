@@ -8373,7 +8373,7 @@ class PositionManager(models.Manager):
                             or force_update:
                         if not positive_value_exists(position_object.voter_we_vote_id) or force_update:
                             voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(
-                                organization.we_vote_id)
+                                organization.we_vote_id, read_only=True)
                             if voter_results['voter_found']:
                                 try:
                                     voter = voter_results['voter']
