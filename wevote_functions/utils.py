@@ -58,7 +58,7 @@ def get_git_commit_date():
         if date and reg.group(1):
             dt = reg.group(1)
             utc_time = datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S%z')            # 2024-03-04T21:58:40Z
-            date_string= localtime(utc_time).strftime("%d/%m/%Y %H:%M")
+            date_string = localtime(utc_time).strftime("%m/%d/%Y %H:%M")
         return date_string
     except Exception as e:
         return 'Not found: ' + str(e)
