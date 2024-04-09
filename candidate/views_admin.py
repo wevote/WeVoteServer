@@ -2427,6 +2427,10 @@ def candidate_edit_process_view(request):
         if positive_value_exists(candidate_to_office_link_delete_id):
             candidate_to_office_link.delete()
             messages.add_message(request, messages.INFO, 'Deleted Candidate-to-Office Link.')
+            # Now give volunteer credit
+            changes_found_dict['is_link_to_office_removed'] = True
+            change_description += "REMOVED: Link to Office " + candidate_to_office_link.contest_office_we_vote_id + " "
+            change_description_changed = True
 
     candidate_to_office_link_add_election = request.POST.get('candidate_to_office_link_add_election', False)
     if not positive_value_exists(candidate_to_office_link_add_election):
@@ -2508,6 +2512,11 @@ def candidate_edit_process_view(request):
                 state_code=candidate_to_office_link_add_state_code)
             if results['candidate_to_office_link_created']:
                 messages.add_message(request, messages.INFO, 'Added Candidate-to-Office Link.')
+                # Now give volunteer credit
+                candidate_to_office_link = results['candidate_to_office_link']
+                changes_found_dict['is_link_to_office_added'] = True
+                change_description += "ADDED: Link to Office " + candidate_to_office_link.contest_office_we_vote_id + " "
+                change_description_changed = True
             else:
                 messages.add_message(request, messages.ERROR, 'Candidate-to-Office Link already exists.')
         else:

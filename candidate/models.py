@@ -169,6 +169,8 @@ class CandidateChangeLog(models.Model):  # Formerly called CandidateLogEntry
     is_facebook_added = models.BooleanField(db_index=True, default=None, null=True)  # New Facebook account added
     is_facebook_removed = models.BooleanField(db_index=True, default=None, null=True)
     is_from_twitter = models.BooleanField(db_index=True, default=None, null=True)  # Error retrieving from Twitter
+    is_link_to_office_added = models.BooleanField(db_index=True, default=None, null=True)  # New LinkedIn link added
+    is_link_to_office_removed = models.BooleanField(db_index=True, default=None, null=True)
     is_linkedin_added = models.BooleanField(db_index=True, default=None, null=True)  # New LinkedIn link added
     is_linkedin_removed = models.BooleanField(db_index=True, default=None, null=True)
     is_official_statement_added = models.BooleanField(db_index=True, default=None, null=True)  # New Official Statement

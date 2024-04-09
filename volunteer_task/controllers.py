@@ -27,6 +27,7 @@ def augmentation_change_found(changes_found_dict={}):  # politician_requested_ch
             'is_candidate_analysis_done',
             'is_candidate_url_added', 'is_candidate_url_removed',
             'is_facebook_added', 'is_facebook_removed',
+            'is_link_to_office_added', 'is_link_to_office_removed',
             'is_linkedin_added', 'is_linkedin_removed',
             'is_politician_analysis_done',
             'is_politician_url_added', 'is_politician_url_removed',
