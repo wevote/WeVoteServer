@@ -3000,8 +3000,9 @@ def candidate_edit_process_view(request):
             if youtube_url is not False:
                 candidate_on_stage.youtube_url = youtube_url
             if withdrawal_date is not False:
+                candidate_withdrawal_date_string = candidate_on_stage.withdrawal_date.strftime("%Y-%m-%d")
                 change_results = change_tracking(
-                    existing_value=candidate_on_stage.withdrawal_date,
+                    existing_value=candidate_withdrawal_date_string,
                     new_value=withdrawal_date,
                     changes_found_dict=changes_found_dict,
                     changes_found_key_base='is_withdrawal_date',
@@ -3011,12 +3012,13 @@ def candidate_edit_process_view(request):
                 if change_results['change_description_changed']:
                     change_description += change_results['change_description']
                     change_description_changed = True
-            if withdrawn_from_election:
-                candidate_on_stage.withdrawn_from_election = withdrawn_from_election
-                if positive_value_exists(withdrawal_date):
-                    candidate_on_stage.withdrawal_date = withdrawal_date
-                else:
-                    candidate_on_stage.withdrawal_date = None
+            candidate_on_stage.withdrawn_from_election = withdrawn_from_election
+            if not positive_value_exists(withdrawn_from_election):
+                candidate_on_stage.withdrawal_date = None
+            elif positive_value_exists(withdrawal_date):
+                candidate_on_stage.withdrawal_date = datetime.strptime(withdrawal_date, "%Y-%m-%d").date()
+            else:
+                candidate_on_stage.withdrawal_date = None
 
             if candidate_photo_file_delete:
                 changes_found_dict['is_photo_removed'] = True
