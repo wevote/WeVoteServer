@@ -37,7 +37,8 @@ class TargetSmartApiCounterMonthlySummary(models.Model):
 # noinspection PyBroadException
 class TargetSmartApiCounterManager(models.Manager):
 
-    def create_counter_entry(self, kind_of_action, number_of_items_sent_in_query=0):
+    @staticmethod
+    def create_counter_entry(kind_of_action, number_of_items_sent_in_query=0):
         """
         Create an entry that records that a call to the TargetSmart Api was made.
         """
@@ -61,7 +62,8 @@ class TargetSmartApiCounterManager(models.Manager):
         }
         return results
 
-    def retrieve_daily_summaries(self, kind_of_action='', days_to_display=30):
+    @staticmethod
+    def retrieve_daily_summaries(kind_of_action='', days_to_display=30):
         # Start with today and cycle backwards in time
         daily_summaries = []
         day_on_stage = date.today()  # TODO: We need to work out the timezone questions
