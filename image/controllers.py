@@ -25,7 +25,8 @@ from twitter.models import TwitterUserManager
 from voter.models import VoterManager, VoterDeviceLink, VoterDeviceLinkManager, VoterAddressManager, Voter
 from voter_guide.models import VoterGuideManager
 from wevote_functions.functions import positive_value_exists, convert_to_int
-from .functions import analyze_remote_url, analyze_image_file, analyze_image_in_memory
+from .functions import analyze_remote_url, analyze_image_file, analyze_image_in_memory, \
+    change_default_profile_image_if_needed
 from .models import WeVoteImageManager, WeVoteImage, \
     CHOSEN_FAVICON_NAME, CHOSEN_LOGO_NAME, CHOSEN_SOCIAL_SHARE_IMAGE_NAME, \
     FACEBOOK_PROFILE_IMAGE_NAME, FACEBOOK_BACKGROUND_IMAGE_NAME, \
@@ -4866,74 +4867,67 @@ def organize_object_photo_fields_based_on_image_type_currently_active(
     # Now move selected field into master politician image
     if uploaded_image_exists and \
             object_with_photo_fields.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_UPLOADED:
-        object_with_photo_fields.we_vote_hosted_profile_image_url_large = \
-            object_with_photo_fields.we_vote_hosted_profile_uploaded_image_url_large
-        object_with_photo_fields.we_vote_hosted_profile_image_url_medium = \
-            object_with_photo_fields.we_vote_hosted_profile_uploaded_image_url_medium
-        object_with_photo_fields.we_vote_hosted_profile_image_url_tiny = \
-            object_with_photo_fields.we_vote_hosted_profile_uploaded_image_url_tiny
-        profile_image_default_updated = True
-        save_changes = True
+        results = change_default_profile_image_if_needed(
+            object_with_photo_fields=object_with_photo_fields,
+            new_profile_image_key='we_vote_hosted_profile_uploaded_image_url')
+        if results['save_changes']:
+            object_with_photo_fields = results['object_with_photo_fields']
+            profile_image_default_updated = True
+            save_changes = True
     elif ballotpedia_image_exists and \
-         object_with_photo_fields.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_BALLOTPEDIA:
-        object_with_photo_fields.we_vote_hosted_profile_image_url_large = \
-            object_with_photo_fields.we_vote_hosted_profile_ballotpedia_image_url_large
-        object_with_photo_fields.we_vote_hosted_profile_image_url_medium = \
-            object_with_photo_fields.we_vote_hosted_profile_ballotpedia_image_url_medium
-        object_with_photo_fields.we_vote_hosted_profile_image_url_tiny = \
-            object_with_photo_fields.we_vote_hosted_profile_ballotpedia_image_url_tiny
-        profile_image_default_updated = True
-        save_changes = True
+            object_with_photo_fields.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_BALLOTPEDIA:
+        results = change_default_profile_image_if_needed(
+            object_with_photo_fields=object_with_photo_fields,
+            new_profile_image_key='we_vote_hosted_profile_ballotpedia_image_url')
+        if results['save_changes']:
+            object_with_photo_fields = results['object_with_photo_fields']
+            profile_image_default_updated = True
+            save_changes = True
     elif twitter_image_exists and \
             object_with_photo_fields.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_TWITTER:
-        object_with_photo_fields.we_vote_hosted_profile_image_url_large = \
-            object_with_photo_fields.we_vote_hosted_profile_twitter_image_url_large
-        object_with_photo_fields.we_vote_hosted_profile_image_url_medium = \
-            object_with_photo_fields.we_vote_hosted_profile_twitter_image_url_medium
-        object_with_photo_fields.we_vote_hosted_profile_image_url_tiny = \
-            object_with_photo_fields.we_vote_hosted_profile_twitter_image_url_tiny
-        profile_image_default_updated = True
-        save_changes = True
+        results = change_default_profile_image_if_needed(
+            object_with_photo_fields=object_with_photo_fields,
+            new_profile_image_key='we_vote_hosted_profile_twitter_image_url')
+        if results['save_changes']:
+            object_with_photo_fields = results['object_with_photo_fields']
+            profile_image_default_updated = True
+            save_changes = True
     elif facebook_image_exists and \
             object_with_photo_fields.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_FACEBOOK:
-        object_with_photo_fields.we_vote_hosted_profile_image_url_large = \
-            object_with_photo_fields.we_vote_hosted_profile_facebook_image_url_large
-        object_with_photo_fields.we_vote_hosted_profile_image_url_medium = \
-            object_with_photo_fields.we_vote_hosted_profile_facebook_image_url_medium
-        object_with_photo_fields.we_vote_hosted_profile_image_url_tiny = \
-            object_with_photo_fields.we_vote_hosted_profile_facebook_image_url_tiny
-        profile_image_default_updated = True
-        save_changes = True
+        results = change_default_profile_image_if_needed(
+            object_with_photo_fields=object_with_photo_fields,
+            new_profile_image_key='we_vote_hosted_profile_facebook_image_url')
+        if results['save_changes']:
+            object_with_photo_fields = results['object_with_photo_fields']
+            profile_image_default_updated = True
+            save_changes = True
     elif linkedin_image_exists and \
-         object_with_photo_fields.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_LINKEDIN:
-        object_with_photo_fields.we_vote_hosted_profile_image_url_large = \
-            object_with_photo_fields.we_vote_hosted_profile_linkedin_image_url_large
-        object_with_photo_fields.we_vote_hosted_profile_image_url_medium = \
-            object_with_photo_fields.we_vote_hosted_profile_linkedin_image_url_medium
-        object_with_photo_fields.we_vote_hosted_profile_image_url_tiny = \
-            object_with_photo_fields.we_vote_hosted_profile_linkedin_image_url_tiny
-        profile_image_default_updated = True
-        save_changes = True
+            object_with_photo_fields.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_LINKEDIN:
+        results = change_default_profile_image_if_needed(
+            object_with_photo_fields=object_with_photo_fields,
+            new_profile_image_key='we_vote_hosted_profile_linkedin_image_url')
+        if results['save_changes']:
+            object_with_photo_fields = results['object_with_photo_fields']
+            profile_image_default_updated = True
+            save_changes = True
     elif wikipedia_image_exists and \
-         object_with_photo_fields.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_WIKIPEDIA:
-        object_with_photo_fields.we_vote_hosted_profile_image_url_large = \
-            object_with_photo_fields.we_vote_hosted_profile_wikipedia_image_url_large
-        object_with_photo_fields.we_vote_hosted_profile_image_url_medium = \
-            object_with_photo_fields.we_vote_hosted_profile_wikipedia_image_url_medium
-        object_with_photo_fields.we_vote_hosted_profile_image_url_tiny = \
-            object_with_photo_fields.we_vote_hosted_profile_wikipedia_image_url_tiny
-        profile_image_default_updated = True
-        save_changes = True
+            object_with_photo_fields.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_WIKIPEDIA:
+        results = change_default_profile_image_if_needed(
+            object_with_photo_fields=object_with_photo_fields,
+            new_profile_image_key='we_vote_hosted_profile_wikipedia_image_url')
+        if results['save_changes']:
+            object_with_photo_fields = results['object_with_photo_fields']
+            profile_image_default_updated = True
+            save_changes = True
     elif vote_usa_image_exists and \
             object_with_photo_fields.profile_image_type_currently_active == PROFILE_IMAGE_TYPE_VOTE_USA:
-        object_with_photo_fields.we_vote_hosted_profile_image_url_large = \
-            object_with_photo_fields.we_vote_hosted_profile_vote_usa_image_url_large
-        object_with_photo_fields.we_vote_hosted_profile_image_url_medium = \
-            object_with_photo_fields.we_vote_hosted_profile_vote_usa_image_url_medium
-        object_with_photo_fields.we_vote_hosted_profile_image_url_tiny = \
-            object_with_photo_fields.we_vote_hosted_profile_vote_usa_image_url_tiny
-        profile_image_default_updated = True
-        save_changes = True
+        results = change_default_profile_image_if_needed(
+            object_with_photo_fields=object_with_photo_fields,
+            new_profile_image_key='we_vote_hosted_profile_vote_usa_image_url')
+        if results['save_changes']:
+            object_with_photo_fields = results['object_with_photo_fields']
+            profile_image_default_updated = True
+            save_changes = True
 
     results = {
         'success':                          success,

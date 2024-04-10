@@ -41,8 +41,12 @@ from politician.models import Politician, PoliticianManager
 from position.models import PositionEntered, PositionListManager
 from representative.models import Representative
 from twitter.models import TwitterLinkPossibility, TwitterUserManager
+from volunteer_task.controllers import change_tracking, change_tracking_boolean
+from volunteer_task.models import VOLUNTEER_ACTION_DUPLICATE_POLITICIAN_ANALYSIS, \
+    VOLUNTEER_ACTION_MATCH_CANDIDATES_TO_POLITICIANS, \
+    VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION, VOLUNTEER_ACTION_POLITICIAN_AUGMENTATION, \
+    VOLUNTEER_ACTION_POLITICIAN_PHOTO, VOLUNTEER_ACTION_POLITICIAN_REQUEST, VolunteerTaskManager
 from voter.models import fetch_voter_from_voter_device_link, VoterDeviceLinkManager, VoterManager, voter_has_authority
-from volunteer_task.models import VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION, VolunteerTaskManager
 from voter_guide.models import VoterGuide
 from wevote_functions.functions import convert_to_int, \
     extract_instagram_handle_from_text_string, extract_twitter_handle_from_text_string, \
@@ -1031,7 +1035,8 @@ def candidate_list_view(request):
             # Show candidates that do NOT have links: Twitter, Instagram, Facebook, Web, Ballotpedia
             candidate_query = candidate_query.filter(
                 (Q(ballotpedia_candidate_url__isnull=True) | Q(ballotpedia_candidate_url=""))
-                & (Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle="") | Q(twitter_handle_updates_failing=True))
+                & (Q(candidate_twitter_handle__isnull=True) | Q(candidate_twitter_handle="")
+                   | Q(twitter_handle_updates_failing=True))
                 & (Q(candidate_url__isnull=True) | Q(candidate_url=""))
                 & (Q(facebook_url__isnull=True) | Q(facebook_url="") | Q(facebook_url_is_broken=True))
                 & (Q(instagram_handle__isnull=True) | Q(instagram_handle=""))
@@ -1993,14 +1998,63 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
         template_values = {
             'ballot_guide_official_statement':  ballot_guide_official_statement,
             'ballotpedia_candidate_id':         ballotpedia_candidate_id,
+            'ballotpedia_candidate_id_dict':              
+            {
+                'label': 'Candidate Name (from Ballotpedia)',
+                'id': 'ballotpedia_candidate_id_id',
+                'name': 'ballotpedia_candidate_id',
+                'value': ballotpedia_candidate_id if ballotpedia_candidate_id else candidate_on_stage.ballotpedia_candidate_id
+			},
             'ballotpedia_candidate_name':       ballotpedia_candidate_name,
+            'ballotpedia_candidate_name_dict':              
+            {
+                'label': 'Ballotpedia Candidate Id',
+                'id': 'ballotpedia_candidate_name_id',
+                'name': 'ballotpedia_candidate_name',
+                'value': ballotpedia_candidate_name if ballotpedia_candidate_name else candidate_on_stage.ballotpedia_candidate_name
+			},
             'ballotpedia_candidate_url':        ballotpedia_candidate_url,
             'ballotpedia_office_id':            ballotpedia_office_id,
+            'ballotpedia_office_id_dict':              
+            {
+                'label': 'Ballotpedia Office Held Id',
+                'id': 'ballotpedia_office_id_id',
+                'name': 'ballotpedia_office_id',
+                'value': ballotpedia_office_id if ballotpedia_office_id else candidate_on_stage.ballotpedia_office_id
+			},
             'ballotpedia_person_id':            ballotpedia_person_id,
+            'ballotpedia_person_id_dict':              
+            {
+                'label': 'Ballotpedia Person Id',
+                'id': 'ballotpedia_person_id_id',
+                'name': 'ballotpedia_person_id',
+                'value': ballotpedia_person_id if ballotpedia_person_id else candidate_on_stage.ballotpedia_person_id
+			},
             'ballotpedia_race_id':              ballotpedia_race_id,
+            'ballotpedia_race_id_dict':              
+            {
+                'label': 'Ballotpedia Race Id',
+                'id': 'ballotpedia_race_id_id',
+                'name': 'ballotpedia_race_id',
+                'value': ballotpedia_race_id if ballotpedia_race_id else candidate_on_stage.ballotpedia_race_id
+			},
             'candidate':                        candidate_on_stage,
             'candidate_email':                  candidate_email,
+            'candidate_email_dict':              
+            {
+                'label': 'Candidate Email',
+                'id': 'candidate_email_id',
+                'name': 'candidate_email',
+                'value': candidate_email if candidate_email else candidate_on_stage.candidate_email
+			},
             'candidate_phone':                  candidate_phone,
+            'candidate_phone_dict':              
+            {
+                'label': 'Candidate Phone',
+                'id': 'candidate_phone_id',
+                'name': 'candidate_phone',
+                'value': candidate_phone if candidate_phone else candidate_on_stage.candidate_phone
+			},
             'candidate_name':                   candidate_name,
             'candidate_position_list':          candidate_position_list,
             'candidate_to_office_link_list':    candidate_to_office_link_list,
@@ -2011,30 +2065,107 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
             'candidate_contact_form_url':       candidate_contact_form_url,
             'change_log_list':                  change_log_list,
             # 'contest_office_we_vote_id':        contest_office_we_vote_id,
+            'contest_office_name_dict':              
+            {
+                'label': 'Contest Office Name (Cached)',
+                'id': 'contest_office_name_id',
+                'name': 'contest_office_name',
+                'value': candidate_on_stage.contest_office_name
+			},
+            'district_name_dict':              
+            {
+                'label': 'District Name (Cached)',
+                'id': 'district_name_id',
+                'name': 'district_name',
+                'value': candidate_on_stage.district_name
+			},
             'do_not_display_on_ballot':         do_not_display_on_ballot,
             'facebook_url':                     facebook_url,
             # 'google_civic_election_id':         google_civic_election_id,
             'google_search_possibility_list':   google_search_possibility_list,
             'google_search_possibility_total_count':    google_search_possibility_total_count,
             'google_civic_candidate_name':      google_civic_candidate_name,
+            'google_civic_candidate_name_dict':              
+            {
+                'label': 'Candidate Name1 (for Google Civic matching)',
+                'id': 'google_civic_candidate_name_id',
+                'name': 'google_civic_candidate_name',
+                'value': google_civic_candidate_name if google_civic_candidate_name else candidate_on_stage.google_civic_candidate_name
+			},
             'google_civic_candidate_name2':     google_civic_candidate_name2,
+            'google_civic_candidate_name2_dict':              
+            {
+                'label': 'Candidate Name2 (for Google Civic matching)',
+                'id': 'google_civic_candidate_name2_id',
+                'name': 'google_civic_candidate_name2',
+                'value': google_civic_candidate_name2 if google_civic_candidate_name2 else candidate_on_stage.google_civic_candidate_name2
+			},
             'google_civic_candidate_name3':     google_civic_candidate_name3,
+            'google_civic_candidate_name3_dict':              
+            {
+                'label': 'Candidate Name3 (for Google Civic matching)',
+                'id': 'google_civic_candidate_name3_id',
+                'name': 'google_civic_candidate_name3',
+                'value': google_civic_candidate_name3 if google_civic_candidate_name3 else candidate_on_stage.google_civic_candidate_name3
+			},
             'instagram_handle':                 instagram_handle,
+            'linkedin_url_dict':              
+            {
+                'label': 'LinkedIn URL',
+                'id': 'linkedin_url_id',
+                'name': 'linkedin_url',
+                'value': candidate_on_stage.linkedin_url
+			},
             'maplight_id':                      maplight_id,
             'messages_on_stage':                messages_on_stage,
             # 'office_list':                      contest_office_list,
             'page':                             page,
             'party':                            party,
+            'party_dict':              
+            {
+                'label': 'Candidate Party',
+                'id': 'party_id',
+                'name': 'party',
+                'value': party if party else candidate_on_stage.party
+			}, 
             'path_count':                       path_count,
             'path_list':                        path_list,
             'rating_list':                      rating_list,
             'state_code':                       state_code,
+            'state_code_dict':              
+            {
+                'label': 'Candidate State Code',
+                'id': 'state_code_id',
+                'name': 'state_code',
+                'value': state_code if state_code else candidate_on_stage.state_code
+			},
             'twitter_link_possibility_list':    twitter_link_possibility_list,
             'vote_smart_id':                    vote_smart_id,
+            'vote_usa_office_dict':              
+            {
+                'label': 'Vote USA Office Id',
+                'id': 'vote_usa_office_id',
+                'name': 'vote_usa_office',
+                'value': vote_smart_id if vote_smart_id else candidate_on_stage.vote_smart_id
+			}, 
+            'vote_usa_politician_dict':              
+            {
+                'label': 'Vote USA Politician Id',
+                'id': 'vote_usa_politician_id',
+                'name': 'vote_usa_politician',
+                'value': vote_smart_id if vote_smart_id else candidate_on_stage.vote_smart_id
+			}, 
             # 'vote_usa_profile_image_url_https': vote_usa_profile_image_url_https,
             'web_app_root_url':                 web_app_root_url,
             'withdrawal_date':                  withdrawal_date,
             'withdrawn_from_election':          withdrawn_from_election,
+            'youtube_url_dict':              
+            {
+                'label': 'YouTube URL',
+                'id': 'youtube_url_id',
+                'name': 'youtube_url',
+                'value': candidate_on_stage.youtube_url
+			},
         }
     else:
         template_values = {
@@ -2150,12 +2281,9 @@ def candidate_edit_process_view(request):
     candidate_year = False
     change_description = ""
     change_description_changed = False
-    is_ballotpedia_added = None
-    is_candidate_analysis_done = None
-    is_facebook_added = None
-    is_linkedin_added = None
-    is_twitter_handle_added = None
-    is_wikipedia_added = None
+    changes_found_dict = {}
+    primary_twitter_handle_changed = False
+    volunteer_task_manager = VolunteerTaskManager()
 
     status = ""
 
@@ -2299,6 +2427,10 @@ def candidate_edit_process_view(request):
         if positive_value_exists(candidate_to_office_link_delete_id):
             candidate_to_office_link.delete()
             messages.add_message(request, messages.INFO, 'Deleted Candidate-to-Office Link.')
+            # Now give volunteer credit
+            changes_found_dict['is_link_to_office_removed'] = True
+            change_description += "REMOVED: Link to Office " + candidate_to_office_link.contest_office_we_vote_id + " "
+            change_description_changed = True
 
     candidate_to_office_link_add_election = request.POST.get('candidate_to_office_link_add_election', False)
     if not positive_value_exists(candidate_to_office_link_add_election):
@@ -2321,7 +2453,10 @@ def candidate_edit_process_view(request):
             positive_value_exists(candidate_to_office_link_add_state_code) and \
             (positive_value_exists(candidate_to_office_link_add_office_we_vote_id) or
              positive_value_exists(candidate_to_office_link_add_office_held_we_vote_id)):
-        candidate_to_office_link_add_election = candidate_to_office_link_add_election.strip()
+        try:
+            candidate_to_office_link_add_election = convert_to_int(candidate_to_office_link_add_election)
+        except Exception as e:
+            candidate_to_office_link_add_election = 0
         if positive_value_exists(candidate_to_office_link_add_office_we_vote_id):
             candidate_to_office_link_add_office_we_vote_id = candidate_to_office_link_add_office_we_vote_id.strip()
         if positive_value_exists(candidate_to_office_link_add_state_code):
@@ -2377,6 +2512,11 @@ def candidate_edit_process_view(request):
                 state_code=candidate_to_office_link_add_state_code)
             if results['candidate_to_office_link_created']:
                 messages.add_message(request, messages.INFO, 'Added Candidate-to-Office Link.')
+                # Now give volunteer credit
+                candidate_to_office_link = results['candidate_to_office_link']
+                changes_found_dict['is_link_to_office_added'] = True
+                change_description += "ADDED: Link to Office " + candidate_to_office_link.contest_office_we_vote_id + " "
+                change_description_changed = True
             else:
                 messages.add_message(request, messages.ERROR, 'Candidate-to-Office Link already exists.')
         else:
@@ -2642,21 +2782,34 @@ def candidate_edit_process_view(request):
 
         if positive_value_exists(candidate_on_stage_found):
             if ballot_guide_official_statement is not False:
+                change_results = change_tracking(
+                    existing_value=candidate_on_stage.ballot_guide_official_statement,
+                    new_value=ballot_guide_official_statement,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_official_statement',
+                    changes_found_key_name='Official Statement',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
+                    change_description_changed = True
                 candidate_on_stage.ballot_guide_official_statement = ballot_guide_official_statement
             if ballotpedia_candidate_id is not False:
                 candidate_on_stage.ballotpedia_candidate_id = convert_to_int(ballotpedia_candidate_id)
             if ballotpedia_candidate_name is not False:
                 candidate_on_stage.ballotpedia_candidate_name = ballotpedia_candidate_name
             if ballotpedia_candidate_url is not False:
-                incoming_value_lower_case = ballotpedia_candidate_url.strip().lower() \
-                    if positive_value_exists(ballotpedia_candidate_url) else ''
-                existing_value_lower_case = candidate_on_stage.ballotpedia_candidate_url.strip().lower() \
-                    if positive_value_exists(candidate_on_stage.ballotpedia_candidate_url) else ''
-                if positive_value_exists(ballotpedia_candidate_url) and \
-                        incoming_value_lower_case != existing_value_lower_case:
-                    change_description += "ADDED: Ballotpedia "
+                change_results = change_tracking(
+                    existing_value=candidate_on_stage.ballotpedia_candidate_url,
+                    new_value=ballotpedia_candidate_url,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_ballotpedia',
+                    changes_found_key_name='Ballotpedia',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
                     change_description_changed = True
-                    is_ballotpedia_added = True
                 candidate_on_stage.ballotpedia_candidate_url = ballotpedia_candidate_url
             if ballotpedia_candidate_summary is not False:
                 candidate_on_stage.ballotpedia_candidate_summary = ballotpedia_candidate_summary
@@ -2666,11 +2819,10 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.ballotpedia_person_id = convert_to_int(ballotpedia_person_id)
             if ballotpedia_race_id is not False:
                 candidate_on_stage.ballotpedia_race_id = convert_to_int(ballotpedia_race_id)
-            if positive_value_exists(candidate_analysis_done) and \
-                    candidate_analysis_done != candidate_on_stage.candidate_analysis_done:
+            if candidate_analysis_done != candidate_on_stage.candidate_analysis_done:
                 change_description += "CHANGED: ANALYSIS_DONE (" + str(candidate_analysis_done) + ") "
                 change_description_changed = True
-                is_candidate_analysis_done = True
+                changes_found_dict['is_candidate_analysis_done'] = True
             candidate_on_stage.candidate_analysis_done = candidate_analysis_done
             if candidate_contact_form_url is not False:
                 candidate_on_stage.candidate_contact_form_url = candidate_contact_form_url
@@ -2681,39 +2833,57 @@ def candidate_edit_process_view(request):
             if candidate_phone is not False:
                 candidate_on_stage.candidate_phone = candidate_phone
             if candidate_twitter_handle is not False:
-                incoming_value_lower_case = candidate_twitter_handle.strip().lower() \
-                    if positive_value_exists(candidate_twitter_handle) else ''
-                existing_value_lower_case = candidate_on_stage.candidate_twitter_handle.strip().lower() \
-                    if positive_value_exists(candidate_on_stage.candidate_twitter_handle) else ''
-                if positive_value_exists(candidate_twitter_handle) and \
-                        incoming_value_lower_case != existing_value_lower_case:
-                    change_description += "ADDED: Twitter "
+                change_results = change_tracking(
+                    existing_value=candidate_on_stage.candidate_twitter_handle,
+                    new_value=candidate_twitter_handle,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_twitter_handle',
+                    changes_found_key_name='Twitter',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
                     change_description_changed = True
-                    is_twitter_handle_added = True
+                    primary_twitter_handle_changed = True
                 candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
             if candidate_twitter_handle2 is not False:
-                incoming_value_lower_case = candidate_twitter_handle2.strip().lower() \
-                    if positive_value_exists(candidate_twitter_handle2) else ''
-                existing_value_lower_case = candidate_on_stage.candidate_twitter_handle2.strip().lower() \
-                    if positive_value_exists(candidate_on_stage.candidate_twitter_handle2) else ''
-                if positive_value_exists(candidate_twitter_handle2) and \
-                        incoming_value_lower_case != existing_value_lower_case:
-                    change_description += "ADDED: Twitter2 "
+                change_results = change_tracking(
+                    existing_value=candidate_on_stage.candidate_twitter_handle2,
+                    new_value=candidate_twitter_handle2,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_twitter_handle',
+                    changes_found_key_name='Twitter2',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
                     change_description_changed = True
-                    is_twitter_handle_added = True
                 candidate_on_stage.candidate_twitter_handle2 = candidate_twitter_handle2
             if candidate_twitter_handle3 is not False:
-                incoming_value_lower_case = candidate_twitter_handle3.strip().lower() \
-                    if positive_value_exists(candidate_twitter_handle3) else ''
-                existing_value_lower_case = candidate_on_stage.candidate_twitter_handle3.strip().lower() \
-                    if positive_value_exists(candidate_on_stage.candidate_twitter_handle3) else ''
-                if positive_value_exists(candidate_twitter_handle3) and \
-                        incoming_value_lower_case != existing_value_lower_case:
-                    change_description += "ADDED: Twitter3 "
+                change_results = change_tracking(
+                    existing_value=candidate_on_stage.candidate_twitter_handle3,
+                    new_value=candidate_twitter_handle3,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_twitter_handle',
+                    changes_found_key_name='Twitter3',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
                     change_description_changed = True
-                    is_twitter_handle_added = True
                 candidate_on_stage.candidate_twitter_handle3 = candidate_twitter_handle3
             if candidate_url is not False:
+                change_results = change_tracking(
+                    existing_value=candidate_on_stage.candidate_url,
+                    new_value=candidate_url,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_candidate_url',
+                    changes_found_key_name='URL',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
+                    change_description_changed = True
                 candidate_on_stage.candidate_url = candidate_url
             if candidate_year is not False:
                 if positive_value_exists(candidate_year):
@@ -2733,15 +2903,17 @@ def candidate_edit_process_view(request):
             if district_name is not False:
                 candidate_on_stage.district_name = district_name
             if facebook_url is not False:
-                incoming_value_lower_case = facebook_url.strip().lower() \
-                    if positive_value_exists(facebook_url) else ''
-                existing_value_lower_case = candidate_on_stage.facebook_url.strip().lower() \
-                    if positive_value_exists(candidate_on_stage.facebook_url) else ''
-                if positive_value_exists(facebook_url) and \
-                        incoming_value_lower_case != existing_value_lower_case:
-                    change_description += "ADDED: Facebook "
+                change_results = change_tracking(
+                    existing_value=candidate_on_stage.facebook_url,
+                    new_value=facebook_url,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_facebook',
+                    changes_found_key_name='Facebook',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
                     change_description_changed = True
-                    is_facebook_added = True
                 candidate_on_stage.facebook_url = facebook_url
             if google_civic_candidate_name is not False:
                 candidate_on_stage.google_civic_candidate_name = google_civic_candidate_name
@@ -2753,14 +2925,17 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.instagram_handle = instagram_handle
             candidate_on_stage.is_battleground_race = is_battleground_race
             if linkedin_url is not False:
-                incoming_value_lower_case = linkedin_url.strip().lower() \
-                    if positive_value_exists(linkedin_url) else ''
-                existing_value_lower_case = candidate_on_stage.linkedin_url.strip().lower() \
-                    if positive_value_exists(candidate_on_stage.linkedin_url) else ''
-                if positive_value_exists(linkedin_url) and incoming_value_lower_case != existing_value_lower_case:
-                    change_description += "ADDED: LinkedIn "
+                change_results = change_tracking(
+                    existing_value=candidate_on_stage.linkedin_url,
+                    new_value=linkedin_url,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_linkedin',
+                    changes_found_key_name='LinkedIn',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
                     change_description_changed = True
-                    is_linkedin_added = True
                 candidate_on_stage.linkedin_url = linkedin_url
             if maplight_id is not False:
                 candidate_on_stage.maplight_id = maplight_id
@@ -2774,8 +2949,35 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.state_code = state_code
             if twitter_url is not False:
                 candidate_on_stage.twitter_url = twitter_url
+
+            # twitter_handle_updates_failing
+            change_results = change_tracking_boolean(
+                existing_value=candidate_on_stage.twitter_handle_updates_failing,
+                new_value=twitter_handle_updates_failing,
+                changes_found_dict=changes_found_dict,
+                changes_found_key_base='is_twitter_handle',
+                changes_found_key_name='Twitter Updates Failing',
+            )
+            changes_found_dict = change_results['changes_found_dict']
+            if change_results['change_description_changed']:
+                change_description += change_results['change_description']
+                change_description_changed = True
             candidate_on_stage.twitter_handle_updates_failing = twitter_handle_updates_failing
+
+            # twitter_handle2_updates_failing
+            change_results = change_tracking_boolean(
+                existing_value=candidate_on_stage.twitter_handle2_updates_failing,
+                new_value=twitter_handle2_updates_failing,
+                changes_found_dict=changes_found_dict,
+                changes_found_key_base='is_twitter_handle',
+                changes_found_key_name='Twitter Updates2 Failing',
+            )
+            changes_found_dict = change_results['changes_found_dict']
+            if change_results['change_description_changed']:
+                change_description += change_results['change_description']
+                change_description_changed = True
             candidate_on_stage.twitter_handle2_updates_failing = twitter_handle2_updates_failing
+
             if vote_smart_id is not False:
                 candidate_on_stage.vote_smart_id = vote_smart_id
             if vote_usa_politician_id is not False:
@@ -2783,25 +2985,43 @@ def candidate_edit_process_view(request):
             if vote_usa_office_id is not False:
                 candidate_on_stage.vote_usa_office_id = vote_usa_office_id
             if wikipedia_url is not False:
-                incoming_value_lower_case = wikipedia_url.strip().lower() \
-                    if positive_value_exists(wikipedia_url) else ''
-                existing_value_lower_case = candidate_on_stage.wikipedia_url.strip().lower() \
-                    if positive_value_exists(candidate_on_stage.wikipedia_url) else ''
-                if positive_value_exists(wikipedia_url) and incoming_value_lower_case != existing_value_lower_case:
-                    change_description += "ADDED: Wikipedia "
+                change_results = change_tracking(
+                    existing_value=candidate_on_stage.wikipedia_url,
+                    new_value=wikipedia_url,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_wikipedia',
+                    changes_found_key_name='Wikipedia',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
                     change_description_changed = True
-                    is_wikipedia_added = True
                 candidate_on_stage.wikipedia_url = wikipedia_url
             if youtube_url is not False:
                 candidate_on_stage.youtube_url = youtube_url
-            if withdrawn_from_election:
-                candidate_on_stage.withdrawn_from_election = withdrawn_from_election
-                if positive_value_exists(withdrawal_date):
-                    candidate_on_stage.withdrawal_date = withdrawal_date
-                else:
-                    candidate_on_stage.withdrawal_date = None
+            if withdrawal_date is not False:
+                candidate_withdrawal_date_string = candidate_on_stage.withdrawal_date.strftime("%Y-%m-%d")
+                change_results = change_tracking(
+                    existing_value=candidate_withdrawal_date_string,
+                    new_value=withdrawal_date,
+                    changes_found_dict=changes_found_dict,
+                    changes_found_key_base='is_withdrawal_date',
+                    changes_found_key_name='Withdrawal Date',
+                )
+                changes_found_dict = change_results['changes_found_dict']
+                if change_results['change_description_changed']:
+                    change_description += change_results['change_description']
+                    change_description_changed = True
+            candidate_on_stage.withdrawn_from_election = withdrawn_from_election
+            if not positive_value_exists(withdrawn_from_election):
+                candidate_on_stage.withdrawal_date = None
+            elif positive_value_exists(withdrawal_date):
+                candidate_on_stage.withdrawal_date = datetime.strptime(withdrawal_date, "%Y-%m-%d").date()
+            else:
+                candidate_on_stage.withdrawal_date = None
 
             if candidate_photo_file_delete:
+                changes_found_dict['is_photo_removed'] = True
                 candidate_on_stage.we_vote_hosted_profile_uploaded_image_url_large = None
                 candidate_on_stage.we_vote_hosted_profile_uploaded_image_url_medium = None
                 candidate_on_stage.we_vote_hosted_profile_uploaded_image_url_tiny = None
@@ -2820,6 +3040,8 @@ def candidate_edit_process_view(request):
                 )
                 if results['success']:
                     candidate_on_stage = results['object_with_photo_fields']
+                    if positive_value_exists(results['save_changes']):
+                        changes_found_dict['is_photo_added'] = True
 
             candidate_on_stage.save()
             candidate_id = candidate_on_stage.id
@@ -2859,7 +3081,9 @@ def candidate_edit_process_view(request):
     # elif profile_image_type_currently_active == 'UNKNOWN':
     #     # Prevent Twitter from updating
     #     pass
-    elif positive_value_exists(candidate_twitter_handle) and not positive_value_exists(twitter_handle_updates_failing):
+    elif positive_value_exists(candidate_twitter_handle) \
+            and not positive_value_exists(twitter_handle_updates_failing) \
+            and primary_twitter_handle_changed:
         status += "REFRESH_FROM_CANDIDATE_TWITTER_HANDLE "
         results = refresh_twitter_candidate_details(candidate_on_stage)
         if not results['success']:
@@ -2876,35 +3100,71 @@ def candidate_edit_process_view(request):
         candidate_on_stage = CandidateCampaign.objects.get(id=candidate_id)
         messages.add_message(request, messages.INFO, 'Twitter refreshed: ' + status)
 
+    # ##################################################
+    # Change log and volunteer scoring
     if change_description_changed:
-        # request
         voter_manager = VoterManager()
         voter_api_device_id = get_voter_api_device_id(request)
         results = voter_manager.retrieve_voter_from_voter_device_id(voter_api_device_id, read_only=True)
         voter_full_name = ''
+        voter_id = ''
         voter_we_vote_id = ''
         if results['voter_found']:
             voter_on_stage = results['voter']
             voter_full_name = voter_on_stage.get_full_name(real_name_only=True)
+            voter_id = voter_on_stage.id
             voter_we_vote_id = voter_on_stage.we_vote_id
 
-        if positive_value_exists(candidate_analysis_comment) or is_candidate_analysis_done:
+        from volunteer_task.controllers import is_candidate_or_politician_analysis_done
+        if positive_value_exists(candidate_analysis_comment) \
+                or is_candidate_or_politician_analysis_done(changes_found_dict=changes_found_dict):
             kind_of_log_entry = KIND_OF_LOG_ENTRY_ANALYSIS_COMMENT
         else:
             kind_of_log_entry = KIND_OF_LOG_ENTRY_LINK_ADDED
         results = candidate_manager.create_candidate_log_entry(
             candidate_we_vote_id=candidate_we_vote_id,
             change_description=change_description,
+            changes_found_dict=changes_found_dict,
             changed_by_name=voter_full_name,
             changed_by_voter_we_vote_id=voter_we_vote_id,
-            is_ballotpedia_added=is_ballotpedia_added,
-            is_candidate_analysis_done=is_candidate_analysis_done,
-            is_facebook_added=is_facebook_added,
-            is_linkedin_added=is_linkedin_added,
-            is_twitter_handle_added=is_twitter_handle_added,
-            is_wikipedia_added=is_wikipedia_added,
             kind_of_log_entry=kind_of_log_entry,
         )
+        # Now add to the volunteers scores for doing tasks
+        if positive_value_exists(voter_we_vote_id):
+            # Give the volunteer who entered this credit
+            from volunteer_task.controllers import augmentation_change_found
+            if augmentation_change_found(changes_found_dict=changes_found_dict):
+                try:
+                    task_results = volunteer_task_manager.create_volunteer_task_completed(
+                        action_constant=VOLUNTEER_ACTION_POLITICIAN_AUGMENTATION,
+                        voter_id=voter_id,
+                        voter_we_vote_id=voter_we_vote_id,
+                    )
+                except Exception as e:
+                    status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED-AUGMENTATION: ' \
+                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            from volunteer_task.controllers import politician_requested_change_found
+            if politician_requested_change_found(changes_found_dict=changes_found_dict):
+                try:
+                    task_results = volunteer_task_manager.create_volunteer_task_completed(
+                        action_constant=VOLUNTEER_ACTION_POLITICIAN_REQUEST,
+                        voter_id=voter_id,
+                        voter_we_vote_id=voter_we_vote_id,
+                    )
+                except Exception as e:
+                    status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED-POLITICIAN_REQUEST: ' \
+                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            from volunteer_task.controllers import photo_change_found
+            if photo_change_found(changes_found_dict=changes_found_dict):
+                try:
+                    task_results = volunteer_task_manager.create_volunteer_task_completed(
+                        action_constant=VOLUNTEER_ACTION_POLITICIAN_PHOTO,
+                        voter_id=voter_id,
+                        voter_we_vote_id=voter_we_vote_id,
+                    )
+                except Exception as e:
+                    status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED-PHOTO: ' \
+                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
     # Make sure 'which_marking' is one of the allowed Filter fields
     if positive_value_exists(which_marking) \
@@ -3012,7 +3272,7 @@ def candidate_edit_process_view(request):
             messages.add_message(request, messages.ERROR,
                                  'Could not save candidate with refreshed politician data:' + str(e))
 
-    url_variables = "?null=1"
+    url_variables = "?n=1"
     if positive_value_exists(show_all_twitter_search_results):
         url_variables += "&show_all_twitter_search_results=1#twitter_link_possibility_list"
 
@@ -3181,6 +3441,7 @@ def candidate_politician_match_this_election_view(request):
 
 @login_required
 def candidate_politician_match_this_year_view(request):
+    status = ""
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'verified_volunteer'}
     if not voter_has_authority(request, authority_required):
@@ -3193,6 +3454,17 @@ def candidate_politician_match_this_year_view(request):
     if not positive_value_exists(candidate_year):
         messages.add_message(request, messages.ERROR, "Year required.")
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()))
+
+    try:
+        # Give the volunteer who entered this credit
+        volunteer_task_manager = VolunteerTaskManager()
+        task_results = volunteer_task_manager.create_volunteer_task_completed(
+            action_constant=VOLUNTEER_ACTION_MATCH_CANDIDATES_TO_POLITICIANS,
+            request=request,
+        )
+    except Exception as e:
+        status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED: ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
     candidate_list_manager = CandidateListManager()
     results = candidate_list_manager.retrieve_all_candidates_for_one_year(
@@ -3456,6 +3728,7 @@ def find_and_merge_duplicate_candidates_view(request):
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     google_civic_election_id = convert_to_int(google_civic_election_id)
     state_code = request.GET.get('state_code', "")
+    status = ""
     candidate_manager = CandidateManager()
     candidate_list_manager = CandidateListManager()
     election_manager = ElectionManager()
@@ -3517,6 +3790,17 @@ def find_and_merge_duplicate_candidates_view(request):
                                         google_civic_election_id=google_civic_election_id,
                                         show_this_year_of_candidates=candidate_year,
                                         state_code=state_code))
+
+    try:
+        # Give the volunteer who entered this credit
+        volunteer_task_manager = VolunteerTaskManager()
+        task_results = volunteer_task_manager.create_volunteer_task_completed(
+            action_constant=VOLUNTEER_ACTION_DUPLICATE_POLITICIAN_ANALYSIS,
+            request=request,
+        )
+    except Exception as e:
+        status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED: ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
     # Loop through all the candidates in this year or election
     ignore_candidate_id_list = []

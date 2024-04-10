@@ -6,7 +6,7 @@ from django.db import models
 from django.utils.timezone import localtime, now
 
 from voter.models import fetch_voter_from_voter_device_link, Voter
-from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_to_int, get_voter_api_device_id, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_volunteer_team_integer, fetch_site_unique_id_prefix
 
 VOLUNTEER_ACTION_POSITION_SAVED = 1
@@ -17,6 +17,10 @@ VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION = 5  # Including starting process
 VOLUNTEER_ACTION_POLITICIAN_AUGMENTATION = 6  # Candidate or Politician
 VOLUNTEER_ACTION_POLITICIAN_PHOTO = 7  # Candidate or Politician: Photo related change
 VOLUNTEER_ACTION_POLITICIAN_REQUEST = 8  # Politician sends in personal statement
+VOLUNTEER_ACTION_ELECTION_RETRIEVE_STARTED = 9
+VOLUNTEER_ACTION_DUPLICATE_POLITICIAN_ANALYSIS = 10  # Candidate or Politician
+VOLUNTEER_ACTION_MATCH_CANDIDATES_TO_POLITICIANS = 11
+VOLUNTEER_ACTION_TWITTER_BULK_RETRIEVE = 12
 
 
 class VolunteerTaskCompleted(models.Model):
@@ -58,6 +62,7 @@ class VolunteerTaskManager(models.Manager):
     @staticmethod
     def create_volunteer_task_completed(
             action_constant=None,
+            request=None,
             voter_we_vote_id=None,
             voter_id=None,
             voter_device_id=None):
@@ -71,6 +76,16 @@ class VolunteerTaskManager(models.Manager):
         missing_required_variable = False
 
         if voter_device_id and not positive_value_exists(voter_we_vote_id):
+            voter = fetch_voter_from_voter_device_link(voter_device_id)
+            if hasattr(voter, 'we_vote_id'):
+                voter_id = voter.id
+                voter_we_vote_id = voter.we_vote_id
+            else:
+                voter_id = 0
+                voter_we_vote_id = ""
+
+        if request and not positive_value_exists(voter_we_vote_id):
+            voter_device_id = get_voter_api_device_id(request)
             voter = fetch_voter_from_voter_device_link(voter_device_id)
             if hasattr(voter, 'we_vote_id'):
                 voter_id = voter.id
@@ -183,25 +198,48 @@ class VolunteerWeeklyMetrics(models.Model):
     # We store YYYYMMDD as an integer for very fast lookup (ex/ "20170901" for September, 1, 2017)
     #  And this end-of-week date is Sunday from ISO 8601 Standard
     end_of_week_date_integer = models.PositiveIntegerField(null=True, db_index=True)
-    candidates_created = models.PositiveIntegerField(null=True)
-    politicians_deduplicated = models.PositiveIntegerField(null=True)
-    positions_saved = models.PositiveIntegerField(null=True)
-    position_comments_saved = models.PositiveIntegerField(null=True)
+    candidates_created = models.PositiveIntegerField(default=0)
+    duplicate_politician_analysis = models.PositiveIntegerField(default=0)
+    election_retrieve_started = models.PositiveIntegerField(default=0)
+    match_candidates_to_politicians = models.PositiveIntegerField(default=0)
+    politicians_augmented = models.PositiveIntegerField(default=0)
+    politicians_deduplicated = models.PositiveIntegerField(default=0)
+    politicians_photo_added = models.PositiveIntegerField(default=0)
+    politicians_requested_changes = models.PositiveIntegerField(default=0)
+    positions_saved = models.PositiveIntegerField(default=0)
+    position_comments_saved = models.PositiveIntegerField(default=0)
+    twitter_bulk_retrieve = models.PositiveIntegerField(default=0)
     # We create this unique identifier to we can prevent duplicates: voter_we_vote_id + "-" + end_of_week_date_integer
     voter_date_unique_string = models.CharField(max_length=255, null=True, db_index=True, unique=True)
     voter_display_name = models.CharField(max_length=255, null=True, db_index=True)
-    voter_guide_possibilities_created = models.PositiveIntegerField(null=True)
+    voter_guide_possibilities_created = models.PositiveIntegerField(default=0)
     voter_we_vote_id = models.CharField(max_length=255, null=True, db_index=True)
 
 
 def display_action_constant_human_readable(action_constant):
     if action_constant == VOLUNTEER_ACTION_CANDIDATE_CREATED:
         return "CANDIDATE_CREATED"
-    if action_constant == VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED:
-        return "VOTER_GUIDE_POSSIBILITY_CREATED"
+    if action_constant == VOLUNTEER_ACTION_DUPLICATE_POLITICIAN_ANALYSIS:
+        return "DUPLICATE_POLITICIAN_ANALYSIS"
+    if action_constant == VOLUNTEER_ACTION_ELECTION_RETRIEVE_STARTED:
+        return "ELECTION_RETRIEVE"
+    if action_constant == VOLUNTEER_ACTION_MATCH_CANDIDATES_TO_POLITICIANS:
+        return "MATCH_TO_POLITICIANS"
+    if action_constant == VOLUNTEER_ACTION_POLITICIAN_AUGMENTATION:
+        return "POLITICIAN_AUGMENTATION"
+    if action_constant == VOLUNTEER_ACTION_POLITICIAN_DEDUPLICATION:
+        return "POLITICIAN_DEDUPLICATION"
+    if action_constant == VOLUNTEER_ACTION_POLITICIAN_PHOTO:
+        return "POLITICIAN_PHOTO"
+    if action_constant == VOLUNTEER_ACTION_POLITICIAN_REQUEST:
+        return "POLITICIAN_REQUEST"
     if action_constant == VOLUNTEER_ACTION_POSITION_COMMENT_SAVED:
         return "POSITION_COMMENT_SAVED"
     if action_constant == VOLUNTEER_ACTION_POSITION_SAVED:
         return "POSITION_SAVED"
+    if action_constant == VOLUNTEER_ACTION_TWITTER_BULK_RETRIEVE:
+        return "TWITTER_BULK_RETRIEVE"
+    if action_constant == VOLUNTEER_ACTION_VOTER_GUIDE_POSSIBILITY_CREATED:
+        return "VOTER_GUIDE_POSSIBILITY_CREATED"
 
     return "VOLUNTEER_ACTION_CONSTANT:" + str(action_constant)

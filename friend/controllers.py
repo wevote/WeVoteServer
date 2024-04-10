@@ -129,6 +129,15 @@ def delete_friends_for_voter(voter_to_delete_we_vote_id):
             friend_entries_not_deleted += 1
             status += "PROBLEM_UPDATING_FRIEND: " + str(e) + ' '
             success = False
+    
+    try:
+        number_deleted, details = CurrentFriend.objects\
+            .filter(viewer_voter_we_vote_id__iexact=voter_to_delete_we_vote_id, )\
+            .delete()
+        friend_entries_deleted += number_deleted
+    except Exception as e:
+        status += "PROBLEM_UPDATING_FRIEND: " + str(e) + " "
+        friend_entries_not_deleted += 1
 
     results = {
         'status':                       status,
@@ -173,7 +182,17 @@ def delete_suggested_friends_for_voter(voter_to_delete_we_vote_id):
             suggested_friend_entries_not_deleted += 1
             status += "PROBLEM_DELETING_SUGGESTED_FRIEND: " + str(e) + ' '
             success = False
-
+            
+    try:
+        number_deleted, details = SuggestedFriend.objects\
+            .filter(viewer_voter_we_vote_id__iexact=voter_to_delete_we_vote_id, )\
+            .delete()
+        suggested_friend_entries_deleted += number_deleted
+    except Exception as e:
+        status += "PROBLEM_DELETING_SUGGESTED_FRIEND: " + str(e) + " "
+        suggested_friend_entries_not_deleted += 1
+     
+        
     results = {
         'status':                               status,
         'success':                              success,
@@ -4183,6 +4202,7 @@ def move_friends_to_another_voter(
                 status += "PROBLEM_UPDATING_FRIEND: " + str(e) + ' '
                 success = False
 
+    # delete -> this part ???
     from_friend_list_remaining_results = friend_manager.retrieve_current_friend_list(
         from_voter_we_vote_id,
         read_only=False)
@@ -4197,6 +4217,10 @@ def move_friends_to_another_voter(
         except Exception as e:
             status += "PROBLEM_DELETING_FRIEND: " + str(e) + ' '
             success = False
+    
+    
+    # Refactor???
+    
 
     results = {
         'status': status,
@@ -4278,7 +4302,7 @@ def move_suggested_friends_to_another_voter(
                 suggested_friend_entries_not_moved += 1
                 status += "PROBLEM_UPDATING_SUGGESTED_FRIEND: " + str(e) + ' '
                 success = False
-
+    # Refactor???
     from_friend_list_remaining_results = friend_manager.retrieve_suggested_friend_list(
         from_voter_we_vote_id, hide_deleted=False, read_only=False)
     if not from_friend_list_remaining_results['success']:
