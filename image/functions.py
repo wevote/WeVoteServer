@@ -113,3 +113,52 @@ def analyze_image_in_memory(image_in_memory):
         'image_format':                 image_format.lower() if image_format is not None else image_format
     }
     return results
+
+
+def change_default_profile_image_if_needed(
+        object_with_photo_fields=None,
+        new_profile_image_key=''):
+    at_least_one_change = False
+    new_profile_image_key_large = ''
+    new_profile_image_key_medium = ''
+    new_profile_image_key_tiny = ''
+    save_changes = False
+    status = ''
+    success = True
+
+    if not hasattr(object_with_photo_fields, 'we_vote_hosted_profile_image_url_large'):
+        status += "NOT_VALID_OBJECT_WITH_PHOTO_FIELDS "
+        success = False
+    try:
+        new_profile_image_key_large = new_profile_image_key + "_large"
+        if not hasattr(object_with_photo_fields, new_profile_image_key_large):
+            status += "MISSING_NEW_PROFILE_IMAGE_URL_LARGE_ATTRIBUTE "
+            success = False
+        new_profile_image_key_medium = new_profile_image_key + "_medium"
+        new_profile_image_key_tiny = new_profile_image_key + "_tiny"
+    except Exception as e:
+        status += "NEW_PROFILE_IMAGE_KEY_PROBLEM: " + str(e) + " "
+        success = False
+    if success:
+        new_profile_image_value_large = getattr(object_with_photo_fields, new_profile_image_key_large)
+        if new_profile_image_value_large != object_with_photo_fields.we_vote_hosted_profile_image_url_large:
+            object_with_photo_fields.we_vote_hosted_profile_image_url_large = new_profile_image_value_large
+            at_least_one_change = True
+        new_profile_image_value_medium = getattr(object_with_photo_fields, new_profile_image_key_medium)
+        if new_profile_image_value_medium != object_with_photo_fields.we_vote_hosted_profile_image_url_medium:
+            object_with_photo_fields.we_vote_hosted_profile_image_url_medium = new_profile_image_value_medium
+            at_least_one_change = True
+        new_profile_image_value_tiny = getattr(object_with_photo_fields, new_profile_image_key_tiny)
+        if new_profile_image_value_tiny != object_with_photo_fields.we_vote_hosted_profile_image_url_tiny:
+            object_with_photo_fields.we_vote_hosted_profile_image_url_tiny = new_profile_image_value_tiny
+            at_least_one_change = True
+        if at_least_one_change:
+            save_changes = True
+
+    results = {
+        'object_with_photo_fields': object_with_photo_fields,
+        'save_changes':             save_changes,
+        'status':                   status,
+        'success':                  success,
+    }
+    return results

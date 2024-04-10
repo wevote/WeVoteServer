@@ -50,6 +50,7 @@ from polling_location.models import KIND_OF_LOG_ENTRY_BALLOT_RECEIVED, KIND_OF_L
 from position.models import POSITION
 import random
 import requests
+from volunteer_task.models import VOLUNTEER_ACTION_ELECTION_RETRIEVE_STARTED, VolunteerTaskManager
 from voter.models import voter_has_authority
 from voter_guide.models import ORGANIZATION_WORD
 import wevote_functions.admin
@@ -2716,6 +2717,7 @@ def refresh_ballots_for_voters_api_v4_view(request):
     :param request:
     :return:
     """
+    status = ""
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
@@ -2730,6 +2732,17 @@ def refresh_ballots_for_voters_api_v4_view(request):
     use_ctcl = positive_value_exists(use_ctcl)
     use_vote_usa = request.GET.get('use_vote_usa', False)
     use_vote_usa = positive_value_exists(use_vote_usa)
+
+    try:
+        # Give the volunteer who entered this credit
+        volunteer_task_manager = VolunteerTaskManager()
+        task_results = volunteer_task_manager.create_volunteer_task_completed(
+            action_constant=VOLUNTEER_ACTION_ELECTION_RETRIEVE_STARTED,
+            request=request,
+        )
+    except Exception as e:
+        status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED: ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
     if positive_value_exists(use_batch_process):
         from import_export_batches.controllers_batch_process import schedule_refresh_ballots_for_voters_api_v4
@@ -3209,6 +3222,17 @@ def retrieve_ballots_for_polling_locations_api_v4_view(request):
     use_vote_usa = request.GET.get('use_vote_usa', False)
     use_vote_usa = positive_value_exists(use_vote_usa)
     # import_limit = convert_to_int(request.GET.get('import_limit', 1000))  # If > 1000, we get error 414 (url too long)
+
+    try:
+        # Give the volunteer who entered this credit
+        volunteer_task_manager = VolunteerTaskManager()
+        task_results = volunteer_task_manager.create_volunteer_task_completed(
+            action_constant=VOLUNTEER_ACTION_ELECTION_RETRIEVE_STARTED,
+            request=request,
+        )
+    except Exception as e:
+        status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED: ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
     if positive_value_exists(use_batch_process):
         from import_export_batches.controllers_batch_process import \

@@ -55,14 +55,25 @@ class TwitterAuthResponse(models.Model):
 
 class TwitterAuthManager(models.Manager):
 
-    def __unicode__(self):
+    @staticmethod
+    def __unicode__():
         return "TwitterAuthManager"
 
-    def update_or_create_twitter_auth_response(self, voter_device_id, id=0,
-                                               username='', name='', profile_image_url='',
-                                               twitter_request_token='', twitter_request_secret='',
-                                               voters_access_token='', voters_access_token_secret='',
-                                               description='', location='', verified='', verified_type=''
+    @staticmethod
+    def update_or_create_twitter_auth_response(
+            voter_device_id,
+            id=0,
+            username='',
+            name='',
+            profile_image_url='',
+            twitter_request_token='',
+            twitter_request_secret='',
+            voters_access_token='',
+            voters_access_token_secret='',
+            description='',
+            location='',
+            verified='',
+            verified_type=''
     ):
 
         defaults = {
@@ -121,7 +132,8 @@ class TwitterAuthManager(models.Manager):
         }
         return results
 
-    def retrieve_twitter_auth_response(self, voter_device_id):
+    @staticmethod
+    def retrieve_twitter_auth_response(voter_device_id):
         """
 
         :param voter_device_id:

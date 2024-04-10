@@ -14,10 +14,11 @@ from candidate.models import PROFILE_IMAGE_TYPE_TWITTER, PROFILE_IMAGE_TYPE_UNKN
     PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from tag.models import Tag
-from wevote_functions.functions import candidate_party_display, convert_to_int, convert_date_to_date_as_integer, \
-    convert_to_political_party_constant, display_full_name_with_correct_capitalization, \
-    extract_first_name_from_full_name, extract_middle_name_from_full_name, \
-    extract_last_name_from_full_name, extract_twitter_handle_from_text_string, positive_value_exists
+from wevote_functions.functions import candidate_party_display, convert_to_int, convert_to_political_party_constant, \
+    display_full_name_with_correct_capitalization, extract_first_name_from_full_name, \
+    extract_middle_name_from_full_name, extract_last_name_from_full_name, \
+    extract_twitter_handle_from_text_string, positive_value_exists
+from wevote_functions.functions_date import convert_date_to_date_as_integer
 from wevote_settings.models import fetch_next_we_vote_id_politician_integer, fetch_site_unique_id_prefix
 
 FEMALE = 'F'
@@ -217,6 +218,7 @@ class Politician(models.Model):
     tag_link = models.ManyToManyField(Tag, through='PoliticianTagLink')
     # The full name of the party the official belongs to.
     political_party = models.CharField(verbose_name="politician political party", max_length=255, null=True)
+    politician_analysis_done = models.BooleanField(default=False)
     politician_url = models.TextField(blank=True, null=True)
     politician_url2 = models.TextField(blank=True, null=True)
     politician_url3 = models.TextField(blank=True, null=True)
@@ -447,12 +449,56 @@ class PoliticiansArePossibleDuplicates(models.Model):
             return ""
 
 
+class PoliticianChangeLog(models.Model):
+    batch_process_id = models.PositiveIntegerField(db_index=True, null=True, unique=False)
+    politician_we_vote_id = models.CharField(max_length=255, null=False, unique=False)
+    changed_by_name = models.CharField(max_length=255, default=None, null=True)
+    changed_by_voter_we_vote_id = models.CharField(max_length=255, default=None, null=True)
+    change_description = models.TextField(null=True, blank=True)
+    log_datetime = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+    # We keep track of which volunteer adds links to social accounts. We run reports seeing when any of these fields
+    # are set, so we can show the changed_by_voter_we_vote_id who collected the data.
+    is_ballotpedia_added = models.BooleanField(db_index=True, default=None, null=True)  # New Ballotpedia link
+    is_ballotpedia_removed = models.BooleanField(db_index=True, default=None, null=True)
+    is_facebook_added = models.BooleanField(db_index=True, default=None, null=True)  # New Facebook account added
+    is_facebook_removed = models.BooleanField(db_index=True, default=None, null=True)
+    is_from_twitter = models.BooleanField(db_index=True, default=None, null=True)  # Error retrieving from Twitter
+    is_linkedin_added = models.BooleanField(db_index=True, default=None, null=True)  # New LinkedIn link added
+    is_linkedin_removed = models.BooleanField(db_index=True, default=None, null=True)
+    is_official_statement_added = models.BooleanField(db_index=True, default=None, null=True)  # New Official Statement
+    is_official_statement_removed = models.BooleanField(db_index=True, default=None, null=True)
+    is_photo_added = models.BooleanField(db_index=True, default=None, null=True)  # New Photo added
+    is_photo_removed = models.BooleanField(db_index=True, default=None, null=True)
+    is_politician_analysis_done = models.BooleanField(db_index=True, default=None, null=True)  # Analysis complete
+    is_politician_url_added = models.BooleanField(db_index=True, default=None, null=True)  # New Ballotpedia link
+    is_politician_url_removed = models.BooleanField(db_index=True, default=None, null=True)
+    is_twitter_handle_added = models.BooleanField(db_index=True, default=None, null=True)  # New Twitter handle saved
+    is_twitter_handle_removed = models.BooleanField(db_index=True, default=None, null=True)
+    is_website_added = models.BooleanField(db_index=True, default=None, null=True)  # New Website link added
+    is_website_removed = models.BooleanField(db_index=True, default=None, null=True)
+    is_wikipedia_added = models.BooleanField(db_index=True, default=None, null=True)  # New Wikipedia link added
+    is_wikipedia_removed = models.BooleanField(db_index=True, default=None, null=True)
+    is_withdrawal_date_added = models.BooleanField(db_index=True, default=None, null=True)  # New Withdrawal Date
+    is_withdrawal_date_removed = models.BooleanField(db_index=True, default=None, null=True)
+    kind_of_log_entry = models.CharField(db_index=True, max_length=50, default=None, null=True)
+    state_code = models.CharField(db_index=True, max_length=2, null=True)
+
+    def change_description_augmented(self):
+        # See issue.models, function of same name for full example of how this should be used
+        if self.change_description:
+            change_description_augmented = self.change_description
+            return change_description_augmented
+        else:
+            return ''
+
+
 class PoliticianManager(models.Manager):
 
     def __init__(self):
         pass
 
-    def add_politician_position_sorting_dates_if_needed(self, position_object=None, politician_we_vote_id=''):
+    @staticmethod
+    def add_politician_position_sorting_dates_if_needed(position_object=None, politician_we_vote_id=''):
         """
         Search for any CandidateCampaign objects for this politician in the future
          Then find the latest election that candidate is running for, so we can get
@@ -537,7 +583,8 @@ class PoliticianManager(models.Manager):
             'success':                  success,
         }
 
-    def get_politician_from_politicianseofriendlypath_table(self, path):
+    @staticmethod
+    def get_politician_from_politicianseofriendlypath_table(path):
         try:
             path_query = PoliticianSEOFriendlyPath.objects.all()
             path_query = path_query.filter(final_pathname_string=path)
@@ -830,7 +877,8 @@ class PoliticianManager(models.Manager):
         }
         return results
 
-    def politician_photo_url(self, politician_id):
+    @staticmethod
+    def politician_photo_url(politician_id):
         politician_manager = PoliticianManager()
         results = politician_manager.retrieve_politician(politician_id=politician_id, read_only=True)
 
@@ -935,8 +983,8 @@ class PoliticianManager(models.Manager):
     def retrieve_politician_from_we_vote_id(self, politician_we_vote_id):
         return self.retrieve_politician(politician_we_vote_id=politician_we_vote_id)
 
+    @staticmethod
     def create_politician_name_filter(
-            self,
             filters=[],
             politician_name='',
             queryset=None,
@@ -1153,7 +1201,8 @@ class PoliticianManager(models.Manager):
         }
         return results
 
-    def search_politicians(self, name_search_terms=None):
+    @staticmethod
+    def search_politicians(name_search_terms=None):
         status = ""
         success = True
         politician_search_results_list = []
@@ -1344,8 +1393,8 @@ class PoliticianManager(models.Manager):
                 results['success'] = False
         return results
 
+    @staticmethod
     def update_or_create_politician(
-            self,
             updated_politician_values={},
             politician_we_vote_id='',
             vote_smart_id=0,
@@ -1448,14 +1497,16 @@ class PoliticianManager(models.Manager):
         }
         return results
 
-    def fetch_politician_id_from_we_vote_id(self, we_vote_id):
+    @staticmethod
+    def fetch_politician_id_from_we_vote_id(we_vote_id):
         politician_manager = PoliticianManager()
         results = politician_manager.retrieve_politician(politician_we_vote_id=we_vote_id, read_only=True)
         if results['success']:
             return results['politician_id']
         return 0
 
-    def fetch_politician_we_vote_id_from_id(self, politician_id):
+    @staticmethod
+    def fetch_politician_we_vote_id_from_id(politician_id):
         politician_manager = PoliticianManager()
         results = politician_manager.retrieve_politician(politician_id=politician_id, read_only=True)
         if results['success']:
@@ -1466,8 +1517,77 @@ class PoliticianManager(models.Manager):
         results = self.retrieve_politicians_are_not_duplicates_list(politician_we_vote_id)
         return results['politicians_are_not_duplicates_list_we_vote_ids']
 
+    @staticmethod
+    def create_politician_log_entry(
+            batch_process_id=None,
+            change_description=None,
+            changes_found_dict=None,
+            changed_by_name=None,
+            changed_by_voter_we_vote_id=None,
+            politician_we_vote_id=None,
+            kind_of_log_entry=None,
+            state_code=None,
+    ):
+        """
+        Create PoliticianChangeLog data
+        """
+        success = True
+        status = ""
+        politician_log_entry_saved = False
+        politician_log_entry = None
+        missing_required_variable = False
+
+        if not politician_we_vote_id:
+            missing_required_variable = True
+            status += 'MISSING_POLITICIAN_WE_VOTE_ID '
+
+        if missing_required_variable:
+            results = {
+                'success':                      success,
+                'status':                       status,
+                'politician_log_entry_saved':   politician_log_entry_saved,
+                'politician_log_entry':         politician_log_entry,
+            }
+            return results
+
+        try:
+            politician_log_entry = PoliticianChangeLog.objects.using('analytics').create(
+                batch_process_id=batch_process_id,
+                change_description=change_description,
+                changed_by_name=changed_by_name,
+                changed_by_voter_we_vote_id=changed_by_voter_we_vote_id,
+                politician_we_vote_id=politician_we_vote_id,
+                kind_of_log_entry=kind_of_log_entry,
+                state_code=state_code,
+            )
+            status += 'POLITICIAN_LOG_ENTRY_SAVED '
+            update_found = False
+            for change_found_key, change_found_value in changes_found_dict.items():
+                if hasattr(politician_log_entry, change_found_key):
+                    setattr(politician_log_entry, change_found_key, change_found_value)
+                    update_found = True
+                else:
+                    status += "** MISSING_FROM_MODEL:" + change_found_key + ' '
+            if update_found:
+                politician_log_entry.save()
+                politician_log_entry_saved = True
+                status += 'POLITICIAN_LOG_ENTRY_UPDATED '
+            success = True
+            politician_log_entry_saved = True
+        except Exception as e:
+            success = False
+            status += 'COULD_NOT_SAVE_POLITICIAN_LOG_ENTRY: ' + str(e) + ' '
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'politician_log_entry_saved':    politician_log_entry_saved,
+            'politician_log_entry':          politician_log_entry,
+        }
+        return results
+
+    @staticmethod
     def create_politician_row_entry(
-            self,
             politician_name='',
             politician_first_name='',
             politician_middle_name='',
@@ -1569,8 +1689,8 @@ class PoliticianManager(models.Manager):
             }
         return results
 
+    @staticmethod
     def update_politician_row_entry(
-            self,
             politician_name='',
             politician_first_name='',
             politician_middle_name='',
@@ -1680,8 +1800,8 @@ class PoliticianManager(models.Manager):
 #             politician_entry = Politician.objects.order_by('last_name')[0]
 #             politician_entry.delete()
 
+    @staticmethod
     def retrieve_politician_list(
-            self,
             limit_to_this_state_code="",
             politician_we_vote_id_list=[],
             read_only=False,
@@ -1733,8 +1853,8 @@ class PoliticianManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_politicians_from_non_unique_identifiers(
-            self,
             state_code='',
             twitter_handle_list=[],
             politician_name='',
@@ -1930,8 +2050,8 @@ class PoliticianManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def fetch_politicians_from_non_unique_identifiers_count(
-            self,
             state_code='',
             twitter_handle_list=[],
             politician_name='',
@@ -2030,8 +2150,8 @@ class PoliticianManager(models.Manager):
 
         return 0
 
+    @staticmethod
     def generate_seo_friendly_path(
-            self,
             base_pathname_string=None,
             politician_name=None,
             politician_we_vote_id='',
@@ -2055,7 +2175,8 @@ class PoliticianManager(models.Manager):
             state_code=state_code,
         )
 
-    def retrieve_politicians_are_not_duplicates_list(self, politician_we_vote_id, read_only=True):
+    @staticmethod
+    def retrieve_politicians_are_not_duplicates_list(politician_we_vote_id, read_only=True):
         """
         Get a list of other politician_we_vote_id's that are not duplicates
         :param politician_we_vote_id:
@@ -2168,7 +2289,8 @@ class PoliticianManager(models.Manager):
 
         return results_list, number_of_rows
 
-    def retrieve_politicians_with_misformatted_names(self, start=0, count=15, read_only=False):
+    @staticmethod
+    def retrieve_politicians_with_misformatted_names(start=0, count=15, read_only=False):
         """
         Get the first 15 records that have 3 capitalized letters in a row, as long as those letters
         are not 'III' i.e. King Henry III.  Also exclude the names where the word "WITHDRAWN" has been appended when
@@ -2204,8 +2326,8 @@ class PoliticianManager(models.Manager):
 
         return results_list, number_of_rows
 
+    @staticmethod
     def save_fresh_twitter_details_to_politician(
-            self,
             politician=None,
             politician_we_vote_id='',
             twitter_user=None):
@@ -2359,7 +2481,8 @@ class PoliticianManager(models.Manager):
         }
         return results
 
-    def update_or_create_politicians_are_not_duplicates(self, politician1_we_vote_id, politician2_we_vote_id):
+    @staticmethod
+    def update_or_create_politicians_are_not_duplicates(politician1_we_vote_id, politician2_we_vote_id):
         """
         Either update or create a politician entry.
         """
@@ -2404,7 +2527,8 @@ class PoliticianManager(models.Manager):
 class PoliticianSEOFriendlyPath(models.Model):
     objects = None
 
-    def __unicode__(self):
+    @staticmethod
+    def __unicode__():
         return "PoliticianSEOFriendlyPath"
 
     politician_we_vote_id = models.CharField(max_length=255, null=True)

@@ -181,7 +181,7 @@
             <th>Tw / Apple / Email / Phone</th>
             <th>Opt In</th>
             <th style='text-align: right'>Contributions</th>
-            <th>Roles</th>
+            <th>Roles / Teams</th>
             <th>Voter Images</th>
         </tr>
       </thead>
@@ -255,6 +255,7 @@
                 {{ voter.amount_spent }}
             </td>
             <td>
+            <!-- Roles / Teams //-->
             <!-- Is site administrator? //-->
             {% if voter.is_admin %}Admin, {% else %}{% endif %}
             {% if voter.is_analytics_admin %}Analytics_Admin, {% else %}{% endif %}
