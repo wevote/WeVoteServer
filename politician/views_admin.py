@@ -1304,15 +1304,19 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
 
     # These variables are here because there was an error on the edit_process_view and the voter needs to try again
     ballotpedia_politician_url = request.GET.get('ballotpedia_politician_url', False)
+    ballotpedia_politician_name = request.GET.get('ballotpedia_politician_name', False)
     facebook_url = request.GET.get('facebook_url', False)
     facebook_url2 = request.GET.get('facebook_url2', False)
     facebook_url3 = request.GET.get('facebook_url3', False)
+    first_name = request.GET.get('first_name', False)
     google_civic_candidate_name = request.GET.get('google_civic_candidate_name', False)
     google_civic_candidate_name2 = request.GET.get('google_civic_candidate_name2', False)
     google_civic_candidate_name3 = request.GET.get('google_civic_candidate_name3', False)
     instagram_handle = request.GET.get('instagram_handle', False)
     if positive_value_exists(instagram_handle):
         instagram_handle = extract_instagram_handle_from_text_string(instagram_handle)
+    last_name = request.GET.get('last_name', False)
+    middle_name = request.GET.get('middle_name', False)
     politician_contact_form_url = request.GET.get('politician_contact_form_url', False)
     politician_email = request.GET.get('politician_email', False)
     politician_email2 = request.GET.get('politician_email2', False)
@@ -1335,6 +1339,7 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
     state_code = request.GET.get('state_code', False)
     status = ''
     vote_smart_id = request.GET.get('vote_smart_id', False)
+    vote_usa_politician_id = request.GET.get('vote_usa_politician_id', False)
     maplight_id = request.GET.get('maplight_id', False)
 
     messages_on_stage = get_messages(request)
@@ -1597,15 +1602,68 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
         else:
             web_app_root_url = 'https://quality.WeVote.US'
         template_values = {
+            'ballotpedia_politician_name':  ballotpedia_politician_name,
+            'ballotpedia_politician_name_dict':              
+            {
+                'label':    'Name from Ballotpedia',
+                'id':       'ballotpedia_politician_name_id',
+                'name':     'ballotpedia_politician_name',
+                'value':     ballotpedia_politician_name if ballotpedia_politician_name else politician_on_stage.ballotpedia_politician_name
+            },
             'ballotpedia_politician_url':   ballotpedia_politician_url,
             'change_log_list':              change_log_list,
             'duplicate_politician_list':    duplicate_politician_list,
             'facebook_url':                 facebook_url,
             'facebook_url2':                facebook_url2,
             'facebook_url3':                facebook_url3,
+            'first_name':                   first_name,
+            'first_name_dict':              
+            {
+                'label':    'First Name',
+                'id':       'first_name_id',
+                'name':     'first_name',
+                'value':     first_name if first_name else politician_on_stage.first_name
+            },
+            'last_name':                   last_name,
+            'last_name_dict':              
+            {
+                'label':    'Last Name',
+                'id':       'last_name_id',
+                'name':     'last_name',
+                'value':     last_name if last_name else politician_on_stage.last_name
+            },
+            'middle_name':                   middle_name,
+            'middle_name_dict':              
+            {
+                'label':    'Middle Name',
+                'id':       'middle_name_id',
+                'name':     'middle_name',
+                'value':     middle_name if middle_name else politician_on_stage.middle_name
+            },
             'google_civic_candidate_name':  google_civic_candidate_name,
+            'google_civic_candidate_name_dict':              
+            {
+                'label':    'Politician Name (for Google Civic matching)',
+                'id':       'google_civic_candidate_name_id',
+                'name':     'google_civic_candidate_name',
+                'value':     google_civic_candidate_name if google_civic_candidate_name else politician_on_stage.google_civic_candidate_name
+            },
             'google_civic_candidate_name2': google_civic_candidate_name2,
+            'google_civic_candidate_name2_dict':              
+            {
+                'label':    'Politician Name 2',
+                'id':       'google_civic_candidate_name2_id',
+                'name':     'google_civic_candidate_name2',
+                'value':     google_civic_candidate_name2 if google_civic_candidate_name2 else politician_on_stage.google_civic_candidate_name2
+            },
             'google_civic_candidate_name3': google_civic_candidate_name3,
+            'google_civic_candidate_name3_dict':              
+            {
+                'label':    'Politician Name 3',
+                'id':       'google_civic_candidate_name3_id',
+                'name':     'google_civic_candidate_name3',
+                'value':     google_civic_candidate_name3 if google_civic_candidate_name3 else politician_on_stage.google_civic_candidate_name3
+            },
             'instagram_handle':             instagram_handle,
             'linked_campaignx_list':        linked_campaignx_list,
             'linked_candidate_list':        linked_candidate_list,
@@ -1636,12 +1694,34 @@ def politician_edit_view(request, politician_id=0, politician_we_vote_id=''):
             'politician_url4':              politician_url4,
             'politician_url5':              politician_url5,
             'political_party':              political_party,
+            'political_party_dict':              
+            {
+                'label':    'Politician Party',
+                'id':       'political_party_id',
+                'name':     'political_party',
+                'value':     political_party if political_party else politician_on_stage.political_party
+            },
             'rating_list':                  rating_list,
             'related_campaignx_list':       related_campaignx_list,
             'related_candidate_list':       related_candidate_list,
             'related_representative_list':  related_representative_list,
             'state_code':                   state_code,
+            'state_code_dict':              
+            {
+                'label':    'State Code',
+                'id':       'state_code_id',
+                'name':     'state_code',
+                'value':     state_code if state_code else politician_on_stage.state_code
+            },
             'vote_smart_id':                vote_smart_id,
+            'vote_usa_politician_id':       vote_usa_politician_id,
+            'vote_usa_politician_id_dict':              
+            {
+                'label':    'Vote USA Politician Id',
+                'id':       'vote_usa_politician_id_id',
+                'name':     'vote_usa_politician_id',
+                'value':     vote_usa_politician_id if vote_usa_politician_id else politician_on_stage.vote_usa_politician_id
+            },
             'web_app_root_url':             web_app_root_url,
         }
         
@@ -2033,7 +2113,12 @@ def politician_edit_process_view(request):
                     "&political_party=" + str(political_party) + \
                     "&vote_smart_id=" + str(vote_smart_id) + \
                     "&maplight_id=" + str(maplight_id)
-
+    "&first_name=" + str(first_name)
+    "&middle_name=" + str(middle_name)
+    "&last_name=" + str(last_name)
+    "&ballotpedia_politician_name=" + str(ballotpedia_politician_name)
+    "&vote_smart_id=" + str(vote_smart_id)
+                    
     if not success:
         messages.add_message(request, messages.ERROR,
                              'POLITICIAN_ERROR Please click the back arrow and report URL to the engineering team ')
