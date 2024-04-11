@@ -286,9 +286,9 @@ def office_held_edit_view(request, office_held_id=0, office_held_we_vote_id=""):
         }
     else:
         template_values = {
-            'messages_on_stage':    			messages_on_stage,
-            'state_code':          				state_code,
-            'twitter_handle':       			twitter_handle,
+            'messages_on_stage':    messages_on_stage,
+            'state_code':           state_code,
+            'twitter_handle':       twitter_handle,
         }
     return render(request, 'office_held/office_held_edit.html', template_values)
 
