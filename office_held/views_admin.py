@@ -235,6 +235,7 @@ def office_held_edit_view(request, office_held_id=0, office_held_we_vote_id=""):
     office_held_id = convert_to_int(office_held_id)
     state_code = request.GET.get('state_code', 0)
     twitter_handle = request.GET.get('twitter_handle', '')
+    google_civic_office_held_name = request.GET.get('google_civic_office_held_name', '')
 
     office_held = None
     office_held_found = False
@@ -254,14 +255,30 @@ def office_held_edit_view(request, office_held_id=0, office_held_we_vote_id=""):
         # Was office_held_merge_possibility_found?
         office_held.contest_office_merge_possibility_found = True  # TODO DALE Make dynamic
         template_values = {
-            'messages_on_stage':    messages_on_stage,
-            'office_held':          office_held,
+            'messages_on_stage':    			messages_on_stage,
+            'office_held':          			office_held,
+            'google_civic_office_held_name':	google_civic_office_held_name,
+            'google_civic_office_held_name_dict':              
+            {
+                'label': 'Alternate Name (for Google Civic matching)',
+                'id': 'google_civic_office_held_name_id',
+                'name': 'google_civic_office_held_name',
+                'value': office_held.google_civic_office_held_name
+			},
         }
     else:
         template_values = {
-            'messages_on_stage':    messages_on_stage,
-            'state_code':           state_code,
-            'twitter_handle':       twitter_handle,
+            'messages_on_stage':    			messages_on_stage,
+            'state_code':          				state_code,
+            'twitter_handle':       			twitter_handle,
+            'google_civic_office_held_name':	google_civic_office_held_name,
+            'google_civic_office_held_name_dict':              
+            {
+                'label': 'Alternate Name (for Google Civic matching)',
+                'id': 'google_civic_office_held_name_id',
+                'name': 'google_civic_office_held_name',
+                'value': office_held.google_civic_office_held_name
+			},
         }
     return render(request, 'office_held/office_held_edit.html', template_values)
 
