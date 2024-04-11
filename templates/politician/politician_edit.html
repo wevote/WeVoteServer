@@ -437,8 +437,8 @@
 </div>
 
 <div class="col">
-<div class="row form-group">
-    <label for="politician_contact_form_url_id" class="control-label">
+<div class="form-group">
+    <label for="politician_contact_form_url_id" class="pl-4 control-label">
         Politician Contact Form
         {% if politician.politician_contact_form_url %}
         <a href="{{ politician.politician_contact_form_url }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
@@ -512,69 +512,9 @@
     </div>
 </div>
 
-<div class="row">
-<div class="col">
-<div class="row form-group">
-    <label for="politician_email_id" class="pl-5 control-label">Politician Email</label>
-    <div class="col">
-        <input type="text" name="politician_email" id="politician_email_id" class="form-control"
-               value="{% if politician %}{{ politician.politician_email|default_if_none:"" }}{% else %}{{ politician_email|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
+{% include "../form_inputs/three_form_groups.html" with field_dict_1=politician_email_dict field_dict_2=politician_email2_dict field_dict_3=politician_email3_dict %}
 
-<div class="col">
-<div class="row form-group">
-    <label for="politician_email2_id" class="control-label">Email 2</label>
-    <div class="col">
-        <input type="text" name="politician_email2" id="politician_email2_id" class="form-control"
-               value="{% if politician %}{{ politician.politician_email2|default_if_none:"" }}{% else %}{{ politician_email2|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-
-<div class="col">
-<div class="row form-group">
-    <label for="politician_email3_id" class="control-label">Email 3</label>
-    <div class="col">
-        <input type="text" name="politician_email3" id="politician_email3_id" class="form-control"
-               value="{% if politician %}{{ politician.politician_email3|default_if_none:"" }}{% else %}{{ politician_email3|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-</div>
-
-<div class="row">
-<div class="col">
-<div class="row form-group">
-    <label for="politician_phone_number_id" class="pl-5 control-label">Politician Phone</label>
-    <div class="col">
-        <input type="text" name="politician_phone_number" id="politician_phone_number_id" class="form-control"
-               value="{% if politician %}{{ politician.politician_phone_number|default_if_none:"" }}{% else %}{{ politician_phone_number|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-
-<div class="col">
-<div class="row form-group">
-    <label for="politician_phone_number2_id" class="control-label">Phone 2</label>
-    <div class="col">
-        <input type="text" name="politician_phone_number2" id="politician_phone_number2_id" class="form-control"
-               value="{% if politician %}{{ politician.politician_phone_number2|default_if_none:"" }}{% else %}{{ politician_phone_number2|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-
-<div class="col">
-<div class="row form-group">
-    <label for="politician_phone_number3_id" class="control-label">Phone 3</label>
-    <div class="col">
-        <input type="text" name="politician_phone_number3" id="politician_phone_number3_id" class="form-control"
-               value="{% if politician %}{{ politician.politician_phone_number3|default_if_none:"" }}{% else %}{{ politician_phone_number3|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-</div>
+{% include "../form_inputs/three_form_groups.html" with field_dict_1=politician_phone_number_dict field_dict_2=politician_phone_number2_dict field_dict_3=politician_phone_number3_dict %}
 
 <div class="row">
 <div class="col">
@@ -617,47 +557,9 @@
 </div>
 </div>
 
-<div class="row">
-<div class="col">
-<div class="row form-group">
-    <label for="vote_smart_id_id" class="pl-5 control-label">Vote Smart Id</label>
-    <div class="col">
-        <input type="text" name="vote_smart_id" id="vote_smart_id_id" class="form-control"
-               value="{% if politician %}{{ politician.vote_smart_id|default_if_none:"" }}{% else %}{{ vote_smart_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
+{% include "../form_inputs/three_form_groups.html" with field_dict_1=vote_smart_id_dict field_dict_2=maplight_id_dict field_dict_3=birth_date_dict %}
 
-<div class="col">
-<div class="row form-group">
-    <label for="maplight_id_id" class="control-label">MapLight Id</label>
-    <div class="col">
-        <input type="text" name="maplight_id" id="maplight_id_id" class="form-control"
-               value="{% if politician %}{{ politician.maplight_id|default_if_none:"" }}{% else %}{{ maplight_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-
-<div class="col">
-<div class="row form-group">
-    <label for="birth_date_id" class="control-label">Birthdate (format Feb. 16, 1955)</label>
-    <div class="col">
-        <input type="text" name="birth_date" id="birth_date_id" class="form-control"
-               value="{% if politician %}{{ politician.birth_date|default_if_none:"" }}{% else %}{{ birth_date|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-
-<div class="col">
-<div class="row form-group">
-    <label for="youtube_url_id" class="control-label">YouTube URL</label>
-    <div class="col">
-        <input type="text" name="youtube_url" id="youtube_url_id" class="form-control"
-               value="{% if politician %}{{ politician.youtube_url|default_if_none:"" }}{% else %}{{ youtube_url|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-</div>
+{% include "../form_inputs/one_form_group.html" with field_dict_1=youtube_url_dict %}
 
 <p><a href="{% url 'politician:politician_list' %}?state_code={{ state_code }}">cancel</a>
 <input name="submit_text" type="submit" value="{% if politician %}Update Politician{% else %}Save New Politician{% endif %}" /></p>
