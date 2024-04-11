@@ -1857,6 +1857,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
     do_not_display_on_ballot = positive_value_exists(request.GET.get('do_not_display_on_ballot', False))
     vote_usa_office_id = request.GET.get('vote_usa_office_id', False)
     vote_usa_politician_id = request.GET.get('vote_usa_politician_id', False)
+    youtube_url = request.GET.get('youtube_url', False)
     
     messages_on_stage = get_messages(request)
     candidate_id = convert_to_int(candidate_id)
@@ -2075,7 +2076,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
                 'label':    'Contest Office Name (Cached)',
                 'id':       'contest_office_name_id',
                 'name':     'contest_office_name',
-                'value':     candidate_on_stage.contest_office_name
+                'value':     contest_office_name if contest_office_name else candidate_on_stage.contest_office_name
             },
             'district_name':                    district_name,
             'district_name_dict':              
@@ -2083,7 +2084,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
                 'label':    'District Name (Cached)',
                 'id':       'district_name_id',
                 'name':     'district_name',
-                'value':     candidate_on_stage.district_name
+                'value':     district_name if district_name else candidate_on_stage.district_name
             },
             'do_not_display_on_ballot':         do_not_display_on_ballot,
             'facebook_url':                     facebook_url,
@@ -2120,7 +2121,7 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
                 'label':    'LinkedIn URL',
                 'id':       'linkedin_url_id',
                 'name':     'linkedin_url',
-                'value':     candidate_on_stage.linkedin_url
+                'value':     instagram_handle if instagram_handle else candidate_on_stage.linkedin_url
             },
             'maplight_id':                      maplight_id,
             'messages_on_stage':                messages_on_stage,
@@ -2167,12 +2168,13 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
             'web_app_root_url':                 web_app_root_url,
             'withdrawal_date':                  withdrawal_date,
             'withdrawn_from_election':          withdrawn_from_election,
+            'youtube_url':                      youtube_url,
             'youtube_url_dict':              
             {
                 'label':    'YouTube URL',
                 'id':       'youtube_url_id',
                 'name':     'youtube_url',
-                'value':     candidate_on_stage.youtube_url
+                'value':     youtube_url if youtube_url else candidate_on_stage.youtube_url
             },
         }
     else:
