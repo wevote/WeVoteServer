@@ -88,7 +88,8 @@ class BookmarkItemManager(models.Manager):
         return "BookmarkItemManager"
 
     # BOOKMARK ON
-    def toggle_on_voter_bookmarked_candidate(self, voter_id, candidate_id):
+    @staticmethod
+    def toggle_on_voter_bookmarked_candidate(voter_id, candidate_id):
         bookmark_status = ITEM_BOOKMARKED
         contest_office_id = None
         contest_measure_id = None
@@ -96,7 +97,8 @@ class BookmarkItemManager(models.Manager):
         return bookmark_item_manager.toggle_voter_bookmarked_item(
             voter_id, bookmark_status, candidate_id, contest_office_id, contest_measure_id)
 
-    def toggle_on_voter_bookmarked_office(self, voter_id, contest_office_id):
+    @staticmethod
+    def toggle_on_voter_bookmarked_office(voter_id, contest_office_id):
         bookmark_status = ITEM_BOOKMARKED
         candidate_id = None
         contest_measure_id = None
@@ -104,7 +106,8 @@ class BookmarkItemManager(models.Manager):
         return bookmark_item_manager.toggle_voter_bookmarked_item(
             voter_id, bookmark_status, candidate_id, contest_office_id, contest_measure_id)
 
-    def toggle_on_voter_bookmarked_measure(self, voter_id, contest_measure_id):
+    @staticmethod
+    def toggle_on_voter_bookmarked_measure(voter_id, contest_measure_id):
         bookmark_status = ITEM_BOOKMARKED
         candidate_id = None
         contest_office_id = None
@@ -113,7 +116,8 @@ class BookmarkItemManager(models.Manager):
             voter_id, bookmark_status, candidate_id, contest_office_id, contest_measure_id)
 
     # BOOKMARK OFF
-    def toggle_off_voter_bookmarked_candidate(self, voter_id, candidate_id):
+    @staticmethod
+    def toggle_off_voter_bookmarked_candidate(voter_id, candidate_id):
         bookmark_status = ITEM_NOT_BOOKMARKED
         contest_office_id = None
         contest_measure_id = None
@@ -121,7 +125,8 @@ class BookmarkItemManager(models.Manager):
         return bookmark_item_manager.toggle_voter_bookmarked_item(
             voter_id, bookmark_status, candidate_id, contest_office_id, contest_measure_id)
 
-    def toggle_off_voter_bookmarked_office(self, voter_id, contest_office_id):
+    @staticmethod
+    def toggle_off_voter_bookmarked_office(voter_id, contest_office_id):
         bookmark_status = ITEM_NOT_BOOKMARKED
         candidate_id = None
         contest_measure_id = None
@@ -129,7 +134,8 @@ class BookmarkItemManager(models.Manager):
         return bookmark_item_manager.toggle_voter_bookmarked_item(
             voter_id, bookmark_status, candidate_id, contest_office_id, contest_measure_id)
 
-    def toggle_off_voter_bookmarked_measure(self, voter_id, contest_measure_id):
+    @staticmethod
+    def toggle_off_voter_bookmarked_measure(voter_id, contest_measure_id):
         bookmark_status = ITEM_NOT_BOOKMARKED
         candidate_id = None
         contest_office_id = None
@@ -137,9 +143,16 @@ class BookmarkItemManager(models.Manager):
         return bookmark_item_manager.toggle_voter_bookmarked_item(
             voter_id, bookmark_status, candidate_id, contest_office_id, contest_measure_id)
 
+    @staticmethod
     def toggle_voter_bookmarked_item(
-            self, voter_id, bookmark_status, candidate_id=None, contest_office_id=None, contest_measure_id=None,
-            contest_office_we_vote_id='', candidate_we_vote_id='', contest_measure_we_vote_id=''):
+            voter_id,
+            bookmark_status,
+            candidate_id=None,
+            contest_office_id=None,
+            contest_measure_id=None,
+            contest_office_we_vote_id='',
+            candidate_we_vote_id='',
+            contest_measure_we_vote_id=''):
         # Does a bookmark_item entry exist from this voter already exist?
         bookmark_item_manager = BookmarkItemManager()
         bookmark_item_id = 0
@@ -215,7 +228,13 @@ class BookmarkItemManager(models.Manager):
         }
         return results
 
-    def retrieve_bookmark_item(self, bookmark_item_id, voter_id, contest_office_id, candidate_id, contest_measure_id):
+    @staticmethod
+    def retrieve_bookmark_item(
+            bookmark_item_id,
+            voter_id,
+            contest_office_id,
+            candidate_id,
+            contest_measure_id):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -296,10 +315,13 @@ class BookmarkItemList(models.Model):
     def retrieve_bookmark_item_list_for_contest_measure(self, contest_measure_we_vote_id):
         return self.retrieve_bookmark_item_list(contest_measure_we_vote_id=contest_measure_we_vote_id, read_only=False)
 
-    def retrieve_bookmark_item_list(self, voter_id=0, candidate_we_vote_id="",
-                                    contest_office_we_vote_id="",
-                                    contest_measure_we_vote_id="",
-                                    read_only=True):
+    @staticmethod
+    def retrieve_bookmark_item_list(
+            voter_id=0,
+            candidate_we_vote_id="",
+            contest_office_we_vote_id="",
+            contest_measure_we_vote_id="",
+            read_only=True):
         # Retrieve a list of bookmark_item entries
         bookmark_item_list_found = False
         bookmark_item_list = []

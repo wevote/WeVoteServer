@@ -1496,10 +1496,18 @@ def generate_ballot_data(
                 if election_results['election_found']:
                     election = election_results['election']
                     # If the voter's address is in a state supported by this election, pass in the text_for_map_search
-                    if election.state_code.lower() == "na" or election.state_code.lower() == "":
+                    try:
+                        election_state_code_lower = election.state_code.lower()
+                    except Exception as e:
+                        election_state_code_lower = ''
+                    try:
+                        state_code_from_text_for_map_search_lower = state_code_from_text_for_map_search.lower()
+                    except Exception as e:
+                        state_code_from_text_for_map_search_lower = ''
+                    if election_state_code_lower == "na" or election_state_code_lower == "":
                         # If a National election, then we want the address passed in
                         text_for_map_search_for_google_civic_retrieve = text_for_map_search
-                    elif election.state_code.lower() == state_code_from_text_for_map_search.lower():
+                    elif election_state_code_lower == state_code_from_text_for_map_search_lower:
                         text_for_map_search_for_google_civic_retrieve = text_for_map_search
                     else:
                         text_for_map_search_for_google_civic_retrieve = ""
@@ -1585,9 +1593,9 @@ def generate_ballot_data(
         # Search for these variables elsewhere when updating code
         turn_off_direct_voter_ballot_retrieve = False
         default_election_data_source_is_ballotpedia = False
-        default_election_data_source_is_ctcl = False
+        default_election_data_source_is_ctcl = True
         default_election_data_source_is_google_civic = False
-        default_election_data_source_is_vote_usa = True
+        default_election_data_source_is_vote_usa = False
         if turn_off_direct_voter_ballot_retrieve:
             # We set this option when we want to force the retrieval of a nearby ballot
             pass
@@ -2241,10 +2249,13 @@ def choose_election_from_existing_data(voter_device_link, google_civic_election_
                 # Remove google_civic_election_id from voter address.
                 status += "VOTER_BALLOT_SAVED_MISSING_REMOVE_ADDRESS_ELECTION "
                 try:
+                    voter_address.ballot_returned_we_vote_id = ""
                     voter_address.google_civic_election_id = 0
                     voter_address.save()
                 except Exception as e:
                     status += "VOTER_ADDRESS_ELECTION_COULD_NOT_BE_REMOVED2: " + str(e) + " "
+        else:
+            status += "VOTER_ADDRESS_ELECTION_NOT_CURRENT "
 
     status += "VOTER_BALLOT_SAVED_NOT_FOUND_FROM_EXISTING_DATA "
     error_results = {
@@ -2867,6 +2878,7 @@ def generate_ballot_item_list_from_object_list(
             kind_of_ballot_item = OFFICE
             office_id = ballot_item.contest_office_id
             office_we_vote_id = ballot_item.contest_office_we_vote_id
+            primary_party = ""
             race_office_level = ""
             if positive_value_exists(office_we_vote_id):
                 office_results = contest_office_manager.retrieve_contest_office_from_we_vote_id(
@@ -2875,6 +2887,7 @@ def generate_ballot_item_list_from_object_list(
                     contest_office = office_results['contest_office']
                     office_id = contest_office.id
                     office_name = contest_office.office_name
+                    primary_party = contest_office.primary_party
                     race_office_level = contest_office.ballotpedia_race_office_level
             try:
                 results = candidate_list_object.retrieve_all_candidates_for_office(
@@ -2908,6 +2921,7 @@ def generate_ballot_item_list_from_object_list(
                     'id':                           office_id,
                     'local_ballot_order':           ballot_item.local_ballot_order,
                     'kind_of_ballot_item':          kind_of_ballot_item,
+                    'primary_party':                primary_party,
                     'race_office_level':            race_office_level,
                     'we_vote_id':                   office_we_vote_id,
                     'candidate_list':               candidates_to_display,
@@ -2984,7 +2998,7 @@ def generate_ballot_item_list_from_object_list(
 def ballot_item_highlights_retrieve_for_api(starting_year):  # ballotItemHighlightsRetrieve
     from candidate.controllers import retrieve_candidate_list_for_all_prior_elections_this_year, \
         retrieve_candidate_list_for_all_upcoming_elections
-    from voter_guide.controllers import URLS_TO_NEVER_HIGHLIGHT
+    from voter_guide.models import WEBSITES_TO_NEVER_HIGHLIGHT_ENDORSEMENTS
     status = "BALLOT_ITEM_HIGHLIGHTS_RETRIEVE "
     success = True
     highlight_list = []
@@ -3041,7 +3055,7 @@ def ballot_item_highlights_retrieve_for_api(starting_year):  # ballotItemHighlig
         'status':               status,
         'success':              success,
         'highlight_list':       highlight_list,
-        'never_highlight_on':   URLS_TO_NEVER_HIGHLIGHT,
+        'never_highlight_on':   WEBSITES_TO_NEVER_HIGHLIGHT_ENDORSEMENTS,
     }
     return json_data
 

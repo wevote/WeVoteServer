@@ -55,7 +55,8 @@ def possible_google_search_user_do_not_match_view(request):
     results = possible_google_search_user_do_not_match(candidate_we_vote_id, item_link)
     messages.add_message(request, messages.INFO, 'Candidate possibility updated with no match.')
 
-    return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id', args=(candidate_we_vote_id,)))
+    return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id', args=(candidate_we_vote_id,)) +
+                                "?show_all_google_search_users=1#google_search_users_for_candidate_table")
 
 
 @login_required
@@ -102,7 +103,9 @@ def retrieve_possible_google_search_users_view(request, candidate_we_vote_id):
     results = retrieve_possible_google_search_users(candidate, voter_device_id)
     messages.add_message(request, messages.INFO, 'Number of possibilities found: ' + results['num_of_possibilities'])
 
-    return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id', args=(candidate_we_vote_id,)))
+    return HttpResponseRedirect(reverse('candidate:candidate_edit_we_vote_id',
+                                        args=(candidate_we_vote_id,)) +
+                                "?show_all_google_search_users=1#google_search_users_for_candidate_table")
 
 
 @login_required

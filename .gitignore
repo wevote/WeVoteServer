@@ -26,6 +26,7 @@ eggs/
 .eggs/
 lib/
 lib64/
+package-lock.json
 parts/
 python*
 sdist/
@@ -128,6 +129,10 @@ sftp-config.json
 *.swp
 *.swo
 
+# VS Code #
+###########
+.vscode/
+
 # npm #
 #######
 node_modules/
@@ -154,4 +159,6 @@ web_app/build/*
 /cert/
 /cert/wevotedeveloper.com.crt
 /cert/wevotedeveloper.com_key.txt
+/cert/2023/wevotedeveloper.com.crt
+/cert/2023/wevotedeveloper.com_key.txt
 WeVoteServerDB*.pgsql

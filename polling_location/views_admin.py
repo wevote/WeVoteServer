@@ -27,6 +27,7 @@ from wevote_functions.functions import convert_state_code_to_state_text, convert
 import wevote_functions.admin
 from django.http import HttpResponse
 import json
+from urllib.parse import quote
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 POLLING_LOCATIONS_SYNC_URL = get_environment_variable("POLLING_LOCATIONS_SYNC_URL")  # pollingLocationsSyncOut
@@ -1066,6 +1067,7 @@ def polling_location_summary_internal_view(
     polling_location_on_stage = PollingLocation()
     polling_location_manager = PollingLocationManager()
     state_code = ''
+    text_for_map_search = ''
     use_ctcl_as_data_source_override = False
     try:
         if positive_value_exists(polling_location_id):
@@ -1074,6 +1076,7 @@ def polling_location_summary_internal_view(
         else:
             polling_location_on_stage = PollingLocation.objects.get(we_vote_id=polling_location_we_vote_id)
         state_code = polling_location_on_stage.state
+        text_for_map_search = polling_location_on_stage.get_text_for_map_search()
         polling_location_on_stage_found = True
     except PollingLocation.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
@@ -1101,11 +1104,17 @@ def polling_location_summary_internal_view(
         offices_held_for_location_list = list(queryset)
 
     election = None
+    ctcl_election_uuid = ''
+    ctcl_election_uuid2 = ''
+    ctcl_election_uuid3 = ''
     if positive_value_exists(google_civic_election_id):
         election_manager = ElectionManager()
         results = election_manager.retrieve_election(google_civic_election_id)
         if results['election_found']:
             election = results['election']
+            ctcl_election_uuid = election.ctcl_uuid
+            ctcl_election_uuid2 = election.ctcl_uuid2
+            ctcl_election_uuid3 = election.ctcl_uuid3
             if positive_value_exists(state_code) and election.use_ctcl_as_data_source_by_state_code:
                 if state_code.lower() in election.use_ctcl_as_data_source_by_state_code.lower():
                     use_ctcl_as_data_source_override = True
@@ -1137,15 +1146,59 @@ def polling_location_summary_internal_view(
                 polling_location_log_entry_list_modified.append(log_entry)
             polling_location_on_stage.polling_location_log_entry_list = polling_location_log_entry_list_modified
 
+    ctcl_retrieve_ballot_api_url2 = ''
+    ctcl_retrieve_ballot_api_url3 = ''
+    try:
+        address = quote(text_for_map_search, safe='')
+    except Exception as e:
+        address = ''
+        # status += "CANNOT_URLENCODE_TEXT_FOR_MAP_SEARCH: " + str(e) + " "
+    try:
+        from import_export_ctcl.controllers import CTCL_API_KEY, CTCL_VOTER_INFO_URL
+        if positive_value_exists(ctcl_election_uuid) and positive_value_exists(address):
+            ctcl_retrieve_ballot_api_url = \
+                "{url}?address={address}&key={accessKey}&electionId={electionId}" \
+                "".format(
+                    accessKey=CTCL_API_KEY,
+                    address=address,
+                    electionId=ctcl_election_uuid,
+                    url=CTCL_VOTER_INFO_URL,
+                )
+        else:
+            ctcl_retrieve_ballot_api_url = ''
+        if positive_value_exists(ctcl_election_uuid2) and positive_value_exists(address):
+            ctcl_retrieve_ballot_api_url2 = \
+                "{url}?address={address}&key={accessKey}&electionId={electionId}" \
+                "".format(
+                    accessKey=CTCL_API_KEY,
+                    address=address,
+                    electionId=ctcl_election_uuid2,
+                    url=CTCL_VOTER_INFO_URL,
+                )
+        if positive_value_exists(ctcl_election_uuid3) and positive_value_exists(address):
+            ctcl_retrieve_ballot_api_url3 = \
+                "{url}?address={address}&key={accessKey}&electionId={electionId}" \
+                "".format(
+                    accessKey=CTCL_API_KEY,
+                    address=address,
+                    electionId=ctcl_election_uuid3,
+                    url=CTCL_VOTER_INFO_URL,
+                )
+    except Exception as e:
+        ctcl_retrieve_ballot_api_url = "FAILED: " + str(e) + " "
+
     template_values = {
-        'ballot_returned_list':         ballot_returned_list,
-        'ballot_returned_list_found':   ballot_returned_list_found,
-        'election':                     election,
-        'election_list':                election_list,
-        'google_civic_election_id':     google_civic_election_id,
-        'messages_on_stage':            messages_on_stage,
+        'ballot_returned_list':             ballot_returned_list,
+        'ballot_returned_list_found':       ballot_returned_list_found,
+        'ctcl_retrieve_ballot_api_url':     ctcl_retrieve_ballot_api_url,
+        'ctcl_retrieve_ballot_api_url2':    ctcl_retrieve_ballot_api_url2,
+        'ctcl_retrieve_ballot_api_url3':    ctcl_retrieve_ballot_api_url3,
+        'election':                         election,
+        'election_list':                    election_list,
+        'google_civic_election_id':         google_civic_election_id,
+        'messages_on_stage':                messages_on_stage,
         'offices_held_for_location_list':   offices_held_for_location_list,
-        'polling_location':             polling_location_on_stage,
+        'polling_location':                 polling_location_on_stage,
         'use_ctcl_as_data_source_override': use_ctcl_as_data_source_override,
     }
     return render(request, 'polling_location/polling_location_summary.html', template_values)

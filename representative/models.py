@@ -281,7 +281,7 @@ class Representative(models.Model):
     representative_url2 = models.TextField(max_length=255, blank=True, null=True)
     representative_url3 = models.TextField(max_length=255, blank=True, null=True)
     # seo_friendly_path data is copied from the Politician object, and isn't edited directly on this object
-    seo_friendly_path = models.CharField(max_length=255, null=True, unique=False)
+    seo_friendly_path = models.CharField(max_length=255, null=True, unique=False, db_index=True)
     seo_friendly_path_date_last_updated = models.DateTimeField(null=True)
     state_code = models.CharField(verbose_name="state this representative serves", max_length=2, null=True)
     supporters_count = models.PositiveIntegerField(default=0)  # From linked_campaignx_we_vote_id CampaignX entry
@@ -308,7 +308,8 @@ class Representative(models.Model):
 
     # Which representative image is currently active?
     profile_image_type_currently_active = models.CharField(
-        max_length=10, choices=PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES, default=PROFILE_IMAGE_TYPE_UNKNOWN)
+        max_length=11, choices=PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES, default=PROFILE_IMAGE_TYPE_UNKNOWN)
+    profile_image_background_color = models.CharField(blank=True, null=True, max_length=7)
     # Image for representative from Facebook, cached on We Vote's servers. See also facebook_profile_image_url_https.
     we_vote_hosted_profile_facebook_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_facebook_image_url_medium = models.TextField(blank=True, null=True)
@@ -480,8 +481,8 @@ class RepresentativeManager(models.Manager):
     def __unicode__(self):
         return "RepresentativeManager"
 
+    @staticmethod
     def retrieve_polling_location_we_vote_id_list_from_representatives_are_missing(
-            self,
             batch_process_date_started=None,
             is_from_google_civic=False,
             state_code=''):
@@ -514,19 +515,22 @@ class RepresentativeManager(models.Manager):
         }
         return results
 
-    def retrieve_representative_from_id(self, representative_id, read_only=False):
+    @staticmethod
+    def retrieve_representative_from_id(representative_id, read_only=False):
         representative_manager = RepresentativeManager()
         return representative_manager.retrieve_representative(
             representative_id=representative_id,
             read_only=read_only)
 
-    def retrieve_representative_from_we_vote_id(self, we_vote_id, read_only=False):
+    @staticmethod
+    def retrieve_representative_from_we_vote_id(we_vote_id, read_only=False):
         representative_manager = RepresentativeManager()
         return representative_manager.retrieve_representative(
             representative_we_vote_id=we_vote_id,
             read_only=read_only)
 
-    def fetch_representative_id_from_we_vote_id(self, we_vote_id):
+    @staticmethod
+    def fetch_representative_id_from_we_vote_id(we_vote_id):
         representative_manager = RepresentativeManager()
         results = representative_manager.retrieve_representative(
             representative_we_vote_id=we_vote_id)
@@ -534,7 +538,8 @@ class RepresentativeManager(models.Manager):
             return results['representative_id']
         return 0
 
-    def fetch_representative_we_vote_id_from_id(self, representative_id):
+    @staticmethod
+    def fetch_representative_we_vote_id_from_id(representative_id):
         representative_manager = RepresentativeManager()
         results = representative_manager.retrieve_representative(
             representative_id=representative_id)
@@ -542,7 +547,8 @@ class RepresentativeManager(models.Manager):
             return results['representative_we_vote_id']
         return ''
 
-    def fetch_google_civic_representative_name_from_we_vote_id(self, we_vote_id):
+    @staticmethod
+    def fetch_google_civic_representative_name_from_we_vote_id(we_vote_id):
         representative_manager = RepresentativeManager()
         results = representative_manager.retrieve_representative(
             representative_we_vote_id=we_vote_id)
@@ -551,7 +557,8 @@ class RepresentativeManager(models.Manager):
             return representative.google_civic_representative_name
         return 0
 
-    def retrieve_representative_from_representative_name(self, representative_name):
+    @staticmethod
+    def retrieve_representative_from_representative_name(representative_name):
         representative_manager = RepresentativeManager()
 
         results = representative_manager.retrieve_representative(
@@ -578,8 +585,8 @@ class RepresentativeManager(models.Manager):
         # Otherwise, return failed results
         return results
 
+    @staticmethod
     def retrieve_representative(
-            self,
             google_civic_representative_name='',
             ocd_division_id='',
             office_held_we_vote_id='',
@@ -715,8 +722,11 @@ class RepresentativeManager(models.Manager):
         }
         return results
 
-    def retrieve_representatives_are_not_duplicates(self, representative1_we_vote_id, representative2_we_vote_id,
-                                                      read_only=True):
+    @staticmethod
+    def retrieve_representatives_are_not_duplicates(
+            representative1_we_vote_id,
+            representative2_we_vote_id,
+            read_only=True):
         status = ''
         representatives_are_not_duplicates = RepresentativesAreNotDuplicates()
         # Note that the direction of the friendship does not matter
@@ -781,7 +791,8 @@ class RepresentativeManager(models.Manager):
         }
         return results
 
-    def retrieve_representatives_are_not_duplicates_list(self, representative_we_vote_id, read_only=True):
+    @staticmethod
+    def retrieve_representatives_are_not_duplicates_list(representative_we_vote_id, read_only=True):
         """
         Get a list of other representative_we_vote_id's that are not duplicates
         :param representative_we_vote_id:
@@ -858,8 +869,8 @@ class RepresentativeManager(models.Manager):
         results = self.retrieve_representatives_are_not_duplicates_list(representative_we_vote_id)
         return results['representatives_are_not_duplicates_list_we_vote_ids']
 
+    @staticmethod
     def retrieve_representative_list(
-            self,
             index_start=0,
             is_missing_politician_we_vote_id=False,
             limit_to_this_state_code='',
@@ -868,8 +879,7 @@ class RepresentativeManager(models.Manager):
             read_only=False,
             representatives_limit=300,
             search_string='',
-            years_list=[],
-    ):
+            years_list=[]):
         """
 
         :param index_start:
@@ -1193,8 +1203,8 @@ class RepresentativeManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def update_or_create_representative(
-            self,
             representative_we_vote_id,
             updated_values={}):
         """
@@ -1223,7 +1233,7 @@ class RepresentativeManager(models.Manager):
                 exception_multiple_object_returned = True
             except Exception as e:
                 status += 'FAILED_TO_RETRIEVE_REPRESENTATIVE_BY_WE_VOTE_ID ' \
-                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                        '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
                 success = False
 
         results = {
@@ -1238,8 +1248,8 @@ class RepresentativeManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def update_or_create_representatives_are_not_duplicates(
-            self,
             representative1_we_vote_id,
             representative2_we_vote_id):
         """
@@ -1270,7 +1280,7 @@ class RepresentativeManager(models.Manager):
                 exception_multiple_object_returned = True
             except Exception as e:
                 status += 'EXCEPTION_UPDATE_OR_CREATE_REPRESENTATIVES_ARE_NOT_DUPLICATES ' \
-                         '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
+                        '{error} [type: {error_type}] '.format(error=e, error_type=type(e))
                 success = False
 
         results = {
@@ -1282,8 +1292,11 @@ class RepresentativeManager(models.Manager):
         }
         return results
 
-    def update_representative_social_media(self, representative, representative_twitter_handle=False,
-                                      representative_facebook=False):
+    @staticmethod
+    def update_representative_social_media(
+            representative,
+            representative_twitter_handle=False,
+            representative_facebook=False):
         """
         Update a representative entry with general social media data. If a value is passed in False
         it means "Do not update"
@@ -1326,13 +1339,15 @@ class RepresentativeManager(models.Manager):
         }
         return results
 
-    def update_representative_twitter_details(self, representative, twitter_json,
-                                                cached_twitter_profile_image_url_https,
-                                                cached_twitter_profile_background_image_url_https,
-                                                cached_twitter_profile_banner_url_https,
-                                                we_vote_hosted_profile_image_url_large,
-                                                we_vote_hosted_profile_image_url_medium,
-                                                we_vote_hosted_profile_image_url_tiny):
+    @staticmethod
+    def update_representative_twitter_details(
+            representative, twitter_dict,
+            cached_twitter_profile_image_url_https,
+            cached_twitter_profile_background_image_url_https,
+            cached_twitter_profile_banner_url_https,
+            we_vote_hosted_profile_image_url_large,
+            we_vote_hosted_profile_image_url_medium,
+            we_vote_hosted_profile_image_url_tiny):
         """
         Update a representative entry with details retrieved from the Twitter API.
         """
@@ -1341,51 +1356,53 @@ class RepresentativeManager(models.Manager):
         values_changed = False
 
         if representative:
-            if 'id' in twitter_json and positive_value_exists(twitter_json['id']):
-                if convert_to_int(twitter_json['id']) != representative.twitter_user_id:
-                    representative.twitter_user_id = convert_to_int(twitter_json['id'])
+            if 'id' in twitter_dict and positive_value_exists(twitter_dict['id']):
+                if convert_to_int(twitter_dict['id']) != representative.twitter_user_id:
+                    representative.twitter_user_id = convert_to_int(twitter_dict['id'])
                     values_changed = True
-            if 'screen_name' in twitter_json and positive_value_exists(twitter_json['screen_name']):
-                if twitter_json['screen_name'] != representative.representative_twitter_handle:
-                    representative.representative_twitter_handle = twitter_json['screen_name']
+            if 'username' in twitter_dict and positive_value_exists(twitter_dict['username']):
+                if twitter_dict['username'] != representative.representative_twitter_handle:
+                    representative.representative_twitter_handle = twitter_dict['username']
                     values_changed = True
-            if 'name' in twitter_json and positive_value_exists(twitter_json['name']):
-                if twitter_json['name'] != representative.twitter_name:
-                    representative.twitter_name = twitter_json['name']
+            if 'name' in twitter_dict and positive_value_exists(twitter_dict['name']):
+                if twitter_dict['name'] != representative.twitter_name:
+                    representative.twitter_name = twitter_dict['name']
                     values_changed = True
-            if 'followers_count' in twitter_json and positive_value_exists(twitter_json['followers_count']):
-                if convert_to_int(twitter_json['followers_count']) != representative.twitter_followers_count:
-                    representative.twitter_followers_count = convert_to_int(twitter_json['followers_count'])
+            if 'followers_count' in twitter_dict and positive_value_exists(twitter_dict['followers_count']):
+                if convert_to_int(twitter_dict['followers_count']) != representative.twitter_followers_count:
+                    representative.twitter_followers_count = convert_to_int(twitter_dict['followers_count'])
                     values_changed = True
 
             if positive_value_exists(cached_twitter_profile_image_url_https):
                 representative.twitter_profile_image_url_https = cached_twitter_profile_image_url_https
                 values_changed = True
-            elif 'profile_image_url_https' in twitter_json and positive_value_exists(
-                    twitter_json['profile_image_url_https']):
-                if twitter_json['profile_image_url_https'] != representative.twitter_profile_image_url_https:
-                    representative.twitter_profile_image_url_https = twitter_json['profile_image_url_https']
+            elif 'profile_image_url' in twitter_dict and positive_value_exists(
+                    twitter_dict['profile_image_url']):
+                if twitter_dict['profile_image_url'] != representative.twitter_profile_image_url_https:
+                    representative.twitter_profile_image_url_https = twitter_dict['profile_image_url']
                     values_changed = True
 
             if positive_value_exists(cached_twitter_profile_banner_url_https):
                 representative.twitter_profile_banner_url_https = cached_twitter_profile_banner_url_https
                 values_changed = True
-            elif ('profile_banner_url' in twitter_json) and positive_value_exists(twitter_json['profile_banner_url']):
-                if twitter_json['profile_banner_url'] != representative.twitter_profile_banner_url_https:
-                    representative.twitter_profile_banner_url_https = twitter_json['profile_banner_url']
-                    values_changed = True
+            # 2024-01-27 Twitter API v2 doesn't return profile_banner_url anymore
+            # elif ('profile_banner_url' in twitter_dict) and positive_value_exists(twitter_dict['profile_banner_url']):
+            #     if twitter_dict['profile_banner_url'] != representative.twitter_profile_banner_url_https:
+            #         representative.twitter_profile_banner_url_https = twitter_dict['profile_banner_url']
+            #         values_changed = True
 
             if positive_value_exists(cached_twitter_profile_background_image_url_https):
                 representative.twitter_profile_background_image_url_https = \
                     cached_twitter_profile_background_image_url_https
                 values_changed = True
-            elif 'profile_background_image_url_https' in twitter_json and positive_value_exists(
-                    twitter_json['profile_background_image_url_https']):
-                if twitter_json['profile_background_image_url_https'] != \
-                        representative.twitter_profile_background_image_url_https:
-                    representative.twitter_profile_background_image_url_https = \
-                        twitter_json['profile_background_image_url_https']
-                    values_changed = True
+            # 2024-01-27 Twitter API v2 doesn't return profile_background_image_url_https anymore
+            # elif 'profile_background_image_url_https' in twitter_dict and positive_value_exists(
+            #         twitter_dict['profile_background_image_url_https']):
+            #     if twitter_dict['profile_background_image_url_https'] != \
+            #             representative.twitter_profile_background_image_url_https:
+            #         representative.twitter_profile_background_image_url_https = \
+            #             twitter_dict['profile_background_image_url_https']
+            #         values_changed = True
             if positive_value_exists(we_vote_hosted_profile_image_url_large):
                 representative.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
                 values_changed = True
@@ -1396,13 +1413,13 @@ class RepresentativeManager(models.Manager):
                 representative.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
                 values_changed = True
 
-            if 'description' in twitter_json:  # No value required to update description (so we can clear out)
-                if twitter_json['description'] != representative.twitter_description:
-                    representative.twitter_description = twitter_json['description']
+            if 'description' in twitter_dict:  # No value required to update description (so we can clear out)
+                if twitter_dict['description'] != representative.twitter_description:
+                    representative.twitter_description = twitter_dict['description']
                     values_changed = True
-            if 'location' in twitter_json:  # No value required to update location (so we can clear out)
-                if twitter_json['location'] != representative.twitter_location:
-                    representative.twitter_location = twitter_json['location']
+            if 'location' in twitter_dict:  # No value required to update location (so we can clear out)
+                if twitter_dict['location'] != representative.twitter_location:
+                    representative.twitter_location = twitter_dict['location']
                     values_changed = True
 
             if values_changed:
@@ -1420,9 +1437,12 @@ class RepresentativeManager(models.Manager):
         }
         return results
 
-    def reset_representative_image_details(self, representative, twitter_profile_image_url_https,
-                                             twitter_profile_background_image_url_https,
-                                             twitter_profile_banner_url_https):
+    @staticmethod
+    def reset_representative_image_details(
+            representative,
+            twitter_profile_image_url_https,
+            twitter_profile_background_image_url_https,
+            twitter_profile_banner_url_https):
         """
         Reset an representative entry with original image details from we vote image.
         """
@@ -1450,7 +1470,8 @@ class RepresentativeManager(models.Manager):
         }
         return results
 
-    def clear_representative_twitter_details(self, representative):
+    @staticmethod
+    def clear_representative_twitter_details(representative):
         """
         Update representative entry with details retrieved from the Twitter API.
         """
@@ -1480,7 +1501,8 @@ class RepresentativeManager(models.Manager):
         }
         return results
 
-    def create_representative_row_entry(self, update_values):
+    @staticmethod
+    def create_representative_row_entry(update_values):
         """
         Create Representative table entry with Representative details
         :param update_values:
@@ -1555,13 +1577,12 @@ class RepresentativeManager(models.Manager):
             }
         return results
 
+    @staticmethod
     def create_representatives_missing(
-            self,
             is_from_google_civic=False,
             polling_location_we_vote_id='',
             state_code=None,
-            defaults={}
-    ):
+            defaults={}):
         entry_created = False
         representatives_missing = None
         representatives_missing_found = False
@@ -1589,7 +1610,8 @@ class RepresentativeManager(models.Manager):
         }
         return results
 
-    def update_representative_row_entry(self, representative_we_vote_id, update_values):
+    @staticmethod
+    def update_representative_row_entry(representative_we_vote_id, update_values):
         """
         Update Representative table entry with matching we_vote_id
         :param representative_we_vote_id:
@@ -1636,8 +1658,8 @@ class RepresentativeManager(models.Manager):
             }
         return results
 
+    @staticmethod
     def retrieve_representatives_from_non_unique_identifiers(
-            self,
             ignore_representative_we_vote_id_list=[],
             ocd_division_id='',
             read_only=True,
@@ -1814,8 +1836,8 @@ class RepresentativeManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def fetch_representatives_from_non_unique_identifiers_count(
-            self,
             ocd_division_id='',
             state_code='',
             representative_twitter_handle='',

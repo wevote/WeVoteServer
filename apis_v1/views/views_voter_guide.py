@@ -4,6 +4,7 @@
 
 from ballot.controllers import choose_election_from_existing_data
 from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 import json
 from api_internal_cache.models import ApiInternalCacheManager
 from position.models import FRIENDS_AND_PUBLIC, FRIENDS_ONLY, PUBLIC_ONLY
@@ -24,6 +25,7 @@ from wevote_functions.functions import convert_to_int, get_maximum_number_to_ret
 logger = wevote_functions.admin.get_logger(__name__)
 
 
+@csrf_exempt
 def voter_guide_possibility_retrieve_view(request):  # voterGuidePossibilityRetrieve
     """
     Retrieve a previously saved website that may contain a voter guide (voterGuidePossibilityRetrieve)
@@ -50,6 +52,7 @@ def voter_guide_possibility_position_save_view(request):  # voterGuidePossibilit
     voter_guide_possibility_id = request.GET.get('voter_guide_possibility_id', 0)
     voter_guide_possibility_position_id = request.GET.get('voter_guide_possibility_position_id', 0)
     ballot_item_name = request.GET.get('ballot_item_name', None)
+    ballot_item_state_code = request.GET.get('ballot_item_state_code', None)
     candidate_twitter_handle = request.GET.get('candidate_twitter_handle', None)
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', None)
     measure_we_vote_id = request.GET.get('measure_we_vote_id', None)
@@ -78,6 +81,7 @@ def voter_guide_possibility_position_save_view(request):  # voterGuidePossibilit
         voter_guide_possibility_id=voter_guide_possibility_id,
         voter_guide_possibility_position_id=voter_guide_possibility_position_id,
         ballot_item_name=ballot_item_name,
+        ballot_item_state_code=ballot_item_state_code,
         position_stance=position_stance,
         statement_text=statement_text,
         more_info_url=more_info_url,
@@ -94,33 +98,55 @@ def voter_guide_possibility_position_save_view(request):  # voterGuidePossibilit
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
+@csrf_exempt
 def voter_guide_possibility_highlights_retrieve_view(request):  # voterGuidePossibilityHighlightsRetrieve
     """
     Retrieve the possible highlights from one organization on one page.
     :param request:
     :return:
     """
+    status = ''
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    limit_to_existing = request.GET.get('limit_to_existing', '')
-    url_to_scan = request.GET.get('url_to_scan', '')
-    pdf_url = request.GET.get('pdf_url', '')
-    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    is_post = True if request.method == 'POST' else False
 
-    # Dale 2023-11-24 Still a work in progress
-    if positive_value_exists(url_to_scan):
-        # from import_export_vertex.controllers import find_names_steve1
-        # results = find_names_steve1(site_url=url_to_scan)
-        # from import_export_vertex.controllers import find_names_dale1
-        # results = find_names_dale1(site_url=url_to_scan)
+    if is_post:
+        url_to_scan = request.POST.get('url_to_scan', '')
+        visible_text_to_scan = request.POST.get('visible_text_to_scan', '')
+        pdf_url = request.POST.get('pdf_url', '')
+        google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+        use_vertex_to_scan_url_if_no_visible_text_provided = \
+            request.POST.get('use_vertex_to_scan_url_if_no_visible_text_provided', True)
+    else:
+        url_to_scan = request.GET.get('url_to_scan', '')
+        pdf_url = request.GET.get('pdf_url', '')
+        google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+        visible_text_to_scan = request.GET.get('visible_text_to_scan', '')
+        use_vertex_to_scan_url_if_no_visible_text_provided = \
+            request.GET.get('use_vertex_to_scan_url_if_no_visible_text_provided', True)
+
+    names_list = []
+    if positive_value_exists(visible_text_to_scan):
+        from import_export_vertex.controllers import find_names_of_people_from_incoming_text
+        results = find_names_of_people_from_incoming_text(text_to_scan=visible_text_to_scan)
+        if results['names_list_found']:
+            names_list = results['names_list']
+        status += results['status']
+    elif positive_value_exists(url_to_scan) \
+            and positive_value_exists(use_vertex_to_scan_url_if_no_visible_text_provided):
         from import_export_vertex.controllers import find_names_of_people_on_one_web_page
         results = find_names_of_people_on_one_web_page(site_url=url_to_scan)
+        if results['names_list_found']:
+            names_list = results['names_list']
+        status += results['status']
 
     json_data = voter_guide_possibility_highlights_retrieve_for_api(
-        voter_device_id=voter_device_id,
-        url_to_scan=url_to_scan,
-        limit_to_existing=limit_to_existing,
+        google_civic_election_id=google_civic_election_id,
+        names_list=names_list,
         pdf_url=pdf_url,
-        google_civic_election_id=google_civic_election_id)
+        status=status,
+        url_to_scan=url_to_scan,
+        voter_device_id=voter_device_id,
+    )
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 

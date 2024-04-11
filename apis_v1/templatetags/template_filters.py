@@ -7,7 +7,7 @@
 from django import template
 from django.contrib.humanize.templatetags.humanize import intcomma
 
-from wevote_functions import functions
+from wevote_functions import functions, functions_date
 
 register = template.Library()
 
@@ -16,6 +16,21 @@ register = template.Library()
 def convert_to_int(value):
     return functions.convert_to_int(value)
 
+
+@register.filter(name="display_nothing_if_zero")
+def display_nothing_if_zero(value):
+    value_integer = functions.convert_to_int(value)
+    if functions.positive_value_exists(value_integer):
+        return value
+    return ''
+
+
+@register.filter(name="get_date_from_date_as_integer")
+def get_date_from_date_as_integer(value):
+    value_integer = functions.convert_to_int(value)
+    if functions.positive_value_exists(value_integer):
+        return functions_date.convert_date_as_integer_to_date(value_integer)
+    return value
 
 @register.filter(name="get_value_from_dict")
 def get_value_from_dict(dict_variable, dict_key):
@@ -28,6 +43,7 @@ def get_list_from_dict(dict_variable, dict_key):
         return dict_variable[dict_key]
     except Exception as e:
         return []
+
 
 @register.filter
 def pennies_to_money(number):

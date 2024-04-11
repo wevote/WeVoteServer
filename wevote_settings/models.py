@@ -61,7 +61,8 @@ class WeVoteSettingsManager(models.Manager):
     Manage all the site settings
     """
 
-    def fetch_setting(self, setting_name):
+    @staticmethod
+    def fetch_setting(setting_name):
         setting_name = setting_name.strip()
         try:
             if setting_name != '':
@@ -83,7 +84,8 @@ class WeVoteSettingsManager(models.Manager):
 
         return ''
 
-    def fetch_setting_results(self, setting_name, read_only=True):
+    @staticmethod
+    def fetch_setting_results(setting_name, read_only=True):
         status = ""
         success = True
         setting_name = setting_name.strip()
@@ -144,7 +146,8 @@ class WeVoteSettingsManager(models.Manager):
             'we_vote_setting_found':    False
         }
 
-    def save_setting(self, setting_name, setting_value, value_type=None, admin_app=False):
+    @staticmethod
+    def save_setting(setting_name, setting_value, value_type=None, admin_app=False):
         accepted_value_types = [WeVoteSetting.BOOLEAN, WeVoteSetting.INTEGER, WeVoteSetting.STRING]
 
         if value_type is None:
@@ -207,7 +210,8 @@ class WeVoteSettingsManager(models.Manager):
         }
         return results
 
-    def set_setting_value_by_type(self, we_vote_setting, setting_value, setting_type, admin_app):
+    @staticmethod
+    def set_setting_value_by_type(we_vote_setting, setting_value, setting_type, admin_app):
         if setting_type == WeVoteSetting.BOOLEAN:
             we_vote_setting.boolean_value = setting_value
             we_vote_setting.integer_value = None
@@ -424,6 +428,25 @@ def fetch_stripe_processing_enabled_state():
         return False
 
 
+def fetch_volunteer_task_weekly_metrics_last_updated():
+    we_vote_settings_manager = WeVoteSettingsManager()
+    # Date as integer ex/ 20240308
+    results = we_vote_settings_manager.fetch_setting_results(
+        'volunteer_task_weekly_metrics_last_updated', read_only=True)
+    if results['success']:
+        if results['we_vote_setting_found']:
+            return results['setting_value']
+        else:
+            # Create the setting the first time
+            results = we_vote_settings_manager.save_setting(
+                setting_name='volunteer_task_weekly_metrics_last_updated',
+                setting_value=True,
+                value_type=WeVoteSetting.INTEGER)
+            return results['success']
+    else:
+        return False
+
+
 def set_stripe_processing_enabled_state(new_state):
     we_vote_settings_manager = WeVoteSettingsManager()
     results = we_vote_settings_manager.save_setting(
@@ -536,6 +559,10 @@ def fetch_next_we_vote_id_sms_integer():
     return fetch_next_we_vote_id_integer('we_vote_id_last_sms_integer')
 
 
+def fetch_next_we_vote_id_volunteer_team_integer():
+    return fetch_next_we_vote_id_integer('we_vote_id_last_volunteer_team_integer')
+
+
 def fetch_next_we_vote_id_voter_integer():
     return fetch_next_we_vote_id_integer('we_vote_id_last_voter_integer')
 
@@ -575,8 +602,8 @@ class RemoteRequestHistoryManager(models.Manager):
     def __unicode__(self):
         return "RemoteRequestHistoryManager"
 
+    @staticmethod
     def create_remote_request_history_entry(
-            self,
             kind_of_action='',
             google_civic_election_id=0,
             candidate_campaign_we_vote_id=None,
@@ -630,8 +657,12 @@ class RemoteRequestHistoryManager(models.Manager):
         }
         return results
 
-    def remote_request_history_entry_exists(self, kind_of_action, google_civic_election_id,
-                                            candidate_campaign_we_vote_id='', organization_we_vote_id=''):
+    @staticmethod
+    def remote_request_history_entry_exists(
+            kind_of_action,
+            google_civic_election_id,
+            candidate_campaign_we_vote_id='',
+            organization_we_vote_id=''):
         success = False
         status = ""
 
@@ -651,7 +682,8 @@ class RemoteRequestHistoryManager(models.Manager):
 
         return False
 
-    def retrieve_remote_request_history_list(self, google_civic_election_id=0):
+    @staticmethod
+    def retrieve_remote_request_history_list(google_civic_election_id=0):
         success = False
         status = ""
         remote_request_history_list = []

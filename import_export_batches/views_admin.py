@@ -50,10 +50,11 @@ from polling_location.models import KIND_OF_LOG_ENTRY_BALLOT_RECEIVED, KIND_OF_L
 from position.models import POSITION
 import random
 import requests
+from volunteer_task.models import VOLUNTEER_ACTION_ELECTION_RETRIEVE_STARTED, VolunteerTaskManager
 from voter.models import voter_has_authority
 from voter_guide.models import ORGANIZATION_WORD
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
+from wevote_functions.functions import convert_to_int, get_voter_api_device_id, positive_value_exists, STATE_CODE_MAP
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -1232,6 +1233,8 @@ def batch_action_list_update_or_create_process_view(request):
     kind_of_batch = request.GET.get('kind_of_batch', '')
     kind_of_action = request.GET.get('kind_of_action')
     state_code = request.GET.get('state_code', '')
+
+    voter_device_id = get_voter_api_device_id(request)
     # do for entire batch_rows
     try:
         batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
@@ -1260,7 +1263,13 @@ def batch_action_list_update_or_create_process_view(request):
 
     if batch_header_map_found and batch_row_list_found:
         results = import_data_from_batch_row_actions(
-            kind_of_batch, kind_of_action, batch_header_id, batch_row_id, state_code, ballot_item_id=ballot_item_id)
+            kind_of_batch,
+            kind_of_action,
+            batch_header_id,
+            batch_row_id,
+            state_code,
+            ballot_item_id=ballot_item_id,
+            voter_device_id=voter_device_id)
         if kind_of_action == IMPORT_CREATE:
             if results['success']:
                 messages.add_message(request, messages.INFO,
@@ -2404,6 +2413,8 @@ def batch_set_batch_list_view(request):
     office_objects_dict = {}
     measure_objects_dict = {}
 
+    voter_device_id = get_voter_api_device_id(request)
+
     try:
         if positive_value_exists(analyze_all_button):
             batch_actions_analyzed = 0
@@ -2502,7 +2513,10 @@ def batch_set_batch_list_view(request):
             batch_actions_not_updated = 0
             for one_batch_description in batch_list:
                 results = import_data_from_batch_row_actions(
-                    one_batch_description.kind_of_batch, IMPORT_ADD_TO_EXISTING, one_batch_description.batch_header_id)
+                    one_batch_description.kind_of_batch,
+                    IMPORT_ADD_TO_EXISTING,
+                    one_batch_description.batch_header_id,
+                    voter_device_id=voter_device_id)
                 if results['number_of_table_rows_updated']:
                     batch_actions_updated += 1
                 else:
@@ -2530,7 +2544,10 @@ def batch_set_batch_list_view(request):
             not_created_status = ""
             for one_batch_description in batch_list:
                 results = import_data_from_batch_row_actions(
-                    one_batch_description.kind_of_batch, IMPORT_CREATE, one_batch_description.batch_header_id)
+                    one_batch_description.kind_of_batch,
+                    IMPORT_CREATE,
+                    one_batch_description.batch_header_id,
+                    voter_device_id=voter_device_id)
                 if results['number_of_table_rows_created']:
                     batch_actions_created += 1
 
@@ -2700,6 +2717,7 @@ def refresh_ballots_for_voters_api_v4_view(request):
     :param request:
     :return:
     """
+    status = ""
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'political_data_manager'}
     if not voter_has_authority(request, authority_required):
@@ -2714,6 +2732,17 @@ def refresh_ballots_for_voters_api_v4_view(request):
     use_ctcl = positive_value_exists(use_ctcl)
     use_vote_usa = request.GET.get('use_vote_usa', False)
     use_vote_usa = positive_value_exists(use_vote_usa)
+
+    try:
+        # Give the volunteer who entered this credit
+        volunteer_task_manager = VolunteerTaskManager()
+        task_results = volunteer_task_manager.create_volunteer_task_completed(
+            action_constant=VOLUNTEER_ACTION_ELECTION_RETRIEVE_STARTED,
+            request=request,
+        )
+    except Exception as e:
+        status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED: ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
     if positive_value_exists(use_batch_process):
         from import_export_batches.controllers_batch_process import schedule_refresh_ballots_for_voters_api_v4
@@ -3193,6 +3222,17 @@ def retrieve_ballots_for_polling_locations_api_v4_view(request):
     use_vote_usa = request.GET.get('use_vote_usa', False)
     use_vote_usa = positive_value_exists(use_vote_usa)
     # import_limit = convert_to_int(request.GET.get('import_limit', 1000))  # If > 1000, we get error 414 (url too long)
+
+    try:
+        # Give the volunteer who entered this credit
+        volunteer_task_manager = VolunteerTaskManager()
+        task_results = volunteer_task_manager.create_volunteer_task_completed(
+            action_constant=VOLUNTEER_ACTION_ELECTION_RETRIEVE_STARTED,
+            request=request,
+        )
+    except Exception as e:
+        status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED: ' \
+                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
     if positive_value_exists(use_batch_process):
         from import_export_batches.controllers_batch_process import \

@@ -2,8 +2,11 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from django.contrib.messages import get_messages
+from django.shortcuts import render
+
 from apis_v1.documentation_source import \
-    activity_comment_save_doc, activity_list_retrieve_doc, activity_notice_list_retrieve_doc, activity_post_save_doc,\
+    activity_comment_save_doc, activity_list_retrieve_doc, activity_notice_list_retrieve_doc, activity_post_save_doc, \
     all_ballot_items_retrieve_doc, \
     analytics_action_sync_out_doc, \
     apple_sign_in_save_doc, ballot_item_highlights_retrieve_doc, ballot_item_options_retrieve_doc, \
@@ -16,6 +19,7 @@ from apis_v1.documentation_source import \
     candidates_sync_out_doc, candidate_to_office_link_sync_out_doc, device_id_generate_doc, \
     device_store_firebase_fcm_token_doc, donation_with_stripe_doc, \
     elections_retrieve_doc, elections_sync_out_doc, facebook_disconnect_doc, facebook_friends_action_doc, \
+    fast_load_status_retrieve_doc, \
     friend_invitation_by_email_send_doc, \
     friend_invitation_by_email_verify_doc, friend_invitation_by_we_vote_id_send_doc, \
     friend_invitation_by_facebook_send_doc, friend_invitation_by_facebook_verify_doc, \
@@ -78,11 +82,9 @@ from apis_v1.documentation_source import \
     voter_stop_supporting_save_doc, voter_supporting_save_doc, voter_twitter_save_to_current_account_doc, \
     voter_update_doc, voter_verify_secret_code_doc, email_ballot_data_doc
 from config.base import get_environment_variable
-from django.contrib.messages import get_messages
-import importlib
-from django.shortcuts import render
 from voter.models import voter_setup
 from wevote_functions.functions import get_voter_api_device_id, set_voter_api_device_id, positive_value_exists
+from wevote_functions.utils import get_git_commit_date
 
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
@@ -153,6 +155,7 @@ def apis_index_doc_view(request):
     template_values = {
         'next': next,
         'messages_on_stage': messages_on_stage,
+        'git_commit_date':   get_git_commit_date(),
     }
     response = render(request, 'apis_v1/apis_index.html', template_values)
 
@@ -1173,7 +1176,7 @@ def twitter_sign_in_start_doc_view(request):
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
-def twitter_sign_in_request_access_token_doc_view(request):
+def twitter_sign_in_request_access_token_doc_view(request):  # twitterSignInRequestAccessToken
     """
     Show documentation about twitterSignInRequestAccessToken
     """
@@ -1385,6 +1388,15 @@ def voter_guide_possibility_highlights_retrieve_doc_view(request):
     template_values = \
         voter_guide_possibility_highlights_retrieve_doc.voter_guide_possibility_highlights_retrieve_doc_template_values(
             url_root)
+    is_post = True if request.method == 'POST' else False
+    if is_post:
+        get_or_post_selected = request.POST.get('get_or_post_selected', '')
+    else:
+        get_or_post_selected = request.GET.get('get_or_post_selected', '')
+    if 'get_or_post' in template_values and template_values['get_or_post'] == 'GET or POST':
+        if positive_value_exists(get_or_post_selected):
+            template_values['get_or_post'] = get_or_post_selected
+            template_values['get_or_post_selected'] = get_or_post_selected
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
@@ -1922,5 +1934,15 @@ def pdf_to_html_retrieve_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = pdf_to_html_doc.pdf_to_html_retrieve_view(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def fast_load_status_retrieve_doc_view(request):
+    """
+    Show documentation about fastLoadStatusRetrieve
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = fast_load_status_retrieve_doc.fast_load_status_retrieve_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)

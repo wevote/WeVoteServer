@@ -1,9 +1,9 @@
 {# templates/admin_tools/index.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Admin Menu{% endblock %}
+{% block title %}Admin Menu{% if WE_VOTE_SERVER_ROOT_URL %} :: {{ WE_VOTE_SERVER_ROOT_URL }}{% endif %}{% endblock %}
 
-{%  block content %}
+{% block content %}
 {% load humanize %}
 <style>
     td {
@@ -13,10 +13,34 @@
 <h1>We Vote Admin Menu</h1>
     {% if user and not user.is_anonymous %}
     <p>
-            <span>Hello {{ user.get_full_name|default:"Voter" }}!</span>
-            <a href="{% url 'logout_we_vote' %}?next={{ request.path }}">Logout</a>
+        <span>Hello {{ user.get_full_name|default:"Voter" }}!</span>
+        <a href="{% url 'logout_we_vote' %}?next={{ request.path }}">Logout</a>
     </p>
     {% endif %}
+
+    {# ################## #}
+<h2>Analytics</h2>
+
+<p><a href="{% url 'analytics:analytics_index' %}">Voter, Daily &amp; Election Metrics</a></p>
+
+<p>
+    <a href="{% url 'issue:issue_partisan_analysis' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+        target="_blank">Breakdown of Endorsements, by Partisan Leaning <span class="glyphicon glyphicon-new-window"></span></a>
+</p>
+
+{# ################## #}
+<h2>Statistics</h2>
+<p><a href="{% url 'analytics:query_builder' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
+        target="_blank">Voter Statistics: Query Builder <span class="glyphicon glyphicon-new-window"></span></a>
+    (aggregate voter usage)
+</p>
+<p><a href="{% url 'volunteer_task:performance_list' %}"
+        target="_blank">Scoreboard: Volunteer Tasks Completed <span class="glyphicon glyphicon-new-window"></span></a>
+</p>
+<p><a href="{% url 'share:voter_who_shares_summary_list' %}">Statistics About Voters Who Share</a></p>
+<p><a href="{% url 'admin_tools:statistics_summary' %}">API Usage Statistics</a></p>
+
+<p>Opinions and Links Statistics:</p>
     <table style="margin-left: 20px; width: 80%">
         <tr style="border-bottom: 1px solid black" >
             <th style="width: fit-content; padding: 4px 10px 4px 0px !important">Statistics</th>
@@ -129,23 +153,8 @@
       });
   </script>
 
-{# ################## #}
-<h2>Analytics</h2>
 
-<p><a href="{% url 'analytics:analytics_index' %}">Voter, Daily &amp; Election Metrics</a></p>
 
-<p>
-    <a href="{% url 'analytics:query_builder' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-        target="_blank">Voter Statistics: Query Builder <span class="glyphicon glyphicon-new-window"></span></a>
-    (aggregate voter usage)
-</p>
-
-<p>
-    <a href="{% url 'issue:issue_partisan_analysis' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
-        target="_blank">Breakdown of Endorsements, by Partisan Leaning <span class="glyphicon glyphicon-new-window"></span></a>
-</p>
-
-<p><a href="{% url 'share:voter_who_shares_summary_list' %}">Statistics About Voters Who Share</a></p>
 {# ################## #}
 <h2>Security</h2>
     <p><a href="{% url 'stripe_donations:suspects_list' %}">Disputed, Fraudulent, and Suspect, Stripe Transactions</a></p>
@@ -153,16 +162,17 @@
 {# ################## #}
 <h2>Maintenance</h2>
     <p><a href="{% url 'apis_v1:apisIndex' %}">API Documentation</a></p>
+    <p><a href="{% url 'admin_tools:sync_dashboard' %}">Sync Data with Master We Vote Servers</a></p>
     <p><a href="{% url 'import_export_batches:batch_process_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
         >Batch Process Status List</a></p>
+    <p><a href="{% url 'voter:voter_list' %}">Voters</a></p>
     <p><a href="{% url 'admin_tools:data_cleanup' %}">Data Cleanup Routines</a></p>
     <p><a href="{% url 'import_export_batches:batches_home' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}"
         >Import Data in Batches</a></p>
+    <p><a href="{% url 'googlebot_site_map:googlebot_site_map_list_view' %}">Googlebot Site Map Stats</a></p>
     <p><a href="{% url 'organization_plans:plan_list' %}">Paid Subscriptions for Endorsers</a></p>
     <p><a href="{% url 'scheduled_tasks:task_list' %}">Scheduled Tasks</a></p>
-    <p><a href="{% url 'admin_tools:sync_dashboard' %}">Sync Data with Master We Vote Servers</a></p>
     <p><a href="{% url 'import_export_vote_smart:vote_smart_index' %}">Vote Smart Tools</a></p>
-    <p><a href="{% url 'voter:voter_list' %}">Voters</a></p>
 
 <br>
 <br>
@@ -188,6 +198,7 @@
             <td>Git commit hash:</td>
             <td>
                 <a id="gitLink" href={{git_commit_hash_url}} target="_blank">{{git_commit_hash}}</a>
+                <span style="padding-left: 40px;">({{git_commit_date}})</span>
             </td>
         </tr>
      </table>

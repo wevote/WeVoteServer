@@ -312,29 +312,36 @@ class ContestOfficeManager(models.Manager):
     def __unicode__(self):
         return "ContestOfficeManager"
 
-    def retrieve_contest_office_from_id(self, contest_office_id):
+    @staticmethod
+    def retrieve_contest_office_from_id(contest_office_id):
         contest_office_manager = ContestOfficeManager()
         return contest_office_manager.retrieve_contest_office(contest_office_id)
 
-    def retrieve_contest_office_from_we_vote_id(self, contest_office_we_vote_id, read_only=False):
+    @staticmethod
+    def retrieve_contest_office_from_we_vote_id(contest_office_we_vote_id, read_only=False):
         contest_office_id = 0
         contest_office_manager = ContestOfficeManager()
         return contest_office_manager.retrieve_contest_office(contest_office_id, contest_office_we_vote_id,
                                                               read_only=read_only)
 
-    def retrieve_contest_office_from_ctcl_uuid(self, ctcl_uuid):
+    @staticmethod
+    def retrieve_contest_office_from_ctcl_uuid(ctcl_uuid):
         contest_office_manager = ContestOfficeManager()
         return contest_office_manager.retrieve_contest_office(
             ctcl_uuid=ctcl_uuid)
 
-    def retrieve_contest_office_from_maplight_id(self, maplight_id):
+    @staticmethod
+    def retrieve_contest_office_from_maplight_id(maplight_id):
         contest_office_id = 0
         contest_office_we_vote_id = ''
         contest_office_manager = ContestOfficeManager()
         return contest_office_manager.retrieve_contest_office(contest_office_id, contest_office_we_vote_id, maplight_id)
 
+    @staticmethod
     def retrieve_contest_office_from_ballotpedia_race_id(
-            self, ballotpedia_race_id, google_civic_election_id, read_only=False):
+            ballotpedia_race_id,
+            google_civic_election_id,
+            read_only=False):
         contest_office_id = 0
         contest_office_manager = ContestOfficeManager()
         return contest_office_manager.retrieve_contest_office(contest_office_id,
@@ -342,14 +349,18 @@ class ContestOfficeManager(models.Manager):
                                                               google_civic_election_id=google_civic_election_id,
                                                               read_only=read_only)
 
-    def retrieve_contest_office_from_ballotpedia_office_id(self, ballotpedia_office_id, google_civic_election_id):
+    @staticmethod
+    def retrieve_contest_office_from_ballotpedia_office_id(
+            ballotpedia_office_id,
+            google_civic_election_id):
         contest_office_id = 0
         contest_office_manager = ContestOfficeManager()
         return contest_office_manager.retrieve_contest_office(contest_office_id,
                                                               ballotpedia_office_id=ballotpedia_office_id,
                                                               google_civic_election_id=google_civic_election_id)
 
-    def fetch_contest_office_id_from_maplight_id(self, maplight_id):
+    @staticmethod
+    def fetch_contest_office_id_from_maplight_id(maplight_id):
         contest_office_id = 0
         contest_office_we_vote_id = ''
         contest_office_manager = ContestOfficeManager()
@@ -359,7 +370,8 @@ class ContestOfficeManager(models.Manager):
             return results['contest_office_id']
         return 0
 
-    def fetch_contest_office_we_vote_id_from_id(self, contest_office_id):
+    @staticmethod
+    def fetch_contest_office_we_vote_id_from_id(contest_office_id):
         maplight_id = 0
         contest_office_we_vote_id = ''
         contest_office_manager = ContestOfficeManager()
@@ -369,7 +381,8 @@ class ContestOfficeManager(models.Manager):
             return results['contest_office_we_vote_id']
         return 0
 
-    def retrieve_offices_are_not_duplicates_list(self, contest_office_we_vote_id, read_only=True):
+    @staticmethod
+    def retrieve_offices_are_not_duplicates_list(contest_office_we_vote_id, read_only=True):
         """
         Get a list of other office_we_vote_id's that are not duplicates
         :param contest_office_we_vote_id:
@@ -446,8 +459,8 @@ class ContestOfficeManager(models.Manager):
         results = self.retrieve_offices_are_not_duplicates_list(office_we_vote_id)
         return results['contest_offices_are_not_duplicates_list_we_vote_ids']
 
+    @staticmethod
     def update_or_create_contest_office(
-            self,
             ballotpedia_race_id='',
             ctcl_uuid=None,
             district_id='',
@@ -758,8 +771,8 @@ class ContestOfficeManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def update_or_create_contest_offices_are_not_duplicates(
-            self,
             contest_office1_we_vote_id='',
             contest_office2_we_vote_id=''):
         """
@@ -803,8 +816,8 @@ class ContestOfficeManager(models.Manager):
         return results
 
     # NOTE: searching by all other variables seems to return a list of objects
+    @staticmethod
     def retrieve_contest_office(
-            self,
             contest_office_id=0,
             contest_office_we_vote_id='',
             maplight_id=None,
@@ -945,7 +958,8 @@ class ContestOfficeManager(models.Manager):
         }
         return results
 
-    def fetch_contest_office_id_from_we_vote_id(self, contest_office_we_vote_id):
+    @staticmethod
+    def fetch_contest_office_id_from_we_vote_id(contest_office_we_vote_id):
         """
         Take in contest_office_we_vote_id and return internal/local-to-this-database contest_office_id
         :param contest_office_we_vote_id:
@@ -966,7 +980,8 @@ class ContestOfficeManager(models.Manager):
 
         return contest_office_id
 
-    def fetch_google_civic_election_id_from_office_we_vote_id(self, contest_office_we_vote_id):
+    @staticmethod
+    def fetch_google_civic_election_id_from_office_we_vote_id(contest_office_we_vote_id):
         """
         Take in contest_office_we_vote_id and return google_civic_election_id
         :param contest_office_we_vote_id:
@@ -987,7 +1002,8 @@ class ContestOfficeManager(models.Manager):
 
         return google_civic_election_id
 
-    def fetch_state_code_from_we_vote_id(self, contest_office_we_vote_id):
+    @staticmethod
+    def fetch_state_code_from_we_vote_id(contest_office_we_vote_id):
         """
         Take in contest_office_we_vote_id and return the state_code
         :param contest_office_we_vote_id:
@@ -1008,8 +1024,8 @@ class ContestOfficeManager(models.Manager):
 
         return state_code
 
+    @staticmethod
     def create_contest_office_row_entry(
-            self,
             contest_office_name='',
             contest_office_votes_allowed=1,
             contest_office_number_elected=1,
@@ -1083,6 +1099,8 @@ class ContestOfficeManager(models.Manager):
                         defaults['is_ballotpedia_primary_runoff_election']
                 if 'ocd_division_id' in defaults:
                     new_contest_office.ocd_division_id = defaults['ocd_division_id']
+                if 'primary_party' in defaults:
+                    new_contest_office.primary_party = defaults['primary_party']
                 if 'vote_usa_office_id' in defaults:
                     new_contest_office.vote_usa_office_id = defaults['vote_usa_office_id']
                 new_contest_office.save()
@@ -1105,8 +1123,8 @@ class ContestOfficeManager(models.Manager):
             }
         return results
 
+    @staticmethod
     def update_contest_office_row_entry(
-            self,
             contest_office_name,
             contest_office_votes_allowed,
             ctcl_uuid,
@@ -1189,6 +1207,8 @@ class ContestOfficeManager(models.Manager):
                         defaults['is_ballotpedia_primary_runoff_election']
                 if 'ocd_division_id' in defaults:
                     existing_office_entry.ocd_division_id = defaults['ocd_division_id']
+                if 'primary_party' in defaults:
+                    existing_office_entry.primary_party = defaults['primary_party']
                 if 'vote_usa_office_id' in defaults:
                     existing_office_entry.vote_usa_office_id = defaults['vote_usa_office_id']
                 # now go ahead and save this entry (update)
@@ -1210,7 +1230,8 @@ class ContestOfficeManager(models.Manager):
         }
         return results
 
-    def count_contest_offices_for_election(self, google_civic_election_id):
+    @staticmethod
+    def count_contest_offices_for_election(google_civic_election_id):
         """
         Return count of contest offices found for a given election
         :param google_civic_election_id: 
@@ -1270,7 +1291,11 @@ class ContestOfficeListManager(models.Manager):
         state_code = ""
         return self.retrieve_offices(google_civic_election_id, state_code, office_list, return_list_of_objects)
 
-    def fetch_office_count(self, google_civic_election_id=0, state_code="", ignore_office_visiting_list=False):
+    @staticmethod
+    def fetch_office_count(
+            google_civic_election_id=0,
+            state_code="",
+            ignore_office_visiting_list=False):
         office_count = 0
         office_manager = ContestOfficeManager()
 
@@ -1289,8 +1314,12 @@ class ContestOfficeListManager(models.Manager):
 
         return office_count
 
+    @staticmethod
     def fetch_offices_from_non_unique_identifiers_count(
-            self, google_civic_election_id, state_code, office_name, ignore_office_we_vote_id_list=[]):
+            google_civic_election_id,
+            state_code,
+            office_name,
+            ignore_office_we_vote_id_list=[]):
         keep_looking_for_duplicates = True
         status = ""
 
@@ -1316,8 +1345,8 @@ class ContestOfficeListManager(models.Manager):
 
         return 0
 
+    @staticmethod
     def retrieve_offices(
-            self,
             google_civic_election_id=0,
             state_code="",
             retrieve_from_this_office_we_vote_id_list=[],
@@ -1403,8 +1432,12 @@ class ContestOfficeListManager(models.Manager):
         }
         return results
 
-    def retrieve_possible_duplicate_offices(self, google_civic_election_id, state_code, office_name,
-                                            we_vote_id_from_master=''):
+    @staticmethod
+    def retrieve_possible_duplicate_offices(
+            google_civic_election_id,
+            state_code,
+            office_name,
+            we_vote_id_from_master=''):
         """
         Find offices that match another office in all critical fields other than we_vote_id_from_master
         :param google_civic_election_id:
@@ -1460,8 +1493,8 @@ class ContestOfficeListManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_contest_offices_from_non_unique_identifiers(
-            self,
             ballotpedia_race_id=0,
             contest_office_name='',
             ctcl_uuid=None,

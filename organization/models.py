@@ -12,7 +12,7 @@ from exception.models import handle_exception, \
     handle_record_found_more_than_one_exception, handle_record_not_saved_exception, handle_record_not_found_exception
 from import_export_facebook.models import FacebookManager
 from twitter.functions import retrieve_twitter_user_info
-from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
+from twitter.models import TwitterApiCounterManager, TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
 from voter.models import VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists
@@ -1349,6 +1349,7 @@ class OrganizationManager(models.Manager):
         organization_on_stage_found = False
         new_organization_created = False
         organization_on_stage = Organization()
+        twitter_api_counter_manager = TwitterApiCounterManager()
         status = "ENTERING_UPDATE_OR_CREATE_ORGANIZATION "
 
         organization_id = convert_to_int(organization_id) if positive_value_exists(organization_id) else False
@@ -1420,30 +1421,36 @@ class OrganizationManager(models.Manager):
                 # refresh_from_twitter is true
                 if positive_value_exists(organization_twitter_handle) and refresh_from_twitter:
                     twitter_user_id = 0
-                    results = retrieve_twitter_user_info(twitter_user_id, organization_twitter_handle)
+                    results = retrieve_twitter_user_info(
+                        twitter_user_id,
+                        organization_twitter_handle,
+                        twitter_api_counter_manager=twitter_api_counter_manager,
+                        parent='parent = update_or_create_organization #1',
+                    )
                     if results['success']:
-                        twitter_json = results['twitter_json']
-                        if positive_value_exists(twitter_json['id']):
-                            twitter_user_id = convert_to_int(twitter_json['id'])
-                        if positive_value_exists(twitter_json['name']):
-                            twitter_name = twitter_json['name']
+                        twitter_dict = results['twitter_dict']
+                        if positive_value_exists(twitter_dict['id']):
+                            twitter_user_id = convert_to_int(twitter_dict['id'])
+                        if positive_value_exists(twitter_dict['name']):
+                            twitter_name = twitter_dict['name']
                             # Use Twitter value if a value for this variable was NOT passed in
                             if not positive_value_exists(organization_name):
-                                organization_name = twitter_json['name']
+                                organization_name = twitter_dict['name']
                         # TODO DALE Look more closely at saving the actual url from twitter (not the Twitter shortcut)
-                        # if positive_value_exists(twitter_json['twitter_url']):
-                        #     # Use Twitter value if a value for this variable was NOT passed in
-                        #     if not positive_value_exists(organization_website):
-                        #         organization_website = twitter_json['twitter_url']
-                        twitter_followers_count = convert_to_int(twitter_json['followers_count'])
-                        if positive_value_exists(twitter_json['profile_image_url_https']):
-                            twitter_profile_image_url_https = twitter_json['profile_image_url_https']
-                        if 'profile_banner_url' in twitter_json:
-                            twitter_profile_banner_url_https = twitter_json['profile_banner_url']
-                        twitter_profile_background_image_url_https = \
-                            twitter_json['profile_background_image_url_https']
-                        twitter_description = twitter_json['description']
-                        twitter_location = twitter_json['location']
+                        if positive_value_exists(twitter_dict['expanded_url']):
+                            if not positive_value_exists(organization_website):
+                                organization_website = twitter_dict['expanded_url']
+                        twitter_followers_count = convert_to_int(twitter_dict['followers_count'])
+                        if positive_value_exists(twitter_dict['profile_image_url']):
+                            twitter_profile_image_url_https = twitter_dict['profile_image_url']
+                        # 2024-01-27 Twitter API v2 doesn't return profile_banner_url anymore
+                        # if 'profile_banner_url' in twitter_dict:
+                        #     twitter_profile_banner_url_https = twitter_dict['profile_banner_url']
+                        # 2024-01-27 Twitter API v2 doesn't return profile_background_image_url_https anymore
+                        # twitter_profile_background_image_url_https = \
+                        #     twitter_dict['profile_background_image_url_https']
+                        twitter_description = twitter_dict['description']
+                        twitter_location = twitter_dict['location']
 
                 value_changed = False
                 if chosen_domain_string is not False:
@@ -1658,25 +1665,31 @@ class OrganizationManager(models.Manager):
                     # refresh_from_twitter is true
                     if positive_value_exists(organization_twitter_handle) and refresh_from_twitter:
                         twitter_user_id = 0
-                        results = retrieve_twitter_user_info(twitter_user_id, organization_twitter_handle)
+                        results = retrieve_twitter_user_info(
+                            twitter_user_id,
+                            organization_twitter_handle,
+                            twitter_api_counter_manager=twitter_api_counter_manager,
+                            parent='parent = update_or_create_organization #2',
+                        )
                         if results['success']:
-                            twitter_json = results['twitter_json']
-                            if positive_value_exists(twitter_json['id']):
-                                twitter_user_id = convert_to_int(twitter_json['id'])
-                            if positive_value_exists(twitter_json['name']):
-                                twitter_name = twitter_json['name']
+                            twitter_dict = results['twitter_dict']
+                            if positive_value_exists(twitter_dict['id']):
+                                twitter_user_id = convert_to_int(twitter_dict['id'])
+                            if positive_value_exists(twitter_dict['name']):
+                                twitter_name = twitter_dict['name']
                                 # Use Twitter value if a value for this variable was NOT passed in
                                 if not positive_value_exists(organization_name):
-                                    organization_name = twitter_json['name']
-                            twitter_followers_count = convert_to_int(twitter_json['followers_count'])
-                            if positive_value_exists(twitter_json['profile_image_url_https']):
-                                twitter_profile_image_url_https = twitter_json['profile_image_url_https']
-                            if 'profile_banner_url' in twitter_json:
-                                twitter_profile_banner_url_https = twitter_json['profile_banner_url']
-                            twitter_profile_background_image_url_https = \
-                                twitter_json['profile_background_image_url_https']
-                            twitter_description = twitter_json['description']
-                            twitter_location = twitter_json['location']
+                                    organization_name = twitter_dict['name']
+                            twitter_followers_count = convert_to_int(twitter_dict['followers_count'])
+                            if positive_value_exists(twitter_dict['profile_image_url']):
+                                twitter_profile_image_url_https = twitter_dict['profile_image_url']
+                            # 2024-01-27 Twitter API v2 doesn't return anymore
+                            # if 'profile_banner_url' in twitter_dict:
+                            #     twitter_profile_banner_url_https = twitter_dict['profile_banner_url']
+                            # twitter_profile_background_image_url_https = \
+                            #     twitter_dict['profile_background_image_url_https']
+                            twitter_description = twitter_dict['description']
+                            twitter_location = twitter_dict['location']
 
                     value_changed = False
                     if chosen_domain_string is not False:
@@ -1796,25 +1809,31 @@ class OrganizationManager(models.Manager):
                 # refresh_from_twitter is true
                 twitter_user_id = 0
                 if positive_value_exists(organization_twitter_handle) and refresh_from_twitter:
-                    results = retrieve_twitter_user_info(twitter_user_id, organization_twitter_handle)
+                    results = retrieve_twitter_user_info(
+                        twitter_user_id,
+                        organization_twitter_handle,
+                        twitter_api_counter_manager=twitter_api_counter_manager,
+                        parent='parent = update_or_create_organization #3',
+                    )
                     if results['success']:
-                        twitter_json = results['twitter_json']
-                        if positive_value_exists(twitter_json['id']):
-                            twitter_user_id = convert_to_int(twitter_json['id'])
-                        if positive_value_exists(twitter_json['name']):
-                            twitter_name = twitter_json['name']
+                        twitter_dict = results['twitter_dict']
+                        if positive_value_exists(twitter_dict['id']):
+                            twitter_user_id = convert_to_int(twitter_dict['id'])
+                        if positive_value_exists(twitter_dict['name']):
+                            twitter_name = twitter_dict['name']
                             # Use Twitter value if a value for this variable was NOT passed in
                             if not positive_value_exists(organization_name):
-                                organization_name = twitter_json['name']
-                        twitter_followers_count = convert_to_int(twitter_json['followers_count'])
-                        if positive_value_exists(twitter_json['profile_image_url_https']):
-                            twitter_profile_image_url_https = twitter_json['profile_image_url_https']
-                        if 'profile_banner_url' in twitter_json:
-                            twitter_profile_banner_url_https = twitter_json['profile_banner_url']
-                        twitter_profile_background_image_url_https = \
-                            twitter_json['profile_background_image_url_https']
-                        twitter_description = twitter_json['description']
-                        twitter_location = twitter_json['location']
+                                organization_name = twitter_dict['name']
+                        twitter_followers_count = convert_to_int(twitter_dict['followers_count'])
+                        if positive_value_exists(twitter_dict['profile_image_url']):
+                            twitter_profile_image_url_https = twitter_dict['profile_image_url']
+                        # 2024-01-27 Twitter API v2 doesn't return anymore
+                        # if 'profile_banner_url' in twitter_dict:
+                        #     twitter_profile_banner_url_https = twitter_dict['profile_banner_url']
+                        # twitter_profile_background_image_url_https = \
+                        #     twitter_dict['profile_background_image_url_https']
+                        twitter_description = twitter_dict['description']
+                        twitter_location = twitter_dict['location']
 
                 if positive_value_exists(organization_type):
                     new_organization_type = organization_type
@@ -2091,7 +2110,7 @@ class OrganizationManager(models.Manager):
     def update_organization_twitter_details(
             self,
             organization,
-            twitter_json,
+            twitter_dict,
             cached_twitter_profile_image_url_https=False,
             cached_twitter_profile_background_image_url_https=False,
             cached_twitter_profile_banner_url_https=False,
@@ -2108,59 +2127,61 @@ class OrganizationManager(models.Manager):
 
         # TODO DALE We should stop saving organization_twitter_handle without saving a TwitterLinkToOrganization
         if organization:
-            if 'id' in twitter_json and positive_value_exists(twitter_json['id']):
-                if convert_to_int(twitter_json['id']) != organization.twitter_user_id:
-                    organization.twitter_user_id = convert_to_int(twitter_json['id'])
+            if 'id' in twitter_dict and positive_value_exists(twitter_dict['id']):
+                if convert_to_int(twitter_dict['id']) != organization.twitter_user_id:
+                    organization.twitter_user_id = convert_to_int(twitter_dict['id'])
                     values_changed = True
-            if 'screen_name' in twitter_json and positive_value_exists(twitter_json['screen_name']):
-                incoming_twitter_screen_name = str(twitter_json['screen_name'])
+            if 'username' in twitter_dict and positive_value_exists(twitter_dict['username']):
+                incoming_twitter_screen_name = str(twitter_dict['username'])
                 if incoming_twitter_screen_name is False or incoming_twitter_screen_name == 'False':
                     incoming_twitter_screen_name = ""
                 organization_twitter_handle = str(organization.organization_twitter_handle)
                 if organization_twitter_handle is False or organization_twitter_handle == 'False':
                     organization_twitter_handle = ""
                 if incoming_twitter_screen_name.lower() != organization_twitter_handle.lower():
-                    organization.organization_twitter_handle = twitter_json['screen_name']
+                    organization.organization_twitter_handle = twitter_dict['username']
                     values_changed = True
-            if 'name' in twitter_json and positive_value_exists(twitter_json['name']):
-                if twitter_json['name'] != organization.twitter_name:
-                    organization.twitter_name = twitter_json['name']
+            if 'name' in twitter_dict and positive_value_exists(twitter_dict['name']):
+                if twitter_dict['name'] != organization.twitter_name:
+                    organization.twitter_name = twitter_dict['name']
                     values_changed = True
                 if not positive_value_exists(organization.organization_name):
-                    organization.organization_name = twitter_json['name']
-            if 'followers_count' in twitter_json and positive_value_exists(twitter_json['followers_count']):
-                if convert_to_int(twitter_json['followers_count']) != organization.twitter_followers_count:
-                    organization.twitter_followers_count = convert_to_int(twitter_json['followers_count'])
+                    organization.organization_name = twitter_dict['name']
+            if 'followers_count' in twitter_dict and positive_value_exists(twitter_dict['followers_count']):
+                if convert_to_int(twitter_dict['followers_count']) != organization.twitter_followers_count:
+                    organization.twitter_followers_count = convert_to_int(twitter_dict['followers_count'])
                     values_changed = True
 
             if positive_value_exists(cached_twitter_profile_image_url_https):
                 organization.twitter_profile_image_url_https = cached_twitter_profile_image_url_https
                 values_changed = True
-            elif 'profile_image_url_https' in twitter_json and positive_value_exists(
-                    twitter_json['profile_image_url_https']):
-                if twitter_json['profile_image_url_https'] != organization.twitter_profile_image_url_https:
-                    organization.twitter_profile_image_url_https = twitter_json['profile_image_url_https']
+            elif 'profile_image_url' in twitter_dict and positive_value_exists(
+                    twitter_dict['profile_image_url']):
+                if twitter_dict['profile_image_url'] != organization.twitter_profile_image_url_https:
+                    organization.twitter_profile_image_url_https = twitter_dict['profile_image_url']
                     values_changed = True
 
             if positive_value_exists(cached_twitter_profile_banner_url_https):
                 organization.twitter_profile_banner_url_https = cached_twitter_profile_banner_url_https
                 values_changed = True
-            elif 'profile_banner_url' in twitter_json and positive_value_exists(twitter_json['profile_banner_url']):
-                if twitter_json['profile_banner_url'] != organization.twitter_profile_banner_url_https:
-                    organization.twitter_profile_banner_url_https = twitter_json['profile_banner_url']
-                    values_changed = True
+            # 2024-01-27 Twitter API v2 doesn't return profile_banner_url anymore
+            # elif 'profile_banner_url' in twitter_dict and positive_value_exists(twitter_dict['profile_banner_url']):
+            #     if twitter_dict['profile_banner_url'] != organization.twitter_profile_banner_url_https:
+            #         organization.twitter_profile_banner_url_https = twitter_dict['profile_banner_url']
+            #         values_changed = True
 
             if positive_value_exists(cached_twitter_profile_background_image_url_https):
                 organization.twitter_profile_background_image_url_https = \
                     cached_twitter_profile_background_image_url_https
                 values_changed = True
-            elif 'profile_background_image_url_https' in twitter_json and positive_value_exists(
-                    twitter_json['profile_background_image_url_https']):
-                if twitter_json['profile_background_image_url_https'] != \
-                        organization.twitter_profile_background_image_url_https:
-                    organization.twitter_profile_background_image_url_https = \
-                        twitter_json['profile_background_image_url_https']
-                    values_changed = True
+            # 2024-01-27 Twitter API v2 doesn't return profile_background_image_url_https anymore
+            # elif 'profile_background_image_url_https' in twitter_dict and positive_value_exists(
+            #         twitter_dict['profile_background_image_url_https']):
+            #     if twitter_dict['profile_background_image_url_https'] != \
+            #             organization.twitter_profile_background_image_url_https:
+            #         organization.twitter_profile_background_image_url_https = \
+            #             twitter_dict['profile_background_image_url_https']
+            #         values_changed = True
             if positive_value_exists(we_vote_hosted_profile_image_url_large):
                 organization.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
                 values_changed = True
@@ -2171,13 +2192,13 @@ class OrganizationManager(models.Manager):
                 organization.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
                 values_changed = True
 
-            if 'description' in twitter_json:  # No value required to update description (so we can clear out)
-                if twitter_json['description'] != organization.twitter_description:
-                    organization.twitter_description = twitter_json['description']
+            if 'description' in twitter_dict:  # No value required to update description (so we can clear out)
+                if twitter_dict['description'] != organization.twitter_description:
+                    organization.twitter_description = twitter_dict['description']
                     values_changed = True
-            if 'location' in twitter_json:  # No value required to update location (so we can clear out)
-                if twitter_json['location'] != organization.twitter_location:
-                    organization.twitter_location = twitter_json['location']
+            if 'location' in twitter_dict:  # No value required to update location (so we can clear out)
+                if twitter_dict['location'] != organization.twitter_location:
+                    organization.twitter_location = twitter_dict['location']
                     values_changed = True
 
             if values_changed:
@@ -3133,7 +3154,7 @@ class Organization(models.Model):
     # Twitter information
     twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)
     organization_twitter_handle = models.CharField(
-        verbose_name='organization twitter screen_name', max_length=255, null=True, unique=False)
+        verbose_name='organization twitter username', max_length=255, null=True, unique=False)
     # organization_twitter_handle2 = models.CharField(
     #     verbose_name='organization twitter screen_name2', max_length=255, null=True, unique=False)
     organization_twitter_updates_failing = models.BooleanField(default=False)
@@ -3156,12 +3177,12 @@ class Organization(models.Model):
 
     # Instagram
     organization_instagram_handle = models.CharField(
-        verbose_name='organization instagram screen_name', max_length=255, null=True, unique=False)
+        verbose_name='organization instagram username', max_length=255, null=True, unique=False)
     instagram_followers_count = models.IntegerField(null=True, blank=True)
 
     # Which organization image is currently active?
     profile_image_type_currently_active = models.CharField(
-        max_length=10, choices=PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES, default=PROFILE_IMAGE_TYPE_UNKNOWN)
+        max_length=11, choices=PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES, default=PROFILE_IMAGE_TYPE_UNKNOWN)
     # Image from Facebook, cached on We Vote's servers. See also facebook_profile_image_url_https.
     we_vote_hosted_profile_facebook_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_facebook_image_url_medium = models.TextField(blank=True, null=True)
@@ -3437,7 +3458,7 @@ class Organization(models.Model):
             return ''
 
 
-class OrganizationChangeLog(models.Model):
+class OrganizationChangeLog(models.Model):  # OrganizationLogEntry would be another name
     """
     What changes were made, and by whom?
     """

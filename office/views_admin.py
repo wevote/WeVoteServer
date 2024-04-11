@@ -9,11 +9,13 @@ from .models import ContestOffice, ContestOfficeListManager, ContestOfficeManage
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.controllers import move_ballot_items_to_another_office
 from bookmark.models import BookmarkItemList
-from candidate.controllers import move_candidates_to_another_office
+from candidate.controllers import create_candidate_from_politician, move_candidates_to_another_office
 from candidate.models import CandidateCampaign, CandidateListManager, CandidateManager, fetch_candidate_count_for_office
 from config.base import get_environment_variable
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.utils.text import slugify
+from django.utils.timezone import localtime, now
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
@@ -24,10 +26,14 @@ from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
 from position.controllers import move_positions_to_another_office
 from position.models import OPPOSE, PositionListManager, SUPPORT
-from voter.models import voter_has_authority
+from volunteer_task.models import VOLUNTEER_ACTION_CANDIDATE_CREATED, VolunteerTaskManager
+from voter.models import fetch_voter_from_voter_device_link, voter_has_authority
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, convert_we_vote_date_string_to_date_as_integer, \
-    positive_value_exists, STATE_CODE_MAP
+from wevote_functions.functions import convert_to_int, get_voter_api_device_id, \
+    extract_first_name_from_full_name, extract_middle_name_from_full_name, extract_last_name_from_full_name, \
+    is_candidate_we_vote_id, is_politician_we_vote_id, positive_value_exists, \
+    STATE_CODE_MAP
+from wevote_functions.functions_date import convert_we_vote_date_string_to_date_as_integer
 from django.http import HttpResponse
 import json
 
@@ -1194,15 +1200,13 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
 
     messages_on_stage = get_messages(request)
     office_id = convert_to_int(office_id)
+    contest_office = None
     contest_office_found = False
     state_code_for_template = ''
 
+    candidate_possibility_search = request.GET.get('candidate_possibility_search', "")
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-    state_code = request.GET.get('state_code', "")
     office_search = request.GET.get('office_search', "")
-    select_for_marking_office_we_vote_ids = request.GET.getlist('select_for_marking_office_we_vote_ids[]')
-    which_marking = request.GET.get('which_marking')
-    office_manager = ContestOfficeManager()
 
     try:
         if positive_value_exists(office_id):
@@ -1227,10 +1231,10 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
     candidate_list_manager = CandidateListManager()
     results = candidate_list_manager.retrieve_candidate_we_vote_id_list_from_office_list(
         contest_office_we_vote_id_list=[contest_office_we_vote_id])
-    candidate_we_vote_id_list = results['candidate_we_vote_id_list']
+    existing_candidate_we_vote_id_list = results['candidate_we_vote_id_list']
     try:
         candidate_query = CandidateCampaign.objects.all()
-        candidate_query = candidate_query.filter(we_vote_id__in=candidate_we_vote_id_list)
+        candidate_query = candidate_query.filter(we_vote_id__in=existing_candidate_we_vote_id_list)
         candidate_query = candidate_query.order_by('candidate_name')
         candidate_list = list(candidate_query)
         support_total = 0
@@ -1261,13 +1265,86 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
     if positive_value_exists(google_civic_election_id):
         election = Election.objects.get(google_civic_election_id=google_civic_election_id)
 
+    # ##############################################################
+    # Office Add Candidates
+    results = office_summary_add_candidates_process_view(
+        request,
+        contest_office=contest_office,
+        existing_candidate_we_vote_id_list=existing_candidate_we_vote_id_list,
+    )
+    at_least_one_candidate_created = results['at_least_one_candidate_created']
+    search_result_options_list = results['search_result_options_list']
+
+    # ##############################################################
+    # Office Merging
+    results = office_summary_merge_with_other_office_process_view(
+        request,
+        contest_office=contest_office,
+        contest_office_found=contest_office_found,
+        contest_office_we_vote_id=contest_office_we_vote_id,
+        root_office_candidate_last_names=root_office_candidate_last_names,
+    )
+    office_search_results_list = results['office_search_results_list']
+
+    if positive_value_exists(at_least_one_candidate_created):
+        return HttpResponseRedirect(reverse('office:office_summary', args=(office_id,)) +
+                                    "?candidate_possibility_search=" + str(candidate_possibility_search) +
+                                    "&google_civic_election_id=" + str(google_civic_election_id) +
+                                    "&state_code=" + str(contest_office.state_code))
+
+    if contest_office_found:
+        template_values = {
+            'candidate_possibility_search': candidate_possibility_search,
+            'candidate_list':               candidate_list_modified,
+            'existing_candidate_we_vote_id_list':    existing_candidate_we_vote_id_list,
+            'election':                     election,
+            'election_list':                election_list,
+            'google_civic_election_id':     google_civic_election_id,
+            'messages_on_stage':            messages_on_stage,
+            'office':                       contest_office,
+            'office_search':                office_search,
+            'office_search_results_list':   office_search_results_list,
+            'search_result_options_list':   search_result_options_list,
+            'state_code':                   state_code_for_template,
+        }
+    else:
+        template_values = {
+            'messages_on_stage':    messages_on_stage,
+            'state_code':           state_code_for_template,
+        }
+    return render(request, 'office/office_summary.html', template_values)
+
+
+def office_summary_merge_with_other_office_process_view(
+        request,
+        contest_office=None,
+        contest_office_found=False,
+        contest_office_we_vote_id='',
+        root_office_candidate_last_names=''):
+    """
+
+    :param request:
+    :param contest_office:
+    :param contest_office_found:
+    :param contest_office_we_vote_id:
+    :param root_office_candidate_last_names:
+    :return:
+    """
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    office_search = request.GET.get('office_search', "")
+    select_for_marking_office_we_vote_ids = request.GET.getlist('select_for_marking_office_we_vote_ids[]')
+    state_code = request.GET.get('state_code', "")
+    which_marking = request.GET.get('which_marking')
+    office_manager = ContestOfficeManager()
+    # ##############################################################
+    # Office Merging
     # Make sure 'which_marking' is one of the allowed Filter fields
     if positive_value_exists(which_marking) \
-            and which_marking not in ["not_a_duplicate"]:
+            and which_marking not in ["not_a_duplicate", "skip"]:
         messages.add_message(request, messages.ERROR,
                              'The filter you are trying to update is not recognized: {which_marking}'
                              ''.format(which_marking=which_marking))
-    if positive_value_exists(which_marking):
+    if positive_value_exists(which_marking) and which_marking in ["not_a_duplicate"]:
         items_processed_successfully = 0
         update = False
         not_a_duplicate = False
@@ -1364,25 +1441,245 @@ def office_summary_view(request, office_id=0, contest_office_we_vote_id=''):
         if one_office.we_vote_id in offices_are_not_duplicates_list_we_vote_ids:
             one_office.not_a_duplicate = True
         office_search_results_list_modified.append(one_office)
+    results = {
+        'office_search_results_list':   office_search_results_list_modified,
+    }
+    return results
 
-    if contest_office_found:
-        template_values = {
-            'messages_on_stage':        messages_on_stage,
-            'office':                   contest_office,
-            'candidate_list':           candidate_list_modified,
-            'state_code':               state_code_for_template,
-            'election':                 election,
-            'election_list':            election_list,
-            'office_search':            office_search,
-            'office_search_results_list':   office_search_results_list_modified,
-            'google_civic_election_id': google_civic_election_id,
-        }
+
+def office_summary_add_candidates_process_view(
+        request,
+        contest_office=None,
+        existing_candidate_we_vote_id_list=[],
+    ):
+    """
+
+    :param request:
+    :param contest_office:
+    :param existing_candidate_we_vote_id_list:
+    :return:
+    """
+    candidate_possibility_search = request.GET.get('candidate_possibility_search', "")
+    state_code = request.GET.get('state_code', "")
+    status = ''
+    volunteer_task_manager = VolunteerTaskManager()
+    voter_device_id = get_voter_api_device_id(request)
+    voter = fetch_voter_from_voter_device_link(voter_device_id)
+    if hasattr(voter, 'we_vote_id'):
+        voter_id = voter.id
+        voter_we_vote_id = voter.we_vote_id
     else:
-        template_values = {
-            'messages_on_stage':    messages_on_stage,
-            'state_code':           state_code_for_template,
+        voter_id = 0
+        voter_we_vote_id = ""
+    at_least_one_candidate_created = False
+    names_to_search_list = []
+    # Break up multiple lines
+    candidate_possibility_search_list = candidate_possibility_search.splitlines()
+    for one_line in candidate_possibility_search_list:
+        one_line_stripped = one_line.strip()
+        if positive_value_exists(one_line_stripped) and one_line_stripped not in names_to_search_list:
+            names_to_search_list.append(one_line_stripped)
+
+    if contest_office and positive_value_exists(contest_office.state_code):
+        state_code = contest_office.state_code
+        state_code = state_code.lower()
+        if state_code in ['na']:
+            state_code = ''
+
+    election_year_as_integer = 0
+    if contest_office and positive_value_exists(contest_office.election_date_as_integer):
+        election_year_as_integer = contest_office.election_date_as_integer // 10000
+
+    choices_made = {}
+    for one_name_to_search in names_to_search_list:
+        one_name_slug = slugify(one_name_to_search)
+        choices_made[one_name_slug] = request.GET.get("select_for_{one_name_slug}"
+                                                      "".format(one_name_slug=one_name_slug))
+
+    # Search among candidates in upcoming elections
+    allowed_years = []
+    if positive_value_exists(election_year_as_integer):
+        allowed_years.append(election_year_as_integer)
+    else:
+        # Calculate this year
+        datetime_now = localtime(now()).date()  # We Vote uses Pacific Time for TIME_ZONE
+        current_year = datetime_now.year
+        allowed_years.append(current_year)
+
+    # We list all options in a single list of dicts, so we can display complex options
+    from candidate.models import CandidateCampaign, CandidateManager
+    from politician.models import PoliticianManager
+    candidate_manager = CandidateManager()
+    politician_manager = PoliticianManager()
+    search_result_options_dict = {}
+    for one_name_to_search in names_to_search_list:
+        candidate_list_limited = []
+        candidate_name_already_linked = False
+        candidate_name_created = False
+
+        if ' ' not in one_name_to_search:
+            last_name = one_name_to_search
+        else:
+            last_name = extract_last_name_from_full_name(one_name_to_search)
+        queryset = CandidateCampaign.objects.all()
+        queryset = queryset.filter(candidate_year__in=allowed_years)
+        # Find any upcoming candidate with the last name in the name
+        queryset = queryset.filter(candidate_name__icontains=last_name)
+        if positive_value_exists(state_code):
+            queryset = queryset.filter(state_code__iexact=state_code)
+        candidate_list = list(queryset)
+        candidate_by_we_vote_id_dict = {}
+        exclude_politician_we_vote_id_list = []
+        for one_candidate in candidate_list:
+            if one_candidate.we_vote_id not in candidate_by_we_vote_id_dict:
+                candidate_by_we_vote_id_dict[one_candidate.we_vote_id] = one_candidate
+            if one_candidate.we_vote_id in existing_candidate_we_vote_id_list:
+                candidate_list_limited.append(one_candidate)
+                candidate_name_already_linked = True
+            if positive_value_exists(one_candidate.politician_we_vote_id):
+                exclude_politician_we_vote_id_list.append(one_candidate.politician_we_vote_id)
+
+        # Find all politicians that match the last name
+        politician_by_we_vote_id_dict = {}
+        from politician.models import Politician
+        queryset = Politician.objects.all()
+        queryset = queryset.filter(last_name__iexact=last_name)
+        if len(exclude_politician_we_vote_id_list) > 0:
+            queryset = queryset.exclude(we_vote_id__in=exclude_politician_we_vote_id_list)
+        if positive_value_exists(state_code):
+            queryset = queryset.filter(state_code__iexact=state_code)
+        politician_list = list(queryset)
+        for one_politician in politician_list:
+            if one_politician.we_vote_id not in politician_by_we_vote_id_dict:
+                politician_by_we_vote_id_dict[one_politician.we_vote_id] = one_politician
+
+        # ############################
+        # Now process incoming choices for candidate, politician, or "create new"
+        create_candidate_for_politician_we_vote_id = None
+        create_this_politician = ''
+        new_politician = None
+        new_politician_created = False
+        link_candidate_we_vote_id_to_office = None
+        one_name_slug = slugify(one_name_to_search)
+        if one_name_slug in choices_made:
+            value = choices_made[one_name_slug]
+            if is_politician_we_vote_id(value):
+                create_candidate_for_politician_we_vote_id = value
+            elif is_candidate_we_vote_id(value):
+                link_candidate_we_vote_id_to_office = value
+            elif value not in ['skip', None]:
+                create_this_politician = value
+        if positive_value_exists(create_this_politician):
+            first_name = extract_first_name_from_full_name(create_this_politician)
+            middle_name = extract_middle_name_from_full_name(create_this_politician)
+            last_name = extract_last_name_from_full_name(create_this_politician)
+            results = politician_manager.create_politician_row_entry(
+                politician_name=create_this_politician,
+                politician_first_name=first_name,
+                politician_middle_name=middle_name,
+                politician_last_name=last_name,
+                state_code=state_code,
+            )
+            if not results['success']:
+                status += results['status']
+                messages.add_message(request, messages.ERROR,
+                                     'UNABLE TO CREATE POLITICIAN: {status}'
+                                     ''.format(status=status))
+            elif results['new_politician_created']:
+                messages.add_message(request, messages.INFO,
+                                     'Created Politician: {create_this_politician}'
+                                     ''.format(create_this_politician=create_this_politician))
+                new_politician_created = True
+                new_politician = results['new_politician']
+                create_candidate_for_politician_we_vote_id = new_politician.we_vote_id
+            else:
+                status += results['status']
+                messages.add_message(request, messages.ERROR,
+                                     'Did not create politician: {status}'
+                                     ''.format(status=status))
+
+        if new_politician_created:
+            politician_list.append(new_politician)
+            politician_by_we_vote_id_dict[new_politician.we_vote_id] = new_politician
+
+        if positive_value_exists(create_candidate_for_politician_we_vote_id):
+            if create_candidate_for_politician_we_vote_id in politician_by_we_vote_id_dict:
+                politician = politician_by_we_vote_id_dict[create_candidate_for_politician_we_vote_id]
+                if not hasattr(politician, 'politician_name'):
+                    messages.add_message(request, messages.ERROR,
+                                         'Did not create candidate from politician-politician object problem: {status}'
+                                         ''.format(status=status))
+                else:
+                    # Create candidate from this politician
+                    results = create_candidate_from_politician(create_candidate_for_politician_we_vote_id)
+                    if results['success']:
+                        one_candidate = results['candidate']
+                        candidate_list_limited.append(one_candidate)
+                        at_least_one_candidate_created = True
+                        candidate_name_created = True
+                        if one_candidate.we_vote_id not in candidate_by_we_vote_id_dict:
+                            candidate_by_we_vote_id_dict[one_candidate.we_vote_id] = one_candidate
+                        link_candidate_we_vote_id_to_office = one_candidate.we_vote_id
+                    else:
+                        status += results['status']
+                        messages.add_message(request, messages.ERROR,
+                                             'Did not create candidate from politician: {status}'
+                                             ''.format(status=status))
+            else:
+                messages.add_message(request, messages.ERROR,
+                                     'Did not create candidate from politician-object not retrieved: {status}'
+                                     ''.format(status=status))
+
+        if (new_politician_created or candidate_name_created or link_candidate_we_vote_id_to_office) \
+                and positive_value_exists(voter_we_vote_id):
+            try:
+                # Give the volunteer who entered this credit
+                task_results = volunteer_task_manager.create_volunteer_task_completed(
+                    action_constant=VOLUNTEER_ACTION_CANDIDATE_CREATED,
+                    voter_id=voter_id,
+                    voter_we_vote_id=voter_we_vote_id,
+                )
+            except Exception as e:
+                status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED: ' \
+                          '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+
+        if positive_value_exists(link_candidate_we_vote_id_to_office):
+            results = candidate_manager.get_or_create_candidate_to_office_link(
+                candidate_we_vote_id=link_candidate_we_vote_id_to_office,
+                contest_office_we_vote_id=contest_office.we_vote_id,
+                google_civic_election_id=contest_office.google_civic_election_id,
+                state_code=contest_office.state_code,
+            )
+            if results['success']:
+                if link_candidate_we_vote_id_to_office in candidate_by_we_vote_id_dict:
+                    one_candidate = candidate_by_we_vote_id_dict[link_candidate_we_vote_id_to_office]
+                    candidate_list_limited.append(one_candidate)
+                    at_least_one_candidate_created = True
+                    candidate_name_already_linked = True
+            else:
+                status += results['status']
+                messages.add_message(request, messages.ERROR,
+                                     'Did not create candidate link to office: {status}'
+                                     ''.format(status=status))
+
+        # Bundle up the options into data package
+        search_result_option_dict = {
+            'candidate_name_created':           candidate_name_created,
+            'candidate_name_already_linked':    candidate_name_already_linked,
+            'candidate_name_to_search':         one_name_to_search,
+            'candidate_slug':                   slugify(one_name_to_search),
+            'candidate_list':                   candidate_list_limited
+            if candidate_name_already_linked else candidate_list,
+            'politician_list':                  politician_list,
         }
-    return render(request, 'office/office_summary.html', template_values)
+        search_result_options_dict[one_name_to_search] = search_result_option_dict
+
+    search_result_options_list = list(search_result_options_dict.values())
+    results = {
+        'at_least_one_candidate_created':   at_least_one_candidate_created,
+        'search_result_options_list':       search_result_options_list,
+    }
+    return results
 
 
 @login_required

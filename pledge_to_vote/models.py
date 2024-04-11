@@ -56,10 +56,12 @@ class PledgeToVote(models.Model):
 
 class PledgeToVoteManager(models.Manager):
 
-    def __unicode__(self):
+    @staticmethod
+    def __unicode__():
         return "PledgeToVoteManager"
 
-    def delete_duplicate_pledges(self, voter_we_vote_id, voter_guide_we_vote_id):
+    @staticmethod
+    def delete_duplicate_pledges(voter_we_vote_id, voter_guide_we_vote_id):
         """
         Delete all existing pledges. We will save a new one.
         :param voter_we_vote_id:
@@ -80,8 +82,14 @@ class PledgeToVoteManager(models.Manager):
         return
 
     def update_or_create_pledge_to_vote(
-            self, voter_we_vote_id, voter_guide_we_vote_id, organization_we_vote_id, google_civic_election_id,
-            take_same_positions='', visible_to_public='', pledge_to_vote_we_vote_id=''):
+            self,
+            voter_we_vote_id,
+            voter_guide_we_vote_id,
+            organization_we_vote_id,
+            google_civic_election_id,
+            take_same_positions='',
+            visible_to_public='',
+            pledge_to_vote_we_vote_id=''):
 
         # If we have variables that we might want to update, check to see if an entry already exists
         # organization_we_vote_id, visible_to_public, pledge_to_vote_we_vote_id
@@ -151,8 +159,13 @@ class PledgeToVoteManager(models.Manager):
         }
         return results
 
-    def retrieve_pledge_to_vote(self, pledge_to_vote_we_vote_id, voter_we_vote_id="", voter_guide_we_vote_id="",
-                                organization_we_vote_id="", google_civic_election_id=""):
+    @staticmethod
+    def retrieve_pledge_to_vote(
+            pledge_to_vote_we_vote_id,
+            voter_we_vote_id="",
+            voter_guide_we_vote_id="",
+            organization_we_vote_id="",
+            google_civic_election_id=""):
 
         pledge_to_vote = PledgeToVote()
         pledge_to_vote_saved = False
@@ -258,7 +271,8 @@ class PledgeToVoteManager(models.Manager):
     def retrieve_pledge_count_from_organization_we_vote_id(self, organization_we_vote_id):
         return self.retrieve_pledge_count("", organization_we_vote_id)
 
-    def retrieve_pledge_count(self, voter_guide_we_vote_id, organization_we_vote_id=''):
+    @staticmethod
+    def retrieve_pledge_count(voter_guide_we_vote_id, organization_we_vote_id=''):
         """
         Return the latest pledge count for a pledge campaign
         :param voter_guide_we_vote_id:
@@ -353,7 +367,8 @@ class PledgeToVoteManager(models.Manager):
         }
         return results
 
-    def retrieve_pledge_to_vote_list(self, google_civic_election_id=0, organization_we_vote_id=""):
+    @staticmethod
+    def retrieve_pledge_to_vote_list(google_civic_election_id=0, organization_we_vote_id=""):
         success = False
         status = ""
         pledge_to_vote_list = []

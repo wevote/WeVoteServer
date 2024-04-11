@@ -29,13 +29,13 @@
 <div class="control-group">
     <label class="control-label" for="username">Email</label>
     <div class="controls">
-        <input type="text" id="username" name="username"  placeholder="Email">
+        <input type="text" id="username" name="username" placeholder="Email" style="width: 250px;" />
     </div>
 </div>
 <div class="control-group">
     <label class="control-label" for="password">Password</label>
     <div class="controls">
-        <input type="password" name="password" id="password" placeholder="Password">
+        <input type="password" name="password" id="password" placeholder="Password" style="width: 250px;">
     </div>
 </div>
 <div>&nbsp;</div>
@@ -72,6 +72,7 @@
     <tr><td>facebook</td>               <td>{{ request.user.fb_username }}</td></tr>
     <tr><td>admin</td>                  <td>{{ request.user.is_admin }}</td></tr>
     <tr><td>analytics_admin</td>        <td>{{ request.user.is_analytics_admin }}</td></tr>
+    <tr><td>voter_manager</td>          <td>{{ request.user.is_voter_manager }}</td></tr>
     <tr><td>partner_organization</td>   <td>{{ request.user.is_partner_organization }}</td></tr>
     <tr><td>political_data_manager</td> <td>{{ request.user.is_political_data_manager }}</td></tr>
     <tr><td>political_data_viewer</td>  <td>{{ request.user.is_political_data_viewer }}</td></tr>

@@ -2,30 +2,28 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from config.base import get_environment_variable, get_node_version, get_postgres_version, \
-    get_python_version, LOGIN_URL, get_git_commit_hash
-from ballot.models import BallotReturned, VoterBallotSaved
-from candidate.models import CandidateCampaign, CandidateManager
-from candidate.controllers import candidates_import_from_sample_file
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
-from django.urls import reverse
-from django.db.models import Count, Q
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from election.models import Election
+from django.urls import reverse
+
+from ballot.models import BallotReturned, VoterBallotSaved
+from candidate.controllers import candidates_import_from_sample_file
+from candidate.models import CandidateCampaign, CandidateManager
+from config.base import get_environment_variable, LOGIN_URL
 from election.controllers import elections_import_from_sample_file
+from election.models import Election
 from email_outbound.models import EmailAddress, SendGridApiCounterManager
 from follow.models import FollowOrganizationList
 from friend.models import CurrentFriend, FriendManager, SuggestedFriend
-from import_export_ballotpedia.models import BallotpediaApiCounterManager
 from import_export_ctcl.models import CTCLApiCounterManager
 from import_export_facebook.models import FacebookLinkToVoter, FacebookManager
 from import_export_google_civic.models import GoogleCivicApiCounterManager
 from import_export_targetsmart.models import TargetSmartApiCounterManager
-from import_export_vote_smart.models import VoteSmartApiCounterManager
 from import_export_vote_usa.models import VoteUSAApiCounterManager
 from measure.models import ContestMeasure, ContestMeasureManager
 from office.controllers import offices_import_from_sample_file
@@ -37,12 +35,15 @@ from position.controllers import find_organizations_referenced_in_positions_for_
     positions_import_from_sample_file
 from position.models import PositionEntered, PositionForFriends, PositionMetricsManager
 from share.models import ShareManager
-from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
+from twitter.functions import retrieve_twitter_rate_limit_info
+from twitter.models import TwitterApiCounterManager, TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
 from voter.models import Voter, VoterAddress, VoterAddressManager, VoterDeviceLinkManager, \
     VoterManager, VoterMetricsManager, \
     voter_has_authority, voter_setup
 from wevote_functions.functions import convert_to_int, delete_voter_api_device_id_cookie, generate_voter_device_id, \
     get_voter_api_device_id, positive_value_exists, set_voter_api_device_id, STATE_CODE_MAP
+from wevote_functions.utils import get_node_version, get_postgres_version, get_python_version, get_git_commit_hash, \
+    get_git_commit_date
 
 BALLOT_ITEMS_SYNC_URL = get_environment_variable("BALLOT_ITEMS_SYNC_URL")  # ballotItemsSyncOut
 BALLOT_RETURNED_SYNC_URL = get_environment_variable("BALLOT_RETURNED_SYNC_URL")  # ballotReturnedSyncOut
@@ -65,7 +66,7 @@ WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 def admin_home_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
     authority_required = {'admin', 'partner_organization', 'political_data_manager', 'political_data_viewer',
-                          'verified_volunteer'}
+                          'verified_volunteer', 'voter_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -91,7 +92,8 @@ def admin_home_view(request):
 
     friend_manager = FriendManager()
     friendlinks = friend_manager.fetch_voters_with_friends_dataset_improved()
-    voters_with_friends_for_graph, voter_with_friends_counts = friend_manager.fetch_voters_with_friends_for_graph(friendlinks)
+    (voters_with_friends_for_graph, voter_with_friends_counts) = \
+        friend_manager.fetch_voters_with_friends_for_graph(friendlinks)
     voter_friendships_count = friend_manager.fetch_voter_friendships_count()
 
     position_metrics_manager = PositionMetricsManager()
@@ -115,6 +117,7 @@ def admin_home_view(request):
         'node_version':                       get_node_version(),
         'git_commit_hash':                    get_git_commit_hash(False),
         'git_commit_hash_url':                get_git_commit_hash(True),
+        'git_commit_date':                    get_git_commit_date(),
         'postgres_version':                   get_postgres_version(),
         'shared_link_clicked_unique_sharer_count': shared_link_clicked_unique_sharer_count,
         'shared_link_clicked_unique_viewer_count': shared_link_clicked_unique_viewer_count,
@@ -145,6 +148,7 @@ def admin_home_view(request):
         'voter_with_friends_counts':          voter_with_friends_counts,
         'voters_with_plan_count':             voters_with_plan_count,
         'voter_friendships_count':            friend_manager.get_count_of_friendships(friendlinks),
+        'WE_VOTE_SERVER_ROOT_URL':            WE_VOTE_SERVER_ROOT_URL,
     }
     response = render(request, 'admin_tools/index.html', template_values)
 
@@ -271,7 +275,8 @@ def data_cleanup_organization_analysis_view(request):
 
             for one_duplicate_organization in organization_list_with_duplicate_twitter:
                 try:
-                    linked_voter = Voter.objects.get(linked_organization_we_vote_id__iexact=one_duplicate_organization.we_vote_id)
+                    linked_voter = \
+                        Voter.objects.get(linked_organization_we_vote_id__iexact=one_duplicate_organization.we_vote_id)
                     one_duplicate_organization.linked_voter = linked_voter
                 except Voter.DoesNotExist:
                     pass
@@ -1738,10 +1743,30 @@ def login_we_vote(request):
             voter_on_stage = request.user
             voter_on_stage_id = voter_on_stage.id
     elif request.POST:
-        username = request.POST.get('username')
         password = request.POST.get('password')
+        input_username = request.POST.get('username').strip()
+        # Retrieve user email address (as entered when account created) to avoid issue from WV-284
+        # Login Admin login page email field being case-sensitive
+        # Maybe in future can be dealt with by making emails in db all lowercase and lower-casing new user emails
+        user_obj = Voter.objects.filter(email__iexact=input_username).first()
+        if user_obj:
+            username = user_obj.email
+        else:
+            # Find the voter based on authenticated emails
+            queryset = EmailAddress.objects.filter(normalized_email_address__iexact=input_username)
+            queryset = queryset.filter(email_ownership_is_verified=True)
+            email_address_obj = queryset.first()
+            if email_address_obj:
+                voter_we_vote_id = email_address_obj.voter_we_vote_id
+                user_obj = Voter.objects.filter(we_vote_id__iexact=voter_we_vote_id).get()
+                username = user_obj.email
+            else:
+                username = None
 
-        user = authenticate(username=username, password=password)
+        if positive_value_exists(username):
+            user = authenticate(username=username, password=password)
+        else:
+            user = None
         if user is not None:
             if user.is_active:
                 login(request, user)
@@ -1890,25 +1915,38 @@ def statistics_summary_view(request):
     # ballotpedia_api_counter_manager = BallotpediaApiCounterManager()
     # ballotpedia_daily_summary_list = ballotpedia_api_counter_manager.retrieve_daily_summaries()
     ctcl_api_counter_manager = CTCLApiCounterManager()
-    ctcl_daily_summary_list = ctcl_api_counter_manager.retrieve_daily_summaries(days_to_display=90)
+    ctcl_daily_summary_list = ctcl_api_counter_manager.retrieve_daily_summaries(days_to_display=15)
+
     google_civic_api_counter_manager = GoogleCivicApiCounterManager()
-    google_civic_daily_summary_list = google_civic_api_counter_manager.retrieve_daily_summaries()
-    sendgrid_api_counter_manager = SendGridApiCounterManager()
-    sendgrid_daily_summary_list = sendgrid_api_counter_manager.retrieve_daily_summaries()
+    google_civic_daily_summary_list = google_civic_api_counter_manager.retrieve_daily_summaries(days_to_display=15)
+
+    # Statistics are not being stored currently DALE 2024-01-22
+    # sendgrid_api_counter_manager = SendGridApiCounterManager()
+    # sendgrid_daily_summary_list = sendgrid_api_counter_manager.retrieve_daily_summaries(days_to_display=15)
+
     # vote_smart_api_counter_manager = VoteSmartApiCounterManager()
     # vote_smart_daily_summary_list = vote_smart_api_counter_manager.retrieve_daily_summaries()
-    targetsmart_api_counter_manager = TargetSmartApiCounterManager()
-    targetsmart_daily_summary_list = targetsmart_api_counter_manager.retrieve_daily_summaries()
+
+    # targetsmart_api_counter_manager = TargetSmartApiCounterManager()
+    # targetsmart_daily_summary_list = targetsmart_api_counter_manager.retrieve_daily_summaries()
+
+    twitter_api_counter_manager = TwitterApiCounterManager()
+    twitter_daily_summary_list = twitter_api_counter_manager.retrieve_daily_summaries(days_to_display=15)
+    twitter_api_limits = retrieve_twitter_rate_limit_info()
+
     vote_usa_api_counter_manager = VoteUSAApiCounterManager()
-    vote_usa_daily_summary_list = vote_usa_api_counter_manager.retrieve_daily_summaries(days_to_display=365)
+    vote_usa_daily_summary_list = vote_usa_api_counter_manager.retrieve_daily_summaries(days_to_display=15)
+
     template_values = {
         'ctcl_daily_summary_list':          ctcl_daily_summary_list,
-        # 'ballotpedia_daily_summary_list':   ballotpedia_daily_summary_list,
         'google_civic_daily_summary_list':  google_civic_daily_summary_list,
-        'sendgrid_daily_summary_list':      sendgrid_daily_summary_list,
-        # 'vote_smart_daily_summary_list':    vote_smart_daily_summary_list,
-        'targetsmart_daily_summary_list':   targetsmart_daily_summary_list,
+        'twitter_daily_summary_list':       twitter_daily_summary_list,
+        'twitter_api_limits':               twitter_api_limits,
         'vote_usa_daily_summary_list':      vote_usa_daily_summary_list,
+        # 'ballotpedia_daily_summary_list':   ballotpedia_daily_summary_list,
+        # 'sendgrid_daily_summary_list':      sendgrid_daily_summary_list,
+        # 'vote_smart_daily_summary_list':    vote_smart_daily_summary_list,
+        # 'targetsmart_daily_summary_list':   targetsmart_daily_summary_list,
     }
     response = render(request, 'admin_tools/statistics_summary.html', template_values)
 

@@ -46,8 +46,8 @@ th, td {
 {% endif %}
 <input name="submit_text" type="submit" value="{% if candidate %}Update Candidate{% else %}Save New Candidate{% endif %}" /></p>
 
-<div class="form-group" style="height: 60px;">
-    <label for="candidate_name_id" class="col-sm-3 control-label">
+<div class="row form-group" style="height: 60px;">
+    <label for="candidate_name_id" class="pl-4 control-label">
       Candidate Name
       {% if candidate %}
         <div>
@@ -70,7 +70,7 @@ th, td {
         {% endif %}
       {% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="candidate_name" id="candidate_name_id" class="form-control"
                value="{% if candidate %}{{ candidate.candidate_name|default_if_none:"" }}{% else %}{{ candidate_name|default_if_none:"" }}{% endif %}" />
         <div>
@@ -125,12 +125,13 @@ th, td {
 </div>
 
 
-<div class="form-group">
-    <label for="profile_image_type_currently_active_id" class="col-sm-3 control-label">
+<div class="row form-group">
+    <label for="profile_image_type_currently_active_id" class="pl-4 control-label">
         Candidate Photo Choice<br />
         <span style="color: darkgray">{{ candidate.profile_image_type_currently_active }}</span>
     </label>
-    <div class="col-sm-8">
+    <div class="col">
+    {# UNKNOWN IMAGE #}
         <span style="float: left; padding: 8px 20px 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="UNKNOWN"
                 {% if candidate.profile_image_type_currently_active == 'UNKNOWN' %} checked {% endif %}
@@ -141,6 +142,7 @@ th, td {
             Unknown
         {% endif %}
         </span>
+    {# UPLOADED IMAGE #}
         <span style="float: left; padding: 8px 20px 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="UPLOADED"
                 {% if candidate.profile_image_type_currently_active == 'UPLOADED' %} checked {% endif %}
@@ -148,11 +150,15 @@ th, td {
             Uploaded
         {% if candidate.we_vote_hosted_profile_uploaded_image_url_tiny %}
             <img src='{{ candidate.we_vote_hosted_profile_uploaded_image_url_tiny }}' />
-            (delete on politician)&nbsp;&nbsp;&nbsp;
+            <label for="candidate_photo_file_delete_id">
+              <input type="checkbox" name="candidate_photo_file_delete" id="candidate_photo_file_delete_id" value="1" />
+                delete&nbsp;&nbsp;&nbsp;
+            </label>
         {% else %}
             (add on politician)
         {% endif %}
         </span>
+    {# FACEBOOK IMAGE #}
         {% if candidate.we_vote_hosted_profile_facebook_image_url_tiny %}
         <span style="float: left; padding: 8px 20px 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="FACEBOOK"
@@ -162,6 +168,7 @@ th, td {
             Facebook
         </span>
         {% endif %}
+    {# TWITTER IMAGE #}
         {% if candidate.we_vote_hosted_profile_twitter_image_url_tiny %}
         <span style="float: left; padding: 8px 20px 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="TWITTER"
@@ -171,6 +178,27 @@ th, td {
             Twitter
         </span>
         {% endif %}
+    {# BALLOTPEDIA IMAGE #}
+        {% if candidate.we_vote_hosted_profile_ballotpedia_image_url_tiny %}
+        <span style="float: left; padding: 8px 25px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="BALLOTPEDIA"
+                {% if candidate.profile_image_type_currently_active == 'BALLOTPEDIA' %} checked {% endif %}
+                />
+            <img src='{{ candidate.we_vote_hosted_profile_ballotpedia_image_url_tiny }}' />
+            Ballotpedia
+        {% endif %}
+        </span>
+    {# LINKEDIN IMAGE #}
+        {% if candidate.we_vote_hosted_profile_linkedin_image_url_tiny %}
+        <span style="float: left; padding: 8px 25px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="LINKEDIN"
+                {% if candidate.profile_image_type_currently_active == 'LINKEDIN' %} checked {% endif %}
+                />
+            <img src='{{ candidate.we_vote_hosted_profile_linkedin_image_url_tiny }}' />
+            LinkedIn
+        {% endif %}
+        </span>
+    {# VOTE_USA IMAGE #}
         {% if candidate.we_vote_hosted_profile_vote_usa_image_url_tiny %}
         <span style="float: left; padding: 8px 25px 0 0;">
             <input type="radio" name="profile_image_type_currently_active" value="VOTE_USA"
@@ -180,12 +208,22 @@ th, td {
             Vote USA
         {% endif %}
         </span>
+    {# WIKIPEDIA IMAGE #}
+        {% if candidate.we_vote_hosted_profile_wikipedia_image_url_tiny %}
+        <span style="float: left; padding: 8px 25px 0 0;">
+            <input type="radio" name="profile_image_type_currently_active" value="WIKIPEDIA"
+                {% if candidate.profile_image_type_currently_active == 'WIKIPEDIA' %} checked {% endif %}
+                />
+            <img src='{{ candidate.we_vote_hosted_profile_wikipedia_image_url_tiny }}' />
+            Wikipedia
+        {% endif %}
+        </span>
     </div>
 </div>
 
 <input type="hidden" name="google_civic_election_id" value="{% if candidate %}{{ candidate.google_civic_election_id }}{% else %}{{ google_civic_election_id }}{% endif %}">
-<div class="form-group">
-    <label for="google_civic_election_id_id" class="col-sm-3 control-label">
+<div class="row form-group">
+    <label for="google_civic_election_id_id" class="pl-4 control-label">
         Candidate to Office Link
         (<span onclick="showElement('candidate_to_office_link_table_add');" style="color: royalblue" >add</span>)
         <span style="color: slategray; font-weight: 400;">
@@ -199,12 +237,16 @@ th, td {
         {% if candidate.candidate_ultimate_election_date %}
             {{ candidate.candidate_ultimate_election_date }}
         {% endif %}
-        {% if candidate.contest_office_name %}
+        {% if candidate.contest_office_name or candidate.district_name %}
             <br />
+        {% endif %}
+        {% if candidate.contest_office_name %}
             {{ candidate.contest_office_name }}
+            {% if candidate.district_name %}
+                &nbsp;|&nbsp;
+            {% endif %}
         {% endif %}
         {% if candidate.district_name %}
-            <br />
             {{ candidate.district_name }}
         {% endif %}
         {% if candidate_to_office_link_list|length == 2 %}
@@ -237,7 +279,7 @@ th, td {
         {% endif %}
         </span>
     </label>
-    <div class="col-sm-8">
+    <div class="col">
     {% if office_name %}
         Adding Candidate to: {{ office_name }}
         <input type="hidden" name="contest_office_id" value="{{ contest_office_id }}">
@@ -309,21 +351,7 @@ th, td {
     </div>
 </div>
 
-<div class="form-group">
-    <label for="contest_office_name_id" class="col-sm-3 control-label">Contest Office Name (Cached)</label>
-    <div class="col-sm-8">
-        <input type="text" name="contest_office_name" id="contest_office_name_id" class="form-control"
-               value="{% if candidate %}{{ candidate.contest_office_name|default_if_none:"" }}{% else %}{{ contest_office_name|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="district_name_id" class="col-sm-3 control-label">District Name (Cached)</label>
-    <div class="col-sm-8">
-        <input type="text" name="district_name" id="district_name_id" class="form-control"
-               value="{% if candidate %}{{ candidate.district_name|default_if_none:"" }}{% else %}{{ district_name|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
+{% include "../form_inputs/two_form_groups.html" with field_dict_1=contest_office_name_dict field_dict_2=district_name_dict %}
 
 {% if state_code_from_election == "" %}
 <div class="form-group">
@@ -336,9 +364,28 @@ th, td {
 {% endif %}
 
 
-<div class="form-group">
-    <label for="candidate_withdrawal_date_id" class="col-sm-3 control-label">Candidate Has Withdrawn From Election</label>
-    <div class="col-sm-8">
+    {% if candidate %}
+<div class="row form-group">
+    <label for="google_search_image_file_id" class="pl-4 control-label">Search Google for Links to Candidate</label>
+    <div class="col d-flex align-items-end">
+        (<a href="{% url 'google_custom_search:retrieve_possible_google_search_users' candidate.we_vote_id %}">retrieve possibilities from Google</a>)
+    {% if google_search_possibility_list %}
+        (<a href="{% url 'google_custom_search:delete_possible_google_search_users' candidate.we_vote_id %}">delete these possibilities</a>)
+        (<a href="{% url 'google_custom_search:bulk_possible_google_search_users_do_not_match' candidate.we_vote_id %}">mark all as "Not a Match"</a>)
+        {% include "candidate/google_search_users_for_candidate_table.html" with candidate=candidate google_search_possibility_list=google_search_possibility_list %}
+        {% if google_search_possibility_list|length == 1 and google_search_possibility_total_count > 1 %}
+            <a href="{% url 'candidate:candidate_edit' candidate.id %}?show_all_google_search_users=1#google_search_users_for_candidate_table">Show more Google search users</a>
+        {% elif google_search_possibility_list|length > 1 %}
+            <a href="{% url 'candidate:candidate_edit' candidate.id %}?show_all_google_search_users=0">Show fewer Google search users</a>
+        {% endif %}
+    {% endif %}
+    </div>
+</div>
+    {% endif %}
+
+<div class="row form-group">
+    <label for="candidate_withdrawal_date_id" class="pl-4 control-label  d-flex align-items-center">Candidate Has Withdrawn From Election</label>
+    <div class="col">
         <span style="float: left; padding: 8px 10px 0 0;">
             <input type="radio" name="withdrawn_from_election" value="True"
                 {% if candidate.withdrawn_from_election %} checked {% endif %}
@@ -364,80 +411,24 @@ th, td {
     </div>
 </div>
 
-<div class="form-group">
-    <label for="google_civic_candidate_name_id" class="col-sm-3 control-label">Candidate Name1 (for Google Civic matching)</label>
-    <div class="col-sm-8">
-        <input type="text" name="google_civic_candidate_name" id="google_civic_candidate_name_id" class="form-control"
-               value="{% if candidate %}{{ candidate.google_civic_candidate_name|default_if_none:"" }}{% else %}{{ google_civic_candidate_name|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
+{% include "../form_inputs/three_form_groups_stacked.html" with field_dict_1=google_civic_candidate_name_dict field_dict_2=google_civic_candidate_name2_dict field_dict_3=google_civic_candidate_name3_dict %}
 
-<div class="form-group">
-    <label for="google_civic_candidate_name2_id" class="col-sm-3 control-label">Candidate Name2 (for Google Civic matching)</label>
-    <div class="col-sm-8">
-        <input type="text" name="google_civic_candidate_name2" id="google_civic_candidate_name2_id" class="form-control"
-               value="{% if candidate %}{{ candidate.google_civic_candidate_name2|default_if_none:"" }}{% else %}{{ google_civic_candidate_name2|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
+{% include "../form_inputs/three_form_groups.html" with field_dict_1=ballotpedia_candidate_name_dict field_dict_2=state_code_dict field_dict_3=party_dict %}
 
-<div class="form-group">
-    <label for="google_civic_candidate_name3_id" class="col-sm-3 control-label">Candidate Name3 (for Google Civic matching)</label>
-    <div class="col-sm-8">
-        <input type="text" name="google_civic_candidate_name3" id="google_civic_candidate_name3_id" class="form-control"
-               value="{% if candidate %}{{ candidate.google_civic_candidate_name3|default_if_none:"" }}{% else %}{{ google_civic_candidate_name3|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="ballotpedia_candidate_name_id" class="col-sm-3 control-label">Candidate Name (from Ballotpedia)</label>
-    <div class="col-sm-8">
-        <input type="text" name="ballotpedia_candidate_name" id="ballotpedia_candidate_name_id" class="form-control"
-               value="{% if candidate %}{{ candidate.ballotpedia_candidate_name|default_if_none:"" }}{% else %}{{ ballotpedia_candidate_name|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="state_code_id" class="col-sm-3 control-label">Candidate State Code</label>
-    <div class="col-sm-8">
-        <input type="text" name="state_code" id="state_code_id" class="form-control"
-               value="{% if candidate %}{{ candidate.state_code|default_if_none:"" }}{% else %}{{ state_code|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="party_id" class="col-sm-3 control-label">Candidate Party</label>
-    <div class="col-sm-8">
-        <input type="text" name="party" id="party_id" class="form-control"
-               value="{% if candidate %}{{ candidate.party|default_if_none:"" }}{% else %}{{ party|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="vote_usa_politician_id_id" class="col-sm-3 control-label">Vote USA Politician Id</label>
-    <div class="col-sm-8">
-        <input type="text" name="vote_usa_politician_id" id="vote_usa_politician_id_id" class="form-control"
-               value="{% if candidate %}{{ candidate.vote_usa_politician_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="vote_usa_office_id_id" class="col-sm-3 control-label">Vote USA Office Id</label>
-    <div class="col-sm-8">
-        <input type="text" name="vote_usa_office_id" id="vote_usa_office_id_id" class="form-control"
-               value="{% if candidate %}{{ candidate.vote_usa_office_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
+{% include "../form_inputs/two_form_groups.html" with field_dict_1=vote_usa_politician_dict field_dict_2=vote_usa_office_dict %}
 
 <a name="twitter_link_possibility_list" />
 
-<div class="form-group">
-    <label for="candidate_twitter_handle_id" class="col-sm-3 control-label">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="candidate_twitter_handle_id" class="pl-4 control-label">
         {% if candidate.we_vote_hosted_profile_twitter_image_url_tiny %}
             <img src='{{ candidate.we_vote_hosted_profile_twitter_image_url_tiny }}' />
         {% endif %}
         Twitter Handle
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="candidate_twitter_handle" id="candidate_twitter_handle_id" class="form-control"
                value="{% if candidate %}{{ candidate.candidate_twitter_handle|default_if_none:"" }}{% else %}{{ candidate_twitter_handle|default_if_none:"" }}{% endif %}" />
     {% if candidate.candidate_twitter_handle %}
@@ -454,10 +445,11 @@ th, td {
         Twitter Followers: {{ candidate.twitter_followers_count|intcomma }}<br />
     {% endif %}
     {% if candidate.twitter_url %}Twitter URL (from Google Civic): {{ candidate.twitter_url }}{% endif %}
-    {% if candidate %}
-    (<a href="{% url 'import_export_twitter:retrieve_possible_twitter_handles' candidate.we_vote_id %}">retrieve possible Twitter handles</a>)
-    (<a href="{% url 'import_export_twitter:delete_possible_twitter_handles' candidate.we_vote_id %}">delete possible Twitter handles</a>)
-    {% endif %}
+{# Dale 2024-02-03 Turned off because Twitter Search API is too expensive #}
+{#    {% if candidate %}#}
+{#    (<a href="{% url 'import_export_twitter:retrieve_possible_twitter_handles' candidate.we_vote_id %}">retrieve possible Twitter handles</a>)#}
+{#    (<a href="{% url 'import_export_twitter:delete_possible_twitter_handles' candidate.we_vote_id %}">delete possible Twitter handles</a>)#}
+{#    {% endif %}#}
     {% if twitter_link_possibility_list %}
     <div class="form-group pull-right">
         <label for="which_marking_id" class="control-label">
@@ -476,7 +468,7 @@ th, td {
             <th>score</th>
             <th></th>
             <th>name</th>
-            <th>screen_name</th>
+            <th>username</th>
             <th>location / utc_offset</th>
             <th>followers count</th>
             <th>description</th>
@@ -528,10 +520,12 @@ th, td {
     {% endif %}
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="candidate_twitter_handle2_id" class="col-sm-3 control-label">Twitter Handle 2</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="candidate_twitter_handle2_id" class="control-label">Twitter Handle 2</label>
+    <div class="col">
         <input type="text" name="candidate_twitter_handle2" id="candidate_twitter_handle2_id" class="form-control"
                value="{% if candidate %}{{ candidate.candidate_twitter_handle2|default_if_none:"" }}{% else %}{{ candidate_twitter_handle2|default_if_none:"" }}{% endif %}" />
     {% if candidate.candidate_twitter_handle2 %}
@@ -544,10 +538,12 @@ th, td {
     {% endif %}
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="candidate_twitter_handle3_id" class="col-sm-3 control-label">Twitter Handle 3</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="candidate_twitter_handle3_id" class="control-label">Twitter Handle 3</label>
+    <div class="col">
         <input type="text" name="candidate_twitter_handle3" id="candidate_twitter_handle3_id" class="form-control"
                value="{% if candidate %}{{ candidate.candidate_twitter_handle3|default_if_none:"" }}{% else %}{{ candidate_twitter_handle3|default_if_none:"" }}{% endif %}" />
     {% if candidate.candidate_twitter_handle3 %}
@@ -557,60 +553,51 @@ th, td {
     {% endif %}
     </div>
 </div>
-
-    {% if candidate %}
-<div class="form-group">
-    <label for="google_search_image_file_id" class="col-sm-3 control-label">Google Search</label>
-    <div class="col-sm-8">
-        (<a href="{% url 'google_custom_search:retrieve_possible_google_search_users' candidate.we_vote_id %}">retrieve possible google search users</a>)
-        (<a href="{% url 'google_custom_search:delete_possible_google_search_users' candidate.we_vote_id %}">delete possible google search users</a>)
-        (<a href="{% url 'google_custom_search:bulk_possible_google_search_users_do_not_match' candidate.we_vote_id %}">these possible candidates don't match</a>)
-    {% if google_search_possibility_list %}
-        {% include "candidate/google_search_users_for_candidate_table.html" with candidate=candidate google_search_possibility_list=google_search_possibility_list %}
-        {% if google_search_possibility_list|length == 1 and google_search_possibility_total_count > 1 %}
-            <a href="{% url 'candidate:candidate_edit' candidate.id %}?show_all_google_search_users=1">Show more Google search users</a>
-        {% elif google_search_possibility_list|length > 1 %}
-            <a href="{% url 'candidate:candidate_edit' candidate.id %}?show_all_google_search_users=0">Show fewer Google search users</a>
-        {% endif %}
-    {% endif %}
-    </div>
 </div>
-    {% endif %}
+</div>
 
-<div class="form-group">
-    <label for="candidate_url_id" class="col-sm-3 control-label">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="candidate_url_id" class="pl-4 control-label">
         Candidate Website
         {% if candidate.candidate_url %}
         <a href="{{ candidate.candidate_url }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="candidate_url" id="candidate_url_id" class="form-control"
                value="{% if candidate %}{{ candidate.candidate_url|default_if_none:"" }}{% else %}{{ candidate_url|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="candidate_contact_form_url_id" class="col-sm-3 control-label">
+<div class="col">
+<div class="row form-group">
+    <label for="candidate_contact_form_url_id" class="control-label">
         Candidate Contact Form
         {% if candidate.candidate_contact_form_url %}
         <a href="{{ candidate.candidate_contact_form_url }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="candidate_contact_form_url" id="candidate_contact_form_url_id" class="form-control"
                value="{% if candidate %}{{ candidate.candidate_contact_form_url|default_if_none:"" }}{% else %}{{ candidate_contact_form_url|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
+</div>
 
-<div class="form-group">
-    <label for="facebook_url_id" class="col-sm-3 control-label">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="facebook_url_id" class="pl-4 control-label">
         Facebook URL
         {% if candidate.facebook_url %}
         <a href="{{ candidate.facebook_url }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="facebook_url" id="facebook_url_id" class="form-control"
                value="{% if candidate %}{{ candidate.facebook_url|default_if_none:"" }}{% else %}{{ facebook_url|default_if_none:"" }}{% endif %}" />
       {% if candidate.facebook_url %}
@@ -627,69 +614,57 @@ th, td {
       {% endif %}
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="instagram_handle_id" class="col-sm-3 control-label">
+<div class="col">
+<div class="row form-group">
+    <label for="instagram_handle_id" class="control-label">
         Instagram Handle
         {% if candidate.instagram_handle %}
         <a href="https://www.instagram.com/{{ candidate.instagram_handle }}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
         {% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="instagram_handle" id="instagram_handle_id" class="form-control"
                value="{% if candidate %}{{ candidate.instagram_handle|default_if_none:"" }}{% else %}{{ instagram_handle|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
-
-<div class="form-group">
-    <label for="linkedin_url_id" class="col-sm-3 control-label">LinkedIn URL</label>
-    <div class="col-sm-8">
-        <input type="text" name="linkedin_url" id="linkedin_url_id" class="form-control"
-               value="{% if candidate %}{{ candidate.linkedin_url|default_if_none:"" }}{% else %}{{ linkedin_url|default_if_none:"" }}{% endif %}" />
-    </div>
+</div>
 </div>
 
-<div class="form-group">
-    <label for="candidate_email_id" class="col-sm-3 control-label">Candidate Email</label>
-    <div class="col-sm-8">
-        <input type="text" name="candidate_email" id="candidate_email_id" class="form-control"
-               value="{% if candidate %}{{ candidate.candidate_email|default_if_none:"" }}{% else %}{{ candidate_email|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
+{% include "../form_inputs/three_form_groups.html" with field_dict_1=linkedin_url_dict field_dict_2=candidate_email_dict field_dict_3=candidate_phone_dict %}
 
-<div class="form-group">
-    <label for="candidate_phone_id" class="col-sm-3 control-label">Candidate Phone</label>
-    <div class="col-sm-8">
-        <input type="text" name="candidate_phone" id="candidate_phone_id" class="form-control"
-               value="{% if candidate %}{{ candidate.candidate_phone|default_if_none:"" }}{% else %}{{ candidate_phone|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="ballotpedia_candidate_url_id" class="col-sm-3 control-label">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="ballotpedia_candidate_url_id" class="pl-4 control-label">
         Ballotpedia Candidate Page
         {% if candidate and candidate.ballotpedia_candidate_url %}(<a href="{{ candidate.ballotpedia_candidate_url }}" target="_blank">Go</a>){% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="ballotpedia_candidate_url" id="ballotpedia_candidate_url_id" class="form-control"
                value="{% if candidate %}{{ candidate.ballotpedia_candidate_url|default_if_none:"" }}{% else %}{{ ballotpedia_candidate_url|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="wikipedia_url_id" class="col-sm-3 control-label">
+<div class="col">
+<div class="row form-group">
+    <label for="wikipedia_url_id" class="control-label">
         Wikipedia URL
         {% if candidate and candidate.wikipedia_url %}(<a href="{{ candidate.wikipedia_url }}" target="_blank">Go</a>){% endif %}
     </label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="wikipedia_url" id="wikipedia_url_id" class="form-control"
                value="{% if candidate %}{{ candidate.wikipedia_url|default_if_none:"" }}{% else %}{{ wikipedia_url|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
+</div>
 
-<div class="form-group">
-    <label for="ballotpedia_candidate_summary_id" class="col-sm-3 control-label">Ballotpedia Candidate Summary</label>
-    <div class="col-sm-8">
+<div class="row form-group">
+    <label for="ballotpedia_candidate_summary_id" class="pl-4 control-label">Ballotpedia Candidate Summary</label>
+    <div class="col">
         <textarea name="ballotpedia_candidate_summary"
                   class="form-control animated"
                   id="ballotpedia_candidate_summary_id"
@@ -697,9 +672,9 @@ th, td {
     </div>
 </div>
 
-<div class="form-group">
-    <label for="ballot_guide_official_statement_id" class="col-sm-3 control-label">Official Candidate Statement</label>
-    <div class="col-sm-8">
+<div class="row form-group">
+    <label for="ballot_guide_official_statement_id" class="pl-4 control-label">Official Candidate Statement</label>
+    <div class="col">
         <textarea name="ballot_guide_official_statement"
                   class="form-control animated"
                   id="ballot_guide_official_statement_id"
@@ -707,56 +682,32 @@ th, td {
     </div>
 </div>
 
-<div class="form-group">
-    <label for="ballotpedia_race_id_id" class="col-sm-3 control-label">Ballotpedia Race Id</label>
-    <div class="col-sm-8">
-        <input type="text" name="ballotpedia_race_id" id="ballotpedia_race_id_id" class="form-control"
-               value="{% if candidate %}{{ candidate.ballotpedia_race_id|default_if_none:"" }}{% else %}{{ ballotpedia_race_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
+{% include "../form_inputs/four_form_groups.html" with field_dict_1=ballotpedia_race_id_dict field_dict_2=ballotpedia_office_id_dict field_dict_3=ballotpedia_candidate_id_dict field_dict_4=ballotpedia_person_id_dict %}
 
-<div class="form-group">
-    <label for="ballotpedia_office_id_id" class="col-sm-3 control-label">Ballotpedia Office Held Id</label>
-    <div class="col-sm-8">
-        <input type="text" name="ballotpedia_office_id" id="ballotpedia_office_id_id" class="form-control"
-               value="{% if candidate %}{{ candidate.ballotpedia_office_id|default_if_none:"" }}{% else %}{{ ballotpedia_office_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="ballotpedia_candidate_id_id" class="col-sm-3 control-label">Ballotpedia Candidate Id</label>
-    <div class="col-sm-8">
-        <input type="text" name="ballotpedia_candidate_id" id="ballotpedia_candidate_id_id" class="form-control"
-               value="{% if candidate %}{{ candidate.ballotpedia_candidate_id|default_if_none:"" }}{% else %}{{ ballotpedia_candidate_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="ballotpedia_person_id_id" class="col-sm-3 control-label">Ballotpedia Person Id</label>
-    <div class="col-sm-8">
-        <input type="text" name="ballotpedia_person_id" id="ballotpedia_person_id_id" class="form-control"
-               value="{% if candidate %}{{ candidate.ballotpedia_person_id|default_if_none:"" }}{% else %}{{ ballotpedia_person_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="photo_url_from_vote_usa_id" class="col-sm-3 control-label">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="photo_url_from_vote_usa_id" class="pl-4 control-label">
         {% if candidate.photo_url_from_vote_usa %}
             <img src='{{ candidate.photo_url_from_vote_usa }}' height="48" />
         {% endif %}
         Vote USA Image</label>
-    <div class="col-sm-8">
+    <div class="col">
         <input type="text" name="photo_url_from_vote_usa" id="photo_url_from_vote_usa_id" class="form-control"
                value="{% if candidate %}{{ candidate.photo_url_from_vote_usa|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="vote_smart_id_id" class="col-sm-3 control-label">Vote Smart Id</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="vote_smart_id_id" class="control-label">Vote Smart Id</label>
+    <div class="col">
         <input type="text" name="vote_smart_id" id="vote_smart_id_id" class="form-control"
                value="{% if candidate %}{{ candidate.vote_smart_id|default_if_none:"" }}{% else %}{{ vote_smart_id|default_if_none:"" }}{% endif %}" />
     </div>
+</div>
+</div>
 </div>
 
 {#<div class="form-group">#}
@@ -767,11 +718,20 @@ th, td {
 {#    </div>#}
 {#</div>#}
 
-<div class="form-group">
-    <label for="youtube_url_id" class="col-sm-3 control-label">YouTube URL</label>
-    <div class="col-sm-8">
-        <input type="text" name="youtube_url" id="youtube_url_id" class="form-control"
-               value="{% if candidate %}{{ candidate.youtube_url|default_if_none:"" }}{% else %}{{ youtube_url|default_if_none:"" }}{% endif %}" />
+{% include "../form_inputs/one_form_group.html" with field_dict_1=youtube_url_dict %}
+
+<div class="row form-group">
+    <label for="analysis_comment_id" class="pl-4 control-label">
+        Candidate Analysis
+    </label>
+    <div class="col">
+        <textarea name="candidate_analysis_comment"
+                  class="form-control animated"
+                  id="candidate_analysis_comment_id"
+                  placeholder="Note about candidate..."></textarea>
+        <input type="checkbox" name="candidate_analysis_done" id="candidate_analysis_done_id" value="1"
+                {% if candidate.candidate_analysis_done %}checked{% endif %} />
+        <label for="candidate_analysis_done_id" style="font-weight: normal !important;">Candidate Analysis Complete{% if candidate.candidate_analysis_done %}. <span style="color: darkgray">One of our team has researched this candidate and could not find more information.</span>{% endif %}</label>
     </div>
 </div>
 
@@ -785,6 +745,12 @@ th, td {
 {% endif %}
 <input name="submit_text" type="submit" value="{% if candidate %}Update Candidate{% else %}Save New Candidate{% endif %}" /></p>
 </form>
+{% if change_log_list %}
+    <br />
+<div class="form-group">
+    {% include "candidate/change_log_list.html" with change_log_list=change_log_list %}
+</div>
+{% endif %}
 
 <br />
 {% if candidate %}

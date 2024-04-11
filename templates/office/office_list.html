@@ -178,8 +178,13 @@
                 {% endif %}
             </td>
             <td>
-                <a href="{% url 'office:office_summary' office.id %}">{{ office.office_name }}</a>
+                <a href="{% url 'office:office_summary' office.id %}">
+                    {{ office.office_name }}{% if office.primary_party %}, {{ office.primary_party }} Primary{% endif %}
+                </a>
                 {% if office.district_name %}<br /><span style="color: darkgray">{{ office.district_name|default_if_none:"" }}</span>{% endif %}
+                {% if office.ballotpedia_race_office_level %}
+                    &nbsp;&nbsp;<span style="color: darkgray">({{office.ballotpedia_race_office_level}})</span>
+                {% endif %}
                 {% if office.is_battleground_race %}<br /><strong>Battleground</strong>{% endif %}
             </td>
           {% if google_civic_election_id == 0 %}

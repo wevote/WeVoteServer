@@ -61,7 +61,8 @@ class VoteSmartApiCounterMonthlySummary(models.Model):
 # noinspection PyBroadException
 class VoteSmartApiCounterManager(models.Manager):
 
-    def create_counter_entry(self, kind_of_action, google_civic_election_id=0):
+    @staticmethod
+    def create_counter_entry(kind_of_action, google_civic_election_id=0):
         """
         Create an entry that records that a call to the Vote Smart Api was made.
         """
@@ -85,7 +86,8 @@ class VoteSmartApiCounterManager(models.Manager):
         }
         return results
 
-    def retrieve_daily_summaries(self, kind_of_action='', google_civic_election_id=0, days_to_display=30):
+    @staticmethod
+    def retrieve_daily_summaries(kind_of_action='', google_civic_election_id=0, days_to_display=30):
         # Start with today and cycle backwards in time
         daily_summaries = []
         day_on_stage = date.today()  # TODO: We need to work out the timezone questions
@@ -128,18 +130,21 @@ class VoteSmartApiCounterManager(models.Manager):
 
 class VoteSmartCandidateManager(models.Manager):
 
-    def __unicode__(self):
+    @staticmethod
+    def __unicode__():
         return "VoteSmartCandidateManager"
 
     def retrieve_candidate_from_vote_smart_id(self, vote_smart_candidate_id):
         return self.retrieve_vote_smart_candidate(vote_smart_candidate_id)
 
-    def retrieve_vote_smart_candidate_from_we_vote_id(self, we_vote_id):
+    @staticmethod
+    def retrieve_vote_smart_candidate_from_we_vote_id(we_vote_id):
         vote_smart_candidate_id = 0
         vote_smart_candidate_manager = VoteSmartCandidateManager()
         return vote_smart_candidate_manager.retrieve_vote_smart_candidate(vote_smart_candidate_id, we_vote_id)
 
-    def fetch_vote_smart_candidate_id_from_we_vote_id(self, we_vote_id):
+    @staticmethod
+    def fetch_vote_smart_candidate_id_from_we_vote_id(we_vote_id):
         vote_smart_candidate_id = 0
         vote_smart_candidate_manager = VoteSmartCandidateManager()
         results = vote_smart_candidate_manager.retrieve_vote_smart_candidate(vote_smart_candidate_id, we_vote_id)
@@ -164,7 +169,8 @@ class VoteSmartCandidateManager(models.Manager):
     #         vote_smart_candidate_id, first_name, last_name, state_code)
     #     return results
 
-    def retrieve_vote_smart_candidate_from_name_components(self, first_name=None, last_name=None, state_code=None):
+    @staticmethod
+    def retrieve_vote_smart_candidate_from_name_components(first_name=None, last_name=None, state_code=None):
         vote_smart_candidate_id = 0
         vote_smart_candidate_manager = VoteSmartCandidateManager()
 
@@ -172,9 +178,13 @@ class VoteSmartCandidateManager(models.Manager):
             vote_smart_candidate_id, first_name, last_name, state_code)
         return results
 
+    @staticmethod
     # NOTE: searching by all other variables seems to return a list of objects
     def retrieve_vote_smart_candidate(
-            self, vote_smart_candidate_id=None, first_name=None, last_name=None, state_code=None):
+            vote_smart_candidate_id=None,
+            first_name=None,
+            last_name=None,
+            state_code=None):
         """
         We want to return one and only one candidate
         :param vote_smart_candidate_id:
@@ -234,7 +244,8 @@ class VoteSmartCandidateManager(models.Manager):
         }
         return results
 
-    def retrieve_vote_smart_candidate_bio(self, vote_smart_candidate_id):
+    @staticmethod
+    def retrieve_vote_smart_candidate_bio(vote_smart_candidate_id):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -435,18 +446,21 @@ def vote_smart_candidate_bio_object_filter(one_candidate_bio):
 
 class VoteSmartOfficialManager(models.Manager):
 
-    def __unicode__(self):
+    @staticmethod
+    def __unicode__():
         return "VoteSmartOfficialManager"
 
     def retrieve_official_from_vote_smart_id(self, vote_smart_candidate_id):
         return self.retrieve_vote_smart_official(vote_smart_candidate_id)
 
-    def retrieve_vote_smart_official_from_we_vote_id(self, we_vote_id):
+    @staticmethod
+    def retrieve_vote_smart_official_from_we_vote_id(we_vote_id):
         vote_smart_candidate_id = 0
         vote_smart_official_manager = VoteSmartOfficialManager()
         return vote_smart_official_manager.retrieve_vote_smart_official(vote_smart_candidate_id, we_vote_id)
 
-    def fetch_vote_smart_candidate_id_from_we_vote_id(self, we_vote_id):
+    @staticmethod
+    def fetch_vote_smart_candidate_id_from_we_vote_id(we_vote_id):
         vote_smart_candidate_id = 0
         vote_smart_official_manager = VoteSmartOfficialManager()
         results = vote_smart_official_manager.retrieve_vote_smart_official(vote_smart_candidate_id, we_vote_id)
@@ -471,7 +485,8 @@ class VoteSmartOfficialManager(models.Manager):
     #         vote_smart_candidate_id, first_name, last_name, state_code)
     #     return results
 
-    def retrieve_vote_smart_official_from_name_components(self, first_name=None, last_name=None, state_code=None):
+    @staticmethod
+    def retrieve_vote_smart_official_from_name_components(first_name=None, last_name=None, state_code=None):
         vote_smart_candidate_id = 0
         vote_smart_official_manager = VoteSmartOfficialManager()
 
@@ -479,9 +494,13 @@ class VoteSmartOfficialManager(models.Manager):
             vote_smart_candidate_id, first_name, last_name, state_code)
         return results
 
+    @staticmethod
     # NOTE: searching by all other variables seems to return a list of objects
     def retrieve_vote_smart_official(
-            self, vote_smart_candidate_id=None, first_name=None, last_name=None, state_code=None):
+            vote_smart_candidate_id=None,
+            first_name=None,
+            last_name=None,
+            state_code=None):
         """
         We want to return one and only one official
         :param vote_smart_candidate_id:
@@ -588,7 +607,8 @@ def vote_smart_official_object_filter(one_official):
 
 class VoteSmartRatingManager(models.Manager):
 
-    def __unicode__(self):
+    @staticmethod
+    def __unicode__():
         return "VoteSmartRatingManager"
 
     # def retrieve_candidate_from_vote_smart_id(self, vote_smart_candidate_id):
@@ -867,14 +887,16 @@ def vote_smart_special_interest_group_filter(special_interest_group):
 
 class VoteSmartSpecialInterestGroupManager(models.Manager):
 
-    def __unicode__(self):
+    @staticmethod
+    def __unicode__():
         return "VoteSmartSpecialInterestGroupManager"
 
     def fetch_vote_smart_organization_issues_for_display(self, vote_smart_id):
         results = self.retrieve_vote_smart_organization_issues_for_display(vote_smart_id)
         return results['issues_display_string']
 
-    def retrieve_vote_smart_organization_issues_for_display(self, vote_smart_id):
+    @staticmethod
+    def retrieve_vote_smart_organization_issues_for_display(vote_smart_id):
         issue_list_found = False
         success = False
         status = ""
@@ -922,7 +944,8 @@ class VoteSmartSpecialInterestGroupManager(models.Manager):
         }
         return results
 
-    def update_or_create_we_vote_organization(self, vote_smart_special_interest_group_id):
+    @staticmethod
+    def update_or_create_we_vote_organization(vote_smart_special_interest_group_id):
         # See if we can find an existing We Vote organization with vote_smart_special_interest_group_id
         if not positive_value_exists(vote_smart_special_interest_group_id):
             results = {

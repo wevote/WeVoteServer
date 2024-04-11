@@ -10,7 +10,8 @@ from organization.models import CHOSEN_FAVICON_ALLOWED, CHOSEN_FULL_DOMAIN_ALLOW
 
 import wevote_functions.admin
 from voter.models import VoterManager
-from wevote_functions.functions import positive_value_exists, convert_date_to_date_as_integer
+from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions_date import convert_date_to_date_as_integer
 import stripe
 import textwrap
 import time
@@ -336,9 +337,15 @@ class DonationManager(models.Manager):
         return results
 
     @staticmethod
-    def retrieve_or_create_recurring_donation_plan(voter_we_vote_id, we_vote_donation_plan_identifier, donation_amount,
-                                                   is_organization_plan, coupon_code, plan_type_enum,
-                                                   organization_we_vote_id, recurring_interval):
+    def retrieve_or_create_recurring_donation_plan(
+            voter_we_vote_id,
+            we_vote_donation_plan_identifier,
+            donation_amount,
+            is_organization_plan,
+            coupon_code,
+            plan_type_enum,
+            organization_we_vote_id,
+            recurring_interval):
         """
         June 2017, we create these records, but never read them for donations
         August 2019, we read them for organization paid subscriptions
@@ -631,8 +638,17 @@ class DonationManager(models.Manager):
         }
         return saved_results
 
-    def create_recurring_donation(self, stripe_customer_id, voter_we_vote_id, donation_amount, start_date_time, email,
-                                  is_organization_plan, coupon_code, plan_type_enum, organization_we_vote_id):
+    def create_recurring_donation(
+            self,
+            stripe_customer_id,
+            voter_we_vote_id,
+            donation_amount,
+            start_date_time,
+            email,
+            is_organization_plan,
+            coupon_code,
+            plan_type_enum,
+            organization_we_vote_id):
         """
 
         :param stripe_customer_id:
@@ -897,8 +913,13 @@ class DonationManager(models.Manager):
         return results
 
     @staticmethod
-    def retrieve_donation_plan_definition(voter_we_vote_id='', organization_we_vote_id='', is_organization_plan=True,
-                                          plan_type_enum='', donation_plan_is_active=True):
+    def retrieve_donation_plan_definition(
+            voter_we_vote_id='',
+            organization_we_vote_id='',
+            is_organization_plan=True,
+            plan_type_enum='',
+            donation_plan_is_active=True):
+
         donation_plan_definition = None
         donation_plan_definition_found = False
         status = ''
@@ -944,8 +965,11 @@ class DonationManager(models.Manager):
         return results
 
     @staticmethod
-    def retrieve_donation_plan_definition_list(voter_we_vote_id='', organization_we_vote_id='',
-                                               return_json_version=False):
+    def retrieve_donation_plan_definition_list(
+            voter_we_vote_id='',
+            organization_we_vote_id='',
+            return_json_version=False):
+
         donation_plan_definition_list = []
         donation_plan_definition_list_json = []
         status = ''
@@ -1122,8 +1146,11 @@ class DonationManager(models.Manager):
         return results
 
     @staticmethod
-    def mark_donation_journal_canceled_or_ended(stripe_subscription_id, customer_id, subscription_ended_at,
-                                                subscription_canceled_at):
+    def mark_donation_journal_canceled_or_ended(
+            stripe_subscription_id,
+            customer_id,
+            subscription_ended_at,
+            subscription_canceled_at):
         """
 
         :param stripe_subscription_id:
@@ -1365,7 +1392,8 @@ class DonationManager(models.Manager):
 
     @staticmethod
     def move_donation_journal_entries_from_organization_to_organization(
-            from_organization_we_vote_id, to_organization_we_vote_id):
+            from_organization_we_vote_id,
+            to_organization_we_vote_id):
         """
 
         :param from_organization_we_vote_id:
@@ -1415,7 +1443,8 @@ class DonationManager(models.Manager):
 
     @staticmethod
     def move_donation_plan_definition_entries_from_organization_to_organization(
-            from_organization_we_vote_id, to_organization_we_vote_id):
+            from_organization_we_vote_id,
+            to_organization_we_vote_id):
         """
 
         :param from_organization_we_vote_id:

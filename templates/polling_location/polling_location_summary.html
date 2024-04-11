@@ -74,9 +74,16 @@
             Ballotpedia: Retrieve Ballot Items for this Map Point <span class="glyphicon glyphicon-new-window"></span></a></li>
     {% endif %}
     {% if election.use_ctcl_as_data_source or use_ctcl_as_data_source_override %}
-        <li>Prepare: <a href="{% url 'import_export_batches:import_ballot_items_for_location' %}?use_ctcl=1&google_civic_election_id={{ google_civic_election_id }}&polling_location_we_vote_id={{ polling_location.we_vote_id }}&state_code={{ polling_location.state|default_if_none:"" }}"
-                        target="_blank" >
-            CTCL: Retrieve Ballot Items for this Map Point <span class="glyphicon glyphicon-new-window"></span></a></li>
+        <li>
+            Prepare:
+            <a href="{{ ctcl_retrieve_ballot_api_url }}" target="_blank">Preview CTCL Ballot-Retrieve API response</a>,
+            {% if ctcl_retrieve_ballot_api_url2 %}<a href="{{ ctcl_retrieve_ballot_api_url2 }}" target="_blank">link 2</a>,{% endif %}
+            {% if ctcl_retrieve_ballot_api_url3 %}<a href="{{ ctcl_retrieve_ballot_api_url3 }}" target="_blank">link 3</a>,{% endif %}
+            <a href="{% url 'import_export_batches:import_ballot_items_for_location' %}?use_ctcl=1&google_civic_election_id={{ google_civic_election_id }}&polling_location_we_vote_id={{ polling_location.we_vote_id }}&state_code={{ polling_location.state|default_if_none:"" }}"
+               target="_blank" >
+                CTCL: Retrieve Ballot Items for this Map Point <span class="glyphicon glyphicon-new-window"></span>
+            </a>
+        </li>
     {% endif %}
     {% if election.use_vote_usa_as_data_source %}
         <li>Prepare: <a href="{% url 'import_export_batches:import_ballot_items_for_location' %}?use_vote_usa=1&google_civic_election_id={{ google_civic_election_id }}&polling_location_we_vote_id={{ polling_location.we_vote_id }}&state_code={{ polling_location.state|default_if_none:"" }}"

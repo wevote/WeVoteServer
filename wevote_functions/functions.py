@@ -484,17 +484,6 @@ def is_ordinal_number(incoming_integer):
     return False
 
 
-def generate_date_as_integer():
-    # We want to store the day as an integer for extremely quick database indexing and lookup
-    datetime_now = localtime(now()).date()  # We Vote uses Pacific Time for TIME_ZONE
-    day_as_string = "{:d}{:02d}{:02d}".format(
-        datetime_now.year,
-        datetime_now.month,
-        datetime_now.day,
-    )
-    return convert_to_int(day_as_string)
-
-
 def generate_office_equivalent_district_phrase_pairs():
     district_numbers_in_chosen_order = []
     district_number = 200
@@ -803,49 +792,6 @@ def convert_to_political_party_constant(raw_party_incoming):
         return WORKING_FAMILIES
     else:
         return raw_party_incoming
-
-
-def convert_date_to_date_as_integer(date):
-    day_as_string = "{:d}{:02d}{:02d}".format(
-        date.year,
-        date.month,
-        date.day,
-    )
-    return convert_to_int(day_as_string)
-
-
-def convert_date_as_integer_to_date(date_as_integer):
-    date_as_string = convert_to_str(date_as_integer)
-    date = datetime.datetime.strptime(date_as_string, '%Y%m%d')
-    return date
-
-
-def convert_date_to_we_vote_date_string(date):
-    day_as_string = "{:d}-{:02d}-{:02d}".format(
-        date.year,
-        date.month,
-        date.day,
-    )
-    return day_as_string
-
-
-def convert_we_vote_date_string_to_date(we_vote_date_string):
-    date_as_string = convert_to_str(we_vote_date_string)
-    date = datetime.datetime.strptime(date_as_string, '%Y-%m-%d')
-    return date
-
-
-def convert_we_vote_date_string_to_date_as_integer(we_vote_date_string):
-    if positive_value_exists(we_vote_date_string):
-        try:
-            date_as_string = convert_to_str(we_vote_date_string)
-            date_as_string = date_as_string.replace("-", "")
-            date_as_integer = convert_to_int(date_as_string)
-            return date_as_integer
-        except Exception as e:
-            return 0
-    else:
-        return 0
 
 
 def digit_count(number):
@@ -1398,17 +1344,14 @@ def extract_twitter_handle_from_text_string(twitter_text_string):
         return ""
     twitter_text_string = str(twitter_text_string)
     twitter_text_string.strip()
-    twitter_text_string = twitter_text_string.lower()
-    twitter_text_string = twitter_text_string.replace("http://twitter.com", "")
-    twitter_text_string = twitter_text_string.replace("http://www.twitter.com", "")
-    twitter_text_string = twitter_text_string.replace("http://m.twitter.com", "")
-    twitter_text_string = twitter_text_string.replace("https://twitter.com", "")
-    twitter_text_string = twitter_text_string.replace("https://m.twitter.com", "")
-    twitter_text_string = twitter_text_string.replace("https://www.twitter.com", "")
-    twitter_text_string = twitter_text_string.replace("/www.twitter.com", "")
-    twitter_text_string = twitter_text_string.replace("www.twitter.com", "")
-    twitter_text_string = twitter_text_string.replace("twitter.com", "")
-    twitter_text_string = twitter_text_string.replace("@", "")
+    strings_to_be_removed_from_url = [
+        "http://twitter.com","http://www.twitter.com", "http://m.twitter.com", "https://twitter.com",
+        "https://m.twitter.com", "https://www.twitter.com", "/www.twitter.com", "www.twitter.com",
+        "twitter.com", "@"
+    ]
+    for string_to_be_removed in strings_to_be_removed_from_url:
+        twitter_text_string = re.compile(re.escape(string_to_be_removed), re.IGNORECASE).sub("", twitter_text_string)
+    twitter_text_string = str(twitter_text_string)
     while twitter_text_string.find('/') == 0 or \
             twitter_text_string.find('#') == 0 or \
             twitter_text_string.find('!') == 0:
@@ -1416,7 +1359,22 @@ def extract_twitter_handle_from_text_string(twitter_text_string):
     if twitter_text_string.find('/') > 0:
         twitter_text_string = twitter_text_string.split("/", 1)[0]  # Remove everything after first "/" (including "/")
     twitter_text_string = twitter_text_string.split("?", 1)[0]  # Remove everything after first "?" (including "?")
+
     return twitter_text_string
+
+
+def is_candidate_we_vote_id(candidate_we_vote_id):
+    if not positive_value_exists(candidate_we_vote_id):
+        return False
+    pattern = re.compile(r'^(wv[\w]{2}cand[\w]+)$')
+    return pattern.match(candidate_we_vote_id)
+
+
+def is_politician_we_vote_id(politician_we_vote_id):
+    if not positive_value_exists(politician_we_vote_id):
+        return False
+    pattern = re.compile(r'^(wv[\w]{2}pol[\w]+)$')
+    return pattern.match(politician_we_vote_id)
 
 
 def is_url_valid(url_to_test):
@@ -1756,11 +1714,15 @@ def process_request_from_master(request, message_text, get_url, get_params):
     :param get_params:
     :return: structured_json and import_results
     """
-    if 'google_civic_election_id' in get_params:
-        message_text += " for google_civic_election_id " + str(get_params['google_civic_election_id'])
-    messages.add_message(request, messages.INFO, message_text)
-    logger.info(message_text)
-    print("process_request_from_master: " + message_text)  # Please don't remove this line
+    status_message = ""
+    try:
+        if 'google_civic_election_id' in get_params:
+            message_text += " for google_civic_election_id " + str(get_params['google_civic_election_id'])
+        messages.add_message(request, messages.INFO, message_text)
+        logger.info(message_text)
+        print("process_request_from_master: " + message_text)  # Please don't remove this line
+    except Exception as e:
+        status_message += "ERROR_PRINTING_MESSAGE_TEXT: " + str(e) + " "
 
     response = requests.get(get_url, params=get_params)
 
@@ -1777,12 +1739,12 @@ def process_request_from_master(request, message_text, get_url, get_params):
         }
 
     if 'google_civic_election_id' in get_params:
-        status_message = "... the master server returned " + str(len(structured_json)) + " items.  Election " \
+        status_message += "... the master server returned " + str(len(structured_json)) + " items.  Election " \
                                  + str(get_params['google_civic_election_id'])  # Please don't remove this line
         print(status_message)
     else:
         # Please don't remove this line
-        status_message = "... the master server returned " + str(len(structured_json)) + " items."
+        status_message += "... the master server returned " + str(len(structured_json)) + " items."
         print(status_message)
 
     return import_results, structured_json

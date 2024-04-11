@@ -18,8 +18,8 @@ from polling_location.models import KIND_OF_LOG_ENTRY_ADDRESS_PARSE_ERROR, \
     KIND_OF_LOG_ENTRY_NO_BALLOT_JSON, PollingLocationManager
 import requests
 import wevote_functions.admin
-from wevote_functions.functions import convert_we_vote_date_string_to_date, extract_state_code_from_address_string, \
-    positive_value_exists
+from wevote_functions.functions import extract_state_code_from_address_string, positive_value_exists
+from wevote_functions.functions_date import convert_we_vote_date_string_to_date
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -308,28 +308,13 @@ def retrieve_ctcl_ballot_items_for_one_voter_api(
     status = ""
     batch_header_id = 0
 
-    still_in_development = True
-    if still_in_development:
-        status += "RETRIEVE_STILL_IN_DEVELOPMENT "
-        results = {
-            'success': False,
-            'status': status,
-            'batch_header_id':  batch_header_id,
-            'existing_offices_by_election_dict': existing_offices_by_election_dict,
-            'existing_candidate_objects_dict': existing_candidate_objects_dict,
-            'existing_candidate_to_office_links_dict': existing_candidate_to_office_links_dict,
-            'existing_measure_objects_dict': existing_measure_objects_dict,
-            'new_office_we_vote_ids_list': new_office_we_vote_ids_list,
-            'new_candidate_we_vote_ids_list': new_candidate_we_vote_ids_list,
-            'new_measure_we_vote_ids_list': new_measure_we_vote_ids_list,
-        }
-        return results
-
     if not positive_value_exists(google_civic_election_id) or not positive_value_exists(ctcl_election_uuid):
         status += "Error-CTCL: Missing election id or ctcl_election_uuid"
         results = {
             'success': False,
             'status': status,
+            'ballot_returned':  ballot_returned,
+            'ballot_returned_found':  False,
             'batch_header_id':  batch_header_id,
             'existing_offices_by_election_dict': existing_offices_by_election_dict,
             'existing_candidate_objects_dict': existing_candidate_objects_dict,
@@ -343,12 +328,13 @@ def retrieve_ctcl_ballot_items_for_one_voter_api(
 
     ballot_returned_error = False
     voter_id = 0
-    if not ballot_returned:
+    if ballot_returned:
+        voter_id = ballot_returned.voter_id
+    else:
         ballot_returned_error = True
         status += "Error-CTCL: Missing ballot_returned object"
 
     if not ballot_returned.voter_id:
-        voter_id = ballot_returned.voter_id
         ballot_returned_error = True
         status += "Error-CTCL: Missing ballot_returned.voter_id"
 
@@ -360,6 +346,8 @@ def retrieve_ctcl_ballot_items_for_one_voter_api(
         results = {
             'success': False,
             'status': status,
+            'ballot_returned':  ballot_returned,
+            'ballot_returned_found':  False,
             'batch_header_id':  batch_header_id,
             'existing_offices_by_election_dict': existing_offices_by_election_dict,
             'existing_candidate_objects_dict': existing_candidate_objects_dict,
@@ -371,21 +359,7 @@ def retrieve_ctcl_ballot_items_for_one_voter_api(
         }
         return results
 
-    # Create rules
-    if 'create_offices' not in update_or_create_rules:
-        update_or_create_rules['create_offices'] = True
-    if 'create_candidates' not in update_or_create_rules:
-        update_or_create_rules['create_candidates'] = True
-    if 'create_measures' not in update_or_create_rules:
-        update_or_create_rules['create_measures'] = True
-    # Update rules
-    if 'update_offices' not in update_or_create_rules:
-        update_or_create_rules['update_offices'] = False
-    if 'update_candidates' not in update_or_create_rules:
-        update_or_create_rules['update_candidates'] = False
-    if 'update_measures' not in update_or_create_rules:
-        update_or_create_rules['update_measures'] = False
-
+    ballot_returned_found = False
     text_for_map_search = ''
     if ballot_returned:
         text_for_map_search = ballot_returned.text_for_map_search
@@ -404,11 +378,19 @@ def retrieve_ctcl_ballot_items_for_one_voter_api(
             state_code = ballot_returned.state_code
 
     if not positive_value_exists(text_for_map_search):
-        success = False
         status += "MISSING_TEXT_FOR_MAP_SEARCH "
+        success = False
+
+    if not positive_value_exists(CTCL_VOTER_INFO_URL):
+        status += 'NO_CTCL_VOTER_INFO_URL_URL '
+        success = False
+
+    if not success:
         results = {
             'success': success,
             'status': status,
+            'ballot_returned':  ballot_returned,
+            'ballot_returned_found':  False,
             'batch_header_id': batch_header_id,
             'existing_offices_by_election_dict': existing_offices_by_election_dict,
             'existing_candidate_objects_dict': existing_candidate_objects_dict,
@@ -432,13 +414,29 @@ def retrieve_ctcl_ballot_items_for_one_voter_api(
                 "address": text_for_map_search,
             })
         one_ballot_json = json.loads(response.text)
+    except Exception as e:
+        one_ballot_json = {}
+        success = False
+        status += 'CTCL_API_END_POINT_CRASH: ' + str(e) + ' '
 
-        # Use Ballotpedia API call counter to track the number of queries we are doing each day
-        ballotpedia_api_counter_manager = CTCLApiCounterManager()
-        ballotpedia_api_counter_manager.create_counter_entry(
+    try:
+        # Use CTCL API call counter to track the number of queries we are doing each day
+        api_counter_manager = CTCLApiCounterManager()
+        api_counter_manager.create_counter_entry(
             CTCL_API_VOTER_INFO_QUERY_TYPE,
             google_civic_election_id=google_civic_election_id)
+    except Exception as e:
+        status += 'COULD_NOT_STORE_METRICS_FOR_CTCL_API:' + str(e) + ''
 
+    try:
+        update_or_create_rules = {
+            'create_candidates': True,
+            'create_offices': True,
+            'create_measures': True,
+            'update_candidates': False,
+            'update_offices': False,
+            'update_measures': False,
+        }
         groom_results = groom_and_store_google_civic_ballot_json_2021(
             one_ballot_json,
             google_civic_election_id=google_civic_election_id,
@@ -472,32 +470,29 @@ def retrieve_ctcl_ballot_items_for_one_voter_api(
                 polling_location_we_vote_id='',
                 voter_id=voter_id,
                 google_civic_election_id=google_civic_election_id,
-                # latitude=polling_location.latitude,
-                # longitude=polling_location.longitude,
                 text_for_map_search=text_for_map_search,
-                # TODO: Update these
-                # normalized_city=polling_location.city,
-                # normalized_state=polling_location.state,
-                # normalized_zip=polling_location.zip_long,
             )
             status += results['status']
             if results['ballot_returned_found']:
                 status += "UPDATE_OR_CREATE_BALLOT_RETURNED1-SUCCESS "
-                # ballot_returned = results['ballot_returned']
-                # ballot_returned_found = True
+                ballot_returned = results['ballot_returned']
+                ballot_returned_found = True
             else:
+                ballot_returned_found = False
                 status += "UPDATE_OR_CREATE_BALLOT_RETURNED1-BALLOT_RETURNED_FOUND-FALSE "
-            results = store_ctcl_json_response_to_import_batch_system(
-                modified_json_list=ballot_item_dict_list,
+
+            from import_export_google_civic.controllers import store_ballot_item_dict_list
+            results = store_ballot_item_dict_list(
+                ballot_item_dict_list=ballot_item_dict_list,
                 google_civic_election_id=google_civic_election_id,
-                kind_of_batch='IMPORT_BALLOT_ITEM',
-                batch_set_id=batch_set_id,
-                state_code=state_code)
-            status += results['status']
-            batch_header_id = results['batch_header_id']
+                voter_id=voter_id,
+                state_code=state_code
+            )
+            if not results['success']:
+                status += results['status']
         else:
-            # We need to at least to mark the BallotReturned entry with a new date_last_updated date so
-            #  we can more on to other ballot returned entries.
+            # We need to mark the BallotReturned entry with a new date_last_updated date,
+            #  so we can move on to other ballot returned entries.
             status += "NO_INCOMING_BALLOT_ITEMS_FOUND_CTCL_ONE_VOTER "
     except Exception as e:
         success = False
@@ -505,16 +500,31 @@ def retrieve_ctcl_ballot_items_for_one_voter_api(
         handle_exception(e, logger=logger, exception_message=status)
 
     results = {
-        'success': success,
-        'status': status,
         'batch_header_id': batch_header_id,
+        'ballot_location_display_name': "",
+        'ballot_location_shortcut': "",
+        'ballot_returned': ballot_returned,
+        'ballot_returned_found': ballot_returned_found,
+        # 'ballot_returned_we_vote_id': ballot_returned_we_vote_id,
+        'election_day_text': election_day_text,
+        'election_description_text': "",
+        # 'election_data_retrieved': bool(ballot_items_count),
         'existing_offices_by_election_dict': existing_offices_by_election_dict,
         'existing_candidate_objects_dict': existing_candidate_objects_dict,
         'existing_candidate_to_office_links_dict': existing_candidate_to_office_links_dict,
         'existing_measure_objects_dict': existing_measure_objects_dict,
+        'google_civic_election_id': google_civic_election_id,
         'new_office_we_vote_ids_list': new_office_we_vote_ids_list,
         'new_candidate_we_vote_ids_list': new_candidate_we_vote_ids_list,
         'new_measure_we_vote_ids_list': new_measure_we_vote_ids_list,
+        'original_text_city': '',
+        'original_text_state': '',
+        'original_text_zip': '',
+        'polling_location_retrieved': False,
+        'state_code': state_code,
+        'success': success,
+        'status': status,
+        'text_for_map_search': text_for_map_search,
     }
     return results
 

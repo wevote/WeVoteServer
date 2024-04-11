@@ -48,6 +48,7 @@ SUGGESTED_FRIEND_LIST = 'SUGGESTED_FRIEND_LIST'
 
 FRIEND_INVITATION_SECRET_KEY_LENGTH = 12
 
+
 class CurrentFriend(models.Model):
     """
     This table stores friendship relationships. The "direction" doesn't matter, although it usually indicates
@@ -125,7 +126,7 @@ class FriendInvitationTwitterLink(models.Model):
     sender_voter_we_vote_id = models.CharField(
         verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False)
     recipient_twitter_handle = models.CharField(
-        verbose_name='twitter screen_name', max_length=255, null=False, unique=False)
+        verbose_name='twitter username', max_length=255, null=False, unique=False)
     secret_key = models.CharField(
         verbose_name="secret key to accept invite", max_length=255, null=True, blank=True, unique=True)
     invitation_message = models.TextField(null=True, blank=True)
@@ -186,8 +187,8 @@ class FriendManager(models.Manager):
     def __unicode__(self):
         return "FriendManager"
 
+    @staticmethod
     def update_or_create_friend_invitation_email_link(
-            self,
             sender_voter_we_vote_id='',
             recipient_email_we_vote_id='',
             recipient_voter_email='',
@@ -239,9 +240,14 @@ class FriendManager(models.Manager):
         }
         return results
 
-    def update_or_create_friend_invitation_voter_link(self, sender_voter_we_vote_id, recipient_voter_we_vote_id='',
-                                                      invitation_message='', sender_email_ownership_is_verified=False,
-                                                      invitation_status=NO_RESPONSE, invitation_secret_key=''):
+    @staticmethod
+    def update_or_create_friend_invitation_voter_link(
+            sender_voter_we_vote_id,
+            recipient_voter_we_vote_id='',
+            invitation_message='',
+            sender_email_ownership_is_verified=False,
+            invitation_status=NO_RESPONSE,
+            invitation_secret_key=''):
         status = ""
         defaults = {
             "sender_voter_we_vote_id":              sender_voter_we_vote_id,
@@ -282,8 +288,12 @@ class FriendManager(models.Manager):
         }
         return results
 
-    def update_or_create_friend_invitation_facebook_link(self, facebook_request_id, sender_facebook_id,
-                                                         recipient_facebook_id, recipient_facebook_name='',):
+    @staticmethod
+    def update_or_create_friend_invitation_facebook_link(
+            facebook_request_id,
+            sender_facebook_id,
+            recipient_facebook_id,
+            recipient_facebook_name=''):
         status = ""
         defaults = {
             "facebook_request_id": facebook_request_id,
@@ -317,7 +327,8 @@ class FriendManager(models.Manager):
         }
         return results
 
-    def retrieve_current_friend(self, sender_voter_we_vote_id, recipient_voter_we_vote_id, read_only=True):
+    @staticmethod
+    def retrieve_current_friend(sender_voter_we_vote_id, recipient_voter_we_vote_id, read_only=True):
         status = ""
         current_friend = CurrentFriend()
         # Note that the direction of the friendship does not matter
@@ -380,7 +391,8 @@ class FriendManager(models.Manager):
         }
         return results
 
-    def retrieve_suggested_friend(self, voter_we_vote_id_one, voter_we_vote_id_two, read_only=True):
+    @staticmethod
+    def retrieve_suggested_friend(voter_we_vote_id_one, voter_we_vote_id_two, read_only=True):
         status = ""
         suggested_friend = SuggestedFriend()
         # Note that the direction of the friendship does not matter
@@ -711,7 +723,8 @@ class FriendManager(models.Manager):
         }
         return results
 
-    def process_friend_invitation_email_response(self, sender_voter, recipient_voter_email, kind_of_invite_response):
+    @staticmethod
+    def process_friend_invitation_email_response(sender_voter, recipient_voter_email, kind_of_invite_response):
         # Find the invite from other_voter (who issued this invitation) to the voter (who is responding)
         # 1) invite found
         # 2) invite NOT found
@@ -768,7 +781,8 @@ class FriendManager(models.Manager):
         }
         return results
 
-    def fetch_current_friends_count(self, voter_we_vote_id):
+    @staticmethod
+    def fetch_current_friends_count(voter_we_vote_id):
         current_friends_count = 0
 
         if not positive_value_exists(voter_we_vote_id):
@@ -784,8 +798,8 @@ class FriendManager(models.Manager):
             current_friends_count = 0
         return current_friends_count
 
+    @staticmethod
     def fetch_mutual_friends_voter_we_vote_id_list_from_current_friends(
-            self,
             voter_we_vote_id='',
             friend_voter_we_vote_id=''):
         """
@@ -843,7 +857,8 @@ class FriendManager(models.Manager):
 
         return mutual_friends_count
 
-    def fetch_suggested_friends_count(self, voter_we_vote_id):
+    @staticmethod
+    def fetch_suggested_friends_count(voter_we_vote_id):
         suggested_friends_count = 0
 
         if not positive_value_exists(voter_we_vote_id):
@@ -859,7 +874,8 @@ class FriendManager(models.Manager):
             suggested_friends_count = 0
         return suggested_friends_count
 
-    def retrieve_current_friend_list(self, voter_we_vote_id, read_only=True):
+    @staticmethod
+    def retrieve_current_friend_list(voter_we_vote_id, read_only=True):
         status = ""
         success = True
         current_friend_list = []  # The entries from CurrentFriend table
@@ -914,7 +930,8 @@ class FriendManager(models.Manager):
         }
         return results
 
-    def retrieve_current_friends_as_voters(self, voter_we_vote_id, read_only=True):
+    @staticmethod
+    def retrieve_current_friends_as_voters(voter_we_vote_id, read_only=True):
         """
         This function is used to return the current friends of the viewer as a list of voters via the api.
         :param voter_we_vote_id:
@@ -1005,7 +1022,8 @@ class FriendManager(models.Manager):
         }
         return results
 
-    def retrieve_friends_we_vote_id_list(self, voter_we_vote_id):
+    @staticmethod
+    def retrieve_friends_we_vote_id_list(voter_we_vote_id):
         """
         This is similar to retrieve_current_friend_list, but only returns the we_vote_id
         :param voter_we_vote_id:
@@ -1076,7 +1094,8 @@ class FriendManager(models.Manager):
         }
         return results
 
-    def retrieve_friend_invitation_email_link_list(self, sender_voter_we_vote_id):
+    @staticmethod
+    def retrieve_friend_invitation_email_link_list(sender_voter_we_vote_id):
         status = ""
 
         if not positive_value_exists(sender_voter_we_vote_id):
@@ -1127,7 +1146,8 @@ class FriendManager(models.Manager):
         }
         return results
 
-    def retrieve_friend_invitation_voter_link_list(self, sender_voter_we_vote_id='', recipient_voter_we_vote_id=''):
+    @staticmethod
+    def retrieve_friend_invitation_voter_link_list(sender_voter_we_vote_id='', recipient_voter_we_vote_id=''):
         status = ""
 
         if not positive_value_exists(sender_voter_we_vote_id) and not positive_value_exists(recipient_voter_we_vote_id):
@@ -1184,7 +1204,8 @@ class FriendManager(models.Manager):
         }
         return results
 
-    def delete_friend_invitation_voter_link(self, id=0):
+    @staticmethod
+    def delete_friend_invitation_voter_link(id=0):
         status = ""
 
         if not positive_value_exists(id):
@@ -1225,7 +1246,8 @@ class FriendManager(models.Manager):
         }
         return results
 
-    def retrieve_friend_invitations_processed(self, viewer_voter_we_vote_id):
+    @staticmethod
+    def retrieve_friend_invitations_processed(viewer_voter_we_vote_id):
         """
 
         :param viewer_voter_we_vote_id:
@@ -1312,8 +1334,9 @@ class FriendManager(models.Manager):
 
         if friend_invitation_from_voter_list_found and friend_invitation_from_email_list_found:
             friend_invitation_from_list_found = True
-            friend_invitation_from_list = list(friend_invitation_from_voter_list) + \
-                                          list(friend_invitation_from_email_list)
+            friend_invitation_from_list = (
+                    list(friend_invitation_from_voter_list) + list(friend_invitation_from_email_list)
+            )
         elif friend_invitation_from_voter_list_found:
             friend_invitation_from_list_found = True
             friend_invitation_from_list = friend_invitation_from_voter_list
@@ -1475,7 +1498,8 @@ class FriendManager(models.Manager):
                     we_vote_id_list.append(friend_invitation.recipient_voter_we_vote_id)
         return we_vote_id_list
 
-    def retrieve_friend_invitations_sent_by_me(self, sender_voter_we_vote_id):
+    @staticmethod
+    def retrieve_friend_invitations_sent_by_me(sender_voter_we_vote_id):
         status = ""
         friend_list_found = False
         friend_list = []
@@ -1618,7 +1642,8 @@ class FriendManager(models.Manager):
                     we_vote_id_list.append(friend_invitation.sender_voter_we_vote_id)
         return we_vote_id_list
 
-    def fetch_friend_related_voter_we_vote_id_list(self, voter_we_vote_id):
+    @staticmethod
+    def fetch_friend_related_voter_we_vote_id_list(voter_we_vote_id):
         """
         Find any other voter_we_vote_id related to voter_we_vote_id. Used for maintenance function.
         :param voter_we_vote_id:
@@ -1682,7 +1707,8 @@ class FriendManager(models.Manager):
             friend_related_voter_we_vote_id_list = []
         return friend_related_voter_we_vote_id_list
 
-    def fetch_voter_friendships_count(self):
+    @staticmethod
+    def fetch_voter_friendships_count():
         current_friend_count = 0
         try:
             current_friend_count = CurrentFriend.objects.using('readonly').count()
@@ -1702,8 +1728,9 @@ class FriendManager(models.Manager):
     #     else:
     #         from django.db.models import F
     #         try:
-    #             friends_query = CurrentFriend.objects.using('readonly') \
-    #                 .annotate(voter_we_vote_id=F('viewee_voter_we_vote_id')).values_list('voter_we_vote_id', flat=True) \
+    #             friends_query = CurrentFriend.objects.using('readonly')
+    #                 .annotate(voter_we_vote_id=F('viewee_voter_we_vote_id'))
+    #                 .values_list('voter_we_vote_id', flat=True)
     #                 .union(
     #                 CurrentFriend.objects.using('readonly')
     #                     .annotate(voter_we_vote_id=F('viewer_voter_we_vote_id'))
@@ -1786,7 +1813,8 @@ class FriendManager(models.Manager):
     #     return sorted(reduced_friendlies, key=lambda tup: tup[1], reverse=True)
 
     # https://stackoverflow.com/questions/65764804/count-of-group-of-two-fields-in-sql-query-postgres/65765087#65765087
-    def fetch_voters_with_friends_dataset_improved(self):
+    @staticmethod
+    def fetch_voters_with_friends_dataset_improved():
         friendlies = []
 
         try:
@@ -1815,13 +1843,15 @@ class FriendManager(models.Manager):
 
         return friendlies
 
-    def get_count_of_friendships(self, friendlinks):
+    @staticmethod
+    def get_count_of_friendships(friendlinks):
         count = 0
         for link in friendlinks:
             count += link[1]
         return count
 
-    def get_count_of_friendlinks(self, friendlinks, comparison, num1, num2=0):
+    @staticmethod
+    def get_count_of_friendlinks(friendlinks, comparison, num1, num2=0):
         matches = []
         if comparison == "==":
             matches = list(filter(lambda x: x[1] == num1, friendlinks))
@@ -1833,7 +1863,8 @@ class FriendManager(models.Manager):
             print("Unknown comparison in get_count_of_friendlinks")
         return len(matches)
 
-    def retrieve_friend_invitations_sent_to_me(self, recipient_voter_we_vote_id, read_only=False):
+    @staticmethod
+    def retrieve_friend_invitations_sent_to_me(recipient_voter_we_vote_id, read_only=False):
         status = ''
         friend_list_found = False
         friend_list = []
@@ -1897,8 +1928,8 @@ class FriendManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_friend_invitation_from_secret_key(
-            self,
             invitation_secret_key,
             for_accepting_friendship=False,
             for_additional_processes=False,
@@ -2022,8 +2053,11 @@ class FriendManager(models.Manager):
         }
         return results
 
-    def retrieve_friend_invitation_from_facebook(self, facebook_request_id, recipient_facebook_id,
-                                                 sender_facebook_id):
+    @staticmethod
+    def retrieve_friend_invitation_from_facebook(
+            facebook_request_id,
+            recipient_facebook_id,
+            sender_facebook_id):
         """
 
         :param facebook_request_id:
@@ -2060,8 +2094,8 @@ class FriendManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_mutual_friend_list(
-            self,
             first_friend_voter_we_vote_id='',
             second_friend_voter_we_vote_id='',
             mutual_friend_voter_we_vote_id='',
@@ -2171,7 +2205,8 @@ class FriendManager(models.Manager):
         }
         return results
 
-    def retrieve_suggested_friend_list(self, voter_we_vote_id, hide_deleted=True, read_only=True):
+    @staticmethod
+    def retrieve_suggested_friend_list(voter_we_vote_id, hide_deleted=True, read_only=True):
         """
         A list of SuggestedFriend table entries.
         :param voter_we_vote_id:
@@ -2377,7 +2412,10 @@ class FriendManager(models.Manager):
         :param read_only:
         :return:
         """
-        all_friends_one_person_results = self.retrieve_current_friend_list(starting_voter_we_vote_id, read_only=read_only)
+        all_friends_one_person_results = self.retrieve_current_friend_list(
+            starting_voter_we_vote_id,
+            read_only=read_only
+        )
         suggested_friend_created_count = 0
         if all_friends_one_person_results['current_friend_list_found']:
             current_friend_list = all_friends_one_person_results['current_friend_list']
@@ -2409,8 +2447,11 @@ class FriendManager(models.Manager):
         }
         return results
 
-    def update_suggested_friend(self, voter_we_vote_id, other_voter_we_vote_id,
-                                defaults=None):
+    def update_suggested_friend(
+            self,
+            voter_we_vote_id,
+            other_voter_we_vote_id,
+            defaults=None):
         status = ""
         success = True
         suggested_friend = None

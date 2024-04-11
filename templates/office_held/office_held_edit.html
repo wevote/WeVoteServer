@@ -37,9 +37,9 @@
 &nbsp;
 <input type="submit" value="{% if office_held %}Update Office Held{% else %}Create Elected New Office{% endif %}" /></p>
 
-<div class="form-group">
-    <label for="office_held_name_id" class="col-sm-3 control-label">Office Held Name</label>
-    <div class="col-sm-8">
+<div class="row form-group">
+    <label for="office_held_name_id" class="pl-4 control-label">Office Held Name</label>
+    <div class="col">
         <input type="text" name="office_held_name" id="office_held_name_id" class="form-control"
                value="{% if office_held %}{{ office_held.office_held_name|default_if_none:"" }}{% else %}{{ office_held_name|default_if_none:"" }}{% endif %}" />
         {% if office_held %}{{ office_held.we_vote_id }}{% else %}{{ we_vote_id }}{% endif %}
@@ -61,98 +61,125 @@
     </div>
 </div>
 
+<div class="row">
+<div class="col">
 <div class="form-group">
-    <label for="google_civic_office_held_name_id" class="col-sm-3 control-label">Alternate Name (for Google Civic matching)</label>
-    <div class="col-sm-8">
+    <label for="google_civic_office_held_name_id" class="pl-4 control-label">Alternate Name (for Google Civic matching)</label>
+    <div class="col">
         <input type="text" name="google_civic_office_held_name" id="google_civic_office_held_name_id" class="form-control"
                value="{% if office_held %}{{ office_held.google_civic_office_held_name|default_if_none:"" }}{% else %}{{ google_civic_office_held_name|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
+<div class="col">
 <div class="form-group">
-    <label for="google_civic_office_held_name2_id" class="col-sm-3 control-label">Alternate Name 2</label>
-    <div class="col-sm-8">
+    <label for="google_civic_office_held_name2_id" class="pl-4 control-label">Alternate Name 2</label>
+    <div class="col">
         <input type="text" name="google_civic_office_held_name2" id="google_civic_office_held_name2_id" class="form-control"
                value="{% if office_held %}{{ office_held.google_civic_office_held_name2|default_if_none:"" }}{% else %}{{ google_civic_office_held_name2|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
+<div class="col">
 <div class="form-group">
-    <label for="google_civic_office_held_name3_id" class="col-sm-3 control-label">Alternate Name 3</label>
-    <div class="col-sm-8">
+    <label for="google_civic_office_held_name3_id" class="pl-4 control-label">Alternate Name 3</label>
+    <div class="col">
         <input type="text" name="google_civic_office_held_name3" id="google_civic_office_held_name3_id" class="form-control"
                value="{% if office_held %}{{ office_held.google_civic_office_held_name3|default_if_none:"" }}{% else %}{{ google_civic_office_held_name3|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
+</div>
 
-<div class="form-group">
-    <label for="district_name_id" class="col-sm-3 control-label">District Name</label>
-    <div class="col-sm-8">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="district_name_id" class="pl-4 control-label">District Name</label>
+    <div class="col">
         <input type="text" name="district_name" id="district_name_id" class="form-control"
                value="{% if office_held %}{{ office_held.district_name|default_if_none:"" }}{% else %}{{ district_name|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="ocd_division_id_id" class="col-sm-3 control-label">Ocd Division ID</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="ocd_division_id_id" class="control-label">Ocd Division ID</label>
+    <div class="col">
         <input type="text" name="ocd_division_id" id="ocd_division_id_id" class="form-control"
                value="{% if office_held %}{{ office_held.ocd_division_id|default_if_none:"" }}{% else %}{{ ocd_division_id|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
+</div>
 
 {% if office_held.primary_party %}
-<div class="form-group">
-    <label for="primary_party_id" class="col-sm-3 control-label">Primary Party</label>
-    <div class="col-sm-8">
-        {% if office_held %}{{ office_held.primary_party|default_if_none:"" }}{% else %}{{ primary_party|default_if_none:"" }}{% endif %}
-    </div>
+<div class="row form-group">
+    <label for="primary_party_id" class="pl-4 control-label">Primary Party</label>
+    <div class="col">
+		<input type="text" name="ocd_division_id" id="ocd_division_id_id" class="form-control"
+		value="{% if office_held %}{{ office_held.ocd_division_id|default_if_none:"" }}{% else %}{{ ocd_division_id|default_if_none:"" }}{% endif %}" />
+ </div>
 </div>
 {% endif %}
 
-<div class="form-group">
-    <label for="state_code_id" class="col-sm-3 control-label">State Code</label>
-    <div class="col-sm-8">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="state_code_id" class="pl-4 control-label">State Code</label>
+    <div class="col">
         <input type="text" name="state_code" id="state_code_id" class="form-control"
                value="{% if office_held %}{{ office_held.state_code|default_if_none:"" }}{% else %}{{ state_code|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="district_id_id" class="col-sm-3 control-label">District ID (Numerical)</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="district_id_id" class="control-label">District ID (Numerical)</label>
+    <div class="col">
         <input type="text" name="district_id" id="district_id_id" class="form-control"
                value="{% if office_held %}{{ office_held.district_id|default_if_none:"" }}{% else %}{{ district_id|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
+</div>
 
-<div class="form-group">
-    <label for="office_held_facebook_url_id" class="col-sm-3 control-label">Office Held Facebook</label>
-    <div class="col-sm-8">
+<div class="row">
+<div class="col">
+<div class="row form-group">
+    <label for="office_held_facebook_url_id" class="pl-4 control-label">Office Held Facebook</label>
+    <div class="col">
         <input type="text" name="office_held_facebook_url" id="office_held_facebook_url_id" class="form-control"
                value="{% if office_held %}{{ office_held.office_held_facebook_url|default_if_none:"" }}{% else %}{{ office_held_facebook_url|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
 
-<div class="form-group">
-    <label for="office_held_twitter_handle_id" class="col-sm-3 control-label">Office Held Twitter Handle</label>
-    <div class="col-sm-8">
+<div class="col">
+<div class="row form-group">
+    <label for="office_held_twitter_handle_id" class="control-label">Office Held Twitter Handle</label>
+    <div class="col">
         <input type="text" name="office_held_twitter_handle" id="office_held_twitter_handle_id" class="form-control"
                value="{% if office_held %}{{ office_held.office_held_twitter_handle|default_if_none:"" }}{% else %}{{ office_held_twitter_handle|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
+</div>
+</div>
 
-<div class="form-group">
-    <label for="office_held_url_id" class="col-sm-3 control-label">Office Held Website</label>
-    <div class="col-sm-8">
+<div class="row form-group">
+    <label for="office_held_url_id" class="pl-4 control-label">Office Held Website</label>
+    <div class="col">
         <input type="text" name="office_held_url" id="office_held_url_id" class="form-control"
                value="{% if office_held %}{{ office_held.office_held_url|default_if_none:"" }}{% else %}{{ office_held_url|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
 
-<div class="form-group">
-    <label for="office_held_description_id" class="col-sm-3 control-label">Office Held Description</label>
-    <div class="col-sm-8">
+<div class="row form-group">
+    <label for="office_held_description_id" class="pl-4 control-label">Office Held Description</label>
+    <div class="col">
         <textarea name="office_held_description" id="office_held_description_id" class="form-control" >{% if office_held %}{{ office_held.office_held_description|default_if_none:"" }}{% else %}{{ office_held_description|default_if_none:"" }}{% endif %}</textarea>
     </div>
 </div>

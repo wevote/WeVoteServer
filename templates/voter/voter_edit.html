@@ -15,6 +15,9 @@
 <input type="hidden" name="voter_id" value="{% if voter %}{{ voter.id }}{% else %}0{% endif %}">
 
 {% if voter %}
+{% if voter_invitation_password %}
+    {% include "voter/voter_invitation_from_manager.html" with voter_invitation_email=voter.email voter_invitation_first_name=voter_invitation_first_name voter_invitation_password=voter_invitation_password %}
+{% endif %}
 
 <div class="form-group">
     <label class="col-sm-3 control-label">
@@ -55,21 +58,6 @@
     </div>
 </div>
 {% endif %}
-
-
-<div class="form-group">
-    <label class="col-sm-3 control-label">
-        &nbsp;</label>
-    <div class="col-sm-9">
-        {% if voter %}
-        <a href="{% url 'voter:voter_summary' voter.id %}">cancel</a>
-        {% else %}
-        <a href="{% url 'voter:voter_list' %}">cancel</a>
-        {% endif %}
-        &nbsp;
-        <input type="submit" value="{% if voter %}Update Voter Account{% else %}Create New Voter Account{% endif %}" />
-    </div>
-</div>
 
 
 <div class="form-group">
@@ -271,36 +259,104 @@
     </div>
 </div>
 
-
-<div class="form-group">
-    <label for="password_text_id" class="col-sm-3 control-label">
-        Change Password</label>
+<div class="row form-group">
+    <label for="google_civic_election_id_id" class="col-sm-3 control-label">
+        Volunteering Team
+        (<span onclick="showElement('team_add');" style="color: royalblue" >add</span>)
+    </label>
     <div class="col-sm-9">
-        <input type="text" name="password_text" id="password_text_id" class="form-control"
-               value="" />
+    {% if office_name %}
+        Adding Candidate to: {{ office_name }}
+        <input type="hidden" name="contest_office_id" value="{{ contest_office_id }}">
+    {% endif %}
+    <table>
+    {% for volunteer_team in volunteer_team_list %}
+        <tr>
+            <td>
+                {% if volunteer_team.is_voter_member %}<strong>IS MEMBER:</strong> {% endif %}
+                {{ volunteer_team.team_name }}
+                ({{ volunteer_team.we_vote_id }})
+                &nbsp;&nbsp;
+            </td>
+            <td>
+                {% if volunteer_team.is_voter_member %}
+                <label for="delete_volunteer_team_member_{{ volunteer_team.id }}_id">
+                    <input type="checkbox"
+                           name="delete_volunteer_team_member_{{ volunteer_team.id }}"
+                           id="delete_volunteer_team_member_{{ volunteer_team.id }}_id"
+                           value=1
+                    />
+                    delete membership
+                </label>
+                {% else %}
+                <label for="add_volunteer_team_member_{{ volunteer_team.id }}_id">
+                    <input type="checkbox"
+                           name="add_volunteer_team_member_{{ volunteer_team.id }}"
+                           id="add_volunteer_team_member_{{ volunteer_team.id }}_id"
+                           value=1
+                    />
+                    add to team
+                </label>
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+    <table id="team_add" style="display: none;">
+        <thead>
+            <tr>
+                <th>Volunteering Team Name to Add</th>
+            </tr>
+            <tr>
+                <th></th>
+            </tr>
+        </thead>
+        <tr>
+            <td>
+                <input type="text" name="team_name_new"
+                       style="width: 400px; border: 1px solid lightgray;"/>
+            </td>
+            <td>
+                <input type="checkbox" name="add_to_new_team" id="add_to_new_team_id" value="1" checked />&nbsp;Add to this team
+            </td>
+        </tr>
+    </table>
     </div>
 </div>
 
+
+<div class="form-group">
+    <label for="passwordTextId" class="col-sm-3 control-label">Change Password</label>
+    <div class="col-sm-9" style="display: flex; flex-wrap: wrap; ">
+        <input type="text" name="password_text" id="passwordTextId" class="form-control" value="" style="width: 20%" />
+        <span style="padding-left: 16px; padding-top: 4px;" />
+        <button type="button" id="passwordButton" onClick="injectPassword()">Suggest Password</button>
+    </div>
+    <input type="hidden" id="passwordProposedId" value="{{ password_proposed }}">
+</div>
+
+<br />
 <br />
 
 
 <div class="form-group">
-    <label class="col-sm-3 control-label">
-        &nbsp;</label>
+    <label class="col-sm-3 control-label" style="padding-top: 4px;">Submit</label>
     <div class="col-sm-9">
+        <input type="submit" value="{% if voter %}Update Voter Account{% else %}Create New Voter Account{% endif %}"/>
         {% if voter %}
-        <a href="{% url 'voter:voter_summary' voter.id %}">cancel</a>
+        <a href="{% url 'voter:voter_summary' voter.id %}" style="padding-left: 30px">cancel</a>
         {% else %}
-        <a href="{% url 'voter:voter_list' %}">cancel</a>
+        <a href="{% url 'voter:voter_list' %}" style="padding-left: 30px">cancel</a>
         {% endif %}
         &nbsp;
-        <input type="submit" value="{% if voter %}Update Voter Account{% else %}Create New Voter Account{% endif %}" />
     </div>
 </div>
 
 
 {% if voter %}
-
+    <br />
+    <h4>Voter's Rights Administration</h4>
+    <div style="padding-left: 20px;">
     {% if voter.is_admin %}
 <p><a href="{% url 'voter:voter_change_authority_process' %}?voter_id={{ voter_id }}&authority_removed=admin">
   Remove Admin Rights</a></p>
@@ -315,6 +371,14 @@
     {% else %}
 <p><a href="{% url 'voter:voter_change_authority_process' %}?voter_id={{ voter_id }}&authority_granted=analytics_admin">
   Grant Analytics Admin Rights</a></p>
+    {% endif %}
+
+    {% if voter.is_voter_manager %}
+<p><a href="{% url 'voter:voter_change_authority_process' %}?voter_id={{ voter_id }}&authority_removed=voter_manager">
+  Remove Voter Manager Rights</a></p>
+    {% else %}
+<p><a href="{% url 'voter:voter_change_authority_process' %}?voter_id={{ voter_id }}&authority_granted=voter_manager">
+  Grant Voter Manager Rights</a></p>
     {% endif %}
 
     {% if voter.is_partner_organization %}
@@ -348,21 +412,21 @@
 <p><a href="{% url 'voter:voter_change_authority_process' %}?voter_id={{ voter_id }}&authority_granted=verified_volunteer">
   Grant Verified Volunteer Rights</a></p>
     {% endif %}
-
-<p><a href="{% url 'voter:voter_remove_facebook_auth_process' %}?voter_id={{ voter_id }}&voter_we_vote_id={{ voter.we_vote_id }}">
-    Remove Facebook Authentication (all devices and browsers)</a></p>
-
-    <p>
-    <a href="{% url 'friend:generate_mutual_friends_for_one_voter' %}?voter_id={{ voter_id }}&voter_we_vote_id={{ voter.we_vote_id }}">Generate mutual friends for this voter</a>
-    </p>
-<br/>
-
+    </div>
+    <h4>Authentication</h4>
+    <div style="padding-left: 20px;">
+        <p><a href="{% url 'voter:voter_remove_facebook_auth_process' %}?voter_id={{ voter_id }}&voter_we_vote_id={{ voter.we_vote_id }}">
+            Remove Facebook Authentication (all devices and browsers)</a></p>
+        <p><a href="{% url 'friend:generate_mutual_friends_for_one_voter' %}?voter_id={{ voter_id }}&voter_we_vote_id={{ voter.we_vote_id }}">Generate mutual friends for this voter</a>
+        </p>
+    </div>
 {% endif %}
 
-    <a href="{% url 'admin_tools:data_cleanup' %}">< Back to Data Cleanup Home</a><br />
-    <br />
-    <a href="{% url 'admin_tools:data_cleanup_voter_list_analysis' %}">< Back to Voter List Analysis</a>
-    <br />
+    <h4>Navigation</h4>
+    <div style="padding-left: 20px;">
+        <p><a href="{% url 'admin_tools:data_cleanup' %}">< Back to Data Cleanup Home</a><br /></p>
+        <p><a href="{% url 'admin_tools:data_cleanup_voter_list_analysis' %}">< Back to Voter List Analysis</a></p>
+    </div>
     <br />
 
 
@@ -496,7 +560,7 @@
     </table>
 {% else %}
     {% if voter.facebook_id_from_link_to_voter or voter.facebook_id %}
-    <h3>GOOD: No other voters found with duplicate local Facebook info</h3>
+    <h4>GOOD: No other voters found with duplicate local Facebook info</h4>
     {% endif %}
     {% if not voter.facebook_id_from_link_to_voter and voter.facebook_id %}
     <a href="{% url 'voter:voter_edit' voter_id %}?create_facebook_link_to_voter=1" target="_blank">
@@ -596,7 +660,7 @@
     </table>
 {% else %}
     {% if voter.twitter_id_from_link_to_voter or voter.twitter_id %}
-    <h3>GOOD: No other voters found with duplicate local Twitter info</h3>
+    <h4>GOOD: No other voters found with duplicate local Twitter info</h4>
     {% endif %}
     {% if not voter.twitter_id_from_link_to_voter and voter.twitter_id %}
     <a href="{% url 'voter:voter_edit' voter_id %}?create_twitter_link_to_voter=1" target="_blank">
@@ -649,16 +713,15 @@
     </table>
 {% else %}
     {% if voter.twitter_id_from_link_to_voter or voter.twitter_id %}
-    <h3>GOOD: No other endorsers found with duplicate local Twitter info (aside from TwitterLinkToOrganization)</h3>
+    <h4>GOOD: No other endorsers found with duplicate local Twitter info (aside from TwitterLinkToOrganization)</h4>
     {% endif %}
 {% endif %}
 
 {% if voter.linked_organization_we_vote_id and not organization_list_with_duplicate_twitter and not voter_list_duplicate_twitter %}
-    <h3><a href="{% url 'voter:voter_edit' voter.id %}?cross_link_all_voter_positions=1" target="_blank">
+    <h4><a href="{% url 'voter:voter_edit' voter.id %}?cross_link_all_voter_positions=1" target="_blank">
         Add voter_we_vote_id and organization_we_vote_id To All Positions
-    </a></h3>
+    </a></h4>
 {% endif %}
-
 
 {% if public_positions_owned_by_this_voter %}
     <h2>Public Positions Owned By This Voter</h2>
@@ -817,8 +880,9 @@
 
 {% if voter %}
     <br />
-    <br />
-    <form action="{% url "voter:voter_delete_process" %}" method="post" class="form-horizontal">
+    <h4>Deletion</h4>
+    <div style="padding-left: 20px;">
+        <form action="{% url "voter:voter_delete_process" %}" method="post" class="form-horizontal">
     {% csrf_token %}
       <input type="hidden" name="voter_id" value="{{ voter.id }}">
       <button type="submit" class="btn btn-danger">Delete Voter</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -826,11 +890,32 @@
         <input type="checkbox" name="confirm_delete" id="confirm_delete_id" value="1" /> Check to confirm that you want to permanently delete this voter
       </label>
     </form>
+    </div>
 {% endif %}
 
     <br />
     <br />
     <br />
     <br />
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
+<script>
+    function hideElement(elementId) {
+      var x = document.getElementById(elementId);
+      x.style.display = "none";
+    }
+    function showElement(elementId) {
+      var x = document.getElementById(elementId);
+      x.style.display = "block";
+    }
+</script>
+
+<script>
+    function injectPassword () {
+        const passwordProposed = $("#passwordProposedId").val();
+        $("#passwordTextId").val(passwordProposed);
+    }
+</script>
 
 {% endblock %}

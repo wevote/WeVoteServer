@@ -406,6 +406,7 @@ def representatives_import_from_master_server_view(request):
         messages.add_message(request, messages.ERROR, "Cannot sync with Master We Vote Server -- "
                                                       "this is the Master We Vote Server.")
         return HttpResponseRedirect(reverse('admin_tools:admin_home', args=()))
+    google_civic_election_id = request.GET.get('google_civic_election_id', '')
     state_code = request.GET.get('state_code', '')
 
     from representative.controllers import representatives_import_from_master_server
@@ -423,7 +424,7 @@ def representatives_import_from_master_server_view(request):
     else:
         messages.add_message(request, messages.ERROR, results['status'])
 
-    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?state_code=" + str(state_code))
+    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?google_civic_election_id=" + str(google_civic_election_id) +  "&state_code=" + str(state_code))
 
 
 @login_required
@@ -1390,6 +1391,7 @@ def representative_edit_process_view(request):
         )
         if results['politician_found']:
             defaults['politician_id'] = results['politician'].id
+            defaults['profile_image_background_color'] = results['politician'].profile_image_background_color
             defaults['seo_friendly_path'] = results['politician'].seo_friendly_path
         elif results['success']:
             defaults['politician_we_vote_id'] = None

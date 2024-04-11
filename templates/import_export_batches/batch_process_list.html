@@ -375,7 +375,8 @@ PROCESSING TURNED OFF:
                  target="_blank">batch log</a>)
               {% if batch_process.polling_location_count %}
                 <br />
-                {{ batch_process.ballot_item_chunk_count|intcomma }} steps exist: Should not exceed {{ batch_process.ballot_item_chunks_expected|intcomma }} steps ({{ batch_process.polling_location_count|intcomma }} total map points)
+{#                {{ batch_process.ballot_item_chunk_count|intcomma }} steps exist: CURRENTLY COUNT IS BROKEN #}
+                  Should not exceed {{ batch_process.ballot_item_chunks_expected|intcomma }} steps ({{ batch_process.polling_location_count|intcomma }} total map points)
               {% endif %}
               {% if batch_process.completion_summary or batch_process.analytics_date_as_integer %}
                 <br />
@@ -388,9 +389,13 @@ PROCESSING TURNED OFF:
               {% endif %}
             </td>
             <td>
-              {% if batch_process.google_civic_election_id %}
-                {{ batch_process.google_civic_election_id|default_if_none:"" }}
-              {% endif %}
+            {% if batch_process.google_civic_election_id %}
+                <a href="{% url 'election:election_summary_by_google_id' batch_process.google_civic_election_id %}?google_civic_election_id={{ batch_process.google_civic_election_id }}&state_code={{ batch_process.state_code }}" target="_blank" >
+                    {{ batch_process.google_civic_election_id|default_if_none:"" }}
+                    <span class="glyphicon glyphicon-new-window"></span>
+                </a>
+                <span class="u-no-break">{{ batch_process.election.election_day_text }}</span>
+            {% endif %}
             </td>
             <td>{{ batch_process.state_code }}</td>
             <td>{{ batch_process.date_added_to_queue|localtime|default_if_none:"" }}</td>

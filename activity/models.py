@@ -81,8 +81,8 @@ class ActivityManager(models.Manager):
     def __unicode__(self):
         return "ActivityManager"
 
+    @staticmethod
     def create_activity_notice(
-            self,
             activity_notice_seed_id=0,
             activity_tidbit_we_vote_id='',
             campaignx_news_item_we_vote_id=None,
@@ -162,8 +162,8 @@ class ActivityManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def create_activity_notice_seed(
-            self,
             activity_notices_created=False,
             activity_notices_scheduled=False,
             activity_tidbit_we_vote_ids_for_friends_serialized='',
@@ -257,8 +257,8 @@ class ActivityManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def create_activity_post(
-            self,
             sender_voter_we_vote_id,
             sender_voter_sms,
             recipient_voter_we_vote_id='',
@@ -296,8 +296,8 @@ class ActivityManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def fetch_activity_notice_count(
-            self,
             activity_in_last_x_seconds=None,
             kind_of_notice='',
             recipient_voter_we_vote_id='',
@@ -342,7 +342,8 @@ class ActivityManager(models.Manager):
             parent_comment_we_vote_id=parent_comment_we_vote_id)
         return results['number_of_comments']
 
-    def retrieve_number_of_comments(self, parent_we_vote_id='', parent_comment_we_vote_id=''):
+    @staticmethod
+    def retrieve_number_of_comments(parent_we_vote_id='', parent_comment_we_vote_id=''):
         """
 
         :param parent_we_vote_id:
@@ -396,7 +397,8 @@ class ActivityManager(models.Manager):
         }
         return results
 
-    def retrieve_activity_comment_list(self, parent_we_vote_id='', parent_comment_we_vote_id=''):
+    @staticmethod
+    def retrieve_activity_comment_list(parent_we_vote_id='', parent_comment_we_vote_id=''):
         """
 
         :param parent_we_vote_id:
@@ -466,8 +468,8 @@ class ActivityManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_activity_notice_for_campaignx(
-            self,
             campaignx_news_item_we_vote_id=None,
             campaignx_we_vote_id=None,
             kind_of_notice='',
@@ -532,9 +534,8 @@ class ActivityManager(models.Manager):
         }
         return results
 
-    def retrieve_activity_notice_seed_list(
-            self,
-            notices_to_be_created=False):
+    @staticmethod
+    def retrieve_activity_notice_seed_list(notices_to_be_created=False):
         status = ""
 
         activity_notice_seed_list = []
@@ -568,8 +569,8 @@ class ActivityManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_activity_notice_list(
-            self,
             activity_notice_seed_id=0,
             to_be_sent_to_email=False,
             to_be_sent_to_sms=False,
@@ -621,8 +622,8 @@ class ActivityManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_recent_activity_notice_seed_from_listener(
-            self,
             kind_of_seed='',
             recipient_voter_we_vote_id=''):
         """
@@ -676,8 +677,8 @@ class ActivityManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_recent_activity_notice_from_speaker_and_recipient(
-            self,
             activity_notice_seed_id=0,
             campaignx_we_vote_id=None,
             kind_of_notice='',
@@ -741,8 +742,8 @@ class ActivityManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_activity_notice_seed(
-            self,
             campaignx_news_item_we_vote_id=None,
             campaignx_we_vote_id=None,
             kind_of_seed='',
@@ -799,8 +800,8 @@ class ActivityManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_recent_activity_notice_seed_from_speaker(
-            self,
             campaignx_we_vote_id=None,
             kind_of_seed='',
             speaker_organization_we_vote_id='',
@@ -871,7 +872,8 @@ class ActivityManager(models.Manager):
         }
         return results
 
-    def retrieve_activity_notice_list_for_recipient(self, recipient_voter_we_vote_id=''):
+    @staticmethod
+    def retrieve_activity_notice_list_for_recipient(recipient_voter_we_vote_id=''):
         """
 
         :param recipient_voter_we_vote_id:
@@ -930,8 +932,8 @@ class ActivityManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_activity_notice_seed_list_for_recipient(
-            self,
             recipient_voter_we_vote_id='',
             kind_of_seed_list=None,
             limit_to_activity_tidbit_we_vote_id_list=[]):
@@ -1007,8 +1009,8 @@ class ActivityManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_next_activity_notice_seed_to_process(
-            self,
             notices_to_be_created=False,
             notices_to_be_scheduled=False,
             notices_to_be_updated=False,
@@ -1084,8 +1086,8 @@ class ActivityManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_activity_post_list(
-            self,
             speaker_voter_we_vote_id_list=[],
             limit_to_visibility_is_friends_only=False,
             limit_to_visibility_is_public=False,
@@ -1155,8 +1157,8 @@ class ActivityManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_activity_post_list_for_recipient(
-            self,
             recipient_voter_we_vote_id='',
             limit_to_activity_tidbit_we_vote_id_list=[],
             voter_friend_we_vote_id_list=[]):
@@ -1233,8 +1235,8 @@ class ActivityManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def update_activity_notice_list_in_bulk(
-            self,
             recipient_voter_we_vote_id='',
             activity_notice_id_list=[],
             activity_notice_seen=False,
@@ -1295,7 +1297,8 @@ class ActivityManager(models.Manager):
         }
         return results
 
-    def update_activity_notice_seed(self, activity_notice_seed_id, update_values):
+    @staticmethod
+    def update_activity_notice_seed(activity_notice_seed_id, update_values):
         """
         :param activity_notice_seed_id:
         :param update_values:
@@ -1371,8 +1374,8 @@ class ActivityManager(models.Manager):
             }
         return results
 
+    @staticmethod
     def update_or_create_activity_comment(
-            self,
             activity_comment_we_vote_id='',
             updated_values={},
             commenter_voter_we_vote_id='',
@@ -1447,8 +1450,8 @@ class ActivityManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def update_or_create_activity_post(
-            self,
             activity_post_we_vote_id='',
             updated_values={},
             speaker_voter_we_vote_id='',
@@ -1523,10 +1526,8 @@ class ActivityManager(models.Manager):
         }
         return results
 
-    def update_speaker_name_in_bulk(
-            self,
-            speaker_voter_we_vote_id='',
-            speaker_name=''):
+    @staticmethod
+    def update_speaker_name_in_bulk(speaker_voter_we_vote_id='', speaker_name=''):
         status = ""
         success = True
         if not positive_value_exists(speaker_voter_we_vote_id):

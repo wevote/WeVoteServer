@@ -1,6 +1,7 @@
 # voter/views_admin.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
+
 import string
 from base64 import b64encode
 from datetime import timedelta
@@ -31,6 +32,7 @@ from share.models import SharedItem, VoterWhoSharesSummaryAllTime, VoterWhoShare
 from sms.models import SMSManager, SMSPhoneNumber
 from stripe_donations.models import StripeManager, StripePayments
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
+from volunteer_task.models import VolunteerTeam, VolunteerTeamMember
 from voter.models import VoterIssuesLookup
 from wevote_functions.functions import convert_to_int, generate_random_string, get_voter_api_device_id, \
     get_voter_device_id, set_voter_api_device_id, positive_value_exists
@@ -49,7 +51,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 @login_required
 def finish_voter_merge_process_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'admin'}  # We may want to add a "voter_admin"
+    authority_required = {'admin', 'voter_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -273,6 +275,7 @@ def voter_authenticate_manually_process_view(request):
         return HttpResponseRedirect(reverse('voter:authenticate_manually', args=()))
 
 
+
 @login_required
 def voter_delete_process_view(request):
     """
@@ -285,7 +288,7 @@ def voter_delete_process_view(request):
     confirm_delete = convert_to_int(request.POST.get('confirm_delete', 0))
 
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'admin'}  # We may want to add a "voter_admin"
+    authority_required = {'admin', 'voter_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -336,7 +339,7 @@ def voter_edit_process_view(request):
 
         return HttpResponseRedirect(reverse('voter:voter_edit', args=(voter_id,)))
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'admin'}  # We may want to add a "voter_admin"
+    authority_required = {'admin', 'voter_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -345,13 +348,15 @@ def voter_edit_process_view(request):
     voter_on_stage = Voter()
     at_least_one_value_changed = False
 
+    add_to_new_team = request.POST.get('add_to_new_team', False)
+    email = request.POST.get('email', False)
     first_name = request.POST.get('first_name', False)
     last_name = request.POST.get('last_name', False)
-    twitter_handle = request.POST.get('twitter_handle', False)
-    email = request.POST.get('email', False)
     password_text = request.POST.get('password_text', False)
     profile_image_type_currently_active = request.POST.get('profile_image_type_currently_active', False)
     sms_phone_number = request.POST.get('sms_phone_number', False)
+    team_name_new = request.POST.get('team_name_new', False)
+    twitter_handle = request.POST.get('twitter_handle', False)
     try:
         voter_photo_file = request.FILES['voter_photo_file']
         voter_photo_file_found = True
@@ -639,13 +644,155 @@ def voter_edit_process_view(request):
         except Exception as e:
             messages.add_message(request, messages.ERROR, 'Could not save voter:' + str(e))
 
-    return HttpResponseRedirect(reverse('voter:voter_edit', args=(voter_id,)))
+    # ##########################################################################
+    # Update volunteer teams this voter is a member of
+    volunteer_team_success = True
+    team_name = ''
+    team_we_vote_id = ''
+    if positive_value_exists(team_name_new):
+        volunteer_team_found = False
+        try:
+            volunteer_team = VolunteerTeam.objects.using('readonly').get(team_name__iexact=team_name_new)
+            volunteer_team_found = True
+            team_name = volunteer_team.team_name
+            team_we_vote_id = volunteer_team.we_vote_id
+        except VolunteerTeam.DoesNotExist:
+            volunteer_team_found = False
+        except Exception as e:
+            message = "COULD_NOT_RETRIEVE_EXISTING_VOLUNTEER_TEAM: " + str(e) + " "
+            messages.add_message(request, messages.ERROR, message)
+            volunteer_team_success = False
 
+        if volunteer_team_success and not positive_value_exists(volunteer_team_found):
+            try:
+                volunteer_team = VolunteerTeam.objects.create(team_name=team_name_new)
+                team_name = volunteer_team.team_name
+                team_we_vote_id = volunteer_team.we_vote_id
+                volunteer_team_found = True
+                message = "Successfully created {team_name}. ".format(team_name=team_name)
+                messages.add_message(request, messages.INFO, message)
+            except Exception as e:
+                message = "COULD_NOT_CREATE_VOLUNTEER_TEAM: " + str(e) + " "
+                messages.add_message(request, messages.ERROR, message)
+
+        if positive_value_exists(volunteer_team_found) and positive_value_exists(add_to_new_team):
+            if not positive_value_exists(voter_we_vote_id) or not positive_value_exists(team_we_vote_id):
+                message = \
+                    "MISSING_REQUIRED_TEAM_MEMBER_VARIABLE:"\
+                    " team_we_vote_id: {team_we_vote_id}."\
+                    " voter_we_vote_id: {voter_we_vote_id}.".format(
+                        team_we_vote_id=team_we_vote_id,
+                        voter_we_vote_id=voter_we_vote_id)
+                messages.add_message(request, messages.ERROR, message)
+            else:
+                try:
+                    defaults = {
+                        'team_we_vote_id': team_we_vote_id,
+                        'voter_we_vote_id': voter_we_vote_id,
+                    }
+                    volunteer_team_member, volunteer_team_member_created = \
+                        VolunteerTeamMember.objects.update_or_create(
+                            team_we_vote_id=team_we_vote_id,
+                            voter_we_vote_id=voter_we_vote_id,
+                            defaults=defaults,
+                        )
+                    if volunteer_team_member_created:
+                        message = \
+                            "Successfully added {voter_we_vote_id} to {team_name}. ".format(
+                                team_name=team_name,
+                                voter_we_vote_id=voter_we_vote_id)
+                    else:
+                        message = \
+                            "{voter_we_vote_id} is already a member of {team_name}. ".format(
+                                team_name=team_name,
+                                voter_we_vote_id=voter_we_vote_id)
+                    messages.add_message(request, messages.INFO, message)
+                except Exception as e:
+                    message = "COULD_NOT_ADD_TEAM_MEMBER: " + str(e) + " "
+                    messages.add_message(request, messages.ERROR, message)
+
+    # ##########################################################################
+    # Now delete or add this voter from/to one of the teams
+    volunteer_team_list = []
+    try:
+        queryset = VolunteerTeam.objects.using('readonly').all()
+        volunteer_team_list = list(queryset)
+    except Exception as e:
+        message = "COULD_NOT_GET_VOLUNTEER_TEAM_LIST2: " + str(e) + " "
+        messages.add_message(request, messages.ERROR, message)
+
+    for volunteer_team in volunteer_team_list:
+        # Delete this voter from the team
+        delete_variable_name = "delete_volunteer_team_member_" + str(volunteer_team.id)
+        delete_voter_from_team = positive_value_exists(request.POST.get(delete_variable_name, False))
+        if positive_value_exists(delete_voter_from_team):
+            team_name = volunteer_team.team_name
+            team_we_vote_id = volunteer_team.we_vote_id
+            if positive_value_exists(team_we_vote_id) and positive_value_exists(voter_we_vote_id):
+                try:
+                    number_deleted, details = VolunteerTeamMember.objects.using('readonly') \
+                        .filter(
+                            team_we_vote_id__iexact=team_we_vote_id,
+                            voter_we_vote_id__iexact=voter_we_vote_id,
+                        ) \
+                        .delete()
+                    messages.add_message(request, messages.INFO,
+                                         "Deleted VolunteerTeamMember ({number_deleted})."
+                                         .format(number_deleted=number_deleted))
+                except Exception as e:
+                    messages.add_message(request, messages.ERROR, 'Could not delete team membership: ' + str(e))
+            else:
+                messages.add_message(request, messages.ERROR, 'Could not delete team membership.')
+        # Add this voter to the team
+        add_variable_name = "add_volunteer_team_member_" + str(volunteer_team.id)
+        add_voter_to_team = positive_value_exists(request.POST.get(add_variable_name, False))
+        if positive_value_exists(add_voter_to_team):
+            team_name = volunteer_team.team_name
+            team_we_vote_id = volunteer_team.we_vote_id
+            if positive_value_exists(team_we_vote_id) and positive_value_exists(voter_we_vote_id):
+                try:
+                    defaults = {
+                        'team_we_vote_id': team_we_vote_id,
+                        'voter_we_vote_id': voter_we_vote_id,
+                    }
+                    volunteer_team_member, volunteer_team_member_created = \
+                        VolunteerTeamMember.objects.update_or_create(
+                            team_we_vote_id=team_we_vote_id,
+                            voter_we_vote_id=voter_we_vote_id,
+                            defaults=defaults,
+                        )
+                    if volunteer_team_member_created:
+                        message = \
+                            "Successfully added {voter_we_vote_id} to {team_name}. ".format(
+                                team_name=team_name,
+                                voter_we_vote_id=voter_we_vote_id)
+                    else:
+                        message = \
+                            "{voter_we_vote_id} is already a member of {team_name}. ".format(
+                                team_name=team_name,
+                                voter_we_vote_id=voter_we_vote_id)
+                    messages.add_message(request, messages.INFO, message)
+                except Exception as e:
+                    messages.add_message(request, messages.ERROR, 'Could not delete team membership: ' + str(e))
+            else:
+                messages.add_message(request, messages.ERROR, 'Could not delete team membership.')
+
+    return HttpResponseRedirect(reverse('voter:voter_edit', args=(voter_id,)) +
+                                "?voter_invitation_password=" + password_text)
+
+
+def generate_proposed_password():
+    # For the create new voter account form, create a proposed default password
+    return generate_random_string(
+        string_length=8,
+        chars=string.ascii_uppercase + string.digits + "!*$",
+        remove_confusing_digits=True
+    )
 
 @login_required
 def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'admin'}  # We may want to add a "voter_admin"
+    authority_required = {'admin', 'voter_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -654,6 +801,7 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
     create_twitter_link_to_voter = request.GET.get('create_twitter_link_to_voter', False)
     cross_link_all_voter_positions = request.GET.get('cross_link_all_voter_positions', False)
     merge_duplicate_positions = request.GET.get('merge_duplicate_positions', False)
+    voter_invitation_password = request.GET.get('voter_invitation_password', '')
 
     voter_id = convert_to_int(voter_id)
     voter_on_stage = Voter()
@@ -1111,6 +1259,33 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
                         modified_supporters_list.append(supporter)
                 supporters_list = modified_supporters_list
 
+        volunteer_team_member_dict = {}
+        try:
+            queryset = VolunteerTeamMember.objects.using('readonly').all()\
+                .filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            volunteer_team_membership_list = list(queryset)
+            if len(volunteer_team_membership_list) > 0:
+                for volunteer_team_member in volunteer_team_membership_list:
+                    if volunteer_team_member.team_we_vote_id not in volunteer_team_member_dict:
+                        volunteer_team_member_dict[volunteer_team_member.team_we_vote_id] = True
+        except Exception as e:
+            message = "COULD_NOT_GET_VOLUNTEER_TEAM_MEMBER_LIST: " + str(e) + " "
+            messages.add_message(request, messages.ERROR, message)
+
+        volunteer_team_list = []
+        try:
+            queryset = VolunteerTeam.objects.using('readonly').all().order_by('team_name')
+            volunteer_team_list = list(queryset)
+            if len(volunteer_team_list) > 0:
+                volunteer_team_list_modified = []
+                for volunteer_team in volunteer_team_list:
+                    volunteer_team.is_voter_member = (volunteer_team.we_vote_id in volunteer_team_member_dict)
+                    volunteer_team_list_modified.append(volunteer_team)
+                volunteer_team_list = volunteer_team_list_modified
+        except Exception as e:
+            message = "COULD_NOT_GET_VOLUNTEER_TEAM_LIST: " + str(e) + " "
+            messages.add_message(request, messages.ERROR, message)
+
         messages.add_message(request, messages.INFO, status_print_list)
 
         messages_on_stage = get_messages(request)
@@ -1123,12 +1298,17 @@ def voter_edit_view(request, voter_id=0, voter_we_vote_id=""):
             'public_positions_owned_by_this_voter':     public_positions_owned_by_this_voter,
             'positions_for_friends_owned_by_this_voter':    positions_for_friends_owned_by_this_voter,
             'sms_phone_numbers_list':                   sms_phone_numbers_list,
-            'stripe_payments':                         StripeManager.retrieve_payments_total(voter_on_stage.we_vote_id),
+            'stripe_payments':                          StripeManager.retrieve_payments_total(voter_on_stage.we_vote_id),
             'supporters_list':                          supporters_list,
+            'volunteer_team_list':                      volunteer_team_list,
             'voter_id':                                 voter_on_stage.id,
             'voter':                                    voter_on_stage,
+            'voter_invitation_first_name':              voter_on_stage.first_name,
+            'voter_invitation_email':                   voter_on_stage.email,
+            'voter_invitation_password':                voter_invitation_password,
             'voter_list_duplicate_facebook':            voter_list_duplicate_facebook_updated,
             'voter_list_duplicate_twitter':             voter_list_duplicate_twitter_updated,
+            'password_proposed':                        generate_proposed_password(),
         }
     else:
         messages_on_stage = get_messages(request)
@@ -1147,7 +1327,7 @@ def voter_change_authority_process_view(request):
     :return:
     """
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'admin'}
+    authority_required = {'admin', 'voter_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -1189,6 +1369,9 @@ def voter_change_authority_process_view(request):
             elif authority_granted == 'verified_volunteer':
                 voter_on_stage.is_verified_volunteer = True
                 authority_changed = True
+            elif authority_granted == 'voter_manager':
+                voter_on_stage.is_voter_manager = True
+                authority_changed = True
 
             if authority_removed == 'admin':
                 voter_on_stage.is_admin = False
@@ -1208,6 +1391,9 @@ def voter_change_authority_process_view(request):
             elif authority_removed == 'verified_volunteer':
                 voter_on_stage.is_verified_volunteer = False
                 authority_changed = True
+            elif authority_removed == 'voter_manager':
+                voter_on_stage.is_voter_manager = False
+                authority_changed = True
 
             if authority_changed:
                 voter_on_stage.save()
@@ -1225,7 +1411,7 @@ def voter_change_authority_process_view(request):
 @login_required
 def voter_remove_facebook_auth_process_view(request, voter_id=0, voter_we_vote_id=""):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'admin'}  # We may want to add a "voter_admin"
+    authority_required = {'admin', 'voter_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -1268,7 +1454,7 @@ def voter_remove_facebook_auth_process_view(request, voter_id=0, voter_we_vote_i
 @login_required
 def voter_list_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    authority_required = {'admin'}  # We may want to add a "voter_admin"
+    authority_required = {'admin', 'voter_manager'}
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
@@ -1279,8 +1465,12 @@ def voter_list_view(request):
     is_political_data_manager = request.GET.get('is_political_data_manager', '')
     is_political_data_viewer = request.GET.get('is_political_data_viewer', '')
     is_verified_volunteer = request.GET.get('is_verified_volunteer', '')
+    is_voter_manager = request.GET.get('is_voter_manager', '')
     has_contributed = request.GET.get('has_contributed', '')
     has_friends = request.GET.get('has_friends', '')
+    voter_invitation_email = request.GET.get('voter_invitation_email', '')
+    voter_invitation_first_name = request.GET.get('voter_invitation_first_name', '')
+    voter_invitation_password = request.GET.get('voter_invitation_password', '')
     # run_scripts = positive_value_exists(request.GET.get('run_scripts', False))
     run_scripts = True
     show_voter_merge_data = request.GET.get('show_voter_merge_data', '')
@@ -1592,6 +1782,8 @@ def voter_list_view(request):
         voter_query = voter_query.filter(is_political_data_manager=True)
     if positive_value_exists(is_political_data_viewer):
         voter_query = voter_query.filter(is_political_data_viewer=True)
+    if positive_value_exists(is_voter_manager):
+        voter_query = voter_query.filter(is_voter_manager=True)
     if positive_value_exists(has_contributed):
         payments = StripePayments.objects.all()
         voter_query = voter_query.filter(we_vote_id__in=Subquery(payments.values('voter_we_vote_id')))
@@ -1645,15 +1837,6 @@ def voter_list_view(request):
             one_voter.to_voter_merge_status_list = to_merge_status_dict[one_voter.we_vote_id]
         modified_voter_list.append(one_voter)
 
-    # For the create new voter account form, create a proposed default password
-    # string.ascii_lowercase +
-    password_proposed = \
-        generate_random_string(
-            string_length=8,
-            chars=string.ascii_uppercase + string.digits + "!*$",
-            remove_confusing_digits=True
-        )
-
     template_values = {
         'is_admin':                     is_admin,
         'is_analytics_admin':           is_analytics_admin,
@@ -1661,12 +1844,16 @@ def voter_list_view(request):
         'is_political_data_manager':    is_political_data_manager,
         'is_political_data_viewer':     is_political_data_viewer,
         'is_verified_volunteer':        is_verified_volunteer,
+        'is_voter_manager':             is_voter_manager,
         'has_contributed':              has_contributed,
         'has_friends':                  has_friends,
         'has_voter_merge_problem':      has_voter_merge_problem,
         'messages_on_stage':            messages_on_stage,
-        'password_proposed':            password_proposed,
+        'password_proposed':            generate_proposed_password(),
         'show_voter_merge_data':        show_voter_merge_data,
+        'voter_invitation_email':       voter_invitation_email,
+        'voter_invitation_first_name':  voter_invitation_first_name,
+        'voter_invitation_password':    voter_invitation_password,
         'voter_list':                   modified_voter_list,
         'voter_list_found_count':       voter_list_found_count,
         'voter_id_signed_in':           voter_id,

@@ -33,7 +33,7 @@ from position.controllers import delete_positions_for_organization, move_positio
     update_position_entered_details_from_organization
 from position.models import PositionListManager
 from stripe_donations.controllers import move_donation_info_to_another_organization
-from twitter.models import TwitterUserManager
+from twitter.models import TwitterUserManager, create_detailed_counter_entry, mark_detailed_counter_entry
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager, Voter
 from voter_guide.models import VoterGuide, VoterGuideManager, VoterGuideListManager
 from wevote_functions.functions import convert_to_int, \
@@ -586,8 +586,9 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id):
     :param organization_we_vote_id:
     :return:
     """
-    status = ""
     success = True
+    status = ""
+    counter = None
     tweets_saved = None
     tweets_not_saved = None
 
@@ -604,6 +605,8 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id):
 
     # December 2021: Using the Twitter 1.1 API for user_timeline, since it is not yet available in 2.0
     # https://developer.twitter.com/en/docs/twitter-api/migrate/twitter-api-endpoint-map
+    print("tweepy OAuthHandler (Old API, probably in deprecated code) in organization_retrieve_tweets_from_twitter"
+          " -- organization_we_vote_id: ", organization_we_vote_id)
     auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
     auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
     api = tweepy.API(auth)
@@ -613,7 +616,17 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id):
     try:
         organization_twitter_id = organization_manager.fetch_twitter_handle_from_organization_we_vote_id(
             organization_we_vote_id)
-        new_tweets = api.user_timeline(screen_name=organization_twitter_id)
+        print("tweepy api.user_timeline (Old API, probably in deprecated code) in "
+              "organization_retrieve_tweets_from_twitter -- organization_we_vote_id: ", organization_we_vote_id)
+        counter = create_detailed_counter_entry('user_timeline', 'organization_retrieve_tweets_from_twitter', success,
+                                                {'voter_we_vote_id': organization_we_vote_id,
+                                                'text': 'Suspect that this code is deprecated'})
+
+        new_tweets = api.user_timeline(username=organization_twitter_id)
+    except tweepy.TooManyRequests:
+        success = False
+        status = 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_RATE_LIMIT_ERROR '
+        mark_detailed_counter_entry(counter, success, status)
     except tweepy.errors.HTTPException as e:
         status = "ORGANIZATION_RETRIEVE_TWEETS_FROM_TWITTER_AUTH_FAIL_HTTPException: " + str(e) + " "
         success = False
@@ -623,10 +636,12 @@ def organization_retrieve_tweets_from_twitter(organization_we_vote_id):
             'tweets_saved': tweets_saved,
             'tweets_not_saved': tweets_not_saved
         }
+        mark_detailed_counter_entry(counter, success, status)
         return results
     except tweepy.TweepyException as e:
         status = "ORGANIZATION_RETRIEVE_TWEETS_FROM_TWITTER_AUTH_FAIL: " + str(e) + " "
         success = False
+        mark_detailed_counter_entry(counter, success, status)
         results = {
             'success': success,
             'status': status,
@@ -3034,7 +3049,7 @@ def refresh_organization_data_from_master_tables(organization_we_vote_id):
     we_vote_hosted_profile_image_url_large = None
     we_vote_hosted_profile_image_url_medium = None
     we_vote_hosted_profile_image_url_tiny = None
-    twitter_json = {}
+    twitter_dict = {}
     success = False
     status = ""
     organization_updated = True
@@ -3099,9 +3114,9 @@ def refresh_organization_data_from_master_tables(organization_we_vote_id):
                     twitter_user.twitter_location != organization.twitter_location or \
                     twitter_user.twitter_followers_count != organization.twitter_followers_count or \
                     twitter_user.twitter_description != organization.twitter_description:
-                twitter_json = {
+                twitter_dict = {
                     'id':               twitter_user.twitter_id,
-                    'screen_name':      twitter_user.twitter_handle,
+                    'username':      twitter_user.twitter_handle,
                     'name':             twitter_user.twitter_name,
                     'followers_count':  twitter_user.twitter_followers_count,
                     'location':         twitter_user.twitter_location,
@@ -3128,7 +3143,7 @@ def refresh_organization_data_from_master_tables(organization_we_vote_id):
                     twitter_profile_banner_url_https = we_vote_image.we_vote_image_url
 
         update_organization_results = organization_manager.update_organization_twitter_details(
-            organization, twitter_json, twitter_profile_image_url_https,
+            organization, twitter_dict, twitter_profile_image_url_https,
             twitter_profile_background_image_url_https, twitter_profile_banner_url_https,
             we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
             we_vote_hosted_profile_image_url_tiny)

@@ -7,7 +7,52 @@
 {% load humanize %}
 
 <h1>Quick Statistics</h1>
-<p>API Calls in the last 30 days.</p>
+<h1></h1>
+
+<h4>Twitter / X API Usage As Reported By Twitter</h4>
+    <div style="padding: 10px 2px 10px 20px">
+      <input type="hidden" id="twitter_api_limits" value="{{ twitter_api_limits }} " />
+      <input type="radio" id="limit" name="lim" value="child">
+      <label for="limit">Show API Endpoints where "Remaining Calls" < "Limit"</label>
+      <input type="radio" id="unlimited" name="lim" value="child" style="margin-left: 16px">
+      <label for="unlimited">Show All API Endpoints</label>
+    </div>
+    <table class="table" style="width: 900px">
+        <thead id="twit_stat_rows">
+            <tr>
+                <th>Twitter API Endpoint</th>
+                <th>Remaining</th>
+                <th>Limit</th>
+                <th style="width: 200px">Date Limit Resets</th>
+            </tr>
+        </thead>
+    </table>
+    <br />
+
+{% if twitter_daily_summary_list %}
+<h4>Twitter / X API Calls (Our Count)</h4>
+    <p>15 most recent days-worth of API calls.</p>
+    <p>We need to track the number of calls to the X API because there are limits to the number of calls we can make per day.</p>
+    <table class="table" style="width: 500px">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Total # of Calls</th>
+                <th>Succeeding</th>
+                <th>Failing</th>
+            </tr>
+        </thead>
+       {% for twitter_daily_summary in twitter_daily_summary_list %}
+        <tr>
+            <td>{{ twitter_daily_summary.date_string }}</td>
+            <td>{{ twitter_daily_summary.total_count|intcomma }}</td>
+            <td>{{ twitter_daily_summary.succeeding_count|intcomma }}</td>
+            <td>{{ twitter_daily_summary.failing_count|intcomma }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br />
+{% endif %}
 
 {% if ctcl_daily_summary_list %}
 <h4>CTCL API Calls</h4>
@@ -28,24 +73,6 @@
     <br />
 {% endif %}
 
-{% if ballotpedia_daily_summary_list %}
-    <h4>Ballotpedia API Calls</h4>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th># of Calls</th>
-            </tr>
-        </thead>
-       {% for ballotpedia_daily_summary in ballotpedia_daily_summary_list %}
-        <tr>
-            <td>{{ ballotpedia_daily_summary.date_string }}</td>
-            <td>{{ ballotpedia_daily_summary.count|intcomma }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-    <br />
-{% endif %}
 
 {% if google_civic_daily_summary_list %}
 <h4>Google API Calls</h4>
@@ -67,6 +94,52 @@
     </table>
     <br />
 {% endif %}
+
+
+
+{% if sendgrid_daily_summary_list %}
+<h4>SendGrid API Calls</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th># of Calls</th>
+            </tr>
+        </thead>
+       {% for sendgrid_daily_summary in sendgrid_daily_summary_list %}
+        <tr>
+            <td>{{ sendgrid_daily_summary.date_string }}</td>
+            <td>{{ sendgrid_daily_summary.count|intcomma }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br />
+{% endif %}
+
+
+{% if ballotpedia_daily_summary_list or vote_smart_daily_summary_list or vote_usa_daily_summary_list or targetsmart_daily_summary_list %}
+    <h2>Historical APIs</h2>
+{% endif %}
+
+{% if ballotpedia_daily_summary_list %}
+    <h4>Ballotpedia API Calls</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th># of Calls</th>
+            </tr>
+        </thead>
+       {% for ballotpedia_daily_summary in ballotpedia_daily_summary_list %}
+        <tr>
+            <td>{{ ballotpedia_daily_summary.date_string }}</td>
+            <td>{{ ballotpedia_daily_summary.count|intcomma }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br />
+{% endif %}
+
 
 {% if vote_smart_daily_summary_list %}
     <h4>Vote Smart API Calls</h4>
@@ -106,26 +179,6 @@
 {% endif %}
 
 
-{% if sendgrid_daily_summary_list %}
-<h4>SendGrid API Calls</h4>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th># of Calls</th>
-            </tr>
-        </thead>
-       {% for sendgrid_daily_summary in sendgrid_daily_summary_list %}
-        <tr>
-            <td>{{ sendgrid_daily_summary.date_string }}</td>
-            <td>{{ sendgrid_daily_summary.count|intcomma }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-    <br />
-{% endif %}
-
-
 {% if targetsmart_daily_summary_list %}
 <h4>TargetSmart API Calls</h4>
     <table class="table">
@@ -144,5 +197,46 @@
     </table>
     <br />
 {% endif %}
+
+  <script>
+    const lim = $('#limit');
+    const unlim = $('#unlimited');
+    const json_limits = $('input#twitter_api_limits').val()
+    const twitter_api_limits = JSON.parse(json_limits);
+    // for testing ... twitter_api_limits[6]['remaining'] = 25;
+
+    function showAPIRows() {
+      let markup = '';
+      $("tr.twit_stat_row").remove();
+      const is_unlimited = unlim.is(":checked");
+      for (let i = 0; i < twitter_api_limits.length; i++) {
+        const twit_stat = twitter_api_limits[i];
+        const { endpoint, remaining, limit, reset } = twit_stat;
+        if (is_unlimited || (remaining !== limit)) {
+          markup += '<tr class="twit_stat_row"><td>' + endpoint + '</td><td>' + remaining
+                        + '</td><td>' + limit + '</td><td>' + reset + '</td></tr>';
+        }
+      }
+      const tsr = $('#twit_stat_rows');
+      tsr.append(markup);
+    }
+
+    if( !lim.is(":checked") && !unlim.is(":checked")) {
+        lim.attr('checked', true);
+        showAPIRows();
+    }
+
+    lim.change(function () {
+        if ($(this).prop("checked")) {
+           showAPIRows(true);
+        }
+    });
+
+    unlim.change(function () {
+        if ($(this).prop("checked")) {
+           showAPIRows(false);
+        }
+    });
+  </script>
 
 {%  endblock %}

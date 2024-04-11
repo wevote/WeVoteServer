@@ -1,0 +1,133 @@
+{# templates/googlebot_stats/googlebot_stats.html #}
+{% extends "template_base.html" %}
+
+{%  block content %}
+
+    <h1>Googlebot Queries received by the Production Server</h1>
+    <h3>Query Dates</h3>
+    Google's Crawlbot crawls most sites at a frequency ranging from every few days to as long as once a month.
+    <div style="height: 10px;"></div>
+    <div id="chartContainer"></div>
+
+    <h3 style="padding-top: 30px; padding-bottom: 20px">Queries recorded in the database (prior 6 months)</h3>
+    <div id="table"  style="margin-left: 54px; height: 42vh; width: fit-content; overflow-y: auto; border: 1px solid darkgreen;">
+      <table>
+        <thead style="position: sticky; top: 0; background: white; border-bottom: 1px solid gray">
+          <tr>
+            <th style="padding: 0 6px; text-align: left; width: 150px;">Date</th>
+            <th style="padding: 0 6px; text-align: left; width: 140px;">Type</th>
+            <th style="padding: 0 6px; text-align: left; width: 62px;">Google</th>
+            <th style="padding: 0 6px; text-align: left;">Remote IP</th>
+            <th style="padding: 0 6px; text-align: left;">Reverse DNS</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in request_list %}
+            {% if "xml" in item.request_url_type %}
+              <tr style="background-color: lightgoldenrodyellow; border-bottom: 1px solid black">
+            {% else %}
+              <tr>
+            {%  endif %}
+              <td style="padding: 0 6px; width: 150px;" nowrap>{{ item.date_requested }}</td>
+              <td style="padding: 0 6px">{{ item.request_url_type }}</td>
+              <td style="padding: 0 6px" id="fromGoogle">{{ item.is_from_google }}</td>
+              <td style="padding: 0 6px">{{ item.remote_address }}</td>
+              <td style="padding: 0 6px;" nowrap>{{ item.remote_dns }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="margin-top: 50px">Run a test Query</h3>
+    <button id="runTestQuery" style="margin: 16px 0 10px 20px">Run a Test Query Now</button>
+    <div id="testWindowLabel" style="margin: 10px 0 10px 55px; display: none">
+        <div>Querying:
+            <a href="https://api.wevoteusa.org/apis/v1/googlebotSiteMap/sitemap_index.xml">
+                https://api.wevoteusa.org/apis/v1/googlebotSiteMap/sitemap_index.xml
+            </a>
+        </div>
+        <div>The links in the xml displayed in the box below, are clickable and open in a new tab</div>
+    </div>
+
+    <div id="testQueryWindow" style="margin: 10px 0 10px 55px; padding: 10px; border: 1px solid gray; height:300px; width: 650px; display: none"></div>
+    <div id="bottomPadding" style="padding: 50px"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      const chartContainer = $('#chartContainer');
+      chartContainer.append('<canvas id="chartCanvas"></canvas>');
+      chartContainer.css({
+          'margin': "1% 5% 1% 5%",
+          'border': '1px solid black',
+          'min-height': '50vh'
+      });
+
+      const $chartCanvas = $("#chartCanvas");
+      $chartCanvas.css('height: 50vh !important');
+
+      const ctx = $chartCanvas[0].getContext("2d");
+      new Chart(ctx, {
+        type: 'bar',
+          data: {
+            labels: {{ dates | safe}},
+            datasets: [{
+              label: 'map?.html from Google',
+              data: {{ counts_google_map | safe }},
+              backgroundColor: 'DodgerBlue',
+            }, {
+              label: 'site_map.xml from Google',
+              data: {{ counts_google_xml | safe }},
+              backgroundColor: 'Cyan',
+            }, {
+              label: 'map?.html from Other Hosts',
+              data: {{ counts_other_map | safe }},
+              backgroundColor: 'ForestGreen',
+            }, {
+              label: 'site_map.xml from Other Hosts',
+              data: {{ counts_other_xml | safe }},
+              backgroundColor: 'LightGreen',
+            }],
+          },
+          options: {
+            plugins: {
+              title: {
+              display: true,
+              text: 'Googlebot Queries from the prior 90 days'
+              },
+            },
+            responsive: true,
+            scales: {
+              x: {
+                stacked: true,
+              },
+              y: {
+                stacked: true
+              }
+            },
+          }
+      });
+
+      // Click handler for showing xml
+      $("#runTestQuery").button().on("click", function() {
+        console.log('clicked');
+        $.ajax({
+          type: "GET",
+          url: 'https://api.wevoteusa.org/apis/v1/googlebotSiteMap/sitemap_index.xml',
+          success: function (data) {
+            console.log(data);
+            $("#testWindowLabel").css("display", "block");
+            let html = data.replace(/<(.*xml version=.*?)>/, "<div>&lt;$1&gt;</div>")
+                .replace(/<(\/?sitemapindex.*?)>/g, "<div>&lt;$1&gt;</div>")
+                .replace(/<(\/?sitemap)>/g, "<div><span style=\"padding-left: 15px\" ></span>&lt;$1&gt;</div>")
+                .replace(/<loc>(.*?)<\/loc>/g, "<div><span style=\"padding-left: 30px\" ></span>&lt;loc&gt;<a href=\"$1\" target=\"_blank\">$1</a>&lt;\/loc&gt</div>");
+            console.log(html)
+            $("#testQueryWindow").html(html).css("display", "block");
+          },
+          error: function(XMLHttpRequest, textStatus, errorThrown) {
+            $("#runTestQuery").html("FAILURE: Look at the local Python console log to figure out what went wrong").css('background-color', 'LIGHTCORAL');
+          },
+        });
+      });
+    </script>
+{% endblock %}

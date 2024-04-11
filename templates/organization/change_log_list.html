@@ -3,7 +3,7 @@
 <table class="table">
     <thead>
         <tr>
-            <th>Endorser Change Log</th>
+            <th>Change Log</th>
             <th>Who Made Change</th>
         </tr>
     </thead>
@@ -11,6 +11,9 @@
     <tr>
         <td>
             {{ change_log_entry.change_description_augmented|safe }}
+            {% if change_log_entry.log_entry_message %}
+                {{ change_log_entry.log_entry_message }}
+            {% endif %}
         </td>
         <td>
             {% if change_log_entry.changed_by_name %}

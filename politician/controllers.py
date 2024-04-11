@@ -30,9 +30,9 @@ from voter.models import VoterManager
 from config.base import get_environment_variable
 import wevote_functions.admin
 from wevote_functions.functions import candidate_party_display, convert_to_int, \
-    convert_to_political_party_constant, \
-    convert_we_vote_date_string_to_date_as_integer, generate_random_string, positive_value_exists, \
+    convert_to_political_party_constant, generate_random_string, positive_value_exists, \
     process_request_from_master, remove_middle_initial_from_name
+from wevote_functions.functions_date import convert_we_vote_date_string_to_date_as_integer
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -556,6 +556,32 @@ def figure_out_politician_conflict_values(politician1, politician2):
                             politician_merge_conflict_values[attribute] = 'CONFLICT'
                     else:
                         politician_merge_conflict_values[attribute] = 'CONFLICT'
+            elif attribute == "seo_friendly_path":
+                if politician1_attribute_value_lower_case == politician2_attribute_value_lower_case:
+                    politician_merge_conflict_values[attribute] = 'MATCHING'
+                elif len(politician1_attribute_value_lower_case) > 0 and len(
+                        politician2_attribute_value_lower_case) == 0:
+                    politician_merge_conflict_values[attribute] = 'POLITICIAN1'
+                elif len(politician1_attribute_value_lower_case) == 0 and len(
+                        politician2_attribute_value_lower_case) > 0:
+                    politician_merge_conflict_values[attribute] = 'POLITICIAN2'
+                elif len(politician1_attribute_value_lower_case) > 5 and len(
+                        politician2_attribute_value_lower_case) > 5:
+                    # If we remove the last four digits from the path, are the strings identical?
+                    politician1_attribute_value_lower_case_minus_four_digits = \
+                        politician1_attribute_value_lower_case[:-4]
+                    politician2_attribute_value_lower_case_minus_four_digits = \
+                        politician2_attribute_value_lower_case[:-4]
+                    if politician1_attribute_value_lower_case == \
+                            politician2_attribute_value_lower_case_minus_four_digits:
+                        politician_merge_conflict_values[attribute] = 'POLITICIAN1'
+                    elif politician2_attribute_value_lower_case == \
+                            politician1_attribute_value_lower_case_minus_four_digits:
+                        politician_merge_conflict_values[attribute] = 'POLITICIAN2'
+                    else:
+                        politician_merge_conflict_values[attribute] = 'CONFLICT'
+                else:
+                    politician_merge_conflict_values[attribute] = 'CONFLICT'
             elif attribute == "state_code":
                 if politician1_attribute_value_lower_case == politician2_attribute_value_lower_case:
                     politician_merge_conflict_values[attribute] = 'MATCHING'
@@ -1554,6 +1580,15 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
     #         }
     #         latest_politician_supporter_endorsement_list.append(one_supporter_dict)
 
+    # Find alternate URLs from PoliticianSEOFriendlyPath
+    queryset = PoliticianSEOFriendlyPath.objects.using('readonly').all()
+    queryset = queryset.filter(politician_we_vote_id=politician.we_vote_id)
+    seo_friendly_path_object_list = list(queryset)
+    for one_seo_friendly_path_object in seo_friendly_path_object_list:
+        if one_seo_friendly_path_object.final_pathname_string and \
+                one_seo_friendly_path_object.final_pathname_string not in seo_friendly_path_list:
+            seo_friendly_path_list.append(one_seo_friendly_path_object.final_pathname_string)
+
     # If smaller sizes weren't stored, use large image
     if politician.we_vote_hosted_profile_image_url_medium:
         we_vote_hosted_profile_image_url_medium = politician.we_vote_hosted_profile_image_url_medium
@@ -1602,9 +1637,11 @@ def politician_retrieve_for_api(  # politicianRetrieve & politicianRetrieveAsOwn
         # 'is_supporters_count_minimum_exceeded': politician.is_supporters_count_minimum_exceeded(),
         # 'latest_politician_supporter_endorsement_list':  latest_politician_supporter_endorsement_list,
         # 'latest_politician_supporter_list':  latest_politician_supporter_list,
+        'profile_image_background_color':   politician.profile_image_background_color,
         'representative_list':              politician_representative_dict_list,
         'representative_list_exists':       politician_representative_list_exists,
         'seo_friendly_path':                politician.seo_friendly_path,
+        'seo_friendly_path_list':           seo_friendly_path_list,
         'state_code':                       politician.state_code,
         'status':                           status,
         'success':                          success,
@@ -1739,6 +1776,7 @@ def politicians_import_from_structured_json(structured_json):  # politiciansSync
         'politician_url4',
         'politician_url5',
         'politician_youtube_id',
+        'profile_image_background_color',
         'profile_image_type_currently_active',
         'seo_friendly_path',
         'state_code',
@@ -1985,12 +2023,18 @@ def update_politician_details_from_candidate(politician=None, candidate=None):
         object1=candidate,
         object2=politician,
         object1_field_name_list=[
+            'ballotpedia_photo_url',
+            'ballotpedia_profile_image_url_https',
             'instagram_followers_count',
             'instagram_handle',
+            'linkedin_photo_url',
+            'linkedin_profile_image_url_https',
             'linkedin_url',
             'photo_url_from_vote_usa',
             'vote_usa_profile_image_url_https',
+            'wikipedia_photo_url',
             'wikipedia_url',
+            'wikipedia_profile_image_url_https',
             'youtube_url',
         ],
         only_change_object2_field_if_incoming_value=True,
@@ -2185,9 +2229,15 @@ def update_politician_details_from_candidate(politician=None, candidate=None):
         object1=candidate,
         object2=politician,
         object1_field_name_list=[
+            'we_vote_hosted_profile_ballotpedia_image_url_large',
+            'we_vote_hosted_profile_ballotpedia_image_url_medium',
+            'we_vote_hosted_profile_ballotpedia_image_url_tiny',
             'we_vote_hosted_profile_facebook_image_url_large',
             'we_vote_hosted_profile_facebook_image_url_medium',
             'we_vote_hosted_profile_facebook_image_url_tiny',
+            'we_vote_hosted_profile_linkedin_image_url_large',
+            'we_vote_hosted_profile_linkedin_image_url_medium',
+            'we_vote_hosted_profile_linkedin_image_url_tiny',
             'we_vote_hosted_profile_twitter_image_url_large',
             'we_vote_hosted_profile_twitter_image_url_medium',
             'we_vote_hosted_profile_twitter_image_url_tiny',
@@ -2197,6 +2247,9 @@ def update_politician_details_from_candidate(politician=None, candidate=None):
             'we_vote_hosted_profile_vote_usa_image_url_large',
             'we_vote_hosted_profile_vote_usa_image_url_medium',
             'we_vote_hosted_profile_vote_usa_image_url_tiny',
+            'we_vote_hosted_profile_wikipedia_image_url_large',
+            'we_vote_hosted_profile_wikipedia_image_url_medium',
+            'we_vote_hosted_profile_wikipedia_image_url_tiny',
         ],
         only_change_object2_field_if_incoming_value=True,
         only_change_object2_field_if_no_existing_value=True)

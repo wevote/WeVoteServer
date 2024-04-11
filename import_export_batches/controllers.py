@@ -33,7 +33,9 @@ from politician.models import Politician, PoliticianManager
 from polling_location.models import PollingLocationManager
 from position.models import PositionManager, INFORMATION_ONLY, OPPOSE, SUPPORT
 from twitter.models import TwitterUserManager
-from voter.models import VoterManager
+from volunteer_task.models import VOLUNTEER_ACTION_CANDIDATE_CREATED, VOLUNTEER_ACTION_POSITION_SAVED, \
+    VolunteerTaskManager
+from voter.models import fetch_voter_from_voter_device_link, VoterManager
 from voter_guide.controllers import refresh_existing_voter_guides
 from voter_guide.models import ORGANIZATION_WORD
 import wevote_functions.admin
@@ -126,7 +128,7 @@ def create_batch_row_actions(
         kind_of_batch = batch_description.kind_of_batch
 
         try:
-            batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
+            batch_header_map = BatchHeaderMap.objects.using('readonly').get(batch_header_id=batch_header_id)
             batch_header_map_found = True
         except BatchHeaderMap.DoesNotExist:
             # This is fine
@@ -3013,7 +3015,7 @@ def create_batch_row_action_ballot_item(batch_description,
     else:
         google_civic_election_id = str(batch_description.google_civic_election_id)
 
-    # Gather information in advance so we can try to only do a single create (and avoid another save if we can help it)
+    # Gather information in advance, so we can try to only do a single create (and avoid another save if we can help it)
 
     # NOTE: If you add incoming header names here, make sure to update BATCH_IMPORT_KEYS_ACCEPTED_FOR_BALLOT_ITEMS
     # These are variables that might come from an import file, and are used to identify which
@@ -3097,7 +3099,7 @@ def create_batch_row_action_ballot_item(batch_description,
             positive_value_exists(contest_office_name):
         # See if we have an office name
         contest_office_list_manager = ContestOfficeListManager()
-        # Needs to be read_only=False so we don't get "terminating connection due to conflict with recovery" error
+        # Needs to be read_only=False, so we don't get "terminating connection due to conflict with recovery" error
         matching_results = contest_office_list_manager.retrieve_contest_offices_from_non_unique_identifiers(
             contest_office_name=contest_office_name,
             google_civic_election_id=google_civic_election_id,
@@ -5072,7 +5074,11 @@ def import_polling_location_data_from_batch_row_actions(
 
 
 def import_position_data_from_batch_row_actions(
-        batch_header_id, batch_row_id, create_entry_flag=False, update_entry_flag=False):
+        batch_header_id,
+        batch_row_id,
+        create_entry_flag=False,
+        update_entry_flag=False,
+        voter_device_id=None):
     success = False
     status = ""
     number_of_positions_created = 0
@@ -5103,8 +5109,8 @@ def import_position_data_from_batch_row_actions(
             # error handling
             status += "IMPORT_POSITION_ENTRY-KIND_OF_ACTION_MISSING"
             results = {
-                'success':                          success,
-                'status':                           status,
+                'success':                      success,
+                'status':                       status,
                 'number_of_positions_created':  number_of_positions_created,
                 'number_of_positions_updated':  number_of_positions_updated
             }
@@ -5127,6 +5133,15 @@ def import_position_data_from_batch_row_actions(
             'number_of_positions_updated':    number_of_positions_updated
         }
         return results
+
+    voter_id = 0
+    volunteer_task_manager = VolunteerTaskManager()
+    voter_we_vote_id = ""
+    if positive_value_exists(voter_device_id):
+        voter = fetch_voter_from_voter_device_link(voter_device_id)
+        if hasattr(voter, 'we_vote_id'):
+            voter_id = voter.id
+            voter_we_vote_id = voter.we_vote_id
 
     position_manager = PositionManager()
     google_civic_election_id = 0
@@ -5166,6 +5181,19 @@ def import_position_data_from_batch_row_actions(
             number_of_positions_created += 1
             position = results['position']
             success = True
+
+            # Give volunteer credit - if here, we know a position was just created
+            if positive_value_exists(voter_we_vote_id):
+                try:
+                    # Give the volunteer who entered this credit
+                    task_results = volunteer_task_manager.create_volunteer_task_completed(
+                        action_constant=VOLUNTEER_ACTION_POSITION_SAVED,
+                        voter_id=voter_id,
+                        voter_we_vote_id=voter_we_vote_id,
+                    )
+                except Exception as e:
+                    status += 'FAILED_TO_CREATE_VOLUNTEER_TASK_COMPLETED: ' \
+                              '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
 
             # now update BatchRowActionPosition table entry
             try:
@@ -5804,8 +5832,14 @@ def delete_ballot_item_data_from_batch_row_actions(batch_header_id, ballot_item_
     return results
 
 
-def import_data_from_batch_row_actions(kind_of_batch, kind_of_action, batch_header_id, batch_row_id=0, state_code="",
-                                       ballot_item_id=0):
+def import_data_from_batch_row_actions(
+        kind_of_batch,
+        kind_of_action,
+        batch_header_id,
+        batch_row_id=0,
+        state_code="",
+        ballot_item_id=0,
+        voter_device_id=""):
     """
     Cycle through and process batch_row_action entries.
     The kind_of_action is either IMPORT_CREATE or IMPORT_ADD_TO_EXISTING or IMPORT_DELETE.
@@ -5815,6 +5849,7 @@ def import_data_from_batch_row_actions(kind_of_batch, kind_of_action, batch_head
     :param batch_row_id:
     :param state_code:
     :param ballot_item_id:
+    :param voter_device_id:
     :return:
     """
     success = False
@@ -5927,7 +5962,12 @@ def import_data_from_batch_row_actions(kind_of_batch, kind_of_action, batch_head
                 number_of_table_rows_updated = results['number_updated']
             success = True
     elif kind_of_batch == POSITION:
-        results = import_position_data_from_batch_row_actions(batch_header_id, batch_row_id, create_flag, update_flag)
+        results = import_position_data_from_batch_row_actions(
+            batch_header_id,
+            batch_row_id,
+            create_flag,
+            update_flag,
+            voter_device_id=voter_device_id)
         status += results['status']
         if results['success']:
             if results['number_of_positions_created']:

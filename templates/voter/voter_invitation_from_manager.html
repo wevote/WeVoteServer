@@ -1,0 +1,32 @@
+{# templates/voter/voter_invitation_from_manager.html #}
+
+{% load template_filters %}
+{% load humanize %}
+<h2>Please copy this message and send it to this voter:</h2>
+<div class="form-group">
+    <div class="col-sm-12 ">
+        <textarea
+          name="voter_invitation_subject"
+          class="form-control animated"
+          id="voter_invitation_subject_id"
+          rows="1"
+        >WeVote Admin Tools Access: {{ voter_invitation_email }} (Political Data Tools)</textarea>
+        <textarea
+          name="voter_invitation"
+          class="form-control animated"
+          id="voter_invitation_id"
+          rows="12"
+        >
+Hello{% if voter_invitation_first_name %} {{ voter_invitation_first_name }}{% endif %}, you can sign into the WeVote Admin Tools server (sometimes called the API server) with this account. Through this interface, you can see our current data, and find the tools we use to collect it.
+
+URL: https://api.WeVoteUSA.org/admin
+Email: {{ voter_invitation_email }}
+Password: {{ voter_invitation_password }}
+
+Once you sign in, please click around to see what data exists (I recommend visiting Elections, Offices, Candidates and Endorsers). Please let me know if you have any questions.
+
+Best regards,
+
+</textarea>
+    </div>
+</div>

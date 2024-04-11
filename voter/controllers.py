@@ -208,6 +208,9 @@ def delete_all_voter_information_permanently(voter_to_delete=None, user=None):  
 
     # Delete suggested friends
     delete_suggested_friends_results = delete_suggested_friends_for_voter(voter_to_delete_we_vote_id)
+
+    # make delete suggested for
+
     status += " " + delete_suggested_friends_results['status']
 
     # Delete friend invitations
@@ -828,6 +831,7 @@ def merge_voter_accounts(from_voter, to_voter):
             or positive_value_exists(from_voter.is_political_data_manager) \
             or positive_value_exists(from_voter.is_political_data_viewer) \
             or positive_value_exists(from_voter.is_verified_volunteer) \
+            or positive_value_exists(from_voter.is_voter_manager) \
             or positive_value_exists(from_voter.last_name) \
             or positive_value_exists(from_voter.middle_name) \
             or positive_value_exists(from_voter.notification_settings_flags) \
@@ -873,6 +877,9 @@ def merge_voter_accounts(from_voter, to_voter):
             if positive_value_exists(from_voter.is_verified_volunteer) \
                     and not positive_value_exists(to_voter.is_verified_volunteer):
                 to_voter.is_verified_volunteer = from_voter.is_verified_volunteer
+            if positive_value_exists(from_voter.is_voter_manager) \
+                    and not positive_value_exists(to_voter.is_voter_manager):
+                to_voter.is_voter_manager = from_voter.is_voter_manager
             if positive_value_exists(from_voter.last_name) and not positive_value_exists(to_voter.last_name):
                 to_voter.last_name = from_voter.last_name
             if positive_value_exists(from_voter.middle_name) and not positive_value_exists(to_voter.middle_name):
@@ -1797,12 +1804,13 @@ def voter_cache_facebook_images_process(voter_id, facebook_auth_response_id, is_
     # Cache original and resized images
 
     t0 = time()
+    status = ""
     # print("process started")
     facebook_manager = FacebookManager()
     facebook_auth_response = facebook_manager.retrieve_facebook_auth_response_by_id(facebook_auth_response_id)
     voter = Voter.objects.get(id=voter_id)  # This voter existed immediately before the call -- so this is safe
     voter.last_login = now()                # TODO: 1/12/2023, We should do this for the other sign in methods too
-    voter.profile_image_type_currently_active = "FACEBOOK"
+    # voter.profile_image_type_currently_active = "FACEBOOK"  # This is handled in save_facebook_user_values
     voter.save()
 
     # print('^^^ voter_cache_facebook_images_process BEFORE in process', os.getpid())
@@ -1812,7 +1820,20 @@ def voter_cache_facebook_images_process(voter_id, facebook_auth_response_id, is_
         is_active_version=True,
         kind_of_image_facebook_profile=True,
         voter_we_vote_id=voter.we_vote_id)
-    image_url_https = initial_cache_results['image_url_https']
+    try:
+        image_url_https = initial_cache_results['image_url_https']
+    except Exception as e:
+        status += "FACEBOOK_IMAGE_URL_NOT_RETURNED: " + str(e) + " " + str(initial_cache_results) + " "
+        image_url_https = ''
+
+    if not positive_value_exists(image_url_https):
+        status += "VOTER_CACHE_FACEBOOK_IMAGES_PROCESS_NO_URL "
+        logger.error(status)
+        return {
+            'we_vote_hosted_profile_image_url_large': '',
+            'we_vote_hosted_profile_image_url_medium': '',
+            'we_vote_hosted_profile_image_url_tiny': '',
+        }
 
     we_vote_image_manager = WeVoteImageManager()
     set_active_results = we_vote_image_manager.set_active_version_false_for_other_images(
@@ -1838,9 +1859,12 @@ def voter_cache_facebook_images_process(voter_id, facebook_auth_response_id, is_
     # Update the facebook photos in the Voter record
     voter_manager = VoterManager()
     voter_manager.save_facebook_user_values(
-        voter, facebook_auth_response, cached_facebook_profile_image_url_https,
-        we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
-        we_vote_hosted_profile_image_url_tiny)
+        voter,
+        facebook_auth_response,
+        cached_facebook_profile_image_url_https=cached_facebook_profile_image_url_https,
+        we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
+        we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
+        we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
     dtc = time() - t0
     # 12/20/22: This takes 1.2 seconds on my local postgres, but 5 to 15 seconds in production,
     # leave this logger active for a few months, so we can gather data
@@ -1854,6 +1878,7 @@ def voter_cache_facebook_images_process(voter_id, facebook_auth_response_id, is_
         'we_vote_hosted_profile_image_url_medium': we_vote_hosted_profile_image_url_medium,
         'we_vote_hosted_profile_image_url_tiny': we_vote_hosted_profile_image_url_tiny,
     }
+
 
 def voter_merge_two_accounts_for_facebook(facebook_secret_key, facebook_user_id, from_voter, voter_device_id,
                                           current_voter_found, status):
@@ -1927,7 +1952,7 @@ def voter_merge_two_accounts_for_facebook(facebook_secret_key, facebook_user_id,
             return None, None, error_results
 
     # Cache original and resized images in a SQS message (job)
-    process_in_sqs_job = True
+    process_in_sqs_job = True  # Switch to 'False' to test locally without an SQS job
     if process_in_sqs_job:
         submit_web_function_job('voter_cache_facebook_images_process', {
                         'voter_id': facebook_owner_voter.id,
@@ -3052,6 +3077,60 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
     else:
         move_twitter_end_time = time()
 
+    move_candidate_change_log_start_time = time()
+    if not voter_merge_status.move_candidate_change_log_complete:  # Proceed even if process above has failed
+        from voter.controllers_changes import move_candidate_change_log_entries_to_another_voter
+        move_candidate_change_log_results = move_candidate_change_log_entries_to_another_voter(
+            from_voter_we_vote_id, to_voter_we_vote_id)
+        # Log the results
+        move_candidate_change_log_end_time = time()
+        status += move_candidate_change_log_results['status']
+        local_success = move_candidate_change_log_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=move_candidate_change_log_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_candidate_change_log_start_time,
+            status=status,
+            step_name='move_candidate_change_log',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_candidate_change_log_end_time = time()
+
+    move_voter_change_log_start_time = time()
+    if not voter_merge_status.move_voter_change_log_complete:  # Proceed even if process above has failed
+        from voter.controllers_changes import move_voter_change_log_entries_to_another_voter
+        move_voter_change_log_results = move_voter_change_log_entries_to_another_voter(
+            from_voter_we_vote_id, to_voter_we_vote_id)
+        # Log the results
+        move_voter_change_log_end_time = time()
+        status += move_voter_change_log_results['status']
+        local_success = move_voter_change_log_results['success']
+        if not local_success:
+            success = False
+        results = voter_merge_tracking(
+            end_time=move_voter_change_log_end_time,
+            from_voter_we_vote_id=from_voter_we_vote_id,
+            start_time=move_voter_change_log_start_time,
+            status=status,
+            step_name='move_voter_change_log',
+            success=local_success,
+            to_voter_we_vote_id=to_voter_we_vote_id,
+            voter_merge_status=voter_merge_status)
+        if results['success']:
+            voter_merge_status = results['voter_merge_status']
+        else:
+            success = False
+    else:
+        move_voter_change_log_end_time = time()
+
     move_voter_contact_start_time = time()
     if not voter_merge_status.move_voter_contact_complete:  # Proceed even if process above has failed
         from voter.controllers_contacts import move_voter_contact_email_to_another_voter
@@ -3528,6 +3607,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
     voter_linked_org_duration = voter_linked_org_end_time - voter_linked_org_start_time
     move_apple_duration = move_apple_user_end_time - move_apple_user_start_time
     repair_positions_duration = repair_positions_end_time - repair_positions_start_time
+    move_candidate_change_log_duration = move_candidate_change_log_end_time - move_candidate_change_log_start_time
     move_positions_duration = move_positions_end_time - move_positions_start_time
     move_organization_duration = move_organization_end_time - move_organization_start_time
     move_friends_duration = move_friends_end_time - move_friends_start_time
@@ -3539,6 +3619,7 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
     move_sms_duration = move_sms_end_time - move_sms_start_time
     move_facebook_duration = move_facebook_end_time - move_facebook_start_time
     move_twitter_duration = move_twitter_end_time - move_twitter_start_time
+    move_voter_change_log_duration = move_voter_change_log_end_time - move_voter_change_log_start_time
     move_voter_contact_duration = move_voter_contact_end_time - move_voter_contact_start_time
     move_voter_plan_duration = move_voter_plan_end_time - move_voter_plan_start_time
     move_donations_duration = move_donations_end_time - move_donations_start_time
@@ -3569,6 +3650,8 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
                  ' seconds, move_sms took ' + "{:.6f}".format(move_sms_duration) +
                  ' seconds, move_facebook took ' + "{:.6f}".format(move_facebook_duration) +
                  ' seconds, move_twitter took ' + "{:.6f}".format(move_twitter_duration) +
+                 ' seconds, move_candidate_change_log took ' + "{:.6f}".format(move_candidate_change_log_duration) +
+                 ' seconds, move_voter_change_log took ' + "{:.6f}".format(move_voter_change_log_duration) +
                  ' seconds, move_voter_contact took ' + "{:.6f}".format(move_voter_contact_duration) +
                  ' seconds, move_voter_plan took ' + "{:.6f}".format(move_voter_plan_duration) +
                  ' seconds, move_donations took ' + "{:.6f}".format(move_donations_duration) +
@@ -3586,8 +3669,8 @@ def voter_merge_two_accounts_action(  # voterMergeTwoAccounts, part 2
                  ' seconds, total took ' + "{:.6f}".format(time_difference) + ' seconds')
 
     results = {
-        'status':                       status,
-        'success':                      success,
+        'status':   status,
+        'success':  success,
     }
     return results
 
@@ -4130,6 +4213,7 @@ def voter_retrieve_for_api(  # voterRetrieve
             'is_political_data_viewer':         voter.is_political_data_viewer,
             'is_signed_in':                     voter.is_signed_in(),
             'is_verified_volunteer':            voter.is_verified_volunteer,
+            'is_voter_manager':                 voter.is_voter_manager,
             'last_name':                        voter.last_name,
             'linked_organization_we_vote_id':   voter.linked_organization_we_vote_id,
             'notification_settings_flags':      voter.notification_settings_flags,
@@ -4183,6 +4267,7 @@ def voter_retrieve_for_api(  # voterRetrieve
             'is_political_data_manager':        False,
             'is_political_data_viewer':         False,
             'is_verified_volunteer':            False,
+            'is_voter_manager':                 False,
             'profile_image_type_currently_active':  '',
             'signed_in':                        False,
             'signed_in_facebook':               False,
@@ -4710,8 +4795,8 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
         current_voter = repair_results['voter']
 
     # Temporarily store Twitter values from current_voter
-    split_off_twitter_access_secret = current_voter.twitter_access_secret
-    split_off_twitter_access_token = current_voter.twitter_access_token
+    split_off_twitter_voters_access_secret = current_voter.twitter_voters_access_secret
+    split_off_twitter_voters_access_token_secret = current_voter.twitter_voters_access_token_secret
     split_off_twitter_connection_active = current_voter.twitter_connection_active
     split_off_twitter_id = current_voter.twitter_id
     split_off_twitter_request_token = current_voter.twitter_request_token
@@ -4729,8 +4814,8 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
 
         # Make sure we remove any legacy of Twitter
         try:
-            current_voter.twitter_access_secret = None
-            current_voter.twitter_access_token = None
+            current_voter.twitter_voters_access_secret = None
+            current_voter.twitter_voters_access_token_secret = None
             current_voter.twitter_connection_active = False
             current_voter.twitter_id = None
             current_voter.twitter_request_token = None
@@ -4742,8 +4827,8 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
 
         # And now update split_off_voter with the twitter values originally in current_voter
         try:
-            split_off_voter.twitter_access_secret = split_off_twitter_access_secret
-            split_off_voter.twitter_access_token = split_off_twitter_access_token
+            split_off_voter.twitter_voters_access_secret = split_off_twitter_voters_access_secret
+            split_off_voter.twitter_voters_access_token_secret = split_off_twitter_voters_access_token_secret
             split_off_voter.twitter_connection_active = split_off_twitter_connection_active
             split_off_voter.twitter_id = split_off_twitter_id
             split_off_voter.twitter_request_token = split_off_twitter_request_token
@@ -4902,7 +4987,7 @@ def voter_split_into_two_accounts_for_api(voter_device_id, split_off_twitter):  
                     current_voter_linked_organization.twitter_location = None
                     current_voter_linked_organization.save()
                 except Exception as e:
-                    status += "UNABLE_TO_SAVE_FROM_ORGANIZATION "
+                    status += "UNABLE_TO_SAVE_FROM_ORGANIZATION: " + str(e) + " "
 
                 # Update the link to the organization on the split_off_voter, and other Twitter values
                 try:

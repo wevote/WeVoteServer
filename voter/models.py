@@ -148,7 +148,8 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def alter_linked_organization_we_vote_id(self, voter, linked_organization_we_vote_id=None):
+    @staticmethod
+    def alter_linked_organization_we_vote_id(voter, linked_organization_we_vote_id=None):
         status = ""
         success = True
         if voter and hasattr(voter, "first_name"):
@@ -166,8 +167,8 @@ class VoterManager(BaseUserManager):
         }
         return results
 
+    @staticmethod
     def update_or_create_contact_email_augmented(
-            self,
             checked_against_open_people=None,
             checked_against_sendgrid=None,
             checked_against_snovio=None,
@@ -329,8 +330,8 @@ class VoterManager(BaseUserManager):
         }
         return results
 
+    @staticmethod
     def update_or_create_voter_contact_email(
-            self,
             city=None,
             display_name=None,
             email_address_text='',
@@ -718,7 +719,8 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def create_developer(self, first_name, last_name, email, password):
+    @staticmethod
+    def create_developer(first_name, last_name, email, password):
         voter = Voter()
         try:
             voter.set_password(password)
@@ -740,9 +742,19 @@ class VoterManager(BaseUserManager):
 
         return voter
 
-    def create_new_voter_account(self, first_name, last_name, email, password, is_admin, is_analytics_admin,
-                                 is_partner_organization, is_political_data_manager, is_political_data_viewer,
-                                 is_verified_volunteer):
+    @staticmethod
+    def create_new_voter_account(
+            first_name,
+            last_name,
+            email,
+            password,
+            is_admin=False,
+            is_analytics_admin=False,
+            is_partner_organization=False,
+            is_political_data_manager=False,
+            is_political_data_viewer=False,
+            is_verified_volunteer=False,
+            is_voter_manager=False):
         """
         Create a new voter, called from the api.wevoteusa.org/voter page
         :param first_name:
@@ -755,6 +767,7 @@ class VoterManager(BaseUserManager):
         :param is_political_data_manager:
         :param is_political_data_viewer:
         :param is_verified_volunteer:
+        :param is_voter_manager:
         :return:
         """
         voter = Voter()
@@ -775,6 +788,7 @@ class VoterManager(BaseUserManager):
             voter.is_political_data_manager = is_political_data_manager
             voter.is_political_data_viewer = is_political_data_viewer
             voter.is_verified_volunteer = is_verified_volunteer
+            voter.is_voter_manager = is_voter_manager
             voter.is_active = True
             voter.save()
             voter_created = True
@@ -860,7 +874,8 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def duplicate_voter(self, voter):
+    @staticmethod
+    def duplicate_voter(voter):
         """
         Starting with an existing voter, create a duplicate version with different we_vote_id
         :param voter:
@@ -878,8 +893,8 @@ class VoterManager(BaseUserManager):
             voter.facebook_email = None
             voter.fb_username = None
             voter.linked_organization_we_vote_id = None
-            voter.twitter_access_secret = None
-            voter.twitter_access_token = None
+            voter.twitter_voters_access_secret = None
+            voter.twitter_voters_access_token_secret = None
             voter.twitter_connection_active = False
             voter.twitter_id = None
             voter.twitter_request_secret = None
@@ -903,8 +918,8 @@ class VoterManager(BaseUserManager):
         }
         return results
 
+    @staticmethod
     def retrieve_contact_email_augmented_list(
-            self,
             checked_against_open_people_more_than_x_days_ago=None,
             checked_against_sendgrid_more_than_x_days_ago=None,
             checked_against_snovio_more_than_x_days_ago=None,
@@ -1007,8 +1022,8 @@ class VoterManager(BaseUserManager):
         }
         return results
 
+    @staticmethod
     def retrieve_voter_contact_email(
-            self,
             email_address_text='',
             imported_by_voter_we_vote_id='',
             read_only=False):
@@ -1067,7 +1082,8 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def retrieve_voter_contact_email_list(self, imported_by_voter_we_vote_id='', read_only=True):
+    @staticmethod
+    def retrieve_voter_contact_email_list(imported_by_voter_we_vote_id='', read_only=True):
         success = True
         status = ""
         voter_contact_email_list = []
@@ -1116,7 +1132,8 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def retrieve_voter_from_voter_device_id(self, voter_device_id, read_only=False):
+    @staticmethod
+    def retrieve_voter_from_voter_device_id(voter_device_id, read_only=False):
         success = True
         status = ''
         voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
@@ -1172,7 +1189,8 @@ class VoterManager(BaseUserManager):
         else:
             return 0
 
-    def fetch_facebook_id_from_voter_we_vote_id(self, voter_we_vote_id):
+    @staticmethod
+    def fetch_facebook_id_from_voter_we_vote_id(voter_we_vote_id):
         if positive_value_exists(voter_we_vote_id):
             facebook_manager = FacebookManager()
             facebook_id = facebook_manager.fetch_facebook_id_from_voter_we_vote_id(voter_we_vote_id)
@@ -1181,7 +1199,8 @@ class VoterManager(BaseUserManager):
 
         return facebook_id
 
-    def fetch_twitter_id_from_voter_we_vote_id(self, voter_we_vote_id):
+    @staticmethod
+    def fetch_twitter_id_from_voter_we_vote_id(voter_we_vote_id):
         if positive_value_exists(voter_we_vote_id):
             twitter_user_manager = TwitterUserManager()
             voter_twitter_id = twitter_user_manager.fetch_twitter_id_from_voter_we_vote_id(voter_we_vote_id)
@@ -1190,7 +1209,8 @@ class VoterManager(BaseUserManager):
 
         return voter_twitter_id
 
-    def fetch_twitter_handle_from_voter_we_vote_id(self, voter_we_vote_id):
+    @staticmethod
+    def fetch_twitter_handle_from_voter_we_vote_id(voter_we_vote_id):
         if positive_value_exists(voter_we_vote_id):
             twitter_user_manager = TwitterUserManager()
             voter_twitter_handle = twitter_user_manager.fetch_twitter_handle_from_voter_we_vote_id(voter_we_vote_id)
@@ -1223,7 +1243,8 @@ class VoterManager(BaseUserManager):
         else:
             return None
 
-    def this_voter_has_first_or_last_name_saved(self, voter):
+    @staticmethod
+    def this_voter_has_first_or_last_name_saved(voter):
         try:
             if positive_value_exists(voter.first_name) or positive_value_exists(voter.last_name):
                 return True
@@ -1519,21 +1540,25 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def retrieve_voter_by_id(self, voter_id, read_only=False):
+    @staticmethod
+    def retrieve_voter_by_id(voter_id, read_only=False):
         voter_manager = VoterManager()
         return voter_manager.retrieve_voter(voter_id, read_only=read_only)
 
-    def retrieve_voter_by_email(self, email, read_only=False):
+    @staticmethod
+    def retrieve_voter_by_email(email, read_only=False):
         voter_id = ''
         voter_manager = VoterManager()
         return voter_manager.retrieve_voter(voter_id, email=email, read_only=read_only)
 
-    def retrieve_voter_by_we_vote_id(self, voter_we_vote_id, read_only=False):
+    @staticmethod
+    def retrieve_voter_by_we_vote_id(voter_we_vote_id, read_only=False):
         voter_id = ''
         voter_manager = VoterManager()
         return voter_manager.retrieve_voter(voter_id, voter_we_vote_id=voter_we_vote_id, read_only=read_only)
 
-    def retrieve_voter_by_twitter_request_token(self, twitter_request_token):
+    @staticmethod
+    def retrieve_voter_by_twitter_request_token(twitter_request_token):
         voter_id = ''
         email = ''
         voter_we_vote_id = ''
@@ -1545,7 +1570,8 @@ class VoterManager(BaseUserManager):
     #     voter_manager = VoterManager()
     #     return voter_manager.retrieve_voter(voter_id, facebook_id=facebook_id, read_only=read_only)
 
-    def retrieve_voter_by_facebook_id(self, facebook_id, read_only=False):
+    @staticmethod
+    def retrieve_voter_by_facebook_id(facebook_id, read_only=False):
         voter_id = ''
         voter_we_vote_id = ''
 
@@ -1558,7 +1584,8 @@ class VoterManager(BaseUserManager):
         voter_manager = VoterManager()
         return voter_manager.retrieve_voter(voter_id, voter_we_vote_id=voter_we_vote_id, read_only=read_only)
 
-    def retrieve_voter_by_facebook_id_old(self, facebook_id):
+    @staticmethod
+    def retrieve_voter_by_facebook_id_old(facebook_id):
         """
         This method should only be used to heal old data.
         :param facebook_id:
@@ -1568,7 +1595,8 @@ class VoterManager(BaseUserManager):
         voter_manager = VoterManager()
         return voter_manager.retrieve_voter(voter_id, facebook_id=facebook_id)
 
-    def retrieve_voter_by_twitter_id(self, twitter_id, read_only=False):
+    @staticmethod
+    def retrieve_voter_by_twitter_id(twitter_id, read_only=False):
         voter_id = ''
         voter_we_vote_id = ''
 
@@ -1582,7 +1610,8 @@ class VoterManager(BaseUserManager):
         voter_manager = VoterManager()
         return voter_manager.retrieve_voter(voter_id, voter_we_vote_id=voter_we_vote_id, read_only=read_only)
 
-    def retrieve_voter_by_sms(self, normalized_sms_phone_number, read_only=False):
+    @staticmethod
+    def retrieve_voter_by_sms(normalized_sms_phone_number, read_only=False):
         voter_id = ''
         voter_we_vote_id = ''
 
@@ -1594,7 +1623,8 @@ class VoterManager(BaseUserManager):
         voter_manager = VoterManager()
         return voter_manager.retrieve_voter(voter_id, voter_we_vote_id=voter_we_vote_id, read_only=read_only)
 
-    def retrieve_voter_by_twitter_id_old(self, twitter_id):
+    @staticmethod
+    def retrieve_voter_by_twitter_id_old(twitter_id):
         """
         This is a function we want to eventually deprecate as we move away from storing the twitter_id
         in the voter table
@@ -1610,20 +1640,31 @@ class VoterManager(BaseUserManager):
         return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token, facebook_id,
                                             twitter_id)
 
-    def retrieve_voter_by_organization_we_vote_id(self, organization_we_vote_id, read_only=False):
+    @staticmethod
+    def retrieve_voter_by_organization_we_vote_id(organization_we_vote_id, read_only=False):
         voter_id = ''
         voter_manager = VoterManager()
         return voter_manager.retrieve_voter(voter_id, organization_we_vote_id=organization_we_vote_id,
                                             read_only=read_only)
 
-    def retrieve_voter_by_primary_email_we_vote_id(self, primary_email_we_vote_id, read_only=False):
+    @staticmethod
+    def retrieve_voter_by_primary_email_we_vote_id(primary_email_we_vote_id, read_only=False):
         voter_id = ''
         voter_manager = VoterManager()
         return voter_manager.retrieve_voter(voter_id, primary_email_we_vote_id=primary_email_we_vote_id,
                                             read_only=read_only)
 
-    def retrieve_voter(self, voter_id, email='', voter_we_vote_id='', twitter_request_token='', facebook_id=0,
-                       twitter_id=0, sms='', organization_we_vote_id='', primary_email_we_vote_id='', read_only=False):
+    @staticmethod
+    def retrieve_voter(
+            voter_id, email='',
+            voter_we_vote_id='',
+            twitter_request_token='',
+            facebook_id=0,
+            twitter_id=0,
+            sms='',
+            organization_we_vote_id='',
+            primary_email_we_vote_id='',
+            read_only=False):
         voter_id = convert_to_int(voter_id)
         if not validate_email(email):
             # We do not want to search for an invalid email
@@ -1778,7 +1819,8 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def retrieve_voter_list_with_emails(self):
+    @staticmethod
+    def retrieve_voter_list_with_emails():
         """
         Retrieve list of voter that are registered for newsletter
 
@@ -1804,14 +1846,15 @@ class VoterManager(BaseUserManager):
 
         return result
 
+    @staticmethod
     def retrieve_voter_list_by_permissions(
-            self,
             is_admin=False,
             is_analytics_admin=False,
             is_partner_organization=False,
             is_political_data_manager=False,
             is_political_data_viewer=False,
             is_verified_volunteer=False,
+            is_voter_manager=False,
             or_filter=True):
         """
         Retrieve list of voters based on the permissions they have been granted
@@ -1826,7 +1869,8 @@ class VoterManager(BaseUserManager):
                 and not positive_value_exists(is_partner_organization) \
                 and not positive_value_exists(is_political_data_manager) \
                 and not positive_value_exists(is_political_data_viewer) \
-                and not positive_value_exists(is_verified_volunteer):
+                and not positive_value_exists(is_verified_volunteer) \
+                and not positive_value_exists(is_voter_manager):
             status += "MUST_SPECIFY_ONE_PERMISSION_TYPE "
             result = {
                 'status': status,
@@ -1856,6 +1900,9 @@ class VoterManager(BaseUserManager):
         if positive_value_exists(is_verified_volunteer):
             new_voter_filter = Q(is_verified_volunteer=True)
             voter_raw_filters.append(new_voter_filter)
+        if positive_value_exists(is_voter_manager):
+            new_voter_filter = Q(is_voter_manager=True)
+            voter_raw_filters.append(new_voter_filter)
 
         if len(voter_raw_filters):
             final_voter_filters = voter_raw_filters.pop()
@@ -1879,7 +1926,8 @@ class VoterManager(BaseUserManager):
         }
         return result
 
-    def retrieve_voter_list_by_name(self, first_name, last_name):
+    @staticmethod
+    def retrieve_voter_list_by_name(first_name, last_name):
         """
         Retrieve list of voters based on name match
 
@@ -1899,7 +1947,8 @@ class VoterManager(BaseUserManager):
         }
         return result
 
-    def retrieve_voter_list_by_we_vote_id_list(self, voter_we_vote_id_list=[], read_only=True):
+    @staticmethod
+    def retrieve_voter_list_by_we_vote_id_list(voter_we_vote_id_list=[], read_only=True):
         status = ''
         voter_list = []
 
@@ -1925,7 +1974,8 @@ class VoterManager(BaseUserManager):
         }
         return result
 
-    def retrieve_voter_plan_list(self, google_civic_election_id=0, voter_we_vote_id='', read_only=True):
+    @staticmethod
+    def retrieve_voter_plan_list(google_civic_election_id=0, voter_we_vote_id='', read_only=True):
         success = True
         status = ""
         voter_plan_list = []
@@ -1958,15 +2008,18 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def create_voter_with_voter_device_id(self, voter_device_id):
+    @staticmethod
+    def create_voter_with_voter_device_id(voter_device_id):
         logger.info("create_voter_with_voter_device_id(voter_device_id)")
 
-    def clear_out_abandoned_voter_records(self):
+    @staticmethod
+    def clear_out_abandoned_voter_records():
         # We will need a method that identifies and deletes abandoned voter records that don't have enough information
         #  to ever be used
         logger.info("clear_out_abandoned_voter_records")
 
-    def remove_voter_cached_email_entries_from_email_address_object(self, email_address_object):
+    @staticmethod
+    def remove_voter_cached_email_entries_from_email_address_object(email_address_object):
         status = ""
         success = False
 
@@ -2011,7 +2064,8 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def remove_voter_cached_sms_entries_from_sms_phone_number(self, sms_phone_number):
+    @staticmethod
+    def remove_voter_cached_sms_entries_from_sms_phone_number(sms_phone_number):
         status = ""
         success = False
 
@@ -2056,11 +2110,14 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def save_facebook_user_values(self, voter, facebook_auth_response,
-                                  cached_facebook_profile_image_url_https=None,
-                                  we_vote_hosted_profile_image_url_large=None,
-                                  we_vote_hosted_profile_image_url_medium=None,
-                                  we_vote_hosted_profile_image_url_tiny=None):
+    @staticmethod
+    def save_facebook_user_values(
+            voter,
+            facebook_auth_response,
+            cached_facebook_profile_image_url_https=None,
+            we_vote_hosted_profile_image_url_large=None,
+            we_vote_hosted_profile_image_url_medium=None,
+            we_vote_hosted_profile_image_url_tiny=None):
         # 1/11/23: This is now only called from voter_cache_facebook_images_process() within an SQS job
         status = ''
         try:
@@ -2124,11 +2181,14 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def save_facebook_user_values_from_dict(self, voter, facebook_user_dict,
-                                            cached_facebook_profile_image_url_https=None,
-                                            we_vote_hosted_profile_image_url_large=None,
-                                            we_vote_hosted_profile_image_url_medium=None,
-                                            we_vote_hosted_profile_image_url_tiny=None):
+    @staticmethod
+    def save_facebook_user_values_from_dict(
+            voter,
+            facebook_user_dict,
+            cached_facebook_profile_image_url_https=None,
+            we_vote_hosted_profile_image_url_large=None,
+            we_vote_hosted_profile_image_url_medium=None,
+            we_vote_hosted_profile_image_url_tiny=None):
         try:
             if 'id' in facebook_user_dict:
                 voter.facebook_id = facebook_user_dict['id']
@@ -2169,11 +2229,14 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def save_twitter_user_values(self, voter, twitter_user_object,
-                                 cached_twitter_profile_image_url_https=None,
-                                 we_vote_hosted_profile_image_url_large=None,
-                                 we_vote_hosted_profile_image_url_medium=None,
-                                 we_vote_hosted_profile_image_url_tiny=None):
+    @staticmethod
+    def save_twitter_user_values(
+            voter,
+            twitter_user_object,
+            cached_twitter_profile_image_url_https=None,
+            we_vote_hosted_profile_image_url_large=None,
+            we_vote_hosted_profile_image_url_medium=None,
+            we_vote_hosted_profile_image_url_tiny=None):
         """
         This is used to store the cached values in the voter record after authentication.
         Please also see import_export_twitter/models.py TwitterAuthResponse->save_twitter_auth_values
@@ -2199,9 +2262,9 @@ class VoterManager(BaseUserManager):
             if positive_value_exists(cached_twitter_profile_image_url_https):
                 voter.twitter_profile_image_url_https = cached_twitter_profile_image_url_https
                 voter_to_save = True
-            elif hasattr(twitter_user_object, "profile_image_url_https") and \
-                    positive_value_exists(twitter_user_object.profile_image_url_https):
-                voter.twitter_profile_image_url_https = twitter_user_object.profile_image_url_https
+            elif hasattr(twitter_user_object, "profile_image_url") and \
+                    positive_value_exists(twitter_user_object.profile_image_url):
+                voter.twitter_profile_image_url_https = twitter_user_object.profile_image_url
                 voter_to_save = True
             # Always update to latest Twitter image
             if positive_value_exists(we_vote_hosted_profile_image_url_large):
@@ -2228,9 +2291,9 @@ class VoterManager(BaseUserManager):
                     voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
                     voter_to_save = True
             # 'profile_background_image_url': 'http://a2.twimg.com/a/1294785484/images/themes/theme15/bg.png',
-            # 'screen_name': 'jaeeeee',
-            if hasattr(twitter_user_object, "screen_name") and positive_value_exists(twitter_user_object.screen_name):
-                voter.twitter_screen_name = twitter_user_object.screen_name
+            # 'username': 'jaeeeee',
+            if hasattr(twitter_user_object, "username") and positive_value_exists(twitter_user_object.username):
+                voter.twitter_screen_name = twitter_user_object.username
                 voter_to_save = True
             # 'lang': 'en',
             if hasattr(twitter_user_object, "name") and positive_value_exists(twitter_user_object.name):
@@ -2253,11 +2316,14 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def save_twitter_user_values_from_twitter_auth_response(self, voter, twitter_auth_response,
-                                                            cached_twitter_profile_image_url_https=None,
-                                                            we_vote_hosted_profile_image_url_large=None,
-                                                            we_vote_hosted_profile_image_url_medium=None,
-                                                            we_vote_hosted_profile_image_url_tiny=None):
+    @staticmethod
+    def save_twitter_user_values_from_twitter_auth_response(
+            voter,
+            twitter_auth_response,
+            cached_twitter_profile_image_url_https=None,
+            we_vote_hosted_profile_image_url_large=None,
+            we_vote_hosted_profile_image_url_medium=None,
+            we_vote_hosted_profile_image_url_tiny=None):
         """
         This is used to store the cached values in the voter record from the twitter_auth_response object once
         voter agrees to a merge.
@@ -2312,7 +2378,7 @@ class VoterManager(BaseUserManager):
                     voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
                     voter_to_save = True
             # 'profile_background_image_url': 'http://a2.twimg.com/a/1294785484/images/themes/theme15/bg.png',
-            # 'screen_name': 'jaeeeee',
+            # 'username': 'jaeeeee',
             if hasattr(twitter_auth_response, "twitter_screen_name") and \
                     positive_value_exists(twitter_auth_response.twitter_screen_name):
                 voter.twitter_screen_name = twitter_auth_response.twitter_screen_name
@@ -2340,11 +2406,14 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def save_twitter_user_values_from_dict(self, voter, twitter_user_dict,
-                                           cached_twitter_profile_image_url_https=None,
-                                           we_vote_hosted_profile_image_url_large=None,
-                                           we_vote_hosted_profile_image_url_medium=None,
-                                           we_vote_hosted_profile_image_url_tiny=None):
+    @staticmethod
+    def save_twitter_user_values_from_dict(
+            voter,
+            twitter_user_dict,
+            cached_twitter_profile_image_url_https=None,
+            we_vote_hosted_profile_image_url_large=None,
+            we_vote_hosted_profile_image_url_medium=None,
+            we_vote_hosted_profile_image_url_tiny=None):
         status = ""
         try:
             # 'id': 132728535,
@@ -2356,12 +2425,12 @@ class VoterManager(BaseUserManager):
             # 'profile_image_url': 'http://a1.twimg.com/profile_images/1213351752/_2_2__normal.jpg',
             if cached_twitter_profile_image_url_https:
                 voter.twitter_profile_image_url_https = cached_twitter_profile_image_url_https
-            elif 'profile_image_url_https' in twitter_user_dict:
-                voter.twitter_profile_image_url_https = twitter_user_dict['profile_image_url_https']
+            elif 'profile_image_url' in twitter_user_dict:
+                voter.twitter_profile_image_url_https = twitter_user_dict['profile_image_url']
             # 'profile_background_image_url': 'http://a2.twimg.com/a/1294785484/images/themes/theme15/bg.png',
-            # 'screen_name': 'jaeeeee',
-            if 'screen_name' in twitter_user_dict:
-                voter.twitter_screen_name = twitter_user_dict['screen_name']
+            # 'username': 'jaeeeee',
+            if 'username' in twitter_user_dict:
+                voter.twitter_screen_name = twitter_user_dict['username']
             if 'name' in twitter_user_dict:
                 voter.twitter_name = twitter_user_dict['name']
             # Always update to latest Twitter image
@@ -2401,8 +2470,8 @@ class VoterManager(BaseUserManager):
         }
         return results
 
+    @staticmethod
     def update_contact_email_augmented_list_not_found(
-            self,
             checked_against_open_people=None,
             checked_against_sendgrid=None,
             checked_against_snovio=None,
@@ -2575,7 +2644,7 @@ class VoterManager(BaseUserManager):
     def update_voter_twitter_details(
             self,
             twitter_id='',
-            twitter_json={},
+            twitter_dict={},
             cached_twitter_profile_image_url_https='',
             we_vote_hosted_profile_image_url_large='',
             we_vote_hosted_profile_image_url_medium='',
@@ -2583,7 +2652,7 @@ class VoterManager(BaseUserManager):
         """
         Update existing voter entry with details retrieved from the Twitter API
         :param twitter_id:
-        :param twitter_json:
+        :param twitter_dict:
         :param cached_twitter_profile_image_url_https:
         :param we_vote_hosted_profile_image_url_large:
         :param we_vote_hosted_profile_image_url_medium:
@@ -2595,7 +2664,7 @@ class VoterManager(BaseUserManager):
         if voter_results['voter_found']:
             # Twitter user already exists so update twitter user details
             results = self.save_twitter_user_values_from_dict(
-                voter, twitter_json,
+                voter, twitter_dict,
                 cached_twitter_profile_image_url_https=cached_twitter_profile_image_url_https,
                 we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
                 we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
@@ -2731,8 +2800,8 @@ class VoterManager(BaseUserManager):
             first_name=first_name,
             last_name=last_name)
 
+    @staticmethod
     def update_voter_by_object(
-            self,
             voter,
             facebook_email=False,
             facebook_profile_image_url_https=False,
@@ -2892,7 +2961,8 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def update_voter_email_ownership_verified(self, voter, email_address_object):
+    @staticmethod
+    def update_voter_email_ownership_verified(voter, email_address_object):
         status = ""
         success = True  # Assume success unless we hit a problem
         voter_updated = False
@@ -2945,7 +3015,8 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def update_voter_sms_ownership_verified(self, voter, sms_phone_number):
+    @staticmethod
+    def update_voter_sms_ownership_verified(voter, sms_phone_number):
         status = ""
         success = True  # Assume success unless we hit a problem
         voter_updated = False
@@ -2993,7 +3064,8 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def update_voter_with_facebook_link_verified(self, voter, facebook_user_id, facebook_email):
+    @staticmethod
+    def update_voter_with_facebook_link_verified(voter, facebook_user_id, facebook_email):
         should_save_voter = False
         voter_updated = False
 
@@ -3020,7 +3092,8 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def update_voter_with_twitter_link_verified(self, voter, twitter_id):
+    @staticmethod
+    def update_voter_with_twitter_link_verified(voter, twitter_id):
         """
         I think this was originally built with the idea that we would cache the Twitter ID in the
         voter record for quick lookup. As of 2016-10-29 I don't think we can cache the twitter_id reliably
@@ -3085,7 +3158,7 @@ class Voter(AbstractBaseUser):
     # When a person using an organization's Twitter handle signs in, we create a voter account. This is how
     #  we link the voter account to the organization.
     linked_organization_we_vote_id = models.CharField(
-        verbose_name="we vote id for linked organization", max_length=255, null=True, blank=True, unique=True)
+        verbose_name="we vote id for linked organization", max_length=255, null=True, unique=True, db_index=True)
 
     # Redefine the basic fields that would normally be defined in User
     # username = models.CharField(unique=True, max_length=50, validators=[alphanumeric])  # Increase max_length to 255
@@ -3129,8 +3202,9 @@ class Voter(AbstractBaseUser):
     is_partner_organization = models.BooleanField(default=False)
     is_political_data_manager = models.BooleanField(default=False)
     is_political_data_viewer = models.BooleanField(default=False)
-    is_signed_in_cached = models.BooleanField(default=None, null=True, db_index=True)  # So we can do searches for analytics
+    is_signed_in_cached = models.BooleanField(default=None, null=True, db_index=True)  # For analytics reports
     is_verified_volunteer = models.BooleanField(default=False)
+    is_voter_manager = models.BooleanField(default=False)
 
     # Facebook session information
     facebook_id = models.BigIntegerField(verbose_name="facebook big integer id", null=True, blank=True)
@@ -3152,7 +3226,7 @@ class Voter(AbstractBaseUser):
     we_vote_hosted_profile_image_url_tiny = models.TextField(blank=True, null=True)
     # Which voter image is currently active?
     profile_image_type_currently_active = models.CharField(
-        max_length=10, choices=PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES, default=PROFILE_IMAGE_TYPE_UNKNOWN)
+        max_length=11, choices=PROFILE_IMAGE_TYPE_CURRENTLY_ACTIVE_CHOICES, default=PROFILE_IMAGE_TYPE_UNKNOWN)
     # Image for voter from Facebook
     we_vote_hosted_profile_facebook_image_url_large = models.TextField(blank=True, null=True)
     we_vote_hosted_profile_facebook_image_url_medium = models.TextField(blank=True, null=True)
@@ -3168,8 +3242,8 @@ class Voter(AbstractBaseUser):
 
     twitter_request_token = models.TextField(verbose_name='twitter request token', null=True, blank=True)
     twitter_request_secret = models.TextField(verbose_name='twitter request secret', null=True, blank=True)
-    twitter_access_token = models.TextField(verbose_name='twitter access token', null=True, blank=True)
-    twitter_access_secret = models.TextField(verbose_name='twitter access secret', null=True, blank=True)
+    twitter_voters_access_token_secret = models.TextField(verbose_name='twitter access token', null=True, blank=True)
+    twitter_voters_access_secret = models.TextField(verbose_name='twitter access secret', null=True, blank=True)
     twitter_connection_active = models.BooleanField(default=False)
 
     # What notification settings has the voter chosen? This is using a series of bits.
@@ -3286,14 +3360,16 @@ class Voter(AbstractBaseUser):
         else:
             return str(self.get_full_name())
 
-    def has_perm(self, perm, obj=None):
+    @staticmethod
+    def has_perm(perm, obj=None):
         """
         Does the user have a specific permission?
         """
         # Simplest possible answer: Yes, always
         return True
 
-    def has_module_perms(self, app_label):
+    @staticmethod
+    def has_module_perms(app_label):
         """
         Does the user have permissions to view the app `app_label`?
         """
@@ -3349,7 +3425,8 @@ class Voter(AbstractBaseUser):
                 return True
         return False
 
-    def signed_in_google(self):
+    @staticmethod
+    def signed_in_google():
         return False
 
     def signed_in_twitter(self):
@@ -3634,7 +3711,8 @@ class VoterDeviceLink(models.Model):
         verbose_name="the Firebase Cloud Messaging (FCW) token for this device", max_length=255, null=True,
         blank=True)
 
-    def generate_voter_device_id(self):
+    @staticmethod
+    def generate_voter_device_id():
         # A simple mapping to this function
         return generate_voter_device_id()
 
@@ -3656,7 +3734,8 @@ class VoterDeviceLinkManager(models.Manager):
     def __str__(self):              # __unicode__ on Python 2
         return "Voter Device Id Manager"
 
-    def clear_secret_key(self, email_secret_key='', sms_secret_key=''):
+    @staticmethod
+    def clear_secret_key(email_secret_key='', sms_secret_key=''):
         email_secret_key_found = False
         sms_secret_key_found = False
         voter_device_link = None
@@ -3709,7 +3788,8 @@ class VoterDeviceLinkManager(models.Manager):
         }
         return results
 
-    def delete_all_voter_device_links(self, voter_device_id):
+    @staticmethod
+    def delete_all_voter_device_links(voter_device_id):
         voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
 
         try:
@@ -3730,7 +3810,8 @@ class VoterDeviceLinkManager(models.Manager):
         }
         return results
 
-    def delete_all_voter_device_links_by_voter_id(self, voter_id):
+    @staticmethod
+    def delete_all_voter_device_links_by_voter_id(voter_id):
         status = ""
         try:
             if positive_value_exists(voter_id):
@@ -3750,7 +3831,8 @@ class VoterDeviceLinkManager(models.Manager):
         }
         return results
 
-    def delete_voter_device_link(self, voter_device_id):
+    @staticmethod
+    def delete_voter_device_link(voter_device_id):
         try:
             if positive_value_exists(voter_device_id):
                 VoterDeviceLink.objects.filter(voter_device_id=voter_device_id).delete()
@@ -3769,7 +3851,8 @@ class VoterDeviceLinkManager(models.Manager):
         }
         return results
 
-    def retrieve_voter_device_link_from_voter_device_id(self, voter_device_id, read_only=False):
+    @staticmethod
+    def retrieve_voter_device_link_from_voter_device_id(voter_device_id, read_only=False):
         voter_id = 0
         voter_device_link_id = 0
         voter_device_link_manager = VoterDeviceLinkManager()
@@ -3777,7 +3860,8 @@ class VoterDeviceLinkManager(models.Manager):
             voter_device_id, voter_id=voter_id, voter_device_link_id=voter_device_link_id, read_only=read_only)
         return results
 
-    def retrieve_voter_device_link(self, voter_device_id, voter_id=0, voter_device_link_id=0, read_only=False):
+    @staticmethod
+    def retrieve_voter_device_link(voter_device_id, voter_id=0, voter_device_link_id=0, read_only=False):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -3788,7 +3872,7 @@ class VoterDeviceLinkManager(models.Manager):
         try:
             if positive_value_exists(voter_device_id):
                 status += " RETRIEVE_VOTER_DEVICE_LINK-GET_BY_VOTER_DEVICE_ID "
-                if read_only and not 'test' in sys.argv:
+                if read_only and 'test' not in sys.argv:
                     voter_device_link_on_stage = VoterDeviceLink.objects.using('readonly').get(
                         voter_device_id=voter_device_id)
                 else:
@@ -3844,7 +3928,8 @@ class VoterDeviceLinkManager(models.Manager):
         }
         return results
 
-    def retrieve_voter_device_link_list(self, google_civic_election_id=0, voter_id=0):
+    @staticmethod
+    def retrieve_voter_device_link_list(google_civic_election_id=0, voter_id=0):
         success = False
         status = ""
         voter_device_link_list = []
@@ -3877,6 +3962,7 @@ class VoterDeviceLinkManager(models.Manager):
         For each voter_device_id we allow 25 (NUMBER_OF_FAILED_TRIES_ALLOWED_ALL_TIME) consecutive failures
         before we lock out the voter_device_id. This is in order to protect against brute force attacks.
         :param voter_device_id:
+        :param cordova_review_bypass:
         :return:
         """
         success = True
@@ -3937,7 +4023,8 @@ class VoterDeviceLinkManager(models.Manager):
         }
         return results
 
-    def save_new_voter_device_link(self, voter_device_id, voter_id):
+    @staticmethod
+    def save_new_voter_device_link(voter_device_id, voter_id):
         error_result = False
         exception_record_not_saved = False
         missing_required_variables = False
@@ -3987,8 +4074,8 @@ class VoterDeviceLinkManager(models.Manager):
     def update_voter_device_link_with_sms_secret_key(self, voter_device_link, sms_secret_key=False):
         return self.update_voter_device_link(voter_device_link, sms_secret_key=sms_secret_key)
 
+    @staticmethod
     def update_voter_device_link(
-            self,
             voter_device_link,
             voter_object=None,
             google_civic_election_id=0,
@@ -4374,6 +4461,7 @@ def retrieve_voter_authority(request):
             'is_political_data_manager':    positive_value_exists(voter.is_political_data_manager),
             'is_political_data_viewer':     positive_value_exists(voter.is_political_data_viewer),
             'is_verified_volunteer':        positive_value_exists(voter.is_verified_volunteer),
+            'is_voter_manager':             positive_value_exists(voter.is_voter_manager),
         }
         return authority_results
 
@@ -4386,6 +4474,7 @@ def retrieve_voter_authority(request):
         'is_political_data_manager':    False,
         'is_political_data_viewer':     False,
         'is_verified_volunteer':        False,
+        'is_voter_manager':             False,
     }
     return authority_results
 
@@ -4396,35 +4485,52 @@ def voter_has_authority(request, authority_required, authority_results=None):
     if not positive_value_exists(authority_results['is_active']):
         return False
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
-    if 'admin' in authority_required:
-        if positive_value_exists(authority_results['is_admin']):
-            return True
-    if 'analytics_admin' in authority_required:
-        if positive_value_exists(authority_results['is_analytics_admin']) or \
-                positive_value_exists(authority_results['is_admin']):
-            return True
-    if 'partner_organization' in authority_required:
-        if positive_value_exists(authority_results['is_partner_organization']) or \
-                positive_value_exists(authority_results['is_political_data_manager']) or \
-                positive_value_exists(authority_results['is_admin']):
-            return True
-    if 'political_data_manager' in authority_required:
-        if positive_value_exists(authority_results['is_political_data_manager']) or \
-                positive_value_exists(authority_results['is_admin']):
-            return True
-    if 'political_data_viewer' in authority_required:
-        if positive_value_exists(authority_results['is_political_data_viewer']) or \
-                positive_value_exists(authority_results['is_analytics_admin']) or \
-                positive_value_exists(authority_results['is_verified_volunteer']) or \
-                positive_value_exists(authority_results['is_political_data_manager']) or \
-                positive_value_exists(authority_results['is_admin']):
-            return True
-    if 'verified_volunteer' in authority_required:
-        if positive_value_exists(authority_results['is_verified_volunteer']) or \
-                positive_value_exists(authority_results['is_analytics_admin']) or \
-                positive_value_exists(authority_results['is_political_data_manager']) or \
-                positive_value_exists(authority_results['is_admin']):
-            return True
+    if 'admin' in authority_required and \
+            positive_value_exists(authority_results['is_admin']):
+        return True
+    if 'analytics_admin' in authority_required and \
+            (
+            positive_value_exists(authority_results['is_analytics_admin']) or
+            positive_value_exists(authority_results['is_admin'])
+            ):
+        return True
+    if 'voter_manager' in authority_required and \
+            (
+            positive_value_exists(authority_results['is_voter_manager']) or
+            positive_value_exists(authority_results['is_admin'])
+            ):
+        return True
+    if 'partner_organization' in authority_required and \
+            (
+            positive_value_exists(authority_results['is_partner_organization']) or
+            positive_value_exists(authority_results['is_political_data_manager']) or
+            positive_value_exists(authority_results['is_admin'])
+            ):
+        return True
+    if 'political_data_manager' in authority_required and \
+            (
+            positive_value_exists(authority_results['is_political_data_manager']) or
+            positive_value_exists(authority_results['is_admin'])
+            ):
+        return True
+    if 'political_data_viewer' in authority_required and \
+            (
+            positive_value_exists(authority_results['is_political_data_viewer']) or
+            positive_value_exists(authority_results['is_analytics_admin']) or
+            positive_value_exists(authority_results['is_verified_volunteer']) or
+            positive_value_exists(authority_results['is_political_data_manager']) or
+            positive_value_exists(authority_results['is_admin'])
+            ):
+        return True
+    if 'verified_volunteer' in authority_required and \
+            (
+            positive_value_exists(authority_results['is_verified_volunteer']) or
+            positive_value_exists(authority_results['is_analytics_admin']) or
+            positive_value_exists(authority_results['is_political_data_manager']) or
+            positive_value_exists(authority_results['is_voter_manager']) or
+            positive_value_exists(authority_results['is_admin'])
+            ):
+        return True
     return False
 
 # class VoterJurisdictionLink(models.Model):
@@ -4510,7 +4616,8 @@ class VoterAddressManager(models.Manager):
     def __unicode__(self):
         return "VoterAddressManager"
 
-    def retrieve_address(self, voter_address_id, voter_id=0, address_type=''):
+    @staticmethod
+    def retrieve_address(voter_address_id, voter_id=0, address_type=''):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -4571,7 +4678,8 @@ class VoterAddressManager(models.Manager):
         }
         return results
 
-    def retrieve_ballot_address_from_voter_id(self, voter_id):
+    @staticmethod
+    def retrieve_ballot_address_from_voter_id(voter_id):
         voter_address_id = 0
         address_type = BALLOT_ADDRESS
         voter_address_manager = VoterAddressManager()
@@ -4607,7 +4715,8 @@ class VoterAddressManager(models.Manager):
                 ballot_map_text += voter_address.text_for_map_search
         return ballot_map_text
 
-    def retrieve_voter_address_list(self, google_civic_election_id=0, voter_id=0):
+    @staticmethod
+    def retrieve_voter_address_list(google_civic_election_id=0, voter_id=0):
         success = True
         status = ""
         voter_address_list = []
@@ -4660,6 +4769,7 @@ class VoterAddressManager(models.Manager):
         :return:
         """
         status = ''
+        success = True
         exception_multiple_object_returned = False
         new_address_created = False
         voter_address_has_value = False
@@ -4717,11 +4827,16 @@ class VoterAddressManager(models.Manager):
                 status = self.save_address_and_dupe_back_to_voter(voter_address_on_stage, status)
                 success = True
                 status += "UPDATE_OR_CREATE_SUCCESSFUL "
+            except Exception as e:
+                status += f'CRASHING_GOOGLE_GEOCODER: '
+
             except VoterAddress.MultipleObjectsReturned as e:
                 handle_record_found_more_than_one_exception(e, logger=logger)
                 success = False
                 status += 'MULTIPLE_MATCHING_ADDRESSES_FOUND '
                 exception_multiple_object_returned = True
+
+            
         else:
             success = False
             status += 'MISSING_VOTER_ID_OR_ADDRESS_TYPE '
@@ -4828,9 +4943,14 @@ class VoterAddressManager(models.Manager):
         return self.fetch_address_count(or_filter, refreshed_from_google, has_election, google_civic_election_id,
                                         has_latitude_longitude, longer_than_this_number=22)
 
-    def fetch_address_count(self, or_filter=True,
-                            refreshed_from_google=False, has_election=False, google_civic_election_id=False,
-                            has_latitude_longitude=False, longer_than_this_number=0):
+    @staticmethod
+    def fetch_address_count(
+            or_filter=True,
+            refreshed_from_google=False,
+            has_election=False,
+            google_civic_election_id=False,
+            has_latitude_longitude=False,
+            longer_than_this_number=0):
         voter_address_queryset = VoterAddress.objects.using('readonly').all()
 
         voter_raw_filters = []
@@ -4894,7 +5014,8 @@ class VoterAddressManager(models.Manager):
         }
         return results
 
-    def duplicate_voter_address(self, voter_address, new_voter_id):
+    @staticmethod
+    def duplicate_voter_address(voter_address, new_voter_id):
         """
         Starting with an existing voter_address, create a duplicate version for a duplicated voter
         :param voter_address:
@@ -4922,12 +5043,14 @@ class VoterAddressManager(models.Manager):
         }
         return results
 
-    def city_key_cleaner(self, raw):
+    @staticmethod
+    def city_key_cleaner(raw):
         clean = raw.replace(',', '').replace('.', '').replace('Twp', '').replace('Township', '').\
             replace('St ', 'Saint ').replace('Ft ', 'Fort ').strip()
         return clean
 
-    def parse_address(self, typed_address):
+    @staticmethod
+    def parse_address(typed_address):
         place_found = False
         line1, state, city, zip_code = '', '', '', ''
         if len(typed_address) == 0:
@@ -4964,13 +5087,12 @@ class VoterAddressManager(models.Manager):
         elif f2 == 0:
             line1 = ''
 
-        # TODO: this function is reused when new voters are created, remove this log line anytime after mid august 2023
-        logger.error('%s', 'parse_address: ' + line1 + '-----' + typed_address + '===' + city + '====' + state)
         return place_found, line1, state, city, zip_code
 
     FIPS_LOOKUP = False
 
-    def get_lookup(self):
+    @staticmethod
+    def get_lookup():
         fl = __class__.FIPS_LOOKUP
         if fl is not False:
             return fl
@@ -5074,7 +5196,8 @@ class VoterAddressManager(models.Manager):
             total_addresses = 0
             try:
                 # with Python 9, in July 2023, this throws an exception every time -- hopefully not with Python 11
-                # total_addresses = len(addresses_to_fix)  8/1/23 This caused a "Worker with pid 10 was terminated due to signal 9
+                # total_addresses = len(addresses_to_fix)
+                # 8/1/23 This caused a "Worker with pid 10 was terminated due to signal 9
                 total_addresses = addresses_to_fix.count()
 
             except Exception as elen:
@@ -5272,6 +5395,8 @@ class VoterMergeStatus(models.Model):
     move_apple_user_milliseconds = models.PositiveIntegerField(default=None, null=True)
     repair_positions_complete = models.BooleanField(default=False)
     repair_positions_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    move_candidate_change_log_complete = models.BooleanField(default=False)
+    move_candidate_change_log_milliseconds = models.PositiveIntegerField(default=None, null=True)
     move_positions_complete = models.BooleanField(default=False)
     move_positions_milliseconds = models.PositiveIntegerField(default=None, null=True)
     move_organization_complete = models.BooleanField(default=False)
@@ -5294,6 +5419,8 @@ class VoterMergeStatus(models.Model):
     move_facebook_milliseconds = models.PositiveIntegerField(default=None, null=True)
     move_twitter_complete = models.BooleanField(default=False)
     move_twitter_milliseconds = models.PositiveIntegerField(default=None, null=True)
+    move_voter_change_log_complete = models.BooleanField(default=False)
+    move_voter_change_log_milliseconds = models.PositiveIntegerField(default=None, null=True)
     move_voter_contact_complete = models.BooleanField(default=False)
     move_voter_contact_milliseconds = models.PositiveIntegerField(default=None, null=True)
     move_voter_plan_complete = models.BooleanField(default=False)
@@ -5400,7 +5527,8 @@ class VoterMetricsManager(models.Manager):
 
         return voter_count
 
-    def fetch_voter_entered_full_address(self, voter_id):
+    @staticmethod
+    def fetch_voter_entered_full_address(voter_id):
         count_result = None
         try:
             count_query = VoterAddress.objects.using('readonly').all()
@@ -5411,7 +5539,8 @@ class VoterMetricsManager(models.Manager):
             pass
         return positive_value_exists(count_result)
 
-    def fetch_voters_with_plan_count(self, google_civic_election_id_list=[], state_code_list=[]):
+    @staticmethod
+    def fetch_voters_with_plan_count(google_civic_election_id_list=[], state_code_list=[]):
         if 'test' in sys.argv:
             # If coming from a test, we cannot use readonly
             plan_queryset = VoterPlan.objects.all()

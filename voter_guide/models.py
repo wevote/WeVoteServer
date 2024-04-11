@@ -43,6 +43,76 @@ VOTER_GUIDE_POSSIBILITY_TYPES = (
     (ENDORSEMENTS_FOR_CANDIDATE, 'List of Endorsements for One Candidate'),
     (UNKNOWN_TYPE, 'List of Endorsements for One Candidate'),
 )
+# Used in different places than WEBSITES_WE_DO_NOT_SCAN_FOR_ENDORSEMENTS - could possibly be combined?
+# This constant is passed over to WebApp
+WEBSITES_TO_NEVER_HIGHLIGHT_ENDORSEMENTS = [
+    '*.atlassian.com',
+    '*.atlassian.net',
+    '*.google.com',
+    '*.newrelic.com',
+    '*.slack.com',
+    '*.wevote.us',
+    '*.zendesk.com',
+    'api.wevoteusa.org',
+    'app.jazz.co',
+    'dashlane.com',
+    'github.com'
+    'localhost',
+    'localhost:3000',
+    'localhost:8000',
+    'localhost:8001',
+    'sketchviewer.com',
+    '*.travis-ci.com',
+    '*.travis-ci.org',
+    'blank',
+    'platform.twitter.com',
+    's7.addthis.com',
+    'vars.hotjar.com',
+    'regex101.com',
+]
+# Used to prevent entering url to scan from being processed. Only used in WeVoteServer.
+# DALE 2024/04/08 There are several websites we were blocking from being scanned for technical reasons.
+#   I am reversing this blockage, so we can create a Voter Guide Possibility entry for use with the Chrome extension.
+WEBSITES_WE_DO_NOT_SCAN_FOR_ENDORSEMENTS = [
+    # 'adirondackdailyenterprise.com',
+    'about:blank',
+    # 'alternet.org', 'apple.com',
+    'app.jazz.co'
+    'atlassian.com', 'atlassian.net',
+    # 'baltimoresun.com',
+    # 'billboard.com', 'bloomberg.com', 'boston.com', 'bostonglobe.com',
+    # 'broadwayworld.com', 'buffalonews.com', 'businessinsider.com', 'buzzfeed.com',
+    # 'charlotteobserver.com', 'chicagotibune.com', 'cnbc.com', 'cnn.com',
+    # 'dailydot.com', 'dailykos.com', 'dallasnews.com', 'democracynow.org', 'denverpost.com',
+    'dco-assets.everestads.net',
+    # 'desmoinesregister.com', 'dispatch.com',
+    'docs.google.com', 'drive.google.com', 'mail.google.com', 'www.google.com',
+    # 'essence.com',
+    # 'facebook.com', 'foxbusiness.com', 'foxnews.com',
+    # 'gayly.com',
+    'github.com',
+    # 'hollywoodreporter.com', 'houstonchronicle.com', 'huffpost.com',
+    # 'indystar.com',
+    # 'instagram.com',
+    'jobs.com',
+    # 'kansascity.com', 'kentucky.com', 'ksat.com',
+    # 'latimes.com',
+    'localhost:8000',
+    # 'mercurynews.com', 'miaminewtimes.com', 'motherjones.com', 'msnbc.com',
+    # 'nationalreview.com', 'nbcnews.com', 'newsweek.com', 'npr.org', 'nydailynews.com', 'nypost.com', 'nytimes.com',
+    # 'ocregister.org', 'opensecrets.org', 'orlandosentinel.com',
+    # 'palmbeachpost.com', 'people.com', 'politico.com',
+    # 'reviewjournal.com', 'rollingstone.com',
+    # 'sacbee.com', 'sfchronicle.com', 'snewsnet.com', 'spectator.us', 'sun-sentinel.com', 'suntimes.com',
+    'http://t.co', 'https://t.co',
+    # 'tampabay.com', 'techcrunch.com', 'texastribune.com', 'thehill.com',
+    # 'thenation.com', 'thestate.com', 'twitter.com',
+    # 'usatoday.com',
+    # 'vox.com',
+    # 'washingtonpost.com',
+    # 'wapo.st', 'westword.com', 'wsj.com',
+    # 'youtu.be', 'youtube.com',
+]
 POSSIBLE_ENDORSEMENT_NUMBER_LIST = [
     "001", "002", "003", "004", "005", "006", "007", "008", "009", "010",
     "011", "012", "013", "014", "015", "016", "017", "018", "019", "020",
@@ -114,19 +184,20 @@ class VoterGuideManager(models.Manager):
     """
     A class for working with the VoterGuide model
     """
-    def update_or_create_organization_voter_guide_by_election_id(self, voter_guide_we_vote_id='',
-                                                                 organization_we_vote_id='',
-                                                                 google_civic_election_id=0,
-                                                                 state_code='',
-                                                                 pledge_goal=0,
-                                                                 we_vote_hosted_profile_image_url_large='',
-                                                                 we_vote_hosted_profile_image_url_medium='',
-                                                                 we_vote_hosted_profile_image_url_tiny='',
-                                                                 vote_smart_ratings_only=False,
-                                                                 elections_dict={},
-                                                                 organizations_dict={},
-                                                                 voter_we_vote_id_dict={},
-                                                                 ):
+    @staticmethod
+    def update_or_create_organization_voter_guide_by_election_id(
+            voter_guide_we_vote_id='',
+            organization_we_vote_id='',
+            google_civic_election_id=0,
+            state_code='',
+            pledge_goal=0,
+            we_vote_hosted_profile_image_url_large='',
+            we_vote_hosted_profile_image_url_medium='',
+            we_vote_hosted_profile_image_url_tiny='',
+            vote_smart_ratings_only=False,
+            elections_dict={},
+            organizations_dict={},
+            voter_we_vote_id_dict={}):
         """
         This creates voter_guides, and also refreshes voter guides with updated organization data
         """
@@ -177,14 +248,14 @@ class VoterGuideManager(models.Manager):
             else:
                 election_state_code = ''
                 if google_civic_election_id in elections_dict:
-                     election = elections_dict[google_civic_election_id]
-                     if election:
-                         election_state_code = election.state_code
-                     else:
-                         try:
-                             del elections_dict[google_civic_election_id]
-                         except Exception as e:
-                             pass
+                    election = elections_dict[google_civic_election_id]
+                    if election:
+                        election_state_code = election.state_code
+                    else:
+                        try:
+                            del elections_dict[google_civic_election_id]
+                        except Exception as e:
+                            pass
                 else:
                     election_manager = ElectionManager()
                     election_results = election_manager.retrieve_election(google_civic_election_id)
@@ -308,13 +379,15 @@ class VoterGuideManager(models.Manager):
         }
         return results
 
-    def update_or_create_organization_voter_guide_by_time_span(self, voter_guide_we_vote_id,
-                                                               organization_we_vote_id, vote_smart_time_span,
-                                                               pledge_goal='',
-                                                               we_vote_hosted_profile_image_url_large='',
-                                                               we_vote_hosted_profile_image_url_medium='',
-                                                               we_vote_hosted_profile_image_url_tiny=''
-                                                               ):
+    @staticmethod
+    def update_or_create_organization_voter_guide_by_time_span(
+            voter_guide_we_vote_id,
+            organization_we_vote_id,
+            vote_smart_time_span,
+            pledge_goal='',
+            we_vote_hosted_profile_image_url_large='',
+            we_vote_hosted_profile_image_url_medium='',
+            we_vote_hosted_profile_image_url_tiny=''):
         organization_found = False
         voter_guide_owner_type = ORGANIZATION
         exception_multiple_object_returned = False
@@ -404,10 +477,8 @@ class VoterGuideManager(models.Manager):
         }
         return results
 
-    def update_or_create_voter_guides_generated(
-            self,
-            google_civic_election_id=0,
-            number_of_voter_guides=0):
+    @staticmethod
+    def update_or_create_voter_guides_generated(google_civic_election_id=0, number_of_voter_guides=0):
         google_civic_election_id = convert_to_int(google_civic_election_id)
         status = ""
 
@@ -439,7 +510,8 @@ class VoterGuideManager(models.Manager):
         }
         return results
 
-    def update_or_create_voter_voter_guide(self, google_civic_election_id, voter):
+    @staticmethod
+    def update_or_create_voter_voter_guide(google_civic_election_id, voter):
         """
 
         :param google_civic_election_id:
@@ -520,7 +592,8 @@ class VoterGuideManager(models.Manager):
         }
         return results
 
-    def voter_guide_exists(self, organization_we_vote_id, google_civic_election_id):
+    @staticmethod
+    def voter_guide_exists(organization_we_vote_id, google_civic_election_id):
         voter_guide_found = False
         google_civic_election_id = int(google_civic_election_id)
 
@@ -542,10 +615,16 @@ class VoterGuideManager(models.Manager):
             handle_exception(e, logger=logger)
         return voter_guide_found
 
-    def retrieve_voter_guide(self, voter_guide_id=0, voter_guide_we_vote_id="", google_civic_election_id=0,
-                             vote_smart_time_span=None,
-                             organization_we_vote_id=None, public_figure_we_vote_id=None, owner_we_vote_id=None,
-                             read_only=False):
+    @staticmethod
+    def retrieve_voter_guide(
+            voter_guide_id=0,
+            voter_guide_we_vote_id="",
+            google_civic_election_id=0,
+            vote_smart_time_span=None,
+            organization_we_vote_id=None,
+            public_figure_we_vote_id=None,
+            owner_we_vote_id=None,
+            read_only=False):
         voter_guide_id = convert_to_int(voter_guide_id)
         google_civic_election_id = convert_to_int(google_civic_election_id)
         organization_we_vote_id = convert_to_str(organization_we_vote_id)
@@ -662,7 +741,8 @@ class VoterGuideManager(models.Manager):
         }
         return results
 
-    def retrieve_most_recent_voter_guide_for_org(self, organization_we_vote_id, read_only=False):
+    @staticmethod
+    def retrieve_most_recent_voter_guide_for_org(organization_we_vote_id, read_only=False):
         status = 'ENTERING_RETRIEVE_MOST_RECENT_VOTER_GUIDE_FOR_ORG'
         voter_guide_found = False
         voter_guide = VoterGuide()
@@ -713,8 +793,11 @@ class VoterGuideManager(models.Manager):
         }
         return results
 
-    def reset_voter_guide_image_details(self, organization, twitter_profile_image_url_https=None,
-                                        facebook_profile_image_url_https=None):
+    @staticmethod
+    def reset_voter_guide_image_details(
+            organization,
+            twitter_profile_image_url_https=None,
+            facebook_profile_image_url_https=None):
         """
         Reset Voter guide entry with original we vote image details
         :param organization:
@@ -850,7 +933,8 @@ class VoterGuideManager(models.Manager):
         }
         return results
 
-    def refresh_one_voter_guide_from_organization(self, voter_guide, organization):
+    @staticmethod
+    def refresh_one_voter_guide_from_organization(voter_guide, organization):
         """
         This function does not save voter_guide
         :param voter_guide:
@@ -932,8 +1016,8 @@ class VoterGuideManager(models.Manager):
         }
         return results
 
-    def merge_duplicate_voter_guides_for_organization_and_election(
-            self, organization_we_vote_id, google_civic_election_id):
+    @staticmethod
+    def merge_duplicate_voter_guides_for_organization_and_election(organization_we_vote_id, google_civic_election_id):
         success = True
         status = ''
         number_of_voter_guides_found = 0
@@ -1030,7 +1114,8 @@ class VoterGuideManager(models.Manager):
         }
         return results
 
-    def save_voter_guide_object(self, voter_guide):
+    @staticmethod
+    def save_voter_guide_object(voter_guide):
         """
         """
         try:
@@ -1102,7 +1187,7 @@ class VoterGuide(models.Model):
         verbose_name="is owner org, public figure, or voter?", max_length=2, choices=ORGANIZATION_TYPE_CHOICES,
         default=UNKNOWN)
 
-    twitter_handle = models.CharField(verbose_name='twitter screen_name', max_length=255, null=True, unique=False)
+    twitter_handle = models.CharField(verbose_name='twitter username', max_length=255, null=True, unique=False)
     twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
                                            max_length=255, null=True, blank=True)
     twitter_followers_count = models.PositiveIntegerField(
@@ -1225,8 +1310,8 @@ class VoterGuideListManager(models.Manager):
     # NOTE: This is extremely simple way to retrieve voter guides, used by admin tools. Being replaced by:
     #  retrieve_voter_guides_by_ballot_item(ballot_item_we_vote_id) AND
     #  retrieve_voter_guides_by_election(google_civic_election_id)
-    def retrieve_voter_guides_for_election(
-            self, google_civic_election_id_list, exclude_voter_guide_owner_type_list=[]):
+    @staticmethod
+    def retrieve_voter_guides_for_election(google_civic_election_id_list, exclude_voter_guide_owner_type_list=[]):
         voter_guide_list = []
         voter_guide_list_found = False
 
@@ -1259,7 +1344,8 @@ class VoterGuideListManager(models.Manager):
         }
         return results
 
-    def retrieve_google_civic_election_id_list_for_elections_with_voter_guides(self):
+    @staticmethod
+    def retrieve_google_civic_election_id_list_for_elections_with_voter_guides():
         google_civic_election_id_list = []
         voter_guide_list = []
         google_civic_election_id_list_found = False
@@ -1379,8 +1465,13 @@ class VoterGuideListManager(models.Manager):
         return self.retrieve_all_voter_guides(organization_we_vote_id, owner_voter_id, owner_voter_we_vote_id,
                                               read_only=read_only)
 
-    def retrieve_all_voter_guides(self, organization_we_vote_id, owner_voter_id=0, owner_voter_we_vote_id="",
-                                  maximum_number_to_retrieve=0, read_only=True):
+    @staticmethod
+    def retrieve_all_voter_guides(
+            organization_we_vote_id,
+            owner_voter_id=0,
+            owner_voter_we_vote_id="",
+            maximum_number_to_retrieve=0,
+            read_only=True):
         status = ''
         voter_guide_list = []
         voter_guide_list_found = False
@@ -1437,11 +1528,16 @@ class VoterGuideListManager(models.Manager):
         }
         return results
 
-    def retrieve_voter_guides_to_follow_by_election(self, google_civic_election_id, organization_we_vote_id_list,
-                                                    search_string,
-                                                    start_retrieve_at_this_number=0,
-                                                    maximum_number_to_retrieve=0, sort_by='', sort_order='',
-                                                    read_only=False):
+    @staticmethod
+    def retrieve_voter_guides_to_follow_by_election(
+            google_civic_election_id,
+            organization_we_vote_id_list,
+            search_string,
+            start_retrieve_at_this_number=0,
+            maximum_number_to_retrieve=0,
+            sort_by='',
+            sort_order='',
+            read_only=False):
         voter_guide_list = []
         voter_guide_list_found = False
         if not positive_value_exists(maximum_number_to_retrieve):
@@ -1506,9 +1602,13 @@ class VoterGuideListManager(models.Manager):
         }
         return results
 
-    def retrieve_voter_guides_to_follow_by_time_span(self, orgs_we_need_found_by_position_and_time_span_list_of_dicts,
-                                                     search_string,
-                                                     maximum_number_to_retrieve=0, sort_by='', sort_order=''):
+    @staticmethod
+    def retrieve_voter_guides_to_follow_by_time_span(
+            orgs_we_need_found_by_position_and_time_span_list_of_dicts,
+            search_string,
+            maximum_number_to_retrieve=0,
+            sort_by='',
+            sort_order=''):
         """
         Get the voter guides for orgs that we found by looking at the positions for an org found based on time span
         """
@@ -1538,8 +1638,9 @@ class VoterGuideListManager(models.Manager):
             voter_guide_query = voter_guide_query.filter(filter_list)
 
             if search_string:
-                voter_guide_query = voter_guide_query.filter(Q(display_name__icontains=search_string) |
-                                                                   Q(twitter_handle__icontains=search_string))
+                voter_guide_query = voter_guide_query.filter(
+                    Q(display_name__icontains=search_string) | Q(twitter_handle__icontains=search_string)
+                )
 
             if sort_order == 'desc':
                 voter_guide_query = voter_guide_query.order_by('-' + sort_by)[:maximum_number_to_retrieve]
@@ -1668,7 +1769,8 @@ class VoterGuideListManager(models.Manager):
         }
         return results
 
-    def remove_older_voter_guides_for_each_org(self, voter_guide_list):
+    @staticmethod
+    def remove_older_voter_guides_for_each_org(voter_guide_list):
         # If we have multiple voter guides for one org, we only want to show the most recent
         organization_already_reviewed = []
         organization_with_multiple_voter_guides = []
@@ -1705,8 +1807,13 @@ class VoterGuideListManager(models.Manager):
 
         return voter_guide_list_filtered
 
-    def retrieve_all_voter_guides_order_by(self, order_by='', limit_number=0, search_string='',
-                                           google_civic_election_id=0, show_individuals=False):
+    @staticmethod
+    def retrieve_all_voter_guides_order_by(
+            order_by='',
+            limit_number=0,
+            search_string='',
+            google_civic_election_id=0,
+            show_individuals=False):
         voter_guide_list = []
         voter_guide_list_found = False
         try:
@@ -1790,7 +1897,8 @@ class VoterGuideListManager(models.Manager):
         }
         return results
 
-    def reorder_voter_guide_list(self, voter_guide_list, field_to_order_by, asc_or_desc='desc'):
+    @staticmethod
+    def reorder_voter_guide_list(voter_guide_list, field_to_order_by, asc_or_desc='desc'):
         def get_key_to_sort_by():
             if field_to_order_by == 'twitter_followers_count':
                 return 'twitter_followers_count'
@@ -1808,10 +1916,14 @@ class VoterGuideListManager(models.Manager):
 
         return voter_guide_list_sorted
 
-    def retrieve_possible_duplicate_voter_guides(self, google_civic_election_id, vote_smart_time_span,
-                                                 organization_we_vote_id, public_figure_we_vote_id,
-                                                 twitter_handle,
-                                                 we_vote_id_from_master=''):
+    @staticmethod
+    def retrieve_possible_duplicate_voter_guides(
+            google_civic_election_id,
+            vote_smart_time_span,
+            organization_we_vote_id,
+            public_figure_we_vote_id,
+            twitter_handle,
+            we_vote_id_from_master=''):
         voter_guide_list_objects = []
         filters = []
         voter_guide_list_found = False
@@ -1884,8 +1996,10 @@ class VoterGuidePossibilityManager(models.Manager):
     """
     A class for working with the VoterGuidePossibility and VoterGuidePossibilityPosition model
     """
+
+    @staticmethod
     def update_or_create_voter_guide_possibility(
-            self, voter_guide_possibility_url='',
+            voter_guide_possibility_url='',
             voter_who_submitted_we_vote_id='',
             voter_guide_possibility_id=0,
             target_google_civic_election_id=0,
@@ -1993,8 +2107,10 @@ class VoterGuidePossibilityManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def update_or_create_voter_guide_possibility_position(
-            self, voter_guide_possibility_position_id=0, voter_guide_possibility_id=0,
+            voter_guide_possibility_position_id=0,
+            voter_guide_possibility_id=0,
             updated_values={}):
         exception_multiple_object_returned = False
 
@@ -2134,8 +2250,8 @@ class VoterGuidePossibilityManager(models.Manager):
             voter_who_submitted_we_vote_id=voter_who_submitted_we_vote_id,
             limit_to_this_year=limit_to_this_year)
 
+    @staticmethod
     def retrieve_voter_guide_possibility(
-            self,
             voter_guide_possibility_id=0,
             google_civic_election_id=0,
             voter_guide_possibility_url='',
@@ -2184,7 +2300,9 @@ class VoterGuidePossibilityManager(models.Manager):
                     # Only retrieve by URL if it was created this year
                     now = datetime.now()
                     status += "LIMITING_TO_THIS_YEAR: " + str(now.year) + " "
-                    voter_guide_possibility_query = voter_guide_possibility_query.filter(date_last_changed__year=now.year)
+                    voter_guide_possibility_query = (
+                        voter_guide_possibility_query.filter(date_last_changed__year=now.year)
+                    )
 
                 voter_guide_possibility_on_stage = voter_guide_possibility_query.last()
                 if voter_guide_possibility_on_stage is not None:
@@ -2206,7 +2324,9 @@ class VoterGuidePossibilityManager(models.Manager):
                     # Only retrieve by URL if it was created this year
                     now = datetime.now()
                     status += "LIMITING_TO_THIS_YEAR: " + str(now.year) + " "
-                    voter_guide_possibility_query = voter_guide_possibility_query.filter(date_last_changed__year=now.year)
+                    voter_guide_possibility_query = (
+                        voter_guide_possibility_query.filter(date_last_changed__year=now.year)
+                    )
 
                 voter_guide_possibility_on_stage = voter_guide_possibility_query.last()
                 if voter_guide_possibility_on_stage is not None:
@@ -2282,8 +2402,8 @@ class VoterGuidePossibilityManager(models.Manager):
         }
         return results
 
+    @staticmethod
     def retrieve_voter_guide_possibility_list(
-            self,
             order_by='',
             start_number=0,
             end_number=25,
@@ -2475,7 +2595,8 @@ class VoterGuidePossibilityManager(models.Manager):
         }
         return results
 
-    def retrieve_voter_guide_possibility_position(self, voter_guide_possibility_position_id):
+    @staticmethod
+    def retrieve_voter_guide_possibility_position(voter_guide_possibility_position_id):
         status = ""
         voter_guide_possibility_position_id = convert_to_int(voter_guide_possibility_position_id)
 
@@ -2513,7 +2634,8 @@ class VoterGuidePossibilityManager(models.Manager):
         }
         return results
 
-    def retrieve_voter_guide_possibility_position_list(self, voter_guide_possibility_id):
+    @staticmethod
+    def retrieve_voter_guide_possibility_position_list(voter_guide_possibility_id):
         voter_guide_possibility_list = []
         voter_guide_possibility_list_found = False
         try:
@@ -2542,7 +2664,8 @@ class VoterGuidePossibilityManager(models.Manager):
         }
         return results
 
-    def migrate_vote_guide_possibility(self, voter_guide_possibility):
+    @staticmethod
+    def migrate_vote_guide_possibility(voter_guide_possibility):
         status = ""
         success = True
         entry_migrated = False
@@ -2681,7 +2804,8 @@ class VoterGuidePossibilityManager(models.Manager):
         }
         return results
 
-    def number_of_ballot_items(self, voter_guide_possibility_id):
+    @staticmethod
+    def number_of_ballot_items(voter_guide_possibility_id):
         """
         How many VoterGuidePossibilityPosition entries for this VoterGuidePossibility?
         :param voter_guide_possibility_id:
@@ -2696,7 +2820,8 @@ class VoterGuidePossibilityManager(models.Manager):
 
         return number_of_ballot_items_found_count
 
-    def number_of_candidates_in_database(self, voter_guide_possibility_id):
+    @staticmethod
+    def number_of_candidates_in_database(voter_guide_possibility_id):
         """
         Out of all the VoterGuidePossibilityPosition entries, how many have been tied to candidates?
         :param voter_guide_possibility_id:
@@ -2713,7 +2838,8 @@ class VoterGuidePossibilityManager(models.Manager):
 
         return number_of_candidates_in_database_count
 
-    def number_of_measures_in_database(self, voter_guide_possibility_id):
+    @staticmethod
+    def number_of_measures_in_database(voter_guide_possibility_id):
         """
         Out of all the VoterGuidePossibilityPosition entries, how many have been tied to measures?
         :param voter_guide_possibility_id:
@@ -2730,7 +2856,8 @@ class VoterGuidePossibilityManager(models.Manager):
 
         return number_of_measures_in_database_count
 
-    def number_of_possible_organizations_in_database(self, voter_guide_possibility_id):
+    @staticmethod
+    def number_of_possible_organizations_in_database(voter_guide_possibility_id):
         """
         Out of all the VoterGuidePossibilityPosition entries, how many have been tied to candidates?
         :param voter_guide_possibility_id:
@@ -2747,7 +2874,8 @@ class VoterGuidePossibilityManager(models.Manager):
 
         return number_of_possible_organizations_in_database_count
 
-    def number_of_ballot_items_not_matched(self, voter_guide_possibility_id):
+    @staticmethod
+    def number_of_ballot_items_not_matched(voter_guide_possibility_id):
         """
         Out of all the VoterGuidePossibilityPosition entries, how many have not been matched to ballot items?
         :param voter_guide_possibility_id:
@@ -2938,6 +3066,7 @@ class VoterGuidePossibilityPosition(models.Model):
     # 001 - 999
     possibility_position_number = models.PositiveIntegerField(null=True, db_index=True)
     ballot_item_name = models.CharField(max_length=255, null=True, unique=False)
+    ballot_item_state_code = models.CharField(max_length=2, null=True, unique=False)
     candidate_we_vote_id = models.CharField(max_length=255, null=True, unique=False)
     candidate_twitter_handle = models.CharField(max_length=255, null=True, unique=False)
     organization_name = models.CharField(max_length=255, null=True, unique=False)
@@ -2959,6 +3088,7 @@ class VoterGuidePossibilityPosition(models.Model):
                                                      verbose_name='Delete saved position from PositionEntered.')
     date_created = models.DateTimeField(verbose_name='date created', null=True, auto_now_add=True)
     date_updated = models.DateTimeField(null=True)
+
 
 class VoterGuidesGenerated(models.Model):
     google_civic_election_id = models.PositiveIntegerField(null=True, db_index=True)

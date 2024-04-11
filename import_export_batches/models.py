@@ -9,14 +9,13 @@ from django.db import models
 from django.db.models import Q
 from django.utils.http import urlquote
 from django.utils.timezone import localtime, now
-from election.models import ElectionManager
+from election.models import Election, ElectionManager
 from electoral_district.controllers import electoral_district_import_from_xml_data
 from exception.models import handle_exception
 import json
 import magic
 from organization.models import ORGANIZATION_TYPE_CHOICES, UNKNOWN, alphanumeric
 from party.controllers import retrieve_all_party_names_and_ids_api, party_import_from_xml_data
-
 from politician.models import GENDER_CHOICES, UNKNOWN
 import urllib
 from urllib.request import Request, urlopen
@@ -5592,6 +5591,20 @@ class BatchProcess(models.Model):
     use_ctcl = models.BooleanField(default=False)
     use_vote_usa = models.BooleanField(default=False)
 
+    def election(self):
+        if not self.google_civic_election_id:
+            return
+        try:
+            election = Election.objects.using('readonly').get(google_civic_election_id=self.google_civic_election_id)
+        except Election.MultipleObjectsReturned as e:
+            logger.error("BatchProcess.election Found multiple")
+            return
+        except Election.DoesNotExist:
+            return
+        except Exception as e:
+            return
+        return election
+
 
 class BatchProcessAnalyticsChunk(models.Model):
     """
@@ -6289,7 +6302,7 @@ class BatchRowActionOrganization(models.Model):
     # Twitter information
     twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)
     organization_twitter_handle = models.CharField(
-        verbose_name='organization twitter screen_name', max_length=255, null=True, unique=False)
+        verbose_name='organization twitter username', max_length=255, null=True, unique=False)
     twitter_name = models.CharField(
         verbose_name="org name from twitter", max_length=255, null=True, blank=True)
     twitter_location = models.CharField(
@@ -6382,7 +6395,7 @@ class BatchRowActionPosition(models.Model):
     # We cache the url to an image for the candidate, measure or office for rapid display
     ballot_item_image_url_https = models.URLField(
         verbose_name='url of https image for candidate, measure or office', max_length=255, blank=True, null=True)
-    ballot_item_twitter_handle = models.CharField(verbose_name='twitter screen_name for candidate, measure, or office',
+    ballot_item_twitter_handle = models.CharField(verbose_name='twitter username for candidate, measure, or office',
                                                   max_length=255, null=True, unique=False)
 
     # What is the organization name, voter name, or public figure name? We cache this here for rapid display
@@ -6391,7 +6404,7 @@ class BatchRowActionPosition(models.Model):
     # We cache the url to an image for the org, voter, or public_figure for rapid display
     speaker_image_url_https = models.URLField(
         verbose_name='url of https image for org or person with position', max_length=255, blank=True, null=True)
-    speaker_twitter_handle = models.CharField(verbose_name='twitter screen_name for org or person with position',
+    speaker_twitter_handle = models.CharField(verbose_name='twitter username for org or person with position',
                                               max_length=255, null=True, unique=False)
 
     date_entered = models.DateTimeField(verbose_name='date entered', null=True, auto_now=True)
