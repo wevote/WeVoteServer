@@ -38,8 +38,7 @@
 <p><a href="{% url 'politician:politician_list' %}?state_code={{ state_code }}">cancel</a>
 <input name="submit_text" type="submit" value="{% if politician %}Update Politician{% else %}Save New Politician{% endif %}" /></p>
 
-<div class="row">
-<div class="col">
+
 <div class="row form-group">
     <label for="profile_image_type_currently_active_id" class="pl-3 control-label">
         Politician Photo Choice<br />
@@ -135,8 +134,8 @@
         </span>
     </div>
 </div>
-</div>
 
+<div class="row">
 {% if politician.we_vote_hosted_profile_image_url_large %}
 <div class="col">
 <div class="row form-group">
@@ -154,11 +153,10 @@
 </div>
 {% endif %}
 </div>
-</div>
 
 <div class="col">
 <div class="row form-group">
-    <label for="politician_name_id" class="pl-5 control-label">
+    <label for="politician_name_id" class="control-label">
         Politician Name
         {% if politician.supporters_count %}
             <div class="u-no-break" style="color: darkgray; font-size: 10px;">supporters_count: {{ politician.supporters_count }}</div>
@@ -257,34 +255,10 @@
     </div>
 </div>
 </div>
-</div>
-
-<div class="row">
-<div class="col">
-<div class="row form-group">
-    <label for="state_code_id" class="pl-5 control-label">State Code</label>
-    <div class="col">
-        <input type="text" name="state_code" id="state_code_id" class="form-control"
-               value="{% if politician %}{{ politician.state_code|default_if_none:"" }}{% else %}{{ state_code|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
 
 <div class="col">
 <div class="row form-group">
-    <label for="political_party_id" class="control-label">Politician Party</label>
-    <div class="col">
-        <input type="text" name="political_party" id="political_party_id" class="form-control"
-               value="{% if politician %}{{ politician.political_party|default_if_none:"" }}{% else %}{{ political_party|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-</div>
-
-<div class="row">
-<div class="col">
-<div class="row form-group">
-    <label for="seo_friendly_path_id" class="pl-5 control-label">
+    <label for="seo_friendly_path_id" class="control-label">
         SEO Friendly Path
         {% if politician.seo_friendly_path %}
             <a href="{{ web_app_root_url }}/{{ politician.seo_friendly_path }}/-/" target="_blank">
@@ -310,7 +284,7 @@
 <div class="row">
 <div class="col">
 <div class="row form-group">
-    <label for="google_civic_candidate_name_id" class="pl-5 control-label u-no-break">Name (for matching)</label>
+    <label for="google_civic_candidate_name_id" class="pl-5 control-label u-no-break">Politician Name (for Google Civic matching)</label>
     <div class="col">
         <input type="text" name="google_civic_candidate_name" id="google_civic_candidate_name_id" class="form-control"
                value="{% if politician %}{{ politician.google_civic_candidate_name|default_if_none:"" }}{% else %}{{ google_civic_candidate_name|default_if_none:"" }}{% endif %}" />
@@ -320,7 +294,7 @@
 
 <div class="col">
 <div class="row form-group">
-    <label for="google_civic_candidate_name2_id" class="control-label u-no-break">Politician Name 2</label>
+    <label for="google_civic_candidate_name2_id" class="control-label u-no-break">Politician Name 2 (for Google Civic matching)</label>
     <div class="col">
         <input type="text" name="google_civic_candidate_name2" id="google_civic_candidate_name2_id" class="form-control"
                value="{% if politician %}{{ politician.google_civic_candidate_name2|default_if_none:"" }}{% else %}{{ google_civic_candidate_name2|default_if_none:"" }}{% endif %}" />
@@ -330,7 +304,7 @@
 
 <div class="col">
 <div class="row form-group">
-    <label for="google_civic_candidate_name3_id" class="control-label u-no-break">Politician Name 3</label>
+    <label for="google_civic_candidate_name3_id" class="control-label u-no-break">Politician Name 3 (for Google Civic matching)</label>
     <div class="col">
         <input type="text" name="google_civic_candidate_name3" id="google_civic_candidate_name3_id" class="form-control"
                value="{% if politician %}{{ politician.google_civic_candidate_name3|default_if_none:"" }}{% else %}{{ google_civic_candidate_name3|default_if_none:"" }}{% endif %}" />
@@ -346,6 +320,26 @@
     <div class="col">
         <input type="text" name="ballotpedia_politician_name" id="ballotpedia_politician_name_id" class="form-control"
                value="{% if politician %}{{ politician.ballotpedia_politician_name|default_if_none:"" }}{% else %}{{ ballotpedia_politician_name|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+</div>
+
+<div class="col">
+<div class="row form-group">
+    <label for="state_code_id" class="control-label">State Code</label>
+    <div class="col">
+        <input type="text" name="state_code" id="state_code_id" class="form-control"
+               value="{% if politician %}{{ politician.state_code|default_if_none:"" }}{% else %}{{ state_code|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+</div>
+
+<div class="col">
+<div class="row form-group">
+    <label for="political_party_id" class="control-label">Politician Party</label>
+    <div class="col">
+        <input type="text" name="political_party" id="political_party_id" class="form-control"
+               value="{% if politician %}{{ politician.political_party|default_if_none:"" }}{% else %}{{ political_party|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
 </div>
@@ -693,12 +687,10 @@
     </div>
 </div>
 </div>
-</div>
 
-<div class="row">
 <div class="col">
 <div class="row form-group">
-    <label for="wikipedia_url_id" class="pl-5 control-label">
+    <label for="wikipedia_url_id" class="control-label">
         Wikipedia Page
         {% if politician and politician.wikipedia_url %}(<a href="{{ politician.wikipedia_url }}" target="_blank">Go</a>){% endif %}
     </label>
@@ -708,12 +700,10 @@
     </div>
 </div>
 </div>
-</div>
 
-<div class="row">
 <div class="col">
 <div class="row form-group">
-    <label for="linkedin_url_id" class="pl-5 control-label">
+    <label for="linkedin_url_id" class="control-label">
         LinkedIn
         {% if politician and politician.linkedin_url %}(<a href="{{ politician.linkedin_url }}" target="_blank">Go</a>){% endif %}
     </label>
@@ -745,24 +735,20 @@
     </div>
 </div>
 </div>
-</div>
 
-<div class="row">
 <div class="col">
 <div class="row form-group">
-    <label for="birth_date_id" class="pl-5 control-label">Birthdate (format Feb. 16, 1955)</label>
+    <label for="birth_date_id" class="control-label">Birthdate (format Feb. 16, 1955)</label>
     <div class="col">
         <input type="text" name="birth_date" id="birth_date_id" class="form-control"
                value="{% if politician %}{{ politician.birth_date|default_if_none:"" }}{% else %}{{ birth_date|default_if_none:"" }}{% endif %}" />
     </div>
 </div>
 </div>
-</div>
 
-<div class="row">
 <div class="col">
 <div class="row form-group">
-    <label for="youtube_url_id" class="pl-5 control-label">YouTube URL</label>
+    <label for="youtube_url_id" class="control-label">YouTube URL</label>
     <div class="col">
         <input type="text" name="youtube_url" id="youtube_url_id" class="form-control"
                value="{% if politician %}{{ politician.youtube_url|default_if_none:"" }}{% else %}{{ youtube_url|default_if_none:"" }}{% endif %}" />
@@ -827,10 +813,6 @@
             <td class="padded">
                 {% if candidate.office %}
                     <a href="{% url 'office:office_summary' candidate.office.id %}" target="_blank">{{ candidate.office.office_name }} <span class="glyphicon glyphicon-new-window"></span></a>
-                {% elif candidate.office_list %}
-                    {% for office in candidate.office_list %}
-                        <a href="{% url 'office:office_summary' office.id %}" target="_blank">{{ office.office_name }} <span class="glyphicon glyphicon-new-window"></span></a>
-                    {% endfor %}
                 {% else %}
                     (office missing)
                 {% endif %}
@@ -1245,12 +1227,6 @@
 
 </form>
 
-{% if change_log_list %}
-    <br />
-<div class="form-group">
-    {% include "candidate/change_log_list.html" with change_log_list=change_log_list %}
-</div>
-{% endif %}
 
 
 {% if duplicate_politician_list %}
