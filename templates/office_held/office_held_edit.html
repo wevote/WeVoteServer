@@ -63,27 +63,7 @@
 
 {% include "../form_inputs/three_form_groups_stacked.html" with field_dict_1=google_civic_office_held_name_dict field_dict_2=google_civic_office_held_name2_dict field_dict_3=google_civic_office_held_name3_dict %}
 
-<div class="row">
-<div class="col">
-<div class="row form-group">
-    <label for="district_name_id" class="pl-4 control-label">District Name</label>
-    <div class="col">
-        <input type="text" name="district_name" id="district_name_id" class="form-control"
-               value="{% if office_held %}{{ office_held.district_name|default_if_none:"" }}{% else %}{{ district_name|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-
-<div class="col">
-<div class="row form-group">
-    <label for="ocd_division_id_id" class="control-label">Ocd Division ID</label>
-    <div class="col">
-        <input type="text" name="ocd_division_id" id="ocd_division_id_id" class="form-control"
-               value="{% if office_held %}{{ office_held.ocd_division_id|default_if_none:"" }}{% else %}{{ ocd_division_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-</div>
+{% include "../form_inputs/two_form_groups.html" with field_dict_1=district_name_dict field_dict_2=ocd_division_id_dict %}
 
 {% if office_held.primary_party %}
 <div class="row form-group">
@@ -95,27 +75,7 @@
 </div>
 {% endif %}
 
-<div class="row">
-<div class="col">
-<div class="row form-group">
-    <label for="state_code_id" class="pl-4 control-label">State Code</label>
-    <div class="col">
-        <input type="text" name="state_code" id="state_code_id" class="form-control"
-               value="{% if office_held %}{{ office_held.state_code|default_if_none:"" }}{% else %}{{ state_code|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-
-<div class="col">
-<div class="row form-group">
-    <label for="district_id_id" class="control-label">District ID (Numerical)</label>
-    <div class="col">
-        <input type="text" name="district_id" id="district_id_id" class="form-control"
-               value="{% if office_held %}{{ office_held.district_id|default_if_none:"" }}{% else %}{{ district_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-</div>
+{% include "../form_inputs/two_form_groups.html" with field_dict_1=state_code_dict field_dict_2=district_id_dict %}
 
 <div class="row">
 <div class="col">

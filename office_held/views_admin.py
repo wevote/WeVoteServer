@@ -232,12 +232,15 @@ def office_held_edit_view(request, office_held_id=0, office_held_we_vote_id=""):
         return redirect_to_sign_in_page(request, authority_required)
 
     messages_on_stage = get_messages(request)
-    office_held_id = convert_to_int(office_held_id)
-    state_code = request.GET.get('state_code', 0)
-    twitter_handle = request.GET.get('twitter_handle', '')
+    district_id = request.GET.get('district_id', '')
+    district_name = request.GET.get('district_name', '')
     google_civic_office_held_name = request.GET.get('google_civic_office_held_name', '')
     google_civic_office_held_name2 = request.GET.get('google_civic_office_held_name2', '')
     google_civic_office_held_name3 = request.GET.get('google_civic_office_held_name3', '')
+    ocd_division_id = request.GET.get('ocd_division_id', '')
+    office_held_id = convert_to_int(office_held_id)
+    state_code = request.GET.get('state_code', 0)
+    twitter_handle = request.GET.get('twitter_handle', '')
 
     office_held = None
     office_held_found = False
@@ -257,15 +260,29 @@ def office_held_edit_view(request, office_held_id=0, office_held_we_vote_id=""):
         # Was office_held_merge_possibility_found?
         office_held.contest_office_merge_possibility_found = True  # TODO DALE Make dynamic
         template_values = {
-            'messages_on_stage':    			messages_on_stage,
-            'office_held':          			office_held,
+            'district_id':    district_id,
+            'district_id_dict':              
+            {
+                'label':    'District ID (Numerical)',
+                'id':       'district_id_id',
+                'name':     'district_id',
+                'value':     district_id if district_id else office_held.district_id
+            },
+            'district_name':    district_name,
+            'district_name_dict':              
+            {
+                'label':    'District Name',
+                'id':       'district_name_id',
+                'name':     'district_name',
+                'value':     district_name if district_name else office_held.district_name
+            },
             'google_civic_office_held_name':    google_civic_office_held_name,
             'google_civic_office_held_name_dict':              
             {
                 'label':    'Alternate Name (for Google Civic matching)',
                 'id':       'google_civic_office_held_name_id',
                 'name':     'google_civic_office_held_name',
-                'value':     office_held.google_civic_office_held_name
+                'value':     google_civic_office_held_name if google_civic_office_held_name else office_held.google_civic_office_held_name
             },
             'google_civic_office_held_name2':    google_civic_office_held_name2,
             'google_civic_office_held_name2_dict':              
@@ -273,7 +290,7 @@ def office_held_edit_view(request, office_held_id=0, office_held_we_vote_id=""):
                 'label':    'Alternate Name 2',
                 'id':       'google_civic_office_held_name2_id',
                 'name':     'google_civic_office_held_name2',
-                'value':     office_held.google_civic_office_held_name2
+                'value':     google_civic_office_held_name2 if google_civic_office_held_name2 else office_held.google_civic_office_held_name2
             },
             'google_civic_office_held_name3':    google_civic_office_held_name3,
             'google_civic_office_held_name3_dict':              
@@ -281,7 +298,25 @@ def office_held_edit_view(request, office_held_id=0, office_held_we_vote_id=""):
                 'label':    'Alternate Name 3',
                 'id':       'google_civic_office_held_name3_id',
                 'name':     'google_civic_office_held_name3',
-                'value':     office_held.google_civic_office_held_name3
+                'value':     google_civic_office_held_name3 if google_civic_office_held_name3 else office_held.google_civic_office_held_name3
+            },
+            'messages_on_stage':    			messages_on_stage,
+            'ocd_division_id':    ocd_division_id,
+            'ocd_division_id_dict':              
+            {
+                'label':    'Ocd Division Id',
+                'id':       'ocd_division_id_id',
+                'name':     'ocd_division_id',
+                'value':     ocd_division_id if ocd_division_id else office_held.ocd_division_id
+            },
+            'office_held':          			office_held,
+            'state_code':    state_code,
+            'state_code_dict':              
+            {
+                'label':    'State Code',
+                'id':       'state_code_id',
+                'name':     'state_code',
+                'value':     state_code if state_code else office_held.state_code
             },
         }
     else:
