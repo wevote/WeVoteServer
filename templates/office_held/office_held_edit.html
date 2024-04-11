@@ -61,40 +61,7 @@
     </div>
 </div>
 
-{% include "../form_inputs/three_form_groups_stacked.html" with field_dict_1=google_civic_office_held_name_dict field_dict_2=google_civic_candidate_name2_dict field_dict_3=google_civic_candidate_name3_dict %}
-
-
-<div class="row">
-<div class="col">
-<div class="form-group">
-    <label for="google_civic_office_held_name_id" class="pl-4 control-label">Alternate Name (for Google Civic matching)</label>
-    <div class="col">
-        <input type="text" name="google_civic_office_held_name" id="google_civic_office_held_name_id" class="form-control"
-               value="{% if office_held %}{{ office_held.google_civic_office_held_name|default_if_none:"" }}{% else %}{{ google_civic_office_held_name|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-
-<div class="col">
-<div class="form-group">
-    <label for="google_civic_office_held_name2_id" class="pl-4 control-label">Alternate Name 2</label>
-    <div class="col">
-        <input type="text" name="google_civic_office_held_name2" id="google_civic_office_held_name2_id" class="form-control"
-               value="{% if office_held %}{{ office_held.google_civic_office_held_name2|default_if_none:"" }}{% else %}{{ google_civic_office_held_name2|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-
-<div class="col">
-<div class="form-group">
-    <label for="google_civic_office_held_name3_id" class="pl-4 control-label">Alternate Name 3</label>
-    <div class="col">
-        <input type="text" name="google_civic_office_held_name3" id="google_civic_office_held_name3_id" class="form-control"
-               value="{% if office_held %}{{ office_held.google_civic_office_held_name3|default_if_none:"" }}{% else %}{{ google_civic_office_held_name3|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-</div>
+{% include "../form_inputs/three_form_groups_stacked.html" with field_dict_1=google_civic_office_held_name_dict field_dict_2=google_civic_office_held_name2_dict field_dict_3=google_civic_office_held_name3_dict %}
 
 <div class="row">
 <div class="col">

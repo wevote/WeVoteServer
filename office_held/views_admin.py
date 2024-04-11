@@ -236,6 +236,8 @@ def office_held_edit_view(request, office_held_id=0, office_held_we_vote_id=""):
     state_code = request.GET.get('state_code', 0)
     twitter_handle = request.GET.get('twitter_handle', '')
     google_civic_office_held_name = request.GET.get('google_civic_office_held_name', '')
+    google_civic_office_held_name2 = request.GET.get('google_civic_office_held_name2', '')
+    google_civic_office_held_name3 = request.GET.get('google_civic_office_held_name3', '')
 
     office_held = None
     office_held_found = False
@@ -257,28 +259,36 @@ def office_held_edit_view(request, office_held_id=0, office_held_we_vote_id=""):
         template_values = {
             'messages_on_stage':    			messages_on_stage,
             'office_held':          			office_held,
-            'google_civic_office_held_name':	google_civic_office_held_name,
+            'google_civic_office_held_name':    google_civic_office_held_name,
             'google_civic_office_held_name_dict':              
             {
-                'label': 'Alternate Name (for Google Civic matching)',
-                'id': 'google_civic_office_held_name_id',
-                'name': 'google_civic_office_held_name',
-                'value': office_held.google_civic_office_held_name
-			},
+                'label':    'Alternate Name (for Google Civic matching)',
+                'id':       'google_civic_office_held_name_id',
+                'name':     'google_civic_office_held_name',
+                'value':     office_held.google_civic_office_held_name
+            },
+            'google_civic_office_held_name2':    google_civic_office_held_name2,
+            'google_civic_office_held_name2_dict':              
+            {
+                'label':    'Alternate Name 2',
+                'id':       'google_civic_office_held_name2_id',
+                'name':     'google_civic_office_held_name2',
+                'value':     office_held.google_civic_office_held_name2
+            },
+            'google_civic_office_held_name3':    google_civic_office_held_name3,
+            'google_civic_office_held_name3_dict':              
+            {
+                'label':    'Alternate Name 3',
+                'id':       'google_civic_office_held_name3_id',
+                'name':     'google_civic_office_held_name3',
+                'value':     office_held.google_civic_office_held_name3
+            },
         }
     else:
         template_values = {
             'messages_on_stage':    			messages_on_stage,
             'state_code':          				state_code,
             'twitter_handle':       			twitter_handle,
-            'google_civic_office_held_name':	google_civic_office_held_name,
-            'google_civic_office_held_name_dict':              
-            {
-                'label': 'Alternate Name (for Google Civic matching)',
-                'id': 'google_civic_office_held_name_id',
-                'name': 'google_civic_office_held_name',
-                'value': office_held.google_civic_office_held_name
-			},
         }
     return render(request, 'office_held/office_held_edit.html', template_values)
 
