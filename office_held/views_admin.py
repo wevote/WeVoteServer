@@ -239,6 +239,9 @@ def office_held_edit_view(request, office_held_id=0, office_held_we_vote_id=""):
     google_civic_office_held_name3 = request.GET.get('google_civic_office_held_name3', '')
     ocd_division_id = request.GET.get('ocd_division_id', '')
     office_held_id = convert_to_int(office_held_id)
+    office_held_facebook_url = request.GET.get('office_held_facebook_url', '')
+    office_held_twitter_handle = request.GET.get('office_held_twitter_handle', '')
+    office_held_url = request.GET.get('office_held_url', '')
     state_code = request.GET.get('state_code', 0)
     twitter_handle = request.GET.get('twitter_handle', '')
 
@@ -260,7 +263,7 @@ def office_held_edit_view(request, office_held_id=0, office_held_we_vote_id=""):
         # Was office_held_merge_possibility_found?
         office_held.contest_office_merge_possibility_found = True  # TODO DALE Make dynamic
         template_values = {
-            'district_id':    district_id,
+            'district_id':                      district_id,
             'district_id_dict':              
             {
                 'label':    'District ID (Numerical)',
@@ -268,7 +271,7 @@ def office_held_edit_view(request, office_held_id=0, office_held_we_vote_id=""):
                 'name':     'district_id',
                 'value':     district_id if district_id else office_held.district_id
             },
-            'district_name':    district_name,
+            'district_name':                    district_name,
             'district_name_dict':              
             {
                 'label':    'District Name',
@@ -310,7 +313,31 @@ def office_held_edit_view(request, office_held_id=0, office_held_we_vote_id=""):
                 'value':     ocd_division_id if ocd_division_id else office_held.ocd_division_id
             },
             'office_held':          			office_held,
-            'state_code':    state_code,
+            'office_held_facebook_url':         office_held_facebook_url,
+            'office_held_facebook_url_dict':              
+            {
+                'label':    'Office Held Facebook',
+                'id':       'office_held_facebook_url_id',
+                'name':     'office_held_facebook_url',
+                'value':     office_held_facebook_url if office_held_facebook_url else office_held.office_held_facebook_url
+            },
+            'office_held_twitter_handle':         office_held_twitter_handle,
+            'office_held_twitter_handle_dict':              
+            {
+                'label':    'Office Held Twitter Handle',
+                'id':       'office_held_twitter_handle_id',
+                'name':     'office_held_twitter_handle',
+                'value':     office_held_twitter_handle if office_held_twitter_handle else office_held.office_held_twitter_handle
+            },
+            'office_held_url':         office_held_url,
+            'office_held_url_dict':              
+            {
+                'label':    'Office Held Website',
+                'id':       'office_held_url_id',
+                'name':     'office_held_url',
+                'value':     office_held_url if office_held_url else office_held.office_held_url
+            },
+            'state_code':                       state_code,
             'state_code_dict':              
             {
                 'label':    'State Code',

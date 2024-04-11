@@ -77,35 +77,9 @@
 
 {% include "../form_inputs/two_form_groups.html" with field_dict_1=state_code_dict field_dict_2=district_id_dict %}
 
-<div class="row">
-<div class="col">
-<div class="row form-group">
-    <label for="office_held_facebook_url_id" class="pl-4 control-label">Office Held Facebook</label>
-    <div class="col">
-        <input type="text" name="office_held_facebook_url" id="office_held_facebook_url_id" class="form-control"
-               value="{% if office_held %}{{ office_held.office_held_facebook_url|default_if_none:"" }}{% else %}{{ office_held_facebook_url|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
+{% include "../form_inputs/two_form_groups.html" with field_dict_1=office_held_facebook_url_dict field_dict_2=office_held_twitter_handle_dict %}
 
-<div class="col">
-<div class="row form-group">
-    <label for="office_held_twitter_handle_id" class="control-label">Office Held Twitter Handle</label>
-    <div class="col">
-        <input type="text" name="office_held_twitter_handle" id="office_held_twitter_handle_id" class="form-control"
-               value="{% if office_held %}{{ office_held.office_held_twitter_handle|default_if_none:"" }}{% else %}{{ office_held_twitter_handle|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-</div>
-
-<div class="row form-group">
-    <label for="office_held_url_id" class="pl-4 control-label">Office Held Website</label>
-    <div class="col">
-        <input type="text" name="office_held_url" id="office_held_url_id" class="form-control"
-               value="{% if office_held %}{{ office_held.office_held_url|default_if_none:"" }}{% else %}{{ office_held_url|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
+{% include "../form_inputs/one_form_group.html" with field_dict_1=office_held_url_dict %}
 
 <div class="row form-group">
     <label for="office_held_description_id" class="pl-4 control-label">Office Held Description</label>
