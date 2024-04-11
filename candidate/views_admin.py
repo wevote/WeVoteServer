@@ -1830,6 +1830,8 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
     candidate_twitter_handle3 = request.GET.get('candidate_twitter_handle3', False)
     candidate_url = request.GET.get('candidate_url', False)
     candidate_contact_form_url = request.GET.get('candidate_contact_form_url', False)
+    contest_office_name = request.GET.get('contest_office_name', False)
+    district_name = request.GET.get('district_name', False)
     facebook_url = request.GET.get('facebook_url', False)
     instagram_handle = request.GET.get('instagram_handle', False)
     if positive_value_exists(instagram_handle):
@@ -1853,7 +1855,9 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
     withdrawal_date = request.GET.get('withdrawal_date', False)
     withdrawn_from_election = positive_value_exists(request.GET.get('withdrawn_from_election', False))
     do_not_display_on_ballot = positive_value_exists(request.GET.get('do_not_display_on_ballot', False))
-
+    vote_usa_office_id = request.GET.get('vote_usa_office_id', False)
+    vote_usa_politician_id = request.GET.get('vote_usa_politician_id', False)
+    
     messages_on_stage = get_messages(request)
     candidate_id = convert_to_int(candidate_id)
     candidate_on_stage_found = False
@@ -2065,13 +2069,15 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
             'candidate_contact_form_url':       candidate_contact_form_url,
             'change_log_list':                  change_log_list,
             # 'contest_office_we_vote_id':        contest_office_we_vote_id,
-            'contest_office_name_dict':              
+            'contest_office_name':              contest_office_name,
+			'contest_office_name_dict':              
             {
                 'label': 'Contest Office Name (Cached)',
                 'id': 'contest_office_name_id',
                 'name': 'contest_office_name',
                 'value': candidate_on_stage.contest_office_name
 			},
+            'district_name':                    district_name,
             'district_name_dict':              
             {
                 'label': 'District Name (Cached)',
@@ -2141,19 +2147,21 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
 			},
             'twitter_link_possibility_list':    twitter_link_possibility_list,
             'vote_smart_id':                    vote_smart_id,
+            'vote_usa_office_id':                  vote_usa_office_id,
             'vote_usa_office_dict':              
             {
                 'label': 'Vote USA Office Id',
                 'id': 'vote_usa_office_id',
                 'name': 'vote_usa_office',
-                'value': vote_smart_id if vote_smart_id else candidate_on_stage.vote_smart_id
+                'value': vote_usa_office_id if vote_usa_office_id else candidate_on_stage.vote_usa_office_id
 			}, 
+            'vote_usa_politician_id':              vote_usa_politician_id,
             'vote_usa_politician_dict':              
             {
                 'label': 'Vote USA Politician Id',
                 'id': 'vote_usa_politician_id',
                 'name': 'vote_usa_politician',
-                'value': vote_smart_id if vote_smart_id else candidate_on_stage.vote_smart_id
+                'value': vote_usa_politician_id if vote_usa_politician_id else candidate_on_stage.vote_usa_politician_id
 			}, 
             # 'vote_usa_profile_image_url_https': vote_usa_profile_image_url_https,
             'web_app_root_url':                 web_app_root_url,
@@ -2373,6 +2381,8 @@ def candidate_edit_process_view(request):
                     "&candidate_twitter_handle3=" + str(candidate_twitter_handle3) + \
                     "&candidate_url=" + str(candidate_url) + \
                     "&contest_office_id=" + str(contest_office_id) + \
+                    "&contest_office_name=" + str(contest_office_name) + \
+                    "&district_name=" + str(district_name) + \
                     "&google_civic_candidate_name=" + str(google_civic_candidate_name) + \
                     "&google_civic_candidate_name2=" + str(google_civic_candidate_name2) + \
                     "&google_civic_candidate_name3=" + str(google_civic_candidate_name3) + \
@@ -2383,6 +2393,8 @@ def candidate_edit_process_view(request):
                     "&politician_we_vote_id=" + str(politician_we_vote_id) + \
                     "&state_code=" + str(state_code) + \
                     "&vote_smart_id=" + str(vote_smart_id)
+    "&vote_usa_office_id=" + str(vote_usa_office_id)
+    "&vote_usa_politician_id=" + str(vote_usa_politician_id )
 
     # Note: A date is not required, but if provided it needs to be in a correct date format
     if positive_value_exists(withdrawn_from_election) and positive_value_exists(withdrawal_date):
