@@ -2186,14 +2186,14 @@ def politician_edit_process_view(request):
                     "&politician_we_vote_id=" + str(politician_we_vote_id) + \
                     "&political_party=" + str(political_party) + \
                     "&vote_smart_id=" + str(vote_smart_id) + \
-                    "&maplight_id=" + str(maplight_id)
-    "&first_name=" + str(first_name)
-    "&middle_name=" + str(middle_name)
-    "&last_name=" + str(last_name)
-    "&ballotpedia_politician_name=" + str(ballotpedia_politician_name)
-    "&vote_smart_id=" + str(vote_smart_id)
-    "&birth_date=" + str(birth_date)
-    "&youtube_url=" + str(youtube_url)
+                    "&maplight_id=" + str(maplight_id) + \
+                    "&first_name=" + str(first_name) + \
+                    "&middle_name=" + str(middle_name) + \
+                    "&last_name=" + str(last_name) + \
+                    "&ballotpedia_politician_name=" + str(ballotpedia_politician_name) + \
+                    "&vote_smart_id=" + str(vote_smart_id) + \
+                    "&birth_date=" + str(birth_date) + \
+                    "&youtube_url=" + str(youtube_url)
                     
     if not success:
         messages.add_message(request, messages.ERROR,
