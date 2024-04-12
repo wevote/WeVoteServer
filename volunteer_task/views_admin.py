@@ -316,9 +316,11 @@ def performance_list_view(request):
             voter_guide_possibilities_created = \
                 team_actions_completed_dict[end_of_week_date_integer]['voter_guide_possibilities_created']
             volunteer_task_total = \
-                candidates_created + politicians_augmented + politicians_deduplicated + politicians_photo_added + \
-                politicians_requested_changes + positions_saved + \
-                position_comments_saved + voter_guide_possibilities_created
+                candidates_created + duplicate_politician_analysis + election_retrieve_started + \
+                match_candidates_to_politicians + \
+                politicians_augmented + politicians_deduplicated + politicians_photo_added + \
+                politicians_requested_changes + positions_saved + position_comments_saved + \
+                twitter_bulk_retrieve + voter_guide_possibilities_created
         else:
             candidates_created = 0
             duplicate_politician_analysis = 0

@@ -3014,7 +3014,10 @@ def candidate_edit_process_view(request):
             if youtube_url is not False:
                 candidate_on_stage.youtube_url = youtube_url
             if withdrawal_date is not False:
-                candidate_withdrawal_date_string = candidate_on_stage.withdrawal_date.strftime("%Y-%m-%d")
+                if positive_value_exists(candidate_on_stage.withdrawal_date):
+                    candidate_withdrawal_date_string = candidate_on_stage.withdrawal_date.strftime("%Y-%m-%d")
+                else:
+                    candidate_withdrawal_date_string = ''
                 change_results = change_tracking(
                     existing_value=candidate_withdrawal_date_string,
                     new_value=withdrawal_date,
