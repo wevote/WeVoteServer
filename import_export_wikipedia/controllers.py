@@ -783,22 +783,18 @@ def retrieve_candidate_images_from_wikipedia_page(candidate, wikipedia_page, for
 # }
 
 
-def retrieve_from_wikipedia_test(test_title):
-
+def retrieve_images_from_wikipedia(page_title):
     response = {"success": True, "status": "", "result": ""}
-    #TODO look at wikipediaPage.images API
     try:
-        test_page = wikipedia.page(title=test_title,pageid=None)
-        test_html = test_page.html()
-        tree = BeautifulSoup(test_html)
-        img_link = tree.find('img').get('src')
+        page = wikipedia.page(title=page_title, pageid=None, auto_suggest=False)
+        page_html = page.html()
+        # TODO what if wikipedia layout changes?
+        page_dom = BeautifulSoup(page_html, 'html.parser')
+        img_link = page_dom.find('img').get('src')
         response["status"] += "SUCCESS "
-        response["result"] = img_link
-    except retrievePageError:
+        response["result"] = "retrieved the following picture from Wikipedia: {}".format(img_link)
+    except Exception as retrievePageError:
         response["success"] = False
-        response["status"] += "WIKIPEDIA_RETRIEVE_IMAGE_ERROR "
-        response["result"] = "retrieve wikipedia page error"
-    
+        response["status"] += "RETRIEVE_IMAGES_FROM_WIKIPEDIA_ERROR "
+        response["result"] = "retrieve_images_from_wikipedia error: {}".format(retrievePageError)
     return response
-
-    

@@ -20,10 +20,7 @@ from django.urls import reverse
 from django.utils.timezone import localtime, now
 
 import wevote_functions.admin
-
-from import_export_wikipedia.controllers import retrieve_from_wikipedia_test
-
-from import_export_wikipedia.controllers import retrieve_candidate_images_from_wikipedia_page
+from import_export_wikipedia.controllers import retrieve_images_from_wikipedia
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.models import BallotReturnedListManager
 from bookmark.models import BookmarkItemList
@@ -1890,16 +1887,16 @@ def candidate_edit_view(request, candidate_id=0, candidate_we_vote_id=""):
     except CandidateCampaign.DoesNotExist:
         # This is fine, create new below
         pass
-    
-    if positive_value_exists(candidate_on_stage.wikipedia_page_title):
-        print("-------------------------------------------------------------------------------here ----------------")
-        response = retrieve_from_wikipedia_test(candidate_on_stage.wikipedia_page_title)
-        if response["success"]==True:
-            candidate_on_stage.wikipedia_photo_url = response["result"]
-            candidate_on_stage.save()
-            messages.add_message(request, messages.ERROR, response["result"])
-        else:
-            messages.add_message(request, messages.ERROR, response["result"])
+
+    if not positive_value_exists(candidate_on_stage.wikipedia_photo_url):
+        if positive_value_exists(candidate_on_stage.wikipedia_page_title):
+            response = retrieve_images_from_wikipedia(candidate_on_stage.wikipedia_page_title)
+            if response["success"]==True:
+                candidate_on_stage.wikipedia_photo_url = response["result"]
+                candidate_on_stage.save()
+                messages.add_message(request, messages.INFO, response["result"])
+            else:
+                messages.add_message(request, messages.ERROR, response["result"])
 
     if 'localhost' in WEB_APP_ROOT_URL:
         web_app_root_url = 'https://localhost:3000'
@@ -3026,6 +3023,9 @@ def candidate_edit_process_view(request):
                     change_description += change_results['change_description']
                     change_description_changed = True
                 candidate_on_stage.wikipedia_url = wikipedia_url
+                print("this is wikipedia url:", wikipedia_url)
+                print("this is the modified url:", wikipedia_url.rsplit('/', 1)[-1].replace("_", " "))
+                candidate_on_stage.wikipedia_page_title = wikipedia_url.rsplit('/', 1)[-1].replace("_", " ")
             if youtube_url is not False:
                 candidate_on_stage.youtube_url = youtube_url
             if withdrawal_date is not False:
