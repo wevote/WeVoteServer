@@ -86,15 +86,21 @@
            target="_blank"
            class="u-no-break">
             <span>
-                <strong>POSITION LIVE </strong>
+                <strong>ENDORSEMENT VISIBLE TO VOTERS </strong>
                 <span class="glyphicon glyphicon-new-window"></span>
             </span>
         </a>
         {% else %}
             <span>
-                <strong>POSITION ALREADY LIVE </strong>
+                <strong>ENDORSEMENT ALREADY LIVE </strong>
             </span>
         {% endif %}
+    </div>
+    {% else %}
+    <div>
+        <span style="color: #999">
+            Endorsement Not Visible to Voters Yet
+        </span>
     </div>
     {% endif %}
 

@@ -6,13 +6,12 @@
 
 ## Preparing a virtual environment on Mac
 
-Mac instructions (Based on [this](http://joebergantine.com/blog/2015/apr/30/installing-python-2-and-python-3-alongside-each-ot/))
+Mac instructions 
 
-Install the latest Python 3.x from package: https://www.python.org/downloads/  
-(Install 3.6.1 or higher, since Python 3.6 has a known issue)
+Install the latest Python 3.x from package: https://www.python.org/downloads/
 
 This allows you to run python3 and pip3. 
-(Software gets installed into /Library/Frameworks/Python.framework/Versions/3.6/bin/.)
+(Software gets installed into a folder like this, depending on the version: /Library/Frameworks/Python.framework/Versions/3.11/bin/.)
 
     $ pip3 install --user virtualenv
     $ vim ~/.bash_profile
@@ -38,11 +37,13 @@ Now activate this new virtual environment for WeVoteServer:
     $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.6/bin/activate
     (WeVoteServer) $ export PATH="/Applications/Postgres.app/Contents/Versions/latest/bin:$PATH"
     
-If you need to upgrade your Python version later (Macintosh), this command does it:
+If using Pycharm, add this new interpreter in Settings:
+
+![PycharmPythonUpgradeAddInterpreter.png](images%2FPycharmPythonUpgradeAddInterpreter.png)
+
+If you need to upgrade your Python version to a new subversion (Macintosh), this command does it:
 
     $ virtualenv3 -p /Library/Frameworks/Python.framework/Versions/3.6/bin/python3 WeVoteServer3.6.1
-    
-Note: If you upgrade to Python 3.7.0+, tweepy package will stop working. 'streaming.py' utility has a reserved word problem, which you may fix locally.
 
 ## Continue with openssl update 
 
