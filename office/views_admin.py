@@ -972,35 +972,35 @@ def office_new_view(request):
             'label':    'Ballotpedia Office Id (Office Held)',
             'id':       'ballotpedia_office_id_id',
             'name':     'ballotpedia_office_id',
-            'value':     ballotpedia_office_id if ballotpedia_office_id else office_on_stage.ballotpedia_office_id
+            'value':     ballotpedia_office_id
         },
         'ballotpedia_office_name_dict':              
         {
             'label':    'Office Name (for Ballotpedia matching)',
             'id':       'ballotpedia_office_name_id',
             'name':     'ballotpedia_office_name',
-            'value':     ballotpedia_office_name if ballotpedia_office_name else office_on_stage.ballotpedia_office_name
+            'value':     ballotpedia_office_name
         },
         'ballotpedia_race_id_dict':              
         {
             'label':    'Ballotpedia Race Id (Contest Office)',
             'id':       'ballotpedia_race_id_id',
             'name':     'ballotpedia_race_id',
-            'value':     ballotpedia_race_id if ballotpedia_race_id else office_on_stage.ballotpedia_race_id
+            'value':     ballotpedia_race_id
         },
         'ctcl_uuid_dict':              
         {
             'label':    'CTCL UUID',
             'id':       'ctcl_uuid_id',
             'name':     'ctcl_uuid',
-            'value':     ctcl_uuid if ctcl_uuid else office_on_stage.ctcl_uuid
+            'value':     ctcl_uuid
         },
         'district_id_dict':              
         {
             'label':    'District ID',
             'id':       'district_id_id',
             'name':     'district_id',
-            'value':     district_id if district_id else office_on_stage.district_id
+            'value':     district_id
         },
         'google_civic_election_id':         google_civic_election_id,
         'google_civic_office_name_dict':              
@@ -1008,35 +1008,35 @@ def office_new_view(request):
             'label':    'Office Name 1 (for Google Civic matching)',
             'id':       'google_civic_office_name_id',
             'name':     'google_civic_office_name',
-            'value':     google_civic_office_name if google_civic_office_name else office_on_stage.google_civic_office_name
+            'value':     google_civic_office_name
         },
         'google_civic_office_name2_dict':              
         {
             'label':    'Office Name 2',
             'id':       'google_civic_office_name2_id',
             'name':     'google_civic_office_name2',
-            'value':     google_civic_office_name2 if google_civic_office_name2 else office_on_stage.google_civic_office_name2
+            'value':     google_civic_office_name2
         },
         'google_civic_office_name3_dict':              
         {
             'label':    'Office Name 3',
             'id':       'google_civic_office_name3_id',
             'name':     'google_civic_office_name3',
-            'value':     google_civic_office_name3 if google_civic_office_name3 else office_on_stage.google_civic_office_name3
+            'value':     google_civic_office_name3
         },
         'google_civic_office_name4_dict':              
         {
             'label':    'Office Name 4',
             'id':       'google_civic_office_name4_id',
             'name':     'google_civic_office_name4',
-            'value':     google_civic_office_name4 if google_civic_office_name4 else office_on_stage.google_civic_office_name4
+            'value':     google_civic_office_name4
         },
         'google_civic_office_name5_dict':              
         {
             'label':    'Office Name 5',
             'id':       'google_civic_office_name5_id',
             'name':     'google_civic_office_name5',
-            'value':     google_civic_office_name5 if google_civic_office_name5 else office_on_stage.google_civic_office_name5
+            'value':     google_civic_office_name5
         },
         'messages_on_stage':        messages_on_stage,
         'ocd_division_id_dict':              
@@ -1044,7 +1044,7 @@ def office_new_view(request):
             'label':    'OCD Division ID',
             'id':       'ocd_division_id_id',
             'name':     'ocd_division_id',
-            'value':     ocd_division_id if ocd_division_id else office_on_stage.ocd_division_id
+            'value':     ocd_division_id
         },
         'office_list':              updated_office_list,
         'state_code':               state_code,
@@ -1092,7 +1092,6 @@ def office_edit_view(request, office_id=0, contest_office_we_vote_id=""):
         # Was a contest_office_merge_possibility_found?
         office_on_stage.contest_office_merge_possibility_found = True  # TODO DALE Make dynamic
         template_values = {
-            'ballotpedia_office_id':              ballotpedia_office_id,
             'ballotpedia_office_id_dict':              
             {
                 'label':    'Ballotpedia Office Id (Office Held)',
@@ -1100,7 +1099,6 @@ def office_edit_view(request, office_id=0, contest_office_we_vote_id=""):
                 'name':     'ballotpedia_office_id',
                 'value':     ballotpedia_office_id if ballotpedia_office_id else office_on_stage.ballotpedia_office_id
             },
-            'ballotpedia_office_name':              ballotpedia_office_name,
             'ballotpedia_office_name_dict':              
             {
                 'label':    'Office Name (for Ballotpedia matching)',
@@ -1108,7 +1106,6 @@ def office_edit_view(request, office_id=0, contest_office_we_vote_id=""):
                 'name':     'ballotpedia_office_name',
                 'value':     ballotpedia_office_name if ballotpedia_office_name else office_on_stage.ballotpedia_office_name
             },
-            'ballotpedia_race_id':              ballotpedia_race_id,
             'ballotpedia_race_id_dict':              
             {
                 'label':    'Ballotpedia Race Id (Contest Office)',
@@ -1116,7 +1113,6 @@ def office_edit_view(request, office_id=0, contest_office_we_vote_id=""):
                 'name':     'ballotpedia_race_id',
                 'value':     ballotpedia_race_id if ballotpedia_race_id else office_on_stage.ballotpedia_race_id
             },
-            'ctcl_uuid':                        ctcl_uuid,
             'ctcl_uuid_dict':              
             {
                 'label':    'CTCL UUID',
@@ -1124,7 +1120,6 @@ def office_edit_view(request, office_id=0, contest_office_we_vote_id=""):
                 'name':     'ctcl_uuid',
                 'value':     ctcl_uuid if ctcl_uuid else office_on_stage.ctcl_uuid
             },
-            'district_id':                      district_id,
             'district_id_dict':              
             {
                 'label':    'District ID',
@@ -1133,7 +1128,6 @@ def office_edit_view(request, office_id=0, contest_office_we_vote_id=""):
                 'value':     district_id if district_id else office_on_stage.district_id
             },
             'google_civic_election_id':         google_civic_election_id,
-            'google_civic_office_name':         google_civic_office_name,
             'google_civic_office_name_dict':              
             {
                 'label':    'Office Name 1 (for Google Civic matching)',
@@ -1141,7 +1135,6 @@ def office_edit_view(request, office_id=0, contest_office_we_vote_id=""):
                 'name':     'google_civic_office_name',
                 'value':     google_civic_office_name if google_civic_office_name else office_on_stage.google_civic_office_name
             },
-            'google_civic_office_name2':         google_civic_office_name2,
             'google_civic_office_name2_dict':              
             {
                 'label':    'Office Name 2',
@@ -1149,7 +1142,6 @@ def office_edit_view(request, office_id=0, contest_office_we_vote_id=""):
                 'name':     'google_civic_office_name2',
                 'value':     google_civic_office_name2 if google_civic_office_name2 else office_on_stage.google_civic_office_name2
             },
-            'google_civic_office_name3':         google_civic_office_name3,
             'google_civic_office_name3_dict':              
             {
                 'label':    'Office Name 3',
@@ -1157,7 +1149,6 @@ def office_edit_view(request, office_id=0, contest_office_we_vote_id=""):
                 'name':     'google_civic_office_name3',
                 'value':     google_civic_office_name3 if google_civic_office_name3 else office_on_stage.google_civic_office_name3
             },
-            'google_civic_office_name4':         google_civic_office_name4,
             'google_civic_office_name4_dict':              
             {
                 'label':    'Office Name 4',
@@ -1165,7 +1156,6 @@ def office_edit_view(request, office_id=0, contest_office_we_vote_id=""):
                 'name':     'google_civic_office_name4',
                 'value':     google_civic_office_name4 if google_civic_office_name4 else office_on_stage.google_civic_office_name4
             },
-            'google_civic_office_name5':         google_civic_office_name5,
             'google_civic_office_name5_dict':              
             {
                 'label':    'Office Name 5',
@@ -1174,7 +1164,6 @@ def office_edit_view(request, office_id=0, contest_office_we_vote_id=""):
                 'value':     google_civic_office_name5 if google_civic_office_name5 else office_on_stage.google_civic_office_name5
             },
             'messages_on_stage':        messages_on_stage,
-            'ocd_division_id':              ocd_division_id,
             'ocd_division_id_dict':              
             {
                 'label':    'OCD Division ID',
