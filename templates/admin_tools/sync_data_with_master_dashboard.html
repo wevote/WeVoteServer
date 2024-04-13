@@ -10,6 +10,8 @@
     <div style="padding: 25px 25px 75px 25px; font-size: 18px">
         If you are loading election data for the first time to your local postgres, press the "FAST LOAD" button below, and within about
         twenty-five minutes, it will have loaded and stored all the election data we have for all elections and for all the states.
+        <br><span style="font-weight: bold;"> Note April 1, 2024: a temporary bug has created 10k+ duplicated ballot_ballotitem entries,
+            so this fast load will take about 45 minutes to complete until the records are deduped.</span>
 
         <input type="hidden" id="started_fast_update" name="started_fast_update" value="false">
         <input type="hidden" id="started_fast_init" name="started_fast_init" value="true">

@@ -182,7 +182,7 @@ def voter_campaignx_follow_view(request):  # campaignFollow
     issue_we_vote_id = request.GET.get('issue_we_vote_id', False)
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     follow_value = positive_value_exists(request.GET.get('follow', False))
-    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_string = request.headers['user-agent']
     user_agent_object = get_user_agent(request)
     ignore_value = positive_value_exists(request.GET.get('ignore', False))
 

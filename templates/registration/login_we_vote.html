@@ -20,6 +20,21 @@
 
 {% if not voter_signed_in %}
 <h1>Sign-In</h1>
+<br><br>
+<p>
+    <a href="{% url 'social:begin' 'facebook' %}?next={{ next }}"
+        style="border-radius: 4px; color: white; font-size: 14px; background: rgb(10, 104, 234); padding: 10px;">
+        Sign in with Facebook
+    </a>
+</p>
+<br><br>
+<p>
+    <a href="{% url 'social:begin' 'twitter' %}?next={{ next }}"
+        style="border-radius: 4px; color: white; font-size: 14px; background: rgb(39, 145, 234); padding: 10px;">
+        Sign in with Twitter
+    </a>
+</p>
+<br><br>
 
 <form method="post" action="{% url 'login_we_vote' %}">
 {% csrf_token %}
@@ -27,7 +42,7 @@
     <input type="hidden" name="next" value="{{ next }}" />
 {% endif %}
 <div class="control-group">
-    <label class="control-label" for="username">Email</label>
+    <label class="control-label" for="username">Sign in with Email</label>
     <div class="controls">
         <input type="text" id="username" name="username" placeholder="Email" style="width: 250px;" />
     </div>
@@ -41,7 +56,7 @@
 <div>&nbsp;</div>
 <div class="control-group">
     <div class="controls">
-        <button type="submit" class="btn btn-primary">Sign In</button>
+        <button type="submit" class="btn btn-primary">Sign in with Email</button>
     </div>
 </div>
 
@@ -51,9 +66,6 @@
 {#  <p><a href="{% url 'auth:password_reset' %}">Lost password?</a></p> #}
 <br />
 <br />
-
-<p><a href="{% url 'social:begin' 'facebook' %}?next={{ next }}">Sign in with Facebook</a></p>
-<p><a href="{% url 'social:begin' 'twitter' %}?next={{ next }}">Sign in with Twitter</a></p>
 
 
 <p> <a href="{% url 'voter:authenticate_manually' %}"></a>

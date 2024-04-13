@@ -2,9 +2,9 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from . import views_admin
-from django.conf.urls import re_path
+from django.urls import re_path
 
+from . import views_admin
 
 urlpatterns = [
     re_path(r'^$', views_admin.politician_list_view, name='politician_list',),
