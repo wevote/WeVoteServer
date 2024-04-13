@@ -19,6 +19,5 @@
     "redux-devtools": "^2.1.5",
     "snyk": "^1.251.0"
   },
-  "dependencies": {},
   "snyk": true
 }
