@@ -1122,6 +1122,19 @@ def politician_new_view(request):
     politician_we_vote_id = request.GET.get('politician_we_vote_id', "")
     gender = request.GET.get('gender', "U")
     gender_likelihood = request.GET.get('gender_likelihood', "")
+    ballotpedia_politician_name = request.GET.get('ballotpedia_politician_name', "")
+    birth_date = request.GET.get('birth_date', "")
+    first_name = request.GET.get('first_name', "")
+    last_name = request.GET.get('last_name', "")
+    middle_name = request.GET.get('middle_name', "")
+    politician_email = request.GET.get('politician_email', "")
+    politician_email2 = request.GET.get('politician_email2', "")
+    politician_email3 = request.GET.get('politician_email3', "")
+    politician_phone_number = request.GET.get('politician_phone_number', "")
+    politician_phone_number2 = request.GET.get('politician_phone_number2', "")
+    politician_phone_number3 = request.GET.get('politician_phone_number3', "")
+    vote_usa_politician_id = request.GET.get('vote_usa_politician_id', "")
+    youtube_url = request.GET.get('youtube_url', "")
 
     # These are the Offices already entered for this election
     try:
@@ -1174,6 +1187,146 @@ def politician_new_view(request):
         'vote_smart_id':                    vote_smart_id,
         'maplight_id':                      maplight_id,
         'politician_we_vote_id':            politician_we_vote_id,
+        'ballotpedia_politician_name_dict':              
+        {
+            'label':    'Name from Ballotpedia',
+            'id':       'ballotpedia_politician_name_id',
+            'name':     'ballotpedia_politician_name',
+            'value':     ballotpedia_politician_name
+        },
+        'birth_date_dict':              
+        {
+        'label':    'Birthdate (format Feb. 16, 1955)',
+        'id':       'birth_date_id',
+        'name':     'birth_date',
+            'value':     birth_date
+        },
+        'first_name_dict':              
+        {
+            'label':    'First Name',
+            'id':       'first_name_id',
+            'name':     'first_name',
+            'value':     first_name
+        },
+        'last_name_dict':              
+        {
+            'label':    'Last Name',
+            'id':       'last_name_id',
+            'name':     'last_name',
+            'value':     last_name
+        },
+        'middle_name_dict':              
+        {
+            'label':    'Middle Name',
+            'id':       'middle_name_id',
+            'name':     'middle_name',
+            'value':     middle_name
+        },
+        'google_civic_candidate_name_dict':              
+        {
+            'label':    'Politician Name (for Google Civic matching)',
+            'id':       'google_civic_candidate_name_id',
+            'name':     'google_civic_candidate_name',
+            'value':     google_civic_candidate_name
+        },
+        'google_civic_candidate_name2_dict':              
+        {
+            'label':    'Politician Name 2',
+            'id':       'google_civic_candidate_name2_id',
+            'name':     'google_civic_candidate_name2',
+            'value':     google_civic_candidate_name2
+        },
+        'google_civic_candidate_name3_dict':              
+        {
+            'label':    'Politician Name 3',
+            'id':       'google_civic_candidate_name3_id',
+            'name':     'google_civic_candidate_name3',
+            'value':     google_civic_candidate_name3
+        },
+        'maplight_id_dict':              
+        {
+            'label':    'MapLight Id',
+            'id':       'maplight_id_id',
+            'name':     'maplight_id',
+            'value':     maplight_id
+        },
+        'politician_email_dict':              
+        {
+            'label':    'Politician Email',
+            'id':       'politician_email_id',
+            'name':     'politician_email',
+            'value':     politician_email
+        },
+        'politician_email2_dict':              
+        {
+            'label':    'Email 2',
+            'id':       'politician_email2_id',
+            'name':     'politician_email2',
+            'value':     politician_email2
+        },
+        'politician_email3_dict':              
+        {
+            'label':    'Email 3',
+            'id':       'politician_email3_id',
+            'name':     'politician_email3',
+            'value':     politician_email3
+        },
+        'politician_phone_number_dict':              
+        {
+            'label':    'Politician Phone',
+            'id':       'politician_phone_number_id',
+            'name':     'politician_phone_number',
+            'value':     politician_phone_number
+        },
+        'politician_phone_number2_dict':              
+        {
+            'label':    'Phone 2',
+            'id':       'politician_phone_number2_id',
+            'name':     'politician_phone_number2',
+            'value':     politician_phone_number2
+        },
+        'politician_phone_number3_dict':              
+        {
+            'label':    'Phone 3',
+            'id':       'politician_phone_number3_id',
+            'name':     'politician_phone_number3',
+            'value':     politician_phone_number3
+        },
+        'political_party_dict':              
+        {
+            'label':    'Politician Party',
+            'id':       'political_party_id',
+            'name':     'political_party',
+            'value':     political_party
+        },
+        'state_code_dict':              
+        {
+            'label':    'State Code',
+            'id':       'state_code_id',
+            'name':     'state_code',
+            'value':     state_code
+        },
+        'vote_smart_id_dict':              
+        {
+            'label':    'Vote Smart Id',
+            'id':       'vote_smart_id_id',
+            'name':     'vote_smart_id',
+            'value':     vote_smart_id
+        },
+        'vote_usa_politician_id_dict':              
+        {
+            'label':    'Vote USA Politician Id',
+            'id':       'vote_usa_politician_id_id',
+            'name':     'vote_usa_politician_id',
+            'value':     vote_usa_politician_id
+        },
+        'youtube_url_dict':              
+        {
+            'label':    'YouTube URL',
+            'id':       'youtube_url_id',
+            'name':     'youtube_url',
+            'value':     youtube_url
+        },
     }
     return render(request, 'politician/politician_edit.html', template_values)
 
