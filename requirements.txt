@@ -3,8 +3,8 @@ boto3==1.34.66
 CacheControl==0.13.1
 cloudscraper==1.2.68
 cryptography==42.0.5
+dj-database-url==2.1.0
 Django==5.0.3
-# dj-database-url==2.1.0
 # git+https://github.com/meneses-pt/django-background-tasks.git
 django-bootstrap3==15.0.0
 django-cors-headers==4.3.1
