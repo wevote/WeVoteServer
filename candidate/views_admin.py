@@ -1731,6 +1731,21 @@ def candidate_new_view(request):
     maplight_id = request.GET.get('maplight_id', "")
     page = request.GET.get('page', 0)
     politician_we_vote_id = request.GET.get('politician_we_vote_id', "")
+    ballotpedia_candidate_id = request.GET.get('ballotpedia_candidate_id', "")
+    ballotpedia_candidate_name = request.GET.get('ballotpedia_candidate_name', "")
+    ballotpedia_office_id = request.GET.get('ballotpedia_office_id', "")
+    ballotpedia_person_id = request.GET.get('ballotpedia_person_id', "")
+    ballotpedia_race_id = request.GET.get('ballotpedia_race_id', "")
+    candidate_email = request.GET.get('candidate_email', "")
+    candidate_phone = request.GET.get('candidate_phone', "")
+    contest_office_name = request.GET.get('contest_office_name', "")
+    district_name = request.GET.get('district_name', "")
+    google_civic_candidate_name2 = request.GET.get('google_civic_candidate_name2', "")
+    google_civic_candidate_name3 = request.GET.get('google_civic_candidate_name3', "")
+    vote_usa_office_id = request.GET.get('vote_usa_office_id', "")
+    vote_usa_politician_id = request.GET.get('vote_usa_politician_id', "")
+    youtube_url = request.GET.get('youtube_url', "")
+    linkedin_url = request.GET.get('linkedin_url', "")
 
     office_manager = ContestOfficeManager()
     candidate_list_manager = CandidateListManager()
@@ -1809,6 +1824,132 @@ def candidate_new_view(request):
         'office_name':                      office_name,
         'page':                             page,
         'politician_we_vote_id':            politician_we_vote_id,
+        'ballotpedia_candidate_id_dict':              
+            {
+                'label':    'Candidate Name (from Ballotpedia)',
+                'id':       'ballotpedia_candidate_id_id',
+                'name':     'ballotpedia_candidate_id',
+                'value':     ballotpedia_candidate_id
+            },
+            'ballotpedia_candidate_name_dict':              
+            {
+                'label':    'Ballotpedia Candidate Id',
+                'id':       'ballotpedia_candidate_name_id',
+                'name':     'ballotpedia_candidate_name',
+                'value':     ballotpedia_candidate_name
+            },
+            'ballotpedia_office_id_dict':              
+            {
+                'label':    'Ballotpedia Office Held Id',
+                'id':       'ballotpedia_office_id_id',
+                'name':     'ballotpedia_office_id',
+                'value':     ballotpedia_office_id
+            },
+            'ballotpedia_person_id_dict':              
+            {
+                'label':    'Ballotpedia Person Id',
+                'id':       'ballotpedia_person_id_id',
+                'name':     'ballotpedia_person_id',
+                'value':     ballotpedia_person_id
+            },
+            'ballotpedia_race_id_dict':              
+            {
+                'label':    'Ballotpedia Race Id',
+                'id':       'ballotpedia_race_id_id',
+                'name':     'ballotpedia_race_id',
+                'value':     ballotpedia_race_id
+            },
+            'candidate_email_dict':              
+            {
+                'label':    'Candidate Email',
+                'id':       'candidate_email_id',
+                'name':     'candidate_email',
+                'value':     candidate_email
+            },
+            'candidate_phone_dict':              
+            {
+                'label':    'Candidate Phone',
+                'id':       'candidate_phone_id',
+                'name':     'candidate_phone',
+                'value':     candidate_phone
+            },
+            'contest_office_name_dict':              
+            {
+                'label':    'Contest Office Name (Cached)',
+                'id':       'contest_office_name_id',
+                'name':     'contest_office_name',
+                'value':     contest_office_name
+            },
+            'district_name_dict':              
+            {
+                'label':    'District Name (Cached)',
+                'id':       'district_name_id',
+                'name':     'district_name',
+                'value':     district_name
+            },
+            'google_civic_candidate_name_dict':              
+            {
+                'label':    'Candidate Name1 (for Google Civic matching)',
+                'id':       'google_civic_candidate_name_id',
+                'name':     'google_civic_candidate_name',
+                'value':     google_civic_candidate_name
+            },
+            'google_civic_candidate_name2_dict':              
+            {
+                'label':    'Candidate Name2 (for Google Civic matching)',
+                'id':       'google_civic_candidate_name2_id',
+                'name':     'google_civic_candidate_name2',
+                'value':     google_civic_candidate_name2
+            },
+            'google_civic_candidate_name3_dict':              
+            {
+                'label':    'Candidate Name3 (for Google Civic matching)',
+                'id':       'google_civic_candidate_name3_id',
+                'name':     'google_civic_candidate_name3',
+                'value':     google_civic_candidate_name3
+            },
+            'linkedin_url_dict':              
+            {
+                'label':    'LinkedIn URL',
+                'id':       'linkedin_url_id',
+                'name':     'linkedin_url',
+                'value':     linkedin_url
+            },
+            'party_dict':              
+            {
+                'label':    'Candidate Party',
+                'id':       'party_id',
+                'name':     'party',
+                'value':     party
+            }, 
+            'state_code_dict':              
+            {
+                'label':    'Candidate State Code',
+                'id':       'state_code_id',
+                'name':     'state_code',
+                'value':     state_code
+            },
+            'vote_usa_office_id_dict':              
+            {
+                'label':    'Vote USA Office Id',
+                'id':       'vote_usa_office_id',
+                'name':     'vote_usa_office',
+                'value':     vote_usa_office_id
+            }, 
+            'vote_usa_politician_id_dict':              
+            {
+                'label':    'Vote USA Politician Id',
+                'id':       'vote_usa_politician_id',
+                'name':     'vote_usa_politician',
+                'value':     vote_usa_politician_id
+            }, 
+            'youtube_url_dict':              
+            {
+                'label':    'YouTube URL',
+                'id':       'youtube_url_id',
+                'name':     'youtube_url',
+                'value':     youtube_url
+            },
     }
     return render(request, 'candidate/candidate_edit.html', template_values)
 
