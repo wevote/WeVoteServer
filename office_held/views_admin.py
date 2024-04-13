@@ -204,6 +204,15 @@ def office_held_new_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     state_code = request.GET.get('state_code', "")
+    district_id = request.GET.get('district_id', "")
+    district_name = request.GET.get('district_name', "")
+    google_civic_office_held_name = request.GET.get('google_civic_office_held_name', "")
+    google_civic_office_held_name2 = request.GET.get('google_civic_office_held_name2', "")
+    google_civic_office_held_name3 = request.GET.get('google_civic_office_held_name3', "")
+    ocd_division_id = request.GET.get('ocd_division_id', "")
+    office_held_facebook_url = request.GET.get('office_held_facebook_url', "")
+    office_held_twitter_handle = request.GET.get('office_held_twitter_handle', "")
+    office_held_url = request.GET.get('office_held_url', "")
 
     office_held_manager = OfficeHeldManager()
     updated_office_held_list = []
@@ -220,6 +229,76 @@ def office_held_new_view(request):
     template_values = {
         'messages_on_stage':        messages_on_stage,
         'office_held_list':      updated_office_held_list,
+        'district_id_dict':              
+        {
+        'label':    'District ID (Numerical)',
+            'id':       'district_id_id',
+            'name':     'district_id',
+            'value':     district_id
+        },
+        'district_name_dict':              
+        {
+            'label':    'District Name',
+            'id':       'district_name_id',
+            'name':     'district_name',
+            'value':     district_name
+        },
+        'google_civic_office_held_name_dict':              
+        {
+            'label':    'Alternate Name (for Google Civic matching)',
+            'id':       'google_civic_office_held_name_id',
+            'name':     'google_civic_office_held_name',
+            'value':     google_civic_office_held_name
+        },
+        'google_civic_office_held_name2_dict':              
+        {
+            'label':    'Alternate Name 2',
+            'id':       'google_civic_office_held_name2_id',
+            'name':     'google_civic_office_held_name2',
+            'value':     google_civic_office_held_name2
+        },
+        'google_civic_office_held_name3_dict':              
+        {
+            'label':    'Alternate Name 3',
+            'id':       'google_civic_office_held_name3_id',
+            'name':     'google_civic_office_held_name3',
+            'value':     google_civic_office_held_name3
+        },
+            'ocd_division_id_dict':              
+        {
+            'label':    'Ocd Division Id',
+            'id':       'ocd_division_id_id',
+            'name':     'ocd_division_id',
+            'value':     ocd_division_id
+        },
+        'office_held_facebook_url_dict':              
+        {
+            'label':    'Office Held Facebook',
+            'id':       'office_held_facebook_url_id',
+            'name':     'office_held_facebook_url',
+            'value':     office_held_facebook_url
+        },
+        'office_held_twitter_handle_dict':              
+        {
+            'label':    'Office Held Twitter Handle',
+            'id':       'office_held_twitter_handle_id',
+            'name':     'office_held_twitter_handle',
+            'value':     office_held_twitter_handle
+        },
+        'office_held_url_dict':              
+        {
+            'label':    'Office Held Website',
+            'id':       'office_held_url_id',
+            'name':     'office_held_url',
+            'value':     office_held_url
+        },
+        'state_code_dict':              
+        {
+            'label':    'State Code',
+            'id':       'state_code_id',
+            'name':     'state_code',
+            'value':     state_code
+        },
     }
     return render(request, 'office_held/office_held_edit.html', template_values)
 
@@ -263,7 +342,6 @@ def office_held_edit_view(request, office_held_id=0, office_held_we_vote_id=""):
         # Was office_held_merge_possibility_found?
         office_held.contest_office_merge_possibility_found = True  # TODO DALE Make dynamic
         template_values = {
-            'district_id':                      district_id,
             'district_id_dict':              
             {
                 'label':    'District ID (Numerical)',
@@ -271,7 +349,6 @@ def office_held_edit_view(request, office_held_id=0, office_held_we_vote_id=""):
                 'name':     'district_id',
                 'value':     district_id if district_id else office_held.district_id
             },
-            'district_name':                    district_name,
             'district_name_dict':              
             {
                 'label':    'District Name',
@@ -279,7 +356,6 @@ def office_held_edit_view(request, office_held_id=0, office_held_we_vote_id=""):
                 'name':     'district_name',
                 'value':     district_name if district_name else office_held.district_name
             },
-            'google_civic_office_held_name':    google_civic_office_held_name,
             'google_civic_office_held_name_dict':              
             {
                 'label':    'Alternate Name (for Google Civic matching)',
@@ -287,7 +363,6 @@ def office_held_edit_view(request, office_held_id=0, office_held_we_vote_id=""):
                 'name':     'google_civic_office_held_name',
                 'value':     google_civic_office_held_name if google_civic_office_held_name else office_held.google_civic_office_held_name
             },
-            'google_civic_office_held_name2':    google_civic_office_held_name2,
             'google_civic_office_held_name2_dict':              
             {
                 'label':    'Alternate Name 2',
@@ -295,7 +370,6 @@ def office_held_edit_view(request, office_held_id=0, office_held_we_vote_id=""):
                 'name':     'google_civic_office_held_name2',
                 'value':     google_civic_office_held_name2 if google_civic_office_held_name2 else office_held.google_civic_office_held_name2
             },
-            'google_civic_office_held_name3':    google_civic_office_held_name3,
             'google_civic_office_held_name3_dict':              
             {
                 'label':    'Alternate Name 3',
@@ -313,7 +387,6 @@ def office_held_edit_view(request, office_held_id=0, office_held_we_vote_id=""):
                 'value':     ocd_division_id if ocd_division_id else office_held.ocd_division_id
             },
             'office_held':          			office_held,
-            'office_held_facebook_url':         office_held_facebook_url,
             'office_held_facebook_url_dict':              
             {
                 'label':    'Office Held Facebook',
@@ -321,7 +394,6 @@ def office_held_edit_view(request, office_held_id=0, office_held_we_vote_id=""):
                 'name':     'office_held_facebook_url',
                 'value':     office_held_facebook_url if office_held_facebook_url else office_held.office_held_facebook_url
             },
-            'office_held_twitter_handle':         office_held_twitter_handle,
             'office_held_twitter_handle_dict':              
             {
                 'label':    'Office Held Twitter Handle',
@@ -329,7 +401,6 @@ def office_held_edit_view(request, office_held_id=0, office_held_we_vote_id=""):
                 'name':     'office_held_twitter_handle',
                 'value':     office_held_twitter_handle if office_held_twitter_handle else office_held.office_held_twitter_handle
             },
-            'office_held_url':         office_held_url,
             'office_held_url_dict':              
             {
                 'label':    'Office Held Website',
@@ -337,7 +408,6 @@ def office_held_edit_view(request, office_held_id=0, office_held_we_vote_id=""):
                 'name':     'office_held_url',
                 'value':     office_held_url if office_held_url else office_held.office_held_url
             },
-            'state_code':                       state_code,
             'state_code_dict':              
             {
                 'label':    'State Code',
