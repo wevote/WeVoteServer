@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from . import views_admin
-from django.conf.urls import re_path
+from django.urls import re_path
 
 
 urlpatterns = [

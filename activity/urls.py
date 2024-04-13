@@ -2,10 +2,6 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from django.conf.urls import url
-
-from . import views_admin
-
 
 urlpatterns = [
     # url(r'^$', views_admin.batches_home_view, name='batches_home',),

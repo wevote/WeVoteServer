@@ -73,11 +73,16 @@ def get_total_row_count():
     rows = 0
     for table in allowable_tables:
         with conn.cursor() as cursor:
-            sql = "SELECT COUNT(id) FROM \"public\".\"{table}\";".format(table=table)
+            sql = "SELECT MAX(id) FROM \"public\".\"{table}\";".format(table=table)
             cursor.execute(sql)
             row = cursor.fetchone()
-            cnt = int(row[0])
-            # print('get_total_row_count of table ', table, ' is ', cnt)
+            if row[0] is not None:
+                sql = "SELECT COUNT(*) FROM \"public\".\"{table}\";".format(table=table)
+                cursor.execute(sql)
+                row = cursor.fetchone()
+                if row[0] is not None:
+                    cnt = int(row[0])
+            print('get_total_row_count of table ', table, ' is ', cnt)
             rows += cnt
 
     print('get_total_row_count is ', rows)
@@ -241,9 +246,9 @@ def retrieve_sql_files_from_master_server(request):
     host = 'https://api.wevoteusa.org/'
 
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    verify_bool = not ('localhost' in host or '127.0.0.1' in host or 'wevotedeveloper.com' in host)
+    # verify_bool = not ('localhost' in host or '127.0.0.1' in host or 'wevotedeveloper.com' in host)
     response = requests.get(host + '/apis/v1/fastLoadStatusRetrieve',
-                            params={ "initialize": True, "voter_device_id": voter_device_id }, verify=verify_bool)
+                            params={ "initialize": True, "voter_device_id": voter_device_id }, verify=False)
     # print("response from master server ", str(response))
 
     for table_name in allowable_tables:
@@ -260,17 +265,31 @@ def retrieve_sql_files_from_master_server(request):
             response = {}
 
             while wait_for_a_http_200:
-                response = requests.get(host + 'apis/v1/retrieveSQLTables/',
-                                        verify=verify_bool,
-                                        params={'table': table_name, 'start': start, 'end': end,
-                                                'voter_device_id': voter_device_id })
-                request_count += 1
-                if response.status_code == 200:
-                    wait_for_a_http_200 = False
-                else:
-                    print(host + 'apis/v1/retrieveSQLTables/   (failing) response.status_code' +
-                          str(response.status_code) + '  RETRYING ---------------------------')
-                    continue
+                load_successful = False
+                retry = 1
+                while not load_successful:
+                    url = (host + '/apis/v1/retrieveSQLTables/&table:' + table_name + '&start:' + str(start) + '&end:' +
+                           str(end))
+                    try:
+                        response = requests.get(host + 'apis/v1/retrieveSQLTables/',
+                                                verify=False,
+                                                params={'table': table_name, 'start': start, 'end': end,
+                                                        'voter_device_id': voter_device_id })
+                        request_count += 1
+                        load_successful = True
+                        if response.status_code == 200:
+                            wait_for_a_http_200 = False
+                        else:
+                            print(host + 'apis/v1/retrieveSQLTables/   (failing get response) response.status_code ' +
+                                  str(response.status_code) + '  RETRY ---- ' + url)
+                            continue
+                    except Exception as getErr:
+                        print(host +
+                              'apis/v1/retrieveSQLTables/   (failing SSL connection err on get) error ' +
+                              str(getErr) + '  RETRY #' + str(retry) + '  ---- ' + url)
+                        retry += 1
+                        if retry < 10:
+                            continue
 
             structured_json = json.loads(response.text)
             if structured_json['success'] is False:

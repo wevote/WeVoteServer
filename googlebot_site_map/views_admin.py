@@ -22,7 +22,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 def log_request(request):
     ip = get_ip_from_headers(request)
-    user_agent = request.META['HTTP_USER_AGENT']
+    user_agent = request.headers['user-agent']
     host = googlebot_reverse_dns(ip)
     path = request.path
     url_bits = path.split('/')

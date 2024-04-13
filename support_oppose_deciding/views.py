@@ -17,7 +17,7 @@ def voter_supporting_candidate_view(request, candidate_id):
     logger.debug("voter_supporting_candidate_view {candidate_id}".format(
         candidate_id=candidate_id
     ))
-    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_string = request.headers['user-agent']
     user_agent_object = get_user_agent(request)
     voter_api_device_id = get_voter_api_device_id(request)
     voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)
@@ -35,7 +35,7 @@ def voter_stop_supporting_candidate_view(request, candidate_id):
     logger.debug("voter_stop_supporting_candidate_view {candidate_id}".format(
         candidate_id=candidate_id
     ))
-    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_string = request.headers['user-agent']
     user_agent_object = get_user_agent(request)
     voter_api_device_id = get_voter_api_device_id(request)
     voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)
@@ -53,7 +53,7 @@ def voter_opposing_candidate_view(request, candidate_id):
     logger.debug("voter_opposing_candidate_view {candidate_id}".format(
         candidate_id=candidate_id
     ))
-    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_string = request.headers['user-agent']
     user_agent_object = get_user_agent(request)
     voter_api_device_id = get_voter_api_device_id(request)
     voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)
@@ -71,7 +71,7 @@ def voter_stop_opposing_candidate_view(request, candidate_id):
     logger.debug("voter_stop_opposing_candidate_view {candidate_id}".format(
         candidate_id=candidate_id
     ))
-    user_agent_string = request.META['HTTP_USER_AGENT']
+    user_agent_string = request.headers['user-agent']
     user_agent_object = get_user_agent(request)
     voter_api_device_id = get_voter_api_device_id(request)
     voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)

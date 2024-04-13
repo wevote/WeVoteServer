@@ -19,7 +19,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  re_path(r'^blog/', include(blog_urls))
 """
 
-from django.conf.urls import include, re_path
+from django.urls import include, re_path
 from django.contrib.auth import views as auth_views
 
 from admin_tools.views import login_we_vote, logout_we_vote
@@ -74,7 +74,7 @@ urlpatterns = [
     re_path(r'^politician/', include(('politician.urls', 'politician'), namespace="politician")),
     re_path(r'^pos/', include(('position.urls', 'position'), namespace="position")),
     re_path(r'^retrieve_tables/', include(('retrieve_tables.urls', 'retrieve_tables'), namespace="retrieve_tables")),
-    re_path(r'^scheduled_tasks/', include(('scheduled_tasks.urls', 'scheduled_tasks'), namespace="scheduled_tasks")),
+    # re_path(r'^scheduled_tasks/', include(('scheduled_tasks.urls', 'scheduled_tasks'), namespace="scheduled_tasks")),
     re_path(r'^share/', include(('share.urls', 'share'), namespace="share")),
     re_path(r'^sod/', include(('support_oppose_deciding.urls', 'support_oppose_deciding'), namespace="support_oppose_deciding")),
     re_path(r'^stripe_donations/', include(('stripe_donations.urls', 'stripe'), namespace="stripe_donations")),
