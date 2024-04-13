@@ -64,6 +64,18 @@ def get_git_commit_date():
         return 'Not found: ' + str(e)
 
 
+def get_java_version():
+    java_version_list = ['Java not installed']
+    try:
+        version = os.popen('java --version').read()
+        if version.endswith('\n'):
+            version = version[:-1]
+        java_version_list = version.split('\n')   # Some Java implementations have multi-line versions
+    except:
+        pass
+    return java_version_list
+
+
 def get_python_version():
     version = os.popen('python --version').read().strip().replace('Python', '')
     print('Python version: ' + version)    # Something like 'Python 3.7.2'

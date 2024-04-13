@@ -169,6 +169,9 @@
   "_comment":                       "import_export_targetsmart",
   "TARGETSMART_API_KEY":            "",
 
+  "_comment":                       "Apache Tika Server (Docker Deployed), Localhost url different if not local PC/Mac",
+  "TIKA_SERVER_URL":                "http://localhost:9998",
+
   "_comment":                       "import_export_theunitedstatesio",
   "LEGISLATORS_CURRENT_CSV_FILE":   "import_export_theunitedstatesio/import_data/legislators-current.csv",
 

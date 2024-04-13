@@ -187,10 +187,6 @@
             <td>{{ python_version }}</td>
         </tr>
         <tr>
-            <td>Node:</td>
-            <td>{{ node_version }}</td>
-        </tr>
-        <tr>
             <td>Postgres:&nbsp;&nbsp;</td>
             <td>{{ postgres_version }}</td>
         </tr>
@@ -200,6 +196,20 @@
                 <a id="gitLink" href={{git_commit_hash_url}} target="_blank">{{git_commit_hash}}</a>
                 <span style="padding-left: 40px;">({{git_commit_date}})</span>
             </td>
+        </tr>
+        {% for line in java_version_list %}
+            <tr>
+            {% if forloop.counter == 1 %}
+                <td>Java:</td>
+            {% else %}
+                <td> </td>
+            {% endif %}
+                <td>{{ line }}</td>
+            </tr>
+        {% endfor %}
+        <tr>
+            <td>Node:</td>
+            <td>{{ node_version }}</td>
         </tr>
      </table>
 </p>

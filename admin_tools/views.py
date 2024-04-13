@@ -17,13 +17,12 @@ from candidate.models import CandidateCampaign, CandidateManager
 from config.base import get_environment_variable, LOGIN_URL
 from election.controllers import elections_import_from_sample_file
 from election.models import Election
-from email_outbound.models import EmailAddress, SendGridApiCounterManager
+from email_outbound.models import EmailAddress
 from follow.models import FollowOrganizationList
 from friend.models import CurrentFriend, FriendManager, SuggestedFriend
 from import_export_ctcl.models import CTCLApiCounterManager
 from import_export_facebook.models import FacebookLinkToVoter, FacebookManager
 from import_export_google_civic.models import GoogleCivicApiCounterManager
-from import_export_targetsmart.models import TargetSmartApiCounterManager
 from import_export_vote_usa.models import VoteUSAApiCounterManager
 from measure.models import ContestMeasure, ContestMeasureManager
 from office.controllers import offices_import_from_sample_file
@@ -43,7 +42,7 @@ from voter.models import Voter, VoterAddress, VoterAddressManager, VoterDeviceLi
 from wevote_functions.functions import convert_to_int, delete_voter_api_device_id_cookie, generate_voter_device_id, \
     get_voter_api_device_id, positive_value_exists, set_voter_api_device_id, STATE_CODE_MAP
 from wevote_functions.utils import get_node_version, get_postgres_version, get_python_version, get_git_commit_hash, \
-    get_git_commit_date
+    get_git_commit_date, get_java_version
 
 BALLOT_ITEMS_SYNC_URL = get_environment_variable("BALLOT_ITEMS_SYNC_URL")  # ballotItemsSyncOut
 BALLOT_RETURNED_SYNC_URL = get_environment_variable("BALLOT_RETURNED_SYNC_URL")  # ballotReturnedSyncOut
@@ -114,6 +113,7 @@ def admin_home_view(request):
     template_values = {
         'google_civic_election_id':           google_civic_election_id,
         'python_version':                     get_python_version(),
+        'java_version_list':                  get_java_version(),
         'node_version':                       get_node_version(),
         'git_commit_hash':                    get_git_commit_hash(False),
         'git_commit_hash_url':                get_git_commit_hash(True),

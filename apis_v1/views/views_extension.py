@@ -4,7 +4,7 @@
 import datetime
 import json
 import os
-import subprocess
+import re
 from urllib.parse import quote
 
 import boto3
@@ -51,7 +51,8 @@ def pdf_to_html_retrieve_view(request):  # pdfToHtmlRetrieve
     try:
         json_data = process_pdf_to_html(pdf_url, return_version)
     except Exception as e:
-        logger.error('pdf2htmlEX call to process_pdf_to_html from pdf_to_html_retrieve_view (Outermost Exception): ' + str(e))
+        logger.error('pdf2htmlEX call to process_pdf_to_html from pdf_to_html_retrieve_view (Outermost Exception): ' +
+                     str(e))
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -94,59 +95,58 @@ def build_absolute_path_for_tempfile(tempfile):
 # https://crpa.org/wp-content/uploads/2020-CA-Primary-Candidate-Final.pdf
 # https://webcache.googleusercontent.com/search?q=cache:https://cadem.org/wp-content/uploads/2022/09/2022-CADEM-General-Endorsements.pdf
 
-def process_pdf_to_html(pdf_url, return_version):
+# You can test Apache Tika on your Mac by downloading the latest version of
+#      https://www.apache.org/dyn/closer.lua/tika/2.9.2/tika-server-standard-2.9.2.jar
+# Then running
+#          java -jar tika-server-standard-2.9.2.jar
+# Which starts a Tika server on http://localhost:9998/
+
+def process_pdf_to_html(pdf_url, return_version=False):
     output_from_subprocess = 'exception occurred before output was captured'
     status = ''
     success = False
-    # logger.error('pdf2htmlEX entry to process_pdf_to_html:' + pdf_url + '   ' + str(return_version))
-
+    # logger.error('process_pdf_to_html entry to process_pdf_to_html:' + pdf_url + '   ' + str(return_version))
     # Version report, only used to debug the pdf2htmlEX installation in our AWS/EC2 instances
-    if return_version:
-        try:
-            command = 'pdf2htmlEX -v'
-            # logger.error('pdf2htmlEX command: ' + command)
+    # if return_version:
+    #     try:
+    #         command = 'pdf2htmlEX -v'
+    #         # logger.error('pdf2htmlEX command: ' + command)
+    #
+    #         process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    #         output_from_subprocess = build_output_string(process)
+    #
+    #         # logger.error('pdf2htmlEX version ' + output_from_subprocess)
+    #         success = True
+    #
+    #     except Exception as e:
+    #         logger.error('pdf2htmlEX version exception: ' + str(e))
+    #
+    #     json_data = {
+    #         'status': 'PDF2HTMLEX_VERSION',
+    #         'success': success,
+    #         'output_from_subprocess': output_from_subprocess,
+    #         's3_url_for_html': '',
+    #     }
+    #     return json_data
 
-            process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            output_from_subprocess = build_output_string(process)
-
-            # logger.error('pdf2htmlEX version ' + output_from_subprocess)
-            success = True
-
-        except Exception as e:
-            logger.error('pdf2htmlEX version exception: ' + str(e))
-
-        json_data = {
-            'status': 'PDF2HTMLEX_VERSION',
-            'success': success,
-            'output_from_subprocess': output_from_subprocess,
-            's3_url_for_html': '',
-        }
-        return json_data
-
-    # logger.error('pdf2htmlEX immediately after return_version: ' + str(return_version))
-    pdf_file_name = os.path.basename(pdf_url)
-    absolute_pdf_file = build_absolute_path_for_tempfile(pdf_file_name)
-    absolute_html_file = absolute_pdf_file.replace('.pdf', '.html')
-    try:
-        os.remove(absolute_pdf_file)    # remove the exact same pdf file if it already exists on disk
-    except Exception:
-        pass
+    # logger.error('process_pdf_to_html immediately after return_version: ' + str(return_version))
+    html_file_name = os.path.basename(pdf_url).replace('.pdf', '.html')
+    absolute_html_file = build_absolute_path_for_tempfile(html_file_name)
     try:
         os.remove(absolute_html_file)    # remove the exact same html file if it already exists on disk
     except Exception:
         pass
 
-    # logger.error('pdf2htmlEX after removing temp files: ' + str(pdf_file_name))
+    # logger.error('process_pdf_to_html after removing temp files: ' + str(pdf_file_name))
 
     # use cloudscraper to get past challenges presented by pages hosted at Cloudflare
     scraper = cloudscraper.create_scraper()  # returns a CloudScraper instance
-    s3_url_for_html = False
     is_pdf = True
     pdf_text_text = ''
     try:
         raw = scraper.get(pdf_url)
         pdf_text_text = raw.content  # in bytes, not using str(raw.content)
-        # logger.error('pdf2htmlEX cloudscraper attempt with base PDF url : ' + pdf_url +
+        # logger.error('process_pdf_to_html cloudscraper attempt with base PDF url : ' + pdf_url +
         #              ' returned bytes: ' + str(len(pdf_text_text)))
         success = True
 
@@ -154,18 +154,18 @@ def process_pdf_to_html(pdf_url, return_version):
     # Now try to use Google's (hopefully) cached version of the page
     except Exception as scraper_or_tempfile_error:
         status = "First pass with base url failed with a " + str(scraper_or_tempfile_error)
-        # logger.error('pdf2htmlEX cloudscraper with base PDF url or tempfile write exception: ' +
+        # logger.error('process_pdf_to_html cloudscraper with base PDF url or tempfile write exception: ' +
         #              str(scraper_or_tempfile_error))
 
     if not success:
-        logger.error('pdf2htmlEX first pass === not success')
+        logger.error('process_pdf_to_html first pass === not success')
         is_pdf = False
         try:
-            # logger.error('pdf2htmlEX first pass === not success, pdf_url:  ' + pdf_url)
+            # logger.error('process_pdf_to_html first pass === not success, pdf_url:  ' + pdf_url)
             encoded = quote(pdf_url, safe='')
-            # logger.error('pdf2htmlEX encoded success: ' + encoded)
+            # logger.error('process_pdf_to_html encoded success: ' + encoded)
             google_cached_pdf_url = 'https://webcache.googleusercontent.com/search?q=cache:' + encoded
-            # logger.error('pdf2htmlEX cloudscraper attempt with google cached PDF url: ' + google_cached_pdf_url)
+            # logger.error('process_pdf_to_html cloudscraper attempt with google cached PDF url: ' + google_cached_pdf_url)
 
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -176,53 +176,43 @@ def process_pdf_to_html(pdf_url, return_version):
                 'Accept-Language': 'en-US,en;q=0.8',
                 'Connection': 'keep-alive'}
             r = requests.get(google_cached_pdf_url, headers)
-            # logger.error('pdf2htmlEX after requests.get: ' + google_cached_pdf_url)
+            # logger.error('process_pdf_to_html after requests.get: ' + google_cached_pdf_url)
             # skip saving the pdf file (since we don't have one), and write the final html file to the temp dir
             html_text_text = r.text
             out_file = open(absolute_html_file, 'w')
             out_file.write(html_text_text)
 
-            # logger.error('pdf2htmlEX requests was successful with google cached PDF url : ' + google_cached_pdf_url +
-            #              ' returned bytes: ' + str(len(pdf_text_text)))
+            # logger.error('process_pdf_to_html requests was successful with google cached PDF url : ' +
+            #      google_cached_pdf_url + ' returned bytes: ' + str(len(pdf_text_text)))
             success = True
         except Exception as scraper_or_tempfile_error2:      # Out of luck
             status += ", Second pass with google cached PDF url failed with a: " + str(scraper_or_tempfile_error2)
-            logger.error('pdf2htmlEX FATAL requests with google cached PDF url or tempfile write exception: ' +
+            logger.error('process_pdf_to_html FATAL requests with google cached PDF url or tempfile write exception: ' +
                          str(scraper_or_tempfile_error2))
 
     if pdf_text_text and len(pdf_text_text) > 10 and is_pdf:
-        # Save the pdf to a temporary file on disk
-        # logger.error('pdf2htmlEX before storage of pdf file: ' + str(absolute_pdf_file))
-        mode = 'w' if type(pdf_text_text) == str else 'wb'
-        # logger.error('pdf2htmlEX write_tags: ' + mode)
-        out_file = open(absolute_pdf_file, mode)
-        out_file.write(pdf_text_text)
-        # logger.error('pdf2htmlEX file stored in local directory as: ' + str(pdf_file_name))
-        out_file.write(pdf_text_text)
-        # logger.error('pdf2htmlEX file stored in local directory as: ' + str(pdf_file_name))
         try:
-            # Run pdf2html from docker image to convert pdf to html
-            temp_path = get_environment_variable_default("PATH_FOR_TEMP_FILES", "/tmp")
-            command = 'pdf2htmlEX --dest-dir ' + temp_path + ' ' + absolute_pdf_file
-            # logger.error('pdf2htmlEX command: ' + command)
-            process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            output_from_subprocess = build_output_string(process)
-            # logger.error('pdf2htmlEX subprocess.run output: ' + output_from_subprocess)
-        except Exception as subprocess_run_error:
-            status += ', ' + str(subprocess_run_error)
-            logger.error('pdf2htmlEX subprocess.run exception: ' + str(subprocess_run_error))
-
-        try:
-            insert_pdf_filename_in_tmp_file(absolute_html_file, pdf_url)
-        except Exception as insert_pdf_error:
-            status += ', ' + str(insert_pdf_error)
-            logger.error('pdf2htmlEX insert_pdf_filename_in_tmp_file e5: ' + str(insert_pdf_error))
+            # Run Tika from docker image to convert pdf to html
+            import tika
+            tika.initVM()
+            from tika import parser
+            server_endpoint = get_environment_variable_default("TIKA_SERVER_ENDPOINT", 'http://tika:9998/tika')
+            if len(server_endpoint) == 0:
+                server_endpoint = 'http://tika:9998/tika'
+            parsed_result = parser.from_buffer(pdf_text_text, server_endpoint, xmlContent=True)
+            output_html = parsed_content_to_full_html(parsed_result['content'], pdf_url)
+            out_file = open(absolute_html_file, 'w')
+            out_file.write(output_html)
+            out_file.close()
+        except Exception as tika_error:
+            status += ', ' + str(tika_error)
+            logger.error('process_pdf_to_html subprocess.run exception: ' + str(tika_error))
 
     # create temporary file in s3, so it can be served to the We Vote Chrome Extension
     s3_url_for_html = store_temporary_html_file_to_aws(absolute_html_file) or 'NO_TEMPFILE_STORED_IN_S3'
     if not s3_url_for_html.startswith("http"):
         status += ', ' + s3_url_for_html
-    # logger.error("pdf2htmlEX stored temp html file: " + absolute_html_file + ', ' + s3_url_for_html)
+    # logger.error("process_pdf_to_html stored temp html file: " + absolute_html_file + ', ' + s3_url_for_html)
 
     if positive_value_exists(s3_url_for_html):
         status = 'PDF_URL_RETURNED successfully with s3_url_for_html, other status = ' + status
@@ -267,18 +257,9 @@ def store_temporary_html_file_to_aws(temp_file_name):
     return s3_html_url
 
 
-def insert_pdf_filename_in_tmp_file(temp_file, pdf_url):
-    f = open(temp_file, "r")
-    contents = f.readlines()
-    f.close()
-
-    value = "<input type=\"hidden\" name=\"pdfFileName\" value=\"{pdf_url}\" />\n".format(pdf_url=pdf_url)
-
-    # insert the hidden input as the first line of the body -- containing the original URL for the PDF
-    offset = contents.index("<body>\n") + 1
-    contents.insert(offset, value)
-
-    f = open(temp_file, "w")
-    contents = "".join(contents)
-    f.write(contents)
-    f.close()
+def parsed_content_to_full_html(content, pdf_url):
+    content = content.replace('<title></title>', '<title>' + pdf_url + '</title>')
+    inp = "<input type=\"hidden\" name=\"pdfFileName\" value=\"{pdf_url}\" />\n".format(pdf_url=pdf_url)
+    content = content.replace('<body>', '<body>\n' + inp)
+    content = re.sub(r'(?<!>)\n', '<br>\n', content)
+    return content
