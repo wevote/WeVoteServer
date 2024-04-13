@@ -38,6 +38,13 @@ We also have a [ReactNative for iOS and Android](https://github.com/wevote/WeVot
 
 [Read about working with WeVoteServer on a daily basis](docs/README_WORKING_WITH_WE_VOTE_SERVER.md)
 
+Need to upgrade Python?
+
+3a. [Install Python/Django on Mac](docs/README_API_INSTALL_PYTHON_MAC.md)
+
+3b. [Install Python/Django on Linux](docs/README_API_INSTALL_PYTHON_LINUX.md)
+
+
 If you need to test donations and have not updated your openssl and pyopenssl during install and setup, you will need
 [to update your local](docs/README_DONATION_SETUP.md).
 

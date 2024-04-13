@@ -1715,7 +1715,7 @@ def candidate_new_view(request):
 
     if not no_office and not positive_value_exists(contest_office_id):
         # If election id is missing, ...
-        url_variables = "?google_civic_election_id=" + google_civic_election_id + "&state_code=" + state_code
+        url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + "&state_code=" + str(state_code)
         messages.add_message(request, messages.ERROR, 'To create a new candidate, please add from an existing office.')
         return HttpResponseRedirect(reverse('office:office_list', args=()) + url_variables)
 

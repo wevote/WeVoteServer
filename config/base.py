@@ -114,9 +114,10 @@ INSTALLED_APPS = (
     'sslserver',
 
     # third party
-    'background_task',
+    # 'background_task',
     'bootstrap3',
     'corsheaders',  # cross origin requests
+    'mathfilters',
     'social_django',  # Installed with `pip install social-auth-app-django`
 
     # project specific
