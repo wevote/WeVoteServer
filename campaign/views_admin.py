@@ -250,6 +250,7 @@ def campaign_edit_owners_process_view(request):
                                 "&state_code=" + str(state_code))
 
 
+@csrf_protect
 @login_required
 def campaign_edit_owners_view(request, campaignx_id=0, campaignx_we_vote_id=""):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
@@ -398,6 +399,7 @@ def campaign_edit_politicians_process_view(request):
                                 "&state_code=" + str(state_code))
 
 
+@csrf_protect
 @login_required
 def campaign_edit_politicians_view(request, campaignx_id=0, campaignx_we_vote_id=""):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
@@ -564,6 +566,7 @@ def campaign_edit_process_view(request):
                                 "&state_code=" + str(state_code))
 
 
+@csrf_protect
 @login_required
 def campaign_edit_view(request, campaignx_we_vote_id=""):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
