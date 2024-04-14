@@ -115,23 +115,26 @@
             {% endif %}
             </td>
             <td>
-              {% if voter_guide_possibility.number_of_ballot_items %}
+                {% if voter_guide_possibility.number_of_ballot_items %}
                   <span class="u-no-break">{{ voter_guide_possibility.number_of_ballot_items|default_if_none:"" }} endorsements found</span>
                   <br />
-              {% endif %}
-              {% if voter_guide_possibility.number_of_ballot_items_not_matched %}
+                {% endif %}
+                {% if voter_guide_possibility.number_of_ballot_items_not_matched %}
                   <span class="u-no-break" style="color: red">({{ voter_guide_possibility.number_of_ballot_items_not_matched }} not matched)</span>
                   <br />
-              {% endif %}
-              {% if voter_guide_possibility.number_of_endorsements_with_position %}
+                {% endif %}
+                {% if voter_guide_possibility.number_of_endorsements_with_position %}
                   <span class="u-no-break" style="color: green">{{ voter_guide_possibility.number_of_endorsements_with_position }} visible to voters</span>
                   <br />
-              {% endif %}
-            {% with voter_guide_possibility.number_of_ballot_items|sub:voter_guide_possibility.number_of_endorsements_with_position as number_of_endorsements_not_visible %}
-              {% if number_of_endorsements_not_visible %}
-                  <span class="u-no-break"><strong>{{ number_of_endorsements_not_visible }} NOT visible to voters</strong></span>
-              {% endif %}
-            {% endwith %}
+                {% endif %}
+{#                {% with voter_guide_possibility.number_of_ballot_items|sub:voter_guide_possibility.number_of_endorsements_with_position as number_of_endorsements_not_visible %}#}
+{#                  {% if number_of_endorsements_not_visible %}#}
+{#                      <span class="u-no-break"><strong>{{ number_of_endorsements_not_visible }} NOT visible to voters</strong></span>#}
+{#                  {% endif %}#}
+{#                {% endwith %}#}
+                {% if voter_guide_possibility.number_of_endorsements_not_visible %}
+                  <span class="u-no-break"><strong>{{ voter_guide_possibility.number_of_endorsements_not_visible }} NOT visible to voters</strong></span>
+                {% endif %}
                 {% if voter_guide_possibility.ignore_this_source %}
                 <br />
                 <strong>Ignore this Source</strong>
