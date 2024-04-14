@@ -10,7 +10,6 @@
 <h1>Scoreboard</h1>
 {# Dropdown to choose which team scores to display #}
 <form name="team_name" method="get" action="{% url 'volunteer_task:performance_list' %}">
-  {% csrf_token %}
   {# Filter by VolunteerTeam: Only show members of the chosen team #}
   <div class="form-group pull-left">
       <label for="team_name_id" class="control-label">
