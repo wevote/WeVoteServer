@@ -13,6 +13,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateManager, CandidateListManager
@@ -224,6 +225,7 @@ def create_possible_voter_guides_from_prior_elections_view(request):
 
 
 # We do not require login for this page
+@csrf_exempt
 def voter_guide_create_view(request):
     """
     Allow anyone on the internet to submit a possible voter guide for including with We Vote

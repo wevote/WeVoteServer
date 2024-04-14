@@ -66,123 +66,13 @@
 </div>
 </div>
 
-<div class="row">
-<div class="col">
-<div class="form-group">
-    <label for="google_civic_office_name_id" class="pl-4 control-label">Office Name 1 (for Google Civic matching)</label>
-    <div class="col">
-        <input type="text" name="google_civic_office_name" id="google_civic_office_name_id" class="form-control"
-               value="{% if office %}{{ office.google_civic_office_name|default_if_none:"" }}{% else %}{{ google_civic_office_name|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
+{% include "../form_inputs/five_form_groups_stacked.html" with field_dict_1=google_civic_office_name_dict field_dict_2=google_civic_office_name2_dict field_dict_3=google_civic_office_name3_dict field_dict_4=google_civic_office_name4_dict field_dict_5=google_civic_office_name5_dict %}
 
-<div class="col">
-<div class="form-group">
-    <label for="google_civic_office_name2_id" class="pl-4 control-label">Office Name 2</label>
-    <div class="col">
-        <input type="text" name="google_civic_office_name2" id="google_civic_office_name2_id" class="form-control"
-               value="{% if office %}{{ office.google_civic_office_name2|default_if_none:"" }}{% else %}{{ google_civic_office_name2|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
+{% include "../form_inputs/two_form_groups.html" with field_dict_1=ballotpedia_office_name_dict field_dict_2=ctcl_uuid_dict %}
 
-<div class="col">
-<div class="form-group">
-    <label for="google_civic_office_name3_id" class="pl-4 control-label">Office Name 3</label>
-    <div class="col">
-        <input type="text" name="google_civic_office_name3" id="google_civic_office_name3_id" class="form-control"
-               value="{% if office %}{{ office.google_civic_office_name3|default_if_none:"" }}{% else %}{{ google_civic_office_name3|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
+{% include "../form_inputs/two_form_groups.html" with field_dict_1=ocd_division_id_dict field_dict_2=district_id_dict %}
 
-<div class="col">
-<div class="form-group">
-    <label for="google_civic_office_name4_id" class="pl-4 control-label">Office Name 4</label>
-    <div class="col">
-        <input type="text" name="google_civic_office_name4" id="google_civic_office_name4_id" class="form-control"
-               value="{% if office %}{{ office.google_civic_office_name4|default_if_none:"" }}{% else %}{{ google_civic_office_name4|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-
-<div class="col">
-<div class="form-group">
-    <label for="google_civic_office_name5_id" class="pl-4 control-label">Office Name 5</label>
-    <div class="col">
-        <input type="text" name="google_civic_office_name5" id="google_civic_office_name5_id" class="form-control"
-               value="{% if office %}{{ office.google_civic_office_name5|default_if_none:"" }}{% else %}{{ google_civic_office_name5|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-</div>
-
-<div class="row">
-<div class="col">
-<div class="row form-group">
-    <label for="ballotpedia_office_name_id" class="pl-4 control-label">Office Name (for Ballotpedia matching)</label>
-    <div class="col">
-        <input type="text" name="ballotpedia_office_name" id="ballotpedia_office_name_id" class="form-control"
-               value="{% if office %}{{ office.ballotpedia_office_name|default_if_none:"" }}{% else %}{{ ballotpedia_office_name|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-
-<div class="col">
-<div class="row form-group">
-    <label for="ctcl_uuid_id" class="control-label">CTCL UUID</label>
-    <div class="col">
-        <input type="text" name="ctcl_uuid" id="ctcl_uuid_id" class="form-control"
-               value="{% if office %}{{ office.ctcl_uuid|default_if_none:"" }}{% else %}{{ ctcl_uuid|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-</div>
-
-<div class="row">
-<div class="col">
-<div class="row form-group">
-    <label for="ocd_division_id_id" class="pl-4 control-label">OCD Division ID</label>
-    <div class="col">
-        <input type="text" name="ocd_division_id" id="ocd_division_id_id" class="form-control"
-               value="{% if office %}{{ office.ocd_division_id|default_if_none:"" }}{% else %}{{ ocd_division_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-
-<div class="col">
-<div class="row form-group">
-    <label for="district_id_id" class="control-label">District Id</label>
-    <div class="col">
-        <input type="text" name="district_id" id="district_id_id" class="form-control"
-               value="{% if office %}{{ office.district_id|default_if_none:"" }}{% else %}{{ district_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-</div>
-
-<div class="row">
-<div class="col">
-<div class="row form-group">
-    <label for="ballotpedia_race_id_id" class="pl-4 control-label">Ballotpedia Race Id (Contest Office)</label>
-    <div class="col">
-        <input type="text" name="ballotpedia_race_id" id="ballotpedia_race_id_id" class="form-control"
-               value="{% if office %}{{ office.ballotpedia_race_id|default_if_none:"" }}{% else %}{{ ballotpedia_race_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-
-<div class="col">
-<div class="row form-group">
-    <label for="ballotpedia_office_id_id" class="control-label">Ballotpedia Office Id (Office Held)</label>
-    <div class="col">
-        <input type="text" name="ballotpedia_office_id" id="ballotpedia_office_id_id" class="form-control"
-               value="{% if office %}{{ office.ballotpedia_office_id|default_if_none:"" }}{% else %}{{ ballotpedia_office_id|default_if_none:"" }}{% endif %}" />
-    </div>
-</div>
-</div>
-</div>
+{% include "../form_inputs/two_form_groups.html" with field_dict_1=ballotpedia_race_id_dict field_dict_2=ballotpedia_office_id_dict %}
 
 <div class="row">
 <div class="col-sm-2">

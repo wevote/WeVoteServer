@@ -2,10 +2,9 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from django.conf.urls import re_path
+from django.urls import re_path
 
 from . import views_admin
-
 
 urlpatterns = [
     re_path(r'^$', views_admin.import_export_maplight_index_view, name='import_export_maplight_index'),

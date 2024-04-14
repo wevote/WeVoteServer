@@ -24,11 +24,12 @@ from politician.models import PoliticianManager
 from position.controllers import move_positions_to_another_candidate, update_all_position_details_from_candidate
 from twitter.models import TwitterUserManager
 from wevote_functions.functions import add_period_to_middle_name_initial, add_period_to_name_prefix_and_suffix, \
-    convert_to_int, convert_to_political_party_constant, positive_value_exists, \
-    process_request_from_master, extract_twitter_handle_from_text_string, \
-    extract_website_from_url, remove_period_from_middle_name_initial, \
-    remove_period_from_name_prefix_and_suffix
-from wevote_functions.functions_date import convert_date_to_we_vote_date_string, convert_we_vote_date_string_to_date_as_integer
+    convert_date_to_we_vote_date_string, convert_to_int, \
+    convert_to_political_party_constant, convert_we_vote_date_string_to_date_as_integer, positive_value_exists, \
+    process_request_from_master, \
+    extract_twitter_handle_from_text_string, extract_website_from_url, \
+    remove_period_from_middle_name_initial, remove_period_from_name_prefix_and_suffix
+from wevote_functions.utils import staticUserAgent
 from .models import CandidateListManager, CandidateCampaign, CandidateManager, \
     CANDIDATE_UNIQUE_ATTRIBUTES_TO_BE_CLEARED, CANDIDATE_UNIQUE_IDENTIFIERS, \
     PROFILE_IMAGE_TYPE_BALLOTPEDIA, PROFILE_IMAGE_TYPE_FACEBOOK, PROFILE_IMAGE_TYPE_LINKEDIN, \
@@ -39,11 +40,6 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 CANDIDATES_SYNC_URL = get_environment_variable("CANDIDATES_SYNC_URL")  # candidatesSyncOut
-
-
-class FakeFirefoxURLopener(urllib.request.FancyURLopener):
-    version = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:25.0)' \
-            + ' Gecko/20100101 Firefox/25.0'
 
 
 def add_name_to_next_spot(candidate_or_politician, google_civic_candidate_name_to_add):
@@ -2791,18 +2787,8 @@ def find_candidate_endorsements_on_one_candidate_web_page(site_url, endorsement_
         }
         return results
 
-    urllib._urlopener = FakeFirefoxURLopener()
-    headers = {
-        'User-Agent':
-            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
-           }
-    # 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    # 'Accept-Encoding': 'none',
-    # 'Accept-Language': 'en-US,en;q=0.8',
-    # 'Connection': 'keep-alive'
-    # 'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
     try:
-        request = urllib.request.Request(site_url, None, headers)
+        request = urllib.request.Request(site_url, None, staticUserAgent())
         page = urllib.request.urlopen(request, timeout=5)
         all_html_raw = page.read()
         all_html = all_html_raw.decode("utf8")
@@ -2909,18 +2895,8 @@ def find_candidate_endorsements_on_one_candidate_web_page(site_url, endorsement_
         }
         return results
 
-    urllib._urlopener = FakeFirefoxURLopener()
-    headers = {
-        'User-Agent':
-            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
-           }
-    # 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    # 'Accept-Encoding': 'none',
-    # 'Accept-Language': 'en-US,en;q=0.8',
-    # 'Connection': 'keep-alive'
-    # 'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
     try:
-        request = urllib.request.Request(site_url, None, headers)
+        request = urllib.request.Request(site_url, None, staticUserAgent())
         page = urllib.request.urlopen(request, timeout=5)
         all_html_raw = page.read()
         all_html = all_html_raw.decode("utf8")
@@ -3029,21 +3005,11 @@ def find_organization_endorsements_of_candidates_on_one_web_page(site_url, endor
         print("PDF Detected ", site_url)
         response = process_pdf_to_html(site_url)
         if positive_value_exists(response['s3_url_for_html']):
-            # Overwrite the the site_url parameter, with a url to an html representation of the PDF file
+            # Overwrite the site_url parameter, with a url to an html representation of the PDF file
             site_url = response['s3_url_for_html']
 
-    urllib._urlopener = FakeFirefoxURLopener()
-    headers = {
-        'User-Agent':
-            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
-           }
-    # 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    # 'Accept-Encoding': 'none',
-    # 'Accept-Language': 'en-US,en;q=0.8',
-    # 'Connection': 'keep-alive'
-    # 'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
     try:
-        request = urllib.request.Request(site_url, None, headers)
+        request = urllib.request.Request(site_url, None, staticUserAgent())
         page = urllib.request.urlopen(request, timeout=5)
         all_html_raw = page.read()
         all_html = all_html_raw.decode("utf8")
@@ -3192,13 +3158,8 @@ def reorder_endorsement_list_to_match_candidates_on_one_web_page(site_url, endor
     status = ""
     success = False
 
-    urllib._urlopener = FakeFirefoxURLopener()
-    headers = {
-        'User-Agent':
-            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
-           }
     try:
-        request = urllib.request.Request(site_url, None, headers)
+        request = urllib.request.Request(site_url, None, staticUserAgent())
         page = urllib.request.urlopen(request, timeout=5)
         all_lines = page.readlines()
         page.close()

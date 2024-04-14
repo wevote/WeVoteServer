@@ -3,7 +3,8 @@
 # -*- coding: UTF-8 -*-
 
 from .controllers import retrieve_all_organizations_logos_from_wikipedia, \
-    retrieve_organization_logo_from_wikipedia_page, retrieve_wikipedia_page_from_wikipedia
+    retrieve_organization_logo_from_wikipedia_page, retrieve_wikipedia_page_from_wikipedia, \
+        retrieve_candidate_images_from_wikipedia_page
 from admin_tools.views import redirect_to_sign_in_page
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages

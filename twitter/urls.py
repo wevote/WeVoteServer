@@ -3,9 +3,6 @@
 # -*- coding: UTF-8 -*-
 
 # See also import_export_twitter/urls.py
-from django.conf.urls import url
-
-from . import views, views_admin
 
 urlpatterns = [
     # views
