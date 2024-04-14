@@ -83,6 +83,7 @@ def get_environment_variable_default(var_name, default_value):
     except KeyError:
         return default_value
 
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -342,7 +343,11 @@ CORS_ALLOW_CREDENTIALS = True
 # will work with https
 # April 2024: 4.0.0 (2023-05-12) drops the following two settings
 # CORS_REPLACE_HTTPS_REFERER = True
-# CSRF_TRUSTED_ORIGINS = ['http://api.wevoteusa.org', 'http://wevotedeveloper.com']
+CSRF_TRUSTED_ORIGINS = [
+    'https://api.wevoteusa.org',
+    'http://localhost', 'https://localhost',
+    'http://wevotedeveloper.com', 'https://wevotedeveloper.com',
+]
 DATA_UPLOAD_MAX_MEMORY_SIZE = 6000000
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 4096
 
