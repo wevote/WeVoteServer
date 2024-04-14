@@ -10,6 +10,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.timezone import localtime, now
+from django.views.decorators.csrf import csrf_protect
 
 import wevote_functions.admin
 from admin_tools.views import redirect_to_sign_in_page
@@ -35,6 +36,7 @@ if not positive_value_exists(CAMPAIGNS_ROOT_URL):
 WEB_APP_ROOT_URL = get_environment_variable("WEB_APP_ROOT_URL")
 
 
+@csrf_protect
 @login_required
 def campaign_delete_process_view(request):
     """
@@ -75,6 +77,7 @@ def campaign_delete_process_view(request):
     return HttpResponseRedirect(reverse('campaign:campaignx_list', args=()))
 
 
+@csrf_protect
 @login_required
 def campaign_edit_owners_process_view(request):
     """
@@ -290,6 +293,7 @@ def campaign_edit_owners_view(request, campaignx_id=0, campaignx_we_vote_id=""):
     return render(request, 'campaign/campaignx_edit_owners.html', template_values)
 
 
+@csrf_protect
 @login_required
 def campaign_edit_politicians_process_view(request):
     """
@@ -431,6 +435,7 @@ def campaign_edit_politicians_view(request, campaignx_id=0, campaignx_we_vote_id
     return render(request, 'campaign/campaignx_edit_politicians.html', template_values)
 
 
+@csrf_protect
 @login_required
 def campaign_edit_process_view(request):
     """
@@ -1224,6 +1229,7 @@ def campaign_supporters_list_view(request, campaignx_we_vote_id=""):
     return render(request, 'campaign/campaignx_supporters_list.html', template_values)
 
 
+@csrf_protect
 @login_required
 def campaign_supporters_list_process_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
@@ -1556,6 +1562,7 @@ def render_campaignx_merge_form(
     return render(request, 'campaign/campaignx_merge.html', template_values)
 
 
+@csrf_protect
 @login_required
 def campaignx_merge_process_view(request):
     """

@@ -2,23 +2,21 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-import json
-from datetime import datetime, timedelta
-
-import pytz
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
 
 from admin_tools.views import redirect_to_sign_in_page
 from volunteer_task.models import VolunteerWeeklyMetrics
-from voter.models import voter_has_authority, VoterManager
+from voter.models import voter_has_authority
 from wevote_functions.functions import convert_to_int, positive_value_exists
 from .controllers import update_weekly_volunteer_metrics
 from .models import VolunteerTeam, VolunteerTeamMember
 
 
+@csrf_exempt
 @login_required
 def performance_list_view(request):
     # admin, analytics_admin, partner_organization, political_data_manager, political_data_viewer, verified_volunteer
@@ -179,7 +177,8 @@ def performance_list_view(request):
                 election_retrieve_started = \
                     actions_completed_dict[voter_we_vote_id][end_of_week_date_integer]['election_retrieve_started']
                 match_candidates_to_politicians = \
-                    actions_completed_dict[voter_we_vote_id][end_of_week_date_integer]['match_candidates_to_politicians']
+                    actions_completed_dict[voter_we_vote_id][end_of_week_date_integer][
+                        'match_candidates_to_politicians']
                 politicians_augmented = \
                     actions_completed_dict[voter_we_vote_id][end_of_week_date_integer]['politicians_augmented']
                 politicians_deduplicated = \
