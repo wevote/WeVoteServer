@@ -21,7 +21,7 @@ def retrieve_sql_tables(request):  # retrieveSQLTables
     :param request:
     :return:
     """
-    table = request.GET.get('table', '')
+    table = request.GET.get('table', 'bad_table_param')
     start = request.GET.get('start', '')
     end = request.GET.get('end', '')
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id

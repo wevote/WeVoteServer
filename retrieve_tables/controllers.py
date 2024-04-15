@@ -122,6 +122,8 @@ def retrieve_sql_tables_as_csv(voter_device_id, table_name, start, end):
 
         # logger.debug("retrieve_sql_tables_as_csv psycopg2 Connected to DB")
 
+        print('retrieve_sql_tables_as_csv "', table_name + '"')
+        print('retrieve_sql_tables_as_csv if table_name in allowable_tables ' + str(table_name in allowable_tables))
         if table_name in allowable_tables:
             try:
                 cur = conn.cursor()
@@ -276,25 +278,25 @@ def retrieve_sql_files_from_master_server(request):
                 load_successful = False
                 retry = 1
                 while not load_successful:
-                    url = (host + '/apis/v1/retrieveSQLTables/&table:' + table_name + '&start:' + str(start) + '&end:' +
+                    url = (host + 'apis/v1/retrieveSQLTables/?table:' + table_name + '&start:' + str(start) + '&end:' +
                            str(end))
                     try:
-                        response = requests.get(host + 'apis/v1/retrieveSQLTables/',
-                                                verify=False,
-                                                params={'table': table_name, 'start': start, 'end': end,
-                                                        'voter_device_id': voter_device_id })
+                        base_url = (host + 'apis/v1/retrieveSQLTables/&table=' + table_name + '&start=' + str(start) +
+                                    '&end=' + str(end) + '&voter_device_id=' + voter_device_id)
+                        print('Attempting: ' + base_url)
+                        response = requests.get(base_url, verify=False)
                         request_count += 1
                         load_successful = True
                         if response.status_code == 200:
                             wait_for_a_http_200 = False
                         else:
                             print(host + 'apis/v1/retrieveSQLTables/   (failing get response) response.status_code ' +
-                                  str(response.status_code) + '  RETRY ---- ' + url)
+                                  str(response.status_code) + '  RETRY ---- ' + base_url)
                             continue
                     except Exception as getErr:
                         print(host +
                               'apis/v1/retrieveSQLTables/   (failing SSL connection err on get) error ' +
-                              str(getErr) + '  RETRY #' + str(retry) + '  ---- ' + url)
+                              str(getErr) + '  RETRY #' + str(retry) + '  ---- ' + base_url)
                         retry += 1
                         if retry < 10:
                             continue
@@ -612,7 +614,7 @@ def csv_file_to_clean_csv_file2(table_name):
 
 def get_row_count_from_master_server():
     try:
-        host = 'https://api.wevoteusa.org/'
+        host = 'https://api.wevoteusa.org'
         response = requests.get(host + '/apis/v1/retrieveSQLTablesRowCount')
         if response.status_code == 200:
             count = int(response.json()['rowCount'])
